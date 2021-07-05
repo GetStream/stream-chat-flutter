@@ -3,6 +3,9 @@ class EventType {
   /// Indicates any type of events
   static const String any = '*';
 
+  ///
+  static const String healthCheck = 'health.check';
+
   /// Event sent when a user starts typing a message
   static const String typingStart = 'typing.start';
 

@@ -114,7 +114,7 @@ class StreamChatThemeData {
     final defaultTheme = StreamChatThemeData(brightness: theme.brightness);
     final customizedTheme = StreamChatThemeData.fromColorAndTextTheme(
       defaultTheme.colorTheme.copyWith(
-        accentBlue: theme.accentColor,
+        accentPrimary: theme.accentColor,
       ),
       defaultTheme.textTheme,
     );
@@ -216,11 +216,13 @@ class StreamChatThemeData {
     ColorTheme colorTheme,
     TextTheme textTheme,
   ) {
-    final accentColor = colorTheme.accentBlue;
+    final accentColor = colorTheme.accentPrimary;
+    final iconTheme =
+        IconThemeData(color: colorTheme.textHighEmphasis.withOpacity(.5));
     return StreamChatThemeData.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      primaryIconTheme: IconThemeData(color: colorTheme.black.withOpacity(.5)),
+      primaryIconTheme: iconTheme,
       defaultChannelImage: (context, channel) => const SizedBox(),
       defaultUserImage: (context, user) => Center(
         child: CachedNetworkImage(
@@ -230,7 +232,7 @@ class StreamChatThemeData {
         ),
       ),
       channelPreviewTheme: ChannelPreviewTheme(
-        unreadCounterColor: colorTheme.accentRed,
+        unreadCounterColor: colorTheme.accentError,
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
@@ -243,7 +245,7 @@ class StreamChatThemeData {
           color: const Color(0xff7A7A7A),
         ),
         lastMessageAt: textTheme.footnote.copyWith(
-          color: colorTheme.black.withOpacity(.5),
+          color: colorTheme.textHighEmphasis.withOpacity(.5),
         ),
         indicatorIconSize: 16,
       ),
@@ -255,7 +257,7 @@ class StreamChatThemeData {
             width: 40,
           ),
         ),
-        color: colorTheme.white,
+        color: colorTheme.barsBg,
         title: textTheme.headlineBold,
       ),
       channelTheme: ChannelTheme(
@@ -267,7 +269,7 @@ class StreamChatThemeData {
               width: 40,
             ),
           ),
-          color: colorTheme.white,
+          color: colorTheme.barsBg,
           title: textTheme.headlineBold,
           subtitle: textTheme.footnote.copyWith(
             color: const Color(0xff7A7A7A),
@@ -275,15 +277,17 @@ class StreamChatThemeData {
         ),
       ),
       ownMessageTheme: MessageTheme(
-        messageAuthor: textTheme.footnote.copyWith(color: colorTheme.grey),
+        messageAuthor:
+            textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         messageText: textTheme.body,
-        createdAt: textTheme.footnote.copyWith(color: colorTheme.grey),
+        createdAt:
+            textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         replies: textTheme.footnoteBold.copyWith(color: accentColor),
-        messageBackgroundColor: colorTheme.greyGainsboro,
-        reactionsBackgroundColor: colorTheme.white,
-        reactionsBorderColor: colorTheme.greyWhisper,
-        reactionsMaskColor: colorTheme.whiteSnow,
-        messageBorderColor: colorTheme.greyGainsboro,
+        messageBackgroundColor: colorTheme.disabled,
+        reactionsBackgroundColor: colorTheme.barsBg,
+        reactionsBorderColor: colorTheme.borders,
+        reactionsMaskColor: colorTheme.appBg,
+        messageBorderColor: colorTheme.disabled,
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
@@ -296,18 +300,20 @@ class StreamChatThemeData {
         ),
       ),
       otherMessageTheme: MessageTheme(
-        reactionsBackgroundColor: colorTheme.greyGainsboro,
-        reactionsBorderColor: colorTheme.white,
-        reactionsMaskColor: colorTheme.whiteSnow,
+        reactionsBackgroundColor: colorTheme.disabled,
+        reactionsBorderColor: colorTheme.barsBg,
+        reactionsMaskColor: colorTheme.appBg,
         messageText: textTheme.body,
-        createdAt: textTheme.footnote.copyWith(color: colorTheme.grey),
-        messageAuthor: textTheme.footnote.copyWith(color: colorTheme.grey),
+        createdAt:
+            textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
+        messageAuthor:
+            textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         replies: textTheme.footnoteBold.copyWith(color: accentColor),
         messageLinks: TextStyle(
           color: accentColor,
         ),
-        messageBackgroundColor: colorTheme.white,
-        messageBorderColor: colorTheme.greyWhisper,
+        messageBackgroundColor: colorTheme.barsBg,
+        messageBorderColor: colorTheme.borders,
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
@@ -319,46 +325,86 @@ class StreamChatThemeData {
       messageInputTheme: MessageInputTheme(
         borderRadius: BorderRadius.circular(20),
         sendAnimationDuration: const Duration(milliseconds: 300),
-        actionButtonColor: colorTheme.accentBlue,
-        actionButtonIdleColor: colorTheme.grey,
-        expandButtonColor: colorTheme.accentBlue,
-        sendButtonColor: colorTheme.accentBlue,
-        sendButtonIdleColor: colorTheme.greyGainsboro,
-        inputBackground: colorTheme.white,
+        actionButtonColor: colorTheme.accentPrimary,
+        actionButtonIdleColor: colorTheme.textLowEmphasis,
+        expandButtonColor: colorTheme.accentPrimary,
+        sendButtonColor: colorTheme.accentPrimary,
+        sendButtonIdleColor: colorTheme.disabled,
+        inputBackground: colorTheme.barsBg,
         inputTextStyle: textTheme.body,
         idleBorderGradient: LinearGradient(
           colors: [
-            colorTheme.greyGainsboro,
-            colorTheme.greyGainsboro,
+            colorTheme.disabled,
+            colorTheme.disabled,
           ],
         ),
         activeBorderGradient: LinearGradient(
           colors: [
-            colorTheme.greyGainsboro,
-            colorTheme.greyGainsboro,
+            colorTheme.disabled,
+            colorTheme.disabled,
           ],
         ),
       ),
       reactionIcons: [
         ReactionIcon(
           type: 'love',
-          assetName: 'Icon_love_reaction.svg',
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.loveReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentPrimary
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
         ReactionIcon(
           type: 'like',
-          assetName: 'Icon_thumbs_up_reaction.svg',
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.thumbsUpReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentPrimary
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
         ReactionIcon(
           type: 'sad',
-          assetName: 'Icon_thumbs_down_reaction.svg',
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.thumbsDownReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentPrimary
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
         ReactionIcon(
           type: 'haha',
-          assetName: 'Icon_LOL_reaction.svg',
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.lolReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentPrimary
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
         ReactionIcon(
           type: 'wow',
-          assetName: 'Icon_wut_reaction.svg',
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.wutReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentPrimary
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
       ],
     );
@@ -531,17 +577,17 @@ class TextTheme {
 class ColorTheme {
   /// Initialise with light theme
   ColorTheme.light({
-    this.black = const Color(0xff000000),
-    this.grey = const Color(0xff7a7a7a),
-    this.greyGainsboro = const Color(0xffdbdbdb),
-    this.greyWhisper = const Color(0xffecebeb),
-    this.whiteSmoke = const Color(0xfff2f2f2),
-    this.whiteSnow = const Color(0xfffcfcfc),
-    this.white = const Color(0xffffffff),
-    this.blueAlice = const Color(0xffe9f2ff),
-    this.accentBlue = const Color(0xff005FFF),
-    this.accentRed = const Color(0xffFF3842),
-    this.accentGreen = const Color(0xff20E070),
+    this.textHighEmphasis = const Color(0xff000000),
+    this.textLowEmphasis = const Color(0xff7a7a7a),
+    this.disabled = const Color(0xffdbdbdb),
+    this.borders = const Color(0xffecebeb),
+    this.inputBg = const Color(0xfff2f2f2),
+    this.appBg = const Color(0xfffcfcfc),
+    this.barsBg = const Color(0xffffffff),
+    this.linkBg = const Color(0xffe9f2ff),
+    this.accentPrimary = const Color(0xff005FFF),
+    this.accentError = const Color(0xffFF3842),
+    this.accentInfo = const Color(0xff20E070),
     this.highlight = const Color(0xfffbf4dd),
     this.overlay = const Color.fromRGBO(0, 0, 0, 0.2),
     this.overlayDark = const Color.fromRGBO(0, 0, 0, 0.6),
@@ -563,17 +609,17 @@ class ColorTheme {
 
   /// Initialise with dark theme
   ColorTheme.dark({
-    this.black = const Color(0xffffffff),
-    this.grey = const Color(0xff7a7a7a),
-    this.greyGainsboro = const Color(0xff2d2f2f),
-    this.greyWhisper = const Color(0xff1c1e22),
-    this.whiteSmoke = const Color(0xff13151b),
-    this.whiteSnow = const Color(0xff070A0D),
-    this.white = const Color(0xff101418),
-    this.blueAlice = const Color(0xff00193D),
-    this.accentBlue = const Color(0xff005FFF),
-    this.accentRed = const Color(0xffFF3742),
-    this.accentGreen = const Color(0xff20E070),
+    this.textHighEmphasis = const Color(0xffffffff),
+    this.textLowEmphasis = const Color(0xff7a7a7a),
+    this.disabled = const Color(0xff2d2f2f),
+    this.borders = const Color(0xff1c1e22),
+    this.inputBg = const Color(0xff13151b),
+    this.appBg = const Color(0xff070A0D),
+    this.barsBg = const Color(0xff101418),
+    this.linkBg = const Color(0xff00193D),
+    this.accentPrimary = const Color(0xff005FFF),
+    this.accentError = const Color(0xffFF3742),
+    this.accentInfo = const Color(0xff20E070),
     this.borderTop = const Effect(
       sigmaX: 0,
       sigmaY: -1,
@@ -616,37 +662,37 @@ class ColorTheme {
   }) : brightness = Brightness.dark;
 
   ///
-  final Color black;
+  final Color textHighEmphasis;
 
   ///
-  final Color grey;
+  final Color textLowEmphasis;
 
   ///
-  final Color greyGainsboro;
+  final Color disabled;
 
   ///
-  final Color greyWhisper;
+  final Color borders;
 
   ///
-  final Color whiteSmoke;
+  final Color inputBg;
 
   ///
-  final Color whiteSnow;
+  final Color appBg;
 
   ///
-  final Color white;
+  final Color barsBg;
 
   ///
-  final Color blueAlice;
+  final Color linkBg;
 
   ///
-  final Color accentBlue;
+  final Color accentPrimary;
 
   ///
-  final Color accentRed;
+  final Color accentError;
 
   ///
-  final Color accentGreen;
+  final Color accentInfo;
 
   ///
   final Effect borderTop;
@@ -678,17 +724,17 @@ class ColorTheme {
   /// Copy with theme
   ColorTheme copyWith({
     Brightness brightness = Brightness.light,
-    Color? black,
-    Color? grey,
-    Color? greyGainsboro,
-    Color? greyWhisper,
-    Color? whiteSmoke,
-    Color? whiteSnow,
-    Color? white,
-    Color? blueAlice,
-    Color? accentBlue,
-    Color? accentRed,
-    Color? accentGreen,
+    Color? textHighEmphasis,
+    Color? textLowEmphasis,
+    Color? disabled,
+    Color? borders,
+    Color? inputBg,
+    Color? appBg,
+    Color? barsBg,
+    Color? linkBg,
+    Color? accentPrimary,
+    Color? accentError,
+    Color? accentInfo,
     Effect? borderTop,
     Effect? borderBottom,
     Effect? shadowIconButton,
@@ -700,17 +746,17 @@ class ColorTheme {
   }) =>
       brightness == Brightness.light
           ? ColorTheme.light(
-              black: black ?? this.black,
-              grey: grey ?? this.grey,
-              greyGainsboro: greyGainsboro ?? this.greyGainsboro,
-              greyWhisper: greyWhisper ?? this.greyWhisper,
-              whiteSmoke: whiteSmoke ?? this.whiteSmoke,
-              whiteSnow: whiteSnow ?? this.whiteSnow,
-              white: white ?? this.white,
-              blueAlice: blueAlice ?? this.blueAlice,
-              accentBlue: accentBlue ?? this.accentBlue,
-              accentRed: accentRed ?? this.accentRed,
-              accentGreen: accentGreen ?? this.accentGreen,
+              textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
+              textLowEmphasis: textLowEmphasis ?? this.textLowEmphasis,
+              disabled: disabled ?? this.disabled,
+              borders: borders ?? this.borders,
+              inputBg: inputBg ?? this.inputBg,
+              appBg: appBg ?? this.appBg,
+              barsBg: barsBg ?? this.barsBg,
+              linkBg: linkBg ?? this.linkBg,
+              accentPrimary: accentPrimary ?? this.accentPrimary,
+              accentError: accentError ?? this.accentError,
+              accentInfo: accentInfo ?? this.accentInfo,
               borderTop: borderTop ?? this.borderTop,
               borderBottom: borderBottom ?? this.borderBottom,
               shadowIconButton: shadowIconButton ?? this.shadowIconButton,
@@ -721,17 +767,17 @@ class ColorTheme {
               bgGradient: bgGradient ?? this.bgGradient,
             )
           : ColorTheme.dark(
-              black: black ?? this.black,
-              grey: grey ?? this.grey,
-              greyGainsboro: greyGainsboro ?? this.greyGainsboro,
-              greyWhisper: greyWhisper ?? this.greyWhisper,
-              whiteSmoke: whiteSmoke ?? this.whiteSmoke,
-              whiteSnow: whiteSnow ?? this.whiteSnow,
-              white: white ?? this.white,
-              blueAlice: blueAlice ?? this.blueAlice,
-              accentBlue: accentBlue ?? this.accentBlue,
-              accentRed: accentRed ?? this.accentRed,
-              accentGreen: accentGreen ?? this.accentGreen,
+              textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
+              textLowEmphasis: textLowEmphasis ?? this.textLowEmphasis,
+              disabled: disabled ?? this.disabled,
+              borders: borders ?? this.borders,
+              inputBg: inputBg ?? this.inputBg,
+              appBg: appBg ?? this.appBg,
+              barsBg: barsBg ?? this.barsBg,
+              linkBg: linkBg ?? this.linkBg,
+              accentPrimary: accentPrimary ?? this.accentPrimary,
+              accentError: accentError ?? this.accentError,
+              accentInfo: accentInfo ?? this.accentInfo,
               borderTop: borderTop ?? this.borderTop,
               borderBottom: borderBottom ?? this.borderBottom,
               shadowIconButton: shadowIconButton ?? this.shadowIconButton,
@@ -746,17 +792,17 @@ class ColorTheme {
   ColorTheme merge(ColorTheme? other) {
     if (other == null) return this;
     return copyWith(
-      black: other.black,
-      grey: other.grey,
-      greyGainsboro: other.greyGainsboro,
-      greyWhisper: other.greyWhisper,
-      whiteSmoke: other.whiteSmoke,
-      whiteSnow: other.whiteSnow,
-      white: other.white,
-      blueAlice: other.blueAlice,
-      accentBlue: other.accentBlue,
-      accentRed: other.accentRed,
-      accentGreen: other.accentGreen,
+      textHighEmphasis: other.textHighEmphasis,
+      textLowEmphasis: other.textLowEmphasis,
+      disabled: other.disabled,
+      borders: other.borders,
+      inputBg: other.inputBg,
+      appBg: other.appBg,
+      barsBg: other.barsBg,
+      linkBg: other.linkBg,
+      accentPrimary: other.accentPrimary,
+      accentError: other.accentError,
+      accentInfo: other.accentInfo,
       highlight: other.highlight,
       overlay: other.overlay,
       overlayDark: other.overlayDark,

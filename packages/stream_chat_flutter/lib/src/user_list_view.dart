@@ -47,8 +47,8 @@ class UserListView extends StatefulWidget {
   const UserListView({
     Key? key,
     this.filter,
-    this.options,
     this.sort,
+    this.presence,
     this.pagination,
     this.onUserTap,
     this.onUserLongPress,
@@ -64,6 +64,7 @@ class UserListView extends StatefulWidget {
     this.emptyBuilder,
     this.loadingBuilder,
     this.listBuilder,
+    this.userListController,
   })  : assert(
           crossAxisCount == 1 || groupAlphabetically == false,
           'Cannot group alphabetically when crossAxisCount > 1',
@@ -75,12 +76,6 @@ class UserListView extends StatefulWidget {
   /// You can also filter other built-in channel fields.
   final Filter? filter;
 
-  /// Query channels options.
-  ///
-  /// state: if true returns the Channel state
-  /// watch: if true listen to changes to this Channel in real time.
-  final Map<String, dynamic>? options;
-
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can
   /// be provided.
@@ -88,6 +83,9 @@ class UserListView extends StatefulWidget {
   /// at or member_count.
   /// Direction can be ascending or descending.
   final List<SortOption>? sort;
+
+  /// If true you’ll receive user presence updates via the websocket events
+  final bool? presence;
 
   /// Pagination parameters
   /// limit: the number of users to return (max is 30)
@@ -131,7 +129,7 @@ class UserListView extends StatefulWidget {
   final int crossAxisCount;
 
   /// The builder that will be used in case of error
-  final Widget Function(Error error)? errorBuilder;
+  final ErrorBuilder? errorBuilder;
 
   /// The builder that will be used to build the list
   final Widget Function(BuildContext context, List<ListItem> users)?
@@ -143,6 +141,11 @@ class UserListView extends StatefulWidget {
   /// The builder used when the channel list is empty.
   final WidgetBuilder? emptyBuilder;
 
+  /// A [UserListController] allows reloading and pagination.
+  /// Use [UserListController.loadData] and [UserListController.paginateData]
+  /// respectively for reloading and pagination.
+  final UserListController? userListController;
+
   @override
   _UserListViewState createState() => _UserListViewState();
 }
@@ -151,13 +154,15 @@ class _UserListViewState extends State<UserListView>
     with WidgetsBindingObserver {
   bool get _isListView => widget.crossAxisCount == 1;
 
-  final UserListController _userListController = UserListController();
+  late final _defaultController = UserListController();
+  UserListController get _userListController =>
+      widget.userListController ?? _defaultController;
 
   @override
   Widget build(BuildContext context) {
     final child = UserListCore(
-      errorBuilder: widget.errorBuilder as Widget Function(Object)? ??
-          (err) => _buildError(err as Error),
+      errorBuilder: widget.errorBuilder ??
+          (BuildContext context, Object err) => _buildError(err),
       emptyBuilder: widget.emptyBuilder ?? (context) => _buildEmpty(),
       loadingBuilder: widget.loadingBuilder ??
           (context) => LayoutBuilder(
@@ -177,9 +182,9 @@ class _UserListViewState extends State<UserListView>
       listBuilder:
           widget.listBuilder ?? (context, list) => _buildListView(list),
       pagination: widget.pagination,
-      options: widget.options,
       sort: widget.sort,
       filter: widget.filter,
+      presence: widget.presence,
       groupAlphabetically: widget.groupAlphabetically,
       userListController: _userListController,
     );
@@ -197,52 +202,33 @@ class _UserListViewState extends State<UserListView>
   bool get isListAlreadySorted =>
       widget.sort?.any((e) => e.field == 'name' && e.direction == 1) ?? false;
 
-  Widget _buildError(Error error) {
-    print(error.stackTrace);
-
-    var message = error.toString();
-    if (error is DioError) {
-      final dioError = error as DioError;
-      if (dioError.type == DioErrorType.response) {
-        message = dioError.message;
-      } else {
-        message = 'Check your connection and retry';
-      }
-    }
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text.rich(
-            const TextSpan(
-              children: [
-                WidgetSpan(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: 2,
+  Widget _buildError(Object error) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text.rich(
+              const TextSpan(
+                children: [
+                  WidgetSpan(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: 2,
+                      ),
+                      child: Icon(Icons.error_outline),
                     ),
-                    child: Icon(Icons.error_outline),
                   ),
-                ),
-                TextSpan(text: 'Error loading channels'),
-              ],
+                  TextSpan(text: 'Error loading users'),
+                ],
+              ),
+              style: Theme.of(context).textTheme.headline6,
             ),
-            style: Theme.of(context).textTheme.headline6,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              top: 16,
+            TextButton(
+              onPressed: () => _userListController.loadData!(),
+              child: const Text('Retry'),
             ),
-            child: Text(message),
-          ),
-          TextButton(
-            onPressed: () => _userListController.loadData!(),
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 
   Widget _buildEmpty() => LayoutBuilder(
         builder: (context, viewportConstraints) => SingleChildScrollView(
@@ -299,7 +285,7 @@ class _UserListViewState extends State<UserListView>
           final chatThemeData = StreamChatTheme.of(context);
           return Container(
             key: ValueKey<String>('HEADER-$header'),
-            color: chatThemeData.colorTheme.black.withOpacity(0.05),
+            color: chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.05),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               child: Text(
@@ -307,7 +293,7 @@ class _UserListViewState extends State<UserListView>
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14.5,
-                  color: chatThemeData.colorTheme.grey,
+                  color: chatThemeData.colorTheme.textLowEmphasis,
                 ),
               ),
             ),
@@ -399,7 +385,7 @@ class _UserListViewState extends State<UserListView>
               return Container(
                 color: StreamChatTheme.of(context)
                     .colorTheme
-                    .accentRed
+                    .accentError
                     .withOpacity(.2),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
@@ -422,6 +408,6 @@ class _UserListViewState extends State<UserListView>
 
   Widget _separatorBuilder(context, i) => Container(
         height: 1,
-        color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+        color: StreamChatTheme.of(context).colorTheme.borders,
       );
 }

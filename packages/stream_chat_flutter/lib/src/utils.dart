@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -28,7 +30,8 @@ Future<bool?> showConfirmationDialog(
 }) {
   final chatThemeData = StreamChatTheme.of(context);
   return showModalBottomSheet(
-      backgroundColor: chatThemeData.colorTheme.white,
+      useRootNavigator: false,
+      backgroundColor: chatThemeData.colorTheme.barsBg,
       context: context,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -72,7 +75,7 @@ Future<bool?> showConfirmationDialog(
                           child: Text(
                             cancelText,
                             style: chatThemeData.textTheme.bodyBold.copyWith(
-                                color: chatThemeData.colorTheme.black
+                                color: chatThemeData.colorTheme.textHighEmphasis
                                     .withOpacity(0.5)),
                           ),
                         ),
@@ -88,7 +91,7 @@ Future<bool?> showConfirmationDialog(
                         child: Text(
                           okText,
                           style: chatThemeData.textTheme.bodyBold.copyWith(
-                              color: chatThemeData.colorTheme.accentRed),
+                              color: chatThemeData.colorTheme.accentError),
                         ),
                       ),
                     ),
@@ -112,7 +115,9 @@ Future<bool?> showInfoDialog(
 }) {
   final chatThemeData = StreamChatTheme.of(context);
   return showModalBottomSheet(
-    backgroundColor: theme?.colorTheme.white ?? chatThemeData.colorTheme.white,
+    useRootNavigator: false,
+    backgroundColor:
+        theme?.colorTheme.barsBg ?? chatThemeData.colorTheme.barsBg,
     context: context,
     shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -143,8 +148,8 @@ Future<bool?> showInfoDialog(
             height: 36,
           ),
           Container(
-            color: theme?.colorTheme.black.withOpacity(.08) ??
-                chatThemeData.colorTheme.black.withOpacity(.08),
+            color: theme?.colorTheme.textHighEmphasis.withOpacity(.08) ??
+                chatThemeData.colorTheme.textHighEmphasis.withOpacity(.08),
             height: 1,
           ),
           Center(
@@ -155,8 +160,8 @@ Future<bool?> showInfoDialog(
               child: Text(
                 okText,
                 style: TextStyle(
-                  color: theme?.colorTheme.black.withOpacity(0.5) ??
-                      chatThemeData.colorTheme.accentBlue,
+                  color: theme?.colorTheme.textHighEmphasis.withOpacity(0.5) ??
+                      chatThemeData.colorTheme.accentPrimary,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -332,7 +337,7 @@ Widget wrapAttachmentWidget(
   bool reverse,
 ) =>
     Material(
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: Clip.hardEdge,
       shape: attachmentShape,
       type: MaterialType.transparency,
       child: attachmentWidget,

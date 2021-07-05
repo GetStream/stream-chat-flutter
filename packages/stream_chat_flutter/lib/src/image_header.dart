@@ -59,7 +59,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
       leading: showBackButton
           ? IconButton(
               icon: StreamSvgIcon.close(
-                color: chatThemeData.colorTheme.black,
+                color: chatThemeData.colorTheme.textHighEmphasis,
                 size: 24,
               ),
               onPressed: onBackPressed,
@@ -70,7 +70,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
         if (message.type != 'ephemeral')
           IconButton(
             icon: StreamSvgIcon.iconMenuPoint(
-              color: chatThemeData.colorTheme.black,
+              color: chatThemeData.colorTheme.textHighEmphasis,
             ),
             onPressed: () {
               _showMessageActionModalBottomSheet(context);
@@ -111,6 +111,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
     final channel = StreamChannel.of(context).channel;
 
     final result = await showDialog(
+      useRootNavigator: false,
       context: context,
       barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
       builder: (context) => StreamChannel(

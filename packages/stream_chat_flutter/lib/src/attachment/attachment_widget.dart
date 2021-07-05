@@ -75,12 +75,14 @@ class AttachmentError extends StatelessWidget {
         child: Container(
           width: size?.width,
           height: size?.height,
-          color:
-              StreamChatTheme.of(context).colorTheme.accentRed.withOpacity(.1),
+          color: StreamChatTheme.of(context)
+              .colorTheme
+              .accentError
+              .withOpacity(.1),
           child: Center(
             child: Icon(
               Icons.error_outline,
-              color: StreamChatTheme.of(context).colorTheme.black,
+              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
             ),
           ),
         ),

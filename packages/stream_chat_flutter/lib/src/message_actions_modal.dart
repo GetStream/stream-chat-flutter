@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -16,6 +15,7 @@ class MessageActionsModal extends StatefulWidget {
   const MessageActionsModal({
     Key? key,
     required this.message,
+    required this.messageWidget,
     required this.messageTheme,
     this.showReactions = true,
     this.showDeleteMessage = true,
@@ -28,17 +28,14 @@ class MessageActionsModal extends StatefulWidget {
     this.showThreadReplyMessage = true,
     this.showFlagButton = true,
     this.showPinButton = true,
-    this.showPinHighlight = false,
-    this.showUserAvatar = DisplayWidget.show,
     this.editMessageInputBuilder,
-    this.messageShape,
-    this.attachmentShape,
     this.reverse = false,
     this.customActions = const [],
-    this.attachmentBorderRadiusGeometry,
     this.onCopyTap,
-    this.textBuilder,
   }) : super(key: key);
+
+  /// Widget that shows the message
+  final Widget messageWidget;
 
   /// Builder for edit message
   final Widget Function(BuildContext, Message)? editMessageInputBuilder;
@@ -85,29 +82,11 @@ class MessageActionsModal extends StatefulWidget {
   /// Flag for showing pin action
   final bool showPinButton;
 
-  /// Display Pin Highlight
-  final bool showPinHighlight;
-
   /// Flag for reversing message
   final bool reverse;
 
-  /// [ShapeBorder] to apply to the widget
-  final ShapeBorder? messageShape;
-
-  /// [ShapeBorder] to apply to attachment
-  final ShapeBorder? attachmentShape;
-
-  /// Enum for displaying user avatar
-  final DisplayWidget showUserAvatar;
-
-  /// [BorderRadius] for attachment border
-  final BorderRadius? attachmentBorderRadiusGeometry;
-
   /// List of custom actions
   final List<MessageAction> customActions;
-
-  /// Customize the MessageWidget textBuilder
-  final Widget Function(BuildContext context, Message message)? textBuilder;
 
   @override
   _MessageActionsModalState createState() => _MessageActionsModalState();
@@ -143,10 +122,94 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
-    final hasFileAttachment =
-        widget.message.attachments.any((it) => it.type == 'file') == true;
-
     final streamChatThemeData = StreamChatTheme.of(context);
+
+    final numberOfReactions = streamChatThemeData.reactionIcons.length;
+    final shiftFactor =
+        numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
+
+    final child = Center(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: widget.reverse
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
+            children: <Widget>[
+              if (widget.showReactions &&
+                  (widget.message.status == MessageSendingStatus.sent))
+                Align(
+                  alignment: Alignment(
+                      user?.id == widget.message.user?.id
+                          ? (divFactor >= 1.0
+                              ? -0.2 - shiftFactor
+                              : (1.2 - divFactor))
+                          : (divFactor >= 1.0
+                              ? 0.2 + shiftFactor
+                              : -(1.2 - divFactor)),
+                      0),
+                  child: ReactionPicker(
+                    message: widget.message,
+                  ),
+                ),
+              const SizedBox(height: 8),
+              IgnorePointer(
+                child: widget.messageWidget,
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: EdgeInsets.only(
+                  left: widget.reverse ? 0 : 40,
+                ),
+                child: SizedBox(
+                  width: mediaQueryData.size.width * 0.75,
+                  child: Material(
+                    color: streamChatThemeData.colorTheme.appBg,
+                    clipBehavior: Clip.hardEdge,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (widget.showReplyMessage &&
+                            widget.message.status == MessageSendingStatus.sent)
+                          _buildReplyButton(context),
+                        if (widget.showThreadReplyMessage &&
+                            (widget.message.status ==
+                                MessageSendingStatus.sent) &&
+                            widget.message.parentId == null)
+                          _buildThreadReplyButton(context),
+                        if (widget.showResendMessage)
+                          _buildResendMessage(context),
+                        if (widget.showEditMessage) _buildEditMessage(context),
+                        if (widget.showCopyMessage) _buildCopyButton(context),
+                        if (widget.showFlagButton) _buildFlagButton(context),
+                        if (widget.showPinButton) _buildPinButton(context),
+                        if (widget.showDeleteMessage)
+                          _buildDeleteButton(context),
+                        ...widget.customActions
+                            .map((action) => _buildCustomAction(
+                                  context,
+                                  action,
+                                ))
+                      ].insertBetween(
+                        Container(
+                          height: 1,
+                          color: streamChatThemeData.colorTheme.borders,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => Navigator.maybePop(context),
@@ -168,136 +231,11 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
               tween: Tween(begin: 0, end: 1),
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOutBack,
-              builder: (context, val, snapshot) => Transform.scale(
+              builder: (context, val, child) => Transform.scale(
                 scale: val,
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: widget.reverse
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
-                        children: <Widget>[
-                          if (widget.showReactions &&
-                              (widget.message.status ==
-                                  MessageSendingStatus.sent))
-                            Align(
-                              alignment: Alignment(
-                                  user?.id == widget.message.user?.id
-                                      ? (divFactor >= 1.0
-                                          ? -0.2
-                                          : (1.2 - divFactor))
-                                      : (divFactor >= 1.0
-                                          ? 0.2
-                                          : -(1.2 - divFactor)),
-                                  0),
-                              child: ReactionPicker(
-                                message: widget.message,
-                              ),
-                            ),
-                          const SizedBox(height: 8),
-                          IgnorePointer(
-                            child: MessageWidget(
-                              key: const Key('MessageWidget'),
-                              reverse: widget.reverse,
-                              attachmentBorderRadiusGeometry: widget
-                                  .attachmentBorderRadiusGeometry
-                                  ?.mirrorBorderIfReversed(
-                                      reverse: !widget.reverse),
-                              message: widget.message.copyWith(
-                                text: widget.message.text!.length > 200
-                                    // ignore: lines_longer_than_80_chars
-                                    ? '${widget.message.text!.substring(0, 200)}...'
-                                    : widget.message.text,
-                              ),
-                              messageTheme: widget.messageTheme,
-                              showReactions: false,
-                              showUsername: false,
-                              showReplyMessage: false,
-                              showUserAvatar: widget.showUserAvatar,
-                              attachmentPadding: EdgeInsets.all(
-                                hasFileAttachment ? 4 : 2,
-                              ),
-                              showTimestamp: false,
-                              translateUserAvatar: false,
-                              padding: const EdgeInsets.all(0),
-                              textPadding: EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal:
-                                    widget.message.text!.isOnlyEmoji ? 0 : 16.0,
-                              ),
-                              showReactionPickerIndicator:
-                                  widget.showReactions &&
-                                      (widget.message.status ==
-                                          MessageSendingStatus.sent),
-                              showSendingIndicator: false,
-                              shape: widget.messageShape,
-                              attachmentShape: widget.attachmentShape,
-                              showPinHighlight: false,
-                              textBuilder: widget.textBuilder,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              left: widget.reverse ? 0 : 40,
-                            ),
-                            child: SizedBox(
-                              width: mediaQueryData.size.width * 0.75,
-                              child: Material(
-                                color: streamChatThemeData.colorTheme.whiteSnow,
-                                clipBehavior: Clip.hardEdge,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    if (widget.showReplyMessage &&
-                                        widget.message.status ==
-                                            MessageSendingStatus.sent)
-                                      _buildReplyButton(context),
-                                    if (widget.showThreadReplyMessage &&
-                                        (widget.message.status ==
-                                            MessageSendingStatus.sent) &&
-                                        widget.message.parentId == null)
-                                      _buildThreadReplyButton(context),
-                                    if (widget.showResendMessage)
-                                      _buildResendMessage(context),
-                                    if (widget.showEditMessage)
-                                      _buildEditMessage(context),
-                                    if (widget.showCopyMessage)
-                                      _buildCopyButton(context),
-                                    if (widget.showFlagButton)
-                                      _buildFlagButton(context),
-                                    if (widget.showPinButton)
-                                      _buildPinButton(context),
-                                    if (widget.showDeleteMessage)
-                                      _buildDeleteButton(context),
-                                    ...widget.customActions
-                                        .map((action) => _buildCustomAction(
-                                              context,
-                                              action,
-                                            ))
-                                  ].insertBetween(
-                                    Container(
-                                      height: 1,
-                                      color: streamChatThemeData
-                                          .colorTheme.greyWhisper,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                child: child,
               ),
+              child: child,
             ),
         ],
       ),
@@ -332,7 +270,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       context,
       title: 'Flag Message',
       icon: StreamSvgIcon.flag(
-        color: streamChatThemeData.colorTheme.accentRed,
+        color: streamChatThemeData.colorTheme.accentError,
         size: 24,
       ),
       question:
@@ -349,7 +287,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         await showInfoDialog(
           context,
           icon: StreamSvgIcon.flag(
-            color: theme.colorTheme.accentRed,
+            color: theme.colorTheme.accentError,
             size: 24,
           ),
           details: 'The message has been reported to a moderator.',
@@ -357,11 +295,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           okText: 'OK',
         );
       } catch (err) {
-        if (err is ApiError && json.decode(err.body ?? '{}')['code'] == 4) {
+        if (err is StreamChatNetworkError &&
+            err.errorCode == ChatErrorCode.inputError) {
           await showInfoDialog(
             context,
             icon: StreamSvgIcon.flag(
-              color: theme.colorTheme.accentRed,
+              color: theme.colorTheme.accentError,
               size: 24,
             ),
             details: 'The message has been reported to a moderator.',
@@ -378,13 +317,13 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   void _togglePin() async {
     final channel = StreamChannel.of(context).channel;
 
+    Navigator.pop(context);
     try {
       if (!widget.message.pinned) {
         await channel.pinMessage(widget.message);
       } else {
         await channel.unpinMessage(widget.message);
       }
-      Navigator.pop(context);
     } catch (e) {
       _showErrorAlert();
     }
@@ -398,7 +337,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       context,
       title: 'Delete message',
       icon: StreamSvgIcon.flag(
-        color: StreamChatTheme.of(context).colorTheme.accentRed,
+        color: StreamChatTheme.of(context).colorTheme.accentError,
         size: 24,
       ),
       question: 'Are you sure you want to permanently delete this\nmessage?',
@@ -424,7 +363,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     showInfoDialog(
       context,
       icon: StreamSvgIcon.error(
-        color: StreamChatTheme.of(context).colorTheme.accentRed,
+        color: StreamChatTheme.of(context).colorTheme.accentError,
         size: 24,
       ),
       details: 'The operation couldn\'t be completed.',
@@ -601,7 +540,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         child: Row(
           children: [
             StreamSvgIcon.circleUp(
-              color: streamChatThemeData.colorTheme.accentBlue,
+              color: streamChatThemeData.colorTheme.accentPrimary,
             ),
             const SizedBox(width: 16),
             Text(
@@ -629,48 +568,51 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           topRight: Radius.circular(16),
         ),
       ),
-      builder: (context) => StreamChannel(
-        channel: channel,
-        child: Flex(
-          direction: Axis.vertical,
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: StreamSvgIcon.edit(
-                      color: streamChatThemeData.colorTheme.greyGainsboro,
+      builder: (context) => Padding(
+        padding: MediaQuery.of(context).viewInsets,
+        child: StreamChannel(
+          channel: channel,
+          child: Flex(
+            direction: Axis.vertical,
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: StreamSvgIcon.edit(
+                        color: streamChatThemeData.colorTheme.disabled,
+                      ),
                     ),
-                  ),
-                  const Text(
-                    'Edit Message',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    icon: StreamSvgIcon.closeSmall(),
-                    onPressed: Navigator.of(context).pop,
-                  ),
-                ],
+                    const Text(
+                      'Edit Message',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: StreamSvgIcon.closeSmall(),
+                      onPressed: Navigator.of(context).pop,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            if (widget.editMessageInputBuilder != null)
-              widget.editMessageInputBuilder!(context, widget.message)
-            else
-              MessageInput(
-                editMessage: widget.message,
-                preMessageSending: (m) {
-                  FocusScope.of(context).unfocus();
-                  Navigator.pop(context);
-                  return m;
-                },
-              ),
-          ],
+              if (widget.editMessageInputBuilder != null)
+                widget.editMessageInputBuilder!(context, widget.message)
+              else
+                MessageInput(
+                  editMessage: widget.message,
+                  preMessageSending: (m) {
+                    FocusScope.of(context).unfocus();
+                    Navigator.pop(context);
+                    return m;
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );

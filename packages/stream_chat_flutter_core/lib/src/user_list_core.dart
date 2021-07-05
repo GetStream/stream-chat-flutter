@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/users_bloc.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 ///
 /// [UserListCore] is a simplified class that allows fetching users while
@@ -63,8 +64,8 @@ class UserListCore extends StatefulWidget {
     required this.listBuilder,
     Key? key,
     this.filter,
-    this.options,
     this.sort,
+    this.presence,
     this.pagination,
     this.groupAlphabetically = false,
     this.userListController,
@@ -76,7 +77,7 @@ class UserListCore extends StatefulWidget {
   final UserListController? userListController;
 
   /// The builder that will be used in case of error
-  final Widget Function(Object error) errorBuilder;
+  final ErrorBuilder errorBuilder;
 
   /// The builder that will be used to build the list
   final Widget Function(BuildContext context, List<ListItem> users) listBuilder;
@@ -92,17 +93,14 @@ class UserListCore extends StatefulWidget {
   /// You can also filter other built-in channel fields.
   final Filter? filter;
 
-  /// Query channels options.
-  ///
-  /// state: if true returns the Channel state
-  /// watch: if true listen to changes to this Channel in real time.
-  final Map<String, dynamic>? options;
-
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can be
   /// provided. You can sort based on last_updated, last_message_at, updated_at,
   /// created_at or member_count. Direction can be ascending or descending.
   final List<SortOption>? sort;
+
+  /// If true you’ll receive user presence updates via the websocket events
+  final bool? presence;
 
   /// Pagination parameters
   /// limit: the number of users to return (max is 30)
@@ -130,12 +128,21 @@ class UserListCoreState extends State<UserListCore>
     if (newUsersBloc != _usersBloc) {
       _usersBloc = newUsersBloc;
       loadData();
-      if (widget.userListController != null) {
-        widget.userListController!.loadData = loadData;
-        widget.userListController!.paginateData = paginateData;
-      }
     }
     super.didChangeDependencies();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _setupController();
+  }
+
+  void _setupController() {
+    if (widget.userListController != null) {
+      widget.userListController!.loadData = loadData;
+      widget.userListController!.paginateData = paginateData;
+    }
   }
 
   @override
@@ -173,7 +180,7 @@ class UserListCoreState extends State<UserListCore>
         stream: _buildUserStream(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return widget.errorBuilder(snapshot.error!);
+            return widget.errorBuilder(context, snapshot.error!);
           }
           if (!snapshot.hasData) {
             return widget.loadingBuilder(context);
@@ -186,22 +193,22 @@ class UserListCoreState extends State<UserListCore>
         },
       );
 
-  // ignore: public_member_api_docs
+  /// Fetches initial users and updates the widget
   Future<void> loadData() => _usersBloc!.queryUsers(
         filter: widget.filter,
         sort: widget.sort,
+        presence: widget.presence,
         pagination: widget.pagination,
-        options: widget.options,
       );
 
-  // ignore: public_member_api_docs
+  /// Fetches more users with updated pagination and updates the widget
   Future<void> paginateData() => _usersBloc!.queryUsers(
         filter: widget.filter,
         sort: widget.sort,
+        presence: widget.presence,
         pagination: widget.pagination!.copyWith(
           offset: _usersBloc!.users?.length ?? 0,
         ),
-        options: widget.options,
       );
 
   @override
@@ -209,10 +216,14 @@ class UserListCoreState extends State<UserListCore>
     super.didUpdateWidget(oldWidget);
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
-        widget.options?.toString() != oldWidget.options?.toString() ||
+        widget.presence != oldWidget.presence ||
         widget.pagination?.toJson().toString() !=
             oldWidget.pagination?.toJson().toString()) {
       loadData();
+    }
+
+    if (widget.userListController != oldWidget.userListController) {
+      _setupController();
     }
   }
 }

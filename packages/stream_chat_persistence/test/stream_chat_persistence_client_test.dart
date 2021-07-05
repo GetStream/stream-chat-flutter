@@ -80,7 +80,7 @@ void main() {
     });
 
     test('getConnectionInfo', () async {
-      const event = Event(type: 'testEvent');
+      final event = Event();
       when(() => mockDatabase.connectionEventDao.connectionEvent)
           .thenAnswer((_) async => event);
 
@@ -101,7 +101,7 @@ void main() {
     });
 
     test('updateConnectionInfo', () async {
-      const event = Event(type: 'testEvent');
+      final event = Event();
       when(() => mockDatabase.connectionEventDao.updateConnectionEvent(event))
           .thenAnswer((_) async => 1);
 

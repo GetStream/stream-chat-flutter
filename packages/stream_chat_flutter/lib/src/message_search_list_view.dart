@@ -68,6 +68,7 @@ class MessageSearchListView extends StatefulWidget {
     this.errorBuilder,
     this.loadingBuilder,
     this.childBuilder,
+    this.messageSearchListController,
   }) : super(key: key);
 
   /// Message String to search on
@@ -127,13 +128,20 @@ class MessageSearchListView extends StatefulWidget {
   /// The builder that will be used in case of loading
   final WidgetBuilder? loadingBuilder;
 
+  /// A [MessageSearchListController] allows reloading and pagination.
+  /// Use [MessageSearchListController.loadData] and
+  /// [MessageSearchListController.paginateData] respectively for reloading and
+  /// pagination.
+  final MessageSearchListController? messageSearchListController;
+
   @override
   _MessageSearchListViewState createState() => _MessageSearchListViewState();
 }
 
 class _MessageSearchListViewState extends State<MessageSearchListView> {
-  final MessageSearchListController _messageSearchListController =
-      MessageSearchListController();
+  late final _defaultController = MessageSearchListController();
+  MessageSearchListController get _messageSearchListController =>
+      widget.messageSearchListController ?? _defaultController;
 
   @override
   Widget build(BuildContext context) => MessageSearchListCore(
@@ -191,7 +199,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
 
   Widget _separatorBuilder(BuildContext context, int index) => Container(
         height: 1,
-        color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+        color: StreamChatTheme.of(context).colorTheme.borders,
       );
 
   Widget _listItemBuilder(
@@ -216,7 +224,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
             return Container(
               color: StreamChatTheme.of(context)
                   .colorTheme
-                  .accentRed
+                  .accentError
                   .withOpacity(.2),
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
@@ -286,7 +294,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
               child: Text(
                 '${items.length} results',
                 style: TextStyle(
-                  color: chatThemeData.colorTheme.grey,
+                  color: chatThemeData.colorTheme.textLowEmphasis,
                 ),
               ),
             ),

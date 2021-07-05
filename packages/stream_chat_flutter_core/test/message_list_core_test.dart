@@ -100,6 +100,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value([]));
+      when(() => mockChannel.state.messages).thenReturn([]);
 
       await tester.pumpWidget(
         StreamChannel(
@@ -133,6 +134,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value([]));
+      when(() => mockChannel.state.messages).thenReturn([]);
       when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
 
       await tester.pumpWidget(
@@ -174,6 +176,7 @@ void main() {
       when(() => mockChannel.state.messages).thenReturn(messages);
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messages).thenReturn(messages);
       when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
 
       await tester.pumpWidget(
@@ -220,6 +223,7 @@ void main() {
       const error = 'Error! Error! Error!';
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.error(error));
+      when(() => mockChannel.state.messages).thenReturn([]);
 
       await tester.pumpWidget(
         Directionality(
@@ -259,6 +263,7 @@ void main() {
       const messages = <Message>[];
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messages).thenReturn(messages);
 
       await tester.pumpWidget(
         Directionality(
@@ -295,7 +300,9 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(false);
       when(() => mockChannel.initialized).thenAnswer((_) async => true);
       when(() => mockChannel.query(
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
             membersPagination: any(named: 'membersPagination'),
             messagesPagination: any(named: 'messagesPagination'),
             preferOffline: any(named: 'preferOffline'),
@@ -305,6 +312,7 @@ void main() {
       const messages = <Message>[];
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messages).thenReturn(messages);
 
       await tester.pumpWidget(
         Directionality(
@@ -349,6 +357,7 @@ void main() {
       final messages = _generateMessages();
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messages).thenReturn(messages);
 
       await tester.pumpWidget(
         Directionality(

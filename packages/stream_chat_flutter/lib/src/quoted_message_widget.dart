@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:video_player/video_player.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Widget builder for quoted message attachment thumnail
 typedef QuotedMessageAttachmentThumbnailBuilder = Widget Function(
@@ -154,7 +154,7 @@ class QuotedMessageWidget extends StatelessWidget {
         color: _getBackgroundColor(context),
         border: showBorder
             ? Border.all(
-                color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                color: StreamChatTheme.of(context).colorTheme.disabled,
               )
             : null,
         borderRadius: BorderRadius.only(
@@ -217,7 +217,7 @@ class QuotedMessageWidget extends StatelessWidget {
     }
     child = AbsorbPointer(child: child);
     return Material(
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: Clip.hardEdge,
       type: MaterialType.transparency,
       shape: attachment.type == 'file' ? null : _getDefaultShape(context),
       child: child,
@@ -280,7 +280,7 @@ class QuotedMessageWidget extends StatelessWidget {
 
   Color? _getBackgroundColor(BuildContext context) {
     if (_containsScrapeUrl) {
-      return StreamChatTheme.of(context).colorTheme.blueAlice;
+      return StreamChatTheme.of(context).colorTheme.linkBg;
     }
     return messageTheme.messageBackgroundColor;
   }

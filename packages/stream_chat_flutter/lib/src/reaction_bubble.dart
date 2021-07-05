@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/reaction_icon.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Creates reaction bubble widget for displaying over messages
@@ -130,20 +129,20 @@ class ReactionBubble extends StatelessWidget {
         horizontal: 4,
       ),
       child: reactionIcon != null
-          ? StreamSvgIcon(
-              assetName: reactionIcon.assetName,
-              width: 16,
-              height: 16,
-              color: (!highlightOwnReactions || reaction.user?.id == userId)
-                  ? chatThemeData.colorTheme.accentBlue
-                  : chatThemeData.colorTheme.black.withOpacity(.5),
+          ? ConstrainedBox(
+              constraints: BoxConstraints.tight(const Size.square(16)),
+              child: reactionIcon.builder(
+                context,
+                !highlightOwnReactions || reaction.user?.id == userId,
+                16,
+              ),
             )
           : Icon(
               Icons.help_outline_rounded,
               size: 16,
               color: (!highlightOwnReactions || reaction.user?.id == userId)
-                  ? chatThemeData.colorTheme.accentBlue
-                  : chatThemeData.colorTheme.black.withOpacity(.5),
+                  ? chatThemeData.colorTheme.accentPrimary
+                  : chatThemeData.colorTheme.textHighEmphasis.withOpacity(.5),
             ),
     );
   }

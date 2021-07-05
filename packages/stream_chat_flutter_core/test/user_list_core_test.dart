@@ -43,7 +43,7 @@ void main() {
         listBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       await tester.pumpWidget(userListCore);
@@ -62,7 +62,7 @@ void main() {
         listBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       final mockClient = MockClient();
@@ -91,7 +91,7 @@ void main() {
         listBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
         userListController: controller,
       );
 
@@ -125,7 +125,8 @@ void main() {
         listBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Container(key: errorWidgetKey),
+        errorBuilder: (BuildContext context, Object error) =>
+            Container(key: errorWidgetKey),
       );
 
       final mockClient = MockClient();
@@ -134,7 +135,7 @@ void main() {
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).thenThrow(error);
 
@@ -154,7 +155,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).called(1);
     },
@@ -170,7 +171,7 @@ void main() {
         listBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Container(key: emptyWidgetKey),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       final mockClient = MockClient();
@@ -179,7 +180,7 @@ void main() {
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
@@ -199,7 +200,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).called(1);
     },
@@ -215,7 +216,7 @@ void main() {
         listBuilder: (_, __) => Container(key: listWidgetKey),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       final mockClient = MockClient();
@@ -224,7 +225,7 @@ void main() {
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
@@ -244,7 +245,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).called(1);
     },
@@ -273,7 +274,7 @@ void main() {
         ),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
         groupAlphabetically: true,
       );
 
@@ -283,7 +284,7 @@ void main() {
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
@@ -310,7 +311,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).called(1);
     },
@@ -341,7 +342,7 @@ void main() {
         ),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
         pagination: pagination,
         groupAlphabetically: true,
       );
@@ -352,7 +353,7 @@ void main() {
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
@@ -379,7 +380,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).called(1);
 
@@ -393,7 +394,7 @@ void main() {
       when(() => mockClient.queryUsers(
                 filter: any(named: 'filter'),
                 sort: any(named: 'sort'),
-                options: any(named: 'options'),
+                presence: any(named: 'presence'),
                 pagination: updatedPagination,
               ))
           .thenAnswer(
@@ -411,7 +412,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: updatedPagination,
           )).called(1);
     },
@@ -446,7 +447,7 @@ void main() {
             ),
             loadingBuilder: (BuildContext context) => Offstage(),
             emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (Object error) => Offstage(),
+            errorBuilder: (BuildContext context, Object error) => Offstage(),
             pagination: pagination.copyWith(limit: limit),
             groupAlphabetically: true,
           );
@@ -457,7 +458,7 @@ void main() {
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
@@ -488,7 +489,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).called(1);
 
@@ -500,7 +501,7 @@ void main() {
       when(() => mockClient.queryUsers(
                 filter: any(named: 'filter'),
                 sort: any(named: 'sort'),
-                options: any(named: 'options'),
+                presence: any(named: 'presence'),
                 pagination: updatedPagination,
               ))
           .thenAnswer((_) async => QueryUsersResponse()..users = updatedUsers);
@@ -515,7 +516,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: updatedPagination,
           )).called(1);
     },

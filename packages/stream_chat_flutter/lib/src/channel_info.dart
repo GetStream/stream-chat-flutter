@@ -11,6 +11,7 @@ class ChannelInfo extends StatelessWidget {
     required this.channel,
     this.textStyle,
     this.showTypingIndicator = true,
+    this.parentId,
   }) : super(key: key);
 
   /// The channel about which the info is to be displayed
@@ -22,17 +23,20 @@ class ChannelInfo extends StatelessWidget {
   /// If true the typing indicator will be rendered if a user is typing
   final bool showTypingIndicator;
 
+  /// Id of the parent message in case of a thread
+  final String? parentId;
+
   @override
   Widget build(BuildContext context) {
     final client = StreamChat.of(context).client;
-    return StreamBuilder<List<Member>>(
-      stream: channel.state?.membersStream,
-      initialData: channel.state?.members,
-      builder: (context, snapshot) => ConnectionStatusBuilder(
+    return BetterStreamBuilder<List<Member>>(
+      stream: channel.state!.membersStream,
+      initialData: channel.state!.members,
+      builder: (context, data) => ConnectionStatusBuilder(
         statusBuilder: (context, status) {
           switch (status) {
             case ConnectionStatus.connected:
-              return _buildConnectedTitleState(context, snapshot.data);
+              return _buildConnectedTitleState(context, data);
             case ConnectionStatus.connecting:
               return _buildConnectingTitleState(context);
             case ConnectionStatus.disconnected:
@@ -88,6 +92,7 @@ class ChannelInfo extends StatelessWidget {
     }
 
     return TypingIndicator(
+      parentId: parentId,
       alignment: Alignment.center,
       alternativeWidget: alternativeWidget,
       style: textStyle,
@@ -132,14 +137,13 @@ class ChannelInfo extends StatelessWidget {
                 vertical: VisualDensity.minimumDensity,
               ),
             ),
-            onPressed: () async {
-              await client.disconnect();
-              await client.connect();
-            },
+            onPressed: () => client
+              ..closeConnection()
+              ..openConnection(),
             child: Text(
               'Try Again',
               style: textStyle?.copyWith(
-                color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                color: StreamChatTheme.of(context).colorTheme.accentPrimary,
               ),
             ),
           ),

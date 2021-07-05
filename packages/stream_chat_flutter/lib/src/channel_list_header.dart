@@ -154,7 +154,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
                           Color? color;
                           switch (status) {
                             case ConnectionStatus.connected:
-                              color = chatThemeData.colorTheme.accentBlue;
+                              color = chatThemeData.colorTheme.accentPrimary;
                               break;
                             case ConnectionStatus.connecting:
                               color = Colors.grey;
@@ -209,7 +209,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     return Text(
       'Stream Chat',
       style: chatThemeData.textTheme.headlineBold.copyWith(
-        color: chatThemeData.colorTheme.black,
+        color: chatThemeData.colorTheme.textHighEmphasis,
       ),
     );
   }
@@ -254,16 +254,15 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
         TextButton(
-          onPressed: () async {
-            await client.disconnect();
-            await client.connect();
-          },
+          onPressed: () => client
+            ..closeConnection()
+            ..openConnection(),
           child: Text(
             'Try Again',
             style: chatThemeData.channelListHeaderTheme.title?.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: chatThemeData.colorTheme.accentBlue,
+              color: chatThemeData.colorTheme.accentPrimary,
             ),
           ),
         ),

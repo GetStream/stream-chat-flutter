@@ -1,11 +1,10 @@
-import 'package:collection/collection.dart' show IterableExtension;
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/channel_bottom_sheet.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -61,9 +60,15 @@ class ChannelListView extends StatefulWidget {
   const ChannelListView({
     Key? key,
     this.filter,
-    this.options,
     this.sort,
-    this.pagination,
+    this.state = true,
+    this.watch = true,
+    this.presence = false,
+    this.memberLimit,
+    this.messageLimit,
+    this.pagination = const PaginationParams(
+      limit: 25,
+    ),
     this.onChannelTap,
     this.onChannelLongPress,
     this.channelWidget,
@@ -84,6 +89,7 @@ class ChannelListView extends StatefulWidget {
     this.onMoreDetailsPressed,
     this.onDeletePressed,
     this.swipeActions,
+    this.channelListController,
   }) : super(key: key);
 
   /// If true a default swipe to action behaviour will be added to this widget
@@ -94,12 +100,6 @@ class ChannelListView extends StatefulWidget {
   /// You can also filter other built-in channel fields.
   final Filter? filter;
 
-  /// Query channels options.
-  ///
-  /// state: if true returns the Channel state
-  /// watch: if true listen to changes to this Channel in real time.
-  final Map<String, dynamic>? options;
-
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options
   /// can be provided.
@@ -108,11 +108,26 @@ class ChannelListView extends StatefulWidget {
   /// Direction can be ascending or descending.
   final List<SortOption<ChannelModel>>? sort;
 
+  /// If true returns the Channel state
+  final bool state;
+
+  /// If true listen to changes to this Channel in real time.
+  final bool watch;
+
+  /// If true you’ll receive user presence updates via the websocket events
+  final bool presence;
+
+  /// Number of members to fetch in each channel
+  final int? memberLimit;
+
+  /// Number of messages to fetch in each channel
+  final int? messageLimit;
+
   /// Pagination parameters
   /// limit: the number of channels to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams? pagination;
+  final PaginationParams pagination;
 
   /// Function called when tapping on a channel
   /// By default it calls [Navigator.push] building a [MaterialPageRoute]
@@ -173,6 +188,12 @@ class ChannelListView extends StatefulWidget {
   /// List of actions for slidable
   final List<SwipeAction>? swipeActions;
 
+  /// A [ChannelListController] allows reloading and pagination.
+  /// Use [ChannelListController.loadData] and
+  /// [ChannelListController.paginateData] respectively for reloading and
+  /// pagination.
+  final ChannelListController? channelListController;
+
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
 }
@@ -180,18 +201,21 @@ class ChannelListView extends StatefulWidget {
 class _ChannelListViewState extends State<ChannelListView> {
   final _slideController = SlidableController();
 
-  final _channelListController = ChannelListController();
+  late final _defaultController = ChannelListController();
+  ChannelListController get _channelListController =>
+      widget.channelListController ?? _defaultController;
 
   @override
   Widget build(BuildContext context) {
     Widget child = ChannelListCore(
-      pagination: widget.pagination ??
-          const PaginationParams(
-            limit: 25,
-          ),
-      options: widget.options,
-      sort: widget.sort,
       filter: widget.filter,
+      sort: widget.sort,
+      state: widget.state,
+      watch: widget.watch,
+      presence: widget.presence,
+      memberLimit: widget.memberLimit,
+      messageLimit: widget.messageLimit,
+      pagination: widget.pagination,
       channelListController: _channelListController,
       listBuilder: widget.listBuilder ?? _buildListView,
       emptyBuilder: widget.emptyBuilder ?? _buildEmptyWidget,
@@ -245,10 +269,7 @@ class _ChannelListViewState extends State<ChannelListView> {
       }
     }
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 500),
-      child: child,
-    );
+    return child;
   }
 
   Widget _buildEmptyWidget(BuildContext context) => LayoutBuilder(
@@ -269,7 +290,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                         padding: const EdgeInsets.all(8),
                         child: StreamSvgIcon.message(
                           size: 136,
-                          color: chatThemeData.colorTheme.greyGainsboro,
+                          color: chatThemeData.colorTheme.disabled,
                         ),
                       ),
                       Padding(
@@ -288,7 +309,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                           'How about sending your first message to a friend?',
                           textAlign: TextAlign.center,
                           style: chatThemeData.textTheme.body.copyWith(
-                            color: chatThemeData.colorTheme.grey,
+                            color: chatThemeData.colorTheme.textLowEmphasis,
                           ),
                         ),
                       ),
@@ -306,7 +327,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                         child: Text(
                           'Start a chat',
                           style: chatThemeData.textTheme.bodyBold.copyWith(
-                            color: chatThemeData.colorTheme.accentBlue,
+                            color: chatThemeData.colorTheme.accentPrimary,
                           ),
                         ),
                       ),
@@ -341,8 +362,8 @@ class _ChannelListViewState extends State<ChannelListView> {
     final chatThemeData = StreamChatTheme.of(context);
     if (widget.crossAxisCount > 1) {
       return Shimmer.fromColors(
-        baseColor: chatThemeData.colorTheme.greyGainsboro,
-        highlightColor: chatThemeData.colorTheme.whiteSmoke,
+        baseColor: chatThemeData.colorTheme.disabled,
+        highlightColor: chatThemeData.colorTheme.inputBg,
         child: Column(
           children: [
             const SizedBox(height: 4),
@@ -370,12 +391,12 @@ class _ChannelListViewState extends State<ChannelListView> {
       );
     } else {
       return Shimmer.fromColors(
-        baseColor: chatThemeData.colorTheme.greyGainsboro,
-        highlightColor: chatThemeData.colorTheme.whiteSmoke,
+        baseColor: chatThemeData.colorTheme.disabled,
+        highlightColor: chatThemeData.colorTheme.inputBg,
         child: ListTile(
           leading: Container(
             decoration: BoxDecoration(
-              color: chatThemeData.colorTheme.white,
+              color: chatThemeData.colorTheme.barsBg,
               shape: BoxShape.circle,
             ),
             constraints: const BoxConstraints.tightFor(
@@ -391,7 +412,7 @@ class _ChannelListViewState extends State<ChannelListView> {
             alignment: Alignment.centerLeft,
             child: Container(
               decoration: BoxDecoration(
-                color: chatThemeData.colorTheme.white,
+                color: chatThemeData.colorTheme.barsBg,
                 borderRadius: BorderRadius.circular(11),
               ),
               constraints: const BoxConstraints.tightFor(
@@ -408,7 +429,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                   alignment: Alignment.centerLeft,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: chatThemeData.colorTheme.white,
+                      color: chatThemeData.colorTheme.barsBg,
                       borderRadius: BorderRadius.circular(11),
                     ),
                     constraints: const BoxConstraints.expand(
@@ -420,7 +441,7 @@ class _ChannelListViewState extends State<ChannelListView> {
               Container(
                 margin: const EdgeInsets.only(left: 16),
                 decoration: BoxDecoration(
-                  color: chatThemeData.colorTheme.white,
+                  color: chatThemeData.colorTheme.barsBg,
                   borderRadius: BorderRadius.circular(11),
                 ),
                 constraints: const BoxConstraints.tightFor(
@@ -465,104 +486,105 @@ class _ChannelListViewState extends State<ChannelListView> {
 
   Widget _listItemBuilder(BuildContext context, int i, List<Channel> channels) {
     final channelsBloc = ChannelsBloc.of(context);
+    final onTap = _getChannelTap(context);
+    final chatThemeData = StreamChatTheme.of(context);
+    final backgroundColor = chatThemeData.colorTheme.inputBg;
+
     if (i < channels.length) {
       final channel = channels[i];
-      final onTap = _getChannelTap(context);
 
-      final chatThemeData = StreamChatTheme.of(context);
-      final backgroundColor = chatThemeData.colorTheme.whiteSmoke;
       return StreamChannel(
-        key: ValueKey<String>('CHANNEL-${channel.id}'),
+        key: ValueKey<String>('CHANNEL-${channel.cid}'),
         channel: channel,
-        child: Builder(
-          builder: (context) => Slidable(
-            controller: _slideController,
-            enabled: widget.swipeToAction,
-            actionPane: const SlidableBehindActionPane(),
-            actionExtentRatio: 0.12,
-            secondaryActions: widget.swipeActions
-                    ?.map((e) => IconSlideAction(
-                          color: e.color,
-                          iconWidget: e.iconWidget,
-                          onTap: () {
-                            e.onTap?.call(channel);
-                          },
-                        ))
-                    .toList() ??
-                <Widget>[
+        child: Slidable(
+          controller: _slideController,
+          enabled: widget.swipeToAction,
+          actionPane: const SlidableBehindActionPane(),
+          actionExtentRatio: 0.12,
+          secondaryActions: widget.swipeActions
+                  ?.map((e) => IconSlideAction(
+                        color: e.color,
+                        iconWidget: e.iconWidget,
+                        onTap: () {
+                          e.onTap?.call(channel);
+                        },
+                      ))
+                  .toList() ??
+              <Widget>[
+                IconSlideAction(
+                  color: backgroundColor,
+                  icon: Icons.more_horiz,
+                  onTap: widget.onMoreDetailsPressed != null
+                      ? () {
+                          widget.onMoreDetailsPressed!(channel);
+                        }
+                      : () {
+                          showModalBottomSheet(
+                            clipBehavior: Clip.hardEdge,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(32),
+                                topRight: Radius.circular(32),
+                              ),
+                            ),
+                            context: context,
+                            builder: (context) => StreamChannel(
+                              channel: channel,
+                              child: ChannelBottomSheet(
+                                onViewInfoTap: () {
+                                  widget.onViewInfoTap?.call(channel);
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                ),
+                if ([
+                  'admin',
+                  'owner',
+                ].contains(channel.state!.members
+                    .firstWhereOrNull(
+                        (m) => m.userId == channel.client.state.user?.id)
+                    ?.role))
                   IconSlideAction(
                     color: backgroundColor,
-                    icon: Icons.more_horiz,
-                    onTap: widget.onMoreDetailsPressed != null
+                    iconWidget: StreamSvgIcon.delete(
+                      color: chatThemeData.colorTheme.accentError,
+                    ),
+                    onTap: widget.onDeletePressed != null
                         ? () {
-                            widget.onMoreDetailsPressed!(channel);
+                            widget.onDeletePressed!(channel);
                           }
-                        : () {
-                            showModalBottomSheet(
-                              clipBehavior: Clip.hardEdge,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(32),
-                                  topRight: Radius.circular(32),
-                                ),
-                              ),
-                              context: context,
-                              builder: (context) => StreamChannel(
-                                channel: channel,
-                                child: ChannelBottomSheet(
-                                  onViewInfoTap: () {
-                                    widget.onViewInfoTap?.call(channel);
-                                  },
-                                ),
+                        : () async {
+                            final res = await showConfirmationDialog(
+                              context,
+                              title: 'Delete Conversation',
+                              okText: 'DELETE',
+                              question:
+                                  // ignore: lines_longer_than_80_chars
+                                  'Are you sure you want to delete this conversation?',
+                              cancelText: 'CANCEL',
+                              icon: StreamSvgIcon.delete(
+                                color: chatThemeData.colorTheme.accentError,
                               ),
                             );
+                            if (res == true) {
+                              await channel.delete();
+                            }
                           },
                   ),
-                  if ([
-                    'admin',
-                    'owner',
-                  ].contains(channel.state!.members
-                      .firstWhereOrNull(
-                          (m) => m.userId == channel.client.state.user?.id)
-                      ?.role))
-                    IconSlideAction(
-                      color: backgroundColor,
-                      iconWidget: StreamSvgIcon.delete(
-                        color: chatThemeData.colorTheme.accentRed,
-                      ),
-                      onTap: widget.onDeletePressed != null
-                          ? () {
-                              widget.onDeletePressed!(channel);
-                            }
-                          : () async {
-                              final res = await showConfirmationDialog(
-                                context,
-                                title: 'Delete Conversation',
-                                okText: 'DELETE',
-                                question:
-                                    // ignore: lines_longer_than_80_chars
-                                    'Are you sure you want to delete this conversation?',
-                                cancelText: 'CANCEL',
-                                icon: StreamSvgIcon.delete(
-                                  color: chatThemeData.colorTheme.accentRed,
-                                ),
-                              );
-                              if (res == true) {
-                                await channel.delete();
-                              }
-                            },
-                    ),
-                ],
-            child: Container(
-              color: chatThemeData.colorTheme.whiteSnow,
-              child: widget.channelPreviewBuilder?.call(context, channel) ??
-                  ChannelPreview(
-                    onLongPress: widget.onChannelLongPress,
-                    channel: channel,
-                    onImageTap: () => widget.onImageTap?.call(channel),
-                    onTap: (channel) => onTap(channel, widget.channelWidget),
-                  ),
+              ],
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: chatThemeData.colorTheme.appBg,
             ),
+            child: widget.channelPreviewBuilder?.call(context, channel) ??
+                ChannelPreview(
+                  onLongPress: widget.onChannelLongPress,
+                  channel: channel,
+                  onImageTap: () => widget.onImageTap?.call(channel),
+                  onTap: (channel) => onTap(channel, widget.channelWidget),
+                ),
           ),
         ),
       );
@@ -636,15 +658,13 @@ class _ChannelListViewState extends State<ChannelListView> {
     context,
     ChannelsBlocState channelsProvider,
   ) =>
-      StreamBuilder<bool>(
+      BetterStreamBuilder<bool>(
           stream: channelsProvider.queryChannelsLoading,
           initialData: false,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Container(
+          errorBuilder: (context, err) => Container(
                 color: StreamChatTheme.of(context)
                     .colorTheme
-                    .accentRed
+                    .accentError
                     .withOpacity(.2),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
@@ -652,17 +672,15 @@ class _ChannelListViewState extends State<ChannelListView> {
                     child: Text('Error loading channels'),
                   ),
                 ),
-              );
-            }
-            return snapshot.data!
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                : const Offstage();
-          });
+              ),
+          builder: (context, data) => data
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : const Offstage());
 
   Widget _separatorBuilder(context, i) {
     final effect = StreamChatTheme.of(context).colorTheme.borderBottom;

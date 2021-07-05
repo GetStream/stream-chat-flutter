@@ -1,0 +1,29 @@
+{
+  "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
+  "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
+  "silent": false,
+  "attachments": [
+    {
+      "type": "video",
+      "title_link": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+      "title": "The Lion King Disney GIF - Find & Share on GIPHY",
+      "thumb_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+      "text": "Discover & share this Lion King Live Action GIF with everyone you know. GIPHY is how you search, share, discover, and create GIFs.",
+      "og_scrape_url": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
+      "image_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+      "author_name": "GIPHY",
+      "asset_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4",
+      "actions": []
+    }
+  ],
+  "mentioned_users": [],
+  "parent_id": "parentId",
+  "quoted_message": null,
+  "quoted_message_id": null,
+  "pinned": false,
+  "pinned_at": null,
+  "pin_expires": null,
+  "pinned_by": null,
+  "show_in_channel": true,
+  "hey": "test"
+}

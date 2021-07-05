@@ -40,7 +40,7 @@ class UrlAttachment extends StatelessWidget {
         children: [
           if (urlAttachment.imageUrl != null)
             Container(
-              clipBehavior: Clip.antiAliasWithSaveLayer,
+              clipBehavior: Clip.hardEdge,
               margin: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
@@ -60,7 +60,7 @@ class UrlAttachment extends StatelessWidget {
                         borderRadius: const BorderRadius.only(
                           topRight: Radius.circular(16),
                         ),
-                        color: chatThemeData.colorTheme.blueAlice,
+                        color: chatThemeData.colorTheme.linkBg,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.only(
@@ -71,7 +71,7 @@ class UrlAttachment extends StatelessWidget {
                         child: Text(
                           hostDisplayName,
                           style: chatThemeData.textTheme.bodyBold.copyWith(
-                            color: chatThemeData.colorTheme.accentBlue,
+                            color: chatThemeData.colorTheme.accentPrimary,
                           ),
                         ),
                       ),

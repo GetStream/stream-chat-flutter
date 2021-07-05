@@ -88,7 +88,7 @@ class _ImageFooterState extends State<ImageFooter> {
         context: context,
         removeTop: true,
         child: BottomAppBar(
-          color: chatThemeData.colorTheme.white,
+          color: chatThemeData.colorTheme.barsBg,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -100,7 +100,7 @@ class _ImageFooterState extends State<ImageFooter> {
                 IconButton(
                   icon: StreamSvgIcon.iconShare(
                     size: 24,
-                    color: chatThemeData.colorTheme.black,
+                    color: chatThemeData.colorTheme.textHighEmphasis,
                   ),
                   onPressed: () async {
                     final attachment =
@@ -144,7 +144,7 @@ class _ImageFooterState extends State<ImageFooter> {
               ),
               IconButton(
                 icon: StreamSvgIcon.iconGrid(
-                  color: chatThemeData.colorTheme.black,
+                  color: chatThemeData.colorTheme.textHighEmphasis,
                 ),
                 onPressed: () => _showPhotosModal(context),
               ),
@@ -160,7 +160,7 @@ class _ImageFooterState extends State<ImageFooter> {
     showModalBottomSheet(
       context: context,
       barrierColor: chatThemeData.colorTheme.overlay,
-      backgroundColor: chatThemeData.colorTheme.white,
+      backgroundColor: chatThemeData.colorTheme.barsBg,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -199,7 +199,7 @@ class _ImageFooterState extends State<ImageFooter> {
                       alignment: Alignment.centerRight,
                       child: IconButton(
                         icon: StreamSvgIcon.close(
-                          color: chatThemeData.colorTheme.black,
+                          color: chatThemeData.colorTheme.textHighEmphasis,
                         ),
                         onPressed: () => Navigator.maybePop(context),
                       ),
@@ -262,7 +262,8 @@ class _ImageFooterState extends State<ImageFooter> {
                                   boxShadow: [
                                     BoxShadow(
                                       blurRadius: 8,
-                                      color: chatThemeData.colorTheme.black
+                                      color: chatThemeData
+                                          .colorTheme.textHighEmphasis
                                           .withOpacity(0.3),
                                     ),
                                   ],

@@ -203,9 +203,9 @@ class _MessageScreenState extends State<MessageScreen> {
     final channel = StreamChannel.of(context).channel;
     return Scaffold(
       appBar: AppBar(
-        title: StreamBuilder<List<User>>(
-          initialData: channel.state?.typingEvents,
-          stream: channel.state?.typingEventsStream,
+        title: StreamBuilder<Iterable<User>>(
+          initialData: channel.state?.typingEvents.keys,
+          stream: channel.state?.typingEventsStream.map((it) => it.keys),
           builder: (context, snapshot) {
             if (snapshot.hasData && snapshot.data!.isNotEmpty) {
               return Text('${snapshot.data!.first.name} is typing...');
@@ -344,7 +344,7 @@ extension on Channel {
   String? get name {
     final _channelName = extraData['name'];
     if (_channelName != null) {
-      return _channelName;
+      return _channelName as String;
     } else {
       return cid;
     }

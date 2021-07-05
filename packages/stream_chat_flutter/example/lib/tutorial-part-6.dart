@@ -50,9 +50,9 @@ class MyApp extends StatelessWidget {
         ),
       ),
       otherMessageTheme: MessageTheme(
-        messageBackgroundColor: colorTheme.black,
+        messageBackgroundColor: colorTheme.textHighEmphasis,
         messageText: TextStyle(
-          color: colorTheme.white,
+          color: colorTheme.barsBg,
         ),
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(8),

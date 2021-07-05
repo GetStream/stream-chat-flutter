@@ -4,6 +4,10 @@ import 'package:stream_chat/stream_chat.dart';
 class MockLogger extends Mock implements Logger {}
 
 class MockClient extends Mock implements StreamChatClient {
+  MockClient() {
+    when(() => wsConnectionStatus).thenReturn(ConnectionStatus.connected);
+  }
+
   @override
   final Logger logger = MockLogger();
 

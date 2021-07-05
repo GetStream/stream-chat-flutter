@@ -68,6 +68,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.actions,
     this.onTitleTap,
+    this.showTypingIndicator = true,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -96,9 +97,32 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// AppBar actions
   final List<Widget>? actions;
 
+  /// If true the typing indicator will be rendered
+  /// if a user is typing in this thread
+  final bool showTypingIndicator;
+
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
+
+    final defaultSubtitle = subtitle ??
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'with ',
+              style: chatThemeData.channelTheme.channelHeaderTheme.subtitle,
+            ),
+            Flexible(
+              child: ChannelName(
+                textStyle:
+                    chatThemeData.channelTheme.channelHeaderTheme.subtitle,
+              ),
+            ),
+          ],
+        );
+
     return AppBar(
       automaticallyImplyLeading: false,
       textTheme: Theme.of(context).textTheme,
@@ -119,6 +143,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
         onTap: onTitleTap,
         child: SizedBox(
           height: preferredSize.height,
+          width: 250,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -128,24 +153,16 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                     style: chatThemeData.channelTheme.channelHeaderTheme.title,
                   ),
               const SizedBox(height: 2),
-              subtitle ??
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'with ',
-                        style: chatThemeData
-                            .channelTheme.channelHeaderTheme.subtitle,
-                      ),
-                      Flexible(
-                        child: ChannelName(
-                          textStyle: chatThemeData
-                              .channelTheme.channelHeaderTheme.subtitle,
-                        ),
-                      ),
-                    ],
-                  ),
+              if (showTypingIndicator)
+                TypingIndicator(
+                  alignment: Alignment.center,
+                  channel: StreamChannel.of(context).channel,
+                  style: chatThemeData.channelTheme.channelHeaderTheme.subtitle,
+                  parentId: parent.id,
+                  alternativeWidget: defaultSubtitle,
+                )
+              else
+                defaultSubtitle,
             ],
           ),
         ),

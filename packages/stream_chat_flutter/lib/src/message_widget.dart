@@ -89,6 +89,7 @@ class MessageWidget extends StatefulWidget {
     this.onLinkTap,
     this.onMessageActions,
     this.onShowMessage,
+    this.userAvatarBuilder,
     this.editMessageInputBuilder,
     this.textBuilder,
     this.onReturnAction,
@@ -221,7 +222,7 @@ class MessageWidget extends StatefulWidget {
             final border = RoundedRectangleBorder(
               side: attachmentBorderSide ??
                   BorderSide(
-                    color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+                    color: StreamChatTheme.of(context).colorTheme.borders,
                   ),
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
@@ -273,6 +274,9 @@ class MessageWidget extends StatefulWidget {
 
   /// Function called on long press
   final void Function(BuildContext, Message)? onMessageActions;
+
+  /// Widget builder for building user avatar
+  final Widget Function(BuildContext, User)? userAvatarBuilder;
 
   /// The message
   final Message message;
@@ -397,6 +401,119 @@ class MessageWidget extends StatefulWidget {
   /// Customize onTap on attachment
   final void Function(Message message, Attachment attachment)? onAttachmentTap;
 
+  /// Creates a copy of [MessageWidget] with specified attributes overridden.
+  MessageWidget copyWith({
+    Key? key,
+    void Function(User)? onMentionTap,
+    void Function(Message)? onThreadTap,
+    void Function(Message)? onReplyTap,
+    Widget Function(BuildContext, Message)? editMessageInputBuilder,
+    Widget Function(BuildContext, Message)? textBuilder,
+    Widget Function(BuildContext, Message)? usernameBuilder,
+    void Function(BuildContext, Message)? onMessageActions,
+    Message? message,
+    MessageTheme? messageTheme,
+    bool? reverse,
+    ShapeBorder? shape,
+    ShapeBorder? attachmentShape,
+    BorderSide? borderSide,
+    BorderSide? attachmentBorderSide,
+    BorderRadiusGeometry? borderRadiusGeometry,
+    BorderRadiusGeometry? attachmentBorderRadiusGeometry,
+    EdgeInsetsGeometry? padding,
+    EdgeInsets? textPadding,
+    EdgeInsetsGeometry? attachmentPadding,
+    DisplayWidget? showUserAvatar,
+    bool? showSendingIndicator,
+    bool? showReactions,
+    bool? allRead,
+    bool? showThreadReplyIndicator,
+    bool? showInChannelIndicator,
+    void Function(User)? onUserAvatarTap,
+    void Function(String)? onLinkTap,
+    bool? showReactionPickerIndicator,
+    List<Read>? readList,
+    ShowMessageCallback? onShowMessage,
+    ValueChanged<ReturnActionType>? onReturnAction,
+    bool? showUsername,
+    bool? showTimestamp,
+    bool? showReplyMessage,
+    bool? showThreadReplyMessage,
+    bool? showEditMessage,
+    bool? showCopyMessage,
+    bool? showDeleteMessage,
+    bool? showResendMessage,
+    bool? showFlagButton,
+    bool? showPinButton,
+    bool? showPinHighlight,
+    Map<String, AttachmentBuilder>? customAttachmentBuilders,
+    bool? translateUserAvatar,
+    OnQuotedMessageTap? onQuotedMessageTap,
+    void Function(Message)? onMessageTap,
+    List<MessageAction>? customActions,
+    void Function(Message message, Attachment attachment)? onAttachmentTap,
+    Widget Function(BuildContext, User)? userAvatarBuilder,
+  }) =>
+      MessageWidget(
+        key: key ?? this.key,
+        onMentionTap: onMentionTap ?? this.onMentionTap,
+        onThreadTap: onThreadTap ?? this.onThreadTap,
+        onReplyTap: onReplyTap ?? this.onReplyTap,
+        editMessageInputBuilder:
+            editMessageInputBuilder ?? this.editMessageInputBuilder,
+        textBuilder: textBuilder ?? this.textBuilder,
+        usernameBuilder: usernameBuilder ?? this.usernameBuilder,
+        onMessageActions: onMessageActions ?? this.onMessageActions,
+        message: message ?? this.message,
+        messageTheme: messageTheme ?? this.messageTheme,
+        reverse: reverse ?? this.reverse,
+        shape: shape ?? this.shape,
+        attachmentShape: attachmentShape ?? this.attachmentShape,
+        borderSide: borderSide ?? this.borderSide,
+        attachmentBorderSide: attachmentBorderSide ?? this.attachmentBorderSide,
+        borderRadiusGeometry: borderRadiusGeometry ?? this.borderRadiusGeometry,
+        attachmentBorderRadiusGeometry: attachmentBorderRadiusGeometry ??
+            this.attachmentBorderRadiusGeometry,
+        padding: padding ?? this.padding,
+        textPadding: textPadding ?? this.textPadding,
+        attachmentPadding: attachmentPadding ?? this.attachmentPadding,
+        showUserAvatar: showUserAvatar ?? this.showUserAvatar,
+        showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
+        showReactions: showReactions ?? this.showReactions,
+        allRead: allRead ?? this.allRead,
+        showThreadReplyIndicator:
+            showThreadReplyIndicator ?? this.showThreadReplyIndicator,
+        showInChannelIndicator:
+            showInChannelIndicator ?? this.showInChannelIndicator,
+        onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
+        onLinkTap: onLinkTap ?? this.onLinkTap,
+        showReactionPickerIndicator:
+            showReactionPickerIndicator ?? this.showReactionPickerIndicator,
+        readList: readList ?? this.readList,
+        onShowMessage: onShowMessage ?? this.onShowMessage,
+        onReturnAction: onReturnAction ?? this.onReturnAction,
+        showUsername: showUsername ?? this.showUsername,
+        showTimestamp: showTimestamp ?? this.showTimestamp,
+        showReplyMessage: showReplyMessage ?? this.showReplyMessage,
+        showThreadReplyMessage:
+            showThreadReplyMessage ?? this.showThreadReplyMessage,
+        showEditMessage: showEditMessage ?? this.showEditMessage,
+        showCopyMessage: showCopyMessage ?? this.showCopyMessage,
+        showDeleteMessage: showDeleteMessage ?? this.showDeleteMessage,
+        showResendMessage: showResendMessage ?? this.showResendMessage,
+        showFlagButton: showFlagButton ?? this.showFlagButton,
+        showPinButton: showPinButton ?? this.showPinButton,
+        showPinHighlight: showPinHighlight ?? this.showPinHighlight,
+        customAttachmentBuilders:
+            customAttachmentBuilders ?? attachmentBuilders,
+        translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
+        onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
+        onMessageTap: onMessageTap ?? this.onMessageTap,
+        customActions: customActions ?? this.customActions,
+        onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
+        userAvatarBuilder: userAvatarBuilder ?? this.userAvatarBuilder,
+      );
+
   @override
   _MessageWidgetState createState() => _MessageWidgetState();
 }
@@ -433,11 +550,11 @@ class _MessageWidgetState extends State<MessageWidget>
       widget.message.attachments.any((element) => element.type == 'giphy') ==
       true;
 
-  bool get hasNonUrlAttachments =>
-      widget.message.attachments
-          .where((it) => it.ogScrapeUrl == null)
-          .isNotEmpty ==
-      true;
+  bool get isOnlyEmoji => widget.message.text?.isOnlyEmoji == true;
+
+  bool get hasNonUrlAttachments => widget.message.attachments
+      .where((it) => it.ogScrapeUrl == null)
+      .isNotEmpty;
 
   bool get hasUrlAttachments =>
       widget.message.attachments.any((it) => it.ogScrapeUrl != null) == true;
@@ -453,12 +570,15 @@ class _MessageWidgetState extends State<MessageWidget>
   @override
   bool get wantKeepAlive => widget.message.attachments.isNotEmpty == true;
 
+  late StreamChatThemeData _streamChatTheme;
+  late StreamChatState _streamChat;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     final avatarWidth =
         widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
-    final leftPadding =
+    final bottomRowPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
     return Material(
@@ -466,7 +586,7 @@ class _MessageWidgetState extends State<MessageWidget>
           ? MaterialType.card
           : MaterialType.transparency,
       color: widget.message.pinned && widget.showPinHighlight
-          ? StreamChatTheme.of(context).colorTheme.highlight
+          ? _streamChatTheme.colorTheme.highlight
           : null,
       child: Portal(
         child: InkWell(
@@ -513,7 +633,8 @@ class _MessageWidgetState extends State<MessageWidget>
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                                if (widget.showUserAvatar ==
+                                if (!widget.reverse &&
+                                    widget.showUserAvatar ==
                                         DisplayWidget.show &&
                                     widget.message.user != null) ...[
                                   _buildUserAvatar(),
@@ -527,7 +648,8 @@ class _MessageWidgetState extends State<MessageWidget>
                                       transform: Matrix4.translationValues(
                                           widget.reverse ? 12 : -12, 0, 0),
                                       constraints: const BoxConstraints(
-                                          maxWidth: 22 * 6.0),
+                                        maxWidth: 22 * 6.0,
+                                      ),
                                       child: _buildReactionIndicator(context),
                                     ),
                                     portalAnchor:
@@ -572,7 +694,7 @@ class _MessageWidgetState extends State<MessageWidget>
                                                   ),
                                                 )
                                               : Card(
-                                                  clipBehavior: Clip.antiAlias,
+                                                  clipBehavior: Clip.hardEdge,
                                                   elevation: 0,
                                                   margin: EdgeInsets.symmetric(
                                                     horizontal: (isFailedState
@@ -626,9 +748,8 @@ class _MessageWidgetState extends State<MessageWidget>
                                             top: -8,
                                             child: CustomPaint(
                                               painter: ReactionBubblePainter(
-                                                StreamChatTheme.of(context)
-                                                    .colorTheme
-                                                    .white,
+                                                _streamChatTheme
+                                                    .colorTheme.barsBg,
                                                 Colors.transparent,
                                                 Colors.transparent,
                                                 tailCirclesSpace: 1,
@@ -639,6 +760,13 @@ class _MessageWidgetState extends State<MessageWidget>
                                     ),
                                   ),
                                 ),
+                                if (widget.reverse &&
+                                    widget.showUserAvatar ==
+                                        DisplayWidget.show &&
+                                    widget.message.user != null) ...[
+                                  _buildUserAvatar(),
+                                  const SizedBox(width: 4),
+                                ]
                               ],
                             ),
                             if (showBottomRow)
@@ -649,7 +777,8 @@ class _MessageWidgetState extends State<MessageWidget>
                       if (showBottomRow)
                         Padding(
                           padding: EdgeInsets.only(
-                            left: leftPadding,
+                            left: !widget.reverse ? bottomRowPadding : 0,
+                            right: widget.reverse ? bottomRowPadding : 0,
                             bottom:
                                 isPinned && widget.showPinHighlight ? 6.0 : 0.0,
                           ),
@@ -673,14 +802,20 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
+  @override
+  void didChangeDependencies() {
+    _streamChatTheme = StreamChatTheme.of(context);
+    _streamChat = StreamChat.of(context);
+    super.didChangeDependencies();
+  }
+
   Widget _buildQuotedMessage() {
-    final isMyMessage =
-        widget.message.user?.id == StreamChat.of(context).user?.id;
+    final isMyMessage = widget.message.user?.id == _streamChat.user?.id;
     final onTap = widget.message.quotedMessage?.isDeleted != true &&
             widget.onQuotedMessageTap != null
         ? () => widget.onQuotedMessageTap!(widget.message.quotedMessageId)
         : null;
-    final chatThemeData = StreamChatTheme.of(context);
+    final chatThemeData = _streamChatTheme;
     return QuotedMessageWidget(
       onTap: onTap,
       message: widget.message.quotedMessage!,
@@ -695,19 +830,19 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget get _bottomRow {
     if (isDeleted) {
-      final chatThemeData = StreamChatTheme.of(context);
+      final chatThemeData = _streamChatTheme;
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           StreamSvgIcon.eye(
-            color: chatThemeData.colorTheme.grey,
+            color: chatThemeData.colorTheme.textLowEmphasis,
             size: 16,
           ),
           const SizedBox(width: 8),
           Text(
             'Only visible to you',
             style: chatThemeData.textTheme.footnote
-                .copyWith(color: chatThemeData.colorTheme.grey),
+                .copyWith(color: chatThemeData.colorTheme.textLowEmphasis),
           ),
         ],
       );
@@ -849,36 +984,16 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
-  Widget _buildThreadParticipantsIndicator(Iterable<User> threadParticipants) {
-    var padding = 0.0;
-    return Stack(
-      children: threadParticipants.map((user) {
-        padding += 8.0;
-        return Positioned(
-          right: padding - 8,
-          bottom: 0,
-          top: 0,
-          child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: StreamChatTheme.of(context).colorTheme.white,
-            ),
-            padding: const EdgeInsets.all(1),
-            child: UserAvatar(
-              user: user,
-              constraints: BoxConstraints.loose(const Size.fromRadius(7)),
-              showOnlineStatus: false,
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
+  Widget _buildThreadParticipantsIndicator(Iterable<User> threadParticipants) =>
+      _ThreadParticipants(
+        streamChatTheme: _streamChatTheme,
+        threadParticipants: threadParticipants,
+      );
 
   Widget _buildReactionIndicator(
     BuildContext context,
   ) {
-    final ownId = StreamChat.of(context).user!.id;
+    final ownId = _streamChat.user!.id;
     final reactionsMap = <String, Reaction>{};
     widget.message.latestReactions?.forEach((element) {
       if (!reactionsMap.containsKey(element.type) ||
@@ -917,24 +1032,36 @@ class _MessageWidgetState extends State<MessageWidget>
     final channel = StreamChannel.of(context).channel;
 
     showDialog(
+        useRootNavigator: false,
         context: context,
-        barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
+        barrierColor: _streamChatTheme.colorTheme.overlay,
         builder: (context) => StreamChannel(
               channel: channel,
               child: MessageActionsModal(
-                textBuilder: widget.textBuilder,
+                messageWidget: widget.copyWith(
+                  key: const Key('MessageWidget'),
+                  message: widget.message.copyWith(
+                    text: widget.message.text!.length > 200
+                        ? '${widget.message.text!.substring(0, 200)}...'
+                        : widget.message.text,
+                  ),
+                  showReactions: false,
+                  showUsername: false,
+                  showTimestamp: false,
+                  translateUserAvatar: false,
+                  showSendingIndicator: false,
+                  padding: const EdgeInsets.all(0),
+                  showReactionPickerIndicator: widget.showReactions &&
+                      (widget.message.status == MessageSendingStatus.sent),
+                  showPinHighlight: false,
+                  showUserAvatar:
+                      widget.message.user!.id == channel.client.state.user!.id
+                          ? DisplayWidget.gone
+                          : DisplayWidget.show,
+                ),
                 onCopyTap: (message) =>
                     Clipboard.setData(ClipboardData(text: message.text)),
-                attachmentBorderRadiusGeometry:
-                    widget.attachmentBorderRadiusGeometry as BorderRadius?,
-                showUserAvatar:
-                    widget.message.user!.id == channel.client.state.user!.id
-                        ? DisplayWidget.gone
-                        : DisplayWidget.show,
                 messageTheme: widget.messageTheme,
-                messageShape: widget.shape ?? _getDefaultShape(context),
-                attachmentShape: widget.attachmentShape ??
-                    _getDefaultAttachmentShape(context),
                 reverse: widget.reverse,
                 showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
                 message: widget.message,
@@ -968,23 +1095,35 @@ class _MessageWidgetState extends State<MessageWidget>
   void _showMessageReactionsModalBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     showDialog(
+      useRootNavigator: false,
       context: context,
-      barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
+      barrierColor: _streamChatTheme.colorTheme.overlay,
       builder: (context) => StreamChannel(
         channel: channel,
         child: MessageReactionsModal(
-          textBuilder: widget.textBuilder,
-          attachmentBorderRadiusGeometry:
-              widget.attachmentBorderRadiusGeometry as BorderRadius?,
-          showUserAvatar:
-              widget.message.user!.id == channel.client.state.user!.id
-                  ? DisplayWidget.gone
-                  : DisplayWidget.show,
+          messageWidget: widget.copyWith(
+            key: const Key('MessageWidget'),
+            message: widget.message.copyWith(
+              text: widget.message.text!.length > 200
+                  ? '${widget.message.text!.substring(0, 200)}...'
+                  : widget.message.text,
+            ),
+            showReactions: false,
+            showUsername: false,
+            showTimestamp: false,
+            translateUserAvatar: false,
+            showSendingIndicator: false,
+            padding: const EdgeInsets.all(0),
+            showReactionPickerIndicator: widget.showReactions &&
+                (widget.message.status == MessageSendingStatus.sent),
+            showPinHighlight: false,
+            showUserAvatar:
+                widget.message.user!.id == channel.client.state.user!.id
+                    ? DisplayWidget.gone
+                    : DisplayWidget.show,
+          ),
           onUserAvatarTap: widget.onUserAvatarTap,
           messageTheme: widget.messageTheme,
-          messageShape: widget.shape ?? _getDefaultShape(context),
-          attachmentShape:
-              widget.attachmentShape ?? _getDefaultAttachmentShape(context),
           reverse: widget.reverse,
           message: widget.message,
           showReactions: widget.showReactions,
@@ -992,28 +1131,6 @@ class _MessageWidgetState extends State<MessageWidget>
       ),
     );
   }
-
-  ShapeBorder _getDefaultAttachmentShape(BuildContext context) {
-    final hasFiles =
-        widget.message.attachments.any((it) => it.type == 'file') == true;
-    return RoundedRectangleBorder(
-      side: hasFiles
-          ? widget.attachmentBorderSide ??
-              BorderSide(
-                color: StreamChatTheme.of(context).colorTheme.greyWhisper,
-              )
-          : BorderSide.none,
-      borderRadius: widget.attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-    );
-  }
-
-  ShapeBorder _getDefaultShape(BuildContext context) => RoundedRectangleBorder(
-        side: widget.borderSide ??
-            BorderSide(
-              color: StreamChatTheme.of(context).colorTheme.greyWhisper,
-            ),
-        borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
-      );
 
   Widget _parseAttachments() {
     final attachmentGroups = <String, List<Attachment>>{};
@@ -1101,7 +1218,7 @@ class _MessageWidgetState extends State<MessageWidget>
             Text(
               widget.readList!.length.toString(),
               style: style.copyWith(
-                color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                color: _streamChatTheme.colorTheme.accentPrimary,
               ),
             ),
           const SizedBox(width: 2),
@@ -1120,13 +1237,14 @@ class _MessageWidgetState extends State<MessageWidget>
                   2
               : 0,
         ),
-        child: UserAvatar(
-          user: widget.message.user!,
-          onTap: widget.onUserAvatarTap,
-          constraints: widget.messageTheme.avatarTheme!.constraints,
-          borderRadius: widget.messageTheme.avatarTheme!.borderRadius,
-          showOnlineStatus: false,
-        ),
+        child: widget.userAvatarBuilder?.call(context, widget.message.user!) ??
+            UserAvatar(
+              user: widget.message.user!,
+              onTap: widget.onUserAvatarTap,
+              constraints: widget.messageTheme.avatarTheme!.constraints,
+              borderRadius: widget.messageTheme.avatarTheme!.borderRadius,
+              showOnlineStatus: false,
+            ),
       );
 
   Widget _buildTextBubble() {
@@ -1158,7 +1276,7 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget _buildPinnedMessage(Message message) {
     final pinnedBy = message.pinnedBy;
-    final pinnedByMe = StreamChat.of(context).user!.id == pinnedBy!.id;
+    final pinnedByMe = _streamChat.user!.id == pinnedBy!.id;
 
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 8),
@@ -1174,7 +1292,7 @@ class _MessageWidgetState extends State<MessageWidget>
           Text(
             'Pinned by ${pinnedByMe ? 'You' : pinnedBy.name}',
             style: TextStyle(
-              color: StreamChatTheme.of(context).colorTheme.grey,
+              color: _streamChatTheme.colorTheme.textLowEmphasis,
               fontSize: 13,
               fontWeight: FontWeight.w400,
             ),
@@ -1184,8 +1302,6 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
-  bool get isOnlyEmoji => widget.message.text!.isOnlyEmoji;
-
   bool get isPinned => widget.message.pinned;
 
   Color? _getBackgroundColor() {
@@ -1194,7 +1310,7 @@ class _MessageWidgetState extends State<MessageWidget>
     }
 
     if (hasUrlAttachments) {
-      return StreamChatTheme.of(context).colorTheme.blueAlice;
+      return _streamChatTheme.colorTheme.linkBg;
     }
 
     if (isOnlyEmoji) {
@@ -1226,6 +1342,45 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 }
 
+class _ThreadParticipants extends StatelessWidget {
+  const _ThreadParticipants({
+    Key? key,
+    required StreamChatThemeData streamChatTheme,
+    required this.threadParticipants,
+  })  : _streamChatTheme = streamChatTheme,
+        super(key: key);
+
+  final StreamChatThemeData _streamChatTheme;
+  final Iterable<User> threadParticipants;
+
+  @override
+  Widget build(BuildContext context) {
+    var padding = 0.0;
+    return Stack(
+      children: threadParticipants.map((user) {
+        padding += 8.0;
+        return Positioned(
+          right: padding - 8,
+          bottom: 0,
+          top: 0,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _streamChatTheme.colorTheme.barsBg,
+            ),
+            padding: const EdgeInsets.all(1),
+            child: UserAvatar(
+              user: user,
+              constraints: BoxConstraints.loose(const Size.fromRadius(7)),
+              showOnlineStatus: false,
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
 class _ThreadReplyPainter extends CustomPainter {
   const _ThreadReplyPainter({
     this.context,
@@ -1240,7 +1395,7 @@ class _ThreadReplyPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color ?? StreamChatTheme.of(context!).colorTheme.greyGainsboro
+      ..color = color ?? StreamChatTheme.of(context!).colorTheme.disabled
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..strokeCap = StrokeCap.round;

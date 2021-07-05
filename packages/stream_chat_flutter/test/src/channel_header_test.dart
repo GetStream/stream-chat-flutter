@@ -34,6 +34,7 @@ void main() {
           .thenAnswer((_) => Stream.value(ConnectionStatus.connected));
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
+      when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(1));
       when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
@@ -107,6 +108,9 @@ void main() {
       ]);
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
+      when(() => client.wsConnectionStatus)
+          .thenReturn(ConnectionStatus.disconnected);
+      when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(1));
 
@@ -169,6 +173,7 @@ void main() {
       ]);
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(1));
 
@@ -373,6 +378,7 @@ void main() {
       ]);
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(1));
 

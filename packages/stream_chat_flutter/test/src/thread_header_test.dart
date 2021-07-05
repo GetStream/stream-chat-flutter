@@ -45,6 +45,7 @@ void main() {
       ]);
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(1));
 

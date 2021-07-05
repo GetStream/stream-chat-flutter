@@ -1,9 +1,6 @@
-import 'dart:math';
-
 import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/reaction_picker.png)
@@ -50,95 +47,89 @@ class _ReactionPickerState extends State<ReactionPicker>
       triggerAnimations();
     }
 
-    return TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: 1),
-        curve: Curves.easeInOutBack,
-        duration: const Duration(milliseconds: 500),
-        builder: (context, val, wid) => Transform.scale(
-              scale: val,
-              child: Material(
-                borderRadius: BorderRadius.circular(24),
-                color: chatThemeData.colorTheme.white,
-                clipBehavior: Clip.hardEdge,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: reactionIcons
-                        .map<Widget>((reactionIcon) {
-                          final ownReactionIndex = widget.message.ownReactions
-                                  ?.indexWhere((reaction) =>
-                                      reaction.type == reactionIcon.type) ??
-                              -1;
-                          final index = reactionIcons.indexOf(reactionIcon);
+    final child = Material(
+      borderRadius: BorderRadius.circular(24),
+      color: chatThemeData.colorTheme.barsBg,
+      clipBehavior: Clip.hardEdge,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: reactionIcons
+              .map<Widget>((reactionIcon) {
+                final ownReactionIndex = widget.message.ownReactions
+                        ?.indexWhere(
+                            (reaction) => reaction.type == reactionIcon.type) ??
+                    -1;
+                final index = reactionIcons.indexOf(reactionIcon);
 
-                          return ConstrainedBox(
-                            constraints: const BoxConstraints.tightFor(
-                              height: 24,
-                              width: 24,
-                            ),
-                            child: RawMaterialButton(
-                              elevation: 0,
-                              shape: ContinuousRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              constraints: const BoxConstraints.tightFor(
-                                height: 24,
-                                width: 24,
-                              ),
-                              onPressed: () {
-                                if (ownReactionIndex != -1) {
-                                  removeReaction(
-                                    context,
-                                    widget.message
-                                        .ownReactions![ownReactionIndex],
-                                  );
-                                } else {
-                                  sendReaction(
-                                    context,
-                                    reactionIcon.type,
-                                  );
-                                }
-                              },
-                              child: AnimatedBuilder(
-                                  animation: animations[index],
-                                  builder: (context, val) => Transform.scale(
-                                        scale: animations[index].value,
-                                        child: StreamSvgIcon(
-                                          assetName: reactionIcon.assetName,
-                                          height: max(
-                                            0,
-                                            animations[index].value * 24.0,
-                                          ),
-                                          width: max(
-                                            0,
-                                            animations[index].value * 24.0,
-                                          ),
-                                          color: ownReactionIndex != -1
-                                              ? chatThemeData
-                                                  .colorTheme.accentBlue
-                                              : Theme.of(context)
-                                                  .iconTheme
-                                                  .color!
-                                                  .withOpacity(.5),
-                                        ),
-                                      )),
-                            ),
-                          );
-                        })
-                        .insertBetween(const SizedBox(
-                          width: 16,
-                        ))
-                        .toList(),
+                final child = reactionIcon.builder(
+                  context,
+                  ownReactionIndex != -1,
+                  24,
+                );
+
+                return ConstrainedBox(
+                  constraints: const BoxConstraints.tightFor(
+                    height: 24,
+                    width: 24,
                   ),
-                ),
-              ),
-            ));
+                  child: RawMaterialButton(
+                    elevation: 0,
+                    shape: ContinuousRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    constraints: const BoxConstraints.tightFor(
+                      height: 24,
+                      width: 24,
+                    ),
+                    onPressed: () {
+                      if (ownReactionIndex != -1) {
+                        removeReaction(
+                          context,
+                          widget.message.ownReactions![ownReactionIndex],
+                        );
+                      } else {
+                        sendReaction(
+                          context,
+                          reactionIcon.type,
+                        );
+                      }
+                    },
+                    child: AnimatedBuilder(
+                      animation: animations[index],
+                      builder: (context, child) => Transform.scale(
+                        scale: animations[index].value,
+                        child: child,
+                      ),
+                      child: child,
+                    ),
+                  ),
+                );
+              })
+              .insertBetween(const SizedBox(
+                width: 16,
+              ))
+              .toList(),
+        ),
+      ),
+    );
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      curve: Curves.easeInOutBack,
+      duration: const Duration(milliseconds: 500),
+      builder: (context, val, widget) => Transform.scale(
+        scale: val,
+        child: widget,
+      ),
+      child: child,
+    );
   }
 
   void triggerAnimations() async {

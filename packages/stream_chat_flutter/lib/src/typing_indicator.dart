@@ -12,6 +12,7 @@ class TypingIndicator extends StatelessWidget {
     this.style,
     this.alignment = Alignment.centerLeft,
     this.padding = const EdgeInsets.all(0),
+    this.parentId,
   }) : super(key: key);
 
   /// Style of the text widget
@@ -29,17 +30,26 @@ class TypingIndicator extends StatelessWidget {
   /// Alignment of the typing indicator
   final Alignment alignment;
 
+  /// Id of the parent message in case of a thread
+  final String? parentId;
+
   @override
   Widget build(BuildContext context) {
     final channelState =
         channel?.state ?? StreamChannel.of(context).channel.state!;
-    return StreamBuilder<List<User>>(
-      initialData: channelState.typingEvents,
-      stream: channelState.typingEventsStream,
-      builder: (context, snapshot) => AnimatedSwitcher(
+
+    final altWidget = alternativeWidget ?? const Offstage();
+
+    return BetterStreamBuilder<Iterable<User>>(
+      initialData: channelState.typingEvents.keys,
+      stream: channelState.typingEventsStream.map((typings) => typings.entries
+          .where((element) => element.value.parentId == parentId)
+          .map((e) => e.key)),
+      builder: (context, data) => AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
-        child: snapshot.data?.isNotEmpty == true
+        child: data.isNotEmpty == true
             ? Padding(
+                key: const Key('main'),
                 padding: padding,
                 child: Align(
                   key: const Key('typings'),
@@ -54,7 +64,7 @@ class TypingIndicator extends StatelessWidget {
                       ),
                       Text(
                         // ignore: lines_longer_than_80_chars
-                        '  ${snapshot.data![0].name}${snapshot.data!.length == 1 ? '' : ' and ${snapshot.data!.length - 1} more'} ${snapshot.data!.length == 1 ? 'is' : 'are'} typing',
+                        '  ${data.elementAt(0).name}${data.length == 1 ? '' : ' and ${data.length - 1} more'} ${data.length == 1 ? 'is' : 'are'} typing',
                         maxLines: 1,
                         style: style,
                       ),
@@ -62,13 +72,7 @@ class TypingIndicator extends StatelessWidget {
                   ),
                 ),
               )
-            : Align(
-                key: const Key('alternative'),
-                alignment: alignment,
-                child: Container(
-                  child: alternativeWidget ?? const Offstage(),
-                ),
-              ),
+            : altWidget,
       ),
     );
   }

@@ -53,15 +53,15 @@ void main() {
               user: User(id: 'other-user'),
             )
           ]));
-
-      when(() => channelState.typingEvents).thenAnswer((i) => [
-            User(id: 'other-user', extraData: {'name': 'demo'})
-          ]);
+      when(() => channelState.typingEvents).thenAnswer((i) => {
+            User(id: 'other-user', extraData: {'name': 'demo'}):
+                Event(type: EventType.typingStart),
+          });
       when(() => channelState.typingEventsStream)
-          .thenAnswer((i) => Stream.value([
-                User(id: 'other-user', extraData: {'name': 'demo'}),
-                User(id: 'other-user', extraData: {'name': 'demo'}),
-              ]));
+          .thenAnswer((i) => Stream.value({
+                User(id: 'other-user', extraData: {'name': 'demo'}):
+                    Event(type: EventType.typingStart),
+              }));
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(

@@ -114,13 +114,22 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
     if (newMessageSearchBloc != _messageSearchBloc) {
       _messageSearchBloc = newMessageSearchBloc;
       loadData();
-      if (widget.messageSearchListController != null) {
-        widget.messageSearchListController!.loadData = loadData;
-        widget.messageSearchListController!.paginateData = paginateData;
-      }
     }
 
     super.didChangeDependencies();
+  }
+
+  void _setupController() {
+    if (widget.messageSearchListController != null) {
+      widget.messageSearchListController!.loadData = loadData;
+      widget.messageSearchListController!.paginateData = paginateData;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _setupController();
   }
 
   @override
@@ -175,6 +184,11 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
         widget.paginationParams?.toJson().toString() !=
             oldWidget.paginationParams?.toJson().toString()) {
       loadData();
+    }
+
+    if (widget.messageSearchListController !=
+        oldWidget.messageSearchListController) {
+      _setupController();
     }
   }
 }

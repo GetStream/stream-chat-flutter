@@ -133,8 +133,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
         }
 
         return InfoTile(
-          // ignore: avoid_bool_literals_in_conditional_expressions
-          showMessage: showConnectionStateTile ? showStatus : false,
+          showMessage: showConnectionStateTile && showStatus,
           message: statusString,
           child: AppBar(
             textTheme: Theme.of(context).textTheme,
