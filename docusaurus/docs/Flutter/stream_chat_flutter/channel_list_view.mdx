@@ -92,7 +92,14 @@ ChannelListView(
   ...
   swipeToAction: true,
   swipeActions: [
-    // Your action widgets here
+    SwipeAction(
+        color: Colors.blue,
+        iconWidget: Icon(Icons.add),
+        onTap: (channel) {
+            // Things to do on icon tap
+        },
+    ),
+    // Other actions here
   ]
 ),
 ```
