@@ -110,3 +110,53 @@ class _ChannelPageState extends State<ChannelPage> {
   }
 }
 ```
+
+### Adding Custom Actions
+
+By default, the `MessageInput` has two actions: one for attachments and one for commands like giphy.
+To add your own action, we use the `actions` parameter like this:
+
+```dart
+MessageInput(
+  actions: [
+    InkWell(
+      child: Icon(
+        Icons.location_on,
+        size: 20.0,
+        color: StreamChatTheme.of(context).colorTheme.grey,
+      ),
+      onTap: () {
+        // Do something here
+      },
+    ),
+  ],
+),
+```
+
+This will add on your action to the existing ones.
+
+### Disable Attachments
+
+To disable attachments being added to the message, set the `disableAttachments` parameter to true.
+
+```dart
+MessageInput(
+    disableAttachments: true,
+),
+```
+
+### Changing Position Of MessageInput Components
+
+You can also change the position of the TextField, actions and 'send' button relative to each other.
+
+To do this, use the `actionsLocation` or `sendButtonLocation` parameters which help you decide the location
+of the buttons in the input.
+
+For example, if we want the actions on the right and the send button inside the TextField, we can do:
+
+```dart
+MessageInput(
+    sendButtonLocation: SendButtonLocation.inside,
+    actionsLocation: ActionsLocation.right,
+),
+```
