@@ -624,8 +624,8 @@ class $ChannelsTable extends Channels
   Set<GeneratedColumn> get $primaryKey => {cid};
   @override
   ChannelEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ChannelEntity.fromData(data, _db, prefix: effectivePrefix);
+    return ChannelEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -1794,8 +1794,8 @@ class $MessagesTable extends Messages
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   MessageEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return MessageEntity.fromData(data, _db, prefix: effectivePrefix);
+    return MessageEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -2977,8 +2977,8 @@ class $PinnedMessagesTable extends PinnedMessages
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   PinnedMessageEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return PinnedMessageEntity.fromData(data, _db, prefix: effectivePrefix);
+    return PinnedMessageEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -3343,8 +3343,8 @@ class $ReactionsTable extends Reactions
   Set<GeneratedColumn> get $primaryKey => {messageId, type, userId};
   @override
   ReactionEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ReactionEntity.fromData(data, _db, prefix: effectivePrefix);
+    return ReactionEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -3776,8 +3776,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   UserEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return UserEntity.fromData(data, _db, prefix: effectivePrefix);
+    return UserEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -4360,8 +4360,8 @@ class $MembersTable extends Members
   Set<GeneratedColumn> get $primaryKey => {userId, channelCid};
   @override
   MemberEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return MemberEntity.fromData(data, _db, prefix: effectivePrefix);
+    return MemberEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -4635,8 +4635,8 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
   Set<GeneratedColumn> get $primaryKey => {userId, channelCid};
   @override
   ReadEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ReadEntity.fromData(data, _db, prefix: effectivePrefix);
+    return ReadEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -4826,8 +4826,8 @@ class $ChannelQueriesTable extends ChannelQueries
   Set<GeneratedColumn> get $primaryKey => {queryHash, channelCid};
   @override
   ChannelQueryEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ChannelQueryEntity.fromData(data, _db, prefix: effectivePrefix);
+    return ChannelQueryEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -5252,8 +5252,8 @@ class $ConnectionEventsTable extends ConnectionEvents
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   ConnectionEventEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ConnectionEventEntity.fromData(data, _db, prefix: effectivePrefix);
+    return ConnectionEventEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
