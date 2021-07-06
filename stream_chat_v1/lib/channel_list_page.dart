@@ -33,7 +33,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
           children: [
             StreamSvgIcon.message(
               color: _isSelected(0)
-                  ? StreamChatTheme.of(context).colorTheme.black
+                  ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
                   : Colors.grey,
             ),
             Positioned(
@@ -51,7 +51,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
           children: [
             StreamSvgIcon.mentions(
               color: _isSelected(1)
-                  ? StreamChatTheme.of(context).colorTheme.black
+                  ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
                   : Colors.grey,
             ),
           ],
@@ -68,7 +68,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
       return Offstage();
     }
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: ChannelListHeader(
         onNewChatButtonTap: () {
           Navigator.pushNamed(context, Routes.NEW_CHAT);
@@ -82,14 +82,15 @@ class _ChannelListPageState extends State<ChannelListPage> {
       ),
       drawerEdgeDragWidth: 50,
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
         currentIndex: _currentIndex,
         items: _navBarItems,
         selectedLabelStyle: StreamChatTheme.of(context).textTheme.footnoteBold,
         unselectedLabelStyle:
             StreamChatTheme.of(context).textTheme.footnoteBold,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: StreamChatTheme.of(context).colorTheme.black,
+        selectedItemColor:
+            StreamChatTheme.of(context).colorTheme.textHighEmphasis,
         unselectedItemColor: Colors.grey,
         onTap: (index) {
           setState(() => _currentIndex = index);
@@ -144,7 +145,7 @@ class LeftDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       child: Container(
-        color: StreamChatTheme.of(context).colorTheme.white,
+        color: StreamChatTheme.of(context).colorTheme.barsBg,
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.only(
@@ -181,7 +182,7 @@ class LeftDrawer extends StatelessWidget {
                   leading: StreamSvgIcon.penWrite(
                     color: StreamChatTheme.of(context)
                         .colorTheme
-                        .black
+                        .textHighEmphasis
                         .withOpacity(.5),
                   ),
                   onTap: () {
@@ -201,7 +202,7 @@ class LeftDrawer extends StatelessWidget {
                   leading: StreamSvgIcon.contacts(
                     color: StreamChatTheme.of(context)
                         .colorTheme
-                        .black
+                        .textHighEmphasis
                         .withOpacity(.5),
                   ),
                   onTap: () {
@@ -244,7 +245,7 @@ class LeftDrawer extends StatelessWidget {
                       leading: StreamSvgIcon.user(
                         color: StreamChatTheme.of(context)
                             .colorTheme
-                            .black
+                            .textHighEmphasis
                             .withOpacity(.5),
                       ),
                       title: Text(
@@ -257,7 +258,9 @@ class LeftDrawer extends StatelessWidget {
                         icon: StreamSvgIcon.iconMoon(
                           size: 24,
                         ),
-                        color: StreamChatTheme.of(context).colorTheme.grey,
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .textLowEmphasis,
                         onPressed: () async {
                           final sp = await StreamingSharedPreferences.instance;
                           sp.setInt(

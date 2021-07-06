@@ -59,7 +59,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       appBar: AppBar(
         brightness: Theme.of(context).brightness,
         elevation: 1,
@@ -67,12 +67,12 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
         title: Text(
           'Photos & Videos',
           style: TextStyle(
-            color: StreamChatTheme.of(context).colorTheme.black,
+            color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
             fontSize: 16.0,
           ),
         ),
         leading: StreamBackButton(),
-        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       ),
       body: _buildMediaGrid(),
     );
@@ -99,14 +99,15 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
               children: [
                 StreamSvgIcon.pictures(
                   size: 136.0,
-                  color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                  color: StreamChatTheme.of(context).colorTheme.disabled,
                 ),
                 SizedBox(height: 16.0),
                 Text(
                   'No Media',
                   style: TextStyle(
                     fontSize: 14.0,
-                    color: StreamChatTheme.of(context).colorTheme.black,
+                    color:
+                        StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                   ),
                 ),
                 SizedBox(height: 8.0),
@@ -117,7 +118,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                     fontSize: 14.0,
                     color: StreamChatTheme.of(context)
                         .colorTheme
-                        .black
+                        .textHighEmphasis
                         .withOpacity(0.5),
                   ),
                 ),

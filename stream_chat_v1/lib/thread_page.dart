@@ -37,7 +37,7 @@ class _ThreadPageState extends State<ThreadPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: ThreadHeader(
         parent: widget.parent!,
       ),

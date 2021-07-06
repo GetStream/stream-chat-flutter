@@ -50,7 +50,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       appBar: AppBar(
         brightness: Theme.of(context).brightness,
         elevation: 1,
@@ -58,7 +58,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
         title: Text(
           'Files',
           style: TextStyle(
-              color: StreamChatTheme.of(context).colorTheme.black,
+              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
               fontSize: 16.0),
         ),
         leading: Center(
@@ -70,13 +70,13 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
               width: 24.0,
               height: 24.0,
               child: StreamSvgIcon.left(
-                color: StreamChatTheme.of(context).colorTheme.black,
+                color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                 size: 24.0,
               ),
             ),
           ),
         ),
-        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       ),
       body: _buildMediaGrid(),
     );
@@ -103,14 +103,15 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
               children: [
                 StreamSvgIcon.files(
                   size: 136.0,
-                  color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                  color: StreamChatTheme.of(context).colorTheme.disabled,
                 ),
                 SizedBox(height: 16.0),
                 Text(
                   'No Files',
                   style: TextStyle(
                     fontSize: 14.0,
-                    color: StreamChatTheme.of(context).colorTheme.black,
+                    color:
+                        StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                   ),
                 ),
                 SizedBox(height: 8.0),
@@ -121,7 +122,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                     fontSize: 14.0,
                     color: StreamChatTheme.of(context)
                         .colorTheme
-                        .black
+                        .textHighEmphasis
                         .withOpacity(0.5),
                   ),
                 ),

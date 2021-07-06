@@ -59,7 +59,7 @@ class _ChannelPageState extends State<ChannelPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: ChannelHeader(
         showTypingIndicator: false,
         onImageTap: () async {
@@ -148,7 +148,7 @@ class _ChannelPageState extends State<ChannelPage> {
                     alignment: Alignment.centerLeft,
                     color: StreamChatTheme.of(context)
                         .colorTheme
-                        .whiteSnow
+                        .appBg
                         .withOpacity(.9),
                     child: TypingIndicator(
                       alignment: Alignment.centerLeft,
@@ -160,8 +160,9 @@ class _ChannelPageState extends State<ChannelPage> {
                           .textTheme
                           .footnote
                           .copyWith(
-                              color:
-                                  StreamChatTheme.of(context).colorTheme.grey),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .textLowEmphasis),
                     ),
                   ),
                 ),

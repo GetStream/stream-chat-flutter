@@ -40,9 +40,8 @@ class UserMentionsPage extends StatelessWidget {
                           padding: const EdgeInsets.all(24),
                           child: StreamSvgIcon.mentions(
                             size: 96,
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .greyGainsboro,
+                            color:
+                                StreamChatTheme.of(context).colorTheme.disabled,
                           ),
                         ),
                         Text(
@@ -51,8 +50,9 @@ class UserMentionsPage extends StatelessWidget {
                               .textTheme
                               .body
                               .copyWith(
-                                color:
-                                    StreamChatTheme.of(context).colorTheme.grey,
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .textLowEmphasis,
                               ),
                         ),
                       ],
