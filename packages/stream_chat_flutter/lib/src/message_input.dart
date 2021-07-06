@@ -25,6 +25,8 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
 
+export 'package:video_compress/video_compress.dart' show VideoQuality;
+
 /// Builder for attachment thumbnails
 typedef AttachmentThumbnailBuilder = Widget Function(
   BuildContext,
@@ -149,10 +151,18 @@ class MessageInput extends StatefulWidget {
     this.showCommandsButton = true,
     this.mentionsTileBuilder,
     this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
+    this.compressedVideoQuality = VideoQuality.DefaultQuality,
+    this.compressedVideoFrameRate = 30,
   }) : super(key: key);
 
   /// Message to edit
   final Message? editMessage;
+
+  /// Video quality to use when compressing the videos
+  final VideoQuality compressedVideoQuality;
+
+  /// Frame rate to use when compressing the videos
+  final int compressedVideoFrameRate;
 
   /// Max attachment size in bytes
   /// Defaults to 20 MB
@@ -1116,8 +1126,11 @@ class MessageInputState extends State<MessageInput> {
 
     if (file.size! > widget.maxAttachmentSize) {
       if (medium.type == AssetType.video && file.path != null) {
-        final mediaInfo = await (VideoService.compressVideo(file.path!)
-            as FutureOr<MediaInfo>);
+        final mediaInfo = await (VideoService.compressVideo(
+          file.path!,
+          frameRate: widget.compressedVideoFrameRate,
+          quality: widget.compressedVideoQuality,
+        ) as FutureOr<MediaInfo>);
 
         if (mediaInfo.filesize! > widget.maxAttachmentSize) {
           _showErrorAlert(
@@ -1892,8 +1905,11 @@ class MessageInputState extends State<MessageInput> {
 
     if (file.size! > widget.maxAttachmentSize) {
       if (attachmentType == 'video' && file.path != null) {
-        final mediaInfo = await (VideoService.compressVideo(file.path!)
-            as FutureOr<MediaInfo>);
+        final mediaInfo = await (VideoService.compressVideo(
+          file.path!,
+          frameRate: widget.compressedVideoFrameRate,
+          quality: widget.compressedVideoQuality,
+        ) as FutureOr<MediaInfo>);
 
         if (mediaInfo.filesize! > widget.maxAttachmentSize) {
           _showErrorAlert(
