@@ -4,14 +4,22 @@ sidebar_position: 6
 title: MessageInput
 ---
 
-The `MessageInput` widget deals with common elements related to sending a message such as a text field for typing text, 
-adding media to a message, quoting a message and more. The message input uses a stream channel ancestor to send a message. 
-The message input can be used along with a message list view to display messages.
+A Widget Dealing With Everything Related To Sending A Message
 
-The message input also has commands such as Giphy and more which can be added. It can also be used to add custom attachments to your messages. 
-The message input is customisable and the orientation of the icons the text field and the send button can be changed.
+### Background
 
-Widget used to enter the message and add attachments
+In Stream Chat, we can send messages in a channel. However, sending a message isn't as simple as adding
+a `TextField` and logic for sending a message. It involves additional processes like addition of media,
+quoting a messages, adding a custom command like a GIF board, and much more. Moreover, most apps also
+need to customize the input to match their theme, overall color and structure pattern, etc.
+
+To do this, we created a `MessageInput` widget which abstracts all expected functionality a modern input
+needs - and allows you to use it out of the box.
+
+### Basic Example
+
+A `StreamChannel` is required above the widget tree in which the `MessageInput` is rendered since the channel is
+where the messages sent actually go. Let's look at a common example of how we could use the `MessageInput`:
 
 ```dart
 class ChannelPage extends StatelessWidget {
@@ -42,9 +50,63 @@ class ChannelPage extends StatelessWidget {
 }
 ```
 
-You usually put this widget in the same page of a [MessageListView]
-as the bottom widget.
+It is common to put this widget in the same page of a [MessageListView] as the bottom widget.
 
-The widget renders the ui based on the first ancestor of
-type [StreamChatTheme].
-Modify it to change the widget appearance.
+### Quoting A Message
+
+The quoting functionality allows us to 'reply' to a specific message without creating a thread out of it.
+It adds the other message as context when sending a message and also displays it above the sent message.
+
+To quote a message, we provide a `quotedMessage` to the `MessageInput`.
+
+```dart
+Message? message;
+
+// ...
+MessageInput(
+    quotedMessage: message,
+),
+```
+
+This will add the message given above the message about to be sent.
+
+While you can implement your own functionality to select which message to reply to, the `MessageListView`
+widget helps in this case since it has an inbuilt `onMessageSwiped` callback which we can use.
+
+```dart
+
+class ChannelPage extends StatefulWidget {
+  @override
+  _ChannelPageState createState() => _ChannelPageState();
+}
+
+class _ChannelPageState extends State<ChannelPage> {
+  Message? quotedMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: MessageListView(
+              // ...
+              onMessageSwiped: (message) {
+                  setState(() {
+                      quotedMessage = message;
+                  });
+              },
+            ),
+          ),
+          MessageInput(
+             quotedMessage: _quotedMessage,
+             onQuotedMessageCleared: () {
+                setState(() => _quotedMessage = null);
+             },
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
