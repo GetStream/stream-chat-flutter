@@ -13,7 +13,7 @@ dependencies:
     sdk: flutter
   logging: ^1.0.1
   meta: ^1.3.0
-  moor: ^4.2.1
+  moor: ^4.4.0
   mutex: ^3.0.0
   path: ^1.8.0
   path_provider: ^2.0.1
