@@ -16,21 +16,25 @@ class IVideoService {
   /// compress video from [path]
   /// compress video from [path] return [Future<MediaInfo>]
   ///
-  /// you can choose its quality by [quality],
-  /// determine whether to delete his source file by [deleteOrigin]
-  /// optional parameters [startTime] [duration] [includeAudio] [frameRate]
+  /// you can choose its [quality] and [frameRate]
   ///
   /// ## example
   /// ```dart
   /// final info = await _flutterVideoCompress.compressVideo(
   ///   file.path,
-  ///   deleteOrigin: true,
   /// );
   /// debugPrint(info.toJson());
   /// ```
-  Future<MediaInfo?> compressVideo(String path) async => _lock.synchronized(
+  Future<MediaInfo?> compressVideo(
+    String path, {
+    int frameRate = 30,
+    VideoQuality quality = VideoQuality.DefaultQuality,
+  }) async =>
+      _lock.synchronized(
         () => VideoCompress.compressVideo(
           path,
+          frameRate: frameRate,
+          quality: quality,
         ),
       );
 
