@@ -107,8 +107,9 @@ extension BuildContextX on BuildContext {
   String translate({
     required String key,
     required String defaultValue,
-  }) =>
-      StreamChatLocalizations.of(this)?.translate(key) ?? defaultValue;
+  }) {
+    return StreamChatLocalizations.of(this)?.translate(key) ?? defaultValue;
+  }
 }
 
 /// Extension on [BorderRadius]

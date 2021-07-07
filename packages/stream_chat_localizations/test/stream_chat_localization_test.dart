@@ -1,12 +1,27 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'dart:ui';
 
-import 'package:stream_chat_localization/stream_chat_localizations.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
 void main() {
-  test('adds one to input values', () {
-    final calculator = Calculator();
-    expect(calculator.addOne(2), 3);
-    expect(calculator.addOne(-7), -6);
-    expect(calculator.addOne(0), 1);
-  });
+  for (final language in kStreamChatSupportedLanguages) {
+    testWidgets('translations exist for $language', (tester) async {
+      final locale = Locale(language);
+
+      expect(
+        GlobalStreamChatLocalizations.delegate.isSupported(locale),
+        isTrue,
+      );
+
+      final localizations =
+      await GlobalStreamChatLocalizations.delegate.load(locale);
+
+      expect(
+        localizations.translate(LocalizedKeys.launchUrlErrorLabel),
+        isNotNull,
+      );
+    });
+  }
 }

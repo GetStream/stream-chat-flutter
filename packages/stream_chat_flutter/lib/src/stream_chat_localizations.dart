@@ -72,7 +72,7 @@ import 'package:flutter/widgets.dart';
 ///    for many languages.
 abstract class StreamChatLocalizations {
   ///
-  String? translate(String key);
+  String translate(String key);
 
   /// The `StreamChatLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -94,4 +94,8 @@ abstract class StreamChatLocalizations {
         context,
         StreamChatLocalizations,
       );
+}
+
+abstract class LocalizedKeys {
+  static const launchUrlErrorLabel = 'launchUrlErrorLabel';
 }

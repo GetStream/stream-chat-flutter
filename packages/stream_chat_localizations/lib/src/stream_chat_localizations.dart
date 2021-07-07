@@ -6,7 +6,33 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     show StreamChatLocalizations;
 
-const kStreamChatSupportedLanguages = [];
+const kStreamChatSupportedLanguages = ['en','it'];
+
+class LocaleConfig {
+  // /// {@template stringify}
+  // /// Global [stringify] setting for all [Equatable] instances.
+  // ///
+  // /// If [stringify] is overridden for a particular [Equatable] instance,
+  // /// then the local [stringify] value takes precedence
+  // /// over [EquatableConfig.stringify].
+  // ///
+  // /// This value defaults to true in debug mode and false in release mode.
+  // /// {@endtemplate}
+  // static bool get stringify {
+  //   if (_stringify == null) {
+  //     assert(() {
+  //       _stringify = true;
+  //       return true;
+  //     }());
+  //   }
+  //   return _stringify ??= false;
+  // }
+  //
+  // /// {@macro stringify}
+  // static set path(String value) => _path = value;
+
+  static String? path;
+}
 
 /// Implementation of localized strings for the stream chat widgets
 ///
@@ -46,10 +72,12 @@ class GlobalStreamChatLocalizations implements StreamChatLocalizations {
 
   final Locale locale;
 
-  final Map<String, String?> translations;
+  final Map<String, String> translations;
 
-  static String getLocalePath(Locale locale) =>
-      'packages/stream_chat_localizations/i18n/${locale.languageCode}.json';
+  static String getLocalePath(Locale locale) {
+    return LocaleConfig.path ??
+        'packages/stream_chat_localizations/src/l10n/${locale.languageCode}.json';
+  }
 
   /// Creates an object that provides US English resource values for the
   /// lowest levels of the widgets library.
@@ -61,9 +89,9 @@ class GlobalStreamChatLocalizations implements StreamChatLocalizations {
   static Future<StreamChatLocalizations> load(Locale locale) async {
     final localePath = getLocalePath(locale);
     final rawTranslations = await rootBundle.loadString(localePath);
-    Map<String, String?> translations = json.decode(rawTranslations);
-    translations = translations.map(
-      (key, value) => MapEntry(key, value?.toString()),
+    final Map<String, dynamic> translationsJson = json.decode(rawTranslations);
+    final translations = translationsJson.map(
+      (key, value) => MapEntry(key, value.toString()),
     );
     return GlobalStreamChatLocalizations(locale, translations);
   }
@@ -105,7 +133,11 @@ class GlobalStreamChatLocalizations implements StreamChatLocalizations {
   ];
 
   @override
-  String? translate(String key) => translations[key];
+  String translate(String key) {
+    final value = translations[key];
+    if (value == null) throw '';
+    return value;
+  }
 }
 
 class _StreamChatLocalizationsDelegate

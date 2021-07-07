@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Text widget to display in message
 class MessageText extends StatelessWidget {
@@ -29,6 +30,11 @@ class MessageText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final texts = context.translate(
+      key: LocalizedKeys.launchUrlErrorLabel,
+      defaultValue: 'defaultValue',
+    );
+    return Text(texts);
     final text = _replaceMentions(message.text ?? '').replaceAll('\n', '\n\n');
 
     final themeData = Theme.of(context);

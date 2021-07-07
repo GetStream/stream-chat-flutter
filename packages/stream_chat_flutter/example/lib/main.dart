@@ -1,10 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_persistence/stream_chat_persistence.dart';
+import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
-final chatPersistentClient = StreamChatPersistenceClient(
-  logLevel: Level.INFO,
-);
+// import 'package:stream_chat_persistence/stream_chat_persistence.dart';
+
+// final chatPersistentClient = StreamChatPersistenceClient(
+//   logLevel: Level.INFO,
+// );
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +18,7 @@ void main() async {
   final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
-  )..chatPersistenceClient = chatPersistentClient;
+  );
 
   /// Set the current user and connect the websocket. In a production scenario, this should be done using
   /// a backend to generate a user token using our server SDK.
@@ -30,6 +34,12 @@ void main() async {
   await channel.watch();
 
   runApp(MyApp(client, channel));
+}
+
+Locale get _defaultLocale {
+  // Flutter 1.26 (2.0.1) returns `Locale?`, 1.27 `Locale`
+  final Locale? locale = WidgetsBinding.instance?.window.locale;
+  return locale ?? const Locale('en', 'US');
 }
 
 /// Example application using Stream Chat Flutter widgets.
@@ -58,6 +68,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       themeMode: ThemeMode.system,
+      locale: Locale('it'),
+      supportedLocales: [Locale('en'), Locale('it')],
+      localizationsDelegates: GlobalStreamChatLocalizations.delegates,
       builder: (context, widget) {
         return StreamChat(
           client: client,
