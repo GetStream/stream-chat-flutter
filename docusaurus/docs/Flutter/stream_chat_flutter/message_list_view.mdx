@@ -8,6 +8,8 @@ A Widget For Displaying A List Of Messages
 
 Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/MessageListView-class.html)
 
+![](../assets/message_list_view.png)
+
 ### Background
 
 Every channel can contain a list of messages sent by users inside it. The `MessageListView` widget
@@ -68,6 +70,8 @@ MessageListView(
 ),
 ```
 
+![](../assets/message_list_view_threads.png)
+
 The `MessageListView` itself can render the thread by supplying the `parentMessage` parameter.
 
 ```dart
@@ -86,7 +90,7 @@ Note: To customize the existing implementation, look at the `MessageWidget` docu
 MessageListView(
     messageBuilder: (context, details, messageList, defaultImpl) {
         // Your implementation of the message here
-        // E.g: return Text(details.message.text);
+        // E.g: return Text(details.message.text ?? '');
     },
 ),
 ```
@@ -105,3 +109,5 @@ MessageListView(
 ```
 
 This will allow these user types to pin messages through the message actions modal.
+
+![](../assets/message_list_view_pin.png)
