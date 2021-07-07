@@ -1,3 +1,8 @@
+## 2.0.0-nullsafety.8
+
+🐞 Fixed
+- Export `PushProvider` enum
+
 ## 2.0.0-nullsafety.7
 
 🛑️ Breaking Changes from `2.0.0-nullsafety.6`

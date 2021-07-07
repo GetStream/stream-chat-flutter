@@ -1,3 +1,13 @@
+## 2.0.0-nullsafety.9
+
+🛑️ Breaking Changes from `2.0.0-nullsafety.8`
+
+- Renamed `ColorTheme` properties to reflect the purpose of the colors
+
+✅ Added
+
+- Added video compress options (frame and quality) to `MessageInput`
+
 ## 2.0.0-nullsafety.8
 
 🛑️ Breaking Changes from `2.0.0-nullsafety.7`
