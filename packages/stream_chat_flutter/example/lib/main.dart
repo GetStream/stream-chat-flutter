@@ -68,9 +68,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       themeMode: ThemeMode.system,
-      locale: Locale('it'),
+      locale: Locale('de'),
       supportedLocales: [Locale('en'), Locale('it')],
-      localizationsDelegates: GlobalStreamChatLocalizations.delegates,
+      localizationsDelegates: GlobalStreamChatLocalizations(
+          localeConfig: LocaleConfig(
+        supportedLanguages: ['it'],
+        customPath: 'lib/i18n',
+      )).delegates,
       builder: (context, widget) {
         return StreamChat(
           client: client,

@@ -9,14 +9,15 @@ void main() {
   for (final language in kStreamChatSupportedLanguages) {
     testWidgets('translations exist for $language', (tester) async {
       final locale = Locale(language);
+      final globalStreamChatLocalizations = GlobalStreamChatLocalizations();
 
       expect(
-        GlobalStreamChatLocalizations.delegate.isSupported(locale),
+        globalStreamChatLocalizations.delegate.isSupported(locale),
         isTrue,
       );
 
       final localizations =
-      await GlobalStreamChatLocalizations.delegate.load(locale);
+          await globalStreamChatLocalizations.delegate.load(locale);
 
       expect(
         localizations.translate(LocalizedKeys.launchUrlErrorLabel),
