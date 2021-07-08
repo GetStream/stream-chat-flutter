@@ -30,15 +30,15 @@ const kStreamChatSupportedLanguages = {'en'};
 /// Generally speaking, this method is only intended to be used by
 /// [GlobalStreamChatLocalizations.delegate].
 GlobalStreamChatLocalizations? getStreamChatTranslation(Locale locale) {
+  final languageCode = locale.languageCode;
+  assert(
+    kStreamChatSupportedLanguages.contains(languageCode),
+    'getStreamChatTranslation() called for unsupported locale "$locale"',
+  );
   switch (locale.languageCode) {
     case 'en':
       return const StreamChatLocalizationsEn();
   }
-  assert(
-  false,
-  'getStreamChatTranslation() called for unsupported locale "$locale"',
-  );
-  return null;
 }
 
 /// Implementation of localized strings for the stream chat widgets
@@ -85,7 +85,7 @@ abstract class GlobalStreamChatLocalizations
   /// as the value of [MaterialApp.localizationsDelegates] to include
   /// the localizations for both the flutter and stream chat widget libraries.
   static const LocalizationsDelegate<StreamChatLocalizations> delegate =
-  _StreamChatLocalizationsDelegate();
+      _StreamChatLocalizationsDelegate();
 
   /// A value for [MaterialApp.localizationsDelegates] that's typically used by
   /// internationalized apps.
@@ -127,17 +127,16 @@ class _StreamChatLocalizationsDelegate
       kStreamChatSupportedLanguages.contains(locale.languageCode);
 
   static final _loadedTranslations =
-  <Locale, Future<StreamChatLocalizations>>{};
+      <Locale, Future<StreamChatLocalizations>>{};
 
   @override
   Future<StreamChatLocalizations> load(Locale locale) {
     assert(isSupported(locale), '');
     return _loadedTranslations.putIfAbsent(
       locale,
-          () =>
-          SynchronousFuture<StreamChatLocalizations>(
-            getStreamChatTranslation(locale)!,
-          ),
+      () => SynchronousFuture<StreamChatLocalizations>(
+        getStreamChatTranslation(locale)!,
+      ),
     );
   }
 
