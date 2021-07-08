@@ -220,52 +220,52 @@ class StreamChatClient {
 
   /// Connects the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  /// Pass [connectWebsocket]: false, if you want to connect to websocket
+  /// Pass [connectWebSocket]: false, if you want to connect to websocket
   /// at a later stage or use the client in connection-less mode
-  Future<OwnUser?> connectUser(
+  Future<OwnUser> connectUser(
     User user,
     String token, {
-    bool connectWebsocket = true,
+    bool connectWebSocket = true,
   }) =>
       _connectUser(
         user,
         token: Token.fromRawValue(token),
-        connectWebsocket: connectWebsocket,
+        connectWebSocket: connectWebSocket,
       );
 
   /// Connects the current user using the [tokenProvider] to fetch the token.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<OwnUser?> connectUserWithProvider(
+  Future<OwnUser> connectUserWithProvider(
     User user,
     TokenProvider tokenProvider, {
-    bool connectWebsocket = true,
+    bool connectWebSocket = true,
   }) =>
       _connectUser(
         user,
         provider: tokenProvider,
-        connectWebsocket: connectWebsocket,
+        connectWebSocket: connectWebSocket,
       );
 
   /// Connects the current user with an anonymous id, this triggers a connection
   /// to the API. It returns a [Future] that resolves when the connection is
   /// setup.
-  Future<OwnUser?> connectAnonymousUser({
-    bool connectWebsocket = true,
+  Future<OwnUser> connectAnonymousUser({
+    bool connectWebSocket = true,
   }) async {
     final token = Token.anonymous();
     final user = OwnUser(id: token.userId);
     return _connectUser(
       user,
       token: token,
-      connectWebsocket: connectWebsocket,
+      connectWebSocket: connectWebSocket,
     );
   }
 
   /// Connects the current user as guest, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<OwnUser?> connectGuestUser(
+  Future<OwnUser> connectGuestUser(
     User user, {
-    bool connectWebsocket = true,
+    bool connectWebSocket = true,
   }) async {
     final userId = user.id;
     final anonymousToken = Token.anonymous(userId: userId);
@@ -282,15 +282,15 @@ class StreamChatClient {
     return _connectUser(
       guestUser.user,
       token: guestUserToken,
-      connectWebsocket: connectWebsocket,
+      connectWebSocket: connectWebSocket,
     );
   }
 
-  Future<OwnUser?> _connectUser(
+  Future<OwnUser> _connectUser(
     User user, {
     Token? token,
     TokenProvider? provider,
-    bool connectWebsocket = true,
+    bool connectWebSocket = true,
   }) async {
     if (_ws.connectionCompleter?.isCompleted == false) {
       throw const StreamChatError(
@@ -310,7 +310,7 @@ class StreamChatClient {
     final ownUser = OwnUser.fromUser(user);
     state.user = ownUser;
 
-    if (!connectWebsocket) {
+    if (!connectWebSocket) {
       return ownUser;
     }
 
@@ -363,7 +363,7 @@ class StreamChatClient {
 
     try {
       final event = await _ws.connect(user);
-      return event.me!.merge(user);
+      return event.me?.merge(user) ?? user;
     } catch (e, stk) {
       logger.severe('error connecting ws', e, stk);
       rethrow;

@@ -321,7 +321,7 @@ void main() {
     );
   });
 
-  group('Connect user calls with `connectWebsocket`: false', () {
+  group('Connect user calls with `connectWebSocket`: false', () {
     const apiKey = 'test-api-key';
     late final api = FakeChatApi();
 
@@ -347,7 +347,7 @@ void main() {
       final res = await client.connectUser(
         user,
         token,
-        connectWebsocket: false,
+        connectWebSocket: false,
       );
       expect(res, isSameUserAs(user));
       expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
@@ -365,7 +365,7 @@ void main() {
         final res = await client.connectUserWithProvider(
           user,
           tokenProvider,
-          connectWebsocket: false,
+          connectWebSocket: false,
         );
         expect(res, isSameUserAs(user));
         expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
@@ -385,7 +385,7 @@ void main() {
 
       final res = await client.connectGuestUser(
         user,
-        connectWebsocket: false,
+        connectWebSocket: false,
       );
 
       expect(res, isSameUserAs(user));
@@ -399,7 +399,7 @@ void main() {
       '`.connectAnonymousUser` should succeed without connecting',
       () async {
         final res = await client.connectAnonymousUser(
-          connectWebsocket: false,
+          connectWebSocket: false,
         );
 
         expect(res, isNotNull);
