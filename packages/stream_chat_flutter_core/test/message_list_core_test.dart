@@ -72,7 +72,7 @@ void main() {
         messageListBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorWidgetBuilder: (BuildContext context, Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       await tester.pumpWidget(messageListCore);
@@ -91,7 +91,7 @@ void main() {
         messageListBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorWidgetBuilder: (BuildContext context, Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       final mockChannel = MockChannel();
@@ -123,7 +123,7 @@ void main() {
         messageListBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorWidgetBuilder: (BuildContext context, Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
         messageListController: controller,
       );
 
@@ -159,7 +159,7 @@ void main() {
         messageListBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorWidgetBuilder: (BuildContext context, Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
         messageListController: controller,
       );
 
@@ -210,7 +210,7 @@ void main() {
         messageListBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorWidgetBuilder: (BuildContext context, Object error) => Offstage(
+        errorBuilder: (BuildContext context, Object error) => Offstage(
           key: errorWidgetKey,
         ),
       );
@@ -252,7 +252,7 @@ void main() {
         messageListBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(key: emptyWidgetKey),
-        errorWidgetBuilder: (BuildContext context, Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       final mockChannel = MockChannel();
@@ -292,7 +292,7 @@ void main() {
         messageListBuilder: (_, __) => Offstage(key: listWidgetKey),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorWidgetBuilder: (BuildContext context, Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       final mockChannel = MockChannel();
@@ -346,7 +346,7 @@ void main() {
         ),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorWidgetBuilder: (BuildContext context, Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       final mockChannel = MockChannel();
@@ -393,7 +393,7 @@ void main() {
         ),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorWidgetBuilder: (BuildContext context, Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
         parentMessage: parentMessage,
       );
 
