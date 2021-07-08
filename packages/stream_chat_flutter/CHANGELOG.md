@@ -3,6 +3,17 @@
 🛑️ Breaking Changes from `2.0.0-nullsafety.8`
 
 - Renamed `ColorTheme` properties to reflect the purpose of the colors
+  - `ColorTheme.black` -> `ColorTheme.textHighEmphasis`
+  - `ColorTheme.grey` -> `ColorTheme.textLowEmphasis`
+  - `ColorTheme.greyGainsboro` -> `ColorTheme.disabled`
+  - `ColorTheme.greyWhisper` -> `ColorTheme.borders`
+  - `ColorTheme.whiteSmoke` -> `ColorTheme.inputBg`
+  - `ColorTheme.whiteSnow` -> `ColorTheme.appBg`
+  - `ColorTheme.white` -> `ColorTheme.barsBg`
+  - `ColorTheme.blueAlice` -> `ColorTheme.linkBg`
+  - `ColorTheme.accentBlue` -> `ColorTheme.accentPrimary`
+  - `ColorTheme.accentRed` -> `ColorTheme.accentError`
+  - `ColorTheme.accentGreen` -> `ColorTheme.accentInfo`
 
 ✅ Added
 
