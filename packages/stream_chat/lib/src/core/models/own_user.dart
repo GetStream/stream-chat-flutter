@@ -3,6 +3,7 @@ import 'package:stream_chat/src/core/models/device.dart';
 import 'package:stream_chat/src/core/models/mute.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
+import 'package:stream_chat/stream_chat.dart';
 
 part 'own_user.g.dart';
 
@@ -25,6 +26,7 @@ class OwnUser extends User {
     bool online = false,
     Map<String, Object?> extraData = const {},
     bool banned = false,
+    List<String> teams = const [],
   }) : super(
           id: id,
           role: role,
@@ -34,6 +36,7 @@ class OwnUser extends User {
           online: online,
           extraData: extraData,
           banned: banned,
+          teams: teams,
         );
 
   /// Create a new instance from a json
@@ -50,7 +53,68 @@ class OwnUser extends User {
         online: user.online,
         banned: user.banned,
         extraData: user.extraData,
+        teams: user.teams,
       );
+
+  /// Creates a copy of [OwnUser] with specified attributes overridden.
+  @override
+  OwnUser copyWith({
+    String? id,
+    String? role,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? lastActive,
+    bool? online,
+    Map<String, Object?>? extraData,
+    bool? banned,
+    List<String>? teams,
+    List<Mute>? channelMutes,
+    List<Device>? devices,
+    List<Mute>? mutes,
+    int? totalUnreadCount,
+    int? unreadChannels,
+  }) =>
+      OwnUser(
+        id: id ?? this.id,
+        banned: banned ?? this.banned,
+        role: role ?? this.role,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        lastActive: lastActive ?? this.lastActive,
+        online: online ?? this.online,
+        extraData: extraData ?? this.extraData,
+        teams: teams ?? this.teams,
+        channelMutes: channelMutes ?? this.channelMutes,
+        devices: devices ?? this.devices,
+        mutes: mutes ?? this.mutes,
+        totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
+        unreadChannels: unreadChannels ?? this.unreadChannels,
+      );
+
+  /// Returns a new [OwnUser] that is a combination of this ownUser
+  /// and the given [other] ownUser.
+  OwnUser merge(OwnUser? other) {
+    if (other == null) {
+      return this;
+    }
+
+    return copyWith(
+      banned: other.banned,
+      channelMutes: other.channelMutes,
+      createdAt: other.createdAt,
+      devices: other.devices,
+      extraData: other.extraData,
+      id: other.id,
+      lastActive: other.lastActive,
+      mutes: other.mutes,
+      online: other.online,
+      role: other.role,
+      teams: other.teams,
+      totalUnreadCount: other.totalUnreadCount,
+      unreadChannels: other.unreadChannels,
+      updatedAt: other.updatedAt,
+    );
+  }
 
   /// List of user devices
   @JsonKey(includeIfNull: false, defaultValue: <Device>[])
