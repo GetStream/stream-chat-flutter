@@ -71,9 +71,6 @@ import 'package:flutter/widgets.dart';
 ///  * [GlobalStreamChatLocalizations], which provides material localizations
 ///    for many languages.
 abstract class StreamChatLocalizations {
-  ///
-  String? translate(String key);
-
   /// The `StreamChatLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -94,4 +91,6 @@ abstract class StreamChatLocalizations {
         context,
         StreamChatLocalizations,
       );
+
+  String get launchUrlError;
 }

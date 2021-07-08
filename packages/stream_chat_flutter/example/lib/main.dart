@@ -1,10 +1,35 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_persistence/stream_chat_persistence.dart';
+import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
-final chatPersistentClient = StreamChatPersistenceClient(
-  logLevel: Level.INFO,
-);
+/// A custom set of localizations for the 'hi' locale.
+class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
+  const StreamChatLocalizationsHi() : super(localeName: 'hi');
+
+  static const LocalizationsDelegate<StreamChatLocalizations> delegate =
+      _HindiStreamChatLocalizationsDelegate();
+
+  @override
+  String get launchUrlError => 'URL लॉन्च नहीं कर सकता';
+}
+
+class _HindiStreamChatLocalizationsDelegate
+    extends LocalizationsDelegate<StreamChatLocalizations> {
+  const _HindiStreamChatLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'hi';
+
+  @override
+  Future<StreamChatLocalizations> load(Locale locale) =>
+      SynchronousFuture(const StreamChatLocalizationsHi());
+
+  @override
+  bool shouldReload(_HindiStreamChatLocalizationsDelegate old) => false;
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +39,7 @@ void main() async {
   final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
-  )..chatPersistenceClient = chatPersistentClient;
+  );
 
   /// Set the current user and connect the websocket. In a production scenario, this should be done using
   /// a backend to generate a user token using our server SDK.
@@ -58,6 +83,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       themeMode: ThemeMode.system,
+      supportedLocales: [
+        Locale('en', 'US'),
+        Locale('hi', 'IN'),
+      ],
+      localizationsDelegates: [
+        GlobalStreamChatLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        StreamChatLocalizationsHi.delegate,
+      ],
       builder: (context, widget) {
         return StreamChat(
           client: client,

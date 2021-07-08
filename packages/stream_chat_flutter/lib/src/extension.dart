@@ -104,11 +104,7 @@ extension BuildContextX on BuildContext {
   double get textScaleFactor =>
       MediaQuery.maybeOf(this)?.textScaleFactor ?? 1.0;
 
-  String translate({
-    required String key,
-    required String defaultValue,
-  }) =>
-      StreamChatLocalizations.of(this)?.translate(key) ?? defaultValue;
+  StreamChatLocalizations? get translations => StreamChatLocalizations.of(this);
 }
 
 /// Extension on [BorderRadius]
