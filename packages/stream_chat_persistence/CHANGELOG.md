@@ -1,3 +1,7 @@
+## 2.0.0-nullsafety.8
+* Updated llc dependency
+* Upgraded moor dependencies and generated files with the latest dependency
+
 ## 2.0.0-nullsafety.7
 
 * Update llc dependency

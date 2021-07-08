@@ -1,3 +1,6 @@
+## 2.0.0-nullsafety.9
+- Update llc dependency
+
 ## 2.0.0-nullsafety.8
 
 🛑️ Breaking Changes from `2.0.0-nullsafety.7`
