@@ -14,7 +14,9 @@ own types of attachments through the SDK such as location, audio, etc.
 This involves doing three things:
 
 1) Rendering the attachment thumbnail in the `MessageInput`
+
 2) Sending a message with the custom attachment
+
 3) Rendering the custom message attachment
 
 To do this, let's check out an example to add location sharing to Stream Chat.
@@ -126,7 +128,7 @@ Next, we build the Static Maps URL (Add your API key before using the code snipp
 ```dart
   String _buildMapAttachment(String lat, String long) {
     var baseURL = 'https://maps.googleapis.com/maps/api/staticmap?';
-    var url = new Uri(
+    var url = Uri(
         scheme: 'https',
         host: 'maps.googleapis.com',
         port: 443,
