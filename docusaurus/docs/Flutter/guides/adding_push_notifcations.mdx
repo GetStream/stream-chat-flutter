@@ -4,3 +4,33 @@ sidebar_position: 3
 title: Adding Push Notifications
 ---
 
+Adding Push Notifications To Your Application
+
+### Introduction
+
+Push notifications are a core part of the experience for a messaging app. Users often need to be notified
+of new messages and old notifications sometimes need to be updated silently as well.
+
+This guide details how to add push notifications to your app.
+
+### Configure APN
+
+Stream Chat supports push for both Android and iOS.
+
+In this section you will find all information on how to configure push for APN and Firebase.
+
+Only new messages are pushed to mobile devices, all other chat events are only send to WebSocket clients and webhook endpoints if configured.
+
+#### Push Delivery Logic
+
+Push message delivery follows the following logic:
+
+* Only channel members can receive push messages
+* Members that are currently online do not receive push messages
+* Messages added within a thread are only sent to users that are part of that thread (they posted at least one message or were mentioned)
+* Messages from muted users are not sent
+* Messages are sent to all registered devices for a user (up to 25)
+* Don't try to register devices for anonymous users (API will ignore but will eat from rate limit budget)
+* Up to 100 members of a channel will receive push notifications
+* skip_push is not marked as true, as described here.
+* push_notifications is enabled (default) on the channel type for message is sent.
