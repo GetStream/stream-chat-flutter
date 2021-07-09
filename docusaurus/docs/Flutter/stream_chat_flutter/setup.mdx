@@ -4,7 +4,7 @@ sidebar_position: 2
 title: Setup
 ---
 
-Understanding Setup For stream_chat_flutter
+Understanding Setup For `stream_chat_flutter`
 
 ### Add pub.dev dependency
 
@@ -12,7 +12,7 @@ First, you need to add the `stream_chat_flutter` dependency to your `pubspec.yam
 
 You can either run this command:
 
-```
+```shell
 flutter pub add stream_chat_flutter
 ```
 
@@ -20,15 +20,17 @@ OR
 
 Add this line in the dependencies section of your pubspec.yaml after substituting latest version:
 
-```
+```yaml
 dependencies:
-  stream_chat_flutter_core: ^latest_version
+  stream_chat_flutter: ^latest_version
 ```
+
+You can find the package details on [pub.dev](https://pub.dev/packages/stream_chat_flutter).
 
 ### Details On Platform Support
 
 `stream_chat_flutter` was originally created for Android and iOS mobile platforms. As Flutter matured,
-additional platforms were added and the package now has experimental support for web and desktop as
+support for additional platforms was added and the package now has experimental support for web and desktop as
 [detailed here](https://getstream.io/blog/announcing-experimental-multi-platform-support-for-the-stream-flutter-sdk/).
 
 However, platforms other than mobile may have additional constraints due to not supporting all plugins,
@@ -44,22 +46,3 @@ Follow [this guide](https://pub.dev/packages/video_player#installation) to fulfi
 
 To pick images from the camera, we use the [image_picker](https://pub.dev/packages/image_picker) plugin.
 Follow [these instructions](https://pub.dev/packages/image_picker#ios) to check the requirements.
-
-### Setup: Web
-
-Due to Moor web (for offline storage) you need to include the sql.js library:
-
-```
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <script defer src="sql-wasm.js"></script>
-    <script defer src="main.dart.js" type="application/javascript"></script>
-</head>
-<body></body>
-</html>
-```
-
-You can grab the latest version of sql-wasm.js and sql-wasm.wasm [here](https://github.com/sql-js/sql.js/releases)
-and copy them into your `/web` folder.

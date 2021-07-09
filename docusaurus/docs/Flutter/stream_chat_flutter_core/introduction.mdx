@@ -15,10 +15,11 @@ Please use the `stream_chat_flutter` package for the full fledged suite of UI co
 In the early days of the Flutter SDK, the SDK was only split into the LLC (`stream_chat`) and
 the UI package (`stream_chat_flutter`). With this you could use a fully built interface with the UI package
 or a fully custom interface with the LLC. However, we soon recognised the need for a third intermediary
-package which made tasks like building and modifying a list or channels or messages easy but without
+package which made tasks like building and modifying a list of channels or messages easy but without
 the complexity of using low level components. The Core package (`stream_chat_flutter_core`) is a manifestation
 of the same idea and allows you to build an interface with Stream Chat without having to deal with
-low level code and architecture as well as implementing your own theme and UI effortlessly.
+low level code and architecture as well as implementing your own theme and UI effortlessly. 
+Also, it has very few dependencies.
 
 We will now explore the components of this intermediary package and understand how it helps you build
 the experience you want your users to have.
@@ -46,7 +47,7 @@ The BLoCs we provide are:
 ### Core Components
 
 Core components usually are an easy way to fetch data associated with Stream Chat.
-Core components use functions exposed by the respective BLoCs (the ChannelListCore uses the ChannelsBloc)
+Core components use functions exposed by the respective BLoCs (for example the ChannelListCore uses the ChannelsBloc)
 and use the respective controllers for various operations. Unlike heavier components from the UI
 package, core components are decoupled from UI and they expose builders instead to help you build
 a fully custom interface.

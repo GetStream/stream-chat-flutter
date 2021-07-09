@@ -19,14 +19,14 @@ giving you complete control to ones that give you a rich out-of-the-box chat exp
 
 The packages that make up the Stream Chat SDK are:
 
-1. <b>Low Level Client (stream_chat)</b> : A pure Dart package that can be used on any Dart project.
+1. <b>Low Level Client (stream_chat)</b>: a pure Dart package that can be used on any Dart project.
 It provides a low-level client to access the Stream Chat service.
-2. <b>Core (stream_chat_flutter_core)</b> : Provides business logic to fetch common things required
+2. <b>Core (stream_chat_flutter_core)</b>: provides business logic to fetch common things required
 for integrating Stream Chat into your application.
 The core package allows more customisation and hence provides business logic but no UI components.
-3. <b>UI (stream_chat_flutter)</b> : This library includes both a low-level chat SDK and a set of
+3. <b>UI (stream_chat_flutter)</b>: this library includes both a low-level chat SDK and a set of
 reusable and customisable UI components.
-4. <b>Persistence (stream_chat_persistence)</b> : Provides a persistence client for fetching and
+4. <b>Persistence (stream_chat_persistence)</b>: provides a persistence client for fetching and
 saving chat data locally.
 
 We recommend building prototypes using the full UI package since it contains UI widgets already
@@ -37,7 +37,7 @@ The Flutter SDK enables you to build any type of chat or messaging experience fo
 and Desktop.
 
 If you're building a very custom UI and would prefer a more lean package,
-our core package will be suited to this use case. Core allows you to build custom,
+our [core package](https://pub.dev/packages/stream_chat_flutter) will be suited to this use case. Core allows you to build custom,
 expressive UIs while retaining the benefits of our full Flutter SDK.
 APIs for accessing and controlling users, sending messages, etc are seamlessly integrated into
 this package and accessible via providers and builders.
@@ -55,7 +55,7 @@ but there is a way to create a unique chat between a certain number of people by
 
 In essence, a normal two-person chat would be a <b>distinct channel</b> created with two members (you cannot add or delete members in this channel), whereas a group created with two people would simply be a <b>non distinct channel</b> (possible to add or remove members).
 
-Note: It is also possible to add more than two people in a distinct channel which retains the same add/removal properties and resembles the Slack DMs where you can DM two or more people as well.
+Note: It is also possible to add more than two people in a distinct channel which retains the same add/removal properties and resembles the Slack DMs where you can DM one or more people as well.
 
 In summary, if you were creating a Whatsapp-like app, the first screen would be a <b>list of channels</b> - which on opening would show a <b>list of messages</b> that were sent by the users in the Channel.
 
