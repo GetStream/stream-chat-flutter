@@ -4,7 +4,7 @@ sidebar_position: 6
 title: MessageInput
 ---
 
-A Widget Dealing With Everything Related To Sending A Message
+A Widget dealing with everything related to sending a message
 
 Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/MessageInput-class.html)
 
@@ -14,7 +14,7 @@ Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_
 
 In Stream Chat, we can send messages in a channel. However, sending a message isn't as simple as adding
 a `TextField` and logic for sending a message. It involves additional processes like addition of media,
-quoting a messages, adding a custom command like a GIF board, and much more. Moreover, most apps also
+quoting a message, adding a custom command like a GIF board, and much more. Moreover, most apps also
 need to customize the input to match their theme, overall color and structure pattern, etc.
 
 To do this, we created a `MessageInput` widget which abstracts all expected functionality a modern input
@@ -54,7 +54,7 @@ class ChannelPage extends StatelessWidget {
 }
 ```
 
-It is common to put this widget in the same page of a [MessageListView] as the bottom widget.
+It is common to put this widget in the same page of a `MessageListView` as the bottom widget.
 
 ### Quoting A Message
 
@@ -119,7 +119,7 @@ class _ChannelPageState extends State<ChannelPage> {
 
 ### Adding Custom Actions
 
-By default, the `MessageInput` has two actions: one for attachments and one for commands like giphy.
+By default, the `MessageInput` has two actions: one for attachments and one for commands like Giphy.
 To add your own action, we use the `actions` parameter like this:
 
 ```dart

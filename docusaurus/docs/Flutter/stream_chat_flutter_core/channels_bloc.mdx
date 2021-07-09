@@ -9,7 +9,7 @@ title: ChannelsBloc
 Channels with pagination, re-ordering, querying and other operations
 associated with Channels.
 
-`ChannelsBloc` can be accessed at anytime by using the static of method
+`ChannelsBloc` can be accessed at anytime by using the static `.of` method
 using Flutter's `BuildContext`.
 
 ```dart
@@ -63,7 +63,7 @@ ChannelsBloc(
 
 #### Decide if channel should be added on new message event
 
-When a new message arrives, a `message.new` event is created. We can decide if we want to add the channel
+When a new message arrives, a `message.new` event is received. We can decide if we want to add the channel
 to the list using the `shouldAddChannel` parameter which is a callback supplying the event data:
 
 ```dart
