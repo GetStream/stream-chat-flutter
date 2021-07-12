@@ -4,6 +4,20 @@ sidebar_position: 4
 title: ChannelListCore
 ---
 
+A Widget For Building A List Of Channels
+
+### Background
+
+The UI SDK of Stream Chat supplies a `ChannelListView` class that builds a list of channels fetching
+according to the filters and sort order given. However, in some cases, implementing novel UI is necessary
+that cannot be done using the customization approaches given in the widget.
+
+To do this, we extracted the logic required for fetching channels into a 'Core' widget - a widget that
+fetches channels in the expected way via the usual params but does not supply any UI and instead
+exposes builders to build the UI in situations such as loading, empty data, errors, and on data received.
+
+### Basic Example
+
 `ChannelListCore` is a simplified class that allows fetching a list of
 channels while exposing UI builders.
 
