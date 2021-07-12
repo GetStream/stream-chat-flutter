@@ -4,7 +4,20 @@ sidebar_position: 9
 title: UsersBloc
 ---
 
-Widget dedicated to the management of a users list with pagination.
+A Widget Dedicated To The Management Of A Users List With Pagination.
+
+### Background
+
+Most widgets in the Core SDK are focused on fetching a particular type of object from Stream Chat - channels,
+messages, users, etc. The BLoC widgets bundle up the base functions used to fetch data as well as the current
+data fetched by the respective functions. Furthermore, the Core widgets use this BLoC to fetch new or
+existing data and build UI based on it.
+
+All Core and UI widgets which focus on fetching a list of objects need to have their respective functions
+above them in the widget tree. The UserListCore and UserListView require the UserListCore
+above them in the widget hierarchy without which they will fail.
+
+### Understanding The Widget
 
 `UsersBloc` can be accessed at anytime by using the static `.of` method
 using Flutter's `BuildContext`.

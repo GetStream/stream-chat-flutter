@@ -4,7 +4,21 @@ sidebar_position: 7
 title: ChannelsBloc
 ---
 
-`ChannelsBloc` is a widget dedicated to the management of a channel list with pagination.
+A Widget Dedicated To The Management Of A Channel List With Pagination.
+
+### Background
+
+Most widgets in the Core SDK are focused on fetching a particular type of object from Stream Chat - channels,
+messages, users, etc. The BLoC widgets bundle up the base functions used to fetch data as well as the current
+data fetched by the respective functions. Furthermore, the Core widgets use this BLoC to fetch new or
+existing data and build UI based on it.
+
+All Core and UI widgets which focus on fetching a list of objects need to have their respective functions
+above them in the widget tree. The ChannelListCore and ChannelListView require the ChannelsBloc
+above them in the widget hierarchy without which they will fail.
+
+### Understanding The Widget
+
 `ChannelsBloc` is used together with `ChannelListCore` to manage a list of
 Channels with pagination, re-ordering, querying and other operations
 associated with Channels.
