@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_chat_flutter/src/stream_neumorphic_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Widget builder for title
 typedef TitleBuilder = Widget Function(
@@ -103,21 +104,20 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
 
         switch (status) {
           case ConnectionStatus.connected:
-            statusString = 'Connected';
+            statusString = context.translations.connectedLabel;
             showStatus = false;
             break;
           case ConnectionStatus.connecting:
-            statusString = 'Reconnecting...';
+            statusString = context.translations.reconnectingLabel;
             break;
           case ConnectionStatus.disconnected:
-            statusString = 'Disconnected';
+            statusString = context.translations.disconnectedLabel;
             break;
         }
 
         final chatThemeData = StreamChatTheme.of(context);
         return InfoTile(
-          // ignore: avoid_bool_literals_in_conditional_expressions
-          showMessage: showConnectionStateTile ? showStatus : false,
+          showMessage: showConnectionStateTile && showStatus,
           message: statusString,
           child: AppBar(
             textTheme: Theme.of(context).textTheme,
@@ -207,7 +207,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget _buildConnectedTitleState(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
     return Text(
-      'Stream Chat',
+      context.translations.streamChatLabel,
       style: chatThemeData.textTheme.headlineBold.copyWith(
         color: chatThemeData.colorTheme.black,
       ),
@@ -226,7 +226,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            'Searching for Network',
+            context.translations.searchingForNetworkLabel,
             style: StreamChatTheme.of(context)
                 .channelListHeaderTheme
                 .title
@@ -247,7 +247,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'Offline...',
+          context.translations.offlineLabel,
           style: chatThemeData.channelListHeaderTheme.title?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -258,7 +258,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             ..closeConnection()
             ..openConnection(),
           child: Text(
-            'Try Again',
+            context.translations.tryAgainLabel,
             style: chatThemeData.channelListHeaderTheme.title?.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.bold,

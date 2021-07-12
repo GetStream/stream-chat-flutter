@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// It shows the current [Message] preview.
 ///
@@ -98,7 +99,7 @@ class MessageSearchItem extends StatelessWidget {
   Widget _buildSubtitle(BuildContext context, Message message) {
     var text = message.text;
     if (message.isDeleted) {
-      text = 'This message was deleted.';
+      text = context.translations.messageDeletedText;
     } else if (message.attachments.isNotEmpty) {
       final parts = <String>[
         ...message.attachments.map((e) {

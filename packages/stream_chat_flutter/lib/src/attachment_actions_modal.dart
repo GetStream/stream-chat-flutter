@@ -48,7 +48,7 @@ class AttachmentActionsModal extends StatelessWidget {
         child: _buildPage(context),
       );
 
-  Widget _buildPage(context) {
+  Widget _buildPage(BuildContext context) {
     final theme = StreamChatTheme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -69,7 +69,7 @@ class AttachmentActionsModal extends StatelessWidget {
                 children: [
                   _buildButton(
                     context,
-                    'Reply',
+                    context.translations.replyLabel,
                     StreamSvgIcon.iconCurveLineLeftUp(
                       size: 24,
                       color: theme.colorTheme.grey,
@@ -80,7 +80,7 @@ class AttachmentActionsModal extends StatelessWidget {
                   ),
                   _buildButton(
                     context,
-                    'Show in Chat',
+                    context.translations.showInChatLabel,
                     StreamSvgIcon.eye(
                       size: 24,
                       color: theme.colorTheme.black,
@@ -89,8 +89,9 @@ class AttachmentActionsModal extends StatelessWidget {
                   ),
                   _buildButton(
                     context,
-                    // ignore: lines_longer_than_80_chars
-                    'Save ${message.attachments[currentIndex].type == 'video' ? 'Video' : 'Image'}',
+                    message.attachments[currentIndex].type == 'video'
+                        ? context.translations.saveVideoLabel
+                        : context.translations.saveImageLabel,
                     StreamSvgIcon.iconSave(
                       size: 24,
                       color: theme.colorTheme.grey,
@@ -141,7 +142,7 @@ class AttachmentActionsModal extends StatelessWidget {
                   if (StreamChat.of(context).user?.id == message.user?.id)
                     _buildButton(
                       context,
-                      'Delete',
+                      context.translations.deleteLabel,
                       StreamSvgIcon.delete(
                         size: 24,
                         color: theme.colorTheme.accentRed,

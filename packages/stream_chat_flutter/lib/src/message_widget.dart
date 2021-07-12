@@ -16,6 +16,7 @@ import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/url_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Widget builder for building attachments
 typedef AttachmentBuilder = Widget Function(
@@ -840,7 +841,7 @@ class _MessageWidgetState extends State<MessageWidget>
           ),
           const SizedBox(width: 8),
           Text(
-            'Only visible to you',
+            context.translations.onlyVisibleToYouText,
             style: chatThemeData.textTheme.footnote
                 .copyWith(color: chatThemeData.colorTheme.grey),
           ),
@@ -854,9 +855,9 @@ class _MessageWidgetState extends State<MessageWidget>
     final showThreadParticipants = threadParticipants?.isNotEmpty == true;
     final replyCount = widget.message.replyCount;
 
-    var msg = 'Thread Reply';
+    var msg = context.translations.threadReplyLabel;
     if (showThreadReplyIndicator && replyCount! > 1) {
-      msg = '$replyCount Thread Replies';
+      msg = context.translations.threadReplyCountText(replyCount);
     }
 
     // ignore: prefer_function_declarations_over_variables
@@ -1201,7 +1202,10 @@ class _MessageWidgetState extends State<MessageWidget>
         );
       }
       return Text(
-        'Uploading $uploadRemaining/$totalAttachments ...',
+        context.translations.attachmentsUploadProgressText(
+          remaining: uploadRemaining,
+          total: totalAttachments,
+        ),
         style: style,
       );
     }
@@ -1275,8 +1279,8 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Widget _buildPinnedMessage(Message message) {
-    final pinnedBy = message.pinnedBy;
-    final pinnedByMe = _streamChat.user!.id == pinnedBy!.id;
+    final pinnedBy = message.pinnedBy!;
+    final currentUser = _streamChat.user!;
 
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 8),
@@ -1290,7 +1294,10 @@ class _MessageWidgetState extends State<MessageWidget>
             width: 4,
           ),
           Text(
-            'Pinned by ${pinnedByMe ? 'You' : pinnedBy.name}',
+            context.translations.pinnedByUserText(
+              pinnedBy: pinnedBy,
+              currentUser: currentUser,
+            ),
             style: TextStyle(
               color: _streamChatTheme.colorTheme.grey,
               fontSize: 13,

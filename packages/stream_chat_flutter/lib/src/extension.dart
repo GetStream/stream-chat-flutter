@@ -2,6 +2,7 @@ import 'package:characters/characters.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
+import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 final _emojiChars = Emoji.chars();
@@ -104,7 +105,8 @@ extension BuildContextX on BuildContext {
   double get textScaleFactor =>
       MediaQuery.maybeOf(this)?.textScaleFactor ?? 1.0;
 
-  StreamChatLocalizations? get translations => StreamChatLocalizations.of(this);
+  Translations get translations =>
+      StreamChatLocalizations.of(this) ?? DefaultTranslations.instance;
 }
 
 /// Extension on [BorderRadius]

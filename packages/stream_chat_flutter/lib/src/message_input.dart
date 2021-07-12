@@ -24,6 +24,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Builder for attachment thumbnails
 typedef AttachmentThumbnailBuilder = Widget Function(
@@ -229,16 +230,12 @@ class MessageInput extends StatefulWidget {
   /// Use this method to get the current [StreamChatState] instance
   static MessageInputState of(BuildContext context) {
     MessageInputState? messageInputState;
-
     messageInputState = context.findAncestorStateOfType<MessageInputState>();
-
-    if (messageInputState == null) {
-      throw Exception(
-          // ignore: lines_longer_than_80_chars
-          'You must have a MessageInput widget as ancestor of your widget tree');
-    }
-
-    return messageInputState;
+    assert(
+      messageInputState != null,
+      'You must have a MessageInput widget as ancestor of your widget tree',
+    );
+    return messageInputState!;
   }
 }
 
@@ -440,7 +437,7 @@ class MessageInputState extends State<MessageInput> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
-              'Also send as direct message',
+              context.translations.alsoSendAsDirectMessageLabel,
               style: _streamChatTheme.textTheme.footnote.copyWith(
                 color: _streamChatTheme.colorTheme.black.withOpacity(0.5),
               ),
@@ -564,7 +561,7 @@ class MessageInputState extends State<MessageInput> {
                     style: _streamChatTheme.messageInputTheme.inputTextStyle,
                     autofocus: widget.autofocus,
                     textAlignVertical: TextAlignVertical.center,
-                    decoration: _getInputDecoration(),
+                    decoration: _getInputDecoration(context),
                     textCapitalization: TextCapitalization.sentences,
                   ),
                 )
@@ -576,11 +573,11 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  InputDecoration _getInputDecoration() {
+  InputDecoration _getInputDecoration(BuildContext context) {
     final passedDecoration = _streamChatTheme.messageInputTheme.inputDecoration;
     return InputDecoration(
       isDense: true,
-      hintText: _getHint(),
+      hintText: _getHint(context),
       hintStyle: _streamChatTheme.messageInputTheme.inputTextStyle!.copyWith(
         color: _streamChatTheme.colorTheme.grey,
       ),
@@ -729,14 +726,14 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  String _getHint() {
+  String _getHint(BuildContext context) {
     if (_commandEnabled && _chosenCommand!.name == 'giphy') {
-      return 'Search GIFs';
+      return context.translations.searchGifLabel;
     }
     if (_attachments.isNotEmpty) {
-      return 'Add a comment or send';
+      return context.translations.addACommentOrSendLabel;
     }
-    return 'Write a message';
+    return context.translations.writeAMessageLabel;
   }
 
   void _checkEmoji(String s, BuildContext context) {
@@ -859,7 +856,7 @@ class MessageInputState extends State<MessageInput> {
                         ),
                       ),
                       Text(
-                        'Instant Commands',
+                        context.translations.instantCommandsLabel,
                         style: TextStyle(
                           color:
                               _streamChatTheme.colorTheme.black.withOpacity(.5),
@@ -1114,8 +1111,7 @@ class MessageInputState extends State<MessageInput> {
 
         if (mediaInfo.filesize! > widget.maxAttachmentSize) {
           _showErrorAlert(
-            // ignore: lines_longer_than_80_chars
-            'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
+            context.translations.fileTooLargeAfterCompressionError,
           );
           return;
         }
@@ -1126,9 +1122,7 @@ class MessageInputState extends State<MessageInput> {
           path: mediaInfo.path,
         );
       } else {
-        _showErrorAlert(
-          'The file is too large to upload. The file size limit is 20MB.',
-        );
+        _showErrorAlert(context.translations.fileTooLargeError);
         return;
       }
     }
@@ -1396,7 +1390,9 @@ class MessageInputState extends State<MessageInput> {
                                 ),
                                 Flexible(
                                   child: Text(
-                                    'Emoji matching "$query"',
+                                    context.translations.emojiMatchingQueryText(
+                                      query,
+                                    ),
                                     style: TextStyle(
                                       color: _streamChatTheme.colorTheme.black
                                           .withOpacity(.5),
@@ -1744,17 +1740,17 @@ class MessageInputState extends State<MessageInput> {
           builder: (_) => Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  const ListTile(
+                  ListTile(
                     title: Text(
-                      'Add a file',
-                      style: TextStyle(
+                      context.translations.addAFileLabel,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   ListTile(
                     leading: const Icon(Icons.image),
-                    title: const Text('Upload a photo'),
+                    title: Text(context.translations.uploadAPhotoLabel),
                     onTap: () {
                       pickFile(DefaultAttachmentTypes.image);
                       Navigator.pop(context);
@@ -1762,7 +1758,7 @@ class MessageInputState extends State<MessageInput> {
                   ),
                   ListTile(
                     leading: const Icon(Icons.video_library),
-                    title: const Text('Upload a video'),
+                    title: Text(context.translations.uploadAVideoLabel),
                     onTap: () {
                       pickFile(DefaultAttachmentTypes.video);
                       Navigator.pop(context);
@@ -1771,7 +1767,7 @@ class MessageInputState extends State<MessageInput> {
                   if (!kIsWeb)
                     ListTile(
                       leading: const Icon(Icons.camera_alt),
-                      title: const Text('Photo from camera'),
+                      title: Text(context.translations.photoFromCameraLabel),
                       onTap: () {
                         pickFile(DefaultAttachmentTypes.image, true);
                         Navigator.pop(context);
@@ -1780,7 +1776,7 @@ class MessageInputState extends State<MessageInput> {
                   if (!kIsWeb)
                     ListTile(
                       leading: const Icon(Icons.videocam),
-                      title: const Text('Video from camera'),
+                      title: Text(context.translations.videoFromCameraLabel),
                       onTap: () {
                         pickFile(DefaultAttachmentTypes.video, true);
                         Navigator.pop(context);
@@ -1788,7 +1784,7 @@ class MessageInputState extends State<MessageInput> {
                     ),
                   ListTile(
                     leading: const Icon(Icons.insert_drive_file),
-                    title: const Text('Upload a file'),
+                    title: Text(context.translations.uploadAFileLabel),
                     onTap: () {
                       pickFile(DefaultAttachmentTypes.file);
                       Navigator.pop(context);
@@ -1888,8 +1884,7 @@ class MessageInputState extends State<MessageInput> {
 
         if (mediaInfo.filesize! > widget.maxAttachmentSize) {
           _showErrorAlert(
-            // ignore: lines_longer_than_80_chars
-            'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
+            context.translations.fileTooLargeAfterCompressionError,
           );
           return;
         }
@@ -1900,9 +1895,7 @@ class MessageInputState extends State<MessageInput> {
           path: mediaInfo.path,
         );
       } else {
-        _showErrorAlert(
-          'The file is too large to upload. The file size limit is 20MB.',
-        );
+        _showErrorAlert(context.translations.fileTooLargeError);
         return;
       }
     }
@@ -2079,7 +2072,7 @@ class MessageInputState extends State<MessageInput> {
             height: 26,
           ),
           Text(
-            'Something went wrong',
+            context.translations.somethingWentWrongLabel,
             style: _streamChatTheme.textTheme.headlineBold,
           ),
           const SizedBox(
@@ -2107,7 +2100,7 @@ class MessageInputState extends State<MessageInput> {
                   Navigator.of(context).pop();
                 },
                 child: Text(
-                  'OK',
+                  context.translations.okLabel,
                   style: _streamChatTheme.textTheme.bodyBold
                       .copyWith(color: _streamChatTheme.colorTheme.accentBlue),
                 ),
@@ -2253,7 +2246,7 @@ class __PickerWidgetState extends State<_PickerWidget> {
                   color: widget.streamChatTheme.colorTheme.whiteSmoke,
                   alignment: Alignment.center,
                   child: Text(
-                    'Add more files',
+                    context.translations.addMoreFilesLabel,
                     style: TextStyle(
                       color: widget.streamChatTheme.colorTheme.accentBlue,
                       fontWeight: FontWeight.bold,
@@ -2285,8 +2278,7 @@ class __PickerWidgetState extends State<_PickerWidget> {
                     color: widget.streamChatTheme.colorTheme.greyGainsboro,
                   ),
                   Text(
-                    // ignore: lines_longer_than_80_chars
-                    'Please enable access to your photos \nand videos so you can share them with friends.',
+                    context.translations.enablePhotoAndVideoAccessMessage,
                     style: widget.streamChatTheme.textTheme.body.copyWith(
                         color: widget.streamChatTheme.colorTheme.grey),
                     textAlign: TextAlign.center,
@@ -2294,7 +2286,7 @@ class __PickerWidgetState extends State<_PickerWidget> {
                   const SizedBox(height: 6),
                   Center(
                     child: Text(
-                      'Allow access to your gallery',
+                      context.translations.allowGalleryAccessMessage,
                       style: widget.streamChatTheme.textTheme.bodyBold.copyWith(
                         color: widget.streamChatTheme.colorTheme.accentBlue,
                       ),

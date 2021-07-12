@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/channel_info.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Bottom Sheet with options
 class ChannelBottomSheet extends StatefulWidget {
@@ -149,7 +150,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                       color: _streamChatThemeData.colorTheme.grey,
                     ),
                   ),
-                  title: 'View Info',
+                  title: context.translations.viewInfoLabel,
                   onTap: widget.onViewInfoTap,
                 ),
                 if (!channel.isDistinct)
@@ -160,7 +161,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                         color: _streamChatThemeData.colorTheme.grey,
                       ),
                     ),
-                    title: 'Leave Group',
+                    title: context.translations.leaveGroupLabel,
                     onTap: () async {
                       setState(() {
                         _showActions = false;
@@ -179,7 +180,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                         color: _streamChatThemeData.colorTheme.accentRed,
                       ),
                     ),
-                    title: 'Delete Conversation',
+                    title: context.translations.deleteConversationLabel,
                     titleColor: _streamChatThemeData.colorTheme.accentRed,
                     onTap: () async {
                       setState(() {
@@ -198,7 +199,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                       color: _streamChatThemeData.colorTheme.grey,
                     ),
                   ),
-                  title: 'Cancel',
+                  title: context.translations.cancelLabel,
                   onTap: () {
                     Navigator.pop(context);
                   },
@@ -219,10 +220,10 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
   Future<void> _showDeleteDialog() async {
     final res = await showConfirmationDialog(
       context,
-      title: 'Delete Conversation',
-      okText: 'DELETE',
-      question: 'Are you sure you want to delete this conversation?',
-      cancelText: 'CANCEL',
+      title: context.translations.deleteConversationLabel,
+      okText: context.translations.deleteLabel,
+      question: context.translations.deleteConversationQuestion,
+      cancelText: context.translations.cancelLabel,
       icon: StreamSvgIcon.delete(
         color: _streamChatThemeData.colorTheme.accentRed,
       ),
@@ -237,10 +238,10 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
   Future<void> _showLeaveDialog() async {
     final res = await showConfirmationDialog(
       context,
-      title: 'Leave conversation',
-      okText: 'LEAVE',
-      question: 'Are you sure you want to leave this conversation?',
-      cancelText: 'CANCEL',
+      title: context.translations.leaveConversationLabel,
+      okText: context.translations.leaveLabel,
+      question: context.translations.leaveConversationQuestion,
+      cancelText: context.translations.cancelLabel,
       icon: StreamSvgIcon.userRemove(
         color: _streamChatThemeData.colorTheme.accentRed,
       ),

@@ -11,6 +11,7 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Footer widget for media display
 class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
@@ -190,7 +191,7 @@ class _ImageFooterState extends State<ImageFooter> {
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Text(
-                          'Photos',
+                          context.translations.photosLabel,
                           style: chatThemeData.textTheme.headlineBold,
                         ),
                       ),

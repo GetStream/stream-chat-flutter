@@ -10,6 +10,7 @@ import 'package:stream_chat_flutter/src/image_footer.dart';
 import 'package:stream_chat_flutter/src/image_header.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Return action for coming back from pages
 enum ReturnActionType {
@@ -182,9 +183,11 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                 children: [
                   ImageHeader(
                     userName: widget.userName,
-                    sentAt:
-                        // ignore: lines_longer_than_80_chars
-                        'Sent ${getDay(widget.message.createdAt.toLocal())} at ${Jiffy(widget.message.createdAt.toLocal()).format('HH:mm')}',
+                    // TODO: Fix this
+                    sentAt: context.translations.sentAtText(
+                      date: widget.message.createdAt,
+                      time: widget.message.createdAt,
+                    ),
                     onBackPressed: () {
                       Navigator.of(context).pop();
                     },

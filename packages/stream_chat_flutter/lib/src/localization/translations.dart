@@ -1,10 +1,201 @@
-part of 'stream_chat_localizations.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart'
+    show User;
 
-/// The translations for English (`en`).
-class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
-  /// Create an instance of the translation bundle for English.
-  const StreamChatLocalizationsEn({String localeName = 'en'})
-      : super(localeName: localeName);
+abstract class Translations {
+  String get launchUrlError;
+
+  String get loadingUsersError;
+
+  String get retryLabel;
+
+  String get noUsersLabel;
+
+  String get userOnlineText;
+
+  String get userLastOnlineText;
+
+  String userTypingText(Iterable<User> users);
+
+  String get threadReplyLabel;
+
+  String get onlyVisibleToYouText;
+
+  String threadReplyCountText(int count);
+
+  String attachmentsUploadProgressText({
+    required int remaining,
+    required int total,
+  });
+
+  String pinnedByUserText({
+    required User pinnedBy,
+    required User currentUser,
+  });
+
+  String get emptyMessagesText;
+
+  String get genericErrorText;
+
+  String get loadingMessagesError;
+
+  String resultCountText(int count);
+
+  String get messageDeletedText;
+
+  String get messageDeletedLabel;
+
+  String get messageReactionsText;
+
+  String get emptyChatMessagesText;
+
+  String threadSeparatorText(int replyCount);
+
+  String get connectedLabel;
+
+  String get disconnectedLabel;
+
+  String get reconnectingLabel;
+
+  String get alsoSendAsDirectMessageLabel;
+
+  String get searchGifLabel;
+
+  String get addACommentOrSendLabel;
+
+  String get writeAMessageLabel;
+
+  String get instantCommandsLabel;
+
+  String get fileTooLargeAfterCompressionError;
+
+  String get fileTooLargeError;
+
+  String emojiMatchingQueryText(String query);
+
+  String get addAFileLabel;
+
+  String get uploadAPhotoLabel;
+
+  String get uploadAVideoLabel;
+
+  String get photoFromCameraLabel;
+
+  String get videoFromCameraLabel;
+
+  String get uploadAFileLabel;
+
+  String get somethingWentWrongLabel;
+
+  String get okLabel;
+
+  String get addMoreFilesLabel;
+
+  String get enablePhotoAndVideoAccessMessage;
+
+  String get allowGalleryAccessMessage;
+
+  String get flagMessageLabel;
+
+  String get flagMessageQuestion;
+
+  String get flagLabel;
+
+  String get cancelLabel;
+
+  String get flagMessageSuccessfulLabel;
+
+  String get flagMessageSuccessfulText;
+
+  String get deleteMessageLabel;
+
+  String get deleteMessageQuestion;
+
+  String get deleteLabel;
+
+  String get operationCouldNotBeCompletedText;
+
+  String get replyLabel;
+
+  String togglePinUnpinText({required bool pinned});
+
+  String toggleDeleteRetryDeleteMessageText({required bool isDeleteFailed});
+
+  String get copyMessageLabel;
+
+  String get editMessageLabel;
+
+  String toggleResendOrResendEditedMessage({required bool isUpdateFailed});
+
+  String get photosLabel;
+
+  String sentAtText({required DateTime date, required DateTime time});
+
+  String get todayLabel;
+
+  String get yesterdayLabel;
+
+  String get channelIsMutedText;
+
+  String get noTitleText;
+
+  String get letsStartChattingLabel;
+
+  String get sendingFirstMessageLabel;
+
+  String get startAChatLabel;
+
+  String get loadingChannelsError;
+
+  //             title: 'Delete Conversation',
+//                               okText: 'DELETE',
+//                               question:
+//                                   'Are you sure you want to delete this conversation?',
+
+  String get deleteConversationLabel;
+
+  String get deleteConversationQuestion;
+
+  String get streamChatLabel;
+
+  String get searchingForNetworkLabel;
+
+  String get offlineLabel;
+
+  String get tryAgainLabel;
+
+  String membersCountText(int count);
+
+  String watchersCountText(int count);
+
+  String get viewInfoLabel;
+
+  String get leaveGroupLabel;
+
+  String get leaveLabel;
+
+  String get leaveConversationLabel;
+
+  String get leaveConversationQuestion;
+
+  String get showInChatLabel;
+
+  String get saveImageLabel;
+
+  String get saveVideoLabel;
+
+  String get uploadErrorLabel;
+
+  String get giphyLabel;
+
+  String get shuffleLabel;
+
+  String get sendLabel;
+}
+
+class DefaultTranslations implements Translations {
+  const DefaultTranslations._();
+
+  static const instance = DefaultTranslations._();
 
   @override
   String get launchUrlError => 'Cannot launch the url';

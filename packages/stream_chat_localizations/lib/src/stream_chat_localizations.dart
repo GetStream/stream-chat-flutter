@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
-    show StreamChatLocalizations;
+    show StreamChatLocalizations, User;
 
 part 'stream_chat_localizations_en.dart';
 
@@ -113,9 +113,6 @@ abstract class GlobalStreamChatLocalizations
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
   ];
-
-  @override
-  String get launchUrlError;
 }
 
 class _StreamChatLocalizationsDelegate
