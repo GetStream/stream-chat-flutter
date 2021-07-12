@@ -93,7 +93,7 @@ firebaseMessaging.onTokenRefresh.listen((token) {
 ### Possible issues
 
 
-We only send push notifications, when the user doesn't have any active websocket connection (which is established when you call client.connectUser). If you set the [onBackgroundEventReceived](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat/onBackgroundEventReceived.html) property of the StreamChat widget, when your app goes to background, your device will keep the ws connection alive for 1 minute, and so within this period, you won't receive any push notification.
+We only send push notifications when the user doesn't have any active websocket connection (which is established when you call `client.connectUser`). If you set the [onBackgroundEventReceived](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat/onBackgroundEventReceived.html) property of the StreamChat widget, when your app goes to background, your device will keep the ws connection alive for 1 minute, and so within this period, you won't receive any push notification.
 
 Make sure to read the [general push docs](https://getstream.io/chat/docs/flutter-dart/push_introduction/?language=dart) in order to avoid known gotchas that may make your relationship with notifications go bad 😢
 
@@ -232,4 +232,3 @@ Future<dynamic> myBackgroundMessageHandler(message) async {
   } 
 } 
 ```
-
