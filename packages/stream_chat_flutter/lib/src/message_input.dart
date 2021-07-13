@@ -27,6 +27,16 @@ import 'package:video_compress/video_compress.dart';
 
 export 'package:video_compress/video_compress.dart' show VideoQuality;
 
+/// A callback that can be passed to [MessageInput.onError].
+///
+/// This callback should not throw.
+///
+/// It exists merely for error reporting, and should not be used otherwise.
+typedef ErrorListener = void Function(
+  Object error,
+  StackTrace? stackTrace,
+);
+
 /// Builder for attachment thumbnails
 typedef AttachmentThumbnailBuilder = Widget Function(
   BuildContext,
@@ -153,6 +163,7 @@ class MessageInput extends StatefulWidget {
     this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
     this.compressedVideoQuality = VideoQuality.DefaultQuality,
     this.compressedVideoFrameRate = 30,
+    this.onError,
   }) : super(key: key);
 
   /// Message to edit
@@ -233,22 +244,21 @@ class MessageInput extends StatefulWidget {
   /// Customize the tile for the mentions overlay
   final MentionTileBuilder? mentionsTileBuilder;
 
+  /// A callback for error reporting
+  final ErrorListener? onError;
+
   @override
   MessageInputState createState() => MessageInputState();
 
   /// Use this method to get the current [StreamChatState] instance
   static MessageInputState of(BuildContext context) {
     MessageInputState? messageInputState;
-
     messageInputState = context.findAncestorStateOfType<MessageInputState>();
-
-    if (messageInputState == null) {
-      throw Exception(
-          // ignore: lines_longer_than_80_chars
-          'You must have a MessageInput widget as ancestor of your widget tree');
-    }
-
-    return messageInputState;
+    assert(
+      messageInputState != null,
+      'You must have a MessageInput widget as ancestor of your widget tree',
+    );
+    return messageInputState!;
   }
 }
 
@@ -1989,7 +1999,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   /// Sends the current message
-  void sendMessage() async {
+  Future<void> sendMessage() async {
     var text = textEditingController.text.trim();
     if (text.isEmpty && _attachments.isEmpty) {
       return;
@@ -2005,9 +2015,7 @@ class MessageInputState extends State<MessageInput> {
 
     textEditingController.clear();
     _attachments.clear();
-    if (widget.onQuotedMessageCleared != null) {
-      widget.onQuotedMessageCleared!();
-    }
+    widget.onQuotedMessageCleared?.call();
 
     setState(() {
       _messageIsPresent = false;
@@ -2019,7 +2027,6 @@ class MessageInputState extends State<MessageInput> {
     _mentionsOverlay?.remove();
     _mentionsOverlay = null;
 
-    Future sendingFuture;
     Message message;
     if (widget.editMessage != null) {
       message = widget.editMessage!.copyWith(
@@ -2057,26 +2064,32 @@ class MessageInputState extends State<MessageInput> {
 
     _mentionedUsers.clear();
 
-    if (widget.editMessage == null ||
-        widget.editMessage!.status == MessageSendingStatus.failed ||
-        widget.editMessage!.status == MessageSendingStatus.sending) {
-      sendingFuture = channel.sendMessage(message);
-    } else {
-      sendingFuture = channel.updateMessage(message);
-    }
+    try {
+      Future sendingFuture;
+      if (widget.editMessage == null ||
+          widget.editMessage!.status == MessageSendingStatus.failed ||
+          widget.editMessage!.status == MessageSendingStatus.sending) {
+        sendingFuture = channel.sendMessage(message);
+      } else {
+        sendingFuture = channel.updateMessage(message);
+      }
 
-    if (!shouldUnfocus) {
-      FocusScope.of(context).requestFocus(_focusNode);
-    }
+      if (!shouldUnfocus) {
+        FocusScope.of(context).requestFocus(_focusNode);
+      }
 
-    return sendingFuture.then((resp) {
+      final resp = await sendingFuture;
       if (resp.message?.type == 'error') {
         _parseExistingMessage(message);
       }
-      if (widget.onMessageSent != null) {
-        widget.onMessageSent!(resp.message);
+      widget.onMessageSent?.call(resp.message);
+    } catch (e, stk) {
+      if (widget.onError != null) {
+        widget.onError?.call(e, stk);
+      } else {
+        rethrow;
       }
-    });
+    }
   }
 
   StreamSubscription? _keyboardListener;
