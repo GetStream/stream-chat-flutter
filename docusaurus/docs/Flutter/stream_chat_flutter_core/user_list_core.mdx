@@ -29,7 +29,7 @@ class UsersListPage extends StatelessWidget {
     return Scaffold(
       body: UsersListCore(
         filter: Filter.autoComplete('name', 'search_here'),
-        sort: [SortOption('last_message_at')],
+        sort: [SortOption('last_active')],
         pagination: PaginationParams(
           limit: 20,
         ),
