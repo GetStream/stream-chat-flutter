@@ -85,6 +85,7 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
       final extentBefore = notification.metrics.extentBefore;
       final extentAfter = notification.metrics.extentAfter;
       final scrollingDown = _scrollPosition < pixels;
+      _scrollPosition = pixels;
 
       if (scrollingDown) {
         if (extentAfter <= scrollOffset) {
@@ -97,8 +98,6 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
           return true;
         }
       }
-
-      _scrollPosition = pixels;
     }
     if (notification is OverscrollNotification) {
       if (notification.overscroll > 0) {

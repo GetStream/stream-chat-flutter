@@ -98,6 +98,8 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
         _queryMessagesLoadingController.add(false);
       }
     } catch (e, stk) {
+      // reset loading controller
+      _queryMessagesLoadingController.add(false);
       if (_messageResponses.hasValue) {
         _queryMessagesLoadingController.addError(e, stk);
       } else {
