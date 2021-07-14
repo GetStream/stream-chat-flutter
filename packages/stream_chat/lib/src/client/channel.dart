@@ -888,6 +888,7 @@ class Channel {
         final oldMessage = state!.messages[oldIndex];
         state!.updateChannelState(state!._channelState.copyWith(
           messages: state?.messages?..remove(oldMessage),
+          channel: state?._channelState.channel,
         ));
       } else {
         // remove thread message if present
