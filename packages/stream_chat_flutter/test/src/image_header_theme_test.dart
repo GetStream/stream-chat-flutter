@@ -13,6 +13,24 @@ void main() {
         const ImageHeaderThemeData().copyWith().hashCode);
   });
 
+  test(
+      'Light ImageHeaderThemeData lerps completely to dark ImageHeaderThemeData',
+      () {
+    expect(
+        const ImageHeaderThemeData().lerp(
+            _imageHeaderThemeDataControl, _imageHeaderThemeDataDarkControl, 1),
+        _imageHeaderThemeDataDarkControl);
+  });
+
+  test(
+      'Dark ImageHeaderThemeData lerps completely to light ImageHeaderThemeData',
+      () {
+    expect(
+        const ImageHeaderThemeData().lerp(
+            _imageHeaderThemeDataDarkControl, _imageHeaderThemeDataControl, 1),
+        _imageHeaderThemeDataControl);
+  });
+
   testWidgets(
       'Passing no ImageHeaderThemeData returns default light theme values',
       (WidgetTester tester) async {
