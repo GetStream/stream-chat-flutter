@@ -13,7 +13,8 @@ void main() {
         const ImageHeaderThemeData().copyWith().hashCode);
   });
 
-  testWidgets('Passing no ImageHeaderThemeData returns defaults',
+  testWidgets(
+      'Passing no ImageHeaderThemeData returns default light theme values',
       (WidgetTester tester) async {
     late BuildContext _context;
     await tester.pumpWidget(
@@ -51,6 +52,9 @@ void main() {
   });
 }
 
+// Light theme test control.
+//
+// Test default ImageHeaderThemeData values against this control.
 final _imageHeaderThemeDataControl = ImageHeaderThemeData(
   closeButtonColor: const Color(0xff000000),
   backgroundColor: const Color(0xffffffff),
