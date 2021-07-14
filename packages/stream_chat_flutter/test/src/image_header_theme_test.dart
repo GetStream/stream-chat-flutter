@@ -22,6 +22,14 @@ void main() {
         _imageHeaderThemeDataDarkControl);
   });
 
+  test('Light ImageHeaderThemeData lerps halfway to dark ImageHeaderThemeData',
+      () {
+    expect(
+        const ImageHeaderThemeData().lerp(_imageHeaderThemeDataControl,
+            _imageHeaderThemeDataDarkControl, 0.5),
+        _imageHeaderThemeDataHalfLerpControl);
+  });
+
   test(
       'Dark ImageHeaderThemeData lerps completely to light ImageHeaderThemeData',
       () {
@@ -120,8 +128,6 @@ void main() {
 }
 
 // Light theme test control.
-//
-// Test default ImageHeaderThemeData values against this control.
 final _imageHeaderThemeDataControl = ImageHeaderThemeData(
   closeButtonColor: const Color(0xff000000),
   backgroundColor: const Color(0xffffffff),
@@ -141,8 +147,25 @@ final _imageHeaderThemeDataControl = ImageHeaderThemeData(
 );
 
 // Light theme test control.
-//
-// Test default ImageHeaderThemeData values against this control.
+final _imageHeaderThemeDataHalfLerpControl = ImageHeaderThemeData(
+  closeButtonColor: const Color(0xff7f7f7f),
+  backgroundColor: const Color(0xff87898b),
+  iconMenuPointColor: const Color(0xff7f7f7f),
+  titleTextStyle: const TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: Color(0xff7f7f7f),
+  ),
+  subtitleTextStyle: const TextStyle(
+    fontSize: 12,
+    color: Color(0xff7a7a7a),
+  ).copyWith(
+    color: const Color(0xff7A7A7A),
+  ),
+  bottomSheetBarrierColor: const Color(0x4c000000),
+);
+
+// Dark theme test control.
 final _imageHeaderThemeDataDarkControl = ImageHeaderThemeData(
   closeButtonColor: const Color(0xffffffff),
   backgroundColor: const Color(0xff101418),
