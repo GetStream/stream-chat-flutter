@@ -1555,7 +1555,7 @@ class ImageFooterTheme extends InheritedTheme {
 /// the default style for [ImageFooter]s below the overall [StreamChatTheme].
 class ImageFooterThemeData with Diagnosticable {
   /// Creates an [ImageFooterThemeData].
-  ImageFooterThemeData({
+  const ImageFooterThemeData({
     this.backgroundColor,
     this.shareIconColor,
     this.titleTextStyle,
