@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/channel_header.dart';
 import 'package:stream_chat_flutter/src/channel_preview.dart';
@@ -58,6 +59,7 @@ class StreamChatThemeData {
     Widget Function(BuildContext, User)? defaultUserImage,
     IconThemeData? primaryIconTheme,
     List<ReactionIcon>? reactionIcons,
+    ImageHeaderThemeData? imageHeaderTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -80,6 +82,7 @@ class StreamChatThemeData {
       defaultUserImage: defaultUserImage,
       primaryIconTheme: primaryIconTheme,
       reactionIcons: reactionIcons,
+      imageHeaderTheme: imageHeaderTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -107,6 +110,7 @@ class StreamChatThemeData {
     required this.defaultUserImage,
     required this.primaryIconTheme,
     required this.reactionIcons,
+    required this.imageHeaderTheme,
   });
 
   /// Create a theme from a Material [Theme]
@@ -135,6 +139,9 @@ class StreamChatThemeData {
 
   /// Theme of the chat widgets dedicated to a channel
   final ChannelTheme channelTheme;
+
+  /// The default style for [ImageHeader]s below the overall [StreamChatTheme].
+  final ImageHeaderThemeData imageHeaderTheme;
 
   /// Theme of the current user messages
   final MessageTheme ownMessageTheme;
@@ -172,6 +179,7 @@ class StreamChatThemeData {
     IconThemeData? primaryIconTheme,
     ChannelListHeaderTheme? channelListHeaderTheme,
     List<ReactionIcon>? reactionIcons,
+    ImageHeaderThemeData? imageHeaderTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -188,6 +196,7 @@ class StreamChatThemeData {
         otherMessageTheme: this.otherMessageTheme.merge(otherMessageTheme),
         messageInputTheme: this.messageInputTheme.merge(messageInputTheme),
         reactionIcons: reactionIcons ?? this.reactionIcons,
+        imageHeaderTheme: imageHeaderTheme ?? this.imageHeaderTheme,
       );
 
   /// Merge themes
@@ -207,6 +216,7 @@ class StreamChatThemeData {
       otherMessageTheme: otherMessageTheme.merge(other.otherMessageTheme),
       messageInputTheme: messageInputTheme.merge(other.messageInputTheme),
       reactionIcons: other.reactionIcons,
+      imageHeaderTheme: imageHeaderTheme.merge(other.imageHeaderTheme),
     );
   }
 
@@ -219,6 +229,40 @@ class StreamChatThemeData {
     final accentColor = colorTheme.accentPrimary;
     final iconTheme =
         IconThemeData(color: colorTheme.textHighEmphasis.withOpacity(.5));
+    final channelTheme = ChannelTheme(
+      channelHeaderTheme: ChannelHeaderTheme(
+        avatarTheme: AvatarTheme(
+          borderRadius: BorderRadius.circular(20),
+          constraints: const BoxConstraints.tightFor(
+            height: 40,
+            width: 40,
+          ),
+        ),
+        color: colorTheme.barsBg,
+        title: textTheme.headlineBold,
+        subtitle: textTheme.footnote.copyWith(
+          color: const Color(0xff7A7A7A),
+        ),
+      ),
+    );
+    final channelPreviewTheme = ChannelPreviewTheme(
+      unreadCounterColor: colorTheme.accentError,
+      avatarTheme: AvatarTheme(
+        borderRadius: BorderRadius.circular(20),
+        constraints: const BoxConstraints.tightFor(
+          height: 40,
+          width: 40,
+        ),
+      ),
+      title: textTheme.bodyBold,
+      subtitle: textTheme.footnote.copyWith(
+        color: const Color(0xff7A7A7A),
+      ),
+      lastMessageAt: textTheme.footnote.copyWith(
+        color: colorTheme.textHighEmphasis.withOpacity(.5),
+      ),
+      indicatorIconSize: 16,
+    );
     return StreamChatThemeData.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
@@ -231,24 +275,7 @@ class StreamChatThemeData {
           fit: BoxFit.cover,
         ),
       ),
-      channelPreviewTheme: ChannelPreviewTheme(
-        unreadCounterColor: colorTheme.accentError,
-        avatarTheme: AvatarTheme(
-          borderRadius: BorderRadius.circular(20),
-          constraints: const BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
-          ),
-        ),
-        title: textTheme.bodyBold,
-        subtitle: textTheme.footnote.copyWith(
-          color: const Color(0xff7A7A7A),
-        ),
-        lastMessageAt: textTheme.footnote.copyWith(
-          color: colorTheme.textHighEmphasis.withOpacity(.5),
-        ),
-        indicatorIconSize: 16,
-      ),
+      channelPreviewTheme: channelPreviewTheme,
       channelListHeaderTheme: ChannelListHeaderTheme(
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
@@ -260,22 +287,7 @@ class StreamChatThemeData {
         color: colorTheme.barsBg,
         title: textTheme.headlineBold,
       ),
-      channelTheme: ChannelTheme(
-        channelHeaderTheme: ChannelHeaderTheme(
-          avatarTheme: AvatarTheme(
-            borderRadius: BorderRadius.circular(20),
-            constraints: const BoxConstraints.tightFor(
-              height: 40,
-              width: 40,
-            ),
-          ),
-          color: colorTheme.barsBg,
-          title: textTheme.headlineBold,
-          subtitle: textTheme.footnote.copyWith(
-            color: const Color(0xff7A7A7A),
-          ),
-        ),
-      ),
+      channelTheme: channelTheme,
       ownMessageTheme: MessageTheme(
         messageAuthor:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
@@ -407,6 +419,14 @@ class StreamChatThemeData {
           },
         ),
       ],
+      imageHeaderTheme: ImageHeaderThemeData(
+        closeButtonColor: colorTheme.textHighEmphasis,
+        backgroundColor: channelTheme.channelHeaderTheme.color,
+        iconMenuPointColor: colorTheme.textHighEmphasis,
+        titleTextStyle: textTheme.headlineBold,
+        subtitleTextStyle: channelPreviewTheme.subtitle,
+        bottomSheetBarrierColor: colorTheme.overlay,
+      ),
     );
   }
 }
@@ -1286,4 +1306,158 @@ class Effect {
         alpha: color as double? ?? this.alpha,
         blur: blur ?? this.blur,
       );
+}
+
+/// Overrides the default style of [ImageHeader] descendants.
+///
+/// See also:
+///
+///  * [ImageHeaderThemeData], which is used to configure this theme.
+class ImageHeaderTheme extends InheritedTheme {
+  /// Creates an [ImageHeaderTheme].
+  ///
+  /// The [data] parameter must not be null.
+  const ImageHeaderTheme({
+    Key? key,
+    required this.data,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  /// The configuration of this theme.
+  final ImageHeaderThemeData data;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If there is no enclosing [ImageHeaderTheme] widget, then
+  /// [StreamChatThemeData.imageHeaderTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ImageHeaderTheme theme = ImageHeaderTheme.of(context);
+  /// ```
+  static ImageHeaderThemeData of(BuildContext context) {
+    final imageHeaderTheme =
+        context.dependOnInheritedWidgetOfExactType<ImageHeaderTheme>();
+    return imageHeaderTheme?.data ??
+        StreamChatTheme.of(context).imageHeaderTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) =>
+      ImageHeaderTheme(data: data, child: child);
+
+  @override
+  bool updateShouldNotify(ImageHeaderTheme oldWidget) => data != oldWidget.data;
+}
+
+/// A style that overrides the default appearance of [ImageHeader]s when used
+/// with [ImageHeaderTheme] or with the overall [StreamChatTheme]'s
+/// [StreamChatThemeData.imageHeaderTheme].
+///
+/// See also:
+///
+/// * [ImageHeaderTheme], the theme which is configured with this class.
+/// * [StreamChatThemeData.imageHeaderTheme], which can be used to override
+/// the default style for [ImageHeader]s below the overall [StreamChatTheme].
+class ImageHeaderThemeData with Diagnosticable {
+  /// Creates an [ImageHeaderThemeData].
+  ImageHeaderThemeData({
+    this.closeButtonColor,
+    this.backgroundColor,
+    this.iconMenuPointColor,
+    this.titleTextStyle,
+    this.subtitleTextStyle,
+    this.bottomSheetBarrierColor,
+  });
+
+  /// The color of the "close" button.
+  ///
+  /// Defaults to [ColorTheme.textHighEmphasis].
+  final Color? closeButtonColor;
+
+  /// The background color of the [ImageHeader] widget.
+  ///
+  /// Defaults to [ChannelHeaderTheme.color].
+  final Color? backgroundColor;
+
+  /// Defaults to [ColorTheme.textHighEmphasis].
+  final Color? iconMenuPointColor;
+
+  /// The [TextStyle] to use for the [ImageHeader] title text.
+  ///
+  /// Defaults to [TextTheme.headlineBold].
+  final TextStyle? titleTextStyle;
+
+  ///
+  final TextStyle? subtitleTextStyle;
+
+  /// The [TextStyle] to use for the [ImageHeader] subtitle text.
+  ///
+  /// Defaults to [ChannelPreviewTheme.subtitle].
+  final Color? bottomSheetBarrierColor;
+
+  /// Copies this [ImageHeaderThemeData] to another.
+  ImageHeaderThemeData copyWith({
+    Color? closeButtonColor,
+    Color? backgroundColor,
+    Color? iconMenuPointColor,
+    TextStyle? titleTextStyle,
+    TextStyle? subtitleTextStyle,
+    Color? bottomSheetBarrierColor,
+  }) =>
+      ImageHeaderThemeData(
+        closeButtonColor: closeButtonColor ?? this.closeButtonColor,
+        backgroundColor: backgroundColor ?? this.backgroundColor,
+        iconMenuPointColor: iconMenuPointColor ?? this.iconMenuPointColor,
+        titleTextStyle: titleTextStyle ?? this.titleTextStyle,
+        subtitleTextStyle: subtitleTextStyle ?? this.subtitleTextStyle,
+        bottomSheetBarrierColor:
+            bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
+      );
+
+  /// Linearly interpolate between two [ImageHeader] themes.
+  ///
+  /// All the properties must be non-null.
+  ImageHeaderThemeData lerp(
+    ImageHeaderThemeData a,
+    ImageHeaderThemeData b,
+    double t,
+  ) =>
+      ImageHeaderThemeData(
+        closeButtonColor: Color.lerp(a.closeButtonColor, b.closeButtonColor, t),
+        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+        iconMenuPointColor:
+            Color.lerp(a.iconMenuPointColor, b.iconMenuPointColor, t),
+        titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
+        subtitleTextStyle:
+            TextStyle.lerp(a.subtitleTextStyle, b.subtitleTextStyle, t),
+        bottomSheetBarrierColor:
+            Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
+      );
+
+  /// Merges one [ImageHeaderThemeData] with the another
+  ImageHeaderThemeData merge(ImageHeaderThemeData? other) {
+    if (other == null) return this;
+    return copyWith(
+      closeButtonColor: other.closeButtonColor,
+      backgroundColor: other.backgroundColor,
+      iconMenuPointColor: other.iconMenuPointColor,
+      titleTextStyle: other.titleTextStyle,
+      subtitleTextStyle: other.subtitleTextStyle,
+      bottomSheetBarrierColor: other.bottomSheetBarrierColor,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(ColorProperty('closeButtonColor', closeButtonColor))
+      ..add(ColorProperty('backgroundColor', backgroundColor))
+      ..add(ColorProperty('iconMenuPointColor', iconMenuPointColor))
+      ..add(DiagnosticsProperty('titleTextStyle', titleTextStyle))
+      ..add(DiagnosticsProperty('subtitleTextStyle', subtitleTextStyle))
+      ..add(ColorProperty('bottomSheetBarrierColor', bottomSheetBarrierColor));
+  }
 }

@@ -51,7 +51,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final imageHeaderThemeData = StreamChatTheme.of(context).imageHeaderTheme;
     return AppBar(
       textTheme: Theme.of(context).textTheme,
       brightness: Theme.of(context).brightness,
@@ -59,18 +59,18 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
       leading: showBackButton
           ? IconButton(
               icon: StreamSvgIcon.close(
-                color: chatThemeData.colorTheme.textHighEmphasis,
+                color: imageHeaderThemeData.closeButtonColor,
                 size: 24,
               ),
               onPressed: onBackPressed,
             )
           : const SizedBox(),
-      backgroundColor: chatThemeData.channelTheme.channelHeaderTheme.color,
+      backgroundColor: imageHeaderThemeData.backgroundColor,
       actions: <Widget>[
         if (message.type != 'ephemeral')
           IconButton(
             icon: StreamSvgIcon.iconMenuPoint(
-              color: chatThemeData.colorTheme.textHighEmphasis,
+              color: imageHeaderThemeData.iconMenuPointColor,
             ),
             onPressed: () {
               _showMessageActionModalBottomSheet(context);
@@ -90,11 +90,11 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
                   children: <Widget>[
                     Text(
                       userName,
-                      style: chatThemeData.textTheme.headlineBold,
+                      style: imageHeaderThemeData.titleTextStyle,
                     ),
                     Text(
                       sentAt,
-                      style: chatThemeData.channelPreviewTheme.subtitle,
+                      style: imageHeaderThemeData.subtitleTextStyle,
                     ),
                   ],
                 ),
@@ -109,11 +109,12 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
 
   void _showMessageActionModalBottomSheet(BuildContext context) async {
     final channel = StreamChannel.of(context).channel;
+    final imageHeaderThemeData = StreamChatTheme.of(context).imageHeaderTheme;
 
     final result = await showDialog(
       useRootNavigator: false,
       context: context,
-      barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
+      barrierColor: imageHeaderThemeData.bottomSheetBarrierColor,
       builder: (context) => StreamChannel(
         channel: channel,
         child: AttachmentActionsModal(
