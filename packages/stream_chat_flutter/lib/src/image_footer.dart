@@ -78,7 +78,7 @@ class _ImageFooterState extends State<ImageFooter> {
   Widget build(BuildContext context) {
     const showShareButton = !kIsWeb;
     final mediaQueryData = MediaQuery.of(context);
-    final chatThemeData = StreamChatTheme.of(context);
+    final imageFooterThemeData = ImageFooterTheme.of(context);
     return SizedBox.fromSize(
       size: Size(
         mediaQueryData.size.width,
@@ -88,7 +88,7 @@ class _ImageFooterState extends State<ImageFooter> {
         context: context,
         removeTop: true,
         child: BottomAppBar(
-          color: chatThemeData.colorTheme.barsBg,
+          color: imageFooterThemeData.backgroundColor,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -100,7 +100,7 @@ class _ImageFooterState extends State<ImageFooter> {
                 IconButton(
                   icon: StreamSvgIcon.iconShare(
                     size: 24,
-                    color: chatThemeData.colorTheme.textHighEmphasis,
+                    color: imageFooterThemeData.shareIconColor,
                   ),
                   onPressed: () async {
                     final attachment =
@@ -136,7 +136,7 @@ class _ImageFooterState extends State<ImageFooter> {
                     children: <Widget>[
                       Text(
                         '${widget.currentPage + 1} of ${widget.totalPages}',
-                        style: chatThemeData.textTheme.headlineBold,
+                        style: imageFooterThemeData.titleTextStyle,
                       ),
                     ],
                   ),
@@ -144,7 +144,7 @@ class _ImageFooterState extends State<ImageFooter> {
               ),
               IconButton(
                 icon: StreamSvgIcon.iconGrid(
-                  color: chatThemeData.colorTheme.textHighEmphasis,
+                  color: imageFooterThemeData.gridIconButtonColor,
                 ),
                 onPressed: () => _showPhotosModal(context),
               ),
@@ -157,10 +157,11 @@ class _ImageFooterState extends State<ImageFooter> {
 
   void _showPhotosModal(context) {
     final chatThemeData = StreamChatTheme.of(context);
+    final imageFooterThemeData = ImageFooterTheme.of(context);
     showModalBottomSheet(
       context: context,
-      barrierColor: chatThemeData.colorTheme.overlay,
-      backgroundColor: chatThemeData.colorTheme.barsBg,
+      barrierColor: imageFooterThemeData.bottomSheetBarrierColor,
+      backgroundColor: imageFooterThemeData.bottomSheetBackgroundColor,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -191,7 +192,8 @@ class _ImageFooterState extends State<ImageFooter> {
                         padding: const EdgeInsets.all(16),
                         child: Text(
                           'Photos',
-                          style: chatThemeData.textTheme.headlineBold,
+                          style:
+                              imageFooterThemeData.bottomSheetPhotosTextStyle,
                         ),
                       ),
                     ),
@@ -199,7 +201,7 @@ class _ImageFooterState extends State<ImageFooter> {
                       alignment: Alignment.centerRight,
                       child: IconButton(
                         icon: StreamSvgIcon.close(
-                          color: chatThemeData.colorTheme.textHighEmphasis,
+                          color: imageFooterThemeData.bottomSheetCloseIconColor,
                         ),
                         onPressed: () => Navigator.maybePop(context),
                       ),
