@@ -31,6 +31,16 @@ void main() {
         _imageHeaderThemeDataControl);
   });
 
+  test('Merging dark and light themes results in a dark theme', () {
+    expect(_imageHeaderThemeDataControl.merge(_imageHeaderThemeDataDarkControl),
+        _imageHeaderThemeDataDarkControl);
+  });
+
+  test('Merging dark and light themes results in a dark theme', () {
+    expect(_imageHeaderThemeDataDarkControl.merge(_imageHeaderThemeDataControl),
+        _imageHeaderThemeDataControl);
+  });
+
   testWidgets(
       'Passing no ImageHeaderThemeData returns default light theme values',
       (WidgetTester tester) async {
