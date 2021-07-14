@@ -96,6 +96,8 @@ class UsersBlocState extends State<UsersBloc>
         _queryUsersLoadingController.add(false);
       }
     } catch (e, stk) {
+      // reset loading controller
+      _queryUsersLoadingController.add(false);
       if (_usersController.hasValue) {
         _queryUsersLoadingController.addError(e, stk);
       } else {
