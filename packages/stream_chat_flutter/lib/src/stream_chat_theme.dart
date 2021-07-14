@@ -1362,7 +1362,7 @@ class ImageHeaderTheme extends InheritedTheme {
 /// the default style for [ImageHeader]s below the overall [StreamChatTheme].
 class ImageHeaderThemeData with Diagnosticable {
   /// Creates an [ImageHeaderThemeData].
-  ImageHeaderThemeData({
+  const ImageHeaderThemeData({
     this.closeButtonColor,
     this.backgroundColor,
     this.iconMenuPointColor,
@@ -1448,6 +1448,27 @@ class ImageHeaderThemeData with Diagnosticable {
       bottomSheetBarrierColor: other.bottomSheetBarrierColor,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ImageHeaderThemeData &&
+          runtimeType == other.runtimeType &&
+          closeButtonColor == other.closeButtonColor &&
+          backgroundColor == other.backgroundColor &&
+          iconMenuPointColor == other.iconMenuPointColor &&
+          titleTextStyle == other.titleTextStyle &&
+          subtitleTextStyle == other.subtitleTextStyle &&
+          bottomSheetBarrierColor == other.bottomSheetBarrierColor;
+
+  @override
+  int get hashCode =>
+      closeButtonColor.hashCode ^
+      backgroundColor.hashCode ^
+      iconMenuPointColor.hashCode ^
+      titleTextStyle.hashCode ^
+      subtitleTextStyle.hashCode ^
+      bottomSheetBarrierColor.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
