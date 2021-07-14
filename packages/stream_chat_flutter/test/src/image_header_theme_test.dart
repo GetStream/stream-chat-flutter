@@ -36,7 +36,7 @@ void main() {
       ),
     );
 
-    final imageHeaderTheme = StreamChatTheme.of(_context).imageHeaderTheme;
+    final imageHeaderTheme = ImageHeaderTheme.of(_context);
     expect(imageHeaderTheme.closeButtonColor,
         _imageHeaderThemeDataControl.closeButtonColor);
     expect(imageHeaderTheme.backgroundColor,

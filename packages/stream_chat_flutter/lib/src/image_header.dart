@@ -51,7 +51,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageHeaderThemeData = StreamChatTheme.of(context).imageHeaderTheme;
+    final imageHeaderThemeData = ImageHeaderTheme.of(context);
     return AppBar(
       textTheme: Theme.of(context).textTheme,
       brightness: Theme.of(context).brightness,
