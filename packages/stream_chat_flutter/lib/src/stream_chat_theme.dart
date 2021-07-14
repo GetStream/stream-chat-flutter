@@ -60,6 +60,7 @@ class StreamChatThemeData {
     IconThemeData? primaryIconTheme,
     List<ReactionIcon>? reactionIcons,
     ImageHeaderThemeData? imageHeaderTheme,
+    ImageFooterThemeData? imageFooterTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -72,18 +73,18 @@ class StreamChatThemeData {
     );
 
     final customizedData = defaultData.copyWith(
-      channelListHeaderTheme: channelListHeaderTheme,
-      channelPreviewTheme: channelPreviewTheme,
-      channelTheme: channelTheme,
-      otherMessageTheme: otherMessageTheme,
-      ownMessageTheme: ownMessageTheme,
-      messageInputTheme: messageInputTheme,
-      defaultChannelImage: defaultChannelImage,
-      defaultUserImage: defaultUserImage,
-      primaryIconTheme: primaryIconTheme,
-      reactionIcons: reactionIcons,
-      imageHeaderTheme: imageHeaderTheme,
-    );
+        channelListHeaderTheme: channelListHeaderTheme,
+        channelPreviewTheme: channelPreviewTheme,
+        channelTheme: channelTheme,
+        otherMessageTheme: otherMessageTheme,
+        ownMessageTheme: ownMessageTheme,
+        messageInputTheme: messageInputTheme,
+        defaultChannelImage: defaultChannelImage,
+        defaultUserImage: defaultUserImage,
+        primaryIconTheme: primaryIconTheme,
+        reactionIcons: reactionIcons,
+        imageHeaderTheme: imageHeaderTheme,
+        imageFooterTheme: imageFooterTheme);
 
     return defaultData.merge(customizedData);
   }
@@ -111,6 +112,7 @@ class StreamChatThemeData {
     required this.primaryIconTheme,
     required this.reactionIcons,
     required this.imageHeaderTheme,
+    required this.imageFooterTheme,
   });
 
   /// Create a theme from a Material [Theme]
@@ -142,6 +144,9 @@ class StreamChatThemeData {
 
   /// The default style for [ImageHeader]s below the overall [StreamChatTheme].
   final ImageHeaderThemeData imageHeaderTheme;
+
+  /// The default style for [ImageFooter]s below the overall [StreamChatTheme].
+  final ImageFooterThemeData imageFooterTheme;
 
   /// Theme of the current user messages
   final MessageTheme ownMessageTheme;
@@ -180,6 +185,7 @@ class StreamChatThemeData {
     ChannelListHeaderTheme? channelListHeaderTheme,
     List<ReactionIcon>? reactionIcons,
     ImageHeaderThemeData? imageHeaderTheme,
+    ImageFooterThemeData? imageFooterTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -197,6 +203,7 @@ class StreamChatThemeData {
         messageInputTheme: this.messageInputTheme.merge(messageInputTheme),
         reactionIcons: reactionIcons ?? this.reactionIcons,
         imageHeaderTheme: imageHeaderTheme ?? this.imageHeaderTheme,
+        imageFooterTheme: imageFooterTheme ?? this.imageFooterTheme,
       );
 
   /// Merge themes
@@ -217,6 +224,7 @@ class StreamChatThemeData {
       messageInputTheme: messageInputTheme.merge(other.messageInputTheme),
       reactionIcons: other.reactionIcons,
       imageHeaderTheme: imageHeaderTheme.merge(other.imageHeaderTheme),
+      imageFooterTheme: imageFooterTheme.merge(other.imageFooterTheme),
     );
   }
 
@@ -426,6 +434,16 @@ class StreamChatThemeData {
         titleTextStyle: textTheme.headlineBold,
         subtitleTextStyle: channelPreviewTheme.subtitle,
         bottomSheetBarrierColor: colorTheme.overlay,
+      ),
+      imageFooterTheme: ImageFooterThemeData(
+        backgroundColor: colorTheme.barsBg,
+        shareIconColor: colorTheme.textHighEmphasis,
+        titleTextStyle: textTheme.headlineBold,
+        gridIconButtonColor: colorTheme.textHighEmphasis,
+        bottomSheetBarrierColor: colorTheme.overlay,
+        bottomSheetBackgroundColor: colorTheme.barsBg,
+        bottomSheetPhotosTextStyle: textTheme.headlineBold,
+        bottomSheetCloseIconColor: colorTheme.textHighEmphasis,
       ),
     );
   }
@@ -1389,12 +1407,12 @@ class ImageHeaderThemeData with Diagnosticable {
   /// Defaults to [TextTheme.headlineBold].
   final TextStyle? titleTextStyle;
 
-  ///
-  final TextStyle? subtitleTextStyle;
-
   /// The [TextStyle] to use for the [ImageHeader] subtitle text.
   ///
   /// Defaults to [ChannelPreviewTheme.subtitle].
+  final TextStyle? subtitleTextStyle;
+
+  ///
   final Color? bottomSheetBarrierColor;
 
   /// Copies this [ImageHeaderThemeData] to another.
@@ -1480,5 +1498,218 @@ class ImageHeaderThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('titleTextStyle', titleTextStyle))
       ..add(DiagnosticsProperty('subtitleTextStyle', subtitleTextStyle))
       ..add(ColorProperty('bottomSheetBarrierColor', bottomSheetBarrierColor));
+  }
+}
+
+/// Overrides the default style of [ImageFooter] descendants.
+///
+/// See also:
+///
+///  * [ImageFooterThemeData], which is used to configure this theme.
+class ImageFooterTheme extends InheritedTheme {
+  /// Creates an [ImageFooterTheme].
+  ///
+  /// The [data] parameter must not be null.
+  const ImageFooterTheme({
+    Key? key,
+    required this.data,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  /// The configuration of this theme.
+  final ImageFooterThemeData data;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If there is no enclosing [ImageFooterTheme] widget, then
+  /// [StreamChatThemeData.imageFooterTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ImageFooterTheme theme = ImageFooterTheme.of(context);
+  /// ```
+  static ImageFooterThemeData of(BuildContext context) {
+    final imageFooterTheme =
+        context.dependOnInheritedWidgetOfExactType<ImageFooterTheme>();
+    return imageFooterTheme?.data ??
+        StreamChatTheme.of(context).imageFooterTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) =>
+      ImageFooterTheme(data: data, child: child);
+
+  @override
+  bool updateShouldNotify(ImageFooterTheme oldWidget) => data != oldWidget.data;
+}
+
+/// A style that overrides the default appearance of [ImageFooter]s when used
+/// with [ImageFooterTheme] or with the overall [StreamChatTheme]'s
+/// [StreamChatThemeData.imageFooterTheme].
+///
+/// See also:
+///
+/// * [ImageFooterTheme], the theme which is configured with this class.
+/// * [StreamChatThemeData.imageFooterTheme], which can be used to override
+/// the default style for [ImageFooter]s below the overall [StreamChatTheme].
+class ImageFooterThemeData with Diagnosticable {
+  /// Creates an [ImageFooterThemeData].
+  ImageFooterThemeData({
+    this.backgroundColor,
+    this.shareIconColor,
+    this.titleTextStyle,
+    this.gridIconButtonColor,
+    this.bottomSheetBarrierColor,
+    this.bottomSheetBackgroundColor,
+    this.bottomSheetPhotosTextStyle,
+    this.bottomSheetCloseIconColor,
+  });
+
+  /// The background color for the [ImageFooter] widget.
+  ///
+  /// Defaults to [ColorTheme.barsBg].
+  final Color? backgroundColor;
+
+  /// The color for the "share" icon.
+  ///
+  /// Defaults to [ColorTheme.textHighEmphasis].
+  final Color? shareIconColor;
+
+  /// The [TextStyle] to use for the [ImageFooter] title text.
+  ///
+  /// Defaults to [TextTheme.headlineBold].
+  final TextStyle? titleTextStyle;
+
+  /// The color to use for the "grid" icon.
+  ///
+  /// Defaults to [ColorTheme.textHighEmphasis].
+  final Color? gridIconButtonColor;
+
+  /// The color to use behind the bottom sheet.
+  ///
+  /// Defaults to [ColorTheme.overlay].
+  final Color? bottomSheetBarrierColor;
+
+  /// The background color to use for the bottom sheet.
+  ///
+  /// Defaults to [ColorTheme.barsBg].
+  final Color? bottomSheetBackgroundColor;
+
+  /// The [TextStyle] to use for the "photos" text in the bottom sheet.
+  ///
+  /// Defaults to [TextTheme.headlineBold].
+  final TextStyle? bottomSheetPhotosTextStyle;
+
+  /// The color to use for the "close" icon.
+  ///
+  /// Defaults to [ColorTheme.textHighEmphasis].
+  final Color? bottomSheetCloseIconColor;
+
+  /// Copies this [ImageFooterThemeData] to another.
+  ImageFooterThemeData copyWith({
+    Color? backgroundColor,
+    Color? shareIconColor,
+    TextStyle? titleTextStyle,
+    Color? gridIconButtonColor,
+    Color? bottomSheetBarrierColor,
+    Color? bottomSheetBackgroundColor,
+    TextStyle? bottomSheetPhotosTextStyle,
+    Color? bottomSheetCloseIconColor,
+  }) =>
+      ImageFooterThemeData(
+        backgroundColor: backgroundColor ?? this.backgroundColor,
+        shareIconColor: shareIconColor ?? this.shareIconColor,
+        titleTextStyle: titleTextStyle ?? this.titleTextStyle,
+        gridIconButtonColor: gridIconButtonColor ?? this.gridIconButtonColor,
+        bottomSheetBarrierColor:
+            bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
+        bottomSheetBackgroundColor:
+            bottomSheetBackgroundColor ?? this.bottomSheetBackgroundColor,
+        bottomSheetPhotosTextStyle:
+            bottomSheetPhotosTextStyle ?? this.bottomSheetPhotosTextStyle,
+        bottomSheetCloseIconColor:
+            bottomSheetCloseIconColor ?? this.bottomSheetCloseIconColor,
+      );
+
+  /// Linearly interpolate between two [ImageFooter] themes.
+  ///
+  /// All the properties must be non-null.
+  ImageFooterThemeData lerp(
+    ImageFooterThemeData a,
+    ImageFooterThemeData b,
+    double t,
+  ) =>
+      ImageFooterThemeData(
+        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+        shareIconColor: Color.lerp(a.shareIconColor, b.shareIconColor, t),
+        titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
+        gridIconButtonColor:
+            Color.lerp(a.gridIconButtonColor, b.gridIconButtonColor, t),
+        bottomSheetBarrierColor:
+            Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
+        bottomSheetBackgroundColor: Color.lerp(
+            a.bottomSheetBackgroundColor, b.bottomSheetBackgroundColor, t),
+        bottomSheetPhotosTextStyle: TextStyle.lerp(
+            a.bottomSheetPhotosTextStyle, b.bottomSheetPhotosTextStyle, t),
+        bottomSheetCloseIconColor: Color.lerp(
+            a.bottomSheetCloseIconColor, b.bottomSheetCloseIconColor, t),
+      );
+
+  /// Merges one [ImageFooterThemeData] with the another
+  ImageFooterThemeData merge(ImageFooterThemeData? other) {
+    if (other == null) return this;
+    return copyWith(
+      backgroundColor: other.backgroundColor,
+      bottomSheetBarrierColor: other.bottomSheetBarrierColor,
+      bottomSheetBackgroundColor: other.bottomSheetBackgroundColor,
+      bottomSheetCloseIconColor: other.bottomSheetCloseIconColor,
+      bottomSheetPhotosTextStyle: other.bottomSheetPhotosTextStyle,
+      gridIconButtonColor: other.gridIconButtonColor,
+      titleTextStyle: other.titleTextStyle,
+      shareIconColor: other.shareIconColor,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ImageFooterThemeData &&
+          runtimeType == other.runtimeType &&
+          backgroundColor == other.backgroundColor &&
+          shareIconColor == other.shareIconColor &&
+          titleTextStyle == other.titleTextStyle &&
+          gridIconButtonColor == other.gridIconButtonColor &&
+          bottomSheetBarrierColor == other.bottomSheetBarrierColor &&
+          bottomSheetBackgroundColor == other.bottomSheetBackgroundColor &&
+          bottomSheetPhotosTextStyle == other.bottomSheetPhotosTextStyle &&
+          bottomSheetCloseIconColor == other.bottomSheetCloseIconColor;
+
+  @override
+  int get hashCode =>
+      backgroundColor.hashCode ^
+      shareIconColor.hashCode ^
+      titleTextStyle.hashCode ^
+      gridIconButtonColor.hashCode ^
+      bottomSheetBarrierColor.hashCode ^
+      bottomSheetBackgroundColor.hashCode ^
+      bottomSheetPhotosTextStyle.hashCode ^
+      bottomSheetCloseIconColor.hashCode;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(ColorProperty('backgroundColor', backgroundColor))
+      ..add(ColorProperty('shareIconColor', shareIconColor))
+      ..add(DiagnosticsProperty('titleTextStyle', titleTextStyle))
+      ..add(ColorProperty('gridIconButtonColor', gridIconButtonColor))
+      ..add(ColorProperty('bottomSheetBarrierColor', bottomSheetBarrierColor))
+      ..add(ColorProperty(
+          'bottomSheetBackgroundColor', bottomSheetBackgroundColor))
+      ..add(DiagnosticsProperty(
+          'bottomSheetPhotosTextStyle', bottomSheetPhotosTextStyle))
+      ..add(ColorProperty(
+          'bottomSheetCloseIconColor', bottomSheetCloseIconColor));
   }
 }
