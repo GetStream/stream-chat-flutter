@@ -17,27 +17,26 @@ void main() {
     StreamChatClient client, {
     int count = 3,
     int offset = 0,
-  }) {
-    return List.generate(
-      count,
-      (index) {
-        index = index + offset;
-        return Channel(
-          client,
-          'testType$index',
-          'testId$index',
-          extraData: {'extra_data_key': 'extra_data_value_$index'},
-        );
-      },
-    );
-  }
+  }) =>
+      List.generate(
+        count,
+        (index) {
+          index = index + offset;
+          return Channel(
+            client,
+            'testType$index',
+            'testId$index',
+            extraData: {'extra_data_key': 'extra_data_value_$index'},
+          );
+        },
+      );
 
   testWidgets(
-    'should throw if ChannelsBloc is used where StreamChat is not present in the widget tree',
+    '''should throw if ChannelsBloc is used where StreamChat is not present in the widget tree''',
     (tester) async {
       const channelsBlocKey = Key('channelsBloc');
       const childKey = Key('child');
-      final channelsBloc = ChannelsBloc(
+      const channelsBloc = ChannelsBloc(
         key: channelsBlocKey,
         child: Offstage(key: childKey),
       );
@@ -55,7 +54,7 @@ void main() {
     (tester) async {
       const channelsBlocKey = Key('channelsBloc');
       const childKey = Key('child');
-      final channelsBloc = ChannelsBloc(
+      const channelsBloc = ChannelsBloc(
         key: channelsBlocKey,
         child: Offstage(key: childKey),
       );
@@ -63,7 +62,7 @@ void main() {
       final mockClient = MockClient();
 
       when(() => mockClient.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.empty());
+          .thenAnswer((_) => const Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -86,16 +85,14 @@ void main() {
         key: channelsBlocKey,
         child: Builder(
           key: childKey,
-          builder: (context) {
-            return Offstage();
-          },
+          builder: (context) => const Offstage(),
         ),
       );
 
       final mockClient = MockClient();
 
       when(() => mockClient.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.empty());
+          .thenAnswer((_) => const Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -157,16 +154,14 @@ void main() {
         key: channelsBlocKey,
         child: Builder(
           key: childKey,
-          builder: (context) {
-            return Offstage();
-          },
+          builder: (context) => const Offstage(),
         ),
       );
 
       final mockClient = MockClient();
 
       when(() => mockClient.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.empty());
+          .thenAnswer((_) => const Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -218,7 +213,7 @@ void main() {
     'through queryChannelsLoading',
     (tester) async {
       const channelsBlocKey = Key('channelsBloc');
-      final channelsBloc = ChannelsBloc(
+      const channelsBloc = ChannelsBloc(
         key: channelsBlocKey,
         child: Offstage(),
       );
@@ -226,7 +221,7 @@ void main() {
       final mockClient = MockClient();
 
       when(() => mockClient.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.empty());
+          .thenAnswer((_) => const Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -323,7 +318,7 @@ void main() {
     'client.queryChannels() throws',
     (tester) async {
       const channelsBlocKey = Key('channelsBloc');
-      final channelsBloc = ChannelsBloc(
+      const channelsBloc = ChannelsBloc(
         key: channelsBlocKey,
         child: Offstage(),
       );
@@ -331,7 +326,7 @@ void main() {
       final mockClient = MockClient();
 
       when(() => mockClient.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.empty());
+          .thenAnswer((_) => const Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -345,7 +340,7 @@ void main() {
       );
 
       final channels = _generateChannels(mockClient);
-      final paginationParams = const PaginationParams(
+      const paginationParams = PaginationParams(
         limit: 3,
       );
 
@@ -380,7 +375,7 @@ void main() {
             paginationParams: paginationParams,
           )).called(1);
 
-      final error = 'Error! Error! Error!';
+      const error = 'Error! Error! Error!';
 
       when(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
@@ -424,13 +419,13 @@ void main() {
       (tester) async {
         final mockClient = MockClient();
         const channelsBlocKey = Key('channelsBloc');
-        final channelsBloc = ChannelsBloc(
+        const channelsBloc = ChannelsBloc(
           key: channelsBlocKey,
           child: Offstage(),
         );
 
         when(() => mockClient.on(any(), any(), any(), any()))
-            .thenAnswer((_) => Stream.empty());
+            .thenAnswer((_) => const Stream.empty());
 
         when(() => mockClient.on(
               EventType.channelHidden,
@@ -503,13 +498,13 @@ void main() {
       (tester) async {
         final mockClient = MockClient();
         const channelsBlocKey = Key('channelsBloc');
-        final channelsBloc = ChannelsBloc(
+        const channelsBloc = ChannelsBloc(
           key: channelsBlocKey,
           child: Offstage(),
         );
 
         when(() => mockClient.on(any(), any(), any(), any()))
-            .thenAnswer((_) => Stream.empty());
+            .thenAnswer((_) => const Stream.empty());
 
         when(() => mockClient.on(
               EventType.channelDeleted,
@@ -589,18 +584,18 @@ void main() {
     );
 
     testWidgets(
-      'event channel should be moved to top of the list if present when'
+      'event channel should be moved to top of the list if present when '
       'EventType.messageNew event is received',
       (tester) async {
         final mockClient = MockClient();
         const channelsBlocKey = Key('channelsBloc');
-        final channelsBloc = ChannelsBloc(
+        const channelsBloc = ChannelsBloc(
           key: channelsBlocKey,
           child: Offstage(),
         );
 
         when(() => mockClient.on(any(), any(), any(), any()))
-            .thenAnswer((_) => Stream.empty());
+            .thenAnswer((_) => const Stream.empty());
 
         when(() => mockClient.on(
               EventType.messageNew,
@@ -678,21 +673,19 @@ void main() {
       (tester) async {
         final hiddenChannelEventController = StreamController<Event>();
 
-        addTearDown(() {
-          hiddenChannelEventController.close();
-        });
+        addTearDown(hiddenChannelEventController.close);
 
         final mockClient = MockClient();
         final channels = _generateChannels(mockClient);
         const channelsBlocKey = Key('channelsBloc');
         final channelsBloc = ChannelsBloc(
           key: channelsBlocKey,
-          child: Offstage(),
           shouldAddChannel: (e) => channels.map((it) => it.cid).contains(e.cid),
+          child: const Offstage(),
         );
 
         when(() => mockClient.on(any(), any(), any(), any()))
-            .thenAnswer((_) => Stream.empty());
+            .thenAnswer((_) => const Stream.empty());
 
         when(() => mockClient.on(
               EventType.channelHidden,
@@ -789,14 +782,14 @@ void main() {
         const channelsBlocKey = Key('channelsBloc');
         final channelsBloc = ChannelsBloc(
           key: channelsBlocKey,
-          child: Offstage(),
           shouldAddChannel: (_) => true,
+          child: const Offstage(),
         );
 
         when(() => mockClient.state.channels).thenReturn(stateChannels);
 
         when(() => mockClient.on(any(), any(), any(), any()))
-            .thenAnswer((_) => Stream.empty());
+            .thenAnswer((_) => const Stream.empty());
 
         when(() => mockClient.on(
               EventType.messageNew,
@@ -868,21 +861,21 @@ void main() {
         final mockClient = MockClient();
         final channels = _generateChannels(mockClient);
         int channelComparator(Channel a, Channel b) {
-          final aData = a.extraData['extra_data_key'] as String;
-          final bData = b.extraData['extra_data_key'] as String;
+          final aData = a.extraData['extra_data_key'].toString();
+          final bData = b.extraData['extra_data_key'].toString();
           return bData.compareTo(aData);
         }
 
         const channelsBlocKey = Key('channelsBloc');
         final channelsBloc = ChannelsBloc(
           key: channelsBlocKey,
-          child: Offstage(),
           shouldAddChannel: (_) => true,
           channelsComparator: channelComparator,
+          child: const Offstage(),
         );
 
         when(() => mockClient.on(any(), any(), any(), any()))
-            .thenAnswer((_) => Stream.empty());
+            .thenAnswer((_) => const Stream.empty());
 
         when(() => mockClient.on(
               EventType.messageNew,
