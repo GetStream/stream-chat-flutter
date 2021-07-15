@@ -47,12 +47,6 @@ void main() {
       final user = User(id: 'test-user-id');
       final token = Token.development(user.id).rawValue;
 
-      final event = Event(
-        type: EventType.healthCheck,
-        connectionId: 'fake-connection-id',
-        me: OwnUser.fromUser(user),
-      );
-
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
         client.wsConnectionStatusStream.skip(1),
@@ -73,12 +67,6 @@ void main() {
         expect(userId, user.id);
         return Token.development(userId).rawValue;
       }
-
-      final event = Event(
-        type: EventType.healthCheck,
-        connectionId: 'fake-connection-id',
-        me: OwnUser.fromUser(user),
-      );
 
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
@@ -104,12 +92,6 @@ void main() {
           (_) async => ConnectGuestUserResponse()
             ..user = user
             ..accessToken = token,
-        );
-
-        final event = Event(
-          type: EventType.healthCheck,
-          connectionId: 'fake-connection-id',
-          me: OwnUser.fromUser(user),
         );
 
         expectLater(
