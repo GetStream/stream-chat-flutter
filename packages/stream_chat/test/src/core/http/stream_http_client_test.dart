@@ -57,7 +57,7 @@ void main() {
   });
 
   test(
-    'connectionIdInterceptor should be added if connectionIdManager is provided',
+    '''connectionIdInterceptor should be added if connectionIdManager is provided''',
     () {
       const apiKey = 'api-key';
       final client = StreamHttpClient(

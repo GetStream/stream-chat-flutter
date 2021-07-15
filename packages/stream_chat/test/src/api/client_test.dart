@@ -413,7 +413,7 @@ void main() {
     });
 
     test(
-      '`.connectUser` should connect successfully if persistence contains event',
+      '''`.connectUser` should connect successfully if persistence contains event''',
       () async {
         final user = User(id: 'test-user-id');
         final token = Token.development(user.id).rawValue;
@@ -434,7 +434,7 @@ void main() {
     );
 
     test(
-      '`.connectUserWithProvider` should connect successfully if persistence contains event',
+      '''`.connectUserWithProvider` should connect successfully if persistence contains event''',
       () async {
         final user = User(id: 'test-user-id');
         Future<String> tokenProvider(String userId) async {
@@ -458,7 +458,7 @@ void main() {
     );
 
     test(
-      '`.connectGuestUser` should connect successfully if persistence contains event',
+      '''`.connectGuestUser` should connect successfully if persistence contains event''',
       () async {
         final user = User(id: 'test-user-id');
         final token = Token.development(user.id).rawValue;
@@ -489,7 +489,7 @@ void main() {
     );
 
     test(
-      '`.connectAnonymousUser` should connect successfully if persistence contains event',
+      '''`.connectAnonymousUser` should connect successfully if persistence contains event''',
       () async {
         final user = User(id: 'test-user-id');
 
@@ -543,7 +543,7 @@ void main() {
 
     group('`.sync`', () {
       test(
-        'should update persistence connectionInfo and lastSync when sync succeeds',
+        '''should update persistence connectionInfo and lastSync when sync succeeds''',
         () async {
           const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
           final lastSyncAt = DateTime.now();
@@ -717,7 +717,7 @@ void main() {
       );
 
       test(
-        'should never rethrow network call if persistence already emitted some channels',
+        '''should never rethrow network call if persistence already emitted some channels''',
         () async {
           final persistentChannelStates = List.generate(
             3,
@@ -925,7 +925,7 @@ void main() {
       });
 
       test(
-        'should rethrow if `.queryChannelsOnline` throws and persistence channels are empty',
+        '''should rethrow if `.queryChannelsOnline` throws and persistence channels are empty''',
         () async {
           when(() => api.channel.queryChannels(
                 filter: any(named: 'filter'),
