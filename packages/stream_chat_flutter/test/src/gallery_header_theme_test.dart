@@ -6,51 +6,51 @@ import 'package:mocktail/mocktail.dart';
 class MockStreamChatClient extends Mock implements StreamChatClient {}
 
 void main() {
-  test('ImageHeaderThemeData copyWith, ==, hashCode basics', () {
+  test('GalleryHeaderThemeData copyWith, ==, hashCode basics', () {
     expect(
-        const ImageHeaderThemeData(), const ImageHeaderThemeData().copyWith());
-    expect(const ImageHeaderThemeData().hashCode,
-        const ImageHeaderThemeData().copyWith().hashCode);
+        const GalleryHeaderThemeData(), const GalleryHeaderThemeData().copyWith());
+    expect(const GalleryHeaderThemeData().hashCode,
+        const GalleryHeaderThemeData().copyWith().hashCode);
   });
 
   test(
-      'Light ImageHeaderThemeData lerps completely to dark ImageHeaderThemeData',
+      'Light GalleryHeaderThemeData lerps completely to dark GalleryHeaderThemeData',
       () {
     expect(
-        const ImageHeaderThemeData().lerp(
-            _imageHeaderThemeDataControl, _imageHeaderThemeDataDarkControl, 1),
-        _imageHeaderThemeDataDarkControl);
+        const GalleryHeaderThemeData().lerp(
+            _galleryHeaderThemeDataControl, _galleryHeaderThemeDataDarkControl, 1),
+        _galleryHeaderThemeDataDarkControl);
   });
 
-  test('Light ImageHeaderThemeData lerps halfway to dark ImageHeaderThemeData',
+  test('Light GalleryHeaderThemeData lerps halfway to dark GalleryHeaderThemeData',
       () {
     expect(
-        const ImageHeaderThemeData().lerp(_imageHeaderThemeDataControl,
-            _imageHeaderThemeDataDarkControl, 0.5),
-        _imageHeaderThemeDataHalfLerpControl);
+        const GalleryHeaderThemeData().lerp(_galleryHeaderThemeDataControl,
+            _galleryHeaderThemeDataDarkControl, 0.5),
+        _galleryHeaderThemeDataHalfLerpControl);
   });
 
   test(
-      'Dark ImageHeaderThemeData lerps completely to light ImageHeaderThemeData',
+      'Dark GalleryHeaderThemeData lerps completely to light GalleryHeaderThemeData',
       () {
     expect(
-        const ImageHeaderThemeData().lerp(
-            _imageHeaderThemeDataDarkControl, _imageHeaderThemeDataControl, 1),
-        _imageHeaderThemeDataControl);
+        const GalleryHeaderThemeData().lerp(
+            _galleryHeaderThemeDataDarkControl, _galleryHeaderThemeDataControl, 1),
+        _galleryHeaderThemeDataControl);
   });
 
   test('Merging dark and light themes results in a dark theme', () {
-    expect(_imageHeaderThemeDataControl.merge(_imageHeaderThemeDataDarkControl),
-        _imageHeaderThemeDataDarkControl);
+    expect(_galleryHeaderThemeDataControl.merge(_galleryHeaderThemeDataDarkControl),
+        _galleryHeaderThemeDataDarkControl);
   });
 
   test('Merging dark and light themes results in a dark theme', () {
-    expect(_imageHeaderThemeDataDarkControl.merge(_imageHeaderThemeDataControl),
-        _imageHeaderThemeDataControl);
+    expect(_galleryHeaderThemeDataDarkControl.merge(_galleryHeaderThemeDataControl),
+        _galleryHeaderThemeDataControl);
   });
 
   testWidgets(
-      'Passing no ImageHeaderThemeData returns default light theme values',
+      'Passing no GalleryHeaderThemeData returns default light theme values',
       (WidgetTester tester) async {
     late BuildContext _context;
     await tester.pumpWidget(
@@ -63,7 +63,7 @@ void main() {
           builder: (context) {
             _context = context;
             return Scaffold(
-              appBar: ImageHeader(
+              appBar: GalleryHeader(
                 message: Message(),
               ),
             );
@@ -72,23 +72,23 @@ void main() {
       ),
     );
 
-    final imageHeaderTheme = ImageHeaderTheme.of(_context);
+    final imageHeaderTheme = GalleryHeaderTheme.of(_context);
     expect(imageHeaderTheme.closeButtonColor,
-        _imageHeaderThemeDataControl.closeButtonColor);
+        _galleryHeaderThemeDataControl.closeButtonColor);
     expect(imageHeaderTheme.backgroundColor,
-        _imageHeaderThemeDataControl.backgroundColor);
+        _galleryHeaderThemeDataControl.backgroundColor);
     expect(imageHeaderTheme.iconMenuPointColor,
-        _imageHeaderThemeDataControl.iconMenuPointColor);
+        _galleryHeaderThemeDataControl.iconMenuPointColor);
     expect(imageHeaderTheme.titleTextStyle,
-        _imageHeaderThemeDataControl.titleTextStyle);
+        _galleryHeaderThemeDataControl.titleTextStyle);
     expect(imageHeaderTheme.subtitleTextStyle,
-        _imageHeaderThemeDataControl.subtitleTextStyle);
+        _galleryHeaderThemeDataControl.subtitleTextStyle);
     expect(imageHeaderTheme.bottomSheetBarrierColor,
-        _imageHeaderThemeDataControl.bottomSheetBarrierColor);
+        _galleryHeaderThemeDataControl.bottomSheetBarrierColor);
   });
 
   testWidgets(
-      'Passing no ImageHeaderThemeData returns default dark theme values',
+      'Passing no GalleryHeaderThemeData returns default dark theme values',
       (WidgetTester tester) async {
     late BuildContext _context;
     await tester.pumpWidget(
@@ -102,7 +102,7 @@ void main() {
           builder: (context) {
             _context = context;
             return Scaffold(
-              appBar: ImageHeader(
+              appBar: GalleryHeader(
                 message: Message(),
               ),
             );
@@ -111,24 +111,24 @@ void main() {
       ),
     );
 
-    final imageHeaderTheme = ImageHeaderTheme.of(_context);
+    final imageHeaderTheme = GalleryHeaderTheme.of(_context);
     expect(imageHeaderTheme.closeButtonColor,
-        _imageHeaderThemeDataDarkControl.closeButtonColor);
+        _galleryHeaderThemeDataDarkControl.closeButtonColor);
     expect(imageHeaderTheme.backgroundColor,
-        _imageHeaderThemeDataDarkControl.backgroundColor);
+        _galleryHeaderThemeDataDarkControl.backgroundColor);
     expect(imageHeaderTheme.iconMenuPointColor,
-        _imageHeaderThemeDataDarkControl.iconMenuPointColor);
+        _galleryHeaderThemeDataDarkControl.iconMenuPointColor);
     expect(imageHeaderTheme.titleTextStyle,
-        _imageHeaderThemeDataDarkControl.titleTextStyle);
+        _galleryHeaderThemeDataDarkControl.titleTextStyle);
     expect(imageHeaderTheme.subtitleTextStyle,
-        _imageHeaderThemeDataDarkControl.subtitleTextStyle);
+        _galleryHeaderThemeDataDarkControl.subtitleTextStyle);
     expect(imageHeaderTheme.bottomSheetBarrierColor,
-        _imageHeaderThemeDataDarkControl.bottomSheetBarrierColor);
+        _galleryHeaderThemeDataDarkControl.bottomSheetBarrierColor);
   });
 }
 
 // Light theme test control.
-final _imageHeaderThemeDataControl = ImageHeaderThemeData(
+final _galleryHeaderThemeDataControl = GalleryHeaderThemeData(
   closeButtonColor: const Color(0xff000000),
   backgroundColor: const Color(0xffffffff),
   iconMenuPointColor: const Color(0xff000000),
@@ -147,7 +147,7 @@ final _imageHeaderThemeDataControl = ImageHeaderThemeData(
 );
 
 // Light theme test control.
-final _imageHeaderThemeDataHalfLerpControl = ImageHeaderThemeData(
+final _galleryHeaderThemeDataHalfLerpControl = GalleryHeaderThemeData(
   closeButtonColor: const Color(0xff7f7f7f),
   backgroundColor: const Color(0xff87898b),
   iconMenuPointColor: const Color(0xff7f7f7f),
@@ -166,7 +166,7 @@ final _imageHeaderThemeDataHalfLerpControl = ImageHeaderThemeData(
 );
 
 // Dark theme test control.
-final _imageHeaderThemeDataDarkControl = ImageHeaderThemeData(
+final _galleryHeaderThemeDataDarkControl = GalleryHeaderThemeData(
   closeButtonColor: const Color(0xffffffff),
   backgroundColor: const Color(0xff101418),
   iconMenuPointColor: const Color(0xffffffff),

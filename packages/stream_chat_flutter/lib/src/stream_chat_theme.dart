@@ -59,8 +59,8 @@ class StreamChatThemeData {
     Widget Function(BuildContext, User)? defaultUserImage,
     IconThemeData? primaryIconTheme,
     List<ReactionIcon>? reactionIcons,
-    ImageHeaderThemeData? imageHeaderTheme,
-    ImageFooterThemeData? imageFooterTheme,
+    GalleryHeaderThemeData? imageHeaderTheme,
+    GalleryFooterThemeData? imageFooterTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -83,8 +83,8 @@ class StreamChatThemeData {
       defaultUserImage: defaultUserImage,
       primaryIconTheme: primaryIconTheme,
       reactionIcons: reactionIcons,
-      imageHeaderTheme: imageHeaderTheme,
-      imageFooterTheme: imageFooterTheme,
+      galleryHeaderTheme: imageHeaderTheme,
+      galleryFooterTheme: imageFooterTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -112,8 +112,8 @@ class StreamChatThemeData {
     required this.defaultUserImage,
     required this.primaryIconTheme,
     required this.reactionIcons,
-    required this.imageHeaderTheme,
-    required this.imageFooterTheme,
+    required this.galleryHeaderTheme,
+    required this.galleryFooterTheme,
   });
 
   /// Create a theme from a Material [Theme]
@@ -143,11 +143,13 @@ class StreamChatThemeData {
   /// Theme of the chat widgets dedicated to a channel
   final ChannelTheme channelTheme;
 
-  /// The default style for [ImageHeader]s below the overall [StreamChatTheme].
-  final ImageHeaderThemeData imageHeaderTheme;
+  /// The default style for [GalleryHeader]s below the overall
+  /// [StreamChatTheme].
+  final GalleryHeaderThemeData galleryHeaderTheme;
 
-  /// The default style for [ImageFooter]s below the overall [StreamChatTheme].
-  final ImageFooterThemeData imageFooterTheme;
+  /// The default style for [GalleryFooter]s below the overall
+  /// [StreamChatTheme].
+  final GalleryFooterThemeData galleryFooterTheme;
 
   /// Theme of the current user messages
   final MessageTheme ownMessageTheme;
@@ -185,8 +187,8 @@ class StreamChatThemeData {
     IconThemeData? primaryIconTheme,
     ChannelListHeaderTheme? channelListHeaderTheme,
     List<ReactionIcon>? reactionIcons,
-    ImageHeaderThemeData? imageHeaderTheme,
-    ImageFooterThemeData? imageFooterTheme,
+    GalleryHeaderThemeData? galleryHeaderTheme,
+    GalleryFooterThemeData? galleryFooterTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -203,8 +205,8 @@ class StreamChatThemeData {
         otherMessageTheme: this.otherMessageTheme.merge(otherMessageTheme),
         messageInputTheme: this.messageInputTheme.merge(messageInputTheme),
         reactionIcons: reactionIcons ?? this.reactionIcons,
-        imageHeaderTheme: imageHeaderTheme ?? this.imageHeaderTheme,
-        imageFooterTheme: imageFooterTheme ?? this.imageFooterTheme,
+        galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
+        galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
       );
 
   /// Merge themes
@@ -224,8 +226,8 @@ class StreamChatThemeData {
       otherMessageTheme: otherMessageTheme.merge(other.otherMessageTheme),
       messageInputTheme: messageInputTheme.merge(other.messageInputTheme),
       reactionIcons: other.reactionIcons,
-      imageHeaderTheme: imageHeaderTheme.merge(other.imageHeaderTheme),
-      imageFooterTheme: imageFooterTheme.merge(other.imageFooterTheme),
+      galleryHeaderTheme: galleryHeaderTheme.merge(other.galleryHeaderTheme),
+      galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),
     );
   }
 
@@ -428,7 +430,7 @@ class StreamChatThemeData {
           },
         ),
       ],
-      imageHeaderTheme: ImageHeaderThemeData(
+      galleryHeaderTheme: GalleryHeaderThemeData(
         closeButtonColor: colorTheme.textHighEmphasis,
         backgroundColor: channelTheme.channelHeaderTheme.color,
         iconMenuPointColor: colorTheme.textHighEmphasis,
@@ -436,7 +438,7 @@ class StreamChatThemeData {
         subtitleTextStyle: channelPreviewTheme.subtitle,
         bottomSheetBarrierColor: colorTheme.overlay,
       ),
-      imageFooterTheme: ImageFooterThemeData(
+      galleryFooterTheme: GalleryFooterThemeData(
         backgroundColor: colorTheme.barsBg,
         shareIconColor: colorTheme.textHighEmphasis,
         titleTextStyle: textTheme.headlineBold,
@@ -1327,61 +1329,62 @@ class Effect {
       );
 }
 
-/// Overrides the default style of [ImageHeader] descendants.
+/// Overrides the default style of [GalleryHeader] descendants.
 ///
 /// See also:
 ///
-///  * [ImageHeaderThemeData], which is used to configure this theme.
-class ImageHeaderTheme extends InheritedTheme {
-  /// Creates an [ImageHeaderTheme].
+///  * [GalleryHeaderThemeData], which is used to configure this theme.
+class GalleryHeaderTheme extends InheritedTheme {
+  /// Creates an [GalleryHeaderTheme].
   ///
   /// The [data] parameter must not be null.
-  const ImageHeaderTheme({
+  const GalleryHeaderTheme({
     Key? key,
     required this.data,
     required Widget child,
   }) : super(key: key, child: child);
 
   /// The configuration of this theme.
-  final ImageHeaderThemeData data;
+  final GalleryHeaderThemeData data;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [ImageHeaderTheme] widget, then
-  /// [StreamChatThemeData.imageHeaderTheme] is used.
+  /// If there is no enclosing [GalleryHeaderTheme] widget, then
+  /// [StreamChatThemeData.galleryHeaderTheme] is used.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
   /// ImageHeaderTheme theme = ImageHeaderTheme.of(context);
   /// ```
-  static ImageHeaderThemeData of(BuildContext context) {
-    final imageHeaderTheme =
-        context.dependOnInheritedWidgetOfExactType<ImageHeaderTheme>();
-    return imageHeaderTheme?.data ??
-        StreamChatTheme.of(context).imageHeaderTheme;
+  static GalleryHeaderThemeData of(BuildContext context) {
+    final galleryHeaderTheme =
+        context.dependOnInheritedWidgetOfExactType<GalleryHeaderTheme>();
+    return galleryHeaderTheme?.data ??
+        StreamChatTheme.of(context).galleryHeaderTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) =>
-      ImageHeaderTheme(data: data, child: child);
+      GalleryHeaderTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(ImageHeaderTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(GalleryHeaderTheme oldWidget) =>
+      data != oldWidget.data;
 }
 
-/// A style that overrides the default appearance of [ImageHeader]s when used
-/// with [ImageHeaderTheme] or with the overall [StreamChatTheme]'s
-/// [StreamChatThemeData.imageHeaderTheme].
+/// A style that overrides the default appearance of [GalleryHeader]s when used
+/// with [GalleryHeaderTheme] or with the overall [StreamChatTheme]'s
+/// [StreamChatThemeData.galleryHeaderTheme].
 ///
 /// See also:
 ///
-/// * [ImageHeaderTheme], the theme which is configured with this class.
-/// * [StreamChatThemeData.imageHeaderTheme], which can be used to override
-/// the default style for [ImageHeader]s below the overall [StreamChatTheme].
-class ImageHeaderThemeData with Diagnosticable {
-  /// Creates an [ImageHeaderThemeData].
-  const ImageHeaderThemeData({
+/// * [GalleryHeaderTheme], the theme which is configured with this class.
+/// * [StreamChatThemeData.galleryHeaderTheme], which can be used to override
+/// the default style for [GalleryHeader]s below the overall [StreamChatTheme].
+class GalleryHeaderThemeData with Diagnosticable {
+  /// Creates an [GalleryHeaderThemeData].
+  const GalleryHeaderThemeData({
     this.closeButtonColor,
     this.backgroundColor,
     this.iconMenuPointColor,
@@ -1395,7 +1398,7 @@ class ImageHeaderThemeData with Diagnosticable {
   /// Defaults to [ColorTheme.textHighEmphasis].
   final Color? closeButtonColor;
 
-  /// The background color of the [ImageHeader] widget.
+  /// The background color of the [GalleryHeader] widget.
   ///
   /// Defaults to [ChannelHeaderTheme.color].
   final Color? backgroundColor;
@@ -1403,12 +1406,12 @@ class ImageHeaderThemeData with Diagnosticable {
   /// Defaults to [ColorTheme.textHighEmphasis].
   final Color? iconMenuPointColor;
 
-  /// The [TextStyle] to use for the [ImageHeader] title text.
+  /// The [TextStyle] to use for the [GalleryHeader] title text.
   ///
   /// Defaults to [TextTheme.headlineBold].
   final TextStyle? titleTextStyle;
 
-  /// The [TextStyle] to use for the [ImageHeader] subtitle text.
+  /// The [TextStyle] to use for the [GalleryHeader] subtitle text.
   ///
   /// Defaults to [ChannelPreviewTheme.subtitle].
   final TextStyle? subtitleTextStyle;
@@ -1416,8 +1419,8 @@ class ImageHeaderThemeData with Diagnosticable {
   ///
   final Color? bottomSheetBarrierColor;
 
-  /// Copies this [ImageHeaderThemeData] to another.
-  ImageHeaderThemeData copyWith({
+  /// Copies this [GalleryHeaderThemeData] to another.
+  GalleryHeaderThemeData copyWith({
     Color? closeButtonColor,
     Color? backgroundColor,
     Color? iconMenuPointColor,
@@ -1425,7 +1428,7 @@ class ImageHeaderThemeData with Diagnosticable {
     TextStyle? subtitleTextStyle,
     Color? bottomSheetBarrierColor,
   }) =>
-      ImageHeaderThemeData(
+      GalleryHeaderThemeData(
         closeButtonColor: closeButtonColor ?? this.closeButtonColor,
         backgroundColor: backgroundColor ?? this.backgroundColor,
         iconMenuPointColor: iconMenuPointColor ?? this.iconMenuPointColor,
@@ -1435,15 +1438,15 @@ class ImageHeaderThemeData with Diagnosticable {
             bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
       );
 
-  /// Linearly interpolate between two [ImageHeader] themes.
+  /// Linearly interpolate between two [GalleryHeader] themes.
   ///
   /// All the properties must be non-null.
-  ImageHeaderThemeData lerp(
-    ImageHeaderThemeData a,
-    ImageHeaderThemeData b,
+  GalleryHeaderThemeData lerp(
+    GalleryHeaderThemeData a,
+    GalleryHeaderThemeData b,
     double t,
   ) =>
-      ImageHeaderThemeData(
+      GalleryHeaderThemeData(
         closeButtonColor: Color.lerp(a.closeButtonColor, b.closeButtonColor, t),
         backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
         iconMenuPointColor:
@@ -1455,8 +1458,8 @@ class ImageHeaderThemeData with Diagnosticable {
             Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
       );
 
-  /// Merges one [ImageHeaderThemeData] with the another
-  ImageHeaderThemeData merge(ImageHeaderThemeData? other) {
+  /// Merges one [GalleryHeaderThemeData] with the another
+  GalleryHeaderThemeData merge(GalleryHeaderThemeData? other) {
     if (other == null) return this;
     return copyWith(
       closeButtonColor: other.closeButtonColor,
@@ -1471,7 +1474,7 @@ class ImageHeaderThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ImageHeaderThemeData &&
+      other is GalleryHeaderThemeData &&
           runtimeType == other.runtimeType &&
           closeButtonColor == other.closeButtonColor &&
           backgroundColor == other.backgroundColor &&
@@ -1502,61 +1505,62 @@ class ImageHeaderThemeData with Diagnosticable {
   }
 }
 
-/// Overrides the default style of [ImageFooter] descendants.
+/// Overrides the default style of [GalleryFooter] descendants.
 ///
 /// See also:
 ///
-///  * [ImageFooterThemeData], which is used to configure this theme.
-class ImageFooterTheme extends InheritedTheme {
-  /// Creates an [ImageFooterTheme].
+///  * [GalleryFooterThemeData], which is used to configure this theme.
+class GalleryFooterTheme extends InheritedTheme {
+  /// Creates an [GalleryFooterTheme].
   ///
   /// The [data] parameter must not be null.
-  const ImageFooterTheme({
+  const GalleryFooterTheme({
     Key? key,
     required this.data,
     required Widget child,
   }) : super(key: key, child: child);
 
   /// The configuration of this theme.
-  final ImageFooterThemeData data;
+  final GalleryFooterThemeData data;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [ImageFooterTheme] widget, then
-  /// [StreamChatThemeData.imageFooterTheme] is used.
+  /// If there is no enclosing [GalleryFooterTheme] widget, then
+  /// [StreamChatThemeData.galleryFooterTheme] is used.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
   /// ImageFooterTheme theme = ImageFooterTheme.of(context);
   /// ```
-  static ImageFooterThemeData of(BuildContext context) {
+  static GalleryFooterThemeData of(BuildContext context) {
     final imageFooterTheme =
-        context.dependOnInheritedWidgetOfExactType<ImageFooterTheme>();
+        context.dependOnInheritedWidgetOfExactType<GalleryFooterTheme>();
     return imageFooterTheme?.data ??
-        StreamChatTheme.of(context).imageFooterTheme;
+        StreamChatTheme.of(context).galleryFooterTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) =>
-      ImageFooterTheme(data: data, child: child);
+      GalleryFooterTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(ImageFooterTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(GalleryFooterTheme oldWidget) =>
+      data != oldWidget.data;
 }
 
-/// A style that overrides the default appearance of [ImageFooter]s when used
-/// with [ImageFooterTheme] or with the overall [StreamChatTheme]'s
-/// [StreamChatThemeData.imageFooterTheme].
+/// A style that overrides the default appearance of [GalleryFooter]s when used
+/// with [GalleryFooterTheme] or with the overall [StreamChatTheme]'s
+/// [StreamChatThemeData.galleryFooterTheme].
 ///
 /// See also:
 ///
-/// * [ImageFooterTheme], the theme which is configured with this class.
-/// * [StreamChatThemeData.imageFooterTheme], which can be used to override
-/// the default style for [ImageFooter]s below the overall [StreamChatTheme].
-class ImageFooterThemeData with Diagnosticable {
-  /// Creates an [ImageFooterThemeData].
-  const ImageFooterThemeData({
+/// * [GalleryFooterTheme], the theme which is configured with this class.
+/// * [StreamChatThemeData.galleryFooterTheme], which can be used to override
+/// the default style for [GalleryFooter]s below the overall [StreamChatTheme].
+class GalleryFooterThemeData with Diagnosticable {
+  /// Creates an [GalleryFooterThemeData].
+  const GalleryFooterThemeData({
     this.backgroundColor,
     this.shareIconColor,
     this.titleTextStyle,
@@ -1567,7 +1571,7 @@ class ImageFooterThemeData with Diagnosticable {
     this.bottomSheetCloseIconColor,
   });
 
-  /// The background color for the [ImageFooter] widget.
+  /// The background color for the [GalleryFooter] widget.
   ///
   /// Defaults to [ColorTheme.barsBg].
   final Color? backgroundColor;
@@ -1577,7 +1581,7 @@ class ImageFooterThemeData with Diagnosticable {
   /// Defaults to [ColorTheme.textHighEmphasis].
   final Color? shareIconColor;
 
-  /// The [TextStyle] to use for the [ImageFooter] title text.
+  /// The [TextStyle] to use for the [GalleryFooter] title text.
   ///
   /// Defaults to [TextTheme.headlineBold].
   final TextStyle? titleTextStyle;
@@ -1607,8 +1611,8 @@ class ImageFooterThemeData with Diagnosticable {
   /// Defaults to [ColorTheme.textHighEmphasis].
   final Color? bottomSheetCloseIconColor;
 
-  /// Copies this [ImageFooterThemeData] to another.
-  ImageFooterThemeData copyWith({
+  /// Copies this [GalleryFooterThemeData] to another.
+  GalleryFooterThemeData copyWith({
     Color? backgroundColor,
     Color? shareIconColor,
     TextStyle? titleTextStyle,
@@ -1618,7 +1622,7 @@ class ImageFooterThemeData with Diagnosticable {
     TextStyle? bottomSheetPhotosTextStyle,
     Color? bottomSheetCloseIconColor,
   }) =>
-      ImageFooterThemeData(
+      GalleryFooterThemeData(
         backgroundColor: backgroundColor ?? this.backgroundColor,
         shareIconColor: shareIconColor ?? this.shareIconColor,
         titleTextStyle: titleTextStyle ?? this.titleTextStyle,
@@ -1633,15 +1637,15 @@ class ImageFooterThemeData with Diagnosticable {
             bottomSheetCloseIconColor ?? this.bottomSheetCloseIconColor,
       );
 
-  /// Linearly interpolate between two [ImageFooter] themes.
+  /// Linearly interpolate between two [GalleryFooter] themes.
   ///
   /// All the properties must be non-null.
-  ImageFooterThemeData lerp(
-    ImageFooterThemeData a,
-    ImageFooterThemeData b,
+  GalleryFooterThemeData lerp(
+    GalleryFooterThemeData a,
+    GalleryFooterThemeData b,
     double t,
   ) =>
-      ImageFooterThemeData(
+      GalleryFooterThemeData(
         backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
         shareIconColor: Color.lerp(a.shareIconColor, b.shareIconColor, t),
         titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
@@ -1657,8 +1661,8 @@ class ImageFooterThemeData with Diagnosticable {
             a.bottomSheetCloseIconColor, b.bottomSheetCloseIconColor, t),
       );
 
-  /// Merges one [ImageFooterThemeData] with the another
-  ImageFooterThemeData merge(ImageFooterThemeData? other) {
+  /// Merges one [GalleryFooterThemeData] with the another
+  GalleryFooterThemeData merge(GalleryFooterThemeData? other) {
     if (other == null) return this;
     return copyWith(
       backgroundColor: other.backgroundColor,
@@ -1675,7 +1679,7 @@ class ImageFooterThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ImageFooterThemeData &&
+      other is GalleryFooterThemeData &&
           runtimeType == other.runtimeType &&
           backgroundColor == other.backgroundColor &&
           shareIconColor == other.shareIconColor &&
