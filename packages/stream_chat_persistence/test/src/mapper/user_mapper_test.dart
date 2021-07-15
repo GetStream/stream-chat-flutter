@@ -39,7 +39,7 @@ void main() {
       lastActive: DateTime.now(),
       online: math.Random().nextBool(),
       banned: math.Random().nextBool(),
-      extraData: {'test_extra_data': 'extraData'},
+      extraData: const {'test_extra_data': 'extraData'},
     );
     final entity = user.toEntity();
     expect(entity, isA<UserEntity>());
