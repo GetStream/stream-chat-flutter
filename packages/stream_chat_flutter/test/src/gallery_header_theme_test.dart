@@ -14,7 +14,7 @@ void main() {
   });
 
   test(
-      'Light GalleryHeaderThemeData lerps completely to dark GalleryHeaderThemeData',
+      '''Light GalleryHeaderThemeData lerps completely to dark GalleryHeaderThemeData''',
       () {
     expect(
         const GalleryHeaderThemeData().lerp(_galleryHeaderThemeDataControl,
@@ -23,7 +23,7 @@ void main() {
   });
 
   test(
-      'Light GalleryHeaderThemeData lerps halfway to dark GalleryHeaderThemeData',
+      '''Light GalleryHeaderThemeData lerps halfway to dark GalleryHeaderThemeData''',
       () {
     expect(
         const GalleryHeaderThemeData().lerp(_galleryHeaderThemeDataControl,
@@ -32,7 +32,7 @@ void main() {
   });
 
   test(
-      'Dark GalleryHeaderThemeData lerps completely to light GalleryHeaderThemeData',
+      '''Dark GalleryHeaderThemeData lerps completely to light GalleryHeaderThemeData''',
       () {
     expect(
         const GalleryHeaderThemeData().lerp(_galleryHeaderThemeDataDarkControl,
