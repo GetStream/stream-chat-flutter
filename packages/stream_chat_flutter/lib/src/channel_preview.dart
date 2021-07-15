@@ -81,20 +81,9 @@ class ChannelPreview extends StatelessWidget {
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 8,
                 ),
-                onTap: () {
-                  if (onTap != null) {
-                    onTap!(channel);
-                  }
-                },
-                onLongPress: () {
-                  if (onLongPress != null) {
-                    onLongPress!(channel);
-                  }
-                },
-                leading: leading ??
-                    ChannelImage(
-                      onTap: onImageTap,
-                    ),
+                onTap: () => onTap?.call(channel),
+                onLongPress: () => onLongPress?.call(channel),
+                leading: leading ?? ChannelImage(onTap: onImageTap),
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
