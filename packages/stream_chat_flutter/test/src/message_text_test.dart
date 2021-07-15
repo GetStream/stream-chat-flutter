@@ -79,7 +79,8 @@ void main() {
         'name': 'test',
       });
 
-      final messageText = '''a message.
+      const messageText = '''
+      a message.
 with multiple lines
 and a list:
 - a. okasd
