@@ -6,51 +6,56 @@ import 'package:mocktail/mocktail.dart';
 class MockStreamChatClient extends Mock implements StreamChatClient {}
 
 void main() {
-  test('ImageFooterThemeData copyWith, ==, hashCode basics', () {
-    expect(
-        const ImageFooterThemeData(), const ImageFooterThemeData().copyWith());
-    expect(const ImageFooterThemeData().hashCode,
-        const ImageFooterThemeData().copyWith().hashCode);
+  test('GalleryFooterThemeData copyWith, ==, hashCode basics', () {
+    expect(const GalleryFooterThemeData(),
+        const GalleryFooterThemeData().copyWith());
+    expect(const GalleryFooterThemeData().hashCode,
+        const GalleryFooterThemeData().copyWith().hashCode);
   });
 
   test(
-      'Light ImageFooterThemeData lerps completely to dark ImageFooterThemeData',
+      'Light GalleryFooterThemeData lerps completely to dark GalleryFooterThemeData',
       () {
     expect(
-        const ImageFooterThemeData().lerp(
-            _imageFooterThemeDataControl, _imageFooterThemeDataControlDark, 1),
-        _imageFooterThemeDataControlDark);
-  });
-
-  test('Light ImageFooterThemeData lerps halfway to dark ImageFooterThemeData',
-      () {
-    expect(
-        const ImageFooterThemeData().lerp(_imageFooterThemeDataControl,
-            _imageFooterThemeDataControlDark, 0.5),
-        _imageFooterThemeDataControlMidLerp);
+        const GalleryFooterThemeData().lerp(_galleryFooterThemeDataControl,
+            _galleryFooterThemeDataControlDark, 1),
+        _galleryFooterThemeDataControlDark);
   });
 
   test(
-      'Dark ImageFooterThemeData lerps completely to light ImageFooterThemeData',
+      'Light GalleryFooterThemeData lerps halfway to dark GalleryFooterThemeData',
       () {
     expect(
-        const ImageFooterThemeData().lerp(
-            _imageFooterThemeDataControlDark, _imageFooterThemeDataControl, 1),
-        _imageFooterThemeDataControl);
+        const GalleryFooterThemeData().lerp(_galleryFooterThemeDataControl,
+            _galleryFooterThemeDataControlDark, 0.5),
+        _galleryFooterThemeDataControlMidLerp);
+  });
+
+  test(
+      'Dark GalleryFooterThemeData lerps completely to light GalleryFooterThemeData',
+      () {
+    expect(
+        const GalleryFooterThemeData().lerp(_galleryFooterThemeDataControlDark,
+            _galleryFooterThemeDataControl, 1),
+        _galleryFooterThemeDataControl);
   });
 
   test('Merging dark and light themes results in a dark theme', () {
-    expect(_imageFooterThemeDataControl.merge(_imageFooterThemeDataControlDark),
-        _imageFooterThemeDataControlDark);
+    expect(
+        _galleryFooterThemeDataControl
+            .merge(_galleryFooterThemeDataControlDark),
+        _galleryFooterThemeDataControlDark);
   });
 
   test('Merging dark and light themes results in a dark theme', () {
-    expect(_imageFooterThemeDataControlDark.merge(_imageFooterThemeDataControl),
-        _imageFooterThemeDataControl);
+    expect(
+        _galleryFooterThemeDataControlDark
+            .merge(_galleryFooterThemeDataControl),
+        _galleryFooterThemeDataControl);
   });
 
   testWidgets(
-      'Passing no ImageFooterThemeData returns default light theme values',
+      'Passing no GalleryFooterThemeData returns default light theme values',
       (WidgetTester tester) async {
     late BuildContext _context;
     await tester.pumpWidget(
@@ -63,7 +68,7 @@ void main() {
           builder: (context) {
             _context = context;
             return Scaffold(
-              appBar: ImageFooter(
+              appBar: GalleryFooter(
                 message: Message(),
               ),
             );
@@ -72,27 +77,27 @@ void main() {
       ),
     );
 
-    final imageFooterTheme = ImageFooterTheme.of(_context);
+    final imageFooterTheme = GalleryFooterTheme.of(_context);
     expect(imageFooterTheme.backgroundColor,
-        _imageFooterThemeDataControl.backgroundColor);
+        _galleryFooterThemeDataControl.backgroundColor);
     expect(imageFooterTheme.shareIconColor,
-        _imageFooterThemeDataControl.shareIconColor);
+        _galleryFooterThemeDataControl.shareIconColor);
     expect(imageFooterTheme.titleTextStyle,
-        _imageFooterThemeDataControl.titleTextStyle);
+        _galleryFooterThemeDataControl.titleTextStyle);
     expect(imageFooterTheme.gridIconButtonColor,
-        _imageFooterThemeDataControl.gridIconButtonColor);
+        _galleryFooterThemeDataControl.gridIconButtonColor);
     expect(imageFooterTheme.bottomSheetBarrierColor,
-        _imageFooterThemeDataControl.bottomSheetBarrierColor);
+        _galleryFooterThemeDataControl.bottomSheetBarrierColor);
     expect(imageFooterTheme.bottomSheetBackgroundColor,
-        _imageFooterThemeDataControl.bottomSheetBackgroundColor);
+        _galleryFooterThemeDataControl.bottomSheetBackgroundColor);
     expect(imageFooterTheme.bottomSheetCloseIconColor,
-        _imageFooterThemeDataControl.bottomSheetCloseIconColor);
+        _galleryFooterThemeDataControl.bottomSheetCloseIconColor);
     expect(imageFooterTheme.bottomSheetPhotosTextStyle,
-        _imageFooterThemeDataControl.bottomSheetPhotosTextStyle);
+        _galleryFooterThemeDataControl.bottomSheetPhotosTextStyle);
   });
 
   testWidgets(
-      'Passing no ImageFooterThemeData returns default dark theme values',
+      'Passing no GalleryFooterThemeData returns default dark theme values',
       (WidgetTester tester) async {
     late BuildContext _context;
     await tester.pumpWidget(
@@ -106,7 +111,7 @@ void main() {
           builder: (context) {
             _context = context;
             return Scaffold(
-              appBar: ImageFooter(
+              appBar: GalleryFooter(
                 message: Message(),
               ),
             );
@@ -115,28 +120,28 @@ void main() {
       ),
     );
 
-    final imageFooterTheme = ImageFooterTheme.of(_context);
+    final imageFooterTheme = GalleryFooterTheme.of(_context);
     expect(imageFooterTheme.backgroundColor,
-        _imageFooterThemeDataControlDark.backgroundColor);
+        _galleryFooterThemeDataControlDark.backgroundColor);
     expect(imageFooterTheme.shareIconColor,
-        _imageFooterThemeDataControlDark.shareIconColor);
+        _galleryFooterThemeDataControlDark.shareIconColor);
     expect(imageFooterTheme.titleTextStyle,
-        _imageFooterThemeDataControlDark.titleTextStyle);
+        _galleryFooterThemeDataControlDark.titleTextStyle);
     expect(imageFooterTheme.gridIconButtonColor,
-        _imageFooterThemeDataControlDark.gridIconButtonColor);
+        _galleryFooterThemeDataControlDark.gridIconButtonColor);
     expect(imageFooterTheme.bottomSheetBarrierColor,
-        _imageFooterThemeDataControlDark.bottomSheetBarrierColor);
+        _galleryFooterThemeDataControlDark.bottomSheetBarrierColor);
     expect(imageFooterTheme.bottomSheetBackgroundColor,
-        _imageFooterThemeDataControlDark.bottomSheetBackgroundColor);
+        _galleryFooterThemeDataControlDark.bottomSheetBackgroundColor);
     expect(imageFooterTheme.bottomSheetCloseIconColor,
-        _imageFooterThemeDataControlDark.bottomSheetCloseIconColor);
+        _galleryFooterThemeDataControlDark.bottomSheetCloseIconColor);
     expect(imageFooterTheme.bottomSheetPhotosTextStyle,
-        _imageFooterThemeDataControlDark.bottomSheetPhotosTextStyle);
+        _galleryFooterThemeDataControlDark.bottomSheetPhotosTextStyle);
   });
 }
 
 // Light theme control
-final _imageFooterThemeDataControl = ImageFooterThemeData(
+final _galleryFooterThemeDataControl = GalleryFooterThemeData(
   backgroundColor: ColorTheme.light().barsBg,
   shareIconColor: ColorTheme.light().textHighEmphasis,
   titleTextStyle: TextTheme.light().headlineBold,
@@ -148,7 +153,7 @@ final _imageFooterThemeDataControl = ImageFooterThemeData(
 );
 
 // Mid-lerp theme control
-const _imageFooterThemeDataControlMidLerp = ImageFooterThemeData(
+const _galleryFooterThemeDataControlMidLerp = GalleryFooterThemeData(
   backgroundColor: Color(0xff87898b),
   shareIconColor: Color(0xff7f7f7f),
   titleTextStyle: TextStyle(
@@ -168,7 +173,7 @@ const _imageFooterThemeDataControlMidLerp = ImageFooterThemeData(
 );
 
 // Dark theme control
-final _imageFooterThemeDataControlDark = ImageFooterThemeData(
+final _galleryFooterThemeDataControlDark = GalleryFooterThemeData(
   backgroundColor: ColorTheme.dark().barsBg,
   shareIconColor: ColorTheme.dark().textHighEmphasis,
   titleTextStyle: TextTheme.dark().headlineBold,
