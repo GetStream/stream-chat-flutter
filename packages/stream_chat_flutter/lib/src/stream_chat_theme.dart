@@ -73,18 +73,19 @@ class StreamChatThemeData {
     );
 
     final customizedData = defaultData.copyWith(
-        channelListHeaderTheme: channelListHeaderTheme,
-        channelPreviewTheme: channelPreviewTheme,
-        channelTheme: channelTheme,
-        otherMessageTheme: otherMessageTheme,
-        ownMessageTheme: ownMessageTheme,
-        messageInputTheme: messageInputTheme,
-        defaultChannelImage: defaultChannelImage,
-        defaultUserImage: defaultUserImage,
-        primaryIconTheme: primaryIconTheme,
-        reactionIcons: reactionIcons,
-        imageHeaderTheme: imageHeaderTheme,
-        imageFooterTheme: imageFooterTheme);
+      channelListHeaderTheme: channelListHeaderTheme,
+      channelPreviewTheme: channelPreviewTheme,
+      channelTheme: channelTheme,
+      otherMessageTheme: otherMessageTheme,
+      ownMessageTheme: ownMessageTheme,
+      messageInputTheme: messageInputTheme,
+      defaultChannelImage: defaultChannelImage,
+      defaultUserImage: defaultUserImage,
+      primaryIconTheme: primaryIconTheme,
+      reactionIcons: reactionIcons,
+      imageHeaderTheme: imageHeaderTheme,
+      imageFooterTheme: imageFooterTheme,
+    );
 
     return defaultData.merge(customizedData);
   }
