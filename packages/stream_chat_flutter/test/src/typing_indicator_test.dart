@@ -54,12 +54,12 @@ void main() {
           ]));
 
       when(() => channelState.typingEvents).thenAnswer((i) => {
-            User(id: 'other-user', extraData: {'name': 'demo'}):
+            User(id: 'other-user', extraData: const {'name': 'demo'}):
                 Event(type: EventType.typingStart),
           });
       when(() => channelState.typingEventsStream)
           .thenAnswer((i) => Stream.value({
-                User(id: 'other-user', extraData: {'name': 'demo'}):
+                User(id: 'other-user', extraData: const {'name': 'demo'}):
                     Event(type: EventType.typingStart),
               }));
 
