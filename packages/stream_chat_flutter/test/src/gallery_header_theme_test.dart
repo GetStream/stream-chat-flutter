@@ -7,8 +7,8 @@ class MockStreamChatClient extends Mock implements StreamChatClient {}
 
 void main() {
   test('GalleryHeaderThemeData copyWith, ==, hashCode basics', () {
-    expect(
-        const GalleryHeaderThemeData(), const GalleryHeaderThemeData().copyWith());
+    expect(const GalleryHeaderThemeData(),
+        const GalleryHeaderThemeData().copyWith());
     expect(const GalleryHeaderThemeData().hashCode,
         const GalleryHeaderThemeData().copyWith().hashCode);
   });
@@ -17,12 +17,13 @@ void main() {
       'Light GalleryHeaderThemeData lerps completely to dark GalleryHeaderThemeData',
       () {
     expect(
-        const GalleryHeaderThemeData().lerp(
-            _galleryHeaderThemeDataControl, _galleryHeaderThemeDataDarkControl, 1),
+        const GalleryHeaderThemeData().lerp(_galleryHeaderThemeDataControl,
+            _galleryHeaderThemeDataDarkControl, 1),
         _galleryHeaderThemeDataDarkControl);
   });
 
-  test('Light GalleryHeaderThemeData lerps halfway to dark GalleryHeaderThemeData',
+  test(
+      'Light GalleryHeaderThemeData lerps halfway to dark GalleryHeaderThemeData',
       () {
     expect(
         const GalleryHeaderThemeData().lerp(_galleryHeaderThemeDataControl,
@@ -34,18 +35,22 @@ void main() {
       'Dark GalleryHeaderThemeData lerps completely to light GalleryHeaderThemeData',
       () {
     expect(
-        const GalleryHeaderThemeData().lerp(
-            _galleryHeaderThemeDataDarkControl, _galleryHeaderThemeDataControl, 1),
+        const GalleryHeaderThemeData().lerp(_galleryHeaderThemeDataDarkControl,
+            _galleryHeaderThemeDataControl, 1),
         _galleryHeaderThemeDataControl);
   });
 
   test('Merging dark and light themes results in a dark theme', () {
-    expect(_galleryHeaderThemeDataControl.merge(_galleryHeaderThemeDataDarkControl),
+    expect(
+        _galleryHeaderThemeDataControl
+            .merge(_galleryHeaderThemeDataDarkControl),
         _galleryHeaderThemeDataDarkControl);
   });
 
   test('Merging dark and light themes results in a dark theme', () {
-    expect(_galleryHeaderThemeDataDarkControl.merge(_galleryHeaderThemeDataControl),
+    expect(
+        _galleryHeaderThemeDataDarkControl
+            .merge(_galleryHeaderThemeDataControl),
         _galleryHeaderThemeDataControl);
   });
 
