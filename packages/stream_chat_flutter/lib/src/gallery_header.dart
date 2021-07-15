@@ -5,9 +5,9 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Header/AppBar widget for media display screen
-class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
+class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a channel header
-  const ImageHeader({
+  const GalleryHeader({
     Key? key,
     required this.message,
     this.currentIndex = 0,
@@ -51,7 +51,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final galleryHeaderThemeData = GalleryHeaderTheme.of(context);
     return AppBar(
       textTheme: Theme.of(context).textTheme,
       brightness: Theme.of(context).brightness,
@@ -59,18 +59,18 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
       leading: showBackButton
           ? IconButton(
               icon: StreamSvgIcon.close(
-                color: chatThemeData.colorTheme.textHighEmphasis,
+                color: galleryHeaderThemeData.closeButtonColor,
                 size: 24,
               ),
               onPressed: onBackPressed,
             )
           : const SizedBox(),
-      backgroundColor: chatThemeData.channelTheme.channelHeaderTheme.color,
+      backgroundColor: galleryHeaderThemeData.backgroundColor,
       actions: <Widget>[
         if (message.type != 'ephemeral')
           IconButton(
             icon: StreamSvgIcon.iconMenuPoint(
-              color: chatThemeData.colorTheme.textHighEmphasis,
+              color: galleryHeaderThemeData.iconMenuPointColor,
             ),
             onPressed: () {
               _showMessageActionModalBottomSheet(context);
@@ -90,11 +90,11 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
                   children: <Widget>[
                     Text(
                       userName,
-                      style: chatThemeData.textTheme.headlineBold,
+                      style: galleryHeaderThemeData.titleTextStyle,
                     ),
                     Text(
                       sentAt,
-                      style: chatThemeData.channelPreviewTheme.subtitle,
+                      style: galleryHeaderThemeData.subtitleTextStyle,
                     ),
                   ],
                 ),
@@ -109,11 +109,13 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
 
   void _showMessageActionModalBottomSheet(BuildContext context) async {
     final channel = StreamChannel.of(context).channel;
+    final galleryHeaderThemeData =
+        StreamChatTheme.of(context).galleryHeaderTheme;
 
     final result = await showDialog(
       useRootNavigator: false,
       context: context,
-      barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
+      barrierColor: galleryHeaderThemeData.bottomSheetBarrierColor,
       builder: (context) => StreamChannel(
         channel: channel,
         child: AttachmentActionsModal(
