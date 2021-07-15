@@ -12,26 +12,24 @@ void main() {
   List<User> _generateUsers({
     int count = 3,
     int offset = 0,
-  }) {
-    return List.generate(
-      count,
-      (index) {
-        index = index + offset;
-        return User(
-          id: 'testId$index',
-          role: 'testRole$index',
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          lastActive: DateTime.now(),
-          online: true,
-          banned: false,
-          extraData: {
-            'name': '${alphabets[index]}-testName',
-          },
-        );
-      },
-    );
-  }
+  }) =>
+      List.generate(
+        count,
+        (index) {
+          index = index + offset;
+          return User(
+            id: 'testId$index',
+            role: 'testRole$index',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            lastActive: DateTime.now(),
+            online: true,
+            extraData: {
+              'name': '${alphabets[index]}-testName',
+            },
+          );
+        },
+      );
 
   testWidgets(
     'should throw if UserListCore is used where UsersBloc is not present '
@@ -40,10 +38,10 @@ void main() {
       const userListCoreKey = Key('userListCore');
       final userListCore = UserListCore(
         key: userListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       await tester.pumpWidget(userListCore);
@@ -59,10 +57,10 @@ void main() {
       const userListCoreKey = Key('userListCore');
       final userListCore = UserListCore(
         key: userListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       final mockClient = MockClient();
@@ -88,10 +86,10 @@ void main() {
       final controller = UserListController();
       final userListCore = UserListCore(
         key: userListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         userListController: controller,
       );
 
@@ -122,9 +120,9 @@ void main() {
       const errorWidgetKey = Key('errorWidget');
       final userListCore = UserListCore(
         key: userListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object error) =>
             Container(key: errorWidgetKey),
       );
@@ -168,10 +166,10 @@ void main() {
       const emptyWidgetKey = Key('emptyWidget');
       final userListCore = UserListCore(
         key: userListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
         emptyBuilder: (BuildContext context) => Container(key: emptyWidgetKey),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       final mockClient = MockClient();
@@ -214,9 +212,9 @@ void main() {
       final userListCore = UserListCore(
         key: userListCoreKey,
         listBuilder: (_, __) => Container(key: listWidgetKey),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       final mockClient = MockClient();
@@ -261,20 +259,20 @@ void main() {
         listBuilder: (_, items) => Container(
           key: listWidgetKey,
           child: ListView(
-            children: items.map((e) {
-              return Container(
-                key: Key(e.key ?? ''),
-                child: e.when(
-                  headerItem: (heading) => Text(heading),
-                  userItem: (user) => Text(user.id),
-                ),
-              );
-            }).toList(growable: false),
+            children: items
+                .map((e) => Container(
+                      key: Key(e.key ?? ''),
+                      child: e.when(
+                        headerItem: (heading) => Text(heading),
+                        userItem: (user) => Text(user.id),
+                      ),
+                    ))
+                .toList(growable: false),
           ),
         ),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         groupAlphabetically: true,
       );
 
@@ -329,20 +327,20 @@ void main() {
         listBuilder: (_, items) => Container(
           key: listWidgetKey,
           child: ListView(
-            children: items.map((e) {
-              return Container(
-                key: Key(e.key ?? ''),
-                child: e.when(
-                  headerItem: (heading) => Text(heading),
-                  userItem: (user) => Text(user.id),
-                ),
-              );
-            }).toList(growable: false),
+            children: items
+                .map((e) => Container(
+                      key: Key(e.key ?? ''),
+                      child: e.when(
+                        headerItem: (heading) => Text(heading),
+                        userItem: (user) => Text(user.id),
+                      ),
+                    ))
+                .toList(growable: false),
           ),
         ),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         pagination: pagination,
         groupAlphabetically: true,
       );
@@ -425,7 +423,7 @@ void main() {
       const pagination = PaginationParams();
 
       StateSetter? _stateSetter;
-      int limit = pagination.limit;
+      var limit = pagination.limit;
 
       const userListCoreKey = Key('userListCore');
       const listWidgetKey = Key('listWidget');
@@ -434,20 +432,21 @@ void main() {
             listBuilder: (_, items) => Container(
               key: listWidgetKey,
               child: ListView(
-                children: items.map((e) {
-                  return Container(
-                    key: Key(e.key ?? ''),
-                    child: e.when(
-                      headerItem: (heading) => Text(heading),
-                      userItem: (user) => Text(user.id),
-                    ),
-                  );
-                }).toList(growable: false),
+                children: items
+                    .map((e) => Container(
+                          key: Key(e.key ?? ''),
+                          child: e.when(
+                            headerItem: (heading) => Text(heading),
+                            userItem: (user) => Text(user.id),
+                          ),
+                        ))
+                    .toList(growable: false),
               ),
             ),
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (BuildContext context, Object error) => Offstage(),
+            loadingBuilder: (BuildContext context) => const Offstage(),
+            emptyBuilder: (BuildContext context) => const Offstage(),
+            errorBuilder: (BuildContext context, Object error) =>
+                const Offstage(),
             pagination: pagination.copyWith(limit: limit),
             groupAlphabetically: true,
           );
