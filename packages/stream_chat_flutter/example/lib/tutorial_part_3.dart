@@ -6,22 +6,30 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// Third step of the [tutorial](https://getstream.io/chat/flutter/tutorial/)
 ///
 /// So far you’ve learned how to use the default widgets.
-/// The library has been designed with composition in mind and to allow all common customizations to be very easy.
-/// This means that you can change any component in your application by swapping the default widgets with the ones you build yourself.
+/// The library has been designed with composition in mind and to allow all
+/// common customizations to be very easy.
+/// This means that you can change any component in your application by
+/// swapping the default widgets with the ones you build yourself.
 ///
 /// Let’s see how we can make some changes to the SDK’s UI components.
-/// We start by changing how channel previews are shown in the channel list and include the number of unread messages for each.
+/// We start by changing how channel previews are shown in the channel list
+/// and include the number of unread messages for each.
 ///
-/// We're passing a custom widget to [ChannelListView.channelPreviewBuilder], this will override the default [ChannelPreview] and allows you to create one yourself.
+/// We're passing a custom widget to [ChannelListView.channelPreviewBuilder];
+/// this will override the default [ChannelPreview] and allows you to create
+/// one yourself.
 ///
 /// There are a couple interesting things we do in this widget:
 ///
-/// - Instead of creating a whole new style for the channel name, we inherit the text style from the parent theme ([StreamChatTheme.of]) and only change the color attribute
+/// - Instead of creating a whole new style for the channel name, we inherit
+/// the text style from the parent theme ([StreamChatTheme.of]) and only
+/// change the color attribute
 ///
-/// - We loop over the list of channel messages to search for the first not deleted message ([Channel.state.messages])
+/// - We loop over the list of channel messages to search for the first not
+/// deleted message ([Channel.state.messages])
 ///
 /// - We retrieve the count of unread messages from [Channel.state]
-void main() async {
+Future<void> main() async {
   final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
@@ -29,31 +37,44 @@ void main() async {
 
   await client.connectUser(
     User(id: 'super-band-9'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
+    '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A''',
   );
 
-  runApp(MyApp(client));
+  runApp(
+    MyApp(
+      client: client,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({
+    Key? key,
+    required this.client,
+  }) : super(key: key);
+
   final StreamChatClient client;
 
-  MyApp(this.client);
-
   @override
+  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, child) => StreamChat(
         client: client,
         child: child,
       ),
-      home: ChannelListPage(),
+      home: const ChannelListPage(),
     );
   }
 }
 
 class ChannelListPage extends StatelessWidget {
+  const ChannelListPage({
+    Key? key,
+  }) : super(key: key);
+
   @override
+  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
       body: ChannelsBloc(
@@ -64,10 +85,10 @@ class ChannelListPage extends StatelessWidget {
           ),
           channelPreviewBuilder: _channelPreviewBuilder,
           // sort: [SortOption('last_message_at')],
-          pagination: PaginationParams(
+          pagination: const PaginationParams(
             limit: 20,
           ),
-          channelWidget: ChannelPage(),
+          channelWidget: const ChannelPage(),
         ),
       ),
     );
@@ -78,7 +99,7 @@ class ChannelListPage extends StatelessWidget {
       (message) => !message.isDeleted,
     );
 
-    final subtitle = (lastMessage == null ? 'nothing yet' : lastMessage.text!);
+    final subtitle = lastMessage == null ? 'nothing yet' : lastMessage.text!;
     final opacity = (channel.state?.unreadCount ?? 0) > 0 ? 1.0 : 0.5;
 
     return ListTile(
@@ -88,7 +109,7 @@ class ChannelListPage extends StatelessWidget {
           MaterialPageRoute(
             builder: (_) => StreamChannel(
               channel: channel,
-              child: ChannelPage(),
+              child: const ChannelPage(),
             ),
           ),
         );
@@ -111,7 +132,7 @@ class ChannelListPage extends StatelessWidget {
               radius: 10,
               child: Text(channel.state!.unreadCount.toString()),
             )
-          : SizedBox(),
+          : const SizedBox(),
     );
   }
 }
@@ -122,11 +143,12 @@ class ChannelPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ChannelHeader(),
+      appBar: const ChannelHeader(),
       body: Column(
-        children: <Widget>[
+        children: const <Widget>[
           Expanded(
             child: MessageListView(),
           ),
