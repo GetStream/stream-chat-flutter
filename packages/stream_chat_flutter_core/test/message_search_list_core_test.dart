@@ -6,7 +6,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
 
-final testFilter = Filter.custom(operator: '\$test', value: 'testValue');
+const testFilter = Filter.custom(operator: '\$test', value: 'testValue');
 
 void main() {
   List<GetMessageResponse> _generateMessages({
@@ -56,10 +56,10 @@ void main() {
       const messageSearchListCoreKey = Key('messageSearchListCore');
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
-        childBuilder: (List<GetMessageResponse> messages) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object? error) => Offstage(),
+        childBuilder: (List<GetMessageResponse> messages) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object? error) => const Offstage(),
         filters: testFilter,
       );
 
@@ -86,10 +86,10 @@ void main() {
       final controller = MessageSearchListController();
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
-        childBuilder: (List<GetMessageResponse> messages) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        childBuilder: (List<GetMessageResponse> messages) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         messageSearchListController: controller,
         filters: testFilter,
       );
@@ -122,10 +122,10 @@ void main() {
       const errorWidgetKey = Key('errorWidget');
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
-        childBuilder: (List<GetMessageResponse> messages) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(
+        childBuilder: (List<GetMessageResponse> messages) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(
           key: errorWidgetKey,
         ),
         filters: testFilter,
@@ -173,10 +173,11 @@ void main() {
       const emptyWidgetKey = Key('emptyWidget');
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
-        childBuilder: (List<GetMessageResponse> messages) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(key: emptyWidgetKey),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        childBuilder: (List<GetMessageResponse> messages) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) =>
+            const Offstage(key: emptyWidgetKey),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         filters: testFilter,
       );
 
@@ -223,12 +224,12 @@ void main() {
       const childWidgetKey = Key('childWidget');
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
-        childBuilder: (List<GetMessageResponse> messages) => Offstage(
+        childBuilder: (List<GetMessageResponse> messages) => const Offstage(
           key: childWidgetKey,
         ),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         filters: testFilter,
       );
 
@@ -283,9 +284,9 @@ void main() {
             messages.map((e) => '${e.channel?.cid}-${e.message.id}').join(','),
           ),
         ),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         paginationParams: pagination,
         filters: testFilter,
       );
@@ -399,9 +400,10 @@ void main() {
                     .join(','),
               ),
             ),
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (BuildContext context, Object error) => Offstage(),
+            loadingBuilder: (BuildContext context) => const Offstage(),
+            emptyBuilder: (BuildContext context) => const Offstage(),
+            errorBuilder: (BuildContext context, Object error) =>
+                const Offstage(),
             paginationParams: pagination.copyWith(limit: limit),
             filters: testFilter,
           );
