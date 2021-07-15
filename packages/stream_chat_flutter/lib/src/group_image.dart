@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -7,7 +6,7 @@ class GroupImage extends StatelessWidget {
   /// Constructor for creating a [GroupImage]
   const GroupImage({
     Key? key,
-    required this.images,
+    required this.members,
     this.constraints,
     this.onTap,
     this.borderRadius,
@@ -17,7 +16,7 @@ class GroupImage extends StatelessWidget {
   }) : super(key: key);
 
   /// List of images to display
-  final List<String> images;
+  final List<Member> members;
 
   /// Constraints on the widget
   final BoxConstraints? constraints;
@@ -39,20 +38,22 @@ class GroupImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget? avatar;
-    final streamChatTheme = StreamChatTheme.of(context);
+    final streamChat = StreamChat.of(context);
+    final channel = StreamChannel.of(context).channel;
 
-    avatar = GestureDetector(
+    assert(channel.state != null, 'Channel ${channel.id} is not initialized');
+
+    final streamChatTheme = StreamChatTheme.of(context);
+    final colorTheme = streamChatTheme.colorTheme;
+    final previewTheme = streamChatTheme.channelPreviewTheme.avatarTheme;
+
+    Widget avatar = GestureDetector(
       onTap: onTap,
       child: ClipRRect(
-        borderRadius: borderRadius ??
-            streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius,
+        borderRadius: borderRadius ?? previewTheme?.borderRadius,
         child: Container(
-          constraints: constraints ??
-              streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
-          decoration: BoxDecoration(
-            color: streamChatTheme.colorTheme.accentPrimary,
-          ),
+          constraints: constraints ?? previewTheme?.constraints,
+          decoration: BoxDecoration(color: colorTheme.accentPrimary),
           child: Flex(
             direction: Axis.vertical,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,48 +63,62 @@ class GroupImage extends StatelessWidget {
                 child: Flex(
                   direction: Axis.horizontal,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: images
-                      .take(2)
-                      .map((url) => Flexible(
-                            fit: FlexFit.tight,
-                            child: FittedBox(
-                              fit: BoxFit.cover,
-                              clipBehavior: Clip.antiAlias,
-                              child: Transform.scale(
-                                scale: 1.2,
-                                child: CachedNetworkImage(
-                                  imageUrl: url,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                  children: members.take(2).map((member) {
+                    final user = member.user!;
+                    return Flexible(
+                      fit: FlexFit.tight,
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        clipBehavior: Clip.antiAlias,
+                        child: Transform.scale(
+                          scale: 1.2,
+                          child: BetterStreamBuilder<User>(
+                            stream: streamChat.client.state.usersStream
+                                .map((users) =>
+                                    users[member.userId ?? user.id] ?? user)
+                                .distinct(),
+                            initialData: user,
+                            builder: (context, user) => UserAvatar(
+                              user: user,
+                              borderRadius: BorderRadius.zero,
                             ),
-                          ))
-                      .toList(),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
-              if (images.length > 2)
+              if (members.length > 2)
                 Flexible(
                   fit: FlexFit.tight,
                   child: Flex(
                     direction: Axis.horizontal,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: images
-                        .skip(2)
-                        .map((url) => Flexible(
-                              fit: FlexFit.tight,
-                              child: FittedBox(
-                                fit: BoxFit.cover,
-                                clipBehavior: Clip.antiAlias,
-                                child: Transform.scale(
-                                  scale: 1.2,
-                                  child: CachedNetworkImage(
-                                    imageUrl: url,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
+                    children: members.skip(2).take(2).map((member) {
+                      final user = member.user!;
+                      return Flexible(
+                        fit: FlexFit.tight,
+                        child: FittedBox(
+                          fit: BoxFit.cover,
+                          clipBehavior: Clip.antiAlias,
+                          child: Transform.scale(
+                            scale: 1.2,
+                            child: BetterStreamBuilder<User>(
+                              stream: streamChat.client.state.usersStream
+                                  .map((users) =>
+                                      users[member.userId ?? user.id] ?? user)
+                                  .distinct(),
+                              initialData: user,
+                              builder: (context, user) => UserAvatar(
+                                user: user,
+                                borderRadius: BorderRadius.zero,
                               ),
-                            ))
-                        .toList(),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
             ],
@@ -114,14 +129,11 @@ class GroupImage extends StatelessWidget {
 
     if (selected) {
       avatar = ClipRRect(
-        borderRadius: (borderRadius ??
-                streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius ??
-                BorderRadius.zero) +
-            BorderRadius.circular(selectionThickness),
+        borderRadius: BorderRadius.circular(selectionThickness) +
+            (borderRadius ?? previewTheme?.borderRadius ?? BorderRadius.zero),
         child: Container(
-          color: selectionColor ?? streamChatTheme.colorTheme.accentPrimary,
-          height: 64,
-          width: 64,
+          constraints: constraints ?? previewTheme?.constraints,
+          color: selectionColor ?? colorTheme.accentPrimary,
           child: Padding(
             padding: EdgeInsets.all(selectionThickness),
             child: avatar,

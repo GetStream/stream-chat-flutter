@@ -83,121 +83,117 @@ class ChannelImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final streamChat = StreamChat.of(context);
     final channel = this.channel ?? StreamChannel.of(context).channel;
+
+    assert(channel.state != null, 'Channel ${channel.id} is not initialized');
+
+    final chatThemeData = StreamChatTheme.of(context);
+    final colorTheme = chatThemeData.colorTheme;
+    final previewTheme = chatThemeData.channelPreviewTheme.avatarTheme;
+
     return BetterStreamBuilder<Map<String, dynamic>>(
       stream: channel.extraDataStream,
       initialData: channel.extraData,
-      builder: (context, data) {
-        String? image;
-        final chatThemeData = StreamChatTheme.of(context);
-        if (data.containsKey('image') == true) {
-          image = data['image'];
-        } else if (channel.state?.members.length == 2) {
-          final otherMember = channel.state?.members
-              .firstWhere((member) => member.user?.id != streamChat.user?.id);
-          return BetterStreamBuilder<User?>(
-              stream: streamChat.client.state.usersStream
-                  .map((users) =>
-                      users[otherMember?.userId] ?? otherMember!.user!)
-                  .distinct(),
-              initialData: otherMember!.user,
-              builder: (context, user) => UserAvatar(
-                    borderRadius: borderRadius ??
-                        chatThemeData
-                            .channelPreviewTheme.avatarTheme?.borderRadius,
-                    user: user ?? otherMember.user!,
-                    constraints: constraints ??
-                        chatThemeData
-                            .channelPreviewTheme.avatarTheme?.constraints,
-                    onTap: onTap != null ? (_) => onTap!() : null,
-                    selected: selected,
-                    selectionColor: selectionColor ??
-                        chatThemeData.colorTheme.accentPrimary,
-                    selectionThickness: selectionThickness,
-                  ));
-        } else {
-          final images = channel.state?.members
-              .where((member) =>
-                  member.user?.id != streamChat.user?.id &&
-                  member.user?.extraData['image'] != null)
-              .take(4)
-              // ignore: cast_nullable_to_non_nullable
-              .map((e) => e.user?.extraData['image'] as String)
-              .toList();
-          return GroupImage(
-            images: images ?? [],
-            borderRadius: borderRadius ??
-                chatThemeData.channelPreviewTheme.avatarTheme?.borderRadius,
-            constraints: constraints ??
-                chatThemeData.channelPreviewTheme.avatarTheme?.constraints,
-            onTap: onTap,
-            selected: selected,
-            selectionColor:
-                selectionColor ?? chatThemeData.colorTheme.accentPrimary,
-            selectionThickness: selectionThickness,
-          );
-        }
+      builder: (context, extraData) {
+        final channelImage = extraData['image'];
 
-        Widget child = ClipRRect(
-          borderRadius: borderRadius ??
-              chatThemeData.channelPreviewTheme.avatarTheme?.borderRadius,
-          child: Container(
-            constraints: constraints ??
-                chatThemeData.channelPreviewTheme.avatarTheme?.constraints,
-            decoration: BoxDecoration(
-              color: chatThemeData.colorTheme.accentPrimary,
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              fit: StackFit.expand,
-              children: <Widget>[
-                if (image != null)
-                  CachedNetworkImage(
-                    imageUrl: image,
-                    errorWidget: (_, __, ___) => Center(
-                      child: Text(
-                        data.containsKey('name') ? data['name'][0] : '',
-                        style: TextStyle(
-                          color: chatThemeData.colorTheme.barsBg,
-                          fontWeight: FontWeight.bold,
-                        ),
+        if (channelImage != null) {
+          Widget child = ClipRRect(
+            borderRadius: borderRadius ?? previewTheme?.borderRadius,
+            child: Container(
+              constraints: constraints ?? previewTheme?.constraints,
+              decoration: BoxDecoration(color: colorTheme.accentPrimary),
+              child: InkWell(
+                onTap: onTap,
+                child: CachedNetworkImage(
+                  imageUrl: channelImage,
+                  errorWidget: (_, __, ___) => Center(
+                    child: Text(
+                      extraData['name']?[0] ?? '',
+                      style: TextStyle(
+                        color: colorTheme.barsBg,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    fit: BoxFit.cover,
-                  )
-                else
-                  chatThemeData.defaultChannelImage(
-                    context,
-                    channel,
                   ),
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: onTap,
-                  ),
+                  fit: BoxFit.cover,
                 ),
-              ],
-            ),
-          ),
-        );
-        if (selected) {
-          child = ClipRRect(
-            key: const Key('selectedImage'),
-            borderRadius: (borderRadius ??
-                    chatThemeData.ownMessageTheme.avatarTheme?.borderRadius ??
-                    BorderRadius.zero) +
-                BorderRadius.circular(selectionThickness),
-            child: Container(
-              constraints: constraints ??
-                  chatThemeData.ownMessageTheme.avatarTheme?.constraints,
-              color: selectionColor ?? chatThemeData.colorTheme.accentPrimary,
-              child: Padding(
-                padding: EdgeInsets.all(selectionThickness),
-                child: child,
               ),
             ),
           );
+
+          if (selected) {
+            child = ClipRRect(
+              key: const Key('selectedImage'),
+              borderRadius: BorderRadius.circular(selectionThickness) +
+                  (borderRadius ??
+                      previewTheme?.borderRadius ??
+                      BorderRadius.zero),
+              child: Container(
+                constraints: constraints ?? previewTheme?.constraints,
+                color: selectionColor ?? colorTheme.accentPrimary,
+                child: Padding(
+                  padding: EdgeInsets.all(selectionThickness),
+                  child: child,
+                ),
+              ),
+            );
+          }
+          return child;
         }
-        return child;
+
+        final currentUser = streamChat.user!;
+        final otherMembers = channel.state!.members
+            .where((it) => it.userId != currentUser.id)
+            .toList(growable: false);
+
+        // our own space, no other members
+        if (otherMembers.isEmpty) {
+          return BetterStreamBuilder<User>(
+            stream: streamChat.client.state.userStream.map((it) => it!),
+            initialData: currentUser,
+            builder: (context, user) => UserAvatar(
+              borderRadius: borderRadius ?? previewTheme?.borderRadius,
+              user: user,
+              constraints: constraints ?? previewTheme?.constraints,
+              onTap: onTap != null ? (_) => onTap!() : null,
+              selected: selected,
+              selectionColor: selectionColor ?? colorTheme.accentPrimary,
+              selectionThickness: selectionThickness,
+            ),
+          );
+        }
+
+        // 1-1 Conversation
+        if (otherMembers.length == 1) {
+          final member = otherMembers.first;
+          final user = member.user!;
+          return BetterStreamBuilder<User>(
+            stream: streamChat.client.state.usersStream
+                .map((users) => users[member.userId ?? user.id] ?? user)
+                .distinct(),
+            initialData: user,
+            builder: (context, user) => UserAvatar(
+              borderRadius: borderRadius ?? previewTheme?.borderRadius,
+              user: user,
+              constraints: constraints ?? previewTheme?.constraints,
+              onTap: onTap != null ? (_) => onTap!() : null,
+              selected: selected,
+              selectionColor: selectionColor ?? colorTheme.accentPrimary,
+              selectionThickness: selectionThickness,
+            ),
+          );
+        }
+
+        // Group conversation
+        return GroupImage(
+          members: otherMembers,
+          borderRadius: borderRadius ?? previewTheme?.borderRadius,
+          constraints: constraints ?? previewTheme?.constraints,
+          onTap: onTap,
+          selected: selected,
+          selectionColor: selectionColor ?? colorTheme.accentPrimary,
+          selectionThickness: selectionThickness,
+        );
       },
     );
   }
