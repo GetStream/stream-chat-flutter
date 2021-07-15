@@ -27,10 +27,9 @@ void main() {
           type: 'testType',
           user: users[index],
           createdAt: DateTime.now(),
-          shadowed: false,
           replyCount: index,
           updatedAt: DateTime.now(),
-          extraData: {'extra_test_field': 'extraTestData'},
+          extraData: const {'extra_test_field': 'extraTestData'},
           text: 'Dummy text #$index',
           pinned: true,
           pinnedAt: DateTime.now(),
@@ -48,10 +47,9 @@ void main() {
           user: users[index],
           parentId: messages[0].id,
           createdAt: DateTime.now(),
-          shadowed: false,
           replyCount: index,
           updatedAt: DateTime.now(),
-          extraData: {'extra_test_field': 'extraTestData'},
+          extraData: const {'extra_test_field': 'extraTestData'},
           text: 'Dummy text #$index',
           pinned: true,
           pinnedAt: DateTime.now(),
@@ -63,16 +61,15 @@ void main() {
   }
 
   testWidgets(
-    'should throw if MessageListCore is used where StreamChannel is not present '
-    'in the widget tree',
+    '''should throw if MessageListCore is used where StreamChannel is not present in the widget tree''',
     (tester) async {
       const messageListCoreKey = Key('messageListCore');
       final messageListCore = MessageListCore(
         key: messageListCoreKey,
-        messageListBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        messageListBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       await tester.pumpWidget(messageListCore);
@@ -88,10 +85,10 @@ void main() {
       const messageListCoreKey = Key('messageListCore');
       final messageListCore = MessageListCore(
         key: messageListCoreKey,
-        messageListBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        messageListBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       final mockChannel = MockChannel();
@@ -120,10 +117,10 @@ void main() {
       final controller = MessageListController();
       final messageListCore = MessageListCore(
         key: messageListCoreKey,
-        messageListBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        messageListBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         messageListController: controller,
       );
 
@@ -150,16 +147,16 @@ void main() {
   );
 
   testWidgets(
-    'should assign paginateData callback and paginate data correctly if a MessageListController is passed',
+    '''should assign paginateData callback and paginate data correctly if a MessageListController is passed''',
     (tester) async {
       const messageListCoreKey = Key('messageListCore');
       final controller = MessageListController();
       final messageListCore = MessageListCore(
         key: messageListCoreKey,
-        messageListBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        messageListBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         messageListController: controller,
       );
 
@@ -207,10 +204,10 @@ void main() {
       const errorWidgetKey = Key('errorWidget');
       final messageListCore = MessageListCore(
         key: messageListCoreKey,
-        messageListBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(
+        messageListBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(
           key: errorWidgetKey,
         ),
       );
@@ -249,10 +246,11 @@ void main() {
       const emptyWidgetKey = Key('emptyWidget');
       final messageListCore = MessageListCore(
         key: messageListCoreKey,
-        messageListBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(key: emptyWidgetKey),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        messageListBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) =>
+            const Offstage(key: emptyWidgetKey),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       final mockChannel = MockChannel();
@@ -289,10 +287,10 @@ void main() {
       const listWidgetKey = Key('listWidget');
       final messageListCore = MessageListCore(
         key: messageListCoreKey,
-        messageListBuilder: (_, __) => Offstage(key: listWidgetKey),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        messageListBuilder: (_, __) => const Offstage(key: listWidgetKey),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       final mockChannel = MockChannel();
@@ -344,9 +342,9 @@ void main() {
             messages.reversed.map((it) => it.id).join(','),
           ),
         ),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       final mockChannel = MockChannel();
@@ -391,9 +389,9 @@ void main() {
             messages.reversed.map((it) => '${it.parentId}-${it.id}').join(','),
           ),
         ),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         parentMessage: parentMessage,
       );
 
