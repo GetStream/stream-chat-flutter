@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
         client: client,
         child: child,
       ),
-      home: ChannelListPage(),
+      home: const ChannelListPage(),
     );
   }
 }
