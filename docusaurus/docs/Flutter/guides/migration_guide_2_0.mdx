@@ -260,7 +260,7 @@ and the other to disconnect the user. This allows more fine-grained control of d
     * `client.closeConnection()` -> for closing user websocket connection.
     * `client.disconnectUser()` -> for disconnecting user and resetting client state.
 
-3) We refactored how we handle errors - new error types are now introduced instead of ApiError.
+3) We refactored how we handle errors - new error types are now introduced that replace ApiError.
 
     * `StreamChatError` -> parent type for all the stream errors.
     * `StreamWebSocketError` -> for user websocket related errors.
