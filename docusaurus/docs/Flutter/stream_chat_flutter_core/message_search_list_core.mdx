@@ -1,0 +1,41 @@
+---
+id: message_search_list_core
+sidebar_position: 6
+title: MessageSearchListCore
+---
+
+A Widget For Displaying Message Searches
+
+### Background
+
+The UI SDK of Stream Chat supplies a `MessageSearchListView` class that builds a list of channels fetching
+according to the filters and sort order given. However, in some cases, implementing novel UI is necessary
+that cannot be done using the customization approaches given in the widget.
+
+To do this, we extracted the logic required for fetching channels into a 'Core' widget - a widget that
+fetches channels in the expected way via the usual params but does not supply any UI and instead
+exposes builders to build the UI in situations such as loading, empty data, errors, and on data received.
+
+### Basic Example
+
+`MessageSearchListCore` is a simplified class that allows searching for
+ messages across channels while exposing UI builders.
+ A `MessageSearchListController` is used to load and paginate data.
+
+```dart
+class MessageSearchPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: MessageSearchListCore(
+              messageQuery: _messageFilter,
+              filters: _channelsFilter,
+              paginationParams: PaginationParams(limit: 20),
+      ),
+    );
+  }
+}
+```
+
+Make sure to have a `MessageSearchBloc` ancestor in order to provide the
+information about the messages.
