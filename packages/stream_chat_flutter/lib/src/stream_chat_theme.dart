@@ -55,7 +55,6 @@ class StreamChatThemeData {
     MessageTheme? otherMessageTheme,
     MessageTheme? ownMessageTheme,
     MessageInputTheme? messageInputTheme,
-    Widget Function(BuildContext, Channel)? defaultChannelImage,
     Widget Function(BuildContext, User)? defaultUserImage,
     IconThemeData? primaryIconTheme,
     List<ReactionIcon>? reactionIcons,
@@ -79,7 +78,6 @@ class StreamChatThemeData {
       otherMessageTheme: otherMessageTheme,
       ownMessageTheme: ownMessageTheme,
       messageInputTheme: messageInputTheme,
-      defaultChannelImage: defaultChannelImage,
       defaultUserImage: defaultUserImage,
       primaryIconTheme: primaryIconTheme,
       reactionIcons: reactionIcons,
@@ -108,7 +106,6 @@ class StreamChatThemeData {
     required this.otherMessageTheme,
     required this.ownMessageTheme,
     required this.messageInputTheme,
-    required this.defaultChannelImage,
     required this.defaultUserImage,
     required this.primaryIconTheme,
     required this.reactionIcons,
@@ -160,9 +157,6 @@ class StreamChatThemeData {
   /// Theme dedicated to the [MessageInput] widget
   final MessageInputTheme messageInputTheme;
 
-  /// The widget that will be built when the channel image is unavailable
-  final Widget Function(BuildContext, Channel) defaultChannelImage;
-
   /// The widget that will be built when the user image is unavailable
   final Widget Function(BuildContext, User) defaultUserImage;
 
@@ -182,7 +176,6 @@ class StreamChatThemeData {
     MessageTheme? ownMessageTheme,
     MessageTheme? otherMessageTheme,
     MessageInputTheme? messageInputTheme,
-    Widget Function(BuildContext, Channel)? defaultChannelImage,
     Widget Function(BuildContext, User)? defaultUserImage,
     IconThemeData? primaryIconTheme,
     ChannelListHeaderTheme? channelListHeaderTheme,
@@ -196,7 +189,6 @@ class StreamChatThemeData {
         textTheme: this.textTheme.merge(textTheme),
         colorTheme: this.colorTheme.merge(colorTheme),
         primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
-        defaultChannelImage: defaultChannelImage ?? this.defaultChannelImage,
         defaultUserImage: defaultUserImage ?? this.defaultUserImage,
         channelPreviewTheme:
             this.channelPreviewTheme.merge(channelPreviewTheme),
@@ -218,7 +210,6 @@ class StreamChatThemeData {
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
       primaryIconTheme: other.primaryIconTheme,
-      defaultChannelImage: other.defaultChannelImage,
       defaultUserImage: other.defaultUserImage,
       channelPreviewTheme: channelPreviewTheme.merge(other.channelPreviewTheme),
       channelTheme: channelTheme.merge(other.channelTheme),
@@ -278,7 +269,6 @@ class StreamChatThemeData {
       textTheme: textTheme,
       colorTheme: colorTheme,
       primaryIconTheme: iconTheme,
-      defaultChannelImage: (context, channel) => const SizedBox(),
       defaultUserImage: (context, user) => Center(
         child: CachedNetworkImage(
           filterQuality: FilterQuality.high,

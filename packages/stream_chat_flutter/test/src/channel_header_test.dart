@@ -14,10 +14,12 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
       final channelState = MockChannelState();
+      final user = OwnUser(id: 'user-id');
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.user).thenReturn(user);
+      when(() => clientState.userStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -63,7 +65,7 @@ void main() {
       ));
 
       expect(find.text('test'), findsOneWidget);
-      expect(find.byType(ChannelImage), findsOneWidget);
+      expect(find.byType(ChannelAvatar), findsOneWidget);
       expect(find.byType(StreamBackButton), findsOneWidget);
       expect(find.byType(ChannelInfo), findsOneWidget);
     },
@@ -76,10 +78,12 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
       final channelState = MockChannelState();
+      final user = OwnUser(id: 'user-id');
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.user).thenReturn(user);
+      when(() => clientState.userStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -141,10 +145,12 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
       final channelState = MockChannelState();
+      final user = OwnUser(id: 'user-id');
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.user).thenReturn(user);
+      when(() => clientState.userStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -207,10 +213,12 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
       final channelState = MockChannelState();
+      final user = OwnUser(id: 'user-id');
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.user).thenReturn(user);
+      when(() => clientState.userStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -263,7 +271,7 @@ void main() {
 
       expect(find.text('test'), findsNothing);
       expect(find.byType(StreamBackButton), findsNothing);
-      expect(find.byType(ChannelImage), findsNothing);
+      expect(find.byType(ChannelAvatar), findsNothing);
       expect(find.byType(ChannelInfo), findsNothing);
       expect(find.text('leading'), findsOneWidget);
       expect(find.text('title'), findsOneWidget);
@@ -281,10 +289,12 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
       final channelState = MockChannelState();
+      final user = OwnUser(id: 'user-id');
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.user).thenReturn(user);
+      when(() => clientState.userStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -346,10 +356,12 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
       final channelState = MockChannelState();
+      final user = OwnUser(id: 'user-id');
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.user).thenReturn(user);
+      when(() => clientState.userStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -403,7 +415,7 @@ void main() {
       ));
 
       await tester.tap(find.byType(StreamBackButton));
-      await tester.tap(find.byType(ChannelImage));
+      await tester.tap(find.byType(ChannelAvatar));
       await tester.tap(find.byType(ChannelName));
 
       expect(backPressed, true);

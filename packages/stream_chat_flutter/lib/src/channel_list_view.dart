@@ -620,7 +620,7 @@ class _ChannelListViewState extends State<ChannelListView> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ChannelImage(
+          ChannelAvatar(
             channel: channel,
             borderRadius: BorderRadius.circular(32),
             selected: selected,
