@@ -205,20 +205,19 @@ in the constructor)
 * Migrate this package to null safety
 * ConnectUserWithProvider now requires tokenProvider as a required param. (Removed from the constructor)
 * client.disconnect() is now divided into two different functions
-* client.closeConnection() -> for closing user websocket connection.
-* client.disconnectUser() -> for disconnecting user and resetting client state.
+    * client.closeConnection() -> for closing user websocket connection.
+    * client.disconnectUser() -> for disconnecting user and resetting client state.
 * client.devToken() now returns a Token model instead of String.
 * ApiError is removed in favor of StreamChatError
-* StreamChatError -> parent type for all the stream errors.
-* StreamWebSocketError -> for user websocket related errors.
-* StreamChatNetworkError -> for network related errors.
+    * StreamChatError -> parent type for all the stream errors.
+    * StreamWebSocketError -> for user websocket related errors.
+    * StreamChatNetworkError -> for network related errors.
 * client.queryChannels(), channel.query() options param is removed in favor of individual params
-* option.state -> bool state
-* option.watch -> bool watch
-* option.presence -> bool presence
+    * option.state -> bool state
+    * option.watch -> bool watch
+    * option.presence -> bool presence
 * client.queryUsers() options param is removed in favor of individual params
-* option.presence -> bool presence
-* Migrate this package to null safety
+    * option.presence -> bool presence
 * Added typed filters
 
 #### 🐞 Fixed
@@ -237,3 +236,63 @@ in the constructor)
 #### 🔄 Changed
 
 * baseURL is now deprecated in favor of using Location to change data location.
+
+### Migrating to 2.0 for `stream_chat`
+
+If you are migrating your full Flutter project to null-safety, first make sure you follow the
+instructions from the [official Null Safety migration guide](https://dart.dev/null-safety/migration-guide).
+:::
+
+To migrate to v2.0 for `stream_chat`, first change the version of the package to the latest
+null-safe version.
+
+```yaml
+dependencies:
+  stream_chat: ^2.0.0
+```
+
+Upon doing this, all breaking changes from the package will take immediate effect. Here are steps to
+remedy the issue:
+
+1) Change over the constructor of `connectUserWithProvider()` to the new format.
+
+2) We added more nuance to the `disconnectUser` by adding two new methods - one to close the connection
+and the other to disconnect the user. This allows more fine-grained control for diconnection.
+
+    * client.closeConnection() -> for closing user websocket connection.
+    * client.disconnectUser() -> for disconnecting user and resetting client state.
+
+3) We refactored how we handle errors - new error types are now introduced instead of ApiError.
+
+    * StreamChatError -> parent type for all the stream errors.
+    * StreamWebSocketError -> for user websocket related errors.
+    * StreamChatNetworkError -> for network related errors.
+
+4) We changed over from a map full of options to a more type safe and sound approach by changing over to explicit parameters.
+
+Use these explicit parameters in the query parameters instead of the option keys:
+
+* client.queryChannels(), channel.query() options param is removed in favor of individual params
+    * option.state -> bool state
+    * option.watch -> bool watch
+    * option.presence -> bool presence
+* client.queryUsers() options param is removed in favor of individual params
+    * option.presence -> bool presence
+
+5) We added type safe filters to make filtering in the app easier.
+
+As an example, in the old app this filter:
+
+```
+    filter: {
+      'members': {
+        '\$in': [StreamChat.of(context).user.id],
+      }
+    },
+```
+
+Would turn into:
+
+```
+    filter: Filter.in_('members', [StreamChat.of(context).user.id])
+```
