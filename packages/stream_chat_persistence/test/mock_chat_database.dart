@@ -1,55 +1,61 @@
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_persistence/src/dao/dao.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 
 class MockChatDatabase extends Mock implements MoorChatDatabase {
-  UserDao _userDao;
+  UserDao? _userDao;
 
   @override
   UserDao get userDao => _userDao ??= MockUserDao();
 
-  ChannelDao _channelDao;
+  ChannelDao? _channelDao;
 
   @override
   ChannelDao get channelDao => _channelDao ??= MockChannelDao();
 
-  MessageDao _messageDao;
+  MessageDao? _messageDao;
 
   @override
   MessageDao get messageDao => _messageDao ??= MockMessageDao();
 
-  PinnedMessageDao _pinnedMessageDao;
+  PinnedMessageDao? _pinnedMessageDao;
 
   @override
   PinnedMessageDao get pinnedMessageDao =>
       _pinnedMessageDao ??= MockPinnedMessageDao();
 
-  MemberDao _memberDao;
+  MemberDao? _memberDao;
 
   @override
   MemberDao get memberDao => _memberDao ??= MockMemberDao();
 
-  ReactionDao _reactionDao;
+  ReactionDao? _reactionDao;
 
   @override
   ReactionDao get reactionDao => _reactionDao ??= MockReactionDao();
 
-  ReadDao _readDao;
+  ReadDao? _readDao;
 
   @override
   ReadDao get readDao => _readDao ??= MockReadDao();
 
-  ChannelQueryDao _channelQueryDao;
+  ChannelQueryDao? _channelQueryDao;
 
   @override
   ChannelQueryDao get channelQueryDao =>
       _channelQueryDao ??= MockChannelQueryDao();
 
-  ConnectionEventDao _connectionEventDao;
+  ConnectionEventDao? _connectionEventDao;
 
   @override
   ConnectionEventDao get connectionEventDao =>
       _connectionEventDao ??= MockConnectionEventDao();
+
+  @override
+  Future<void> flush() => Future.value();
+
+  @override
+  Future<void> disconnect() => Future.value();
 }
 
 class MockUserDao extends Mock implements UserDao {}

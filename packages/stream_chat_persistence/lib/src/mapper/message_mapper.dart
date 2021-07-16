@@ -7,22 +7,22 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 extension MessageEntityX on MessageEntity {
   /// Maps a [MessageEntity] into [Message]
   Message toMessage({
-    User user,
-    User pinnedBy,
-    List<Reaction> latestReactions,
-    List<Reaction> ownReactions,
-    Message quotedMessage,
+    User? user,
+    User? pinnedBy,
+    List<Reaction>? latestReactions,
+    List<Reaction>? ownReactions,
+    Message? quotedMessage,
   }) =>
       Message(
         shadowed: shadowed,
         latestReactions: latestReactions,
         ownReactions: ownReactions,
-        attachments: attachments?.map((it) {
+        attachments: attachments.map((it) {
           final json = jsonDecode(it);
           return Attachment.fromData(json);
-        })?.toList(),
+        }).toList(),
         createdAt: createdAt,
-        extraData: extraData,
+        extraData: extraData ?? <String, Object>{},
         updatedAt: updatedAt,
         id: id,
         type: type,
@@ -42,16 +42,17 @@ extension MessageEntityX on MessageEntity {
         pinnedAt: pinnedAt,
         pinExpires: pinExpires,
         pinnedBy: pinnedBy,
+        mentionedUsers:
+            mentionedUsers.map((e) => User.fromJson(jsonDecode(e))).toList(),
       );
 }
 
 /// Useful mapping functions for [Message]
 extension MessageX on Message {
   /// Maps a [Message] into [MessageEntity]
-  MessageEntity toEntity({String cid}) => MessageEntity(
+  MessageEntity toEntity({String? cid}) => MessageEntity(
         id: id,
-        attachments:
-            attachments?.map((it) => jsonEncode(it.toData()))?.toList(),
+        attachments: attachments.map((it) => jsonEncode(it.toData())).toList(),
         channelCid: cid,
         type: type,
         parentId: parentId,
@@ -63,6 +64,7 @@ extension MessageX on Message {
         replyCount: replyCount,
         reactionScores: reactionScores,
         reactionCounts: reactionCounts,
+        mentionedUsers: mentionedUsers.map(jsonEncode).toList(),
         status: status,
         updatedAt: updatedAt,
         extraData: extraData,

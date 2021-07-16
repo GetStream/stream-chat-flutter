@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -38,14 +39,13 @@ class StreamChatCore extends StatefulWidget {
   /// [StreamChatCore] is a stateful widget which reacts to system events and
   /// updates Stream's connection status accordingly.
   const StreamChatCore({
-    Key key,
-    @required this.client,
-    @required this.child,
+    Key? key,
+    required this.client,
+    required this.child,
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(minutes: 1),
-  })  : assert(client != null, 'Stream Chat Client should not be null'),
-        assert(child != null, 'Child should not be null'),
-        super(key: key);
+    this.connectivityStream,
+  }) : super(key: key);
 
   /// Instance of Stream Chat Client containing information about the current
   /// application.
@@ -61,23 +61,28 @@ class StreamChatCore extends StatefulWidget {
   /// Handler called whenever the [client] receives a new [Event] while the app
   /// is in background. Can be used to display various notifications depending
   /// upon the [Event.type]
-  final EventHandler onBackgroundEventReceived;
+  final EventHandler? onBackgroundEventReceived;
+
+  /// Stream of connectivity result
+  /// Visible for testing
+  @visibleForTesting
+  final Stream<ConnectivityResult>? connectivityStream;
 
   @override
   StreamChatCoreState createState() => StreamChatCoreState();
 
   /// Use this method to get the current [StreamChatCoreState] instance
   static StreamChatCoreState of(BuildContext context) {
-    StreamChatCoreState streamChatState;
+    StreamChatCoreState? streamChatState;
 
     streamChatState = context.findAncestorStateOfType<StreamChatCoreState>();
 
-    if (streamChatState == null) {
-      throw Exception(
-          'You must have a StreamChat widget at the top of your widget tree');
-    }
+    assert(
+      streamChatState != null,
+      'You must have a StreamChat widget at the top of your widget tree',
+    );
 
-    return streamChatState;
+    return streamChatState!;
   }
 }
 
@@ -87,59 +92,119 @@ class StreamChatCoreState extends State<StreamChatCore>
   /// Initialized client used throughout the application.
   StreamChatClient get client => widget.client;
 
-  Timer _disconnectTimer;
+  Timer? _disconnectTimer;
 
   @override
   Widget build(BuildContext context) => widget.child;
 
   /// The current user
-  User get user => client.state?.user;
+  User? get user => client.state.user;
 
   /// The current user as a stream
-  Stream<User> get userStream => client.state?.userStream;
+  Stream<User?> get userStream => client.state.userStream;
+
+  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
+
+  var _isInForeground = true;
+  var _isConnectionAvailable = true;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
+    _subscribeToConnectivityChange(widget.connectivityStream);
   }
 
-  StreamSubscription _eventSubscription;
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (user != null) {
-      if (state == AppLifecycleState.paused) {
-        if (widget.onBackgroundEventReceived == null) {
-          client.disconnect();
-          return;
-        }
-        _eventSubscription = client.on().listen(
-              widget.onBackgroundEventReceived,
-            );
-
-        void onTimerComplete() {
-          _eventSubscription.cancel();
-          client.disconnect();
-        }
-
-        _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
-      } else if (state == AppLifecycleState.resumed) {
-        if (_disconnectTimer?.isActive == true) {
-          _eventSubscription.cancel();
-          _disconnectTimer.cancel();
+  void _subscribeToConnectivityChange([
+    Stream<ConnectivityResult>? connectivityStream,
+  ]) {
+    if (_connectivitySubscription == null) {
+      connectivityStream ??= Connectivity().onConnectivityChanged;
+      _connectivitySubscription =
+          connectivityStream.distinct().listen((result) {
+        _isConnectionAvailable = result != ConnectivityResult.none;
+        if (!_isInForeground) return;
+        if (_isConnectionAvailable) {
+          if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
+              user != null) {
+            client.openConnection();
+          }
         } else {
-          if (client.wsConnectionStatus == ConnectionStatus.disconnected) {
-            client.connect();
+          if (client.wsConnectionStatus == ConnectionStatus.connected) {
+            client.closeConnection();
           }
         }
-      }
+      });
+    }
+  }
+
+  void _unsubscribeFromConnectivityChange() {
+    if (_connectivitySubscription != null) {
+      _connectivitySubscription?.cancel();
+      _connectivitySubscription = null;
     }
   }
 
   @override
+  void didUpdateWidget(StreamChatCore oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final connectivityStream = widget.connectivityStream;
+    if (connectivityStream != oldWidget.connectivityStream) {
+      _unsubscribeFromConnectivityChange();
+      _subscribeToConnectivityChange(connectivityStream);
+    }
+  }
+
+  StreamSubscription? _eventSubscription;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _isInForeground = [
+      AppLifecycleState.resumed,
+      AppLifecycleState.inactive,
+    ].contains(state);
+    if (user != null) {
+      if (_isInForeground) {
+        _onForeground();
+      } else {
+        _onBackground();
+      }
+    }
+  }
+
+  void _onForeground() {
+    if (_disconnectTimer?.isActive == true) {
+      _eventSubscription?.cancel();
+      _disconnectTimer?.cancel();
+    } else if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
+        _isConnectionAvailable) {
+      client.openConnection();
+    }
+  }
+
+  void _onBackground() {
+    if (widget.onBackgroundEventReceived == null) {
+      if (client.wsConnectionStatus != ConnectionStatus.disconnected) {
+        client.closeConnection();
+      }
+      return;
+    }
+
+    _eventSubscription = client.on().listen(widget.onBackgroundEventReceived);
+
+    void onTimerComplete() {
+      _eventSubscription?.cancel();
+      client.closeConnection();
+    }
+
+    _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
+    return;
+  }
+
+  @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
+    _unsubscribeFromConnectivityChange();
     _eventSubscription?.cancel();
     _disconnectTimer?.cancel();
     super.dispose();

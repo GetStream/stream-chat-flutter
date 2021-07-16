@@ -4,8 +4,8 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 /// Useful mapping functions for [ReactionEntity]
 extension ReactionEntityX on ReactionEntity {
   /// Maps a [ReactionEntity] into [Reaction]
-  Reaction toReaction({User user}) => Reaction(
-        extraData: extraData,
+  Reaction toReaction({User? user}) => Reaction(
+        extraData: extraData ?? {},
         type: type,
         createdAt: createdAt,
         userId: userId,
@@ -22,8 +22,8 @@ extension ReactionX on Reaction {
         extraData: extraData,
         type: type,
         createdAt: createdAt,
-        userId: userId,
-        messageId: messageId,
+        userId: userId!,
+        messageId: messageId!,
         score: score,
       );
 }

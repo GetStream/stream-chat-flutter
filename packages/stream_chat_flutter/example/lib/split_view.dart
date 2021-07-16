@@ -10,131 +10,131 @@ void main() async {
 
   await client.connectUser(
     User(id: 'super-band-9'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
+    '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A''',
   );
 
-  runApp(MyApp(client));
+  runApp(
+    MyApp(
+      client: client,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({
+    Key? key,
+    required this.client,
+  }) : super(key: key);
+
   final StreamChatClient client;
 
-  MyApp(this.client);
-
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      builder: (context, child) => StreamChat(
-        child: child,
-        client: client,
-      ),
-      home: SplitView(),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+        builder: (context, child) => StreamChat(
+          client: client,
+          child: child,
+        ),
+        home: const SplitView(),
+      );
 }
 
 class SplitView extends StatefulWidget {
+  const SplitView({
+    Key? key,
+  }) : super(key: key);
+
   @override
   _SplitViewState createState() => _SplitViewState();
 }
 
 class _SplitViewState extends State<SplitView> {
-  Channel selectedChannel;
+  Channel? selectedChannel;
 
   @override
-  Widget build(BuildContext context) {
-    return Flex(
-      direction: Axis.horizontal,
-      children: <Widget>[
-        Flexible(
-          child: ChannelListPage(
-            onTap: (channel) {
-              setState(() {
-                selectedChannel = channel;
-              });
-            },
+  Widget build(BuildContext context) => Flex(
+        direction: Axis.horizontal,
+        children: <Widget>[
+          Flexible(
+            child: ChannelListPage(
+              onTap: (channel) {
+                setState(() {
+                  selectedChannel = channel;
+                });
+              },
+            ),
           ),
-          flex: 1,
-        ),
-        Flexible(
-          child: Scaffold(
-            body: selectedChannel != null
-                ? StreamChannel(
-                    key: ValueKey(selectedChannel.cid),
-                    child: ChannelPage(),
-                    channel: selectedChannel,
-                  )
-                : Center(
-                    child: Text(
-                      'Pick a channel to show the messages 💬',
-                      style: Theme.of(context).textTheme.headline5,
+          Flexible(
+            flex: 2,
+            child: Scaffold(
+              body: selectedChannel != null
+                  ? StreamChannel(
+                      key: ValueKey(selectedChannel!.cid),
+                      channel: selectedChannel!,
+                      child: const ChannelPage(),
+                    )
+                  : Center(
+                      child: Text(
+                        'Pick a channel to show the messages 💬',
+                        style: Theme.of(context).textTheme.headline5,
+                      ),
                     ),
-                  ),
+            ),
           ),
-          flex: 2,
-        ),
-      ],
-    );
-  }
+        ],
+      );
 }
 
 class ChannelListPage extends StatelessWidget {
-  final void Function(Channel) onTap;
+  const ChannelListPage({
+    Key? key,
+    this.onTap,
+  }) : super(key: key);
 
-  ChannelListPage({this.onTap});
+  final void Function(Channel)? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ChannelsBloc(
-        child: ChannelListView(
-          onChannelTap: onTap != null
-              ? (channel, _) {
-                  onTap(channel);
-                }
-              : null,
-          filter: {
-            'members': {
-              '\$in': [StreamChat.of(context).user.id],
-            }
-          },
-          sort: [SortOption('last_message_at')],
-          pagination: PaginationParams(
-            limit: 20,
+  Widget build(BuildContext context) => Scaffold(
+        body: ChannelsBloc(
+          child: ChannelListView(
+            onChannelTap: onTap != null
+                ? (channel, _) {
+                    onTap!(channel);
+                  }
+                : null,
+            filter: Filter.in_(
+              'members',
+              [StreamChat.of(context).user!.id],
+            ),
+            sort: const [SortOption('last_message_at')],
+            pagination: const PaginationParams(
+              limit: 20,
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Navigator(
-      onGenerateRoute: (settings) {
-        return MaterialPageRoute(
-          builder: (context) {
-            return Scaffold(
-              appBar: ChannelHeader(
-                showBackButton: false,
-              ),
-              body: Column(
-                children: <Widget>[
-                  Expanded(
-                    child: MessageListView(),
-                  ),
-                  MessageInput(),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
+  Widget build(BuildContext context) => Navigator(
+        onGenerateRoute: (settings) => MaterialPageRoute(
+          builder: (context) => Scaffold(
+            appBar: const ChannelHeader(
+              showBackButton: false,
+            ),
+            body: Column(
+              children: const <Widget>[
+                Expanded(
+                  child: MessageListView(),
+                ),
+                MessageInput(),
+              ],
+            ),
+          ),
+        ),
+      );
 }

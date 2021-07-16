@@ -1,0 +1,29 @@
+{
+  "type": "giphy",
+  "title": "awesome",
+  "title_link": "https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti",
+  "thumb_url": "https://media0.giphy.com/media/3o7TKnCdBx5cMg0qti/giphy.gif",
+  "actions": [
+    {
+      "name": "image_action",
+      "text": "Send",
+      "style": "primary",
+      "type": "button",
+      "value": "send"
+    },
+    {
+      "name": "image_action",
+      "text": "Shuffle",
+      "style": "default",
+      "type": "button",
+      "value": "shuffle"
+    },
+    {
+      "name": "image_action",
+      "text": "Cancel",
+      "style": "default",
+      "type": "button",
+      "value": "cancel"
+    }
+  ]
+}

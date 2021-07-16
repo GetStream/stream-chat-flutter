@@ -5,23 +5,20 @@ import 'package:stream_chat_persistence/src/dao/channel_query_dao.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:test/test.dart';
 
+import '../../stream_chat_persistence_client_test.dart';
 import '../utils/date_matcher.dart';
 
 void main() {
-  MoorChatDatabase database;
-  ChannelQueryDao channelQueryDao;
+  late MoorChatDatabase database;
+  late ChannelQueryDao channelQueryDao;
 
   setUp(() {
-    database = MoorChatDatabase.testable('testUserId');
+    database = testDatabaseProvider('testUserId');
     channelQueryDao = database.channelQueryDao;
   });
 
   test('updateChannelQueries', () async {
-    const filter = {
-      'members': {
-        r'$in': ['testUserId'],
-      },
-    };
+    final filter = Filter.in_('members', const ['testUserId']);
 
     const cids = ['testCid1', 'testCid2', 'testCid3'];
 
@@ -36,11 +33,7 @@ void main() {
   });
 
   test('clear queryCache before updateChannelQueries', () async {
-    const filter = {
-      'members': {
-        r'$in': ['testUserId'],
-      },
-    };
+    final filter = Filter.in_('members', const ['testUserId']);
 
     const cids = ['testCid1', 'testCid2', 'testCid3'];
 
@@ -59,11 +52,7 @@ void main() {
   });
 
   test('getCachedChannelCids', () async {
-    const filter = {
-      'members': {
-        r'$in': ['testUserId'],
-      },
-    };
+    final filter = Filter.in_('members', const ['testUserId']);
 
     const cids = ['testCid1', 'testCid2', 'testCid3'];
 
@@ -78,7 +67,7 @@ void main() {
   });
 
   Future<List<ChannelModel>> _insertTestDataForGetChannel(
-    Map<String, Object> filter, {
+    Filter filter, {
     int count = 3,
   }) async {
     final now = DateTime.now();
@@ -110,11 +99,7 @@ void main() {
   }
 
   group('getChannels', () {
-    const filter = {
-      'members': {
-        r'$in': ['testUserId'],
-      },
-    };
+    final filter = Filter.in_('members', const ['testUserId']);
 
     test('should return empty list of channels', () async {
       final channels = await channelQueryDao.getChannels(filter: filter);
@@ -147,7 +132,7 @@ void main() {
         // Should match lastMessageAt date
         expect(
           updatedChannel.lastMessageAt,
-          isSameDateAs(insertedChannel.lastMessageAt),
+          isSameDateAs(insertedChannel.lastMessageAt!),
         );
       }
     });
@@ -160,10 +145,7 @@ void main() {
         const pagination = PaginationParams(offset: offset, limit: limit);
 
         // Inserting test data for get channels
-        final insertedChannels = await _insertTestDataForGetChannel(
-          filter,
-          count: 30,
-        );
+        await _insertTestDataForGetChannel(filter, count: 30);
 
         // Should match with the inserted channels
         final updatedChannels = await channelQueryDao.getChannels(
@@ -187,7 +169,12 @@ void main() {
       // Should match with the inserted channels
       final updatedChannels = await channelQueryDao.getChannels(
         filter: filter,
-        sort: [SortOption('member_count', comparator: sortComparator)],
+        sort: [
+          SortOption(
+            'member_count',
+            comparator: sortComparator,
+          )
+        ],
       );
 
       expect(updatedChannels.length, insertedChannels.length);
@@ -210,7 +197,7 @@ void main() {
         // Should match lastMessageAt date
         expect(
           updatedChannel.lastMessageAt,
-          isSameDateAs(insertedChannel.lastMessageAt),
+          isSameDateAs(insertedChannel.lastMessageAt!),
         );
       }
     });
@@ -226,8 +213,8 @@ void main() {
 
     test('should return sorted channels using custom field', () async {
       int sortComparator(ChannelModel a, ChannelModel b) {
-        final aData = a.extraData['test_custom_field'] as int;
-        final bData = b.extraData['test_custom_field'] as int;
+        final aData = int.parse(a.extraData['test_custom_field'].toString());
+        final bData = int.parse(b.extraData['test_custom_field'].toString());
         return bData.compareTo(aData);
       }
 
@@ -261,7 +248,7 @@ void main() {
         // Should match lastMessageAt date
         expect(
           updatedChannel.lastMessageAt,
-          isSameDateAs(insertedChannel.lastMessageAt),
+          isSameDateAs(insertedChannel.lastMessageAt!),
         );
       }
     });

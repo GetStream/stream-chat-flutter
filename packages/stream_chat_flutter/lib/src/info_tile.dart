@@ -2,41 +2,59 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// Tile to display a message, used in stream chat to display connection status
 class InfoTile extends StatelessWidget {
-  final String message;
-  final Widget child;
-  final bool showMessage;
-  final Alignment tileAnchor;
-  final Alignment childAnchor;
-  final TextStyle textStyle;
-  final Color backgroundColor;
+  /// Constructor for creating an [InfoTile] widget
+  const InfoTile({
+    Key? key,
+    required this.message,
+    required this.child,
+    required this.showMessage,
+    this.tileAnchor,
+    this.childAnchor,
+    this.textStyle,
+    this.backgroundColor,
+  }) : super(key: key);
 
-  InfoTile(
-      {this.message,
-      this.child,
-      this.showMessage,
-      this.tileAnchor,
-      this.childAnchor,
-      this.textStyle,
-      this.backgroundColor});
+  /// String to display
+  final String message;
+
+  /// Widget to display over
+  final Widget child;
+
+  /// Flag to show message
+  final bool showMessage;
+
+  /// Anchor for tile - [portalAnchor] for [PortalEntry]
+  final Alignment? tileAnchor;
+
+  /// Alignment for child - [childAnchor] for [PortalEntry]
+  final Alignment? childAnchor;
+
+  /// [TextStyle] for message
+  final TextStyle? textStyle;
+
+  /// Background color for tile
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
+    final chatThemeData = StreamChatTheme.of(context);
     return PortalEntry(
       visible: showMessage,
       portalAnchor: tileAnchor ?? Alignment.topCenter,
       childAnchor: childAnchor ?? Alignment.bottomCenter,
       portal: Container(
-        height: 25.0,
+        height: 25,
         color: backgroundColor ??
-            StreamChatTheme.of(context).colorTheme.grey.withOpacity(0.9),
+            chatThemeData.colorTheme.textLowEmphasis.withOpacity(0.9),
         child: Center(
           child: Text(
             message,
             style: textStyle ??
-                StreamChatTheme.of(context).textTheme.body.copyWith(
-                      color: Colors.white,
-                    ),
+                chatThemeData.textTheme.body.copyWith(
+                  color: Colors.white,
+                ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

@@ -1,83 +1,32 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter_core/src/message_search_list_core.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
+
+const testFilter = Filter.custom(operator: '\$test', value: 'testValue');
 
 void main() {
   List<GetMessageResponse> _generateMessages({
     int count = 3,
     int offset = 0,
-  }) {
-    return List.generate(
-      count,
-      (index) {
-        index = index + offset;
-        return GetMessageResponse()
-          ..message = Message(
-            id: 'testId$index',
-            text: 'testTextData$index',
-          )
-          ..channel = ChannelModel(
-            cid: 'testCid',
-          );
-      },
-    );
-  }
-
-  test(
-    'should throw assertion error in case childBuilder is null',
-    () {
-      final messageSearchListCore = () => MessageSearchListCore(
-            childBuilder: null,
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (BuildContext context, Object error) => Offstage(),
-          );
-      expect(messageSearchListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case loadingBuilder is null',
-    () {
-      final messageSearchListCore = () => MessageSearchListCore(
-            childBuilder: (List<GetMessageResponse> messages) => Offstage(),
-            loadingBuilder: null,
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (BuildContext context, Object error) => Offstage(),
-          );
-      expect(messageSearchListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case emptyBuilder is null',
-    () {
-      final messageSearchListCore = () => MessageSearchListCore(
-            childBuilder: (List<GetMessageResponse> messages) => Offstage(),
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: null,
-            errorBuilder: (BuildContext context, Object error) => Offstage(),
-          );
-      expect(messageSearchListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case errorBuilder is null',
-    () {
-      final messageSearchListCore = () => MessageSearchListCore(
-            childBuilder: (List<GetMessageResponse> messages) => Offstage(),
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: null,
-          );
-      expect(messageSearchListCore, throwsA(isA<AssertionError>()));
-    },
-  );
+  }) =>
+      List.generate(
+        count,
+        (index) {
+          index = index + offset;
+          return GetMessageResponse()
+            ..message = Message(
+              id: 'testId$index',
+              text: 'testTextData$index',
+            )
+            ..channel = ChannelModel(
+              cid: 'test:Cid',
+            );
+        },
+      );
 
   testWidgets(
     'should throw if MessageSearchListCore is used where MessageSearchBloc '
@@ -86,16 +35,17 @@ void main() {
       const messageSearchListCoreKey = Key('messageSearchListCore');
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
-        childBuilder: (List<GetMessageResponse> messages) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        childBuilder: (List<GetMessageResponse>? messages) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object? error) => const Offstage(),
+        filters: testFilter,
       );
 
       await tester.pumpWidget(messageSearchListCore);
 
       expect(find.byKey(messageSearchListCoreKey), findsNothing);
-      expect(tester.takeException(), isInstanceOf<Exception>());
+      expect(tester.takeException(), isInstanceOf<AssertionError>());
     },
   );
 
@@ -106,10 +56,11 @@ void main() {
       const messageSearchListCoreKey = Key('messageSearchListCore');
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
-        childBuilder: (List<GetMessageResponse> messages) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        childBuilder: (List<GetMessageResponse> messages) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object? error) => const Offstage(),
+        filters: testFilter,
       );
 
       final mockClient = MockClient();
@@ -135,11 +86,12 @@ void main() {
       final controller = MessageSearchListController();
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
-        childBuilder: (List<GetMessageResponse> messages) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        childBuilder: (List<GetMessageResponse> messages) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         messageSearchListController: controller,
+        filters: testFilter,
       );
 
       expect(controller.loadData, isNull);
@@ -155,6 +107,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       expect(find.byKey(messageSearchListCoreKey), findsOneWidget);
       expect(controller.loadData, isNotNull);
@@ -169,24 +122,25 @@ void main() {
       const errorWidgetKey = Key('errorWidget');
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
-        childBuilder: (List<GetMessageResponse> messages) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(
+        childBuilder: (List<GetMessageResponse> messages) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(
           key: errorWidgetKey,
         ),
+        filters: testFilter,
       );
 
       final mockClient = MockClient();
 
       const error = 'Error! Error! Error!';
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).thenThrow(error);
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).thenThrow(error);
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -201,13 +155,13 @@ void main() {
 
       expect(find.byKey(errorWidgetKey), findsOneWidget);
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).called(1);
     },
   );
 
@@ -219,22 +173,24 @@ void main() {
       const emptyWidgetKey = Key('emptyWidget');
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
-        childBuilder: (List<GetMessageResponse> messages) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(key: emptyWidgetKey),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        childBuilder: (List<GetMessageResponse> messages) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) =>
+            const Offstage(key: emptyWidgetKey),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
+        filters: testFilter,
       );
 
       final mockClient = MockClient();
 
       final messageResponseList = <GetMessageResponse>[];
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).thenAnswer(
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).thenAnswer(
         (_) async => SearchMessagesResponse()..results = messageResponseList,
       );
 
@@ -251,13 +207,13 @@ void main() {
 
       expect(find.byKey(emptyWidgetKey), findsOneWidget);
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).called(1);
     },
   );
 
@@ -268,24 +224,25 @@ void main() {
       const childWidgetKey = Key('childWidget');
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
-        childBuilder: (List<GetMessageResponse> messages) => Offstage(
+        childBuilder: (List<GetMessageResponse> messages) => const Offstage(
           key: childWidgetKey,
         ),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
+        filters: testFilter,
       );
 
       final mockClient = MockClient();
 
       final messageResponseList = _generateMessages();
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).thenAnswer(
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).thenAnswer(
         (_) async => SearchMessagesResponse()..results = messageResponseList,
       );
 
@@ -302,13 +259,13 @@ void main() {
 
       expect(find.byKey(childWidgetKey), findsOneWidget);
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).called(1);
     },
   );
 
@@ -324,25 +281,26 @@ void main() {
         childBuilder: (List<GetMessageResponse> messages) => Container(
           key: childWidgetKey,
           child: Text(
-            messages.map((e) => '${e.channel.cid}-${e.message.id}').join(','),
+            messages.map((e) => '${e.channel?.cid}-${e.message.id}').join(','),
           ),
         ),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         paginationParams: pagination,
+        filters: testFilter,
       );
 
       final mockClient = MockClient();
 
       final messageResponseList = _generateMessages();
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: pagination,
-      )).thenAnswer(
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: pagination,
+          )).thenAnswer(
         (_) async => SearchMessagesResponse()..results = messageResponseList,
       );
 
@@ -364,19 +322,19 @@ void main() {
       expect(
         find.text(
           messageResponseList
-              .map((e) => '${e.channel.cid}-${e.message.id}')
+              .map((e) => '${e.channel?.cid}-${e.message.id}')
               .join(','),
         ),
         findsOneWidget,
       );
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: pagination,
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: pagination,
+          )).called(1);
 
       final messageSearchListCoreState =
           tester.state<MessageSearchListCoreState>(
@@ -386,13 +344,13 @@ void main() {
       final offset = messageResponseList.length;
       final paginatedMessageResponseList = _generateMessages(offset: offset);
       final updatedPagination = pagination.copyWith(offset: offset);
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: updatedPagination,
-      )).thenAnswer(
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: updatedPagination,
+          )).thenAnswer(
         (_) async =>
             SearchMessagesResponse()..results = paginatedMessageResponseList,
       );
@@ -406,17 +364,17 @@ void main() {
         find.text([
           ...messageResponseList,
           ...paginatedMessageResponseList,
-        ].map((e) => '${e.channel.cid}-${e.message.id}').join(',')),
+        ].map((e) => '${e.channel?.cid}-${e.message.id}').join(',')),
         findsOneWidget,
       );
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: updatedPagination,
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: updatedPagination,
+          )).called(1);
     },
   );
 
@@ -426,8 +384,8 @@ void main() {
     (tester) async {
       const pagination = PaginationParams();
 
-      StateSetter _stateSetter;
-      int limit = pagination.limit;
+      StateSetter? _stateSetter;
+      var limit = pagination.limit;
 
       const messageSearchListCoreKey = Key('messageSearchListCore');
       const childWidgetKey = Key('childWidget');
@@ -438,26 +396,28 @@ void main() {
               key: childWidgetKey,
               child: Text(
                 messages
-                    .map((e) => '${e.channel.cid}-${e.message.id}')
+                    .map((e) => '${e.channel?.cid}-${e.message.id}')
                     .join(','),
               ),
             ),
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (BuildContext context, Object error) => Offstage(),
+            loadingBuilder: (BuildContext context) => const Offstage(),
+            emptyBuilder: (BuildContext context) => const Offstage(),
+            errorBuilder: (BuildContext context, Object error) =>
+                const Offstage(),
             paginationParams: pagination.copyWith(limit: limit),
+            filters: testFilter,
           );
 
       final mockClient = MockClient();
 
       final messageResponseList = _generateMessages();
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: pagination,
-      )).thenAnswer(
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: pagination,
+          )).thenAnswer(
         (_) async => SearchMessagesResponse()..results = messageResponseList,
       );
 
@@ -483,32 +443,32 @@ void main() {
       expect(
         find.text(
           messageResponseList
-              .map((e) => '${e.channel.cid}-${e.message.id}')
+              .map((e) => '${e.channel?.cid}-${e.message.id}')
               .join(','),
         ),
         findsOneWidget,
       );
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: pagination,
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: pagination,
+          )).called(1);
 
       // Rebuilding MessageSearchListCore with new pagination limit
-      _stateSetter(() => limit = 6);
+      _stateSetter?.call(() => limit = 6);
 
       final updatedMessageResponseList = _generateMessages(count: limit);
       final updatedPagination = pagination.copyWith(limit: limit);
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: updatedPagination,
-      )).thenAnswer(
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: updatedPagination,
+          )).thenAnswer(
         (_) async =>
             SearchMessagesResponse()..results = updatedMessageResponseList,
       );
@@ -518,18 +478,18 @@ void main() {
       expect(find.byKey(childWidgetKey), findsOneWidget);
       expect(
         find.text(updatedMessageResponseList
-            .map((e) => '${e.channel.cid}-${e.message.id}')
+            .map((e) => '${e.channel?.cid}-${e.message.id}')
             .join(',')),
         findsOneWidget,
       );
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: updatedPagination,
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: updatedPagination,
+          )).called(1);
     },
   );
 }

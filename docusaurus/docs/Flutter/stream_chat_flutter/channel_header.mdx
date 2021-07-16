@@ -1,0 +1,84 @@
+---
+id: channel_header
+sidebar_position: 10
+title: ChannelHeader
+---
+
+A Widget To Display Common Channel Details
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ChannelHeader-class.html)
+
+![](../assets/channel_header.png)
+
+### Background
+
+When a user opens a channel, it is helpful to provide context of which channel they are in. This may
+be in the form of a channel name or the users in the channel. Along with that, there also needs to be
+a way for the user to look at more details of the channel (media, pinned messages, actions, etc.) and
+preferably also a way to navigate back to where they came from.
+
+To encapsulate all of this functionality into one widget, the Flutter SDK contains a `ChannelHeader`
+widget which provides these out of the box.
+
+### Basic Example
+
+Let's just add a `ChannelHeader` to a page with a `MessageListView` and a `MessageInput` to display
+and send messages.
+
+```dart
+class ChannelPage extends StatelessWidget {
+  const ChannelPage({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: ChannelHeader(),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: MessageListView(
+              threadBuilder: (_, parentMessage) {
+                return ThreadPage(
+                  parent: parentMessage,
+                );
+              },
+            ),
+          ),
+          MessageInput(),
+        ],
+      ),
+    );
+  }
+}
+```
+
+### Customizing Parts Of The Header
+
+The header works like a `ListTile` widget.
+
+Use the `title`, `subtitle`, `leading`, or `actions` parameters to substitute the widgets for your own.
+
+```dart
+//...
+ChannelHeader(
+    title: Text('My Custom Name'),
+),
+```
+
+![](../assets/channel_header_custom_title.png)
+
+### Showing Connection State
+
+The `ChannelHeader` can also display connection state below the tile which shows the user if they
+are connected or offline, etc. on connection events.
+
+To enable this, use the `showConnectionStateTile` property.
+
+```dart
+//...
+ChannelHeader(
+    showConnectionStateTile: true,
+),
+```

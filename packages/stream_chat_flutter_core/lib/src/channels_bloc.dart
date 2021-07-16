@@ -20,13 +20,12 @@ class ChannelsBloc extends StatefulWidget {
   /// Creates a new [ChannelsBloc]. The parameter [child] must be supplied and
   /// not null.
   const ChannelsBloc({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.lockChannelsOrder = false,
     this.channelsComparator,
     this.shouldAddChannel,
-  })  : assert(child != null, 'Parameter child should not be null.'),
-        super(key: key);
+  }) : super(key: key);
 
   /// The widget child
   final Widget child;
@@ -36,32 +35,35 @@ class ChannelsBloc extends StatefulWidget {
   final bool lockChannelsOrder;
 
   /// Comparator used to sort the channels when a message.new event is received
-  final Comparator<Channel> channelsComparator;
+  final Comparator<Channel>? channelsComparator;
 
   /// Function used to evaluate if a channel should be added to the list when a
   /// message.new event is received
-  final bool Function(Event) shouldAddChannel;
+  final bool Function(Event)? shouldAddChannel;
 
   @override
   ChannelsBlocState createState() => ChannelsBlocState();
 
   /// Use this method to get the current [ChannelsBlocState] instance
   static ChannelsBlocState of(BuildContext context) {
-    ChannelsBlocState streamChatState;
+    ChannelsBlocState? streamChatState;
 
     streamChatState = context.findAncestorStateOfType<ChannelsBlocState>();
 
-    if (streamChatState == null) {
-      throw Exception('You must have a ChannelsBloc widget as ancestor');
-    }
+    assert(
+      streamChatState != null,
+      'You must have a ChannelsBloc widget as ancestor',
+    );
 
-    return streamChatState;
+    return streamChatState!;
   }
 }
 
 /// The current state of the [ChannelsBloc].
 class ChannelsBlocState extends State<ChannelsBloc>
     with AutomaticKeepAliveClientMixin {
+  StreamChatCoreState? _streamChatCoreState;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -69,14 +71,15 @@ class ChannelsBlocState extends State<ChannelsBloc>
   }
 
   /// The current channel list
-  List<Channel> get channels => _channelsController.value;
+  List<Channel>? get channels => _channelsController.valueOrNull;
 
   /// The current channel list as a stream
   Stream<List<Channel>> get channelsStream => _channelsController.stream;
 
   final _queryChannelsLoadingController = BehaviorSubject.seeded(false);
 
-  final _channelsController = BehaviorSubject<List<Channel>>();
+  final BehaviorSubject<List<Channel>> _channelsController =
+      BehaviorSubject<List<Channel>>();
 
   /// The stream notifying the state of queryChannel call
   Stream<bool> get queryChannelsLoading =>
@@ -86,18 +89,23 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
   bool _paginationEnded = false;
 
+  final List<StreamSubscription> _subscriptions = [];
+
   /// Calls [client.queryChannels] updating [queryChannelsLoading] stream
   Future<void> queryChannels({
-    Map<String, dynamic> filter,
-    List<SortOption<ChannelModel>> sortOptions,
-    PaginationParams paginationParams,
-    Map<String, dynamic> options,
+    Filter? filter,
+    List<SortOption<ChannelModel>>? sortOptions,
+    bool state = true,
+    bool watch = true,
+    bool presence = false,
+    int? memberLimit,
+    int? messageLimit,
+    bool waitForConnect = true,
+    PaginationParams paginationParams = const PaginationParams(limit: 30),
   }) async {
-    final client = StreamChatCore.of(context).client;
+    final client = _streamChatCoreState!.client;
 
-    final clear = paginationParams == null ||
-        paginationParams.offset == null ||
-        paginationParams.offset == 0;
+    final clear = paginationParams.offset == 0;
 
     if ((!clear && _paginationEnded) ||
         _queryChannelsLoadingController.value == true) {
@@ -114,7 +122,12 @@ class ChannelsBlocState extends State<ChannelsBloc>
       await for (final channels in client.queryChannels(
         filter: filter,
         sort: sortOptions,
-        options: options,
+        state: state,
+        watch: watch,
+        presence: presence,
+        memberLimit: memberLimit,
+        messageLimit: messageLimit,
+        waitForConnect: waitForConnect,
         paginationParams: paginationParams,
       )) {
         newChannels = channels;
@@ -133,6 +146,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
         _paginationEnded = true;
       }
     } catch (e, stk) {
+      // reset loading controller
+      _queryChannelsLoadingController.sink.add(false);
       if (_channelsController.hasValue) {
         _queryChannelsLoadingController.addError(e, stk);
       } else {
@@ -141,76 +156,86 @@ class ChannelsBlocState extends State<ChannelsBloc>
     }
   }
 
-  final List<StreamSubscription> _subscriptions = [];
-
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    final newStreamChatCoreState = StreamChatCore.of(context);
 
-    final client = StreamChatCore.of(context).client;
+    if (newStreamChatCoreState != _streamChatCoreState) {
+      _streamChatCoreState = newStreamChatCoreState;
+      final client = _streamChatCoreState!.client;
 
-    if (!widget.lockChannelsOrder) {
-      _subscriptions.add(client
-          .on(
-        EventType.messageNew,
-      )
-          .listen((e) {
-        final newChannels = List<Channel>.from(channels ?? []);
-        final index = newChannels.indexWhere((c) => c.cid == e.cid);
-        if (index != -1) {
-          if (index > 0) {
-            final channel = newChannels.removeAt(index);
-            newChannels.insert(0, channel);
-          }
-        } else if (widget.shouldAddChannel?.call(e) == true) {
-          final hiddenIndex = _hiddenChannels.indexWhere((c) => c.cid == e.cid);
-          if (hiddenIndex != -1) {
-            newChannels.insert(0, _hiddenChannels[hiddenIndex]);
-            _hiddenChannels.removeAt(hiddenIndex);
-          } else {
-            if (client.state?.channels != null &&
-                client.state?.channels[e.cid] != null) {
-              newChannels.insert(0, client.state.channels[e.cid]);
+      _cancelSubscriptions();
+      if (!widget.lockChannelsOrder) {
+        _subscriptions.add(client
+            .on(
+          EventType.messageNew,
+        )
+            .listen((e) {
+          final newChannels = List<Channel>.from(channels ?? []);
+          final index = newChannels.indexWhere((c) => c.cid == e.cid);
+          if (index != -1) {
+            if (index > 0) {
+              final channel = newChannels.removeAt(index);
+              newChannels.insert(0, channel);
+            }
+          } else if (widget.shouldAddChannel?.call(e) == true) {
+            final hiddenIndex =
+                _hiddenChannels.indexWhere((c) => c.cid == e.cid);
+            if (hiddenIndex != -1) {
+              newChannels.insert(0, _hiddenChannels[hiddenIndex]);
+              _hiddenChannels.removeAt(hiddenIndex);
+            } else {
+              if (client.state.channels[e.cid] != null) {
+                newChannels.insert(0, client.state.channels[e.cid]!);
+              }
             }
           }
-        }
 
-        if (widget.channelsComparator != null) {
-          newChannels.sort(widget.channelsComparator);
-        }
-        _channelsController.add(newChannels);
-      }));
+          if (widget.channelsComparator != null) {
+            newChannels.sort(widget.channelsComparator);
+          }
+          _channelsController.add(newChannels);
+        }));
+      }
+
+      _subscriptions
+        ..add(client.on(EventType.channelHidden).listen((event) async {
+          final newChannels = List<Channel>.from(channels ?? []);
+          final channelIndex =
+              newChannels.indexWhere((c) => c.cid == event.cid);
+          if (channelIndex > -1) {
+            final channel = newChannels.removeAt(channelIndex);
+            _hiddenChannels.add(channel);
+            _channelsController.add(newChannels);
+          }
+        }))
+        ..add(client
+            .on(
+          EventType.channelDeleted,
+          EventType.notificationRemovedFromChannel,
+        )
+            .listen((e) {
+          final channel = e.channel;
+          _channelsController.add(List.from(
+              (channels ?? [])..removeWhere((c) => c.cid == channel?.cid)));
+        }));
     }
 
-    _subscriptions.add(client.on(EventType.channelHidden).listen((event) async {
-      final newChannels = List<Channel>.from(channels ?? []);
-      final channelIndex = newChannels.indexWhere((c) => c.cid == event.cid);
-      if (channelIndex > -1) {
-        final channel = newChannels.removeAt(channelIndex);
-        _hiddenChannels.add(channel);
-        _channelsController.add(newChannels);
-      }
-    }));
-    // ignore: cascade_invocations
-    _subscriptions.add(client
-        .on(
-      EventType.channelDeleted,
-      EventType.notificationRemovedFromChannel,
-    )
-        .listen((e) {
-      // ignore: cascade_invocations
-      final channel = e.channel;
-      _channelsController.add(List.from(
-          (channels ?? [])..removeWhere((c) => c.cid == channel.cid)));
-    }));
+    super.didChangeDependencies();
   }
 
   @override
   void dispose() {
     _channelsController.close();
     _queryChannelsLoadingController.close();
-    _subscriptions.forEach((s) => s.cancel());
+    _cancelSubscriptions();
     super.dispose();
+  }
+
+  void _cancelSubscriptions() {
+    _subscriptions
+      ..forEach((s) => s.cancel())
+      ..clear();
   }
 
   @override

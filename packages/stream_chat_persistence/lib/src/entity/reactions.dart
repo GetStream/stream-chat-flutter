@@ -16,13 +16,13 @@ class Reactions extends Table {
   TextColumn get type => text()();
 
   /// The DateTime on which the reaction is created
-  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   /// The score of the reaction (ie. number of reactions sent)
-  IntColumn get score => integer().nullable()();
+  IntColumn get score => integer().withDefault(const Constant(0))();
 
   /// Reaction custom extraData
-  TextColumn get extraData => text().nullable().map(MapConverter<Object>())();
+  TextColumn get extraData => text().nullable().map(MapConverter<Object?>())();
 
   @override
   Set<Column> get primaryKey => {

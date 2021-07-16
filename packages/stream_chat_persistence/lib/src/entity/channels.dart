@@ -15,7 +15,7 @@ class Channels extends Table {
   TextColumn get cid => text()();
 
   /// The channel configuration data
-  TextColumn get config => text().map(MapConverter<Object>())();
+  TextColumn get config => text().map(MapConverter())();
 
   /// True if this channel entity is frozen
   BoolColumn get frozen => boolean().withDefault(const Constant(false))();
@@ -24,22 +24,22 @@ class Channels extends Table {
   DateTimeColumn get lastMessageAt => dateTime().nullable()();
 
   /// The date of channel creation
-  DateTimeColumn get createdAt => dateTime().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   /// The date of the last channel update
-  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   /// The date of channel deletion
   DateTimeColumn get deletedAt => dateTime().nullable()();
 
   /// The count of this channel members
-  IntColumn get memberCount => integer().nullable()();
+  IntColumn get memberCount => integer().withDefault(const Constant(0))();
 
   /// The id of the user that created this channel
   TextColumn get createdById => text().nullable()();
 
   /// Map of custom channel extraData
-  TextColumn get extraData => text().nullable().map(MapConverter<Object>())();
+  TextColumn get extraData => text().nullable().map(MapConverter<Object?>())();
 
   @override
   Set<Column> get primaryKey => {cid};

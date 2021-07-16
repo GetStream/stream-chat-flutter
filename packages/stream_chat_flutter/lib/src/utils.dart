@@ -1,87 +1,86 @@
-import 'dart:math';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../stream_chat_flutter.dart';
-import 'stream_svg_icon.dart';
-
-Future<void> launchURL(BuildContext context, String url) async {
-  if (await canLaunch(url)) {
+/// Launch URL
+Future<void> launchURL(BuildContext context, String? url) async {
+  if (url != null && await canLaunch(url)) {
     await launch(url);
   } else {
     // ignore: deprecated_member_use
     Scaffold.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Cannot launch the url'),
       ),
     );
   }
 }
 
-Future<bool> showConfirmationDialog(
+/// Shows confirmation dialog
+Future<bool?> showConfirmationDialog(
   BuildContext context, {
-  String title,
-  Widget icon,
-  String question,
-  String okText,
-  String cancelText,
+  required String title,
+  required String okText,
+  Widget? icon,
+  String? question,
+  String? cancelText,
 }) {
+  final chatThemeData = StreamChatTheme.of(context);
   return showModalBottomSheet(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      useRootNavigator: false,
+      backgroundColor: chatThemeData.colorTheme.barsBg,
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16.0),
-        topRight: Radius.circular(16.0),
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(16),
       )),
       builder: (context) {
-        final effect = StreamChatTheme.of(context).colorTheme.borderTop;
+        final effect = chatThemeData.colorTheme.borderTop;
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 26.0),
+              const SizedBox(height: 26),
               if (icon != null) icon,
-              SizedBox(height: 26.0),
+              const SizedBox(height: 26),
               Text(
                 title,
-                style: StreamChatTheme.of(context).textTheme.headlineBold,
+                style: chatThemeData.textTheme.headlineBold,
               ),
-              SizedBox(height: 7.0),
-              Text(
-                question,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 36.0),
+              const SizedBox(height: 7),
+              if (question != null)
+                Text(
+                  question,
+                  textAlign: TextAlign.center,
+                ),
+              const SizedBox(height: 36),
               Container(
-                color: effect.color.withOpacity(effect.alpha ?? 1),
+                color: effect.color!.withOpacity(effect.alpha ?? 1),
                 height: 1,
               ),
               Row(
                 children: [
-                  Flexible(
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(false);
-                        },
-                        child: Text(
-                          cancelText,
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .bodyBold
-                              .copyWith(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .black
-                                      .withOpacity(0.5)),
+                  if (cancelText != null)
+                    Flexible(
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(false);
+                          },
+                          child: Text(
+                            cancelText,
+                            style: chatThemeData.textTheme.bodyBold.copyWith(
+                                color: chatThemeData.colorTheme.textHighEmphasis
+                                    .withOpacity(0.5)),
+                          ),
                         ),
                       ),
                     ),
-                  ),
                   Flexible(
                     child: Container(
                       alignment: Alignment.center,
@@ -91,13 +90,8 @@ Future<bool> showConfirmationDialog(
                         },
                         child: Text(
                           okText,
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .bodyBold
-                              .copyWith(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .accentRed),
+                          style: chatThemeData.textTheme.bodyBold.copyWith(
+                              color: chatThemeData.colorTheme.accentError),
                         ),
                       ),
                     ),
@@ -110,71 +104,72 @@ Future<bool> showConfirmationDialog(
       });
 }
 
-Future<bool> showInfoDialog(
+/// Shows info dialog
+Future<bool?> showInfoDialog(
   BuildContext context, {
-  String title,
-  Widget icon,
-  String details,
-  String okText,
-  StreamChatThemeData theme,
+  required String title,
+  required String okText,
+  Widget? icon,
+  String? details,
+  StreamChatThemeData? theme,
 }) {
+  final chatThemeData = StreamChatTheme.of(context);
   return showModalBottomSheet(
-    backgroundColor: theme?.colorTheme?.white ??
-        StreamChatTheme.of(context).colorTheme.white,
+    useRootNavigator: false,
+    backgroundColor:
+        theme?.colorTheme.barsBg ?? chatThemeData.colorTheme.barsBg,
     context: context,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-      topLeft: Radius.circular(16.0),
-      topRight: Radius.circular(16.0),
+      topLeft: Radius.circular(16),
+      topRight: Radius.circular(16),
     )),
-    builder: (context) {
-      return SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 26.0,
-            ),
-            if (icon != null) icon,
-            SizedBox(
-              height: 26.0,
-            ),
-            Text(
-              title,
-              style: theme?.textTheme?.headlineBold ??
-                  StreamChatTheme.of(context).textTheme.headlineBold,
-            ),
-            SizedBox(
-              height: 7.0,
-            ),
-            Text(details),
-            SizedBox(
-              height: 36.0,
-            ),
-            Container(
-              color: theme?.colorTheme?.black?.withOpacity(.08) ??
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
-              height: 1.0,
-            ),
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  okText,
-                  style: TextStyle(
-                    color: theme?.colorTheme?.black?.withOpacity(0.5) ??
-                        StreamChatTheme.of(context).colorTheme.accentBlue,
-                    fontWeight: FontWeight.w400,
-                  ),
+    builder: (context) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            height: 26,
+          ),
+          if (icon != null) icon,
+          const SizedBox(
+            height: 26,
+          ),
+          Text(
+            title,
+            style: theme?.textTheme.headlineBold ??
+                chatThemeData.textTheme.headlineBold,
+          ),
+          const SizedBox(
+            height: 7,
+          ),
+          if (details != null) Text(details),
+          const SizedBox(
+            height: 36,
+          ),
+          Container(
+            color: theme?.colorTheme.textHighEmphasis.withOpacity(.08) ??
+                chatThemeData.colorTheme.textHighEmphasis.withOpacity(.08),
+            height: 1,
+          ),
+          Center(
+            child: TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                okText,
+                style: TextStyle(
+                  color: theme?.colorTheme.textHighEmphasis.withOpacity(0.5) ??
+                      chatThemeData.colorTheme.accentPrimary,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),
-          ],
-        ),
-      );
-    },
+          ),
+        ],
+      ),
+    ),
   );
 }
 
@@ -183,7 +178,7 @@ String getRandomPicUrl(User user) =>
     'https://getstream.io/random_png/?id=${user.id}&name=${user.name}';
 
 /// Get websiteName from [hostName]
-String getWebsiteName(String hostName) {
+String? getWebsiteName(String hostName) {
   switch (hostName) {
     case 'reddit':
       return 'Reddit';
@@ -234,7 +229,7 @@ String fileSize(dynamic size, [int round = 2]) {
    * the optional parameter [round] specifies the number
    * of digits after comma/point (default is 2)
    */
-  final divider = 1024;
+  const divider = 1024;
   int _size;
   try {
     _size = int.parse(size.toString());
@@ -272,103 +267,78 @@ String fileSize(dynamic size, [int round = 2]) {
 
   if (_size < divider * divider * divider * divider * divider &&
       _size % divider == 0) {
-    num r = _size / divider / divider / divider / divider;
+    final num r = _size / divider / divider / divider / divider;
     return '${r.toStringAsFixed(0)} TB';
   }
 
   if (_size < divider * divider * divider * divider * divider) {
-    num r = _size / divider / divider / divider / divider;
+    final num r = _size / divider / divider / divider / divider;
     return '${r.toStringAsFixed(round)} TB';
   }
 
   if (_size < divider * divider * divider * divider * divider * divider &&
       _size % divider == 0) {
-    num r = _size / divider / divider / divider / divider / divider;
+    final num r = _size / divider / divider / divider / divider / divider;
     return '${r.toStringAsFixed(0)} PB';
   } else {
-    num r = _size / divider / divider / divider / divider / divider;
+    final num r = _size / divider / divider / divider / divider / divider;
     return '${r.toStringAsFixed(round)} PB';
   }
 }
 
 ///
-StreamSvgIcon getFileTypeImage(String type) {
+StreamSvgIcon getFileTypeImage(String? type) {
   switch (type) {
     case '7z':
       return StreamSvgIcon.filetype7z();
-      break;
     case 'csv':
       return StreamSvgIcon.filetypeCsv();
-      break;
     case 'doc':
       return StreamSvgIcon.filetypeDoc();
-      break;
     case 'docx':
       return StreamSvgIcon.filetypeDocx();
-      break;
     case 'html':
       return StreamSvgIcon.filetypeHtml();
-      break;
     case 'md':
       return StreamSvgIcon.filetypeMd();
-      break;
     case 'odt':
       return StreamSvgIcon.filetypeOdt();
-      break;
     case 'pdf':
       return StreamSvgIcon.filetypePdf();
-      break;
     case 'ppt':
       return StreamSvgIcon.filetypePpt();
-      break;
     case 'pptx':
       return StreamSvgIcon.filetypePptx();
-      break;
     case 'rar':
       return StreamSvgIcon.filetypeRar();
-      break;
     case 'rtf':
       return StreamSvgIcon.filetypeRtf();
-      break;
     case 'tar':
       return StreamSvgIcon.filetypeTar();
-      break;
     case 'txt':
       return StreamSvgIcon.filetypeTxt();
-      break;
     case 'xls':
       return StreamSvgIcon.filetypeXls();
-      break;
     case 'xlsx':
       return StreamSvgIcon.filetypeXlsx();
-      break;
     case 'zip':
       return StreamSvgIcon.filetypeZip();
-      break;
     default:
       return StreamSvgIcon.filetypeGeneric();
-      break;
   }
 }
 
+/// Wraps attachment widget with custom shape
 Widget wrapAttachmentWidget(
   BuildContext context,
   Widget attachmentWidget,
   ShapeBorder attachmentShape,
+  // ignore: avoid_positional_boolean_parameters
   bool reverse,
-  BorderRadius borderRadius,
-) {
-  return ClipRRect(
-    borderRadius: borderRadius,
-    child: Material(
-      clipBehavior: Clip.antiAlias,
+) =>
+    Material(
+      clipBehavior: Clip.hardEdge,
       shape: attachmentShape,
       type: MaterialType.transparency,
-      child: Transform(
-        transform: Matrix4.rotationY(reverse ? pi : 0),
-        alignment: Alignment.center,
-        child: attachmentWidget,
-      ),
-    ),
-  );
-}
+      child: attachmentWidget,
+    );

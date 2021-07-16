@@ -7,22 +7,22 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 extension PinnedMessageEntityX on PinnedMessageEntity {
   /// Maps a [PinnedMessageEntity] into [Message]
   Message toMessage({
-    User user,
-    User pinnedBy,
-    List<Reaction> latestReactions,
-    List<Reaction> ownReactions,
-    Message quotedMessage,
+    User? user,
+    User? pinnedBy,
+    List<Reaction>? latestReactions,
+    List<Reaction>? ownReactions,
+    Message? quotedMessage,
   }) =>
       Message(
         shadowed: shadowed,
         latestReactions: latestReactions,
         ownReactions: ownReactions,
-        attachments: attachments?.map((it) {
+        attachments: attachments.map((it) {
           final json = jsonDecode(it);
           return Attachment.fromData(json);
-        })?.toList(),
+        }).toList(),
         createdAt: createdAt,
-        extraData: extraData,
+        extraData: extraData ?? <String, Object>{},
         updatedAt: updatedAt,
         id: id,
         type: type,
@@ -48,10 +48,9 @@ extension PinnedMessageEntityX on PinnedMessageEntity {
 /// Useful mapping functions for [Message]
 extension PMessageX on Message {
   /// Maps a [Message] into [PinnedMessageEntity]
-  PinnedMessageEntity toPinnedEntity({String cid}) => PinnedMessageEntity(
+  PinnedMessageEntity toPinnedEntity({String? cid}) => PinnedMessageEntity(
         id: id,
-        attachments:
-            attachments?.map((it) => jsonEncode(it.toData()))?.toList(),
+        attachments: attachments.map((it) => jsonEncode(it.toData())).toList(),
         channelCid: cid,
         type: type,
         parentId: parentId,
@@ -63,6 +62,7 @@ extension PMessageX on Message {
         replyCount: replyCount,
         reactionScores: reactionScores,
         reactionCounts: reactionCounts,
+        mentionedUsers: mentionedUsers.map(jsonEncode).toList(),
         status: status,
         updatedAt: updatedAt,
         extraData: extraData,

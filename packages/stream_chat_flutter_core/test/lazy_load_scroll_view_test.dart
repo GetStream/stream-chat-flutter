@@ -3,23 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter_core/src/lazy_load_scroll_view.dart';
 
 void main() {
-  test(
-    'should throw assertion error if child is null',
-    () async {
-      const lazyLoadScrollViewKey = Key('lazyLoadScrollView');
-      final lazyLoadScrollView = () => LazyLoadScrollView(
-            key: lazyLoadScrollViewKey,
-            child: null,
-          );
-      expect(lazyLoadScrollView, throwsA(isA<AssertionError>()));
-    },
-  );
-
   testWidgets(
     'should render LazyLoadScrollView if child is provided',
     (tester) async {
       const lazyLoadScrollViewKey = Key('lazyLoadScrollView');
-      final lazyLoadScrollView = LazyLoadScrollView(
+      const lazyLoadScrollView = LazyLoadScrollView(
         key: lazyLoadScrollViewKey,
         child: Offstage(),
       );
@@ -35,7 +23,7 @@ void main() {
     (tester) async {
       const lazyLoadScrollViewKey = Key('lazyLoadScrollView');
       const childKey = Key('childKey');
-      final lazyLoadScrollView = LazyLoadScrollView(
+      const lazyLoadScrollView = LazyLoadScrollView(
         key: lazyLoadScrollViewKey,
         child: Offstage(key: childKey),
       );
@@ -53,7 +41,7 @@ void main() {
       const lazyLoadScrollViewKey = Key('lazyLoadScrollView');
       const childListViewKey = Key('childListView');
 
-      bool onPageScrollStartCalled = false;
+      var onPageScrollStartCalled = false;
 
       final lazyLoadScrollView = LazyLoadScrollView(
         key: lazyLoadScrollViewKey,
@@ -64,7 +52,7 @@ void main() {
           key: childListViewKey,
           children: List.generate(
             12,
-            (index) => Container(
+            (index) => SizedBox(
               height: 100,
               child: Text('Item #$index'),
             ),
@@ -83,7 +71,7 @@ void main() {
       expect(find.byKey(childListViewKey), findsOneWidget);
       expect(onPageScrollStartCalled, isFalse);
 
-      await tester.startGesture(const Offset(100.0, 100.0));
+      await tester.startGesture(const Offset(100, 100));
       await tester.pump(const Duration(seconds: 1));
 
       expect(onPageScrollStartCalled, isTrue);
@@ -97,8 +85,8 @@ void main() {
       const lazyLoadScrollViewKey = Key('lazyLoadScrollView');
       const childListViewKey = Key('childListView');
 
-      bool onPageScrollStartCalled = false;
-      bool onPageScrollEndCalled = false;
+      var onPageScrollStartCalled = false;
+      var onPageScrollEndCalled = false;
 
       final lazyLoadScrollView = LazyLoadScrollView(
         key: lazyLoadScrollViewKey,
@@ -112,7 +100,7 @@ void main() {
           key: childListViewKey,
           children: List.generate(
             12,
-            (index) => Container(
+            (index) => SizedBox(
               height: 100,
               child: Text('Item #$index'),
             ),
@@ -134,7 +122,7 @@ void main() {
 
       final gesture = await tester.createGesture();
 
-      await gesture.down(const Offset(100.0, 100.0));
+      await gesture.down(const Offset(100, 100));
       await tester.pump(const Duration(seconds: 1));
 
       expect(onPageScrollStartCalled, isTrue);
@@ -153,7 +141,7 @@ void main() {
       const lazyLoadScrollViewKey = Key('lazyLoadScrollView');
       const childListViewKey = Key('childListView');
 
-      bool onInBetweenOfPageCalled = false;
+      var onInBetweenOfPageCalled = false;
 
       final lazyLoadScrollView = LazyLoadScrollView(
         key: lazyLoadScrollViewKey,
@@ -164,7 +152,7 @@ void main() {
           key: childListViewKey,
           children: List.generate(
             12,
-            (index) => Container(
+            (index) => SizedBox(
               height: 100,
               child: Text('Item #$index'),
             ),
@@ -185,9 +173,9 @@ void main() {
 
       final gesture = await tester.createGesture();
 
-      await gesture.down(const Offset(100.0, 100.0));
+      await gesture.down(const Offset(100, 100));
       await tester.pump(const Duration(seconds: 1));
-      await gesture.moveBy(const Offset(-200.0, -200.0));
+      await gesture.moveBy(const Offset(-200, -200));
       await tester.pump(const Duration(seconds: 1));
 
       expect(onInBetweenOfPageCalled, isTrue);
@@ -201,7 +189,7 @@ void main() {
       const lazyLoadScrollViewKey = Key('lazyLoadScrollView');
       const childListViewKey = Key('childListView');
 
-      bool onStartOfPageCalled = false;
+      var onStartOfPageCalled = false;
 
       final lazyLoadScrollView = LazyLoadScrollView(
         key: lazyLoadScrollViewKey,
@@ -212,7 +200,7 @@ void main() {
           key: childListViewKey,
           children: List.generate(
             12,
-            (index) => Container(
+            (index) => SizedBox(
               height: 100,
               child: Text('Item #$index'),
             ),
@@ -233,11 +221,11 @@ void main() {
 
       final gesture = await tester.createGesture();
 
-      await gesture.down(const Offset(100.0, 100.0));
+      await gesture.down(const Offset(100, 100));
       await tester.pump(const Duration(seconds: 1));
-      await gesture.moveBy(const Offset(-200.0, -200.0));
+      await gesture.moveBy(const Offset(-200, -200));
       await tester.pump(const Duration(seconds: 1));
-      await gesture.moveBy(const Offset(201.0, 201.0));
+      await gesture.moveBy(const Offset(201, 201));
       await tester.pump(const Duration(seconds: 1));
 
       expect(onStartOfPageCalled, isTrue);
@@ -251,7 +239,7 @@ void main() {
       const lazyLoadScrollViewKey = Key('lazyLoadScrollView');
       const childListViewKey = Key('childListView');
 
-      bool onEndOfPageCalled = false;
+      var onEndOfPageCalled = false;
 
       final lazyLoadScrollView = LazyLoadScrollView(
         key: lazyLoadScrollViewKey,
@@ -262,7 +250,7 @@ void main() {
           key: childListViewKey,
           children: List.generate(
             12,
-            (index) => Container(
+            (index) => SizedBox(
               height: 100,
               child: Text('Item #$index'),
             ),
@@ -283,9 +271,9 @@ void main() {
 
       final gesture = await tester.createGesture();
 
-      await gesture.down(const Offset(100.0, 100.0));
+      await gesture.down(const Offset(100, 100));
       await tester.pump(const Duration(seconds: 1));
-      await gesture.moveBy(const Offset(-601.0, -601.0));
+      await gesture.moveBy(const Offset(-601, -601));
       await tester.pump(const Duration(seconds: 1));
 
       expect(onEndOfPageCalled, isTrue);

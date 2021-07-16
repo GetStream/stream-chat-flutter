@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/message_search_bloc.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -8,64 +8,38 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'matchers/get_message_response_matcher.dart';
 import 'mocks.dart';
 
+const testFilter = Filter.custom(operator: '\$test', value: 'testValue');
+
 void main() {
   List<GetMessageResponse> _generateMessages({
     int count = 3,
     int offset = 0,
-  }) {
-    return List.generate(
-      count,
-      (index) {
-        index = index + offset;
-        return GetMessageResponse()
-          ..message = Message(
-            id: 'testId$index',
-            text: 'testTextData$index',
-          )
-          ..channel = ChannelModel(
-            cid: 'testCid',
-          );
-      },
-    );
-  }
-
-  test(
-    'should throw assertion error if child is null',
-    () async {
-      const messageSearchBlocKey = Key('messageSearchBloc');
-      final messageSearchBloc = () => MessageSearchBloc(
-            key: messageSearchBlocKey,
-            child: null,
-          );
-      expect(messageSearchBloc, throwsA(isA<AssertionError>()));
-    },
-  );
+  }) =>
+      List.generate(
+        count,
+        (index) {
+          index = index + offset;
+          return GetMessageResponse()
+            ..message = Message(
+              id: 'testId$index',
+              text: 'testTextData$index',
+            )
+            ..channel = ChannelModel(
+              cid: 'testCid:id',
+            );
+        },
+      );
 
   testWidgets(
     'messageSearchBlocState.search() should throw if used where '
     'StreamChat is not present in the widget tree',
     (tester) async {
-      const messageSearchBlocKey = Key('messageSearchBloc');
-      const childKey = Key('child');
-      final messageSearchBloc = MessageSearchBloc(
-        key: messageSearchBlocKey,
-        child: Offstage(key: childKey),
+      const messageSearchBloc = MessageSearchBloc(
+        child: Offstage(),
       );
 
       await tester.pumpWidget(messageSearchBloc);
-
-      expect(find.byKey(messageSearchBlocKey), findsOneWidget);
-      expect(find.byKey(childKey), findsOneWidget);
-
-      final usersBlocState = tester.state<MessageSearchBlocState>(
-        find.byKey(messageSearchBlocKey),
-      );
-
-      try {
-        await usersBlocState.search();
-      } catch (e) {
-        expect(e, isInstanceOf<Exception>());
-      }
+      expect(tester.takeException(), isInstanceOf<AssertionError>());
     },
   );
 
@@ -74,7 +48,7 @@ void main() {
     (tester) async {
       const messageSearchBlocKey = Key('messageSearchBloc');
       const childKey = Key('child');
-      final messageSearchBloc = MessageSearchBloc(
+      const messageSearchBloc = MessageSearchBloc(
         key: messageSearchBlocKey,
         child: Offstage(key: childKey),
       );
@@ -93,30 +67,30 @@ void main() {
 
       final messageResponseList = _generateMessages();
 
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).thenAnswer(
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).thenAnswer(
         (_) async => SearchMessagesResponse()..results = messageResponseList,
       );
 
-      messageSearchBlocState.search();
+      messageSearchBlocState.search(filter: testFilter);
 
       await expectLater(
         messageSearchBlocState.messagesStream,
         emits(isSameMessageResponseListAs(messageResponseList)),
       );
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).called(1);
     },
   );
 
@@ -126,7 +100,7 @@ void main() {
     (tester) async {
       const messageSearchBlocKey = Key('messageSearchBloc');
       const childKey = Key('child');
-      final messageSearchBloc = MessageSearchBloc(
+      const messageSearchBloc = MessageSearchBloc(
         key: messageSearchBlocKey,
         child: Offstage(key: childKey),
       );
@@ -144,28 +118,28 @@ void main() {
       );
 
       const error = 'Error! Error! Error!';
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).thenThrow(error);
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).thenThrow(error);
 
-      messageSearchBlocState.search();
+      messageSearchBlocState.search(filter: testFilter);
 
       await expectLater(
         messageSearchBlocState.messagesStream,
         emitsError(error),
       );
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).called(1);
     },
   );
 
@@ -176,7 +150,7 @@ void main() {
     (tester) async {
       const messageSearchBlocKey = Key('messageSearchBloc');
       const childKey = Key('child');
-      final messageSearchBloc = MessageSearchBloc(
+      const messageSearchBloc = MessageSearchBloc(
         key: messageSearchBlocKey,
         child: Offstage(key: childKey),
       );
@@ -196,47 +170,47 @@ void main() {
 
       final messageResponseList = _generateMessages();
 
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).thenAnswer(
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).thenAnswer(
         (_) async => SearchMessagesResponse()..results = messageResponseList,
       );
 
-      messageSearchBlocState.search();
+      messageSearchBlocState.search(filter: testFilter);
 
       await expectLater(
         messageSearchBlocState.messagesStream,
         emits(isSameMessageResponseListAs(messageResponseList)),
       );
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).called(1);
 
       final offset = messageResponseList.length;
       final paginatedMessageResponseList = _generateMessages(offset: offset);
       final pagination = PaginationParams(offset: offset);
 
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: pagination,
-      )).thenAnswer(
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: pagination,
+          )).thenAnswer(
         (_) async =>
             SearchMessagesResponse()..results = paginatedMessageResponseList,
       );
 
-      messageSearchBlocState.search(pagination: pagination);
+      messageSearchBlocState.search(pagination: pagination, filter: testFilter);
 
       await Future.wait([
         expectLater(
@@ -251,13 +225,13 @@ void main() {
         ),
       ]);
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: pagination,
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: pagination,
+          )).called(1);
     },
   );
 
@@ -268,7 +242,7 @@ void main() {
     (tester) async {
       const messageSearchBlocKey = Key('messageSearchBloc');
       const childKey = Key('child');
-      final messageSearchBloc = MessageSearchBloc(
+      const messageSearchBloc = MessageSearchBloc(
         key: messageSearchBlocKey,
         child: Offstage(key: childKey),
       );
@@ -288,57 +262,57 @@ void main() {
 
       final messageResponseList = _generateMessages();
 
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).thenAnswer(
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).thenAnswer(
         (_) async => SearchMessagesResponse()..results = messageResponseList,
       );
 
-      messageSearchBlocState.search();
+      messageSearchBlocState.search(filter: testFilter);
 
       await expectLater(
         messageSearchBlocState.messagesStream,
         emits(isSameMessageResponseListAs(messageResponseList)),
       );
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: anyNamed('paginationParams'),
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: any(named: 'paginationParams'),
+          )).called(1);
 
       final offset = messageResponseList.length;
       final pagination = PaginationParams(offset: offset);
 
       const error = 'Error! Error! Error!';
-      when(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: pagination,
-      )).thenThrow(error);
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: pagination,
+          )).thenThrow(error);
 
-      messageSearchBlocState.search(pagination: pagination);
+      messageSearchBlocState.search(pagination: pagination, filter: testFilter);
 
       await expectLater(
         messageSearchBlocState.queryMessagesLoading,
         emitsError(error),
       );
 
-      verify(mockClient.search(
-        any,
-        query: anyNamed('query'),
-        sort: anyNamed('sort'),
-        messageFilters: anyNamed('messageFilters'),
-        paginationParams: pagination,
-      )).called(1);
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: pagination,
+          )).called(1);
     },
   );
 }

@@ -3,67 +3,76 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// Widget to display URL attachment
 class UrlAttachment extends StatelessWidget {
-  final Attachment urlAttachment;
-  final String hostDisplayName;
-  final EdgeInsets textPadding;
+  /// Constructor for creating a [UrlAttachment]
+  const UrlAttachment({
+    Key? key,
+    required this.urlAttachment,
+    required this.hostDisplayName,
+    this.textPadding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 8,
+    ),
+  }) : super(key: key);
 
-  UrlAttachment({
-    @required this.urlAttachment,
-    @required this.hostDisplayName,
-    @required this.textPadding,
-  });
+  /// Attachment to be displayed
+  final Attachment urlAttachment;
+
+  /// Host name
+  final String hostDisplayName;
+
+  /// Padding for text
+  final EdgeInsets textPadding;
 
   @override
   Widget build(BuildContext context) {
+    final chatThemeData = StreamChatTheme.of(context);
     return GestureDetector(
-      onTap: () => launchURL(
-        context,
-        urlAttachment.ogScrapeUrl,
-      ),
+      onTap: () {
+        launchURL(
+          context,
+          urlAttachment.ogScrapeUrl,
+        );
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (urlAttachment.imageUrl != null)
             Container(
-              clipBehavior: Clip.antiAliasWithSaveLayer,
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
+              clipBehavior: Clip.hardEdge,
+              margin: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.0),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Stack(
                 children: [
                   CachedNetworkImage(
                     width: double.infinity,
-                    imageUrl: urlAttachment.imageUrl,
+                    imageUrl: urlAttachment.imageUrl!,
                     fit: BoxFit.cover,
                   ),
                   Positioned(
-                    left: 0.0,
+                    left: 0,
                     bottom: -1,
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(16.0),
+                        borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(16),
                         ),
-                        color: StreamChatTheme.of(context).colorTheme.blueAlice,
+                        color: chatThemeData.colorTheme.linkBg,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.only(
-                          top: 8.0,
-                          left: 8.0,
-                          right: 8.0,
+                          top: 8,
+                          left: 8,
+                          right: 8,
                         ),
                         child: Text(
                           hostDisplayName,
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .bodyBold
-                              .copyWith(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .accentBlue,
-                              ),
+                          style: chatThemeData.textTheme.bodyBold.copyWith(
+                            color: chatThemeData.colorTheme.accentPrimary,
+                          ),
                         ),
                       ),
                     ),
@@ -78,20 +87,16 @@ class UrlAttachment extends StatelessWidget {
               children: [
                 if (urlAttachment.title != null)
                   Text(
-                    urlAttachment.title.trim(),
+                    urlAttachment.title!.trim(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: StreamChatTheme.of(context)
-                        .textTheme
-                        .body
+                    style: chatThemeData.textTheme.body
                         .copyWith(fontWeight: FontWeight.w700),
                   ),
                 if (urlAttachment.text != null)
                   Text(
-                    urlAttachment.text,
-                    style: StreamChatTheme.of(context)
-                        .textTheme
-                        .body
+                    urlAttachment.text!,
+                    style: chatThemeData.textTheme.body
                         .copyWith(fontWeight: FontWeight.w400),
                   ),
               ],

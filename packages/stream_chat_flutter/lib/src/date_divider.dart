@@ -4,14 +4,18 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
 /// It shows a date divider depending on the date difference
 class DateDivider extends StatelessWidget {
-  final DateTime dateTime;
-  final bool uppercase;
-
+  /// Constructor for creating a [DateDivider]
   const DateDivider({
-    Key key,
-    @required this.dateTime,
+    Key? key,
+    required this.dateTime,
     this.uppercase = false,
   }) : super(key: key);
+
+  /// [DateTime] to display
+  final DateTime dateTime;
+
+  /// If text is uppercase
+  final bool uppercase;
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +26,10 @@ class DateDivider extends StatelessWidget {
     if (Jiffy(createdAt).isSame(now, Units.DAY)) {
       dayInfo = 'Today';
     } else if (Jiffy(createdAt)
-        .isSame(now.subtract(Duration(days: 1)), Units.DAY)) {
+        .isSame(now.subtract(const Duration(days: 1)), Units.DAY)) {
       dayInfo = 'Yesterday';
     } else if (Jiffy(createdAt).isAfter(
-      now.subtract(Duration(days: 7)),
+      now.subtract(const Duration(days: 7)),
       Units.DAY,
     )) {
       dayInfo = createdAt.EEEE;
@@ -40,18 +44,19 @@ class DateDivider extends StatelessWidget {
 
     if (uppercase) dayInfo = dayInfo.toUpperCase();
 
+    final chatThemeData = StreamChatTheme.of(context);
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
         decoration: BoxDecoration(
-          color: StreamChatTheme.of(context).colorTheme.overlayDark,
+          color: chatThemeData.colorTheme.overlayDark,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           dayInfo,
-          style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                color: StreamChatTheme.of(context).colorTheme.white,
-              ),
+          style: chatThemeData.textTheme.footnote.copyWith(
+            color: chatThemeData.colorTheme.barsBg,
+          ),
         ),
       ),
     );

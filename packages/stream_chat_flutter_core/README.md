@@ -1,4 +1,4 @@
-# Official Core Flutter SDK for [Stream Chat](https://getstream.io/chat/)
+# Official Core [Flutter SDK](https://getstream.io/chat/sdk/flutter/) for [Stream Chat](https://getstream.io/chat/)
 
 > The official Flutter core components for Stream Chat, a service for
 > building chat applications.

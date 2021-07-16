@@ -1,0 +1,71 @@
+---
+id: stream_chat_and_theming
+sidebar_position: 3
+title: StreamChat And Theming
+---
+
+Understanding How To Customize Widgets Using `StreamChatTheme`
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChatTheme-class.html) and [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChatThemeData-class.html)
+
+### Background
+
+Stream's UI SDK makes it easy for developers to add custom styles and attributes to our widgets. Like most Flutter frameworks, Stream exposes a dedicated widget for theming.
+
+Using `StreamChatTheme`, users can customize most aspects of our UI widgets by setting attributes using `StreamChatThemeData`.
+
+Similar to the `Theme` and `ThemeData` in Flutter, Stream Chat uses a top level [inherited widget](https://api.flutter.dev/flutter/widgets/InheritedWidget-class.html) to provide theming information throughout your application. This can be optionally set at the top of your application tree or at a localized point in your widget sub-tree.
+
+If you'd like to customize the look and feel of Stream chat across your entire application, we recommend setting your theme at the top level. Conversely, users can customize specific screens or widgets by wrapping components in a `StreamChatTheme`.
+
+### A closer look at StreamChatThemeData 
+
+Looking at the constructor for `StreamChatThemeData`, we can see the full list of properties and widgets available for customization.
+
+Some high-level properties such as `textTheme` or `colorTheme` can be set application-wide directly from this class. In contrast, larger components such as `ChannelHeader`, `MessageInputs`, etc. have been broken up into smaller theme objects.
+
+```dart
+factory StreamChatThemeData({ 
+    Brightness? brightness,
+    TextTheme? textTheme,
+    ColorTheme? colorTheme,
+    ChannelListHeaderTheme? channelListHeaderTheme,
+    ChannelPreviewTheme? channelPreviewTheme,
+    ChannelTheme? channelTheme,
+    MessageTheme? otherMessageTheme,
+    MessageTheme? ownMessageTheme,
+    MessageInputTheme? messageInputTheme,
+    Widget Function(BuildContext, Channel)? defaultChannelImage,
+    Widget Function(BuildContext, User)? defaultUserImage,
+    IconThemeData? primaryIconTheme,
+    List<ReactionIcon>? reactionIcons,
+  }); 
+```
+
+### Stream Chat Theme in use
+
+Let's take a look at customizing widgets using `StreamChatTheme`. In the example below, we can change the default color theme to yellow and override the channel header's typography and colors.
+
+```dart
+builder: (context, child) => StreamChat( 
+        client: client, 
+        child: child, 
+        streamChatThemeData: StreamChatThemeData( 
+          colorTheme: ColorTheme.light( 
+            primaryAccent: const Color(0xffffe072), 
+          ), 
+          channelTheme: ChannelTheme( 
+            channelHeaderTheme: ChannelHeaderTheme( 
+              color: const Color(0xffd34646), 
+              title: TextStyle( 
+                color: Colors.white, 
+              ), 
+            ), 
+          ), 
+        ), 
+      ),
+```
+
+We are creating this class at the very top of our widget tree using the `streamChatThemeData` parameter found in the `StreamChat` widget.
+
+![](../assets/using_theme.jpg)

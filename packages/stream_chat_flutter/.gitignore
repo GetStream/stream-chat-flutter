@@ -63,3 +63,6 @@ fvm
 google-services.json
 example/ios/dist
 .vscode/
+
+# don't check in golden failure output
+**/failures/*.png

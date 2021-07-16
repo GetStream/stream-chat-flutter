@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-import 'package:moor/ffi.dart';
 import 'package:moor/moor.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -46,10 +44,6 @@ class MoorChatDatabase extends _$MoorChatDatabase {
     DatabaseConnection connection,
   ) : super.connect(connection);
 
-  /// Custom constructor used only for testing
-  @visibleForTesting
-  MoorChatDatabase.testable(this._userId) : super(VmDatabase.memory());
-
   final String _userId;
 
   /// User id to which the database is connected
@@ -57,7 +51,7 @@ class MoorChatDatabase extends _$MoorChatDatabase {
 
   // you should bump this number whenever you change or add a table definition.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -71,6 +65,13 @@ class MoorChatDatabase extends _$MoorChatDatabase {
           }
         },
       );
+
+  /// Deletes all the tables
+  Future<void> flush() => batch((batch) {
+        allTables.forEach((table) {
+          delete(table).go();
+        });
+      });
 
   /// Closes the database instance
   Future<void> disconnect() => close();

@@ -8,37 +8,36 @@ import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import 'extension.dart';
-import 'message_widget.dart';
-import 'stream_chat_theme.dart';
-
+/// Modal widget for displaying message reactions
 class MessageReactionsModal extends StatelessWidget {
-  final Widget Function(BuildContext, Message) editMessageInputBuilder;
-  final void Function(Message) onThreadTap;
-  final Message message;
-  final MessageTheme messageTheme;
-  final bool reverse;
-  final bool showReactions;
-  final DisplayWidget showUserAvatar;
-  final ShapeBorder messageShape;
-  final ShapeBorder attachmentShape;
-  final void Function(User) onUserAvatarTap;
-  final BorderRadius attachmentBorderRadiusGeometry;
-
+  /// Constructor for creating a [MessageReactionsModal] reactions
   const MessageReactionsModal({
-    Key key,
-    @required this.message,
-    @required this.messageTheme,
+    Key? key,
+    required this.message,
+    required this.messageWidget,
+    required this.messageTheme,
     this.showReactions = true,
-    this.onThreadTap,
-    this.editMessageInputBuilder,
-    this.messageShape,
-    this.attachmentShape,
     this.reverse = false,
-    this.showUserAvatar = DisplayWidget.show,
     this.onUserAvatarTap,
-    this.attachmentBorderRadiusGeometry,
   }) : super(key: key);
+
+  /// Widget that shows the message
+  final Widget messageWidget;
+
+  /// Message to display reactions of
+  final Message message;
+
+  /// [MessageTheme] to apply to [message]
+  final MessageTheme messageTheme;
+
+  /// Flag to reverse message
+  final bool reverse;
+
+  /// Flag to show reactions on message
+  final bool showReactions;
+
+  /// Callback when user avatar is tapped
+  final void Function(User)? onUserAvatarTap;
 
   @override
   Widget build(BuildContext context) {
@@ -46,10 +45,10 @@ class MessageReactionsModal extends StatelessWidget {
     final user = StreamChat.of(context).user;
 
     final roughMaxSize = 2 * size.width / 3;
-    var messageTextLength = message.text.length;
+    var messageTextLength = message.text!.length;
     if (message.quotedMessage != null) {
-      var quotedMessageLength = message.quotedMessage.text.length + 40;
-      if (message.quotedMessage.attachments?.isNotEmpty == true) {
+      var quotedMessageLength = message.quotedMessage!.text!.length + 40;
+      if (message.quotedMessage!.attachments.isNotEmpty == true) {
         quotedMessageLength += 40;
       }
       if (quotedMessageLength > messageTextLength) {
@@ -57,120 +56,93 @@ class MessageReactionsModal extends StatelessWidget {
       }
     }
     final roughSentenceSize =
-        messageTextLength * messageTheme.messageText.fontSize * 1.2;
-    final divFactor = message.attachments?.isNotEmpty == true
+        messageTextLength * (messageTheme.messageText?.fontSize ?? 1) * 1.2;
+    final divFactor = message.attachments.isNotEmpty == true
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInOutBack,
-      builder: (context, val, snapshot) {
-        final hasFileAttachment =
-            message.attachments?.any((it) => it.type == 'file') == true;
-        return GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () => Navigator.maybePop(context),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: 10,
-                    sigmaY: 10,
-                  ),
-                  child: Container(
-                    color: StreamChatTheme.of(context).colorTheme.overlay,
-                  ),
-                ),
-              ),
-              Transform.scale(
-                scale: val,
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          if (showReactions &&
-                              (message.status == MessageSendingStatus.sent ||
-                                  message.status == null))
-                            Align(
-                              alignment: Alignment(
-                                  user.id == message.user.id
-                                      ? (divFactor > 1.0
-                                          ? 0.0
-                                          : (1.0 - divFactor))
-                                      : (divFactor > 1.0
-                                          ? 0.0
-                                          : -(1.0 - divFactor)),
-                                  0.0),
-                              child: ReactionPicker(
-                                message: message,
-                                messageTheme: messageTheme,
-                              ),
-                            ),
-                          const SizedBox(height: 8),
-                          IgnorePointer(
-                            child: MessageWidget(
-                              key: Key('MessageWidget'),
-                              reverse: reverse,
-                              message: message.copyWith(
-                                text: message.text.length > 200
-                                    ? '${message.text.substring(0, 200)}...'
-                                    : message.text,
-                              ),
-                              messageTheme: messageTheme,
-                              showReactions: false,
-                              showUsername: false,
-                              showUserAvatar: showUserAvatar,
-                              showThreadReplyIndicator: false,
-                              showTimestamp: false,
-                              translateUserAvatar: false,
-                              showSendingIndicator: false,
-                              shape: messageShape,
-                              attachmentShape: attachmentShape,
-                              padding: const EdgeInsets.all(0),
-                              attachmentBorderRadiusGeometry:
-                                  attachmentBorderRadiusGeometry,
-                              attachmentPadding: EdgeInsets.all(
-                                hasFileAttachment ? 4 : 2,
-                              ),
-                              showInChannelIndicator: false,
-                              textPadding: EdgeInsets.symmetric(
-                                vertical: 8.0,
-                                horizontal: message.text.isOnlyEmoji ? 0 : 16.0,
-                              ),
-                              showReactionPickerIndicator: showReactions &&
-                                  (message.status ==
-                                          MessageSendingStatus.sent ||
-                                      message.status == null),
-                            ),
-                          ),
-                          if (message.latestReactions?.isNotEmpty == true) ...[
-                            const SizedBox(height: 8),
-                            _buildReactionCard(context),
-                          ]
-                        ],
-                      ),
-                    ),
+    final numberOfReactions = StreamChatTheme.of(context).reactionIcons.length;
+    final shiftFactor =
+        numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
+
+    final child = Center(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (showReactions &&
+                  (message.status == MessageSendingStatus.sent))
+                Align(
+                  alignment: Alignment(
+                      user!.id == message.user!.id
+                          ? (divFactor >= 1.0
+                              ? -0.2 - shiftFactor
+                              : (1.2 - divFactor))
+                          : (divFactor >= 1.0
+                              ? 0.2 + shiftFactor
+                              : -(1.2 - divFactor)),
+                      0),
+                  child: ReactionPicker(
+                    message: message,
                   ),
                 ),
+              const SizedBox(height: 8),
+              IgnorePointer(
+                child: messageWidget,
               ),
+              if (message.latestReactions?.isNotEmpty == true) ...[
+                const SizedBox(height: 8),
+                _buildReactionCard(
+                  context,
+                  user,
+                ),
+              ]
             ],
           ),
-        );
-      },
+        ),
+      ),
+    );
+
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => Navigator.maybePop(context),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: 10,
+                sigmaY: 10,
+              ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: StreamChatTheme.of(context).colorTheme.overlay,
+                ),
+              ),
+            ),
+          ),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: 1),
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutBack,
+            builder: (context, val, widget) => Transform.scale(
+              scale: val,
+              child: widget,
+            ),
+            child: child,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildReactionCard(BuildContext context) {
-    final currentUser = StreamChat.of(context).user;
+  Widget _buildReactionCard(BuildContext context, User? user) {
+    final chatThemeData = StreamChatTheme.of(context);
     return Card(
-      color: StreamChatTheme.of(context).colorTheme.white,
+      color: chatThemeData.colorTheme.barsBg,
       clipBehavior: Clip.hardEdge,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -183,7 +155,7 @@ class MessageReactionsModal extends StatelessWidget {
           children: [
             Text(
               'Message Reactions',
-              style: StreamChatTheme.of(context).textTheme.headlineBold,
+              style: chatThemeData.textTheme.headlineBold,
             ),
             const SizedBox(height: 16),
             Flexible(
@@ -191,11 +163,10 @@ class MessageReactionsModal extends StatelessWidget {
                 child: Wrap(
                   spacing: 16,
                   runSpacing: 16,
-                  alignment: WrapAlignment.start,
-                  children: message.latestReactions
+                  children: message.latestReactions!
                       .map((e) => _buildReaction(
                             e,
-                            currentUser,
+                            user!,
                             context,
                           ))
                       .toList(),
@@ -213,28 +184,27 @@ class MessageReactionsModal extends StatelessWidget {
     User currentUser,
     BuildContext context,
   ) {
-    final isCurrentUser = reaction.user.id == currentUser.id;
+    final isCurrentUser = reaction.user?.id == currentUser.id;
+    final chatThemeData = StreamChatTheme.of(context);
     return ConstrainedBox(
-      constraints: BoxConstraints.loose(Size(
+      constraints: BoxConstraints.loose(const Size(
         64,
         98,
       )),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Stack(
             clipBehavior: Clip.none,
             children: [
               UserAvatar(
                 onTap: onUserAvatarTap,
-                user: reaction.user,
-                constraints: BoxConstraints.tightFor(
+                user: reaction.user!,
+                constraints: const BoxConstraints.tightFor(
                   height: 64,
                   width: 64,
                 ),
-                onlineIndicatorConstraints: BoxConstraints.tightFor(
+                onlineIndicatorConstraints: const BoxConstraints.tightFor(
                   height: 12,
                   width: 12,
                 ),
@@ -250,9 +220,11 @@ class MessageReactionsModal extends StatelessWidget {
                   child: ReactionBubble(
                     reactions: [reaction],
                     flipTail: !reverse,
-                    borderColor: messageTheme.reactionsBorderColor,
-                    backgroundColor: messageTheme.reactionsBackgroundColor,
-                    maskColor: StreamChatTheme.of(context).colorTheme.white,
+                    borderColor:
+                        messageTheme.reactionsBorderColor ?? Colors.transparent,
+                    backgroundColor: messageTheme.reactionsBackgroundColor ??
+                        Colors.transparent,
+                    maskColor: chatThemeData.colorTheme.barsBg,
                     tailCirclesSpacing: 1,
                     highlightOwnReactions: false,
                   ),
@@ -262,8 +234,8 @@ class MessageReactionsModal extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            reaction.user.name.split(' ')[0],
-            style: StreamChatTheme.of(context).textTheme.footnoteBold,
+            reaction.user!.name.split(' ')[0],
+            style: chatThemeData.textTheme.footnoteBold,
             textAlign: TextAlign.center,
           ),
         ],

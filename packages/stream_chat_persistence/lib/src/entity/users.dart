@@ -12,22 +12,22 @@ class Users extends Table {
   TextColumn get role => text().nullable()();
 
   /// Date of user creation
-  DateTimeColumn get createdAt => dateTime().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   /// Date of last user update
-  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   /// Date of last user connection
   DateTimeColumn get lastActive => dateTime().nullable()();
 
   /// True if user is online
-  BoolColumn get online => boolean().nullable()();
+  BoolColumn get online => boolean().withDefault(const Constant(false))();
 
   /// True if user is banned from the chat
-  BoolColumn get banned => boolean().nullable()();
+  BoolColumn get banned => boolean().withDefault(const Constant(false))();
 
   /// Map of custom user extraData
-  TextColumn get extraData => text().nullable().map(MapConverter<Object>())();
+  TextColumn get extraData => text().map(MapConverter<Object?>())();
 
   @override
   Set<Column> get primaryKey => {id};

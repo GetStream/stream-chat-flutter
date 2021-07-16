@@ -9,14 +9,13 @@ import 'package:stream_chat_flutter_core/src/stream_chat_core.dart';
 /// [MessageSearchBloc] can be access at anytime by using the static [of] method
 /// using Flutter's [BuildContext].
 ///
-// API docs: https://getstream.io/chat/docs/flutter-dart/send_message/
+/// API docs: https://getstream.io/chat/docs/flutter-dart/send_message/
 class MessageSearchBloc extends StatefulWidget {
   /// Instantiate a new MessageSearchBloc
   const MessageSearchBloc({
-    Key key,
-    @required this.child,
-  })  : assert(child != null, 'Parameter child should not be null.'),
-        super(key: key);
+    Key? key,
+    required this.child,
+  }) : super(key: key);
 
   /// The widget child
   final Widget child;
@@ -26,23 +25,27 @@ class MessageSearchBloc extends StatefulWidget {
 
   /// Use this method to get the current [MessageSearchBlocState] instance
   static MessageSearchBlocState of(BuildContext context) {
-    MessageSearchBlocState state;
+    MessageSearchBlocState? state;
 
     state = context.findAncestorStateOfType<MessageSearchBlocState>();
 
-    if (state == null) {
-      throw Exception('You must have a MessageSearchBloc widget as ancestor');
-    }
+    assert(
+      state != null,
+      'You must have a MessageSearchBloc widget as ancestor',
+    );
 
-    return state;
+    return state!;
   }
 }
 
 /// The current state of the [MessageSearchBloc]
 class MessageSearchBlocState extends State<MessageSearchBloc>
     with AutomaticKeepAliveClientMixin {
+  late StreamChatCoreState _streamChatCoreState;
+
   /// The current messages list
-  List<GetMessageResponse> get messageResponses => _messageResponses.value;
+  List<GetMessageResponse>? get messageResponses =>
+      _messageResponses.valueOrNull;
 
   /// The current messages list as a stream
   Stream<List<GetMessageResponse>> get messagesStream =>
@@ -59,13 +62,13 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
   /// Calls [StreamChatClient.search] updating
   /// [messagesStream] and [queryMessagesLoading] stream
   Future<void> search({
-    Map<String, dynamic> filter,
-    Map<String, dynamic> messageFilter,
-    List<SortOption> sort,
-    String query,
-    PaginationParams pagination,
+    required Filter filter,
+    Filter? messageFilter,
+    List<SortOption>? sort,
+    String? query,
+    PaginationParams? pagination,
   }) async {
-    final client = StreamChatCore.of(context).client;
+    final client = _streamChatCoreState.client;
 
     if (_queryMessagesLoadingController.value == true) return;
 
@@ -73,9 +76,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
       _queryMessagesLoadingController.add(true);
     }
     try {
-      final clear = pagination == null ||
-          pagination.offset == null ||
-          pagination.offset == 0;
+      final clear = pagination == null || pagination.offset == 0;
 
       final oldMessages = List<GetMessageResponse>.from(messageResponses ?? []);
 
@@ -97,6 +98,8 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
         _queryMessagesLoadingController.add(false);
       }
     } catch (e, stk) {
+      // reset loading controller
+      _queryMessagesLoadingController.add(false);
       if (_messageResponses.hasValue) {
         _queryMessagesLoadingController.addError(e, stk);
       } else {
@@ -109,6 +112,12 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
   Widget build(BuildContext context) {
     super.build(context);
     return widget.child;
+  }
+
+  @override
+  void didChangeDependencies() {
+    _streamChatCoreState = StreamChatCore.of(context);
+    super.didChangeDependencies();
   }
 
   @override

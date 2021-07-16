@@ -1,12 +1,14 @@
-import 'package:stream_chat/src/api/requests.dart';
-import 'package:stream_chat/src/models/channel_model.dart';
-import 'package:stream_chat/src/models/channel_state.dart';
-import 'package:stream_chat/src/models/event.dart';
-import 'package:stream_chat/src/models/member.dart';
-import 'package:stream_chat/src/models/message.dart';
-import 'package:stream_chat/src/models/reaction.dart';
-import 'package:stream_chat/src/models/read.dart';
-import 'package:stream_chat/src/models/user.dart';
+import 'package:stream_chat/src/core/api/requests.dart';
+import 'package:stream_chat/src/core/models/channel_model.dart';
+import 'package:stream_chat/src/core/models/channel_state.dart';
+import 'package:stream_chat/src/core/models/event.dart';
+import 'package:stream_chat/src/core/models/filter.dart';
+import 'package:stream_chat/src/core/models/member.dart';
+import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/reaction.dart';
+import 'package:stream_chat/src/core/models/read.dart';
+import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 
 /// A simple client used for persisting chat data locally.
 abstract class ChatPersistenceClient {
@@ -20,14 +22,14 @@ abstract class ChatPersistenceClient {
   /// Get stored replies by messageId
   Future<List<Message>> getReplies(
     String parentId, {
-    PaginationParams options,
+    PaginationParams? options,
   });
 
   /// Get stored connection event
-  Future<Event> getConnectionInfo();
+  Future<Event?> getConnectionInfo();
 
   /// Get stored lastSyncAt
-  Future<DateTime> getLastSyncAt();
+  Future<DateTime?> getLastSyncAt();
 
   /// Update stored connection event
   Future<void> updateConnectionInfo(Event event);
@@ -39,7 +41,7 @@ abstract class ChatPersistenceClient {
   Future<List<String>> getChannelCids();
 
   /// Get stored [ChannelModel]s by providing channel [cid]
-  Future<ChannelModel> getChannelByCid(String cid);
+  Future<ChannelModel?> getChannelByCid(String cid);
 
   /// Get stored channel [Member]s by providing channel [cid]
   Future<List<Member>> getMembersByCid(String cid);
@@ -53,20 +55,20 @@ abstract class ChatPersistenceClient {
   /// for filtering out messages
   Future<List<Message>> getMessagesByCid(
     String cid, {
-    PaginationParams messagePagination,
+    PaginationParams? messagePagination,
   });
 
   /// Get stored pinned [Message]s by providing channel [cid]
   Future<List<Message>> getPinnedMessagesByCid(
     String cid, {
-    PaginationParams messagePagination,
+    PaginationParams? messagePagination,
   });
 
   /// Get [ChannelState] data by providing channel [cid]
   Future<ChannelState> getChannelStateByCid(
     String cid, {
-    PaginationParams messagePagination,
-    PaginationParams pinnedMessagePagination,
+    PaginationParams? messagePagination,
+    PaginationParams? pinnedMessagePagination,
   }) async {
     final data = await Future.wait([
       getMembersByCid(cid),
@@ -76,11 +78,16 @@ abstract class ChatPersistenceClient {
       getPinnedMessagesByCid(cid, messagePagination: pinnedMessagePagination),
     ]);
     return ChannelState(
-      members: data[0],
-      read: data[1],
-      channel: data[2],
-      messages: data[3],
-      pinnedMessages: data[4],
+      // ignore: cast_nullable_to_non_nullable
+      members: data[0] as List<Member>,
+      // ignore: cast_nullable_to_non_nullable
+      read: data[1] as List<Read>,
+      // ignore: cast_nullable_to_non_nullable
+      channel: data[2] as ChannelModel?,
+      // ignore: cast_nullable_to_non_nullable
+      messages: data[3] as List<Message>,
+      // ignore: cast_nullable_to_non_nullable
+      pinnedMessages: data[4] as List<Message>,
     );
   }
 
@@ -89,9 +96,9 @@ abstract class ChatPersistenceClient {
   /// Optionally, pass [filter], [sort], [paginationParams]
   /// for filtering out states.
   Future<List<ChannelState>> getChannelStates({
-    Map<String, dynamic> filter,
-    List<SortOption<ChannelModel>> sort = const [],
-    PaginationParams paginationParams,
+    Filter? filter,
+    List<SortOption<ChannelModel>>? sort,
+    PaginationParams? paginationParams,
   });
 
   /// Update list of channel queries.
@@ -99,7 +106,7 @@ abstract class ChatPersistenceClient {
   /// If [clearQueryCache] is true before the insert
   /// the list of matching rows will be deleted
   Future<void> updateChannelQueries(
-    Map<String, dynamic> filter,
+    Filter? filter,
     List<String> cids, {
     bool clearQueryCache = false,
   });
@@ -180,8 +187,11 @@ abstract class ChatPersistenceClient {
         .map((m) => m.id)
         .toList(growable: false));
 
+    final cleanedChannelStates =
+        channelStates.where((it) => it.channel != null);
+
     final deleteMembers = deleteMembersByCids(
-      channelStates.map((it) => it.channel.cid).toList(growable: false),
+      cleanedChannelStates.map((it) => it.channel!.cid).toList(growable: false),
     );
 
     await Future.wait([
@@ -189,58 +199,57 @@ abstract class ChatPersistenceClient {
       deleteMembers,
     ]);
 
-    final channels =
-        channelStates.map((it) => it.channel).where((it) => it != null);
+    final channels = cleanedChannelStates.map((it) => it.channel).withNullifyer;
 
-    final reactions = channelStates
+    final reactions = cleanedChannelStates
         .expand((it) => it.messages)
         .expand((it) => [
               if (it.ownReactions != null)
-                ...it.ownReactions.where((r) => r.userId != null),
+                ...it.ownReactions!.where((r) => r.userId != null),
               if (it.latestReactions != null)
-                ...it.latestReactions.where((r) => r.userId != null)
+                ...it.latestReactions!.where((r) => r.userId != null),
             ])
-        .where((it) => it != null);
+        .withNullifyer;
 
-    final users = channelStates
+    final users = cleanedChannelStates
         .map((cs) => [
               cs.channel?.createdBy,
               ...cs.messages
-                  ?.map((m) => [
+                  .map((m) => [
                         m.user,
                         if (m.latestReactions != null)
-                          ...m.latestReactions.map((r) => r.user),
+                          ...m.latestReactions!.map((r) => r.user),
                         if (m.ownReactions != null)
-                          ...m.ownReactions.map((r) => r.user),
+                          ...m.ownReactions!.map((r) => r.user),
                       ])
-                  ?.expand((v) => v),
-              if (cs.read != null) ...cs.read.map((r) => r.user),
-              if (cs.members != null) ...cs.members.map((m) => m.user),
+                  .expand((v) => v),
+              ...cs.read.map((r) => r.user),
+              ...cs.members.map((m) => m.user),
             ])
         .expand((it) => it)
-        .where((it) => it != null);
+        .withNullifyer;
 
-    final updateMessagesFuture = channelStates.map((it) {
-      final cid = it.channel.cid;
-      final messages = it.messages.where((it) => it != null);
+    final updateMessagesFuture = cleanedChannelStates.map((it) {
+      final cid = it.channel!.cid;
+      final messages = it.messages;
       return updateMessages(cid, messages.toList(growable: false));
     }).toList(growable: false);
 
-    final updatePinnedMessagesFuture = channelStates.map((it) {
-      final cid = it.channel.cid;
-      final messages = it.pinnedMessages.where((it) => it != null);
+    final updatePinnedMessagesFuture = cleanedChannelStates.map((it) {
+      final cid = it.channel!.cid;
+      final messages = it.pinnedMessages;
       return updatePinnedMessages(cid, messages.toList(growable: false));
     }).toList(growable: false);
 
-    final updateReadsFuture = channelStates.map((it) {
-      final cid = it.channel.cid;
-      final reads = it.read?.where((it) => it != null) ?? [];
+    final updateReadsFuture = cleanedChannelStates.map((it) {
+      final cid = it.channel!.cid;
+      final reads = it.read;
       return updateReads(cid, reads.toList(growable: false));
     }).toList(growable: false);
 
-    final updateMembersFuture = channelStates.map((it) {
-      final cid = it.channel.cid;
-      final members = it.members.where((it) => it != null);
+    final updateMembersFuture = cleanedChannelStates.map((it) {
+      final cid = it.channel!.cid;
+      final members = it.members;
       return updateMembers(cid, members.toList(growable: false));
     }).toList(growable: false);
 

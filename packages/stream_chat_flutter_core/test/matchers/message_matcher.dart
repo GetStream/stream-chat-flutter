@@ -1,4 +1,3 @@
-import 'package:meta/meta.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -7,8 +6,8 @@ Matcher isSameMessageAs(Message targetMessage) =>
 
 class _IsSameMessageAs extends Matcher {
   const _IsSameMessageAs({
-    @required this.targetMessage,
-  }) : assert(targetMessage != null, '');
+    required this.targetMessage,
+  });
 
   final Message targetMessage;
 
@@ -26,14 +25,14 @@ Matcher isSameMessageListAs(List<Message> targetMessageList) =>
 
 class _IsSameMessageListAs extends Matcher {
   const _IsSameMessageListAs({
-    @required this.targetMessageList,
-  }) : assert(targetMessageList != null, '');
+    required this.targetMessageList,
+  });
 
   final List<Message> targetMessageList;
 
   @override
   bool matches(covariant List<Message> messageList, Map matchState) {
-    bool matches = true;
+    var matches = true;
     for (var i = 0; i < messageList.length; i++) {
       final message = messageList[i];
       final targetMessage = targetMessageList[i];

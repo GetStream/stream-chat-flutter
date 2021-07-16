@@ -34,15 +34,21 @@ void main() {
       expect(channelModel.updatedAt, isSameDateAs(entity.updatedAt));
       expect(channelModel.memberCount, entity.memberCount);
       expect(channelModel.cid, entity.cid);
-      expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt));
-      expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt));
+      expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt!));
+      expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt!));
       expect(channelModel.extraData, entity.extraData);
-      expect(channelModel.createdBy.id, entity.createdById);
+      expect(channelModel.createdBy!.id, entity.createdById);
     });
 
     test('toChannelState should map entity into ChannelState ', () {
       final members = List.generate(3, (index) => Member());
-      final reads = List.generate(3, (index) => Read());
+      final reads = List.generate(
+        3,
+        (index) => Read(
+          user: User(id: 'testUserId$index'),
+          lastRead: DateTime.now(),
+        ),
+      );
       final messages = List.generate(3, (index) => Message());
 
       final channelState = entity.toChannelState(
@@ -59,7 +65,7 @@ void main() {
       expect(channelState.messages.length, messages.length);
       expect(channelState.pinnedMessages.length, messages.length);
 
-      final channelModel = channelState.channel;
+      final channelModel = channelState.channel!;
       expect(channelModel.id, entity.id);
       expect(channelModel.config.toJson()['max_message_length'], 33);
       expect(channelModel.frozen, entity.frozen);
@@ -67,10 +73,10 @@ void main() {
       expect(channelModel.updatedAt, isSameDateAs(entity.updatedAt));
       expect(channelModel.memberCount, entity.memberCount);
       expect(channelModel.cid, entity.cid);
-      expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt));
-      expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt));
+      expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt!));
+      expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt!));
       expect(channelModel.extraData, entity.extraData);
-      expect(channelModel.createdBy.id, entity.createdById);
+      expect(channelModel.createdBy!.id, entity.createdById);
     });
   });
 
@@ -103,9 +109,9 @@ void main() {
     expect(channelEntity.updatedAt, isSameDateAs(model.updatedAt));
     expect(channelEntity.memberCount, model.memberCount);
     expect(channelEntity.cid, model.cid);
-    expect(channelEntity.lastMessageAt, isSameDateAs(model.lastMessageAt));
-    expect(channelEntity.deletedAt, isSameDateAs(model.deletedAt));
+    expect(channelEntity.lastMessageAt, isSameDateAs(model.lastMessageAt!));
+    expect(channelEntity.deletedAt, isSameDateAs(model.deletedAt!));
     expect(channelEntity.extraData, model.extraData);
-    expect(channelEntity.createdById, model.createdBy.id);
+    expect(channelEntity.createdById, model.createdBy!.id);
   });
 }

@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-import 'back_button.dart';
-import 'channel_name.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/thread_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/thread_header_paint.png)
@@ -46,45 +43,24 @@ import 'channel_name.dart';
 /// Usually you would use this widget as an [AppBar] inside a [Scaffold].
 /// However you can also use it as a normal widget.
 ///
-/// Make sure to have a [StreamChannel] ancestor in order to provide the information about the channel.
-/// Every part of the widget uses a [StreamBuilder] to render the channel information as soon as it updates.
+/// Make sure to have a [StreamChannel] ancestor in order to provide the
+/// information about the channel.
+/// Every part of the widget uses a [StreamBuilder] to render the channel
+/// information as soon as it updates.
 ///
 /// By default the widget shows a backButton that calls [Navigator.pop].
-/// You can disable this button using the [showBackButton] property of just override the behaviour
+/// You can disable this button using the [showBackButton] property of just
+/// override the behaviour
 /// with [onBackPressed].
 ///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
+/// The widget components render the ui based on the first ancestor of type
+/// [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
 /// Modify it to change the widget appearance.
 class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
-  /// True if this header shows the leading back button
-  final bool showBackButton;
-
-  /// Callback to call when pressing the back button.
-  /// By default it calls [Navigator.pop]
-  final VoidCallback onBackPressed;
-
-  /// Callback to call when the title is tapped.
-  final VoidCallback onTitleTap;
-
-  /// The message parent of this thread
-  final Message parent;
-
-  /// Title widget
-  final Widget title;
-
-  /// Subtitle widget
-  final Widget subtitle;
-
-  /// Leading widget
-  final Widget leading;
-
-  /// AppBar actions
-  final List<Widget> actions;
-
   /// Instantiate a new ThreadHeader
-  ThreadHeader({
-    Key key,
-    @required this.parent,
+  const ThreadHeader({
+    Key? key,
+    required this.parent,
     this.showBackButton = true,
     this.onBackPressed,
     this.title,
@@ -92,13 +68,64 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.actions,
     this.onTitleTap,
-  })  : preferredSize = Size.fromHeight(kToolbarHeight),
+    this.showTypingIndicator = true,
+  })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
+
+  /// True if this header shows the leading back button
+  final bool showBackButton;
+
+  /// Callback to call when pressing the back button.
+  /// By default it calls [Navigator.pop]
+  final VoidCallback? onBackPressed;
+
+  /// Callback to call when the title is tapped.
+  final VoidCallback? onTitleTap;
+
+  /// The message parent of this thread
+  final Message parent;
+
+  /// Title widget
+  final Widget? title;
+
+  /// Subtitle widget
+  final Widget? subtitle;
+
+  /// Leading widget
+  final Widget? leading;
+
+  /// AppBar actions
+  final List<Widget>? actions;
+
+  /// If true the typing indicator will be rendered
+  /// if a user is typing in this thread
+  final bool showTypingIndicator;
 
   @override
   Widget build(BuildContext context) {
+    final chatThemeData = StreamChatTheme.of(context);
+
+    final defaultSubtitle = subtitle ??
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'with ',
+              style: chatThemeData.channelTheme.channelHeaderTheme.subtitle,
+            ),
+            Flexible(
+              child: ChannelName(
+                textStyle:
+                    chatThemeData.channelTheme.channelHeaderTheme.subtitle,
+              ),
+            ),
+          ],
+        );
+
     return AppBar(
       automaticallyImplyLeading: false,
+      textTheme: Theme.of(context).textTheme,
       brightness: Theme.of(context).brightness,
       elevation: 1,
       leading: leading ??
@@ -108,51 +135,34 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                   onPressed: onBackPressed,
                   showUnreads: true,
                 )
-              : SizedBox()),
-      backgroundColor:
-          StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
+              : const SizedBox()),
+      backgroundColor: chatThemeData.channelTheme.channelHeaderTheme.color,
       centerTitle: true,
       actions: actions,
       title: InkWell(
         onTap: onTitleTap,
-        child: Container(
+        child: SizedBox(
           height: preferredSize.height,
+          width: 250,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               title ??
                   Text(
                     'Thread Reply',
-                    style: StreamChatTheme.of(context)
-                        .channelTheme
-                        .channelHeaderTheme
-                        .title,
+                    style: chatThemeData.channelTheme.channelHeaderTheme.title,
                   ),
-              SizedBox(height: 2),
-              subtitle ??
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'with ',
-                        style: StreamChatTheme.of(context)
-                            .channelTheme
-                            .channelHeaderTheme
-                            .subtitle,
-                      ),
-                      Flexible(
-                        child: ChannelName(
-                          textStyle: StreamChatTheme.of(context)
-                              .channelTheme
-                              .channelHeaderTheme
-                              .subtitle,
-                        ),
-                      ),
-                    ],
-                  ),
+              const SizedBox(height: 2),
+              if (showTypingIndicator)
+                TypingIndicator(
+                  alignment: Alignment.center,
+                  channel: StreamChannel.of(context).channel,
+                  style: chatThemeData.channelTheme.channelHeaderTheme.subtitle,
+                  parentId: parent.id,
+                  alternativeWidget: defaultSubtitle,
+                )
+              else
+                defaultSubtitle,
             ],
           ),
         ),

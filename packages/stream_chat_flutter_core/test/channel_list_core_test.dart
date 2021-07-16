@@ -1,86 +1,33 @@
 import 'dart:async';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mockito/mockito.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter_core/src/channel_list_core.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
 
 void main() {
-  const pagination = PaginationParams(offset: 0, limit: 3);
+  const pagination = PaginationParams(limit: 3);
 
   List<Channel> _generateChannels(
     StreamChatClient client, {
     int count = 3,
     int offset = 0,
-  }) {
-    return List.generate(
-      count,
-      (index) {
-        index = index + offset;
-        return Channel(
-          client,
-          'testType$index',
-          'testId$index',
-          {'extra_data_key': 'extra_data_value_$index'},
-        );
-      },
-    );
-  }
-
-  test(
-    'should throw assertion error in case listBuilder is null',
-    () {
-      final channelListCore = () => ChannelListCore(
-            listBuilder: null,
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (BuildContext context, Object error) => Offstage(),
+  }) =>
+      List.generate(
+        count,
+        (index) {
+          index = index + offset;
+          return Channel(
+            client,
+            'testType$index',
+            'testId$index',
+            extraData: {'extra_data_key': 'extra_data_value_$index'},
           );
-      expect(channelListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case loadingBuilder is null',
-    () {
-      final channelListCore = () => ChannelListCore(
-            listBuilder: (_, __) => Offstage(),
-            loadingBuilder: null,
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (BuildContext context, Object error) => Offstage(),
-          );
-      expect(channelListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case emptyBuilder is null',
-    () {
-      final channelListCore = () => ChannelListCore(
-            listBuilder: (_, __) => Offstage(),
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: null,
-            errorBuilder: (BuildContext context, Object error) => Offstage(),
-          );
-      expect(channelListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case errorBuilder is null',
-    () {
-      final channelListCore = () => ChannelListCore(
-            listBuilder: (_, __) => Offstage(),
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: null,
-          );
-      expect(channelListCore, throwsA(isA<AssertionError>()));
-    },
-  );
+        },
+      );
 
   testWidgets(
     'should throw if ChannelListCore is used where ChannelsBloc is not present '
@@ -89,16 +36,16 @@ void main() {
       const channelListCoreKey = Key('channelListCore');
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       await tester.pumpWidget(channelListCore);
 
       expect(find.byKey(channelListCoreKey), findsNothing);
-      expect(tester.takeException(), isInstanceOf<Exception>());
+      expect(tester.takeException(), isInstanceOf<AssertionError>());
     },
   );
 
@@ -108,15 +55,16 @@ void main() {
       const channelListCoreKey = Key('channelListCore');
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+      when(() => mockClient.on(any(), any(), any(), any()))
+          .thenAnswer((_) => const Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -139,10 +87,10 @@ void main() {
       final controller = ChannelListController();
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         channelListController: controller,
       );
 
@@ -151,7 +99,8 @@ void main() {
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+      when(() => mockClient.on(any(), any(), any(), any()))
+          .thenAnswer((_) => const Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -175,9 +124,9 @@ void main() {
       const errorWidgetKey = Key('errorWidget');
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object error) =>
             Container(key: errorWidgetKey),
         pagination: pagination,
@@ -185,15 +134,20 @@ void main() {
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+      when(() => mockClient.on(any(), any(), any(), any()))
+          .thenAnswer((_) => const Stream.empty());
 
       const error = 'Error! Error! Error!';
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: pagination,
-      )).thenThrow(error);
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: pagination,
+          )).thenThrow(error);
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -208,40 +162,49 @@ void main() {
 
       expect(find.byKey(errorWidgetKey), findsOneWidget);
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: pagination,
-      )).called(1);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: pagination,
+          )).called(1);
     },
   );
 
   testWidgets(
-    'should build empty widget if channelsBlocState.channelsStream emits empty data',
+    '''should build empty widget if channelsBlocState.channelsStream emits empty data''',
     (tester) async {
       const channelListCoreKey = Key('channelListCore');
       const emptyWidgetKey = Key('emptyWidget');
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
         emptyBuilder: (BuildContext context) => Container(key: emptyWidgetKey),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         pagination: pagination,
       );
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+      when(() => mockClient.on(any(), any(), any(), any()))
+          .thenAnswer((_) => const Stream.empty());
 
       const channels = <Channel>[];
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: pagination,
-      )).thenAnswer((_) => Stream.value(channels));
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: pagination,
+          )).thenAnswer((_) => Stream.value(channels));
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -256,40 +219,49 @@ void main() {
 
       expect(find.byKey(emptyWidgetKey), findsOneWidget);
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: pagination,
-      )).called(1);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: pagination,
+          )).called(1);
     },
   );
 
   testWidgets(
-    'should build list widget if channelsBlocState.channelsStream emits some data',
+    '''should build list widget if channelsBlocState.channelsStream emits some data''',
     (tester) async {
       const channelListCoreKey = Key('channelListCore');
       const listWidgetKey = Key('listWidget');
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
         listBuilder: (_, __) => Container(key: listWidgetKey),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         pagination: pagination,
       );
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+      when(() => mockClient.on(any(), any(), any(), any()))
+          .thenAnswer((_) => const Stream.empty());
 
       final channels = _generateChannels(mockClient);
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: pagination,
-      )).thenAnswer((_) => Stream.value(channels));
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: pagination,
+          )).thenAnswer((_) => Stream.value(channels));
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -304,12 +276,16 @@ void main() {
 
       expect(find.byKey(listWidgetKey), findsOneWidget);
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: pagination,
-      )).called(1);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: pagination,
+          )).called(1);
     },
   );
 
@@ -321,31 +297,34 @@ void main() {
       const listWidgetKey = Key('listWidget');
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
-        listBuilder: (_, channels) {
-          return Container(
-            key: listWidgetKey,
-            child: Text(
-              channels.map((e) => e.cid).join(','),
-            ),
-          );
-        },
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        listBuilder: (_, channels) => Container(
+          key: listWidgetKey,
+          child: Text(
+            channels.map((e) => e.cid).join(','),
+          ),
+        ),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         pagination: pagination,
       );
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+      when(() => mockClient.on(any(), any(), any(), any()))
+          .thenAnswer((_) => const Stream.empty());
 
       final channels = _generateChannels(mockClient);
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: pagination,
-      )).thenAnswer((_) => Stream.value(channels));
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: pagination,
+          )).thenAnswer((_) => Stream.value(channels));
 
       await tester.pumpWidget(
         Directionality(
@@ -364,12 +343,16 @@ void main() {
       expect(find.byKey(listWidgetKey), findsOneWidget);
       expect(find.text(channels.map((e) => e.cid).join(',')), findsOneWidget);
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: pagination,
-      )).called(1);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: pagination,
+          )).called(1);
 
       final channelListCoreState = tester.state<ChannelListCoreState>(
         find.byKey(channelListCoreKey),
@@ -378,12 +361,16 @@ void main() {
       final offset = channels.length;
       final paginatedChannels = _generateChannels(mockClient, offset: offset);
       final updatedPagination = pagination.copyWith(offset: offset);
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: updatedPagination,
-      )).thenAnswer((_) => Stream.value(paginatedChannels));
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: updatedPagination,
+          )).thenAnswer((_) => Stream.value(paginatedChannels));
 
       await channelListCoreState.paginateData();
 
@@ -398,12 +385,16 @@ void main() {
         findsOneWidget,
       );
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: updatedPagination,
-      )).called(1);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: updatedPagination,
+          )).called(1);
     },
   );
 
@@ -411,39 +402,43 @@ void main() {
     'should rebuild ChannelListCore with updated widget data '
     'on calling setState()',
     (tester) async {
-      StateSetter _stateSetter;
-      int limit = pagination.limit;
+      StateSetter? _stateSetter;
+      var limit = pagination.limit;
 
       const channelListCoreKey = Key('channelListCore');
       const listWidgetKey = Key('listWidget');
 
       ChannelListCore channelListCoreBuilder(int limit) => ChannelListCore(
             key: channelListCoreKey,
-            listBuilder: (_, channels) {
-              return Container(
-                key: listWidgetKey,
-                child: Text(
-                  channels.map((e) => e.cid).join(','),
-                ),
-              );
-            },
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (BuildContext context, Object error) => Offstage(),
+            listBuilder: (_, channels) => Container(
+              key: listWidgetKey,
+              child: Text(
+                channels.map((e) => e.cid).join(','),
+              ),
+            ),
+            loadingBuilder: (BuildContext context) => const Offstage(),
+            emptyBuilder: (BuildContext context) => const Offstage(),
+            errorBuilder: (BuildContext context, Object error) =>
+                const Offstage(),
             pagination: pagination.copyWith(limit: limit),
           );
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+      when(() => mockClient.on(any(), any(), any(), any()))
+          .thenAnswer((_) => const Stream.empty());
 
       final channels = _generateChannels(mockClient);
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: pagination,
-      )).thenAnswer((_) => Stream.value(channels));
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: pagination,
+          )).thenAnswer((_) => Stream.value(channels));
 
       await tester.pumpWidget(
         Directionality(
@@ -466,24 +461,32 @@ void main() {
       expect(find.byKey(listWidgetKey), findsOneWidget);
       expect(find.text(channels.map((e) => e.cid).join(',')), findsOneWidget);
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: pagination,
-      )).called(1);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: pagination,
+          )).called(1);
 
       // Rebuilding ChannelListCore with new pagination limit
-      _stateSetter(() => limit = 6);
+      _stateSetter?.call(() => limit = 6);
 
       final updatedChannels = _generateChannels(mockClient, count: limit);
       final updatedPagination = pagination.copyWith(limit: limit);
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: updatedPagination,
-      )).thenAnswer((_) => Stream.value(updatedChannels));
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: updatedPagination,
+          )).thenAnswer((_) => Stream.value(updatedChannels));
 
       await tester.pumpAndSettle();
 
@@ -493,12 +496,16 @@ void main() {
         findsOneWidget,
       );
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: updatedPagination,
-      )).called(1);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: updatedPagination,
+          )).called(1);
     },
   );
 }

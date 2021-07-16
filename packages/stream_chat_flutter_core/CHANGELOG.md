@@ -1,3 +1,69 @@
+## 2.0.0
+
+🛑️ Breaking Changes from `1.5.3`
+
+- migrate this package to null safety
+- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of individual params/properties
+    - `options.state` -> bool state
+    - `options.watch` -> bool watch
+    - `options.presence` -> bool presence
+- `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual params/properties
+    - `options.presence` -> bool presence
+
+✅ Added
+
+- Monitor connection using `connectivity_plus` package
+
+🐞 Fixed
+
+- Minor fixes
+- Performance improvements
+
+## 2.0.0-nullsafety.9
+- Update llc dependency
+
+## 2.0.0-nullsafety.8
+
+🛑️ Breaking Changes from `2.0.0-nullsafety.7`
+
+- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of individual
+  params/properties
+    - `options.state` -> bool state
+    - `options.watch` -> bool watch
+    - `options.presence` -> bool presence
+- `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual params/properties
+    - `options.presence` -> bool presence
+
+## 2.0.0-nullsafety.7
+
+* Fixed a bug with connectivity implementation
+
+## 2.0.0-nullsafety.6
+
+* Update llc dependency
+* Minor fixes and improvements
+
+## 2.0.0-nullsafety.5
+
+* Update llc dependency
+* Minor fixes and improvements
+* Performance improvements
+* Monitor connection using `connectivity_plus` package
+
+## 2.0.0-nullsafety.3
+
+* Update llc dependency
+* Minor fixes and improvements
+
+## 2.0.0-nullsafety.2
+
+* Fix ChannelsBloc not performing calls if pagination ended
+
+## 2.0.0-nullsafety.1
+
+* Migrate this package to null safety
+* Update llc dependency
+
 ## 1.5.3
 
 * Fix ChannelsBloc not performing calls if pagination ended

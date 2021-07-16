@@ -19,16 +19,15 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: ChannelListCore(
-///         filter: {
-///           'members': {
-///             '\$in': [StreamChat.of(context).user.id],
-///           }
-///         },
+///         filter: Filter.in_(
+///            'members',
+///            [StreamChat.of(context).user!.id],
+///         ),
 ///         sort: [SortOption('last_message_at')],
 ///         pagination: PaginationParams(
 ///           limit: 20,
 ///         ),
-///         errorBuilder: (err) {
+///         errorBuilder: (context, err) {
 ///           return Center(
 ///             child: Text('An error has occured'),
 ///           );
@@ -38,7 +37,7 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 ///             child: Text('Nothing here...'),
 ///           );
 ///         },
-///         emptyBuilder: (context) {
+///         loadingBuilder: (context) {
 ///           return Center(
 ///             child: CircularProgressIndicator(),
 ///           );
@@ -57,41 +56,29 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 class ChannelListCore extends StatefulWidget {
   /// Instantiate a new ChannelListView
   const ChannelListCore({
-    Key key,
-    @required this.errorBuilder,
-    @required this.emptyBuilder,
-    @required this.loadingBuilder,
-    @required this.listBuilder,
+    Key? key,
+    required this.errorBuilder,
+    required this.emptyBuilder,
+    required this.loadingBuilder,
+    required this.listBuilder,
     this.filter,
-    this.options,
+    this.state = true,
+    this.watch = true,
+    this.presence = false,
+    this.memberLimit,
+    this.messageLimit,
     this.sort,
     this.pagination = const PaginationParams(
       limit: 25,
     ),
     this.channelListController,
-  })  : assert(
-          errorBuilder != null,
-          'Parameter errorBuilder should not be null',
-        ),
-        assert(
-          emptyBuilder != null,
-          'Parameter emptyBuilder should not be null',
-        ),
-        assert(
-          loadingBuilder != null,
-          'Parameter loadingBuilder should not be null',
-        ),
-        assert(
-          listBuilder != null,
-          'Parameter listBuilder should not be null',
-        ),
-        super(key: key);
+  }) : super(key: key);
 
   /// A [ChannelListController] allows reloading and pagination.
   /// Use [ChannelListController.loadData] and
   /// [ChannelListController.paginateData] respectively for reloading and
   /// pagination.
-  final ChannelListController channelListController;
+  final ChannelListController? channelListController;
 
   /// The builder that will be used in case of error
   final ErrorBuilder errorBuilder;
@@ -108,20 +95,29 @@ class ChannelListCore extends StatefulWidget {
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
-  final Map<String, dynamic> filter;
-
-  /// Query channels options.
-  ///
-  /// state: if true returns the Channel state
-  /// watch: if true listen to changes to this Channel in real time.
-  final Map<String, dynamic> options;
+  final Filter? filter;
 
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can be
   /// provided.
   /// You can sort based on last_updated, last_message_at, updated_at, created
   /// _at or member_count. Direction can be ascending or descending.
-  final List<SortOption<ChannelModel>> sort;
+  final List<SortOption<ChannelModel>>? sort;
+
+  /// If true returns the Channel state
+  final bool state;
+
+  /// If true listen to changes to this Channel in real time.
+  final bool watch;
+
+  /// If true you’ll receive user presence updates via the websocket events
+  final bool presence;
+
+  /// Number of members to fetch in each channel
+  final int? memberLimit;
+
+  /// Number of messages to fetch in each channel
+  final int? messageLimit;
 
   /// Pagination parameters
   /// limit: the number of channels to return (max is 30)
@@ -135,12 +131,11 @@ class ChannelListCore extends StatefulWidget {
 
 /// The current state of the [ChannelListCore].
 class ChannelListCoreState extends State<ChannelListCore> {
-  @override
-  Widget build(BuildContext context) {
-    final channelsBloc = ChannelsBloc.of(context);
+  late ChannelsBlocState _channelsBloc;
+  StreamChatCoreState? _streamChatCoreState;
 
-    return _buildListView(channelsBloc);
-  }
+  @override
+  Widget build(BuildContext context) => _buildListView(_channelsBloc);
 
   StreamBuilder<List<Channel>> _buildListView(
     ChannelsBlocState channelsBlocState,
@@ -149,12 +144,12 @@ class ChannelListCoreState extends State<ChannelListCore> {
         stream: channelsBlocState.channelsStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return widget.errorBuilder(context, snapshot.error);
+            return widget.errorBuilder(context, snapshot.error!);
           }
           if (!snapshot.hasData) {
             return widget.loadingBuilder(context);
           }
-          final channels = snapshot.data;
+          final channels = snapshot.data!;
           if (channels.isEmpty) {
             return widget.emptyBuilder(context);
           }
@@ -163,49 +158,60 @@ class ChannelListCoreState extends State<ChannelListCore> {
       );
 
   /// Fetches initial channels and updates the widget
-  Future<void> loadData() {
-    final channelsBloc = ChannelsBloc.of(context);
-    return channelsBloc.queryChannels(
-      filter: widget.filter,
-      sortOptions: widget.sort,
-      paginationParams: widget.pagination,
-      options: widget.options,
-    );
-  }
+  Future<void> loadData() => _channelsBloc.queryChannels(
+        filter: widget.filter,
+        sortOptions: widget.sort,
+        state: widget.state,
+        watch: widget.watch,
+        presence: widget.presence,
+        memberLimit: widget.memberLimit,
+        messageLimit: widget.messageLimit,
+        paginationParams: widget.pagination,
+      );
 
   /// Fetches more channels with updated pagination and updates the widget
-  Future<void> paginateData() {
-    final channelsBloc = ChannelsBloc.of(context);
-    return channelsBloc.queryChannels(
-      filter: widget.filter,
-      sortOptions: widget.sort,
-      paginationParams: widget.pagination.copyWith(
-        offset: channelsBloc.channels?.length ?? 0,
-      ),
-      options: widget.options,
-    );
-  }
+  Future<void> paginateData() => _channelsBloc.queryChannels(
+        filter: widget.filter,
+        sortOptions: widget.sort,
+        state: widget.state,
+        watch: widget.watch,
+        presence: widget.presence,
+        memberLimit: widget.memberLimit,
+        messageLimit: widget.messageLimit,
+        paginationParams: widget.pagination.copyWith(
+          offset: _channelsBloc.channels?.length ?? 0,
+        ),
+      );
 
-  StreamSubscription<Event> _subscription;
+  StreamSubscription<Event>? _subscription;
 
   @override
   void initState() {
     super.initState();
-    loadData();
-    final client = StreamChatCore.of(context).client;
-    _subscription = client
-        .on(
-          EventType.connectionRecovered,
-          EventType.notificationAddedToChannel,
-          EventType.notificationMessageNew,
-          EventType.channelVisible,
-        )
-        .listen((event) => loadData());
+    _setupController();
+  }
 
-    if (widget.channelListController != null) {
-      widget.channelListController.loadData = loadData;
-      widget.channelListController.paginateData = paginateData;
+  @override
+  void didChangeDependencies() {
+    _channelsBloc = ChannelsBloc.of(context);
+    final newStreamChatCoreState = StreamChatCore.of(context);
+
+    if (newStreamChatCoreState != _streamChatCoreState) {
+      _streamChatCoreState = newStreamChatCoreState;
+      loadData();
+      final client = _streamChatCoreState!.client;
+      _subscription?.cancel();
+      _subscription = client
+          .on(
+            EventType.connectionRecovered,
+            EventType.notificationAddedToChannel,
+            EventType.notificationMessageNew,
+            EventType.channelVisible,
+          )
+          .listen((event) => loadData());
     }
+
+    super.didChangeDependencies();
   }
 
   @override
@@ -214,16 +220,31 @@ class ChannelListCoreState extends State<ChannelListCore> {
 
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
-        widget.options?.toString() != oldWidget.options?.toString() ||
-        widget.pagination?.toJson()?.toString() !=
-            oldWidget.pagination?.toJson()?.toString()) {
+        widget.state != oldWidget.state ||
+        widget.watch != oldWidget.watch ||
+        widget.presence != oldWidget.presence ||
+        widget.messageLimit != oldWidget.messageLimit ||
+        widget.memberLimit != oldWidget.memberLimit ||
+        widget.pagination.toJson().toString() !=
+            oldWidget.pagination.toJson().toString()) {
       loadData();
+    }
+
+    if (widget.channelListController != oldWidget.channelListController) {
+      _setupController();
+    }
+  }
+
+  void _setupController() {
+    if (widget.channelListController != null) {
+      widget.channelListController!.loadData = loadData;
+      widget.channelListController!.paginateData = paginateData;
     }
   }
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _subscription?.cancel();
     super.dispose();
   }
 }
@@ -233,10 +254,10 @@ class ChannelListCoreState extends State<ChannelListCore> {
 class ChannelListController {
   /// This function calls Stream's servers to load a list of channels.
   /// If there is existing data, calling this function causes a reload.
-  AsyncCallback loadData;
+  AsyncCallback? loadData;
 
   /// This function is used to load another page of data. Note, [loadData]
   /// should be used to populate the initial page of data. Calling
   /// [paginateData] performs a query to load subsequent pages.
-  AsyncCallback paginateData;
+  AsyncCallback? paginateData;
 }

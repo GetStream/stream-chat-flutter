@@ -2,6 +2,7 @@ name: stream_flutter_workflow
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+  flutter_version: "2.2.2"
 
 on:
   pull_request:
@@ -9,97 +10,114 @@ on:
     branches:
       - master
       - develop
-    paths-ignore:
-      - 'docs/**'
 
 jobs:
   analyze:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: "Git Checkout"
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: 'Install Flutter'
-        run: ./.github/workflows/scripts/install-flutter.sh stable
-      - name: 'Install Tools'
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v2
+        with:
+          path: /opt/hostedtoolcache/flutter
+          key: ${{ env.flutter_version }}-flutter
+      - name: "Install Flutter"
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ env.flutter_version }}
+      - name: "Install Tools"
         run: |
-          ./.github/workflows/scripts/install-tools.sh
-          flutter pub global activate tuneup
-      - name: 'Bootstrap Workspace'
+          flutter pub global activate melos
+      - name: "Bootstrap Workspace"
         run: melos bootstrap
-      - name: 'Dart Analyze'
+      - name: "Dart Analyze"
         run: |
-          melos exec -c 3 --ignore="*example*" -- \
-            tuneup check
-      - name: 'Pub Check'
+          melos run analyze
+      - name: "Pub Check"
         if: github.ref == 'refs/heads/master'
         run: |
-          melos exec -c 1 --no-private --ignore="*example*" -- \
-            pub publish --dry-run
+          melos run lint:pub
+
   format:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v2
+      - name: "Git Checkout"
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: 'Install Flutter'
-        run: ./.github/workflows/scripts/install-flutter.sh stable
-      - name: 'Install Tools'
-        run: |
-          ./.github/workflows/scripts/install-tools.sh
-      - name: 'Bootstrap Workspace'
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v2
+        with:
+          path: /opt/hostedtoolcache/flutter
+          key: ${{ env.flutter_version }}-flutter
+      - name: "Install Flutter"
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ env.flutter_version }}
+      - name: "Install Tools"
+        run: flutter pub global activate melos
+      - name: "Bootstrap Workspace"
         run: melos bootstrap
-      - name: 'Dart'
+      - name: "Melos Format"
+        run: melos run format
+      - name: "Validate Formatting"
         run: |
-          melos exec -c 1 -- \
-            flutter format .
           ./.github/workflows/scripts/validate-formatting.sh
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v2
+      - name: "Git Checkout"
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: 'Install Flutter'
-        run: ./.github/workflows/scripts/install-flutter.sh stable
-      - name: 'Install Tools'
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v2
+        with:
+          path: /Users/runner/hostedtoolcache/flutter
+          key: ${{ env.flutter_version }}-flutter
+      - name: "Install Flutter"
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ env.flutter_version }}
+      - name: "Install Tools"
         run: |
-          ./.github/workflows/scripts/install-tools.sh
-          flutter pub global activate coverage
-          flutter pub global activate remove_from_coverage
-      - name: 'Bootstrap Workspace'
+          flutter pub global activate melos
+          pub global activate remove_from_coverage
+      - name: "Bootstrap Workspace"
         run: melos bootstrap
-      - name: 'Dart Test'
-        run: |
-          cd packages/stream_chat
-          flutter pub run test --coverage coverage/
-          format_coverage --lcov --in=coverage/ --out=coverage/lcov.info --packages=.packages --report-on=lib
-      - name: 'Flutter Test'
-        run: |
-          melos exec -c 3 --flutter --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
-            flutter test --coverage
-      - name: CodeCov
-        run: |
-          melos exec  -c 3 --fail-fast --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
-          "\$MELOS_ROOT_PATH/.github/workflows/scripts/coverage.sh"
-          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
-      - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
+      - name: "Flutter Test"
+        run: melos run test:all
+      - name: "Collect Coverage"
+        run: melos run coverage:ignore-file --no-select
+      - name: "Upload Coverage"
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          files: packages/*/coverage/lcov.info
+      - name: "Stream Chat Coverage Check"
+        uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat/coverage/lcov.info
-          min_coverage: 40
-      - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
+          min_coverage: 80
+      - name: "Stream Chat Persistence Coverage Check"
+        uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_persistence/coverage/lcov.info
           min_coverage: 95
-      - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
+      - name: "Stream Chat Flutter Core Coverage Check"
+        uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_flutter_core/coverage/lcov.info
           min_coverage: 90
-      - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
+      - name: "Stream Chat Flutter Coverage Check"
+        uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_flutter/coverage/lcov.info
-          min_coverage: 16
+          min_coverage: 67

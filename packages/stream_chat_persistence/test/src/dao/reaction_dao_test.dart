@@ -5,18 +5,20 @@ import 'package:stream_chat_persistence/src/dao/reaction_dao.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:test/test.dart';
 
+import '../../stream_chat_persistence_client_test.dart';
+
 void main() {
-  ReactionDao reactionDao;
-  MoorChatDatabase database;
+  late ReactionDao reactionDao;
+  late MoorChatDatabase database;
 
   setUp(() {
-    database = MoorChatDatabase.testable('testUserId');
+    database = testDatabaseProvider('testUserId');
     reactionDao = database.reactionDao;
   });
 
   Future<List<Reaction>> _prepareReactionData(
     String messageId, {
-    String userId,
+    String? userId,
     int count = 3,
   }) async {
     final users = List.generate(count, (index) => User(id: 'testUserId$index'));
@@ -29,7 +31,7 @@ void main() {
       showInChannel: math.Random().nextBool(),
       replyCount: 3,
       updatedAt: DateTime.now(),
-      extraData: {'extra_test_field': 'extraTestData'},
+      extraData: const {'extra_test_field': 'extraTestData'},
       text: 'Dummy text',
       pinned: math.Random().nextBool(),
       pinnedAt: DateTime.now(),

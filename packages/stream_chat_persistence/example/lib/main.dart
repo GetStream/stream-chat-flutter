@@ -3,8 +3,8 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
 Future<void> main() async {
-  /// Create a new instance of [StreamChatClient] passing the apikey obtained from your
-  /// project dashboard.
+  /// Create a new instance of [StreamChatClient] passing the apikey obtained
+  /// from your project dashboard.
   final client = StreamChatClient('b67pax5b2wdq');
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,12 +22,13 @@ Future<void> main() async {
   await client.connectUser(
     User(
       id: 'cool-shadow-7',
-      extraData: {
+      extraData: const {
         'image':
             'https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow',
       },
     ),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiY29vbC1zaGFkb3ctNyJ9.gkOlCRb1qgy4joHPaxFwPOdXcGvSPvp6QY0S4mpRkVo',
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiY29vbC1zaGFkb3ctNyJ9.'
+    'gkOlCRb1qgy4joHPaxFwPOdXcGvSPvp6QY0S4mpRkVo',
   );
 
   /// Creates a channel using the type `messaging` and `godevs`.
@@ -50,55 +51,57 @@ Future<void> main() async {
 
 /// Example using Stream's Low Level Dart client.
 class StreamExample extends StatelessWidget {
-  /// To initialize this example, an instance of [client] and [channel] is required.
+  /// To initialize this example, an instance of
+  /// [client] and [channel] is required.
   const StreamExample({
-    Key key,
-    @required this.client,
-    @required this.channel,
+    Key? key,
+    required this.client,
+    required this.channel,
   }) : super(key: key);
 
-  /// Instance of [StreamChatClient] we created earlier. This contains information about
-  /// our application and connection state.
+  /// Instance of [StreamChatClient] we created earlier.
+  /// This contains information about our application and connection state.
   final StreamChatClient client;
 
   /// The channel we'd like to observe and participate.
   final Channel channel;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Stream Chat Dart Example',
-      home: HomeScreen(channel: channel),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+        title: 'Stream Chat Dart Example',
+        home: HomeScreen(channel: channel),
+      );
 }
 
 /// Main screen of our application. The layout is comprised of an [AppBar]
 /// containing the channel name and a [MessageView] displaying recent messages.
 class HomeScreen extends StatelessWidget {
   /// [HomeScreen] is constructed using the [Channel] we defined earlier.
-  const HomeScreen({Key key, @required this.channel}) : super(key: key);
+  const HomeScreen({
+    Key? key,
+    required this.channel,
+  }) : super(key: key);
 
   /// Channel object containing the [Channel.id] we'd like to observe.
   final Channel channel;
 
   @override
   Widget build(BuildContext context) {
-    final messages = channel.state.channelStateStream;
+    final messages = channel.state!.channelStateStream;
     return Scaffold(
       appBar: AppBar(
         title: Text('Channel: ${channel.id}'),
       ),
       body: SafeArea(
-        child: StreamBuilder<ChannelState>(
+        child: StreamBuilder<ChannelState?>(
           stream: messages,
           builder: (
             BuildContext context,
-            AsyncSnapshot<ChannelState> snapshot,
+            AsyncSnapshot<ChannelState?> snapshot,
           ) {
             if (snapshot.hasData && snapshot.data != null) {
               return MessageView(
-                messages: snapshot.data.messages.reversed.toList(),
+                messages: snapshot.data!.messages.reversed.toList(),
                 channel: channel,
               );
             } else if (snapshot.hasError) {
@@ -110,8 +113,8 @@ class HomeScreen extends StatelessWidget {
             }
             return const Center(
               child: SizedBox(
-                width: 100.0,
-                height: 100.0,
+                width: 100,
+                height: 100,
                 child: CircularProgressIndicator(),
               ),
             );
@@ -127,9 +130,9 @@ class HomeScreen extends StatelessWidget {
 class MessageView extends StatefulWidget {
   /// Message takes the latest list of messages and the current channel.
   const MessageView({
-    Key key,
-    @required this.messages,
-    @required this.channel,
+    Key? key,
+    required this.messages,
+    required this.channel,
   }) : super(key: key);
 
   /// List of messages sent in the given channel.
@@ -143,8 +146,8 @@ class MessageView extends StatefulWidget {
 }
 
 class _MessageViewState extends State<MessageView> {
-  TextEditingController _controller;
-  ScrollController _scrollController;
+  late final TextEditingController _controller;
+  late final ScrollController _scrollController;
 
   List<Message> get _messages => widget.messages;
 
@@ -172,86 +175,85 @@ class _MessageViewState extends State<MessageView> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            controller: _scrollController,
-            itemCount: _messages.length,
-            reverse: true,
-            itemBuilder: (BuildContext context, int index) {
-              final item = _messages[index];
-              if (item.user.id == widget.channel.client.uid) {
-                return Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(item.text),
-                  ),
-                );
-              } else {
-                return Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(item.text),
-                  ),
-                );
-              }
-            },
+  Widget build(BuildContext context) => Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: _messages.length,
+              reverse: true,
+              itemBuilder: (BuildContext context, int index) {
+                final item = _messages[index];
+                if (item.user?.id == widget.channel.client.uid) {
+                  return Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(item.text ?? ''),
+                    ),
+                  );
+                } else {
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(item.text ?? ''),
+                    ),
+                  );
+                }
+              },
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter your message',
-                  ),
-                ),
-              ),
-              Material(
-                type: MaterialType.circle,
-                color: Colors.blue,
-                clipBehavior: Clip.hardEdge,
-                child: InkWell(
-                  onTap: () async {
-                    // We can send a new message by calling `sendMessage` on
-                    // the current channel. After sending a message, the
-                    // TextField is cleared and the list view is scrolled
-                    // to show the new item.
-                    if (_controller.value.text.isNotEmpty) {
-                      await widget.channel.sendMessage(
-                        Message(text: _controller.value.text),
-                      );
-                      _controller.clear();
-                      _updateList();
-                    }
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(
-                      child: Icon(
-                        Icons.send,
-                        color: Colors.white,
-                      ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your message',
                     ),
                   ),
                 ),
-              )
-            ],
-          ),
-        )
-      ],
-    );
-  }
+                Material(
+                  type: MaterialType.circle,
+                  color: Colors.blue,
+                  clipBehavior: Clip.hardEdge,
+                  child: InkWell(
+                    onTap: () async {
+                      // We can send a new message by calling `sendMessage` on
+                      // the current channel. After sending a message, the
+                      // TextField is cleared and the list view is scrolled
+                      // to show the new item.
+                      if (_controller.value.text.isNotEmpty) {
+                        await widget.channel.sendMessage(
+                          Message(text: _controller.value.text),
+                        );
+                        _controller.clear();
+                        _updateList();
+                      }
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Center(
+                        child: Icon(
+                          Icons.send,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      );
 }
 
-/// Helper extension for quickly retrieving the current user id from a [StreamChatClient].
+/// Helper extension for quickly retrieving
+/// the current user id from a [StreamChatClient].
 extension on StreamChatClient {
-  String get uid => state.user.id;
+  String get uid => state.user!.id;
 }

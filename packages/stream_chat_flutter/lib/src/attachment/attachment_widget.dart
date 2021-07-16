@@ -1,27 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import '../stream_chat_theme.dart';
-
+/// Enum for identifying type of attachment
 enum AttachmentSource {
+  /// Attachment is attached
   local,
+
+  /// Attachment is uploaded
   network,
 }
 
+/// Extension for identifying type of attachment
 extension AttachmentSourceX on AttachmentSource {
   /// The [when] method is the equivalent to pattern matching.
   /// Its prototype depends on the AttachmentSource defined.
   // ignore: missing_return
   T when<T>({
-    @required T Function() local,
-    @required T Function() network,
+    required T Function() local,
+    required T Function() network,
   }) {
-    assert(() {
-      if (local == null || network == null) {
-        throw 'check for all possible cases';
-      }
-      return true;
-    }());
     switch (this) {
       case AttachmentSource.local:
         return local();
@@ -31,48 +29,62 @@ extension AttachmentSourceX on AttachmentSource {
   }
 }
 
+/// Abstract class for deriving attachment types
 abstract class AttachmentWidget extends StatelessWidget {
-  final Size size;
-  final Message message;
-  final Attachment attachment;
-  final AttachmentSource _source;
-
-  AttachmentSource get source => _source ?? attachment.file != null
-      ? AttachmentSource.local
-      : AttachmentSource.network;
-
+  /// Constructor for creating attachment widget
   const AttachmentWidget({
-    Key key,
-    @required this.message,
-    @required this.attachment,
+    Key? key,
+    required this.message,
+    required this.attachment,
     this.size,
-    AttachmentSource source,
+    AttachmentSource? source,
   })  : _source = source,
         super(key: key);
+
+  /// Size of attachments
+  final Size? size;
+  final AttachmentSource? _source;
+
+  /// Message which attachment is attached to
+  final Message message;
+
+  /// Attachment to display
+  final Attachment attachment;
+
+  /// Getter for source of attachment
+  AttachmentSource get source =>
+      _source ??
+      (attachment.file != null
+          ? AttachmentSource.local
+          : AttachmentSource.network);
 }
 
+/// Widget for building in case of error
 class AttachmentError extends StatelessWidget {
-  final Size size;
-
+  /// Constructor for creating AttachmentError
   const AttachmentError({
-    Key key,
+    Key? key,
     this.size,
   }) : super(key: key);
 
+  /// Size of error
+  final Size? size;
+
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: size?.width,
-        height: size?.height,
-        color: StreamChatTheme.of(context).colorTheme.accentRed.withOpacity(.1),
-        child: Center(
-          child: Icon(
-            Icons.error_outline,
-            color: StreamChatTheme.of(context).colorTheme.black,
+  Widget build(BuildContext context) => Center(
+        child: Container(
+          width: size?.width,
+          height: size?.height,
+          color: StreamChatTheme.of(context)
+              .colorTheme
+              .accentError
+              .withOpacity(.1),
+          child: Center(
+            child: Icon(
+              Icons.error_outline,
+              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
