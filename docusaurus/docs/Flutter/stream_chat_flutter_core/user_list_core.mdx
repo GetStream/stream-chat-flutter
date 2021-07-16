@@ -1,0 +1,64 @@
+---
+id: user_list_core
+sidebar_position: 10
+title: UserListCore
+---
+
+A Widget For Building A List Of Users
+
+### Background
+
+The UI SDK of Stream Chat supplies a `UserListView` class that builds a list of channels fetching
+according to the filters and sort order given. However, in some cases, implementing novel UI is necessary
+that cannot be done using the customization approaches given in the widget.
+
+To do this, we extracted the logic required for fetching channels into a 'Core' widget - a widget that
+fetches channels in the expected way via the usual params but does not supply any UI and instead
+exposes builders to build the UI in situations such as loading, empty data, errors, and on data received.
+
+### Basic Example
+
+`UserListCore` is a simplified class that allows fetching users while
+exposing UI builders.
+A `UserListController` is used to load and paginate data.
+
+```dart
+class UsersListPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: UsersListCore(
+        sort: [SortOption('last_active')],
+        pagination: PaginationParams(
+          limit: 20,
+        ),
+        errorBuilder: (err) {
+          return Center(
+            child: Text('An error has occured'),
+          );
+        },
+        emptyBuilder: (context) {
+          return Center(
+            child: Text('Nothing here...'),
+          );
+        },
+        emptyBuilder: (context) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+        listBuilder: (context, list) {
+          return UsersPage(list);
+        }
+      ),
+    );
+  }
+}
+```
+
+`UsersBloc` must be the ancestor of this widget. This is necessary since
+`UserListCore` depends on functionality contained within `UsersBloc`.
+
+The parameters `listBuilder`, `loadingBuilder`, `emptyBuilder` and
+`errorBuilder` must all be supplied and not null.
+

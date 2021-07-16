@@ -105,7 +105,7 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat/coverage/lcov.info
-          min_coverage: 40
+          min_coverage: 80
       - name: "Stream Chat Persistence Coverage Check"
         uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
@@ -120,4 +120,4 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_flutter/coverage/lcov.info
-          min_coverage: 35
+          min_coverage: 67

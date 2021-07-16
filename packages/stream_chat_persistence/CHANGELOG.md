@@ -1,3 +1,7 @@
+## 2.0.0
+* Migrate this package to null safety
+* Minor fixes and improvements
+
 ## 2.0.0-nullsafety.8
 * Updated llc dependency
 * Upgraded moor dependencies and generated files with the latest dependency

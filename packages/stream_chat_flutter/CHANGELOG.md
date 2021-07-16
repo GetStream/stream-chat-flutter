@@ -1,3 +1,67 @@
+## 2.0.0
+
+🛑️ Breaking Changes from `1.5.4`
+
+- Migrate this package to null safety
+- Renamed `ChannelImage` to `ChannelAvatar`
+- Updated `StreamChatThemeData.reactionIcons` to accept custom builder
+- Renamed `ColorTheme` properties to reflect the purpose of the colors
+  - `ColorTheme.black` -> `ColorTheme.textHighEmphasis`
+  - `ColorTheme.grey` -> `ColorTheme.textLowEmphasis`
+  - `ColorTheme.greyGainsboro` -> `ColorTheme.disabled`
+  - `ColorTheme.greyWhisper` -> `ColorTheme.borders`
+  - `ColorTheme.whiteSmoke` -> `ColorTheme.inputBg`
+  - `ColorTheme.whiteSnow` -> `ColorTheme.appBg`
+  - `ColorTheme.white` -> `ColorTheme.barsBg`
+  - `ColorTheme.blueAlice` -> `ColorTheme.linkBg`
+  - `ColorTheme.accentBlue` -> `ColorTheme.accentPrimary`
+  - `ColorTheme.accentRed` -> `ColorTheme.accentError`
+  - `ColorTheme.accentGreen` -> `ColorTheme.accentInfo`
+
+- `ChannelListCore` options property is removed in favor of individual properties
+    - `options.state` -> bool state
+    - `options.watch` -> bool watch
+    - `options.presence` -> bool presence
+- `UserListView` options property is removed in favor of individual properties
+    - `options.presence` -> bool presence
+- Renamed `ImageHeader` to `GalleryHeader`
+- Renamed `ImageFooter` to `GalleryFooter`
+- `MessageBuilder` and `ParentMessageBuilder` signature is now
+
+```dart
+typedef MessageBuilder = Widget Function(
+    BuildContext,
+    MessageDetails,
+    List<Message>,
+    MessageWidget defaultMessageWidget,
+    );
+```
+
+the last parameter is the default `MessageWidget`
+You can call `.copyWith` to customize just a subset of properties
+
+
+✅ Added
+
+- Added video compress options (frame and quality) to `MessageInput`
+- TypingIndicator now has a property called `parentId` to show typing indicator specific to threads
+- [#493](https://github.com/GetStream/stream-chat-flutter/pull/493): add support for messageListView header/footer
+- `MessageWidget` accepts a `userAvatarBuilder`
+- Added pinMessage ui support
+- Added `MessageListView.threadSeparatorBuilder` property
+- Added `MessageInput.onError` property to allow error handling
+- Added `GalleryHeader/GalleryFooter` theme classes
+
+🐞 Fixed
+
+- [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text box when editing
+  message
+- Modals are shown using the nearest `Navigator` to make using the SDK easier in a nested navigator use case
+- [#484](https://github.com/GetStream/stream-chat-flutter/issues/484): messages don't update without a reload
+- `MessageListView` not rendering if the user is not a member of the channel
+- Fix `MessageInput` overflow when there are no actions
+- Minor fixes and improvements
+
 ## 2.0.0-nullsafety.9
 
 🛑️ Breaking Changes from `2.0.0-nullsafety.8`
