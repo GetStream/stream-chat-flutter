@@ -1,0 +1,146 @@
+---
+id: mig_guide_2_0
+sidebar_position: 5
+title: Migrating to 2.0 (Null-safety)
+---
+
+A Migration Guide For Switching To v2.0 Of The Flutter SDK
+
+### Overview
+
+v2.0 of the Stream Chat Flutter SDK brings along several changes - primarily making the SDK null-safe.
+Null safety allows your apps to run faster, with fewer errors, and with less code.
+
+Check [this link](https://flutter.dev/docs/null-safety) for more about Null Safety in Flutter.
+
+This guide is intended to enumerate and better explain the changes in the SDK.
+
+The changes will be listed by package and a concise changelog will be followed by more info.
+
+### Changelog of `stream_chat_flutter`
+
+#### Breaking Changes from 1.5.4
+
+*Migrate this package to null safety
+
+*Renamed ChannelImage to ChannelAvatar
+
+*Updated StreamChatThemeData.reactionIcons to accept custom builder
+
+*Renamed ColorTheme properties to reflect the purpose of the colors
+
+    *ColorTheme.black -> ColorTheme.textHighEmphasis
+    *ColorTheme.grey -> ColorTheme.textLowEmphasis
+    *ColorTheme.greyGainsboro -> ColorTheme.disabled
+    *ColorTheme.greyWhisper -> ColorTheme.borders
+    *ColorTheme.whiteSmoke -> ColorTheme.inputBg
+    *ColorTheme.whiteSnow -> ColorTheme.appBg
+    *ColorTheme.white -> ColorTheme.barsBg
+    *ColorTheme.blueAlice -> ColorTheme.linkBg
+    *ColorTheme.accentBlue -> ColorTheme.accentPrimary
+    *ColorTheme.accentRed -> ColorTheme.accentError
+    *ColorTheme.accentGreen -> ColorTheme.accentInfo
+
+*ChannelListCore options property is removed in favor of individual properties
+
+    *options.state -> bool state
+    *options.watch -> bool watch
+    *options.presence -> bool presence
+
+*UserListView options property is removed in favor of individual properties
+
+    *options.presence -> bool presence
+
+*Renamed ImageHeader to GalleryHeader
+
+*Renamed ImageFooter to GalleryFooter
+
+*MessageBuilder and ParentMessageBuilder signature is now
+
+```
+typedef MessageBuilder = Widget Function(
+    BuildContext,
+    MessageDetails,
+    List<Message>,
+    MessageWidget defaultMessageWidget,
+    );
+```
+
+The last parameter is the default MessageWidget
+You can call .copyWith to customize just a subset of properties
+
+#### ✅ Added
+
+Added video compress options (frame and quality) to MessageInput
+TypingIndicator now has a property called parentId to show typing indicator specific to threads
+#493: add support for messageListView header/footer
+MessageWidget accepts a userAvatarBuilder
+Added pinMessage ui support
+Added MessageListView.threadSeparatorBuilder property
+Added MessageInput.onError property to allow error handling
+Added GalleryHeader/GalleryFooter theme classes
+
+#### 🐞 Fixed
+
+#483: Keyboard covers input text box when editing
+message
+Modals are shown using the nearest Navigator to make using the SDK easier in a nested navigator use case
+#484: messages don't update without a reload
+MessageListView not rendering if the user is not a member of the channel
+Fix MessageInput overflow when there are no actions
+Minor fixes and improvements
+
+### Migrating to 2.0 for `stream_chat_flutter`
+
+:::note
+If you are migrating your full Flutter project to null-safety, first make sure you follow the
+instructions from the [official Null Safety migration guide](https://dart.dev/null-safety/migration-guide).
+:::
+
+To migrate to v2.0 for `stream_chat_flutter`, first change the version of the package to the latest
+null-safe version.
+
+```yaml
+dependencies:
+  stream_chat_flutter: ^2.0.0
+```
+
+Upon doing this, all breaking changes from the package will take immediate effect. Here are steps to
+remedy the issue:
+
+1) Replace the offending class names with the revised class names
+
+    * ChannelImage -> ChannelAvatar
+    * ImageHeader -> GalleryHeader
+    * ImageFooter -> GalleryFooter
+
+2) The new version comes with revised color names since the previous names do not suit light/dark mode
+nomenclature. Make sure any old colors used from theme are changed over to the new theme color names:
+
+    *ColorTheme.black -> ColorTheme.textHighEmphasis
+    *ColorTheme.grey -> ColorTheme.textLowEmphasis
+    *ColorTheme.greyGainsboro -> ColorTheme.disabled
+    *ColorTheme.greyWhisper -> ColorTheme.borders
+    *ColorTheme.whiteSmoke -> ColorTheme.inputBg
+    *ColorTheme.whiteSnow -> ColorTheme.appBg
+    *ColorTheme.white -> ColorTheme.barsBg
+    *ColorTheme.blueAlice -> ColorTheme.linkBg
+    *ColorTheme.accentBlue -> ColorTheme.accentPrimary
+    *ColorTheme.accentRed -> ColorTheme.accentError
+    *ColorTheme.accentGreen -> ColorTheme.accentInfo
+
+3) We decided to make messages easier to customize and now supply the default implementation of the
+messages in the builder - so you can now customize a single parameter without having to redo the
+entire implementation. Please reform your builders to take into account the new format:
+
+```
+typedef MessageBuilder = Widget Function(
+    BuildContext,
+    MessageDetails,
+    List<Message>,
+    MessageWidget defaultMessageWidget,
+    );
+```
+
+Use `defaultMessageWidget.copyWith()` to edit any properties to make it much simpler to tweak the
+default implementation.
