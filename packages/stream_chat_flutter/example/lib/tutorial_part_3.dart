@@ -114,7 +114,7 @@ class ChannelListPage extends StatelessWidget {
           ),
         );
       },
-      leading: ChannelImage(
+      leading: ChannelAvatar(
         channel: channel,
       ),
       title: ChannelName(
