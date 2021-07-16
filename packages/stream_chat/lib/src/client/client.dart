@@ -426,7 +426,10 @@ class StreamChatClient {
         await queryChannelsOnline(
           filter: Filter.in_('cid', cids),
           paginationParams: const PaginationParams(limit: 30),
-        ).then((_) => sync(cids: cids, lastSyncAt: _lastSyncedAt));
+        );
+        if (persistenceEnabled) {
+          await sync(cids: cids, lastSyncAt: _lastSyncedAt);
+        }
       }
       handleEvent(Event(
         type: EventType.connectionRecovered,
