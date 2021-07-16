@@ -1779,7 +1779,7 @@ class MessageListViewTheme extends InheritedTheme {
 class MessageListViewThemeData with Diagnosticable {
   /// Creates a [MessageListViewThemeData].
   const MessageListViewThemeData({
-    required this.backgroundColor,
+    this.backgroundColor,
   });
 
   /// The color of the [MessageListView] background.
