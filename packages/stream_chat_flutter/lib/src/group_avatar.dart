@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget for constructing a group of images
-class GroupImage extends StatelessWidget {
-  /// Constructor for creating a [GroupImage]
-  const GroupImage({
+class GroupAvatar extends StatelessWidget {
+  /// Constructor for creating a [GroupAvatar]
+  const GroupAvatar({
     Key? key,
     required this.members,
     this.constraints,

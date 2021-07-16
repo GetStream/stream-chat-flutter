@@ -65,7 +65,7 @@ void main() {
       ));
 
       expect(find.text('test'), findsOneWidget);
-      expect(find.byType(ChannelImage), findsOneWidget);
+      expect(find.byType(ChannelAvatar), findsOneWidget);
       expect(find.byType(StreamBackButton), findsOneWidget);
       expect(find.byType(ChannelInfo), findsOneWidget);
     },
@@ -271,7 +271,7 @@ void main() {
 
       expect(find.text('test'), findsNothing);
       expect(find.byType(StreamBackButton), findsNothing);
-      expect(find.byType(ChannelImage), findsNothing);
+      expect(find.byType(ChannelAvatar), findsNothing);
       expect(find.byType(ChannelInfo), findsNothing);
       expect(find.text('leading'), findsOneWidget);
       expect(find.text('title'), findsOneWidget);
@@ -415,7 +415,7 @@ void main() {
       ));
 
       await tester.tap(find.byType(StreamBackButton));
-      await tester.tap(find.byType(ChannelImage));
+      await tester.tap(find.byType(ChannelAvatar));
       await tester.tap(find.byType(ChannelName));
 
       expect(backPressed, true);

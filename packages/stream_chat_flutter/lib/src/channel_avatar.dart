@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/group_image.dart';
+import 'package:stream_chat_flutter/src/group_avatar.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -45,9 +45,9 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// The widget renders the ui based on the first ancestor of type
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class ChannelImage extends StatelessWidget {
+class ChannelAvatar extends StatelessWidget {
   /// Instantiate a new ChannelImage
-  const ChannelImage({
+  const ChannelAvatar({
     Key? key,
     this.channel,
     this.constraints,
@@ -187,7 +187,7 @@ class ChannelImage extends StatelessWidget {
         }
 
         // Group conversation
-        return GroupImage(
+        return GroupAvatar(
           members: otherMembers,
           borderRadius: borderRadius ?? previewTheme?.borderRadius,
           constraints: constraints ?? previewTheme?.constraints,

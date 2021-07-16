@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat_flutter/src/group_image.dart';
+import 'package:stream_chat_flutter/src/group_avatar.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'mocks.dart';
@@ -35,7 +35,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: const Scaffold(
-              body: ChannelImage(),
+              body: ChannelAvatar(),
             ),
           ),
         ),
@@ -113,7 +113,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: const Scaffold(
-              body: ChannelImage(),
+              body: ChannelAvatar(),
             ),
           ),
         ),
@@ -183,13 +183,13 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: const Scaffold(
-              body: ChannelImage(),
+              body: ChannelAvatar(),
             ),
           ),
         ),
       ));
 
-      final image = tester.widget<GroupImage>(find.byType(GroupImage));
+      final image = tester.widget<GroupAvatar>(find.byType(GroupAvatar));
       final otherMembers = members.where((it) => it.userId != currentUser.id);
       expect(
         image.members.map((it) => it.user?.id),
@@ -225,7 +225,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: const Scaffold(
-              body: ChannelImage(
+              body: ChannelAvatar(
                 selected: true,
               ),
             ),
