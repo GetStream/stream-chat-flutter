@@ -2,8 +2,8 @@ export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 export 'src/attachment/attachment.dart';
 export 'src/back_button.dart';
-export 'src/channel_header.dart';
 export 'src/channel_avatar.dart';
+export 'src/channel_header.dart';
 export 'src/channel_list_header.dart';
 export 'src/channel_list_view.dart';
 export 'src/channel_name.dart';

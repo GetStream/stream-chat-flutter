@@ -1859,11 +1859,11 @@ class MessageInputState extends State<MessageInput> {
     }
 
     if (camera) {
-      PickedFile? pickedFile;
+      XFile? pickedFile;
       if (fileType == DefaultAttachmentTypes.image) {
-        pickedFile = await _imagePicker.getImage(source: ImageSource.camera);
+        pickedFile = await _imagePicker.pickImage(source: ImageSource.camera);
       } else if (fileType == DefaultAttachmentTypes.video) {
-        pickedFile = await _imagePicker.getVideo(source: ImageSource.camera);
+        pickedFile = await _imagePicker.pickVideo(source: ImageSource.camera);
       }
       if (pickedFile == null) {
         return;
