@@ -3,7 +3,8 @@ name: docusaurus
 on:
   push:
     branches:
-      - docusaurus # default branch name for each repo that docs should be push from
+      - master
+      - develop
     paths:
       - docusaurus/**
 jobs:
