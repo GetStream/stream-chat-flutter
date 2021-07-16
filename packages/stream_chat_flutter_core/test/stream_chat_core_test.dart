@@ -296,15 +296,15 @@ void main() {
       await tester.runAsync(() async {
         final mockClient = MockClient();
         final mockOnBackgroundEventReceived = MockOnBackgroundEventReceived();
-        const backgroundKeepAlive = const Duration(seconds: 3);
+        const backgroundKeepAlive = Duration(seconds: 3);
         const streamChatCoreKey = Key('streamChatCore');
         const childKey = Key('child');
         final streamChatCore = StreamChatCore(
           key: streamChatCoreKey,
           client: mockClient,
-          child: Offstage(key: childKey),
           onBackgroundEventReceived: mockOnBackgroundEventReceived,
           backgroundKeepAlive: backgroundKeepAlive,
+          child: const Offstage(key: childKey),
         );
 
         await tester.pumpWidget(streamChatCore);
@@ -313,12 +313,13 @@ void main() {
         expect(find.byKey(childKey), findsOneWidget);
 
         final event = Event(type: EventType.any);
-        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(mockClient.on).thenAnswer((_) => Stream.value(event));
 
         final streamChatCoreState = tester.state<StreamChatCoreState>(
           find.byKey(streamChatCoreKey),
         );
 
+        // ignore: cascade_invocations
         streamChatCoreState
             .didChangeAppLifecycleState(AppLifecycleState.paused);
 
@@ -346,8 +347,8 @@ void main() {
         final streamChatCore = StreamChatCore(
           key: streamChatCoreKey,
           client: mockClient,
-          child: Offstage(key: childKey),
           connectivityStream: Stream.value(ConnectivityResult.mobile),
+          child: const Offstage(key: childKey),
         );
 
         await tester.pumpWidget(streamChatCore);
@@ -356,10 +357,10 @@ void main() {
         expect(find.byKey(childKey), findsOneWidget);
 
         final event = Event(type: EventType.any);
-        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.openConnection())
+        when(mockClient.on).thenAnswer((_) => Stream.value(event));
+        when(mockClient.openConnection)
             .thenAnswer((_) async => OwnUser(id: 'test'));
-        when(() => mockClient.closeConnection()).thenAnswer((_) async => null);
+        when(mockClient.closeConnection).thenAnswer((_) async {});
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.disconnected);
 
@@ -367,6 +368,7 @@ void main() {
           find.byKey(streamChatCoreKey),
         );
 
+        // ignore: cascade_invocations
         streamChatCoreState
             .didChangeAppLifecycleState(AppLifecycleState.paused);
 
@@ -375,7 +377,7 @@ void main() {
         streamChatCoreState
             .didChangeAppLifecycleState(AppLifecycleState.inactive);
 
-        verify(() => mockClient.openConnection()).called(1);
+        verify(mockClient.openConnection).called(1);
       });
     },
   );
@@ -391,18 +393,18 @@ void main() {
         const childKey = Key('child');
 
         final event = Event();
-        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.openConnection())
+        when(mockClient.on).thenAnswer((_) => Stream.value(event));
+        when(mockClient.openConnection)
             .thenAnswer((_) async => OwnUser(id: 'test'));
-        when(() => mockClient.closeConnection()).thenAnswer((_) async => null);
+        when(mockClient.closeConnection).thenAnswer((_) async {});
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.disconnected);
 
         final streamChatCore = StreamChatCore(
           key: streamChatCoreKey,
           client: mockClient,
-          child: Offstage(key: childKey),
           connectivityStream: Stream.value(ConnectivityResult.none),
+          child: const Offstage(key: childKey),
         );
 
         await tester.pumpWidget(streamChatCore);
@@ -414,6 +416,7 @@ void main() {
           find.byKey(streamChatCoreKey),
         );
 
+        // ignore: cascade_invocations
         streamChatCoreState
             .didChangeAppLifecycleState(AppLifecycleState.paused);
 
@@ -422,7 +425,7 @@ void main() {
         streamChatCoreState
             .didChangeAppLifecycleState(AppLifecycleState.inactive);
 
-        verifyNever(() => mockClient.openConnection());
+        verifyNever(mockClient.openConnection);
       });
     },
   );
