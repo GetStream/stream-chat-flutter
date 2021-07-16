@@ -19,16 +19,15 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: ChannelListCore(
-///         filter: {
-///           'members': {
-///             '\$in': [StreamChat.of(context).user.id],
-///           }
-///         },
+///         filter: Filter.in_(
+///            'members',
+///            [StreamChat.of(context).user!.id],
+///         ),
 ///         sort: [SortOption('last_message_at')],
 ///         pagination: PaginationParams(
 ///           limit: 20,
 ///         ),
-///         errorBuilder: (err) {
+///         errorBuilder: (context, err) {
 ///           return Center(
 ///             child: Text('An error has occured'),
 ///           );
@@ -38,7 +37,7 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 ///             child: Text('Nothing here...'),
 ///           );
 ///         },
-///         emptyBuilder: (context) {
+///         loadingBuilder: (context) {
 ///           return Center(
 ///             child: CircularProgressIndicator(),
 ///           );

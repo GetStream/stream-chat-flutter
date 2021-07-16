@@ -1,0 +1,71 @@
+---
+slug: /
+id: introduction
+sidebar_position: 1
+title: About The Flutter SDK
+---
+Exploring The Basics Of Stream Chat
+
+![](../assets/sdk_title.png)
+
+Stream Chat is a service that helps you easily build a full chat experience in your Flutter (and more) apps.
+
+This section of the documentation focuses on our Flutter SDK which helps you easily
+ship high quality messaging experiences in apps and programs built with the [Flutter toolkit made
+by Google](https://flutter.dev).
+
+The Stream Chat Flutter SDK comprises of four different packages to choose from ranging from ones
+giving you complete control to ones that give you a rich out-of-the-box chat experience.
+
+The packages that make up the Stream Chat SDK are:
+
+1. <b>Low Level Client (stream_chat)</b>: a pure Dart package that can be used on any Dart project.
+It provides a low-level client to access the Stream Chat service.
+2. <b>Core (stream_chat_flutter_core)</b>: provides business logic to fetch common things required
+for integrating Stream Chat into your application.
+The core package allows more customisation and hence provides business logic but no UI components.
+3. <b>UI (stream_chat_flutter)</b>: this library includes both a low-level chat SDK and a set of
+reusable and customisable UI components.
+4. <b>Persistence (stream_chat_persistence)</b>: provides a persistence client for fetching and
+saving chat data locally.
+
+We recommend building prototypes using the full UI package since it contains UI widgets already
+integrated with Stream's API. [stream_chat_flutter](https://pub.dev/packages/stream_chat_flutter)
+is the fastest way to get up and running using Stream chat in your app.
+
+The Flutter SDK enables you to build any type of chat or messaging experience for Android, iOS, Web
+and Desktop.
+
+If you're building a very custom UI and would prefer a more lean package,
+our [core package](https://pub.dev/packages/stream_chat_flutter) will be suited to this use case. Core allows you to build custom,
+expressive UIs while retaining the benefits of our full Flutter SDK.
+APIs for accessing and controlling users, sending messages, etc are seamlessly integrated into
+this package and accessible via providers and builders.
+
+Before going into the docs, let's take a small detour to look at how the elements of Stream Chat are structured.
+
+There are two core elements in chat, <b>Users and Channels.</b>
+Channels are groups of one or more users that can message each other.
+In an app, you need to have a user connected to query channels.
+
+There is no specific distinction between a chat between two people and a group chat,
+but there is a way to create a unique chat between a certain number of people by creating a <b>distinct</b> channel.
+
+![](../assets/chat_basics.png)
+
+In essence, a normal two-person chat would be a <b>distinct channel</b> created with two members (you cannot add or delete members in this channel), whereas a group created with two people would simply be a <b>non distinct channel</b> (possible to add or remove members).
+
+Note: It is also possible to add more than two people in a distinct channel which retains the same add/removal properties and resembles the Slack DMs where you can DM one or more people as well.
+
+In summary, if you were creating a Whatsapp-like app, the first screen would be a <b>list of channels</b> - which on opening would show a <b>list of messages</b> that were sent by the users in the Channel.
+
+While this is a simplistic overview of the service, the Flutter SDK handles the UI and more time consuming things (media upload, offline storage, theming, etc.) for you.
+
+Before reading the docs, consider trying our [online API tour](https://getstream.io/chat/get_started/),
+it is a nice way to learn how the API works.
+It's in-browser so Javascript-based but the ideas are pretty much the same as Dart.
+
+You may also like to look at the [Flutter tutorial](https://getstream.io/chat/flutter/tutorial/)
+which focuses on using the UI package to get Stream Chat integrated into a Flutter app.
+
+Further sections break down each individual packages and explain several common operations.

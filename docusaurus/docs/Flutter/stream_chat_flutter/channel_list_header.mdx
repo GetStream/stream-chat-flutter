@@ -1,0 +1,88 @@
+---
+id: channel_list_header
+sidebar_position: 9
+title: ChannelListHeader
+---
+
+A Header Widget For A List Of Channels
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ChannelListHeader-class.html)
+
+![](../assets/channel_list_header.png)
+
+### Background
+
+A common pattern for most messaging apps is to show a list of Channels (chats) on the first screen
+and navigate to an individual one on being clicked. On this first page where the list of channels are
+displayed, it is usual to have functionality such as adding a new chat, display the user logged in, etc.
+
+To encapsulate all of this functionality into one widget, the Flutter SDK contains a `ChannelListHeader`
+widget which provides these out of the box.
+
+### Basic Example
+
+This is a basic example of a page which has a `ChannelListView` and a `ChannelListHeader` to recreate a
+common Channels Page.
+
+```dart
+class DemoPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: ChannelListHeader(),
+      body: ChannelsBloc(
+         child: ChannelListView(
+           filter: Filter.in_('members', [StreamChat.of(context).user.id]),
+           sort: [SortOption('last_message_at')],
+           pagination: PaginationParams(
+             limit: 20,
+           ),
+           channelWidget: ChannelPage(),
+         ),
+      ),
+    );
+  }
+}
+```
+
+### Customizing Parts Of The Header
+
+The header works like a `ListTile` widget.
+
+Use the `titleBuilder`, `subtitle`, `leading`, or `actions` parameters to substitute the widgets for your own.
+
+```dart
+//...
+ChannelListHeader(
+    subtitle: Text('My Custom Subtitle'),
+),
+```
+
+![](../assets/channel_list_header_custom_subtitle.png)
+
+The `titleBuilder` param helps you build different titles depending on the connection state:
+
+```dart
+//...
+ChannelListHeader(
+    titleBuilder: (context, status, client) {
+        switch(status) {
+            /// Return your title widget
+        }
+    },
+),
+```
+
+### Showing Connection State
+
+The `ChannelListHeader` can also display connection state below the tile which shows the user if they
+are connected or offline, etc. on connection events.
+
+To enable this, use the `showConnectionStateTile` property.
+
+```dart
+//...
+ChannelListHeader(
+    showConnectionStateTile: true,
+),
+```
