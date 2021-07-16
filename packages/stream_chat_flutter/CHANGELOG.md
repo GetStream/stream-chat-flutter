@@ -3,6 +3,7 @@
 🛑️ Breaking Changes from `1.5.4`
 
 - Migrate this package to null safety
+- Renamed `ChannelImage` to `ChannelAvatar`
 - Updated `StreamChatThemeData.reactionIcons` to accept custom builder
 - Renamed `ColorTheme` properties to reflect the purpose of the colors
   - `ColorTheme.black` -> `ColorTheme.textHighEmphasis`
@@ -23,6 +24,8 @@
     - `options.presence` -> bool presence
 - `UserListView` options property is removed in favor of individual properties
     - `options.presence` -> bool presence
+- Renamed `ImageHeader` to `GalleryHeader`
+- Renamed `ImageFooter` to `GalleryFooter`
 - `MessageBuilder` and `ParentMessageBuilder` signature is now
 
 ```dart
@@ -47,6 +50,7 @@ You can call `.copyWith` to customize just a subset of properties
 - Added pinMessage ui support
 - Added `MessageListView.threadSeparatorBuilder` property
 - Added `MessageInput.onError` property to allow error handling
+- Added `GalleryHeader/GalleryFooter` theme classes
 
 🐞 Fixed
 
