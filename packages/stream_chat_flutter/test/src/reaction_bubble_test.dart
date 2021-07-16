@@ -47,6 +47,7 @@ void main() {
         StreamChat(
           client: client,
           streamChatThemeData: theme,
+          connectivityStream: Stream.value(ConnectivityResult.mobile),
           child: SizedBox(
             child: ReactionBubble(
               reactions: [
@@ -60,7 +61,6 @@ void main() {
               maskColor: theme.ownMessageTheme.reactionsMaskColor!,
             ),
           ),
-          connectivityStream: Stream.value(ConnectivityResult.mobile),
         ),
         surfaceSize: const Size(100, 100),
       );
@@ -83,6 +83,7 @@ void main() {
         StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
+          connectivityStream: Stream.value(ConnectivityResult.mobile),
           child: Container(
             color: Colors.black,
             child: ReactionBubble(
@@ -97,7 +98,6 @@ void main() {
               maskColor: theme.ownMessageTheme.reactionsMaskColor!,
             ),
           ),
-          connectivityStream: Stream.value(ConnectivityResult.mobile),
         ),
         surfaceSize: const Size(100, 100),
       );

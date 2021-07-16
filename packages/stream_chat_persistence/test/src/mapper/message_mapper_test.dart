@@ -173,8 +173,8 @@ void main() {
     expect(entity.shadowed, message.shadowed);
     expect(entity.showInChannel, message.showInChannel);
     expect(entity.replyCount, message.replyCount);
-    expect(entity.mentionedUsers,
-        message.mentionedUsers.map((e) => jsonEncode(e)).toList());
+    expect(
+        entity.mentionedUsers, message.mentionedUsers.map(jsonEncode).toList());
     expect(entity.reactionScores, message.reactionScores);
     expect(entity.reactionCounts, message.reactionCounts);
     expect(entity.status, message.status);

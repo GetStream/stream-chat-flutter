@@ -12,30 +12,28 @@ void main() {
   List<User> _generateUsers({
     int count = 3,
     int offset = 0,
-  }) {
-    return List.generate(
-      count,
-      (index) {
-        index = index + offset;
-        return User(
-          id: 'testId$index',
-          role: 'testRole$index',
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          lastActive: DateTime.now(),
-          online: true,
-          banned: false,
-          extraData: {'extra_data_key': 'extraDataValue'},
-        );
-      },
-    );
-  }
+  }) =>
+      List.generate(
+        count,
+        (index) {
+          index = index + offset;
+          return User(
+            id: 'testId$index',
+            role: 'testRole$index',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            lastActive: DateTime.now(),
+            online: true,
+            extraData: const {'extra_data_key': 'extraDataValue'},
+          );
+        },
+      );
 
   testWidgets(
     'usersBlocState.queryUsers() should throw if used where '
     'StreamChat is not present in the widget tree',
     (tester) async {
-      final usersBloc = UsersBloc(
+      const usersBloc = UsersBloc(
         child: Offstage(),
       );
 
@@ -49,7 +47,7 @@ void main() {
     (tester) async {
       const usersBlocKey = Key('usersBloc');
       const childKey = Key('child');
-      final usersBloc = UsersBloc(
+      const usersBloc = UsersBloc(
         key: usersBlocKey,
         child: Offstage(key: childKey),
       );
@@ -98,7 +96,7 @@ void main() {
     (tester) async {
       const usersBlocKey = Key('usersBloc');
       const childKey = Key('child');
-      final usersBloc = UsersBloc(
+      const usersBloc = UsersBloc(
         key: usersBlocKey,
         child: Offstage(key: childKey),
       );
@@ -116,7 +114,7 @@ void main() {
         find.byKey(usersBlocKey),
       );
 
-      final error = 'Error! Error! Error!';
+      const error = 'Error! Error! Error!';
 
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
@@ -148,7 +146,7 @@ void main() {
     (tester) async {
       const usersBlocKey = Key('usersBloc');
       const childKey = Key('child');
-      final usersBloc = UsersBloc(
+      const usersBloc = UsersBloc(
         key: usersBlocKey,
         child: Offstage(key: childKey),
       );
@@ -231,7 +229,7 @@ void main() {
     (tester) async {
       const usersBlocKey = Key('usersBloc');
       const childKey = Key('child');
-      final usersBloc = UsersBloc(
+      const usersBloc = UsersBloc(
         key: usersBlocKey,
         child: Offstage(key: childKey),
       );
@@ -275,7 +273,7 @@ void main() {
       final offset = users.length;
       final pagination = PaginationParams(offset: offset);
 
-      final error = 'Error! Error! Error!';
+      const error = 'Error! Error! Error!';
 
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),

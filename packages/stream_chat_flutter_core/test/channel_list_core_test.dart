@@ -9,26 +9,25 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'mocks.dart';
 
 void main() {
-  const pagination = PaginationParams(offset: 0, limit: 3);
+  const pagination = PaginationParams(limit: 3);
 
   List<Channel> _generateChannels(
     StreamChatClient client, {
     int count = 3,
     int offset = 0,
-  }) {
-    return List.generate(
-      count,
-      (index) {
-        index = index + offset;
-        return Channel(
-          client,
-          'testType$index',
-          'testId$index',
-          extraData: {'extra_data_key': 'extra_data_value_$index'},
-        );
-      },
-    );
-  }
+  }) =>
+      List.generate(
+        count,
+        (index) {
+          index = index + offset;
+          return Channel(
+            client,
+            'testType$index',
+            'testId$index',
+            extraData: {'extra_data_key': 'extra_data_value_$index'},
+          );
+        },
+      );
 
   testWidgets(
     'should throw if ChannelListCore is used where ChannelsBloc is not present '
@@ -37,10 +36,10 @@ void main() {
       const channelListCoreKey = Key('channelListCore');
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       await tester.pumpWidget(channelListCore);
@@ -56,16 +55,16 @@ void main() {
       const channelListCoreKey = Key('channelListCore');
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
       final mockClient = MockClient();
 
       when(() => mockClient.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.empty());
+          .thenAnswer((_) => const Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -88,10 +87,10 @@ void main() {
       final controller = ChannelListController();
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         channelListController: controller,
       );
 
@@ -101,7 +100,7 @@ void main() {
       final mockClient = MockClient();
 
       when(() => mockClient.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.empty());
+          .thenAnswer((_) => const Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -125,9 +124,9 @@ void main() {
       const errorWidgetKey = Key('errorWidget');
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object error) =>
             Container(key: errorWidgetKey),
         pagination: pagination,
@@ -136,7 +135,7 @@ void main() {
       final mockClient = MockClient();
 
       when(() => mockClient.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.empty());
+          .thenAnswer((_) => const Stream.empty());
 
       const error = 'Error! Error! Error!';
       when(() => mockClient.queryChannels(
@@ -177,23 +176,23 @@ void main() {
   );
 
   testWidgets(
-    'should build empty widget if channelsBlocState.channelsStream emits empty data',
+    '''should build empty widget if channelsBlocState.channelsStream emits empty data''',
     (tester) async {
       const channelListCoreKey = Key('channelListCore');
       const emptyWidgetKey = Key('emptyWidget');
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
-        listBuilder: (_, __) => Offstage(),
-        loadingBuilder: (BuildContext context) => Offstage(),
+        listBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
         emptyBuilder: (BuildContext context) => Container(key: emptyWidgetKey),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         pagination: pagination,
       );
 
       final mockClient = MockClient();
 
       when(() => mockClient.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.empty());
+          .thenAnswer((_) => const Stream.empty());
 
       const channels = <Channel>[];
       when(() => mockClient.queryChannels(
@@ -234,23 +233,23 @@ void main() {
   );
 
   testWidgets(
-    'should build list widget if channelsBlocState.channelsStream emits some data',
+    '''should build list widget if channelsBlocState.channelsStream emits some data''',
     (tester) async {
       const channelListCoreKey = Key('channelListCore');
       const listWidgetKey = Key('listWidget');
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
         listBuilder: (_, __) => Container(key: listWidgetKey),
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         pagination: pagination,
       );
 
       final mockClient = MockClient();
 
       when(() => mockClient.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.empty());
+          .thenAnswer((_) => const Stream.empty());
 
       final channels = _generateChannels(mockClient);
       when(() => mockClient.queryChannels(
@@ -298,24 +297,22 @@ void main() {
       const listWidgetKey = Key('listWidget');
       final channelListCore = ChannelListCore(
         key: channelListCoreKey,
-        listBuilder: (_, channels) {
-          return Container(
-            key: listWidgetKey,
-            child: Text(
-              channels.map((e) => e.cid).join(','),
-            ),
-          );
-        },
-        loadingBuilder: (BuildContext context) => Offstage(),
-        emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (BuildContext context, Object error) => Offstage(),
+        listBuilder: (_, channels) => Container(
+          key: listWidgetKey,
+          child: Text(
+            channels.map((e) => e.cid).join(','),
+          ),
+        ),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
         pagination: pagination,
       );
 
       final mockClient = MockClient();
 
       when(() => mockClient.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.empty());
+          .thenAnswer((_) => const Stream.empty());
 
       final channels = _generateChannels(mockClient);
       when(() => mockClient.queryChannels(
@@ -413,24 +410,23 @@ void main() {
 
       ChannelListCore channelListCoreBuilder(int limit) => ChannelListCore(
             key: channelListCoreKey,
-            listBuilder: (_, channels) {
-              return Container(
-                key: listWidgetKey,
-                child: Text(
-                  channels.map((e) => e.cid).join(','),
-                ),
-              );
-            },
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (BuildContext context, Object error) => Offstage(),
+            listBuilder: (_, channels) => Container(
+              key: listWidgetKey,
+              child: Text(
+                channels.map((e) => e.cid).join(','),
+              ),
+            ),
+            loadingBuilder: (BuildContext context) => const Offstage(),
+            emptyBuilder: (BuildContext context) => const Offstage(),
+            errorBuilder: (BuildContext context, Object error) =>
+                const Offstage(),
             pagination: pagination.copyWith(limit: limit),
           );
 
       final mockClient = MockClient();
 
       when(() => mockClient.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.empty());
+          .thenAnswer((_) => const Stream.empty());
 
       final channels = _generateChannels(mockClient);
       when(() => mockClient.queryChannels(

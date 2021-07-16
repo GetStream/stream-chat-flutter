@@ -27,10 +27,9 @@ void main() {
           type: 'testType',
           user: users[index],
           createdAt: DateTime.now(),
-          shadowed: false,
           replyCount: index,
           updatedAt: DateTime.now(),
-          extraData: {'extra_test_field': 'extraTestData'},
+          extraData: const {'extra_test_field': 'extraTestData'},
           text: 'Dummy text #$index',
           pinned: true,
           pinnedAt: DateTime.now(),
@@ -48,10 +47,9 @@ void main() {
           user: users[index],
           parentId: messages[0].id,
           createdAt: DateTime.now(),
-          shadowed: false,
           replyCount: index,
           updatedAt: DateTime.now(),
-          extraData: {'extra_test_field': 'extraTestData'},
+          extraData: const {'extra_test_field': 'extraTestData'},
           text: 'Dummy text #$index',
           pinned: true,
           pinnedAt: DateTime.now(),
@@ -72,7 +70,7 @@ void main() {
       final streamChannel = StreamChannel(
         key: streamChannelKey,
         channel: mockChannel,
-        child: Offstage(key: childKey),
+        child: const Offstage(key: childKey),
       );
 
       await tester.pumpWidget(streamChannel);
@@ -91,10 +89,10 @@ void main() {
       final streamChannel = StreamChannel(
         key: streamChannelKey,
         channel: mockChannel,
-        child: Offstage(key: childKey),
+        child: const Offstage(key: childKey),
       );
 
-      final errorMessage = 'Error! Error! Error!';
+      const errorMessage = 'Error! Error! Error!';
       final error = DioError(
         type: DioErrorType.response,
         error: errorMessage,
@@ -128,8 +126,7 @@ void main() {
       final streamChannel = StreamChannel(
         key: streamChannelKey,
         channel: mockChannel,
-        child: Offstage(key: childKey),
-        showLoading: true,
+        child: const Offstage(key: childKey),
       );
 
       when(() => mockChannel.initialized).thenAnswer((_) async => false);
@@ -158,8 +155,8 @@ void main() {
       final streamChannel = StreamChannel(
         key: streamChannelKey,
         channel: mockChannel,
-        child: Offstage(key: childKey),
         initialMessageId: 'testInitialMessageId',
+        child: const Offstage(key: childKey),
       );
 
       when(() => mockChannel.initialized).thenAnswer((_) async => true);
@@ -213,8 +210,8 @@ void main() {
           StreamChannel(
             key: streamChannelKey,
             channel: mockChannel,
-            child: Offstage(key: childKey),
             initialMessageId: initialMessageId,
+            child: const Offstage(key: childKey),
           );
 
       final beforePagination = PaginationParams(
