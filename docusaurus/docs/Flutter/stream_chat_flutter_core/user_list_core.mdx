@@ -18,9 +18,9 @@ exposes builders to build the UI in situations such as loading, empty data, erro
 
 ### Basic Example
 
-[UserListCore] is a simplified class that allows fetching users while
+`UserListCore` is a simplified class that allows fetching users while
 exposing UI builders.
-A [UserListController] is used to load and paginate data.
+A `UserListController` is used to load and paginate data.
 
 ```dart
 class UsersListPage extends StatelessWidget {
@@ -28,7 +28,6 @@ class UsersListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: UsersListCore(
-        filter: Filter.autoComplete('name', 'search_here'),
         sort: [SortOption('last_active')],
         pagination: PaginationParams(
           limit: 20,
@@ -57,9 +56,9 @@ class UsersListPage extends StatelessWidget {
 }
 ```
 
-[UsersBloc] must be the ancestor of this widget. This is necessary since
-[UserListCore] depends on functionality contained within [UsersBloc].
+`UsersBloc` must be the ancestor of this widget. This is necessary since
+`UserListCore` depends on functionality contained within `UsersBloc`.
 
-The parameters [listBuilder], [loadingBuilder], [emptyBuilder] and
-[errorBuilder] must all be supplied and not null.
+The parameters `listBuilder`, `loadingBuilder`, `emptyBuilder` and
+`errorBuilder` must all be supplied and not null.
 
