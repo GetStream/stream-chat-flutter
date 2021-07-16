@@ -252,7 +252,7 @@ dependencies:
 Upon doing this, all breaking changes from the package will take immediate effect. Here are steps to
 remedy the issues:
 
-1) Change over the constructor of `connectUserWithProvider()` to the new format.
+1) Change over the constructor of `connectUserWithProvider()` to the new format which has `tokenProvider` as a required param.
 
 2) We added more nuance to `disconnectUser()` by adding two new methods - one to close the connection
 and the other to disconnect the user. This allows more fine-grained control of disconnection.
