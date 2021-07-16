@@ -1802,7 +1802,7 @@ class MessageListViewThemeData with Diagnosticable {
     double t,
   ) =>
       MessageListViewThemeData(
-          backgroundColor: Color.lerp(a.backgroundColor, a.backgroundColor, t));
+          backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t));
 
   /// Merges one [MessageListViewThemeData] with another.
   MessageListViewThemeData merge(MessageListViewThemeData? other) {
