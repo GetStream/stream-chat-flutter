@@ -38,7 +38,6 @@ class GroupImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final streamChat = StreamChat.of(context);
     final channel = StreamChannel.of(context).channel;
 
     assert(channel.state != null, 'Channel ${channel.id} is not initialized');
@@ -63,30 +62,34 @@ class GroupImage extends StatelessWidget {
                 child: Flex(
                   direction: Axis.horizontal,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: members.take(2).map((member) {
-                    final user = member.user!;
-                    return Flexible(
-                      fit: FlexFit.tight,
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        clipBehavior: Clip.antiAlias,
-                        child: Transform.scale(
-                          scale: 1.2,
-                          child: BetterStreamBuilder<User>(
-                            stream: streamChat.client.state.usersStream
-                                .map((users) =>
-                                    users[member.userId ?? user.id] ?? user)
-                                .distinct(),
-                            initialData: user,
-                            builder: (context, user) => UserAvatar(
-                              user: user,
-                              borderRadius: BorderRadius.zero,
+                  children: members
+                      .take(2)
+                      .map(
+                        (member) => Flexible(
+                          fit: FlexFit.tight,
+                          child: FittedBox(
+                            fit: BoxFit.cover,
+                            clipBehavior: Clip.antiAlias,
+                            child: Transform.scale(
+                              scale: 1.2,
+                              child: BetterStreamBuilder<Member>(
+                                stream: channel.state!.membersStream.map(
+                                  (members) => members.firstWhere(
+                                    (it) => it.userId == member.userId,
+                                    orElse: () => member,
+                                  ),
+                                ),
+                                initialData: member,
+                                builder: (context, member) => UserAvatar(
+                                  user: member.user!,
+                                  borderRadius: BorderRadius.zero,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      )
+                      .toList(),
                 ),
               ),
               if (members.length > 2)
@@ -95,30 +98,35 @@ class GroupImage extends StatelessWidget {
                   child: Flex(
                     direction: Axis.horizontal,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: members.skip(2).take(2).map((member) {
-                      final user = member.user!;
-                      return Flexible(
-                        fit: FlexFit.tight,
-                        child: FittedBox(
-                          fit: BoxFit.cover,
-                          clipBehavior: Clip.antiAlias,
-                          child: Transform.scale(
-                            scale: 1.2,
-                            child: BetterStreamBuilder<User>(
-                              stream: streamChat.client.state.usersStream
-                                  .map((users) =>
-                                      users[member.userId ?? user.id] ?? user)
-                                  .distinct(),
-                              initialData: user,
-                              builder: (context, user) => UserAvatar(
-                                user: user,
-                                borderRadius: BorderRadius.zero,
+                    children: members
+                        .skip(2)
+                        .take(2)
+                        .map(
+                          (member) => Flexible(
+                            fit: FlexFit.tight,
+                            child: FittedBox(
+                              fit: BoxFit.cover,
+                              clipBehavior: Clip.antiAlias,
+                              child: Transform.scale(
+                                scale: 1.2,
+                                child: BetterStreamBuilder<Member>(
+                                  stream: channel.state!.membersStream.map(
+                                    (members) => members.firstWhere(
+                                      (it) => it.userId == member.userId,
+                                      orElse: () => member,
+                                    ),
+                                  ),
+                                  initialData: member,
+                                  builder: (context, member) => UserAvatar(
+                                    user: member.user!,
+                                    borderRadius: BorderRadius.zero,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                        )
+                        .toList(),
                   ),
                 ),
             ],

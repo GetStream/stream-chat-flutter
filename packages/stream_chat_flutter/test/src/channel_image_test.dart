@@ -132,9 +132,10 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
       final channelState = MockChannelState();
+      final currentUser = OwnUser(id: 'user-id');
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.user).thenReturn(currentUser);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
@@ -143,36 +144,7 @@ void main() {
       when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(
-                id: 'user-id',
-                extraData: {
-                  'image': 'testimage1',
-                },
-              ),
-            ),
-            Member(
-              userId: 'user-id2',
-              user: User(
-                id: 'user-id2',
-                extraData: {
-                  'image': 'testimage2',
-                },
-              ),
-            ),
-            Member(
-              userId: 'user-id3',
-              user: User(
-                id: 'user-id3',
-                extraData: {
-                  'image': 'testimage3',
-                },
-              ),
-            ),
-          ]));
-      when(() => channelState.members).thenReturn([
+      final members = [
         Member(
           userId: 'user-id',
           user: User(
@@ -200,7 +172,10 @@ void main() {
             },
           ),
         ),
-      ]);
+      ];
+      when(() => channelState.members).thenReturn(members);
+      when(() => channelState.membersStream)
+          .thenAnswer((_) => Stream.value(members));
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
@@ -215,10 +190,11 @@ void main() {
       ));
 
       final image = tester.widget<GroupImage>(find.byType(GroupImage));
-      expect(image.images, [
-        'testimage2',
-        'testimage3',
-      ]);
+      final otherMembers = members.where((it) => it.userId != currentUser.id);
+      expect(
+        image.members.map((it) => it.user?.id),
+        otherMembers.map((it) => it.user?.id),
+      );
     },
   );
 

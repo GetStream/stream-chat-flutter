@@ -166,15 +166,17 @@ class ChannelImage extends StatelessWidget {
         // 1-1 Conversation
         if (otherMembers.length == 1) {
           final member = otherMembers.first;
-          final user = member.user!;
-          return BetterStreamBuilder<User>(
-            stream: streamChat.client.state.usersStream
-                .map((users) => users[member.userId ?? user.id] ?? user)
-                .distinct(),
-            initialData: user,
-            builder: (context, user) => UserAvatar(
+          return BetterStreamBuilder<Member>(
+            stream: channel.state!.membersStream.map(
+              (members) => members.firstWhere(
+                (it) => it.userId == member.userId,
+                orElse: () => member,
+              ),
+            ),
+            initialData: member,
+            builder: (context, member) => UserAvatar(
               borderRadius: borderRadius ?? previewTheme?.borderRadius,
-              user: user,
+              user: member.user!,
               constraints: constraints ?? previewTheme?.constraints,
               onTap: onTap != null ? (_) => onTap!() : null,
               selected: selected,
