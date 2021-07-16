@@ -2,6 +2,7 @@
 
 🛑️ Breaking Changes from `1.5.3`
 
+- migrate this package to null safety
 - `ConnectUserWithProvider` now requires `tokenProvider` as a required param. (Removed from the constructor)
 - `client.disconnect()` is now divided into two different functions
     - `client.closeConnection()` -> for closing user websocket connection.
@@ -24,6 +25,7 @@
 
 - [#369](https://github.com/GetStream/stream-chat-flutter/issues/369): Client does not return without internet connection
 - several minor fixes
+- performance improvements
 
 
 ✅ Added
