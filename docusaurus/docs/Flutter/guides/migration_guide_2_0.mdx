@@ -283,7 +283,7 @@ Use these explicit parameters in the query parameters instead of the option keys
 
 As an example, in the old app this filter:
 
-```
+```dart
     filter: {
       'members': {
         '\$in': [StreamChat.of(context).user.id],
@@ -293,6 +293,6 @@ As an example, in the old app this filter:
 
 Would turn into:
 
-```
+```dart
     filter: Filter.in_('members', [StreamChat.of(context).user.id])
 ```
