@@ -18,3 +18,47 @@ exposes builders to build the UI in situations such as loading, empty data, erro
 
 ### Basic Example
 
+`UserListCore` is a simplified class that allows fetching users while
+exposing UI builders.
+A `UserListController` is used to load and paginate data.
+
+```dart
+class UsersListPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: UsersListCore(
+        sort: [SortOption('last_active')],
+        pagination: PaginationParams(
+          limit: 20,
+        ),
+        errorBuilder: (err) {
+          return Center(
+            child: Text('An error has occured'),
+          );
+        },
+        emptyBuilder: (context) {
+          return Center(
+            child: Text('Nothing here...'),
+          );
+        },
+        emptyBuilder: (context) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+        listBuilder: (context, list) {
+          return UsersPage(list);
+        }
+      ),
+    );
+  }
+}
+```
+
+`UsersBloc` must be the ancestor of this widget. This is necessary since
+`UserListCore` depends on functionality contained within `UsersBloc`.
+
+The parameters `listBuilder`, `loadingBuilder`, `emptyBuilder` and
+`errorBuilder` must all be supplied and not null.
+

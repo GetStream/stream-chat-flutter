@@ -27,11 +27,7 @@ class UsersListPage extends StatelessWidget {
     return Scaffold(
       body: UsersBloc(
         child: UsersListView(
-          filter: Filter.and([
-            Filter.autoComplete('name', 'search_here'),
-            Filter.notEqual(
-                'id', StreamChat.of(context).user!.id),
-          ]),
+          filter: Filter.notEqual('id', StreamChat.of(context).user!.id),
           sort: [
             SortOption(
               'name',
