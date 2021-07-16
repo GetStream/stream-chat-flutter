@@ -74,7 +74,7 @@ void main() {
               userId: 'user-id2',
               user: User(
                 id: 'user-id2',
-                extraData: {
+                extraData: const {
                   'image': 'testimage',
                 },
               ),
@@ -85,7 +85,7 @@ void main() {
           userId: 'user-id2',
           user: User(
             id: 'user-id2',
-            extraData: {
+            extraData: const {
               'image': 'testimage',
             },
           ),
@@ -98,7 +98,7 @@ void main() {
       when(() => clientState.usersStream).thenAnswer((i) => Stream.value({
             'user-id2': User(
               id: 'user-id2',
-              extraData: {
+              extraData: const {
                 'image': 'testimage',
               },
             ),
@@ -149,7 +149,7 @@ void main() {
           userId: 'user-id',
           user: User(
             id: 'user-id',
-            extraData: {
+            extraData: const {
               'image': 'testimage1',
             },
           ),
@@ -158,7 +158,7 @@ void main() {
           userId: 'user-id2',
           user: User(
             id: 'user-id2',
-            extraData: {
+            extraData: const {
               'image': 'testimage2',
             },
           ),
@@ -167,7 +167,7 @@ void main() {
           userId: 'user-id3',
           user: User(
             id: 'user-id3',
-            extraData: {
+            extraData: const {
               'image': 'testimage3',
             },
           ),
