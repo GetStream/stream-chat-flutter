@@ -14,7 +14,7 @@ void main() {
   });
 
   test(
-      'Light GalleryFooterThemeData lerps completely to dark GalleryFooterThemeData',
+      '''Light GalleryFooterThemeData lerps completely to dark GalleryFooterThemeData''',
       () {
     expect(
         const GalleryFooterThemeData().lerp(_galleryFooterThemeDataControl,
@@ -23,7 +23,7 @@ void main() {
   });
 
   test(
-      'Light GalleryFooterThemeData lerps halfway to dark GalleryFooterThemeData',
+      '''Light GalleryFooterThemeData lerps halfway to dark GalleryFooterThemeData''',
       () {
     expect(
         const GalleryFooterThemeData().lerp(_galleryFooterThemeDataControl,
@@ -32,7 +32,7 @@ void main() {
   });
 
   test(
-      'Dark GalleryFooterThemeData lerps completely to light GalleryFooterThemeData',
+      '''Dark GalleryFooterThemeData lerps completely to light GalleryFooterThemeData''',
       () {
     expect(
         const GalleryFooterThemeData().lerp(_galleryFooterThemeDataControlDark,

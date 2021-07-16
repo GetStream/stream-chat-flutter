@@ -45,7 +45,7 @@ void main() {
   });
 
   test(
-    '`setTokenOrProvider` should throw if both token and provider is not provided',
+    '''`setTokenOrProvider` should throw if both token and provider is not provided''',
     () async {
       expect(tokenManager.userId, isNull);
 
