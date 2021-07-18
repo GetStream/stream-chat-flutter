@@ -81,33 +81,33 @@ void main() {
 
   testWidgets(
       'Passing no MessageListViewThemeData returns default dark theme values',
-          (WidgetTester tester) async {
-        late BuildContext _context;
-        await tester.pumpWidget(
-          MaterialApp(
-            builder: (context, child) => StreamChat(
-              client: MockStreamChatClient(),
-              streamChatThemeData: StreamChatThemeData.dark(),
-              child: child,
-            ),
-            home: Builder(
-              builder: (BuildContext context) {
-                _context = context;
-                return Scaffold(
-                  body: StreamChannel(
-                    channel: MockChannel(),
-                    child: const MessageListView(),
-                  ),
-                );
-              },
-            ),
-          ),
-        );
+      (WidgetTester tester) async {
+    late BuildContext _context;
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => StreamChat(
+          client: MockStreamChatClient(),
+          streamChatThemeData: StreamChatThemeData.dark(),
+          child: child,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            _context = context;
+            return Scaffold(
+              body: StreamChannel(
+                channel: MockChannel(),
+                child: const MessageListView(),
+              ),
+            );
+          },
+        ),
+      ),
+    );
 
-        final messageListViewTheme = MessageListViewTheme.of(_context);
-        expect(messageListViewTheme.backgroundColor,
-            _messageListViewThemeDataControlDark.backgroundColor);
-      });
+    final messageListViewTheme = MessageListViewTheme.of(_context);
+    expect(messageListViewTheme.backgroundColor,
+        _messageListViewThemeDataControlDark.backgroundColor);
+  });
 
   // default dark theme values
 }
