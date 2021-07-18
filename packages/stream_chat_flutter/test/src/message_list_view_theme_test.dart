@@ -108,8 +108,6 @@ void main() {
     expect(messageListViewTheme.backgroundColor,
         _messageListViewThemeDataControlDark.backgroundColor);
   });
-
-  // default dark theme values
 }
 
 final _messageListViewThemeDataControl = MessageListViewThemeData(
