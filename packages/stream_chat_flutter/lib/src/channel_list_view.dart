@@ -573,7 +573,7 @@ class _ChannelListViewState extends State<ChannelListView> {
             ],
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: chatThemeData.colorTheme.appBg,
+            color: chatThemeData.channelListViewTheme.backgroundColor,
           ),
           child: widget.channelPreviewBuilder?.call(context, channel) ??
               ChannelPreview(
