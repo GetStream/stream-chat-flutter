@@ -1899,7 +1899,7 @@ class ChannelListViewTheme extends InheritedTheme {
 /// [StreamChatTheme].
 class ChannelListViewThemeData with Diagnosticable {
   /// Creates a [ChannelListViewThemeData].
-  ChannelListViewThemeData({
+  const ChannelListViewThemeData({
     this.backgroundColor,
   });
 
