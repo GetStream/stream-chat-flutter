@@ -144,58 +144,61 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       widget.messageSearchListController ?? _defaultController;
 
   @override
-  Widget build(BuildContext context) => MessageSearchListCore(
-        filters: widget.filters,
-        sortOptions: widget.sortOptions,
-        messageQuery: widget.messageQuery,
-        paginationParams: widget.paginationParams,
-        messageFilters: widget.messageFilters,
-        messageSearchListController: _messageSearchListController,
-        emptyBuilder: widget.emptyBuilder ??
-            (context) => LayoutBuilder(
-                  builder: (context, viewportConstraints) =>
-                      SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: viewportConstraints.maxHeight,
-                      ),
-                      child: const Center(
-                        child: Text('There are no messages currently'),
-                      ),
-                    ),
-                  ),
-                ),
-        errorBuilder: widget.errorBuilder ??
-            (BuildContext context, dynamic error) {
-              if (error is Error) {
-                print(error.stackTrace);
-              }
-              return InfoTile(
-                showMessage: widget.showErrorTile,
-                tileAnchor: Alignment.topCenter,
-                childAnchor: Alignment.topCenter,
-                message: 'An error occurred.',
-                child: Container(),
-              );
-            },
-        loadingBuilder: widget.loadingBuilder ??
-            (context) => LayoutBuilder(
-                  builder: (context, viewportConstraints) =>
-                      SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: viewportConstraints.maxHeight,
-                      ),
-                      child: const Center(
-                        child: CircularProgressIndicator(),
+  Widget build(BuildContext context) => ColoredBox(
+    color: MessageSearchListViewTheme.of(context).backgroundColor!,
+    child: MessageSearchListCore(
+          filters: widget.filters,
+          sortOptions: widget.sortOptions,
+          messageQuery: widget.messageQuery,
+          paginationParams: widget.paginationParams,
+          messageFilters: widget.messageFilters,
+          messageSearchListController: _messageSearchListController,
+          emptyBuilder: widget.emptyBuilder ??
+              (context) => LayoutBuilder(
+                    builder: (context, viewportConstraints) =>
+                        SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: viewportConstraints.maxHeight,
+                        ),
+                        child: const Center(
+                          child: Text('There are no messages currently'),
+                        ),
                       ),
                     ),
                   ),
-                ),
-        childBuilder: widget.childBuilder ?? _buildListView,
-      );
+          errorBuilder: widget.errorBuilder ??
+              (BuildContext context, dynamic error) {
+                if (error is Error) {
+                  print(error.stackTrace);
+                }
+                return InfoTile(
+                  showMessage: widget.showErrorTile,
+                  tileAnchor: Alignment.topCenter,
+                  childAnchor: Alignment.topCenter,
+                  message: 'An error occurred.',
+                  child: Container(),
+                );
+              },
+          loadingBuilder: widget.loadingBuilder ??
+              (context) => LayoutBuilder(
+                    builder: (context, viewportConstraints) =>
+                        SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: viewportConstraints.maxHeight,
+                        ),
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    ),
+                  ),
+          childBuilder: widget.childBuilder ?? _buildListView,
+        ),
+  );
 
   Widget _separatorBuilder(BuildContext context, int index) => Container(
         height: 1,

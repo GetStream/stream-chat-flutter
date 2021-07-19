@@ -63,6 +63,7 @@ class StreamChatThemeData {
     MessageListViewThemeData? messageListViewTheme,
     ChannelListViewThemeData? channelListViewTheme,
     UserListViewThemeData? userListViewTheme,
+    MessageSearchListViewThemeData? messageSearchListViewTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -89,6 +90,7 @@ class StreamChatThemeData {
       messageListViewTheme: messageListViewTheme,
       channelListViewTheme: channelListViewTheme,
       userListViewTheme: userListViewTheme,
+      messageSearchListViewTheme: messageSearchListViewTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -120,6 +122,7 @@ class StreamChatThemeData {
     required this.messageListViewTheme,
     required this.channelListViewTheme,
     required this.userListViewTheme,
+    required this.messageSearchListViewTheme,
   });
 
   /// Create a theme from a Material [Theme]
@@ -184,6 +187,9 @@ class StreamChatThemeData {
   /// Theme configuration for the [UserListView] widget.
   final UserListViewThemeData userListViewTheme;
 
+  /// Theme configuration for the [] widget.
+  final MessageSearchListViewThemeData messageSearchListViewTheme;
+
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -203,6 +209,7 @@ class StreamChatThemeData {
     MessageListViewThemeData? messageListViewTheme,
     ChannelListViewThemeData? channelListViewTheme,
     UserListViewThemeData? userListViewTheme,
+    MessageSearchListViewThemeData? messageSearchListViewTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -223,6 +230,8 @@ class StreamChatThemeData {
         messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
         channelListViewTheme: channelListViewTheme ?? this.channelListViewTheme,
         userListViewTheme: userListViewTheme ?? this.userListViewTheme,
+        messageSearchListViewTheme:
+            messageSearchListViewTheme ?? this.messageSearchListViewTheme,
       );
 
   /// Merge themes
@@ -248,6 +257,8 @@ class StreamChatThemeData {
       channelListViewTheme:
           channelListViewTheme.merge(other.channelListViewTheme),
       userListViewTheme: userListViewTheme.merge(other.userListViewTheme),
+      messageSearchListViewTheme:
+          messageSearchListViewTheme.merge(other.messageSearchListViewTheme),
     );
   }
 
@@ -474,6 +485,9 @@ class StreamChatThemeData {
         backgroundColor: colorTheme.appBg,
       ),
       userListViewTheme: UserListViewThemeData(
+        backgroundColor: colorTheme.appBg,
+      ),
+      messageSearchListViewTheme: MessageSearchListViewThemeData(
         backgroundColor: colorTheme.appBg,
       ),
     );
@@ -1993,7 +2007,7 @@ class UserListViewTheme extends InheritedTheme {
   /// ```
   static UserListViewThemeData of(BuildContext context) {
     final userListViewTheme =
-    context.dependOnInheritedWidgetOfExactType<UserListViewTheme>();
+        context.dependOnInheritedWidgetOfExactType<UserListViewTheme>();
     return userListViewTheme?.data ??
         StreamChatTheme.of(context).userListViewTheme;
   }
@@ -2038,10 +2052,10 @@ class UserListViewThemeData with Diagnosticable {
   ///
   /// All the properties must be non-null.
   UserListViewThemeData lerp(
-      UserListViewThemeData a,
-      UserListViewThemeData b,
-      double t,
-      ) =>
+    UserListViewThemeData a,
+    UserListViewThemeData b,
+    double t,
+  ) =>
       UserListViewThemeData(
         backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       );
@@ -2057,9 +2071,118 @@ class UserListViewThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is UserListViewThemeData &&
-              runtimeType == other.runtimeType &&
-              backgroundColor == other.backgroundColor;
+      other is UserListViewThemeData &&
+          runtimeType == other.runtimeType &&
+          backgroundColor == other.backgroundColor;
+
+  @override
+  int get hashCode => backgroundColor.hashCode;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ColorProperty('backgroundColor', backgroundColor));
+  }
+}
+
+/// Overrides the default style of [MessageSearchListView] descendants.
+///
+/// See also:
+///
+///  * [UserListViewThemeData], which is used to configure this theme.
+class MessageSearchListViewTheme extends InheritedTheme {
+  /// Creates a [UserListViewTheme].
+  ///
+  /// The [data] parameter must not be null.
+  const MessageSearchListViewTheme({
+    Key? key,
+    required this.data,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  /// The configuration of this theme.
+  final MessageSearchListViewThemeData data;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If there is no enclosing [MessageSearchListView] widget, then
+  /// [StreamChatThemeData.messageSearchListViewTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// MessageSearchListViewTheme theme = MessageSearchListViewTheme.of(context);
+  /// ```
+  static MessageSearchListViewThemeData of(BuildContext context) {
+    final messageSearchListViewTheme = context
+        .dependOnInheritedWidgetOfExactType<MessageSearchListViewTheme>();
+    return messageSearchListViewTheme?.data ??
+        StreamChatTheme.of(context).messageSearchListViewTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) =>
+      MessageSearchListViewTheme(data: data, child: child);
+
+  @override
+  bool updateShouldNotify(MessageSearchListViewTheme oldWidget) =>
+      data != oldWidget.data;
+}
+
+/// A style that overrides the default appearance of [MessageSearchListView]s
+/// when used with [MessageSearchListView] or with the overall
+/// [StreamChatTheme]'s [StreamChatThemeData.messageSearchListViewTheme].
+///
+/// See also:
+///
+/// * [MessageSearchListViewTheme], the theme which is configured with this
+/// class.
+/// * [StreamChatThemeData.messageSearchListViewTheme], which can be used to
+/// override the default style for [UserListView]s below the overall
+/// [StreamChatTheme].
+class MessageSearchListViewThemeData with Diagnosticable {
+  /// Creates a [MessageSearchListViewThemeData].
+  const MessageSearchListViewThemeData({
+    this.backgroundColor,
+  });
+
+  /// The color of the [MessageSearchListView] background.
+  final Color? backgroundColor;
+
+  /// Copies this [MessageSearchListViewThemeData] to another.
+  MessageSearchListViewThemeData copyWith({
+    Color? backgroundColor,
+  }) =>
+      MessageSearchListViewThemeData(
+        backgroundColor: backgroundColor ?? this.backgroundColor,
+      );
+
+  /// Linearly interpolate between two [UserListViewThemeData] themes.
+  ///
+  /// All the properties must be non-null.
+  MessageSearchListViewThemeData lerp(
+    MessageSearchListViewThemeData a,
+    MessageSearchListViewThemeData b,
+    double t,
+  ) =>
+      MessageSearchListViewThemeData(
+        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+      );
+
+  /// Merges one [MessageSearchListViewThemeData] with another.
+  MessageSearchListViewThemeData merge(MessageSearchListViewThemeData? other) {
+    if (other == null) return this;
+    return copyWith(
+      backgroundColor: other.backgroundColor,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MessageSearchListViewThemeData &&
+          runtimeType == other.runtimeType &&
+          backgroundColor == other.backgroundColor;
 
   @override
   int get hashCode => backgroundColor.hashCode;
