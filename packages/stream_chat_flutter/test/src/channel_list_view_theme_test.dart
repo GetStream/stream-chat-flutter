@@ -11,7 +11,7 @@ void main() {
   });
 
   test(
-      '''List ChannelListViewThemeData lerps completely to dark ChannelListViewThemeData''',
+      '''Light ChannelListViewThemeData lerps completely to dark ChannelListViewThemeData''',
       () {
     expect(
         const ChannelListViewThemeData().lerp(_channelListViewThemeDataControl,
