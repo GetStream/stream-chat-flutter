@@ -2309,6 +2309,7 @@ class __PickerWidgetState extends State<_PickerWidget> {
 
           return InkWell(
             onTap: () async {
+              print('on tap');
               PhotoManager.openSetting();
             },
             child: Container(
