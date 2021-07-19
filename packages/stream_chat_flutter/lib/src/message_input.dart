@@ -24,7 +24,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 export 'package:video_compress/video_compress.dart' show VideoQuality;
 

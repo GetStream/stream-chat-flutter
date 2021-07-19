@@ -274,7 +274,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         size: 24,
       ),
       question: context.translations.flagMessageQuestion,
-      okText: context.translations.okLabel,
+      okText: context.translations.flagLabel,
       cancelText: context.translations.cancelLabel,
     );
 
@@ -594,7 +594,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                     ),
                     Text(
                       context.translations.editMessageLabel,
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     IconButton(
                       visualDensity: VisualDensity.compact,

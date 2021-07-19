@@ -17,7 +17,6 @@ import 'package:stream_chat_flutter/src/system_message.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Widget builder for message
 /// [defaultMessageWidget] is the default [MessageWidget] configuration
