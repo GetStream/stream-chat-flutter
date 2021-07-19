@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class SearchTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
+  final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
   final String hintText;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool showCloseButton;
 
   const SearchTextField({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
     this.onChanged,
     this.onTap,
     this.hintText = 'Search',
@@ -22,9 +22,9 @@ class SearchTextField extends StatelessWidget {
     return Container(
       height: 36,
       decoration: BoxDecoration(
-        color: StreamChatTheme.of(context).colorTheme.white,
+        color: StreamChatTheme.of(context).colorTheme.barsBg,
         border: Border.all(
-          color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+          color: StreamChatTheme.of(context).colorTheme.borders,
         ),
         borderRadius: BorderRadius.circular(24),
       ),
@@ -48,7 +48,8 @@ class SearchTextField extends StatelessWidget {
                     right: 8,
                   ),
                   child: StreamSvgIcon.search(
-                    color: StreamChatTheme.of(context).colorTheme.black,
+                    color:
+                        StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                     size: 24,
                   ),
                 ),
@@ -56,7 +57,7 @@ class SearchTextField extends StatelessWidget {
                 hintStyle: StreamChatTheme.of(context).textTheme.body.copyWith(
                     color: StreamChatTheme.of(context)
                         .colorTheme
-                        .black
+                        .textHighEmphasis
                         .withOpacity(.5)),
                 contentPadding: const EdgeInsets.all(0),
                 border: OutlineInputBorder(
@@ -76,11 +77,11 @@ class SearchTextField extends StatelessWidget {
                 ),
                 splashRadius: 24,
                 onPressed: () {
-                  if (controller.text.isNotEmpty) {
+                  if (controller!.text.isNotEmpty) {
                     Future.microtask(
                       () => [
-                        controller.clear(),
-                        if (onChanged != null) onChanged(''),
+                        controller!.clear(),
+                        if (onChanged != null) onChanged!(''),
                       ],
                     );
                   }

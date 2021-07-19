@@ -1,4 +1,5 @@
 import 'package:example/app_config.dart';
+import 'package:example/home_page.dart';
 import 'package:example/stream_version.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,7 @@ class ChooseUserPage extends StatelessWidget {
     final users = defaultUsers;
 
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -32,7 +33,7 @@ class ChooseUserPage extends StatelessWidget {
                 child: SvgPicture.asset(
                   'assets/logo.svg',
                   height: 40,
-                  color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                  color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                 ),
               ),
             ),
@@ -54,7 +55,7 @@ class ChooseUserPage extends StatelessWidget {
                   separatorBuilder: (context, i) {
                     return Container(
                       height: 1,
-                      color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+                      color: StreamChatTheme.of(context).colorTheme.borders,
                     );
                   },
                   itemCount: users.length + 1,
@@ -78,7 +79,7 @@ class ChooseUserPage extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(16),
                                     color: StreamChatTheme.of(context)
                                         .colorTheme
-                                        .white,
+                                        .barsBg,
                                   ),
                                   height: 100,
                                   width: 100,
@@ -89,8 +90,11 @@ class ChooseUserPage extends StatelessWidget {
                               ),
                             );
 
-                            final client = StreamChat.of(context).client;
-                            client.apiKey = kDefaultStreamApiKey;
+                            final client = StreamChatClient(
+                              kDefaultStreamApiKey,
+                              logLevel: Level.INFO,
+                            );
+
                             await client.connectUser(
                               user,
                               token,
@@ -115,6 +119,7 @@ class ChooseUserPage extends StatelessWidget {
                               context,
                               Routes.HOME,
                               ModalRoute.withName(Routes.HOME),
+                              arguments: HomePageArgs(client),
                             );
                           },
                           leading: UserAvatar(
@@ -136,13 +141,13 @@ class ChooseUserPage extends StatelessWidget {
                                 .copyWith(
                                   color: StreamChatTheme.of(context)
                                       .colorTheme
-                                      .grey,
+                                      .textLowEmphasis,
                                 ),
                           ),
                           trailing: StreamSvgIcon.arrowRight(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
-                                .accentBlue,
+                                .accentPrimary,
                           ),
                         );
                       }),
@@ -152,11 +157,12 @@ class ChooseUserPage extends StatelessWidget {
                         },
                         leading: CircleAvatar(
                           child: StreamSvgIcon.settings(
-                            color: StreamChatTheme.of(context).colorTheme.black,
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .textHighEmphasis,
                           ),
-                          backgroundColor: StreamChatTheme.of(context)
-                              .colorTheme
-                              .greyWhisper,
+                          backgroundColor:
+                              StreamChatTheme.of(context).colorTheme.borders,
                         ),
                         title: Text(
                           'Advanced Options',
@@ -168,8 +174,9 @@ class ChooseUserPage extends StatelessWidget {
                               .textTheme
                               .footnote
                               .copyWith(
-                                color:
-                                    StreamChatTheme.of(context).colorTheme.grey,
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .textLowEmphasis,
                               ),
                         ),
                         trailing: SvgPicture.asset(

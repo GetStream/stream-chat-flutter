@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'channel_page.dart';
 import 'chips_input_text_field.dart';
-import 'main.dart';
 import 'routes/routes.dart';
 
 class NewChatScreen extends StatefulWidget {
@@ -16,9 +16,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
   final _chipInputTextFieldStateKey =
       GlobalKey<ChipInputTextFieldState<User>>();
 
-  TextEditingController _controller;
+  late TextEditingController _controller;
 
-  ChipInputTextFieldState get _chipInputTextFieldState =>
+  ChipInputTextFieldState? get _chipInputTextFieldState =>
       _chipInputTextFieldStateKey.currentState;
 
   String _userNameQuery = '';
@@ -30,14 +30,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   bool _isSearchActive = false;
 
-  Channel channel;
+  Channel? channel;
 
-  Timer _debounce;
+  Timer? _debounce;
 
   bool _showUserList = true;
 
   void _userNameListener() {
-    if (_debounce?.isActive ?? false) _debounce.cancel();
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted)
         setState(() {
@@ -66,17 +66,15 @@ class _NewChatScreenState extends State<NewChatScreen> {
         final chatState = StreamChat.of(context);
 
         final res = await chatState.client.queryChannelsOnline(
-          options: {
-            'state': false,
-            'watch': false,
-          },
-          filter: {
+          state: false,
+          watch: false,
+          filter: Filter.raw(value: {
             'members': [
               ..._selectedUsers.map((e) => e.id),
-              chatState.user.id,
+              chatState.user!.id,
             ],
             'distinct': true,
-          },
+          }),
           messageLimit: 0,
           paginationParams: PaginationParams(
             limit: 1,
@@ -86,14 +84,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
         final _channelExisted = res.length == 1;
         if (_channelExisted) {
           channel = res.first;
-          await channel.watch();
+          await channel!.watch();
         } else {
           channel = chatState.client.channel(
             'messaging',
             extraData: {
               'members': [
                 ..._selectedUsers.map((e) => e.id),
-                chatState.user.id,
+                chatState.user!.id,
               ],
             },
           );
@@ -110,27 +108,25 @@ class _NewChatScreenState extends State<NewChatScreen> {
   void dispose() {
     _searchFocusNode.dispose();
     _messageInputFocusNode.dispose();
-    _controller?.clear();
-    _controller?.removeListener(_userNameListener);
-    _controller?.dispose();
+    _controller.clear();
+    _controller.removeListener(_userNameListener);
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: AppBar(
         brightness: Theme.of(context).brightness,
         elevation: 0,
-        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
         leading: const StreamBackButton(),
         title: Text(
           'New Chat',
-          style: StreamChatTheme.of(context)
-              .textTheme
-              .headlineBold
-              .copyWith(color: StreamChatTheme.of(context).colorTheme.black),
+          style: StreamChatTheme.of(context).textTheme.headlineBold.copyWith(
+              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis),
         ),
         centerTitle: true,
       ),
@@ -158,7 +154,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
             message: statusString,
             child: StreamChannel(
               showLoading: false,
-              channel: channel,
+              channel: channel!,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -169,7 +165,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     chipBuilder: (context, user) {
                       return GestureDetector(
                         onTap: () {
-                          _chipInputTextFieldState.removeItem(user);
+                          _chipInputTextFieldState?.removeItem(user);
                           _searchFocusNode.requestFocus();
                         },
                         child: Stack(
@@ -179,7 +175,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                               decoration: BoxDecoration(
                                 color: StreamChatTheme.of(context)
                                     .colorTheme
-                                    .greyGainsboro,
+                                    .disabled,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               padding: const EdgeInsets.only(left: 24),
@@ -191,7 +187,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   style: TextStyle(
                                     color: StreamChatTheme.of(context)
                                         .colorTheme
-                                        .black,
+                                        .textHighEmphasis,
                                   ),
                                 ),
                               ),
@@ -242,7 +238,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   child: StreamSvgIcon.contacts(
                                     color: StreamChatTheme.of(context)
                                         .colorTheme
-                                        .accentBlue,
+                                        .accentPrimary,
                                     size: 24,
                                   ),
                                 ),
@@ -281,7 +277,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                 .copyWith(
                                     color: StreamChatTheme.of(context)
                                         .colorTheme
-                                        .black
+                                        .textHighEmphasis
                                         .withOpacity(.5))),
                       ),
                     ),
@@ -299,24 +295,21 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   _controller.clear();
                                   if (!_selectedUsers.contains(user)) {
                                     _chipInputTextFieldState
-                                      ..addItem(user)
+                                      ?..addItem(user)
                                       ..pauseItemAddition();
                                   } else {
-                                    _chipInputTextFieldState.removeItem(user);
+                                    _chipInputTextFieldState!.removeItem(user);
                                   }
                                 },
                                 pagination: PaginationParams(
                                   limit: 25,
                                 ),
-                                filter: {
+                                filter: Filter.and([
                                   if (_userNameQuery.isNotEmpty)
-                                    'name': {
-                                      r'$autocomplete': _userNameQuery,
-                                    },
-                                  'id': {
-                                    r'$ne': StreamChat.of(context).user.id,
-                                  },
-                                },
+                                    Filter.autoComplete('name', _userNameQuery),
+                                  Filter.notEqual(
+                                      'id', StreamChat.of(context).user!.id),
+                                ]),
                                 sort: [
                                   SortOption(
                                     'name',
@@ -355,7 +348,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                                           color: StreamChatTheme
                                                                   .of(context)
                                                               .colorTheme
-                                                              .black
+                                                              .textHighEmphasis
                                                               .withOpacity(.5)),
                                                 ),
                                               ],
@@ -370,7 +363,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             ),
                           )
                         : FutureBuilder<bool>(
-                            future: channel.initialized,
+                            future: channel!.initialized,
                             builder: (context, snapshot) {
                               if (snapshot.data == true) {
                                 return MessageListView();
@@ -383,7 +376,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                     fontSize: 12,
                                     color: StreamChatTheme.of(context)
                                         .colorTheme
-                                        .black
+                                        .textHighEmphasis
                                         .withOpacity(.5),
                                   ),
                                 ),
@@ -394,14 +387,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
                   MessageInput(
                     focusNode: _messageInputFocusNode,
                     preMessageSending: (message) async {
-                      await channel.watch();
+                      await channel!.watch();
                       return message;
                     },
                     onMessageSent: (m) {
                       Navigator.pushNamedAndRemoveUntil(
                         context,
                         Routes.CHANNEL_PAGE,
-                        ModalRoute.withName(Routes.HOME),
+                        ModalRoute.withName(Routes.CHANNEL_LIST_PAGE),
                         arguments: ChannelPageArgs(channel: channel),
                       );
                     },

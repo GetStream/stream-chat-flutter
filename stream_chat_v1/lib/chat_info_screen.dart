@@ -1,24 +1,34 @@
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'main.dart';
+import 'channel_file_display_screen.dart';
+import 'channel_media_display_screen.dart';
+import 'channel_page.dart';
+import 'pinned_messages_screen.dart';
 import 'routes/routes.dart';
 
 /// Detail screen for a 1:1 chat correspondence
 class ChatInfoScreen extends StatefulWidget {
   /// User in consideration
-  final User user;
+  final User? user;
 
-  const ChatInfoScreen({Key key, this.user}) : super(key: key);
+  final MessageTheme messageTheme;
+
+  const ChatInfoScreen({
+    Key? key,
+    required this.messageTheme,
+    this.user,
+  }) : super(key: key);
 
   @override
   _ChatInfoScreenState createState() => _ChatInfoScreenState();
 }
 
 class _ChatInfoScreenState extends State<ChatInfoScreen> {
-  ValueNotifier<bool> mutedBool = ValueNotifier(false);
+  ValueNotifier<bool?> mutedBool = ValueNotifier(false);
 
   @override
   void initState() {
@@ -30,25 +40,25 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       body: ListView(
         children: [
           _buildUserHeader(),
           Container(
             height: 8.0,
-            color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+            color: StreamChatTheme.of(context).colorTheme.disabled,
           ),
           _buildOptionListTiles(),
           Container(
             height: 8.0,
-            color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+            color: StreamChatTheme.of(context).colorTheme.disabled,
           ),
           if ([
             'admin',
             'owner',
-          ].contains(channel.state.members
-              .firstWhere((m) => m.userId == channel.client.state.user.id,
-                  orElse: () => null)
+          ].contains(channel.state!.members
+              .firstWhereOrNull(
+                  (m) => m.userId == channel.client.state.user!.id)
               ?.role))
             _buildDeleteListTile(),
         ],
@@ -58,7 +68,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
 
   Widget _buildUserHeader() {
     return Material(
-      color: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      color: StreamChatTheme.of(context).colorTheme.appBg,
       child: SafeArea(
         child: Stack(
           children: [
@@ -68,7 +78,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: UserAvatar(
-                    user: widget.user,
+                    user: widget.user!,
                     constraints: BoxConstraints(
                       maxWidth: 72.0,
                       maxHeight: 72.0,
@@ -78,23 +88,23 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                   ),
                 ),
                 Text(
-                  widget.user.name,
+                  widget.user!.name,
                   style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 7.0),
                 _buildConnectedTitleState(),
                 SizedBox(height: 15.0),
                 OptionListTile(
-                  title: '@${widget.user.id}',
-                  tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+                  title: '@${widget.user!.id}',
+                  tileColor: StreamChatTheme.of(context).colorTheme.appBg,
                   trailing: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
-                      widget.user.name,
+                      widget.user!.name,
                       style: TextStyle(
                           color: StreamChatTheme.of(context)
                               .colorTheme
-                              .black
+                              .textHighEmphasis
                               .withOpacity(0.5),
                           fontSize: 16.0),
                     ),
@@ -124,7 +134,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         //   title: 'Notifications',
         //   leading: StreamSvgIcon.Icon_notification(
         //     size: 24.0,
-        //     color: StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+        //     color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
         //   ),
         //   trailing: CupertinoSwitch(
         //     value: true,
@@ -138,7 +148,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               mutedBool.value = snapshot.data;
 
               return OptionListTile(
-                tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+                tileColor: StreamChatTheme.of(context).colorTheme.appBg,
                 title: 'Mute user',
                 titleTextStyle: StreamChatTheme.of(context).textTheme.body,
                 leading: Padding(
@@ -147,21 +157,21 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                     size: 24.0,
                     color: StreamChatTheme.of(context)
                         .colorTheme
-                        .black
+                        .textHighEmphasis
                         .withOpacity(0.5),
                   ),
                 ),
                 trailing: snapshot.data == null
                     ? CircularProgressIndicator()
-                    : ValueListenableBuilder<bool>(
+                    : ValueListenableBuilder<bool?>(
                         valueListenable: mutedBool,
                         builder: (context, value, _) {
                           return CupertinoSwitch(
-                            value: value,
+                            value: value!,
                             onChanged: (val) {
                               mutedBool.value = val;
 
-                              if (snapshot.data) {
+                              if (snapshot.data!) {
                                 channel.channel.unmute();
                               } else {
                                 channel.channel.mute();
@@ -176,7 +186,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         //   title: 'Block User',
         //   leading: StreamSvgIcon.Icon_user_delete(
         //     size: 24.0,
-        //     color: StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+        //     color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
         //   ),
         //   trailing: CupertinoSwitch(
         //     value: widget.user.banned,
@@ -191,19 +201,82 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         //   onTap: () {},
         // ),
         OptionListTile(
+          title: 'Pinned Messages',
+          tileColor: StreamChatTheme.of(context).colorTheme.appBg,
+          titleTextStyle: StreamChatTheme.of(context).textTheme.body,
+          leading: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22.0),
+            child: StreamSvgIcon.pin(
+              size: 24.0,
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .textHighEmphasis
+                  .withOpacity(0.5),
+            ),
+          ),
+          trailing: StreamSvgIcon.right(
+            color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+          ),
+          onTap: () {
+            final channel = StreamChannel.of(context).channel;
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StreamChannel(
+                  channel: channel,
+                  child: MessageSearchBloc(
+                    child: PinnedMessagesScreen(
+                      messageTheme: widget.messageTheme,
+                      sortOptions: [
+                        SortOption(
+                          'created_at',
+                          direction: SortOption.ASC,
+                        ),
+                      ],
+                      paginationParams: PaginationParams(limit: 20),
+                      onShowMessage: (m, c) async {
+                        final client = StreamChat.of(context).client;
+                        final message = m;
+                        final channel = client.channel(
+                          c.type,
+                          id: c.id,
+                        );
+                        if (channel.state == null) {
+                          await channel.watch();
+                        }
+                        Navigator.pushNamed(
+                          context,
+                          Routes.CHANNEL_PAGE,
+                          arguments: ChannelPageArgs(
+                            channel: channel,
+                            initialMessage: message,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        OptionListTile(
           title: 'Photos & Videos',
-          tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+          tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: StreamSvgIcon.pictures(
               size: 36.0,
-              color:
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .textHighEmphasis
+                  .withOpacity(0.5),
             ),
           ),
           trailing: StreamSvgIcon.right(
-            color: StreamChatTheme.of(context).colorTheme.grey,
+            color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
             final channel = StreamChannel.of(context).channel;
@@ -215,6 +288,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                   channel: channel,
                   child: MessageSearchBloc(
                     child: ChannelMediaDisplayScreen(
+                      messageTheme: widget.messageTheme,
                       sortOptions: [
                         SortOption(
                           'created_at',
@@ -250,18 +324,20 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         ),
         OptionListTile(
           title: 'Files',
-          tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+          tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18.0),
             child: StreamSvgIcon.files(
               size: 32.0,
-              color:
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .textHighEmphasis
+                  .withOpacity(0.5),
             ),
           ),
           trailing: StreamSvgIcon.right(
-            color: StreamChatTheme.of(context).colorTheme.grey,
+            color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
             final channel = StreamChannel.of(context).channel;
@@ -289,18 +365,20 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         ),
         OptionListTile(
           title: 'Shared groups',
-          tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+          tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22.0),
             child: StreamSvgIcon.iconGroup(
               size: 24.0,
-              color:
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .textHighEmphasis
+                  .withOpacity(0.5),
             ),
           ),
           trailing: StreamSvgIcon.right(
-            color: StreamChatTheme.of(context).colorTheme.grey,
+            color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
             Navigator.push(
@@ -317,21 +395,21 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   Widget _buildDeleteListTile() {
     return OptionListTile(
       title: 'Delete Conversation',
-      tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      tileColor: StreamChatTheme.of(context).colorTheme.appBg,
       titleTextStyle: StreamChatTheme.of(context).textTheme.body.copyWith(
-            color: StreamChatTheme.of(context).colorTheme.accentRed,
+            color: StreamChatTheme.of(context).colorTheme.accentError,
           ),
       leading: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 22.0),
         child: StreamSvgIcon.delete(
-          color: StreamChatTheme.of(context).colorTheme.accentRed,
+          color: StreamChatTheme.of(context).colorTheme.accentError,
           size: 24.0,
         ),
       ),
       onTap: () {
         _showDeleteDialog();
       },
-      titleColor: StreamChatTheme.of(context).colorTheme.accentRed,
+      titleColor: StreamChatTheme.of(context).colorTheme.accentError,
     );
   }
 
@@ -343,7 +421,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       question: 'Are you sure you want to delete this conversation?',
       cancelText: 'CANCEL',
       icon: StreamSvgIcon.delete(
-        color: StreamChatTheme.of(context).colorTheme.accentRed,
+        color: StreamChatTheme.of(context).colorTheme.accentError,
       ),
     );
     var channel = StreamChannel.of(context).channel;
@@ -367,7 +445,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           style: TextStyle(
               color: StreamChatTheme.of(context)
                   .colorTheme
-                  .black
+                  .textHighEmphasis
                   .withOpacity(0.5)),
         );
       } else {
@@ -376,7 +454,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           style: TextStyle(
               color: StreamChatTheme.of(context)
                   .colorTheme
-                  .black
+                  .textHighEmphasis
                   .withOpacity(0.5)),
         );
       }
@@ -385,7 +463,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (widget.user.online)
+        if (widget.user!.online)
           Material(
             type: MaterialType.circle,
             child: Container(
@@ -396,13 +474,13 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               ),
               child: Material(
                 shape: CircleBorder(),
-                color: StreamChatTheme.of(context).colorTheme.accentGreen,
+                color: StreamChatTheme.of(context).colorTheme.accentInfo,
               ),
             ),
-            color: StreamChatTheme.of(context).colorTheme.white,
+            color: StreamChatTheme.of(context).colorTheme.barsBg,
           ),
         alternativeWidget,
-        if (widget.user.online)
+        if (widget.user!.online)
           SizedBox(
             width: 24.0,
           ),
@@ -412,8 +490,8 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
 }
 
 class _SharedGroupsScreen extends StatefulWidget {
-  final User mainUser;
-  final User otherUser;
+  final User? mainUser;
+  final User? otherUser;
 
   _SharedGroupsScreen(this.mainUser, this.otherUser);
 
@@ -427,7 +505,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
     var chat = StreamChat.of(context);
 
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: AppBar(
         brightness: Theme.of(context).brightness,
         elevation: 1,
@@ -435,28 +513,18 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
         title: Text(
           'Shared Groups',
           style: TextStyle(
-              color: StreamChatTheme.of(context).colorTheme.black,
+              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
               fontSize: 16.0),
         ),
         leading: StreamBackButton(),
-        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       ),
       body: StreamBuilder<List<Channel>>(
         stream: chat.client.queryChannels(
-          filter: {
-            r'$and': [
-              {
-                'members': {
-                  r'$in': [widget.otherUser.id],
-                },
-              },
-              {
-                'members': {
-                  r'$in': [widget.mainUser.id],
-                },
-              }
-            ],
-          },
+          filter: Filter.and([
+            Filter.in_('members', [widget.otherUser!.id]),
+            Filter.in_('members', [widget.mainUser!.id]),
+          ]),
         ),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -465,21 +533,23 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             );
           }
 
-          if (snapshot.data.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   StreamSvgIcon.message(
                     size: 136.0,
-                    color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                    color: StreamChatTheme.of(context).colorTheme.disabled,
                   ),
                   SizedBox(height: 16.0),
                   Text(
                     'No Shared Groups',
                     style: TextStyle(
                       fontSize: 14.0,
-                      color: StreamChatTheme.of(context).colorTheme.black,
+                      color: StreamChatTheme.of(context)
+                          .colorTheme
+                          .textHighEmphasis,
                     ),
                   ),
                   SizedBox(height: 8.0),
@@ -490,7 +560,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                       fontSize: 14.0,
                       color: StreamChatTheme.of(context)
                           .colorTheme
-                          .black
+                          .textHighEmphasis
                           .withOpacity(0.5),
                     ),
                   ),
@@ -499,11 +569,11 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             );
           }
 
-          final channels = snapshot.data
+          final channels = snapshot.data!
               .where((c) =>
-                  c.state.members.any((m) =>
-                      m.userId != widget.mainUser.id &&
-                      m.userId != widget.otherUser.id) ||
+                  c.state!.members.any((m) =>
+                      m.userId != widget.mainUser!.id &&
+                      m.userId != widget.otherUser!.id) ||
                   !c.isDistinct)
               .toList();
 
@@ -523,24 +593,24 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
 
   Widget _buildListTile(Channel channel) {
     var extraData = channel.extraData;
-    var members = channel.state.members;
+    var members = channel.state!.members;
 
     var textStyle = TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold);
 
     return Container(
       height: 64.0,
       child: LayoutBuilder(builder: (context, constraints) {
-        String title;
+        String? title;
         if (extraData['name'] == null) {
           final otherMembers = members.where(
-              (member) => member.userId != StreamChat.of(context).user.id);
+              (member) => member.userId != StreamChat.of(context).user!.id);
           if (otherMembers.isNotEmpty) {
             final maxWidth = constraints.maxWidth;
-            final maxChars = maxWidth / textStyle.fontSize;
+            final maxChars = maxWidth / textStyle.fontSize!;
             var currentChars = 0;
             final currentMembers = <Member>[];
             otherMembers.forEach((element) {
-              final newLength = currentChars + element.user.name.length;
+              final newLength = currentChars + element.user!.name.length;
               if (newLength < maxChars) {
                 currentChars = newLength;
                 currentMembers.add(element);
@@ -550,12 +620,12 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             final exceedingMembers =
                 otherMembers.length - currentMembers.length;
             title =
-                '${currentMembers.map((e) => e.user.name).join(', ')} ${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
+                '${currentMembers.map((e) => e.user!.name).join(', ')} ${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
           } else {
             title = 'No title';
           }
         } else {
-          title = extraData['name'];
+          title = extraData['name'] as String;
         }
 
         return Column(
@@ -565,7 +635,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: ChannelImage(
+                    child: ChannelAvatar(
                       channel: channel,
                       constraints:
                           BoxConstraints(maxWidth: 40.0, maxHeight: 40.0),
@@ -583,7 +653,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                       style: TextStyle(
                           color: StreamChatTheme.of(context)
                               .colorTheme
-                              .black
+                              .textHighEmphasis
                               .withOpacity(0.5)),
                     ),
                   )
@@ -592,8 +662,10 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             ),
             Container(
               height: 1.0,
-              color:
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .textHighEmphasis
+                  .withOpacity(.08),
             ),
           ],
         );

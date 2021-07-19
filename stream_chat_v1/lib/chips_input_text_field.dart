@@ -6,18 +6,18 @@ typedef OnChipAdded<T> = void Function(T chip);
 typedef OnChipRemoved<T> = void Function(T chip);
 
 class ChipsInputTextField<T> extends StatefulWidget {
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final ValueChanged<String> onInputChanged;
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final ValueChanged<String>? onInputChanged;
   final ChipBuilder<T> chipBuilder;
-  final OnChipAdded<T> onChipAdded;
-  final OnChipRemoved<T> onChipRemoved;
+  final OnChipAdded<T>? onChipAdded;
+  final OnChipRemoved<T>? onChipRemoved;
   final String hint;
 
   const ChipsInputTextField({
-    Key key,
-    @required this.chipBuilder,
-    @required this.controller,
+    Key? key,
+    required this.chipBuilder,
+    required this.controller,
     this.onInputChanged,
     this.focusNode,
     this.onChipAdded,
@@ -35,7 +35,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
 
   void addItem(T item) {
     setState(() => _chips.add(item));
-    if (widget.onChipAdded != null) widget.onChipAdded(item);
+    if (widget.onChipAdded != null) widget.onChipAdded!(item);
   }
 
   void removeItem(T item) {
@@ -43,7 +43,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
       _chips.remove(item);
       if (_chips.isEmpty) resumeItemAddition();
     });
-    if (widget.onChipRemoved != null) widget.onChipRemoved(item);
+    if (widget.onChipRemoved != null) widget.onChipRemoved!(item);
   }
 
   void pauseItemAddition() {
@@ -66,7 +66,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
       onTap: _pauseItemAddition ? resumeItemAddition : null,
       child: Material(
         elevation: 1,
-        color: StreamChatTheme.of(context).colorTheme.white,
+        color: StreamChatTheme.of(context).colorTheme.barsBg,
         child: Container(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
@@ -82,7 +82,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                         .copyWith(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
-                                .black
+                                .textHighEmphasis
                                 .withOpacity(.5)),
                   ),
                 ),
@@ -119,7 +119,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                                 .copyWith(
                                     color: StreamChatTheme.of(context)
                                         .colorTheme
-                                        .black
+                                        .textHighEmphasis
                                         .withOpacity(.5)),
                           ),
                         ),
@@ -134,14 +134,14 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                         ? StreamSvgIcon.user(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
-                                .black
+                                .textHighEmphasis
                                 .withOpacity(0.5),
                             size: 24,
                           )
                         : StreamSvgIcon.userAdd(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
-                                .black
+                                .textHighEmphasis
                                 .withOpacity(0.5),
                             size: 24,
                           ),

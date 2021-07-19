@@ -1,4 +1,4 @@
-fastlane_version "2.179.0"
+fastlane_version "2.187.0"
 default_platform :ios
 
 before_all do
@@ -62,7 +62,7 @@ platform :ios do
 
         settings_to_override = {
           :BUNDLE_IDENTIFIER => "io.getstream.flutter",
-          :PROVISIONING_PROFILE_SPECIFIER => "match AppStore io.getstream.flutter"
+          :PROVISIONING_PROFILE_SPECIFIER => "match AppStore io.getstream.flutter 1620032657"
         }
 
         gym(
