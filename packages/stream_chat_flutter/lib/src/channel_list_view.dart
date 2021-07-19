@@ -231,9 +231,12 @@ class _ChannelListViewState extends State<ChannelListView> {
       );
     }
 
-    return LazyLoadScrollView(
-      onEndOfPage: () => _channelListController.paginateData!(),
-      child: child,
+    return ColoredBox(
+      color: ChannelListViewTheme.of(context).backgroundColor!,
+      child: LazyLoadScrollView(
+        onEndOfPage: () => _channelListController.paginateData!(),
+        child: child,
+      ),
     );
   }
 
@@ -571,18 +574,13 @@ class _ChannelListViewState extends State<ChannelListView> {
                         },
                 ),
             ],
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: chatThemeData.channelListViewTheme.backgroundColor,
-          ),
-          child: widget.channelPreviewBuilder?.call(context, channel) ??
-              ChannelPreview(
-                onLongPress: widget.onChannelLongPress,
-                channel: channel,
-                onImageTap: () => widget.onImageTap?.call(channel),
-                onTap: (channel) => onTap(channel, widget.channelWidget),
-              ),
-        ),
+        child: widget.channelPreviewBuilder?.call(context, channel) ??
+            ChannelPreview(
+              onLongPress: widget.onChannelLongPress,
+              channel: channel,
+              onImageTap: () => widget.onImageTap?.call(channel),
+              onTap: (channel) => onTap(channel, widget.channelWidget),
+            ),
       ),
     );
   }
