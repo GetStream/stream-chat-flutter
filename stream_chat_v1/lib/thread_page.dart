@@ -49,7 +49,11 @@ class _ThreadPageState extends State<ThreadPage> {
               initialScrollIndex: widget.initialScrollIndex,
               initialAlignment: widget.initialAlignment,
               onMessageSwiped: _reply,
-              onReplyTap: _reply,
+              messageBuilder: (context, details, messages, defaultMessage) {
+                return defaultMessage.copyWith(
+                  onReplyTap: _reply,
+                );
+              },
               pinPermissions: ['owner', 'admin', 'member'],
             ),
           ),

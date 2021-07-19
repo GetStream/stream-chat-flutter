@@ -635,7 +635,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: ChannelImage(
+                    child: ChannelAvatar(
                       channel: channel,
                       constraints:
                           BoxConstraints(maxWidth: 40.0, maxHeight: 40.0),

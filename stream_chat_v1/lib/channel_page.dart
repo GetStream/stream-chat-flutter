@@ -113,29 +113,33 @@ class _ChannelPageState extends State<ChannelPage> {
                   initialAlignment: widget.initialAlignment,
                   highlightInitialMessage: widget.highlightInitialMessage,
                   onMessageSwiped: _reply,
-                  onReplyTap: _reply,
+                  messageBuilder: (context, details, messages, defaultMessage) {
+                    return defaultMessage.copyWith(
+                      onReplyTap: _reply,
+                      onShowMessage: (m, c) async {
+                        final client = StreamChat.of(context).client;
+                        final message = m;
+                        final channel = client.channel(
+                          c.type,
+                          id: c.id,
+                        );
+                        if (channel.state == null) {
+                          await channel.watch();
+                        }
+                        Navigator.pushReplacementNamed(
+                          context,
+                          Routes.CHANNEL_PAGE,
+                          arguments: ChannelPageArgs(
+                            channel: channel,
+                            initialMessage: message,
+                          ),
+                        );
+                      },
+                    );
+                  },
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(
                       parent: parentMessage,
-                    );
-                  },
-                  onShowMessage: (m, c) async {
-                    final client = StreamChat.of(context).client;
-                    final message = m;
-                    final channel = client.channel(
-                      c.type,
-                      id: c.id,
-                    );
-                    if (channel.state == null) {
-                      await channel.watch();
-                    }
-                    Navigator.pushReplacementNamed(
-                      context,
-                      Routes.CHANNEL_PAGE,
-                      arguments: ChannelPageArgs(
-                        channel: channel,
-                        initialMessage: message,
-                      ),
                     );
                   },
                   pinPermissions: ['owner', 'admin', 'member'],
