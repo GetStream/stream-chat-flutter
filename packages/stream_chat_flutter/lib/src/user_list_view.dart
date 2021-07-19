@@ -164,12 +164,12 @@ class _UserListViewState extends State<UserListView>
       color: UserListViewTheme.of(context).backgroundColor!,
       child: UserListCore(
         errorBuilder: widget.errorBuilder ??
-                (BuildContext context, Object err) => _buildError(err),
+            (BuildContext context, Object err) => _buildError(err),
         emptyBuilder: widget.emptyBuilder ?? (context) => _buildEmpty(),
         loadingBuilder: widget.loadingBuilder ??
-                (context) => LayoutBuilder(
-              builder: (context, viewportConstraints) =>
-                  SingleChildScrollView(
+            (context) => LayoutBuilder(
+                  builder: (context, viewportConstraints) =>
+                      SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
@@ -180,9 +180,9 @@ class _UserListViewState extends State<UserListView>
                       ),
                     ),
                   ),
-            ),
+                ),
         listBuilder:
-        widget.listBuilder ?? (context, list) => _buildListView(list),
+            widget.listBuilder ?? (context, list) => _buildListView(list),
         pagination: widget.pagination,
         sort: widget.sort,
         filter: widget.filter,

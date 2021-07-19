@@ -73,32 +73,32 @@ void main() {
 
   testWidgets(
       'Passing no ChannelListViewThemeData returns default dark theme values',
-          (WidgetTester tester) async {
-        late BuildContext _context;
-        await tester.pumpWidget(
-          MaterialApp(
-            builder: (context, child) => StreamChat(
-              client: MockClient(),
-              streamChatThemeData: StreamChatThemeData.dark(),
-              child: child,
-            ),
-            home: Builder(
-              builder: (BuildContext context) {
-                _context = context;
-                return const Scaffold(
-                  body: UsersBloc(
-                    child: UserListView(),
-                  ),
-                );
-              },
-            ),
-          ),
-        );
+      (WidgetTester tester) async {
+    late BuildContext _context;
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => StreamChat(
+          client: MockClient(),
+          streamChatThemeData: StreamChatThemeData.dark(),
+          child: child,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            _context = context;
+            return const Scaffold(
+              body: UsersBloc(
+                child: UserListView(),
+              ),
+            );
+          },
+        ),
+      ),
+    );
 
-        final userListViewTheme = UserListViewTheme.of(_context);
-        expect(userListViewTheme.backgroundColor,
-            _userListViewThemeDataControlDark.backgroundColor);
-      });
+    final userListViewTheme = UserListViewTheme.of(_context);
+    expect(userListViewTheme.backgroundColor,
+        _userListViewThemeDataControlDark.backgroundColor);
+  });
 }
 
 final _userListViewThemeDataControl = UserListViewThemeData(

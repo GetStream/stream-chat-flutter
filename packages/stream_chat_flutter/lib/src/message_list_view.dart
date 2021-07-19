@@ -530,7 +530,8 @@ class _MessageListViewState extends State<MessageListView> {
                     },
                     itemBuilder: (context, i) {
                       if (i == itemCount - 1) {
-                        if (widget.parentMessage == null) return const Offstage();
+                        if (widget.parentMessage == null)
+                          return const Offstage();
                         return buildParentMessage(widget.parentMessage!);
                       }
 
@@ -558,7 +559,8 @@ class _MessageListViewState extends State<MessageListView> {
                             const Offstage();
                       }
 
-                      const bottomMessageIndex = 2; // 1 -> loader // 0 -> footer
+                      const bottomMessageIndex =
+                          2; // 1 -> loader // 0 -> footer
 
                       final message = messages[i - 2];
                       Widget messageWidget;

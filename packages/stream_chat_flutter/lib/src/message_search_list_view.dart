@@ -145,8 +145,8 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
 
   @override
   Widget build(BuildContext context) => ColoredBox(
-    color: MessageSearchListViewTheme.of(context).backgroundColor!,
-    child: MessageSearchListCore(
+        color: MessageSearchListViewTheme.of(context).backgroundColor!,
+        child: MessageSearchListCore(
           filters: widget.filters,
           sortOptions: widget.sortOptions,
           messageQuery: widget.messageQuery,
@@ -198,7 +198,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                   ),
           childBuilder: widget.childBuilder ?? _buildListView,
         ),
-  );
+      );
 
   Widget _separatorBuilder(BuildContext context, int index) => Container(
         height: 1,
