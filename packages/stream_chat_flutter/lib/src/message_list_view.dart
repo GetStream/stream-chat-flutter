@@ -530,8 +530,9 @@ class _MessageListViewState extends State<MessageListView> {
                     },
                     itemBuilder: (context, i) {
                       if (i == itemCount - 1) {
-                        if (widget.parentMessage == null)
+                        if (widget.parentMessage == null) {
                           return const Offstage();
+                        }
                         return buildParentMessage(widget.parentMessage!);
                       }
 
