@@ -548,19 +548,18 @@ class _ChannelListViewState extends State<ChannelListView> {
                   color: backgroundColor,
                   iconWidget: StreamSvgIcon.delete(
                     color: chatThemeData.colorTheme.accentError,
-                    ),
-                    onTap: widget.onDeletePressed != null
-                        ? () {
-                            widget.onDeletePressed!(channel);
-                          }
-                        : () async {
-                            final res = await showConfirmationDialog(
-                              context,
-                              title:
-                                  context.translations.deleteConversationLabel,
-                              question: context
-                                .translations.deleteConversationQuestion,
-                              okText: context.translations.deleteLabel,
+                  ),
+                  onTap: widget.onDeletePressed != null
+                      ? () {
+                          widget.onDeletePressed?.call(channel);
+                        }
+                      : () async {
+                          final res = await showConfirmationDialog(
+                            context,
+                            title: context.translations.deleteConversationLabel,
+                            question:
+                                context.translations.deleteConversationQuestion,
+                            okText: context.translations.deleteLabel,
                             cancelText: context.translations.cancelLabel,
                             icon: StreamSvgIcon.delete(
                               color: chatThemeData.colorTheme.accentError,
