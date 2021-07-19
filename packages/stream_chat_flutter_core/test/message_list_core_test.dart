@@ -151,7 +151,7 @@ void main() {
     (tester) async {
       const messageListCoreKey = Key('messageListCore');
       final controller = MessageListController();
-      final paginationLimit = 10;
+      const paginationLimit = 10;
       final messageListCore = MessageListCore(
         paginationLimit: paginationLimit,
         key: messageListCoreKey,
