@@ -112,7 +112,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'with ',
+              '${context.translations.withText} ',
               style: chatThemeData.channelTheme.channelHeaderTheme.subtitle,
             ),
             Flexible(

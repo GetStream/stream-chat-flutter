@@ -2254,10 +2254,10 @@ class _PickerWidget extends StatefulWidget {
   final StreamChatThemeData streamChatTheme;
 
   @override
-  __PickerWidgetState createState() => __PickerWidgetState();
+  _PickerWidgetState createState() => _PickerWidgetState();
 }
 
-class __PickerWidgetState extends State<_PickerWidget> {
+class _PickerWidgetState extends State<_PickerWidget> {
   Future<bool>? requestPermission;
 
   @override

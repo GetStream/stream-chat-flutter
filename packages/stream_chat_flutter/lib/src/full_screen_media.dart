@@ -200,7 +200,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                       );
                     },
                   ),
-                  if (widget.message.type != 'ephemeral')
+                  if (!widget.message.isEphemeral)
                     GalleryFooter(
                       currentPage: _currentPage,
                       totalPages: widget.mediaAttachments.length,

@@ -5,32 +5,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
-/// A custom set of localizations for the 'hi' locale.
-class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
-  const StreamChatLocalizationsHi() : super(localeName: 'hi');
-
-  static const LocalizationsDelegate<StreamChatLocalizations> delegate =
-      _HindiStreamChatLocalizationsDelegate();
-
-  @override
-  String get launchUrlError => 'URL लॉन्च नहीं कर सकता';
-}
-
-class _HindiStreamChatLocalizationsDelegate
-    extends LocalizationsDelegate<StreamChatLocalizations> {
-  const _HindiStreamChatLocalizationsDelegate();
-
-  @override
-  bool isSupported(Locale locale) => locale.languageCode == 'hi';
-
-  @override
-  Future<StreamChatLocalizations> load(Locale locale) =>
-      SynchronousFuture(const StreamChatLocalizationsHi());
-
-  @override
-  bool shouldReload(_HindiStreamChatLocalizationsDelegate old) => false;
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -96,18 +70,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
         theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
-  themeMode: ThemeMode.system,
-  supportedLocales: [
-  Locale('en', 'US'),
-  Locale('hi', 'IN'),
-  ],
-  localizationsDelegates: [
-  GlobalStreamChatLocalizations.delegate,
-  GlobalCupertinoLocalizations.delegate,
-  GlobalMaterialLocalizations.delegate,
-  GlobalWidgetsLocalizations.delegate,
-  StreamChatLocalizationsHi.delegate,
-  ],
+        localizationsDelegates: const [
+          GlobalStreamChatLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
         builder: (context, widget) => StreamChat(
           client: client,
           child: widget,

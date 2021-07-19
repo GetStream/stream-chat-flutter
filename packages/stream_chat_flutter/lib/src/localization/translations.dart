@@ -190,6 +190,16 @@ abstract class Translations {
   String get shuffleLabel;
 
   String get sendLabel;
+
+  String get withText;
+
+  String get inText;
+
+  String get youText;
+
+  String get ofText;
+
+  String get fileText;
 }
 
 class DefaultTranslations implements Translations {
@@ -514,4 +524,19 @@ class DefaultTranslations implements Translations {
 
   @override
   String get sendLabel => 'Send';
+
+  @override
+  String get withText => 'with';
+
+  @override
+  String get inText => 'in';
+
+  @override
+  String get youText => 'You';
+
+  @override
+  String get ofText => 'of';
+
+  @override
+  String get fileText => 'File';
 }

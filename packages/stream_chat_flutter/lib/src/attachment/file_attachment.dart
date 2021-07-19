@@ -76,7 +76,7 @@ class FileAttachment extends AttachmentWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      attachment.title ?? 'File',
+                      attachment.title ?? context.translations.fileText,
                       style: StreamChatTheme.of(context).textTheme.bodyBold,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

@@ -43,15 +43,10 @@ class MessageText extends StatelessWidget {
           final mentionedUser = message.mentionedUsers.firstWhereOrNull(
             (u) => '@${u.name}' == link,
           );
-          if (mentionedUser == null) {
-            return;
-          }
 
-          if (onMentionTap != null) {
-            onMentionTap!(mentionedUser);
-          } else {
-            print('tap on ${mentionedUser.name}');
-          }
+          if (mentionedUser == null) return;
+
+          onMentionTap?.call(mentionedUser);
         } else {
           if (onLinkTap != null) {
             onLinkTap!(link);

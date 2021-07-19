@@ -50,12 +50,14 @@ class MessageSearchItem extends StatelessWidget {
       title: Row(
         children: [
           Text(
-            user.id == StreamChat.of(context).user?.id ? 'You' : user.name,
+            user.id == StreamChat.of(context).user?.id
+                ? context.translations.youText
+                : user.name,
             style: chatThemeData.channelPreviewTheme.title,
           ),
           if (channelName != null) ...[
             Text(
-              ' in ',
+              ' ${context.translations.inText} ',
               style: chatThemeData.channelPreviewTheme.title?.copyWith(
                 fontWeight: FontWeight.normal,
               ),

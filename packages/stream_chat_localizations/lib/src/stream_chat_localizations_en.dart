@@ -323,4 +323,19 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get sendLabel => 'Send';
+
+  @override
+  String get withText => 'with';
+
+  @override
+  String get inText => 'in';
+
+  @override
+  String get youText => 'You';
+
+  @override
+  String get ofText => 'of';
+
+  @override
+  String get fileText => 'File';
 }

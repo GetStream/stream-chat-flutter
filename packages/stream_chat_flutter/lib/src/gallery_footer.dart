@@ -136,7 +136,9 @@ class _GalleryFooterState extends State<GalleryFooter> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        '${widget.currentPage + 1} of ${widget.totalPages}',
+                        '${widget.currentPage + 1} '
+                        '${context.translations.ofText} '
+                        '${widget.totalPages}',
                         style: galleryFooterThemeData.titleTextStyle,
                       ),
                     ],
