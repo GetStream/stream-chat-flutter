@@ -29,7 +29,7 @@ Future<bool?> showConfirmationDialog(
   final chatThemeData = StreamChatTheme.of(context);
   return showModalBottomSheet(
       useRootNavigator: false,
-      backgroundColor: chatThemeData.colorTheme.white,
+      backgroundColor: chatThemeData.colorTheme.barsBg,
       context: context,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -73,7 +73,7 @@ Future<bool?> showConfirmationDialog(
                           child: Text(
                             cancelText,
                             style: chatThemeData.textTheme.bodyBold.copyWith(
-                                color: chatThemeData.colorTheme.black
+                                color: chatThemeData.colorTheme.textHighEmphasis
                                     .withOpacity(0.5)),
                           ),
                         ),
@@ -89,7 +89,7 @@ Future<bool?> showConfirmationDialog(
                         child: Text(
                           okText,
                           style: chatThemeData.textTheme.bodyBold.copyWith(
-                              color: chatThemeData.colorTheme.accentRed),
+                              color: chatThemeData.colorTheme.accentError),
                         ),
                       ),
                     ),
@@ -114,7 +114,8 @@ Future<bool?> showInfoDialog(
   final chatThemeData = StreamChatTheme.of(context);
   return showModalBottomSheet(
     useRootNavigator: false,
-    backgroundColor: theme?.colorTheme.white ?? chatThemeData.colorTheme.white,
+    backgroundColor:
+        theme?.colorTheme.barsBg ?? chatThemeData.colorTheme.barsBg,
     context: context,
     shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -145,8 +146,8 @@ Future<bool?> showInfoDialog(
             height: 36,
           ),
           Container(
-            color: theme?.colorTheme.black.withOpacity(.08) ??
-                chatThemeData.colorTheme.black.withOpacity(.08),
+            color: theme?.colorTheme.textHighEmphasis.withOpacity(.08) ??
+                chatThemeData.colorTheme.textHighEmphasis.withOpacity(.08),
             height: 1,
           ),
           Center(
@@ -157,8 +158,8 @@ Future<bool?> showInfoDialog(
               child: Text(
                 okText,
                 style: TextStyle(
-                  color: theme?.colorTheme.black.withOpacity(0.5) ??
-                      chatThemeData.colorTheme.accentBlue,
+                  color: theme?.colorTheme.textHighEmphasis.withOpacity(0.5) ??
+                      chatThemeData.colorTheme.accentPrimary,
                   fontWeight: FontWeight.w400,
                 ),
               ),

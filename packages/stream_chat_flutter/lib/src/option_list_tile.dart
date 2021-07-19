@@ -46,11 +46,11 @@ class OptionListTile extends StatelessWidget {
     return Column(
       children: [
         Container(
-          color: separatorColor ?? chatThemeData.colorTheme.greyGainsboro,
+          color: separatorColor ?? chatThemeData.colorTheme.disabled,
           height: 1,
         ),
         Material(
-          color: tileColor ?? chatThemeData.colorTheme.white,
+          color: tileColor ?? chatThemeData.colorTheme.barsBg,
           child: SizedBox(
             height: 63,
             child: InkWell(

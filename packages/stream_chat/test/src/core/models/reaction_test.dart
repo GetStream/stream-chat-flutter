@@ -13,7 +13,7 @@ void main() {
       expect(reaction.type, 'wow');
       expect(
         reaction.user?.toJson(),
-        User(id: '2de0297c-f3f2-489d-b930-ef77342edccf', extraData: {
+        User(id: '2de0297c-f3f2-489d-b930-ef77342edccf', extraData: const {
           'image': 'https://randomuser.me/api/portraits/women/45.jpg',
           'name': 'Daisy Morgan'
         }).toJson(),
@@ -28,7 +28,8 @@ void main() {
         messageId: '76cd8c82-b557-4e48-9d12-87995d3a0e04',
         createdAt: DateTime.parse('2020-01-28T22:17:31.108742Z'),
         type: 'wow',
-        user: User(id: '2de0297c-f3f2-489d-b930-ef77342edccf', extraData: {
+        user:
+            User(id: '2de0297c-f3f2-489d-b930-ef77342edccf', extraData: const {
           'image': 'https://randomuser.me/api/portraits/women/45.jpg',
           'name': 'Daisy Morgan'
         }),

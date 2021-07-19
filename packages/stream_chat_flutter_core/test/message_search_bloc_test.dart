@@ -8,34 +8,33 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'matchers/get_message_response_matcher.dart';
 import 'mocks.dart';
 
-final testFilter = Filter.custom(operator: '\$test', value: 'testValue');
+const testFilter = Filter.custom(operator: '\$test', value: 'testValue');
 
 void main() {
   List<GetMessageResponse> _generateMessages({
     int count = 3,
     int offset = 0,
-  }) {
-    return List.generate(
-      count,
-      (index) {
-        index = index + offset;
-        return GetMessageResponse()
-          ..message = Message(
-            id: 'testId$index',
-            text: 'testTextData$index',
-          )
-          ..channel = ChannelModel(
-            cid: 'testCid:id',
-          );
-      },
-    );
-  }
+  }) =>
+      List.generate(
+        count,
+        (index) {
+          index = index + offset;
+          return GetMessageResponse()
+            ..message = Message(
+              id: 'testId$index',
+              text: 'testTextData$index',
+            )
+            ..channel = ChannelModel(
+              cid: 'testCid:id',
+            );
+        },
+      );
 
   testWidgets(
     'messageSearchBlocState.search() should throw if used where '
     'StreamChat is not present in the widget tree',
     (tester) async {
-      final messageSearchBloc = MessageSearchBloc(
+      const messageSearchBloc = MessageSearchBloc(
         child: Offstage(),
       );
 
@@ -49,7 +48,7 @@ void main() {
     (tester) async {
       const messageSearchBlocKey = Key('messageSearchBloc');
       const childKey = Key('child');
-      final messageSearchBloc = MessageSearchBloc(
+      const messageSearchBloc = MessageSearchBloc(
         key: messageSearchBlocKey,
         child: Offstage(key: childKey),
       );
@@ -101,7 +100,7 @@ void main() {
     (tester) async {
       const messageSearchBlocKey = Key('messageSearchBloc');
       const childKey = Key('child');
-      final messageSearchBloc = MessageSearchBloc(
+      const messageSearchBloc = MessageSearchBloc(
         key: messageSearchBlocKey,
         child: Offstage(key: childKey),
       );
@@ -151,7 +150,7 @@ void main() {
     (tester) async {
       const messageSearchBlocKey = Key('messageSearchBloc');
       const childKey = Key('child');
-      final messageSearchBloc = MessageSearchBloc(
+      const messageSearchBloc = MessageSearchBloc(
         key: messageSearchBlocKey,
         child: Offstage(key: childKey),
       );
@@ -243,7 +242,7 @@ void main() {
     (tester) async {
       const messageSearchBlocKey = Key('messageSearchBloc');
       const childKey = Key('child');
-      final messageSearchBloc = MessageSearchBloc(
+      const messageSearchBloc = MessageSearchBloc(
         key: messageSearchBlocKey,
         child: Offstage(key: childKey),
       );

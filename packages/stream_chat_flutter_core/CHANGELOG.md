@@ -1,3 +1,27 @@
+## 2.0.0
+
+🛑️ Breaking Changes from `1.5.3`
+
+- migrate this package to null safety
+- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of individual params/properties
+    - `options.state` -> bool state
+    - `options.watch` -> bool watch
+    - `options.presence` -> bool presence
+- `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual params/properties
+    - `options.presence` -> bool presence
+
+✅ Added
+
+- Monitor connection using `connectivity_plus` package
+
+🐞 Fixed
+
+- Minor fixes
+- Performance improvements
+
+## 2.0.0-nullsafety.9
+- Update llc dependency
+
 ## 2.0.0-nullsafety.8
 
 🛑️ Breaking Changes from `2.0.0-nullsafety.7`

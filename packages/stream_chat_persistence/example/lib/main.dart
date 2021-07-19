@@ -3,8 +3,8 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
 Future<void> main() async {
-  /// Create a new instance of [StreamChatClient] passing the apikey obtained from your
-  /// project dashboard.
+  /// Create a new instance of [StreamChatClient] passing the apikey obtained
+  /// from your project dashboard.
   final client = StreamChatClient('b67pax5b2wdq');
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,12 +22,13 @@ Future<void> main() async {
   await client.connectUser(
     User(
       id: 'cool-shadow-7',
-      extraData: {
+      extraData: const {
         'image':
             'https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow',
       },
     ),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiY29vbC1zaGFkb3ctNyJ9.gkOlCRb1qgy4joHPaxFwPOdXcGvSPvp6QY0S4mpRkVo',
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiY29vbC1zaGFkb3ctNyJ9.'
+    'gkOlCRb1qgy4joHPaxFwPOdXcGvSPvp6QY0S4mpRkVo',
   );
 
   /// Creates a channel using the type `messaging` and `godevs`.
@@ -66,12 +67,10 @@ class StreamExample extends StatelessWidget {
   final Channel channel;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Stream Chat Dart Example',
-      home: HomeScreen(channel: channel),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+        title: 'Stream Chat Dart Example',
+        home: HomeScreen(channel: channel),
+      );
 }
 
 /// Main screen of our application. The layout is comprised of an [AppBar]
@@ -176,83 +175,81 @@ class _MessageViewState extends State<MessageView> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            controller: _scrollController,
-            itemCount: _messages.length,
-            reverse: true,
-            itemBuilder: (BuildContext context, int index) {
-              final item = _messages[index];
-              if (item.user?.id == widget.channel.client.uid) {
-                return Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Text(item.text ?? ''),
-                  ),
-                );
-              } else {
-                return Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Text(item.text ?? ''),
-                  ),
-                );
-              }
-            },
+  Widget build(BuildContext context) => Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: _messages.length,
+              reverse: true,
+              itemBuilder: (BuildContext context, int index) {
+                final item = _messages[index];
+                if (item.user?.id == widget.channel.client.uid) {
+                  return Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(item.text ?? ''),
+                    ),
+                  );
+                } else {
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(item.text ?? ''),
+                    ),
+                  );
+                }
+              },
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter your message',
-                  ),
-                ),
-              ),
-              Material(
-                type: MaterialType.circle,
-                color: Colors.blue,
-                clipBehavior: Clip.hardEdge,
-                child: InkWell(
-                  onTap: () async {
-                    // We can send a new message by calling `sendMessage` on
-                    // the current channel. After sending a message, the
-                    // TextField is cleared and the list view is scrolled
-                    // to show the new item.
-                    if (_controller.value.text.isNotEmpty) {
-                      await widget.channel.sendMessage(
-                        Message(text: _controller.value.text),
-                      );
-                      _controller.clear();
-                      _updateList();
-                    }
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(
-                      child: Icon(
-                        Icons.send,
-                        color: Colors.white,
-                      ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your message',
                     ),
                   ),
                 ),
-              )
-            ],
-          ),
-        )
-      ],
-    );
-  }
+                Material(
+                  type: MaterialType.circle,
+                  color: Colors.blue,
+                  clipBehavior: Clip.hardEdge,
+                  child: InkWell(
+                    onTap: () async {
+                      // We can send a new message by calling `sendMessage` on
+                      // the current channel. After sending a message, the
+                      // TextField is cleared and the list view is scrolled
+                      // to show the new item.
+                      if (_controller.value.text.isNotEmpty) {
+                        await widget.channel.sendMessage(
+                          Message(text: _controller.value.text),
+                        );
+                        _controller.clear();
+                        _updateList();
+                      }
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Center(
+                        child: Icon(
+                          Icons.send,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      );
 }
 
 /// Helper extension for quickly retrieving

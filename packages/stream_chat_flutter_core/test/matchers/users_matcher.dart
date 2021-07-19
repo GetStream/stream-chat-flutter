@@ -1,4 +1,3 @@
-import 'package:meta/meta.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -7,7 +6,7 @@ Matcher isSameUserAs(User targetUser) => _IsSameUserAs(targetUser: targetUser);
 class _IsSameUserAs extends Matcher {
   const _IsSameUserAs({
     required this.targetUser,
-  }) : assert(targetUser != null, '');
+  });
 
   final User targetUser;
 
@@ -25,13 +24,13 @@ Matcher isSameUserListAs(List<User> targetUserList) =>
 class _IsSameUserListAs extends Matcher {
   const _IsSameUserListAs({
     required this.targetUserList,
-  }) : assert(targetUserList != null, '');
+  });
 
   final List<User> targetUserList;
 
   @override
   bool matches(covariant List<User> userList, Map matchState) {
-    bool matches = true;
+    var matches = true;
     for (var i = 0; i < userList.length; i++) {
       final user = userList[i];
       final targetUser = targetUserList[i];

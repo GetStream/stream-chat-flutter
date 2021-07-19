@@ -70,7 +70,7 @@ class UserAvatar extends StatelessWidget {
           constraints: constraints ??
               streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
           decoration: BoxDecoration(
-            color: streamChatTheme.colorTheme.accentBlue,
+            color: streamChatTheme.colorTheme.accentPrimary,
           ),
           child: hasImage
               ? CachedNetworkImage(
@@ -95,7 +95,7 @@ class UserAvatar extends StatelessWidget {
         child: Container(
           constraints: constraints ??
               streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
-          color: selectionColor ?? streamChatTheme.colorTheme.accentBlue,
+          color: selectionColor ?? streamChatTheme.colorTheme.accentPrimary,
           child: Padding(
             padding: EdgeInsets.all(selectionThickness),
             child: avatar,
@@ -115,7 +115,7 @@ class UserAvatar extends StatelessWidget {
                 alignment: onlineIndicatorAlignment,
                 child: Material(
                   type: MaterialType.circle,
-                  color: streamChatTheme.colorTheme.white,
+                  color: streamChatTheme.colorTheme.barsBg,
                   child: Container(
                     margin: const EdgeInsets.all(2),
                     constraints: onlineIndicatorConstraints ??
@@ -125,7 +125,7 @@ class UserAvatar extends StatelessWidget {
                         ),
                     child: Material(
                       shape: const CircleBorder(),
-                      color: streamChatTheme.colorTheme.accentGreen,
+                      color: streamChatTheme.colorTheme.accentInfo,
                     ),
                   ),
                 ),

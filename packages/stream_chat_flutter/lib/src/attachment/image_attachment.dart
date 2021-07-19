@@ -103,8 +103,8 @@ class ImageAttachment extends AttachmentWidget {
                 );
                 final colorTheme = StreamChatTheme.of(context).colorTheme;
                 return Shimmer.fromColors(
-                  baseColor: colorTheme.greyGainsboro,
-                  highlightColor: colorTheme.whiteSmoke,
+                  baseColor: colorTheme.disabled,
+                  highlightColor: colorTheme.inputBg,
                   child: image,
                 );
               },

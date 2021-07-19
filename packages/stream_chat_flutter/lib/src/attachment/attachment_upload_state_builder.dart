@@ -130,7 +130,7 @@ class _PreparingState extends StatelessWidget {
           alignment: Alignment.topRight,
           child: _IconButton(
             icon: StreamSvgIcon.close(
-              color: StreamChatTheme.of(context).colorTheme.white,
+              color: StreamChatTheme.of(context).colorTheme.barsBg,
             ),
             onPressed: () => channel.cancelAttachmentUpload(attachmentId),
           ),
@@ -170,7 +170,7 @@ class _InProgressState extends StatelessWidget {
           alignment: Alignment.topRight,
           child: _IconButton(
             icon: StreamSvgIcon.close(
-              color: StreamChatTheme.of(context).colorTheme.white,
+              color: StreamChatTheme.of(context).colorTheme.barsBg,
             ),
             onPressed: () => channel.cancelAttachmentUpload(attachmentId),
           ),
@@ -209,7 +209,7 @@ class _FailedState extends StatelessWidget {
       children: [
         _IconButton(
           icon: StreamSvgIcon.retry(
-            color: theme.colorTheme.white,
+            color: theme.colorTheme.barsBg,
           ),
           onPressed: () {
             channel.retryAttachmentUpload(messageId, attachmentId);
@@ -229,7 +229,7 @@ class _FailedState extends StatelessWidget {
               child: Text(
                 context.translations.uploadErrorLabel,
                 style: theme.textTheme.footnote.copyWith(
-                  color: theme.colorTheme.white,
+                  color: theme.colorTheme.barsBg,
                 ),
               ),
             ),
@@ -248,7 +248,7 @@ class _SuccessState extends StatelessWidget {
           backgroundColor: StreamChatTheme.of(context).colorTheme.overlayDark,
           maxRadius: 12,
           child: StreamSvgIcon.check(
-            color: StreamChatTheme.of(context).colorTheme.white,
+            color: StreamChatTheme.of(context).colorTheme.barsBg,
           ),
         ),
       );

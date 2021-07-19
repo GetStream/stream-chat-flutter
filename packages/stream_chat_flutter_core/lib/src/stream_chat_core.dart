@@ -159,7 +159,10 @@ class StreamChatCoreState extends State<StreamChatCore>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _isInForeground = state == AppLifecycleState.resumed;
+    _isInForeground = [
+      AppLifecycleState.resumed,
+      AppLifecycleState.inactive,
+    ].contains(state);
     if (user != null) {
       if (_isInForeground) {
         _onForeground();

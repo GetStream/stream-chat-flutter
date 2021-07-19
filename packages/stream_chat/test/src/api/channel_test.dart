@@ -555,7 +555,7 @@ void main() {
       });
 
       test(
-        'should directly update the state with message as deleted if the state is sending or failed',
+        '''should directly update the state with message as deleted if the state is sending or failed''',
         () async {
           const messageId = 'test-message-id';
           final message = Message(
@@ -981,7 +981,7 @@ void main() {
       );
 
       test(
-        'should override previous reaction if present and `enforceUnique` is true',
+        '''should override previous reaction if present and `enforceUnique` is true''',
         () async {
           const userId = 'test-user-id';
           const messageId = 'test-message-id';
@@ -1875,7 +1875,7 @@ void main() {
         });
 
         test(
-          'should send `typingStart` event if there is not already a typingEvent or the difference between the two is >= 2 seconds',
+          '''should send `typingStart` event if there is not already a typingEvent or the difference between the two is >= 2 seconds''',
           () async {
             final typingEvent = Event(type: EventType.typingStart);
 

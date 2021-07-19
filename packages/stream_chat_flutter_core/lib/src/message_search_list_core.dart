@@ -17,12 +17,8 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: MessageSearchListCore(
-///               messageQuery: _channelQuery,
-///               filters: {
-///                 'members': {
-///                   r'$in': [user.id]
-///                 }
-///               },
+///               messageQuery: _messageFilter,
+///               filters: _channelsFilter,
 ///               paginationParams: PaginationParams(limit: 20),
 ///       ),
 ///     );

@@ -59,7 +59,7 @@ class UploadProgressIndicator extends StatelessWidget {
             '${_percentage.toInt()}%',
             style: textStyle ??
                 theme.textTheme.footnote.copyWith(
-                  color: theme.colorTheme.white,
+                  color: theme.colorTheme.barsBg,
                 ),
           ),
         ],

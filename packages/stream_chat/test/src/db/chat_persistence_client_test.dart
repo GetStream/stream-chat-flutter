@@ -154,7 +154,6 @@ void main() {
     });
 
     test('updateChannelState', () async {
-      const cid = 'test:cid';
       final channelState = ChannelState();
       persistenceClient.updateChannelState(channelState);
     });

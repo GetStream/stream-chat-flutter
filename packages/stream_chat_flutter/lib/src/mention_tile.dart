@@ -76,7 +76,7 @@ class MentionTile extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: chatThemeData.textTheme.footnoteBold.copyWith(
-                          color: chatThemeData.colorTheme.grey,
+                          color: chatThemeData.colorTheme.textLowEmphasis,
                         ),
                       ),
                 ],
@@ -90,7 +90,7 @@ class MentionTile extends StatelessWidget {
                   left: 8,
                 ),
                 child: StreamSvgIcon.mentions(
-                  color: chatThemeData.colorTheme.accentBlue,
+                  color: chatThemeData.colorTheme.accentPrimary,
                 ),
               ),
         ],

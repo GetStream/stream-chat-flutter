@@ -6,8 +6,8 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:stream_chat_flutter/src/image_footer.dart';
-import 'package:stream_chat_flutter/src/image_header.dart';
+import 'package:stream_chat_flutter/src/gallery_footer.dart';
+import 'package:stream_chat_flutter/src/gallery_header.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
@@ -181,7 +181,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ImageHeader(
+                  GalleryHeader(
                     userName: widget.userName,
                     // TODO: Fix this
                     sentAt: context.translations.sentAtText(
@@ -201,7 +201,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                     },
                   ),
                   if (widget.message.type != 'ephemeral')
-                    ImageFooter(
+                    GalleryFooter(
                       currentPage: _currentPage,
                       totalPages: widget.mediaAttachments.length,
                       mediaAttachments: widget.mediaAttachments,

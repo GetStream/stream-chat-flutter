@@ -28,7 +28,7 @@ It teaches you how to use this SDK and also shows how to make frequently require
 ## Example App
 
 This repo includes a fully functional example app with setup instructions.
-The example is available under the [example](https://github.com/GetStream/stream-chat-flutter/tree/master/example) folder.
+The example is available under the [example](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter/example) folder.
 
 ## Add dependency
 Add this to your package's pubspec.yaml file, use the latest version [![Pub](https://img.shields.io/pub/v/stream_chat_flutter.svg)](https://pub.dartlang.org/packages/stream_chat_flutter)

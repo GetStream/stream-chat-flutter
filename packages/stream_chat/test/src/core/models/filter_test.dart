@@ -192,7 +192,7 @@ void main() {
       test('custom with no operator', () {
         const key = 'testKey';
         const values = ['testValue'];
-        final filter = Filter.custom(key: key, value: values);
+        const filter = Filter.custom(key: key, value: values);
         final encoded = json.encode(filter);
         expect(
           encoded,

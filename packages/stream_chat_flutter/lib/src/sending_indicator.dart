@@ -25,7 +25,7 @@ class SendingIndicator extends StatelessWidget {
     if (isMessageRead) {
       return StreamSvgIcon.checkAll(
         size: size,
-        color: StreamChatTheme.of(context).colorTheme.accentBlue,
+        color: StreamChatTheme.of(context).colorTheme.accentPrimary,
       );
     }
     if (message.status == MessageSendingStatus.sent) {

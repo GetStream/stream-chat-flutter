@@ -1,0 +1,20 @@
+name: docusaurus
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - docusaurus/**
+jobs:
+  push_docusaurus:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: push
+        uses: GetStream/push-stream-chat-docusaurus-action@main
+        with: 
+          target-branch: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
+        env:
+          DOCUSAURUS_GH_TOKEN: ${{ secrets.DOCUSAURUS_GH_TOKEN }}

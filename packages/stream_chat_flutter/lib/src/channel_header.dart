@@ -99,7 +99,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
 
   /// AppBar actions
-  /// By default it shows the [ChannelImage]
+  /// By default it shows the [ChannelAvatar]
   final List<Widget>? actions;
 
   @override
@@ -148,7 +148,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: Center(
-                      child: ChannelImage(
+                      child: ChannelAvatar(
                         borderRadius: chatThemeData.channelTheme
                             .channelHeaderTheme.avatarTheme?.borderRadius,
                         constraints: chatThemeData.channelTheme

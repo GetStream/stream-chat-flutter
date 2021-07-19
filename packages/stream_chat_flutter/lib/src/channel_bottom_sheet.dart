@@ -33,7 +33,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
     final isOwner = userAsMember.role == 'owner';
 
     return Material(
-      color: _streamChatThemeData.colorTheme.white,
+      color: _streamChatThemeData.colorTheme.barsBg,
       clipBehavior: Clip.antiAlias,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -147,7 +147,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                   leading: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: StreamSvgIcon.user(
-                      color: _streamChatThemeData.colorTheme.grey,
+                      color: _streamChatThemeData.colorTheme.textLowEmphasis,
                     ),
                   ),
                   title: context.translations.viewInfoLabel,
@@ -158,7 +158,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                     leading: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: StreamSvgIcon.userRemove(
-                        color: _streamChatThemeData.colorTheme.grey,
+                        color: _streamChatThemeData.colorTheme.textLowEmphasis,
                       ),
                     ),
                     title: context.translations.leaveGroupLabel,
@@ -177,11 +177,11 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                     leading: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: StreamSvgIcon.delete(
-                        color: _streamChatThemeData.colorTheme.accentRed,
+                        color: _streamChatThemeData.colorTheme.accentError,
                       ),
                     ),
                     title: context.translations.deleteConversationLabel,
-                    titleColor: _streamChatThemeData.colorTheme.accentRed,
+                    titleColor: _streamChatThemeData.colorTheme.accentError,
                     onTap: () async {
                       setState(() {
                         _showActions = false;
@@ -196,7 +196,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                   leading: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: StreamSvgIcon.closeSmall(
-                      color: _streamChatThemeData.colorTheme.grey,
+                      color: _streamChatThemeData.colorTheme.textLowEmphasis,
                     ),
                   ),
                   title: context.translations.cancelLabel,
@@ -225,7 +225,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
       question: context.translations.deleteConversationQuestion,
       cancelText: context.translations.cancelLabel,
       icon: StreamSvgIcon.delete(
-        color: _streamChatThemeData.colorTheme.accentRed,
+        color: _streamChatThemeData.colorTheme.accentError,
       ),
     );
     final channel = _streamChannelState.channel;
@@ -243,7 +243,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
       question: context.translations.leaveConversationQuestion,
       cancelText: context.translations.cancelLabel,
       icon: StreamSvgIcon.userRemove(
-        color: _streamChatThemeData.colorTheme.accentRed,
+        color: _streamChatThemeData.colorTheme.accentError,
       ),
     );
     if (res == true) {

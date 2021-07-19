@@ -416,128 +416,67 @@ class $ChannelsTable extends Channels
   final String? _alias;
   $ChannelsTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedTextColumn id = _constructId();
-  GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn(
-      'id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+      'id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _typeMeta = const VerificationMeta('type');
-  @override
-  late final GeneratedTextColumn type = _constructType();
-  GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn(
-      'type',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+      'type', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _cidMeta = const VerificationMeta('cid');
-  @override
-  late final GeneratedTextColumn cid = _constructCid();
-  GeneratedTextColumn _constructCid() {
-    return GeneratedTextColumn(
-      'cid',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> cid = GeneratedColumn<String?>(
+      'cid', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _configMeta = const VerificationMeta('config');
-  @override
-  late final GeneratedTextColumn config = _constructConfig();
-  GeneratedTextColumn _constructConfig() {
-    return GeneratedTextColumn(
-      'config',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String?>
+      config = GeneratedColumn<String?>('config', aliasedName, false,
+              typeName: 'TEXT', requiredDuringInsert: true)
+          .withConverter<Map<String, dynamic>>($ChannelsTable.$converter0);
   final VerificationMeta _frozenMeta = const VerificationMeta('frozen');
-  @override
-  late final GeneratedBoolColumn frozen = _constructFrozen();
-  GeneratedBoolColumn _constructFrozen() {
-    return GeneratedBoolColumn('frozen', $tableName, false,
-        defaultValue: const Constant(false));
-  }
-
+  late final GeneratedColumn<bool?> frozen = GeneratedColumn<bool?>(
+      'frozen', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (frozen IN (0, 1))',
+      defaultValue: const Constant(false));
   final VerificationMeta _lastMessageAtMeta =
       const VerificationMeta('lastMessageAt');
-  @override
-  late final GeneratedDateTimeColumn lastMessageAt = _constructLastMessageAt();
-  GeneratedDateTimeColumn _constructLastMessageAt() {
-    return GeneratedDateTimeColumn(
-      'last_message_at',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> lastMessageAt =
+      GeneratedColumn<DateTime?>('last_message_at', aliasedName, true,
+          typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  @override
-  late final GeneratedDateTimeColumn createdAt = _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
-        defaultValue: currentDateAndTime);
-  }
-
+  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+      'created_at', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
-  @override
-  late final GeneratedDateTimeColumn updatedAt = _constructUpdatedAt();
-  GeneratedDateTimeColumn _constructUpdatedAt() {
-    return GeneratedDateTimeColumn('updated_at', $tableName, false,
-        defaultValue: currentDateAndTime);
-  }
-
+  late final GeneratedColumn<DateTime?> updatedAt = GeneratedColumn<DateTime?>(
+      'updated_at', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   final VerificationMeta _deletedAtMeta = const VerificationMeta('deletedAt');
-  @override
-  late final GeneratedDateTimeColumn deletedAt = _constructDeletedAt();
-  GeneratedDateTimeColumn _constructDeletedAt() {
-    return GeneratedDateTimeColumn(
-      'deleted_at',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> deletedAt = GeneratedColumn<DateTime?>(
+      'deleted_at', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _memberCountMeta =
       const VerificationMeta('memberCount');
-  @override
-  late final GeneratedIntColumn memberCount = _constructMemberCount();
-  GeneratedIntColumn _constructMemberCount() {
-    return GeneratedIntColumn('member_count', $tableName, false,
-        defaultValue: const Constant(0));
-  }
-
+  late final GeneratedColumn<int?> memberCount = GeneratedColumn<int?>(
+      'member_count', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   final VerificationMeta _createdByIdMeta =
       const VerificationMeta('createdById');
-  @override
-  late final GeneratedTextColumn createdById = _constructCreatedById();
-  GeneratedTextColumn _constructCreatedById() {
-    return GeneratedTextColumn(
-      'created_by_id',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> createdById = GeneratedColumn<String?>(
+      'created_by_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
-  @override
-  late final GeneratedTextColumn extraData = _constructExtraData();
-  GeneratedTextColumn _constructExtraData() {
-    return GeneratedTextColumn(
-      'extra_data',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
+      extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
+              typeName: 'TEXT', requiredDuringInsert: false)
+          .withConverter<Map<String, Object?>>($ChannelsTable.$converter1);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -554,11 +493,9 @@ class $ChannelsTable extends Channels
         extraData
       ];
   @override
-  $ChannelsTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'channels';
   @override
-  String get $tableName => _alias ?? 'channels';
-  @override
-  final String actualTableName = 'channels';
+  String get actualTableName => 'channels';
   @override
   VerificationContext validateIntegrity(Insertable<ChannelEntity> instance,
       {bool isInserting = false}) {
@@ -624,8 +561,8 @@ class $ChannelsTable extends Channels
   Set<GeneratedColumn> get $primaryKey => {cid};
   @override
   ChannelEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ChannelEntity.fromData(data, _db, prefix: effectivePrefix);
+    return ChannelEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -1405,257 +1342,137 @@ class $MessagesTable extends Messages
   final String? _alias;
   $MessagesTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedTextColumn id = _constructId();
-  GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn(
-      'id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+      'id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _messageTextMeta =
       const VerificationMeta('messageText');
-  @override
-  late final GeneratedTextColumn messageText = _constructMessageText();
-  GeneratedTextColumn _constructMessageText() {
-    return GeneratedTextColumn(
-      'message_text',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> messageText = GeneratedColumn<String?>(
+      'message_text', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _attachmentsMeta =
       const VerificationMeta('attachments');
-  @override
-  late final GeneratedTextColumn attachments = _constructAttachments();
-  GeneratedTextColumn _constructAttachments() {
-    return GeneratedTextColumn(
-      'attachments',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<List<String>, String?>
+      attachments = GeneratedColumn<String?>('attachments', aliasedName, false,
+              typeName: 'TEXT', requiredDuringInsert: true)
+          .withConverter<List<String>>($MessagesTable.$converter0);
   final VerificationMeta _statusMeta = const VerificationMeta('status');
-  @override
-  late final GeneratedIntColumn status = _constructStatus();
-  GeneratedIntColumn _constructStatus() {
-    return GeneratedIntColumn('status', $tableName, false,
-        defaultValue: const Constant(1));
-  }
-
+  late final GeneratedColumnWithTypeConverter<MessageSendingStatus, int?>
+      status = GeneratedColumn<int?>('status', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              defaultValue: const Constant(1))
+          .withConverter<MessageSendingStatus>($MessagesTable.$converter1);
   final VerificationMeta _typeMeta = const VerificationMeta('type');
-  @override
-  late final GeneratedTextColumn type = _constructType();
-  GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn('type', $tableName, false,
-        defaultValue: const Constant('regular'));
-  }
-
+  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+      'type', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: false,
+      defaultValue: const Constant('regular'));
   final VerificationMeta _mentionedUsersMeta =
       const VerificationMeta('mentionedUsers');
-  @override
-  late final GeneratedTextColumn mentionedUsers = _constructMentionedUsers();
-  GeneratedTextColumn _constructMentionedUsers() {
-    return GeneratedTextColumn(
-      'mentioned_users',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<List<String>, String?>
+      mentionedUsers = GeneratedColumn<String?>(
+              'mentioned_users', aliasedName, false,
+              typeName: 'TEXT', requiredDuringInsert: true)
+          .withConverter<List<String>>($MessagesTable.$converter2);
   final VerificationMeta _reactionCountsMeta =
       const VerificationMeta('reactionCounts');
-  @override
-  late final GeneratedTextColumn reactionCounts = _constructReactionCounts();
-  GeneratedTextColumn _constructReactionCounts() {
-    return GeneratedTextColumn(
-      'reaction_counts',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<Map<String, int>, String?>
+      reactionCounts = GeneratedColumn<String?>(
+              'reaction_counts', aliasedName, true,
+              typeName: 'TEXT', requiredDuringInsert: false)
+          .withConverter<Map<String, int>>($MessagesTable.$converter3);
   final VerificationMeta _reactionScoresMeta =
       const VerificationMeta('reactionScores');
-  @override
-  late final GeneratedTextColumn reactionScores = _constructReactionScores();
-  GeneratedTextColumn _constructReactionScores() {
-    return GeneratedTextColumn(
-      'reaction_scores',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<Map<String, int>, String?>
+      reactionScores = GeneratedColumn<String?>(
+              'reaction_scores', aliasedName, true,
+              typeName: 'TEXT', requiredDuringInsert: false)
+          .withConverter<Map<String, int>>($MessagesTable.$converter4);
   final VerificationMeta _parentIdMeta = const VerificationMeta('parentId');
-  @override
-  late final GeneratedTextColumn parentId = _constructParentId();
-  GeneratedTextColumn _constructParentId() {
-    return GeneratedTextColumn(
-      'parent_id',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> parentId = GeneratedColumn<String?>(
+      'parent_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _quotedMessageIdMeta =
       const VerificationMeta('quotedMessageId');
-  @override
-  late final GeneratedTextColumn quotedMessageId = _constructQuotedMessageId();
-  GeneratedTextColumn _constructQuotedMessageId() {
-    return GeneratedTextColumn(
-      'quoted_message_id',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> quotedMessageId =
+      GeneratedColumn<String?>('quoted_message_id', aliasedName, true,
+          typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _replyCountMeta = const VerificationMeta('replyCount');
-  @override
-  late final GeneratedIntColumn replyCount = _constructReplyCount();
-  GeneratedIntColumn _constructReplyCount() {
-    return GeneratedIntColumn(
-      'reply_count',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<int?> replyCount = GeneratedColumn<int?>(
+      'reply_count', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _showInChannelMeta =
       const VerificationMeta('showInChannel');
-  @override
-  late final GeneratedBoolColumn showInChannel = _constructShowInChannel();
-  GeneratedBoolColumn _constructShowInChannel() {
-    return GeneratedBoolColumn(
-      'show_in_channel',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<bool?> showInChannel = GeneratedColumn<bool?>(
+      'show_in_channel', aliasedName, true,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (show_in_channel IN (0, 1))');
   final VerificationMeta _shadowedMeta = const VerificationMeta('shadowed');
-  @override
-  late final GeneratedBoolColumn shadowed = _constructShadowed();
-  GeneratedBoolColumn _constructShadowed() {
-    return GeneratedBoolColumn('shadowed', $tableName, false,
-        defaultValue: const Constant(false));
-  }
-
+  late final GeneratedColumn<bool?> shadowed = GeneratedColumn<bool?>(
+      'shadowed', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (shadowed IN (0, 1))',
+      defaultValue: const Constant(false));
   final VerificationMeta _commandMeta = const VerificationMeta('command');
-  @override
-  late final GeneratedTextColumn command = _constructCommand();
-  GeneratedTextColumn _constructCommand() {
-    return GeneratedTextColumn(
-      'command',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> command = GeneratedColumn<String?>(
+      'command', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  @override
-  late final GeneratedDateTimeColumn createdAt = _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
-        defaultValue: currentDateAndTime);
-  }
-
+  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+      'created_at', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
-  @override
-  late final GeneratedDateTimeColumn updatedAt = _constructUpdatedAt();
-  GeneratedDateTimeColumn _constructUpdatedAt() {
-    return GeneratedDateTimeColumn('updated_at', $tableName, false,
-        defaultValue: currentDateAndTime);
-  }
-
+  late final GeneratedColumn<DateTime?> updatedAt = GeneratedColumn<DateTime?>(
+      'updated_at', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   final VerificationMeta _deletedAtMeta = const VerificationMeta('deletedAt');
-  @override
-  late final GeneratedDateTimeColumn deletedAt = _constructDeletedAt();
-  GeneratedDateTimeColumn _constructDeletedAt() {
-    return GeneratedDateTimeColumn(
-      'deleted_at',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> deletedAt = GeneratedColumn<DateTime?>(
+      'deleted_at', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  @override
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn(
-      'user_id',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
-  @override
-  late final GeneratedBoolColumn pinned = _constructPinned();
-  GeneratedBoolColumn _constructPinned() {
-    return GeneratedBoolColumn('pinned', $tableName, false,
-        defaultValue: const Constant(false));
-  }
-
+  late final GeneratedColumn<bool?> pinned = GeneratedColumn<bool?>(
+      'pinned', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (pinned IN (0, 1))',
+      defaultValue: const Constant(false));
   final VerificationMeta _pinnedAtMeta = const VerificationMeta('pinnedAt');
-  @override
-  late final GeneratedDateTimeColumn pinnedAt = _constructPinnedAt();
-  GeneratedDateTimeColumn _constructPinnedAt() {
-    return GeneratedDateTimeColumn(
-      'pinned_at',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> pinnedAt = GeneratedColumn<DateTime?>(
+      'pinned_at', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _pinExpiresMeta = const VerificationMeta('pinExpires');
-  @override
-  late final GeneratedDateTimeColumn pinExpires = _constructPinExpires();
-  GeneratedDateTimeColumn _constructPinExpires() {
-    return GeneratedDateTimeColumn(
-      'pin_expires',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> pinExpires = GeneratedColumn<DateTime?>(
+      'pin_expires', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _pinnedByUserIdMeta =
       const VerificationMeta('pinnedByUserId');
-  @override
-  late final GeneratedTextColumn pinnedByUserId = _constructPinnedByUserId();
-  GeneratedTextColumn _constructPinnedByUserId() {
-    return GeneratedTextColumn(
-      'pinned_by_user_id',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> pinnedByUserId = GeneratedColumn<String?>(
+      'pinned_by_user_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
-  @override
-  late final GeneratedTextColumn channelCid = _constructChannelCid();
-  GeneratedTextColumn _constructChannelCid() {
-    return GeneratedTextColumn('channel_cid', $tableName, true,
-        $customConstraints:
-            'NULLABLE REFERENCES channels(cid) ON DELETE CASCADE');
-  }
-
+  late final GeneratedColumn<String?> channelCid = GeneratedColumn<String?>(
+      'channel_cid', aliasedName, true,
+      typeName: 'TEXT',
+      requiredDuringInsert: false,
+      $customConstraints:
+          'NULLABLE REFERENCES channels(cid) ON DELETE CASCADE');
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
-  @override
-  late final GeneratedTextColumn extraData = _constructExtraData();
-  GeneratedTextColumn _constructExtraData() {
-    return GeneratedTextColumn(
-      'extra_data',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
+      extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
+              typeName: 'TEXT', requiredDuringInsert: false)
+          .withConverter<Map<String, Object?>>($MessagesTable.$converter5);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1684,11 +1501,9 @@ class $MessagesTable extends Messages
         extraData
       ];
   @override
-  $MessagesTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'messages';
   @override
-  String get $tableName => _alias ?? 'messages';
-  @override
-  final String actualTableName = 'messages';
+  String get actualTableName => 'messages';
   @override
   VerificationContext validateIntegrity(Insertable<MessageEntity> instance,
       {bool isInserting = false}) {
@@ -1794,8 +1609,8 @@ class $MessagesTable extends Messages
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   MessageEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return MessageEntity.fromData(data, _db, prefix: effectivePrefix);
+    return MessageEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -2587,257 +2402,139 @@ class $PinnedMessagesTable extends PinnedMessages
   final String? _alias;
   $PinnedMessagesTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedTextColumn id = _constructId();
-  GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn(
-      'id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+      'id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _messageTextMeta =
       const VerificationMeta('messageText');
-  @override
-  late final GeneratedTextColumn messageText = _constructMessageText();
-  GeneratedTextColumn _constructMessageText() {
-    return GeneratedTextColumn(
-      'message_text',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> messageText = GeneratedColumn<String?>(
+      'message_text', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _attachmentsMeta =
       const VerificationMeta('attachments');
-  @override
-  late final GeneratedTextColumn attachments = _constructAttachments();
-  GeneratedTextColumn _constructAttachments() {
-    return GeneratedTextColumn(
-      'attachments',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<List<String>, String?>
+      attachments = GeneratedColumn<String?>('attachments', aliasedName, false,
+              typeName: 'TEXT', requiredDuringInsert: true)
+          .withConverter<List<String>>($PinnedMessagesTable.$converter0);
   final VerificationMeta _statusMeta = const VerificationMeta('status');
-  @override
-  late final GeneratedIntColumn status = _constructStatus();
-  GeneratedIntColumn _constructStatus() {
-    return GeneratedIntColumn('status', $tableName, false,
-        defaultValue: const Constant(1));
-  }
-
+  late final GeneratedColumnWithTypeConverter<MessageSendingStatus, int?>
+      status = GeneratedColumn<int?>('status', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              defaultValue: const Constant(1))
+          .withConverter<MessageSendingStatus>(
+              $PinnedMessagesTable.$converter1);
   final VerificationMeta _typeMeta = const VerificationMeta('type');
-  @override
-  late final GeneratedTextColumn type = _constructType();
-  GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn('type', $tableName, false,
-        defaultValue: const Constant('regular'));
-  }
-
+  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+      'type', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: false,
+      defaultValue: const Constant('regular'));
   final VerificationMeta _mentionedUsersMeta =
       const VerificationMeta('mentionedUsers');
-  @override
-  late final GeneratedTextColumn mentionedUsers = _constructMentionedUsers();
-  GeneratedTextColumn _constructMentionedUsers() {
-    return GeneratedTextColumn(
-      'mentioned_users',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<List<String>, String?>
+      mentionedUsers = GeneratedColumn<String?>(
+              'mentioned_users', aliasedName, false,
+              typeName: 'TEXT', requiredDuringInsert: true)
+          .withConverter<List<String>>($PinnedMessagesTable.$converter2);
   final VerificationMeta _reactionCountsMeta =
       const VerificationMeta('reactionCounts');
-  @override
-  late final GeneratedTextColumn reactionCounts = _constructReactionCounts();
-  GeneratedTextColumn _constructReactionCounts() {
-    return GeneratedTextColumn(
-      'reaction_counts',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<Map<String, int>, String?>
+      reactionCounts = GeneratedColumn<String?>(
+              'reaction_counts', aliasedName, true,
+              typeName: 'TEXT', requiredDuringInsert: false)
+          .withConverter<Map<String, int>>($PinnedMessagesTable.$converter3);
   final VerificationMeta _reactionScoresMeta =
       const VerificationMeta('reactionScores');
-  @override
-  late final GeneratedTextColumn reactionScores = _constructReactionScores();
-  GeneratedTextColumn _constructReactionScores() {
-    return GeneratedTextColumn(
-      'reaction_scores',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<Map<String, int>, String?>
+      reactionScores = GeneratedColumn<String?>(
+              'reaction_scores', aliasedName, true,
+              typeName: 'TEXT', requiredDuringInsert: false)
+          .withConverter<Map<String, int>>($PinnedMessagesTable.$converter4);
   final VerificationMeta _parentIdMeta = const VerificationMeta('parentId');
-  @override
-  late final GeneratedTextColumn parentId = _constructParentId();
-  GeneratedTextColumn _constructParentId() {
-    return GeneratedTextColumn(
-      'parent_id',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> parentId = GeneratedColumn<String?>(
+      'parent_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _quotedMessageIdMeta =
       const VerificationMeta('quotedMessageId');
-  @override
-  late final GeneratedTextColumn quotedMessageId = _constructQuotedMessageId();
-  GeneratedTextColumn _constructQuotedMessageId() {
-    return GeneratedTextColumn(
-      'quoted_message_id',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> quotedMessageId =
+      GeneratedColumn<String?>('quoted_message_id', aliasedName, true,
+          typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _replyCountMeta = const VerificationMeta('replyCount');
-  @override
-  late final GeneratedIntColumn replyCount = _constructReplyCount();
-  GeneratedIntColumn _constructReplyCount() {
-    return GeneratedIntColumn(
-      'reply_count',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<int?> replyCount = GeneratedColumn<int?>(
+      'reply_count', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _showInChannelMeta =
       const VerificationMeta('showInChannel');
-  @override
-  late final GeneratedBoolColumn showInChannel = _constructShowInChannel();
-  GeneratedBoolColumn _constructShowInChannel() {
-    return GeneratedBoolColumn(
-      'show_in_channel',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<bool?> showInChannel = GeneratedColumn<bool?>(
+      'show_in_channel', aliasedName, true,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (show_in_channel IN (0, 1))');
   final VerificationMeta _shadowedMeta = const VerificationMeta('shadowed');
-  @override
-  late final GeneratedBoolColumn shadowed = _constructShadowed();
-  GeneratedBoolColumn _constructShadowed() {
-    return GeneratedBoolColumn('shadowed', $tableName, false,
-        defaultValue: const Constant(false));
-  }
-
+  late final GeneratedColumn<bool?> shadowed = GeneratedColumn<bool?>(
+      'shadowed', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (shadowed IN (0, 1))',
+      defaultValue: const Constant(false));
   final VerificationMeta _commandMeta = const VerificationMeta('command');
-  @override
-  late final GeneratedTextColumn command = _constructCommand();
-  GeneratedTextColumn _constructCommand() {
-    return GeneratedTextColumn(
-      'command',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> command = GeneratedColumn<String?>(
+      'command', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  @override
-  late final GeneratedDateTimeColumn createdAt = _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
-        defaultValue: currentDateAndTime);
-  }
-
+  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+      'created_at', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
-  @override
-  late final GeneratedDateTimeColumn updatedAt = _constructUpdatedAt();
-  GeneratedDateTimeColumn _constructUpdatedAt() {
-    return GeneratedDateTimeColumn('updated_at', $tableName, false,
-        defaultValue: currentDateAndTime);
-  }
-
+  late final GeneratedColumn<DateTime?> updatedAt = GeneratedColumn<DateTime?>(
+      'updated_at', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   final VerificationMeta _deletedAtMeta = const VerificationMeta('deletedAt');
-  @override
-  late final GeneratedDateTimeColumn deletedAt = _constructDeletedAt();
-  GeneratedDateTimeColumn _constructDeletedAt() {
-    return GeneratedDateTimeColumn(
-      'deleted_at',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> deletedAt = GeneratedColumn<DateTime?>(
+      'deleted_at', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  @override
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn(
-      'user_id',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
-  @override
-  late final GeneratedBoolColumn pinned = _constructPinned();
-  GeneratedBoolColumn _constructPinned() {
-    return GeneratedBoolColumn('pinned', $tableName, false,
-        defaultValue: const Constant(false));
-  }
-
+  late final GeneratedColumn<bool?> pinned = GeneratedColumn<bool?>(
+      'pinned', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (pinned IN (0, 1))',
+      defaultValue: const Constant(false));
   final VerificationMeta _pinnedAtMeta = const VerificationMeta('pinnedAt');
-  @override
-  late final GeneratedDateTimeColumn pinnedAt = _constructPinnedAt();
-  GeneratedDateTimeColumn _constructPinnedAt() {
-    return GeneratedDateTimeColumn(
-      'pinned_at',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> pinnedAt = GeneratedColumn<DateTime?>(
+      'pinned_at', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _pinExpiresMeta = const VerificationMeta('pinExpires');
-  @override
-  late final GeneratedDateTimeColumn pinExpires = _constructPinExpires();
-  GeneratedDateTimeColumn _constructPinExpires() {
-    return GeneratedDateTimeColumn(
-      'pin_expires',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> pinExpires = GeneratedColumn<DateTime?>(
+      'pin_expires', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _pinnedByUserIdMeta =
       const VerificationMeta('pinnedByUserId');
-  @override
-  late final GeneratedTextColumn pinnedByUserId = _constructPinnedByUserId();
-  GeneratedTextColumn _constructPinnedByUserId() {
-    return GeneratedTextColumn(
-      'pinned_by_user_id',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> pinnedByUserId = GeneratedColumn<String?>(
+      'pinned_by_user_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
-  @override
-  late final GeneratedTextColumn channelCid = _constructChannelCid();
-  GeneratedTextColumn _constructChannelCid() {
-    return GeneratedTextColumn('channel_cid', $tableName, true,
-        $customConstraints:
-            'NULLABLE REFERENCES channels(cid) ON DELETE CASCADE');
-  }
-
+  late final GeneratedColumn<String?> channelCid = GeneratedColumn<String?>(
+      'channel_cid', aliasedName, true,
+      typeName: 'TEXT',
+      requiredDuringInsert: false,
+      $customConstraints:
+          'NULLABLE REFERENCES channels(cid) ON DELETE CASCADE');
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
-  @override
-  late final GeneratedTextColumn extraData = _constructExtraData();
-  GeneratedTextColumn _constructExtraData() {
-    return GeneratedTextColumn(
-      'extra_data',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
+      extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
+              typeName: 'TEXT', requiredDuringInsert: false)
+          .withConverter<Map<String, Object?>>(
+              $PinnedMessagesTable.$converter5);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -2866,11 +2563,9 @@ class $PinnedMessagesTable extends PinnedMessages
         extraData
       ];
   @override
-  $PinnedMessagesTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'pinned_messages';
   @override
-  String get $tableName => _alias ?? 'pinned_messages';
-  @override
-  final String actualTableName = 'pinned_messages';
+  String get actualTableName => 'pinned_messages';
   @override
   VerificationContext validateIntegrity(
       Insertable<PinnedMessageEntity> instance,
@@ -2977,8 +2672,8 @@ class $PinnedMessagesTable extends PinnedMessages
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   PinnedMessageEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return PinnedMessageEntity.fromData(data, _db, prefix: effectivePrefix);
+    return PinnedMessageEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -3239,71 +2934,43 @@ class $ReactionsTable extends Reactions
   final String? _alias;
   $ReactionsTable(this._db, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  @override
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn(
-      'user_id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  @override
-  late final GeneratedTextColumn messageId = _constructMessageId();
-  GeneratedTextColumn _constructMessageId() {
-    return GeneratedTextColumn('message_id', $tableName, false,
-        $customConstraints: 'REFERENCES messages(id) ON DELETE CASCADE');
-  }
-
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'REFERENCES messages(id) ON DELETE CASCADE');
   final VerificationMeta _typeMeta = const VerificationMeta('type');
-  @override
-  late final GeneratedTextColumn type = _constructType();
-  GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn(
-      'type',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+      'type', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  @override
-  late final GeneratedDateTimeColumn createdAt = _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
-        defaultValue: currentDateAndTime);
-  }
-
+  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+      'created_at', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   final VerificationMeta _scoreMeta = const VerificationMeta('score');
-  @override
-  late final GeneratedIntColumn score = _constructScore();
-  GeneratedIntColumn _constructScore() {
-    return GeneratedIntColumn('score', $tableName, false,
-        defaultValue: const Constant(0));
-  }
-
+  late final GeneratedColumn<int?> score = GeneratedColumn<int?>(
+      'score', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
-  @override
-  late final GeneratedTextColumn extraData = _constructExtraData();
-  GeneratedTextColumn _constructExtraData() {
-    return GeneratedTextColumn(
-      'extra_data',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
+      extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
+              typeName: 'TEXT', requiredDuringInsert: false)
+          .withConverter<Map<String, Object?>>($ReactionsTable.$converter0);
   @override
   List<GeneratedColumn> get $columns =>
       [userId, messageId, type, createdAt, score, extraData];
   @override
-  $ReactionsTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'reactions';
   @override
-  String get $tableName => _alias ?? 'reactions';
-  @override
-  final String actualTableName = 'reactions';
+  String get actualTableName => 'reactions';
   @override
   VerificationContext validateIntegrity(Insertable<ReactionEntity> instance,
       {bool isInserting = false}) {
@@ -3343,8 +3010,8 @@ class $ReactionsTable extends Reactions
   Set<GeneratedColumn> get $primaryKey => {messageId, type, userId};
   @override
   ReactionEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ReactionEntity.fromData(data, _db, prefix: effectivePrefix);
+    return ReactionEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -3648,90 +3315,55 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
   final String? _alias;
   $UsersTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedTextColumn id = _constructId();
-  GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn(
-      'id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+      'id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _roleMeta = const VerificationMeta('role');
-  @override
-  late final GeneratedTextColumn role = _constructRole();
-  GeneratedTextColumn _constructRole() {
-    return GeneratedTextColumn(
-      'role',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> role = GeneratedColumn<String?>(
+      'role', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  @override
-  late final GeneratedDateTimeColumn createdAt = _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
-        defaultValue: currentDateAndTime);
-  }
-
+  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+      'created_at', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
-  @override
-  late final GeneratedDateTimeColumn updatedAt = _constructUpdatedAt();
-  GeneratedDateTimeColumn _constructUpdatedAt() {
-    return GeneratedDateTimeColumn('updated_at', $tableName, false,
-        defaultValue: currentDateAndTime);
-  }
-
+  late final GeneratedColumn<DateTime?> updatedAt = GeneratedColumn<DateTime?>(
+      'updated_at', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   final VerificationMeta _lastActiveMeta = const VerificationMeta('lastActive');
-  @override
-  late final GeneratedDateTimeColumn lastActive = _constructLastActive();
-  GeneratedDateTimeColumn _constructLastActive() {
-    return GeneratedDateTimeColumn(
-      'last_active',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> lastActive = GeneratedColumn<DateTime?>(
+      'last_active', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _onlineMeta = const VerificationMeta('online');
-  @override
-  late final GeneratedBoolColumn online = _constructOnline();
-  GeneratedBoolColumn _constructOnline() {
-    return GeneratedBoolColumn('online', $tableName, false,
-        defaultValue: const Constant(false));
-  }
-
+  late final GeneratedColumn<bool?> online = GeneratedColumn<bool?>(
+      'online', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (online IN (0, 1))',
+      defaultValue: const Constant(false));
   final VerificationMeta _bannedMeta = const VerificationMeta('banned');
-  @override
-  late final GeneratedBoolColumn banned = _constructBanned();
-  GeneratedBoolColumn _constructBanned() {
-    return GeneratedBoolColumn('banned', $tableName, false,
-        defaultValue: const Constant(false));
-  }
-
+  late final GeneratedColumn<bool?> banned = GeneratedColumn<bool?>(
+      'banned', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (banned IN (0, 1))',
+      defaultValue: const Constant(false));
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
-  @override
-  late final GeneratedTextColumn extraData = _constructExtraData();
-  GeneratedTextColumn _constructExtraData() {
-    return GeneratedTextColumn(
-      'extra_data',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
+      extraData = GeneratedColumn<String?>('extra_data', aliasedName, false,
+              typeName: 'TEXT', requiredDuringInsert: true)
+          .withConverter<Map<String, Object?>>($UsersTable.$converter0);
   @override
   List<GeneratedColumn> get $columns =>
       [id, role, createdAt, updatedAt, lastActive, online, banned, extraData];
   @override
-  $UsersTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'users';
   @override
-  String get $tableName => _alias ?? 'users';
-  @override
-  final String actualTableName = 'users';
+  String get actualTableName => 'users';
   @override
   VerificationContext validateIntegrity(Insertable<UserEntity> instance,
       {bool isInserting = false}) {
@@ -3776,8 +3408,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   UserEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return UserEntity.fromData(data, _db, prefix: effectivePrefix);
+    return UserEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -4165,111 +3797,71 @@ class $MembersTable extends Members
   final String? _alias;
   $MembersTable(this._db, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  @override
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn(
-      'user_id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
-  @override
-  late final GeneratedTextColumn channelCid = _constructChannelCid();
-  GeneratedTextColumn _constructChannelCid() {
-    return GeneratedTextColumn('channel_cid', $tableName, false,
-        $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
-  }
-
+  late final GeneratedColumn<String?> channelCid = GeneratedColumn<String?>(
+      'channel_cid', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
   final VerificationMeta _roleMeta = const VerificationMeta('role');
-  @override
-  late final GeneratedTextColumn role = _constructRole();
-  GeneratedTextColumn _constructRole() {
-    return GeneratedTextColumn(
-      'role',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> role = GeneratedColumn<String?>(
+      'role', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _inviteAcceptedAtMeta =
       const VerificationMeta('inviteAcceptedAt');
-  @override
-  late final GeneratedDateTimeColumn inviteAcceptedAt =
-      _constructInviteAcceptedAt();
-  GeneratedDateTimeColumn _constructInviteAcceptedAt() {
-    return GeneratedDateTimeColumn(
-      'invite_accepted_at',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> inviteAcceptedAt =
+      GeneratedColumn<DateTime?>('invite_accepted_at', aliasedName, true,
+          typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _inviteRejectedAtMeta =
       const VerificationMeta('inviteRejectedAt');
-  @override
-  late final GeneratedDateTimeColumn inviteRejectedAt =
-      _constructInviteRejectedAt();
-  GeneratedDateTimeColumn _constructInviteRejectedAt() {
-    return GeneratedDateTimeColumn(
-      'invite_rejected_at',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> inviteRejectedAt =
+      GeneratedColumn<DateTime?>('invite_rejected_at', aliasedName, true,
+          typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _invitedMeta = const VerificationMeta('invited');
-  @override
-  late final GeneratedBoolColumn invited = _constructInvited();
-  GeneratedBoolColumn _constructInvited() {
-    return GeneratedBoolColumn('invited', $tableName, false,
-        defaultValue: const Constant(false));
-  }
-
+  late final GeneratedColumn<bool?> invited = GeneratedColumn<bool?>(
+      'invited', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (invited IN (0, 1))',
+      defaultValue: const Constant(false));
   final VerificationMeta _bannedMeta = const VerificationMeta('banned');
-  @override
-  late final GeneratedBoolColumn banned = _constructBanned();
-  GeneratedBoolColumn _constructBanned() {
-    return GeneratedBoolColumn('banned', $tableName, false,
-        defaultValue: const Constant(false));
-  }
-
+  late final GeneratedColumn<bool?> banned = GeneratedColumn<bool?>(
+      'banned', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (banned IN (0, 1))',
+      defaultValue: const Constant(false));
   final VerificationMeta _shadowBannedMeta =
       const VerificationMeta('shadowBanned');
-  @override
-  late final GeneratedBoolColumn shadowBanned = _constructShadowBanned();
-  GeneratedBoolColumn _constructShadowBanned() {
-    return GeneratedBoolColumn('shadow_banned', $tableName, false,
-        defaultValue: const Constant(false));
-  }
-
+  late final GeneratedColumn<bool?> shadowBanned = GeneratedColumn<bool?>(
+      'shadow_banned', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (shadow_banned IN (0, 1))',
+      defaultValue: const Constant(false));
   final VerificationMeta _isModeratorMeta =
       const VerificationMeta('isModerator');
-  @override
-  late final GeneratedBoolColumn isModerator = _constructIsModerator();
-  GeneratedBoolColumn _constructIsModerator() {
-    return GeneratedBoolColumn('is_moderator', $tableName, false,
-        defaultValue: const Constant(false));
-  }
-
+  late final GeneratedColumn<bool?> isModerator = GeneratedColumn<bool?>(
+      'is_moderator', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (is_moderator IN (0, 1))',
+      defaultValue: const Constant(false));
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  @override
-  late final GeneratedDateTimeColumn createdAt = _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
-        defaultValue: currentDateAndTime);
-  }
-
+  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+      'created_at', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
-  @override
-  late final GeneratedDateTimeColumn updatedAt = _constructUpdatedAt();
-  GeneratedDateTimeColumn _constructUpdatedAt() {
-    return GeneratedDateTimeColumn('updated_at', $tableName, false,
-        defaultValue: currentDateAndTime);
-  }
-
+  late final GeneratedColumn<DateTime?> updatedAt = GeneratedColumn<DateTime?>(
+      'updated_at', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns => [
         userId,
@@ -4285,11 +3877,9 @@ class $MembersTable extends Members
         updatedAt
       ];
   @override
-  $MembersTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'members';
   @override
-  String get $tableName => _alias ?? 'members';
-  @override
-  final String actualTableName = 'members';
+  String get actualTableName => 'members';
   @override
   VerificationContext validateIntegrity(Insertable<MemberEntity> instance,
       {bool isInserting = false}) {
@@ -4360,8 +3950,8 @@ class $MembersTable extends Members
   Set<GeneratedColumn> get $primaryKey => {userId, channelCid};
   @override
   MemberEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return MemberEntity.fromData(data, _db, prefix: effectivePrefix);
+    return MemberEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -4550,53 +4140,33 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
   final String? _alias;
   $ReadsTable(this._db, [this._alias]);
   final VerificationMeta _lastReadMeta = const VerificationMeta('lastRead');
-  @override
-  late final GeneratedDateTimeColumn lastRead = _constructLastRead();
-  GeneratedDateTimeColumn _constructLastRead() {
-    return GeneratedDateTimeColumn(
-      'last_read',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> lastRead = GeneratedColumn<DateTime?>(
+      'last_read', aliasedName, false,
+      typeName: 'INTEGER', requiredDuringInsert: true);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  @override
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn(
-      'user_id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
-  @override
-  late final GeneratedTextColumn channelCid = _constructChannelCid();
-  GeneratedTextColumn _constructChannelCid() {
-    return GeneratedTextColumn('channel_cid', $tableName, false,
-        $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
-  }
-
+  late final GeneratedColumn<String?> channelCid = GeneratedColumn<String?>(
+      'channel_cid', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
   final VerificationMeta _unreadMessagesMeta =
       const VerificationMeta('unreadMessages');
-  @override
-  late final GeneratedIntColumn unreadMessages = _constructUnreadMessages();
-  GeneratedIntColumn _constructUnreadMessages() {
-    return GeneratedIntColumn('unread_messages', $tableName, false,
-        defaultValue: const Constant(0));
-  }
-
+  late final GeneratedColumn<int?> unreadMessages = GeneratedColumn<int?>(
+      'unread_messages', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   @override
   List<GeneratedColumn> get $columns =>
       [lastRead, userId, channelCid, unreadMessages];
   @override
-  $ReadsTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'reads';
   @override
-  String get $tableName => _alias ?? 'reads';
-  @override
-  final String actualTableName = 'reads';
+  String get actualTableName => 'reads';
   @override
   VerificationContext validateIntegrity(Insertable<ReadEntity> instance,
       {bool isInserting = false}) {
@@ -4635,8 +4205,8 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
   Set<GeneratedColumn> get $primaryKey => {userId, channelCid};
   @override
   ReadEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ReadEntity.fromData(data, _db, prefix: effectivePrefix);
+    return ReadEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -4771,35 +4341,19 @@ class $ChannelQueriesTable extends ChannelQueries
   final String? _alias;
   $ChannelQueriesTable(this._db, [this._alias]);
   final VerificationMeta _queryHashMeta = const VerificationMeta('queryHash');
-  @override
-  late final GeneratedTextColumn queryHash = _constructQueryHash();
-  GeneratedTextColumn _constructQueryHash() {
-    return GeneratedTextColumn(
-      'query_hash',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> queryHash = GeneratedColumn<String?>(
+      'query_hash', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
-  @override
-  late final GeneratedTextColumn channelCid = _constructChannelCid();
-  GeneratedTextColumn _constructChannelCid() {
-    return GeneratedTextColumn(
-      'channel_cid',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> channelCid = GeneratedColumn<String?>(
+      'channel_cid', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [queryHash, channelCid];
   @override
-  $ChannelQueriesTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'channel_queries';
   @override
-  String get $tableName => _alias ?? 'channel_queries';
-  @override
-  final String actualTableName = 'channel_queries';
+  String get actualTableName => 'channel_queries';
   @override
   VerificationContext validateIntegrity(Insertable<ChannelQueryEntity> instance,
       {bool isInserting = false}) {
@@ -4826,8 +4380,8 @@ class $ChannelQueriesTable extends ChannelQueries
   Set<GeneratedColumn> get $primaryKey => {queryHash, channelCid};
   @override
   ChannelQueryEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ChannelQueryEntity.fromData(data, _db, prefix: effectivePrefix);
+    return ChannelQueryEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -5110,85 +4664,38 @@ class $ConnectionEventsTable extends ConnectionEvents
   final String? _alias;
   $ConnectionEventsTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedIntColumn id = _constructId();
-  GeneratedIntColumn _constructId() {
-    return GeneratedIntColumn(
-      'id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
+      'id', aliasedName, false,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _typeMeta = const VerificationMeta('type');
-  @override
-  late final GeneratedTextColumn type = _constructType();
-  GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn(
-      'type',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+      'type', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _ownUserMeta = const VerificationMeta('ownUser');
-  @override
-  late final GeneratedTextColumn ownUser = _constructOwnUser();
-  GeneratedTextColumn _constructOwnUser() {
-    return GeneratedTextColumn(
-      'own_user',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String?>
+      ownUser = GeneratedColumn<String?>('own_user', aliasedName, true,
+              typeName: 'TEXT', requiredDuringInsert: false)
+          .withConverter<Map<String, dynamic>>(
+              $ConnectionEventsTable.$converter0);
   final VerificationMeta _totalUnreadCountMeta =
       const VerificationMeta('totalUnreadCount');
-  @override
-  late final GeneratedIntColumn totalUnreadCount = _constructTotalUnreadCount();
-  GeneratedIntColumn _constructTotalUnreadCount() {
-    return GeneratedIntColumn(
-      'total_unread_count',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<int?> totalUnreadCount = GeneratedColumn<int?>(
+      'total_unread_count', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _unreadChannelsMeta =
       const VerificationMeta('unreadChannels');
-  @override
-  late final GeneratedIntColumn unreadChannels = _constructUnreadChannels();
-  GeneratedIntColumn _constructUnreadChannels() {
-    return GeneratedIntColumn(
-      'unread_channels',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<int?> unreadChannels = GeneratedColumn<int?>(
+      'unread_channels', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _lastEventAtMeta =
       const VerificationMeta('lastEventAt');
-  @override
-  late final GeneratedDateTimeColumn lastEventAt = _constructLastEventAt();
-  GeneratedDateTimeColumn _constructLastEventAt() {
-    return GeneratedDateTimeColumn(
-      'last_event_at',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> lastEventAt =
+      GeneratedColumn<DateTime?>('last_event_at', aliasedName, true,
+          typeName: 'INTEGER', requiredDuringInsert: false);
   final VerificationMeta _lastSyncAtMeta = const VerificationMeta('lastSyncAt');
-  @override
-  late final GeneratedDateTimeColumn lastSyncAt = _constructLastSyncAt();
-  GeneratedDateTimeColumn _constructLastSyncAt() {
-    return GeneratedDateTimeColumn(
-      'last_sync_at',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> lastSyncAt = GeneratedColumn<DateTime?>(
+      'last_sync_at', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -5200,11 +4707,9 @@ class $ConnectionEventsTable extends ConnectionEvents
         lastSyncAt
       ];
   @override
-  $ConnectionEventsTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'connection_events';
   @override
-  String get $tableName => _alias ?? 'connection_events';
-  @override
-  final String actualTableName = 'connection_events';
+  String get actualTableName => 'connection_events';
   @override
   VerificationContext validateIntegrity(
       Insertable<ConnectionEventEntity> instance,
@@ -5252,8 +4757,8 @@ class $ConnectionEventsTable extends ConnectionEvents
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   ConnectionEventEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ConnectionEventEntity.fromData(data, _db, prefix: effectivePrefix);
+    return ConnectionEventEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override

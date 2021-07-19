@@ -47,9 +47,10 @@ class User extends Equatable {
 
   /// User role
   @JsonKey(
-      includeIfNull: false,
-      toJson: Serializer.readOnly,
-      defaultValue: <String>[])
+    includeIfNull: false,
+    toJson: Serializer.readOnly,
+    defaultValue: <String>[],
+  )
   final List<String> teams;
 
   /// Date of user creation

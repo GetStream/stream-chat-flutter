@@ -148,7 +148,7 @@ class ChannelInfo extends StatelessWidget {
             child: Text(
               context.translations.tryAgainLabel,
               style: textStyle?.copyWith(
-                color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                color: StreamChatTheme.of(context).colorTheme.accentPrimary,
               ),
             ),
           ),

@@ -76,7 +76,7 @@ class UserItem extends StatelessWidget {
       ),
       trailing: selected
           ? StreamSvgIcon.checkSend(
-              color: chatThemeData.colorTheme.accentBlue,
+              color: chatThemeData.colorTheme.accentPrimary,
             )
           : null,
       title: Text(
@@ -94,8 +94,8 @@ class UserItem extends StatelessWidget {
           ? context.translations.userOnlineText
           : context.translations.userLastOnlineText +
               Jiffy(user.lastActive).fromNow(),
-      style: chatTheme.textTheme.footnote
-          .copyWith(color: chatTheme.colorTheme.black.withOpacity(.5)),
+      style: chatTheme.textTheme.footnote.copyWith(
+          color: chatTheme.colorTheme.textHighEmphasis.withOpacity(.5)),
     );
   }
 }

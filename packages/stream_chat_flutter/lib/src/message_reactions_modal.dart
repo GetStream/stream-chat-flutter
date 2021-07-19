@@ -143,7 +143,7 @@ class MessageReactionsModal extends StatelessWidget {
   Widget _buildReactionCard(BuildContext context, User? user) {
     final chatThemeData = StreamChatTheme.of(context);
     return Card(
-      color: chatThemeData.colorTheme.white,
+      color: chatThemeData.colorTheme.barsBg,
       clipBehavior: Clip.hardEdge,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -225,7 +225,7 @@ class MessageReactionsModal extends StatelessWidget {
                         messageTheme.reactionsBorderColor ?? Colors.transparent,
                     backgroundColor: messageTheme.reactionsBackgroundColor ??
                         Colors.transparent,
-                    maskColor: chatThemeData.colorTheme.white,
+                    maskColor: chatThemeData.colorTheme.barsBg,
                     tailCirclesSpacing: 1,
                     highlightOwnReactions: false,
                   ),

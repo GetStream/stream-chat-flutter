@@ -40,8 +40,8 @@ class DeletedMessage extends StatelessWidget {
             side: borderSide ??
                 BorderSide(
                   color: Theme.of(context).brightness == Brightness.dark
-                      ? chatThemeData.colorTheme.white.withAlpha(24)
-                      : chatThemeData.colorTheme.black.withAlpha(24),
+                      ? chatThemeData.colorTheme.barsBg.withAlpha(24)
+                      : chatThemeData.colorTheme.textHighEmphasis.withAlpha(24),
                 ),
           ),
       child: Padding(

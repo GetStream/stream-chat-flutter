@@ -49,7 +49,7 @@ class _ReactionPickerState extends State<ReactionPicker>
 
     final child = Material(
       borderRadius: BorderRadius.circular(24),
-      color: chatThemeData.colorTheme.white,
+      color: chatThemeData.colorTheme.barsBg,
       clipBehavior: Clip.hardEdge,
       child: Padding(
         padding: const EdgeInsets.symmetric(

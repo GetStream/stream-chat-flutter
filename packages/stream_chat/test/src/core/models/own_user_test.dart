@@ -41,5 +41,43 @@ void main() {
       expect(ownUser.banned, user.banned);
       expect(ownUser.extraData, user.extraData);
     });
+
+    test('copyWith', () {
+      final user = OwnUser.fromJson(jsonFixture('own_user.json'));
+      var newUser = user.copyWith();
+
+      expect(newUser.id, user.id);
+      expect(newUser.role, user.role);
+      expect(newUser.name, user.name);
+
+      newUser = user.copyWith(
+        id: 'test',
+        role: 'test',
+        extraData: {
+          'name': 'test',
+        },
+      );
+
+      expect(newUser.id, 'test');
+      expect(newUser.role, 'test');
+      expect(newUser.name, 'test');
+    });
+
+    test('merge', () {
+      final user = OwnUser.fromJson(jsonFixture('own_user.json'));
+      final newUser = user.merge(OwnUser(
+        id: 'test',
+        role: 'test',
+        extraData: const {
+          'name': 'test',
+        },
+        banned: true,
+      ));
+
+      expect(newUser.id, 'test');
+      expect(newUser.role, 'test');
+      expect(newUser.name, 'test');
+      expect(newUser.banned, true);
+    });
   });
 }

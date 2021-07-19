@@ -146,6 +146,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
         _paginationEnded = true;
       }
     } catch (e, stk) {
+      // reset loading controller
+      _queryChannelsLoadingController.sink.add(false);
       if (_channelsController.hasValue) {
         _queryChannelsLoadingController.addError(e, stk);
       } else {

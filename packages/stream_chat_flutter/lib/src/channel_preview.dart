@@ -56,7 +56,7 @@ class ChannelPreview extends StatelessWidget {
   final Widget? subtitle;
 
   /// Widget rendering the leading element, by default
-  /// it shows the [ChannelImage]
+  /// it shows the [ChannelAvatar]
   final Widget? leading;
 
   /// Widget rendering the trailing element,
@@ -82,20 +82,9 @@ class ChannelPreview extends StatelessWidget {
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 8,
                 ),
-                onTap: () {
-                  if (onTap != null) {
-                    onTap!(channel);
-                  }
-                },
-                onLongPress: () {
-                  if (onLongPress != null) {
-                    onLongPress!(channel);
-                  }
-                },
-                leading: leading ??
-                    ChannelImage(
-                      onTap: onImageTap,
-                    ),
+                onTap: () => onTap?.call(channel),
+                onLongPress: () => onLongPress?.call(channel),
+                leading: leading ?? ChannelAvatar(onTap: onImageTap),
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[

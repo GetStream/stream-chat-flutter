@@ -143,7 +143,6 @@ class MessageListView extends StatefulWidget {
     this.parentMessage,
     this.threadBuilder,
     this.onThreadTap,
-    this.onReplyTap,
     this.dateDividerBuilder,
     this.scrollPhysics = const ClampingScrollPhysics(),
     this.initialScrollIndex,
@@ -153,7 +152,6 @@ class MessageListView extends StatefulWidget {
     this.onMessageSwiped,
     this.highlightInitialMessage = false,
     this.messageHighlightColor,
-    this.onShowMessage,
     this.showConnectionStateTile = false,
     this.headerBuilder,
     this.footerBuilder,
@@ -161,16 +159,11 @@ class MessageListView extends StatefulWidget {
     this.emptyBuilder,
     this.systemMessageBuilder,
     this.messageListBuilder,
-    this.errorWidgetBuilder,
+    this.errorBuilder,
     this.messageFilter,
-    this.customAttachmentBuilders,
     this.onMessageTap,
     this.onSystemMessageTap,
-    this.onAttachmentTap,
-    this.onLinkTap,
     this.pinPermissions = const [],
-    this.textBuilder,
-    this.usernameBuilder,
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
     this.messageListController,
@@ -223,9 +216,6 @@ class MessageListView extends StatefulWidget {
   /// Called when message item gets swiped
   final OnMessageSwiped? onMessageSwiped;
 
-  ///
-  final ReplyTapCallback? onReplyTap;
-
   /// If true the list will highlight the initialMessage if there is any.
   ///
   /// Also See [StreamChannel]
@@ -233,9 +223,6 @@ class MessageListView extends StatefulWidget {
 
   /// Color used while highlighting initial message
   final Color? messageHighlightColor;
-
-  /// Callback when show message is tapped
-  final ShowMessageCallback? onShowMessage;
 
   /// Flag for showing tile on header
   final bool showConnectionStateTile;
@@ -263,15 +250,10 @@ class MessageListView extends StatefulWidget {
   /// This parameter can be used to display an error message to
   /// users in the event
   /// of a connection failure.
-  final ErrorBuilder? errorWidgetBuilder;
+  final ErrorBuilder? errorBuilder;
 
   /// Predicate used to filter messages
   final bool Function(Message)? messageFilter;
-
-  /// Attachment builders for the default message widget
-  /// Please change this in the [MessageWidget] if you are using a
-  /// custom implementation
-  final Map<String, AttachmentBuilder>? customAttachmentBuilders;
 
   /// Called when any message is tapped except a system message
   /// (use [onSystemMessageTap] instead)
@@ -279,18 +261,6 @@ class MessageListView extends StatefulWidget {
 
   /// Called when system message is tapped
   final OnMessageTap? onSystemMessageTap;
-
-  /// Customize onTap on attachment
-  final void Function(Message message, Attachment attachment)? onAttachmentTap;
-
-  /// Customize the MessageWidget textBuilder
-  final Widget Function(BuildContext context, Message message)? textBuilder;
-
-  /// Customize the MessageWidget usernameBuilder
-  final Widget Function(BuildContext context, Message message)? usernameBuilder;
-
-  /// Callback for when link is tapped
-  final void Function(String link)? onLinkTap;
 
   /// A List of user types that have permission to pin messages
   final List<String> pinPermissions;
@@ -370,19 +340,21 @@ class _MessageListViewState extends State<MessageListView> {
                   child: Text(
                     context.translations.emptyChatMessagesText,
                     style: _streamTheme.textTheme.footnote.copyWith(
-                        color: _streamTheme.colorTheme.black.withOpacity(.5)),
+                        color: _streamTheme.colorTheme.textHighEmphasis
+                            .withOpacity(.5)),
                   ),
                 ),
         messageListBuilder: widget.messageListBuilder ??
             (context, list) => _buildListView(list),
         messageListController: _messageListController,
         parentMessage: widget.parentMessage,
-        errorWidgetBuilder: widget.errorWidgetBuilder ??
+        errorBuilder: widget.errorBuilder ??
             (BuildContext context, Object error) => Center(
                   child: Text(
                     context.translations.genericErrorText,
                     style: _streamTheme.textTheme.footnote.copyWith(
-                        color: _streamTheme.colorTheme.black.withOpacity(.5)),
+                        color: _streamTheme.colorTheme.textHighEmphasis
+                            .withOpacity(.5)),
                   ),
                 ),
       );
@@ -712,7 +684,7 @@ class _MessageListViewState extends State<MessageListView> {
               clipBehavior: Clip.none,
               children: [
                 FloatingActionButton(
-                  backgroundColor: _streamTheme.colorTheme.white,
+                  backgroundColor: _streamTheme.colorTheme.barsBg,
                   onPressed: () {
                     if (unreadCount > 0) {
                       streamChannel!.channel.markRead();
@@ -731,7 +703,7 @@ class _MessageListViewState extends State<MessageListView> {
                     }
                   },
                   child: StreamSvgIcon.down(
-                    color: _streamTheme.colorTheme.black,
+                    color: _streamTheme.colorTheme.textHighEmphasis,
                   ),
                 ),
                 if (showUnreadCount)
@@ -823,7 +795,6 @@ class _MessageListViewState extends State<MessageListView> {
       showUsername: !isMyMessage,
       padding: const EdgeInsets.all(8),
       showSendingIndicator: false,
-      onThreadTap: _onThreadTap,
       borderRadiusGeometry: BorderRadius.only(
         topLeft: const Radius.circular(16),
         bottomLeft:
@@ -841,7 +812,6 @@ class _MessageListViewState extends State<MessageListView> {
       messageTheme: isMyMessage
           ? _streamTheme.ownMessageTheme
           : _streamTheme.otherMessageTheme,
-      onShowMessage: widget.onShowMessage,
       onReturnAction: (action) {
         switch (action) {
           case ReturnActionType.none:
@@ -852,16 +822,12 @@ class _MessageListViewState extends State<MessageListView> {
             break;
         }
       },
-      customAttachmentBuilders: widget.customAttachmentBuilders,
       onMessageTap: (message) {
         if (widget.onMessageTap != null) {
           widget.onMessageTap!(message);
         }
         FocusScope.of(context).unfocus();
       },
-      textBuilder: widget.textBuilder,
-      usernameBuilder: widget.usernameBuilder,
-      onLinkTap: widget.onLinkTap,
       showPinButton: currentUserMember != null &&
           widget.pinPermissions.contains(currentUserMember.role),
     );
@@ -899,7 +865,7 @@ class _MessageListViewState extends State<MessageListView> {
 
     final userId = StreamChat.of(context).user!.id;
     final isMyMessage = message.user!.id == userId;
-    final nextMessage = index - 3 >= 0 ? messages[index - 3] : null;
+    final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
     final isNextUserSame =
         nextMessage != null && message.user!.id == nextMessage.user!.id;
 
@@ -1004,7 +970,6 @@ class _MessageListViewState extends State<MessageListView> {
       showFlagButton: !isMyMessage,
       borderSide: borderSide,
       onThreadTap: _onThreadTap,
-      onReplyTap: widget.onReplyTap,
       attachmentBorderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(attachmentBorderRadius),
         bottomLeft: isMyMessage
@@ -1055,7 +1020,6 @@ class _MessageListViewState extends State<MessageListView> {
           : _streamTheme.otherMessageTheme,
       readList: readList,
       allRead: allRead,
-      onShowMessage: widget.onShowMessage,
       onReturnAction: (action) {
         switch (action) {
           case ReturnActionType.none:
@@ -1066,17 +1030,12 @@ class _MessageListViewState extends State<MessageListView> {
             break;
         }
       },
-      customAttachmentBuilders: widget.customAttachmentBuilders,
       onMessageTap: (message) {
         if (widget.onMessageTap != null) {
           widget.onMessageTap!(message);
         }
         FocusScope.of(context).unfocus();
       },
-      onAttachmentTap: widget.onAttachmentTap,
-      textBuilder: widget.textBuilder,
-      usernameBuilder: widget.usernameBuilder,
-      onLinkTap: widget.onLinkTap,
       showPinButton: widget.pinPermissions.contains(currentUserMember.role),
     );
 
@@ -1108,7 +1067,7 @@ class _MessageListViewState extends State<MessageListView> {
             widget.onMessageSwiped?.call(message);
           },
           backgroundIcon: StreamSvgIcon.reply(
-            color: _streamTheme.colorTheme.accentBlue,
+            color: _streamTheme.colorTheme.accentPrimary,
           ),
           child: child,
         ),
@@ -1124,7 +1083,7 @@ class _MessageListViewState extends State<MessageListView> {
       child = TweenAnimationBuilder<Color?>(
         tween: ColorTween(
           begin: highlightColor,
-          end: colorTheme.white.withOpacity(0),
+          end: colorTheme.barsBg.withOpacity(0),
         ),
         duration: const Duration(seconds: 3),
         onEnd: () => initialMessageHighlightComplete = true,
@@ -1254,7 +1213,7 @@ class _LoadingIndicator extends StatelessWidget {
       stream: stream,
       initialData: false,
       errorBuilder: (context, error) => Container(
-        color: streamTheme.colorTheme.accentRed.withOpacity(.2),
+        color: streamTheme.colorTheme.accentError.withOpacity(.2),
         child: Center(
           child: Text(context.translations.loadingMessagesError),
         ),

@@ -72,7 +72,7 @@ class AttachmentActionsModal extends StatelessWidget {
                     context.translations.replyLabel,
                     StreamSvgIcon.iconCurveLineLeftUp(
                       size: 24,
-                      color: theme.colorTheme.grey,
+                      color: theme.colorTheme.textLowEmphasis,
                     ),
                     () {
                       Navigator.pop(context, ReturnActionType.reply);
@@ -83,7 +83,7 @@ class AttachmentActionsModal extends StatelessWidget {
                     context.translations.showInChatLabel,
                     StreamSvgIcon.eye(
                       size: 24,
-                      color: theme.colorTheme.black,
+                      color: theme.colorTheme.textHighEmphasis,
                     ),
                     onShowMessage,
                   ),
@@ -94,7 +94,7 @@ class AttachmentActionsModal extends StatelessWidget {
                         : context.translations.saveImageLabel,
                     StreamSvgIcon.iconSave(
                       size: 24,
-                      color: theme.colorTheme.grey,
+                      color: theme.colorTheme.textLowEmphasis,
                     ),
                     () {
                       final attachment = message.attachments[currentIndex];
@@ -145,7 +145,7 @@ class AttachmentActionsModal extends StatelessWidget {
                       context.translations.deleteLabel,
                       StreamSvgIcon.delete(
                         size: 24,
-                        color: theme.colorTheme.accentRed,
+                        color: theme.colorTheme.accentError,
                       ),
                       () {
                         final channel = StreamChannel.of(context).channel;
@@ -166,7 +166,7 @@ class AttachmentActionsModal extends StatelessWidget {
                             ..maybePop();
                         }
                       },
-                      color: theme.colorTheme.accentRed,
+                      color: theme.colorTheme.accentError,
                     ),
                 ]
                     .map<Widget>((e) => Align(
@@ -176,7 +176,7 @@ class AttachmentActionsModal extends StatelessWidget {
                     .insertBetween(
                       Container(
                         height: 1,
-                        color: theme.colorTheme.greyWhisper,
+                        color: theme.colorTheme.borders,
                       ),
                     ),
               ),
@@ -197,7 +197,7 @@ class AttachmentActionsModal extends StatelessWidget {
   }) =>
       Material(
         key: key,
-        color: StreamChatTheme.of(context).colorTheme.white,
+        color: StreamChatTheme.of(context).colorTheme.barsBg,
         child: InkWell(
           onTap: onTap,
           child: Padding(
@@ -242,7 +242,7 @@ class AttachmentActionsModal extends StatelessWidget {
               width: 182,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                color: theme.colorTheme.white,
+                color: theme.colorTheme.barsBg,
               ),
               child: Center(
                 child: progress == null
@@ -250,7 +250,7 @@ class AttachmentActionsModal extends StatelessWidget {
                         height: 100,
                         width: 100,
                         child: StreamSvgIcon.error(
-                          color: theme.colorTheme.greyGainsboro,
+                          color: theme.colorTheme.disabled,
                         ),
                       )
                     : progress.toProgressIndicatorValue == 1.0
@@ -259,7 +259,7 @@ class AttachmentActionsModal extends StatelessWidget {
                             height: 160,
                             width: 160,
                             child: StreamSvgIcon.check(
-                              color: theme.colorTheme.greyGainsboro,
+                              color: theme.colorTheme.disabled,
                             ),
                           )
                         : SizedBox(
@@ -272,14 +272,14 @@ class AttachmentActionsModal extends StatelessWidget {
                                   value: progress.toProgressIndicatorValue,
                                   strokeWidth: 8,
                                   valueColor: AlwaysStoppedAnimation(
-                                    theme.colorTheme.accentBlue,
+                                    theme.colorTheme.accentPrimary,
                                   ),
                                 ),
                                 Center(
                                   child: Text(
                                     '${progress.toPercentage}%',
                                     style: theme.textTheme.headline.copyWith(
-                                      color: theme.colorTheme.grey,
+                                      color: theme.colorTheme.textLowEmphasis,
                                     ),
                                   ),
                                 ),

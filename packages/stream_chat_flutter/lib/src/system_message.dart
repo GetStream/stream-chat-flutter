@@ -32,7 +32,7 @@ class SystemMessage extends StatelessWidget {
         textAlign: TextAlign.center,
         softWrap: true,
         style: theme.textTheme.captionBold.copyWith(
-          color: theme.colorTheme.grey,
+          color: theme.colorTheme.textLowEmphasis,
         ),
       ),
     );

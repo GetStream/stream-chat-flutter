@@ -165,7 +165,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                 child: SizedBox(
                   width: mediaQueryData.size.width * 0.75,
                   child: Material(
-                    color: streamChatThemeData.colorTheme.whiteSnow,
+                    color: streamChatThemeData.colorTheme.appBg,
                     clipBehavior: Clip.hardEdge,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -197,7 +197,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                       ].insertBetween(
                         Container(
                           height: 1,
-                          color: streamChatThemeData.colorTheme.greyWhisper,
+                          color: streamChatThemeData.colorTheme.borders,
                         ),
                       ),
                     ),
@@ -270,7 +270,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       context,
       title: context.translations.flagMessageLabel,
       icon: StreamSvgIcon.flag(
-        color: streamChatThemeData.colorTheme.accentRed,
+        color: streamChatThemeData.colorTheme.accentError,
         size: 24,
       ),
       question: context.translations.flagMessageQuestion,
@@ -285,7 +285,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         await showInfoDialog(
           context,
           icon: StreamSvgIcon.flag(
-            color: theme.colorTheme.accentRed,
+            color: theme.colorTheme.accentError,
             size: 24,
           ),
           details: context.translations.flagMessageSuccessfulText,
@@ -298,7 +298,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           await showInfoDialog(
             context,
             icon: StreamSvgIcon.flag(
-              color: theme.colorTheme.accentRed,
+              color: theme.colorTheme.accentError,
               size: 24,
             ),
             details: context.translations.flagMessageSuccessfulText,
@@ -335,7 +335,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       context,
       title: context.translations.deleteMessageLabel,
       icon: StreamSvgIcon.flag(
-        color: StreamChatTheme.of(context).colorTheme.accentRed,
+        color: StreamChatTheme.of(context).colorTheme.accentError,
         size: 24,
       ),
       question: context.translations.deleteMessageQuestion,
@@ -361,7 +361,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     showInfoDialog(
       context,
       icon: StreamSvgIcon.error(
-        color: StreamChatTheme.of(context).colorTheme.accentRed,
+        color: StreamChatTheme.of(context).colorTheme.accentError,
         size: 24,
       ),
       details: context.translations.operationCouldNotBeCompletedText,
@@ -542,7 +542,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         child: Row(
           children: [
             StreamSvgIcon.circleUp(
-              color: streamChatThemeData.colorTheme.accentBlue,
+              color: streamChatThemeData.colorTheme.accentPrimary,
             ),
             const SizedBox(width: 16),
             Text(
@@ -589,7 +589,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: StreamSvgIcon.edit(
-                        color: streamChatThemeData.colorTheme.greyGainsboro,
+                        color: streamChatThemeData.colorTheme.disabled,
                       ),
                     ),
                     Text(

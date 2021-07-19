@@ -89,6 +89,7 @@ void main() {
         )(
           StreamChat(
             client: client,
+            connectivityStream: Stream.value(ConnectivityResult.mobile),
             child: StreamChannel(
               showLoading: false,
               channel: channel,
@@ -100,7 +101,6 @@ void main() {
                 ),
               ),
             ),
-            connectivityStream: Stream.value(ConnectivityResult.mobile),
           ),
         ),
         surfaceSize: const Size.square(200),
@@ -141,6 +141,7 @@ void main() {
         )(
           StreamChat(
             client: client,
+            connectivityStream: Stream.value(ConnectivityResult.mobile),
             child: StreamChannel(
               showLoading: false,
               channel: channel,
@@ -152,7 +153,6 @@ void main() {
                 ),
               ),
             ),
-            connectivityStream: Stream.value(ConnectivityResult.mobile),
           ),
         ),
         surfaceSize: const Size.square(200),

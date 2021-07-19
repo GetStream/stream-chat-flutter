@@ -47,12 +47,6 @@ void main() {
       final user = User(id: 'test-user-id');
       final token = Token.development(user.id).rawValue;
 
-      final event = Event(
-        type: EventType.healthCheck,
-        connectionId: 'fake-connection-id',
-        me: OwnUser.fromUser(user),
-      );
-
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
         client.wsConnectionStatusStream.skip(1),
@@ -64,9 +58,7 @@ void main() {
 
       final res = await client.connectUser(user, token);
       expect(res, isNotNull);
-      expect(res.type, event.type);
-      expect(res.connectionId, event.connectionId);
-      expect(res.me, isSameUserAs(user));
+      expect(res, isSameUserAs(user));
     });
 
     test('`.connectUserWithProvider` should work fine', () async {
@@ -75,12 +67,6 @@ void main() {
         expect(userId, user.id);
         return Token.development(userId).rawValue;
       }
-
-      final event = Event(
-        type: EventType.healthCheck,
-        connectionId: 'fake-connection-id',
-        me: OwnUser.fromUser(user),
-      );
 
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
@@ -93,9 +79,7 @@ void main() {
 
       final res = await client.connectUserWithProvider(user, tokenProvider);
       expect(res, isNotNull);
-      expect(res.type, event.type);
-      expect(res.connectionId, event.connectionId);
-      expect(res.me, isSameUserAs(user));
+      expect(res, isSameUserAs(user));
     });
 
     group('`.connectGuestUser`', () {
@@ -110,12 +94,6 @@ void main() {
             ..accessToken = token,
         );
 
-        final event = Event(
-          type: EventType.healthCheck,
-          connectionId: 'fake-connection-id',
-          me: OwnUser.fromUser(user),
-        );
-
         expectLater(
           // skipping first seed status -> ConnectionStatus.disconnected
           client.wsConnectionStatusStream.skip(1),
@@ -127,9 +105,7 @@ void main() {
 
         final res = await client.connectGuestUser(user);
         expect(res, isNotNull);
-        expect(res.type, event.type);
-        expect(res.connectionId, event.connectionId);
-        expect(res.me, isSameUserAs(user));
+        expect(res, isSameUserAs(user));
 
         verify(
           () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
@@ -175,9 +151,6 @@ void main() {
 
       final res = await client.connectAnonymousUser();
       expect(res, isNotNull);
-      expect(res.type, EventType.healthCheck);
-      expect(res.connectionId, 'fake-connection-id');
-      expect(res.me, isNotNull);
     });
 
     group('`.openConnection`', () {
@@ -330,6 +303,93 @@ void main() {
     );
   });
 
+  group('Connect user calls with `connectWebSocket`: false', () {
+    const apiKey = 'test-api-key';
+    late final api = FakeChatApi();
+
+    late StreamChatClient client;
+
+    setUpAll(() {
+      // fallback values
+      registerFallbackValue<User>(FakeUser());
+    });
+
+    setUp(() {
+      client = StreamChatClient(apiKey, chatApi: api);
+    });
+
+    tearDown(() {
+      client.dispose();
+    });
+
+    test('`.connectUser` should succeed without connecting', () async {
+      final user = User(id: 'test-user-id');
+      final token = Token.development(user.id).rawValue;
+
+      final res = await client.connectUser(
+        user,
+        token,
+        connectWebSocket: false,
+      );
+      expect(res, isSameUserAs(user));
+      expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+    });
+
+    test(
+      '`.connectUserWithProvider` should succeed without connecting',
+      () async {
+        final user = User(id: 'test-user-id');
+        Future<String> tokenProvider(String userId) async {
+          expect(userId, user.id);
+          return Token.development(userId).rawValue;
+        }
+
+        final res = await client.connectUserWithProvider(
+          user,
+          tokenProvider,
+          connectWebSocket: false,
+        );
+        expect(res, isSameUserAs(user));
+        expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+      },
+    );
+
+    test('`.connectGuestUser` should succeed without connecting', () async {
+      final user = User(id: 'test-user-id');
+      final token = Token.development(user.id).rawValue;
+
+      when(() => api.guest.getGuestUser(any(that: isSameUserAs(user))))
+          .thenAnswer(
+        (_) async => ConnectGuestUserResponse()
+          ..user = user
+          ..accessToken = token,
+      );
+
+      final res = await client.connectGuestUser(
+        user,
+        connectWebSocket: false,
+      );
+
+      expect(res, isSameUserAs(user));
+      expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+      verify(
+        () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
+      ).called(1);
+    });
+
+    test(
+      '`.connectAnonymousUser` should succeed without connecting',
+      () async {
+        final res = await client.connectAnonymousUser(
+          connectWebSocket: false,
+        );
+
+        expect(res, isNotNull);
+        expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+      },
+    );
+  });
+
   group('Fake web-socket connection function with failure and persistence', () {
     const apiKey = 'test-api-key';
     late final api = FakeChatApi();
@@ -353,7 +413,7 @@ void main() {
     });
 
     test(
-      '`.connectUser` should connect successfully if persistence contains event',
+      '''`.connectUser` should connect successfully if persistence contains event''',
       () async {
         final user = User(id: 'test-user-id');
         final token = Token.development(user.id).rawValue;
@@ -366,8 +426,7 @@ void main() {
 
         final res = await client.connectUser(user, token);
         expect(res, isNotNull);
-        expect(res.connectionId, 'test-connection-id');
-        expect(res.me?.id, user.id);
+        expect(res, isSameUserAs(user));
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
@@ -375,7 +434,7 @@ void main() {
     );
 
     test(
-      '`.connectUserWithProvider` should connect successfully if persistence contains event',
+      '''`.connectUserWithProvider` should connect successfully if persistence contains event''',
       () async {
         final user = User(id: 'test-user-id');
         Future<String> tokenProvider(String userId) async {
@@ -391,8 +450,7 @@ void main() {
 
         final res = await client.connectUserWithProvider(user, tokenProvider);
         expect(res, isNotNull);
-        expect(res.connectionId, 'test-connection-id');
-        expect(res.me?.id, user.id);
+        expect(res, isSameUserAs(user));
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
@@ -400,7 +458,7 @@ void main() {
     );
 
     test(
-      '`.connectGuestUser` should connect successfully if persistence contains event',
+      '''`.connectGuestUser` should connect successfully if persistence contains event''',
       () async {
         final user = User(id: 'test-user-id');
         final token = Token.development(user.id).rawValue;
@@ -420,8 +478,7 @@ void main() {
 
         final res = await client.connectGuestUser(user);
         expect(res, isNotNull);
-        expect(res.connectionId, 'test-connection-id');
-        expect(res.me?.id, user.id);
+        expect(res, isSameUserAs(user));
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
@@ -432,7 +489,7 @@ void main() {
     );
 
     test(
-      '`.connectAnonymousUser` should connect successfully if persistence contains event',
+      '''`.connectAnonymousUser` should connect successfully if persistence contains event''',
       () async {
         final user = User(id: 'test-user-id');
 
@@ -446,8 +503,6 @@ void main() {
 
         final res = await client.connectAnonymousUser();
         expect(res, isNotNull);
-        expect(res.connectionId, 'test-connection-id');
-        expect(res.me?.id, user.id);
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
@@ -488,7 +543,7 @@ void main() {
 
     group('`.sync`', () {
       test(
-        'should update persistence connectionInfo and lastSync when sync succeeds',
+        '''should update persistence connectionInfo and lastSync when sync succeeds''',
         () async {
           const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
           final lastSyncAt = DateTime.now();
@@ -662,7 +717,7 @@ void main() {
       );
 
       test(
-        'should never rethrow network call if persistence already emitted some channels',
+        '''should never rethrow network call if persistence already emitted some channels''',
         () async {
           final persistentChannelStates = List.generate(
             3,
@@ -870,7 +925,7 @@ void main() {
       });
 
       test(
-        'should rethrow if `.queryChannelsOnline` throws and persistence channels are empty',
+        '''should rethrow if `.queryChannelsOnline` throws and persistence channels are empty''',
         () async {
           when(() => api.channel.queryChannels(
                 filter: any(named: 'filter'),
