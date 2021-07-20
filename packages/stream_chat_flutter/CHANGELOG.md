@@ -1,4 +1,7 @@
 ## Upcoming
+
+✅  Added
+
 - Allow the various ListView widgets to be themed via ThemeData classes
 
 ## 2.0.0
