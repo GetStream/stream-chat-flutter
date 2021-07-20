@@ -167,7 +167,7 @@ class MessageListView extends StatefulWidget {
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
     this.messageListController,
-    this.reverse = false,
+    this.reverse = true,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
