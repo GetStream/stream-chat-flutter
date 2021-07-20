@@ -18,6 +18,7 @@ class User extends Equatable {
     this.extraData = const {},
     this.banned = false,
     this.teams = const [],
+    this.language = 'en',
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -81,6 +82,13 @@ class User extends Equatable {
     defaultValue: {},
   )
   final Map<String, Object?> extraData;
+
+  /// The language this user prefers.
+  ///
+  /// Defaults to 'en'.
+  @JsonKey(
+      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: 'en')
+  final String? language;
 
   @override
   int get hashCode => id.hashCode;
