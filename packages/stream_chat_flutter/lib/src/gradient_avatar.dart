@@ -4,15 +4,20 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+/// Fallback user avatar with a polygon gradient overlayed with text
 class GradientAvatar extends StatefulWidget {
-  final String name;
-  final String userId;
-
+  /// Constructor for [GradientAvatar]
   const GradientAvatar({
     Key? key,
     required this.name,
     required this.userId,
   }) : super(key: key);
+
+  /// Name of user to shorten and display
+  final String name;
+
+  /// ID of user to be used for key
+  final String userId;
 
   @override
   _GradientAvatarState createState() => _GradientAvatarState();
@@ -20,52 +25,50 @@ class GradientAvatar extends StatefulWidget {
 
 class _GradientAvatarState extends State<GradientAvatar> {
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: RepaintBoundary(
-        child: Container(
-          width: 100.0,
-          height: 100.0,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              CustomPaint(
-                painter: DemoPainter(widget.userId),
-                child: SizedBox.expand(),
-              ),
-              FittedBox(
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Opacity(
-                    opacity: 0.8,
-                    child: Text(
-                      getShortenedName(widget.name),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 112.0,
-                        fontWeight: FontWeight.bold,
+  Widget build(BuildContext context) => Center(
+        child: RepaintBoundary(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CustomPaint(
+                  painter: DemoPainter(widget.userId),
+                  child: const SizedBox.expand(),
+                ),
+                FittedBox(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Opacity(
+                      opacity: 0.8,
+                      child: Text(
+                        getShortenedName(widget.name),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 112,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 
   String getShortenedName(String name) {
-    List<String> parts = name.split(' ')..removeWhere((e) => e == '');
+    var parts = name.split(' ')..removeWhere((e) => e == '');
 
     if (parts.length > 2) {
       parts = parts.take(2).toList();
     }
 
-    String result = '';
+    var result = '';
 
-    for (int i = 0; i < parts.length; i++) {
+    for (var i = 0; i < parts.length; i++) {
       result = result + parts[i][0];
     }
 
@@ -73,60 +76,65 @@ class _GradientAvatarState extends State<GradientAvatar> {
   }
 }
 
+/// Painter for bg polygon gradient
 class DemoPainter extends CustomPainter {
+  /// Constructor for [DemoPainter]
+  DemoPainter(this.userId);
+
+  /// Init grid row count
   static const int rowCount = 5;
+
+  /// Init grid column count
   static const int columnCount = 5;
 
+  /// User ID used for key
   String userId;
-
-  DemoPainter(this.userId);
 
   @override
   void paint(Canvas canvas, Size size) {
-    var rowUnit = size.width / columnCount;
-    var columnUnit = size.height / rowCount;
-    var rand = Random(userId.length);
+    final rowUnit = size.width / columnCount;
+    final columnUnit = size.height / rowCount;
+    final rand = Random(userId.length);
 
-    List<Offset4> squares = [];
-    Set<Offset> points = {};
-    List<Color> gradient = colorGradients[rand.nextInt(colorGradients.length)];
+    final squares = <Offset4>[];
+    final points = <Offset>{};
+    final gradient = colorGradients[rand.nextInt(colorGradients.length)];
 
-    for (int i = 0; i < rowCount; i++) {
-      for (int j = 0; j < columnCount; j++) {
-        var off1 = Offset(rowUnit * j, columnUnit * i);
-        var off2 = Offset(rowUnit * (j + 1), columnUnit * i);
-        var off3 = Offset(rowUnit * (j + 1), columnUnit * (i + 1));
-        var off4 = Offset(rowUnit * j, columnUnit * (i + 1));
+    for (var i = 0; i < rowCount; i++) {
+      for (var j = 0; j < columnCount; j++) {
+        final off1 = Offset(rowUnit * j, columnUnit * i);
+        final off2 = Offset(rowUnit * (j + 1), columnUnit * i);
+        final off3 = Offset(rowUnit * (j + 1), columnUnit * (i + 1));
+        final off4 = Offset(rowUnit * j, columnUnit * (i + 1));
 
         points.addAll([off1, off2, off3, off4]);
 
-        var p1 = points.toList().indexOf(off1);
-        var p2 = points.toList().indexOf(off2);
-        var p3 = points.toList().indexOf(off3);
-        var p4 = points.toList().indexOf(off4);
+        final p1 = points.toList().indexOf(off1);
+        final p2 = points.toList().indexOf(off2);
+        final p3 = points.toList().indexOf(off3);
+        final p4 = points.toList().indexOf(off4);
 
         squares.add(
             Offset4(p1, p2, p3, p4, i, j, rowCount, columnCount, gradient));
       }
     }
 
-    var list = transformPoints(points, size);
+    final list = transformPoints(points, size);
     squares.forEach((e) => e.draw(canvas, list));
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 
+  /// Transforms initial grid into a polygon grid
   List<Offset> transformPoints(Set<Offset> points, Size size) {
-    List<Offset> transformedList = [];
-    var orgList = points.toList();
-    var rand = Random(userId.length);
+    final transformedList = <Offset>[];
+    final orgList = points.toList();
+    final rand = Random(userId.length);
 
-    for (int i = 0; i < points.length; i++) {
-      var orgDx = orgList[i].dx;
-      var orgDy = orgList[i].dy;
+    for (var i = 0; i < points.length; i++) {
+      final orgDx = orgList[i].dx;
+      final orgDy = orgList[i].dy;
 
       if (orgDx == 0 ||
           orgDy == 0 ||
@@ -136,11 +144,11 @@ class DemoPainter extends CustomPainter {
         continue;
       }
 
-      int sign1 = rand.nextInt(2) == 1 ? 1 : -1;
-      int sign2 = rand.nextInt(2) == 1 ? 1 : -1;
+      final sign1 = rand.nextInt(2) == 1 ? 1 : -1;
+      final sign2 = rand.nextInt(2) == 1 ? 1 : -1;
 
-      double dx = 0.6 * sign1 * rand.nextInt(size.width ~/ columnCount);
-      double dy = 0.6 * sign2 * rand.nextInt(size.height ~/ rowCount);
+      final dx = 0.6 * sign1 * rand.nextInt(size.width ~/ columnCount);
+      final dy = 0.6 * sign2 * rand.nextInt(size.height ~/ rowCount);
 
       transformedList.add(Offset(orgDx + dx, orgDy + dy));
     }
@@ -149,22 +157,51 @@ class DemoPainter extends CustomPainter {
   }
 }
 
+/// Class for storing and drawing four points of a polygon
 class Offset4 {
+  /// Constructor for [Offset4]
+  Offset4(
+    this.p1,
+    this.p2,
+    this.p3,
+    this.p4,
+    this.row,
+    this.column,
+    this.rowSize,
+    this.colSize,
+    this.gradient,
+  );
+
+  /// Point 1
   int p1;
+
+  /// Point 2
   int p2;
+
+  /// Point 3
   int p3;
+
+  /// Point 4
   int p4;
+
+  /// Position of polygon on grid
   int row;
+
+  /// Position of polygon on grid
   int column;
+
+  /// Max row size
   int rowSize;
+
+  /// Max col size
   int colSize;
+
+  /// Gradient to be applied to polygon
   List<Color> gradient;
 
-  Offset4(this.p1, this.p2, this.p3, this.p4, this.row, this.column,
-      this.rowSize, this.colSize, this.gradient);
-
+  /// Draw the polygon on canvas
   void draw(Canvas canvas, List<Offset> points) {
-    Paint paint = Paint()
+    final paint = Paint()
       ..color = Color.fromARGB(255, Random().nextInt(255),
           Random().nextInt(255), Random().nextInt(255))
       ..shader = ui.Gradient.linear(
@@ -185,6 +222,7 @@ class Offset4 {
   }
 }
 
+/// Gradient list for polygons
 const colorGradients = [
   [Color(0xffffafbd), Color(0xffffc3a0)],
   [Color(0xff2193b0), Color(0xff6dd5ed)],
