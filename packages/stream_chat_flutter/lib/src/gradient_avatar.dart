@@ -27,30 +27,12 @@ class _GradientAvatarState extends State<GradientAvatar> {
   @override
   Widget build(BuildContext context) => Center(
         child: RepaintBoundary(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              CustomPaint(
-                painter: DemoPainter(widget.userId),
-                child: const SizedBox.expand(),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Opacity(
-                  opacity: 0.7,
-                  child: FittedBox(
-                    child: Text(
-                      getShortenedName(widget.name),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 120,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          child: CustomPaint(
+            painter: DemoPainter(
+              widget.userId,
+              getShortenedName(widget.name),
+            ),
+            child: const SizedBox.expand(),
           ),
         ),
       );
@@ -75,7 +57,10 @@ class _GradientAvatarState extends State<GradientAvatar> {
 /// Painter for bg polygon gradient
 class DemoPainter extends CustomPainter {
   /// Constructor for [DemoPainter]
-  DemoPainter(this.userId);
+  DemoPainter(
+    this.userId,
+    this.username,
+  );
 
   /// Init grid row count
   static const int rowCount = 5;
@@ -85,6 +70,9 @@ class DemoPainter extends CustomPainter {
 
   /// User ID used for key
   String userId;
+
+  /// User name to display
+  String username;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -117,6 +105,35 @@ class DemoPainter extends CustomPainter {
 
     final list = transformPoints(points, size);
     squares.forEach((e) => e.draw(canvas, list));
+
+    final smallerSide = size.width > size.height ? size.width : size.height;
+
+    final textSize = smallerSide / 3;
+
+    final dxShift = (username.length == 2 ? 1.45 : 0.75) * textSize / 2;
+    final dyShift = (username.length == 2 ? 1.0 : 1.8) * textSize / 2;
+
+    final fontSize = username.length == 2 ? textSize : textSize * 1.5;
+
+    TextPainter(
+        text: TextSpan(
+          text: username,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withOpacity(0.7),
+          ),
+        ),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr)
+      ..layout(maxWidth: size.width)
+      ..paint(
+        canvas,
+        Offset(
+          (size.width / 2) - dxShift,
+          (size.height / 2) - dyShift,
+        ),
+      );
   }
 
   @override
