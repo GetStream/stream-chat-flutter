@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `MessageListView.reverse` property
+
 ## 2.0.0
 
 🛑️ Breaking Changes from `1.5.4`
