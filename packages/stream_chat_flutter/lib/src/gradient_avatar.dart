@@ -93,10 +93,12 @@ class DemoPainter extends CustomPainter {
 
         points.addAll([off1, off2, off3, off4]);
 
-        final p1 = points.toList().indexOf(off1);
-        final p2 = points.toList().indexOf(off2);
-        final p3 = points.toList().indexOf(off3);
-        final p4 = points.toList().indexOf(off4);
+        final pointsList = points.toList();
+
+        final p1 = pointsList.indexOf(off1);
+        final p2 = pointsList.indexOf(off2);
+        final p3 = pointsList.indexOf(off3);
+        final p4 = pointsList.indexOf(off4);
 
         squares.add(
             Offset4(p1, p2, p3, p4, i, j, rowCount, columnCount, gradient));
