@@ -710,12 +710,13 @@ class _MessageListViewState extends State<MessageListView> {
                       );
                     }
                   },
-                  child: Transform.rotate(
-                    angle: widget.reverse ? 0 : pi,
-                    child: StreamSvgIcon.down(
-                      color: _streamTheme.colorTheme.textHighEmphasis,
-                    ),
-                  ),
+                  child: widget.reverse
+                      ? StreamSvgIcon.down(
+                          color: _streamTheme.colorTheme.textHighEmphasis,
+                        )
+                      : StreamSvgIcon.up(
+                          color: _streamTheme.colorTheme.textHighEmphasis,
+                        ),
                 ),
                 if (showUnreadCount)
                   Positioned(
