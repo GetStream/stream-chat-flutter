@@ -220,6 +220,7 @@ class Message extends Equatable {
   final DateTime? deletedAt;
 
   /// A Map of translations.
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final Map<String, String>? i18n;
 
   /// Known top level fields.
