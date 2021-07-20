@@ -84,8 +84,8 @@ class ChannelInfo extends StatelessWidget {
           );
         } else {
           alternativeWidget = Text(
-            context.translations.userLastOnlineText +
-                Jiffy(otherMember.user?.lastActive).fromNow(),
+            '${context.translations.userLastOnlineText} '
+            '${Jiffy(otherMember.user?.lastActive).fromNow()}',
             style: textStyle,
           );
         }

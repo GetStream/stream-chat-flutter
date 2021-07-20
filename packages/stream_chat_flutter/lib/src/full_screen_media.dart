@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/src/gallery_footer.dart';
 import 'package:stream_chat_flutter/src/gallery_header.dart';
@@ -183,7 +182,6 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                 children: [
                   GalleryHeader(
                     userName: widget.userName,
-                    // TODO: Fix this
                     sentAt: context.translations.sentAtText(
                       date: widget.message.createdAt,
                       time: widget.message.createdAt,
@@ -224,22 +222,6 @@ class _FullScreenMediaState extends State<FullScreenMedia>
           ],
         ),
       );
-
-  String getDay(DateTime dateTime) {
-    final now = DateTime.now();
-
-    if (DateTime(dateTime.year, dateTime.month, dateTime.day) ==
-        DateTime(now.year, now.month, now.day)) {
-      return 'today';
-    } else if (DateTime(now.year, now.month, now.day)
-            .difference(dateTime)
-            .inHours <
-        24) {
-      return 'yesterday';
-    } else {
-      return 'on ${Jiffy(dateTime).MMMd}';
-    }
-  }
 
   @override
   void dispose() async {

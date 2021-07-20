@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     show StreamChatLocalizations, User;
 
 part 'stream_chat_localizations_en.dart';
+
+part 'stream_chat_localizations_hi.dart';
 
 /// The set of supported languages, as language code strings.
 ///
@@ -14,7 +17,7 @@ part 'stream_chat_localizations_en.dart';
 /// See also:
 ///
 ///  * [getStreamChatTranslation], whose documentation describes these values.
-const kStreamChatSupportedLanguages = {'en'};
+const kStreamChatSupportedLanguages = {'en', 'hi'};
 
 /// Creates a [GlobalStreamChatLocalizations] instance for the given `locale`.
 ///
@@ -38,6 +41,8 @@ GlobalStreamChatLocalizations? getStreamChatTranslation(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return const StreamChatLocalizationsEn();
+    case 'hi':
+      return const StreamChatLocalizationsHi();
   }
 }
 

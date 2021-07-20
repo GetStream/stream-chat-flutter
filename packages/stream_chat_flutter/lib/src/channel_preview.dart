@@ -198,7 +198,7 @@ class ChannelPreview extends StatelessWidget {
             size: 16,
           ),
           Text(
-            context.translations.channelIsMutedText,
+            '  ${context.translations.channelIsMutedText}',
             style: chatThemeData.channelPreviewTheme.subtitle,
           ),
         ],

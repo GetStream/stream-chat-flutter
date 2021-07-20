@@ -70,6 +70,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
         theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
+        supportedLocales: const [
+          Locale('en'),
+          Locale('hi'),
+        ],
         localizationsDelegates: const [
           GlobalStreamChatLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,

@@ -73,7 +73,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String resultCountText(int count) => '$count results';
 
   @override
-  String get messageDeletedText => 'This message was deleted.';
+  String get messageDeletedText => 'This message is deleted.';
 
   @override
   String get messageDeletedLabel => 'Message deleted';
@@ -227,9 +227,22 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   @override
   String get photosLabel => 'Photos';
 
+  String _getDay(DateTime dateTime) {
+    final now = Jiffy(DateTime.now());
+    final date = Jiffy(dateTime);
+
+    if (date.isSame(now, Units.DAY)) {
+      return 'today';
+    } else if (now.diff(date, Units.HOUR) < 24) {
+      return 'yesterday';
+    } else {
+      return 'on ${date.MMMd}';
+    }
+  }
+
   @override
   String sentAtText({required DateTime date, required DateTime time}) =>
-      'Sent $date at $time';
+      'Sent ${_getDay(date)} at ${Jiffy(time.toLocal()).format('HH:mm')}';
 
   @override
   String get todayLabel => 'Today';
@@ -238,7 +251,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get yesterdayLabel => 'Yesterday';
 
   @override
-  String get channelIsMutedText => '  Channel is muted';
+  String get channelIsMutedText => 'Channel is muted';
 
   @override
   String get noTitleText => 'No title';

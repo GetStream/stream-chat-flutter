@@ -92,8 +92,8 @@ class UserItem extends StatelessWidget {
     return Text(
       user.online == true
           ? context.translations.userOnlineText
-          : context.translations.userLastOnlineText +
-              Jiffy(user.lastActive).fromNow(),
+          : '${context.translations.userLastOnlineText} '
+              '${Jiffy(user.lastActive).fromNow()}',
       style: chatTheme.textTheme.footnote.copyWith(
           color: chatTheme.colorTheme.textHighEmphasis.withOpacity(.5)),
     );
