@@ -1,5 +1,6 @@
 // ignore_for_file: lines_longer_than_80_chars
 import 'dart:async';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
@@ -166,10 +167,18 @@ class MessageListView extends StatefulWidget {
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
     this.messageListController,
+    this.reverse = false,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
   final MessageBuilder? messageBuilder;
+
+  /// Whether the view scrolls in the reading direction.
+  ///
+  /// Defaults to true.
+  ///
+  /// See [ScrollView.reverse].
+  final bool reverse;
 
   /// Function used to build a custom system message widget
   final SystemMessageBuilder? systemMessageBuilder;
@@ -445,7 +454,7 @@ class _MessageListViewState extends State<MessageListView> {
                   initialAlignment: initialAlignment ?? 0,
                   physics: widget.scrollPhysics,
                   itemScrollController: _scrollController,
-                  reverse: true,
+                  reverse: widget.reverse,
                   addAutomaticKeepAlives: false,
                   itemCount: itemCount,
 
@@ -608,7 +617,8 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Positioned _buildFloatingDateDivider(int itemCount) => Positioned(
-        top: 20,
+        top: widget.reverse ? 20 : null,
+        bottom: widget.reverse ? null : 20,
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
           initialData: _itemPositionListener.itemPositions.value,
           stream: _itemPositionStream,
@@ -700,8 +710,11 @@ class _MessageListViewState extends State<MessageListView> {
                       );
                     }
                   },
-                  child: StreamSvgIcon.down(
-                    color: _streamTheme.colorTheme.textHighEmphasis,
+                  child: Transform.rotate(
+                    angle: widget.reverse ? 0 : pi,
+                    child: StreamSvgIcon.down(
+                      color: _streamTheme.colorTheme.textHighEmphasis,
+                    ),
                   ),
                 ),
                 if (showUnreadCount)
