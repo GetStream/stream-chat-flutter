@@ -67,6 +67,9 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
+    i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
+      (k, e) => MapEntry(k, e as String),
+    ),
   );
 }
 
@@ -107,18 +110,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   val['pinned_by'] = readonly(instance.pinnedBy);
   val['extra_data'] = instance.extraData;
   writeNotNull('deleted_at', readonly(instance.deletedAt));
+  val['i18n'] = instance.i18n;
   return val;
 }
-
-TranslatedMessage _$TranslatedMessageFromJson(Map<String, dynamic> json) {
-  return TranslatedMessage(
-    (json['i18n'] as Map<String, dynamic>?)?.map(
-      (k, e) => MapEntry(k, e as String),
-    ),
-  );
-}
-
-Map<String, dynamic> _$TranslatedMessageToJson(TranslatedMessage instance) =>
-    <String, dynamic>{
-      'i18n': instance.i18n,
-    };
