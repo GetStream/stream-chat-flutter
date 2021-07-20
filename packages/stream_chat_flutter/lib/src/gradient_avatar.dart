@@ -27,34 +27,30 @@ class _GradientAvatarState extends State<GradientAvatar> {
   @override
   Widget build(BuildContext context) => Center(
         child: RepaintBoundary(
-          child: SizedBox(
-            width: 100,
-            height: 100,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                CustomPaint(
-                  painter: DemoPainter(widget.userId),
-                  child: const SizedBox.expand(),
-                ),
-                FittedBox(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Opacity(
-                      opacity: 0.8,
-                      child: Text(
-                        getShortenedName(widget.name),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 112,
-                          fontWeight: FontWeight.bold,
-                        ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              CustomPaint(
+                painter: DemoPainter(widget.userId),
+                child: const SizedBox.expand(),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Opacity(
+                  opacity: 0.7,
+                  child: FittedBox(
+                    child: Text(
+                      getShortenedName(widget.name),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 120,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );
