@@ -47,7 +47,7 @@ class _GradientAvatarState extends State<GradientAvatar> {
     var result = '';
 
     for (var i = 0; i < parts.length; i++) {
-      result = result + parts[i][0];
+      result = result + parts[i][0].toUpperCase();
     }
 
     return result;
@@ -112,8 +112,8 @@ class DemoPainter extends CustomPainter {
 
     final textSize = smallerSide / 3;
 
-    final dxShift = (username.length == 2 ? 1.45 : 0.75) * textSize / 2;
-    final dyShift = (username.length == 2 ? 1.0 : 1.8) * textSize / 2;
+    final dxShift = (username.length == 2 ? 1.45 : 0.9) * textSize / 2;
+    final dyShift = (username.length == 2 ? 1.0 : 1.65) * textSize / 2;
 
     final fontSize = username.length == 2 ? textSize : textSize * 1.5;
 
