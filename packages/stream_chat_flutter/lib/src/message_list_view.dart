@@ -615,6 +615,8 @@ class _MessageListViewState extends State<MessageListView> {
 
   Positioned _buildFloatingDateDivider(int itemCount) => Positioned(
         top: 20,
+        left: 0,
+        right: 0,
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
           initialData: _itemPositionListener.itemPositions.value,
           stream: _itemPositionStream,
