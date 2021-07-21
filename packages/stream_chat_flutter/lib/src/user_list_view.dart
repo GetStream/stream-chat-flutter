@@ -162,33 +162,36 @@ class _UserListViewState extends State<UserListView>
 
   @override
   Widget build(BuildContext context) {
-    final child = UserListCore(
-      errorBuilder: widget.errorBuilder ??
-          (BuildContext context, Object err) => _buildError(err),
-      emptyBuilder: widget.emptyBuilder ?? (context) => _buildEmpty(),
-      loadingBuilder: widget.loadingBuilder ??
-          (context) => LayoutBuilder(
-                builder: (context, viewportConstraints) =>
-                    SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: viewportConstraints.maxHeight,
-                    ),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
+    final child = ColoredBox(
+      color: UserListViewTheme.of(context).backgroundColor!,
+      child: UserListCore(
+        errorBuilder: widget.errorBuilder ??
+            (BuildContext context, Object err) => _buildError(err),
+        emptyBuilder: widget.emptyBuilder ?? (context) => _buildEmpty(),
+        loadingBuilder: widget.loadingBuilder ??
+            (context) => LayoutBuilder(
+                  builder: (context, viewportConstraints) =>
+                      SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: viewportConstraints.maxHeight,
+                      ),
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
                     ),
                   ),
                 ),
-              ),
-      listBuilder:
-          widget.listBuilder ?? (context, list) => _buildListView(list),
-      pagination: widget.pagination,
-      sort: widget.sort,
-      filter: widget.filter,
-      presence: widget.presence,
-      groupAlphabetically: widget.groupAlphabetically,
-      userListController: _userListController,
+        listBuilder:
+            widget.listBuilder ?? (context, list) => _buildListView(list),
+        pagination: widget.pagination,
+        sort: widget.sort,
+        filter: widget.filter,
+        presence: widget.presence,
+        groupAlphabetically: widget.groupAlphabetically,
+        userListController: _userListController,
+      ),
     );
 
     if (!widget.pullToRefresh) {

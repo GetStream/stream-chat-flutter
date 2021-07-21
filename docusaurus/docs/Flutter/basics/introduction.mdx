@@ -44,6 +44,8 @@ this package and accessible via providers and builders.
 
 Before going into the docs, let's take a small detour to look at how the elements of Stream Chat are structured.
 
+### Basic Structure
+
 There are two core elements in chat, <b>Users and Channels.</b>
 Channels are groups of one or more users that can message each other.
 In an app, you need to have a user connected to query channels.
@@ -55,7 +57,9 @@ but there is a way to create a unique chat between a certain number of people by
 
 In essence, a normal two-person chat would be a <b>distinct channel</b> created with two members (you cannot add or delete members in this channel), whereas a group created with two people would simply be a <b>non distinct channel</b> (possible to add or remove members).
 
-Note: It is also possible to add more than two people in a distinct channel which retains the same add/removal properties and resembles the Slack DMs where you can DM one or more people as well.
+:::note
+It is also possible to add more than two people in a distinct channel which retains the same add/removal properties and resembles the Slack DMs where you can DM one or more people as well.
+:::
 
 In summary, if you were creating a Whatsapp-like app, the first screen would be a <b>list of channels</b> - which on opening would show a <b>list of messages</b> that were sent by the users in the Channel.
 
