@@ -1610,9 +1610,12 @@ void main() {
       const messageId = 'test-message-id';
       const language = 'hi'; // Hindi
       const translatedMessageText = 'नमस्ते';
-      final translatedMessage = TranslatedMessage(const {
-        language: translatedMessageText,
-      });
+
+      final translatedMessage = Message(
+        i18n: const {
+          language: translatedMessageText,
+        },
+      );
 
       when(() => client.translateMessage(messageId, language)).thenAnswer(
         (_) async => TranslateMessageResponse()..message = translatedMessage,

@@ -75,7 +75,7 @@ class QueryChannelsResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class TranslateMessageResponse extends _BaseResponse {
   /// Translated message
-  late TranslatedMessage message;
+  late Message message;
 
   /// Create a new instance from a json
   static TranslateMessageResponse fromJson(Map<String, dynamic> json) =>

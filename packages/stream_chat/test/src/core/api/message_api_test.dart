@@ -371,9 +371,11 @@ void main() {
     final path = '/messages/${message.id}/translate';
 
     const translatedMessageText = 'नमस्ते';
-    final translatedMessage = TranslatedMessage(const {
-      language: translatedMessageText,
-    });
+    final translatedMessage = Message(
+      i18n: const {
+        language: translatedMessageText,
+      },
+    );
 
     when(() => client.post(
           path,
