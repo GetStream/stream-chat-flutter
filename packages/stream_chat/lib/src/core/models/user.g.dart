@@ -48,6 +48,6 @@ Map<String, dynamic> _$UserToJson(User instance) {
   writeNotNull('online', readonly(instance.online));
   writeNotNull('banned', readonly(instance.banned));
   val['extra_data'] = instance.extraData;
-  writeNotNull('language', readonly(instance.language));
+  val['language'] = instance.language;
   return val;
 }

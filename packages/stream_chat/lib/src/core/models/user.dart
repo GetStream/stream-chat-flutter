@@ -86,8 +86,7 @@ class User extends Equatable {
   /// The language this user prefers.
   ///
   /// Defaults to 'en'.
-  @JsonKey(
-      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: 'en')
+  @JsonKey(defaultValue: 'en')
   final String? language;
 
   @override
