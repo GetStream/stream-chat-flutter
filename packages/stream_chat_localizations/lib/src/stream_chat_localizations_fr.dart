@@ -239,7 +239,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
     } else if (now.diff(date, Units.HOUR) < 24) {
       return 'hier';
     } else {
-      return 'le ${date.MMMd}'; //hmm lookup french format d/MM/yyyy
+      return 'le ${date.MMMd}';
     }
   }
 
