@@ -200,12 +200,15 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
 
     final backgroundColor =
         MessageSearchListViewTheme.of(context).backgroundColor;
-    return backgroundColor != null
-        ? ColoredBox(
-            color: backgroundColor,
-            child: messageSearchListCore,
-          )
-        : messageSearchListCore;
+
+    if (backgroundColor != null) {
+      return ColoredBox(
+        color: backgroundColor,
+        child: messageSearchListCore,
+      );
+    }
+
+    return messageSearchListCore;
   }
 
   Widget _separatorBuilder(BuildContext context, int index) => Container(

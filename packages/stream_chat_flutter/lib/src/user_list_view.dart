@@ -191,12 +191,16 @@ class _UserListViewState extends State<UserListView>
 
     final backgroundColor = UserListViewTheme.of(context).backgroundColor;
 
-    final child = backgroundColor != null
-        ? ColoredBox(
-            color: backgroundColor,
-            child: userListCore,
-          )
-        : userListCore;
+    Widget child;
+
+    if (backgroundColor != null) {
+      child = ColoredBox(
+        color: backgroundColor,
+        child: userListCore,
+      );
+    } else {
+      child = userListCore;
+    }
 
     if (!widget.pullToRefresh) {
       return child;
