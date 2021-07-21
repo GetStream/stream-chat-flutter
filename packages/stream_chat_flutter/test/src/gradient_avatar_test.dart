@@ -38,6 +38,66 @@ void main() {
     },
   );
 
+  testWidgets(
+    'control special character test',
+        (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: const Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: GradientAvatar(name: 'd123@/d de:\$as', userId: 'demo123'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(GradientAvatar), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'control alpha numeric test 2',
+        (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: const Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: GradientAvatar(name: '123@/d \$as', userId: 'demo123'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(GradientAvatar), findsOneWidget);
+    },
+  );
+
   testGoldens(
     'golden test for the name "demo user"',
     (WidgetTester tester) async {
