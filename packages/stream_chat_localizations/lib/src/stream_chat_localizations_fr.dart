@@ -171,7 +171,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   @override
   String get flagMessageQuestion =>
       'Voulez-vous envoyer une copie de ce message à une'
-      '\modérateur pour une enquête plus approfondie ?';
+      '\nmodérateur pour une enquête plus approfondie ?';
 
   @override
   String get flagLabel => 'SIGNALER';
