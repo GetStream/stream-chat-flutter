@@ -289,6 +289,7 @@ class ChannelApi {
   ) async {
     final response = await _client.post(
       '${_getChannelUrl(channelId, channelType)}/stop-watching',
+      data: {},
     );
     return EmptyResponse.fromJson(response.data);
   }
