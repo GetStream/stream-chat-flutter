@@ -115,14 +115,14 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get instantCommandsLabel => 'तत्काल आदेश';
 
   @override
-  String get fileTooLargeAfterCompressionError =>
+  String fileTooLargeAfterCompressionError(double limitInMB) =>
       'फ़ाइल अपलोड करने के लिए बहुत बड़ी है। '
-      'फ़ाइल आकार सीमा 20MB है। '
+      'फ़ाइल आकार सीमा $limitInMB MB है। '
       'हमने इसे कंप्रेस करने की कोशिश की, लेकिन यह काफी नहीं था।';
 
   @override
-  String get fileTooLargeError =>
-      'फ़ाइल अपलोड करने के लिए बहुत बड़ी है। फ़ाइल आकार सीमा 20MB है।';
+  String fileTooLargeError(double limitInMB) =>
+      'फ़ाइल अपलोड करने के लिए बहुत बड़ी है। फ़ाइल आकार सीमा $limitInMB MB है।';
 
   @override
   String emojiMatchingQueryText(String query) => '"$query" से मिलते हुए इमोजी';

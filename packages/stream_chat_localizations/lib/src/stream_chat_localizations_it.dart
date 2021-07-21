@@ -117,14 +117,14 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String get instantCommandsLabel => 'Commandi istantanei';
 
   @override
-  String get fileTooLargeAfterCompressionError =>
+  String fileTooLargeAfterCompressionError(double limitInMB) =>
       'Il file è troppo grande per essere caricato. '
-      'Il file eccede il limite di 20MB. '
+      'Il file eccede il limite di $limitInMB MB. '
       'Abbiamo provato a comprimerlo, ma non è stato abbastanza.';
 
   @override
-  String get fileTooLargeError =>
-      'Il file è troppo grande per essere caricato. Il limite è di 20MB.';
+  String fileTooLargeError(double limitInMB) => '''
+Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
 
   @override
   String emojiMatchingQueryText(String query) => 'Emoji per "$query"';
