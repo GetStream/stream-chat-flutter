@@ -42,7 +42,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
 
   @override
   String threadReplyCountText(int count) =>
-      "$count Réponses au fil d'actualité";
+      "$count Réponses au fil de discussion";
 
   @override
   String attachmentsUploadProgressText({
@@ -170,7 +170,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      'Voulez-vous envoyer une copie de ce message à une'
+      'Voulez-vous envoyer une copie de ce message à un'
       '\nmodérateur pour une enquête plus approfondie ?';
 
   @override
