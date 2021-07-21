@@ -232,13 +232,21 @@ class _ChannelListViewState extends State<ChannelListView> {
       );
     }
 
-    return ColoredBox(
-      color: ChannelListViewTheme.of(context).backgroundColor!,
-      child: LazyLoadScrollView(
-        onEndOfPage: () => _channelListController.paginateData!(),
-        child: child,
-      ),
+    child = LazyLoadScrollView(
+      onEndOfPage: () => _channelListController.paginateData!(),
+      child: child,
     );
+
+    final backgroundColor = ChannelListViewTheme.of(context).backgroundColor;
+
+    if (backgroundColor != null) {
+      return ColoredBox(
+        color: backgroundColor,
+        child: child,
+      );
+    }
+
+    return child;
   }
 
   Widget _buildListView(BuildContext context, List<Channel> channels) {

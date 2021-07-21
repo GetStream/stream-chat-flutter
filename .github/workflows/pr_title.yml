@@ -19,6 +19,7 @@ jobs:
             persistence
             core
             ui
+            doc
             repo
             localization
           requireScope: true
