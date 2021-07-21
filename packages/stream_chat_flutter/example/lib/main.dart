@@ -70,16 +70,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
         theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
-        supportedLocales: const [
-          Locale('en'),
-          Locale('hi'),
-        ],
-        localizationsDelegates: const [
-          GlobalStreamChatLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
+        supportedLocales: const [Locale('en'), Locale('hi')],
+        localizationsDelegates: GlobalStreamChatLocalizations.delegates,
         builder: (context, widget) => StreamChat(
           client: client,
           child: widget,

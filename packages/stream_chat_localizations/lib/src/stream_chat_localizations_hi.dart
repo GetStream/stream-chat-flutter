@@ -350,4 +350,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get fileText => 'फ़ाइल';
+
+  @override
+  String get replyToMessageLabel => 'संदेश का जवाब';
 }

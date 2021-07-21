@@ -357,9 +357,9 @@ class MessageInputState extends State<MessageInput> {
                           color: _streamChatTheme.colorTheme.disabled,
                         ),
                       ),
-                      const Text(
-                        'Reply to Message',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      Text(
+                        context.translations.replyToMessageLabel,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       IconButton(
                         visualDensity: VisualDensity.compact,

@@ -351,4 +351,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get fileText => 'File';
+
+  @override
+  String get replyToMessageLabel => 'Reply to Message';
 }

@@ -196,6 +196,8 @@ abstract class Translations {
   String get ofText;
 
   String get fileText;
+
+  String get replyToMessageLabel;
 }
 
 class DefaultTranslations implements Translations {
@@ -548,4 +550,7 @@ class DefaultTranslations implements Translations {
 
   @override
   String get fileText => 'File';
+
+  @override
+  String get replyToMessageLabel => 'Reply to Message';
 }
