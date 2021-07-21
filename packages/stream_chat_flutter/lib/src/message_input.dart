@@ -1144,7 +1144,9 @@ class MessageInputState extends State<MessageInput> {
 
         if (mediaInfo.filesize! > widget.maxAttachmentSize) {
           _showErrorAlert(
-            context.translations.fileTooLargeAfterCompressionError,
+            context.translations.fileTooLargeAfterCompressionError(
+              widget.maxAttachmentSize / (1024 * 1024),
+            ),
           );
           return;
         }
@@ -1155,7 +1157,9 @@ class MessageInputState extends State<MessageInput> {
           path: mediaInfo.path,
         );
       } else {
-        _showErrorAlert(context.translations.fileTooLargeError);
+        _showErrorAlert(context.translations.fileTooLargeError(
+          widget.maxAttachmentSize / (1024 * 1024),
+        ));
         return;
       }
     }
@@ -1922,7 +1926,9 @@ class MessageInputState extends State<MessageInput> {
 
         if (mediaInfo.filesize! > widget.maxAttachmentSize) {
           _showErrorAlert(
-            context.translations.fileTooLargeAfterCompressionError,
+            context.translations.fileTooLargeAfterCompressionError(
+              widget.maxAttachmentSize / (1024 * 1024),
+            ),
           );
           return;
         }
@@ -1933,7 +1939,9 @@ class MessageInputState extends State<MessageInput> {
           path: mediaInfo.path,
         );
       } else {
-        _showErrorAlert(context.translations.fileTooLargeError);
+        _showErrorAlert(context.translations.fileTooLargeError(
+          widget.maxAttachmentSize / (1024 * 1024),
+        ));
         return;
       }
     }
