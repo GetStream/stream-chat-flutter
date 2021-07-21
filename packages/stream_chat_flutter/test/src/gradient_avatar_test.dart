@@ -40,7 +40,7 @@ void main() {
 
   testWidgets(
     'control special character test',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
 
@@ -56,7 +56,8 @@ void main() {
                 child: SizedBox(
                   width: 50,
                   height: 50,
-                  child: GradientAvatar(name: 'd123@/d de:\$as', userId: 'demo123'),
+                  child: GradientAvatar(
+                      name: 'd123@/d de:\$as', userId: 'demo123'),
                 ),
               ),
             ),
@@ -70,7 +71,7 @@ void main() {
 
   testWidgets(
     'control alpha numeric test 2',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
 
