@@ -61,7 +61,7 @@ void main() {
 
   testGoldens(
     'golden test for the name "demo"',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
