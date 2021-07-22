@@ -114,9 +114,26 @@ void main() {
         isNotNull,
       );
       expect(localizations.photosLabel, isNotNull);
+      // today
       expect(
         localizations.sentAtText(
           date: DateTime.now(),
+          time: DateTime.now(),
+        ),
+        isNotNull,
+      );
+      // yesterday
+      expect(
+        localizations.sentAtText(
+          date: DateTime.now().subtract(const Duration(days: 1)),
+          time: DateTime.now(),
+        ),
+        isNotNull,
+      );
+      // any other day
+      expect(
+        localizations.sentAtText(
+          date: DateTime.now().subtract(const Duration(days: 3)),
           time: DateTime.now(),
         ),
         isNotNull,
@@ -129,6 +146,7 @@ void main() {
       expect(localizations.sendingFirstMessageLabel, isNotNull);
       expect(localizations.startAChatLabel, isNotNull);
       expect(localizations.loadingChannelsError, isNotNull);
+      expect(localizations.deleteConversationLabel, isNotNull);
       expect(localizations.deleteConversationQuestion, isNotNull);
       expect(localizations.streamChatLabel, isNotNull);
       expect(localizations.searchingForNetworkText, isNotNull);
@@ -148,6 +166,7 @@ void main() {
       expect(localizations.leaveConversationLabel, isNotNull);
       expect(localizations.leaveConversationQuestion, isNotNull);
       expect(localizations.showInChatLabel, isNotNull);
+      expect(localizations.saveImageLabel, isNotNull);
       expect(localizations.saveVideoLabel, isNotNull);
       expect(localizations.uploadErrorLabel, isNotNull);
       expect(localizations.giphyLabel, isNotNull);

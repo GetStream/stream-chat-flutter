@@ -229,21 +229,24 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get photosLabel => 'Foto';
 
   String _getDay(DateTime dateTime) {
-    final now = Jiffy(DateTime.now());
-    final date = Jiffy(dateTime);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = DateTime(now.year, now.month, now.day - 1);
 
-    if (date.isSame(now, Units.DAY)) {
+    final date = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+    if (date == today) {
       return 'oggi';
-    } else if (now.diff(date, Units.HOUR) < 24) {
+    } else if (date == yesterday) {
       return 'ieri';
     } else {
-      return 'il ${date.MMMd}';
+      return 'il ${Jiffy(date).MMMd}';
     }
   }
 
   @override
-  String sentAtText({required DateTime date, required DateTime time}) => '''
-Inviato il ${_getDay(date)} alle ${Jiffy(time.toLocal()).format('HH:mm')}''';
+  String sentAtText({required DateTime date, required DateTime time}) =>
+      "Inviato ${_getDay(date)} alle ${Jiffy(time.toLocal()).format('HH:mm')}";
 
   @override
   String get todayLabel => 'Oggi';

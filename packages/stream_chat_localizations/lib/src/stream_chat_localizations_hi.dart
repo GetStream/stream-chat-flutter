@@ -227,15 +227,18 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get photosLabel => 'तस्वीरें';
 
   String _getDay(DateTime dateTime) {
-    final now = Jiffy(DateTime.now());
-    final date = Jiffy(dateTime);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = DateTime(now.year, now.month, now.day - 1);
 
-    if (date.isSame(now, Units.DAY)) {
+    final date = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+    if (date == today) {
       return 'आज';
-    } else if (now.diff(date, Units.HOUR) < 24) {
+    } else if (date == yesterday) {
       return 'कल';
     } else {
-      return '${date.MMMd} को';
+      return '${Jiffy(date).MMMd} को';
     }
   }
 
