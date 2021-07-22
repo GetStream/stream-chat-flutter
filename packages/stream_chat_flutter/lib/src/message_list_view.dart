@@ -166,10 +166,14 @@ class MessageListView extends StatefulWidget {
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
     this.messageListController,
+    this.paginationLimit = 20,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
   final MessageBuilder? messageBuilder;
+
+  /// Limit used during pagination
+  final int paginationLimit;
 
   /// Function used to build a custom system message widget
   final SystemMessageBuilder? systemMessageBuilder;
@@ -328,6 +332,7 @@ class _MessageListViewState extends State<MessageListView> {
 
   @override
   Widget build(BuildContext context) => MessageListCore(
+        paginationLimit: widget.paginationLimit,
         messageFilter: widget.messageFilter,
         loadingBuilder: widget.loadingBuilder ??
             (context) => const Center(
@@ -655,7 +660,9 @@ class _MessageListViewState extends State<MessageListView> {
       );
 
   Future<void> _paginateData(
-          StreamChannelState? channel, QueryDirection direction) =>
+    StreamChannelState? channel,
+    QueryDirection direction,
+  ) =>
       _messageListController.paginateData!(direction: direction);
 
   int? _getTopElementIndex(Iterable<ItemPosition> values) {
