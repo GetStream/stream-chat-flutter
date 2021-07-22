@@ -99,9 +99,8 @@ void main() {
   }
 
   group('getChannels', () {
-    
     tearDown(() async => database.flush());
-    
+
     final filter = Filter.in_('members', const ['testUserId']);
 
     test('should return empty list of channels', () async {
