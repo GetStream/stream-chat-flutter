@@ -3,7 +3,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
   test('Default translations should exist', () {
-    final translations = DefaultTranslations.instance;
+    const translations = DefaultTranslations.instance;
     expect(translations.launchUrlError, isNotNull);
     expect(translations.loadingUsersError, isNotNull);
     expect(translations.noUsersLabel, isNotNull);
