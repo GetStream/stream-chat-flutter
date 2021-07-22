@@ -82,6 +82,7 @@ class ChannelModel {
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly, defaultValue: 0)
   final int memberCount;
 
+  /// The number of seconds in a cooldown
   @JsonKey(includeIfNull: false)
   final int cooldown;
 
