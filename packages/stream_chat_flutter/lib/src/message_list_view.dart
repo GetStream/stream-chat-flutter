@@ -166,11 +166,19 @@ class MessageListView extends StatefulWidget {
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
     this.messageListController,
+    this.reverse = true,
     this.paginationLimit = 20,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
   final MessageBuilder? messageBuilder;
+
+  /// Whether the view scrolls in the reading direction.
+  ///
+  /// Defaults to true.
+  ///
+  /// See [ScrollView.reverse].
+  final bool reverse;
 
   /// Limit used during pagination
   final int paginationLimit;
@@ -450,7 +458,7 @@ class _MessageListViewState extends State<MessageListView> {
                   initialAlignment: initialAlignment ?? 0,
                   physics: widget.scrollPhysics,
                   itemScrollController: _scrollController,
-                  reverse: true,
+                  reverse: widget.reverse,
                   addAutomaticKeepAlives: false,
                   itemCount: itemCount,
 
@@ -626,7 +634,8 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Positioned _buildFloatingDateDivider(int itemCount) => Positioned(
-        top: 20,
+        top: widget.reverse ? 20 : null,
+        bottom: widget.reverse ? null : 20,
         left: 0,
         right: 0,
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
@@ -722,9 +731,13 @@ class _MessageListViewState extends State<MessageListView> {
                       );
                     }
                   },
-                  child: StreamSvgIcon.down(
-                    color: _streamTheme.colorTheme.textHighEmphasis,
-                  ),
+                  child: widget.reverse
+                      ? StreamSvgIcon.down(
+                          color: _streamTheme.colorTheme.textHighEmphasis,
+                        )
+                      : StreamSvgIcon.up(
+                          color: _streamTheme.colorTheme.textHighEmphasis,
+                        ),
                 ),
                 if (showUnreadCount)
                   Positioned(

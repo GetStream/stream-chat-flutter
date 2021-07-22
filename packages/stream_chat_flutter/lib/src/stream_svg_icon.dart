@@ -38,6 +38,18 @@ class StreamSvgIcon extends StatelessWidget {
       );
 
   /// [StreamSvgIcon] type
+  factory StreamSvgIcon.up({
+    double? size,
+    Color? color,
+  }) =>
+      StreamSvgIcon(
+        assetName: 'Icon_up.svg',
+        color: color,
+        width: size,
+        height: size,
+      );
+
+  /// [StreamSvgIcon] type
   factory StreamSvgIcon.attach({
     double? size,
     Color? color,
