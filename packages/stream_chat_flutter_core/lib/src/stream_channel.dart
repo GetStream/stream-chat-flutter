@@ -147,9 +147,18 @@ class StreamChannelState extends State<StreamChannel> {
   }
 
   /// Calls [channel.query] updating [queryMessage] stream
-  Future<void> queryMessages({QueryDirection? direction = QueryDirection.top}) {
-    if (direction == QueryDirection.top) return _queryTopMessages();
-    return _queryBottomMessages();
+  Future<void> queryMessages({
+    QueryDirection? direction = QueryDirection.top,
+    int limit = 20,
+  }) {
+    if (direction == QueryDirection.top) {
+      return _queryTopMessages(
+        limit: limit,
+      );
+    }
+    return _queryBottomMessages(
+      limit: limit,
+    );
   }
 
   /// Calls [channel.getReplies] updating [queryMessage] stream

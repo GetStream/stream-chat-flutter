@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added `MessageListView.paginationLimit`
 - Allow the various ListView widgets to be themed via ThemeData classes
 
 🐞 Fixed
