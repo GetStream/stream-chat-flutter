@@ -54,8 +54,8 @@ void main() {
     expect(translations.searchGifLabel, isNotNull);
     expect(translations.writeAMessageLabel, isNotNull);
     expect(translations.instantCommandsLabel, isNotNull);
-    expect(translations.fileTooLargeAfterCompressionError, isNotNull);
-    expect(translations.fileTooLargeError, isNotNull);
+    expect(translations.fileTooLargeAfterCompressionError(33), isNotNull);
+    expect(translations.fileTooLargeError(33), isNotNull);
     expect(translations.emojiMatchingQueryText('sahil'), isNotNull);
     expect(translations.addAFileLabel, isNotNull);
     expect(translations.photoFromCameraLabel, isNotNull);
