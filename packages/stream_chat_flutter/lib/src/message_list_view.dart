@@ -391,7 +391,7 @@ class _MessageListViewState extends State<MessageListView> {
             1 // parent message
         ;
 
-    return Stack(
+    final child = Stack(
       alignment: Alignment.center,
       children: [
         ConnectionStatusBuilder(
@@ -533,7 +533,9 @@ class _MessageListViewState extends State<MessageListView> {
                   },
                   itemBuilder: (context, i) {
                     if (i == itemCount - 1) {
-                      if (widget.parentMessage == null) return const Offstage();
+                      if (widget.parentMessage == null) {
+                        return const Offstage();
+                      }
                       return buildParentMessage(widget.parentMessage!);
                     }
 
@@ -589,6 +591,17 @@ class _MessageListViewState extends State<MessageListView> {
           _buildFloatingDateDivider(itemCount),
       ],
     );
+
+    final backgroundColor = MessageListViewTheme.of(context).backgroundColor;
+
+    if (backgroundColor != null) {
+      return ColoredBox(
+        color: backgroundColor,
+        child: child,
+      );
+    }
+
+    return child;
   }
 
   Widget _buildThreadSeparator() {
@@ -614,6 +627,8 @@ class _MessageListViewState extends State<MessageListView> {
 
   Positioned _buildFloatingDateDivider(int itemCount) => Positioned(
         top: 20,
+        left: 0,
+        right: 0,
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
           initialData: _itemPositionListener.itemPositions.value,
           stream: _itemPositionStream,

@@ -160,7 +160,7 @@ class _UserListViewState extends State<UserListView>
 
   @override
   Widget build(BuildContext context) {
-    final child = UserListCore(
+    final userListCore = UserListCore(
       errorBuilder: widget.errorBuilder ??
           (BuildContext context, Object err) => _buildError(err),
       emptyBuilder: widget.emptyBuilder ?? (context) => _buildEmpty(),
@@ -188,6 +188,19 @@ class _UserListViewState extends State<UserListView>
       groupAlphabetically: widget.groupAlphabetically,
       userListController: _userListController,
     );
+
+    final backgroundColor = UserListViewTheme.of(context).backgroundColor;
+
+    Widget child;
+
+    if (backgroundColor != null) {
+      child = ColoredBox(
+        color: backgroundColor,
+        child: userListCore,
+      );
+    } else {
+      child = userListCore;
+    }
 
     if (!widget.pullToRefresh) {
       return child;
