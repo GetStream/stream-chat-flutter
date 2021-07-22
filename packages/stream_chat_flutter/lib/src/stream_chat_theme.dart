@@ -1,12 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/channel_header.dart';
 import 'package:stream_chat_flutter/src/channel_preview.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/gradient_avatar.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/reaction_icon.dart';
-import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -310,10 +309,9 @@ class StreamChatThemeData {
       colorTheme: colorTheme,
       primaryIconTheme: iconTheme,
       defaultUserImage: (context, user) => Center(
-        child: CachedNetworkImage(
-          filterQuality: FilterQuality.high,
-          imageUrl: getRandomPicUrl(user),
-          fit: BoxFit.cover,
+        child: GradientAvatar(
+          name: user.name,
+          userId: user.id,
         ),
       ),
       channelPreviewTheme: channelPreviewTheme,
