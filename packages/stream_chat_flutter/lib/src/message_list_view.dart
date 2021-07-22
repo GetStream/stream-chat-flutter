@@ -179,7 +179,7 @@ class MessageListView extends StatefulWidget {
   ///
   /// See [ScrollView.reverse].
   final bool reverse;
-  
+
   /// Limit used during pagination
   final int paginationLimit;
 
