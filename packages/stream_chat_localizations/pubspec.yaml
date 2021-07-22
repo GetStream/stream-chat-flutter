@@ -1,0 +1,19 @@
+name: stream_chat_localizations
+description: A new Flutter project.
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  stream_chat_flutter: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

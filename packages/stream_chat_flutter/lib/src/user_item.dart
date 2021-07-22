@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_list_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 ///
 /// It shows the current [User] preview.
@@ -86,12 +87,13 @@ class UserItem extends StatelessWidget {
     );
   }
 
-  Widget _buildLastActive(context) {
+  Widget _buildLastActive(BuildContext context) {
     final chatTheme = StreamChatTheme.of(context);
     return Text(
       user.online == true
-          ? 'Online'
-          : 'Last online ${Jiffy(user.lastActive).fromNow()}',
+          ? context.translations.userOnlineText
+          : '${context.translations.userLastOnlineText} '
+              '${Jiffy(user.lastActive).fromNow()}',
       style: chatTheme.textTheme.footnote.copyWith(
           color: chatTheme.colorTheme.textHighEmphasis.withOpacity(.5)),
     );

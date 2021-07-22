@@ -717,7 +717,7 @@ void main() {
       await tester.tap(find.text('Delete Message'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Delete message'), findsOneWidget);
+      expect(find.text('Delete Message'), findsOneWidget);
 
       await tester.tap(find.text('DELETE'));
       await tester.pumpAndSettle();
@@ -773,7 +773,7 @@ void main() {
       await tester.tap(find.text('Delete Message'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Delete message'), findsOneWidget);
+      expect(find.text('Delete Message'), findsOneWidget);
 
       await tester.tap(find.text('DELETE'));
       await tester.pumpAndSettle();

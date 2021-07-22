@@ -3,6 +3,7 @@ import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/message_search_item.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Callback called when tapping on a user
 typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
@@ -140,6 +141,7 @@ class MessageSearchListView extends StatefulWidget {
 
 class _MessageSearchListViewState extends State<MessageSearchListView> {
   late final _defaultController = MessageSearchListController();
+
   MessageSearchListController get _messageSearchListController =>
       widget.messageSearchListController ?? _defaultController;
 
@@ -161,8 +163,8 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                     constraints: BoxConstraints(
                       minHeight: viewportConstraints.maxHeight,
                     ),
-                    child: const Center(
-                      child: Text('There are no messages currently'),
+                    child: Center(
+                      child: Text(context.translations.emptyMessagesText),
                     ),
                   ),
                 ),
@@ -176,7 +178,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
               showMessage: widget.showErrorTile,
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
-              message: 'An error occurred.',
+              message: context.translations.genericErrorText,
               child: Container(),
             );
           },
@@ -240,10 +242,10 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                   .colorTheme
                   .accentError
                   .withOpacity(.2),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Center(
-                  child: Text('Error loading messages'),
+                  child: Text(context.translations.loadingMessagesError),
                 ),
               ),
             );
@@ -306,7 +308,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                 horizontal: 8,
               ),
               child: Text(
-                '${items.length} results',
+                context.translations.resultCountText(items.length),
                 style: TextStyle(
                   color: chatThemeData.colorTheme.textLowEmphasis,
                 ),

@@ -33,6 +33,8 @@ dependencies:
   #    path: ../../stream_chat_flutter_core
   stream_chat_flutter:
     path: ../
+  stream_chat_localizations:
+    path: ../../stream_chat_localizations
   stream_chat_persistence:
     path: ../../stream_chat_persistence
 

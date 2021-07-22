@@ -13,7 +13,7 @@ scripts:
 
   analyze:
     run: |
-      melos exec -c 4 --ignore="*example*" -- \
+      melos exec -c 5 --ignore="*example*" -- \
         dart analyze --fatal-infos .
     description: |
       Run `dart analyze` in all packages.
@@ -26,7 +26,7 @@ scripts:
 
   lint:pub:
     run: |
-      melos exec -c 4 --no-private --ignore="*example*" -- \
+      melos exec -c 5 --no-private --ignore="*example*" -- \
             pub publish --dry-run
     description: |
       Run `pub publish --dry-run` in all packages.
@@ -56,7 +56,7 @@ scripts:
       dir-exists: test
 
   test:flutter:
-    run: melos exec -c 3 --fail-fast -- "flutter test --coverage"
+    run: melos exec -c 4 --fail-fast -- "flutter test --coverage"
     description: Run Flutter tests for a specific package in this project.
     select-package:
       flutter: true
@@ -64,7 +64,7 @@ scripts:
 
   coverage:ignore-file:
     run: |
-      melos exec -c 4 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/remove-from-coverage.sh"
+      melos exec -c 5 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/remove-from-coverage.sh"
     description: Removes all the ignored files from the coverage report.
     select-package:
       dir-exists: coverage

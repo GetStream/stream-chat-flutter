@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Widget to show the current list of typing users
 class TypingIndicator extends StatelessWidget {
@@ -63,8 +64,7 @@ class TypingIndicator extends StatelessWidget {
                         height: 4,
                       ),
                       Text(
-                        // ignore: lines_longer_than_80_chars
-                        '  ${data.elementAt(0).name}${data.length == 1 ? '' : ' and ${data.length - 1} more'} ${data.length == 1 ? 'is' : 'are'} typing',
+                        context.translations.userTypingText(data),
                         maxLines: 1,
                         style: style,
                       ),

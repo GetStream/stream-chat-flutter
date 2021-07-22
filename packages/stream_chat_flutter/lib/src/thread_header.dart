@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/thread_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/thread_header_paint.png)
@@ -111,7 +112,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'with ',
+              '${context.translations.withText} ',
               style: chatThemeData.channelTheme.channelHeaderTheme.subtitle,
             ),
             Flexible(
@@ -149,7 +150,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
             children: [
               title ??
                   Text(
-                    'Thread Reply',
+                    context.translations.threadReplyLabel,
                     style: chatThemeData.channelTheme.channelHeaderTheme.title,
                   ),
               const SizedBox(height: 2),
