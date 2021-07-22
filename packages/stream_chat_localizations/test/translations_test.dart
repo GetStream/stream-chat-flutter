@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-import 'package:stream_chat_localizations/stream_chat_localizations.dart';
+import 'package:stream_chat_localizations/src/stream_chat_localizations.dart';
 
 void main() {
   for (final language in kStreamChatSupportedLanguages) {
@@ -183,12 +182,8 @@ void main() {
 
   test('should throw if try to load locale which is not supported', () async {
     const locale = Locale('not-supported-locale');
-    expect(
-      GlobalStreamChatLocalizations.delegate.isSupported(locale),
-      isFalse,
-    );
     try {
-      await GlobalStreamChatLocalizations.delegate.load(locale);
+      getStreamChatTranslation(locale);
     } catch (e) {
       expect(e, isA<AssertionError>());
     }
