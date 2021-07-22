@@ -30,7 +30,6 @@ class CustomGoldenFileComparator extends LocalFileComparator {
   }
 
   @override
-  Future<void> update(Uri golden, Uint8List imageBytes) {
-    return super.update(golden, imageBytes);
-  }
+  Future<void> update(Uri golden, Uint8List imageBytes) =>
+      super.update(golden, imageBytes);
 }
