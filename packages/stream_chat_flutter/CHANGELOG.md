@@ -1,3 +1,7 @@
+## 1.5.5
+
+- Fix floating date not having a fixed width
+
 ## 1.5.4
 
 - Updated `stream_chat_core` dependency

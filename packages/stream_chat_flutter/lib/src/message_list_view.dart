@@ -552,6 +552,8 @@ class _MessageListViewState extends State<MessageListView> {
         if (widget.showScrollToBottom) _buildScrollToBottom(),
         Positioned(
           top: 20.0,
+          left: 0,
+          right: 0,
           child: ValueListenableBuilder<Iterable<ItemPosition>>(
             valueListenable: _itemPositionListener.itemPositions,
             builder: (context, values, _) {
