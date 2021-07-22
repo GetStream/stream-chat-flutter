@@ -1,6 +1,6 @@
 part of 'stream_chat_localizations.dart';
 
-/// The translations for English (`fr`).
+/// The translations for French (`fr`).
 class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for French.
   const StreamChatLocalizationsFr({String localeName = 'fr'})
@@ -42,7 +42,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
 
   @override
   String threadReplyCountText(int count) =>
-      "$count Réponses au fil de discussion";
+      '$count Réponses au fil de discussion';
 
   @override
   String attachmentsUploadProgressText({
@@ -80,7 +80,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Message supprimé';
 
   @override
-  String get messageReactionsText => 'Réactions aux messages';
+  String get messageReactionsLabel => 'Réactions aux messages';
 
   @override
   String get emptyChatMessagesText => 'Pas encore de chats ici...';
@@ -124,7 +124,8 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
 
   @override
   String fileTooLargeError(double limitInMB) =>
-      'Le fichier est trop volumineux pour être téléchargé. La taille limite du fichier est de $limitInMB Mo.';
+      'Le fichier est trop volumineux pour être téléchargé. '
+      'La taille limite du fichier est de $limitInMB Mo.';
 
   @override
   String emojiMatchingQueryText(String query) =>
@@ -152,7 +153,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get okLabel => 'OK';
 
   @override
-  String get somethingWentWrongLabel => 'Quelque chose a mal tourné';
+  String get somethingWentWrongError => 'Quelque chose a mal tourné';
 
   @override
   String get addMoreFilesLabel => "Ajouter d'autres fichiers";
@@ -283,7 +284,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get streamChatLabel => 'Stream Chat';
 
   @override
-  String get searchingForNetworkLabel => 'Recherche de réseau';
+  String get searchingForNetworkText => 'Recherche de réseau';
 
   @override
   String get offlineLabel => 'Hors ligne...';

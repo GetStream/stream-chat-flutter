@@ -7,7 +7,6 @@ import 'package:stream_chat_flutter/src/attachment_actions_modal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'mocks.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 class MockAttachmentDownloader extends Mock {
   ProgressCallback? progressCallback;

@@ -79,7 +79,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Message deleted';
 
   @override
-  String get messageReactionsText => 'Message Reactions';
+  String get messageReactionsLabel => 'Message Reactions';
 
   @override
   String get emptyChatMessagesText => 'No chats here yet...';
@@ -149,7 +149,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get okLabel => 'OK';
 
   @override
-  String get somethingWentWrongLabel => 'Something went wrong';
+  String get somethingWentWrongError => 'Something went wrong';
 
   @override
   String get addMoreFilesLabel => 'Add more files';
@@ -280,7 +280,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get streamChatLabel => 'Stream Chat';
 
   @override
-  String get searchingForNetworkLabel => 'Searching for Network';
+  String get searchingForNetworkText => 'Searching for Network';
 
   @override
   String get offlineLabel => 'Offline...';

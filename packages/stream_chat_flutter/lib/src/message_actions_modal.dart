@@ -365,7 +365,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         size: 24,
       ),
       details: context.translations.operationCouldNotBeCompletedText,
-      title: context.translations.somethingWentWrongLabel,
+      title: context.translations.somethingWentWrongError,
       okText: context.translations.okLabel,
     );
   }

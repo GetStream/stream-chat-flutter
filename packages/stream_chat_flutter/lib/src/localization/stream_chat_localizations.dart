@@ -7,7 +7,7 @@ import 'package:stream_chat_flutter/src/localization/translations.dart'
 ///
 /// See also:
 ///
-///  * [GlobalStreamChatLocalizations], which provides material localizations
+///  * [GlobalStreamChatLocalizations], which provides stream chat localizations
 ///    for many languages.
 abstract class StreamChatLocalizations implements Translations {
   /// The `StreamChatLocalizations` from the closest [Localizations] instance

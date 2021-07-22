@@ -116,7 +116,7 @@ class ChannelInfo extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            context.translations.searchingForNetworkLabel,
+            context.translations.searchingForNetworkText,
             style: textStyle,
           ),
         ],

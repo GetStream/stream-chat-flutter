@@ -51,7 +51,7 @@ void main() {
       expect(localizations.resultCountText(3), isNotNull);
       expect(localizations.messageDeletedText, isNotNull);
       expect(localizations.messageDeletedLabel, isNotNull);
-      expect(localizations.messageReactionsText, isNotNull);
+      expect(localizations.messageReactionsLabel, isNotNull);
       expect(localizations.emptyChatMessagesText, isNotNull);
       expect(localizations.threadSeparatorText(3), isNotNull);
       expect(localizations.connectedLabel, isNotNull);
@@ -72,7 +72,7 @@ void main() {
       expect(localizations.uploadAVideoLabel, isNotNull);
       expect(localizations.videoFromCameraLabel, isNotNull);
       expect(localizations.okLabel, isNotNull);
-      expect(localizations.somethingWentWrongLabel, isNotNull);
+      expect(localizations.somethingWentWrongError, isNotNull);
       expect(localizations.addMoreFilesLabel, isNotNull);
       expect(localizations.enablePhotoAndVideoAccessMessage, isNotNull);
       expect(localizations.allowGalleryAccessMessage, isNotNull);
@@ -131,7 +131,7 @@ void main() {
       expect(localizations.loadingChannelsError, isNotNull);
       expect(localizations.deleteConversationQuestion, isNotNull);
       expect(localizations.streamChatLabel, isNotNull);
-      expect(localizations.searchingForNetworkLabel, isNotNull);
+      expect(localizations.searchingForNetworkText, isNotNull);
       expect(localizations.offlineLabel, isNotNull);
       expect(localizations.tryAgainLabel, isNotNull);
       // 1 member

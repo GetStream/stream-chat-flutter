@@ -6,8 +6,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     show StreamChatLocalizations, User;
 
 part 'stream_chat_localizations_en.dart';
+
 part 'stream_chat_localizations_fr.dart';
+
 part 'stream_chat_localizations_it.dart';
+
 part 'stream_chat_localizations_hi.dart';
 
 /// The set of supported languages, as language code strings.
@@ -28,8 +31,8 @@ const kStreamChatSupportedLanguages = {
 /// Creates a [GlobalStreamChatLocalizations] instance for the given `locale`.
 ///
 /// All of the function's arguments except `locale` will be passed to the
-/// [GlobalStreamChatLocalizations] constructor. (The `localeName` argument of that
-/// constructor is specified by the actual subclass constructor by this
+/// [GlobalStreamChatLocalizations] constructor. (The `localeName` argument
+/// of that constructor is specified by the actual subclass constructor by this
 /// function.)
 ///
 /// The following locales are supported by this package:
@@ -92,13 +95,15 @@ abstract class GlobalStreamChatLocalizations
     required String localeName,
   }) : _localeName = localeName;
 
+  // ignore: unused_field
   final String _localeName;
 
   /// A [LocalizationsDelegate] for [StreamChatLocalizations].
   ///
-  /// Most internationalized apps will use [GlobalStreamChatLocalizations.delegates]
-  /// as the value of [MaterialApp.localizationsDelegates] to include
-  /// the localizations for both the flutter and stream chat widget libraries.
+  /// Most internationalized apps will use
+  /// [GlobalStreamChatLocalizations.delegates] as the value of
+  /// [MaterialApp.localizationsDelegates] to include the localizations for both
+  /// the flutter and stream chat widget libraries.
   static const LocalizationsDelegate<StreamChatLocalizations> delegate =
       _StreamChatLocalizationsDelegate();
 

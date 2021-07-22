@@ -2121,7 +2121,7 @@ class MessageInputState extends State<MessageInput> {
             height: 26,
           ),
           Text(
-            context.translations.somethingWentWrongLabel,
+            context.translations.somethingWentWrongError,
             style: _streamChatTheme.textTheme.headlineBold,
           ),
           const SizedBox(

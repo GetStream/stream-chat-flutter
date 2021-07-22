@@ -155,7 +155,7 @@ class MessageReactionsModal extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              context.translations.messageReactionsText,
+              context.translations.messageReactionsLabel,
               style: chatThemeData.textTheme.headlineBold,
             ),
             const SizedBox(height: 16),

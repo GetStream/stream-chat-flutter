@@ -1,8 +1,8 @@
 part of 'stream_chat_localizations.dart';
 
-/// The translations for English (`hi`).
+/// The translations for Italian (`it`).
 class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
-  /// Create an instance of the translation bundle for Hindi.
+  /// Create an instance of the translation bundle for Italian.
   const StreamChatLocalizationsIt({String localeName = 'it'})
       : super(localeName: localeName);
 
@@ -80,7 +80,7 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Messaggio cancellato';
 
   @override
-  String get messageReactionsText => 'Reazioni al messaggio';
+  String get messageReactionsLabel => 'Reazioni al messaggio';
 
   @override
   String get emptyChatMessagesText => 'Nessuna conversazione al momento...';
@@ -151,7 +151,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get okLabel => 'Ok';
 
   @override
-  String get somethingWentWrongLabel => 'Qualcosa è andato storto';
+  String get somethingWentWrongError => 'Qualcosa è andato storto';
 
   @override
   String get addMoreFilesLabel => 'Aggiungi altri file';
@@ -281,7 +281,7 @@ Inviato il ${_getDay(date)} alle ${Jiffy(time.toLocal()).format('HH:mm')}''';
   String get streamChatLabel => 'Stream Chat';
 
   @override
-  String get searchingForNetworkLabel => 'Cercando una connessione';
+  String get searchingForNetworkText => 'Cercando una connessione';
 
   @override
   String get offlineLabel => 'Offline...';

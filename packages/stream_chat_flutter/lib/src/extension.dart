@@ -106,6 +106,8 @@ extension BuildContextX on BuildContext {
   double get textScaleFactor =>
       MediaQuery.maybeOf(this)?.textScaleFactor ?? 1.0;
 
+  /// Retrieves current translations according to locale
+  /// Defaults to [DefaultTranslations]
   Translations get translations =>
       StreamChatLocalizations.of(this) ?? DefaultTranslations.instance;
 }

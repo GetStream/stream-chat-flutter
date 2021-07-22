@@ -226,7 +226,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            context.translations.searchingForNetworkLabel,
+            context.translations.searchingForNetworkText,
             style: StreamChatTheme.of(context)
                 .channelListHeaderTheme
                 .title
