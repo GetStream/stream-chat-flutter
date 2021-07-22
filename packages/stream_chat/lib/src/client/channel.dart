@@ -127,7 +127,7 @@ class Channel {
   /// Cooldown count as a stream
   Stream<int?>? get cooldownStream {
     _checkInitialized();
-    return state?.cooldownStateStream.map((cs) => cs.channel?.cooldown);
+    return state?.channelStateStream.map((cs) => cs.channel?.cooldown);
   }
 
   /// Channel creation date
