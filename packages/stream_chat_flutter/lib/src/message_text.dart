@@ -29,6 +29,7 @@ class MessageText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //print(StreamChat.of(context).user);
     final text = _replaceMentions(message.text ?? '').replaceAll('\n', '\n\n');
 
     final themeData = Theme.of(context);

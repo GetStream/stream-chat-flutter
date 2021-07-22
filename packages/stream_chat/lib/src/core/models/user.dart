@@ -37,6 +37,7 @@ class User extends Equatable {
     'online',
     'banned',
     'teams',
+    'language',
   ];
 
   /// User id
@@ -126,6 +127,7 @@ class User extends Equatable {
     Map<String, Object?>? extraData,
     bool? banned,
     List<String>? teams,
+    String? language,
   }) =>
       User(
         id: id ?? this.id,
@@ -137,6 +139,7 @@ class User extends Equatable {
         extraData: extraData ?? this.extraData,
         banned: banned ?? this.banned,
         teams: teams ?? this.teams,
+        language: language ?? this.language,
       );
 
   @override
@@ -150,5 +153,6 @@ class User extends Equatable {
         online,
         banned,
         extraData,
+        language,
       ];
 }
