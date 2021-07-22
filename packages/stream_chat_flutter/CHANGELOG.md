@@ -2,7 +2,11 @@
 
 ✅ Added
 
-- Added `MessageListView.reverse` property
+- Allow the various ListView widgets to be themed via ThemeData classes
+
+🐞 Fixed
+
+- Fix floating date divider not having a fixed size
 
 ## 2.0.0
 

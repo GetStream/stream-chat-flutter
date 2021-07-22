@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- [#563](https://github.com/GetStream/stream-chat-flutter/issues/563): `Channel.stopWatching()` not working 
+
 ## 2.0.0
 
 🛑️ Breaking Changes from `1.5.3`

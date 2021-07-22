@@ -231,10 +231,21 @@ class _ChannelListViewState extends State<ChannelListView> {
       );
     }
 
-    return LazyLoadScrollView(
+    child = LazyLoadScrollView(
       onEndOfPage: () => _channelListController.paginateData!(),
       child: child,
     );
+
+    final backgroundColor = ChannelListViewTheme.of(context).backgroundColor;
+
+    if (backgroundColor != null) {
+      return ColoredBox(
+        color: backgroundColor,
+        child: child,
+      );
+    }
+
+    return child;
   }
 
   Widget _buildListView(BuildContext context, List<Channel> channels) {
@@ -571,18 +582,13 @@ class _ChannelListViewState extends State<ChannelListView> {
                         },
                 ),
             ],
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: chatThemeData.colorTheme.appBg,
-          ),
-          child: widget.channelPreviewBuilder?.call(context, channel) ??
-              ChannelPreview(
-                onLongPress: widget.onChannelLongPress,
-                channel: channel,
-                onImageTap: () => widget.onImageTap?.call(channel),
-                onTap: (channel) => onTap(channel, widget.channelWidget),
-              ),
-        ),
+        child: widget.channelPreviewBuilder?.call(context, channel) ??
+            ChannelPreview(
+              onLongPress: widget.onChannelLongPress,
+              channel: channel,
+              onImageTap: () => widget.onImageTap?.call(channel),
+              onTap: (channel) => onTap(channel, widget.channelWidget),
+            ),
       ),
     );
   }
