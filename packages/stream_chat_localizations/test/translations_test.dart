@@ -161,4 +161,25 @@ void main() {
       expect(localizations.replyToMessageLabel, isNotNull);
     });
   }
+
+  test('should throw if try to load locale which is not supported', () async {
+    const locale = Locale('not-supported-locale');
+    expect(
+      GlobalStreamChatLocalizations.delegate.isSupported(locale),
+      isFalse,
+    );
+    try {
+      await GlobalStreamChatLocalizations.delegate.load(locale);
+    } catch (e) {
+      expect(e, isA<AssertionError>());
+    }
+  });
+
+  test('`.toString`', () {
+    final supportedLocales = kStreamChatSupportedLanguages;
+    expect(
+      GlobalStreamChatLocalizations.delegate.toString(),
+      'GlobalStreamChatLocalizations.delegate($supportedLocales locales)',
+    );
+  });
 }
