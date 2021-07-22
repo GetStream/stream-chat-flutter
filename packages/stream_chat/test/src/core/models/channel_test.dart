@@ -12,6 +12,7 @@ void main() {
       expect(channel.cid, equals('livestream:test'));
       expect(channel.extraData['cats'], equals(true));
       expect(channel.extraData['fruit'], equals(['bananas', 'apples']));
+      expect(channel.cooldown, equals(0));
     });
 
     test('should serialize to json correctly', () {

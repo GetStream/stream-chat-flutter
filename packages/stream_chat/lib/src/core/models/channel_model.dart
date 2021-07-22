@@ -23,6 +23,7 @@ class ChannelModel {
     this.memberCount = 0,
     this.extraData = const {},
     this.team,
+    this.cooldown = 0,
   })  : assert(
           (cid != null && cid.contains(':')) || (id != null && type != null),
           'provide either a cid or an id and type',
@@ -81,6 +82,9 @@ class ChannelModel {
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly, defaultValue: 0)
   final int memberCount;
 
+  @JsonKey(includeIfNull: false)
+  final int cooldown;
+
   /// Map of custom channel extraData
   @JsonKey(
     includeIfNull: false,
@@ -107,6 +111,7 @@ class ChannelModel {
     'deleted_at',
     'member_count',
     'team',
+    'cooldown',
   ];
 
   /// Shortcut for channel name
@@ -133,6 +138,7 @@ class ChannelModel {
     int? memberCount,
     Map<String, Object?>? extraData,
     String? team,
+    int? cooldown,
   }) =>
       ChannelModel(
         id: id ?? this.id,
@@ -148,6 +154,7 @@ class ChannelModel {
         memberCount: memberCount ?? this.memberCount,
         extraData: extraData ?? this.extraData,
         team: team ?? this.team,
+        cooldown: cooldown ?? this.cooldown,
       );
 
   /// Returns a new [ChannelModel] that is a combination of this channelModel
@@ -168,6 +175,7 @@ class ChannelModel {
       memberCount: other.memberCount,
       extraData: other.extraData,
       team: other.team,
+      cooldown: other.cooldown,
     );
   }
 }
