@@ -176,7 +176,7 @@ void main() {
   });
 
   test('`.toString`', () {
-    final supportedLocales = kStreamChatSupportedLanguages;
+    const supportedLocales = kStreamChatSupportedLanguages;
     expect(
       GlobalStreamChatLocalizations.delegate.toString(),
       'GlobalStreamChatLocalizations.delegate($supportedLocales locales)',
