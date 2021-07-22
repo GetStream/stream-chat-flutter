@@ -47,13 +47,6 @@ void main() {
         _galleryHeaderThemeDataDarkControl);
   });
 
-  test('Merging dark and light themes results in a dark theme', () {
-    expect(
-        _galleryHeaderThemeDataDarkControl
-            .merge(_galleryHeaderThemeDataControl),
-        _galleryHeaderThemeDataControl);
-  });
-
   testWidgets(
       'Passing no GalleryHeaderThemeData returns default light theme values',
       (WidgetTester tester) async {

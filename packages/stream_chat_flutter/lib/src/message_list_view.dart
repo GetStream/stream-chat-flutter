@@ -166,10 +166,14 @@ class MessageListView extends StatefulWidget {
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
     this.messageListController,
+    this.paginationLimit = 20,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
   final MessageBuilder? messageBuilder;
+
+  /// Limit used during pagination
+  final int paginationLimit;
 
   /// Function used to build a custom system message widget
   final SystemMessageBuilder? systemMessageBuilder;
@@ -328,6 +332,7 @@ class _MessageListViewState extends State<MessageListView> {
 
   @override
   Widget build(BuildContext context) => MessageListCore(
+        paginationLimit: widget.paginationLimit,
         messageFilter: widget.messageFilter,
         loadingBuilder: widget.loadingBuilder ??
             (context) => const Center(
@@ -386,7 +391,7 @@ class _MessageListViewState extends State<MessageListView> {
             1 // parent message
         ;
 
-    return Stack(
+    final child = Stack(
       alignment: Alignment.center,
       children: [
         ConnectionStatusBuilder(
@@ -528,7 +533,9 @@ class _MessageListViewState extends State<MessageListView> {
                   },
                   itemBuilder: (context, i) {
                     if (i == itemCount - 1) {
-                      if (widget.parentMessage == null) return const Offstage();
+                      if (widget.parentMessage == null) {
+                        return const Offstage();
+                      }
                       return buildParentMessage(widget.parentMessage!);
                     }
 
@@ -584,6 +591,17 @@ class _MessageListViewState extends State<MessageListView> {
           _buildFloatingDateDivider(itemCount),
       ],
     );
+
+    final backgroundColor = MessageListViewTheme.of(context).backgroundColor;
+
+    if (backgroundColor != null) {
+      return ColoredBox(
+        color: backgroundColor,
+        child: child,
+      );
+    }
+
+    return child;
   }
 
   Widget _buildThreadSeparator() {
@@ -609,6 +627,8 @@ class _MessageListViewState extends State<MessageListView> {
 
   Positioned _buildFloatingDateDivider(int itemCount) => Positioned(
         top: 20,
+        left: 0,
+        right: 0,
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
           initialData: _itemPositionListener.itemPositions.value,
           stream: _itemPositionStream,
@@ -640,7 +660,9 @@ class _MessageListViewState extends State<MessageListView> {
       );
 
   Future<void> _paginateData(
-          StreamChannelState? channel, QueryDirection direction) =>
+    StreamChannelState? channel,
+    QueryDirection direction,
+  ) =>
       _messageListController.paginateData!(direction: direction);
 
   int? _getTopElementIndex(Iterable<ItemPosition> values) {

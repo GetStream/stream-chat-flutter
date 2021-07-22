@@ -144,58 +144,72 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       widget.messageSearchListController ?? _defaultController;
 
   @override
-  Widget build(BuildContext context) => MessageSearchListCore(
-        filters: widget.filters,
-        sortOptions: widget.sortOptions,
-        messageQuery: widget.messageQuery,
-        paginationParams: widget.paginationParams,
-        messageFilters: widget.messageFilters,
-        messageSearchListController: _messageSearchListController,
-        emptyBuilder: widget.emptyBuilder ??
-            (context) => LayoutBuilder(
-                  builder: (context, viewportConstraints) =>
-                      SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: viewportConstraints.maxHeight,
-                      ),
-                      child: const Center(
-                        child: Text('There are no messages currently'),
-                      ),
+  Widget build(BuildContext context) {
+    final messageSearchListCore = MessageSearchListCore(
+      filters: widget.filters,
+      sortOptions: widget.sortOptions,
+      messageQuery: widget.messageQuery,
+      paginationParams: widget.paginationParams,
+      messageFilters: widget.messageFilters,
+      messageSearchListController: _messageSearchListController,
+      emptyBuilder: widget.emptyBuilder ??
+          (context) => LayoutBuilder(
+                builder: (context, viewportConstraints) =>
+                    SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: viewportConstraints.maxHeight,
+                    ),
+                    child: const Center(
+                      child: Text('There are no messages currently'),
                     ),
                   ),
                 ),
-        errorBuilder: widget.errorBuilder ??
-            (BuildContext context, dynamic error) {
-              if (error is Error) {
-                print(error.stackTrace);
-              }
-              return InfoTile(
-                showMessage: widget.showErrorTile,
-                tileAnchor: Alignment.topCenter,
-                childAnchor: Alignment.topCenter,
-                message: 'An error occurred.',
-                child: Container(),
-              );
-            },
-        loadingBuilder: widget.loadingBuilder ??
-            (context) => LayoutBuilder(
-                  builder: (context, viewportConstraints) =>
-                      SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: viewportConstraints.maxHeight,
-                      ),
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+              ),
+      errorBuilder: widget.errorBuilder ??
+          (BuildContext context, dynamic error) {
+            if (error is Error) {
+              print(error.stackTrace);
+            }
+            return InfoTile(
+              showMessage: widget.showErrorTile,
+              tileAnchor: Alignment.topCenter,
+              childAnchor: Alignment.topCenter,
+              message: 'An error occurred.',
+              child: Container(),
+            );
+          },
+      loadingBuilder: widget.loadingBuilder ??
+          (context) => LayoutBuilder(
+                builder: (context, viewportConstraints) =>
+                    SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: viewportConstraints.maxHeight,
+                    ),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
                     ),
                   ),
                 ),
-        childBuilder: widget.childBuilder ?? _buildListView,
+              ),
+      childBuilder: widget.childBuilder ?? _buildListView,
+    );
+
+    final backgroundColor =
+        MessageSearchListViewTheme.of(context).backgroundColor;
+
+    if (backgroundColor != null) {
+      return ColoredBox(
+        color: backgroundColor,
+        child: messageSearchListCore,
       );
+    }
+
+    return messageSearchListCore;
+  }
 
   Widget _separatorBuilder(BuildContext context, int index) => Container(
         height: 1,

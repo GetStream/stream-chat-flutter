@@ -12,13 +12,15 @@ jobs:
   main:
     runs-on: ubuntu-latest
     steps:
-      - uses: amannn/action-semantic-pull-request@v2.1.0
+      - uses: amannn/action-semantic-pull-request@v3.4.0
         with: 
           scopes: |
             llc
             persistence
             core
             ui
+            doc
+            repo
           requireScope: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
