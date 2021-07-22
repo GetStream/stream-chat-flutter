@@ -84,9 +84,9 @@ void main() {
         cid: cids[index],
         createdBy: users[index],
         config: ChannelConfig(),
-        extraData: {'test_custom_field': math.Random().nextInt(100)},
+        extraData: {'test_custom_field': 3 + index},
         createdAt: now,
-        memberCount: math.Random().nextInt(100),
+        memberCount: 3 + index,
         lastMessageAt: now.add(Duration(hours: index)),
       ),
     ).reversed.toList(growable: false);
@@ -99,6 +99,9 @@ void main() {
   }
 
   group('getChannels', () {
+    
+    tearDown(() async => database.flush());
+    
     final filter = Filter.in_('members', const ['testUserId']);
 
     test('should return empty list of channels', () async {
