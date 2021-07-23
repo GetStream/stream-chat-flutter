@@ -87,6 +87,30 @@ void main() {
     );
   });
 
+  test('loggingInterceptor should log requests', () async {
+    const apiKey = 'api-key';
+    final logger = MockLogger();
+    final client = StreamHttpClient(apiKey, logger: logger);
+
+    try {
+      await client.get('path');
+    } catch (_) {}
+
+    verify(() => logger.info(any())).called(greaterThan(0));
+  });
+
+  test('loggingInterceptor should log error', () async {
+    const apiKey = 'api-key';
+    final logger = MockLogger();
+    final client = StreamHttpClient(apiKey, logger: logger);
+
+    try {
+      await client.get('path');
+    } catch (_) {}
+
+    verify(() => logger.severe(any())).called(greaterThan(0));
+  });
+
   test('`.lock` should lock the dio client', () async {
     final client = StreamHttpClient('api-key');
     expect(client.httpClient.interceptors.requestLock.locked, isFalse);
