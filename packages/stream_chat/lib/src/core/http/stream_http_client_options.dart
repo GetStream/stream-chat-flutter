@@ -10,7 +10,7 @@ class StreamHttpClientOptions {
     this.location,
     this.connectTimeout = const Duration(seconds: 6),
     this.receiveTimeout = const Duration(seconds: 6),
-    this.queryParams = const {},
+    this.queryParameters = const {},
     this.headers = const {},
   }) : _baseUrl = baseUrl ?? _defaultBaseURL;
 
@@ -40,7 +40,7 @@ class StreamHttpClientOptions {
   ///
   /// The value can be overridden per parameter by adding a [MultiParam]
   /// object wrapping the actual List value and the desired format.
-  final Map<String, Object?> queryParams;
+  final Map<String, Object?> queryParameters;
 
   /// Http request headers.
   /// The keys of initial headers will be converted to lowercase,

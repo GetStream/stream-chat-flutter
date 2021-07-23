@@ -33,7 +33,7 @@ class StreamHttpClient {
       ..options.connectTimeout = _options.connectTimeout.inMilliseconds
       ..options.queryParameters = {
         'api_key': apiKey,
-        ..._options.queryParams,
+        ..._options.queryParameters,
       }
       ..options.headers = {
         'Content-Type': 'application/json',

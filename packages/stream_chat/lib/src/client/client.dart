@@ -25,6 +25,7 @@ import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
@@ -42,6 +43,10 @@ final _levelEmojiMapper = {
   Level.WARNING: '⚠️',
   Level.SEVERE: '🚨',
 };
+
+final _userAgent = 'stream-chat-dart-client-'
+    '${CurrentPlatform.name}-'
+    '${PACKAGE_VERSION.split('+')[0]}';
 
 /// The official Dart client for Stream Chat,
 /// a service for building chat applications.
@@ -81,9 +86,7 @@ class StreamChatClient {
       location: location,
       connectTimeout: connectTimeout,
       receiveTimeout: receiveTimeout,
-      headers: {
-        'X-Stream-Client': userAgent,
-      },
+      headers: {'X-Stream-Client': _userAgent},
     );
 
     _chatApi = chatApi ??
@@ -103,9 +106,7 @@ class StreamChatClient {
           tokenManager: _tokenManager,
           handler: handleEvent,
           logger: detachedLogger('🔌'),
-          queryParams: {
-            'X-Stream-Client': userAgent,
-          },
+          queryParameters: {'X-Stream-Client': _userAgent},
         );
 
     _retryPolicy = retryPolicy ??

@@ -41,14 +41,14 @@ class WebSocket with TimerHelper {
     this.reconnectionMonitorInterval = 10,
     this.healthCheckInterval = 20,
     this.reconnectionMonitorTimeout = 40,
-    this.queryParams = const {},
+    this.queryParameters = const {},
   }) : _logger = logger;
 
   ///
   final String apiKey;
 
   /// Additional query parameters to be added to the websocket url
-  final Map<String, Object?> queryParams;
+  final Map<String, Object?> queryParameters;
 
   /// WS base url
   final String baseUrl;
@@ -160,7 +160,7 @@ class WebSocket with TimerHelper {
       'api_key': apiKey,
       'authorization': token.rawValue,
       'stream-auth-type': token.authType.raw,
-      ...queryParams,
+      ...queryParameters,
     };
     final scheme = baseUrl.startsWith('https') ? 'wss' : 'ws';
     final host = baseUrl.replaceAll(RegExp(r'(^\w+:|^)\/\/'), '');
