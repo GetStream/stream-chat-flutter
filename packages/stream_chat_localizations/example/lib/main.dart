@@ -64,29 +64,27 @@ class MyApp extends StatelessWidget {
   final Channel channel;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      // Add all the supported locales
-      supportedLocales: const [
-        Locale('en'),
-        Locale('hi'),
-        Locale('fr'),
-        Locale('it'),
-      ],
-      // Add GlobalStreamChatLocalizations.delegates
-      localizationsDelegates: GlobalStreamChatLocalizations.delegates,
-      builder: (context, widget) => StreamChat(
-        client: client,
-        child: widget,
-      ),
-      home: StreamChannel(
-        channel: channel,
-        child: const ChannelPage(),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        // Add all the supported locales
+        supportedLocales: const [
+          Locale('en'),
+          Locale('hi'),
+          Locale('fr'),
+          Locale('it'),
+        ],
+        // Add GlobalStreamChatLocalizations.delegates
+        localizationsDelegates: GlobalStreamChatLocalizations.delegates,
+        builder: (context, widget) => StreamChat(
+          client: client,
+          child: widget,
+        ),
+        home: StreamChannel(
+          channel: channel,
+          child: const ChannelPage(),
+        ),
+      );
 }
 
 /// A list of messages sent in the current channel.
