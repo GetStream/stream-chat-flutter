@@ -33,11 +33,14 @@ class StreamHttpClient {
       ..options.baseUrl = _options.baseUrl
       ..options.receiveTimeout = _options.receiveTimeout.inMilliseconds
       ..options.connectTimeout = _options.connectTimeout.inMilliseconds
-      ..options.queryParameters = {'api_key': apiKey}
+      ..options.queryParameters = {
+        'api_key': apiKey,
+        ..._options.queryParams,
+      }
       ..options.headers = {
         'Content-Type': 'application/json',
-        'X-Stream-Client': _options.userAgent,
         'Content-Encoding': 'application/gzip',
+        ..._options.headers,
       }
       ..interceptors.addAll([
         if (tokenManager != null) AuthInterceptor(this, tokenManager),

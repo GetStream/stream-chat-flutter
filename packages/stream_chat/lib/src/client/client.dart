@@ -31,6 +31,7 @@ import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/location.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
+import 'package:stream_chat/version.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -80,6 +81,9 @@ class StreamChatClient {
       location: location,
       connectTimeout: connectTimeout,
       receiveTimeout: receiveTimeout,
+      headers: {
+        'X-Stream-Client': userAgent,
+      },
     );
 
     _chatApi = chatApi ??
@@ -99,6 +103,9 @@ class StreamChatClient {
           tokenManager: _tokenManager,
           handler: handleEvent,
           logger: detachedLogger('🔌'),
+          queryParams: {
+            'X-Stream-Client': userAgent,
+          },
         );
 
     _retryPolicy = retryPolicy ??

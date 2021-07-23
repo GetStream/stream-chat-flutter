@@ -13,6 +13,7 @@ import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/ws/timer_helper.dart';
+import 'package:stream_chat/version.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
@@ -41,10 +42,14 @@ class WebSocket with TimerHelper {
     this.reconnectionMonitorInterval = 10,
     this.healthCheckInterval = 20,
     this.reconnectionMonitorTimeout = 40,
+    this.queryParams = const {},
   }) : _logger = logger;
 
   ///
   final String apiKey;
+
+  /// Additional query parameters to be added to the websocket url
+  final Map<String, Object?> queryParams;
 
   /// WS base url
   final String baseUrl;
@@ -156,6 +161,7 @@ class WebSocket with TimerHelper {
       'api_key': apiKey,
       'authorization': token.rawValue,
       'stream-auth-type': token.authType.raw,
+      ...queryParams,
     };
     final scheme = baseUrl.startsWith('https') ? 'wss' : 'ws';
     final host = baseUrl.replaceAll(RegExp(r'(^\w+:|^)\/\/'), '');
