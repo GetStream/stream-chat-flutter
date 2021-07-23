@@ -13,7 +13,6 @@ import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/ws/timer_helper.dart';
-import 'package:stream_chat/version.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
