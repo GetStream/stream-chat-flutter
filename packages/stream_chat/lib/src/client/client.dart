@@ -388,9 +388,6 @@ class StreamChatClient {
   }
 
   void _handleHealthCheckEvent(Event event) {
-    final user = event.me;
-    if (user != null) state.user = user;
-
     final connectionId = event.connectionId;
     if (connectionId != null) {
       _connectionIdManager.setConnectionId(connectionId);
@@ -1333,16 +1330,15 @@ class ClientState {
     _subscriptions.addAll([
       _client
           .on()
-          .where((event) => event.me != null)
-          .map((e) => e.me)
+          .where((event) =>
+              event.me != null && event.type != EventType.healthCheck)
+          .map((e) => e.me!)
           .listen((user) {
-        _userController.add(user);
-        final totalUnreadCount = user?.totalUnreadCount;
-        if (totalUnreadCount != null) {
-          _totalUnreadCountController.add(totalUnreadCount);
-        }
+        this.user = user;
+        final totalUnreadCount = user.totalUnreadCount;
+        _totalUnreadCountController.add(totalUnreadCount);
 
-        final unreadChannels = user?.unreadChannels;
+        final unreadChannels = user.unreadChannels;
         if (unreadChannels != null) {
           _unreadChannelsController.add(unreadChannels);
         }
