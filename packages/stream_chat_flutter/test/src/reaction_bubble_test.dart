@@ -6,7 +6,6 @@ import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'mocks.dart';
-import 'simple_frame.dart';
 
 void main() {
   testGoldens(

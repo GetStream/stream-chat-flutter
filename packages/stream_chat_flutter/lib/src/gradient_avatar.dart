@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Fallback user avatar with a polygon gradient overlayed with text
 class GradientAvatar extends StatefulWidget {
