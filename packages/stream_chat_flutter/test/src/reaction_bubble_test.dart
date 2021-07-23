@@ -10,29 +10,6 @@ import 'simple_frame.dart';
 
 void main() {
   testGoldens(
-    'it should show no reactions',
-    (WidgetTester tester) async {
-      await tester.pumpWidgetBuilder(
-        SimpleFrame(
-          child: StreamChatTheme(
-            data: StreamChatThemeData(),
-            child: const SizedBox(
-              child: ReactionBubble(
-                reactions: [],
-                borderColor: Colors.black,
-                backgroundColor: Colors.white,
-                maskColor: Colors.white,
-              ),
-            ),
-          ),
-        ),
-        surfaceSize: const Size(100, 100),
-      );
-      await screenMatchesGolden(tester, 'reaction_bubble_0');
-    },
-  );
-
-  testGoldens(
     'it should show a like - light theme',
     (WidgetTester tester) async {
       final client = MockClient();

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Fallback user avatar with a polygon gradient overlayed with text
 class GradientAvatar extends StatefulWidget {
@@ -31,6 +32,7 @@ class _GradientAvatarState extends State<GradientAvatar> {
             painter: DemoPainter(
               widget.userId,
               getShortenedName(widget.name),
+              DefaultTextStyle.of(context).style.fontFamily ?? 'Roboto',
             ),
             child: const SizedBox.expand(),
           ),
@@ -60,6 +62,7 @@ class DemoPainter extends CustomPainter {
   DemoPainter(
     this.userId,
     this.username,
+    this.fontFamily,
   );
 
   /// Init grid row count
@@ -73,6 +76,9 @@ class DemoPainter extends CustomPainter {
 
   /// User name to display
   String username;
+
+  /// Font family to use
+  String fontFamily;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -121,6 +127,7 @@ class DemoPainter extends CustomPainter {
         text: TextSpan(
           text: username,
           style: TextStyle(
+            fontFamily: fontFamily,
             fontSize: fontSize,
             fontWeight: FontWeight.w500,
             color: Colors.white.withOpacity(0.7),

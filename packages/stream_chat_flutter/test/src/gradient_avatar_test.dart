@@ -24,8 +24,8 @@ void main() {
             child: const Scaffold(
               body: Center(
                 child: SizedBox(
-                  width: 50,
-                  height: 50,
+                  width: 100,
+                  height: 100,
                   child: GradientAvatar(name: 'demo user', userId: 'demo123'),
                 ),
               ),
@@ -46,8 +46,8 @@ void main() {
           home: Scaffold(
             body: Center(
               child: SizedBox(
-                width: 50,
-                height: 50,
+                width: 100,
+                height: 100,
                 child: GradientAvatar(name: 'demo user', userId: 'demo123'),
               ),
             ),
@@ -67,8 +67,8 @@ void main() {
           home: Scaffold(
             body: Center(
               child: SizedBox(
-                width: 50,
-                height: 50,
+                width: 100,
+                height: 100,
                 child: GradientAvatar(name: 'demo', userId: 'demo1'),
               ),
             ),
@@ -88,10 +88,12 @@ void main() {
           home: Scaffold(
             body: Center(
               child: SizedBox(
-                width: 50,
-                height: 50,
-                child:
-                    GradientAvatar(name: 'd123@/d de:\$as', userId: 'demo123'),
+                width: 100,
+                height: 100,
+                child: GradientAvatar(
+                  name: 'd123@/d de:\$as',
+                  userId: 'demo123',
+                ),
               ),
             ),
           ),
@@ -110,8 +112,8 @@ void main() {
           home: Scaffold(
             body: Center(
               child: SizedBox(
-                width: 50,
-                height: 50,
+                width: 100,
+                height: 100,
                 child: GradientAvatar(name: '123@/d \$as', userId: 'demo123'),
               ),
             ),
