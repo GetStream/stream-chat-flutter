@@ -26,7 +26,7 @@ class CustomGoldenFileComparator extends LocalFileComparator {
       final error = await generateFailureOutput(result, golden, basedir);
       throw FlutterError(error);
     }
-    return result.passed;
+    return true;
   }
 
   @override
