@@ -25,12 +25,14 @@ import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/location.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
+import 'package:stream_chat/version.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -41,6 +43,10 @@ final _levelEmojiMapper = {
   Level.WARNING: '⚠️',
   Level.SEVERE: '🚨',
 };
+
+final _userAgent = 'stream-chat-dart-client-'
+    '${CurrentPlatform.name}-'
+    '${PACKAGE_VERSION.split('+')[0]}';
 
 /// The official Dart client for Stream Chat,
 /// a service for building chat applications.
@@ -80,6 +86,7 @@ class StreamChatClient {
       location: location,
       connectTimeout: connectTimeout,
       receiveTimeout: receiveTimeout,
+      headers: {'X-Stream-Client': _userAgent},
     );
 
     _chatApi = chatApi ??
@@ -99,6 +106,7 @@ class StreamChatClient {
           tokenManager: _tokenManager,
           handler: handleEvent,
           logger: detachedLogger('🔌'),
+          queryParameters: {'X-Stream-Client': _userAgent},
         );
 
     _retryPolicy = retryPolicy ??
@@ -324,7 +332,7 @@ class StreamChatClient {
     } catch (e, stk) {
       if (e is StreamWebSocketError && e.isRetriable) {
         final event = await _chatPersistenceClient?.getConnectionInfo();
-        if (event != null) return event.me?.merge(ownUser) ?? ownUser;
+        if (event != null) return ownUser.merge(event.me);
       }
       logger.severe('error connecting user : ${ownUser.id}', e, stk);
       rethrow;
@@ -363,7 +371,7 @@ class StreamChatClient {
 
     try {
       final event = await _ws.connect(user);
-      return event.me?.merge(user) ?? user;
+      return user.merge(event.me);
     } catch (e, stk) {
       logger.severe('error connecting ws', e, stk);
       rethrow;

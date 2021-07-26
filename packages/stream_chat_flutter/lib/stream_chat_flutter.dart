@@ -14,6 +14,7 @@ export 'src/deleted_message.dart';
 export 'src/full_screen_media.dart';
 export 'src/gallery_footer.dart';
 export 'src/gallery_header.dart';
+export 'src/gradient_avatar.dart';
 export 'src/info_tile.dart';
 export 'src/mention_tile.dart';
 export 'src/message_action.dart';

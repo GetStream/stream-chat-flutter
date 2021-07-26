@@ -166,10 +166,22 @@ class MessageListView extends StatefulWidget {
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
     this.messageListController,
+    this.reverse = true,
+    this.paginationLimit = 20,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
   final MessageBuilder? messageBuilder;
+
+  /// Whether the view scrolls in the reading direction.
+  ///
+  /// Defaults to true.
+  ///
+  /// See [ScrollView.reverse].
+  final bool reverse;
+
+  /// Limit used during pagination
+  final int paginationLimit;
 
   /// Function used to build a custom system message widget
   final SystemMessageBuilder? systemMessageBuilder;
@@ -328,6 +340,7 @@ class _MessageListViewState extends State<MessageListView> {
 
   @override
   Widget build(BuildContext context) => MessageListCore(
+        paginationLimit: widget.paginationLimit,
         messageFilter: widget.messageFilter,
         loadingBuilder: widget.loadingBuilder ??
             (context) => const Center(
@@ -386,210 +399,217 @@ class _MessageListViewState extends State<MessageListView> {
             1 // parent message
         ;
 
-    return ColoredBox(
-      color: MessageListViewTheme.of(context).backgroundColor!,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          ConnectionStatusBuilder(
-            statusBuilder: (context, status) {
-              var statusString = '';
-              var showStatus = true;
-              switch (status) {
-                case ConnectionStatus.connected:
-                  statusString = 'Connected';
-                  showStatus = false;
-                  break;
-                case ConnectionStatus.connecting:
-                  statusString = 'Reconnecting...';
-                  break;
-                case ConnectionStatus.disconnected:
-                  statusString = 'Disconnected';
-                  break;
-              }
+    final child = Stack(
+      alignment: Alignment.center,
+      children: [
+        ConnectionStatusBuilder(
+          statusBuilder: (context, status) {
+            var statusString = '';
+            var showStatus = true;
+            switch (status) {
+              case ConnectionStatus.connected:
+                statusString = 'Connected';
+                showStatus = false;
+                break;
+              case ConnectionStatus.connecting:
+                statusString = 'Reconnecting...';
+                break;
+              case ConnectionStatus.disconnected:
+                statusString = 'Disconnected';
+                break;
+            }
 
-              return InfoTile(
-                showMessage: widget.showConnectionStateTile && showStatus,
-                tileAnchor: Alignment.topCenter,
-                childAnchor: Alignment.topCenter,
-                message: statusString,
-                child: LazyLoadScrollView(
-                  onPageScrollStart: () {
-                    FocusScope.of(context).unfocus();
+            return InfoTile(
+              showMessage: widget.showConnectionStateTile && showStatus,
+              tileAnchor: Alignment.topCenter,
+              childAnchor: Alignment.topCenter,
+              message: statusString,
+              child: LazyLoadScrollView(
+                onPageScrollStart: () {
+                  FocusScope.of(context).unfocus();
+                },
+                onStartOfPage: () async {
+                  _inBetweenList = false;
+                  if (!_upToDate) {
+                    _topPaginationActive = false;
+                    _bottomPaginationActive = true;
+                    return _paginateData(
+                      streamChannel,
+                      QueryDirection.bottom,
+                    );
+                  }
+                },
+                onEndOfPage: () async {
+                  _inBetweenList = false;
+                  _topPaginationActive = true;
+                  _bottomPaginationActive = false;
+                  return _paginateData(
+                    streamChannel,
+                    QueryDirection.top,
+                  );
+                },
+                onInBetweenOfPage: () {
+                  _inBetweenList = true;
+                },
+                child: ScrollablePositionedList.separated(
+                  key: ValueKey(initialIndex! + initialAlignment!),
+                  itemPositionsListener: _itemPositionListener,
+                  initialScrollIndex: initialIndex ?? 0,
+                  initialAlignment: initialAlignment ?? 0,
+                  physics: widget.scrollPhysics,
+                  itemScrollController: _scrollController,
+                  reverse: widget.reverse,
+                  addAutomaticKeepAlives: false,
+                  itemCount: itemCount,
+
+                  // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
+                  // eg:     |Type|         rev(|Index(item)|)     rev(|Index(separator)|)    |Index(item)|    |Index(separator)|
+                  //     ParentMessage  ->        7                                             (count-1)
+                  //        Separator(ThreadSeparator)          ->           6                                      (count-2)
+                  //     Header         ->        6                                             (count-2)
+                  //        Separator(Header -> 8??T -> 0||52)  ->           5                                      (count-3)
+                  //     TopLoader      ->        5                                             (count-3)
+                  //        Separator(0)                        ->           4                                      (count-4)
+                  //     Message        ->        4                                             (count-4)
+                  //        Separator(2||8)                     ->           3                                      (count-5)
+                  //     Message        ->        3                                             (count-5)
+                  //        Separator(2||8)                     ->           2                                      (count-6)
+                  //     Message        ->        2                                             (count-6)
+                  //        Separator(0)                        ->           1                                      (count-7)
+                  //     BottomLoader   ->        1                                             (count-7)
+                  //        Separator(Footer -> 8??30)          ->           0                                      (count-8)
+                  //     Footer         ->        0                                             (count-8)
+
+                  separatorBuilder: (context, i) {
+                    if (i == itemCount - 2) {
+                      if (widget.parentMessage == null) {
+                        return const Offstage();
+                      }
+                      return _buildThreadSeparator();
+                    }
+                    if (i == itemCount - 3) {
+                      if (widget.headerBuilder == null) {
+                        if (_isThreadConversation) return const Offstage();
+                        return const SizedBox(height: 52);
+                      }
+                      return const SizedBox(height: 8);
+                    }
+                    if (i == 0) {
+                      if (widget.footerBuilder == null) {
+                        return const SizedBox(height: 30);
+                      }
+                      return const SizedBox(height: 8);
+                    }
+
+                    if (i == 1 || i == itemCount - 4) return const Offstage();
+
+                    final message = messages[i - 1];
+                    final nextMessage = messages[i - 2];
+                    if (!Jiffy(message.createdAt.toLocal()).isSame(
+                      nextMessage.createdAt.toLocal(),
+                      Units.DAY,
+                    )) {
+                      final divider = widget.dateDividerBuilder != null
+                          ? widget.dateDividerBuilder!(
+                              nextMessage.createdAt.toLocal(),
+                            )
+                          : DateDivider(
+                              dateTime: nextMessage.createdAt.toLocal(),
+                            );
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: divider,
+                      );
+                    }
+                    final timeDiff =
+                        Jiffy(nextMessage.createdAt.toLocal()).diff(
+                      message.createdAt.toLocal(),
+                      Units.MINUTE,
+                    );
+
+                    final isNextUserSame =
+                        message.user!.id == nextMessage.user?.id;
+                    final isThread = message.replyCount! > 0;
+                    final isDeleted = message.isDeleted;
+                    if (timeDiff >= 1 ||
+                        !isNextUserSame ||
+                        isThread ||
+                        isDeleted) {
+                      return const SizedBox(height: 8);
+                    }
+                    return const SizedBox(height: 2);
                   },
-                  onStartOfPage: () async {
-                    _inBetweenList = false;
-                    if (!_upToDate) {
-                      _topPaginationActive = false;
-                      _bottomPaginationActive = true;
-                      return _paginateData(
-                        streamChannel,
+                  itemBuilder: (context, i) {
+                    if (i == itemCount - 1) {
+                      if (widget.parentMessage == null) {
+                        return const Offstage();
+                      }
+                      return buildParentMessage(widget.parentMessage!);
+                    }
+
+                    if (i == itemCount - 2) {
+                      return widget.headerBuilder?.call(context) ??
+                          const Offstage();
+                    }
+
+                    if (i == itemCount - 3) {
+                      return _buildLoadingIndicator(
+                        streamChannel!,
+                        QueryDirection.top,
+                      );
+                    }
+
+                    if (i == 1) {
+                      return _buildLoadingIndicator(
+                        streamChannel!,
                         QueryDirection.bottom,
                       );
                     }
-                  },
-                  onEndOfPage: () async {
-                    _inBetweenList = false;
-                    _topPaginationActive = true;
-                    _bottomPaginationActive = false;
-                    return _paginateData(
-                      streamChannel,
-                      QueryDirection.top,
-                    );
-                  },
-                  onInBetweenOfPage: () {
-                    _inBetweenList = true;
-                  },
-                  child: ScrollablePositionedList.separated(
-                    key: ValueKey(initialIndex! + initialAlignment!),
-                    itemPositionsListener: _itemPositionListener,
-                    initialScrollIndex: initialIndex ?? 0,
-                    initialAlignment: initialAlignment ?? 0,
-                    physics: widget.scrollPhysics,
-                    itemScrollController: _scrollController,
-                    reverse: true,
-                    addAutomaticKeepAlives: false,
-                    itemCount: itemCount,
 
-                    // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
-                    // eg:     |Type|         rev(|Index(item)|)     rev(|Index(separator)|)    |Index(item)|    |Index(separator)|
-                    //     ParentMessage  ->        7                                             (count-1)
-                    //        Separator(ThreadSeparator)          ->           6                                      (count-2)
-                    //     Header         ->        6                                             (count-2)
-                    //        Separator(Header -> 8??T -> 0||52)  ->           5                                      (count-3)
-                    //     TopLoader      ->        5                                             (count-3)
-                    //        Separator(0)                        ->           4                                      (count-4)
-                    //     Message        ->        4                                             (count-4)
-                    //        Separator(2||8)                     ->           3                                      (count-5)
-                    //     Message        ->        3                                             (count-5)
-                    //        Separator(2||8)                     ->           2                                      (count-6)
-                    //     Message        ->        2                                             (count-6)
-                    //        Separator(0)                        ->           1                                      (count-7)
-                    //     BottomLoader   ->        1                                             (count-7)
-                    //        Separator(Footer -> 8??30)          ->           0                                      (count-8)
-                    //     Footer         ->        0                                             (count-8)
+                    if (i == 0) {
+                      return widget.footerBuilder?.call(context) ??
+                          const Offstage();
+                    }
 
-                    separatorBuilder: (context, i) {
-                      if (i == itemCount - 2) {
-                        if (widget.parentMessage == null) {
-                          return const Offstage();
-                        }
-                        return _buildThreadSeparator();
-                      }
-                      if (i == itemCount - 3) {
-                        if (widget.headerBuilder == null) {
-                          if (_isThreadConversation) return const Offstage();
-                          return const SizedBox(height: 52);
-                        }
-                        return const SizedBox(height: 8);
-                      }
-                      if (i == 0) {
-                        if (widget.footerBuilder == null) {
-                          return const SizedBox(height: 30);
-                        }
-                        return const SizedBox(height: 8);
-                      }
+                    const bottomMessageIndex = 2; // 1 -> loader // 0 -> footer
 
-                      if (i == 1 || i == itemCount - 4) return const Offstage();
+                    final message = messages[i - 2];
+                    Widget messageWidget;
 
-                      final message = messages[i - 1];
-                      final nextMessage = messages[i - 2];
-                      if (!Jiffy(message.createdAt.toLocal()).isSame(
-                        nextMessage.createdAt.toLocal(),
-                        Units.DAY,
-                      )) {
-                        final divider = widget.dateDividerBuilder != null
-                            ? widget.dateDividerBuilder!(
-                                nextMessage.createdAt.toLocal(),
-                              )
-                            : DateDivider(
-                                dateTime: nextMessage.createdAt.toLocal(),
-                              );
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: divider,
-                        );
-                      }
-                      final timeDiff =
-                          Jiffy(nextMessage.createdAt.toLocal()).diff(
-                        message.createdAt.toLocal(),
-                        Units.MINUTE,
+                    if (i == bottomMessageIndex) {
+                      messageWidget = _buildBottomMessage(
+                        context,
+                        message,
+                        messages,
+                        streamChannel!,
+                        i - 2,
                       );
-
-                      final isNextUserSame =
-                          message.user!.id == nextMessage.user?.id;
-                      final isThread = message.replyCount! > 0;
-                      final isDeleted = message.isDeleted;
-                      if (timeDiff >= 1 ||
-                          !isNextUserSame ||
-                          isThread ||
-                          isDeleted) {
-                        return const SizedBox(height: 8);
-                      }
-                      return const SizedBox(height: 2);
-                    },
-                    itemBuilder: (context, i) {
-                      if (i == itemCount - 1) {
-                        if (widget.parentMessage == null) {
-                          return const Offstage();
-                        }
-                        return buildParentMessage(widget.parentMessage!);
-                      }
-
-                      if (i == itemCount - 2) {
-                        return widget.headerBuilder?.call(context) ??
-                            const Offstage();
-                      }
-
-                      if (i == itemCount - 3) {
-                        return _buildLoadingIndicator(
-                          streamChannel!,
-                          QueryDirection.top,
-                        );
-                      }
-
-                      if (i == 1) {
-                        return _buildLoadingIndicator(
-                          streamChannel!,
-                          QueryDirection.bottom,
-                        );
-                      }
-
-                      if (i == 0) {
-                        return widget.footerBuilder?.call(context) ??
-                            const Offstage();
-                      }
-
-                      const bottomMessageIndex =
-                          2; // 1 -> loader // 0 -> footer
-
-                      final message = messages[i - 2];
-                      Widget messageWidget;
-
-                      if (i == bottomMessageIndex) {
-                        messageWidget = _buildBottomMessage(
-                          context,
-                          message,
-                          messages,
-                          streamChannel!,
-                          i - 2,
-                        );
-                      } else {
-                        messageWidget = buildMessage(message, messages, i - 2);
-                      }
-                      return messageWidget;
-                    },
-                  ),
+                    } else {
+                      messageWidget = buildMessage(message, messages, i - 2);
+                    }
+                    return messageWidget;
+                  },
                 ),
-              );
-            },
-          ),
-          if (widget.showScrollToBottom) _buildScrollToBottom(),
-          if (widget.showFloatingDateDivider)
-            _buildFloatingDateDivider(itemCount),
-        ],
-      ),
+              ),
+            );
+          },
+        ),
+        if (widget.showScrollToBottom) _buildScrollToBottom(),
+        if (widget.showFloatingDateDivider)
+          _buildFloatingDateDivider(itemCount),
+      ],
     );
+
+    final backgroundColor = MessageListViewTheme.of(context).backgroundColor;
+
+    if (backgroundColor != null) {
+      return ColoredBox(
+        color: backgroundColor,
+        child: child,
+      );
+    }
+
+    return child;
   }
 
   Widget _buildThreadSeparator() {
@@ -614,7 +634,10 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Positioned _buildFloatingDateDivider(int itemCount) => Positioned(
-        top: 20,
+        top: widget.reverse ? 20 : null,
+        bottom: widget.reverse ? null : 20,
+        left: 0,
+        right: 0,
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
           initialData: _itemPositionListener.itemPositions.value,
           stream: _itemPositionStream,
@@ -646,7 +669,9 @@ class _MessageListViewState extends State<MessageListView> {
       );
 
   Future<void> _paginateData(
-          StreamChannelState? channel, QueryDirection direction) =>
+    StreamChannelState? channel,
+    QueryDirection direction,
+  ) =>
       _messageListController.paginateData!(direction: direction);
 
   int? _getTopElementIndex(Iterable<ItemPosition> values) {
@@ -706,9 +731,13 @@ class _MessageListViewState extends State<MessageListView> {
                       );
                     }
                   },
-                  child: StreamSvgIcon.down(
-                    color: _streamTheme.colorTheme.textHighEmphasis,
-                  ),
+                  child: widget.reverse
+                      ? StreamSvgIcon.down(
+                          color: _streamTheme.colorTheme.textHighEmphasis,
+                        )
+                      : StreamSvgIcon.up(
+                          color: _streamTheme.colorTheme.textHighEmphasis,
+                        ),
                 ),
                 if (showUnreadCount)
                   Positioned(

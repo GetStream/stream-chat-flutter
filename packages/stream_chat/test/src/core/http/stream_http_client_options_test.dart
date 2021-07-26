@@ -9,6 +9,8 @@ void main() {
     expect(options.baseUrl, 'https://chat-us-east-1.stream-io-api.com');
     expect(options.connectTimeout, const Duration(seconds: 6));
     expect(options.receiveTimeout, const Duration(seconds: 6));
+    expect(options.queryParameters, const {});
+    expect(options.headers, const {});
   });
 
   test('should override all the default set params', () {
@@ -16,11 +18,15 @@ void main() {
       baseUrl: 'base-url',
       connectTimeout: Duration(seconds: 3),
       receiveTimeout: Duration(seconds: 3),
+      headers: {'test': 'test'},
+      queryParameters: {'123': '123'},
     );
     expect(options.location, isNull);
     expect(options.baseUrl, 'base-url');
     expect(options.connectTimeout, const Duration(seconds: 3));
     expect(options.receiveTimeout, const Duration(seconds: 3));
+    expect(options.headers, {'test': 'test'});
+    expect(options.queryParameters, {'123': '123'});
   });
 
   group('should create baseUrl according to provided location', () {
