@@ -1,3 +1,35 @@
+## 2.1.0
+
+ - **TEST**: fix `sentAtText`, add remaining tests.
+ - **TEST**: add tests for MessageSearchListViewThemeData.
+ - **TEST**: add tests for UserListViewThemeData.
+ - **TEST**: fix tests.
+ - **TEST**: add tests for ChannelListViewThemeData.
+ - **TEST**: add tests for MessageListViewThemeData.
+ - **TEST**: remove a duplicated test in gallery_header_theme_test.dart.
+ - **FIX**: fix `fileTooLargeAfterCompressionError`, `fileTooLargeError`.
+ - **FIX**: check if locale is supported before setting it.
+ - **FIX**: curly brace lint.
+ - **FIX**: dartfmt on a couple of files.
+ - **FIX**: theme channel_list_view.dart background color in the proper place.
+ - **FIX**: make ChannelListViewThemeData constructor const.
+ - **FEAT**: add MessageListView.reverse property.
+ - **FEAT**: add macos support to stream_chat_flutter example app.
+ - **FEAT**: Initial implementation.
+ - **CHORE**: fix analysis error.
+ - **CHORE**: add doc-comments.
+ - **CHORE**: update changelog.
+ - **CHORE**: add translations for `replyToMessageLabel`.
+ - **CHORE**: upgrade photo_view dependency.
+ - **CHORE**: update CHANGELOG.md per PR review.
+ - **CHORE**: minor fixes, add support for "hi" locale.
+ - **CHORE**: set MessageSeachListView bg color via theme and stop setting scaffold bg color.
+ - **CHORE**: theme user_list_view.dart background color from theme.
+ - **CHORE**: flutter format.
+ - **CHORE**: add remaining translations.
+ - **CHORE**: allow ChannelListView background color to be themed via StreamChatThemeData.
+ - **CHORE**: Allow MessageListView background color to be customized via theme.
+
 ## Upcoming
 
 ✅ Added

@@ -1,3 +1,10 @@
+## 2.0.1
+
+ - **TEST**: re-add removed tests.
+ - **FIX**: channel.stopWatching.
+ - **CHORE**: minor changes.
+ - **CHORE**: add changelog entry.
+
 ## Upcoming
 
 🐞 Fixed
