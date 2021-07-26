@@ -87,7 +87,7 @@ class HomeScreen extends StatelessWidget {
             filter: Filter.and([
               Filter.equal('type', 'messaging'),
               Filter.in_('members', [
-                StreamChatCore.of(context).user!.id,
+                StreamChatCore.of(context).currentUser!.id,
               ])
             ]),
             emptyBuilder: (BuildContext context) => const Center(
@@ -336,7 +336,7 @@ class _MessageScreenState extends State<MessageScreen> {
 /// below, we add two simple extensions to the [StreamChatClient] and [Channel].
 extension on StreamChatClient {
   /// Fetches the current user id.
-  String get uid => state.user!.id;
+  String get uid => state.currentUser!.id;
 }
 
 extension on Channel {

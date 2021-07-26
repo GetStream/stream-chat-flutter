@@ -13,7 +13,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.connected));
 
@@ -30,7 +30,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final userAvatar = tester.widget<UserAvatar>(find.byType(UserAvatar));
-      expect(userAvatar.user, clientState.user);
+      expect(userAvatar.user, clientState.currentUser);
       expect(find.byType(StreamNeumorphicButton), findsOneWidget);
       expect(find.text('Stream Chat'), findsOneWidget);
     },
@@ -43,7 +43,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
 
@@ -72,7 +72,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
 
@@ -101,7 +101,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
 
@@ -139,7 +139,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
 
@@ -173,7 +173,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
 

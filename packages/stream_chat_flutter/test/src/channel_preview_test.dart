@@ -18,8 +18,9 @@ void main() {
 
       when(() => channel.cid).thenReturn('cid');
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(user);
-      when(() => clientState.userStream).thenAnswer((_) => Stream.value(user));
+      when(() => clientState.currentUser).thenReturn(user);
+      when(() => clientState.currentUserStream)
+          .thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);

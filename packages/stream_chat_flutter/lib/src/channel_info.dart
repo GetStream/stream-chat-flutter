@@ -67,7 +67,7 @@ class ChannelInfo extends StatelessWidget {
             .subtitle,
       );
     } else {
-      final userId = StreamChat.of(context).user?.id;
+      final userId = StreamChat.of(context).currentUser?.id;
       final otherMember = members?.firstWhereOrNull(
         (element) => element.userId != userId,
       );

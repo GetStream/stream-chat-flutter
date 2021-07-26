@@ -49,7 +49,9 @@ class MessageSearchItem extends StatelessWidget {
       title: Row(
         children: [
           Text(
-            user.id == StreamChat.of(context).user?.id ? 'You' : user.name,
+            user.id == StreamChat.of(context).currentUser?.id
+                ? 'You'
+                : user.name,
             style: chatThemeData.channelPreviewTheme.title,
           ),
           if (channelName != null) ...[

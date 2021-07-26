@@ -451,7 +451,7 @@ void main() {
         expect(find.byKey(streamChatCoreKey), findsOneWidget);
         expect(find.byKey(childKey), findsOneWidget);
 
-        when(() => mockClient.state.userStream)
+        when(() => mockClient.state.currentUserStream)
             .thenAnswer((_) => userController.stream);
 
         final streamChatCoreState = tester.state<StreamChatCoreState>(
@@ -462,7 +462,7 @@ void main() {
         userController.add(ownUser);
 
         await expectLater(
-          streamChatCoreState.userStream,
+          streamChatCoreState.currentUserStream,
           emits(ownUser),
         );
 

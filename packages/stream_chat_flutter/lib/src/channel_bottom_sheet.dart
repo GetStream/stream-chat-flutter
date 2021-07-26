@@ -27,8 +27,8 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
 
     final members = channel.state?.members ?? [];
 
-    final userAsMember =
-        members.firstWhere((e) => e.user?.id == _streamChatState.user?.id);
+    final userAsMember = members
+        .firstWhere((e) => e.user?.id == _streamChatState.currentUser?.id);
     final isOwner = userAsMember.role == 'owner';
 
     return Material(
@@ -247,7 +247,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
     );
     if (res == true) {
       final channel = _streamChannelState.channel;
-      final user = _streamChatState.user;
+      final user = _streamChatState.currentUser;
       if (user != null) {
         await channel.removeMembers([user.id]);
       }

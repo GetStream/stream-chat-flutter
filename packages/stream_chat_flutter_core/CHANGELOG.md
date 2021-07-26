@@ -3,6 +3,11 @@
 ✅ Added
 - Added `MessageListCore.paginationLimit`
 
+🔄 Changed
+
+- `StreamChatCore.of(context).user` is now deprecated in favor of `StreamChatCore.of(context).currentUser`.
+- `StreamChatCore.of(context).userStream` is now deprecated in favor of `StreamChatCore.of(context).currentUserStream`.
+
 ## 2.0.0
 
 🛑️ Breaking Changes from `1.5.3`
