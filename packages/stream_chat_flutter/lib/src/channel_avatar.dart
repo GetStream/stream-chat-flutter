@@ -141,7 +141,7 @@ class ChannelAvatar extends StatelessWidget {
           return child;
         }
 
-        final currentUser = streamChat.user!;
+        final currentUser = streamChat.currentUser!;
         final otherMembers = channel.state!.members
             .where((it) => it.userId != currentUser.id)
             .toList(growable: false);
@@ -149,7 +149,7 @@ class ChannelAvatar extends StatelessWidget {
         // our own space, no other members
         if (otherMembers.isEmpty) {
           return BetterStreamBuilder<User>(
-            stream: streamChat.client.state.userStream.map((it) => it!),
+            stream: streamChat.client.state.currentUserStream.map((it) => it!),
             initialData: currentUser,
             builder: (context, user) => UserAvatar(
               borderRadius: borderRadius ?? previewTheme?.borderRadius,

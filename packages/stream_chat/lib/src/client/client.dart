@@ -316,7 +316,7 @@ class StreamChatClient {
     );
 
     final ownUser = OwnUser.fromUser(user);
-    state.user = ownUser;
+    state.currentUser = ownUser;
 
     if (!connectWebSocket) {
       return ownUser;
@@ -342,12 +342,12 @@ class StreamChatClient {
   /// Creates a new WebSocket connection with the current user.
   Future<OwnUser> openConnection() async {
     assert(
-      state.user != null,
+      state.currentUser != null,
       'User is not set on client, '
       'use `connectUser` or `connectAnonymousUser` instead',
     );
 
-    final user = state.user!;
+    final user = state.currentUser!;
 
     logger.info('Opening web-socket connection for ${user.id}');
 
@@ -386,7 +386,7 @@ class StreamChatClient {
   void closeConnection() {
     if (wsConnectionStatus == ConnectionStatus.disconnected) return;
 
-    logger.info('Closing web-socket connection for ${state.user?.id}');
+    logger.info('Closing web-socket connection for ${state.currentUser?.id}');
     _wsConnectionStatus = ConnectionStatus.disconnected;
 
     _connectionStatusSubscription?.cancel();
@@ -397,7 +397,7 @@ class StreamChatClient {
 
   void _handleHealthCheckEvent(Event event) {
     final user = event.me;
-    if (user != null) state.user = user;
+    if (user != null) state.currentUser = user;
 
     final connectionId = event.connectionId;
     if (connectionId != null) {
@@ -1298,7 +1298,7 @@ class StreamChatClient {
   /// If [flushChatPersistence] is true the client deletes all offline
   /// user's data.
   Future<void> disconnectUser({bool flushChatPersistence = false}) async {
-    logger.info('Disconnecting user : ${state.user?.id}');
+    logger.info('Disconnecting user : ${state.currentUser?.id}');
 
     // resetting state
     state.dispose();
@@ -1344,7 +1344,7 @@ class ClientState {
           .where((event) => event.me != null)
           .map((e) => e.me)
           .listen((user) {
-        _userController.add(user);
+        _currentUserController.add(user);
         final totalUnreadCount = user?.totalUnreadCount;
         if (totalUnreadCount != null) {
           _totalUnreadCountController.add(totalUnreadCount);
@@ -1394,8 +1394,8 @@ class ClientState {
 
   void _listenUserUpdated() {
     _subscriptions.add(_client.on(EventType.userUpdated).listen((event) {
-      if (event.user!.id == user!.id) {
-        user = OwnUser.fromJson(event.user!.toJson());
+      if (event.user!.id == currentUser!.id) {
+        currentUser = OwnUser.fromJson(event.user!.toJson());
       }
       updateUser(event.user);
     }));
@@ -1418,8 +1418,8 @@ class ClientState {
   final StreamChatClient _client;
 
   /// Update user information
-  set user(OwnUser? user) {
-    _userController.add(user);
+  set currentUser(OwnUser? user) {
+    _currentUserController.add(user);
   }
 
   /// Update all the [users] with the provided [userList]
@@ -1436,10 +1436,24 @@ class ClientState {
   void updateUser(User? user) => updateUsers([user]);
 
   /// The current user
-  OwnUser? get user => _userController.valueOrNull;
+  OwnUser? get currentUser => _currentUserController.valueOrNull;
 
   /// The current user as a stream
-  Stream<OwnUser?> get userStream => _userController.stream;
+  Stream<OwnUser?> get currentUserStream => _currentUserController.stream;
+
+  // coverage:ignore-start
+
+  /// The current user
+  @Deprecated('Use `.currentUser` instead, Will be removed in future releases')
+  OwnUser? get user => _currentUserController.valueOrNull;
+
+  /// The current user as a stream
+  @Deprecated(
+    'Use `.currentUserStream` instead, Will be removed in future releases',
+  )
+  Stream<OwnUser?> get userStream => _currentUserController.stream;
+
+  // coverage:ignore-end
 
   /// The current user
   Map<String, User> get users => _usersController.value;
@@ -1471,7 +1485,7 @@ class ClientState {
   }
 
   final _channelsController = BehaviorSubject<Map<String, Channel>>.seeded({});
-  final _userController = BehaviorSubject<OwnUser?>();
+  final _currentUserController = BehaviorSubject<OwnUser?>();
   final _usersController = BehaviorSubject<Map<String, User>>.seeded({});
   final _unreadChannelsController = BehaviorSubject<int>.seeded(0);
   final _totalUnreadCountController = BehaviorSubject<int>.seeded(0);
@@ -1479,7 +1493,7 @@ class ClientState {
   /// Call this method to dispose this object
   void dispose() {
     _subscriptions.forEach((s) => s.cancel());
-    _userController.close();
+    _currentUserController.close();
     _unreadChannelsController.close();
     _totalUnreadCountController.close();
     channels.values.forEach((c) => c.dispose());

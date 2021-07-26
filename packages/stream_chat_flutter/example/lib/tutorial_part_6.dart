@@ -99,7 +99,7 @@ class ChannelListPage extends StatelessWidget {
         child: ChannelListView(
           filter: Filter.in_(
             'members',
-            [StreamChat.of(context).user!.id],
+            [StreamChat.of(context).currentUser!.id],
           ),
           sort: const [SortOption('last_message_at')],
           pagination: const PaginationParams(

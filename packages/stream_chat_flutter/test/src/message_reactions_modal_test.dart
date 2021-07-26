@@ -16,7 +16,7 @@ void main() {
       final themeData = ThemeData();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
@@ -61,7 +61,7 @@ void main() {
       final themeData = ThemeData();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
 

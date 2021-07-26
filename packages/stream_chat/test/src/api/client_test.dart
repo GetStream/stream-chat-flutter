@@ -155,7 +155,7 @@ void main() {
 
     group('`.openConnection`', () {
       test('should throw if state does not contain user', () async {
-        expect(client.state.user, isNull);
+        expect(client.state.currentUser, isNull);
         try {
           await client.openConnection();
         } catch (e) {
@@ -164,7 +164,7 @@ void main() {
       });
 
       test('should throw if connection is already in progress', () async {
-        expect(client.state.user, isNull);
+        expect(client.state.currentUser, isNull);
         try {
           await client.connectAnonymousUser();
           await client.openConnection();
@@ -179,7 +179,7 @@ void main() {
       });
 
       test('should throw if connection is already available', () async {
-        expect(client.state.user, isNull);
+        expect(client.state.currentUser, isNull);
         try {
           await client.connectAnonymousUser();
           // waiting 300ms for `wsConnectionStatusStream` to emit
@@ -799,7 +799,7 @@ void main() {
     });
 
     test('`.disconnectUser` should reset state and user', () async {
-      expect(client.state.user, isNotNull);
+      expect(client.state.currentUser, isNotNull);
       expect(client.wsConnectionStatus, ConnectionStatus.connected);
 
       expectLater(
@@ -810,7 +810,7 @@ void main() {
 
       await client.disconnectUser();
 
-      expect(client.state.user, isNull);
+      expect(client.state.currentUser, isNull);
       expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
     });
   });

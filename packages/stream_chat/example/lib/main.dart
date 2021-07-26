@@ -245,5 +245,5 @@ class _MessageViewState extends State<MessageView> {
 /// Helper extension for quickly retrieving
 /// the current user id from a [StreamChatClient].
 extension on StreamChatClient {
-  String get uid => state.user!.id;
+  String get uid => state.currentUser!.id;
 }
