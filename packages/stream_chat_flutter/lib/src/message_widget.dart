@@ -15,6 +15,7 @@ import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/url_attachment.dart';
+import 'package:stream_chat_flutter/src/visible_footnote.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget builder for building attachments
@@ -92,6 +93,7 @@ class MessageWidget extends StatefulWidget {
     this.userAvatarBuilder,
     this.editMessageInputBuilder,
     this.textBuilder,
+    this.bottomRowBuilder,
     this.onReturnAction,
     Map<String, AttachmentBuilder>? customAttachmentBuilders,
     this.readList,
@@ -274,6 +276,9 @@ class MessageWidget extends StatefulWidget {
 
   /// Function called on long press
   final void Function(BuildContext, Message)? onMessageActions;
+
+  /// Widget builder for building a bottom row below the message
+  final Widget Function(BuildContext, Message)? bottomRowBuilder;
 
   /// Widget builder for building user avatar
   final Widget Function(BuildContext, User)? userAvatarBuilder;
@@ -782,7 +787,11 @@ class _MessageWidgetState extends State<MessageWidget>
                             bottom:
                                 isPinned && widget.showPinHighlight ? 6.0 : 0.0,
                           ),
-                          child: _bottomRow,
+                          child: widget.bottomRowBuilder?.call(
+                                context,
+                                widget.message,
+                              ) ??
+                              _bottomRow,
                         ),
                       if (isFailedState)
                         Positioned(
@@ -830,22 +839,7 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget get _bottomRow {
     if (isDeleted) {
-      final chatThemeData = _streamChatTheme;
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          StreamSvgIcon.eye(
-            color: chatThemeData.colorTheme.textLowEmphasis,
-            size: 16,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'Only visible to you',
-            style: chatThemeData.textTheme.footnote
-                .copyWith(color: chatThemeData.colorTheme.textLowEmphasis),
-          ),
-        ],
-      );
+      return const VisibleFootnote();
     }
 
     final children = <Widget>[];
