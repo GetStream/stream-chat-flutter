@@ -97,6 +97,8 @@ class StreamChatCoreState extends State<StreamChatCore>
   @override
   Widget build(BuildContext context) => widget.child;
 
+  // coverage:ignore-start
+
   /// The current user
   @Deprecated('Use `.currentUser` instead, Will be removed in future releases')
   User? get user => client.state.currentUser;
@@ -106,6 +108,8 @@ class StreamChatCoreState extends State<StreamChatCore>
     'Use `.currentUserStream` instead, Will be removed in future releases',
   )
   Stream<User?> get userStream => client.state.currentUserStream;
+
+  // coverage:ignore-end
 
   /// The current user
   User? get currentUser => client.state.currentUser;

@@ -1441,6 +1441,8 @@ class ClientState {
   /// The current user as a stream
   Stream<OwnUser?> get currentUserStream => _currentUserController.stream;
 
+  // coverage:ignore-start
+
   /// The current user
   @Deprecated('Use `.currentUser` instead, Will be removed in future releases')
   OwnUser? get user => _currentUserController.valueOrNull;
@@ -1450,6 +1452,8 @@ class ClientState {
     'Use `.currentUserStream` instead, Will be removed in future releases',
   )
   Stream<OwnUser?> get userStream => _currentUserController.stream;
+
+  // coverage:ignore-end
 
   /// The current user
   Map<String, User> get users => _usersController.value;
