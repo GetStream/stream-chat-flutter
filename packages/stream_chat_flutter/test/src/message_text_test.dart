@@ -80,7 +80,7 @@ void main() {
       });
 
       const messageText = '''
-      a message.
+a message.
 with multiple lines
 and a list:
 - a. okasd
