@@ -33,6 +33,7 @@ export 'src/stream_chat_theme.dart';
 export 'src/stream_neumorphic_button.dart';
 export 'src/stream_svg_icon.dart';
 export 'src/system_message.dart';
+export 'src/theme/themes.dart';
 export 'src/thread_header.dart';
 export 'src/typing_indicator.dart';
 export 'src/unread_indicator.dart';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/theme/themes.dart';
 
 /// Widget to display deleted message
 class DeletedMessage extends StatelessWidget {
