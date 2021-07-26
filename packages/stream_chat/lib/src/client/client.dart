@@ -332,7 +332,7 @@ class StreamChatClient {
     } catch (e, stk) {
       if (e is StreamWebSocketError && e.isRetriable) {
         final event = await _chatPersistenceClient?.getConnectionInfo();
-        if (event != null) return event.me?.merge(ownUser) ?? ownUser;
+        if (event != null) return ownUser.merge(event.me);
       }
       logger.severe('error connecting user : ${ownUser.id}', e, stk);
       rethrow;
@@ -371,7 +371,7 @@ class StreamChatClient {
 
     try {
       final event = await _ws.connect(user);
-      return event.me?.merge(user) ?? user;
+      return user.merge(event.me);
     } catch (e, stk) {
       logger.severe('error connecting ws', e, stk);
       rethrow;
