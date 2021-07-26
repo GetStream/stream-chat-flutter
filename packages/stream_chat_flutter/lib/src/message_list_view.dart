@@ -942,7 +942,7 @@ class _MessageListViewState extends State<MessageListView> {
     final currentUser = StreamChat.of(context).user;
     final members = StreamChannel.of(context).channel.state?.members ?? [];
     final currentUserMember =
-        members.firstWhere((e) => e.user!.id == currentUser!.id);
+        members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
     Widget messageWidget = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
@@ -1049,7 +1049,7 @@ class _MessageListViewState extends State<MessageListView> {
         }
         FocusScope.of(context).unfocus();
       },
-      showPinButton: widget.pinPermissions.contains(currentUserMember.role),
+      showPinButton: widget.pinPermissions.contains(currentUserMember?.role),
     );
 
     if (widget.messageBuilder != null) {

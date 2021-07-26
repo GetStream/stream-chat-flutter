@@ -291,9 +291,13 @@ class MessageInputState extends State<MessageInput> {
 
   bool get _hasQuotedMessage => widget.quotedMessage != null;
 
+  late DateTime? _cooldownStartedAt;
+  int? _timeOut;
+
   @override
   void initState() {
     super.initState();
+    _startSlowMode();
     _focusNode = widget.focusNode ?? FocusNode();
     _emojiNames =
         Emoji.all().where((it) => it.name != null).map((e) => e.name!);
@@ -322,6 +326,25 @@ class MessageInputState extends State<MessageInput> {
         _openFilePickerSection = false;
       }
     });
+  }
+
+  void _startSlowMode() {
+    if (StreamChannel.of(context).channel.cooldownStartedAt != null) {
+      _cooldownStartedAt = StreamChannel.of(context).channel.cooldownStartedAt;
+      if (DateTime.now().difference(_cooldownStartedAt!).inSeconds <
+          StreamChannel.of(context).channel.cooldown!) {
+        _timeOut = StreamChannel.of(context).channel.cooldown! -
+            DateTime.now().difference(_cooldownStartedAt!).inSeconds;
+        Timer.periodic(const Duration(seconds: 1), (timer) {
+          if (_timeOut == 0) {
+            timer.cancel();
+          } else {
+            print('Time left until cooldown is over: $_timeOut');
+            setState(() => _timeOut = _timeOut! - 1);
+          }
+        });
+      }
+    }
   }
 
   @override
@@ -472,13 +495,44 @@ class MessageInputState extends State<MessageInput> {
       );
 
   Widget _animateSendButton(BuildContext context) {
-    final sendButton = widget.activeSendButton != null
-        ? InkWell(
-            onTap: sendMessage,
-            child: widget.activeSendButton,
-          )
-        : _buildSendButton(context);
-    return AnimatedCrossFade(
+    late Widget sendButton;
+    if (_timeOut != null && _timeOut! > 0) {
+      sendButton = _CountdownButton(
+        count: _timeOut!,
+      );
+    } else if (!_messageIsPresent && _attachments.isEmpty) {
+      sendButton = widget.idleSendButton ?? _buildIdleSendButton(context);
+    } else {
+      sendButton = widget.activeSendButton != null
+          ? InkWell(
+              onTap: sendMessage,
+              child: widget.activeSendButton,
+            )
+          : _buildSendButton(context);
+    }
+
+    /*if (_timeOut == null || _timeOut == 0) {
+      sendButton = widget.activeSendButton != null
+          ? InkWell(
+              onTap: sendMessage,
+              child: widget.activeSendButton,
+            )
+          : _buildSendButton(context);
+    } else {
+      sendButton = _CountdownButton(
+        count: _timeOut!,
+      );
+    }
+
+    if (!_messageIsPresent && _attachments.isEmpty) {
+      sendButton = widget.idleSendButton ?? _buildIdleSendButton(context);
+    }*/
+
+    return AnimatedSwitcher(
+      duration: _streamChatTheme.messageInputTheme.sendAnimationDuration!,
+      child: sendButton,
+    );
+    /*return AnimatedCrossFade(
       crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
           ? CrossFadeState.showFirst
           : CrossFadeState.showSecond,
@@ -486,7 +540,7 @@ class MessageInputState extends State<MessageInput> {
       secondChild: widget.idleSendButton ?? _buildIdleSendButton(context),
       duration: _streamChatTheme.messageInputTheme.sendAnimationDuration!,
       alignment: Alignment.center,
-    );
+    );*/
   }
 
   Widget _buildExpandActionsButton() {
@@ -2082,6 +2136,7 @@ class MessageInputState extends State<MessageInput> {
       if (resp.message?.type == 'error') {
         _parseExistingMessage(message);
       }
+      _startSlowMode();
       widget.onMessageSent?.call(resp.message);
     } catch (e, stk) {
       if (widget.onError != null) {
@@ -2346,4 +2401,31 @@ class __PickerWidgetState extends State<_PickerWidget> {
           );
         });
   }
+}
+
+class _CountdownButton extends StatelessWidget {
+  const _CountdownButton({
+    Key? key,
+    required this.count,
+  }) : super(key: key);
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(8),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: StreamChatTheme.of(context).colorTheme.disabled,
+            shape: BoxShape.circle,
+          ),
+          child: SizedBox(
+            height: 24,
+            width: 24,
+            child: Center(
+              child: Text('$count'),
+            ),
+          ),
+        ),
+      );
 }

@@ -83,7 +83,7 @@ class ChannelModel {
   final int memberCount;
 
   /// The number of seconds in a cooldown
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeIfNull: false, defaultValue: 0)
   final int cooldown;
 
   /// Map of custom channel extraData

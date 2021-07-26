@@ -13,7 +13,7 @@ void main() async {
   /// Create a new instance of [StreamChatClient] passing the apikey obtained
   /// from your project dashboard.
   final client = StreamChatClient(
-    's2dxdhpxd94g',
+    'kv7mcsxr24p8',
     logLevel: Level.INFO,
   )..chatPersistenceClient = chatPersistentClient;
 
@@ -24,14 +24,18 @@ void main() async {
   /// Please see the following for more information:
   /// https://getstream.io/chat/docs/ios_user_setup_and_tokens/
   await client.connectUser(
-    User(id: 'super-band-9'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.'
-    '0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
+    User(id: 'salvatore'),
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic2FsdmF0b3JlIn0.pgiJz7sIc7iP29BHKFwe3nLm5-OaR_1l2P-SlgiC9a8',
   );
 
-  final channel = client.channel('messaging', id: 'godevs');
+  final channel = client.channel('messaging', id: 'godevs2', extraData: {
+    'members': ['salvatore'],
+  });
 
   await channel.watch();
+
+  await channel.enableSlowMode(cooldownInterval: 20);
+  print('Channel cooldown set to ${channel.cooldown}');
 
   runApp(
     MyApp(
