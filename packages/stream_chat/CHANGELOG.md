@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - [#563](https://github.com/GetStream/stream-chat-flutter/issues/563): `Channel.stopWatching()` not working 
+- [#575](https://github.com/GetStream/stream-chat-flutter/issues/575): Wrong `OwnUser.*`
 
 ## 2.0.0
 
