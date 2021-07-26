@@ -15,7 +15,6 @@ import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/url_attachment.dart';
-import 'package:stream_chat_flutter/src/visible_footnote.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget builder for building attachments
@@ -94,6 +93,7 @@ class MessageWidget extends StatefulWidget {
     this.editMessageInputBuilder,
     this.textBuilder,
     this.bottomRowBuilder,
+    this.deletedBottomRowBuilder,
     this.onReturnAction,
     Map<String, AttachmentBuilder>? customAttachmentBuilders,
     this.readList,
@@ -277,8 +277,11 @@ class MessageWidget extends StatefulWidget {
   /// Function called on long press
   final void Function(BuildContext, Message)? onMessageActions;
 
-  /// Widget builder for building a bottom row below the message
+  /// Widget builder for building a bottom row below the message when deleted
   final Widget Function(BuildContext, Message)? bottomRowBuilder;
+
+  /// Widget builder for building a bottom row below the message when deleted
+  final Widget Function(BuildContext, Message)? deletedBottomRowBuilder;
 
   /// Widget builder for building user avatar
   final Widget Function(BuildContext, User)? userAvatarBuilder;
@@ -415,6 +418,8 @@ class MessageWidget extends StatefulWidget {
     Widget Function(BuildContext, Message)? editMessageInputBuilder,
     Widget Function(BuildContext, Message)? textBuilder,
     Widget Function(BuildContext, Message)? usernameBuilder,
+    Widget Function(BuildContext, Message)? bottomRowBuilder,
+    Widget Function(BuildContext, Message)? deletedBottomRowBuilder,
     void Function(BuildContext, Message)? onMessageActions,
     Message? message,
     MessageTheme? messageTheme,
@@ -468,6 +473,9 @@ class MessageWidget extends StatefulWidget {
             editMessageInputBuilder ?? this.editMessageInputBuilder,
         textBuilder: textBuilder ?? this.textBuilder,
         usernameBuilder: usernameBuilder ?? this.usernameBuilder,
+        bottomRowBuilder: bottomRowBuilder ?? this.bottomRowBuilder,
+        deletedBottomRowBuilder:
+            deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
         onMessageActions: onMessageActions ?? this.onMessageActions,
         message: message ?? this.message,
         messageTheme: messageTheme ?? this.messageTheme,
@@ -839,7 +847,11 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget get _bottomRow {
     if (isDeleted) {
-      return const VisibleFootnote();
+      return widget.deletedBottomRowBuilder?.call(
+            context,
+            widget.message,
+          ) ??
+          const SizedBox.shrink();
     }
 
     final children = <Widget>[];

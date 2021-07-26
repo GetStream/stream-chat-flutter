@@ -31,6 +31,7 @@ export 'src/sending_indicator.dart';
 export 'src/stream_chat.dart';
 export 'src/stream_chat_theme.dart';
 export 'src/stream_neumorphic_button.dart';
+export 'src/visible_footnote.dart';
 export 'src/stream_svg_icon.dart';
 export 'src/system_message.dart';
 export 'src/thread_header.dart';

@@ -96,6 +96,13 @@ class ChannelPage extends StatelessWidget {
               threadBuilder: (_, parentMessage) => ThreadPage(
                 parent: parentMessage,
               ),
+              messageBuilder: (context, message, list, defaultMessage) {
+                return defaultMessage.copyWith(
+                  deletedBottomRowBuilder: (c, m) {
+                    return VisibleFootnote();
+                  },
+                );
+              },
             ),
           ),
           const MessageInput(),
