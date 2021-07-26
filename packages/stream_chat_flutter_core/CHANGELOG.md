@@ -3,7 +3,7 @@
 ✅ Added
 - Added `MessageListCore.paginationLimit`
 
-🛑️ Changed
+🔄 Changed
 - Changed default message filter of `MessageListCore`
 
 ## 2.0.0
