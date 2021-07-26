@@ -14,7 +14,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
@@ -44,7 +44,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(

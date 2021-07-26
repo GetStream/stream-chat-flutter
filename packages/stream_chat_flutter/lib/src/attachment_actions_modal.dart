@@ -138,7 +138,8 @@ class AttachmentActionsModal extends StatelessWidget {
                       );
                     },
                   ),
-                  if (StreamChat.of(context).user?.id == message.user?.id)
+                  if (StreamChat.of(context).currentUser?.id ==
+                      message.user?.id)
                     _buildButton(
                       context,
                       'Delete',

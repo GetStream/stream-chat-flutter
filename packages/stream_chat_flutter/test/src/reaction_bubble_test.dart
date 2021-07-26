@@ -16,7 +16,7 @@ void main() {
       final themeData = ThemeData.light();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final theme = StreamChatThemeData.fromTheme(themeData);
       await tester.pumpWidgetBuilder(
@@ -53,7 +53,7 @@ void main() {
       final theme = StreamChatThemeData.fromTheme(themeData);
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       await tester.pumpWidgetBuilder(
         StreamChat(
@@ -90,7 +90,7 @@ void main() {
       final theme = StreamChatThemeData.fromTheme(themeData);
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       await tester.pumpWidgetBuilder(
         StreamChat(
@@ -135,7 +135,7 @@ void main() {
       final theme = StreamChatThemeData.fromTheme(themeData);
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       await tester.pumpWidgetBuilder(
         StreamChat(
@@ -179,7 +179,7 @@ void main() {
       final themeData = ThemeData();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       await tester.pumpWidgetBuilder(
         StreamChat(

@@ -65,12 +65,12 @@ class Channel {
 
   /// Returns true if the channel is muted
   bool get isMuted =>
-      _client.state.user?.channelMutes
+      _client.state.currentUser?.channelMutes
           .any((element) => element.channel.cid == cid) ==
       true;
 
   /// Returns true if the channel is muted as a stream
-  Stream<bool>? get isMutedStream => _client.state.userStream
+  Stream<bool>? get isMutedStream => _client.state.currentUserStream
       .map((event) =>
           event!.channelMutes.any((element) => element.channel.cid == cid) ==
           true)
@@ -382,7 +382,7 @@ class Channel {
     // ignore: parameter_assignments
     message = message.copyWith(
       createdAt: message.createdAt,
-      user: _client.state.user,
+      user: _client.state.currentUser,
       quotedMessage: quotedMessage,
       status: MessageSendingStatus.sending,
       attachments: message.attachments.map(
@@ -693,7 +693,7 @@ class Channel {
     _checkInitialized();
     final messageId = message.id;
     final now = DateTime.now();
-    final user = _client.state.user;
+    final user = _client.state.currentUser;
 
     final latestReactions = [...message.latestReactions ?? <Reaction>[]];
     if (enforceUnique) {
@@ -750,7 +750,7 @@ class Channel {
   Future<EmptyResponse> deleteReaction(
       Message message, Reaction reaction) async {
     final type = reaction.type;
-    final user = _client.state.user;
+    final user = _client.state.currentUser;
 
     final reactionCounts = {...message.reactionCounts ?? <String, int>{}};
     if (reactionCounts.containsKey(type)) {
@@ -1314,7 +1314,7 @@ class ChannelClientState {
 
   void _computeInitialUnread() {
     final userRead = channelState.read.firstWhereOrNull(
-      (r) => r.user.id == _channel._client.state.user?.id,
+      (r) => r.user.id == _channel._client.state.currentUser?.id,
     );
     if (userRead != null) {
       unreadCount = userRead.unreadMessages;
@@ -1431,7 +1431,7 @@ class ChannelClientState {
 
   void _listenReactionDeleted() {
     _subscriptions.add(_channel.on(EventType.reactionDeleted).listen((event) {
-      final userId = _channel.client.state.user!.id;
+      final userId = _channel.client.state.currentUser!.id;
       final message = event.message!.copyWith(
         ownReactions: [...event.message!.latestReactions!]
           ..removeWhere((it) => it.userId != userId),
@@ -1442,7 +1442,7 @@ class ChannelClientState {
 
   void _listenReactions() {
     _subscriptions.add(_channel.on(EventType.reactionNew).listen((event) {
-      final userId = _channel.client.state.user!.id;
+      final userId = _channel.client.state.currentUser!.id;
       final message = event.message!.copyWith(
         ownReactions: [...event.message!.latestReactions!]
           ..removeWhere((it) => it.userId != userId),
@@ -1458,7 +1458,7 @@ class ChannelClientState {
       EventType.reactionUpdated,
     )
         .listen((event) {
-      final userId = _channel.client.state.user!.id;
+      final userId = _channel.client.state.currentUser!.id;
       final message = event.message!.copyWith(
         ownReactions: [...event.message!.latestReactions!]
           ..removeWhere((it) => it.userId != userId),
@@ -1552,7 +1552,7 @@ class ChannelClientState {
 
           if (userReadIndex != null && userReadIndex != -1) {
             final userRead = readList.removeAt(userReadIndex);
-            if (userRead.user.id == _channel._client.state.user!.id) {
+            if (userRead.user.id == _channel._client.state.currentUser!.id) {
               unreadCount = 0;
             }
             readList.add(Read(
@@ -1642,11 +1642,12 @@ class ChannelClientState {
   int get unreadCount => _unreadCountController.value;
 
   bool _countMessageAsUnread(Message message) {
-    final userId = _channel.client.state.user?.id;
-    final userIsMuted = _channel.client.state.user?.mutes.firstWhereOrNull(
-          (m) => m.user.id == message.user?.id,
-        ) !=
-        null;
+    final userId = _channel.client.state.currentUser?.id;
+    final userIsMuted =
+        _channel.client.state.currentUser?.mutes.firstWhereOrNull(
+              (m) => m.user.id == message.user?.id,
+            ) !=
+            null;
     return message.silent != true &&
         message.shadowed != true &&
         message.user?.id != userId &&
@@ -1795,7 +1796,7 @@ class ChannelClientState {
           (event) {
             if (event.user != null) {
               final user = event.user!;
-              if (user.id != _channel.client.state.user?.id) {
+              if (user.id != _channel.client.state.currentUser?.id) {
                 _typings[user] = event;
                 _typingEventsController.add(_typings);
               }
@@ -1808,7 +1809,7 @@ class ChannelClientState {
           (event) {
             if (event.user != null) {
               final user = event.user!;
-              if (user.id != _channel.client.state.user?.id) {
+              if (user.id != _channel.client.state.currentUser?.id) {
                 _typings.remove(event.user);
                 _typingEventsController.add(_typings);
               }
