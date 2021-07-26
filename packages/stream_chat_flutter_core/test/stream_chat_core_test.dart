@@ -431,7 +431,7 @@ void main() {
   );
 
   testWidgets(
-    'streamChatCoreState.userStream should emit all the user events '
+    'streamChatCoreState.currentUserStream should emit all the user events '
     'provided by client',
     (tester) async {
       await tester.runAsync(() async {
