@@ -8,7 +8,7 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 ///
 ///  * [GalleryHeaderThemeData], which is used to configure this theme.
 class GalleryHeaderTheme extends InheritedTheme {
-  /// Creates an [GalleryHeaderTheme].
+  /// Creates a [GalleryHeaderTheme].
   ///
   /// The [data] parameter must not be null.
   const GalleryHeaderTheme({

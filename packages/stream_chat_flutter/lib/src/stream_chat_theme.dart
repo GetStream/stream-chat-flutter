@@ -62,6 +62,7 @@ class StreamChatThemeData {
     ChannelListViewThemeData? channelListViewTheme,
     UserListViewThemeData? userListViewTheme,
     MessageSearchListViewThemeData? messageSearchListViewTheme,
+    AvatarThemeData? avatarTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -89,6 +90,7 @@ class StreamChatThemeData {
       channelListViewTheme: channelListViewTheme,
       userListViewTheme: userListViewTheme,
       messageSearchListViewTheme: messageSearchListViewTheme,
+      avatarTheme: avatarTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -121,6 +123,7 @@ class StreamChatThemeData {
     required this.channelListViewTheme,
     required this.userListViewTheme,
     required this.messageSearchListViewTheme,
+    required this.avatarTheme,
   });
 
   /// Create a theme from a Material [Theme]
@@ -188,6 +191,9 @@ class StreamChatThemeData {
   /// Theme configuration for the [] widget.
   final MessageSearchListViewThemeData messageSearchListViewTheme;
 
+  /// Theme configuration for the [] widget.
+  final AvatarThemeData avatarTheme;
+
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -208,6 +214,7 @@ class StreamChatThemeData {
     ChannelListViewThemeData? channelListViewTheme,
     UserListViewThemeData? userListViewTheme,
     MessageSearchListViewThemeData? messageSearchListViewTheme,
+    AvatarThemeData? avatarTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -230,6 +237,7 @@ class StreamChatThemeData {
         userListViewTheme: userListViewTheme ?? this.userListViewTheme,
         messageSearchListViewTheme:
             messageSearchListViewTheme ?? this.messageSearchListViewTheme,
+        avatarTheme: avatarTheme ?? this.avatarTheme,
       );
 
   /// Merge themes
@@ -257,6 +265,7 @@ class StreamChatThemeData {
       userListViewTheme: userListViewTheme.merge(other.userListViewTheme),
       messageSearchListViewTheme:
           messageSearchListViewTheme.merge(other.messageSearchListViewTheme),
+      avatarTheme: avatarTheme.merge(other.avatarTheme),
     );
   }
 
@@ -271,7 +280,7 @@ class StreamChatThemeData {
         IconThemeData(color: colorTheme.textHighEmphasis.withOpacity(.5));
     final channelTheme = ChannelTheme(
       channelHeaderTheme: ChannelHeaderTheme(
-        avatarTheme: AvatarTheme(
+        avatarTheme: AvatarThemeData(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
             height: 40,
@@ -287,7 +296,7 @@ class StreamChatThemeData {
     );
     final channelPreviewTheme = ChannelPreviewTheme(
       unreadCounterColor: colorTheme.accentError,
-      avatarTheme: AvatarTheme(
+      avatarTheme: AvatarThemeData(
         borderRadius: BorderRadius.circular(20),
         constraints: const BoxConstraints.tightFor(
           height: 40,
@@ -315,7 +324,7 @@ class StreamChatThemeData {
       ),
       channelPreviewTheme: channelPreviewTheme,
       channelListHeaderTheme: ChannelListHeaderTheme(
-        avatarTheme: AvatarTheme(
+        avatarTheme: AvatarThemeData(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
             height: 40,
@@ -338,7 +347,7 @@ class StreamChatThemeData {
         reactionsBorderColor: colorTheme.borders,
         reactionsMaskColor: colorTheme.appBg,
         messageBorderColor: colorTheme.disabled,
-        avatarTheme: AvatarTheme(
+        avatarTheme: AvatarThemeData(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
             height: 32,
@@ -364,7 +373,7 @@ class StreamChatThemeData {
         ),
         messageBackgroundColor: colorTheme.barsBg,
         messageBorderColor: colorTheme.borders,
-        avatarTheme: AvatarTheme(
+        avatarTheme: AvatarThemeData(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
             height: 32,
@@ -487,7 +496,9 @@ class StreamChatThemeData {
       messageSearchListViewTheme: MessageSearchListViewThemeData(
         backgroundColor: colorTheme.appBg,
       ),
+      avatarTheme: AvatarThemeData(
+        borderRadius: BorderRadius.circular(8),
+      ),
     );
   }
 }
-

@@ -49,7 +49,7 @@ class MessageTheme {
   final Color? reactionsMaskColor;
 
   /// Theme of the avatar
-  final AvatarTheme? avatarTheme;
+  final AvatarThemeData? avatarTheme;
 
   /// Copy with a theme
   MessageTheme copyWith({
@@ -60,7 +60,7 @@ class MessageTheme {
     TextStyle? replies,
     Color? messageBackgroundColor,
     Color? messageBorderColor,
-    AvatarTheme? avatarTheme,
+    AvatarThemeData? avatarTheme,
     Color? reactionsBackgroundColor,
     Color? reactionsBorderColor,
     Color? reactionsMaskColor,

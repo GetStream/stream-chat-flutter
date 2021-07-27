@@ -18,7 +18,7 @@ class ChannelHeaderTheme {
   final TextStyle? subtitle;
 
   /// Theme for avatar
-  final AvatarTheme? avatarTheme;
+  final AvatarThemeData? avatarTheme;
 
   /// Color for [ChannelHeaderTheme]
   final Color? color;
@@ -27,7 +27,7 @@ class ChannelHeaderTheme {
   ChannelHeaderTheme copyWith({
     TextStyle? title,
     TextStyle? subtitle,
-    AvatarTheme? avatarTheme,
+    AvatarThemeData? avatarTheme,
     Color? color,
   }) =>
       ChannelHeaderTheme(

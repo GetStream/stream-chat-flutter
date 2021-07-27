@@ -14,7 +14,7 @@ class ChannelListHeaderTheme {
   final TextStyle? title;
 
   /// Theme dedicated to the userAvatar
-  final AvatarTheme? avatarTheme;
+  final AvatarThemeData? avatarTheme;
 
   /// Background color of the appbar
   final Color? color;
@@ -22,7 +22,7 @@ class ChannelListHeaderTheme {
   /// Returns a new [ChannelListHeaderTheme] replacing some of its properties
   ChannelListHeaderTheme copyWith({
     TextStyle? title,
-    AvatarTheme? avatarTheme,
+    AvatarThemeData? avatarTheme,
     Color? color,
   }) =>
       ChannelListHeaderTheme(

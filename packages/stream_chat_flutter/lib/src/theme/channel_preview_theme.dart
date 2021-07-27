@@ -23,7 +23,7 @@ class ChannelPreviewTheme {
   final TextStyle? lastMessageAt;
 
   /// Avatar theme
-  final AvatarTheme? avatarTheme;
+  final AvatarThemeData? avatarTheme;
 
   /// Unread counter color
   final Color? unreadCounterColor;
@@ -36,7 +36,7 @@ class ChannelPreviewTheme {
     TextStyle? title,
     TextStyle? subtitle,
     TextStyle? lastMessageAt,
-    AvatarTheme? avatarTheme,
+    AvatarThemeData? avatarTheme,
     Color? unreadCounterColor,
     double? indicatorIconSize,
   }) =>
