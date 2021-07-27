@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
+import 'package:stream_chat_flutter/src/theme/themes.dart';
 
 /// Overrides the default style of [ChannelHeader] descendants.
 ///
@@ -59,17 +60,17 @@ class ChannelHeaderTheme extends InheritedTheme {
 class ChannelHeaderThemeData with Diagnosticable {
   /// Creates a [ChannelHeaderThemeData]
   const ChannelHeaderThemeData({
-    this.title,
-    this.subtitle,
+    this.titleStyle,
+    this.subtitleStyle,
     this.avatarTheme,
     this.color,
   });
 
   /// Theme for title
-  final TextStyle? title;
+  final TextStyle? titleStyle;
 
   /// Theme for subtitle
-  final TextStyle? subtitle;
+  final TextStyle? subtitleStyle;
 
   /// Theme for avatar
   final AvatarThemeData? avatarTheme;
@@ -79,26 +80,70 @@ class ChannelHeaderThemeData with Diagnosticable {
 
   /// Copy with theme
   ChannelHeaderThemeData copyWith({
-    TextStyle? title,
-    TextStyle? subtitle,
+    TextStyle? titleStyle,
+    TextStyle? subtitleStyle,
     AvatarThemeData? avatarTheme,
     Color? color,
   }) =>
       ChannelHeaderThemeData(
-        title: title ?? this.title,
-        subtitle: subtitle ?? this.subtitle,
+        titleStyle: titleStyle ?? this.titleStyle,
+        subtitleStyle: subtitleStyle ?? this.subtitleStyle,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         color: color ?? this.color,
+      );
+
+  /// Linearly interpolate between two [ChannelHeaderThemeData].
+  ///
+  /// All the properties must be non-null.
+  ChannelHeaderThemeData lerp(
+    ChannelHeaderThemeData a,
+    ChannelHeaderThemeData b,
+    double t,
+  ) =>
+      ChannelHeaderThemeData(
+        titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
+        subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
+        avatarTheme:
+            const AvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+        color: Color.lerp(a.color, b.color, t),
       );
 
   /// Merge with other [ChannelHeaderThemeData]
   ChannelHeaderThemeData merge(ChannelHeaderThemeData? other) {
     if (other == null) return this;
     return copyWith(
-      title: title?.merge(other.title) ?? other.title,
-      subtitle: subtitle?.merge(other.subtitle) ?? other.subtitle,
+      titleStyle: titleStyle?.merge(other.titleStyle) ?? other.titleStyle,
+      subtitleStyle:
+          subtitleStyle?.merge(other.subtitleStyle) ?? other.subtitleStyle,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
       color: other.color,
     );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChannelHeaderThemeData &&
+          runtimeType == other.runtimeType &&
+          titleStyle == other.titleStyle &&
+          subtitleStyle == other.subtitleStyle &&
+          avatarTheme == other.avatarTheme &&
+          color == other.color;
+
+  @override
+  int get hashCode =>
+      titleStyle.hashCode ^
+      subtitleStyle.hashCode ^
+      avatarTheme.hashCode ^
+      color.hashCode;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('title', titleStyle))
+      ..add(DiagnosticsProperty('subtitle', subtitleStyle))
+      ..add(DiagnosticsProperty('avatarTheme', avatarTheme))
+      ..add(ColorProperty('color', color));
   }
 }

@@ -169,7 +169,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                     title ??
                         ChannelName(
                           textStyle: chatThemeData
-                              .channelTheme.channelHeaderTheme.title,
+                              .channelTheme.channelHeaderTheme.titleStyle,
                         ),
                     const SizedBox(height: 2),
                     subtitle ??
@@ -177,7 +177,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                           showTypingIndicator: showTypingIndicator,
                           channel: channel,
                           textStyle: chatThemeData
-                              .channelTheme.channelHeaderTheme.subtitle,
+                              .channelTheme.channelHeaderTheme.subtitleStyle,
                         ),
                   ],
                 ),

@@ -86,7 +86,7 @@ class GalleryHeaderThemeData with Diagnosticable {
 
   /// The [TextStyle] to use for the [GalleryHeader] subtitle text.
   ///
-  /// Defaults to [ChannelPreviewTheme.subtitle].
+  /// Defaults to [ChannelPreviewTheme.subtitleStyle].
   final TextStyle? subtitleTextStyle;
 
   ///

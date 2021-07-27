@@ -628,7 +628,7 @@ class _MessageListViewState extends State<MessageListView> {
         child: Text(
           '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
           textAlign: TextAlign.center,
-          style: _streamTheme.channelTheme.channelHeaderTheme.subtitle,
+          style: _streamTheme.channelTheme.channelHeaderTheme.subtitleStyle,
         ),
       ),
     );
