@@ -851,7 +851,7 @@ class _MessageWidgetState extends State<MessageWidget>
             context,
             widget.message,
           ) ??
-          const SizedBox.shrink();
+          const Offstage();
     }
 
     final children = <Widget>[];
