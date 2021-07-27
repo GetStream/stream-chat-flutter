@@ -827,7 +827,7 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Widget _buildQuotedMessage() {
-    final isMyMessage = widget.message.user?.id == _streamChat.user?.id;
+    final isMyMessage = widget.message.user?.id == _streamChat.currentUser?.id;
     final onTap = widget.message.quotedMessage?.isDeleted != true &&
             widget.onQuotedMessageTap != null
         ? () => widget.onQuotedMessageTap!(widget.message.quotedMessageId)
@@ -999,7 +999,7 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildReactionIndicator(
     BuildContext context,
   ) {
-    final ownId = _streamChat.user!.id;
+    final ownId = _streamChat.currentUser!.id;
     final reactionsMap = <String, Reaction>{};
     widget.message.latestReactions?.forEach((element) {
       if (!reactionsMap.containsKey(element.type) ||
@@ -1060,10 +1060,10 @@ class _MessageWidgetState extends State<MessageWidget>
                   showReactionPickerIndicator: widget.showReactions &&
                       (widget.message.status == MessageSendingStatus.sent),
                   showPinHighlight: false,
-                  showUserAvatar:
-                      widget.message.user!.id == channel.client.state.user!.id
-                          ? DisplayWidget.gone
-                          : DisplayWidget.show,
+                  showUserAvatar: widget.message.user!.id ==
+                          channel.client.state.currentUser!.id
+                      ? DisplayWidget.gone
+                      : DisplayWidget.show,
                 ),
                 onCopyTap: (message) =>
                     Clipboard.setData(ClipboardData(text: message.text)),
@@ -1124,7 +1124,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 (widget.message.status == MessageSendingStatus.sent),
             showPinHighlight: false,
             showUserAvatar:
-                widget.message.user!.id == channel.client.state.user!.id
+                widget.message.user!.id == channel.client.state.currentUser!.id
                     ? DisplayWidget.gone
                     : DisplayWidget.show,
           ),
@@ -1282,7 +1282,7 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget _buildPinnedMessage(Message message) {
     final pinnedBy = message.pinnedBy;
-    final pinnedByMe = _streamChat.user!.id == pinnedBy!.id;
+    final pinnedByMe = _streamChat.currentUser!.id == pinnedBy!.id;
 
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 8),

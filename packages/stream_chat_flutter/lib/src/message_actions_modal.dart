@@ -101,7 +101,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   Widget _showMessageOptionsModal() {
     final mediaQueryData = MediaQuery.of(context);
     final size = mediaQueryData.size;
-    final user = StreamChat.of(context).user;
+    final user = StreamChat.of(context).currentUser;
 
     final roughMaxSize = 2 * size.width / 3;
     var messageTextLength = widget.message.text!.length;

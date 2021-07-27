@@ -1,5 +1,10 @@
 ## Upcoming
 
+🔄 Changed
+
+- `client.user` is now deprecated in favor of `client.currentUser`.
+- `client.userStream` is now deprecated in favor of `client.currentUserStream`.
+
 🐞 Fixed
 
 - [#563](https://github.com/GetStream/stream-chat-flutter/issues/563): `Channel.stopWatching()` not working 

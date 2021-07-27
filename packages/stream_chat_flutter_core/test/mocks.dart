@@ -18,10 +18,10 @@ class MockClient extends Mock implements StreamChatClient {
 }
 
 class MockClientState extends Mock implements ClientState {
-  OwnUser? _user;
+  OwnUser? _currentUser;
 
   @override
-  OwnUser get user => _user ??= OwnUser(
+  OwnUser get currentUser => _currentUser ??= OwnUser(
         id: 'testUserId',
         role: 'admin',
         createdAt: DateTime.now(),

@@ -42,7 +42,7 @@ class MessageReactionsModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final user = StreamChat.of(context).user;
+    final user = StreamChat.of(context).currentUser;
 
     final roughMaxSize = 2 * size.width / 3;
     var messageTextLength = message.text!.length;

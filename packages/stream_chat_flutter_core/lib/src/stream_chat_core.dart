@@ -97,11 +97,25 @@ class StreamChatCoreState extends State<StreamChatCore>
   @override
   Widget build(BuildContext context) => widget.child;
 
+  // coverage:ignore-start
+
   /// The current user
-  User? get user => client.state.user;
+  @Deprecated('Use `.currentUser` instead, Will be removed in future releases')
+  User? get user => client.state.currentUser;
 
   /// The current user as a stream
-  Stream<User?> get userStream => client.state.userStream;
+  @Deprecated(
+    'Use `.currentUserStream` instead, Will be removed in future releases',
+  )
+  Stream<User?> get userStream => client.state.currentUserStream;
+
+  // coverage:ignore-end
+
+  /// The current user
+  User? get currentUser => client.state.currentUser;
+
+  /// The current user as a stream
+  Stream<User?> get currentUserStream => client.state.currentUserStream;
 
   StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
@@ -126,7 +140,7 @@ class StreamChatCoreState extends State<StreamChatCore>
         if (!_isInForeground) return;
         if (_isConnectionAvailable) {
           if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
-              user != null) {
+              currentUser != null) {
             client.openConnection();
           }
         } else {
@@ -163,7 +177,7 @@ class StreamChatCoreState extends State<StreamChatCore>
       AppLifecycleState.resumed,
       AppLifecycleState.inactive,
     ].contains(state);
-    if (user != null) {
+    if (currentUser != null) {
       if (_isInForeground) {
         _onForeground();
       } else {
