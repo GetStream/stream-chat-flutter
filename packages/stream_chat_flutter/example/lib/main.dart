@@ -23,15 +23,11 @@ void main() async {
   ///
   /// Please see the following for more information:
   /// https://getstream.io/chat/docs/ios_user_setup_and_tokens/
-  await client.connectUser(
-    User(id: 'super-band-9', language: 'fr'),
+  final res = await client.connectUser(
+    User(id: 'super-band-9'),
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.'
     '0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
   );
-
-  client.on().listen((e) {
-    print('e.user.language ${e.me?.language}');
-  });
 
   final channel = client.channel('messaging', id: 'godevs');
 

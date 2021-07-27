@@ -325,8 +325,8 @@ class StreamChatClient {
         _chatPersistenceClient = _originalChatPersistenceClient;
         await _chatPersistenceClient!.connect(ownUser.id);
       }
-      final res = await openConnection();
-      return res;
+      final connectedUser = await openConnection();
+      return state.currentUser = connectedUser;
     } catch (e, stk) {
       if (e is StreamWebSocketError && e.isRetriable) {
         final event = await _chatPersistenceClient?.getConnectionInfo();
