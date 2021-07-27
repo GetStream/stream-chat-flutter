@@ -27,7 +27,7 @@ class OwnUser extends User {
     Map<String, Object?> extraData = const {},
     bool banned = false,
     List<String> teams = const [],
-    String? language,
+    String language = 'en',
   }) : super(
           id: id,
           role: role,
@@ -99,10 +99,7 @@ class OwnUser extends User {
   /// Returns a new [OwnUser] that is a combination of this ownUser
   /// and the given [other] ownUser.
   OwnUser merge(OwnUser? other) {
-    if (other == null) {
-      return this;
-    }
-
+    if (other == null) return this;
     return copyWith(
       banned: other.banned,
       channelMutes: other.channelMutes,

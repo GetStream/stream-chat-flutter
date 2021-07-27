@@ -88,10 +88,7 @@ class User extends Equatable {
   ///
   /// Defaults to 'en'.
   @JsonKey(defaultValue: 'en')
-  final String? language;
-
-  @override
-  int get hashCode => id.hashCode;
+  final String language;
 
   /// Shortcut for user name
   String get name {
@@ -105,11 +102,6 @@ class User extends Equatable {
   /// List of users to list of userIds
   static List<String>? toIds(List<User>? users) =>
       users?.map((u) => u.id).toList();
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is User && runtimeType == other.runtimeType && id == other.id;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
@@ -143,16 +135,5 @@ class User extends Equatable {
       );
 
   @override
-  List<Object?> get props => [
-        id,
-        role,
-        teams,
-        createdAt,
-        updatedAt,
-        lastActive,
-        online,
-        banned,
-        extraData,
-        language,
-      ];
+  List<Object?> get props => [id];
 }
