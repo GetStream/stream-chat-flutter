@@ -87,7 +87,11 @@ class User extends Equatable {
   /// The language this user prefers.
   ///
   /// Defaults to 'en'.
-  @JsonKey(defaultValue: 'en')
+  @JsonKey(
+    includeIfNull: false,
+    toJson: Serializer.readOnly,
+    defaultValue: 'en',
+  )
   final String language;
 
   /// Shortcut for user name

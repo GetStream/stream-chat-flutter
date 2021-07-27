@@ -110,6 +110,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   val['pinned_by'] = readonly(instance.pinnedBy);
   val['extra_data'] = instance.extraData;
   writeNotNull('deleted_at', readonly(instance.deletedAt));
-  writeNotNull('i18n', readonly(instance.i18n));
+  writeNotNull('i18n', instance.i18n);
   return val;
 }

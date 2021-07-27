@@ -34,6 +34,7 @@ void main() {
   testWidgets(
     'it should show correct message text',
     (WidgetTester tester) async {
+      final currentUser = OwnUser(id: 'user-id');
       final client = MockClient();
       final clientState = MockClientState();
       final channel = MockChannel();
@@ -43,7 +44,9 @@ void main() {
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(currentUser);
+      when(() => clientState.currentUserStream)
+          .thenAnswer((_) => Stream.value(currentUser));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -176,6 +179,7 @@ void main() {
   testGoldens(
     'control test',
     (WidgetTester tester) async {
+      final currentUser = OwnUser(id: 'user-id');
       final client = MockClient();
       final clientState = MockClientState();
       final channel = MockChannel();
@@ -185,7 +189,9 @@ void main() {
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(currentUser);
+      when(() => clientState.currentUserStream)
+          .thenAnswer((_) => Stream.value(currentUser));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -209,14 +215,18 @@ cool.''';
 
       await tester.pumpWidgetBuilder(
         materialAppWrapper()(SimpleFrame(
-          child: StreamChannel(
-            channel: channel,
-            child: Scaffold(
-              body: MessageText(
-                message: Message(
-                  text: messageText,
+          child: StreamChat(
+            client: client,
+            connectivityStream: Stream.value(ConnectivityResult.wifi),
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: MessageText(
+                  message: Message(
+                    text: messageText,
+                  ),
+                  messageTheme: streamTheme.otherMessageTheme,
                 ),
-                messageTheme: streamTheme.otherMessageTheme,
               ),
             ),
           ),
