@@ -56,7 +56,7 @@ class AvatarTheme extends InheritedTheme {
 /// the default style for [UserAvatar]s below the overall [StreamChatTheme].
 class AvatarThemeData with Diagnosticable {
   /// Creates an [AvatarThemeData].
-  AvatarThemeData({
+  const AvatarThemeData({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
   })  : _constraints = constraints,
