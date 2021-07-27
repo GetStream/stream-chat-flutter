@@ -39,7 +39,5 @@ export 'src/typing_indicator.dart';
 export 'src/unread_indicator.dart';
 export 'src/user_avatar.dart';
 export 'src/user_item.dart';
-export 'src/user_item.dart';
-export 'src/user_list_view.dart';
 export 'src/user_list_view.dart';
 export 'src/utils.dart';
