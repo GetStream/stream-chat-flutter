@@ -188,10 +188,10 @@ class StreamChatThemeData {
   /// Theme configuration for the [UserListView] widget.
   final UserListViewThemeData userListViewTheme;
 
-  /// Theme configuration for the [] widget.
+  /// Theme configuration for the [MessageSearchListView] widget.
   final MessageSearchListViewThemeData messageSearchListViewTheme;
 
-  /// Theme configuration for the [] widget.
+  /// Theme configuration for the [UserAvatar] widget.
   final AvatarThemeData avatarTheme;
 
   /// Creates a copy of [StreamChatThemeData] with specified attributes
@@ -279,7 +279,7 @@ class StreamChatThemeData {
     final iconTheme =
         IconThemeData(color: colorTheme.textHighEmphasis.withOpacity(.5));
     final channelTheme = ChannelTheme(
-      channelHeaderTheme: ChannelHeaderTheme(
+      channelHeaderTheme: ChannelHeaderThemeData(
         avatarTheme: AvatarThemeData(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
@@ -497,7 +497,7 @@ class StreamChatThemeData {
         backgroundColor: colorTheme.appBg,
       ),
       avatarTheme: AvatarThemeData(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(20),
       ),
     );
   }

@@ -8,11 +8,11 @@ class ChannelTheme {
   });
 
   /// Theme of the [ChannelHeader] widget
-  final ChannelHeaderTheme channelHeaderTheme;
+  final ChannelHeaderThemeData channelHeaderTheme;
 
   /// Creates a copy of [ChannelTheme] with specified attributes overridden.
   ChannelTheme copyWith({
-    ChannelHeaderTheme? channelHeaderTheme,
+    ChannelHeaderThemeData? channelHeaderTheme,
   }) =>
       ChannelTheme(
         channelHeaderTheme: channelHeaderTheme ?? this.channelHeaderTheme,
