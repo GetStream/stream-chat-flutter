@@ -277,10 +277,10 @@ class MessageWidget extends StatefulWidget {
   /// Function called on long press
   final void Function(BuildContext, Message)? onMessageActions;
 
-  /// Widget builder for building a bottom row below the message when deleted
+  /// Widget builder for building a bottom row below the message
   final Widget Function(BuildContext, Message)? bottomRowBuilder;
 
-  /// Widget builder for building a bottom row below the message when deleted
+  /// Widget builder for building a bottom row below a deleted message
   final Widget Function(BuildContext, Message)? deletedBottomRowBuilder;
 
   /// Widget builder for building user avatar
