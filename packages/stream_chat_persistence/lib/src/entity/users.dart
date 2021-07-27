@@ -11,6 +11,9 @@ class Users extends Table {
   /// User role
   TextColumn get role => text().nullable()();
 
+  /// The language this user prefers.
+  TextColumn get language => text().withDefault(const Constant('en'))();
+
   /// Date of user creation
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 

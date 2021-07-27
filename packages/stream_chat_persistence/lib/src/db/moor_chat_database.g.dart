@@ -647,6 +647,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   /// The channel cid of which this message is part of
   final String? channelCid;
 
+  /// A Map of [messageText] translations.
+  final Map<String, String>? i18n;
+
   /// Message custom extraData
   final Map<String, Object?>? extraData;
   MessageEntity(
@@ -673,6 +676,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       this.pinExpires,
       this.pinnedByUserId,
       this.channelCid,
+      this.i18n,
       this.extraData});
   factory MessageEntity.fromData(
       Map<String, dynamic> data, GeneratedDatabase db,
@@ -725,7 +729,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           .mapFromDatabaseResponse(data['${effectivePrefix}pinned_by_user_id']),
       channelCid: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
-      extraData: $MessagesTable.$converter5.mapToDart(const StringType()
+      i18n: $MessagesTable.$converter5.mapToDart(const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}i18n'])),
+      extraData: $MessagesTable.$converter6.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
@@ -797,8 +803,12 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     if (!nullToAbsent || channelCid != null) {
       map['channel_cid'] = Variable<String?>(channelCid);
     }
-    if (!nullToAbsent || extraData != null) {
+    if (!nullToAbsent || i18n != null) {
       final converter = $MessagesTable.$converter5;
+      map['i18n'] = Variable<String?>(converter.mapToSql(i18n));
+    }
+    if (!nullToAbsent || extraData != null) {
+      final converter = $MessagesTable.$converter6;
       map['extra_data'] = Variable<String?>(converter.mapToSql(extraData));
     }
     return map;
@@ -833,6 +843,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       pinExpires: serializer.fromJson<DateTime?>(json['pinExpires']),
       pinnedByUserId: serializer.fromJson<String?>(json['pinnedByUserId']),
       channelCid: serializer.fromJson<String?>(json['channelCid']),
+      i18n: serializer.fromJson<Map<String, String>?>(json['i18n']),
       extraData: serializer.fromJson<Map<String, Object?>?>(json['extraData']),
     );
   }
@@ -863,6 +874,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       'pinExpires': serializer.toJson<DateTime?>(pinExpires),
       'pinnedByUserId': serializer.toJson<String?>(pinnedByUserId),
       'channelCid': serializer.toJson<String?>(channelCid),
+      'i18n': serializer.toJson<Map<String, String>?>(i18n),
       'extraData': serializer.toJson<Map<String, Object?>?>(extraData),
     };
   }
@@ -891,6 +903,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           Value<DateTime?> pinExpires = const Value.absent(),
           Value<String?> pinnedByUserId = const Value.absent(),
           Value<String?> channelCid = const Value.absent(),
+          Value<Map<String, String>?> i18n = const Value.absent(),
           Value<Map<String, Object?>?> extraData = const Value.absent()}) =>
       MessageEntity(
         id: id ?? this.id,
@@ -922,6 +935,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         pinnedByUserId:
             pinnedByUserId.present ? pinnedByUserId.value : this.pinnedByUserId,
         channelCid: channelCid.present ? channelCid.value : this.channelCid,
+        i18n: i18n.present ? i18n.value : this.i18n,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
   @override
@@ -950,6 +964,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           ..write('pinExpires: $pinExpires, ')
           ..write('pinnedByUserId: $pinnedByUserId, ')
           ..write('channelCid: $channelCid, ')
+          ..write('i18n: $i18n, ')
           ..write('extraData: $extraData')
           ..write(')'))
         .toString();
@@ -998,7 +1013,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
                                                                               .hashCode,
                                                                           $mrjc(
                                                                               pinned.hashCode,
-                                                                              $mrjc(pinnedAt.hashCode, $mrjc(pinExpires.hashCode, $mrjc(pinnedByUserId.hashCode, $mrjc(channelCid.hashCode, extraData.hashCode))))))))))))))))))))))));
+                                                                              $mrjc(pinnedAt.hashCode, $mrjc(pinExpires.hashCode, $mrjc(pinnedByUserId.hashCode, $mrjc(channelCid.hashCode, $mrjc(i18n.hashCode, extraData.hashCode)))))))))))))))))))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1026,6 +1041,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           other.pinExpires == this.pinExpires &&
           other.pinnedByUserId == this.pinnedByUserId &&
           other.channelCid == this.channelCid &&
+          other.i18n == this.i18n &&
           other.extraData == this.extraData);
 }
 
@@ -1053,6 +1069,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   final Value<DateTime?> pinExpires;
   final Value<String?> pinnedByUserId;
   final Value<String?> channelCid;
+  final Value<Map<String, String>?> i18n;
   final Value<Map<String, Object?>?> extraData;
   const MessagesCompanion({
     this.id = const Value.absent(),
@@ -1078,6 +1095,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.pinExpires = const Value.absent(),
     this.pinnedByUserId = const Value.absent(),
     this.channelCid = const Value.absent(),
+    this.i18n = const Value.absent(),
     this.extraData = const Value.absent(),
   });
   MessagesCompanion.insert({
@@ -1104,6 +1122,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.pinExpires = const Value.absent(),
     this.pinnedByUserId = const Value.absent(),
     this.channelCid = const Value.absent(),
+    this.i18n = const Value.absent(),
     this.extraData = const Value.absent(),
   })  : id = Value(id),
         attachments = Value(attachments),
@@ -1132,6 +1151,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     Expression<DateTime?>? pinExpires,
     Expression<String?>? pinnedByUserId,
     Expression<String?>? channelCid,
+    Expression<Map<String, String>?>? i18n,
     Expression<Map<String, Object?>?>? extraData,
   }) {
     return RawValuesInsertable({
@@ -1158,6 +1178,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       if (pinExpires != null) 'pin_expires': pinExpires,
       if (pinnedByUserId != null) 'pinned_by_user_id': pinnedByUserId,
       if (channelCid != null) 'channel_cid': channelCid,
+      if (i18n != null) 'i18n': i18n,
       if (extraData != null) 'extra_data': extraData,
     });
   }
@@ -1186,6 +1207,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       Value<DateTime?>? pinExpires,
       Value<String?>? pinnedByUserId,
       Value<String?>? channelCid,
+      Value<Map<String, String>?>? i18n,
       Value<Map<String, Object?>?>? extraData}) {
     return MessagesCompanion(
       id: id ?? this.id,
@@ -1211,6 +1233,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       pinExpires: pinExpires ?? this.pinExpires,
       pinnedByUserId: pinnedByUserId ?? this.pinnedByUserId,
       channelCid: channelCid ?? this.channelCid,
+      i18n: i18n ?? this.i18n,
       extraData: extraData ?? this.extraData,
     );
   }
@@ -1296,8 +1319,12 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     if (channelCid.present) {
       map['channel_cid'] = Variable<String?>(channelCid.value);
     }
-    if (extraData.present) {
+    if (i18n.present) {
       final converter = $MessagesTable.$converter5;
+      map['i18n'] = Variable<String?>(converter.mapToSql(i18n.value));
+    }
+    if (extraData.present) {
+      final converter = $MessagesTable.$converter6;
       map['extra_data'] =
           Variable<String?>(converter.mapToSql(extraData.value));
     }
@@ -1330,6 +1357,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
           ..write('pinExpires: $pinExpires, ')
           ..write('pinnedByUserId: $pinnedByUserId, ')
           ..write('channelCid: $channelCid, ')
+          ..write('i18n: $i18n, ')
           ..write('extraData: $extraData')
           ..write(')'))
         .toString();
@@ -1468,11 +1496,16 @@ class $MessagesTable extends Messages
       requiredDuringInsert: false,
       $customConstraints:
           'NULLABLE REFERENCES channels(cid) ON DELETE CASCADE');
+  final VerificationMeta _i18nMeta = const VerificationMeta('i18n');
+  late final GeneratedColumnWithTypeConverter<Map<String, String>, String?>
+      i18n = GeneratedColumn<String?>('i18n', aliasedName, true,
+              typeName: 'TEXT', requiredDuringInsert: false)
+          .withConverter<Map<String, String>>($MessagesTable.$converter5);
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
   late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
       extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
               typeName: 'TEXT', requiredDuringInsert: false)
-          .withConverter<Map<String, Object?>>($MessagesTable.$converter5);
+          .withConverter<Map<String, Object?>>($MessagesTable.$converter6);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1498,6 +1531,7 @@ class $MessagesTable extends Messages
         pinExpires,
         pinnedByUserId,
         channelCid,
+        i18n,
         extraData
       ];
   @override
@@ -1601,6 +1635,7 @@ class $MessagesTable extends Messages
           channelCid.isAcceptableOrUnknown(
               data['channel_cid']!, _channelCidMeta));
     }
+    context.handle(_i18nMeta, const VerificationResult.success());
     context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
@@ -1628,7 +1663,9 @@ class $MessagesTable extends Messages
       MapConverter<int>();
   static TypeConverter<Map<String, int>, String> $converter4 =
       MapConverter<int>();
-  static TypeConverter<Map<String, Object?>, String> $converter5 =
+  static TypeConverter<Map<String, String>, String> $converter5 =
+      MapConverter<String>();
+  static TypeConverter<Map<String, Object?>, String> $converter6 =
       MapConverter<Object?>();
 }
 
@@ -1704,6 +1741,9 @@ class PinnedMessageEntity extends DataClass
   /// The channel cid of which this message is part of
   final String? channelCid;
 
+  /// A Map of [messageText] translations.
+  final Map<String, String>? i18n;
+
   /// Message custom extraData
   final Map<String, Object?>? extraData;
   PinnedMessageEntity(
@@ -1730,6 +1770,7 @@ class PinnedMessageEntity extends DataClass
       this.pinExpires,
       this.pinnedByUserId,
       this.channelCid,
+      this.i18n,
       this.extraData});
   factory PinnedMessageEntity.fromData(
       Map<String, dynamic> data, GeneratedDatabase db,
@@ -1785,7 +1826,9 @@ class PinnedMessageEntity extends DataClass
           .mapFromDatabaseResponse(data['${effectivePrefix}pinned_by_user_id']),
       channelCid: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
-      extraData: $PinnedMessagesTable.$converter5.mapToDart(const StringType()
+      i18n: $PinnedMessagesTable.$converter5.mapToDart(const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}i18n'])),
+      extraData: $PinnedMessagesTable.$converter6.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
@@ -1857,8 +1900,12 @@ class PinnedMessageEntity extends DataClass
     if (!nullToAbsent || channelCid != null) {
       map['channel_cid'] = Variable<String?>(channelCid);
     }
-    if (!nullToAbsent || extraData != null) {
+    if (!nullToAbsent || i18n != null) {
       final converter = $PinnedMessagesTable.$converter5;
+      map['i18n'] = Variable<String?>(converter.mapToSql(i18n));
+    }
+    if (!nullToAbsent || extraData != null) {
+      final converter = $PinnedMessagesTable.$converter6;
       map['extra_data'] = Variable<String?>(converter.mapToSql(extraData));
     }
     return map;
@@ -1893,6 +1940,7 @@ class PinnedMessageEntity extends DataClass
       pinExpires: serializer.fromJson<DateTime?>(json['pinExpires']),
       pinnedByUserId: serializer.fromJson<String?>(json['pinnedByUserId']),
       channelCid: serializer.fromJson<String?>(json['channelCid']),
+      i18n: serializer.fromJson<Map<String, String>?>(json['i18n']),
       extraData: serializer.fromJson<Map<String, Object?>?>(json['extraData']),
     );
   }
@@ -1923,6 +1971,7 @@ class PinnedMessageEntity extends DataClass
       'pinExpires': serializer.toJson<DateTime?>(pinExpires),
       'pinnedByUserId': serializer.toJson<String?>(pinnedByUserId),
       'channelCid': serializer.toJson<String?>(channelCid),
+      'i18n': serializer.toJson<Map<String, String>?>(i18n),
       'extraData': serializer.toJson<Map<String, Object?>?>(extraData),
     };
   }
@@ -1951,6 +2000,7 @@ class PinnedMessageEntity extends DataClass
           Value<DateTime?> pinExpires = const Value.absent(),
           Value<String?> pinnedByUserId = const Value.absent(),
           Value<String?> channelCid = const Value.absent(),
+          Value<Map<String, String>?> i18n = const Value.absent(),
           Value<Map<String, Object?>?> extraData = const Value.absent()}) =>
       PinnedMessageEntity(
         id: id ?? this.id,
@@ -1982,6 +2032,7 @@ class PinnedMessageEntity extends DataClass
         pinnedByUserId:
             pinnedByUserId.present ? pinnedByUserId.value : this.pinnedByUserId,
         channelCid: channelCid.present ? channelCid.value : this.channelCid,
+        i18n: i18n.present ? i18n.value : this.i18n,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
   @override
@@ -2010,6 +2061,7 @@ class PinnedMessageEntity extends DataClass
           ..write('pinExpires: $pinExpires, ')
           ..write('pinnedByUserId: $pinnedByUserId, ')
           ..write('channelCid: $channelCid, ')
+          ..write('i18n: $i18n, ')
           ..write('extraData: $extraData')
           ..write(')'))
         .toString();
@@ -2058,7 +2110,7 @@ class PinnedMessageEntity extends DataClass
                                                                               .hashCode,
                                                                           $mrjc(
                                                                               pinned.hashCode,
-                                                                              $mrjc(pinnedAt.hashCode, $mrjc(pinExpires.hashCode, $mrjc(pinnedByUserId.hashCode, $mrjc(channelCid.hashCode, extraData.hashCode))))))))))))))))))))))));
+                                                                              $mrjc(pinnedAt.hashCode, $mrjc(pinExpires.hashCode, $mrjc(pinnedByUserId.hashCode, $mrjc(channelCid.hashCode, $mrjc(i18n.hashCode, extraData.hashCode)))))))))))))))))))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2086,6 +2138,7 @@ class PinnedMessageEntity extends DataClass
           other.pinExpires == this.pinExpires &&
           other.pinnedByUserId == this.pinnedByUserId &&
           other.channelCid == this.channelCid &&
+          other.i18n == this.i18n &&
           other.extraData == this.extraData);
 }
 
@@ -2113,6 +2166,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
   final Value<DateTime?> pinExpires;
   final Value<String?> pinnedByUserId;
   final Value<String?> channelCid;
+  final Value<Map<String, String>?> i18n;
   final Value<Map<String, Object?>?> extraData;
   const PinnedMessagesCompanion({
     this.id = const Value.absent(),
@@ -2138,6 +2192,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.pinExpires = const Value.absent(),
     this.pinnedByUserId = const Value.absent(),
     this.channelCid = const Value.absent(),
+    this.i18n = const Value.absent(),
     this.extraData = const Value.absent(),
   });
   PinnedMessagesCompanion.insert({
@@ -2164,6 +2219,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.pinExpires = const Value.absent(),
     this.pinnedByUserId = const Value.absent(),
     this.channelCid = const Value.absent(),
+    this.i18n = const Value.absent(),
     this.extraData = const Value.absent(),
   })  : id = Value(id),
         attachments = Value(attachments),
@@ -2192,6 +2248,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     Expression<DateTime?>? pinExpires,
     Expression<String?>? pinnedByUserId,
     Expression<String?>? channelCid,
+    Expression<Map<String, String>?>? i18n,
     Expression<Map<String, Object?>?>? extraData,
   }) {
     return RawValuesInsertable({
@@ -2218,6 +2275,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       if (pinExpires != null) 'pin_expires': pinExpires,
       if (pinnedByUserId != null) 'pinned_by_user_id': pinnedByUserId,
       if (channelCid != null) 'channel_cid': channelCid,
+      if (i18n != null) 'i18n': i18n,
       if (extraData != null) 'extra_data': extraData,
     });
   }
@@ -2246,6 +2304,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       Value<DateTime?>? pinExpires,
       Value<String?>? pinnedByUserId,
       Value<String?>? channelCid,
+      Value<Map<String, String>?>? i18n,
       Value<Map<String, Object?>?>? extraData}) {
     return PinnedMessagesCompanion(
       id: id ?? this.id,
@@ -2271,6 +2330,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       pinExpires: pinExpires ?? this.pinExpires,
       pinnedByUserId: pinnedByUserId ?? this.pinnedByUserId,
       channelCid: channelCid ?? this.channelCid,
+      i18n: i18n ?? this.i18n,
       extraData: extraData ?? this.extraData,
     );
   }
@@ -2356,8 +2416,12 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     if (channelCid.present) {
       map['channel_cid'] = Variable<String?>(channelCid.value);
     }
-    if (extraData.present) {
+    if (i18n.present) {
       final converter = $PinnedMessagesTable.$converter5;
+      map['i18n'] = Variable<String?>(converter.mapToSql(i18n.value));
+    }
+    if (extraData.present) {
+      final converter = $PinnedMessagesTable.$converter6;
       map['extra_data'] =
           Variable<String?>(converter.mapToSql(extraData.value));
     }
@@ -2390,6 +2454,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
           ..write('pinExpires: $pinExpires, ')
           ..write('pinnedByUserId: $pinnedByUserId, ')
           ..write('channelCid: $channelCid, ')
+          ..write('i18n: $i18n, ')
           ..write('extraData: $extraData')
           ..write(')'))
         .toString();
@@ -2529,12 +2594,17 @@ class $PinnedMessagesTable extends PinnedMessages
       requiredDuringInsert: false,
       $customConstraints:
           'NULLABLE REFERENCES channels(cid) ON DELETE CASCADE');
+  final VerificationMeta _i18nMeta = const VerificationMeta('i18n');
+  late final GeneratedColumnWithTypeConverter<Map<String, String>, String?>
+      i18n = GeneratedColumn<String?>('i18n', aliasedName, true,
+              typeName: 'TEXT', requiredDuringInsert: false)
+          .withConverter<Map<String, String>>($PinnedMessagesTable.$converter5);
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
   late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
       extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
               typeName: 'TEXT', requiredDuringInsert: false)
           .withConverter<Map<String, Object?>>(
-              $PinnedMessagesTable.$converter5);
+              $PinnedMessagesTable.$converter6);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -2560,6 +2630,7 @@ class $PinnedMessagesTable extends PinnedMessages
         pinExpires,
         pinnedByUserId,
         channelCid,
+        i18n,
         extraData
       ];
   @override
@@ -2664,6 +2735,7 @@ class $PinnedMessagesTable extends PinnedMessages
           channelCid.isAcceptableOrUnknown(
               data['channel_cid']!, _channelCidMeta));
     }
+    context.handle(_i18nMeta, const VerificationResult.success());
     context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
@@ -2691,7 +2763,9 @@ class $PinnedMessagesTable extends PinnedMessages
       MapConverter<int>();
   static TypeConverter<Map<String, int>, String> $converter4 =
       MapConverter<int>();
-  static TypeConverter<Map<String, Object?>, String> $converter5 =
+  static TypeConverter<Map<String, String>, String> $converter5 =
+      MapConverter<String>();
+  static TypeConverter<Map<String, Object?>, String> $converter6 =
       MapConverter<Object?>();
 }
 
@@ -3030,6 +3104,9 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   /// User role
   final String? role;
 
+  /// The language this user prefers.
+  final String language;
+
   /// Date of user creation
   final DateTime createdAt;
 
@@ -3050,6 +3127,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   UserEntity(
       {required this.id,
       this.role,
+      required this.language,
       required this.createdAt,
       required this.updatedAt,
       this.lastActive,
@@ -3064,6 +3142,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
       role: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}role']),
+      language: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}language'])!,
       createdAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
       updatedAt: const DateTimeType()
@@ -3085,6 +3165,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     if (!nullToAbsent || role != null) {
       map['role'] = Variable<String?>(role);
     }
+    map['language'] = Variable<String>(language);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || lastActive != null) {
@@ -3105,6 +3186,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     return UserEntity(
       id: serializer.fromJson<String>(json['id']),
       role: serializer.fromJson<String?>(json['role']),
+      language: serializer.fromJson<String>(json['language']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       lastActive: serializer.fromJson<DateTime?>(json['lastActive']),
@@ -3119,6 +3201,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'role': serializer.toJson<String?>(role),
+      'language': serializer.toJson<String>(language),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'lastActive': serializer.toJson<DateTime?>(lastActive),
@@ -3131,6 +3214,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   UserEntity copyWith(
           {String? id,
           Value<String?> role = const Value.absent(),
+          String? language,
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> lastActive = const Value.absent(),
@@ -3140,6 +3224,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       UserEntity(
         id: id ?? this.id,
         role: role.present ? role.value : this.role,
+        language: language ?? this.language,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         lastActive: lastActive.present ? lastActive.value : this.lastActive,
@@ -3152,6 +3237,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     return (StringBuffer('UserEntity(')
           ..write('id: $id, ')
           ..write('role: $role, ')
+          ..write('language: $language, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('lastActive: $lastActive, ')
@@ -3168,19 +3254,24 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       $mrjc(
           role.hashCode,
           $mrjc(
-              createdAt.hashCode,
+              language.hashCode,
               $mrjc(
-                  updatedAt.hashCode,
+                  createdAt.hashCode,
                   $mrjc(
-                      lastActive.hashCode,
-                      $mrjc(online.hashCode,
-                          $mrjc(banned.hashCode, extraData.hashCode))))))));
+                      updatedAt.hashCode,
+                      $mrjc(
+                          lastActive.hashCode,
+                          $mrjc(
+                              online.hashCode,
+                              $mrjc(
+                                  banned.hashCode, extraData.hashCode)))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is UserEntity &&
           other.id == this.id &&
           other.role == this.role &&
+          other.language == this.language &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.lastActive == this.lastActive &&
@@ -3192,6 +3283,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
 class UsersCompanion extends UpdateCompanion<UserEntity> {
   final Value<String> id;
   final Value<String?> role;
+  final Value<String> language;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> lastActive;
@@ -3201,6 +3293,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   const UsersCompanion({
     this.id = const Value.absent(),
     this.role = const Value.absent(),
+    this.language = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.lastActive = const Value.absent(),
@@ -3211,6 +3304,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   UsersCompanion.insert({
     required String id,
     this.role = const Value.absent(),
+    this.language = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.lastActive = const Value.absent(),
@@ -3222,6 +3316,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   static Insertable<UserEntity> custom({
     Expression<String>? id,
     Expression<String?>? role,
+    Expression<String>? language,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime?>? lastActive,
@@ -3232,6 +3327,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (role != null) 'role': role,
+      if (language != null) 'language': language,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (lastActive != null) 'last_active': lastActive,
@@ -3244,6 +3340,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   UsersCompanion copyWith(
       {Value<String>? id,
       Value<String?>? role,
+      Value<String>? language,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<DateTime?>? lastActive,
@@ -3253,6 +3350,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     return UsersCompanion(
       id: id ?? this.id,
       role: role ?? this.role,
+      language: language ?? this.language,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       lastActive: lastActive ?? this.lastActive,
@@ -3270,6 +3368,9 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     }
     if (role.present) {
       map['role'] = Variable<String?>(role.value);
+    }
+    if (language.present) {
+      map['language'] = Variable<String>(language.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -3299,6 +3400,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     return (StringBuffer('UsersCompanion(')
           ..write('id: $id, ')
           ..write('role: $role, ')
+          ..write('language: $language, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('lastActive: $lastActive, ')
@@ -3322,6 +3424,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
   late final GeneratedColumn<String?> role = GeneratedColumn<String?>(
       'role', aliasedName, true,
       typeName: 'TEXT', requiredDuringInsert: false);
+  final VerificationMeta _languageMeta = const VerificationMeta('language');
+  late final GeneratedColumn<String?> language = GeneratedColumn<String?>(
+      'language', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: false,
+      defaultValue: const Constant('en'));
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
       'created_at', aliasedName, false,
@@ -3358,8 +3466,17 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
               typeName: 'TEXT', requiredDuringInsert: true)
           .withConverter<Map<String, Object?>>($UsersTable.$converter0);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, role, createdAt, updatedAt, lastActive, online, banned, extraData];
+  List<GeneratedColumn> get $columns => [
+        id,
+        role,
+        language,
+        createdAt,
+        updatedAt,
+        lastActive,
+        online,
+        banned,
+        extraData
+      ];
   @override
   String get aliasedName => _alias ?? 'users';
   @override
@@ -3377,6 +3494,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
     if (data.containsKey('role')) {
       context.handle(
           _roleMeta, role.isAcceptableOrUnknown(data['role']!, _roleMeta));
+    }
+    if (data.containsKey('language')) {
+      context.handle(_languageMeta,
+          language.isAcceptableOrUnknown(data['language']!, _languageMeta));
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
