@@ -23,7 +23,7 @@ void main() async {
   ///
   /// Please see the following for more information:
   /// https://getstream.io/chat/docs/ios_user_setup_and_tokens/
-  final res = await client.connectUser(
+  await client.connectUser(
     User(id: 'super-band-9'),
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.'
     '0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
