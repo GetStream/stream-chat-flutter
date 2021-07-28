@@ -1,59 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/theme/themes.dart';
 
-/// Overrides the default style of [UserAvatar] descendants.
-///
-/// See also:
-///
-///  * [AvatarThemeData], which is used to configure this theme.
-class AvatarTheme extends InheritedTheme {
-  /// Creates an [AvatarTheme].
-  ///
-  /// The [data] parameter must not be null.
-  const AvatarTheme({
-    Key? key,
-    required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
-
-  /// The configuration of this theme.
-  final AvatarThemeData data;
-
-  /// The closest instance of this class that encloses the given context.
-  ///
-  /// If there is no enclosing [GalleryHeaderTheme] widget, then
-  /// [StreamChatThemeData.avatarTheme] is used.
-  ///
-  /// Typical usage is as follows:
-  ///
-  /// ```dart
-  /// final theme = AvatarTheme.of(context);
-  /// ```
-  static AvatarThemeData of(BuildContext context) {
-    final avatarTheme =
-        context.dependOnInheritedWidgetOfExactType<AvatarTheme>();
-    return avatarTheme?.data ?? StreamChatTheme.of(context).avatarTheme;
-  }
-
-  @override
-  Widget wrap(BuildContext context, Widget child) =>
-      AvatarTheme(data: data, child: child);
-
-  @override
-  bool updateShouldNotify(AvatarTheme oldWidget) => data != oldWidget.data;
-}
-
-/// A style that overrides the default appearance of [UserAvatar]s when used
-/// with [AvatarTheme] or with the overall [StreamChatTheme]'s
-/// [StreamChatThemeData.avatarTheme].
-///
-/// See also:
-///
-/// * [AvatarTheme], the theme which is configured with this class.
-/// * [StreamChatThemeData.avatarTheme], which can be used to override
-/// the default style for [UserAvatar]s below the overall [StreamChatTheme].
+/// A style that overrides the default appearance of various avatar widgets.
 class AvatarThemeData with Diagnosticable {
   /// Creates an [AvatarThemeData].
   const AvatarThemeData({

@@ -62,7 +62,6 @@ class StreamChatThemeData {
     ChannelListViewThemeData? channelListViewTheme,
     UserListViewThemeData? userListViewTheme,
     MessageSearchListViewThemeData? messageSearchListViewTheme,
-    AvatarThemeData? avatarTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -90,7 +89,6 @@ class StreamChatThemeData {
       channelListViewTheme: channelListViewTheme,
       userListViewTheme: userListViewTheme,
       messageSearchListViewTheme: messageSearchListViewTheme,
-      avatarTheme: avatarTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -123,7 +121,6 @@ class StreamChatThemeData {
     required this.channelListViewTheme,
     required this.userListViewTheme,
     required this.messageSearchListViewTheme,
-    required this.avatarTheme,
   });
 
   /// Create a theme from a Material [Theme]
@@ -191,9 +188,6 @@ class StreamChatThemeData {
   /// Theme configuration for the [MessageSearchListView] widget.
   final MessageSearchListViewThemeData messageSearchListViewTheme;
 
-  /// Theme configuration for the [UserAvatar] widget.
-  final AvatarThemeData avatarTheme;
-
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -214,7 +208,6 @@ class StreamChatThemeData {
     ChannelListViewThemeData? channelListViewTheme,
     UserListViewThemeData? userListViewTheme,
     MessageSearchListViewThemeData? messageSearchListViewTheme,
-    AvatarThemeData? avatarTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -237,7 +230,6 @@ class StreamChatThemeData {
         userListViewTheme: userListViewTheme ?? this.userListViewTheme,
         messageSearchListViewTheme:
             messageSearchListViewTheme ?? this.messageSearchListViewTheme,
-        avatarTheme: avatarTheme ?? this.avatarTheme,
       );
 
   /// Merge themes
@@ -265,7 +257,6 @@ class StreamChatThemeData {
       userListViewTheme: userListViewTheme.merge(other.userListViewTheme),
       messageSearchListViewTheme:
           messageSearchListViewTheme.merge(other.messageSearchListViewTheme),
-      avatarTheme: avatarTheme.merge(other.avatarTheme),
     );
   }
 
@@ -495,9 +486,6 @@ class StreamChatThemeData {
       ),
       messageSearchListViewTheme: MessageSearchListViewThemeData(
         backgroundColor: colorTheme.appBg,
-      ),
-      avatarTheme: AvatarThemeData(
-        borderRadius: BorderRadius.circular(20),
       ),
     );
   }
