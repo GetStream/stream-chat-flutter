@@ -268,9 +268,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       ),
                       Container(
                         height: 1.0,
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .disabled,
+                        color: StreamChatTheme.of(context).colorTheme.disabled,
                       ),
                     ],
                   ),
@@ -992,7 +990,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         context,
                         StreamSvgIcon.userRemove(
                           color: StreamChatTheme.of(context)
-                            .colorTheme.accentError,
+                              .colorTheme
+                              .accentError,
                           size: 24.0,
                         ),
                         'Remove From Group', () async {
@@ -1010,8 +1009,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       }
                       Navigator.pop(context);
                     },
-                        color: StreamChatTheme.of(context)
-                          .colorTheme.accentError),
+                        color:
+                            StreamChatTheme.of(context).colorTheme.accentError),
                   _buildModalListTile(
                       context,
                       StreamSvgIcon.closeSmall(
