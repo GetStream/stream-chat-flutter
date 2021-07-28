@@ -113,6 +113,7 @@ class _ChannelPageState extends State<ChannelPage> {
                   initialAlignment: widget.initialAlignment,
                   highlightInitialMessage: widget.highlightInitialMessage,
                   onMessageSwiped: _reply,
+                  messageFilter: defaultFilter,
                   messageBuilder: (context, details, messages, defaultMessage) {
                     return defaultMessage.copyWith(
                       onReplyTap: _reply,
@@ -184,5 +185,13 @@ class _ChannelPageState extends State<ChannelPage> {
         ],
       ),
     );
+  }
+
+  bool defaultFilter(Message m) {
+    var _currentUser = StreamChat.of(context).currentUser;
+    final isMyMessage = m.user?.id == _currentUser?.id;
+    final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
+    if (isDeletedOrShadowed && !isMyMessage) return false;
+    return true;
   }
 }

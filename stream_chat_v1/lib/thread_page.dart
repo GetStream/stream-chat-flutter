@@ -49,6 +49,7 @@ class _ThreadPageState extends State<ThreadPage> {
               initialScrollIndex: widget.initialScrollIndex,
               initialAlignment: widget.initialAlignment,
               onMessageSwiped: _reply,
+              messageFilter: defaultFilter,
               messageBuilder: (context, details, messages, defaultMessage) {
                 return defaultMessage.copyWith(
                   onReplyTap: _reply,
@@ -70,5 +71,13 @@ class _ThreadPageState extends State<ThreadPage> {
         ],
       ),
     );
+  }
+
+  bool defaultFilter(Message m) {
+    var _currentUser = StreamChat.of(context).currentUser;
+    final isMyMessage = m.user?.id == _currentUser?.id;
+    final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
+    if (isDeletedOrShadowed && !isMyMessage) return false;
+    return true;
   }
 }
