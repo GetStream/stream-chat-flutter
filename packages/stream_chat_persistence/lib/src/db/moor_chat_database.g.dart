@@ -3105,7 +3105,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   final String? role;
 
   /// The language this user prefers.
-  final String language;
+  final String? language;
 
   /// Date of user creation
   final DateTime createdAt;
@@ -3127,7 +3127,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   UserEntity(
       {required this.id,
       this.role,
-      required this.language,
+      this.language,
       required this.createdAt,
       required this.updatedAt,
       this.lastActive,
@@ -3143,7 +3143,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       role: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}role']),
       language: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}language'])!,
+          .mapFromDatabaseResponse(data['${effectivePrefix}language']),
       createdAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
       updatedAt: const DateTimeType()
@@ -3165,7 +3165,9 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     if (!nullToAbsent || role != null) {
       map['role'] = Variable<String?>(role);
     }
-    map['language'] = Variable<String>(language);
+    if (!nullToAbsent || language != null) {
+      map['language'] = Variable<String?>(language);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || lastActive != null) {
@@ -3186,7 +3188,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     return UserEntity(
       id: serializer.fromJson<String>(json['id']),
       role: serializer.fromJson<String?>(json['role']),
-      language: serializer.fromJson<String>(json['language']),
+      language: serializer.fromJson<String?>(json['language']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       lastActive: serializer.fromJson<DateTime?>(json['lastActive']),
@@ -3201,7 +3203,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'role': serializer.toJson<String?>(role),
-      'language': serializer.toJson<String>(language),
+      'language': serializer.toJson<String?>(language),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'lastActive': serializer.toJson<DateTime?>(lastActive),
@@ -3214,7 +3216,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   UserEntity copyWith(
           {String? id,
           Value<String?> role = const Value.absent(),
-          String? language,
+          Value<String?> language = const Value.absent(),
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> lastActive = const Value.absent(),
@@ -3224,7 +3226,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       UserEntity(
         id: id ?? this.id,
         role: role.present ? role.value : this.role,
-        language: language ?? this.language,
+        language: language.present ? language.value : this.language,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         lastActive: lastActive.present ? lastActive.value : this.lastActive,
@@ -3283,7 +3285,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
 class UsersCompanion extends UpdateCompanion<UserEntity> {
   final Value<String> id;
   final Value<String?> role;
-  final Value<String> language;
+  final Value<String?> language;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> lastActive;
@@ -3316,7 +3318,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   static Insertable<UserEntity> custom({
     Expression<String>? id,
     Expression<String?>? role,
-    Expression<String>? language,
+    Expression<String?>? language,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime?>? lastActive,
@@ -3340,7 +3342,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   UsersCompanion copyWith(
       {Value<String>? id,
       Value<String?>? role,
-      Value<String>? language,
+      Value<String?>? language,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<DateTime?>? lastActive,
@@ -3370,7 +3372,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       map['role'] = Variable<String?>(role.value);
     }
     if (language.present) {
-      map['language'] = Variable<String>(language.value);
+      map['language'] = Variable<String?>(language.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -3426,10 +3428,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _languageMeta = const VerificationMeta('language');
   late final GeneratedColumn<String?> language = GeneratedColumn<String?>(
-      'language', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: false,
-      defaultValue: const Constant('en'));
+      'language', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
       'created_at', aliasedName, false,

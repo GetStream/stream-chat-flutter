@@ -27,7 +27,7 @@ class OwnUser extends User {
     Map<String, Object?> extraData = const {},
     bool banned = false,
     List<String> teams = const [],
-    String language = 'en',
+    String? language,
   }) : super(
           id: id,
           role: role,

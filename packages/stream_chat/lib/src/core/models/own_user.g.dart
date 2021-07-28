@@ -39,6 +39,6 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) {
     teams:
         (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??
             [],
-    language: json['language'] as String? ?? 'en',
+    language: json['language'] as String,
   );
 }
