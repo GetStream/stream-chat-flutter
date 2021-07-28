@@ -136,6 +136,9 @@ class _ChannelPageState extends State<ChannelPage> {
                           ),
                         );
                       },
+                      deletedBottomRowBuilder: (context, message) {
+                        return VisibleFootnote();
+                      },
                     );
                   },
                   threadBuilder: (_, parentMessage) {

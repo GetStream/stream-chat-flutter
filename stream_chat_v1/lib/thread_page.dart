@@ -53,6 +53,9 @@ class _ThreadPageState extends State<ThreadPage> {
               messageBuilder: (context, details, messages, defaultMessage) {
                 return defaultMessage.copyWith(
                   onReplyTap: _reply,
+                  deletedBottomRowBuilder: (context, message) {
+                    return VisibleFootnote();
+                  },
                 );
               },
               pinPermissions: ['owner', 'admin', 'member'],
