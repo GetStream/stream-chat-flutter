@@ -56,11 +56,16 @@ void main() {
       extraData: {'extra_test_data': 'extraData'},
       userId: user.id,
       deletedAt: DateTime.now(),
-      messageText: 'dummy text',
+      messageText: 'Hello',
       pinned: true,
       pinExpires: DateTime.now().toUtc(),
       pinnedAt: DateTime.now(),
       pinnedByUserId: user.id,
+      i18n: const {
+        'en_text': 'Hello',
+        'hi_text': 'नमस्ते',
+        'language': 'en',
+      },
     );
     final message = entity.toMessage(
       user: user,
@@ -99,6 +104,7 @@ void main() {
     expect(message.pinnedBy!.id, entity.pinnedByUserId);
     expect(message.reactionCounts, entity.reactionCounts);
     expect(message.reactionScores, entity.reactionScores);
+    expect(message.i18n, entity.i18n);
     for (var i = 0; i < message.attachments.length; i++) {
       final messageAttachment = message.attachments[i];
       final entityAttachmentData = jsonDecode(entity.attachments[i]);
@@ -156,11 +162,16 @@ void main() {
       extraData: const {'extra_test_data': 'extraData'},
       user: user,
       deletedAt: DateTime.now(),
-      text: 'dummy text',
+      text: 'Hello',
       pinned: true,
       pinExpires: DateTime.now(),
       pinnedAt: DateTime.now(),
       pinnedBy: user,
+      i18n: const {
+        'en_text': 'Hello',
+        'hi_text': 'नमस्ते',
+        'language': 'en',
+      },
     );
     final entity = message.toEntity(cid: cid);
     expect(entity, isA<MessageEntity>());
@@ -193,5 +204,6 @@ void main() {
       entity.attachments,
       message.attachments.map((it) => jsonEncode(it.toData())).toList(),
     );
+    expect(entity.i18n, message.i18n);
   });
 }

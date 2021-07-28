@@ -36,5 +36,9 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) {
     online: json['online'] as bool? ?? false,
     extraData: json['extra_data'] as Map<String, dynamic>? ?? {},
     banned: json['banned'] as bool? ?? false,
+    teams:
+        (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+            [],
+    language: json['language'] as String?,
   );
 }

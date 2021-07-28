@@ -35,10 +35,15 @@ void main() {
         replyCount: index,
         updatedAt: DateTime.now(),
         extraData: const {'extra_test_field': 'extraTestData'},
-        text: 'Dummy text #$index',
+        text: 'Hello #$index',
         pinned: math.Random().nextBool(),
         pinnedAt: DateTime.now(),
         pinnedBy: User(id: 'testUserId$index'),
+        i18n: {
+          'en_text': 'Hello #$index',
+          'hi_text': 'नमस्ते #$index',
+          'language': 'en',
+        },
       ),
     );
     final quotedMessages = List.generate(
@@ -52,11 +57,16 @@ void main() {
         replyCount: index,
         updatedAt: DateTime.now(),
         extraData: const {'extra_test_field': 'extraTestData'},
-        text: 'Dummy text #$index',
+        text: 'Hello #$index',
         quotedMessageId: messages[index].id,
         pinned: math.Random().nextBool(),
         pinnedAt: DateTime.now(),
         pinnedBy: User(id: 'testUserId$index'),
+        i18n: {
+          'en_text': 'Hello #$index',
+          'hi_text': 'नमस्ते #$index',
+          'language': 'en',
+        },
       ),
     );
     final threadMessages = List.generate(
@@ -72,10 +82,15 @@ void main() {
         replyCount: index,
         updatedAt: DateTime.now(),
         extraData: const {'extra_test_field': 'extraTestData'},
-        text: 'Dummy text #$index',
+        text: 'Hello #$index',
         pinned: math.Random().nextBool(),
         pinnedAt: DateTime.now(),
         pinnedBy: User(id: 'testUserId$index'),
+        i18n: {
+          'en_text': 'Hello #$index',
+          'hi_text': 'नमस्ते #$index',
+          'language': 'en',
+        },
       ),
     );
     final allMessages = [

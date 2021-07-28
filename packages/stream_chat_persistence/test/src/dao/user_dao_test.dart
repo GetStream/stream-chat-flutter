@@ -22,6 +22,7 @@ void main() {
       (index) => User(
         id: 'testUserId$index',
         role: 'testRole',
+        language: 'hi',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         lastActive: DateTime.now(),
