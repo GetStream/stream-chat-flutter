@@ -704,7 +704,8 @@ class _MessageListViewState extends State<MessageListView> {
           final unreadCount = snapshot.data!.item2;
           final showUnreadCount = unreadCount > 0 &&
               streamChannel!.channel.state!.members.any((e) =>
-                  e.userId == streamChannel!.channel.client.state.user!.id);
+                  e.userId ==
+                  streamChannel!.channel.client.state.currentUser!.id);
           return Positioned(
             bottom: 8,
             right: 8,
@@ -810,9 +811,10 @@ class _MessageListViewState extends State<MessageListView> {
   Widget buildParentMessage(
     Message message,
   ) {
-    final isMyMessage = message.user!.id == StreamChat.of(context).user!.id;
+    final isMyMessage =
+        message.user!.id == StreamChat.of(context).currentUser!.id;
     final isOnlyEmoji = message.text!.isOnlyEmoji;
-    final currentUser = StreamChat.of(context).user;
+    final currentUser = StreamChat.of(context).currentUser;
     final members = StreamChannel.of(context).channel.state?.members ?? [];
     final currentUserMember =
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
@@ -897,7 +899,7 @@ class _MessageListViewState extends State<MessageListView> {
           );
     }
 
-    final userId = StreamChat.of(context).user!.id;
+    final userId = StreamChat.of(context).currentUser!.id;
     final isMyMessage = message.user!.id == userId;
     final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
     final isNextUserSame =
@@ -960,7 +962,7 @@ class _MessageListViewState extends State<MessageListView> {
             ? BorderSide.none
             : null;
 
-    final currentUser = StreamChat.of(context).user;
+    final currentUser = StreamChat.of(context).currentUser;
     final members = StreamChannel.of(context).channel.state?.members ?? [];
     final currentUserMember =
         members.firstWhere((e) => e.user!.id == currentUser!.id);
@@ -1166,7 +1168,7 @@ class _MessageListViewState extends State<MessageListView> {
           _topPaginationActive = false;
         }
         if (event.message!.user!.id ==
-            streamChannel!.channel.client.state.user!.id) {
+            streamChannel!.channel.client.state.currentUser!.id) {
           WidgetsBinding.instance!.addPostFrameCallback((_) {
             _scrollController?.jumpTo(
               index: 0,

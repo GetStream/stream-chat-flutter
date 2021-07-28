@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
+import 'package:stream_chat_flutter/src/visible_footnote.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
@@ -217,36 +218,11 @@ class GiphyAttachment extends AttachmentWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Align(
+        const Align(
           alignment: Alignment.centerRight,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                StreamSvgIcon.eye(
-                  color: StreamChatTheme.of(context)
-                      .colorTheme
-                      .textHighEmphasis
-                      .withOpacity(0.5),
-                  size: 16,
-                ),
-                const SizedBox(
-                  width: 8,
-                ),
-                Text(
-                  context.translations.onlyVisibleToYouText,
-                  style: StreamChatTheme.of(context)
-                      .textTheme
-                      .footnote
-                      .copyWith(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .textHighEmphasis
-                              .withOpacity(0.5)),
-                ),
-              ],
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: VisibleFootnote(),
           ),
         ),
       ],

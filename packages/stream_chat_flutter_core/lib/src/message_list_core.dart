@@ -116,7 +116,7 @@ class MessageListCoreState extends State<MessageListCore> {
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
-  OwnUser? get _currentUser => _streamChannel!.channel.client.state.user;
+  OwnUser? get _currentUser => _streamChannel!.channel.client.state.currentUser;
 
   var _messages = <Message>[];
 
@@ -134,8 +134,7 @@ class MessageListCoreState extends State<MessageListCore> {
 
     bool defaultFilter(Message m) {
       final isMyMessage = m.user?.id == _currentUser?.id;
-      final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
-      if (isDeletedOrShadowed && !isMyMessage) return false;
+      if (m.shadowed && !isMyMessage) return false;
       return true;
     }
 

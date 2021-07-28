@@ -17,7 +17,7 @@ void main() {
       final channelState = MockChannelState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
@@ -56,7 +56,7 @@ void main() {
       final channelState = MockChannelState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
@@ -135,7 +135,7 @@ void main() {
       final currentUser = OwnUser(id: 'user-id');
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(currentUser);
+      when(() => clientState.currentUser).thenReturn(currentUser);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
@@ -207,7 +207,7 @@ void main() {
       final channelState = MockChannelState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({

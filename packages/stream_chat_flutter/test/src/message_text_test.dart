@@ -21,7 +21,7 @@ void main() {
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -66,7 +66,7 @@ void main() {
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -80,7 +80,7 @@ void main() {
       });
 
       const messageText = '''
-      a message.
+a message.
 with multiple lines
 and a list:
 - a. okasd

@@ -4,6 +4,12 @@
 
 - Added `MessageListView.paginationLimit`
 - Allow the various ListView widgets to be themed via ThemeData classes
+- Added `bottomRowBuilder` and `deletedBottomRowBuilder` that build a widget below a `MessageWidget`
+
+🔄 Changed
+
+- `StreamChat.of(context).user` is now deprecated in favor of `StreamChat.of(context).currentUser`.
+- `StreamChat.of(context).userStream` is now deprecated in favor of `StreamChat.of(context).currentUserStream`.
 
 🐞 Fixed
 

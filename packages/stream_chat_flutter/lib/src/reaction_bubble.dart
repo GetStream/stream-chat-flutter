@@ -123,7 +123,7 @@ class ReactionBubble extends StatelessWidget {
     );
 
     final chatThemeData = StreamChatTheme.of(context);
-    final userId = StreamChat.of(context).user?.id;
+    final userId = StreamChat.of(context).currentUser?.id;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 4,

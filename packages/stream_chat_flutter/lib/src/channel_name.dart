@@ -49,8 +49,8 @@ class ChannelName extends StatelessWidget {
           if (extraData['name'] != null) {
             title = extraData['name'];
           } else {
-            final otherMembers =
-                members?.where((member) => member.userId != client.user!.id);
+            final otherMembers = members
+                ?.where((member) => member.userId != client.currentUser!.id);
             if (otherMembers?.length == 1) {
               if (otherMembers!.first.user != null) {
                 title = otherMembers.first.user!.name;

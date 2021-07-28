@@ -96,7 +96,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final _client = client ?? StreamChat.of(context).client;
-    final user = _client.state.user;
+    final user = _client.state.currentUser;
     return ConnectionStatusBuilder(
       statusBuilder: (context, status) {
         var statusString = '';

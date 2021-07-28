@@ -102,7 +102,7 @@ class ChannelPreview extends StatelessWidget {
                         if (members?.isEmpty == true ||
                             members?.any((Member e) =>
                                     e.user!.id ==
-                                    channel.client.state.user?.id) !=
+                                    channel.client.state.currentUser?.id) !=
                                 true) {
                           return const SizedBox();
                         }
@@ -125,7 +125,7 @@ class ChannelPreview extends StatelessWidget {
                               (m) => !m.isDeleted && m.shadowed != true,
                             );
                             if (lastMessage?.user?.id ==
-                                streamChatState.user?.id) {
+                                streamChatState.currentUser?.id) {
                               return Padding(
                                 padding: const EdgeInsets.only(right: 4),
                                 child: SendingIndicator(
@@ -134,7 +134,8 @@ class ChannelPreview extends StatelessWidget {
                                   isMessageRead: channel.state!.read
                                           ?.where((element) =>
                                               element.user.id !=
-                                              channel.client.state.user!.id)
+                                              channel
+                                                  .client.state.currentUser!.id)
                                           .where((element) => element.lastRead
                                               .isAfter(lastMessage.createdAt))
                                           .isNotEmpty ==
