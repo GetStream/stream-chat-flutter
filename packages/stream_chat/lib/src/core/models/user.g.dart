@@ -25,6 +25,7 @@ User _$UserFromJson(Map<String, dynamic> json) {
     teams:
         (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??
             [],
+    language: json['language'] as String?,
   );
 }
 
@@ -47,5 +48,6 @@ Map<String, dynamic> _$UserToJson(User instance) {
   writeNotNull('online', readonly(instance.online));
   writeNotNull('banned', readonly(instance.banned));
   val['extra_data'] = instance.extraData;
+  writeNotNull('language', instance.language);
   return val;
 }

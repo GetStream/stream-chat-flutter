@@ -18,6 +18,7 @@ class User extends Equatable {
     this.extraData = const {},
     this.banned = false,
     this.teams = const [],
+    this.language,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -36,6 +37,7 @@ class User extends Equatable {
     'online',
     'banned',
     'teams',
+    'language',
   ];
 
   /// User id
@@ -82,8 +84,11 @@ class User extends Equatable {
   )
   final Map<String, Object?> extraData;
 
-  @override
-  int get hashCode => id.hashCode;
+  /// The language this user prefers.
+  ///
+  /// Defaults to 'en'.
+  @JsonKey(includeIfNull: false)
+  final String? language;
 
   /// Shortcut for user name
   String get name {
@@ -97,11 +102,6 @@ class User extends Equatable {
   /// List of users to list of userIds
   static List<String>? toIds(List<User>? users) =>
       users?.map((u) => u.id).toList();
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is User && runtimeType == other.runtimeType && id == other.id;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
@@ -119,6 +119,7 @@ class User extends Equatable {
     Map<String, Object?>? extraData,
     bool? banned,
     List<String>? teams,
+    String? language,
   }) =>
       User(
         id: id ?? this.id,
@@ -130,18 +131,9 @@ class User extends Equatable {
         extraData: extraData ?? this.extraData,
         banned: banned ?? this.banned,
         teams: teams ?? this.teams,
+        language: language ?? this.language,
       );
 
   @override
-  List<Object?> get props => [
-        id,
-        role,
-        teams,
-        createdAt,
-        updatedAt,
-        lastActive,
-        online,
-        banned,
-        extraData,
-      ];
+  List<Object?> get props => [id];
 }

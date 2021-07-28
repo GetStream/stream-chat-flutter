@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added `MessageListView.paginationLimit`
+- `MessageText` renders message translation if available
 - Allow the various ListView widgets to be themed via ThemeData classes
 - Added `bottomRowBuilder` and `deletedBottomRowBuilder` that build a widget below a `MessageWidget`
 

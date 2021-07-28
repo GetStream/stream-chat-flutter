@@ -28,6 +28,7 @@ void main() {
       expect(message.pinnedAt, null);
       expect(message.pinExpires, null);
       expect(message.pinnedBy, null);
+      expect(message.i18n, null);
     });
 
     test('should serialize to json correctly', () {
