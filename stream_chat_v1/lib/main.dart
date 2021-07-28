@@ -47,7 +47,7 @@ class _MyAppState extends State<MyApp>
     final client = StreamChatClient(
       apiKey ?? kDefaultStreamApiKey,
       logLevel: Level.SEVERE,
-    );
+    )..chatPersistenceClient = chatPersistentClient;
 
     if (userId != null && token != null) {
       await client.connectUser(
