@@ -1,0 +1,100 @@
+---
+id: customize_text_messages
+sidebar_position: 6
+title: Customize Text Messages
+---
+
+Customizing Text Messages
+
+### Introduction
+
+Every application provides a unique look and feel to their own messaging interface including and not
+limited to fonts, colors, and shapes.
+
+This guide details how to customize text messages in the `MessageListView` in the Stream Chat Flutter
+UI SDK.
+
+:::note
+This guide is specifically for the `MessageListView` but if you intend to display a `MessageWidget`
+separately, follow the same process without the `.copyWith` and use the default constructor instead.
+:::
+
+### Basics of customizing a `MessageWidget`
+
+First, add a `MessageListView` in the appropriate place where you intend to display messages from a
+channel.
+
+```
+MessageListView(
+    ...
+)
+```
+
+Now, we use the `messageBuilder` parameter to build a custom message. The builder function also provides
+the default implementation of the `MessageWidget` so that we can change certain aspects of the widget
+without redoing all of the default parameters.
+
+:::note
+In earlier versions of the SDK, some `MessageWidget` parameters were exposed directly through the `MessageListView`,
+however, this quickly becomes hard to maintain as more parameters and customizations are added to the
+`MessageWidget`. Newer version utilise a cleaner interface to change the parameters by supplying a
+default message implementation as aforementioned.
+:::
+
+```
+MessageListView(
+    ...
+    messageBuilder: (context, messageDetails, messageList, defaultWidget) {
+        return defaultWidget;
+    },
+)
+```
+
+We use `.copyWith()` to customize the widget:
+
+```
+MessageListView(
+    ...
+    messageBuilder: (context, messageDetails, messageList, defaultWidget) {
+        return defaultWidget.copyWith(
+            ...
+        );
+    },
+)
+```
+
+### Customizing text
+
+If you intend to simply change the theme for the text, you need not recreate the whole widget. The
+`MessageWidget` has a `messageTheme` parameter that allows you to pass the theme for most aspects
+of the message.
+
+```
+MessageListView(
+    ...
+    messageBuilder: (context, messageDetails, messageList, defaultWidget) {
+        return defaultWidget.copyWith(
+            messageTheme: MessageTheme(
+                ...
+                messageText: TextStyle(),
+            ),
+        );
+    },
+)
+```
+
+If you want to replace the entire text widget in the `MessageWidget`, you can use the `textBuilder`
+parameter which provides a builder for creating a widget to substitute the default text.parameter
+
+```
+MessageListView(
+    ...
+    messageBuilder: (context, messageDetails, messageList, defaultWidget) {
+        return defaultWidget.copyWith(
+            textBuilder: (context, message) {
+                return Text(message.text);
+            },
+        );
+    },
+)
+```
