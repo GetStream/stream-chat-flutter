@@ -14,6 +14,8 @@
 - [Register](https://getstream.io/chat/trial/) to get an API key for Stream Chat
 - [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/) 
 - [Chat UI Kit](https://getstream.io/chat/ui-kit/)
+- [UI Docs](https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter/introduction/)
+- [Chat Client Docs](https://getstream.io/chat/docs/flutter-dart/?language=dart)
 
 ### Changelog
 
