@@ -60,4 +60,5 @@ dev_dependencies:
   golden_toolkit: ^0.9.0
   mocktail: ^0.1.2
   pedantic: ^1.11.0
+  path: ^1.8.0
 
