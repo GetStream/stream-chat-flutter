@@ -56,7 +56,7 @@ class ChannelPreviewTheme {
       title: title?.merge(other.title) ?? other.title,
       subtitle: subtitle?.merge(other.subtitle) ?? other.subtitle,
       lastMessageAt:
-      lastMessageAt?.merge(other.lastMessageAt) ?? other.lastMessageAt,
+          lastMessageAt?.merge(other.lastMessageAt) ?? other.lastMessageAt,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
       unreadCounterColor: other.unreadCounterColor,
     );

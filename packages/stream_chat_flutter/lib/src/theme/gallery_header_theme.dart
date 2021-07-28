@@ -32,7 +32,7 @@ class GalleryHeaderTheme extends InheritedTheme {
   /// ```
   static GalleryHeaderThemeData of(BuildContext context) {
     final galleryHeaderTheme =
-    context.dependOnInheritedWidgetOfExactType<GalleryHeaderTheme>();
+        context.dependOnInheritedWidgetOfExactType<GalleryHeaderTheme>();
     return galleryHeaderTheme?.data ??
         StreamChatTheme.of(context).galleryHeaderTheme;
   }
@@ -108,27 +108,27 @@ class GalleryHeaderThemeData with Diagnosticable {
         titleTextStyle: titleTextStyle ?? this.titleTextStyle,
         subtitleTextStyle: subtitleTextStyle ?? this.subtitleTextStyle,
         bottomSheetBarrierColor:
-        bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
+            bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
       );
 
   /// Linearly interpolate between two [GalleryHeader] themes.
   ///
   /// All the properties must be non-null.
   GalleryHeaderThemeData lerp(
-      GalleryHeaderThemeData a,
-      GalleryHeaderThemeData b,
-      double t,
-      ) =>
+    GalleryHeaderThemeData a,
+    GalleryHeaderThemeData b,
+    double t,
+  ) =>
       GalleryHeaderThemeData(
         closeButtonColor: Color.lerp(a.closeButtonColor, b.closeButtonColor, t),
         backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
         iconMenuPointColor:
-        Color.lerp(a.iconMenuPointColor, b.iconMenuPointColor, t),
+            Color.lerp(a.iconMenuPointColor, b.iconMenuPointColor, t),
         titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
         subtitleTextStyle:
-        TextStyle.lerp(a.subtitleTextStyle, b.subtitleTextStyle, t),
+            TextStyle.lerp(a.subtitleTextStyle, b.subtitleTextStyle, t),
         bottomSheetBarrierColor:
-        Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
+            Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
       );
 
   /// Merges one [GalleryHeaderThemeData] with the another
@@ -147,14 +147,14 @@ class GalleryHeaderThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is GalleryHeaderThemeData &&
-              runtimeType == other.runtimeType &&
-              closeButtonColor == other.closeButtonColor &&
-              backgroundColor == other.backgroundColor &&
-              iconMenuPointColor == other.iconMenuPointColor &&
-              titleTextStyle == other.titleTextStyle &&
-              subtitleTextStyle == other.subtitleTextStyle &&
-              bottomSheetBarrierColor == other.bottomSheetBarrierColor;
+      other is GalleryHeaderThemeData &&
+          runtimeType == other.runtimeType &&
+          closeButtonColor == other.closeButtonColor &&
+          backgroundColor == other.backgroundColor &&
+          iconMenuPointColor == other.iconMenuPointColor &&
+          titleTextStyle == other.titleTextStyle &&
+          subtitleTextStyle == other.subtitleTextStyle &&
+          bottomSheetBarrierColor == other.bottomSheetBarrierColor;
 
   @override
   int get hashCode =>

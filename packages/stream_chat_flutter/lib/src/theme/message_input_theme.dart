@@ -72,12 +72,12 @@ class MessageInputTheme {
   }) =>
       MessageInputTheme(
         sendAnimationDuration:
-        sendAnimationDuration ?? this.sendAnimationDuration,
+            sendAnimationDuration ?? this.sendAnimationDuration,
         inputBackground: inputBackground ?? this.inputBackground,
         actionButtonColor: actionButtonColor ?? this.actionButtonColor,
         sendButtonColor: sendButtonColor ?? this.sendButtonColor,
         actionButtonIdleColor:
-        actionButtonIdleColor ?? this.actionButtonIdleColor,
+            actionButtonIdleColor ?? this.actionButtonIdleColor,
         expandButtonColor: expandButtonColor ?? this.expandButtonColor,
         inputTextStyle: inputTextStyle ?? this.inputTextStyle,
         sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
@@ -98,7 +98,7 @@ class MessageInputTheme {
       sendButtonColor: other.sendButtonColor,
       sendButtonIdleColor: other.sendButtonIdleColor,
       inputTextStyle:
-      inputTextStyle?.merge(other.inputTextStyle) ?? other.inputTextStyle,
+          inputTextStyle?.merge(other.inputTextStyle) ?? other.inputTextStyle,
       inputDecoration: inputDecoration?.merge(other.inputDecoration) ??
           other.inputDecoration,
       activeBorderGradient: other.activeBorderGradient,

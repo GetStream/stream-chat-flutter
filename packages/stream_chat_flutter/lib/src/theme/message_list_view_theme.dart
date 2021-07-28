@@ -32,7 +32,7 @@ class MessageListViewTheme extends InheritedTheme {
   /// ```
   static MessageListViewThemeData of(BuildContext context) {
     final messageListViewTheme =
-    context.dependOnInheritedWidgetOfExactType<MessageListViewTheme>();
+        context.dependOnInheritedWidgetOfExactType<MessageListViewTheme>();
     return messageListViewTheme?.data ??
         StreamChatTheme.of(context).messageListViewTheme;
   }
@@ -77,10 +77,10 @@ class MessageListViewThemeData with Diagnosticable {
   ///
   /// All the properties must be non-null.
   MessageListViewThemeData lerp(
-      MessageListViewThemeData a,
-      MessageListViewThemeData b,
-      double t,
-      ) =>
+    MessageListViewThemeData a,
+    MessageListViewThemeData b,
+    double t,
+  ) =>
       MessageListViewThemeData(
         backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       );
@@ -96,9 +96,9 @@ class MessageListViewThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is MessageListViewThemeData &&
-              runtimeType == other.runtimeType &&
-              backgroundColor == other.backgroundColor;
+      other is MessageListViewThemeData &&
+          runtimeType == other.runtimeType &&
+          backgroundColor == other.backgroundColor;
 
   @override
   int get hashCode => backgroundColor.hashCode;
