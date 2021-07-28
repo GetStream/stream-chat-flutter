@@ -137,7 +137,7 @@ class _ChannelPageState extends State<ChannelPage> {
                         );
                       },
                       deletedBottomRowBuilder: (context, message) {
-                        return VisibleFootnote();
+                        return const VisibleFootnote();
                       },
                     );
                   },

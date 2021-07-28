@@ -54,7 +54,7 @@ class _ThreadPageState extends State<ThreadPage> {
                 return defaultMessage.copyWith(
                   onReplyTap: _reply,
                   deletedBottomRowBuilder: (context, message) {
-                    return VisibleFootnote();
+                    return const VisibleFootnote();
                   },
                 );
               },
