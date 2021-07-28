@@ -335,6 +335,7 @@ class _MessageListViewState extends State<MessageListView> {
   bool _inBetweenList = false;
 
   late final _defaultController = MessageListController();
+
   MessageListController get _messageListController =>
       widget.messageListController ?? _defaultController;
 
@@ -349,7 +350,7 @@ class _MessageListViewState extends State<MessageListView> {
         emptyBuilder: widget.emptyBuilder ??
             (context) => Center(
                   child: Text(
-                    'No chats here yet...',
+                    context.translations.emptyChatMessagesText,
                     style: _streamTheme.textTheme.footnote.copyWith(
                         color: _streamTheme.colorTheme.textHighEmphasis
                             .withOpacity(.5)),
@@ -362,7 +363,7 @@ class _MessageListViewState extends State<MessageListView> {
         errorBuilder: widget.errorBuilder ??
             (BuildContext context, Object error) => Center(
                   child: Text(
-                    'Something went wrong',
+                    context.translations.genericErrorText,
                     style: _streamTheme.textTheme.footnote.copyWith(
                         color: _streamTheme.colorTheme.textHighEmphasis
                             .withOpacity(.5)),
@@ -408,14 +409,14 @@ class _MessageListViewState extends State<MessageListView> {
             var showStatus = true;
             switch (status) {
               case ConnectionStatus.connected:
-                statusString = 'Connected';
+                statusString = context.translations.connectedLabel;
                 showStatus = false;
                 break;
               case ConnectionStatus.connecting:
-                statusString = 'Reconnecting...';
+                statusString = context.translations.reconnectingLabel;
                 break;
               case ConnectionStatus.disconnected:
-                statusString = 'Disconnected';
+                statusString = context.translations.disconnectedLabel;
                 break;
             }
 
@@ -617,7 +618,7 @@ class _MessageListViewState extends State<MessageListView> {
       return widget.threadSeparatorBuilder!.call(context);
     }
 
-    final replyCount = widget.parentMessage!.replyCount;
+    final replyCount = widget.parentMessage!.replyCount!;
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: _streamTheme.colorTheme.bgGradient,
@@ -625,7 +626,7 @@ class _MessageListViewState extends State<MessageListView> {
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Text(
-          '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
+          context.translations.threadSeparatorText(replyCount),
           textAlign: TextAlign.center,
           style: _streamTheme.channelTheme.channelHeaderTheme.subtitle,
         ),
@@ -1249,8 +1250,8 @@ class _LoadingIndicator extends StatelessWidget {
       initialData: false,
       errorBuilder: (context, error) => Container(
         color: streamTheme.colorTheme.accentError.withOpacity(.2),
-        child: const Center(
-          child: Text('Error loading messages'),
+        child: Center(
+          child: Text(context.translations.loadingMessagesError),
         ),
       ),
       builder: (context, data) {

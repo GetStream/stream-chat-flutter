@@ -6,6 +6,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview_paint.png)
@@ -173,7 +174,7 @@ class ChannelPreview extends StatelessWidget {
               startOfDay
                   .subtract(const Duration(days: 1))
                   .millisecondsSinceEpoch) {
-            stringDate = 'Yesterday';
+            stringDate = context.translations.yesterdayLabel;
           } else if (startOfDay.difference(lastMessageAt).inDays < 7) {
             stringDate = Jiffy(lastMessageAt.toLocal()).EEEE;
           } else {
@@ -198,7 +199,7 @@ class ChannelPreview extends StatelessWidget {
             size: 16,
           ),
           Text(
-            '  Channel is muted',
+            '  ${context.translations.channelIsMutedText}',
             style: chatThemeData.channelPreviewTheme.subtitle,
           ),
         ],

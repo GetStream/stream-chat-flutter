@@ -11,6 +11,7 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Footer widget for media display
 class GalleryFooter extends StatefulWidget implements PreferredSizeWidget {
@@ -135,7 +136,9 @@ class _GalleryFooterState extends State<GalleryFooter> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        '${widget.currentPage + 1} of ${widget.totalPages}',
+                        '${widget.currentPage + 1} '
+                        '${context.translations.ofText} '
+                        '${widget.totalPages}',
                         style: galleryFooterThemeData.titleTextStyle,
                       ),
                     ],
@@ -191,7 +194,7 @@ class _GalleryFooterState extends State<GalleryFooter> {
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Text(
-                          'Photos',
+                          context.translations.photosLabel,
                           style:
                               galleryFooterThemeData.bottomSheetPhotosTextStyle,
                         ),

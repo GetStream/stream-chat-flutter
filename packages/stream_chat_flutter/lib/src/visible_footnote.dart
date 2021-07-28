@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Widget for displaying a footnote
 class VisibleFootnote extends StatelessWidget {
@@ -19,7 +20,7 @@ class VisibleFootnote extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Text(
-          'Only visible to you',
+          context.translations.onlyVisibleToYouText,
           style: chatThemeData.textTheme.footnote
               .copyWith(color: chatThemeData.colorTheme.textLowEmphasis),
         ),

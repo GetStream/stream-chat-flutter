@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/visible_footnote.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Widget for showing a GIF attachment
 class GiphyAttachment extends AttachmentWidget {
@@ -72,9 +73,9 @@ class GiphyAttachment extends AttachmentWidget {
                   children: [
                     StreamSvgIcon.giphyIcon(),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Giphy',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      context.translations.giphyLabel,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 8),
                     if (attachment.title != null)
@@ -135,7 +136,7 @@ class GiphyAttachment extends AttachmentWidget {
                           });
                         },
                         child: Text(
-                          'Cancel',
+                          context.translations.cancelLabel.toLowerCase(),
                           style: StreamChatTheme.of(context)
                               .textTheme
                               .bodyBold
@@ -167,7 +168,7 @@ class GiphyAttachment extends AttachmentWidget {
                           });
                         },
                         child: Text(
-                          'Shuffle',
+                          context.translations.shuffleLabel,
                           style: StreamChatTheme.of(context)
                               .textTheme
                               .bodyBold
@@ -200,7 +201,7 @@ class GiphyAttachment extends AttachmentWidget {
                           });
                         },
                         child: Text(
-                          'Send',
+                          context.translations.sendLabel,
                           style: TextStyle(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
@@ -315,7 +316,7 @@ class GiphyAttachment extends AttachmentWidget {
                           size: 16,
                         ),
                         Text(
-                          'GIPHY',
+                          context.translations.giphyLabel.toUpperCase(),
                           style: TextStyle(
                             color:
                                 StreamChatTheme.of(context).colorTheme.barsBg,
