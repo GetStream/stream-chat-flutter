@@ -1,4 +1,4 @@
-## Upcoming
+## 2.1.0
 
 ✅ Added
 - Added support for `Message.i18n`
