@@ -31,9 +31,9 @@ class MessageText extends StatelessWidget {
   Widget build(BuildContext context) {
     final streamChat = StreamChat.of(context);
     assert(streamChat.currentUser != null, '');
-    return BetterStreamBuilder(
-      stream: streamChat.currentUserStream.map((it) => it!.language),
-      initialData: streamChat.currentUser!.language,
+    return BetterStreamBuilder<String>(
+      stream: streamChat.currentUserStream.map((it) => it!.language ?? 'en'),
+      initialData: streamChat.currentUser!.language ?? 'en',
       builder: (context, language) {
         final translatedText =
             message.i18n?['${language}_text'] ?? message.text;
