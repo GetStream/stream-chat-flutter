@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Callback called when tapping on a user
 typedef UserTapCallback = void Function(User, Widget?);
@@ -155,12 +156,13 @@ class _UserListViewState extends State<UserListView>
   bool get _isListView => widget.crossAxisCount == 1;
 
   late final _defaultController = UserListController();
+
   UserListController get _userListController =>
       widget.userListController ?? _defaultController;
 
   @override
   Widget build(BuildContext context) {
-    final child = UserListCore(
+    final userListCore = UserListCore(
       errorBuilder: widget.errorBuilder ??
           (BuildContext context, Object err) => _buildError(err),
       emptyBuilder: widget.emptyBuilder ?? (context) => _buildEmpty(),
@@ -189,6 +191,19 @@ class _UserListViewState extends State<UserListView>
       userListController: _userListController,
     );
 
+    final backgroundColor = UserListViewTheme.of(context).backgroundColor;
+
+    Widget child;
+
+    if (backgroundColor != null) {
+      child = ColoredBox(
+        color: backgroundColor,
+        child: userListCore,
+      );
+    } else {
+      child = userListCore;
+    }
+
     if (!widget.pullToRefresh) {
       return child;
     } else {
@@ -207,9 +222,9 @@ class _UserListViewState extends State<UserListView>
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text.rich(
-              const TextSpan(
+              TextSpan(
                 children: [
-                  WidgetSpan(
+                  const WidgetSpan(
                     child: Padding(
                       padding: EdgeInsets.only(
                         right: 2,
@@ -217,14 +232,14 @@ class _UserListViewState extends State<UserListView>
                       child: Icon(Icons.error_outline),
                     ),
                   ),
-                  TextSpan(text: 'Error loading users'),
+                  TextSpan(text: context.translations.loadingUsersError),
                 ],
               ),
               style: Theme.of(context).textTheme.headline6,
             ),
             TextButton(
               onPressed: () => _userListController.loadData!(),
-              child: const Text('Retry'),
+              child: Text(context.translations.retryLabel),
             ),
           ],
         ),
@@ -237,8 +252,8 @@ class _UserListViewState extends State<UserListView>
             constraints: BoxConstraints(
               minHeight: viewportConstraints.maxHeight,
             ),
-            child: const Center(
-              child: Text('There are no users currently'),
+            child: Center(
+              child: Text(context.translations.noUsersLabel),
             ),
           ),
         ),
@@ -387,10 +402,10 @@ class _UserListViewState extends State<UserListView>
                     .colorTheme
                     .accentError
                     .withOpacity(.2),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Center(
-                    child: Text('Error loading users'),
+                    child: Text(context.translations.loadingUsersError),
                   ),
                 ),
               );

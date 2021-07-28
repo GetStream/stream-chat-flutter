@@ -7,6 +7,7 @@ import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Modal widget for displaying message reactions
 class MessageReactionsModal extends StatelessWidget {
@@ -42,7 +43,7 @@ class MessageReactionsModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final user = StreamChat.of(context).user;
+    final user = StreamChat.of(context).currentUser;
 
     final roughMaxSize = 2 * size.width / 3;
     var messageTextLength = message.text!.length;
@@ -154,7 +155,7 @@ class MessageReactionsModal extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Message Reactions',
+              context.translations.messageReactionsLabel,
               style: chatThemeData.textTheme.headlineBold,
             ),
             const SizedBox(height: 16),

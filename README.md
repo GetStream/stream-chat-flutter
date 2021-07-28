@@ -48,6 +48,9 @@ This package provides business logic to fetch common things required for integra
 ### [stream_chat_flutter](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter)
 This library includes both a low-level chat SDK and a set of reusable and customizable UI components.
 
+### [stream_chat_localizations](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_localizations)
+This library includes a set of localization files for the Flutter UI components.
+
 ## Flutter Chat Tutorial
 
 The best place to start is the [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/).

@@ -10,9 +10,7 @@ import 'package:stream_chat/src/core/http/interceptor/connection_id_interceptor.
 import 'package:stream_chat/src/core/http/interceptor/logging_interceptor.dart';
 import 'package:stream_chat/src/core/http/stream_chat_dio_error.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
-import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/location.dart';
-import 'package:stream_chat/version.dart';
 
 part 'stream_http_client_options.dart';
 
@@ -33,11 +31,14 @@ class StreamHttpClient {
       ..options.baseUrl = _options.baseUrl
       ..options.receiveTimeout = _options.receiveTimeout.inMilliseconds
       ..options.connectTimeout = _options.connectTimeout.inMilliseconds
-      ..options.queryParameters = {'api_key': apiKey}
+      ..options.queryParameters = {
+        'api_key': apiKey,
+        ..._options.queryParameters,
+      }
       ..options.headers = {
         'Content-Type': 'application/json',
-        'X-Stream-Client': _options.userAgent,
         'Content-Encoding': 'application/gzip',
+        ..._options.headers,
       }
       ..interceptors.addAll([
         if (tokenManager != null) AuthInterceptor(this, tokenManager),

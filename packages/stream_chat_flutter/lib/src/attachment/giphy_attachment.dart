@@ -2,8 +2,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
+import 'package:stream_chat_flutter/src/visible_footnote.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Widget for showing a GIF attachment
 class GiphyAttachment extends AttachmentWidget {
@@ -71,9 +73,9 @@ class GiphyAttachment extends AttachmentWidget {
                   children: [
                     StreamSvgIcon.giphyIcon(),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Giphy',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      context.translations.giphyLabel,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 8),
                     if (attachment.title != null)
@@ -134,7 +136,7 @@ class GiphyAttachment extends AttachmentWidget {
                           });
                         },
                         child: Text(
-                          'Cancel',
+                          context.translations.cancelLabel.toLowerCase(),
                           style: StreamChatTheme.of(context)
                               .textTheme
                               .bodyBold
@@ -166,7 +168,7 @@ class GiphyAttachment extends AttachmentWidget {
                           });
                         },
                         child: Text(
-                          'Shuffle',
+                          context.translations.shuffleLabel,
                           style: StreamChatTheme.of(context)
                               .textTheme
                               .bodyBold
@@ -199,7 +201,7 @@ class GiphyAttachment extends AttachmentWidget {
                           });
                         },
                         child: Text(
-                          'Send',
+                          context.translations.sendLabel,
                           style: TextStyle(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
@@ -216,36 +218,11 @@ class GiphyAttachment extends AttachmentWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Align(
+        const Align(
           alignment: Alignment.centerRight,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                StreamSvgIcon.eye(
-                  color: StreamChatTheme.of(context)
-                      .colorTheme
-                      .textHighEmphasis
-                      .withOpacity(0.5),
-                  size: 16,
-                ),
-                const SizedBox(
-                  width: 8,
-                ),
-                Text(
-                  'Only visible to you',
-                  style: StreamChatTheme.of(context)
-                      .textTheme
-                      .footnote
-                      .copyWith(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .textHighEmphasis
-                              .withOpacity(0.5)),
-                ),
-              ],
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: VisibleFootnote(),
           ),
         ),
       ],
@@ -339,7 +316,7 @@ class GiphyAttachment extends AttachmentWidget {
                           size: 16,
                         ),
                         Text(
-                          'GIPHY',
+                          context.translations.giphyLabel.toUpperCase(),
                           style: TextStyle(
                             color:
                                 StreamChatTheme.of(context).colorTheme.barsBg,

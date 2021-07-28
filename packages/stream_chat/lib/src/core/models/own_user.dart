@@ -27,6 +27,7 @@ class OwnUser extends User {
     Map<String, Object?> extraData = const {},
     bool banned = false,
     List<String> teams = const [],
+    String? language,
   }) : super(
           id: id,
           role: role,
@@ -37,6 +38,7 @@ class OwnUser extends User {
           extraData: extraData,
           banned: banned,
           teams: teams,
+          language: language,
         );
 
   /// Create a new instance from a json
@@ -54,6 +56,7 @@ class OwnUser extends User {
         banned: user.banned,
         extraData: user.extraData,
         teams: user.teams,
+        language: user.language,
       );
 
   /// Creates a copy of [OwnUser] with specified attributes overridden.
@@ -73,6 +76,7 @@ class OwnUser extends User {
     List<Mute>? mutes,
     int? totalUnreadCount,
     int? unreadChannels,
+    String? language,
   }) =>
       OwnUser(
         id: id ?? this.id,
@@ -89,15 +93,13 @@ class OwnUser extends User {
         mutes: mutes ?? this.mutes,
         totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
         unreadChannels: unreadChannels ?? this.unreadChannels,
+        language: language ?? this.language,
       );
 
   /// Returns a new [OwnUser] that is a combination of this ownUser
   /// and the given [other] ownUser.
   OwnUser merge(OwnUser? other) {
-    if (other == null) {
-      return this;
-    }
-
+    if (other == null) return this;
     return copyWith(
       banned: other.banned,
       channelMutes: other.channelMutes,
@@ -113,6 +115,7 @@ class OwnUser extends User {
       totalUnreadCount: other.totalUnreadCount,
       unreadChannels: other.unreadChannels,
       updatedAt: other.updatedAt,
+      language: other.language,
     );
   }
 

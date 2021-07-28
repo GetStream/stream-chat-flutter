@@ -6,6 +6,7 @@ import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_header_paint.png)
@@ -121,14 +122,14 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
 
         switch (status) {
           case ConnectionStatus.connected:
-            statusString = 'Connected';
+            statusString = context.translations.connectedLabel;
             showStatus = false;
             break;
           case ConnectionStatus.connecting:
-            statusString = 'Reconnecting...';
+            statusString = context.translations.reconnectingLabel;
             break;
           case ConnectionStatus.disconnected:
-            statusString = 'Disconnected';
+            statusString = context.translations.disconnectedLabel;
             break;
         }
 
