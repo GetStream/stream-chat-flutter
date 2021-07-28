@@ -134,7 +134,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                               id: Uuid().v4(),
                               extraData: {
                                 'members': [
-                                  client.state.user!.id,
+                                  client.state.currentUser!.id,
                                   ..._selectedUsers.map((e) => e.id),
                                 ],
                                 'name': groupName,

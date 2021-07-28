@@ -50,7 +50,7 @@ class _ChannelList extends State<ChannelList> {
 
   @override
   Widget build(BuildContext context) {
-    final user = StreamChat.of(context).user;
+    final user = StreamChat.of(context).currentUser;
     return WillPopScope(
       onWillPop: () async {
         if (_isSearchActive) {
@@ -167,7 +167,7 @@ class _ChannelList extends State<ChannelList> {
                                   user: channel.state!.members
                                       .where((m) =>
                                           m.userId !=
-                                          channel.client.state.user!.id)
+                                          channel.client.state.currentUser!.id)
                                       .first
                                       .user,
                                 ),
