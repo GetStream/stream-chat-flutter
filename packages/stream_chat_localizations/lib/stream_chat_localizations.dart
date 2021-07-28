@@ -1,5 +1,5 @@
 /// Localizations for the StreamChat Flutter library.
-library stream_chat_localization;
+library stream_chat_localizations;
 
 export 'package:flutter_localizations/flutter_localizations.dart'
     show
