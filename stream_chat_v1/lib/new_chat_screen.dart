@@ -71,7 +71,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
           filter: Filter.raw(value: {
             'members': [
               ..._selectedUsers.map((e) => e.id),
-              chatState.user!.id,
+              chatState.currentUser!.id,
             ],
             'distinct': true,
           }),
@@ -91,7 +91,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
             extraData: {
               'members': [
                 ..._selectedUsers.map((e) => e.id),
-                chatState.user!.id,
+                chatState.currentUser!.id,
               ],
             },
           );
@@ -308,7 +308,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   if (_userNameQuery.isNotEmpty)
                                     Filter.autoComplete('name', _userNameQuery),
                                   Filter.notEqual(
-                                      'id', StreamChat.of(context).user!.id),
+                                      'id', StreamChat.of(context).currentUser!.id),
                                 ]),
                                 sort: [
                                   SortOption(

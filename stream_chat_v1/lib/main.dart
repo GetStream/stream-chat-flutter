@@ -133,7 +133,7 @@ class _MyAppState extends State<MyApp>
                   )!
                 ];
               },
-              initialRoute: _initData!.client.state.user == null
+              initialRoute: _initData!.client.state.currentUser == null
                   ? Routes.CHOOSE_USER
                   : Routes.HOME,
             ),

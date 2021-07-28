@@ -63,7 +63,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = StreamChat.of(context).user;
+    final user = StreamChat.of(context).currentUser;
     if (user == null) {
       return Offstage();
     }
