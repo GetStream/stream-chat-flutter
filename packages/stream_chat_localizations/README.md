@@ -20,7 +20,18 @@ This package provides localized strings for the stream chat widgets for many lan
 
 Check out the [changelog on pub.dev](https://pub.dev/packages/stream_chat_localizations/changelog) to see the latest changes in the package.
 
+## Supported languages
+
+At the moment we support the following languages:
+- [English](https://pub.dev/documentation/stream_chat_localizations/latest/stream_chat_localizations/StreamChatLocalizationsEn-class.html)
+- [Hindi](https://pub.dev/documentation/stream_chat_localizations/latest/stream_chat_localizations/StreamChatLocalizationsHi-class.html)
+- [Italian](https://pub.dev/documentation/stream_chat_localizations/latest/stream_chat_localizations/StreamChatLocalizationsIt-class.html)
+- [French](https://pub.dev/documentation/stream_chat_localizations/latest/stream_chat_localizations/StreamChatLocalizationsFr-class.html)
+
+More languages will be added in the future. Feel free to [contribute](https://github.com/GetStream/stream-chat-flutter/blob/master/CONTRIBUTING.md) to add more languages.
+
 ## Add dependency
+
 Add this to your package's pubspec.yaml file, use the latest version [![Pub](https://img.shields.io/pub/v/stream_chat_localizations.svg)](https://pub.dartlang.org/packages/stream_chat_localizations)
 ```yaml
 dependencies:
@@ -30,6 +41,7 @@ dependencies:
 You should then run `flutter packages get`
 
 ### Usage
+
 ```dart
 import 'package:flutter/material.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
@@ -65,7 +77,20 @@ class MyApp extends StatelessWidget {
 }
 ```
 
+### Adding a new language
+
+To add a new language, you need to create a new class extending `GlobalStreamChatLocalizations` and create a delegate for it adding it to the `delegates` array.
+
+Checkout [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/add_new_lang.dart) to see how to add a new language.
+
+### Override exisiting languages
+
+To override an existing language, you need to create a new class extending that particular language class and create a delegate for it adding it to the `delegates` array.
+
+Checkout [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/override_lang.dart) to see how to override an existing language.
+
 ### ⚠️ Note on **iOS**
+
 For translation to work on **iOS** you need to add supported locales to 
 `ios/Runner/Info.plist` as described [here](https://flutter.dev/docs/development/accessibility-and-localization/internationalization#specifying-supportedlocales).
 
