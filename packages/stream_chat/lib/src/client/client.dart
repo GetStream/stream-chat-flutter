@@ -1340,7 +1340,7 @@ class ClientState {
               event.me != null && event.type != EventType.healthCheck)
           .map((e) => e.me!)
           .listen((user) {
-        currentUser = user;
+        currentUser = currentUser?.merge(user) ?? user;
         final totalUnreadCount = user.totalUnreadCount;
         _totalUnreadCountController.add(totalUnreadCount);
 
