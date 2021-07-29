@@ -24,7 +24,7 @@ separately, follow the same process without the `.copyWith` and use the default 
 First, add a `MessageListView` in the appropriate place where you intend to display messages from a
 channel.
 
-```
+```dart
 MessageListView(
     ...
 )
@@ -41,7 +41,7 @@ however, this quickly becomes hard to maintain as more parameters and customizat
 default message implementation as aforementioned.
 :::
 
-```
+```dart
 MessageListView(
     ...
     messageBuilder: (context, messageDetails, messageList, defaultWidget) {
@@ -52,7 +52,7 @@ MessageListView(
 
 We use `.copyWith()` to customize the widget:
 
-```
+```dart
 MessageListView(
     ...
     messageBuilder: (context, messageDetails, messageList, defaultWidget) {
@@ -69,7 +69,7 @@ If you intend to simply change the theme for the text, you need not recreate the
 `MessageWidget` has a `messageTheme` parameter that allows you to pass the theme for most aspects
 of the message.
 
-```
+```dart
 MessageListView(
     ...
     messageBuilder: (context, messageDetails, messageList, defaultWidget) {
@@ -86,7 +86,7 @@ MessageListView(
 If you want to replace the entire text widget in the `MessageWidget`, you can use the `textBuilder`
 parameter which provides a builder for creating a widget to substitute the default text.parameter
 
-```
+```dart
 MessageListView(
     ...
     messageBuilder: (context, messageDetails, messageList, defaultWidget) {
@@ -103,7 +103,7 @@ MessageListView(
 
 To add elements like hashtags, we can override the `textBuilder` in the MessageWidget:
 
-```
+```dart
 MessageListView(
     ...
     messageBuilder: (context, messageDetails, messageList, defaultWidget) {
