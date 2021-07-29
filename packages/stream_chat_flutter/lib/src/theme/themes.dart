@@ -3,7 +3,6 @@ export 'channel_header_theme.dart';
 export 'channel_list_header_theme.dart';
 export 'channel_list_view_theme.dart';
 export 'channel_preview_theme.dart';
-export 'channel_theme.dart';
 export 'color_theme.dart';
 export 'gallery_footer_theme.dart';
 export 'gallery_header_theme.dart';

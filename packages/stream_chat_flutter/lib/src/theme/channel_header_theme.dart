@@ -36,7 +36,7 @@ class ChannelHeaderTheme extends InheritedTheme {
     final channelHeaderTheme =
         context.dependOnInheritedWidgetOfExactType<ChannelHeaderTheme>();
     return channelHeaderTheme?.data ??
-        StreamChatTheme.of(context).channelTheme.channelHeaderTheme;
+        StreamChatTheme.of(context).channelHeaderTheme;
   }
 
   @override

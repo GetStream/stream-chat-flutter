@@ -61,10 +61,7 @@ class ChannelInfo extends StatelessWidget {
       if (watcherCount > 0) text += ' $watcherCount Online';
       alternativeWidget = Text(
         text,
-        style: StreamChatTheme.of(context)
-            .channelTheme
-            .channelHeaderTheme
-            .subtitleStyle,
+        style: StreamChatTheme.of(context).channelHeaderTheme.subtitleStyle,
       );
     } else {
       final userId = StreamChat.of(context).currentUser?.id;

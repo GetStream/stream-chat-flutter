@@ -140,17 +140,16 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             brightness: Theme.of(context).brightness,
             elevation: 1,
             leading: leadingWidget,
-            backgroundColor:
-                chatThemeData.channelTheme.channelHeaderTheme.color,
+            backgroundColor: chatThemeData.channelHeaderTheme.color,
             actions: actions ??
                 <Widget>[
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: Center(
                       child: ChannelAvatar(
-                        borderRadius: chatThemeData.channelTheme
+                        borderRadius: chatThemeData
                             .channelHeaderTheme.avatarTheme?.borderRadius,
-                        constraints: chatThemeData.channelTheme
+                        constraints: chatThemeData
                             .channelHeaderTheme.avatarTheme?.constraints,
                         onTap: onImageTap,
                       ),
@@ -168,16 +167,16 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                   children: <Widget>[
                     title ??
                         ChannelName(
-                          textStyle: chatThemeData
-                              .channelTheme.channelHeaderTheme.titleStyle,
+                          textStyle:
+                              chatThemeData.channelHeaderTheme.titleStyle,
                         ),
                     const SizedBox(height: 2),
                     subtitle ??
                         ChannelInfo(
                           showTypingIndicator: showTypingIndicator,
                           channel: channel,
-                          textStyle: chatThemeData
-                              .channelTheme.channelHeaderTheme.subtitleStyle,
+                          textStyle:
+                              chatThemeData.channelHeaderTheme.subtitleStyle,
                         ),
                   ],
                 ),

@@ -112,12 +112,11 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
           children: [
             Text(
               'with ',
-              style: chatThemeData.channelTheme.channelHeaderTheme.subtitleStyle,
+              style: chatThemeData.channelHeaderTheme.subtitleStyle,
             ),
             Flexible(
               child: ChannelName(
-                textStyle:
-                    chatThemeData.channelTheme.channelHeaderTheme.subtitleStyle,
+                textStyle: chatThemeData.channelHeaderTheme.subtitleStyle,
               ),
             ),
           ],
@@ -136,7 +135,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                   showUnreads: true,
                 )
               : const SizedBox()),
-      backgroundColor: chatThemeData.channelTheme.channelHeaderTheme.color,
+      backgroundColor: chatThemeData.channelHeaderTheme.color,
       centerTitle: true,
       actions: actions,
       title: InkWell(
@@ -150,14 +149,14 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
               title ??
                   Text(
                     'Thread Reply',
-                    style: chatThemeData.channelTheme.channelHeaderTheme.titleStyle,
+                    style: chatThemeData.channelHeaderTheme.titleStyle,
                   ),
               const SizedBox(height: 2),
               if (showTypingIndicator)
                 TypingIndicator(
                   alignment: Alignment.center,
                   channel: StreamChannel.of(context).channel,
-                  style: chatThemeData.channelTheme.channelHeaderTheme.subtitleStyle,
+                  style: chatThemeData.channelHeaderTheme.subtitleStyle,
                   parentId: parent.id,
                   alternativeWidget: defaultSubtitle,
                 )

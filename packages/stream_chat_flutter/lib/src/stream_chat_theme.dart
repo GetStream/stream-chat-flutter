@@ -49,7 +49,7 @@ class StreamChatThemeData {
     ColorTheme? colorTheme,
     ChannelListHeaderTheme? channelListHeaderTheme,
     ChannelPreviewTheme? channelPreviewTheme,
-    ChannelTheme? channelTheme,
+    ChannelHeaderThemeData? channelHeaderTheme,
     MessageTheme? otherMessageTheme,
     MessageTheme? ownMessageTheme,
     MessageInputTheme? messageInputTheme,
@@ -76,7 +76,7 @@ class StreamChatThemeData {
     final customizedData = defaultData.copyWith(
       channelListHeaderTheme: channelListHeaderTheme,
       channelPreviewTheme: channelPreviewTheme,
-      channelTheme: channelTheme,
+      channelHeaderTheme: channelHeaderTheme,
       otherMessageTheme: otherMessageTheme,
       ownMessageTheme: ownMessageTheme,
       messageInputTheme: messageInputTheme,
@@ -108,7 +108,7 @@ class StreamChatThemeData {
     required this.colorTheme,
     required this.channelListHeaderTheme,
     required this.channelPreviewTheme,
-    required this.channelTheme,
+    required this.channelHeaderTheme,
     required this.otherMessageTheme,
     required this.ownMessageTheme,
     required this.messageInputTheme,
@@ -147,8 +147,8 @@ class StreamChatThemeData {
   /// Theme of the [ChannelListHeader]
   final ChannelListHeaderTheme channelListHeaderTheme;
 
-  /// Theme of the chat widgets dedicated to a channel
-  final ChannelTheme channelTheme;
+  /// Theme of the chat widgets dedicated to a channel header
+  final ChannelHeaderThemeData channelHeaderTheme;
 
   /// The default style for [GalleryHeader]s below the overall
   /// [StreamChatTheme].
@@ -194,7 +194,7 @@ class StreamChatThemeData {
     TextTheme? textTheme,
     ColorTheme? colorTheme,
     ChannelPreviewTheme? channelPreviewTheme,
-    ChannelTheme? channelTheme,
+    ChannelHeaderThemeData? channelHeaderTheme,
     MessageTheme? ownMessageTheme,
     MessageTheme? otherMessageTheme,
     MessageInputTheme? messageInputTheme,
@@ -218,7 +218,7 @@ class StreamChatThemeData {
         defaultUserImage: defaultUserImage ?? this.defaultUserImage,
         channelPreviewTheme:
             this.channelPreviewTheme.merge(channelPreviewTheme),
-        channelTheme: this.channelTheme.merge(channelTheme),
+        channelHeaderTheme: this.channelHeaderTheme.merge(channelHeaderTheme),
         ownMessageTheme: this.ownMessageTheme.merge(ownMessageTheme),
         otherMessageTheme: this.otherMessageTheme.merge(otherMessageTheme),
         messageInputTheme: this.messageInputTheme.merge(messageInputTheme),
@@ -243,7 +243,7 @@ class StreamChatThemeData {
       primaryIconTheme: other.primaryIconTheme,
       defaultUserImage: other.defaultUserImage,
       channelPreviewTheme: channelPreviewTheme.merge(other.channelPreviewTheme),
-      channelTheme: channelTheme.merge(other.channelTheme),
+      channelHeaderTheme: channelHeaderTheme.merge(other.channelHeaderTheme),
       ownMessageTheme: ownMessageTheme.merge(other.ownMessageTheme),
       otherMessageTheme: otherMessageTheme.merge(other.otherMessageTheme),
       messageInputTheme: messageInputTheme.merge(other.messageInputTheme),
@@ -269,20 +269,18 @@ class StreamChatThemeData {
     final accentColor = colorTheme.accentPrimary;
     final iconTheme =
         IconThemeData(color: colorTheme.textHighEmphasis.withOpacity(.5));
-    final channelTheme = ChannelTheme(
-      channelHeaderTheme: ChannelHeaderThemeData(
-        avatarTheme: AvatarThemeData(
-          borderRadius: BorderRadius.circular(20),
-          constraints: const BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
-          ),
+    final channelHeaderTheme = ChannelHeaderThemeData(
+      avatarTheme: AvatarThemeData(
+        borderRadius: BorderRadius.circular(20),
+        constraints: const BoxConstraints.tightFor(
+          height: 40,
+          width: 40,
         ),
-        color: colorTheme.barsBg,
-        titleStyle: textTheme.headlineBold,
-        subtitleStyle: textTheme.footnote.copyWith(
-          color: const Color(0xff7A7A7A),
-        ),
+      ),
+      color: colorTheme.barsBg,
+      titleStyle: textTheme.headlineBold,
+      subtitleStyle: textTheme.footnote.copyWith(
+        color: const Color(0xff7A7A7A),
       ),
     );
     final channelPreviewTheme = ChannelPreviewTheme(
@@ -325,7 +323,7 @@ class StreamChatThemeData {
         color: colorTheme.barsBg,
         title: textTheme.headlineBold,
       ),
-      channelTheme: channelTheme,
+      channelHeaderTheme: channelHeaderTheme,
       ownMessageTheme: MessageTheme(
         messageAuthor:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
@@ -459,7 +457,7 @@ class StreamChatThemeData {
       ],
       galleryHeaderTheme: GalleryHeaderThemeData(
         closeButtonColor: colorTheme.textHighEmphasis,
-        backgroundColor: channelTheme.channelHeaderTheme.color,
+        backgroundColor: channelHeaderTheme.color,
         iconMenuPointColor: colorTheme.textHighEmphasis,
         titleTextStyle: textTheme.headlineBold,
         subtitleTextStyle: channelPreviewTheme.subtitle,

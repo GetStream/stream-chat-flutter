@@ -125,7 +125,6 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                             backgroundDecoration: BoxDecoration(
                               color: ColorTween(
                                 begin: StreamChatTheme.of(context)
-                                    .channelTheme
                                     .channelHeaderTheme
                                     .color,
                                 end: Colors.black,
