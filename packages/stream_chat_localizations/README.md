@@ -15,6 +15,8 @@
 - [Chat UI Kit](https://getstream.io/chat/ui-kit/)
 - [UI Docs](https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter/introduction/)
 
+![localization_support](https://user-images.githubusercontent.com/13705472/127504329-a9690184-ce0f-4442-adb4-a33b5e3a3bf1.png)
+
 ## What is Localization?
 
 If you deploy your app to users who speak another language, you'll need to internationalize (localize) it. That means you need to write the app in a way that makes it possible to localize values like text and layouts for each language or locale that the app supports. For more information, see the [Flutter documentation](https://flutter.dev/docs/development/accessibility-and-localization/**internationalization**).
