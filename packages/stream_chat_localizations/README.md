@@ -24,10 +24,10 @@ Check out the [changelog on pub.dev](https://pub.dev/packages/stream_chat_locali
 ## Supported languages
 
 At the moment we support the following languages:
-- [English](https://pub.dev/documentation/stream_chat_localizations/latest/stream_chat_localizations/StreamChatLocalizationsEn-class.html)
-- [Hindi](https://pub.dev/documentation/stream_chat_localizations/latest/stream_chat_localizations/StreamChatLocalizationsHi-class.html)
-- [Italian](https://pub.dev/documentation/stream_chat_localizations/latest/stream_chat_localizations/StreamChatLocalizationsIt-class.html)
-- [French](https://pub.dev/documentation/stream_chat_localizations/latest/stream_chat_localizations/StreamChatLocalizationsFr-class.html)
+- [English](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_en.dart)
+- [Hindi](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_hi.dart)
+- [Italian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_it.dart)
+- [French](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_fr.dart)
 
 More languages will be added in the future. Feel free to [contribute](https://github.com/GetStream/stream-chat-flutter/blob/master/CONTRIBUTING.md) to add more languages.
 
