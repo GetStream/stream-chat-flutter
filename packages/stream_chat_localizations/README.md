@@ -93,7 +93,7 @@ Checkout [this example](https://github.com/GetStream/stream-chat-flutter/blob/ma
 ### ⚠️ Note on **iOS**
 
 For translation to work on **iOS** you need to add supported locales to 
-`ios/Runner/Info.plist` as described [here](https://flutter.dev/docs/development/accessibility-and-localization/internationalization#specifying-supportedlocales).
+`ios/Runner/Info.plist` as described [here](https://flutter.dev/docs/development/accessibility-and-localization/internationalization#localizing-for-ios-updating-the-ios-app-bundle).
 
 Example:
 
