@@ -378,7 +378,7 @@ class StreamChatThemeData {
         expandButtonColor: colorTheme.accentPrimary,
         sendButtonColor: colorTheme.accentPrimary,
         sendButtonIdleColor: colorTheme.disabled,
-        inputBackground: colorTheme.barsBg,
+        inputBackgroundColor: colorTheme.barsBg,
         inputTextStyle: textTheme.body,
         idleBorderGradient: LinearGradient(
           colors: [

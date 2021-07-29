@@ -562,7 +562,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       elevation: 2,
       clipBehavior: Clip.hardEdge,
       isScrollControlled: true,
-      backgroundColor: streamChatThemeData.messageInputTheme.inputBackground,
+      backgroundColor:
+          streamChatThemeData.messageInputTheme.inputBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16),

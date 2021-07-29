@@ -328,7 +328,7 @@ class MessageInputState extends State<MessageInput> {
   Widget build(BuildContext context) {
     Widget child = DecoratedBox(
       decoration: BoxDecoration(
-        color: _streamChatTheme.messageInputTheme.inputBackground,
+        color: _streamChatTheme.messageInputTheme.inputBackgroundColor,
       ),
       child: SafeArea(
         child: GestureDetector(
@@ -565,7 +565,7 @@ class MessageInputState extends State<MessageInput> {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: _streamChatTheme.messageInputTheme.borderRadius,
-              color: _streamChatTheme.messageInputTheme.inputBackground,
+              color: _streamChatTheme.messageInputTheme.inputBackgroundColor,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
