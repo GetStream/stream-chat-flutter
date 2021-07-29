@@ -45,7 +45,7 @@ dependencies:
  stream_chat_localizations: ^latest_version
 ```
 
-You should then run `flutter packages get`
+Then run `flutter packages get`
 
 ### Usage
 
@@ -88,13 +88,13 @@ class MyApp extends StatelessWidget {
 
 To add a new language, you need to create a new class extending `GlobalStreamChatLocalizations` and create a delegate for it adding it to the `delegates` array.
 
-Checkout [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/add_new_lang.dart) to see how to add a new language.
+Check out [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/add_new_lang.dart) to see how to add a new language.
 
-### Override exisiting languages
+### Override existing languages
 
 To override an existing language, you need to create a new class extending that particular language class and create a delegate for it adding it to the `delegates` array.
 
-Checkout [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/override_lang.dart) to see how to override an existing language.
+Check out [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/override_lang.dart) to see how to override an existing language.
 
 ### ⚠️ Note on **iOS**
 
@@ -115,8 +115,7 @@ Example:
 
 ## Contributing
 
-We welcome code changes that improve this library or fix a problem,
-please make sure to follow all best practices and add tests if applicable before submitting a Pull Request on Github.
+We welcome code changes that improve this library or fix a problem. Please make sure to follow all best practices and add tests if applicable before submitting a Pull Request on Github.
 We are pleased to merge your code into the official repository.
 Make sure to sign our [Contributor License Agreement (CLA)](https://docs.google.com/forms/d/e/1FAIpQLScFKsKkAJI7mhCr7K9rEIOpqIDThrWxuvxnwUq2XkHyG154vQ/viewform) first.
 See our license file for more details.
