@@ -1,10 +1,57 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
-/// Defines the theme dedicated to the [MessageInput] widget
+/// Overrides the default style of [MessageInput] descendants.
+///
+/// See also:
+///
+///  * [MessageInputThemeData], which is used to configure this theme.
+class MessageInputTheme extends InheritedTheme {
+  /// Creates a [MessageInputTheme].
+  ///
+  /// The [data] parameter must not be null.
+  const MessageInputTheme({
+    Key? key,
+    required this.data,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  /// The configuration of this theme.
+  final MessageInputThemeData data;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If there is no enclosing [MessageInputTheme] widget, then
+  /// [StreamChatThemeData.messageInputTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// final theme = MessageInputTheme.of(context);
+  /// ```
+  static MessageInputThemeData of(BuildContext context) {
+    final messageInputTheme =
+        context.dependOnInheritedWidgetOfExactType<MessageInputTheme>();
+    return messageInputTheme?.data ??
+        StreamChatTheme.of(context).messageInputTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) =>
+      MessageInputTheme(data: data, child: child);
+
+  @override
+  bool updateShouldNotify(MessageInputTheme oldWidget) =>
+      data != oldWidget.data;
+}
+
+/// A style that overrides the default appearance of [MessageInput] widgets
+/// when used with [MessageInputTheme] or with the overall [StreamChatTheme]'s
+/// [StreamChatThemeData.messageInputTheme].
 class MessageInputThemeData with Diagnosticable {
-  /// Returns a new [MessageInputThemeData]
+  /// Creates a [MessageInputThemeData].
   const MessageInputThemeData({
     this.sendAnimationDuration,
     this.actionButtonColor,
