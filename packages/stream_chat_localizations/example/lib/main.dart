@@ -76,6 +76,8 @@ class MyApp extends StatelessWidget {
         ],
         // Add GlobalStreamChatLocalizations.delegates
         localizationsDelegates: GlobalStreamChatLocalizations.delegates,
+        // Programatically set the locale (this is a global change)
+        locale: const Locale('fr'),
         builder: (context, widget) => StreamChat(
           client: client,
           child: widget,
