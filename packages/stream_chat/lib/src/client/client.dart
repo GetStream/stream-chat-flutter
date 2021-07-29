@@ -1336,6 +1336,21 @@ class ClientState {
     _subscriptions.addAll([
       _client
           .on()
+          .where((event) =>
+              event.me != null && event.type != EventType.healthCheck)
+          .map((e) => e.me!)
+          .listen((user) {
+        currentUser = user;
+        final totalUnreadCount = user.totalUnreadCount;
+        _totalUnreadCountController.add(totalUnreadCount);
+
+        final unreadChannels = user.unreadChannels;
+        if (unreadChannels != null) {
+          _unreadChannelsController.add(unreadChannels);
+        }
+      }),
+      _client
+          .on()
           .map((event) => event.unreadChannels)
           .whereType<int>()
           .listen(_unreadChannelsController.add),
