@@ -1,8 +1,8 @@
 part of 'stream_chat_localizations.dart';
 
-/// The translations for French (`fr`).
+/// The translations for Spanish (`es`).
 class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
-  /// Create an instance of the translation bundle for French.
+  /// Create an instance of the translation bundle for Spanish.
   const StreamChatLocalizationsEs({String localeName = 'es'})
       : super(localeName: localeName);
 
