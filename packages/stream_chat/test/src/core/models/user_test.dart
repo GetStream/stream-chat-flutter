@@ -29,7 +29,6 @@ void main() {
       expect(newUser.id, user.id);
       expect(newUser.role, user.role);
       expect(newUser.name, user.name);
-      expect(newUser.language, user.language);
 
       newUser = user.copyWith(
         id: 'test',
@@ -42,7 +41,6 @@ void main() {
       expect(newUser.id, 'test');
       expect(newUser.role, 'test');
       expect(newUser.name, 'test');
-      expect(newUser.language, 'en');
     });
   });
 }
