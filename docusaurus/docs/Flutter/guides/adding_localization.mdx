@@ -98,17 +98,23 @@ Here is an example of how that would look like:
             Locale('fr'),
             Locale('it'),
         ],
+        // locales are the locales of the device
+        // supportedLocales are the app supported locales
         localeListResolutionCallback: (locales, supportedLocales) {
+            // We map the supported locales to language codes
+            // note that this is completely optional and this logic can be changed as you like
             final supportedLanguageCodes =
                 supportedLocales.map((e) => e.languageCode);
             if (locales != null) {
-            for (final locale in locales) {
-                if (supportedLanguageCodes.contains(locale.languageCode)) {
-                return locale;
+                // we iterate over the locales and find the first one that is supported
+                for (final locale in locales) {
+                    if (supportedLanguageCodes.contains(locale.languageCode)) {
+                        return locale;
+                    }
                 }
             }
-            }
 
+            // if we didn't find a supported language, we return the italian language
             return const Locale('it');
         },
         // Add GlobalStreamChatLocalizations.delegates
@@ -117,7 +123,7 @@ Here is an example of how that would look like:
 
 ```
 
-In this case we're using Italian as the default language.
+In this case we're using italian as the default language.
 
 ### ⚠️ Note on **iOS**
 
