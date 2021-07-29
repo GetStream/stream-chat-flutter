@@ -32,6 +32,8 @@ You should then run `flutter packages get`
 
 ### Usage
 
+Flutter generally and the Stream Chat SDK will use the system locale of the users device, if that locale is supported (see below), if the locale is not supported we will default to `en`
+
 ```dart
 import 'package:flutter/material.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
@@ -78,6 +80,43 @@ Checkout [this example](https://github.com/GetStream/stream-chat-flutter/blob/ma
 To override an existing language, create a new class extending that particular language class and create a delegate for it, adding it to the `delegates` array.
 
 Checkout [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/override_lang.dart) to see how to override an existing language.
+
+### Changing the default language
+
+To change the default language you can use the `MaterialApp.localeListResolutionCallback` property.
+Here is an example of how that would look like:
+
+```dart
+    MaterialApp(
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        // Add all the supported locales
+        supportedLocales: const [
+            Locale('en'),
+            Locale('hi'),
+            Locale('fr'),
+            Locale('it'),
+        ],
+        localeListResolutionCallback: (locales, supportedLocales) {
+            final supportedLanguageCodes =
+                supportedLocales.map((e) => e.languageCode);
+            if (locales != null) {
+            for (final locale in locales) {
+                if (supportedLanguageCodes.contains(locale.languageCode)) {
+                return locale;
+                }
+            }
+            }
+
+            return const Locale('it');
+        },
+        // Add GlobalStreamChatLocalizations.delegates
+        localizationsDelegates: GlobalStreamChatLocalizations.delegates,
+        ...
+
+```
+
+In this case we're using Italian as the default language.
 
 ### ⚠️ Note on **iOS**
 
