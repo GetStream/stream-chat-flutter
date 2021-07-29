@@ -1,0 +1,76 @@
+---
+id: adding_chat_to_video_livestreams
+sidebar_position: 7
+title: Adding Chat To Video Livestreams
+---
+
+Adding Chat To Video Livestreams
+
+### Introduction
+
+There are two common scenarios in live-streaming applications. Let's explore creating both types:
+
+### Split-screen
+
+In the split-screen implementation, we have a visual split between the video and the message list.
+
+![](../assets/live_stream_1.jpg)
+
+```
+Scaffold(
+  body: Column(
+    children: <Widget>[
+      Expanded(
+        child: // Your video implementation here,
+      ),
+      Expanded(
+        child: Column(
+          children: [
+           Expanded(
+             child: MessageListView(),
+           ),
+           MessageInput(),
+          ],
+        ),
+      ),
+    ],
+  ),
+)
+```
+
+### Overlapping chat with a transparency gradient
+
+The second type looks like this:
+
+![](../assets/live_stream_2.jpg)
+
+We can use a `Stack` for achieving this:
+
+```
+Scaffold(
+  body: Stack(
+    children: <Widget>[
+      // Add your video implementation here
+      ShaderMask(
+        shaderCallback: (rect) {
+          return LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+           colors: [Colors.black, Colors.transparent],
+           stops: [0.4, 0.65]
+          ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+        },
+       blendMode: BlendMode.dstIn,
+         child: Column(
+           children: [
+             Expanded(
+               child: MessageListView(),
+             ),
+             MessageInput(),
+           ],
+         ),
+       ),
+     ],
+   ),
+ )
+```
