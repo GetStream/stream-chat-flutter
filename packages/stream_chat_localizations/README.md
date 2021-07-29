@@ -15,7 +15,11 @@
 - [Chat UI Kit](https://getstream.io/chat/ui-kit/)
 - [UI Docs](https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter/introduction/)
 
-This package provides localized strings for the stream chat widgets for many languages.
+## What is Localization?
+
+If you deploy your app to users who speak another language, you'll need to internationalize (localize) it. That means you need to write the app in a way that makes it possible to localize values like text and layouts for each language or locale that the app supports. For more information, see the [Flutter documentation](https://flutter.dev/docs/development/accessibility-and-localization/**internationalization**).
+
+What this package allows you to do is to provide localized strings for the Stream chat widgets. For example, depending on the application locale, the Stream Chat widgets will display the appropriate language. The locale will be set automatically, based on system preferences, or you could set it programmatically in your app. The package supports several different languages, with more to be added. The package allows you to override any supported language or add a new language that isn't supported.
 
 ### Changelog
 
