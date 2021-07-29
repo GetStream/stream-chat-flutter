@@ -1,3 +1,7 @@
+## 2.1.1
+
+- Updated llc dependency
+
 ## 2.1.0
 
 🛑️ Breaking Changes from `2.0.0`
