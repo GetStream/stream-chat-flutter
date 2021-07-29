@@ -8,15 +8,23 @@ Adding Chat To Video Livestreams
 
 ### Introduction
 
+Video livestreams are usually complemented with a chat section to make the livestream more interactive
+and encourage retention.
+
+This guide details multiple ways of adding chat functionality to your video livestream.
+
+### Implementing Chat
+
 There are two common scenarios in live-streaming applications. Let's explore creating both types:
 
 ### Split-screen
 
 In the split-screen implementation, we have a visual split between the video and the message list.
+This allows the content to be unobstructed by chat and have a clear separation of boundaries.
 
 ![](../assets/live_stream_1.jpg)
 
-```
+```dart
 Scaffold(
   body: Column(
     children: <Widget>[
@@ -40,13 +48,17 @@ Scaffold(
 
 ### Overlapping chat with a transparency gradient
 
+Another way to add chat is to overlay the video content with messages which progressively fade out
+as we go to the top of the screen. This gives the content a more rich feel as it takes the whole
+screen and allows the chat to be more homogeneously integrated with the content.
+
 The second type looks like this:
 
 ![](../assets/live_stream_2.jpg)
 
 We can use a `Stack` for achieving this:
 
-```
+```dart
 Scaffold(
   body: Stack(
     children: <Widget>[
