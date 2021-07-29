@@ -31,7 +31,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
     if (users.length == 1) {
       return "${first.name} est en train d'écrire";
     }
-    return "${first.name} and ${users.length - 1} sont entrain d'écrire";
+    return "${first.name} et ${users.length - 1} sont entrain d'écrire";
   }
 
   @override
@@ -49,7 +49,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
     required int remaining,
     required int total,
   }) =>
-      'Uploading $remaining/$total ...';
+      'Transfert en cours $remaining/$total ...';
 
   @override
   String pinnedByUserText({
@@ -206,8 +206,8 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
 
   @override
   String togglePinUnpinText({required bool pinned}) {
-    if (pinned) return 'Détacher de la conversation';
-    return 'Attacher à la conversation';
+    if (pinned) return 'Décrocher de la conversation';
+    return 'Épingler à la discussion';
   }
 
   @override
@@ -311,7 +311,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get viewInfoLabel => 'Voir les informations';
 
   @override
-  String get leaveGroupLabel => 'Quitter le Group';
+  String get leaveGroupLabel => 'Quitter le Groupe';
 
   @override
   String get leaveLabel => 'QUITTER';
@@ -324,7 +324,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
       'Etes-vous sûr de vouloir quitter cette conversation ?';
 
   @override
-  String get showInChatLabel => 'Montrer dans le Chat';
+  String get showInChatLabel => 'Montrer dans la Discussion';
 
   @override
   String get saveImageLabel => "Sauvegarder l'image";
