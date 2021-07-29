@@ -7,7 +7,7 @@ import 'channel_page.dart';
 class UserMentionsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final user = StreamChat.of(context).user!;
+    final user = StreamChat.of(context).currentUser!;
     return MessageSearchBloc(
       child: MessageSearchListView(
         filters: Filter.in_('members', [user.id]),

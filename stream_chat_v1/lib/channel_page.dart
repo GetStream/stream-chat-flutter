@@ -66,7 +66,7 @@ class _ChannelPageState extends State<ChannelPage> {
           var channel = StreamChannel.of(context).channel;
 
           if (channel.memberCount == 2 && channel.isDistinct) {
-            final currentUser = StreamChat.of(context).user;
+            final currentUser = StreamChat.of(context).currentUser;
             final otherUser = channel.state!.members.firstWhereOrNull(
               (element) => element.user!.id != currentUser!.id,
             );

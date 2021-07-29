@@ -248,7 +248,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                     filter: Filter.and([
                       if (_userNameQuery.isNotEmpty)
                         Filter.autoComplete('name', _userNameQuery),
-                      Filter.notEqual('id', StreamChat.of(context).user!.id),
+                      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
                     ]),
                     sort: [
                       SortOption(

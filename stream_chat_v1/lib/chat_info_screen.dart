@@ -58,7 +58,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             'owner',
           ].contains(channel.state!.members
               .firstWhereOrNull(
-                  (m) => m.userId == channel.client.state.user!.id)
+                  (m) => m.userId == channel.client.state.currentUser!.id)
               ?.role))
             _buildDeleteListTile(),
         ],
@@ -385,7 +385,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => _SharedGroupsScreen(
-                        StreamChat.of(context).user, widget.user)));
+                        StreamChat.of(context).currentUser, widget.user)));
           },
         ),
       ],
@@ -603,7 +603,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
         String? title;
         if (extraData['name'] == null) {
           final otherMembers = members.where(
-              (member) => member.userId != StreamChat.of(context).user!.id);
+              (member) => member.userId != StreamChat.of(context).currentUser!.id);
           if (otherMembers.isNotEmpty) {
             final maxWidth = constraints.maxWidth;
             final maxChars = maxWidth / textStyle.fontSize!;
