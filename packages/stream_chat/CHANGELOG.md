@@ -1,3 +1,9 @@
+## 2.1.1
+
+🐞 Fixed
+
+- Mutes were not working correctly in 2.1.0
+
 ## 2.1.0
 
 🛑️ Removed

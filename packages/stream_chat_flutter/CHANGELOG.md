@@ -1,5 +1,9 @@
 ## 2.1.0
 
+- Updated core dependency
+
+## 2.1.0
+
 ✅ Added
 
 - Added `MessageListView.paginationLimit`
