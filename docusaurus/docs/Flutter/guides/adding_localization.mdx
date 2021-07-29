@@ -10,6 +10,14 @@ Adding Localization To UI Widgets
 
 We have a dedicated package for adding localization to our UI widgets. It's called `stream_chat_localizations` and you can find it [here](https://pub.dev/packages/stream_chat_localizations).
 
+![localization_support](https://user-images.githubusercontent.com/13705472/127504329-a9690184-ce0f-4442-adb4-a33b5e3a3bf1.png)
+
+## What is Localization?
+
+If you deploy your app to users who speak another language, you'll need to internationalize (localize) it. That means you need to write the app in a way that makes it possible to localize values like text and layouts for each language or locale that the app supports. For more information, see the [Flutter documentation](https://flutter.dev/docs/development/accessibility-and-localization/**internationalization**).
+
+What this package allows you to do is to provide localized strings for the Stream chat widgets. For example, depending on the application locale, the Stream Chat widgets will display the appropriate language. The locale will be set automatically, based on system preferences, or you could set it programmatically in your app. The package supports several different languages, with more to be added. The package allows you to override any supported language or add a new language that isn't supported.
+
 ### Supported languages
 
 At the moment we support the following languages:
@@ -22,17 +30,17 @@ More languages will be added in the future. Feel free to [contribute](https://gi
 
 ### Add dependency
 
-Add this to your package's pubspec.yaml file, use the latest version [![Pub](https://img.shields.io/pub/v/stream_chat_localizations.svg)](https://pub.dartlang.org/packages/stream_chat_localizations)
+Add this to your package's `pubspec.yaml` file, use the latest version [![Pub](https://img.shields.io/pub/v/stream_chat_localizations.svg)](https://pub.dartlang.org/packages/stream_chat_localizations)
 ```yaml
 dependencies:
  stream_chat_localizations: ^latest_version
 ```
 
-You should then run `flutter packages get`
+Then run `flutter packages get`
 
 ### Usage
 
-Flutter generally and the Stream Chat SDK will use the system locale of the users device, if that locale is supported (see below), if the locale is not supported we will default to `en`.
+Generally, Flutter and the Stream Chat SDK will use the system locale of the user's device, if that locale is supported (see below). If the locale is not supported we will default to `en`.
 Make sure to read more about localization in the [official Flutter docs](https://flutter.dev/docs/development/accessibility-and-localization/internationalization).
 
 ```dart
@@ -70,17 +78,42 @@ class MyApp extends StatelessWidget {
 }
 ```
 
+## Setting a language
+The application language can be changed through system preferences or programmatically.
+
+### System Preferences
+The application locale can be changed by changing the language for your device or emulator within the device's system preferences.
+
+[iOS change language](https://support.apple.com/en-us/HT204031)
+
+[Android change language](https://support.google.com/websearch/answer/3333234?co=GENIE.Platform%3DAndroid&hl=en)
+
+Note that the language needs to be supported in your application to work.
+
+### Programmatically
+You can also set the locale programmatically in your Flutter application without changing the device's language.
+
+```dart
+return MaterialApp(
+ ...
+ locale: const Locale('fr'),
+ ...
+);
+```
+
+There are many ways that this can be set for additional control. For information and examples, see this [Stack Overflow post](https://stackoverflow.com/questions/49441212/flutter-multi-lingual-application-how-to-override-the-locale).
+
 ### Adding a new language
 
 To add a new language, create a new class extending `GlobalStreamChatLocalizations` and create a delegate for it, adding it to the `delegates` array.
 
-Checkout [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/add_new_lang.dart) to see how to add a new language.
+Check out [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/add_new_lang.dart) to see how to add a new language.
 
-### Override exisiting languages
+### Override existing languages
 
 To override an existing language, create a new class extending that particular language class and create a delegate for it, adding it to the `delegates` array.
 
-Checkout [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/override_lang.dart) to see how to override an existing language.
+Check out [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/override_lang.dart) to see how to override an existing language.
 
 ### Changing the default language
 
@@ -114,7 +147,7 @@ Here is an example of how that would look like:
                 }
             }
 
-            // if we didn't find a supported language, we return the italian language
+            // if we didn't find a supported language, we return the Italian language
             return const Locale('it');
         },
         // Add GlobalStreamChatLocalizations.delegates
@@ -123,7 +156,7 @@ Here is an example of how that would look like:
 
 ```
 
-In this case we're using italian as the default language.
+In this case, we're using Italian as the default language.
 
 ### ⚠️ Note on **iOS**
 
