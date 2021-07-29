@@ -52,7 +52,7 @@ class StreamChatThemeData {
     ChannelHeaderThemeData? channelHeaderTheme,
     MessageTheme? otherMessageTheme,
     MessageTheme? ownMessageTheme,
-    MessageInputTheme? messageInputTheme,
+    MessageInputThemeData? messageInputTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     IconThemeData? primaryIconTheme,
     List<ReactionIcon>? reactionIcons,
@@ -165,7 +165,7 @@ class StreamChatThemeData {
   final MessageTheme otherMessageTheme;
 
   /// Theme dedicated to the [MessageInput] widget
-  final MessageInputTheme messageInputTheme;
+  final MessageInputThemeData messageInputTheme;
 
   /// The widget that will be built when the user image is unavailable
   final Widget Function(BuildContext, User) defaultUserImage;
@@ -197,7 +197,7 @@ class StreamChatThemeData {
     ChannelHeaderThemeData? channelHeaderTheme,
     MessageTheme? ownMessageTheme,
     MessageTheme? otherMessageTheme,
-    MessageInputTheme? messageInputTheme,
+    MessageInputThemeData? messageInputTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     IconThemeData? primaryIconTheme,
     ChannelListHeaderTheme? channelListHeaderTheme,
@@ -370,7 +370,7 @@ class StreamChatThemeData {
           ),
         ),
       ),
-      messageInputTheme: MessageInputTheme(
+      messageInputTheme: MessageInputThemeData(
         borderRadius: BorderRadius.circular(20),
         sendAnimationDuration: const Duration(milliseconds: 300),
         actionButtonColor: colorTheme.accentPrimary,

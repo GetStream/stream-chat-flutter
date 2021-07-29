@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Defines the theme dedicated to the [MessageInput] widget
-class MessageInputTheme with Diagnosticable {
-  /// Returns a new [MessageInputTheme]
-  const MessageInputTheme({
+class MessageInputThemeData with Diagnosticable {
+  /// Returns a new [MessageInputThemeData]
+  const MessageInputThemeData({
     this.sendAnimationDuration,
     this.actionButtonColor,
     this.sendButtonColor,
@@ -56,8 +56,8 @@ class MessageInputTheme with Diagnosticable {
   /// Border radius of [MessageInput]
   final BorderRadius? borderRadius;
 
-  /// Returns a new [MessageInputTheme] replacing some of its properties
-  MessageInputTheme copyWith({
+  /// Returns a new [MessageInputThemeData] replacing some of its properties
+  MessageInputThemeData copyWith({
     Duration? sendAnimationDuration,
     Color? inputBackgroundColor,
     Color? actionButtonColor,
@@ -71,7 +71,7 @@ class MessageInputTheme with Diagnosticable {
     Gradient? idleBorderGradient,
     BorderRadius? borderRadius,
   }) =>
-      MessageInputTheme(
+      MessageInputThemeData(
         sendAnimationDuration:
             sendAnimationDuration ?? this.sendAnimationDuration,
         inputBackgroundColor: inputBackgroundColor ?? this.inputBackgroundColor,
@@ -88,13 +88,13 @@ class MessageInputTheme with Diagnosticable {
         borderRadius: borderRadius ?? this.borderRadius,
       );
 
-  /// Linearly interpolate from one [MessageInputTheme] to another.
-  MessageInputTheme lerp(
-    MessageInputTheme a,
-    MessageInputTheme b,
+  /// Linearly interpolate from one [MessageInputThemeData] to another.
+  MessageInputThemeData lerp(
+    MessageInputThemeData a,
+    MessageInputThemeData b,
     double t,
   ) =>
-      MessageInputTheme(
+      MessageInputThemeData(
         actionButtonColor:
             Color.lerp(a.actionButtonColor, b.actionButtonColor, t),
         actionButtonIdleColor:
@@ -116,8 +116,8 @@ class MessageInputTheme with Diagnosticable {
         inputDecoration: a.inputDecoration,
       );
 
-  /// Merges [this] [MessageInputTheme] with the [other]
-  MessageInputTheme merge(MessageInputTheme? other) {
+  /// Merges [this] [MessageInputThemeData] with the [other]
+  MessageInputThemeData merge(MessageInputThemeData? other) {
     if (other == null) return this;
     return copyWith(
       sendAnimationDuration: other.sendAnimationDuration,
@@ -140,7 +140,7 @@ class MessageInputTheme with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MessageInputTheme &&
+      other is MessageInputThemeData &&
           runtimeType == other.runtimeType &&
           sendAnimationDuration == other.sendAnimationDuration &&
           sendButtonColor == other.sendButtonColor &&
