@@ -296,7 +296,7 @@ class StreamChatThemeData {
       subtitleStyle: textTheme.footnote.copyWith(
         color: const Color(0xff7A7A7A),
       ),
-      lastMessageAt: textTheme.footnote.copyWith(
+      lastMessageAtStyle: textTheme.footnote.copyWith(
         color: colorTheme.textHighEmphasis.withOpacity(.5),
       ),
       indicatorIconSize: 16,

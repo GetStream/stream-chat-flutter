@@ -8,7 +8,7 @@ class ChannelPreviewTheme with Diagnosticable {
   const ChannelPreviewTheme({
     this.titleStyle,
     this.subtitleStyle,
-    this.lastMessageAt,
+    this.lastMessageAtStyle,
     this.avatarTheme,
     this.unreadCounterColor,
     this.indicatorIconSize,
@@ -21,7 +21,7 @@ class ChannelPreviewTheme with Diagnosticable {
   final TextStyle? subtitleStyle;
 
   /// Theme of last message at
-  final TextStyle? lastMessageAt;
+  final TextStyle? lastMessageAtStyle;
 
   /// Avatar theme
   final AvatarThemeData? avatarTheme;
@@ -36,7 +36,7 @@ class ChannelPreviewTheme with Diagnosticable {
   ChannelPreviewTheme copyWith({
     TextStyle? titleStyle,
     TextStyle? subtitleStyle,
-    TextStyle? lastMessageAt,
+    TextStyle? lastMessageAtStyle,
     AvatarThemeData? avatarTheme,
     Color? unreadCounterColor,
     double? indicatorIconSize,
@@ -44,7 +44,7 @@ class ChannelPreviewTheme with Diagnosticable {
       ChannelPreviewTheme(
         titleStyle: titleStyle ?? this.titleStyle,
         subtitleStyle: subtitleStyle ?? this.subtitleStyle,
-        lastMessageAt: lastMessageAt ?? this.lastMessageAt,
+        lastMessageAtStyle: lastMessageAtStyle ?? this.lastMessageAtStyle,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
         indicatorIconSize: indicatorIconSize ?? this.indicatorIconSize,
@@ -57,8 +57,8 @@ class ChannelPreviewTheme with Diagnosticable {
       titleStyle: titleStyle?.merge(other.titleStyle) ?? other.titleStyle,
       subtitleStyle:
           subtitleStyle?.merge(other.subtitleStyle) ?? other.subtitleStyle,
-      lastMessageAt:
-          lastMessageAt?.merge(other.lastMessageAt) ?? other.lastMessageAt,
+      lastMessageAtStyle: lastMessageAtStyle?.merge(other.lastMessageAtStyle) ??
+          other.lastMessageAtStyle,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
       unreadCounterColor: other.unreadCounterColor,
     );
@@ -70,7 +70,7 @@ class ChannelPreviewTheme with Diagnosticable {
     properties
       ..add(DiagnosticsProperty('titleStyle', titleStyle))
       ..add(DiagnosticsProperty('subtitleStyle', subtitleStyle))
-      ..add(DiagnosticsProperty('lastMessageAtStyle', lastMessageAt))
+      ..add(DiagnosticsProperty('lastMessageAtStyle', lastMessageAtStyle))
       ..add(DiagnosticsProperty('avatarTheme', avatarTheme))
       ..add(ColorProperty('unreadCounterColor', unreadCounterColor));
   }

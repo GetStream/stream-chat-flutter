@@ -93,7 +93,7 @@ class MessageSearchItem extends StatelessWidget {
 
     return Text(
       stringDate,
-      style: StreamChatTheme.of(context).channelPreviewTheme.lastMessageAt,
+      style: StreamChatTheme.of(context).channelPreviewTheme.lastMessageAtStyle,
     );
   }
 
