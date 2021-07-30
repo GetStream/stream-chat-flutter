@@ -1,3 +1,7 @@
+## 1.5.6
+
+- Add `showFloatingDateDivider` property to `MessageListView`
+
 ## 1.5.5
 
 - Fix floating date not having a fixed width
