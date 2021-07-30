@@ -33,16 +33,16 @@ class ChannelPreviewTheme {
 
   /// Copy with theme
   ChannelPreviewTheme copyWith({
-    TextStyle? title,
-    TextStyle? subtitle,
+    TextStyle? titleStyle,
+    TextStyle? subtitleStyle,
     TextStyle? lastMessageAt,
     AvatarThemeData? avatarTheme,
     Color? unreadCounterColor,
     double? indicatorIconSize,
   }) =>
       ChannelPreviewTheme(
-        titleStyle: title ?? this.titleStyle,
-        subtitleStyle: subtitle ?? this.subtitleStyle,
+        titleStyle: titleStyle ?? this.titleStyle,
+        subtitleStyle: subtitleStyle ?? this.subtitleStyle,
         lastMessageAt: lastMessageAt ?? this.lastMessageAt,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
@@ -53,8 +53,8 @@ class ChannelPreviewTheme {
   ChannelPreviewTheme merge(ChannelPreviewTheme? other) {
     if (other == null) return this;
     return copyWith(
-      title: titleStyle?.merge(other.titleStyle) ?? other.titleStyle,
-      subtitle:
+      titleStyle: titleStyle?.merge(other.titleStyle) ?? other.titleStyle,
+      subtitleStyle:
           subtitleStyle?.merge(other.subtitleStyle) ?? other.subtitleStyle,
       lastMessageAt:
           lastMessageAt?.merge(other.lastMessageAt) ?? other.lastMessageAt,
