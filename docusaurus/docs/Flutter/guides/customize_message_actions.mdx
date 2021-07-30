@@ -1,0 +1,79 @@
+---
+id: customize_message_actions
+sidebar_position: 8
+title: Customize Message Actions
+---
+
+Customizing Message Actions
+
+### Introduction
+
+Message actions pop up in message overlay, when you long-press a message.
+We have provided granular control over these actions.
+
+By default we render the following message actions:
+
+* edit message
+
+* delete message
+
+* reply
+
+* thread reply
+
+* copy message
+
+* flag message
+
+* pin message
+
+:::note
+Edit and delete message are only available on messages sent by the user.
+Additionally, pinning a message requires you to add the roles which are allowed to pin messages.
+:::
+
+### Partially remove some message actions
+
+For example, if you only want to keep "copy message" and "delete message",
+here is how to do it using the `messageBuilder` with our `MessageWidget`.
+
+```dart
+MessageListView(
+  messageBuilder: (context, details, messages, defaultMessage) {
+    return defaultMessage.copyWith(
+        showFlagButton: false,
+        showEditMessage: false,
+        showCopyMessage: true,
+        showDeleteMessage: details.isMyMessage,
+        showReplyMessage: false,
+        showThreadReplyMessage: false,
+    );
+  },
+)
+```
+
+### Add a new custom message action
+
+The SDK also allows you to add new actions into the dialog.
+
+For example, let's suppose you want to introduce a new message action - "Demo Action":
+
+We use the `customActions` parameter of the `MessageWidget` to add extra actions.
+
+```dart
+MessageListView(
+  messageBuilder: (context, details, messages, defaultMessage) {
+    return MessageWidget(
+      customActions: [
+        MessageAction(
+          leading: Icon(Icons.add),
+          title: Text('Demo Action'),
+          onTap: (message) {
+            /// Complete action here
+          },
+        ),
+      ],
+    );
+  },
+)
+```
