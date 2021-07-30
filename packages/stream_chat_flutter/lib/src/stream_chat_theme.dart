@@ -48,7 +48,7 @@ class StreamChatThemeData {
     TextTheme? textTheme,
     ColorTheme? colorTheme,
     ChannelListHeaderTheme? channelListHeaderTheme,
-    ChannelPreviewTheme? channelPreviewTheme,
+    ChannelPreviewThemeData? channelPreviewTheme,
     ChannelHeaderThemeData? channelHeaderTheme,
     MessageTheme? otherMessageTheme,
     MessageTheme? ownMessageTheme,
@@ -142,7 +142,7 @@ class StreamChatThemeData {
   final ColorTheme colorTheme;
 
   /// Theme of the [ChannelPreview]
-  final ChannelPreviewTheme channelPreviewTheme;
+  final ChannelPreviewThemeData channelPreviewTheme;
 
   /// Theme of the [ChannelListHeader]
   final ChannelListHeaderTheme channelListHeaderTheme;
@@ -193,7 +193,7 @@ class StreamChatThemeData {
   StreamChatThemeData copyWith({
     TextTheme? textTheme,
     ColorTheme? colorTheme,
-    ChannelPreviewTheme? channelPreviewTheme,
+    ChannelPreviewThemeData? channelPreviewTheme,
     ChannelHeaderThemeData? channelHeaderTheme,
     MessageTheme? ownMessageTheme,
     MessageTheme? otherMessageTheme,
@@ -283,7 +283,7 @@ class StreamChatThemeData {
         color: const Color(0xff7A7A7A),
       ),
     );
-    final channelPreviewTheme = ChannelPreviewTheme(
+    final channelPreviewTheme = ChannelPreviewThemeData(
       unreadCounterColor: colorTheme.accentError,
       avatarTheme: AvatarThemeData(
         borderRadius: BorderRadius.circular(20),

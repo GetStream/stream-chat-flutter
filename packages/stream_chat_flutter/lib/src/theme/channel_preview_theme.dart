@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
 
 /// Theme for channel preview
-class ChannelPreviewTheme with Diagnosticable {
-  /// Constructor for creating [ChannelPreviewTheme]
-  const ChannelPreviewTheme({
+class ChannelPreviewThemeData with Diagnosticable {
+  /// Constructor for creating [ChannelPreviewThemeData]
+  const ChannelPreviewThemeData({
     this.titleStyle,
     this.subtitleStyle,
     this.lastMessageAtStyle,
@@ -33,7 +33,7 @@ class ChannelPreviewTheme with Diagnosticable {
   final double? indicatorIconSize;
 
   /// Copy with theme
-  ChannelPreviewTheme copyWith({
+  ChannelPreviewThemeData copyWith({
     TextStyle? titleStyle,
     TextStyle? subtitleStyle,
     TextStyle? lastMessageAtStyle,
@@ -41,7 +41,7 @@ class ChannelPreviewTheme with Diagnosticable {
     Color? unreadCounterColor,
     double? indicatorIconSize,
   }) =>
-      ChannelPreviewTheme(
+      ChannelPreviewThemeData(
         titleStyle: titleStyle ?? this.titleStyle,
         subtitleStyle: subtitleStyle ?? this.subtitleStyle,
         lastMessageAtStyle: lastMessageAtStyle ?? this.lastMessageAtStyle,
@@ -51,7 +51,7 @@ class ChannelPreviewTheme with Diagnosticable {
       );
 
   /// Merge with theme
-  ChannelPreviewTheme merge(ChannelPreviewTheme? other) {
+  ChannelPreviewThemeData merge(ChannelPreviewThemeData? other) {
     if (other == null) return this;
     return copyWith(
       titleStyle: titleStyle?.merge(other.titleStyle) ?? other.titleStyle,
