@@ -249,7 +249,8 @@ class ChannelPreview extends StatelessWidget {
                 lastMessage.mentionedUsers,
                 lastMessage.attachments,
                 chatThemeData.channelPreviewTheme.subtitleStyle?.copyWith(
-                    color: chatThemeData.channelPreviewTheme.subtitleStyle?.color,
+                    color:
+                        chatThemeData.channelPreviewTheme.subtitleStyle?.color,
                     fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
                         ? FontStyle.italic
                         : FontStyle.normal),

@@ -54,7 +54,8 @@ class ChannelPreviewTheme {
     if (other == null) return this;
     return copyWith(
       title: titleStyle?.merge(other.titleStyle) ?? other.titleStyle,
-      subtitle: subtitleStyle?.merge(other.subtitleStyle) ?? other.subtitleStyle,
+      subtitle:
+          subtitleStyle?.merge(other.subtitleStyle) ?? other.subtitleStyle,
       lastMessageAt:
           lastMessageAt?.merge(other.lastMessageAt) ?? other.lastMessageAt,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
