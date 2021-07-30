@@ -47,8 +47,7 @@ TranslateMessageResponse _$TranslateMessageResponseFromJson(
     Map<String, dynamic> json) {
   return TranslateMessageResponse()
     ..duration = json['duration'] as String?
-    ..message =
-        TranslatedMessage.fromJson(json['message'] as Map<String, dynamic>);
+    ..message = Message.fromJson(json['message'] as Map<String, dynamic>);
 }
 
 QueryMembersResponse _$QueryMembersResponseFromJson(Map<String, dynamic> json) {

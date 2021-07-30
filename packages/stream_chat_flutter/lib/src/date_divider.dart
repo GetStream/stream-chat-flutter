@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// It shows a date divider depending on the date difference
 class DateDivider extends StatelessWidget {
@@ -24,10 +25,10 @@ class DateDivider extends StatelessWidget {
 
     String dayInfo;
     if (Jiffy(createdAt).isSame(now, Units.DAY)) {
-      dayInfo = 'Today';
+      dayInfo = context.translations.todayLabel;
     } else if (Jiffy(createdAt)
         .isSame(now.subtract(const Duration(days: 1)), Units.DAY)) {
-      dayInfo = 'Yesterday';
+      dayInfo = context.translations.yesterdayLabel;
     } else if (Jiffy(createdAt).isAfter(
       now.subtract(const Duration(days: 7)),
       Units.DAY,

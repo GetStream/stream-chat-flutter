@@ -7,6 +7,7 @@ extension UserEntityX on UserEntity {
   User toUser() => User(
         id: id,
         updatedAt: updatedAt,
+        language: language,
         role: role,
         online: online,
         lastActive: lastActive,
@@ -22,6 +23,7 @@ extension UserX on User {
   UserEntity toEntity() => UserEntity(
         id: id,
         role: role,
+        language: language,
         createdAt: createdAt,
         updatedAt: updatedAt,
         lastActive: lastActive,

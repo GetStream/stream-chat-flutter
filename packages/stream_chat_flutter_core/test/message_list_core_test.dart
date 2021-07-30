@@ -151,7 +151,9 @@ void main() {
     (tester) async {
       const messageListCoreKey = Key('messageListCore');
       final controller = MessageListController();
+      const paginationLimit = 10;
       final messageListCore = MessageListCore(
+        paginationLimit: paginationLimit,
         key: messageListCoreKey,
         messageListBuilder: (_, __) => const Offstage(),
         loadingBuilder: (BuildContext context) => const Offstage(),
@@ -165,10 +167,6 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
-      // when(() => mockChannel.query(
-      //       messagesPagination: any(named: 'messagesPagination'),
-      //       preferOffline: any(named: 'preferOffline'),
-      //     )).thenAnswer((_) => mockChannel.state);
       final messages = _generateMessages();
       when(() => mockChannel.state.messages).thenReturn(messages);
       when(() => mockChannel.state.messagesStream)
@@ -191,7 +189,10 @@ void main() {
       await coreState.paginateData();
 
       verify(() => mockChannel.query(
-            messagesPagination: any(named: 'messagesPagination'),
+            messagesPagination: any(
+              named: 'messagesPagination',
+              that: wrapMatcher((it) => it.limit == paginationLimit),
+            ),
             preferOffline: any(named: 'preferOffline'),
           )).called(1);
     },

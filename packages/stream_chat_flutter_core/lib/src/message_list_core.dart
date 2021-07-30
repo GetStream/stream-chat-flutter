@@ -71,6 +71,7 @@ class MessageListCore extends StatefulWidget {
     this.parentMessage,
     this.messageListController,
     this.messageFilter,
+    this.paginationLimit = 20,
   }) : super(key: key);
 
   /// A [MessageListController] allows pagination.
@@ -85,6 +86,9 @@ class MessageListCore extends StatefulWidget {
 
   /// Function used to build an empty widget
   final WidgetBuilder emptyBuilder;
+
+  /// Limit used to paginate messages
+  final int paginationLimit;
 
   /// Callback triggered when an error occurs while performing the given
   /// request.
@@ -112,7 +116,7 @@ class MessageListCoreState extends State<MessageListCore> {
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
-  OwnUser? get _currentUser => _streamChannel!.channel.client.state.user;
+  OwnUser? get _currentUser => _streamChannel!.channel.client.state.currentUser;
 
   var _messages = <Message>[];
 
@@ -130,8 +134,7 @@ class MessageListCoreState extends State<MessageListCore> {
 
     bool defaultFilter(Message m) {
       final isMyMessage = m.user?.id == _currentUser?.id;
-      final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
-      if (isDeletedOrShadowed && !isMyMessage) return false;
+      if (m.shadowed && !isMyMessage) return false;
       return true;
     }
 
@@ -163,13 +166,20 @@ class MessageListCoreState extends State<MessageListCore> {
   /// Fetches more messages with updated pagination and updates the widget.
   ///
   /// Optionally pass the fetch direction, defaults to [QueryDirection.top]
+  /// Optionally pass a limit, defaults to 20
   Future<void> paginateData({
     QueryDirection direction = QueryDirection.top,
   }) {
     if (!_isThreadConversation) {
-      return _streamChannel!.queryMessages(direction: direction);
+      return _streamChannel!.queryMessages(
+        direction: direction,
+        limit: widget.paginationLimit,
+      );
     } else {
-      return _streamChannel!.getReplies(widget.parentMessage!.id);
+      return _streamChannel!.getReplies(
+        widget.parentMessage!.id,
+        limit: widget.paginationLimit,
+      );
     }
   }
 
@@ -179,7 +189,10 @@ class MessageListCoreState extends State<MessageListCore> {
 
     if (newStreamChannel != _streamChannel) {
       if (_streamChannel == null /*only first time*/ && _isThreadConversation) {
-        newStreamChannel.getReplies(widget.parentMessage!.id);
+        newStreamChannel.getReplies(
+          widget.parentMessage!.id,
+          limit: widget.paginationLimit,
+        );
       }
       _streamChannel = newStreamChannel;
     }
@@ -197,7 +210,10 @@ class MessageListCoreState extends State<MessageListCore> {
 
     if (widget.parentMessage?.id != widget.parentMessage?.id) {
       if (_isThreadConversation) {
-        _streamChannel!.getReplies(widget.parentMessage!.id);
+        _streamChannel!.getReplies(
+          widget.parentMessage!.id,
+          limit: widget.paginationLimit,
+        );
       }
     }
   }

@@ -2,6 +2,7 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Widget which shows channel info
 class ChannelInfo extends StatelessWidget {
@@ -55,10 +56,13 @@ class ChannelInfo extends StatelessWidget {
   ) {
     Widget? alternativeWidget;
 
-    if (channel.memberCount != null && channel.memberCount! > 2) {
-      var text = '${channel.memberCount} Members';
+    final memberCount = channel.memberCount;
+    if (memberCount != null && memberCount > 2) {
+      var text = context.translations.membersCountText(memberCount);
       final watcherCount = channel.state?.watcherCount ?? 0;
-      if (watcherCount > 0) text += ' $watcherCount Online';
+      if (watcherCount > 0) {
+        text += ' ${context.translations.watchersCountText(watcherCount)}';
+      }
       alternativeWidget = Text(
         text,
         style: StreamChatTheme.of(context)
@@ -67,7 +71,7 @@ class ChannelInfo extends StatelessWidget {
             .subtitle,
       );
     } else {
-      final userId = StreamChat.of(context).user?.id;
+      final userId = StreamChat.of(context).currentUser?.id;
       final otherMember = members?.firstWhereOrNull(
         (element) => element.userId != userId,
       );
@@ -75,12 +79,13 @@ class ChannelInfo extends StatelessWidget {
       if (otherMember != null) {
         if (otherMember.user?.online == true) {
           alternativeWidget = Text(
-            'Online',
+            context.translations.userOnlineText,
             style: textStyle,
           );
         } else {
           alternativeWidget = Text(
-            'Last seen ${Jiffy(otherMember.user?.lastActive).fromNow()}',
+            '${context.translations.userLastOnlineText} '
+            '${Jiffy(otherMember.user?.lastActive).fromNow()}',
             style: textStyle,
           );
         }
@@ -111,7 +116,7 @@ class ChannelInfo extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            'Searching for Network',
+            context.translations.searchingForNetworkText,
             style: textStyle,
           ),
         ],
@@ -125,7 +130,7 @@ class ChannelInfo extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Offline...',
+            context.translations.offlineLabel,
             style: textStyle,
           ),
           TextButton(
@@ -141,7 +146,7 @@ class ChannelInfo extends StatelessWidget {
               ..closeConnection()
               ..openConnection(),
             child: Text(
-              'Try Again',
+              context.translations.tryAgainLabel,
               style: textStyle?.copyWith(
                 color: StreamChatTheme.of(context).colorTheme.accentPrimary,
               ),

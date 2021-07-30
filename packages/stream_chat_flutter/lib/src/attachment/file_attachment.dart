@@ -7,9 +7,9 @@ import 'package:stream_chat_flutter/src/upload_progress_indicator.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
-// ignore: always_use_package_imports
-import 'attachment_widget.dart';
+import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 
 /// Widget for displaying file attachments
 class FileAttachment extends AttachmentWidget {
@@ -76,7 +76,7 @@ class FileAttachment extends AttachmentWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      attachment.title ?? 'File',
+                      attachment.title ?? context.translations.fileText,
                       style: StreamChatTheme.of(context).textTheme.bodyBold,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -286,7 +286,10 @@ class FileAttachment extends AttachmentWidget {
         progressIndicatorColor: theme.colorTheme.accentPrimary,
       ),
       success: () => Text(fileSize(size), style: textStyle),
-      failed: (_) => Text('UPLOAD ERROR', style: textStyle),
+      failed: (_) => Text(
+        context.translations.uploadErrorLabel,
+        style: textStyle,
+      ),
     );
   }
 }

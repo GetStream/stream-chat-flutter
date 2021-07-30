@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
 
 part 'message.g.dart';
@@ -73,6 +73,7 @@ class Message extends Equatable {
     this.extraData = const {},
     this.deletedAt,
     this.status = MessageSendingStatus.sent,
+    this.i18n,
   })  : id = id ?? const Uuid().v4(),
         pinExpires = pinExpires?.toUtc(),
         createdAt = createdAt ?? DateTime.now(),
@@ -218,6 +219,10 @@ class Message extends Equatable {
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime? deletedAt;
 
+  /// A Map of translations.
+  @JsonKey(includeIfNull: false)
+  final Map<String, String>? i18n;
+
   /// Known top level fields.
   /// Useful for [Serializer] methods.
   static const topLevelFields = [
@@ -248,6 +253,7 @@ class Message extends Equatable {
     'pinned_at',
     'pin_expires',
     'pinned_by',
+    'i18n',
   ];
 
   /// Serialize to json
@@ -285,6 +291,7 @@ class Message extends Equatable {
     User? pinnedBy,
     Map<String, Object?>? extraData,
     MessageSendingStatus? status,
+    Map<String, String>? i18n,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -324,6 +331,7 @@ class Message extends Equatable {
       pinnedBy: pinnedBy ?? this.pinnedBy,
       pinExpires:
           pinExpires == _pinExpires ? this.pinExpires : pinExpires as DateTime?,
+      i18n: i18n ?? this.i18n,
     );
   }
 
@@ -358,6 +366,7 @@ class Message extends Equatable {
         pinnedAt: other.pinnedAt,
         pinExpires: other.pinExpires,
         pinnedBy: other.pinnedBy,
+        i18n: other.i18n,
       );
 
   @override
@@ -390,35 +399,6 @@ class Message extends Equatable {
         pinnedBy,
         extraData,
         status,
+        i18n,
       ];
-}
-
-/// A translated message
-/// It has an additional property called [i18n]
-@JsonSerializable()
-class TranslatedMessage extends Message {
-  /// Constructor used for json serialization
-  TranslatedMessage(this.i18n) : super();
-
-  /// Create a new instance from a json
-  factory TranslatedMessage.fromJson(Map<String, dynamic> json) =>
-      _$TranslatedMessageFromJson(
-        Serializer.moveToExtraDataFromRoot(json, topLevelFields),
-      );
-
-  /// A Map of
-  final Map<String, String>? i18n;
-
-  /// Known top level fields.
-  /// Useful for [Serializer] methods.
-  static final topLevelFields = [
-    'i18n',
-    ...Message.topLevelFields,
-  ];
-
-  /// Serialize to json
-  @override
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-        _$TranslatedMessageToJson(this),
-      );
 }

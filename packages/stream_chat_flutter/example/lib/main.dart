@@ -1,11 +1,8 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_persistence/stream_chat_persistence.dart';
-
-/// A chat-persisted StreamChatClient
-final chatPersistentClient = StreamChatPersistenceClient(
-  logLevel: Level.INFO,
-);
+import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +12,7 @@ void main() async {
   final client = StreamChatClient(
     'kv7mcsxr24p8',
     logLevel: Level.INFO,
-  )..chatPersistenceClient = chatPersistentClient;
+  );
 
   /// Set the current user and connect the websocket. In a production
   /// scenario, this should be done using a backend to generate a user token
@@ -76,6 +73,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
         theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
+        supportedLocales: const [
+          Locale('en'),
+          Locale('hi'),
+          Locale('fr'),
+          Locale('it'),
+        ],
+        localizationsDelegates: GlobalStreamChatLocalizations.delegates,
         builder: (context, widget) => StreamChat(
           client: client,
           child: widget,

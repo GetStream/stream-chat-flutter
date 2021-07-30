@@ -35,7 +35,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
@@ -77,7 +77,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id2'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id2'));
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
@@ -119,7 +119,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
@@ -160,7 +160,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
@@ -207,7 +207,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
@@ -254,7 +254,7 @@ void main() {
       when(() => mockChannel.updateMessage(any()))
           .thenAnswer((_) async => UpdateMessageResponse());
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final message = Message(
         text: 'test',
@@ -308,7 +308,7 @@ void main() {
       when(() => mockChannel.updateMessage(any()))
           .thenAnswer((_) async => UpdateMessageResponse());
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final message = Message(
         text: 'test',
@@ -357,7 +357,7 @@ void main() {
       when(() => mockChannel.deleteMessage(any()))
           .thenAnswer((_) async => EmptyResponse());
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final message = Message(
         user: User(
@@ -399,7 +399,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final imageDownloader = MockAttachmentDownloader();
 
@@ -454,7 +454,7 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final fileDownloader = MockAttachmentDownloader();
 

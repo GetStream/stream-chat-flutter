@@ -13,6 +13,7 @@
 - [Register](https://getstream.io/chat/trial/) to get an API key for Stream Chat
 - [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/) 
 - [Chat UI Kit](https://getstream.io/chat/ui-kit/)
+- [Flutter Offline Docs](https://getstream.io/chat/docs/flutter-dart/flutter_offline/)
 
 This package provides a persistence client for fetching and saving chat data locally.
 Stream Chat Persistence uses [Moor](https://github.com/simolus3/moor) as a disk cache.

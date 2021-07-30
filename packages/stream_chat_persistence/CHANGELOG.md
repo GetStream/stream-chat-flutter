@@ -1,3 +1,13 @@
+## 2.1.1
+
+- Updated llc dependency
+
+## 2.1.0
+
+✅ Added
+- Added support for `Message.i18n`
+- Added support for `User.language`
+
 ## 2.0.0
 * Migrate this package to null safety
 * Minor fixes and improvements

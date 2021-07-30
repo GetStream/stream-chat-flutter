@@ -166,10 +166,22 @@ class MessageListView extends StatefulWidget {
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
     this.messageListController,
+    this.reverse = true,
+    this.paginationLimit = 20,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
   final MessageBuilder? messageBuilder;
+
+  /// Whether the view scrolls in the reading direction.
+  ///
+  /// Defaults to true.
+  ///
+  /// See [ScrollView.reverse].
+  final bool reverse;
+
+  /// Limit used during pagination
+  final int paginationLimit;
 
   /// Function used to build a custom system message widget
   final SystemMessageBuilder? systemMessageBuilder;
@@ -323,11 +335,13 @@ class _MessageListViewState extends State<MessageListView> {
   bool _inBetweenList = false;
 
   late final _defaultController = MessageListController();
+
   MessageListController get _messageListController =>
       widget.messageListController ?? _defaultController;
 
   @override
   Widget build(BuildContext context) => MessageListCore(
+        paginationLimit: widget.paginationLimit,
         messageFilter: widget.messageFilter,
         loadingBuilder: widget.loadingBuilder ??
             (context) => const Center(
@@ -336,7 +350,7 @@ class _MessageListViewState extends State<MessageListView> {
         emptyBuilder: widget.emptyBuilder ??
             (context) => Center(
                   child: Text(
-                    'No chats here yet...',
+                    context.translations.emptyChatMessagesText,
                     style: _streamTheme.textTheme.footnote.copyWith(
                         color: _streamTheme.colorTheme.textHighEmphasis
                             .withOpacity(.5)),
@@ -349,7 +363,7 @@ class _MessageListViewState extends State<MessageListView> {
         errorBuilder: widget.errorBuilder ??
             (BuildContext context, Object error) => Center(
                   child: Text(
-                    'Something went wrong',
+                    context.translations.genericErrorText,
                     style: _streamTheme.textTheme.footnote.copyWith(
                         color: _streamTheme.colorTheme.textHighEmphasis
                             .withOpacity(.5)),
@@ -395,14 +409,14 @@ class _MessageListViewState extends State<MessageListView> {
             var showStatus = true;
             switch (status) {
               case ConnectionStatus.connected:
-                statusString = 'Connected';
+                statusString = context.translations.connectedLabel;
                 showStatus = false;
                 break;
               case ConnectionStatus.connecting:
-                statusString = 'Reconnecting...';
+                statusString = context.translations.reconnectingLabel;
                 break;
               case ConnectionStatus.disconnected:
-                statusString = 'Disconnected';
+                statusString = context.translations.disconnectedLabel;
                 break;
             }
 
@@ -445,7 +459,7 @@ class _MessageListViewState extends State<MessageListView> {
                   initialAlignment: initialAlignment ?? 0,
                   physics: widget.scrollPhysics,
                   itemScrollController: _scrollController,
-                  reverse: true,
+                  reverse: widget.reverse,
                   addAutomaticKeepAlives: false,
                   itemCount: itemCount,
 
@@ -604,7 +618,7 @@ class _MessageListViewState extends State<MessageListView> {
       return widget.threadSeparatorBuilder!.call(context);
     }
 
-    final replyCount = widget.parentMessage!.replyCount;
+    final replyCount = widget.parentMessage!.replyCount!;
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: _streamTheme.colorTheme.bgGradient,
@@ -612,7 +626,7 @@ class _MessageListViewState extends State<MessageListView> {
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Text(
-          '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
+          context.translations.threadSeparatorText(replyCount),
           textAlign: TextAlign.center,
           style: _streamTheme.channelTheme.channelHeaderTheme.subtitle,
         ),
@@ -621,7 +635,8 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Positioned _buildFloatingDateDivider(int itemCount) => Positioned(
-        top: 20,
+        top: widget.reverse ? 20 : null,
+        bottom: widget.reverse ? null : 20,
         left: 0,
         right: 0,
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
@@ -655,7 +670,9 @@ class _MessageListViewState extends State<MessageListView> {
       );
 
   Future<void> _paginateData(
-          StreamChannelState? channel, QueryDirection direction) =>
+    StreamChannelState? channel,
+    QueryDirection direction,
+  ) =>
       _messageListController.paginateData!(direction: direction);
 
   int? _getTopElementIndex(Iterable<ItemPosition> values) {
@@ -687,7 +704,8 @@ class _MessageListViewState extends State<MessageListView> {
           final unreadCount = snapshot.data!.item2;
           final showUnreadCount = unreadCount > 0 &&
               streamChannel!.channel.state!.members.any((e) =>
-                  e.userId == streamChannel!.channel.client.state.user!.id);
+                  e.userId ==
+                  streamChannel!.channel.client.state.currentUser!.id);
           return Positioned(
             bottom: 8,
             right: 8,
@@ -715,9 +733,13 @@ class _MessageListViewState extends State<MessageListView> {
                       );
                     }
                   },
-                  child: StreamSvgIcon.down(
-                    color: _streamTheme.colorTheme.textHighEmphasis,
-                  ),
+                  child: widget.reverse
+                      ? StreamSvgIcon.down(
+                          color: _streamTheme.colorTheme.textHighEmphasis,
+                        )
+                      : StreamSvgIcon.up(
+                          color: _streamTheme.colorTheme.textHighEmphasis,
+                        ),
                 ),
                 if (showUnreadCount)
                   Positioned(
@@ -789,9 +811,10 @@ class _MessageListViewState extends State<MessageListView> {
   Widget buildParentMessage(
     Message message,
   ) {
-    final isMyMessage = message.user!.id == StreamChat.of(context).user!.id;
+    final isMyMessage =
+        message.user!.id == StreamChat.of(context).currentUser!.id;
     final isOnlyEmoji = message.text!.isOnlyEmoji;
-    final currentUser = StreamChat.of(context).user;
+    final currentUser = StreamChat.of(context).currentUser;
     final members = StreamChannel.of(context).channel.state?.members ?? [];
     final currentUserMember =
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
@@ -876,7 +899,7 @@ class _MessageListViewState extends State<MessageListView> {
           );
     }
 
-    final userId = StreamChat.of(context).user!.id;
+    final userId = StreamChat.of(context).currentUser!.id;
     final isMyMessage = message.user!.id == userId;
     final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
     final isNextUserSame =
@@ -939,7 +962,7 @@ class _MessageListViewState extends State<MessageListView> {
             ? BorderSide.none
             : null;
 
-    final currentUser = StreamChat.of(context).user;
+    final currentUser = StreamChat.of(context).currentUser;
     final members = StreamChannel.of(context).channel.state?.members ?? [];
     final currentUserMember =
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
@@ -1145,7 +1168,7 @@ class _MessageListViewState extends State<MessageListView> {
           _topPaginationActive = false;
         }
         if (event.message!.user!.id ==
-            streamChannel!.channel.client.state.user!.id) {
+            streamChannel!.channel.client.state.currentUser!.id) {
           WidgetsBinding.instance!.addPostFrameCallback((_) {
             _scrollController?.jumpTo(
               index: 0,
@@ -1227,8 +1250,8 @@ class _LoadingIndicator extends StatelessWidget {
       initialData: false,
       errorBuilder: (context, error) => Container(
         color: streamTheme.colorTheme.accentError.withOpacity(.2),
-        child: const Center(
-          child: Text('Error loading messages'),
+        child: Center(
+          child: Text(context.translations.loadingMessagesError),
         ),
       ),
       builder: (context, data) {

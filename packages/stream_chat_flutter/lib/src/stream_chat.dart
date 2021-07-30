@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -126,21 +125,34 @@ class StreamChatState extends State<StreamChat> {
     return defaultTheme.merge(themeData);
   }
 
+  // coverage:ignore-start
+
   /// The current user
-  User? get user => widget.client.state.user;
+  @Deprecated('Use `.currentUser` instead, Will be removed in future releases')
+  User? get user => widget.client.state.currentUser;
 
   /// The current user as a stream
-  Stream<User?> get userStream => widget.client.state.userStream;
+  @Deprecated(
+    'Use `.currentUserStream` instead, Will be removed in future releases',
+  )
+  Stream<User?> get userStream => widget.client.state.currentUserStream;
 
-  @override
-  void initState() {
-    super.initState();
-  }
+  // coverage:ignore-end
+
+  /// The current user
+  User? get currentUser => widget.client.state.currentUser;
+
+  /// The current user as a stream
+  Stream<User?> get currentUserStream => widget.client.state.currentUserStream;
 
   @override
   void didChangeDependencies() {
-    final locale = ui.window.locale;
-    Jiffy.locale(locale.languageCode);
+    final currentLocale = Localizations.localeOf(context);
+    final languageCode = currentLocale.languageCode;
+    final availableLocales = Jiffy.getAllAvailableLocales();
+    if (availableLocales.contains(languageCode)) {
+      Jiffy.locale(languageCode);
+    }
     super.didChangeDependencies();
   }
 }

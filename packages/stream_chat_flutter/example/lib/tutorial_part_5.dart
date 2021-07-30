@@ -72,7 +72,7 @@ class ChannelListPage extends StatelessWidget {
         child: ChannelListView(
           filter: Filter.in_(
             'members',
-            [StreamChat.of(context).user!.id],
+            [StreamChat.of(context).currentUser!.id],
           ),
           sort: const [SortOption('last_message_at')],
           pagination: const PaginationParams(
@@ -115,7 +115,8 @@ class ChannelPage extends StatelessWidget {
     MessageWidget _,
   ) {
     final message = details.message;
-    final isCurrentUser = StreamChat.of(context).user!.id == message.user!.id;
+    final isCurrentUser =
+        StreamChat.of(context).currentUser!.id == message.user!.id;
     final textAlign = isCurrentUser ? TextAlign.right : TextAlign.left;
     final color = isCurrentUser ? Colors.blueGrey : Colors.blue;
 
