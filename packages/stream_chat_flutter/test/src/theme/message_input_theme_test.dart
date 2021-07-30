@@ -38,12 +38,14 @@ final _messageInputThemeControl = MessageInputThemeData(
   inputBackgroundColor: ColorTheme.light().barsBg,
   inputTextStyle: TextTheme.light().body,
   idleBorderGradient: LinearGradient(
+    stops: const [0.0, 1.0],
     colors: [
       ColorTheme.light().disabled,
       ColorTheme.light().disabled,
     ],
   ),
   activeBorderGradient: LinearGradient(
+    stops: const [0.0, 1.0],
     colors: [
       ColorTheme.light().disabled,
       ColorTheme.light().disabled,
