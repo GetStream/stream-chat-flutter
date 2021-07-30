@@ -7,7 +7,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
       : super(localeName: localeName);
 
   @override
-  String get launchUrlError => 'No se puede lanzar la url';
+  String get launchUrlError => 'No se pudo abrir la url';
 
   @override
   String get loadingUsersError => 'Error de carga del usuario';
@@ -16,7 +16,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get noUsersLabel => 'No hay usuarios actualmente';
 
   @override
-  String get retryLabel => 'Inténtalo de nuevo';
+  String get retryLabel => 'Inténtelo de nuevo';
 
   @override
   String get userLastOnlineText => 'Última vez en línea';
@@ -42,7 +42,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
 
   @override
   String threadReplyCountText(int count) =>
-      '$count Respuestas al hilo de discusión';
+      '$count respuestas al hilo de discusión';
 
   @override
   String attachmentsUploadProgressText({
@@ -68,7 +68,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get genericErrorText => 'Hubo un problema';
 
   @override
-  String get loadingMessagesError => 'Mensajes de error de carga';
+  String get loadingMessagesError => 'Hubo un error mientras se cargaba el mensaje';
 
   @override
   String resultCountText(int count) => '$count resultados';
@@ -87,8 +87,8 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
 
   @override
   String threadSeparatorText(int replyCount) {
-    if (replyCount == 1) return '1 Respuesta';
-    return '$replyCount Respuestas';
+    if (replyCount == 1) return '1 respuesta';
+    return '$replyCount respuestas';
   }
 
   @override
@@ -114,7 +114,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get writeAMessageLabel => 'Escribir un mensaje';
 
   @override
-  String get instantCommandsLabel => 'Mandos instantáneos';
+  String get instantCommandsLabel => 'Comandos instantáneos';
 
   @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
@@ -225,7 +225,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   @override
   String toggleResendOrResendEditedMessage({required bool isUpdateFailed}) {
     if (isUpdateFailed) return 'Reenviar el mensaje modificado';
-    return 'Enviar de vuelta';
+    return 'Reenviar';
   }
 
   @override
@@ -249,7 +249,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
 
   @override
   String sentAtText({required DateTime date, required DateTime time}) =>
-      'Enviado ${_getDay(date)} a ${Jiffy(time.toLocal()).format('HH:mm')}';
+      'Enviado el ${_getDay(date)} a las ${Jiffy(time.toLocal()).format('HH:mm')}';
 
   @override
   String get todayLabel => 'Hoy';
@@ -258,7 +258,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get yesterdayLabel => 'Ayer';
 
   @override
-  String get channelIsMutedText => 'El canal está cortado';
+  String get channelIsMutedText => 'El canal está silenciado';
 
   @override
   String get noTitleText => 'Sin título';
@@ -271,7 +271,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
       '¿Qué le parece enviar su primer mensaje a un amigo?';
 
   @override
-  String get startAChatLabel => 'Iniciar una discusión';
+  String get startAChatLabel => 'Iniciar una conversación';
 
   @override
   String get loadingChannelsError => 'Error al cargar los canales';
@@ -287,18 +287,18 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get streamChatLabel => 'Stream Chat';
 
   @override
-  String get searchingForNetworkText => 'Búsqueda en la red';
+  String get searchingForNetworkText => 'Buscando red';
 
   @override
   String get offlineLabel => 'Sin conexión...';
 
   @override
-  String get tryAgainLabel => 'Inténtalo de nuevo';
+  String get tryAgainLabel => 'Inténtelo de nuevo';
 
   @override
   String membersCountText(int count) {
-    if (count == 1) return '1 Membre';
-    return '$count Membres';
+    if (count == 1) return '1 miembro';
+    return '$count miembros';
   }
 
   @override
@@ -311,17 +311,17 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get viewInfoLabel => 'Ver información';
 
   @override
-  String get leaveGroupLabel => 'Dejar el Grupo';
+  String get leaveGroupLabel => 'Salir del Grupo';
 
   @override
-  String get leaveLabel => 'DEJAR';
+  String get leaveLabel => 'SALIR';
 
   @override
-  String get leaveConversationLabel => 'Dejar la conversación';
+  String get leaveConversationLabel => 'Salir de la conversación';
 
   @override
   String get leaveConversationQuestion =>
-      '¿Estás seguro de que quieres dejar esta conversación?';
+      '¿Estás seguro de que quiere salir de esta conversación?';
 
   @override
   String get showInChatLabel => 'Mostrar en el chat';
