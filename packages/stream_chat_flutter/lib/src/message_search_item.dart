@@ -52,18 +52,18 @@ class MessageSearchItem extends StatelessWidget {
             user.id == StreamChat.of(context).currentUser?.id
                 ? 'You'
                 : user.name,
-            style: chatThemeData.channelPreviewTheme.title,
+            style: chatThemeData.channelPreviewTheme.titleStyle,
           ),
           if (channelName != null) ...[
             Text(
               ' in ',
-              style: chatThemeData.channelPreviewTheme.title?.copyWith(
+              style: chatThemeData.channelPreviewTheme.titleStyle?.copyWith(
                 fontWeight: FontWeight.normal,
               ),
             ),
             Text(
               channelName as String,
-              style: chatThemeData.channelPreviewTheme.title,
+              style: chatThemeData.channelPreviewTheme.titleStyle,
             ),
           ],
         ],
@@ -127,12 +127,12 @@ class MessageSearchItem extends StatelessWidget {
         text!,
         message.mentionedUsers,
         message.attachments,
-        chatThemeData.channelPreviewTheme.subtitle?.copyWith(
+        chatThemeData.channelPreviewTheme.subtitleStyle?.copyWith(
           fontStyle: (message.isSystem || message.isDeleted)
               ? FontStyle.italic
               : FontStyle.normal,
         ),
-        chatThemeData.channelPreviewTheme.subtitle?.copyWith(
+        chatThemeData.channelPreviewTheme.subtitleStyle?.copyWith(
           fontStyle: (message.isSystem || message.isDeleted)
               ? FontStyle.italic
               : FontStyle.normal,

@@ -5,8 +5,8 @@ import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
 class ChannelPreviewTheme {
   /// Constructor for creating [ChannelPreviewTheme]
   const ChannelPreviewTheme({
-    this.title,
-    this.subtitle,
+    this.titleStyle,
+    this.subtitleStyle,
     this.lastMessageAt,
     this.avatarTheme,
     this.unreadCounterColor,
@@ -14,10 +14,10 @@ class ChannelPreviewTheme {
   });
 
   /// Theme for title
-  final TextStyle? title;
+  final TextStyle? titleStyle;
 
   /// Theme for subtitle
-  final TextStyle? subtitle;
+  final TextStyle? subtitleStyle;
 
   /// Theme of last message at
   final TextStyle? lastMessageAt;
@@ -41,8 +41,8 @@ class ChannelPreviewTheme {
     double? indicatorIconSize,
   }) =>
       ChannelPreviewTheme(
-        title: title ?? this.title,
-        subtitle: subtitle ?? this.subtitle,
+        titleStyle: title ?? this.titleStyle,
+        subtitleStyle: subtitle ?? this.subtitleStyle,
         lastMessageAt: lastMessageAt ?? this.lastMessageAt,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
@@ -53,8 +53,8 @@ class ChannelPreviewTheme {
   ChannelPreviewTheme merge(ChannelPreviewTheme? other) {
     if (other == null) return this;
     return copyWith(
-      title: title?.merge(other.title) ?? other.title,
-      subtitle: subtitle?.merge(other.subtitle) ?? other.subtitle,
+      title: titleStyle?.merge(other.titleStyle) ?? other.titleStyle,
+      subtitle: subtitleStyle?.merge(other.subtitleStyle) ?? other.subtitleStyle,
       lastMessageAt:
           lastMessageAt?.merge(other.lastMessageAt) ?? other.lastMessageAt,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,

@@ -64,7 +64,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                     showTypingIndicator: false,
                     channel: _streamChannelState.channel,
                     textStyle:
-                        _streamChatThemeData.channelPreviewTheme.subtitle,
+                        _streamChatThemeData.channelPreviewTheme.subtitleStyle,
                   ),
                 ),
                 const SizedBox(

@@ -90,7 +90,7 @@ class ChannelPreview extends StatelessWidget {
                     Flexible(
                       child: title ??
                           ChannelName(
-                            textStyle: channelPreviewTheme.title,
+                            textStyle: channelPreviewTheme.titleStyle,
                           ),
                     ),
                     BetterStreamBuilder<List<Member>?>(
@@ -199,7 +199,7 @@ class ChannelPreview extends StatelessWidget {
           ),
           Text(
             '  Channel is muted',
-            style: chatThemeData.channelPreviewTheme.subtitle,
+            style: chatThemeData.channelPreviewTheme.subtitleStyle,
           ),
         ],
       );
@@ -207,7 +207,7 @@ class ChannelPreview extends StatelessWidget {
     return TypingIndicator(
       channel: channel,
       alternativeWidget: _buildLastMessage(context),
-      style: chatThemeData.channelPreviewTheme.subtitle,
+      style: chatThemeData.channelPreviewTheme.subtitleStyle,
     );
   }
 
@@ -248,13 +248,13 @@ class ChannelPreview extends StatelessWidget {
                 text,
                 lastMessage.mentionedUsers,
                 lastMessage.attachments,
-                chatThemeData.channelPreviewTheme.subtitle?.copyWith(
-                    color: chatThemeData.channelPreviewTheme.subtitle?.color,
+                chatThemeData.channelPreviewTheme.subtitleStyle?.copyWith(
+                    color: chatThemeData.channelPreviewTheme.subtitleStyle?.color,
                     fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
                         ? FontStyle.italic
                         : FontStyle.normal),
-                chatThemeData.channelPreviewTheme.subtitle?.copyWith(
-                  color: chatThemeData.channelPreviewTheme.subtitle?.color,
+                chatThemeData.channelPreviewTheme.subtitleStyle?.copyWith(
+                  color: chatThemeData.channelPreviewTheme.subtitleStyle?.color,
                   fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
                       ? FontStyle.italic
                       : FontStyle.normal,

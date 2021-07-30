@@ -292,8 +292,8 @@ class StreamChatThemeData {
           width: 40,
         ),
       ),
-      title: textTheme.bodyBold,
-      subtitle: textTheme.footnote.copyWith(
+      titleStyle: textTheme.bodyBold,
+      subtitleStyle: textTheme.footnote.copyWith(
         color: const Color(0xff7A7A7A),
       ),
       lastMessageAt: textTheme.footnote.copyWith(
@@ -460,7 +460,7 @@ class StreamChatThemeData {
         backgroundColor: channelHeaderTheme.color,
         iconMenuPointColor: colorTheme.textHighEmphasis,
         titleTextStyle: textTheme.headlineBold,
-        subtitleTextStyle: channelPreviewTheme.subtitle,
+        subtitleTextStyle: channelPreviewTheme.subtitleStyle,
         bottomSheetBarrierColor: colorTheme.overlay,
       ),
       galleryFooterTheme: GalleryFooterThemeData(
