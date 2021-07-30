@@ -17,6 +17,13 @@ void main() {
               _messageInputThemeControl, _messageInputThemeControlDark, 1),
           _messageInputThemeControlDark);
     });
+
+    test('Lerp completely from dark to light', () {
+      expect(
+          const MessageInputThemeData().lerp(
+              _messageInputThemeControlDark, _messageInputThemeControl, 1),
+          _messageInputThemeControl);
+    });
   });
 }
 
@@ -79,12 +86,14 @@ final _messageInputThemeControlDark = MessageInputThemeData(
   inputBackgroundColor: ColorTheme.dark().barsBg,
   inputTextStyle: TextTheme.dark().body,
   idleBorderGradient: LinearGradient(
+    stops: const [0.0, 1.0],
     colors: [
       ColorTheme.dark().disabled,
       ColorTheme.dark().disabled,
     ],
   ),
   activeBorderGradient: LinearGradient(
+    stops: const [0.0, 1.0],
     colors: [
       ColorTheme.dark().disabled,
       ColorTheme.dark().disabled,
