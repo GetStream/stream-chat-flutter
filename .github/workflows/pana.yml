@@ -31,8 +31,7 @@ jobs:
           TOTAL: ${{ steps.analysis.outputs.total }}
           TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
         run: |
-          PERCENTAGE=$(( $TOTAL * 100 / $TOTAL_MAX ))
-          if (( $PERCENTAGE < 90 ))
+          if (( $TOTAL < 120 ))
           then
             echo Score too low!
             exit 1
@@ -53,7 +52,7 @@ jobs:
           TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
         run: |
           PERCENTAGE=$(( $TOTAL * 100 / $TOTAL_MAX ))
-          if (( $PERCENTAGE < 90 ))
+          if (( $TOTAL < 90 ))
           then
             echo Score too low!
             exit 1
@@ -73,8 +72,7 @@ jobs:
           TOTAL: ${{ steps.analysis.outputs.total }}
           TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
         run: |
-          PERCENTAGE=$(( $TOTAL * 100 / $TOTAL_MAX ))
-          if (( $PERCENTAGE < 100 ))
+          if (( $TOTAL < 120 ))
           then
             echo Score too low!
             exit 1
@@ -94,8 +92,7 @@ jobs:
           TOTAL: ${{ steps.analysis.outputs.total }}
           TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
         run: |
-          PERCENTAGE=$(( $TOTAL * 100 / $TOTAL_MAX ))
-          if (( $PERCENTAGE < 80 ))
+          if (( $TOTAL < 100 ))
           then
             echo Score too low!
             exit 1
