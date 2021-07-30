@@ -1248,7 +1248,7 @@ class StreamChatClient {
       );
 
   /// Enables slow mode
-  Future<UpdateChannelResponse> enableSlowdown(
+  Future<PartialUpdateChannelResponse> enableSlowdown(
     String channelId,
     String channelType,
     int cooldown,
@@ -1260,7 +1260,7 @@ class StreamChatClient {
       );
 
   /// Disables slow mode
-  Future<UpdateChannelResponse> disableSlowdown(
+  Future<PartialUpdateChannelResponse> disableSlowdown(
     String channelId,
     String channelType,
   ) async =>

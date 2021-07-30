@@ -834,7 +834,7 @@ class Channel {
   }
 
   /// Enable slow mode
-  Future<UpdateChannelResponse> enableSlowMode({
+  Future<PartialUpdateChannelResponse> enableSlowMode({
     required int cooldownInterval,
   }) async {
     _checkInitialized();
@@ -842,7 +842,7 @@ class Channel {
   }
 
   /// Disable slow mode
-  Future<UpdateChannelResponse> disableSlowMode() async {
+  Future<PartialUpdateChannelResponse> disableSlowMode() async {
     _checkInitialized();
     return _client.disableSlowdown(id!, type);
   }

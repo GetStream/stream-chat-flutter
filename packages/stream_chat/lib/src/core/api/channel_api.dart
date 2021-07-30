@@ -124,32 +124,32 @@ class ChannelApi {
   }
 
   /// Enable slowdown
-  Future<UpdateChannelResponse> enableSlowdown(
+  Future<PartialUpdateChannelResponse> enableSlowdown(
     String channelId,
     String channelType,
     int cooldown,
   ) async {
-    final response = await _client.post(
-      _getChannelUrl(channelId, channelType),
-      data: {
+    final response = await updateChannelPartial(
+      channelId,
+      channelType,
+      set: {
         'cooldown': cooldown,
       },
     );
-    return UpdateChannelResponse.fromJson(response.data);
+    return response;
   }
 
   /// Disable slowdown
-  Future<UpdateChannelResponse> disableSlowdown(
+  Future<PartialUpdateChannelResponse> disableSlowdown(
     String channelId,
     String channelType,
   ) async {
-    final response = await _client.post(
-      _getChannelUrl(channelId, channelType),
-      data: {
-        'cooldown': 0,
-      },
+    final response = await updateChannelPartial(
+      channelId,
+      channelType,
+      unset: ['cooldown'],
     );
-    return UpdateChannelResponse.fromJson(response.data);
+    return response;
   }
 
   /// Accept invitation to the channel
