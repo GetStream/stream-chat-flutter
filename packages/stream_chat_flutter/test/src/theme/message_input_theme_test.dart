@@ -32,6 +32,11 @@ void main() {
           _messageInputThemeControl);
     });
   });
+
+  test('Merging two MessageInputThemeData results in the latter', () {
+    expect(_messageInputThemeControl.merge(_messageInputThemeControlDark),
+        _messageInputThemeControlDark);
+  });
 }
 
 final _messageInputThemeControl = MessageInputThemeData(
