@@ -207,7 +207,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   @override
   String togglePinUnpinText({required bool pinned}) {
     if (pinned) return 'Décrocher de la conversation';
-    return 'Épingler à la discussion';
+    return 'Épingler à la conversation';
   }
 
   @override
@@ -354,7 +354,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get youText => 'Vous';
 
   @override
-  String get ofText => 'de';
+  String galleryPaginationText({required int currentPage, required int totalPages}) => '${currentPage+1} de $totalPages';
 
   @override
   String get fileText => 'Fichier';
