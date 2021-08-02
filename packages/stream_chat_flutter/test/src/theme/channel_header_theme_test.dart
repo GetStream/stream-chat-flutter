@@ -26,7 +26,7 @@ void main() {
       expect(
           const ChannelHeaderThemeData()
               .lerp(_channelThemeControl, _channelThemeControlDark, 0.5),
-          _channelThemeControlDark);
+          _channelThemeControlMidLerp);
     });
 
     test(
@@ -70,10 +70,14 @@ final _channelThemeControlMidLerp = ChannelHeaderThemeData(
       width: 40,
     ),
   ),
-  color: ColorTheme.light().barsBg,
-  titleStyle: TextTheme.light().headlineBold,
+  color: const Color(0xff101418),
+  titleStyle: const TextStyle(
+    color: Color(0xffffffff),
+    fontWeight: FontWeight.bold,
+    fontSize: 16,
+  ),
   subtitleStyle: TextTheme.light().footnote.copyWith(
-        color: const Color(0xff7A7A7A),
+        color: const Color(0xff7a7a7a),
       ),
 );
 
