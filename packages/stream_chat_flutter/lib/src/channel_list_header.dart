@@ -45,7 +45,7 @@ typedef TitleBuilder = Widget Function(
 /// if you don't have it in the widget tree.
 ///
 /// The widget components render the ui based on the first ancestor of type
-/// [StreamChatTheme] and on its [ChannelListHeaderTheme] property.
+/// [StreamChatTheme] and on its [ChannelListHeaderThemeData] property.
 /// Modify it to change the widget appearance.
 class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Instantiates a ChannelListHeader
@@ -115,6 +115,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
         }
 
         final chatThemeData = StreamChatTheme.of(context);
+        final channelListHeaderThemeData = ChannelListHeaderTheme.of(context);
         return InfoTile(
           // ignore: avoid_bool_literals_in_conditional_expressions
           showMessage: showConnectionStateTile ? showStatus : false,
@@ -123,7 +124,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             textTheme: Theme.of(context).textTheme,
             brightness: Theme.of(context).brightness,
             elevation: 1,
-            backgroundColor: chatThemeData.channelListHeaderTheme.color,
+            backgroundColor: channelListHeaderThemeData.color,
             centerTitle: true,
             leading: leading ??
                 Center(
@@ -138,10 +139,10 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
                                 }
                                 Scaffold.of(context).openDrawer();
                               },
-                          borderRadius: chatThemeData
-                              .channelListHeaderTheme.avatarTheme?.borderRadius,
-                          constraints: chatThemeData
-                              .channelListHeaderTheme.avatarTheme?.constraints,
+                          borderRadius: channelListHeaderThemeData
+                              .avatarTheme?.borderRadius,
+                          constraints: channelListHeaderThemeData
+                              .avatarTheme?.constraints,
                         )
                       : const Offstage(),
                 ),
@@ -227,10 +228,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
           const SizedBox(width: 10),
           Text(
             'Searching for Network',
-            style: StreamChatTheme.of(context)
-                .channelListHeaderTheme
-                .title
-                ?.copyWith(
+            style: ChannelListHeaderTheme.of(context).titleStyle?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -248,7 +246,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
       children: [
         Text(
           'Offline...',
-          style: chatThemeData.channelListHeaderTheme.title?.copyWith(
+          style: chatThemeData.channelListHeaderTheme.titleStyle?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -259,7 +257,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             ..openConnection(),
           child: Text(
             'Try Again',
-            style: chatThemeData.channelListHeaderTheme.title?.copyWith(
+            style: chatThemeData.channelListHeaderTheme.titleStyle?.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: chatThemeData.colorTheme.accentPrimary,

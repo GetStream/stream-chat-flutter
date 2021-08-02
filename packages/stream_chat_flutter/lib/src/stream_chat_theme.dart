@@ -47,7 +47,7 @@ class StreamChatThemeData {
     Brightness? brightness,
     TextTheme? textTheme,
     ColorTheme? colorTheme,
-    ChannelListHeaderTheme? channelListHeaderTheme,
+    ChannelListHeaderThemeData? channelListHeaderTheme,
     ChannelPreviewThemeData? channelPreviewTheme,
     ChannelHeaderThemeData? channelHeaderTheme,
     MessageThemeData? otherMessageTheme,
@@ -145,7 +145,7 @@ class StreamChatThemeData {
   final ChannelPreviewThemeData channelPreviewTheme;
 
   /// Theme of the [ChannelListHeader]
-  final ChannelListHeaderTheme channelListHeaderTheme;
+  final ChannelListHeaderThemeData channelListHeaderTheme;
 
   /// Theme of the chat widgets dedicated to a channel header
   final ChannelHeaderThemeData channelHeaderTheme;
@@ -200,7 +200,7 @@ class StreamChatThemeData {
     MessageInputThemeData? messageInputTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     IconThemeData? primaryIconTheme,
-    ChannelListHeaderTheme? channelListHeaderTheme,
+    ChannelListHeaderThemeData? channelListHeaderTheme,
     List<ReactionIcon>? reactionIcons,
     GalleryHeaderThemeData? galleryHeaderTheme,
     GalleryFooterThemeData? galleryFooterTheme,
@@ -312,7 +312,7 @@ class StreamChatThemeData {
         ),
       ),
       channelPreviewTheme: channelPreviewTheme,
-      channelListHeaderTheme: ChannelListHeaderTheme(
+      channelListHeaderTheme: ChannelListHeaderThemeData(
         avatarTheme: AvatarThemeData(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
@@ -321,7 +321,7 @@ class StreamChatThemeData {
           ),
         ),
         color: colorTheme.barsBg,
-        title: textTheme.headlineBold,
+        titleStyle: textTheme.headlineBold,
       ),
       channelHeaderTheme: channelHeaderTheme,
       ownMessageTheme: MessageThemeData(
