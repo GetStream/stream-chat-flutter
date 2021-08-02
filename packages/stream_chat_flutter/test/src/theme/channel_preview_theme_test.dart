@@ -65,7 +65,7 @@ final _channelPreviewThemeControl = ChannelPreviewThemeData(
 );
 
 final _channelPreviewThemeControlMidLerp = ChannelPreviewThemeData(
-  unreadCounterColor: const Color(0xffff3842),
+  unreadCounterColor: const Color(0xffff3742),
   avatarTheme: AvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
@@ -74,7 +74,7 @@ final _channelPreviewThemeControlMidLerp = ChannelPreviewThemeData(
     ),
   ),
   titleStyle: const TextStyle(
-    color: Color(0xff000000),
+    color: Color(0xff7f7f7f),
     fontSize: 14,
     fontWeight: FontWeight.bold,
   ),
@@ -83,7 +83,7 @@ final _channelPreviewThemeControlMidLerp = ChannelPreviewThemeData(
     fontSize: 12,
   ),
   lastMessageAtStyle: TextTheme.light().footnote.copyWith(
-        color: Color(0x80000000).withOpacity(.5),
+        color: const Color(0x807f7f7f).withOpacity(.5),
       ),
   indicatorIconSize: 16,
 );
