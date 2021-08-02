@@ -26,8 +26,8 @@ class ImageGroup extends StatelessWidget {
   /// Message which images are attached to
   final Message message;
 
-  /// [MessageTheme] to apply to message
-  final MessageTheme messageTheme;
+  /// [MessageThemeData] to apply to message
+  final MessageThemeData messageTheme;
 
   /// Size of iamges
   final Size size;

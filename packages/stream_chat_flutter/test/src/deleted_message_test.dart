@@ -21,11 +21,11 @@ void main() {
           client: client,
           child: const Scaffold(
             body: DeletedMessage(
-              messageTheme: MessageTheme(
-                createdAt: TextStyle(
+              messageTheme: MessageThemeData(
+                createdAtStyle: TextStyle(
                   color: Colors.black,
                 ),
-                messageText: TextStyle(),
+                messageTextStyle: TextStyle(),
               ),
             ),
           ),

@@ -25,8 +25,8 @@ class MessageText extends StatelessWidget {
   /// Callback for when link is tapped
   final void Function(String)? onLinkTap;
 
-  /// [MessageTheme] whose text theme is to be applied
-  final MessageTheme messageTheme;
+  /// [MessageThemeData] whose text theme is to be applied
+  final MessageThemeData messageTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -64,16 +64,16 @@ class MessageText extends StatelessWidget {
       styleSheet: MarkdownStyleSheet.fromTheme(
         themeData.copyWith(
           textTheme: themeData.textTheme.apply(
-            bodyColor: messageTheme.messageText?.color,
-            decoration: messageTheme.messageText?.decoration,
-            decorationColor: messageTheme.messageText?.decorationColor,
-            decorationStyle: messageTheme.messageText?.decorationStyle,
-            fontFamily: messageTheme.messageText?.fontFamily,
+            bodyColor: messageTheme.messageTextStyle?.color,
+            decoration: messageTheme.messageTextStyle?.decoration,
+            decorationColor: messageTheme.messageTextStyle?.decorationColor,
+            decorationStyle: messageTheme.messageTextStyle?.decorationStyle,
+            fontFamily: messageTheme.messageTextStyle?.fontFamily,
           ),
         ),
       ).copyWith(
-        a: messageTheme.messageLinks,
-        p: messageTheme.messageText,
+        a: messageTheme.messageLinksStyle,
+        p: messageTheme.messageTextStyle,
       ),
     );
   }

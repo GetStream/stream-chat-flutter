@@ -50,8 +50,8 @@ class StreamChatThemeData {
     ChannelListHeaderTheme? channelListHeaderTheme,
     ChannelPreviewThemeData? channelPreviewTheme,
     ChannelHeaderThemeData? channelHeaderTheme,
-    MessageTheme? otherMessageTheme,
-    MessageTheme? ownMessageTheme,
+    MessageThemeData? otherMessageTheme,
+    MessageThemeData? ownMessageTheme,
     MessageInputThemeData? messageInputTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     IconThemeData? primaryIconTheme,
@@ -159,10 +159,10 @@ class StreamChatThemeData {
   final GalleryFooterThemeData galleryFooterTheme;
 
   /// Theme of the current user messages
-  final MessageTheme ownMessageTheme;
+  final MessageThemeData ownMessageTheme;
 
   /// Theme of other users messages
-  final MessageTheme otherMessageTheme;
+  final MessageThemeData otherMessageTheme;
 
   /// Theme dedicated to the [MessageInput] widget
   final MessageInputThemeData messageInputTheme;
@@ -195,8 +195,8 @@ class StreamChatThemeData {
     ColorTheme? colorTheme,
     ChannelPreviewThemeData? channelPreviewTheme,
     ChannelHeaderThemeData? channelHeaderTheme,
-    MessageTheme? ownMessageTheme,
-    MessageTheme? otherMessageTheme,
+    MessageThemeData? ownMessageTheme,
+    MessageThemeData? otherMessageTheme,
     MessageInputThemeData? messageInputTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     IconThemeData? primaryIconTheme,
@@ -324,13 +324,13 @@ class StreamChatThemeData {
         title: textTheme.headlineBold,
       ),
       channelHeaderTheme: channelHeaderTheme,
-      ownMessageTheme: MessageTheme(
-        messageAuthor:
+      ownMessageTheme: MessageThemeData(
+        messageAuthorStyle:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
-        messageText: textTheme.body,
-        createdAt:
+        messageTextStyle: textTheme.body,
+        createdAtStyle:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
-        replies: textTheme.footnoteBold.copyWith(color: accentColor),
+        repliesStyle: textTheme.footnoteBold.copyWith(color: accentColor),
         messageBackgroundColor: colorTheme.disabled,
         reactionsBackgroundColor: colorTheme.barsBg,
         reactionsBorderColor: colorTheme.borders,
@@ -343,21 +343,21 @@ class StreamChatThemeData {
             width: 32,
           ),
         ),
-        messageLinks: TextStyle(
+        messageLinksStyle: TextStyle(
           color: accentColor,
         ),
       ),
-      otherMessageTheme: MessageTheme(
+      otherMessageTheme: MessageThemeData(
         reactionsBackgroundColor: colorTheme.disabled,
         reactionsBorderColor: colorTheme.barsBg,
         reactionsMaskColor: colorTheme.appBg,
-        messageText: textTheme.body,
-        createdAt:
+        messageTextStyle: textTheme.body,
+        createdAtStyle:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
-        messageAuthor:
+        messageAuthorStyle:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
-        replies: textTheme.footnoteBold.copyWith(color: accentColor),
-        messageLinks: TextStyle(
+        repliesStyle: textTheme.footnoteBold.copyWith(color: accentColor),
+        messageLinksStyle: TextStyle(
           color: accentColor,
         ),
         messageBackgroundColor: colorTheme.barsBg,

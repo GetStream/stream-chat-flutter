@@ -13,7 +13,7 @@ class AttachmentTitle extends StatelessWidget {
   }) : super(key: key);
 
   /// Theme to apply to text
-  final MessageTheme messageTheme;
+  final MessageThemeData messageTheme;
 
   /// Attachment data to display
   final Attachment attachment;
@@ -35,7 +35,7 @@ class AttachmentTitle extends StatelessWidget {
                 Text(
                   attachment.title!,
                   overflow: TextOverflow.ellipsis,
-                  style: messageTheme.messageText?.copyWith(
+                  style: messageTheme.messageTextStyle?.copyWith(
                     color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                     fontWeight: FontWeight.bold,
                   ),
@@ -51,7 +51,7 @@ class AttachmentTitle extends StatelessWidget {
                       .toList()
                       .reversed
                       .join('.'),
-                  style: messageTheme.messageText,
+                  style: messageTheme.messageTextStyle,
                 ),
             ],
           ),

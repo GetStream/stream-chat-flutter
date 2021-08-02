@@ -50,8 +50,8 @@ class MessageActionsModal extends StatefulWidget {
   /// Message in focus for actions
   final Message message;
 
-  /// [MessageTheme] for message
-  final MessageTheme messageTheme;
+  /// [MessageThemeData] for message
+  final MessageThemeData messageTheme;
 
   /// Flag for showing reactions
   final bool showReactions;
@@ -117,7 +117,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       }
     }
     final roughSentenceSize = messageTextLength *
-        (widget.messageTheme.messageText?.fontSize ?? 1) *
+        (widget.messageTheme.messageTextStyle?.fontSize ?? 1) *
         1.2;
     final divFactor = widget.message.attachments.isNotEmpty == true
         ? 1

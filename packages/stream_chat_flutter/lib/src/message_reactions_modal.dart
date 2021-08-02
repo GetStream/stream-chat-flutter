@@ -28,8 +28,8 @@ class MessageReactionsModal extends StatelessWidget {
   /// Message to display reactions of
   final Message message;
 
-  /// [MessageTheme] to apply to [message]
-  final MessageTheme messageTheme;
+  /// [MessageThemeData] to apply to [message]
+  final MessageThemeData messageTheme;
 
   /// Flag to reverse message
   final bool reverse;
@@ -56,8 +56,9 @@ class MessageReactionsModal extends StatelessWidget {
         messageTextLength = quotedMessageLength;
       }
     }
-    final roughSentenceSize =
-        messageTextLength * (messageTheme.messageText?.fontSize ?? 1) * 1.2;
+    final roughSentenceSize = messageTextLength *
+        (messageTheme.messageTextStyle?.fontSize ?? 1) *
+        1.2;
     final divFactor = message.attachments.isNotEmpty == true
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));

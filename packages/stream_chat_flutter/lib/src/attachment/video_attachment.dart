@@ -25,8 +25,8 @@ class VideoAttachment extends AttachmentWidget {
           size: size,
         );
 
-  /// [MessageTheme] for showing title
-  final MessageTheme messageTheme;
+  /// [MessageThemeData] for showing title
+  final MessageThemeData messageTheme;
 
   /// Callback when show message is tapped
   final ShowMessageCallback? onShowMessage;

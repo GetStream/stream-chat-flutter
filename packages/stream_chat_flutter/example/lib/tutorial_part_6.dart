@@ -63,9 +63,9 @@ class MyApp extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-      otherMessageTheme: MessageTheme(
+      otherMessageTheme: MessageThemeData(
         messageBackgroundColor: colorTheme.textHighEmphasis,
-        messageText: TextStyle(
+        messageTextStyle: TextStyle(
           color: colorTheme.barsBg,
         ),
         avatarTheme: AvatarThemeData(

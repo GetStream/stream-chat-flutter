@@ -28,8 +28,8 @@ class ImageAttachment extends AttachmentWidget {
           size: size,
         );
 
-  /// [MessageTheme] for showing image title
-  final MessageTheme messageTheme;
+  /// [MessageThemeData] for showing image title
+  final MessageThemeData messageTheme;
 
   /// Flag for showing title
   final bool showTitle;

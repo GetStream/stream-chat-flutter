@@ -15,7 +15,7 @@ class DeletedMessage extends StatelessWidget {
   }) : super(key: key);
 
   /// The theme of the message
-  final MessageTheme messageTheme;
+  final MessageThemeData messageTheme;
 
   /// The border radius of the message text
   final BorderRadiusGeometry? borderRadiusGeometry;
@@ -51,9 +51,9 @@ class DeletedMessage extends StatelessWidget {
         ),
         child: Text(
           'Message deleted',
-          style: messageTheme.messageText?.copyWith(
+          style: messageTheme.messageTextStyle?.copyWith(
             fontStyle: FontStyle.italic,
-            color: messageTheme.createdAt?.color,
+            color: messageTheme.createdAtStyle?.color,
           ),
         ),
       ),
