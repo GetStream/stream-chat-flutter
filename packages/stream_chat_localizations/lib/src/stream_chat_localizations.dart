@@ -21,7 +21,13 @@ part 'stream_chat_localizations_hi.dart';
 /// See also:
 ///
 ///  * [getStreamChatTranslation], whose documentation describes these values.
-const kStreamChatSupportedLanguages = {'en', 'hi', 'fr', 'it', 'es'};
+const kStreamChatSupportedLanguages = {
+  'en',
+  'hi',
+  'fr',
+  'it',
+  'es',
+};
 
 /// Creates a [GlobalStreamChatLocalizations] instance for the given `locale`.
 ///
