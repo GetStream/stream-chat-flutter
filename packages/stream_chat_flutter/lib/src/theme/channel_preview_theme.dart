@@ -50,6 +50,24 @@ class ChannelPreviewThemeData with Diagnosticable {
         indicatorIconSize: indicatorIconSize ?? this.indicatorIconSize,
       );
 
+  /// Linearly interpolate one [ChannelPreviewThemeData] to another.
+  ChannelPreviewThemeData lerp(
+    ChannelPreviewThemeData a,
+    ChannelPreviewThemeData b,
+    double t,
+  ) =>
+      ChannelPreviewThemeData(
+        avatarTheme:
+            const AvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+        indicatorIconSize: a.indicatorIconSize,
+        lastMessageAtStyle:
+            TextStyle.lerp(a.lastMessageAtStyle, b.lastMessageAtStyle, t),
+        subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
+        titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
+        unreadCounterColor:
+            Color.lerp(a.unreadCounterColor, b.unreadCounterColor, t),
+      );
+
   /// Merge with theme
   ChannelPreviewThemeData merge(ChannelPreviewThemeData? other) {
     if (other == null) return this;
@@ -63,6 +81,27 @@ class ChannelPreviewThemeData with Diagnosticable {
       unreadCounterColor: other.unreadCounterColor,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChannelPreviewThemeData &&
+          runtimeType == other.runtimeType &&
+          titleStyle == other.titleStyle &&
+          subtitleStyle == other.subtitleStyle &&
+          lastMessageAtStyle == other.lastMessageAtStyle &&
+          avatarTheme == other.avatarTheme &&
+          unreadCounterColor == other.unreadCounterColor &&
+          indicatorIconSize == other.indicatorIconSize;
+
+  @override
+  int get hashCode =>
+      titleStyle.hashCode ^
+      subtitleStyle.hashCode ^
+      lastMessageAtStyle.hashCode ^
+      avatarTheme.hashCode ^
+      unreadCounterColor.hashCode ^
+      indicatorIconSize.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
