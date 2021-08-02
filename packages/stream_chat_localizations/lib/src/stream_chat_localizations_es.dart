@@ -68,7 +68,8 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get genericErrorText => 'Hubo un problema';
 
   @override
-  String get loadingMessagesError => 'Hubo un error mientras se cargaba el mensaje';
+  String get loadingMessagesError =>
+      'Hubo un error mientras se cargaba el mensaje';
 
   @override
   String resultCountText(int count) => '$count resultados';
@@ -354,7 +355,9 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get youText => 'Usted';
 
   @override
-  String get ofText => 'de';
+  String galleryPaginationText(
+          {required int currentPage, required int totalPages}) =>
+      '${currentPage + 1} de $totalPages';
 
   @override
   String get fileText => 'Archivo';

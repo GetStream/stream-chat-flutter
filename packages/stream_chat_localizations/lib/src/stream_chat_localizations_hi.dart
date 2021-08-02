@@ -340,16 +340,18 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get sendLabel => 'भेजें';
 
   @override
-  String get withText => 'विद';
+  String get withText => 'विद';//TODO: break?
 
   @override
-  String get inText => 'इन';
+  String get inText => 'इन';//TODO: break?
 
   @override
   String get youText => 'आप';
 
   @override
-  String get ofText => 'ऑफ़';
+  String galleryPaginationText(
+          {required int currentPage, required int totalPages}) =>
+      '${currentPage + 1} ऑफ़ $totalPages';
 
   @override
   String get fileText => 'फ़ाइल';

@@ -177,8 +177,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get flagMessageSuccessfulLabel => 'フラグ付メッセージ';
 
   @override
-  String get flagMessageSuccessfulText =>
-      'このメッセージはモデレーターに報告されました。';
+  String get flagMessageSuccessfulText => 'このメッセージはモデレーターに報告されました。';
 
   @override
   String get deleteLabel => '消す';
@@ -187,13 +186,11 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get deleteMessageLabel => 'メッセージを削除する ';
 
   @override
-  String get deleteMessageQuestion =>
-      'このメッセージ'
+  String get deleteMessageQuestion => 'このメッセージ'
       '\nを完全に削除してもよろしいですか？';
 
   @override
-  String get operationCouldNotBeCompletedText =>
-      '操作を完了できませんでした。';
+  String get operationCouldNotBeCompletedText => '操作を完了できませんでした。';
 
   @override
   String get replyLabel => '返信';
@@ -261,8 +258,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get letsStartChattingLabel => 'さあ、チャットを始めよう';
 
   @override
-  String get sendingFirstMessageLabel =>
-      'どのように友人にあなたの最初のメッセージを送ることについてはどうですか？';
+  String get sendingFirstMessageLabel => 'どのように友人にあなたの最初のメッセージを送ることについてはどうですか？';
 
   @override
   String get startAChatLabel => 'チャットを開始する';
@@ -274,8 +270,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get deleteConversationLabel => '会話を削除する';
 
   @override
-  String get deleteConversationQuestion =>
-      'この会話を削除してもよろしいですか？';
+  String get deleteConversationQuestion => 'この会話を削除してもよろしいですか？';
 
   @override
   String get streamChatLabel => 'ストリームチャット';
@@ -314,8 +309,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get leaveConversationLabel => '会話を離れる';
 
   @override
-  String get leaveConversationQuestion =>
-      'この会話を離れてもよろしいですか？';
+  String get leaveConversationQuestion => 'この会話を離れてもよろしいですか？';
 
   @override
   String get showInChatLabel => 'チャットで表示';
@@ -348,9 +342,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get youText => '君';
 
   @override
-  String get ofText => 'の';//TODO: break
-  // galleryPaginationText(
-  //         {required int currentPage, required int totalPages}) 
+  String galleryPaginationText(
+          {required int currentPage, required int totalPages}) =>
+      '$totalPagesの${currentPage + 1}';
 
   @override
   String get fileText => 'ファイル';

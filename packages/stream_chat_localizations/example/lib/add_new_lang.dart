@@ -374,7 +374,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get youText => 'You';
 
   @override
-  String get ofText => 'of';
+  String galleryPaginationText(
+          {required int currentPage, required int totalPages}) =>
+      '$currentPage of $totalPages';
 
   @override
   String get fileText => 'File';

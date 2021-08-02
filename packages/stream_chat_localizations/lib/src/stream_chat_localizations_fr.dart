@@ -354,7 +354,9 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get youText => 'Vous';
 
   @override
-  String galleryPaginationText({required int currentPage, required int totalPages}) => '${currentPage+1} de $totalPages';
+  String galleryPaginationText(
+          {required int currentPage, required int totalPages}) =>
+      '${currentPage + 1} de $totalPages';
 
   @override
   String get fileText => 'Fichier';
