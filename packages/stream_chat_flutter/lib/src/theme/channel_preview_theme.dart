@@ -1,10 +1,63 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
 
-/// Theme for channel preview
+/// Overrides the default style of [ChannelPreview] descendants.
+///
+/// See also:
+///
+///  * [ChannelPreviewThemeData], which is used to configure this theme.
+class ChannelPreviewTheme extends InheritedTheme {
+  /// Creates a [ChannelPreviewTheme].
+  ///
+  /// The [data] parameter must not be null.
+  const ChannelPreviewTheme({
+    Key? key,
+    required this.data,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  /// The configuration of this theme.
+  final ChannelPreviewThemeData data;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If there is no enclosing [ChannelPreviewTheme] widget, then
+  /// [StreamChatThemeData.channelPreviewTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// final theme = ChannelPreviewTheme.of(context);
+  /// ```
+  static ChannelPreviewThemeData of(BuildContext context) {
+    final channelPreviewTheme =
+        context.dependOnInheritedWidgetOfExactType<ChannelPreviewTheme>();
+    return channelPreviewTheme?.data ??
+        StreamChatTheme.of(context).channelPreviewTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) =>
+      ChannelPreviewTheme(data: data, child: child);
+
+  @override
+  bool updateShouldNotify(ChannelPreviewTheme oldWidget) =>
+      data != oldWidget.data;
+}
+
+/// A style that overrides the default appearance of [ChannelPreview]s when used
+/// with [ChannelPreviewTheme] or with the overall [StreamChatTheme]'s
+/// [StreamChatThemeData.channelPreviewTheme].
+///
+/// See also:
+///
+/// * [ChannelPreviewTheme], the theme which is configured with this class.
+/// * [StreamChatThemeData.channelPreviewTheme], which can be used to override
+/// the default style for [ChannelHeader]s below the overall [StreamChatTheme].
 class ChannelPreviewThemeData with Diagnosticable {
-  /// Constructor for creating [ChannelPreviewThemeData]
+  /// Creates a [ChannelPreviewThemeData].
   const ChannelPreviewThemeData({
     this.titleStyle,
     this.subtitleStyle,
