@@ -68,7 +68,7 @@ class ChannelPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final channelPreviewTheme = StreamChatTheme.of(context).channelPreviewTheme;
+    final channelPreviewTheme = ChannelPreviewTheme.of(context);
     final streamChatState = StreamChat.of(context);
     return BetterStreamBuilder<bool>(
         stream: channel.isMutedStream,
