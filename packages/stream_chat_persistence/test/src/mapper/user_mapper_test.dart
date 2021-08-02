@@ -11,6 +11,7 @@ void main() {
     final entity = UserEntity(
       id: 'testUserId',
       role: 'testType',
+      language: 'hi',
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       lastActive: DateTime.now(),
@@ -22,6 +23,7 @@ void main() {
     expect(user, isA<User>());
     expect(user.id, entity.id);
     expect(user.role, entity.role);
+    expect(user.language, entity.language);
     expect(user.createdAt, isSameDateAs(entity.createdAt));
     expect(user.updatedAt, isSameDateAs(entity.updatedAt));
     expect(user.lastActive, isSameDateAs(entity.lastActive!));
@@ -34,6 +36,7 @@ void main() {
     final user = User(
       id: 'testUserId',
       role: 'testType',
+      language: 'hi',
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       lastActive: DateTime.now(),
@@ -45,6 +48,7 @@ void main() {
     expect(entity, isA<UserEntity>());
     expect(entity.id, user.id);
     expect(entity.role, user.role);
+    expect(entity.language, user.language);
     expect(entity.createdAt, isSameDateAs(user.createdAt));
     expect(entity.updatedAt, isSameDateAs(user.updatedAt));
     expect(entity.lastActive, isSameDateAs(user.lastActive!));

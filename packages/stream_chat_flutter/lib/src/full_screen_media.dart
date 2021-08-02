@@ -4,12 +4,12 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/src/gallery_footer.dart';
 import 'package:stream_chat_flutter/src/gallery_header.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Return action for coming back from pages
 enum ReturnActionType {
@@ -181,9 +181,10 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                 children: [
                   GalleryHeader(
                     userName: widget.userName,
-                    sentAt:
-                        // ignore: lines_longer_than_80_chars
-                        'Sent ${getDay(widget.message.createdAt.toLocal())} at ${Jiffy(widget.message.createdAt.toLocal()).format('HH:mm')}',
+                    sentAt: context.translations.sentAtText(
+                      date: widget.message.createdAt,
+                      time: widget.message.createdAt,
+                    ),
                     onBackPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -196,7 +197,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                       );
                     },
                   ),
-                  if (widget.message.type != 'ephemeral')
+                  if (!widget.message.isEphemeral)
                     GalleryFooter(
                       currentPage: _currentPage,
                       totalPages: widget.mediaAttachments.length,
@@ -220,22 +221,6 @@ class _FullScreenMediaState extends State<FullScreenMedia>
           ],
         ),
       );
-
-  String getDay(DateTime dateTime) {
-    final now = DateTime.now();
-
-    if (DateTime(dateTime.year, dateTime.month, dateTime.day) ==
-        DateTime(now.year, now.month, now.day)) {
-      return 'today';
-    } else if (DateTime(now.year, now.month, now.day)
-            .difference(dateTime)
-            .inHours <
-        24) {
-      return 'yesterday';
-    } else {
-      return 'on ${Jiffy(dateTime).MMMd}';
-    }
-  }
 
   @override
   void dispose() async {

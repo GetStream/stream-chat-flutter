@@ -2,6 +2,7 @@ import 'package:characters/characters.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
+import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 final _emojiChars = Emoji.chars();
@@ -9,7 +10,8 @@ final _emojiChars = Emoji.chars();
 /// String extension
 extension StringExtension on String {
   /// Returns the capitalized string
-  String capitalize() => '${this[0].toUpperCase()}${substring(1)}';
+  String capitalize() =>
+      '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
 
   /// Returns whether the string contains only emoji's or not.
   ///
@@ -103,6 +105,11 @@ extension BuildContextX on BuildContext {
   // ignore: public_member_api_docs
   double get textScaleFactor =>
       MediaQuery.maybeOf(this)?.textScaleFactor ?? 1.0;
+
+  /// Retrieves current translations according to locale
+  /// Defaults to [DefaultTranslations]
+  Translations get translations =>
+      StreamChatLocalizations.of(this) ?? DefaultTranslations.instance;
 }
 
 /// Extension on [BorderRadius]

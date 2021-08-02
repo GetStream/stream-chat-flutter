@@ -1,9 +1,21 @@
-## Upcoming
+## 2.1.2
+
+🐞 Fixed
+
+- [#590](https://github.com/GetStream/stream-chat-flutter/issues/590): livestream use case, no members when sending message
+  
+## 2.1.1
+
+- Updated core dependency
+
+## 2.1.0
 
 ✅ Added
 
 - Added `MessageListView.paginationLimit`
+- `MessageText` renders message translation if available
 - Allow the various ListView widgets to be themed via ThemeData classes
+- Added `bottomRowBuilder` and `deletedBottomRowBuilder` that build a widget below a `MessageWidget`
 
 🔄 Changed
 

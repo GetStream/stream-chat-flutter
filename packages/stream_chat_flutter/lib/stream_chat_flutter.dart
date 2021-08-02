@@ -1,3 +1,4 @@
+export 'package:jiffy/jiffy.dart';
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 export 'src/attachment/attachment.dart';
@@ -16,6 +17,8 @@ export 'src/gallery_footer.dart';
 export 'src/gallery_header.dart';
 export 'src/gradient_avatar.dart';
 export 'src/info_tile.dart';
+export 'src/localization/stream_chat_localizations.dart';
+export 'src/localization/translations.dart' show DefaultTranslations;
 export 'src/mention_tile.dart';
 export 'src/message_action.dart';
 export 'src/message_input.dart';
@@ -41,3 +44,4 @@ export 'src/user_avatar.dart';
 export 'src/user_item.dart';
 export 'src/user_list_view.dart';
 export 'src/utils.dart';
+export 'src/visible_footnote.dart';

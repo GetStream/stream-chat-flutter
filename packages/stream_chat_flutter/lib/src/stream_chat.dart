@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -147,14 +146,13 @@ class StreamChatState extends State<StreamChat> {
   Stream<User?> get currentUserStream => widget.client.state.currentUserStream;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
-    final locale = ui.window.locale;
-    Jiffy.locale(locale.languageCode);
+    final currentLocale = Localizations.localeOf(context);
+    final languageCode = currentLocale.languageCode;
+    final availableLocales = Jiffy.getAllAvailableLocales();
+    if (availableLocales.contains(languageCode)) {
+      Jiffy.locale(languageCode);
+    }
     super.didChangeDependencies();
   }
 }

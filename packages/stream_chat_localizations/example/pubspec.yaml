@@ -1,0 +1,26 @@
+name: example
+description: A new Flutter project.
+
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  cupertino_icons: ^1.0.3
+  flutter:
+    sdk: flutter
+  stream_chat_localizations:
+    path: ../
+
+dependency_overrides:
+  stream_chat_flutter:
+    path: ../../stream_chat_flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

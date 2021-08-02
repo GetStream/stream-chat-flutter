@@ -13,8 +13,8 @@ class SystemMessage extends StatelessWidget {
   /// This message
   final Message message;
 
-  // ignore: lines_longer_than_80_chars
-  /// The function called when tapping on the message when the message is not failed
+  /// The function called when tapping on the message
+  /// when the message is not failed
   final void Function(Message)? onMessageTap;
 
   @override

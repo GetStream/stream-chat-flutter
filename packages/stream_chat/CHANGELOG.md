@@ -1,4 +1,19 @@
-## Upcoming
+## 2.1.1
+
+🐞 Fixed
+
+- Mutes were not working correctly in 2.1.0
+
+## 2.1.0
+
+🛑️ Removed
+
+- The `MessageTranslation` class has been removed. Use the new `i18n` field in the `Message` class instead.
+
+✅ Added
+
+- The `Message` class now has an `i18n` field for translations
+- The `User` class now has a `language` field for the user's language preference.
 
 🔄 Changed
 

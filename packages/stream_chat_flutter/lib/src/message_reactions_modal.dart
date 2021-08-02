@@ -8,6 +8,7 @@ import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Modal widget for displaying message reactions
 class MessageReactionsModal extends StatelessWidget {
@@ -156,7 +157,7 @@ class MessageReactionsModal extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Message Reactions',
+              context.translations.messageReactionsLabel,
               style: chatThemeData.textTheme.headlineBold,
             ),
             const SizedBox(height: 16),

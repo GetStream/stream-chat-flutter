@@ -93,6 +93,8 @@ class MessageWidget extends StatefulWidget {
     this.userAvatarBuilder,
     this.editMessageInputBuilder,
     this.textBuilder,
+    this.bottomRowBuilder,
+    this.deletedBottomRowBuilder,
     this.onReturnAction,
     Map<String, AttachmentBuilder>? customAttachmentBuilders,
     this.readList,
@@ -276,6 +278,12 @@ class MessageWidget extends StatefulWidget {
   /// Function called on long press
   final void Function(BuildContext, Message)? onMessageActions;
 
+  /// Widget builder for building a bottom row below the message
+  final Widget Function(BuildContext, Message)? bottomRowBuilder;
+
+  /// Widget builder for building a bottom row below a deleted message
+  final Widget Function(BuildContext, Message)? deletedBottomRowBuilder;
+
   /// Widget builder for building user avatar
   final Widget Function(BuildContext, User)? userAvatarBuilder;
 
@@ -411,6 +419,8 @@ class MessageWidget extends StatefulWidget {
     Widget Function(BuildContext, Message)? editMessageInputBuilder,
     Widget Function(BuildContext, Message)? textBuilder,
     Widget Function(BuildContext, Message)? usernameBuilder,
+    Widget Function(BuildContext, Message)? bottomRowBuilder,
+    Widget Function(BuildContext, Message)? deletedBottomRowBuilder,
     void Function(BuildContext, Message)? onMessageActions,
     Message? message,
     MessageThemeData? messageTheme,
@@ -464,6 +474,9 @@ class MessageWidget extends StatefulWidget {
             editMessageInputBuilder ?? this.editMessageInputBuilder,
         textBuilder: textBuilder ?? this.textBuilder,
         usernameBuilder: usernameBuilder ?? this.usernameBuilder,
+        bottomRowBuilder: bottomRowBuilder ?? this.bottomRowBuilder,
+        deletedBottomRowBuilder:
+            deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
         onMessageActions: onMessageActions ?? this.onMessageActions,
         message: message ?? this.message,
         messageTheme: messageTheme ?? this.messageTheme,
@@ -783,7 +796,11 @@ class _MessageWidgetState extends State<MessageWidget>
                             bottom:
                                 isPinned && widget.showPinHighlight ? 6.0 : 0.0,
                           ),
-                          child: _bottomRow,
+                          child: widget.bottomRowBuilder?.call(
+                                context,
+                                widget.message,
+                              ) ??
+                              _bottomRow,
                         ),
                       if (isFailedState)
                         Positioned(
@@ -831,22 +848,11 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget get _bottomRow {
     if (isDeleted) {
-      final chatThemeData = _streamChatTheme;
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          StreamSvgIcon.eye(
-            color: chatThemeData.colorTheme.textLowEmphasis,
-            size: 16,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'Only visible to you',
-            style: chatThemeData.textTheme.footnote
-                .copyWith(color: chatThemeData.colorTheme.textLowEmphasis),
-          ),
-        ],
-      );
+      return widget.deletedBottomRowBuilder?.call(
+            context,
+            widget.message,
+          ) ??
+          const Offstage();
     }
 
     final children = <Widget>[];
@@ -855,9 +861,9 @@ class _MessageWidgetState extends State<MessageWidget>
     final showThreadParticipants = threadParticipants?.isNotEmpty == true;
     final replyCount = widget.message.replyCount;
 
-    var msg = 'Thread Reply';
+    var msg = context.translations.threadReplyLabel;
     if (showThreadReplyIndicator && replyCount! > 1) {
-      msg = '$replyCount Thread Replies';
+      msg = context.translations.threadReplyCountText(replyCount);
     }
 
     // ignore: prefer_function_declarations_over_variables
@@ -1202,7 +1208,10 @@ class _MessageWidgetState extends State<MessageWidget>
         );
       }
       return Text(
-        'Uploading $uploadRemaining/$totalAttachments ...',
+        context.translations.attachmentsUploadProgressText(
+          remaining: uploadRemaining,
+          total: totalAttachments,
+        ),
         style: style,
       );
     }
@@ -1276,8 +1285,8 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Widget _buildPinnedMessage(Message message) {
-    final pinnedBy = message.pinnedBy;
-    final pinnedByMe = _streamChat.currentUser!.id == pinnedBy!.id;
+    final pinnedBy = message.pinnedBy!;
+    final currentUser = _streamChat.currentUser!;
 
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 8),
@@ -1291,7 +1300,10 @@ class _MessageWidgetState extends State<MessageWidget>
             width: 4,
           ),
           Text(
-            'Pinned by ${pinnedByMe ? 'You' : pinnedBy.name}',
+            context.translations.pinnedByUserText(
+              pinnedBy: pinnedBy,
+              currentUser: currentUser,
+            ),
             style: TextStyle(
               color: _streamChatTheme.colorTheme.textLowEmphasis,
               fontSize: 13,

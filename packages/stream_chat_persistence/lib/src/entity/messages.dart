@@ -80,6 +80,9 @@ class Messages extends Table {
   TextColumn get channelCid => text().nullable().customConstraint(
       'NULLABLE REFERENCES channels(cid) ON DELETE CASCADE')();
 
+  /// A Map of [messageText] translations.
+  TextColumn get i18n => text().nullable().map(MapConverter<String>())();
+
   /// Message custom extraData
   TextColumn get extraData => text().nullable().map(MapConverter<Object?>())();
 

@@ -318,17 +318,15 @@ class StreamChatClient {
     final ownUser = OwnUser.fromUser(user);
     state.currentUser = ownUser;
 
-    if (!connectWebSocket) {
-      return ownUser;
-    }
+    if (!connectWebSocket) return ownUser;
 
     try {
       if (_originalChatPersistenceClient != null) {
         _chatPersistenceClient = _originalChatPersistenceClient;
         await _chatPersistenceClient!.connect(ownUser.id);
       }
-      final res = await openConnection();
-      return res;
+      final connectedUser = await openConnection();
+      return state.currentUser = connectedUser;
     } catch (e, stk) {
       if (e is StreamWebSocketError && e.isRetriable) {
         final event = await _chatPersistenceClient?.getConnectionInfo();
@@ -396,9 +394,6 @@ class StreamChatClient {
   }
 
   void _handleHealthCheckEvent(Event event) {
-    final user = event.me;
-    if (user != null) state.currentUser = user;
-
     final connectionId = event.connectionId;
     if (connectionId != null) {
       _connectionIdManager.setConnectionId(connectionId);
@@ -1341,16 +1336,15 @@ class ClientState {
     _subscriptions.addAll([
       _client
           .on()
-          .where((event) => event.me != null)
-          .map((e) => e.me)
+          .where((event) =>
+              event.me != null && event.type != EventType.healthCheck)
+          .map((e) => e.me!)
           .listen((user) {
-        _currentUserController.add(user);
-        final totalUnreadCount = user?.totalUnreadCount;
-        if (totalUnreadCount != null) {
-          _totalUnreadCountController.add(totalUnreadCount);
-        }
+        currentUser = currentUser?.merge(user) ?? user;
+        final totalUnreadCount = user.totalUnreadCount;
+        _totalUnreadCountController.add(totalUnreadCount);
 
-        final unreadChannels = user?.unreadChannels;
+        final unreadChannels = user.unreadChannels;
         if (unreadChannels != null) {
           _unreadChannelsController.add(unreadChannels);
         }
@@ -1417,7 +1411,8 @@ class ClientState {
 
   final StreamChatClient _client;
 
-  /// Update user information
+  /// Sets the user currently interacting with the client
+  /// note: this fully overrides the [currentUser]
   set currentUser(OwnUser? user) {
     _currentUserController.add(user);
   }

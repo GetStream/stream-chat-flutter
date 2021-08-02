@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 
@@ -50,7 +51,7 @@ class DeletedMessage extends StatelessWidget {
           horizontal: 16,
         ),
         child: Text(
-          'Message deleted',
+          context.translations.messageDeletedLabel,
           style: messageTheme.messageTextStyle?.copyWith(
             fontStyle: FontStyle.italic,
             color: messageTheme.createdAtStyle?.color,

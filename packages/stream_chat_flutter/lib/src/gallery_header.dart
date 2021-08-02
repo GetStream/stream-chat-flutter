@@ -68,7 +68,7 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
           : const SizedBox(),
       backgroundColor: galleryHeaderThemeData.backgroundColor,
       actions: <Widget>[
-        if (message.type != 'ephemeral')
+        if (!message.isEphemeral)
           IconButton(
             icon: StreamSvgIcon.iconMenuPoint(
               color: galleryHeaderThemeData.iconMenuPointColor,
@@ -79,7 +79,7 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
       ],
       centerTitle: true,
-      title: message.type != 'ephemeral'
+      title: !message.isEphemeral
           ? InkWell(
               onTap: onTitleTap,
               child: SizedBox(

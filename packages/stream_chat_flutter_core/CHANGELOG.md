@@ -1,10 +1,16 @@
-## Upcoming
+## 2.1.1
+
+- Updated llc dependency
+
+## 2.1.0
+
+🛑️ Breaking Changes from `2.0.0`
+- Changed default message filter of `MessageListCore`
 
 ✅ Added
 - Added `MessageListCore.paginationLimit`
 
 🔄 Changed
-
 - `StreamChatCore.of(context).user` is now deprecated in favor of `StreamChatCore.of(context).currentUser`.
 - `StreamChatCore.of(context).userStream` is now deprecated in favor of `StreamChatCore.of(context).currentUserStream`.
 

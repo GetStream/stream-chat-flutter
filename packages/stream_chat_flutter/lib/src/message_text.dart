@@ -30,60 +30,66 @@ class MessageText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = _replaceMentions(message.text ?? '').replaceAll('\n', '\n\n');
+    final streamChat = StreamChat.of(context);
+    assert(streamChat.currentUser != null, '');
+    return BetterStreamBuilder<String>(
+      stream: streamChat.currentUserStream.map((it) => it!.language ?? 'en'),
+      initialData: streamChat.currentUser!.language ?? 'en',
+      builder: (context, language) {
+        final translatedText =
+            message.i18n?['${language}_text'] ?? message.text;
+        final messageText =
+            _replaceMentions(translatedText ?? '').replaceAll('\n', '\n\n');
+        final themeData = Theme.of(context);
+        return MarkdownBody(
+          data: messageText,
+          onTapLink: (
+            String link,
+            String? href,
+            String title,
+          ) {
+            if (link.startsWith('@')) {
+              final mentionedUser = message.mentionedUsers.firstWhereOrNull(
+                (u) => '@${u.name}' == link,
+              );
 
-    final themeData = Theme.of(context);
-    return MarkdownBody(
-      data: text,
-      onTapLink: (
-        String link,
-        String? href,
-        String title,
-      ) {
-        if (link.startsWith('@')) {
-          final mentionedUser = message.mentionedUsers.firstWhereOrNull(
-            (u) => '@${u.name}' == link,
-          );
-          if (mentionedUser == null) {
-            return;
-          }
+              if (mentionedUser == null) return;
 
-          if (onMentionTap != null) {
-            onMentionTap!(mentionedUser);
-          } else {
-            print('tap on ${mentionedUser.name}');
-          }
-        } else {
-          if (onLinkTap != null) {
-            onLinkTap!(link);
-          } else {
-            launchURL(context, link);
-          }
-        }
-      },
-      styleSheet: MarkdownStyleSheet.fromTheme(
-        themeData.copyWith(
-          textTheme: themeData.textTheme.apply(
-            bodyColor: messageTheme.messageTextStyle?.color,
-            decoration: messageTheme.messageTextStyle?.decoration,
-            decorationColor: messageTheme.messageTextStyle?.decorationColor,
-            decorationStyle: messageTheme.messageTextStyle?.decorationStyle,
-            fontFamily: messageTheme.messageTextStyle?.fontFamily,
+              onMentionTap?.call(mentionedUser);
+            } else {
+              if (onLinkTap != null) {
+                onLinkTap!(link);
+              } else {
+                launchURL(context, link);
+              }
+            }
+          },
+          styleSheet: MarkdownStyleSheet.fromTheme(
+            themeData.copyWith(
+              textTheme: themeData.textTheme.apply(
+                bodyColor: messageTheme.messageTextStyle?.color,
+                decoration: messageTheme.messageTextStyle?.decoration,
+                decorationColor: messageTheme.messageTextStyle?.decorationColor,
+                decorationStyle: messageTheme.messageTextStyle?.decorationStyle,
+                fontFamily: messageTheme.messageTextStyle?.fontFamily,
+              ),
+            ),
+          ).copyWith(
+            a: messageTheme.messageLinksStyle,
+            p: messageTheme.messageTextStyle,
           ),
-        ),
-      ).copyWith(
-        a: messageTheme.messageLinksStyle,
-        p: messageTheme.messageTextStyle,
-      ),
+        );
+      },
     );
   }
 
   String _replaceMentions(String text) {
-    message.mentionedUsers.map((u) => u.name).toSet().forEach((userName) {
-      // ignore: parameter_assignments
-      text = text.replaceAll(
+    var messageTextToRender = text;
+    for (final user in message.mentionedUsers.toSet()) {
+      final userName = user.name;
+      messageTextToRender = messageTextToRender.replaceAll(
           '@$userName', '[@$userName](@${userName.replaceAll(' ', '')})');
-    });
-    return text;
+    }
+    return messageTextToRender;
   }
 }

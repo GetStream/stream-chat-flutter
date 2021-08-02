@@ -269,16 +269,14 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final streamChatThemeData = StreamChatTheme.of(context);
     final answer = await showConfirmationDialog(
       context,
-      title: 'Flag Message',
+      title: context.translations.flagMessageLabel,
       icon: StreamSvgIcon.flag(
         color: streamChatThemeData.colorTheme.accentError,
         size: 24,
       ),
-      question:
-          // ignore: lines_longer_than_80_chars
-          'Do you want to send a copy of this message to a\nmoderator for further investigation?',
-      okText: 'FLAG',
-      cancelText: 'CANCEL',
+      question: context.translations.flagMessageQuestion,
+      okText: context.translations.flagLabel,
+      cancelText: context.translations.cancelLabel,
     );
 
     final theme = streamChatThemeData;
@@ -291,9 +289,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             color: theme.colorTheme.accentError,
             size: 24,
           ),
-          details: 'The message has been reported to a moderator.',
-          title: 'Message flagged',
-          okText: 'OK',
+          details: context.translations.flagMessageSuccessfulText,
+          title: context.translations.flagMessageSuccessfulLabel,
+          okText: context.translations.okLabel,
         );
       } catch (err) {
         if (err is StreamChatNetworkError &&
@@ -304,9 +302,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
               color: theme.colorTheme.accentError,
               size: 24,
             ),
-            details: 'The message has been reported to a moderator.',
-            title: 'Message flagged',
-            okText: 'OK',
+            details: context.translations.flagMessageSuccessfulText,
+            title: context.translations.flagMessageSuccessfulLabel,
+            okText: context.translations.okLabel,
           );
         } else {
           _showErrorAlert();
@@ -336,14 +334,14 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     });
     final answer = await showConfirmationDialog(
       context,
-      title: 'Delete message',
+      title: context.translations.deleteMessageLabel,
       icon: StreamSvgIcon.flag(
         color: StreamChatTheme.of(context).colorTheme.accentError,
         size: 24,
       ),
-      question: 'Are you sure you want to permanently delete this\nmessage?',
-      okText: 'DELETE',
-      cancelText: 'CANCEL',
+      question: context.translations.deleteMessageQuestion,
+      okText: context.translations.deleteLabel,
+      cancelText: context.translations.cancelLabel,
     );
 
     if (answer == true) {
@@ -367,9 +365,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         color: StreamChatTheme.of(context).colorTheme.accentError,
         size: 24,
       ),
-      details: 'The operation couldn\'t be completed.',
-      title: 'Something went wrong',
-      okText: 'OK',
+      details: context.translations.operationCouldNotBeCompletedText,
+      title: context.translations.somethingWentWrongError,
+      okText: context.translations.okLabel,
     );
   }
 
@@ -391,7 +389,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             ),
             const SizedBox(width: 16),
             Text(
-              'Reply',
+              context.translations.replyLabel,
               style: streamChatThemeData.textTheme.body,
             ),
           ],
@@ -413,7 +411,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             ),
             const SizedBox(width: 16),
             Text(
-              'Flag Message',
+              context.translations.flagMessageLabel,
               style: streamChatThemeData.textTheme.body,
             ),
           ],
@@ -436,7 +434,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             ),
             const SizedBox(width: 16),
             Text(
-              '${widget.message.pinned ? 'Unpin from' : 'Pin to'} Conversation',
+              context.translations.togglePinUnpinText(
+                pinned: widget.message.pinned,
+              ),
               style: streamChatThemeData.textTheme.body,
             ),
           ],
@@ -459,7 +459,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             ),
             const SizedBox(width: 16),
             Text(
-              isDeleteFailed ? 'Retry Deleting Message' : 'Delete Message',
+              context.translations.toggleDeleteRetryDeleteMessageText(
+                isDeleteFailed: isDeleteFailed,
+              ),
               style: StreamChatTheme.of(context)
                   .textTheme
                   .body
@@ -488,7 +490,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             ),
             const SizedBox(width: 16),
             Text(
-              'Copy Message',
+              context.translations.copyMessageLabel,
               style: streamChatThemeData.textTheme.body,
             ),
           ],
@@ -513,7 +515,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             ),
             const SizedBox(width: 16),
             Text(
-              'Edit Message',
+              context.translations.editMessageLabel,
               style: streamChatThemeData.textTheme.body,
             ),
           ],
@@ -545,7 +547,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             ),
             const SizedBox(width: 16),
             Text(
-              isUpdateFailed ? 'Resend Edited Message' : 'Resend',
+              context.translations.toggleResendOrResendEditedMessage(
+                isUpdateFailed: isUpdateFailed,
+              ),
               style: streamChatThemeData.textTheme.body,
             ),
           ],
@@ -590,9 +594,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                         color: streamChatThemeData.colorTheme.disabled,
                       ),
                     ),
-                    const Text(
-                      'Edit Message',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      context.translations.editMessageLabel,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     IconButton(
                       visualDensity: VisualDensity.compact,
@@ -638,7 +642,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             ),
             const SizedBox(width: 16),
             Text(
-              'Thread Reply',
+              context.translations.threadReplyLabel,
               style: streamChatThemeData.textTheme.body,
             ),
           ],

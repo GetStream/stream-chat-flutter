@@ -8,6 +8,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Callback called when tapping on a channel
 typedef ChannelTapCallback = void Function(Channel, Widget?);
@@ -302,7 +303,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                       Padding(
                         padding: const EdgeInsets.all(8),
                         child: Text(
-                          'Let’s start chatting!',
+                          context.translations.letsStartChattingLabel,
                           style: chatThemeData.textTheme.headline,
                         ),
                       ),
@@ -312,7 +313,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                           horizontal: 52,
                         ),
                         child: Text(
-                          'How about sending your first message to a friend?',
+                          context.translations.sendingFirstMessageLabel,
                           textAlign: TextAlign.center,
                           style: chatThemeData.textTheme.body.copyWith(
                             color: chatThemeData.colorTheme.textLowEmphasis,
@@ -331,7 +332,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                       child: TextButton(
                         onPressed: widget.onStartChatPressed,
                         child: Text(
-                          'Start a chat',
+                          context.translations.startAChatLabel,
                           style: chatThemeData.textTheme.bodyBold.copyWith(
                             color: chatThemeData.colorTheme.accentPrimary,
                           ),
@@ -467,9 +468,9 @@ class _ChannelListViewState extends State<ChannelListView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text.rich(
-              const TextSpan(
+              TextSpan(
                 children: [
-                  WidgetSpan(
+                  const WidgetSpan(
                     child: Padding(
                       padding: EdgeInsets.only(
                         right: 2,
@@ -477,14 +478,14 @@ class _ChannelListViewState extends State<ChannelListView> {
                       child: Icon(Icons.error_outline),
                     ),
                   ),
-                  TextSpan(text: 'Error loading channels'),
+                  TextSpan(text: context.translations.loadingChannelsError),
                 ],
               ),
               style: Theme.of(context).textTheme.headline6,
             ),
             TextButton(
               onPressed: () => _channelListController.loadData!(),
-              child: const Text('Retry'),
+              child: Text(context.translations.retryLabel),
             ),
           ],
         ),
@@ -562,17 +563,16 @@ class _ChannelListViewState extends State<ChannelListView> {
                   ),
                   onTap: widget.onDeletePressed != null
                       ? () {
-                          widget.onDeletePressed!(channel);
+                          widget.onDeletePressed?.call(channel);
                         }
                       : () async {
                           final res = await showConfirmationDialog(
                             context,
-                            title: 'Delete Conversation',
-                            okText: 'DELETE',
+                            title: context.translations.deleteConversationLabel,
                             question:
-                                // ignore: lines_longer_than_80_chars
-                                'Are you sure you want to delete this conversation?',
-                            cancelText: 'CANCEL',
+                                context.translations.deleteConversationQuestion,
+                            okText: context.translations.deleteLabel,
+                            cancelText: context.translations.cancelLabel,
                             icon: StreamSvgIcon.delete(
                               color: chatThemeData.colorTheme.accentError,
                             ),
@@ -669,7 +669,7 @@ class _ChannelListViewState extends State<ChannelListView> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                'Error loading channels',
+                context.translations.loadingChannelsError,
                 style: theme.textTheme.body.copyWith(
                   color: Colors.white,
                 ),
