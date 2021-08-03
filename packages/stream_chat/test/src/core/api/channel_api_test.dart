@@ -176,7 +176,7 @@ void main() {
   });
 
   test('markAllRead', () async {
-    const path = 'channels/read';
+    const path = '/channels/read';
     when(() => client.post(path)).thenAnswer(
         (_) async => successResponse(path, data: <String, dynamic>{}));
 
