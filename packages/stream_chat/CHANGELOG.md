@@ -2,8 +2,13 @@
 
 🐞 Fixed
 
-- Mutes were not working correctly in 2.1.0
 - Fixed `channel.markAllRead` throwing failed host lookup.
+
+## 2.1.1
+
+🐞 Fixed
+
+- Mutes were not working correctly in 2.1.0
 
 ## 2.1.0
 
