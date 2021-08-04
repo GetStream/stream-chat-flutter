@@ -113,6 +113,7 @@ class StreamChatThemeData {
     required this.ownMessageTheme,
     required this.messageInputTheme,
     required this.defaultUserImage,
+    this.placeholderUserImage,
     required this.primaryIconTheme,
     required this.reactionIcons,
     required this.galleryHeaderTheme,
@@ -169,6 +170,9 @@ class StreamChatThemeData {
 
   /// The widget that will be built when the user image is unavailable
   final Widget Function(BuildContext, User) defaultUserImage;
+
+  /// The widget that will be built when the user image is loading
+  final Widget Function(BuildContext context, User user)? placeholderUserImage;
 
   /// Primary icon theme
   final IconThemeData primaryIconTheme;

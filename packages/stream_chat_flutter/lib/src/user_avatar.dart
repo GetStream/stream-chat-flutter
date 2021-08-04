@@ -79,6 +79,8 @@ class UserAvatar extends StatelessWidget {
                   imageUrl: user.extraData['image'] as String,
                   errorWidget: (_, __, ___) =>
                       streamChatTheme.defaultUserImage(context, user),
+                  placeholder: (_, __) =>
+                      streamChatTheme.placeholderUserImage!(context, user),
                   fit: BoxFit.cover,
                 )
               : streamChatTheme.defaultUserImage(context, user),
