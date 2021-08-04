@@ -1,3 +1,21 @@
+## Upcoming
+
+🔄 Changed
+
+Theming has been upgraded! Most theme classes now have `InheritedTheme` classes 
+associated with them, and have been upgraded with some goodies like `lerp` functions. 
+Here's the full naming breakdown:
+* `AvatarTheme` is now `AvatarThemeData`
+* `ChannelHeaderTheme` is now `ChannelHeaderThemeData`
+* `ChannelListHeaderTheme` is now `ChannelListHeaderThemeData`
+* `ChannelListViewTheme` is now `ChannelListViewThemeData`
+* `ChannelPreviewTheme` is now `ChannelPreviewThemeData`
+* `MessageInputTheme` is now `MessageInputThemeData`
+* `MessageListViewTheme` is now `MessageListViewTheme`
+* `MessageSearchListViewTheme` is now `MessageSearchListViewThemeData`
+* `MessageTheme` is now `MessageThemeData`
+* `UserListViewTheme` is now `UserListViewThemeData`
+
 ## 2.1.2
 
 🐞 Fixed
@@ -531,6 +549,7 @@ Widget build(BuildContext context) {
     },
     home: ChannelListPage(),
   );
+}
 ```
 
 - Fix reaction bubble going below previous message on iOS
