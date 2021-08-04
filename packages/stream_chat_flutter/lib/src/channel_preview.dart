@@ -183,15 +183,13 @@ class ChannelPreview extends StatelessWidget {
 
           return Text(
             stringDate,
-            style: StreamChatTheme.of(context)
-                .channelPreviewTheme
-                .lastMessageAtStyle,
+            style: ChannelPreviewTheme.of(context).lastMessageAtStyle,
           );
         },
       );
 
   Widget _buildSubtitle(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final channelPreviewTheme = ChannelPreviewTheme.of(context);
     if (channel.isMuted) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -201,7 +199,7 @@ class ChannelPreview extends StatelessWidget {
           ),
           Text(
             '  ${context.translations.channelIsMutedText}',
-            style: chatThemeData.channelPreviewTheme.subtitleStyle,
+            style: channelPreviewTheme.subtitleStyle,
           ),
         ],
       );
@@ -209,7 +207,7 @@ class ChannelPreview extends StatelessWidget {
     return TypingIndicator(
       channel: channel,
       alternativeWidget: _buildLastMessage(context),
-      style: chatThemeData.channelPreviewTheme.subtitleStyle,
+      style: channelPreviewTheme.subtitleStyle,
     );
   }
 

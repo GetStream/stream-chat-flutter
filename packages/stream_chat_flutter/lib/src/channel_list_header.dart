@@ -241,12 +241,13 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     StreamChatClient client,
   ) {
     final chatThemeData = StreamChatTheme.of(context);
+    final channelListHeaderTheme = ChannelListHeaderTheme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           context.translations.offlineLabel,
-          style: chatThemeData.channelListHeaderTheme.titleStyle?.copyWith(
+          style: channelListHeaderTheme.titleStyle?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -257,7 +258,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             ..openConnection(),
           child: Text(
             context.translations.tryAgainLabel,
-            style: chatThemeData.channelListHeaderTheme.titleStyle?.copyWith(
+            style: channelListHeaderTheme.titleStyle?.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: chatThemeData.colorTheme.accentPrimary,

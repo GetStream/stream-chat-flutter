@@ -118,10 +118,7 @@ class ChannelListPage extends StatelessWidget {
         channel: channel,
       ),
       title: ChannelName(
-        textStyle: StreamChatTheme.of(context)
-            .channelPreviewTheme
-            .titleStyle!
-            .copyWith(
+        textStyle: ChannelPreviewTheme.of(context).titleStyle!.copyWith(
               color: StreamChatTheme.of(context)
                   .colorTheme
                   .textHighEmphasis

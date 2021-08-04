@@ -105,7 +105,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-    final chatThemeData = StreamChatTheme.of(context);
+    final channelHeaderTheme = ChannelHeaderTheme.of(context);
 
     final leadingWidget = leading ??
         (showBackButton
@@ -141,17 +141,17 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             brightness: Theme.of(context).brightness,
             elevation: 1,
             leading: leadingWidget,
-            backgroundColor: chatThemeData.channelHeaderTheme.color,
+            backgroundColor: channelHeaderTheme.color,
             actions: actions ??
                 <Widget>[
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: Center(
                       child: ChannelAvatar(
-                        borderRadius: chatThemeData
-                            .channelHeaderTheme.avatarTheme?.borderRadius,
-                        constraints: chatThemeData
-                            .channelHeaderTheme.avatarTheme?.constraints,
+                        borderRadius:
+                            channelHeaderTheme.avatarTheme?.borderRadius,
+                        constraints:
+                            channelHeaderTheme.avatarTheme?.constraints,
                         onTap: onImageTap,
                       ),
                     ),
@@ -168,16 +168,14 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                   children: <Widget>[
                     title ??
                         ChannelName(
-                          textStyle:
-                              chatThemeData.channelHeaderTheme.titleStyle,
+                          textStyle: channelHeaderTheme.titleStyle,
                         ),
                     const SizedBox(height: 2),
                     subtitle ??
                         ChannelInfo(
                           showTypingIndicator: showTypingIndicator,
                           channel: channel,
-                          textStyle:
-                              chatThemeData.channelHeaderTheme.subtitleStyle,
+                          textStyle: channelHeaderTheme.subtitleStyle,
                         ),
                   ],
                 ),

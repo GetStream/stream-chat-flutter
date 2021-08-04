@@ -122,18 +122,18 @@ class MessageSearchItem extends StatelessWidget {
       text = parts.join(' ');
     }
 
-    final chatThemeData = StreamChatTheme.of(context);
+    final channelPreviewTheme = ChannelPreviewTheme.of(context);
     return Text.rich(
       _getDisplayText(
         text!,
         message.mentionedUsers,
         message.attachments,
-        chatThemeData.channelPreviewTheme.subtitleStyle?.copyWith(
+        channelPreviewTheme.subtitleStyle?.copyWith(
           fontStyle: (message.isSystem || message.isDeleted)
               ? FontStyle.italic
               : FontStyle.normal,
         ),
-        chatThemeData.channelPreviewTheme.subtitleStyle?.copyWith(
+        channelPreviewTheme.subtitleStyle?.copyWith(
           fontStyle: (message.isSystem || message.isDeleted)
               ? FontStyle.italic
               : FontStyle.normal,

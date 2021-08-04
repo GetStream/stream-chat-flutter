@@ -629,7 +629,7 @@ class _MessageListViewState extends State<MessageListView> {
         child: Text(
           context.translations.threadSeparatorText(replyCount),
           textAlign: TextAlign.center,
-          style: _streamTheme.channelHeaderTheme.subtitleStyle,
+          style: ChannelHeaderTheme.of(context).subtitleStyle,
         ),
       ),
     );
