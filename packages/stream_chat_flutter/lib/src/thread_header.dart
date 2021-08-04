@@ -104,7 +104,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final channelHeaderTheme = ChannelHeaderTheme.of(context);
 
     final defaultSubtitle = subtitle ??
         Row(
@@ -113,11 +113,11 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
           children: [
             Text(
               '${context.translations.withText} ',
-              style: chatThemeData.channelHeaderTheme.subtitleStyle,
+              style: channelHeaderTheme.subtitleStyle,
             ),
             Flexible(
               child: ChannelName(
-                textStyle: chatThemeData.channelHeaderTheme.subtitleStyle,
+                textStyle: channelHeaderTheme.subtitleStyle,
               ),
             ),
           ],
@@ -136,7 +136,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                   showUnreads: true,
                 )
               : const SizedBox()),
-      backgroundColor: chatThemeData.channelHeaderTheme.color,
+      backgroundColor: channelHeaderTheme.color,
       centerTitle: true,
       actions: actions,
       title: InkWell(
@@ -150,14 +150,14 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
               title ??
                   Text(
                     context.translations.threadReplyLabel,
-                    style: chatThemeData.channelHeaderTheme.titleStyle,
+                    style: channelHeaderTheme.titleStyle,
                   ),
               const SizedBox(height: 2),
               if (showTypingIndicator)
                 TypingIndicator(
                   alignment: Alignment.center,
                   channel: StreamChannel.of(context).channel,
-                  style: chatThemeData.channelHeaderTheme.subtitleStyle,
+                  style: channelHeaderTheme.subtitleStyle,
                   parentId: parent.id,
                   alternativeWidget: defaultSubtitle,
                 )
