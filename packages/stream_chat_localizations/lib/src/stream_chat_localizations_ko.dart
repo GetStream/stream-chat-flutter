@@ -145,7 +145,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get videoFromCameraLabel => '카메라의 비디오.';
 
   @override
-  String get okLabel => 'ㅇㅋ';
+  String get okLabel => '확인';
 
   @override
   String get somethingWentWrongError => '뭔가 잘못됐습느다';
