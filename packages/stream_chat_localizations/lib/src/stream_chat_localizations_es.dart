@@ -68,7 +68,8 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get genericErrorText => 'Hubo un problema';
 
   @override
-  String get loadingMessagesError => 'Hubo un error mientras se cargaba el mensaje';
+  String get loadingMessagesError =>
+      'Hubo un error mientras se cargaba el mensaje';
 
   @override
   String resultCountText(int count) => '$count resultados';
@@ -249,7 +250,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
 
   @override
   String sentAtText({required DateTime date, required DateTime time}) =>
-      'Enviado el ${_getDay(date)} a las ${Jiffy(time.toLocal()).format('HH:mm')}';
+      '''Enviado el ${_getDay(date)} a las ${Jiffy(time.toLocal()).format('HH:mm')}''';
 
   @override
   String get todayLabel => 'Hoy';
