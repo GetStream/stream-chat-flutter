@@ -36,7 +36,7 @@ class MessageSearchItem extends StatelessWidget {
     final channel = getMessageResponse.channel;
     final channelName = channel?.extraData['name'];
     final user = message.user!;
-    final chatThemeData = StreamChatTheme.of(context);
+    final channelPreviewTheme = ChannelPreviewTheme.of(context);
     return ListTile(
       onTap: onTap,
       leading: UserAvatar(
@@ -53,18 +53,18 @@ class MessageSearchItem extends StatelessWidget {
             user.id == StreamChat.of(context).currentUser?.id
                 ? context.translations.youText
                 : user.name,
-            style: chatThemeData.channelPreviewTheme.titleStyle,
+            style: channelPreviewTheme.titleStyle,
           ),
           if (channelName != null) ...[
             Text(
               ' ${context.translations.inText} ',
-              style: chatThemeData.channelPreviewTheme.titleStyle?.copyWith(
+              style: channelPreviewTheme.titleStyle?.copyWith(
                 fontWeight: FontWeight.normal,
               ),
             ),
             Text(
               channelName as String,
-              style: chatThemeData.channelPreviewTheme.titleStyle,
+              style: channelPreviewTheme.titleStyle,
             ),
           ],
         ],
