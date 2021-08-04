@@ -1,16 +1,16 @@
 part of 'stream_chat_localizations.dart';
 
-/// The translations for English (`ja`).
+/// The translations for Japanese (`ja`).
 class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for Japanese.
   const StreamChatLocalizationsJa({String localeName = 'ja'})
       : super(localeName: localeName);
 
   @override
-  String get launchUrlError => 'ユーアーレルの起動ができない';
+  String get launchUrlError => 'URLの起動ができません';
 
   @override
-  String get loadingUsersError => 'ユーザーの読み込みエラー';
+  String get loadingUsersError => 'ユーザーの読み込みができません';
 
   @override
   String get noUsersLabel => '現在、ユーザーはいません。';
@@ -29,26 +29,26 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
     if (users.isEmpty) return '';
     final first = users.first;
     if (users.length == 1) {
-      return '${first.name}がタイプしている';
+      return '${first.name}が入力しています';
     }
-    return '${first.name}とあと${users.length - 1}人が入力しています';
+    return '${first.name}と${users.length - 1}人が入力しています';
   }
 
   @override
   String get threadReplyLabel => 'スレッド返信';
 
   @override
-  String get onlyVisibleToYouText => '自分にしか見えない';
+  String get onlyVisibleToYouText => '自分しか見れません';
 
   @override
-  String threadReplyCountText(int count) => '$countスレッドの返信';
+  String threadReplyCountText(int count) => '$countつのスレッド返信';
 
   @override
   String attachmentsUploadProgressText({
     required int remaining,
     required int total,
   }) =>
-      '$remaining/${total}mbのアップロード 。。。';
+      '$remaining/${total}mbのアップロード中 。。。';
 
   @override
   String pinnedByUserText({
@@ -56,21 +56,21 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
     required User currentUser,
   }) {
     final pinnedByCurrentUser = currentUser.id == pinnedBy.id;
-    if (pinnedByCurrentUser) return 'あなたのピン留';
-    return '${pinnedBy.name}のピン留';
+    if (pinnedByCurrentUser) return 'あなたのピン';
+    return '${pinnedBy.name}のピン';
   }
 
   @override
   String get emptyMessagesText => '現在、メッセージはありません。';
 
   @override
-  String get genericErrorText => '何かが間違っていた';
+  String get genericErrorText => 'エラーが発生しました';
 
   @override
   String get loadingMessagesError => 'メッセージの読み込みエラー';
 
   @override
-  String resultCountText(int count) => '$countつの結果';
+  String resultCountText(int count) => '$count件の結果';
 
   @override
   String get messageDeletedText => 'このメッセージは削除されました。';
@@ -79,34 +79,32 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'メッセージ削除';
 
   @override
-  String get messageReactionsLabel => 'メッセージに対する反応';
+  String get messageReactionsLabel => 'メッセージのリアクション';
 
   @override
-  String get emptyChatMessagesText => 'ここではまだ会話はありませんが。。。';
+  String get emptyChatMessagesText => 'チャットがありませんが。。。';
 
   @override
-  String threadSeparatorText(int replyCount) {
-    if (replyCount == 1) return '1 回答';
-    return '$replyCount件の返信';
-  }
+  String threadSeparatorText(int replyCount)=> '$replyCount件の返信';
+  
 
   @override
-  String get connectedLabel => 'コネクテッド';
+  String get connectedLabel => '接続しています';
 
   @override
   String get disconnectedLabel => '接続切れ';
 
   @override
-  String get reconnectingLabel => 'リコネクティング。。。';
+  String get reconnectingLabel => '再接続中。。。';
 
   @override
-  String get alsoSendAsDirectMessageLabel => 'ダイレクトメッセージでも送信可能';
+  String get alsoSendAsDirectMessageLabel => 'ダイレクトメッセージでも送信';
 
   @override
   String get addACommentOrSendLabel => 'コメントの追加や送信';
 
   @override
-  String get searchGifLabel => '検索用GIF';
+  String get searchGifLabel => 'GIFの検索';
 
   @override
   String get writeAMessageLabel => 'メッセージを書く';
@@ -149,7 +147,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get okLabel => 'よし';
 
   @override
-  String get somethingWentWrongError => '何かが間違っていたのだ。';
+  String get somethingWentWrongError => 'エラーが発生しました';
 
   @override
   String get addMoreFilesLabel => 'ファイルの追加';
@@ -158,29 +156,29 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get enablePhotoAndVideoAccessMessage => 'お友達と共有できるように、写真'
       '\nやビデオへのアクセスを有効にしてください。';
   @override
-  String get allowGalleryAccessMessage => 'お客様のギャラリーへのアクセスを許可する';
+  String get allowGalleryAccessMessage => 'ギャラリーへのアクセスを許可する';
 
   @override
-  String get flagMessageLabel => 'メッセージフラグが';
+  String get flagMessageLabel => 'メッセージをフラグする';
 
   @override
   String get flagMessageQuestion => 'このメッセージのコピーを'
       '\nモデレーターに送って、さらに調査してもらいますか？';
 
   @override
-  String get flagLabel => 'フラグが';
+  String get flagLabel => 'フラグする';
 
   @override
   String get cancelLabel => 'キャンセル';
 
   @override
-  String get flagMessageSuccessfulLabel => 'フラグ付メッセージ';
+  String get flagMessageSuccessfulLabel => 'メッセージにフラグが付けられました';
 
   @override
   String get flagMessageSuccessfulText => 'このメッセージはモデレーターに報告されました。';
 
   @override
-  String get deleteLabel => '消す';
+  String get deleteLabel => '削除';
 
   @override
   String get deleteMessageLabel => 'メッセージを削除する ';
@@ -197,25 +195,25 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String togglePinUnpinText({required bool pinned}) {
-    if (pinned) return 'カンバセーションからピンを外す ';
-    return '会話へのピン';
+    if (pinned) return '会話のピンを外す';
+    return '会話にピンする';
   }
 
   @override
   String toggleDeleteRetryDeleteMessageText({required bool isDeleteFailed}) {
-    if (isDeleteFailed) return 'メッセージの削除を再試行してください';
+    if (isDeleteFailed) return 'メッセージの削除を再試行する';
     return 'メッセージを削除する';
   }
 
   @override
-  String get copyMessageLabel => 'コピーメッセージ';
+  String get copyMessageLabel => 'メッセージをコピーする';
 
   @override
-  String get editMessageLabel => 'メッセージの編集';
+  String get editMessageLabel => 'メッセージを編集する';
 
   @override
   String toggleResendOrResendEditedMessage({required bool isUpdateFailed}) {
-    if (isUpdateFailed) return '編集したメッセージの再送';
+    if (isUpdateFailed) return '編集したメッセージを再送する';
     return '再送';
   }
 
@@ -240,7 +238,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String sentAtText({required DateTime date, required DateTime time}) =>
-      '${_getDay(date)} at ${Jiffy(time.toLocal()).format('HH:mm')}に送信 ';
+      '${_getDay(date)}の${Jiffy(time.toLocal()).format('HH:mm')}に送信しました ';
 
   @override
   String get todayLabel => '今日';
@@ -249,16 +247,16 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get yesterdayLabel => '昨日';
 
   @override
-  String get channelIsMutedText => 'チャンネルがミュートされています';
+  String get channelIsMutedText => 'チャンネルが無音されています';
 
   @override
   String get noTitleText => 'タイトル無し';
 
   @override
-  String get letsStartChattingLabel => 'さあ、チャットを始めよう';
+  String get letsStartChattingLabel => 'チャットを始めよう！';
 
   @override
-  String get sendingFirstMessageLabel => 'どのように友人にあなたの最初のメッセージを送ることについてはどうですか？';
+  String get sendingFirstMessageLabel => '友人に最初のメッセージを送りましょうか？';
 
   @override
   String get startAChatLabel => 'チャットを開始する';
@@ -270,13 +268,13 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get deleteConversationLabel => '会話を削除する';
 
   @override
-  String get deleteConversationQuestion => 'この会話を削除してもよろしいですか？';
+  String get deleteConversationQuestion => '本当に会話を削除しますか？';
 
   @override
   String get streamChatLabel => 'ストリームチャット';
 
   @override
-  String get searchingForNetworkText => 'ネットワークの検索';
+  String get searchingForNetworkText => 'ネットワークを検索中';
 
   @override
   String get offlineLabel => 'オフライン。。。';
@@ -285,16 +283,10 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get tryAgainLabel => '再試行する';
 
   @override
-  String membersCountText(int count) {
-    if (count == 1) return '1人のメンバー';
-    return '$count人のメンバー';
-  }
+  String membersCountText(int count) => '$count人のメンバー';
 
   @override
-  String watchersCountText(int count) {
-    if (count == 1) return '1オンライン';
-    return '$countオンライン';
-  }
+  String watchersCountText(int count) => '$count人がオンライン';
 
   @override
   String get viewInfoLabel => '情報を見る';
@@ -309,7 +301,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get leaveConversationLabel => '会話を離れる';
 
   @override
-  String get leaveConversationQuestion => 'この会話を離れてもよろしいですか？';
+  String get leaveConversationQuestion => '本当に会話を離れますか？';
 
   @override
   String get showInChatLabel => 'チャットで表示';
@@ -336,15 +328,18 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get withText => 'と';
 
   @override
-  String get inText => 'は';
+  String get inText => 'に';
 
   @override
-  String get youText => '君';
+  String get youText => 'お客様';
+  // This is the word for 'customer' or 'user' because saying 'you' directly is too informal and rude
 
   @override
-  String galleryPaginationText(
-          {required int currentPage, required int totalPages}) =>
-      '$totalPagesの${currentPage + 1}';
+  String galleryPaginationText({
+    required int currentPage,
+    required int totalPages,
+  }) =>
+      '${currentPage + 1} / $totalPages';
 
   @override
   String get fileText => 'ファイル';
