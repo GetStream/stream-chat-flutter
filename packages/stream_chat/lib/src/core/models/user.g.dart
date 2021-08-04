@@ -10,6 +10,7 @@ User _$UserFromJson(Map<String, dynamic> json) {
   return User(
     id: json['id'] as String,
     role: json['role'] as String?,
+    image: json['image'] as String?,
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
@@ -19,8 +20,8 @@ User _$UserFromJson(Map<String, dynamic> json) {
     lastActive: json['last_active'] == null
         ? null
         : DateTime.parse(json['last_active'] as String),
-    online: json['online'] as bool? ?? false,
     extraData: json['extra_data'] as Map<String, dynamic>? ?? {},
+    online: json['online'] as bool? ?? false,
     banned: json['banned'] as bool? ?? false,
     teams:
         (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??
@@ -41,6 +42,7 @@ Map<String, dynamic> _$UserToJson(User instance) {
   }
 
   writeNotNull('role', readonly(instance.role));
+  writeNotNull('image', readonly(instance.image));
   writeNotNull('teams', readonly(instance.teams));
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));

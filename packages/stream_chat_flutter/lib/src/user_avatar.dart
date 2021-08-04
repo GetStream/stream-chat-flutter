@@ -56,9 +56,7 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = user.extraData.containsKey('image') &&
-        user.extraData['image'] != null &&
-        user.extraData['image'] != '';
+    final hasImage = user.image != null && user.image!.isNotEmpty;
     final streamChatTheme = StreamChatTheme.of(context);
 
     Widget avatar = FittedBox(
@@ -75,8 +73,7 @@ class UserAvatar extends StatelessWidget {
           child: hasImage
               ? CachedNetworkImage(
                   filterQuality: FilterQuality.high,
-                  // ignore: cast_nullable_to_non_nullable
-                  imageUrl: user.extraData['image'] as String,
+                  imageUrl: user.image!,
                   errorWidget: (_, __, ___) =>
                       streamChatTheme.defaultUserImage(context, user),
                   fit: BoxFit.cover,

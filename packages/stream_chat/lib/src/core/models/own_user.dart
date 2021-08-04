@@ -28,6 +28,7 @@ class OwnUser extends User {
     bool banned = false,
     List<String> teams = const [],
     String? language,
+    String? image,
   }) : super(
           id: id,
           role: role,
@@ -39,6 +40,7 @@ class OwnUser extends User {
           banned: banned,
           teams: teams,
           language: language,
+          image: image,
         );
 
   /// Create a new instance from a json
@@ -57,6 +59,7 @@ class OwnUser extends User {
         extraData: user.extraData,
         teams: user.teams,
         language: user.language,
+        image: user.image,
       );
 
   /// Creates a copy of [OwnUser] with specified attributes overridden.
@@ -77,24 +80,26 @@ class OwnUser extends User {
     int? totalUnreadCount,
     int? unreadChannels,
     String? language,
+    String? image,
   }) =>
       OwnUser(
-        id: id ?? this.id,
-        banned: banned ?? this.banned,
-        role: role ?? this.role,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        lastActive: lastActive ?? this.lastActive,
-        online: online ?? this.online,
-        extraData: extraData ?? this.extraData,
-        teams: teams ?? this.teams,
-        channelMutes: channelMutes ?? this.channelMutes,
-        devices: devices ?? this.devices,
-        mutes: mutes ?? this.mutes,
-        totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
-        unreadChannels: unreadChannels ?? this.unreadChannels,
-        language: language ?? this.language,
-      );
+          id: id ?? this.id,
+          banned: banned ?? this.banned,
+          role: role ?? this.role,
+          createdAt: createdAt ?? this.createdAt,
+          updatedAt: updatedAt ?? this.updatedAt,
+          lastActive: lastActive ?? this.lastActive,
+          online: online ?? this.online,
+          extraData: extraData ?? this.extraData,
+          teams: teams ?? this.teams,
+          channelMutes: channelMutes ?? this.channelMutes,
+          devices: devices ?? this.devices,
+          mutes: mutes ?? this.mutes,
+          totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
+          unreadChannels: unreadChannels ?? this.unreadChannels,
+          language: language ?? this.language,
+          image: image // if null, it will be retrieved from extraData['image']
+          );
 
   /// Returns a new [OwnUser] that is a combination of this ownUser
   /// and the given [other] ownUser.
@@ -116,6 +121,7 @@ class OwnUser extends User {
       unreadChannels: other.unreadChannels,
       updatedAt: other.updatedAt,
       language: other.language,
+      image: other.image,
     );
   }
 

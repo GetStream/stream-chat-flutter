@@ -4,29 +4,45 @@ import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'user.g.dart';
 
-/// The class that defines the user model
+/// Class that defines a Stream Chat User.
 @JsonSerializable()
 class User extends Equatable {
-  /// Constructor used for json serialization
+  /// Creates a new user.
+  ///
+  /// If an [image] is provided it will be set on [extraData] with a `key`
+  /// of 'image'.
+  ///
+  /// For example:
+  /// ```dart
+  /// final user = User(id: 'id', image: 'https://getstream.io/image.png');
+  /// print(user.image == user.extraData['image']); // true
+  /// ```
   User({
     required this.id,
     this.role,
+    String? image,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.lastActive,
+    Map<String, Object?> extraData = const {},
     this.online = false,
-    this.extraData = const {},
     this.banned = false,
     this.teams = const [],
     this.language,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  })  : _image = image,
+        createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now(),
 
-  /// Create a new instance from a json
+        // For backwards compatibalitity, set 'image' on [extraData].
+        extraData =
+            (image != null) ? {...extraData, 'image': image} : extraData;
+
+  /// Create a new instance from json.
   factory User.fromJson(Map<String, dynamic> json) =>
       _$UserFromJson(Serializer.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// Known top level fields.
+  ///
   /// Useful for [Serializer] methods.
   static const topLevelFields = [
     'id',
@@ -38,16 +54,64 @@ class User extends Equatable {
     'banned',
     'teams',
     'language',
+    'image',
   ];
 
-  /// User id
+  /// User id.
   final String id;
 
-  /// User role
+  /// User role.
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final String? role;
 
-  /// User role
+  /// Image for user. This is also set on `extraData['image']`.
+  ///
+  /// {@template image}
+  /// There are a few ways to set an image.
+  ///
+  /// Setting an image by passing in an image argument:
+  /// ```dart
+  /// final user = User(
+  ///   id: 'id',
+  ///   image: 'https://getstream.io/image',
+  /// );
+  /// ```
+  ///
+  /// Or by directly setting it in [extraData], for example:
+  /// ```dart
+  /// final user = User(
+  ///   id: 'id',
+  ///   extraData: const {'image': 'https://getstream.io/image'},
+  /// );
+  ///
+  /// ```
+  /// Parsing json with an 'image' key will automatically set the `image`
+  /// property and `extraData['image']` key/value.
+  ///
+  /// ```dart
+  /// final user = User.fromJson({
+  ///   id: 'id',
+  ///   image: 'https://getstream.io/image', // key: image
+  /// });
+  ///
+  /// print(user.image == user.extraData['image']); // true
+  /// ```
+  /// {@endtemplate}
+  final String? _image;
+
+  /// Shortcut for user image.
+  ///
+  /// {@macro image}
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  String? get image {
+    if (_image != null) {
+      return _image;
+    } else {
+      return extraData['image'] as String?;
+    }
+  }
+
+  /// User teams
   @JsonKey(
     includeIfNull: false,
     toJson: Serializer.readOnly,
@@ -55,29 +119,29 @@ class User extends Equatable {
   )
   final List<String> teams;
 
-  /// Date of user creation
+  /// Date of user creation.
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime createdAt;
 
-  /// Date of last user update
+  /// Date of last user update.
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime updatedAt;
 
-  /// Date of last user connection
+  /// Date of last user connection.
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime? lastActive;
 
-  /// True if user is online
+  /// True if user is online.
   @JsonKey(
       includeIfNull: false, toJson: Serializer.readOnly, defaultValue: false)
   final bool online;
 
-  /// True if user is banned from the chat
+  /// True if user is banned from the chat.
   @JsonKey(
       includeIfNull: false, toJson: Serializer.readOnly, defaultValue: false)
   final bool banned;
 
-  /// Map of custom user extraData
+  /// Map of custom user extraData.
   @JsonKey(
     includeIfNull: false,
     defaultValue: {},
@@ -85,12 +149,10 @@ class User extends Equatable {
   final Map<String, Object?> extraData;
 
   /// The language this user prefers.
-  ///
-  /// Defaults to 'en'.
   @JsonKey(includeIfNull: false)
   final String? language;
 
-  /// Shortcut for user name
+  /// Shortcut for user name.
   String get name {
     if (extraData.containsKey('name')) {
       final name = extraData['name']! as String;
@@ -99,11 +161,11 @@ class User extends Equatable {
     return id;
   }
 
-  /// List of users to list of userIds
+  /// List of users to list of userIds.
   static List<String>? toIds(List<User>? users) =>
       users?.map((u) => u.id).toList();
 
-  /// Serialize to json
+  /// Serialize to json.
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
         _$UserToJson(this),
       );
@@ -120,6 +182,7 @@ class User extends Equatable {
     bool? banned,
     List<String>? teams,
     String? language,
+    String? image,
   }) =>
       User(
         id: id ?? this.id,
@@ -132,6 +195,7 @@ class User extends Equatable {
         banned: banned ?? this.banned,
         teams: teams ?? this.teams,
         language: language ?? this.language,
+        image: image, // if null, it will be retrieved from extraData['image']
       );
 
   @override
