@@ -19,6 +19,7 @@ class UserAvatar extends StatelessWidget {
     this.selected = false,
     this.selectionColor,
     this.selectionThickness = 4,
+    this.placeholderUserImageBuilder,
   }) : super(key: key);
 
   /// User whose avatar is to displayed
@@ -54,6 +55,10 @@ class UserAvatar extends StatelessWidget {
   /// Selection thickness around the avatar
   final double selectionThickness;
 
+  /// The widget that will be built when the user image is loading
+  final Widget Function(BuildContext context, User user)?
+      placeholderUserImageBuilder;
+
   @override
   Widget build(BuildContext context) {
     final hasImage = user.extraData.containsKey('image') &&
@@ -79,8 +84,12 @@ class UserAvatar extends StatelessWidget {
                   imageUrl: user.extraData['image'] as String,
                   errorWidget: (_, __, ___) =>
                       streamChatTheme.defaultUserImage(context, user),
-                  placeholder: (_, __) =>
-                      streamChatTheme.placeholderUserImage!(context, user),
+                  placeholder: placeholderUserImageBuilder == null
+                      ? streamChatTheme.placeholderUserImage == null
+                          ? null
+                          : (_, __) => streamChatTheme.placeholderUserImage!(
+                              context, user)
+                      : (_, __) => placeholderUserImageBuilder!(context, user),
                   fit: BoxFit.cover,
                 )
               : streamChatTheme.defaultUserImage(context, user),
