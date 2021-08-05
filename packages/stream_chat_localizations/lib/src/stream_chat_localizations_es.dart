@@ -250,7 +250,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
 
   @override
   String sentAtText({required DateTime date, required DateTime time}) =>
-      'Enviado el ${_getDay(date)} a las ${Jiffy(time.toLocal()).format('HH:mm')}';
+      '''Enviado el ${_getDay(date)} a las ${Jiffy(time.toLocal()).format('HH:mm')}''';
 
   @override
   String get todayLabel => 'Hoy';
