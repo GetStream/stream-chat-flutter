@@ -7,11 +7,12 @@ import 'package:stream_chat/stream_chat.dart';
 
 part 'own_user.g.dart';
 
-/// The class that defines the own user model
-/// This object can be found in [Event]
+/// The class that defines the own user model.
+///
+/// This object can be found in [Event].
 @JsonSerializable(createToJson: false)
 class OwnUser extends User {
-  /// Constructor used for json serialization
+  /// Constructor used for json serialization.
   OwnUser({
     this.devices = const [],
     this.mutes = const [],
@@ -45,11 +46,11 @@ class OwnUser extends User {
           language: language,
         );
 
-  /// Create a new instance from a json
+  /// Create a new instance from json.
   factory OwnUser.fromJson(Map<String, dynamic> json) => _$OwnUserFromJson(
       Serializer.moveToExtraDataFromRoot(json, topLevelFields));
 
-  /// Create a new instance from [User] object
+  /// Create a new instance from [User] object.
   factory OwnUser.fromUser(User user) => OwnUser(
         id: user.id,
         role: user.role,
@@ -133,27 +134,28 @@ class OwnUser extends User {
     );
   }
 
-  /// List of user devices
+  /// List of user devices.
   @JsonKey(includeIfNull: false, defaultValue: <Device>[])
   final List<Device> devices;
 
-  /// List of users muted by the user
+  /// List of users muted by the user.
   @JsonKey(includeIfNull: false, defaultValue: <Mute>[])
   final List<Mute> mutes;
 
-  /// List of users muted by the user
+  /// List of users muted by the user.
   @JsonKey(includeIfNull: false, defaultValue: <Mute>[])
   final List<Mute> channelMutes;
 
-  /// Total unread messages by the user
+  /// Total unread messages by the user.
   @JsonKey(includeIfNull: false, defaultValue: 0)
   final int totalUnreadCount;
 
-  /// Total unread channels by the user
+  /// Total unread channels by the user.
   @JsonKey(includeIfNull: false)
   final int? unreadChannels;
 
   /// Known top level fields.
+  ///
   /// Useful for [Serializer] methods.
   static final topLevelFields = [
     'devices',
