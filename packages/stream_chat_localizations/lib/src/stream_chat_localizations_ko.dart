@@ -335,7 +335,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get inText => '에';
 
   @override
-  String get youText => '고객님';
+  String get youText => '당신';
   // This is the word for 'customer' or 'user' because saying 'you' directly is too informal and rude
 
   @override
