@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/theme/themes.dart';
 
 /// Widget to display deleted message
 class DeletedMessage extends StatelessWidget {
@@ -15,7 +16,7 @@ class DeletedMessage extends StatelessWidget {
   }) : super(key: key);
 
   /// The theme of the message
-  final MessageTheme messageTheme;
+  final MessageThemeData messageTheme;
 
   /// The border radius of the message text
   final BorderRadiusGeometry? borderRadiusGeometry;
@@ -51,9 +52,9 @@ class DeletedMessage extends StatelessWidget {
         ),
         child: Text(
           context.translations.messageDeletedLabel,
-          style: messageTheme.messageText?.copyWith(
+          style: messageTheme.messageTextStyle?.copyWith(
             fontStyle: FontStyle.italic,
-            color: messageTheme.createdAt?.color,
+            color: messageTheme.createdAtStyle?.color,
           ),
         ),
       ),

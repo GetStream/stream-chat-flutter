@@ -2,10 +2,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_neumorphic_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Widget builder for title
 typedef TitleBuilder = Widget Function(
@@ -46,7 +46,7 @@ typedef TitleBuilder = Widget Function(
 /// if you don't have it in the widget tree.
 ///
 /// The widget components render the ui based on the first ancestor of type
-/// [StreamChatTheme] and on its [ChannelListHeaderTheme] property.
+/// [StreamChatTheme] and on its [ChannelListHeaderThemeData] property.
 /// Modify it to change the widget appearance.
 class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Instantiates a ChannelListHeader
@@ -116,6 +116,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
         }
 
         final chatThemeData = StreamChatTheme.of(context);
+        final channelListHeaderThemeData = ChannelListHeaderTheme.of(context);
         return InfoTile(
           showMessage: showConnectionStateTile && showStatus,
           message: statusString,
@@ -123,7 +124,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             textTheme: Theme.of(context).textTheme,
             brightness: Theme.of(context).brightness,
             elevation: 1,
-            backgroundColor: chatThemeData.channelListHeaderTheme.color,
+            backgroundColor: channelListHeaderThemeData.color,
             centerTitle: true,
             leading: leading ??
                 Center(
@@ -138,10 +139,10 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
                                 }
                                 Scaffold.of(context).openDrawer();
                               },
-                          borderRadius: chatThemeData
-                              .channelListHeaderTheme.avatarTheme?.borderRadius,
-                          constraints: chatThemeData
-                              .channelListHeaderTheme.avatarTheme?.constraints,
+                          borderRadius: channelListHeaderThemeData
+                              .avatarTheme?.borderRadius,
+                          constraints: channelListHeaderThemeData
+                              .avatarTheme?.constraints,
                         )
                       : const Offstage(),
                 ),
@@ -227,10 +228,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
           const SizedBox(width: 10),
           Text(
             context.translations.searchingForNetworkText,
-            style: StreamChatTheme.of(context)
-                .channelListHeaderTheme
-                .title
-                ?.copyWith(
+            style: ChannelListHeaderTheme.of(context).titleStyle?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -243,12 +241,13 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     StreamChatClient client,
   ) {
     final chatThemeData = StreamChatTheme.of(context);
+    final channelListHeaderTheme = ChannelListHeaderTheme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           context.translations.offlineLabel,
-          style: chatThemeData.channelListHeaderTheme.title?.copyWith(
+          style: channelListHeaderTheme.titleStyle?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -259,7 +258,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             ..openConnection(),
           child: Text(
             context.translations.tryAgainLabel,
-            style: chatThemeData.channelListHeaderTheme.title?.copyWith(
+            style: channelListHeaderTheme.titleStyle?.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: chatThemeData.colorTheme.accentPrimary,
