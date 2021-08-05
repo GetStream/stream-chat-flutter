@@ -10,7 +10,6 @@ User _$UserFromJson(Map<String, dynamic> json) {
   return User(
     id: json['id'] as String,
     role: json['role'] as String?,
-    image: json['image'] as String?,
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
@@ -42,7 +41,6 @@ Map<String, dynamic> _$UserToJson(User instance) {
   }
 
   writeNotNull('role', readonly(instance.role));
-  writeNotNull('image', readonly(instance.image));
   writeNotNull('teams', readonly(instance.teams));
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));

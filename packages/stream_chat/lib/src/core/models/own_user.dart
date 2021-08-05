@@ -20,6 +20,8 @@ class OwnUser extends User {
     this.channelMutes = const [],
     required String id,
     String? role,
+    String? name,
+    String? image,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? lastActive,
@@ -28,10 +30,11 @@ class OwnUser extends User {
     bool banned = false,
     List<String> teams = const [],
     String? language,
-    String? image,
   }) : super(
           id: id,
           role: role,
+          name: name,
+          image: image,
           createdAt: createdAt,
           updatedAt: updatedAt,
           lastActive: lastActive,
@@ -40,7 +43,6 @@ class OwnUser extends User {
           banned: banned,
           teams: teams,
           language: language,
-          image: image,
         );
 
   /// Create a new instance from a json
@@ -51,6 +53,8 @@ class OwnUser extends User {
   factory OwnUser.fromUser(User user) => OwnUser(
         id: user.id,
         role: user.role,
+        name: user.name,
+        image: user.image,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         lastActive: user.lastActive,
@@ -59,7 +63,6 @@ class OwnUser extends User {
         extraData: user.extraData,
         teams: user.teams,
         language: user.language,
-        image: user.image,
       );
 
   /// Creates a copy of [OwnUser] with specified attributes overridden.
@@ -67,6 +70,8 @@ class OwnUser extends User {
   OwnUser copyWith({
     String? id,
     String? role,
+    String? name,
+    String? image,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? lastActive,
@@ -80,48 +85,51 @@ class OwnUser extends User {
     int? totalUnreadCount,
     int? unreadChannels,
     String? language,
-    String? image,
   }) =>
       OwnUser(
-          id: id ?? this.id,
-          banned: banned ?? this.banned,
-          role: role ?? this.role,
-          createdAt: createdAt ?? this.createdAt,
-          updatedAt: updatedAt ?? this.updatedAt,
-          lastActive: lastActive ?? this.lastActive,
-          online: online ?? this.online,
-          extraData: extraData ?? this.extraData,
-          teams: teams ?? this.teams,
-          channelMutes: channelMutes ?? this.channelMutes,
-          devices: devices ?? this.devices,
-          mutes: mutes ?? this.mutes,
-          totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
-          unreadChannels: unreadChannels ?? this.unreadChannels,
-          language: language ?? this.language,
-          image: image // if null, it will be retrieved from extraData['image']
-          );
+        id: id ?? this.id,
+        role: role ?? this.role,
+        /* if null, it will be retrieved from extraData['name']*/
+        name: name,
+        /* if null, it will be retrieved from extraData['image']*/
+        image: image,
+        banned: banned ?? this.banned,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        lastActive: lastActive ?? this.lastActive,
+        online: online ?? this.online,
+        extraData: extraData ?? this.extraData,
+        teams: teams ?? this.teams,
+        channelMutes: channelMutes ?? this.channelMutes,
+        devices: devices ?? this.devices,
+        mutes: mutes ?? this.mutes,
+        totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
+        unreadChannels: unreadChannels ?? this.unreadChannels,
+        language: language ?? this.language,
+      );
 
   /// Returns a new [OwnUser] that is a combination of this ownUser
   /// and the given [other] ownUser.
   OwnUser merge(OwnUser? other) {
     if (other == null) return this;
     return copyWith(
+      id: other.id,
+      role: other.role,
+      name: other.name,
+      image: other.image,
       banned: other.banned,
       channelMutes: other.channelMutes,
       createdAt: other.createdAt,
       devices: other.devices,
       extraData: other.extraData,
-      id: other.id,
       lastActive: other.lastActive,
       mutes: other.mutes,
       online: other.online,
-      role: other.role,
       teams: other.teams,
       totalUnreadCount: other.totalUnreadCount,
       unreadChannels: other.unreadChannels,
       updatedAt: other.updatedAt,
       language: other.language,
-      image: other.image,
     );
   }
 

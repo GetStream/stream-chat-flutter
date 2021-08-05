@@ -45,9 +45,9 @@ void main() {
       final user = User(
         id: id,
         role: role,
+        name: name,
         image: image,
         extraData: const {
-          'name': name,
           'extraDataStringTest': extraDataStringTest,
           'extraDataIntTest': extraDataIntTest,
           'extraDataDoubleTest': extraDataDoubleTest,
@@ -93,9 +93,7 @@ void main() {
       newUser = user.copyWith(
         id: 'test',
         role: 'test',
-        extraData: {
-          'name': 'test',
-        },
+        name: 'test',
         image: 'https://stream.io/new-image',
         online: false,
         banned: false,
@@ -118,6 +116,40 @@ void main() {
       expect(newUser.updatedAt, DateTime.parse('2021-05-04 12:39:21.817646'));
       expect(newUser.lastActive, DateTime.parse('2021-05-06 12:39:21.817646'));
       expect(newUser.language, 'it');
+    });
+
+    test('name property and extraData manipulation', () {
+      final user = User(id: id, name: name);
+
+      expect(user.name, name);
+      expect(user.extraData['name'], name);
+      expect(user.toJson(), {'id': id, 'name': name});
+      expect(User.fromJson(user.toJson()).toJson(), {'id': id, 'name': name});
+
+      const nameOne = 'Name One';
+      var newUser = user.copyWith(
+        extraData: {'name': nameOne},
+      );
+
+      expect(newUser.extraData['name'], nameOne);
+      expect(newUser.name, nameOne);
+
+      const nameTwo = 'Name Two';
+      newUser = user.copyWith(
+        name: nameTwo,
+      );
+
+      expect(newUser.extraData['name'], nameTwo);
+      expect(newUser.name, nameTwo);
+
+      const nameThree = 'Name Three';
+      newUser = user.copyWith(
+        name: nameThree,
+        extraData: {'name': nameThree},
+      );
+
+      expect(newUser.extraData['name'], nameThree);
+      expect(newUser.name, nameThree);
     });
 
     test('image property and extraData manipulation', () {

@@ -9,6 +9,18 @@ part 'user.g.dart';
 class User extends Equatable {
   /// Creates a new user.
   ///
+  /// {@template name}
+  /// If an [name] is provided it will be set on [extraData] with a `key`
+  /// of 'name'.
+  ///
+  /// For example:
+  /// ```dart
+  /// final user = User(id: 'id', name: 'Sahil Kumar');
+  /// print(user.name == user.extraData['name']); // true
+  /// ```
+  /// {@endtemplate}
+  ///
+  /// {@template image}
   /// If an [image] is provided it will be set on [extraData] with a `key`
   /// of 'image'.
   ///
@@ -17,9 +29,11 @@ class User extends Equatable {
   /// final user = User(id: 'id', image: 'https://getstream.io/image.png');
   /// print(user.image == user.extraData['image']); // true
   /// ```
+  /// {@endtemplate}
   User({
     required this.id,
     this.role,
+    String? name,
     String? image,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -29,13 +43,14 @@ class User extends Equatable {
     this.banned = false,
     this.teams = const [],
     this.language,
-  })  : _image = image,
-        createdAt = createdAt ?? DateTime.now(),
+  })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now(),
-
-        // For backwards compatibalitity, set 'image' on [extraData].
-        extraData =
-            (image != null) ? {...extraData, 'image': image} : extraData;
+        /*For backwards compatibility, set 'name', 'image' in [extraData].*/
+        extraData = {
+          ...extraData,
+          if (name != null) 'name': name,
+          if (image != null) 'image': image,
+        };
 
   /// Create a new instance from json.
   factory User.fromJson(Map<String, dynamic> json) =>
@@ -54,62 +69,32 @@ class User extends Equatable {
     'banned',
     'teams',
     'language',
-    'image',
   ];
 
   /// User id.
   final String id;
 
-  /// User role.
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
-  final String? role;
-
-  /// Image for user. This is also set on `extraData['image']`.
+  /// Shortcut for user name.
   ///
-  /// {@template image}
-  /// There are a few ways to set an image.
-  ///
-  /// Setting an image by passing in an image argument:
-  /// ```dart
-  /// final user = User(
-  ///   id: 'id',
-  ///   image: 'https://getstream.io/image',
-  /// );
-  /// ```
-  ///
-  /// Or by directly setting it in [extraData], for example:
-  /// ```dart
-  /// final user = User(
-  ///   id: 'id',
-  ///   extraData: const {'image': 'https://getstream.io/image'},
-  /// );
-  ///
-  /// ```
-  /// Parsing json with an 'image' key will automatically set the `image`
-  /// property and `extraData['image']` key/value.
-  ///
-  /// ```dart
-  /// final user = User.fromJson({
-  ///   id: 'id',
-  ///   image: 'https://getstream.io/image', // key: image
-  /// });
-  ///
-  /// print(user.image == user.extraData['image']); // true
-  /// ```
-  /// {@endtemplate}
-  final String? _image;
+  /// {@macro name}
+  @JsonKey(ignore: true)
+  String get name {
+    if (extraData.containsKey('name')) {
+      final name = extraData['name']! as String;
+      if (name.isNotEmpty) return name;
+    }
+    return id;
+  }
 
   /// Shortcut for user image.
   ///
   /// {@macro image}
+  @JsonKey(ignore: true)
+  String? get image => extraData['image'] as String?;
+
+  /// User role.
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
-  String? get image {
-    if (_image != null) {
-      return _image;
-    } else {
-      return extraData['image'] as String?;
-    }
-  }
+  final String? role;
 
   /// User teams
   @JsonKey(
@@ -152,15 +137,6 @@ class User extends Equatable {
   @JsonKey(includeIfNull: false)
   final String? language;
 
-  /// Shortcut for user name.
-  String get name {
-    if (extraData.containsKey('name')) {
-      final name = extraData['name']! as String;
-      if (name.isNotEmpty) return name;
-    }
-    return id;
-  }
-
   /// List of users to list of userIds.
   static List<String>? toIds(List<User>? users) =>
       users?.map((u) => u.id).toList();
@@ -174,6 +150,8 @@ class User extends Equatable {
   User copyWith({
     String? id,
     String? role,
+    String? name,
+    String? image,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? lastActive,
@@ -182,11 +160,14 @@ class User extends Equatable {
     bool? banned,
     List<String>? teams,
     String? language,
-    String? image,
   }) =>
       User(
         id: id ?? this.id,
         role: role ?? this.role,
+        /* if null, it will be retrieved from extraData['name']*/
+        name: name,
+        /* if null, it will be retrieved from extraData['image']*/
+        image: image,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         lastActive: lastActive ?? this.lastActive,
@@ -195,9 +176,8 @@ class User extends Equatable {
         banned: banned ?? this.banned,
         teams: teams ?? this.teams,
         language: language ?? this.language,
-        image: image, // if null, it will be retrieved from extraData['image']
       );
 
   @override
-  List<Object?> get props => [id];
+  List<Object?> get props => [id, role];
 }
