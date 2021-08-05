@@ -19,7 +19,7 @@ class UserAvatar extends StatelessWidget {
     this.selected = false,
     this.selectionColor,
     this.selectionThickness = 4,
-    this.placeholderUserImageBuilder,
+    this.placeholder,
   }) : super(key: key);
 
   /// User whose avatar is to displayed
@@ -56,8 +56,7 @@ class UserAvatar extends StatelessWidget {
   final double selectionThickness;
 
   /// The widget that will be built when the user image is loading
-  final Widget Function(BuildContext context, User user)?
-      placeholderUserImageBuilder;
+  final Widget Function(BuildContext, User)? placeholder;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +64,9 @@ class UserAvatar extends StatelessWidget {
         user.extraData['image'] != null &&
         user.extraData['image'] != '';
     final streamChatTheme = StreamChatTheme.of(context);
+
+    final placeholder =
+        this.placeholder ?? streamChatTheme.placeholderUserImage;
 
     Widget avatar = FittedBox(
       fit: BoxFit.cover,
@@ -79,18 +81,15 @@ class UserAvatar extends StatelessWidget {
           ),
           child: hasImage
               ? CachedNetworkImage(
+                  fit: BoxFit.cover,
                   filterQuality: FilterQuality.high,
                   // ignore: cast_nullable_to_non_nullable
                   imageUrl: user.extraData['image'] as String,
-                  errorWidget: (_, __, ___) =>
+                  errorWidget: (context, __, ___) =>
                       streamChatTheme.defaultUserImage(context, user),
-                  placeholder: placeholderUserImageBuilder == null
-                      ? streamChatTheme.placeholderUserImage == null
-                          ? null
-                          : (_, __) => streamChatTheme.placeholderUserImage!(
-                              context, user)
-                      : (_, __) => placeholderUserImageBuilder!(context, user),
-                  fit: BoxFit.cover,
+                  placeholder: placeholder != null
+                      ? (context, __) => placeholder(context, user)
+                      : null,
                 )
               : streamChatTheme.defaultUserImage(context, user),
         ),

@@ -54,6 +54,7 @@ class StreamChatThemeData {
     MessageThemeData? ownMessageTheme,
     MessageInputThemeData? messageInputTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
+    Widget Function(BuildContext, User)? placeholderUserImage,
     IconThemeData? primaryIconTheme,
     List<ReactionIcon>? reactionIcons,
     GalleryHeaderThemeData? imageHeaderTheme,
@@ -68,7 +69,7 @@ class StreamChatThemeData {
     textTheme ??= isDark ? TextTheme.dark() : TextTheme.light();
     colorTheme ??= isDark ? ColorTheme.dark() : ColorTheme.light();
 
-    final defaultData = fromColorAndTextTheme(
+    final defaultData = StreamChatThemeData.fromColorAndTextTheme(
       colorTheme,
       textTheme,
     );
@@ -81,6 +82,7 @@ class StreamChatThemeData {
       ownMessageTheme: ownMessageTheme,
       messageInputTheme: messageInputTheme,
       defaultUserImage: defaultUserImage,
+      placeholderUserImage: placeholderUserImage,
       primaryIconTheme: primaryIconTheme,
       reactionIcons: reactionIcons,
       galleryHeaderTheme: imageHeaderTheme,
@@ -136,137 +138,8 @@ class StreamChatThemeData {
     return defaultTheme.merge(customizedTheme);
   }
 
-  /// The text themes used in the widgets
-  final TextTheme textTheme;
-
-  /// The color themes used in the widgets
-  final ColorTheme colorTheme;
-
-  /// Theme of the [ChannelPreview]
-  final ChannelPreviewThemeData channelPreviewTheme;
-
-  /// Theme of the [ChannelListHeader]
-  final ChannelListHeaderThemeData channelListHeaderTheme;
-
-  /// Theme of the chat widgets dedicated to a channel header
-  final ChannelHeaderThemeData channelHeaderTheme;
-
-  /// The default style for [GalleryHeader]s below the overall
-  /// [StreamChatTheme].
-  final GalleryHeaderThemeData galleryHeaderTheme;
-
-  /// The default style for [GalleryFooter]s below the overall
-  /// [StreamChatTheme].
-  final GalleryFooterThemeData galleryFooterTheme;
-
-  /// Theme of the current user messages
-  final MessageThemeData ownMessageTheme;
-
-  /// Theme of other users messages
-  final MessageThemeData otherMessageTheme;
-
-  /// Theme dedicated to the [MessageInput] widget
-  final MessageInputThemeData messageInputTheme;
-
-  /// The widget that will be built when the user image is unavailable
-  final Widget Function(BuildContext, User) defaultUserImage;
-
-  /// The widget that will be built when the user image is loading
-  final Widget Function(BuildContext context, User user)? placeholderUserImage;
-
-  /// Primary icon theme
-  final IconThemeData primaryIconTheme;
-
-  /// Assets used for rendering reactions
-  final List<ReactionIcon> reactionIcons;
-
-  /// Theme configuration for the [MessageListView] widget.
-  final MessageListViewThemeData messageListViewTheme;
-
-  /// Theme configuration for the [ChannelListView] widget.
-  final ChannelListViewThemeData channelListViewTheme;
-
-  /// Theme configuration for the [UserListView] widget.
-  final UserListViewThemeData userListViewTheme;
-
-  /// Theme configuration for the [MessageSearchListView] widget.
-  final MessageSearchListViewThemeData messageSearchListViewTheme;
-
-  /// Creates a copy of [StreamChatThemeData] with specified attributes
-  /// overridden.
-  StreamChatThemeData copyWith({
-    TextTheme? textTheme,
-    ColorTheme? colorTheme,
-    ChannelPreviewThemeData? channelPreviewTheme,
-    ChannelHeaderThemeData? channelHeaderTheme,
-    MessageThemeData? ownMessageTheme,
-    MessageThemeData? otherMessageTheme,
-    MessageInputThemeData? messageInputTheme,
-    Widget Function(BuildContext, User)? defaultUserImage,
-    IconThemeData? primaryIconTheme,
-    ChannelListHeaderThemeData? channelListHeaderTheme,
-    List<ReactionIcon>? reactionIcons,
-    GalleryHeaderThemeData? galleryHeaderTheme,
-    GalleryFooterThemeData? galleryFooterTheme,
-    MessageListViewThemeData? messageListViewTheme,
-    ChannelListViewThemeData? channelListViewTheme,
-    UserListViewThemeData? userListViewTheme,
-    MessageSearchListViewThemeData? messageSearchListViewTheme,
-  }) =>
-      StreamChatThemeData.raw(
-        channelListHeaderTheme:
-            this.channelListHeaderTheme.merge(channelListHeaderTheme),
-        textTheme: this.textTheme.merge(textTheme),
-        colorTheme: this.colorTheme.merge(colorTheme),
-        primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
-        defaultUserImage: defaultUserImage ?? this.defaultUserImage,
-        channelPreviewTheme:
-            this.channelPreviewTheme.merge(channelPreviewTheme),
-        channelHeaderTheme: this.channelHeaderTheme.merge(channelHeaderTheme),
-        ownMessageTheme: this.ownMessageTheme.merge(ownMessageTheme),
-        otherMessageTheme: this.otherMessageTheme.merge(otherMessageTheme),
-        messageInputTheme: this.messageInputTheme.merge(messageInputTheme),
-        reactionIcons: reactionIcons ?? this.reactionIcons,
-        galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
-        galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
-        messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
-        channelListViewTheme: channelListViewTheme ?? this.channelListViewTheme,
-        userListViewTheme: userListViewTheme ?? this.userListViewTheme,
-        messageSearchListViewTheme:
-            messageSearchListViewTheme ?? this.messageSearchListViewTheme,
-      );
-
-  /// Merge themes
-  StreamChatThemeData merge(StreamChatThemeData? other) {
-    if (other == null) return this;
-    return copyWith(
-      channelListHeaderTheme:
-          channelListHeaderTheme.merge(other.channelListHeaderTheme),
-      textTheme: textTheme.merge(other.textTheme),
-      colorTheme: colorTheme.merge(other.colorTheme),
-      primaryIconTheme: other.primaryIconTheme,
-      defaultUserImage: other.defaultUserImage,
-      channelPreviewTheme: channelPreviewTheme.merge(other.channelPreviewTheme),
-      channelHeaderTheme: channelHeaderTheme.merge(other.channelHeaderTheme),
-      ownMessageTheme: ownMessageTheme.merge(other.ownMessageTheme),
-      otherMessageTheme: otherMessageTheme.merge(other.otherMessageTheme),
-      messageInputTheme: messageInputTheme.merge(other.messageInputTheme),
-      reactionIcons: other.reactionIcons,
-      galleryHeaderTheme: galleryHeaderTheme.merge(other.galleryHeaderTheme),
-      galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),
-      messageListViewTheme:
-          messageListViewTheme.merge(other.messageListViewTheme),
-      channelListViewTheme:
-          channelListViewTheme.merge(other.channelListViewTheme),
-      userListViewTheme: userListViewTheme.merge(other.userListViewTheme),
-      messageSearchListViewTheme:
-          messageSearchListViewTheme.merge(other.messageSearchListViewTheme),
-    );
-  }
-
   /// Create theme from color and text theme
-  // ignore: prefer_constructors_over_static_methods
-  static StreamChatThemeData fromColorAndTextTheme(
+  factory StreamChatThemeData.fromColorAndTextTheme(
     ColorTheme colorTheme,
     TextTheme textTheme,
   ) {
@@ -489,6 +362,137 @@ class StreamChatThemeData {
       messageSearchListViewTheme: MessageSearchListViewThemeData(
         backgroundColor: colorTheme.appBg,
       ),
+    );
+  }
+
+  /// The text themes used in the widgets
+  final TextTheme textTheme;
+
+  /// The color themes used in the widgets
+  final ColorTheme colorTheme;
+
+  /// Theme of the [ChannelPreview]
+  final ChannelPreviewThemeData channelPreviewTheme;
+
+  /// Theme of the [ChannelListHeader]
+  final ChannelListHeaderThemeData channelListHeaderTheme;
+
+  /// Theme of the chat widgets dedicated to a channel header
+  final ChannelHeaderThemeData channelHeaderTheme;
+
+  /// The default style for [GalleryHeader]s below the overall
+  /// [StreamChatTheme].
+  final GalleryHeaderThemeData galleryHeaderTheme;
+
+  /// The default style for [GalleryFooter]s below the overall
+  /// [StreamChatTheme].
+  final GalleryFooterThemeData galleryFooterTheme;
+
+  /// Theme of the current user messages
+  final MessageThemeData ownMessageTheme;
+
+  /// Theme of other users messages
+  final MessageThemeData otherMessageTheme;
+
+  /// Theme dedicated to the [MessageInput] widget
+  final MessageInputThemeData messageInputTheme;
+
+  /// The widget that will be built when the user image is unavailable
+  final Widget Function(BuildContext, User) defaultUserImage;
+
+  /// The widget that will be built when the user image is loading
+  final Widget Function(BuildContext, User)? placeholderUserImage;
+
+  /// Primary icon theme
+  final IconThemeData primaryIconTheme;
+
+  /// Assets used for rendering reactions
+  final List<ReactionIcon> reactionIcons;
+
+  /// Theme configuration for the [MessageListView] widget.
+  final MessageListViewThemeData messageListViewTheme;
+
+  /// Theme configuration for the [ChannelListView] widget.
+  final ChannelListViewThemeData channelListViewTheme;
+
+  /// Theme configuration for the [UserListView] widget.
+  final UserListViewThemeData userListViewTheme;
+
+  /// Theme configuration for the [MessageSearchListView] widget.
+  final MessageSearchListViewThemeData messageSearchListViewTheme;
+
+  /// Creates a copy of [StreamChatThemeData] with specified attributes
+  /// overridden.
+  StreamChatThemeData copyWith({
+    TextTheme? textTheme,
+    ColorTheme? colorTheme,
+    ChannelPreviewThemeData? channelPreviewTheme,
+    ChannelHeaderThemeData? channelHeaderTheme,
+    MessageThemeData? ownMessageTheme,
+    MessageThemeData? otherMessageTheme,
+    MessageInputThemeData? messageInputTheme,
+    Widget Function(BuildContext, User)? defaultUserImage,
+    Widget Function(BuildContext, User)? placeholderUserImage,
+    IconThemeData? primaryIconTheme,
+    ChannelListHeaderThemeData? channelListHeaderTheme,
+    List<ReactionIcon>? reactionIcons,
+    GalleryHeaderThemeData? galleryHeaderTheme,
+    GalleryFooterThemeData? galleryFooterTheme,
+    MessageListViewThemeData? messageListViewTheme,
+    ChannelListViewThemeData? channelListViewTheme,
+    UserListViewThemeData? userListViewTheme,
+    MessageSearchListViewThemeData? messageSearchListViewTheme,
+  }) =>
+      StreamChatThemeData.raw(
+        channelListHeaderTheme:
+            this.channelListHeaderTheme.merge(channelListHeaderTheme),
+        textTheme: this.textTheme.merge(textTheme),
+        colorTheme: this.colorTheme.merge(colorTheme),
+        primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
+        defaultUserImage: defaultUserImage ?? this.defaultUserImage,
+        placeholderUserImage: placeholderUserImage ?? this.placeholderUserImage,
+        channelPreviewTheme:
+            this.channelPreviewTheme.merge(channelPreviewTheme),
+        channelHeaderTheme: this.channelHeaderTheme.merge(channelHeaderTheme),
+        ownMessageTheme: this.ownMessageTheme.merge(ownMessageTheme),
+        otherMessageTheme: this.otherMessageTheme.merge(otherMessageTheme),
+        messageInputTheme: this.messageInputTheme.merge(messageInputTheme),
+        reactionIcons: reactionIcons ?? this.reactionIcons,
+        galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
+        galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
+        messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
+        channelListViewTheme: channelListViewTheme ?? this.channelListViewTheme,
+        userListViewTheme: userListViewTheme ?? this.userListViewTheme,
+        messageSearchListViewTheme:
+            messageSearchListViewTheme ?? this.messageSearchListViewTheme,
+      );
+
+  /// Merge themes
+  StreamChatThemeData merge(StreamChatThemeData? other) {
+    if (other == null) return this;
+    return copyWith(
+      channelListHeaderTheme:
+          channelListHeaderTheme.merge(other.channelListHeaderTheme),
+      textTheme: textTheme.merge(other.textTheme),
+      colorTheme: colorTheme.merge(other.colorTheme),
+      primaryIconTheme: other.primaryIconTheme,
+      defaultUserImage: other.defaultUserImage,
+      placeholderUserImage: other.placeholderUserImage,
+      channelPreviewTheme: channelPreviewTheme.merge(other.channelPreviewTheme),
+      channelHeaderTheme: channelHeaderTheme.merge(other.channelHeaderTheme),
+      ownMessageTheme: ownMessageTheme.merge(other.ownMessageTheme),
+      otherMessageTheme: otherMessageTheme.merge(other.otherMessageTheme),
+      messageInputTheme: messageInputTheme.merge(other.messageInputTheme),
+      reactionIcons: other.reactionIcons,
+      galleryHeaderTheme: galleryHeaderTheme.merge(other.galleryHeaderTheme),
+      galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),
+      messageListViewTheme:
+          messageListViewTheme.merge(other.messageListViewTheme),
+      channelListViewTheme:
+          channelListViewTheme.merge(other.channelListViewTheme),
+      userListViewTheme: userListViewTheme.merge(other.userListViewTheme),
+      messageSearchListViewTheme:
+          messageSearchListViewTheme.merge(other.messageSearchListViewTheme),
     );
   }
 }
