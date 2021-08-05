@@ -4,6 +4,11 @@
 
 - Fixed `channel.markAllRead` throwing failed host lookup.
 
+✅ Added
+
+- `User` and `OwnUser` classes now have an `image` property. Setting an image will also set the 'image' key on `extraData`, so `user.image` and `user.extraData['image']` is the same.
+- `User` and `OwnUser` classes now have a `name` property. Setting a name will also set the 'name' key on `extraData`, so `user.name` and `user.extraData['name']` is the same.
+
 ## 2.1.1
 
 🐞 Fixed

@@ -60,9 +60,7 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = user.extraData.containsKey('image') &&
-        user.extraData['image'] != null &&
-        user.extraData['image'] != '';
+    final hasImage = user.image != null && user.image!.isNotEmpty;
     final streamChatTheme = StreamChatTheme.of(context);
 
     final placeholder =
@@ -80,8 +78,7 @@ class UserAvatar extends StatelessWidget {
               ? CachedNetworkImage(
                   fit: BoxFit.cover,
                   filterQuality: FilterQuality.high,
-                  // ignore: cast_nullable_to_non_nullable
-                  imageUrl: user.extraData['image'] as String,
+                  imageUrl: user.image!,
                   errorWidget: (context, __, ___) =>
                       streamChatTheme.defaultUserImage(context, user),
                   placeholder: placeholder != null

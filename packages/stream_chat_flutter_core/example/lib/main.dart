@@ -13,13 +13,10 @@ Future<void> main() async {
   await client.connectUser(
     User(
       id: 'cool-shadow-7',
-      extraData: const {
-        'image':
-            'https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow',
-      },
+      image:
+          'https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow',
     ),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiY29vbC1zaGFkb3ctNyJ9'
-    '.gkOlCRb1qgy4joHPaxFwPOdXcGvSPvp6QY0S4mpRkVo',
+    '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiY29vbC1zaGFkb3ctNyJ9.gkOlCRb1qgy4joHPaxFwPOdXcGvSPvp6QY0S4mpRkVo''',
   );
 
   runApp(
