@@ -84,7 +84,7 @@ void main() {
     final clientState = MockClientState();
     final channel = MockChannel();
     final channelState = MockChannelState();
-    const messageTheme = MessageTheme();
+    const messageTheme = MessageThemeData();
 
     final currentUser = OwnUser(
       id: 'sahil',

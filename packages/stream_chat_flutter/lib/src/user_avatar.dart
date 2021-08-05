@@ -19,6 +19,7 @@ class UserAvatar extends StatelessWidget {
     this.selected = false,
     this.selectionColor,
     this.selectionThickness = 4,
+    this.placeholder,
   }) : super(key: key);
 
   /// User whose avatar is to displayed
@@ -54,10 +55,16 @@ class UserAvatar extends StatelessWidget {
   /// Selection thickness around the avatar
   final double selectionThickness;
 
+  /// The widget that will be built when the user image is loading
+  final Widget Function(BuildContext, User)? placeholder;
+
   @override
   Widget build(BuildContext context) {
     final hasImage = user.image != null && user.image!.isNotEmpty;
     final streamChatTheme = StreamChatTheme.of(context);
+
+    final placeholder =
+        this.placeholder ?? streamChatTheme.placeholderUserImage;
 
     Widget avatar = FittedBox(
       fit: BoxFit.cover,
@@ -67,16 +74,16 @@ class UserAvatar extends StatelessWidget {
         child: Container(
           constraints: constraints ??
               streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
-          decoration: BoxDecoration(
-            color: streamChatTheme.colorTheme.accentPrimary,
-          ),
           child: hasImage
               ? CachedNetworkImage(
+                  fit: BoxFit.cover,
                   filterQuality: FilterQuality.high,
                   imageUrl: user.image!,
-                  errorWidget: (_, __, ___) =>
+                  errorWidget: (context, __, ___) =>
                       streamChatTheme.defaultUserImage(context, user),
-                  fit: BoxFit.cover,
+                  placeholder: placeholder != null
+                      ? (context, __) => placeholder(context, user)
+                      : null,
                 )
               : streamChatTheme.defaultUserImage(context, user),
         ),

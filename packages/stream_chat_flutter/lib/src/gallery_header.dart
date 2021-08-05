@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment_actions_modal.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Header/AppBar widget for media display screen

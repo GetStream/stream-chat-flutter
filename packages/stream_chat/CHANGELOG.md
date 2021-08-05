@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `channel.markAllRead` throwing failed host lookup.
+
 ## 2.1.1
 
 🐞 Fixed
