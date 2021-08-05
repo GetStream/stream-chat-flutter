@@ -1,0 +1,76 @@
+---
+id: adding_local_data_persistence
+sidebar_position: 9
+title: Adding Local Data Persistence
+---
+
+Adding Local Data Persistence
+
+### Introduction
+
+Most messaging apps need to work regardless of whether the app is currently connected to the internet.
+Local data persistence stores the fetched data from the backend on a local SQLite database using the
+moor package in Flutter. All packages in the SDK can use local data persistence to store messages
+across multiple platforms.
+
+### Implementation
+
+To add data persistence you can extend the class ChatPersistenceClient and pass an instance to the StreamChatClient.
+
+```dart
+class CustomChatPersistentClient extends ChatPersistenceClient {
+...
+}
+
+final client = StreamChatClient(
+  apiKey ?? kDefaultStreamApiKey,
+  logLevel: Level.INFO,
+)..chatPersistenceClient = CustomChatPersistentClient();
+```
+
+We provide an official persistent client in the [stream_chat_persistence](https://pub.dev/packages/stream_chat_persistence)
+package that works using the library [moor](https://moor.simonbinder.eu), an SQLite ORM.
+
+Add this to your package's `pubspec.yaml` file, using the latest version.
+
+```yaml
+dependencies:
+ stream_chat_persistence: ^latest_version
+```
+
+You should then run `flutter packages get`
+
+The usage is pretty simple.
+
+1. Create a new instance of `StreamChatPersistenceClient` providing `logLevel` and `connectionMode`
+
+```dart
+final chatPersistentClient = StreamChatPersistenceClient(
+  logLevel: Level.INFO,
+  connectionMode: ConnectionMode.background,
+);
+```
+
+2. Pass the instance to the official `StreamChatClient`
+
+```dart
+  final client = StreamChatClient(
+    apiKey ?? kDefaultStreamApiKey,
+    logLevel: Level.INFO,
+  )..chatPersistenceClient = chatPersistentClient;
+```
+
+And you are ready to go...
+
+Note that passing `ConnectionMode.background` the database uses a background isolate to unblock the main thread.
+The `StreamChatClient` uses the `chatPersistentClient` to synchronize the database with the newest
+information every time it receives new data about channels/messages/users.
+
+### Multi-user
+
+The DB file is named after the `userId`, so if you instantiate a client using a different `userId` you will use a different database.
+Calling `client.disconnect(flushOfflineStorage: true)` flushes all current database data.
+
+### Updating/deleting/sending a message while offline
+
+The information about the action is saved in offline storage. When the client returns online, everything is retried.
