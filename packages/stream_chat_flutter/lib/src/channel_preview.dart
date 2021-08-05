@@ -242,20 +242,19 @@ class ChannelPreview extends StatelessWidget {
 
             text = parts.join(' ');
 
-            final chatThemeData = StreamChatTheme.of(context);
+            final channelPreviewTheme = ChannelPreviewTheme.of(context);
             return Text.rich(
               _getDisplayText(
                 text,
                 lastMessage.mentionedUsers,
                 lastMessage.attachments,
-                chatThemeData.channelPreviewTheme.subtitleStyle?.copyWith(
-                    color:
-                        chatThemeData.channelPreviewTheme.subtitleStyle?.color,
+                channelPreviewTheme.subtitleStyle?.copyWith(
+                    color: channelPreviewTheme.subtitleStyle?.color,
                     fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
                         ? FontStyle.italic
                         : FontStyle.normal),
-                chatThemeData.channelPreviewTheme.subtitleStyle?.copyWith(
-                  color: chatThemeData.channelPreviewTheme.subtitleStyle?.color,
+                channelPreviewTheme.subtitleStyle?.copyWith(
+                  color: channelPreviewTheme.subtitleStyle?.color,
                   fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
                       ? FontStyle.italic
                       : FontStyle.normal,
