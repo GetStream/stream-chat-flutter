@@ -76,9 +76,6 @@ class UserAvatar extends StatelessWidget {
         child: Container(
           constraints: constraints ??
               streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
-          decoration: BoxDecoration(
-            color: streamChatTheme.colorTheme.accentPrimary,
-          ),
           child: hasImage
               ? CachedNetworkImage(
                   fit: BoxFit.cover,
