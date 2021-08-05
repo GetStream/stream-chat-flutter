@@ -69,7 +69,7 @@ information every time it receives new data about channels/messages/users.
 ### Multi-user
 
 The DB file is named after the `userId`, so if you instantiate a client using a different `userId` you will use a different database.
-Calling `client.disconnect(flushOfflineStorage: true)` flushes all current database data.
+Calling `client.disconnectUser(flushChatPersistence: true)` flushes all current database data.
 
 ### Updating/deleting/sending a message while offline
 
