@@ -8,6 +8,7 @@
   - `ChannelHeader`
   - `ChannelListHeader`
   - `GalleryHeader`
+  - `GalleryFooter`
   - `ThreadHeader`
 
 
