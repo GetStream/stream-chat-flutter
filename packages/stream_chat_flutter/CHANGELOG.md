@@ -4,6 +4,7 @@
 
 - [#516](https://github.com/GetStream/stream-chat-flutter/issues/516): Added `StreamChatThemeData.placeholderUserImage` for 
   building a widget when the `UserAvatar` image is loading
+- Added a `backgroundColor` property to the various header widgets
 
 
 🔄 Changed

@@ -19,6 +19,7 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
     this.onImageTap,
     this.userName = '',
     this.sentAt = '',
+    this.backgroundColor,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -50,6 +51,9 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Stores the current index of media shown
   final int currentIndex;
 
+  /// The background color of this [GalleryHeader].
+  final Color? backgroundColor;
+
   @override
   Widget build(BuildContext context) {
     final galleryHeaderThemeData = GalleryHeaderTheme.of(context);
@@ -66,7 +70,8 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
               onPressed: onBackPressed,
             )
           : const SizedBox(),
-      backgroundColor: galleryHeaderThemeData.backgroundColor,
+      backgroundColor:
+          backgroundColor ?? galleryHeaderThemeData.backgroundColor,
       actions: <Widget>[
         if (!message.isEphemeral)
           IconButton(

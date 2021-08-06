@@ -67,6 +67,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
     this.subtitle,
     this.leading,
     this.actions,
+    this.backgroundColor,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -101,6 +102,9 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// AppBar actions
   /// By default it shows the [ChannelAvatar]
   final List<Widget>? actions;
+
+  /// The background color for this [ChannelHeader].
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +145,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             brightness: Theme.of(context).brightness,
             elevation: 1,
             leading: leadingWidget,
-            backgroundColor: channelHeaderTheme.color,
+            backgroundColor: backgroundColor ?? channelHeaderTheme.color,
             actions: actions ??
                 <Widget>[
                   Padding(
