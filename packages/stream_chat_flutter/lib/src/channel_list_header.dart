@@ -61,6 +61,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     this.subtitle,
     this.leading,
     this.actions,
+    this.backgroundColor,
   }) : super(key: key);
 
   /// Pass this if you don't have a [StreamChatClient] in your widget tree.
@@ -93,6 +94,9 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   /// By default it shows the new chat button
   final List<Widget>? actions;
 
+  /// The background color for this [ChannelListHeader].
+  final Color? backgroundColor;
+
   @override
   Widget build(BuildContext context) {
     final _client = client ?? StreamChat.of(context).client;
@@ -124,7 +128,8 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             textTheme: Theme.of(context).textTheme,
             brightness: Theme.of(context).brightness,
             elevation: 1,
-            backgroundColor: channelListHeaderThemeData.color,
+            backgroundColor:
+                backgroundColor ?? channelListHeaderThemeData.color,
             centerTitle: true,
             leading: leading ??
                 Center(
