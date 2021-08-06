@@ -34,6 +34,7 @@ At the moment we support the following languages:
 - [Hindi](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_hi.dart)
 - [Italian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_it.dart)
 - [French](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_fr.dart)
+- [Spanish](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_es.dart)
 
 More languages will be added in the future. Feel free to [contribute](https://github.com/GetStream/stream-chat-flutter/blob/master/CONTRIBUTING.md) to add more languages.
 
@@ -68,6 +69,7 @@ class MyApp extends StatelessWidget {
         Locale('hi'),
         Locale('fr'),
         Locale('it'),
+        Locale('es'),
       ],
       // Add GlobalStreamChatLocalizations.delegates
       localizationsDelegates: GlobalStreamChatLocalizations.delegates,
@@ -86,13 +88,13 @@ class MyApp extends StatelessWidget {
 
 ### Adding a new language
 
-To add a new language, you need to create a new class extending `GlobalStreamChatLocalizations` and create a delegate for it adding it to the `delegates` array.
+To add a new language, create a new class extending `GlobalStreamChatLocalizations` and create a delegate for it, adding it to the `delegates` array.
 
 Check out [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/add_new_lang.dart) to see how to add a new language.
 
 ### Override existing languages
 
-To override an existing language, you need to create a new class extending that particular language class and create a delegate for it adding it to the `delegates` array.
+To override an existing language, create a new class extending that particular language class and create a delegate for it, adding it to the `delegates` array.
 
 Check out [this example](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/example/lib/override_lang.dart) to see how to override an existing language.
 
@@ -110,6 +112,7 @@ Example:
 	<string>nb</string>
 	<string>fr</string>
 	<string>it</string>
+	<string>es</string>
 </array>
 ```
 

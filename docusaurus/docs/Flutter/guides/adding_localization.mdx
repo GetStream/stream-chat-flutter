@@ -25,6 +25,7 @@ At the moment we support the following languages:
 - [Hindi](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_hi.dart)
 - [Italian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_it.dart)
 - [French](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_fr.dart)
+- [Spanish](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_es.dart)
 
 More languages will be added in the future. Feel free to [contribute](https://github.com/GetStream/stream-chat-flutter/blob/master/CONTRIBUTING.md) to add more languages.
 
@@ -62,6 +63,7 @@ class MyApp extends StatelessWidget {
         Locale('hi'),
         Locale('fr'),
         Locale('it'),
+        Locale('es'),
       ],
       // Add GlobalStreamChatLocalizations.delegates
       localizationsDelegates: GlobalStreamChatLocalizations.delegates,
@@ -130,6 +132,7 @@ Here is an example of how that would look like:
             Locale('hi'),
             Locale('fr'),
             Locale('it'),
+            Locale('es'),
         ],
         // locales are the locales of the device
         // supportedLocales are the app supported locales
@@ -172,5 +175,6 @@ Example:
 	<string>nb</string>
 	<string>fr</string>
 	<string>it</string>
+	<string>es</string>
 </array>
 ```

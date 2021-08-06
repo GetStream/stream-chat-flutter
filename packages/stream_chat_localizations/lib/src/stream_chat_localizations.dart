@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+part 'stream_chat_localizations_es.dart';
+
 part 'stream_chat_localizations_en.dart';
 
 part 'stream_chat_localizations_fr.dart';
@@ -24,6 +26,7 @@ const kStreamChatSupportedLanguages = {
   'hi',
   'fr',
   'it',
+  'es',
 };
 
 /// Creates a [GlobalStreamChatLocalizations] instance for the given `locale`.
@@ -54,6 +57,8 @@ GlobalStreamChatLocalizations? getStreamChatTranslation(Locale locale) {
       return const StreamChatLocalizationsFr();
     case 'it':
       return const StreamChatLocalizationsIt();
+    case 'es':
+      return const StreamChatLocalizationsEs();
   }
 }
 
