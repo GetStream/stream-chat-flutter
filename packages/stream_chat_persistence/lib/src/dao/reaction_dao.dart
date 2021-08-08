@@ -42,10 +42,9 @@ class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
 
   /// Updates the reactions data with the new [reactionList] data
   Future<void> updateReactions(List<Reaction> reactionList) => batch((it) {
-        it.insertAll(
+        it.insertAllOnConflictUpdate(
           reactions,
           reactionList.map((r) => r.toEntity()).toList(),
-          mode: InsertMode.insertOrReplace,
         );
       });
 

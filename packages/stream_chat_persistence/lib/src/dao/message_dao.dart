@@ -171,10 +171,9 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
   /// the new [messageList] data
   Future<void> updateMessages(String cid, List<Message> messageList) => batch(
         (batch) {
-          batch.insertAll(
+          batch.insertAllOnConflictUpdate(
             messages,
             messageList.map((it) => it.toEntity(cid: cid)).toList(),
-            mode: InsertMode.insertOrReplace,
           );
         },
       );

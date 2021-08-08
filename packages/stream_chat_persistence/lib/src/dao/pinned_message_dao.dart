@@ -170,10 +170,9 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
   /// the new [messageList] data
   Future<void> updateMessages(String cid, List<Message> messageList) => batch(
         (batch) {
-          batch.insertAll(
+          batch.insertAllOnConflictUpdate(
             pinnedMessages,
             messageList.map((it) => it.toPinnedEntity(cid: cid)).toList(),
-            mode: InsertMode.insertOrReplace,
           );
         },
       );

@@ -32,10 +32,9 @@ class MemberDao extends DatabaseAccessor<MoorChatDatabase>
   /// Updates all the members using the new [memberList] data
   Future<void> updateMembers(String cid, List<Member> memberList) async =>
       batch(
-        (it) => it.insertAll(
+        (it) => it.insertAllOnConflictUpdate(
           members,
           memberList.map((m) => m.toEntity(cid: cid)).toList(),
-          mode: InsertMode.insertOrReplace,
         ),
       );
 

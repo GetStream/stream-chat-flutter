@@ -26,7 +26,7 @@ class ConnectionEventDao extends DatabaseAccessor<MoorChatDatabase>
   /// Update stored connection event with latest data
   Future<int> updateConnectionEvent(Event event) => transaction(() async {
         final connectionInfo = await select(connectionEvents).getSingleOrNull();
-        return into(connectionEvents).insert(
+        return into(connectionEvents).insertOnConflictUpdate(
           ConnectionEventEntity(
             id: 1,
             type: event.type,
@@ -38,7 +38,6 @@ class ConnectionEventDao extends DatabaseAccessor<MoorChatDatabase>
             unreadChannels:
                 event.unreadChannels ?? connectionInfo?.unreadChannels,
           ),
-          mode: InsertMode.insertOrReplace,
         );
       });
 
