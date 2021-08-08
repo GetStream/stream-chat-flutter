@@ -23,6 +23,7 @@ void main() {
     bool mapAllThreadToFirstMessage = false,
     int count = 3,
   }) async {
+    final channels = [ChannelModel(cid: cid)];
     final users = List.generate(count, (index) => User(id: 'testUserId$index'));
     final messages = List.generate(
       count,
@@ -83,13 +84,20 @@ void main() {
       if (quoted) ...quotedMessages,
       if (threads) ...threadMessages
     ];
+    final reaction = Reaction(
+      type: 'type',
+      messageId: allMessages.first.id,
+      user: users.first,
+    );
     await database.userDao.updateUsers(users);
+    await database.channelDao.updateChannels(channels);
     await pinnedMessageDao.updateMessages(cid, allMessages);
+    await database.reactionDao.updateReactions([reaction]);
     return allMessages;
   }
 
   test('deleteMessageByIds', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
 
     // Preparing test data
     final insertedMessages = await _prepareTestData(cid);
@@ -98,66 +106,116 @@ void main() {
     final messages = await pinnedMessageDao.getMessagesByCid(cid);
     expect(messages.length, insertedMessages.length);
 
+    final firstMessageId = messages.first.id;
+
+    // Fetched reactions list should have one reaction for given message id
+    final reactions = await database.reactionDao.getReactions(firstMessageId);
+    expect(reactions.length, 1);
+
     // Deleting 2 messages from DB
     await pinnedMessageDao.deleteMessageByIds(
-      ['testMessageId${cid}0', 'testMessageId${cid}1'],
+      [firstMessageId, 'testMessageId${cid}1'],
     );
 
     // New fetched messages length should 2 less than the
     // previous fetched messages
     final newMessages = await pinnedMessageDao.getMessagesByCid(cid);
     expect(newMessages.length, messages.length - 2);
+
+    // Reaction for the first message should be deleted too
+    final newReactions =
+        await database.reactionDao.getReactions(firstMessageId);
+    expect(newReactions, isEmpty);
   });
 
   group('deleteMessageByCids', () {
-    const cid1 = 'testCid1';
-    const cid2 = 'testCid2';
+    const cid1 = 'test:Cid1';
+    const cid2 = 'test:Cid2';
 
-    test('should delete all the messages of first channel', () async {
-      // Preparing test data
-      final cid1InsertedMessages = await _prepareTestData(cid1);
-      final cid2InsertedMessages = await _prepareTestData(cid2);
+    test(
+      'should delete all the messages and reactions of first channel',
+      () async {
+        // Preparing test data
+        final cid1InsertedMessages = await _prepareTestData(cid1);
+        final cid2InsertedMessages = await _prepareTestData(cid2);
 
-      // Fetched message list should match the test message list length
-      final cid1Messages = await pinnedMessageDao.getMessagesByCid(cid1);
-      final cid2Messages = await pinnedMessageDao.getMessagesByCid(cid2);
-      expect(cid1Messages.length, cid1InsertedMessages.length);
-      expect(cid2Messages.length, cid2InsertedMessages.length);
+        // Fetched message list should match the test message list length
+        final cid1Messages = await pinnedMessageDao.getMessagesByCid(cid1);
+        final cid2Messages = await pinnedMessageDao.getMessagesByCid(cid2);
+        expect(cid1Messages.length, cid1InsertedMessages.length);
+        expect(cid2Messages.length, cid2InsertedMessages.length);
 
-      // Deleting all the messages of cid1
-      await pinnedMessageDao.deleteMessageByCids([cid1]);
+        // Fetched reactions list should have one reaction for given message id
+        final cid1firstMessageId = cid1Messages.first.id;
+        final cid1Reactions =
+            await database.reactionDao.getReactions(cid1firstMessageId);
+        expect(cid1Reactions.length, 1);
 
-      // Fetched messages length of only cid1 should be empty
-      final cid1FetchedMessages = await pinnedMessageDao.getMessagesByCid(cid1);
-      final cid2FetchedMessages = await pinnedMessageDao.getMessagesByCid(cid2);
-      expect(cid1FetchedMessages, isEmpty);
-      expect(cid2FetchedMessages, isNotEmpty);
-    });
+        // Deleting all the messages of cid1
+        await pinnedMessageDao.deleteMessageByCids([cid1]);
 
-    test('should delete all the messages of both channel', () async {
-      // Preparing test data
-      final cid1InsertedMessages = await _prepareTestData(cid1);
-      final cid2InsertedMessages = await _prepareTestData(cid2);
+        // Fetched messages length of only cid1 should be empty
+        final cid1FetchedMessages =
+            await pinnedMessageDao.getMessagesByCid(cid1);
+        final cid2FetchedMessages =
+            await pinnedMessageDao.getMessagesByCid(cid2);
+        expect(cid1FetchedMessages, isEmpty);
+        expect(cid2FetchedMessages, isNotEmpty);
 
-      // Fetched message list should match the test message list length
-      final cid1Messages = await pinnedMessageDao.getMessagesByCid(cid1);
-      final cid2Messages = await pinnedMessageDao.getMessagesByCid(cid2);
-      expect(cid1Messages.length, cid1InsertedMessages.length);
-      expect(cid2Messages.length, cid2InsertedMessages.length);
+        // Reaction for the first message should be deleted too
+        final cid1FetchedReactions =
+            await database.reactionDao.getReactions(cid1firstMessageId);
+        expect(cid1FetchedReactions, isEmpty);
+      },
+    );
 
-      // Deleting all the messages of cid1
-      await pinnedMessageDao.deleteMessageByCids([cid1, cid2]);
+    test(
+      'should delete all the messages and reactions of both channel',
+      () async {
+        // Preparing test data
+        final cid1InsertedMessages = await _prepareTestData(cid1);
+        final cid2InsertedMessages = await _prepareTestData(cid2);
 
-      // Fetched messages length of both cid1 and cid2 should be empty
-      final cid1FetchedMessages = await pinnedMessageDao.getMessagesByCid(cid1);
-      final cid2FetchedMessages = await pinnedMessageDao.getMessagesByCid(cid2);
-      expect(cid1FetchedMessages, isEmpty);
-      expect(cid2FetchedMessages, isEmpty);
-    });
+        // Fetched message list should match the test message list length
+        final cid1Messages = await pinnedMessageDao.getMessagesByCid(cid1);
+        final cid2Messages = await pinnedMessageDao.getMessagesByCid(cid2);
+        expect(cid1Messages.length, cid1InsertedMessages.length);
+        expect(cid2Messages.length, cid2InsertedMessages.length);
+
+        // Fetched reactions list should have one reaction for given message id
+        final cid1FirstMessageId = cid1Messages.first.id;
+        final cid1Reactions =
+            await database.reactionDao.getReactions(cid1FirstMessageId);
+        expect(cid1Reactions.length, 1);
+        final cid2FirstMessageId = cid2Messages.first.id;
+        final cid2Reactions =
+            await database.reactionDao.getReactions(cid2FirstMessageId);
+        expect(cid2Reactions.length, 1);
+
+        // Deleting all the messages of cid1
+        await pinnedMessageDao.deleteMessageByCids([cid1, cid2]);
+
+        // Fetched messages length of both cid1 and cid2 should be empty
+        final cid1FetchedMessages =
+            await pinnedMessageDao.getMessagesByCid(cid1);
+        final cid2FetchedMessages =
+            await pinnedMessageDao.getMessagesByCid(cid2);
+        expect(cid1FetchedMessages, isEmpty);
+        expect(cid2FetchedMessages, isEmpty);
+
+        // Reaction for the first message should be deleted too
+        final cid1FetchedReactions =
+            await database.reactionDao.getReactions(cid1FirstMessageId);
+        expect(cid1FetchedReactions, isEmpty);
+        final cid2FetchedReactions =
+            await database.reactionDao.getReactions(cid2FirstMessageId);
+        expect(cid2FetchedReactions, isEmpty);
+      },
+    );
   });
 
   test('getMessageById', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
     const id = 'testMessageId${cid}0';
 
     // Should be null initially
@@ -175,7 +233,7 @@ void main() {
   });
 
   test('getThreadMessages', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
 
     // Messages should be empty initially
     final messages = await pinnedMessageDao.getThreadMessages(cid);
@@ -194,7 +252,7 @@ void main() {
   });
 
   test('getThreadMessagesByParentId', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
     const parentId = 'testMessageId${cid}0';
 
     // Messages should be empty initially
@@ -214,7 +272,7 @@ void main() {
   });
 
   test('getThreadMessagesByParentId along with pagination', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
     const parentId = 'testMessageId${cid}0';
     const options = PaginationParams(
       limit: 15,
@@ -248,7 +306,7 @@ void main() {
   });
 
   test('getMessagesByCid', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
 
     // Should be empty initially
     final messages = await pinnedMessageDao.getMessagesByCid(cid);
@@ -269,7 +327,7 @@ void main() {
   });
 
   test('getMessagesByCid along with quotedMessage', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
 
     // Should be empty initially
     final messages = await pinnedMessageDao.getMessagesByCid(cid);
@@ -287,7 +345,7 @@ void main() {
   });
 
   test('getMessagesByCid along with pagination', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
     const limit = 15;
     const lessThan = 'testMessageId${cid}25';
     const greaterThanOrEqual = 'testMessageId${cid}5';
@@ -319,7 +377,7 @@ void main() {
   });
 
   test('updateMessages', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
 
     // Preparing test data
     final insertedMessages = await _prepareTestData(cid);

@@ -21,6 +21,8 @@ void main() {
     String? userId,
     int count = 3,
   }) async {
+    const cid = 'test:Cid';
+    final channels = [ChannelModel(cid: cid)];
     final users = List.generate(count, (index) => User(id: 'testUserId$index'));
     final message = Message(
       id: messageId,
@@ -50,7 +52,8 @@ void main() {
     );
 
     await database.userDao.updateUsers(users);
-    await database.messageDao.updateMessages('testCid', [message]);
+    await database.channelDao.updateChannels(channels);
+    await database.messageDao.updateMessages(cid, [message]);
     await reactionDao.updateReactions(reactions);
 
     return reactions;
