@@ -64,6 +64,9 @@ class MoorChatDatabase extends _$MoorChatDatabase {
             }
           }
         },
+        beforeOpen: (details) async {
+          await customStatement('PRAGMA foreign_keys = ON;');
+        },
       );
 
   /// Deletes all the tables
