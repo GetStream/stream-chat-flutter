@@ -46,9 +46,9 @@ extension PlatformFileX on PlatformFile {
       );
 }
 
-///
+/// Extension on [InputDecoration]
 extension InputDecorationX on InputDecoration {
-  ///
+  /// Merges this [AvatarThemeData] with the [other]
   InputDecoration merge(InputDecoration? other) {
     if (other == null) return this;
     return copyWith(
@@ -122,4 +122,51 @@ extension FlipBorder on BorderRadius {
           bottomLeft: bottomRight,
           bottomRight: bottomLeft)
       : this;
+}
+
+/// Extension on [IconButton]
+extension IconButtonX on IconButton {
+  /// Creates a copy of [IconButton] with specified attributes overridden.
+  IconButton copyWith({
+    double? iconSize,
+    VisualDensity? visualDensity,
+    EdgeInsetsGeometry? padding,
+    AlignmentGeometry? alignment,
+    double? splashRadius,
+    Color? color,
+    Color? focusColor,
+    Color? hoverColor,
+    Color? highlightColor,
+    Color? splashColor,
+    Color? disabledColor,
+    void Function()? onPressed,
+    MouseCursor? mouseCursor,
+    FocusNode? focusNode,
+    bool? autofocus,
+    String? tooltip,
+    bool? enableFeedback,
+    BoxConstraints? constraints,
+    Widget? icon,
+  }) =>
+      IconButton(
+        iconSize: iconSize ?? this.iconSize,
+        visualDensity: visualDensity ?? this.visualDensity,
+        padding: padding ?? this.padding,
+        alignment: alignment ?? this.alignment,
+        splashRadius: splashRadius ?? this.splashRadius,
+        color: color ?? this.color,
+        focusColor: focusColor ?? this.focusColor,
+        hoverColor: hoverColor ?? this.hoverColor,
+        highlightColor: highlightColor ?? this.highlightColor,
+        splashColor: splashColor ?? this.splashColor,
+        disabledColor: disabledColor ?? this.disabledColor,
+        onPressed: onPressed ?? this.onPressed,
+        mouseCursor: mouseCursor ?? this.mouseCursor,
+        focusNode: focusNode ?? this.focusNode,
+        autofocus: autofocus ?? this.autofocus,
+        tooltip: tooltip ?? this.tooltip,
+        enableFeedback: enableFeedback ?? this.enableFeedback,
+        constraints: constraints ?? this.constraints,
+        icon: icon ?? this.icon,
+      );
 }

@@ -50,6 +50,14 @@ typedef MentionTileBuilder = Widget Function(
   Member member,
 );
 
+/// Widget builder for action button
+/// [defaultActionButton] is the default [IconButton] configuration
+/// Use [defaultActionButton.copyWith] to easily customize it
+typedef ActionButtonBuilder = Widget Function(
+  BuildContext context,
+  IconButton defaultActionButton,
+);
+
 /// Location for actions on the [MessageInput]
 enum ActionsLocation {
   /// Align to left
@@ -164,6 +172,8 @@ class MessageInput extends StatefulWidget {
     this.compressedVideoQuality = VideoQuality.DefaultQuality,
     this.compressedVideoFrameRate = 30,
     this.onError,
+    this.attachmentButtonBuilder,
+    this.commandButtonBuilder,
   }) : super(key: key);
 
   /// Message to edit
@@ -246,6 +256,12 @@ class MessageInput extends StatefulWidget {
 
   /// A callback for error reporting
   final ErrorListener? onError;
+
+  /// Builder for customizing attachment button.
+  final ActionButtonBuilder? attachmentButtonBuilder;
+
+  /// Builder for customizing command button.
+  final ActionButtonBuilder? commandButtonBuilder;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -403,11 +419,11 @@ class MessageInputState extends State<MessageInput> {
         children: <Widget>[
           if (!_commandEnabled &&
               widget.actionsLocation == ActionsLocation.left)
-            _buildExpandActionsButton(),
+            _buildExpandActionsButton(context),
           _buildTextInput(context),
           if (!_commandEnabled &&
               widget.actionsLocation == ActionsLocation.right)
-            _buildExpandActionsButton(),
+            _buildExpandActionsButton(context),
           if (widget.sendButtonLocation == SendButtonLocation.outside)
             _animateSendButton(context),
         ],
@@ -490,7 +506,7 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Widget _buildExpandActionsButton() {
+  Widget _buildExpandActionsButton(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -528,12 +544,13 @@ class MessageInputState extends State<MessageInput> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
-                    if (!widget.disableAttachments) _buildAttachmentButton(),
+                    if (!widget.disableAttachments)
+                      _buildAttachmentButton(context),
                     if (widget.showCommandsButton &&
                         widget.editMessage == null &&
                         channel.state != null &&
                         channel.config?.commands.isNotEmpty == true)
-                      _buildCommandButton(),
+                      _buildCommandButton(context),
                     ...widget.actions ?? [],
                   ].insertBetween(const SizedBox(width: 8)),
                 ),
@@ -669,9 +686,7 @@ class MessageInputState extends State<MessageInput> {
           : (widget.actionsLocation == ActionsLocation.leftInside
               ? Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildExpandActionsButton(),
-                  ],
+                  children: [_buildExpandActionsButton(context)],
                 )
               : null),
       suffixIconConstraints: const BoxConstraints.tightFor(height: 40),
@@ -697,7 +712,7 @@ class MessageInputState extends State<MessageInput> {
             ),
           if (!_commandEnabled &&
               widget.actionsLocation == ActionsLocation.rightInside)
-            _buildExpandActionsButton(),
+            _buildExpandActionsButton(context),
           if (widget.sendButtonLocation == SendButtonLocation.inside)
             _animateSendButton(context),
         ],
@@ -1681,10 +1696,9 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  Widget _buildCommandButton() {
+  Widget _buildCommandButton(BuildContext context) {
     final s = textEditingController.text.trim();
-
-    return IconButton(
+    final defaultButton = IconButton(
       icon: StreamSvgIcon.lightning(
         color: s.isNotEmpty
             ? _streamChatTheme.colorTheme.disabled
@@ -1722,38 +1736,46 @@ class MessageInputState extends State<MessageInput> {
         }
       },
     );
+
+    return widget.commandButtonBuilder?.call(context, defaultButton) ??
+        defaultButton;
   }
 
-  Widget _buildAttachmentButton() => IconButton(
-        icon: StreamSvgIcon.attach(
-          color: _openFilePickerSection
-              ? _messageInputTheme.actionButtonColor
-              : _messageInputTheme.actionButtonIdleColor,
-        ),
-        padding: const EdgeInsets.all(0),
-        constraints: const BoxConstraints.tightFor(
-          height: 24,
-          width: 24,
-        ),
-        splashRadius: 24,
-        onPressed: () async {
-          _emojiOverlay?.remove();
-          _emojiOverlay = null;
-          _commandsOverlay?.remove();
-          _commandsOverlay = null;
-          _mentionsOverlay?.remove();
-          _mentionsOverlay = null;
+  Widget _buildAttachmentButton(BuildContext context) {
+    final defaultButton = IconButton(
+      icon: StreamSvgIcon.attach(
+        color: _openFilePickerSection
+            ? _messageInputTheme.actionButtonColor
+            : _messageInputTheme.actionButtonIdleColor,
+      ),
+      padding: const EdgeInsets.all(0),
+      constraints: const BoxConstraints.tightFor(
+        height: 24,
+        width: 24,
+      ),
+      splashRadius: 24,
+      onPressed: () async {
+        _emojiOverlay?.remove();
+        _emojiOverlay = null;
+        _commandsOverlay?.remove();
+        _commandsOverlay = null;
+        _mentionsOverlay?.remove();
+        _mentionsOverlay = null;
 
-          if (_openFilePickerSection) {
-            setState(() {
-              _openFilePickerSection = false;
-              _filePickerSize = _kMinMediaPickerSize;
-            });
-          } else {
-            showAttachmentModal();
-          }
-        },
-      );
+        if (_openFilePickerSection) {
+          setState(() {
+            _openFilePickerSection = false;
+            _filePickerSize = _kMinMediaPickerSize;
+          });
+        } else {
+          showAttachmentModal();
+        }
+      },
+    );
+
+    return widget.attachmentButtonBuilder?.call(context, defaultButton) ??
+        defaultButton;
+  }
 
   /// Show the attachment modal, making the user choose where to
   /// pick a media from
