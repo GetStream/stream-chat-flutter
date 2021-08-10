@@ -13,10 +13,11 @@ void main() {
       expect(reaction.type, 'wow');
       expect(
         reaction.user?.toJson(),
-        User(id: '2de0297c-f3f2-489d-b930-ef77342edccf', extraData: const {
-          'image': 'https://randomuser.me/api/portraits/women/45.jpg',
-          'name': 'Daisy Morgan'
-        }).toJson(),
+        User(
+          id: '2de0297c-f3f2-489d-b930-ef77342edccf',
+          image: 'https://randomuser.me/api/portraits/women/45.jpg',
+          name: 'Daisy Morgan',
+        ).toJson(),
       );
       expect(reaction.score, 1);
       expect(reaction.userId, '2de0297c-f3f2-489d-b930-ef77342edccf');
@@ -28,11 +29,11 @@ void main() {
         messageId: '76cd8c82-b557-4e48-9d12-87995d3a0e04',
         createdAt: DateTime.parse('2020-01-28T22:17:31.108742Z'),
         type: 'wow',
-        user:
-            User(id: '2de0297c-f3f2-489d-b930-ef77342edccf', extraData: const {
-          'image': 'https://randomuser.me/api/portraits/women/45.jpg',
-          'name': 'Daisy Morgan'
-        }),
+        user: User(
+          id: '2de0297c-f3f2-489d-b930-ef77342edccf',
+          image: 'https://randomuser.me/api/portraits/women/45.jpg',
+          name: 'Daisy Morgan',
+        ),
         userId: '2de0297c-f3f2-489d-b930-ef77342edccf',
         extraData: {'bananas': 'yes'},
         score: 1,
@@ -58,10 +59,11 @@ void main() {
       expect(newReaction.type, 'wow');
       expect(
         newReaction.user?.toJson(),
-        User(id: '2de0297c-f3f2-489d-b930-ef77342edccf', extraData: const {
-          'image': 'https://randomuser.me/api/portraits/women/45.jpg',
-          'name': 'Daisy Morgan',
-        }).toJson(),
+        User(
+          id: '2de0297c-f3f2-489d-b930-ef77342edccf',
+          image: 'https://randomuser.me/api/portraits/women/45.jpg',
+          name: 'Daisy Morgan',
+        ).toJson(),
       );
       expect(newReaction.score, 1);
       expect(newReaction.userId, '2de0297c-f3f2-489d-b930-ef77342edccf');
