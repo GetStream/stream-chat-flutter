@@ -140,7 +140,7 @@ class Channel {
     if (_initializedCompleter.isCompleted) {
       throw StateError(
         'Once the channel is initialized you should use channel.updateName '
-        'to update the channel image',
+        'to update the channel name',
       );
     }
     _extraData.addAll({'name': name});
