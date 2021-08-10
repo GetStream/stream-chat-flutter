@@ -972,7 +972,13 @@ class Channel {
   ) =>
       updatePartial(set: {'name': name});
 
-  /// Edit the channel custom data.
+  /// Update the channel custom data. This replaces all of the channel data
+  /// with the given [channelData].
+  ///
+  /// If you instead want to do a partial update, use [updatePartial].
+  ///
+  /// See, https://getstream.io/chat/docs/other-rest/channel_update/?language=dart
+  /// for more information.
   Future<UpdateChannelResponse> update(
     Map<String, Object?> channelData, [
     Message? updateMessage,
@@ -986,9 +992,18 @@ class Channel {
     );
   }
 
-  /// Edit the channel custom data.
-  // TODO: This is the same description as [update]. Distinguish the two
-  // and provide a better description for set and unset.
+  /// A partial update can be used to set and unset specific custom data fields
+  /// when it is necessary to retain additional custom data fields on the
+  /// object.
+  ///
+  /// - [set] will add, or update existing attributes.
+  /// - [unset] will remove the attributes with the provided list of
+  /// values (keys).
+  ///
+  /// If you want to do a full update/replacement, use [update] instead.
+  ///
+  /// See, https://getstream.io/chat/docs/other-rest/channel_update/?language=dart
+  /// for more information.
   Future<PartialUpdateChannelResponse> updatePartial({
     Map<String, Object?>? set,
     List<String>? unset,
