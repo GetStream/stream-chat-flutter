@@ -15,20 +15,49 @@ import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-/// This a the class that manages a specific channel.
+/// Class that manages a specific channel.
+///
+/// {@template image}
+/// If an optional [image] argument is provided in the constructor then it
+/// will be set on [extraData] with a key of 'image'.
+///
+/// ```dart
+/// final channel = Channel(client, type, id, image: 'https://getstream.io/image.png');
+/// print(channel.image == channel.extraData['image']); // true
+/// ```
+///
+/// Before the channel is initialized the image can be set directly:
+/// ```dart
+/// channel.image = 'https://getstream.io/new-image';
+/// ```
+///
+/// To update the image after the channel has been initialized call:
+/// ```dart
+/// channel.updateImage('https://getstream.io/new-image');
+/// ```
+///
+/// This will do a partial update to update the image.
+/// {@endtemplate}
 class Channel {
-  /// Create a channel client instance.
+  /// Class that manages a specific channel.
+  ///
+  /// Optional [extraData] and [image] properties can be provided. The [image]
+  /// is exposed to easily set a key of 'image' on [extraData].
   Channel(
     this._client,
     this._type,
     this._id, {
     Map<String, Object?>? extraData,
+    String? image,
   })  : _cid = _id != null ? '$_type:$_id' : null,
-        _extraData = extraData ?? {} {
-    _client.logger.info('New Channel instance not initialized created');
+        _extraData = {
+          ...?extraData,
+          if (image != null) 'image': image,
+        } {
+    _client.logger.info('New Channel instance created, not yet initialized');
   }
 
-  /// Create a channel client instance from a [ChannelState] object
+  /// Create a channel client instance from a [ChannelState] object.
   Channel.fromState(this._client, ChannelState channelState)
       : assert(
           channelState.channel != null,
@@ -40,7 +69,7 @@ class Channel {
         _extraData = channelState.channel!.extraData {
     state = ChannelClientState(this, channelState);
     _initializedCompleter.complete(true);
-    _client.logger.info('New Channel instance initialized created');
+    _client.logger.info('New Channel instance initialized');
   }
 
   /// This client state
@@ -61,6 +90,19 @@ class Channel {
       );
     }
     _extraData.addAll(extraData);
+  }
+
+  /// Shortcut to set channel image.
+  ///
+  /// {@macro image}
+  set image(String? image) {
+    if (_initializedCompleter.isCompleted) {
+      throw StateError(
+        'Once the channel is initialized you should use channel.update '
+        'to update channel image',
+      );
+    }
+    _extraData.addAll({'image': image});
   }
 
   /// Returns true if the channel is muted.
@@ -218,7 +260,26 @@ class Channel {
     );
   }
 
-  /// The main Stream chat client
+  /// Shortcut to get channel image.
+  ///
+  /// {@macro image}
+  String? get image => extraData['image'] as String?;
+
+  /// Channel [image] as a stream.
+  ///
+  /// The channel needs to be initialized.
+  ///
+  /// {@macro image}
+  Stream<String?> get imageStream {
+    _checkInitialized();
+    return state!.channelStateStream.map(
+      (cs) =>
+          (cs.channel?.extraData['image'] as String?) ??
+          (_extraData['image'] as String?),
+    );
+  }
+
+  /// The main Stream chat client.
   StreamChatClient get client => _client;
   final StreamChatClient _client;
 
@@ -799,7 +860,36 @@ class Channel {
     }
   }
 
-  /// Edit the channel custom data
+  /// Update the channel's [image].
+  ///
+  /// This is equivelant to calling [updatePartial] and providing a map with an
+  /// 'image' key:
+  ///
+  /// ```dart
+  /// channel.updatePartial(
+  ///   set: {'image': 'https://getstream.io/new-image'}
+  /// );
+  /// ```
+  ///
+  /// Instead do:
+  /// ```dart
+  /// channel.updateImage('https://getstream.io/new-image');
+  /// ```
+  Future<PartialUpdateChannelResponse> updateImage(
+    String image,
+  ) {
+    _checkInitialized();
+
+    return _client.updateChannelPartial(
+      id!,
+      type,
+      set: {
+        'image': image,
+      },
+    );
+  }
+
+  /// Edit the channel custom data.
   Future<UpdateChannelResponse> update(
     Map<String, Object?> channelData, [
     Message? updateMessage,
@@ -813,7 +903,9 @@ class Channel {
     );
   }
 
-  /// Edit the channel custom data
+  /// Edit the channel custom data.
+  // TODO: This is the same description as [update]. Distinguish the two
+  // and provide a better description for set and unset.
   Future<PartialUpdateChannelResponse> updatePartial({
     Map<String, Object?>? set,
     List<String>? unset,

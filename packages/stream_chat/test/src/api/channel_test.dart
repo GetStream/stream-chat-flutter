@@ -72,6 +72,23 @@ void main() {
       expect(channel.extraData.containsKey('name'), isTrue);
       expect(channel.extraData['name'], 'test-channel-name');
     });
+
+    test('should be able to get and set `image`', () {
+      expect(channel.extraData.isEmpty, isTrue);
+
+      const imageUrl = 'https://getstream.io/some-image';
+      channel.image = imageUrl;
+
+      expect(channel.image, imageUrl);
+      expect(channel.extraData['image'], imageUrl);
+
+      const newImage = 'https://getstream.io/new-image';
+      final newChannelInstance =
+          Channel(client, channelType, channelId, image: newImage);
+
+      expect(newChannelInstance.image, newImage);
+      expect(newChannelInstance.extraData['image'], newImage);
+    });
   });
 
   // TODO : test all persistence related logic in this group
@@ -187,6 +204,14 @@ void main() {
     test('should throw if trying to set `extraData`', () {
       try {
         channel.extraData = {'name': 'test-channel-name'};
+      } catch (e) {
+        expect(e, isA<StateError>());
+      }
+    });
+
+    test('should throw if trying to set `image`', () {
+      try {
+        channel.image = 'https://stream.io/some-image';
       } catch (e) {
         expect(e, isA<StateError>());
       }
@@ -1190,6 +1215,35 @@ void main() {
 
       verify(() => client.updateChannel(channelId, channelType, channelData,
           message: any(named: 'message'))).called(1);
+    });
+
+    test('`.updateImage`', () async {
+      const image = 'https://getstream.io/new-image';
+
+      final channelModel = ChannelModel(
+        cid: channelCid,
+        extraData: {'image': image},
+      );
+
+      when(() => client.updateChannelPartial(
+            any(),
+            any(),
+            set: {'image': image},
+          )).thenAnswer(
+        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
+      );
+      final res = await channel.updateImage(image);
+
+      expect(res, isNotNull);
+      expect(res.channel.extraData['image'], image);
+
+      verify(
+        () => client.updateChannelPartial(
+          any(),
+          any(),
+          set: {'image': image},
+        ),
+      ).called(1);
     });
 
     test('`.updatePartial`', () async {
