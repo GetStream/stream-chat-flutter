@@ -17,6 +17,32 @@ import 'package:stream_chat/stream_chat.dart';
 
 /// Class that manages a specific channel.
 ///
+/// #### Channel name
+///
+/// {@template name}
+/// If an optional [name] argument is provided in the constructor then it
+/// will be set on [extraData] with a key of 'name'.
+///
+/// ```dart
+/// final channel = Channel(client, type, id, name: 'Channel name');
+/// print(channel.name == channel.extraData['name']); // true
+/// ```
+///
+/// Before the channel is initialized the name can be set directly:
+/// ```dart
+/// channel.name = 'New channel name';
+/// ```
+///
+/// To update the name after the channel has been initialized, call:
+/// ```dart
+/// channel.updateName('Updated channel name');
+/// ```
+///
+/// This will do a partial update to update the name.
+/// {@endtemplate}
+///
+/// #### Channel image
+///
 /// {@template image}
 /// If an optional [image] argument is provided in the constructor then it
 /// will be set on [extraData] with a key of 'image'.
@@ -31,7 +57,7 @@ import 'package:stream_chat/stream_chat.dart';
 /// channel.image = 'https://getstream.io/new-image';
 /// ```
 ///
-/// To update the image after the channel has been initialized call:
+/// To update the image after the channel has been initialized, call:
 /// ```dart
 /// channel.updateImage('https://getstream.io/new-image');
 /// ```
@@ -49,10 +75,12 @@ class Channel {
     this._id, {
     Map<String, Object?>? extraData,
     String? image,
+    String? name,
   })  : _cid = _id != null ? '$_type:$_id' : null,
         _extraData = {
           ...?extraData,
           if (image != null) 'image': image,
+          if (name != null) 'name': name,
         } {
     _client.logger.info('New Channel instance created, not yet initialized');
   }
@@ -98,11 +126,24 @@ class Channel {
   set image(String? image) {
     if (_initializedCompleter.isCompleted) {
       throw StateError(
-        'Once the channel is initialized you should use channel.update '
-        'to update channel image',
+        'Once the channel is initialized you should use channel.updateImage '
+        'to update the channel image',
       );
     }
     _extraData.addAll({'image': image});
+  }
+
+  /// Shortcut to set channel name.
+  ///
+  /// {@macro name}
+  set name(String? name) {
+    if (_initializedCompleter.isCompleted) {
+      throw StateError(
+        'Once the channel is initialized you should use channel.updateName '
+        'to update the channel image',
+      );
+    }
+    _extraData.addAll({'name': name});
   }
 
   /// Returns true if the channel is muted.
@@ -276,6 +317,39 @@ class Channel {
       (cs) =>
           (cs.channel?.extraData['image'] as String?) ??
           (_extraData['image'] as String?),
+    );
+  }
+
+  /// Shortcut to get channel name.
+  ///
+  /// If no name is set this returns the channel cid, else null.
+  ///
+  /// {@macro name}
+  String? get name {
+    if (extraData.containsKey('name')) {
+      final name = extraData['name']! as String;
+      if (name.isNotEmpty) return name;
+    }
+    return cid;
+  }
+
+  /// Channel [name] as a stream.
+  ///
+  /// If no name is set the stream returns the channel cid.
+  ///
+  /// The channel needs to be initialized.
+  ///
+  /// {@macro name}
+  Stream<String> get nameStream {
+    _checkInitialized();
+    return state!.channelStateStream.map(
+      (cs) {
+        if (cs.channel?.extraData.containsKey('name') ?? false) {
+          final name = cs.channel!.extraData['name']! as String;
+          if (name.isNotEmpty) return name;
+        }
+        return name!;
+      },
     );
   }
 
@@ -862,7 +936,7 @@ class Channel {
 
   /// Update the channel's [image].
   ///
-  /// This is equivelant to calling [updatePartial] and providing a map with an
+  /// This is the same as calling [updatePartial] and providing a map with an
   /// 'image' key:
   ///
   /// ```dart
@@ -877,17 +951,28 @@ class Channel {
   /// ```
   Future<PartialUpdateChannelResponse> updateImage(
     String image,
-  ) {
-    _checkInitialized();
+  ) =>
+      updatePartial(set: {'image': image});
 
-    return _client.updateChannelPartial(
-      id!,
-      type,
-      set: {
-        'image': image,
-      },
-    );
-  }
+  /// Update the channel's [name].
+  ///
+  /// This is the same as calling [updatePartial] and providing a map with a
+  /// 'name' key:
+  ///
+  /// ```dart
+  /// channel.updatePartial(
+  ///   set: {'name': 'Updated channel name'}
+  /// );
+  /// ```
+  ///
+  /// Instead do:
+  /// ```dart
+  /// channel.updateName('Updated channel name');
+  /// ```
+  Future<PartialUpdateChannelResponse> updateName(
+    String name,
+  ) =>
+      updatePartial(set: {'name': name});
 
   /// Edit the channel custom data.
   Future<UpdateChannelResponse> update(

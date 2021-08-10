@@ -89,6 +89,28 @@ void main() {
       expect(newChannelInstance.image, newImage);
       expect(newChannelInstance.extraData['image'], newImage);
     });
+
+    test('should be able to get and set `name`', () {
+      expect(channel.extraData.isEmpty, isTrue);
+      expect(
+        channel.name,
+        channelId,
+        reason: 'if name is not set then use channel id',
+      );
+
+      const name = 'Channel name';
+      channel.name = name;
+
+      expect(channel.name, name);
+      expect(channel.extraData['name'], name);
+
+      const newName = 'New channel name';
+      final newChannelInstance =
+          Channel(client, channelType, channelId, name: newName);
+
+      expect(newChannelInstance.name, newName);
+      expect(newChannelInstance.extraData['name'], newName);
+    });
   });
 
   // TODO : test all persistence related logic in this group
@@ -212,6 +234,14 @@ void main() {
     test('should throw if trying to set `image`', () {
       try {
         channel.image = 'https://stream.io/some-image';
+      } catch (e) {
+        expect(e, isA<StateError>());
+      }
+    });
+
+    test('should throw if trying to set `name`', () {
+      try {
+        channel.name = 'New name';
       } catch (e) {
         expect(e, isA<StateError>());
       }
@@ -1242,6 +1272,35 @@ void main() {
           any(),
           any(),
           set: {'image': image},
+        ),
+      ).called(1);
+    });
+
+    test('`.updateName`', () async {
+      const name = 'Name';
+
+      final channelModel = ChannelModel(
+        cid: channelCid,
+        extraData: {'name': name},
+      );
+
+      when(() => client.updateChannelPartial(
+            any(),
+            any(),
+            set: {'name': name},
+          )).thenAnswer(
+        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
+      );
+      final res = await channel.updateName(name);
+
+      expect(res, isNotNull);
+      expect(res.channel.extraData['name'], name);
+
+      verify(
+        () => client.updateChannelPartial(
+          any(),
+          any(),
+          set: {'name': name},
         ),
       ).called(1);
     });
