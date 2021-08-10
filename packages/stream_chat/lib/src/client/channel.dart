@@ -314,9 +314,7 @@ class Channel {
   Stream<String?> get imageStream {
     _checkInitialized();
     return state!.channelStateStream.map(
-      (cs) =>
-          (cs.channel?.extraData['image'] as String?) ??
-          (_extraData['image'] as String?),
+      (cs) => (cs.channel?.extraData['image'] as String?) ?? image,
     );
   }
 
