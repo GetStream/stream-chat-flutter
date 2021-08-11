@@ -90,12 +90,11 @@ class ChannelAvatar extends StatelessWidget {
     final colorTheme = chatThemeData.colorTheme;
     final previewTheme = chatThemeData.channelPreviewTheme.avatarTheme;
 
-    return BetterStreamBuilder<Map<String, dynamic>>(
-      stream: channel.extraDataStream,
-      initialData: channel.extraData,
-      builder: (context, extraData) {
-        final channelImage = extraData['image'];
-
+    return StreamBuilder<String?>(
+      stream: channel.imageStream,
+      initialData: channel.image,
+      builder: (context, snapshot) {
+        final channelImage = snapshot.data;
         if (channelImage != null) {
           Widget child = ClipRRect(
             borderRadius: borderRadius ?? previewTheme?.borderRadius,
@@ -108,7 +107,7 @@ class ChannelAvatar extends StatelessWidget {
                   imageUrl: channelImage,
                   errorWidget: (_, __, ___) => Center(
                     child: Text(
-                      extraData['name']?[0] ?? '',
+                      channel.name?[0] ?? '',
                       style: TextStyle(
                         color: colorTheme.barsBg,
                         fontWeight: FontWeight.bold,

@@ -20,14 +20,11 @@ void main() {
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-            'image': 'imagetest',
-          }));
-      when(() => channel.extraData).thenReturn({
-        'name': 'test',
-        'image': 'imagetest',
-      });
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+      when(() => channel.name).thenReturn('test');
+      when(() => channel.imageStream)
+          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
@@ -43,7 +40,7 @@ void main() {
 
       final image =
           tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
-      expect(image.imageUrl, 'imagetest');
+      expect(image.imageUrl, 'https://bit.ly/321RmWb');
     },
   );
 
@@ -59,12 +56,10 @@ void main() {
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
-      when(() => channel.extraData).thenReturn({
-        'name': 'test',
-      });
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+      when(() => channel.name).thenReturn('test');
+      when(() => channel.imageStream).thenAnswer((i) => Stream.value(null));
+      when(() => channel.image).thenReturn(null);
       when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
             Member(
               userId: 'user-id',
@@ -132,12 +127,9 @@ void main() {
       when(() => clientState.currentUser).thenReturn(currentUser);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
-      when(() => channel.extraData).thenReturn({
-        'name': 'test',
-      });
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+      when(() => channel.name).thenReturn('test');
+      when(() => channel.imageStream).thenAnswer((i) => Stream.value(null));
       final members = [
         Member(
           userId: 'user-id',
@@ -198,14 +190,11 @@ void main() {
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-            'image': 'imagetest',
-          }));
-      when(() => channel.extraData).thenReturn({
-        'name': 'test',
-        'image': 'imagetest',
-      });
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+      when(() => channel.name).thenReturn('test');
+      when(() => channel.imageStream)
+          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(

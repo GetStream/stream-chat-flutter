@@ -27,40 +27,40 @@ class ChannelName extends StatelessWidget {
     final client = StreamChat.of(context);
     final channel = StreamChannel.of(context).channel;
 
-    return BetterStreamBuilder<Map<String, Object?>>(
-      stream: channel.extraDataStream,
-      initialData: channel.extraData,
-      builder: (context, data) => _buildName(
-        data,
-        channel.state?.members,
+    assert(channel.state != null, 'Channel ${channel.id} is not initialized');
+
+    return StreamBuilder<String?>(
+      stream: channel.nameStream,
+      initialData: channel.name,
+      builder: (context, snapshot) => _buildName(
+        snapshot.data,
+        channel.state!.members,
         client,
       ),
     );
   }
 
   Widget _buildName(
-    Map<String, dynamic> extraData,
-    List<Member>? members,
+    String? name,
+    List<Member> members,
     StreamChatState client,
   ) =>
       LayoutBuilder(
         builder: (context, constraints) {
-          var title = context.translations.noTitleText;
-          if (extraData['name'] != null) {
-            title = extraData['name'];
-          } else {
+          var title = name;
+          if (title == null && members.isNotEmpty) {
             final otherMembers = members
-                ?.where((member) => member.userId != client.currentUser!.id);
-            if (otherMembers?.length == 1) {
-              if (otherMembers!.first.user != null) {
+                .where((member) => member.userId != client.currentUser!.id);
+            if (otherMembers.length == 1) {
+              if (otherMembers.first.user != null) {
                 title = otherMembers.first.user!.name;
               }
-            } else if (otherMembers?.isNotEmpty == true) {
+            } else if (otherMembers.isNotEmpty == true) {
               final maxWidth = constraints.maxWidth;
               final maxChars = maxWidth / (textStyle?.fontSize ?? 1);
               var currentChars = 0;
               final currentMembers = <Member>[];
-              otherMembers!.forEach((element) {
+              otherMembers.forEach((element) {
                 final newLength =
                     currentChars + (element.user?.name.length ?? 0);
                 if (newLength < maxChars) {
@@ -77,7 +77,7 @@ class ChannelName extends StatelessWidget {
           }
 
           return Text(
-            title,
+            title ?? context.translations.noTitleText,
             style: textStyle,
             overflow: textOverflow,
           );
