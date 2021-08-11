@@ -73,14 +73,14 @@ class Channel {
     this._client,
     this._type,
     this._id, {
-    Map<String, Object?>? extraData,
-    String? image,
     String? name,
+    String? image,
+    Map<String, Object?>? extraData,
   })  : _cid = _id != null ? '$_type:$_id' : null,
         _extraData = {
           ...?extraData,
-          if (image != null) 'image': image,
           if (name != null) 'name': name,
+          if (image != null) 'image': image,
         } {
     _client.logger.info('New Channel instance created, not yet initialized');
   }
@@ -110,14 +110,17 @@ class Channel {
   String? _cid;
   final Map<String, Object?> _extraData;
 
-  set extraData(Map<String, Object?> extraData) {
+  /// Shortcut to set channel name.
+  ///
+  /// {@macro name}
+  set name(String? name) {
     if (_initializedCompleter.isCompleted) {
       throw StateError(
-        'Once the channel is initialized you should use channel.update '
-        'to update channel data',
+        'Once the channel is initialized you should use `channel.updateName` '
+        'to update the channel name',
       );
     }
-    _extraData.addAll(extraData);
+    _extraData.addAll({'name': name});
   }
 
   /// Shortcut to set channel image.
@@ -126,24 +129,21 @@ class Channel {
   set image(String? image) {
     if (_initializedCompleter.isCompleted) {
       throw StateError(
-        'Once the channel is initialized you should use channel.updateImage '
+        'Once the channel is initialized you should use `channel.updateImage` '
         'to update the channel image',
       );
     }
     _extraData.addAll({'image': image});
   }
 
-  /// Shortcut to set channel name.
-  ///
-  /// {@macro name}
-  set name(String? name) {
+  set extraData(Map<String, Object?> extraData) {
     if (_initializedCompleter.isCompleted) {
       throw StateError(
-        'Once the channel is initialized you should use channel.updateName '
-        'to update the channel name',
+        'Once the channel is initialized you should use `channel.update` '
+        'to update channel data',
       );
     }
-    _extraData.addAll({'name': name});
+    _extraData.addAll(extraData);
   }
 
   /// Returns true if the channel is muted.
@@ -301,23 +301,6 @@ class Channel {
     );
   }
 
-  /// Shortcut to get channel image.
-  ///
-  /// {@macro image}
-  String? get image => extraData['image'] as String?;
-
-  /// Channel [image] as a stream.
-  ///
-  /// The channel needs to be initialized.
-  ///
-  /// {@macro image}
-  Stream<String?> get imageStream {
-    _checkInitialized();
-    return state!.channelStateStream.map(
-      (cs) => (cs.channel?.extraData['image'] as String?) ?? image,
-    );
-  }
-
   /// Shortcut to get channel name.
   ///
   /// If no name is set this returns the channel cid, else null.
@@ -342,12 +325,31 @@ class Channel {
     _checkInitialized();
     return state!.channelStateStream.map(
       (cs) {
-        if (cs.channel?.extraData.containsKey('name') ?? false) {
-          final name = cs.channel!.extraData['name']! as String;
+        final extraData = cs.channel?.extraData;
+        if (extraData != null && extraData.containsKey('name')) {
+          final name = extraData['name']! as String;
           if (name.isNotEmpty) return name;
         }
+        // this can never be null once the channel is initialized
         return name!;
       },
+    );
+  }
+
+  /// Shortcut to get channel image.
+  ///
+  /// {@macro image}
+  String? get image => extraData['image'] as String?;
+
+  /// Channel [image] as a stream.
+  ///
+  /// The channel needs to be initialized.
+  ///
+  /// {@macro image}
+  Stream<String?> get imageStream {
+    _checkInitialized();
+    return state!.channelStateStream.map(
+      (cs) => (cs.channel?.extraData['image'] as String?) ?? image,
     );
   }
 
@@ -932,26 +934,6 @@ class Channel {
     }
   }
 
-  /// Update the channel's [image].
-  ///
-  /// This is the same as calling [updatePartial] and providing a map with an
-  /// 'image' key:
-  ///
-  /// ```dart
-  /// channel.updatePartial(
-  ///   set: {'image': 'https://getstream.io/new-image'}
-  /// );
-  /// ```
-  ///
-  /// Instead do:
-  /// ```dart
-  /// channel.updateImage('https://getstream.io/new-image');
-  /// ```
-  Future<PartialUpdateChannelResponse> updateImage(
-    String image,
-  ) =>
-      updatePartial(set: {'image': image});
-
   /// Update the channel's [name].
   ///
   /// This is the same as calling [updatePartial] and providing a map with a
@@ -967,10 +949,26 @@ class Channel {
   /// ```dart
   /// channel.updateName('Updated channel name');
   /// ```
-  Future<PartialUpdateChannelResponse> updateName(
-    String name,
-  ) =>
+  Future<PartialUpdateChannelResponse> updateName(String name) =>
       updatePartial(set: {'name': name});
+
+  /// Update the channel's [image].
+  ///
+  /// This is the same as calling [updatePartial] and providing a map with an
+  /// 'image' key:
+  ///
+  /// ```dart
+  /// channel.updatePartial(
+  ///   set: {'image': 'https://getstream.io/new-image'}
+  /// );
+  /// ```
+  ///
+  /// Instead do:
+  /// ```dart
+  /// channel.updateImage('https://getstream.io/new-image');
+  /// ```
+  Future<PartialUpdateChannelResponse> updateImage(String image) =>
+      updatePartial(set: {'image': image});
 
   /// Update the channel custom data. This replaces all of the channel data
   /// with the given [channelData].

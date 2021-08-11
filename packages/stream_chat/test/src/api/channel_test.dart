@@ -39,6 +39,7 @@ void main() {
     late final client = MockStreamChatClient();
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
+    const channelCid = '$channelType:$channelId';
     late Channel channel;
 
     setUpAll(() {
@@ -94,7 +95,7 @@ void main() {
       expect(channel.extraData.isEmpty, isTrue);
       expect(
         channel.name,
-        channelId,
+        channelCid,
         reason: 'if name is not set then use channel id',
       );
 
@@ -1256,24 +1257,23 @@ void main() {
       );
 
       when(() => client.updateChannelPartial(
-            any(),
-            any(),
+            channelId,
+            channelType,
             set: {'image': image},
           )).thenAnswer(
         (_) async => PartialUpdateChannelResponse()..channel = channelModel,
       );
+
       final res = await channel.updateImage(image);
 
       expect(res, isNotNull);
       expect(res.channel.extraData['image'], image);
 
-      verify(
-        () => client.updateChannelPartial(
-          any(),
-          any(),
-          set: {'image': image},
-        ),
-      ).called(1);
+      verify(() => client.updateChannelPartial(
+            channelId,
+            channelType,
+            set: {'image': image},
+          )).called(1);
     });
 
     test('`.updateName`', () async {
@@ -1285,24 +1285,23 @@ void main() {
       );
 
       when(() => client.updateChannelPartial(
-            any(),
-            any(),
+            channelId,
+            channelType,
             set: {'name': name},
           )).thenAnswer(
         (_) async => PartialUpdateChannelResponse()..channel = channelModel,
       );
+
       final res = await channel.updateName(name);
 
       expect(res, isNotNull);
       expect(res.channel.extraData['name'], name);
 
-      verify(
-        () => client.updateChannelPartial(
-          any(),
-          any(),
-          set: {'name': name},
-        ),
-      ).called(1);
+      verify(() => client.updateChannelPartial(
+            channelId,
+            channelType,
+            set: {'name': name},
+          )).called(1);
     });
 
     test('`.updatePartial`', () async {
