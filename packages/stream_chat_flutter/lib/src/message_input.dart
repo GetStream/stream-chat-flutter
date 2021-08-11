@@ -263,9 +263,12 @@ class MessageInput extends StatefulWidget {
   /// A callback for error reporting
   final ErrorListener? onError;
 
+  /// A limit for the no. of attachments that can be sent with a single message.
   final int attachmentLimit;
 
-  /// A callback for error reporting
+  /// A callback for when the [attachmentLimit] is exceeded.
+  ///
+  /// This will override the default error alert behaviour.
   final AttachmentLimitExceedListener? onAttachmentLimitExceed;
 
   @override
@@ -1856,17 +1859,18 @@ class MessageInputState extends State<MessageInput> {
 
   /// Adds an attachment to the [_attachments] map
   void _addAttachments(Iterable<Attachment> attachments) {
+    final limit = widget.attachmentLimit;
     final length = _attachments.length + attachments.length;
-    if (length > widget.attachmentLimit) {
+    if (length > limit) {
       final onAttachmentLimitExceed = widget.onAttachmentLimitExceed;
       if (onAttachmentLimitExceed != null) {
         return onAttachmentLimitExceed(
           widget.attachmentLimit,
-          'Attachment Limit crossed ${widget.attachmentLimit}',
+          context.translations.attachmentLimitExceedError(limit),
         );
       }
       return _showErrorAlert(
-        'Attachment Limit crossed ${widget.attachmentLimit}',
+        context.translations.attachmentLimitExceedError(limit),
       );
     }
     for (final attachment in attachments) {

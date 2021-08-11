@@ -356,4 +356,10 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get replyToMessageLabel => 'संदेश का जवाब';
+
+  @override
+  String attachmentLimitExceedError(int limit) {
+    // TODO: implement attachmentLimitExceedError
+    throw UnimplementedError();
+  }
 }

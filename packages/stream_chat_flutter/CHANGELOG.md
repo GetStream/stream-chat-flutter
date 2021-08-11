@@ -10,6 +10,9 @@
   - `GalleryHeader`
   - `GalleryFooter`
   - `ThreadHeader`
+- Added `MessageInput.attachmentLimit` in order to limit the no. of attachments that can be sent with a single message.
+- Added `MessageInput.onAttachmentLimitExceed` callback which will be called when the `attachmentLimit` is exceeded.
+  This will override the default error alert behaviour.
 
 
 🔄 Changed

@@ -362,4 +362,10 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
 
   @override
   String get replyToMessageLabel => 'Responder al Mensaje';
+
+  @override
+  String attachmentLimitExceedError(int limit) {
+    // TODO: implement attachmentLimitExceedError
+    throw UnimplementedError();
+  }
 }

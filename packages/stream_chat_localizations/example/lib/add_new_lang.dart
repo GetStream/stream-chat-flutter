@@ -381,6 +381,10 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get replyToMessageLabel => 'Reply to Message';
+
+  @override
+  String attachmentLimitExceedError(int limit) =>
+      'Attachment limit exceeded, limit: $limit';
 }
 
 void main() async {
