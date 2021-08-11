@@ -39,7 +39,6 @@ void main() {
     late final client = MockStreamChatClient();
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
-    const channelCid = '$channelType:$channelId';
     late Channel channel;
 
     setUpAll(() {
@@ -93,11 +92,6 @@ void main() {
 
     test('should be able to get and set `name`', () {
       expect(channel.extraData.isEmpty, isTrue);
-      expect(
-        channel.name,
-        channelCid,
-        reason: 'if name is not set then use channel id',
-      );
 
       const name = 'Channel name';
       channel.name = name;

@@ -303,37 +303,17 @@ class Channel {
 
   /// Shortcut to get channel name.
   ///
-  /// If no name is set this returns the channel cid, else null.
-  ///
   /// {@macro name}
-  String? get name {
-    if (extraData.containsKey('name')) {
-      final name = extraData['name']! as String;
-      if (name.isNotEmpty) return name;
-    }
-    return cid;
-  }
+  String? get name => extraData['name'] as String?;
 
   /// Channel [name] as a stream.
-  ///
-  /// If no name is set the stream returns the channel cid.
   ///
   /// The channel needs to be initialized.
   ///
   /// {@macro name}
-  Stream<String> get nameStream {
+  Stream<String?> get nameStream {
     _checkInitialized();
-    return state!.channelStateStream.map(
-      (cs) {
-        final extraData = cs.channel?.extraData;
-        if (extraData != null && extraData.containsKey('name')) {
-          final name = extraData['name']! as String;
-          if (name.isNotEmpty) return name;
-        }
-        // this can never be null once the channel is initialized
-        return name!;
-      },
-    );
+    return extraDataStream.map((it) => it['name'] as String?);
   }
 
   /// Shortcut to get channel image.
@@ -348,9 +328,7 @@ class Channel {
   /// {@macro image}
   Stream<String?> get imageStream {
     _checkInitialized();
-    return state!.channelStateStream.map(
-      (cs) => (cs.channel?.extraData['image'] as String?) ?? image,
-    );
+    return extraDataStream.map((it) => it['image'] as String?);
   }
 
   /// The main Stream chat client.
