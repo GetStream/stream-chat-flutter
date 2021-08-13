@@ -28,6 +28,10 @@ Here's the full naming breakdown:
 * `MessageTheme` is now `MessageThemeData`
 * `UserListViewTheme` is now `UserListViewThemeData`
 
+🐞 Fixed
+
+- Fixed `MessageInput` textField behaviour
+
 ## 2.1.2
 
 🐞 Fixed
