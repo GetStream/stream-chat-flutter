@@ -197,7 +197,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
       'कार्रवाई पूरी नहीं की जा सकी.';
 
   @override
-  String get replyLabel => 'रिप्लाई';
+  String get replyLabel => 'जवाब दें';
 
   @override
   String togglePinUnpinText({required bool pinned}) {
@@ -224,7 +224,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get photosLabel => 'तस्वीरें';
+  String get photosLabel => 'फ़ोटोज';
 
   String _getDay(DateTime dateTime) {
     final now = DateTime.now();
@@ -250,10 +250,10 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get todayLabel => 'आज';
 
   @override
-  String get yesterdayLabel => 'बिता हुआ कल';
+  String get yesterdayLabel => 'कल';
 
   @override
-  String get channelIsMutedText => 'चैनल मौन है';
+  String get channelIsMutedText => 'चैनल म्यूट है';
 
   @override
   String get noTitleText => 'कोई शीर्षक नहीं';
