@@ -1869,15 +1869,14 @@ class MessageInputState extends State<MessageInput> {
       } else if (fileType == DefaultAttachmentTypes.video) {
         pickedFile = await _imagePicker.pickVideo(source: ImageSource.camera);
       }
-      if (pickedFile == null) {
-        return;
+      if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        file = AttachmentFile(
+          size: bytes.length,
+          path: pickedFile.path,
+          bytes: bytes,
+        );
       }
-      final bytes = await pickedFile.readAsBytes();
-      file = AttachmentFile(
-        size: bytes.length,
-        path: pickedFile.path,
-        bytes: bytes,
-      );
     } else {
       late FileType type;
       if (fileType == DefaultAttachmentTypes.image) {
