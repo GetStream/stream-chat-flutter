@@ -42,6 +42,10 @@ breakdown:
 * `MessageTheme` is now `MessageThemeData`
 * `UserListViewTheme` is now `UserListViewThemeData`
 
+🐞 Fixed
+
+- Fixed `MessageInput` textField case where `input` is not enabled if the file picked from the camera is null.
+
 ## 2.1.2
 
 🐞 Fixed
