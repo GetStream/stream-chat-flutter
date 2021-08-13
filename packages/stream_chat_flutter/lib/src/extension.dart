@@ -48,7 +48,7 @@ extension PlatformFileX on PlatformFile {
 
 /// Extension on [InputDecoration]
 extension InputDecorationX on InputDecoration {
-  /// Merges this [AvatarThemeData] with the [other]
+  /// Merges this [InputDecoration] with the [other]
   InputDecoration merge(InputDecoration? other) {
     if (other == null) return this;
     return copyWith(

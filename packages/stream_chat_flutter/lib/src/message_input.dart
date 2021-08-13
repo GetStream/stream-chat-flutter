@@ -50,9 +50,10 @@ typedef MentionTileBuilder = Widget Function(
   Member member,
 );
 
-/// Widget builder for action button
-/// [defaultActionButton] is the default [IconButton] configuration
-/// Use [defaultActionButton.copyWith] to easily customize it
+/// Widget builder for action button.
+///
+/// [defaultActionButton] is the default [IconButton] configuration,
+/// Use [defaultActionButton.copyWith] to easily customize it.
 typedef ActionButtonBuilder = Widget Function(
   BuildContext context,
   IconButton defaultActionButton,
@@ -257,10 +258,16 @@ class MessageInput extends StatefulWidget {
   /// A callback for error reporting
   final ErrorListener? onError;
 
-  /// Builder for customizing attachment button.
+  /// Builder for customizing the attachment button.
+  ///
+  /// The builder contains the default [IconButton] that can be customized by
+  /// calling `.copyWith`.
   final ActionButtonBuilder? attachmentButtonBuilder;
 
-  /// Builder for customizing command button.
+  /// Builder for customizing the command button.
+  ///
+  /// The builder contains the default [IconButton] that can be customized by
+  /// calling `.copyWith`.
   final ActionButtonBuilder? commandButtonBuilder;
 
   @override
