@@ -15,20 +15,77 @@ import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-/// This a the class that manages a specific channel.
+/// Class that manages a specific channel.
+///
+/// #### Channel name
+///
+/// {@template name}
+/// If an optional [name] argument is provided in the constructor then it
+/// will be set on [extraData] with a key of 'name'.
+///
+/// ```dart
+/// final channel = Channel(client, type, id, name: 'Channel name');
+/// print(channel.name == channel.extraData['name']); // true
+/// ```
+///
+/// Before the channel is initialized the name can be set directly:
+/// ```dart
+/// channel.name = 'New channel name';
+/// ```
+///
+/// To update the name after the channel has been initialized, call:
+/// ```dart
+/// channel.updateName('Updated channel name');
+/// ```
+///
+/// This will do a partial update to update the name.
+/// {@endtemplate}
+///
+/// #### Channel image
+///
+/// {@template image}
+/// If an optional [image] argument is provided in the constructor then it
+/// will be set on [extraData] with a key of 'image'.
+///
+/// ```dart
+/// final channel = Channel(client, type, id, image: 'https://getstream.io/image.png');
+/// print(channel.image == channel.extraData['image']); // true
+/// ```
+///
+/// Before the channel is initialized the image can be set directly:
+/// ```dart
+/// channel.image = 'https://getstream.io/new-image';
+/// ```
+///
+/// To update the image after the channel has been initialized, call:
+/// ```dart
+/// channel.updateImage('https://getstream.io/new-image');
+/// ```
+///
+/// This will do a partial update to update the image.
+/// {@endtemplate}
 class Channel {
-  /// Create a channel client instance.
+  /// Class that manages a specific channel.
+  ///
+  /// Optional [extraData] and [image] properties can be provided. The [image]
+  /// is exposed to easily set a key of 'image' on [extraData].
   Channel(
     this._client,
     this._type,
     this._id, {
+    String? name,
+    String? image,
     Map<String, Object?>? extraData,
   })  : _cid = _id != null ? '$_type:$_id' : null,
-        _extraData = extraData ?? {} {
-    _client.logger.info('New Channel instance not initialized created');
+        _extraData = {
+          ...?extraData,
+          if (name != null) 'name': name,
+          if (image != null) 'image': image,
+        } {
+    _client.logger.info('New Channel instance created, not yet initialized');
   }
 
-  /// Create a channel client instance from a [ChannelState] object
+  /// Create a channel client instance from a [ChannelState] object.
   Channel.fromState(this._client, ChannelState channelState)
       : assert(
           channelState.channel != null,
@@ -40,7 +97,7 @@ class Channel {
         _extraData = channelState.channel!.extraData {
     state = ChannelClientState(this, channelState);
     _initializedCompleter.complete(true);
-    _client.logger.info('New Channel instance initialized created');
+    _client.logger.info('New Channel instance initialized');
   }
 
   /// This client state
@@ -53,66 +110,92 @@ class Channel {
   String? _cid;
   final Map<String, Object?> _extraData;
 
+  /// Shortcut to set channel name.
+  ///
+  /// {@macro name}
+  set name(String? name) {
+    if (_initializedCompleter.isCompleted) {
+      throw StateError(
+        'Once the channel is initialized you should use `channel.updateName` '
+        'to update the channel name',
+      );
+    }
+    _extraData.addAll({'name': name});
+  }
+
+  /// Shortcut to set channel image.
+  ///
+  /// {@macro image}
+  set image(String? image) {
+    if (_initializedCompleter.isCompleted) {
+      throw StateError(
+        'Once the channel is initialized you should use `channel.updateImage` '
+        'to update the channel image',
+      );
+    }
+    _extraData.addAll({'image': image});
+  }
+
   set extraData(Map<String, Object?> extraData) {
     if (_initializedCompleter.isCompleted) {
       throw StateError(
-        'Once the channel is initialized you should use channel.update '
+        'Once the channel is initialized you should use `channel.update` '
         'to update channel data',
       );
     }
     _extraData.addAll(extraData);
   }
 
-  /// Returns true if the channel is muted
+  /// Returns true if the channel is muted.
   bool get isMuted =>
       _client.state.currentUser?.channelMutes
           .any((element) => element.channel.cid == cid) ==
       true;
 
-  /// Returns true if the channel is muted as a stream
+  /// Returns true if the channel is muted, as a stream.
   Stream<bool>? get isMutedStream => _client.state.currentUserStream
       .map((event) =>
           event!.channelMutes.any((element) => element.channel.cid == cid) ==
           true)
       .distinct();
 
-  /// True if the channel is a group
+  /// True if the channel is a group.
   bool get isGroup => memberCount != 2;
 
-  /// True if the channel is distinct
+  /// True if the channel is distinct.
   bool get isDistinct => id?.startsWith('!members') == true;
 
-  /// Channel configuration
+  /// Channel configuration.
   ChannelConfig? get config {
     _checkInitialized();
     return state?._channelState.channel?.config;
   }
 
-  /// Channel configuration as a stream
+  /// Channel configuration as a stream.
   Stream<ChannelConfig?>? get configStream {
     _checkInitialized();
     return state?.channelStateStream.map((cs) => cs.channel?.config);
   }
 
-  /// Channel user creator
+  /// Channel user creator.
   User? get createdBy {
     _checkInitialized();
     return state?._channelState.channel?.createdBy;
   }
 
-  /// Channel user creator as a stream
+  /// Channel user creator as a stream.
   Stream<User?>? get createdByStream {
     _checkInitialized();
     return state?.channelStateStream.map((cs) => cs.channel?.createdBy);
   }
 
-  /// Channel frozen status
+  /// Channel frozen status.
   bool? get frozen {
     _checkInitialized();
     return state?._channelState.channel?.frozen;
   }
 
-  /// Channel frozen status as a stream
+  /// Channel frozen status as a stream.
   Stream<bool?>? get frozenStream {
     _checkInitialized();
     return state?.channelStateStream.map((cs) => cs.channel?.frozen);
@@ -133,90 +216,90 @@ class Channel {
   ///
   DateTime? cooldownStartedAt;
 
-  /// Channel creation date
+  /// Channel creation date.
   DateTime? get createdAt {
     _checkInitialized();
     return state?._channelState.channel?.createdAt;
   }
 
-  /// Channel creation date as a stream
+  /// Channel creation date as a stream.
   Stream<DateTime?>? get createdAtStream {
     _checkInitialized();
     return state?.channelStateStream.map((cs) => cs.channel?.createdAt);
   }
 
-  /// Channel last message date
+  /// Channel last message date.
   DateTime? get lastMessageAt {
     _checkInitialized();
 
     return state?._channelState.channel?.lastMessageAt;
   }
 
-  /// Channel last message date as a stream
+  /// Channel last message date as a stream.
   Stream<DateTime?>? get lastMessageAtStream {
     _checkInitialized();
 
     return state?.channelStateStream.map((cs) => cs.channel?.lastMessageAt);
   }
 
-  /// Channel updated date
+  /// Channel updated date.
   DateTime? get updatedAt {
     _checkInitialized();
 
     return state?._channelState.channel?.updatedAt;
   }
 
-  /// Channel updated date as a stream
+  /// Channel updated date as a stream.
   Stream<DateTime?>? get updatedAtStream {
     _checkInitialized();
 
     return state?.channelStateStream.map((cs) => cs.channel?.updatedAt);
   }
 
-  /// Channel deletion date
+  /// Channel deletion date.
   DateTime? get deletedAt {
     _checkInitialized();
 
     return state?._channelState.channel?.deletedAt;
   }
 
-  /// Channel deletion date as a stream
+  /// Channel deletion date as a stream.
   Stream<DateTime?>? get deletedAtStream {
     _checkInitialized();
 
     return state?.channelStateStream.map((cs) => cs.channel?.deletedAt);
   }
 
-  /// Channel member count
+  /// Channel member count.
   int? get memberCount {
     _checkInitialized();
 
     return state?._channelState.channel?.memberCount;
   }
 
-  /// Channel member count as a stream
+  /// Channel member count as a stream.
   Stream<int?>? get memberCountStream {
     _checkInitialized();
 
     return state?.channelStateStream.map((cs) => cs.channel?.memberCount);
   }
 
-  /// Channel id
+  /// Channel id.
   String? get id => state?._channelState.channel?.id ?? _id;
 
-  /// Channel type
+  /// Channel type.
   String get type => state?._channelState.channel?.type ?? _type;
 
-  /// Channel cid
+  /// Channel cid.
   String? get cid => state?._channelState.channel?.cid ?? _cid;
 
-  /// Channel team
+  /// Channel team.
   String? get team {
     _checkInitialized();
     return state?._channelState.channel?.team;
   }
 
-  /// Channel extra data
+  /// Channel extra data.
   Map<String, Object?> get extraData {
     var data = state?._channelState.channel?.extraData;
     if (data == null || data.isEmpty) {
@@ -225,7 +308,7 @@ class Channel {
     return data;
   }
 
-  /// Channel extra data as a stream
+  /// Channel extra data as a stream.
   Stream<Map<String, dynamic>> get extraDataStream {
     _checkInitialized();
     return state!.channelStateStream.map(
@@ -233,15 +316,46 @@ class Channel {
     );
   }
 
-  /// The main Stream chat client
+  /// Shortcut to get channel name.
+  ///
+  /// {@macro name}
+  String? get name => extraData['name'] as String?;
+
+  /// Channel [name] as a stream.
+  ///
+  /// The channel needs to be initialized.
+  ///
+  /// {@macro name}
+  Stream<String?> get nameStream {
+    _checkInitialized();
+    return extraDataStream.map((it) => it['name'] as String?);
+  }
+
+  /// Shortcut to get channel image.
+  ///
+  /// {@macro image}
+  String? get image => extraData['image'] as String?;
+
+  /// Channel [image] as a stream.
+  ///
+  /// The channel needs to be initialized.
+  ///
+  /// {@macro image}
+  Stream<String?> get imageStream {
+    _checkInitialized();
+    return extraDataStream.map((it) => it['image'] as String?);
+  }
+
+  /// The main Stream chat client.
   StreamChatClient get client => _client;
   final StreamChatClient _client;
 
   final Completer<bool> _initializedCompleter = Completer();
 
-  /// True if this is initialized
+  /// True if this is initialized.
+  ///
   /// Call [watch] to initialize the client or instantiate it using
-  /// [Channel.fromState]
+  /// [Channel.fromState].
   Future<bool> get initialized => _initializedCompleter.future;
 
   final _cancelableAttachmentUploadRequest = <String, CancelToken>{};
@@ -377,7 +491,9 @@ class Channel {
   }
 
   /// Send a [message] to this channel.
-  /// If [skipPush] is true the message will not send a push notification
+  ///
+  /// If [skipPush] is true the message will not send a push notification.
+  ///
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually sending the message.
   Future<SendMessageResponse> sendMessage(
@@ -445,6 +561,7 @@ class Channel {
   }
 
   /// Updates the [message] in this channel.
+  ///
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually updating the message.
   Future<UpdateMessageResponse> updateMessage(Message message) async {
@@ -507,8 +624,10 @@ class Channel {
   }
 
   /// Partially updates the [message] in this channel.
-  /// Use [set] to define values to be set
-  /// Use [unset] to define values to be unset
+  ///
+  /// Use [set] to define values to be set.
+  ///
+  /// Use [unset] to define values to be unset.
   Future<UpdateMessageResponse> partialUpdateMessage(
     Message message, {
     Map<String, Object?>? set,
@@ -608,7 +727,7 @@ class Channel {
     );
   }
 
-  /// Unpins provided message
+  /// Unpins provided message.
   Future<UpdateMessageResponse> unpinMessage(Message message) =>
       partialUpdateMessage(
         message,
@@ -617,7 +736,7 @@ class Channel {
         },
       );
 
-  /// Send a file to this channel
+  /// Send a file to this channel.
   Future<SendFileResponse> sendFile(
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
@@ -633,7 +752,7 @@ class Channel {
     );
   }
 
-  /// Send an image to this channel
+  /// Send an image to this channel.
   Future<SendImageResponse> sendImage(
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
@@ -649,7 +768,7 @@ class Channel {
     );
   }
 
-  /// A message search.
+  /// Search for a message with the given options.
   Future<SearchMessagesResponse> search({
     String? query,
     Filter? messageFilters,
@@ -666,7 +785,7 @@ class Channel {
     );
   }
 
-  /// Delete a file from this channel
+  /// Delete a file from this channel.
   Future<EmptyResponse> deleteFile(
     String url, {
     CancelToken? cancelToken,
@@ -680,7 +799,7 @@ class Channel {
     );
   }
 
-  /// Delete an image from this channel
+  /// Delete an image from this channel.
   Future<EmptyResponse> deleteImage(
     String url, {
     CancelToken? cancelToken,
@@ -694,14 +813,15 @@ class Channel {
     );
   }
 
-  /// Send an event on this channel
+  /// Send an event on this channel.
   Future<EmptyResponse> sendEvent(Event event) {
     _checkInitialized();
     return _client.sendEvent(id!, type, event);
   }
 
-  /// Send a reaction to this channel
-  /// Set [enforceUnique] to true to remove the existing user reaction
+  /// Send a reaction to this channel.
+  ///
+  /// Set [enforceUnique] to true to remove the existing user reaction.
   Future<SendReactionResponse> sendReaction(
     Message message,
     String type, {
@@ -764,7 +884,7 @@ class Channel {
     }
   }
 
-  /// Delete a reaction from this channel
+  /// Delete a reaction from this channel.
   Future<EmptyResponse> deleteReaction(
       Message message, Reaction reaction) async {
     final type = reaction.type;
@@ -810,7 +930,49 @@ class Channel {
     }
   }
 
-  /// Edit the channel custom data
+  /// Update the channel's [name].
+  ///
+  /// This is the same as calling [updatePartial] and providing a map with a
+  /// 'name' key:
+  ///
+  /// ```dart
+  /// channel.updatePartial(
+  ///   set: {'name': 'Updated channel name'}
+  /// );
+  /// ```
+  ///
+  /// Instead do:
+  /// ```dart
+  /// channel.updateName('Updated channel name');
+  /// ```
+  Future<PartialUpdateChannelResponse> updateName(String name) =>
+      updatePartial(set: {'name': name});
+
+  /// Update the channel's [image].
+  ///
+  /// This is the same as calling [updatePartial] and providing a map with an
+  /// 'image' key:
+  ///
+  /// ```dart
+  /// channel.updatePartial(
+  ///   set: {'image': 'https://getstream.io/new-image'}
+  /// );
+  /// ```
+  ///
+  /// Instead do:
+  /// ```dart
+  /// channel.updateImage('https://getstream.io/new-image');
+  /// ```
+  Future<PartialUpdateChannelResponse> updateImage(String image) =>
+      updatePartial(set: {'image': image});
+
+  /// Update the channel custom data. This replaces all of the channel data
+  /// with the given [channelData].
+  ///
+  /// If you instead want to do a partial update, use [updatePartial].
+  ///
+  /// See, https://getstream.io/chat/docs/other-rest/channel_update/?language=dart
+  /// for more information.
   Future<UpdateChannelResponse> update(
     Map<String, Object?> channelData, [
     Message? updateMessage,
@@ -824,7 +986,18 @@ class Channel {
     );
   }
 
-  /// Edit the channel custom data
+  /// A partial update can be used to set and unset specific custom data fields
+  /// when it is necessary to retain additional custom data fields on the
+  /// object.
+  ///
+  /// - [set] will add, or update existing attributes.
+  /// - [unset] will remove the attributes with the provided list of
+  /// values (keys).
+  ///
+  /// If you want to do a full update/replacement, use [update] instead.
+  ///
+  /// See, https://getstream.io/chat/docs/other-rest/channel_update/?language=dart
+  /// for more information.
   Future<PartialUpdateChannelResponse> updatePartial({
     Map<String, Object?>? set,
     List<String>? unset,
@@ -853,25 +1026,25 @@ class Channel {
     return _client.deleteChannel(id!, type);
   }
 
-  /// Removes all messages from the channel
+  /// Removes all messages from the channel.
   Future<EmptyResponse> truncate() async {
     _checkInitialized();
     return _client.truncateChannel(id!, type);
   }
 
-  /// Accept invitation to the channel
+  /// Accept invitation to the channel.
   Future<AcceptInviteResponse> acceptInvite([Message? message]) async {
     _checkInitialized();
     return _client.acceptChannelInvite(id!, type, message: message);
   }
 
-  /// Reject invitation to the channel
+  /// Reject invitation to the channel.
   Future<RejectInviteResponse> rejectInvite([Message? message]) async {
     _checkInitialized();
     return _client.rejectChannelInvite(id!, type, message: message);
   }
 
-  /// Add members to the channel
+  /// Add members to the channel.
   Future<AddMembersResponse> addMembers(
     List<String> memberIds, [
     Message? message,
@@ -880,7 +1053,7 @@ class Channel {
     return _client.addChannelMembers(id!, type, memberIds, message: message);
   }
 
-  /// Invite members to the channel
+  /// Invite members to the channel.
   Future<InviteMembersResponse> inviteMembers(
     List<String> memberIds, [
     Message? message,
@@ -889,7 +1062,7 @@ class Channel {
     return _client.inviteChannelMembers(id!, type, memberIds, message: message);
   }
 
-  /// Remove members from the channel
+  /// Remove members from the channel.
   Future<RemoveMembersResponse> removeMembers(
     List<String> memberIds, [
     Message? message,
@@ -898,7 +1071,7 @@ class Channel {
     return _client.removeChannelMembers(id!, type, memberIds, message: message);
   }
 
-  /// Send action for a specific message of this channel
+  /// Send action for a specific message of this channel.
   Future<SendActionResponse> sendAction(
     Message message,
     Map<String, dynamic> formData,
@@ -945,9 +1118,10 @@ class Channel {
     return res;
   }
 
-  /// Mark all messages as read
+  /// Mark all messages as read.
+  ///
   /// Optionally provide a [messageId] if you want to mark a
-  /// particular message as read
+  /// particular message as read.
   Future<EmptyResponse> markRead({String? messageId}) async {
     _checkInitialized();
     client.state.totalUnreadCount =
@@ -956,7 +1130,7 @@ class Channel {
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
-  /// Loads the initial channel state and watches for changes
+  /// Loads the initial channel state and watches for changes.
   Future<ChannelState> watch() async {
     ChannelState response;
 
@@ -987,15 +1161,16 @@ class Channel {
     }
   }
 
-  /// Stop watching the channel
+  /// Stop watching the channel.
   Future<EmptyResponse> stopWatching() async {
     _checkInitialized();
     return _client.stopChannelWatching(id!, type);
   }
 
-  /// List the message replies for a parent message
+  /// List the message replies for a parent message.
+  ///
   /// Set [preferOffline] to true to avoid the api call if the data is already
-  /// in the offline storage
+  /// in the offline storage.
   Future<QueryRepliesResponse> getReplies(
     String parentId, {
     PaginationParams? options,
@@ -1019,7 +1194,7 @@ class Channel {
     return repliesResponse;
   }
 
-  /// List the reactions for a message in the channel
+  /// List the reactions for a message in the channel.
   Future<QueryReactionsResponse> getReactions(
     String messageId, {
     PaginationParams? pagination,
@@ -1029,7 +1204,7 @@ class Channel {
         pagination: pagination,
       );
 
-  /// Retrieves a list of messages by ID
+  /// Retrieves a list of messages by given [messageIDs].
   Future<GetMessagesByIdResponse> getMessagesById(
     List<String> messageIDs,
   ) async {
@@ -1040,7 +1215,7 @@ class Channel {
     return res;
   }
 
-  /// Retrieves a list of messages by ID
+  /// Translate a message by given [messageId] and [language].
   Future<TranslateMessageResponse> translateMessage(
     String messageId,
     String language,
@@ -1050,12 +1225,13 @@ class Channel {
         language,
       );
 
-  /// Creates a new channel
+  /// Creates a new channel.
   Future<ChannelState> create() async => query(state: false);
 
-  /// Query the API, get messages, members or other channel fields
-  /// Set [preferOffline] to true to avoid the api call if the data is already
-  /// in the offline storage
+  /// Query the API, get messages, members or other channel fields.
+  ///
+  /// Set [preferOffline] to true to avoid the API call if the data is already
+  /// in the offline storage.
   Future<ChannelState> query({
     bool state = true,
     bool watch = false,
@@ -1109,7 +1285,7 @@ class Channel {
     }
   }
 
-  /// Query channel members
+  /// Query channel members.
   Future<QueryMembersResponse> queryMembers({
     Filter? filter,
     List<SortOption>? sort,
@@ -1124,19 +1300,19 @@ class Channel {
         pagination: pagination,
       );
 
-  /// Mutes the channel
+  /// Mutes the channel.
   Future<EmptyResponse> mute({Duration? expiration}) {
     _checkInitialized();
     return _client.muteChannel(cid!, expiration: expiration);
   }
 
-  /// Unmutes the channel
+  /// Unmute the channel.
   Future<EmptyResponse> unmute() {
     _checkInitialized();
     return _client.unmuteChannel(cid!);
   }
 
-  /// Bans a user from the channel
+  /// Bans the user with given [userID] from the channel.
   Future<EmptyResponse> banUser(
     String userID,
     Map<String, dynamic> options,
@@ -1150,7 +1326,7 @@ class Channel {
     return _client.banUser(userID, opts);
   }
 
-  /// Remove the ban for a user in the channel
+  /// Remove the ban for the user with given [userID] in the channel.
   Future<EmptyResponse> unbanUser(String userID) async {
     _checkInitialized();
     return _client.unbanUser(userID, {
@@ -1159,7 +1335,7 @@ class Channel {
     });
   }
 
-  /// Shadow bans a user from the channel
+  /// Shadow bans the user with the given [userID] from the channel.
   Future<EmptyResponse> shadowBan(
     String userID,
     Map<String, dynamic> options,
@@ -1173,7 +1349,7 @@ class Channel {
     return _client.shadowBan(userID, opts);
   }
 
-  /// Remove the shadow ban for a user in the channel
+  /// Remove the shadow ban for the user with the given [userID] in the channel.
   Future<EmptyResponse> removeShadowBan(String userID) async {
     _checkInitialized();
     return _client.removeShadowBan(userID, {
@@ -1183,8 +1359,10 @@ class Channel {
   }
 
   /// Hides the channel from [StreamChatClient.queryChannels] for the user
-  /// until a message is added If [clearHistory] is set to true - all messages
-  /// will be removed for the user
+  /// until a message is added.
+  ///
+  /// If [clearHistory] is set to true - all messages
+  /// will be removed for the user.
   Future<EmptyResponse> hide({bool clearHistory = false}) async {
     _checkInitialized();
     final response = await _client.hideChannel(
@@ -1202,7 +1380,7 @@ class Channel {
     return response;
   }
 
-  /// Removes the hidden status for the channel
+  /// Removes the hidden status for the channel.
   Future<EmptyResponse> show() async {
     _checkInitialized();
     return _client.showChannel(id!, type);
@@ -1210,7 +1388,7 @@ class Channel {
 
   /// Stream of [Event] coming from websocket connection specific for the
   /// channel. Pass an eventType as parameter in order to filter just a type
-  /// of event
+  /// of event.
   Stream<Event> on([
     String? eventType,
     String? eventType2,
@@ -1248,7 +1426,7 @@ class Channel {
     }
   }
 
-  /// Sets last typing to null and sends the typing.stop event
+  /// Sets last typing to null and sends the typing.stop event.
   Future<void> stopTyping([String? parentId]) async {
     if (config?.typingEvents == false) {
       return;
@@ -1262,7 +1440,7 @@ class Channel {
     ));
   }
 
-  /// Call this method to dispose the channel client
+  /// Call this method to dispose the channel client.
   void dispose() {
     state?.dispose();
   }
@@ -1276,9 +1454,9 @@ class Channel {
   }
 }
 
-/// The class that handles the state of the channel listening to the events
+/// The class that handles the state of the channel listening to the events.
 class ChannelClientState {
-  /// Creates a new instance listening to events and updating the state
+  /// Creates a new instance listening to events and updating the state.
   ChannelClientState(
     this._channel,
     ChannelState channelState,
@@ -1425,23 +1603,25 @@ class ChannelClientState {
   }
 
   /// Flag which indicates if [ChannelClientState] contain latest/recent messages or not.
+  ///
   /// This flag should be managed by UI sdks.
-  /// When false, any new message (received by WebSocket event
-  /// - [EventType.messageNew]) will not be pushed on to message list.
+  ///
+  /// When false, any new message received by WebSocket event
+  /// [EventType.messageNew] will not be pushed on to message list.
   bool get isUpToDate => _isUpToDateController.value;
 
   set isUpToDate(bool isUpToDate) => _isUpToDateController.add(isUpToDate);
 
-  /// [isUpToDate] flag count as a stream
+  /// [isUpToDate] flag count as a stream.
   Stream<bool> get isUpToDateStream => _isUpToDateController.stream;
 
   final BehaviorSubject<bool> _isUpToDateController =
       BehaviorSubject.seeded(true);
 
-  /// The retry queue associated to this channel
+  /// The retry queue associated to this channel.
   late final RetryQueue _retryQueue;
 
-  /// Retry failed message
+  /// Retry failed message.
   Future<void> retryFailedMessages() async {
     final failedMessages =
         <Message>[...messages, ...threads.values.expand((v) => v)]
@@ -1534,7 +1714,7 @@ class ChannelClientState {
     }));
   }
 
-  /// Add a message to this channel
+  /// Add a message to this channel.
   void addMessage(Message message) {
     if (message.parentId == null || message.showInChannel == true) {
       final newMessages = List<Message>.from(_channelState.messages);
@@ -1599,36 +1779,36 @@ class ChannelClientState {
     );
   }
 
-  /// Channel message list
+  /// Channel message list.
   List<Message> get messages => _channelState.messages;
 
-  /// Channel message list as a stream
+  /// Channel message list as a stream.
   Stream<List<Message>?> get messagesStream => channelStateStream
       .map((cs) => cs.messages)
       .distinct(const ListEquality().equals);
 
-  /// Channel pinned message list
+  /// Channel pinned message list.
   List<Message>? get pinnedMessages => _channelState.pinnedMessages.toList();
 
-  /// Channel pinned message list as a stream
+  /// Channel pinned message list as a stream.
   Stream<List<Message>?> get pinnedMessagesStream =>
       channelStateStream.map((cs) => cs.pinnedMessages.toList());
 
-  /// Get channel last message
+  /// Get channel last message.
   Message? get lastMessage => _channelState.messages.isNotEmpty == true
       ? _channelState.messages.last
       : null;
 
-  /// Get channel last message
+  /// Get channel last message.
   Stream<Message?> get lastMessageStream => messagesStream
       .map((event) => event?.isNotEmpty == true ? event!.last : null);
 
-  /// Channel members list
+  /// Channel members list.
   List<Member> get members => _channelState.members
       .map((e) => e.copyWith(user: _channel.client.state.users[e.user!.id]))
       .toList();
 
-  /// Channel members list as a stream
+  /// Channel members list as a stream.
   Stream<List<Member>> get membersStream => CombineLatestStream.combine2<
           List<Member?>?, Map<String?, User?>, List<Member>>(
         channelStateStream.map((cs) => cs.members),
@@ -1637,19 +1817,19 @@ class ChannelClientState {
             members!.map((e) => e!.copyWith(user: users[e.user!.id])).toList(),
       ).distinct(const ListEquality().equals);
 
-  /// Channel watcher count
+  /// Channel watcher count.
   int? get watcherCount => _channelState.watcherCount;
 
-  /// Channel watcher count as a stream
+  /// Channel watcher count as a stream.
   Stream<int?> get watcherCountStream =>
       channelStateStream.map((cs) => cs.watcherCount);
 
-  /// Channel watchers list
+  /// Channel watchers list.
   List<User> get watchers => _channelState.watchers
       .map((e) => _channel.client.state.users[e.id] ?? e)
       .toList();
 
-  /// Channel watchers list as a stream
+  /// Channel watchers list as a stream.
   Stream<List<User>> get watchersStream => CombineLatestStream.combine2<
           List<User>?, Map<String?, User?>, List<User>>(
         channelStateStream.map((cs) => cs.watchers),
@@ -1657,20 +1837,20 @@ class ChannelClientState {
         (watchers, users) => watchers!.map((e) => users[e.id] ?? e).toList(),
       );
 
-  /// Channel read list
+  /// Channel read list.
   List<Read>? get read => _channelState.read;
 
-  /// Channel read list as a stream
+  /// Channel read list as a stream.
   Stream<List<Read>?> get readStream => channelStateStream.map((cs) => cs.read);
 
   final BehaviorSubject<int> _unreadCountController = BehaviorSubject.seeded(0);
 
   set unreadCount(int value) => _unreadCountController.add(value);
 
-  /// Unread count getter as a stream
+  /// Unread count getter as a stream.
   Stream<int> get unreadCountStream => _unreadCountController.stream.distinct();
 
-  /// Unread count getter
+  /// Unread count getter.
   int get unreadCount => _unreadCountController.value;
 
   bool _countMessageAsUnread(Message message) {
@@ -1686,7 +1866,7 @@ class ChannelClientState {
         !userIsMuted;
   }
 
-  /// Update threads with updated information about messages
+  /// Update threads with updated information about messages.
   void updateThreadInfo(String parentId, List<Message> messages) {
     final newThreads = Map<String, List<Message>>.from(threads);
 
@@ -1708,7 +1888,7 @@ class ChannelClientState {
     _threads = newThreads;
   }
 
-  /// Delete all channel messages
+  /// Delete all channel messages.
   void truncate() {
     _channelState = _channelState.copyWith(
       messages: [],
@@ -1717,7 +1897,7 @@ class ChannelClientState {
 
   final List<String> _updatedMessagesIds = [];
 
-  /// Update channelState with updated information
+  /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
     final newMessages = <Message>[
       ...updatedState.messages,
@@ -1769,13 +1949,13 @@ class ChannelClientState {
   int _sortByCreatedAt(Message a, Message b) =>
       a.createdAt.compareTo(b.createdAt);
 
-  /// The channel state related to this client
+  /// The channel state related to this client.
   ChannelState get _channelState => _channelStateController.value;
 
-  /// The channel state related to this client as a stream
+  /// The channel state related to this client as a stream.
   Stream<ChannelState> get channelStateStream => _channelStateController.stream;
 
-  /// The channel state related to this client
+  /// The channel state related to this client.
   ChannelState get channelState => _channelStateController.value;
   late BehaviorSubject<ChannelState> _channelStateController;
 
@@ -1786,11 +1966,11 @@ class ChannelClientState {
     _debouncedUpdatePersistenceChannelState.call([v]);
   }
 
-  /// The channel threads related to this channel
+  /// The channel threads related to this channel.
   Map<String, List<Message>> get threads =>
       _threadsController.value.map((key, value) => MapEntry(key, value));
 
-  /// The channel threads related to this channel as a stream
+  /// The channel threads related to this channel as a stream.
   Stream<Map<String, List<Message>>> get threadsStream =>
       _threadsController.stream;
   final BehaviorSubject<Map<String, List<Message>>> _threadsController =
@@ -1804,10 +1984,10 @@ class ChannelClientState {
     _threadsController.add(v);
   }
 
-  /// Channel related typing users last value
+  /// Channel related typing users last value.
   Map<User, Event> get typingEvents => _typingEventsController.value;
 
-  /// Channel related typing users stream
+  /// Channel related typing users stream.
   Stream<Map<User, Event>> get typingEventsStream =>
       _typingEventsController.stream;
 
@@ -1935,7 +2115,7 @@ class ChannelClientState {
     });
   }
 
-  /// Call this method to dispose this object
+  /// Call this method to dispose this object.
   void dispose() {
     _debouncedUpdatePersistenceChannelState.cancel();
     _unreadCountController.close();

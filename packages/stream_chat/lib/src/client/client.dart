@@ -767,7 +767,9 @@ class StreamChatClient {
         cancelToken: cancelToken,
       );
 
-  /// Replaces the [channelId] of type [ChannelType] data with [data]
+  /// Replaces the [channelId] of type [ChannelType] data with [data].
+  ///
+  /// Use [updateChannelPartial] for a partial update.
   Future<UpdateChannelResponse> updateChannel(
     String channelId,
     String channelType,
@@ -781,7 +783,10 @@ class StreamChatClient {
         message: message,
       );
 
-  /// Updates the [channelId] of type [ChannelType] data with [data]
+  /// Partial update for the [channelId] of type [ChannelType]. Sets the
+  /// data provided in [set], and removes the attributes given in [unset].
+  ///
+  /// Use [updateChannel] for a full update.
   Future<PartialUpdateChannelResponse> updateChannelPartial(
     String channelId,
     String channelType, {

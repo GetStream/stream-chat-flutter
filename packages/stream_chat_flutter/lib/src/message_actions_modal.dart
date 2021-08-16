@@ -6,6 +6,7 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_action.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -49,8 +50,8 @@ class MessageActionsModal extends StatefulWidget {
   /// Message in focus for actions
   final Message message;
 
-  /// [MessageTheme] for message
-  final MessageTheme messageTheme;
+  /// [MessageThemeData] for message
+  final MessageThemeData messageTheme;
 
   /// Flag for showing reactions
   final bool showReactions;
@@ -116,7 +117,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       }
     }
     final roughSentenceSize = messageTextLength *
-        (widget.messageTheme.messageText?.fontSize ?? 1) *
+        (widget.messageTheme.messageTextStyle?.fontSize ?? 1) *
         1.2;
     final divFactor = widget.message.attachments.isNotEmpty == true
         ? 1
@@ -565,7 +566,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       elevation: 2,
       clipBehavior: Clip.hardEdge,
       isScrollControlled: true,
-      backgroundColor: streamChatThemeData.messageInputTheme.inputBackground,
+      backgroundColor: MessageInputTheme.of(context).inputBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16),

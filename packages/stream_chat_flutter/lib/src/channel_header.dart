@@ -67,6 +67,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
     this.subtitle,
     this.leading,
     this.actions,
+    this.backgroundColor,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -102,10 +103,13 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// By default it shows the [ChannelAvatar]
   final List<Widget>? actions;
 
+  /// The background color for this [ChannelHeader].
+  final Color? backgroundColor;
+
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-    final chatThemeData = StreamChatTheme.of(context);
+    final channelHeaderTheme = ChannelHeaderTheme.of(context);
 
     final leadingWidget = leading ??
         (showBackButton
@@ -141,18 +145,17 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             brightness: Theme.of(context).brightness,
             elevation: 1,
             leading: leadingWidget,
-            backgroundColor:
-                chatThemeData.channelTheme.channelHeaderTheme.color,
+            backgroundColor: backgroundColor ?? channelHeaderTheme.color,
             actions: actions ??
                 <Widget>[
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: Center(
                       child: ChannelAvatar(
-                        borderRadius: chatThemeData.channelTheme
-                            .channelHeaderTheme.avatarTheme?.borderRadius,
-                        constraints: chatThemeData.channelTheme
-                            .channelHeaderTheme.avatarTheme?.constraints,
+                        borderRadius:
+                            channelHeaderTheme.avatarTheme?.borderRadius,
+                        constraints:
+                            channelHeaderTheme.avatarTheme?.constraints,
                         onTap: onImageTap,
                       ),
                     ),
@@ -169,16 +172,14 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                   children: <Widget>[
                     title ??
                         ChannelName(
-                          textStyle: chatThemeData
-                              .channelTheme.channelHeaderTheme.title,
+                          textStyle: channelHeaderTheme.titleStyle,
                         ),
                     const SizedBox(height: 2),
                     subtitle ??
                         ChannelInfo(
                           showTypingIndicator: showTypingIndicator,
                           channel: channel,
-                          textStyle: chatThemeData
-                              .channelTheme.channelHeaderTheme.subtitle,
+                          textStyle: channelHeaderTheme.subtitleStyle,
                         ),
                   ],
                 ),

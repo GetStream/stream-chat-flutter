@@ -19,6 +19,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
   bool _showActions = true;
 
   late StreamChannelState _streamChannelState;
+  late ChannelPreviewThemeData _channelPreviewThemeData;
   late StreamChatThemeData _streamChatThemeData;
   late StreamChatState _streamChatState;
 
@@ -64,8 +65,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                   child: ChannelInfo(
                     showTypingIndicator: false,
                     channel: _streamChannelState.channel,
-                    textStyle:
-                        _streamChatThemeData.channelPreviewTheme.subtitle,
+                    textStyle: _channelPreviewThemeData.subtitleStyle,
                   ),
                 ),
                 const SizedBox(
@@ -213,6 +213,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
   void didChangeDependencies() {
     _streamChannelState = StreamChannel.of(context);
     _streamChatThemeData = StreamChatTheme.of(context);
+    _channelPreviewThemeData = ChannelPreviewTheme.of(context);
     _streamChatState = StreamChat.of(context);
     super.didChangeDependencies();
   }
