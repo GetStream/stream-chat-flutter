@@ -52,6 +52,8 @@ Stream's Flutter code is kept in a single mono-repository consisting of multiple
 
 `stream_chat_persistence` - This package provides a persistence client for fetching and saving chat data locally. Stream Chat Persistence uses Moor as a disk cache.
 
+`stream_chat_localizations` - This package provides a set of localizations for the SDK.
+
 ### Local Setup
 
 Congratulations! 🎉.  You've successfully cloned our repo, and you are ready to make your first contribution. Before you can start making code changes, there are a few things to configure. 
