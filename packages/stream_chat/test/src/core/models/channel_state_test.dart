@@ -29,6 +29,7 @@ void main() {
           DateTime.parse('2019-04-03T18:43:33.213374Z'));
       expect(channelState.channel?.createdBy, isA<User>());
       expect(channelState.channel?.frozen, true);
+      expect(channelState.channel?.cooldown, 0);
       expect(channelState.channel?.extraData['example'], 1);
       expect(channelState.channel?.extraData['name'], '#dev');
       expect(

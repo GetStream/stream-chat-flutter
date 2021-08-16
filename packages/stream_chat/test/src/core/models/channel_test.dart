@@ -25,7 +25,13 @@ void main() {
 
       expect(
         channel.toJson(),
-        {'id': 'id', 'type': 'type', 'frozen': false, 'name': 'cool'},
+        {
+          'id': 'id',
+          'type': 'type',
+          'frozen': false,
+          'cooldown': 0,
+          'name': 'cool',
+        },
       );
     });
 
@@ -39,7 +45,13 @@ void main() {
 
       expect(
         channel.toJson(),
-        {'id': 'id', 'type': 'type', 'name': 'cool', 'frozen': false},
+        {
+          'id': 'id',
+          'type': 'type',
+          'frozen': false,
+          'cooldown': 0,
+          'name': 'cool',
+        },
       );
     });
   });
