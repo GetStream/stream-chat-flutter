@@ -45,7 +45,7 @@ breakdown:
 🐞 Fixed
 
 - Fixed `MessageInput` textField case where `input` is not enabled if the file picked from the camera is null.
-- Fixed date dividers in not reversed `MessageListView`.
+- Fixed date dividers position/alignment in non reversed `MessageListView`.
 
 ## 2.1.2
 
