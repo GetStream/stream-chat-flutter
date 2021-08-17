@@ -946,7 +946,7 @@ class _MessageListViewState extends State<MessageListView> {
     }
 
     final channel = streamChannel!.channel;
-    final readList = channel.state?.read?.where((read) {
+    final readList = channel.state?.read.where((read) {
           if (read.user.id == userId) return false;
           return read.lastRead.isAfter(message.createdAt) ||
               read.lastRead.isAtSameMomentAs(message.createdAt);
@@ -1234,8 +1234,7 @@ class _MessageListViewState extends State<MessageListView> {
           MaterialPageRoute(
             builder: (_) => BetterStreamBuilder<Message>(
               stream: streamChannel!.channel.state!.messagesStream.map(
-                  (messages) =>
-                      messages!.firstWhere((m) => m.id == message.id)),
+                  (messages) => messages.firstWhere((m) => m.id == message.id)),
               initialData: message,
               builder: (_, data) => StreamChannel(
                 channel: streamChannel!.channel,

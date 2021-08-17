@@ -153,9 +153,9 @@ class Channel {
       true;
 
   /// Returns true if the channel is muted, as a stream.
-  Stream<bool>? get isMutedStream => _client.state.currentUserStream
+  Stream<bool> get isMutedStream => _client.state.currentUserStream
       .map((event) =>
-          event!.channelMutes.any((element) => element.channel.cid == cid) ==
+          event?.channelMutes.any((element) => element.channel.cid == cid) ==
           true)
       .distinct();
 
@@ -168,105 +168,97 @@ class Channel {
   /// Channel configuration.
   ChannelConfig? get config {
     _checkInitialized();
-    return state?._channelState.channel?.config;
+    return state!._channelState.channel?.config;
   }
 
   /// Channel configuration as a stream.
-  Stream<ChannelConfig?>? get configStream {
+  Stream<ChannelConfig?> get configStream {
     _checkInitialized();
-    return state?.channelStateStream.map((cs) => cs.channel?.config);
+    return state!.channelStateStream.map((cs) => cs.channel?.config);
   }
 
   /// Channel user creator.
   User? get createdBy {
     _checkInitialized();
-    return state?._channelState.channel?.createdBy;
+    return state!._channelState.channel?.createdBy;
   }
 
   /// Channel user creator as a stream.
-  Stream<User?>? get createdByStream {
+  Stream<User?> get createdByStream {
     _checkInitialized();
-    return state?.channelStateStream.map((cs) => cs.channel?.createdBy);
+    return state!.channelStateStream.map((cs) => cs.channel?.createdBy);
   }
 
   /// Channel frozen status.
-  bool? get frozen {
+  bool get frozen {
     _checkInitialized();
-    return state?._channelState.channel?.frozen;
+    return state!._channelState.channel?.frozen == true;
   }
 
   /// Channel frozen status as a stream.
-  Stream<bool?>? get frozenStream {
+  Stream<bool> get frozenStream {
     _checkInitialized();
-    return state?.channelStateStream.map((cs) => cs.channel?.frozen);
+    return state!.channelStateStream.map((cs) => cs.channel?.frozen == true);
   }
 
   /// Channel creation date.
   DateTime? get createdAt {
     _checkInitialized();
-    return state?._channelState.channel?.createdAt;
+    return state!._channelState.channel?.createdAt;
   }
 
   /// Channel creation date as a stream.
-  Stream<DateTime?>? get createdAtStream {
+  Stream<DateTime?> get createdAtStream {
     _checkInitialized();
-    return state?.channelStateStream.map((cs) => cs.channel?.createdAt);
+    return state!.channelStateStream.map((cs) => cs.channel?.createdAt);
   }
 
   /// Channel last message date.
   DateTime? get lastMessageAt {
     _checkInitialized();
-
-    return state?._channelState.channel?.lastMessageAt;
+    return state!._channelState.channel?.lastMessageAt;
   }
 
   /// Channel last message date as a stream.
-  Stream<DateTime?>? get lastMessageAtStream {
+  Stream<DateTime?> get lastMessageAtStream {
     _checkInitialized();
-
-    return state?.channelStateStream.map((cs) => cs.channel?.lastMessageAt);
+    return state!.channelStateStream.map((cs) => cs.channel?.lastMessageAt);
   }
 
   /// Channel updated date.
   DateTime? get updatedAt {
     _checkInitialized();
-
-    return state?._channelState.channel?.updatedAt;
+    return state!._channelState.channel?.updatedAt;
   }
 
   /// Channel updated date as a stream.
-  Stream<DateTime?>? get updatedAtStream {
+  Stream<DateTime?> get updatedAtStream {
     _checkInitialized();
-
-    return state?.channelStateStream.map((cs) => cs.channel?.updatedAt);
+    return state!.channelStateStream.map((cs) => cs.channel?.updatedAt);
   }
 
   /// Channel deletion date.
   DateTime? get deletedAt {
     _checkInitialized();
-
-    return state?._channelState.channel?.deletedAt;
+    return state!._channelState.channel?.deletedAt;
   }
 
   /// Channel deletion date as a stream.
-  Stream<DateTime?>? get deletedAtStream {
+  Stream<DateTime?> get deletedAtStream {
     _checkInitialized();
-
-    return state?.channelStateStream.map((cs) => cs.channel?.deletedAt);
+    return state!.channelStateStream.map((cs) => cs.channel?.deletedAt);
   }
 
   /// Channel member count.
   int? get memberCount {
     _checkInitialized();
-
-    return state?._channelState.channel?.memberCount;
+    return state!._channelState.channel?.memberCount;
   }
 
   /// Channel member count as a stream.
-  Stream<int?>? get memberCountStream {
+  Stream<int?> get memberCountStream {
     _checkInitialized();
-
-    return state?.channelStateStream.map((cs) => cs.channel?.memberCount);
+    return state!.channelStateStream.map((cs) => cs.channel?.memberCount);
   }
 
   /// Channel id.
@@ -281,7 +273,7 @@ class Channel {
   /// Channel team.
   String? get team {
     _checkInitialized();
-    return state?._channelState.channel?.team;
+    return state!._channelState.channel?.team;
   }
 
   /// Channel extra data.
@@ -294,7 +286,7 @@ class Channel {
   }
 
   /// Channel extra data as a stream.
-  Stream<Map<String, dynamic>> get extraDataStream {
+  Stream<Map<String, Object?>> get extraDataStream {
     _checkInitialized();
     return state!.channelStateStream.map(
       (cs) => cs.channel?.extraData ?? _extraData,
@@ -1728,9 +1720,9 @@ class ChannelClientState {
         (event) {
           final readList = List<Read>.from(_channelState.read);
           final userReadIndex =
-              read?.indexWhere((r) => r.user.id == event.user!.id);
+              read.indexWhere((r) => r.user.id == event.user!.id);
 
-          if (userReadIndex != null && userReadIndex != -1) {
+          if (userReadIndex != -1) {
             final userRead = readList.removeAt(userReadIndex);
             if (userRead.user.id == _channel._client.state.currentUser!.id) {
               unreadCount = 0;
@@ -1751,15 +1743,15 @@ class ChannelClientState {
   List<Message> get messages => _channelState.messages;
 
   /// Channel message list as a stream.
-  Stream<List<Message>?> get messagesStream => channelStateStream
+  Stream<List<Message>> get messagesStream => channelStateStream
       .map((cs) => cs.messages)
       .distinct(const ListEquality().equals);
 
   /// Channel pinned message list.
-  List<Message>? get pinnedMessages => _channelState.pinnedMessages.toList();
+  List<Message> get pinnedMessages => _channelState.pinnedMessages.toList();
 
   /// Channel pinned message list as a stream.
-  Stream<List<Message>?> get pinnedMessagesStream =>
+  Stream<List<Message>> get pinnedMessagesStream =>
       channelStateStream.map((cs) => cs.pinnedMessages.toList());
 
   /// Get channel last message.
@@ -1768,8 +1760,8 @@ class ChannelClientState {
       : null;
 
   /// Get channel last message.
-  Stream<Message?> get lastMessageStream => messagesStream
-      .map((event) => event?.isNotEmpty == true ? event!.last : null);
+  Stream<Message?> get lastMessageStream =>
+      messagesStream.map((event) => event.isNotEmpty ? event.last : null);
 
   /// Channel members list.
   List<Member> get members => _channelState.members
@@ -1806,10 +1798,10 @@ class ChannelClientState {
       );
 
   /// Channel read list.
-  List<Read>? get read => _channelState.read;
+  List<Read> get read => _channelState.read;
 
   /// Channel read list as a stream.
-  Stream<List<Read>?> get readStream => channelStateStream.map((cs) => cs.read);
+  Stream<List<Read>> get readStream => channelStateStream.map((cs) => cs.read);
 
   final BehaviorSubject<int> _unreadCountController = BehaviorSubject.seeded(0);
 
@@ -2060,7 +2052,7 @@ class ChannelClientState {
             .toList();
 
         updateChannelState(_channelState.copyWith(
-          pinnedMessages: pinnedMessages!.where(_pinIsValid()).toList(),
+          pinnedMessages: pinnedMessages.where(_pinIsValid()).toList(),
           messages: expiredMessages,
         ));
       }
