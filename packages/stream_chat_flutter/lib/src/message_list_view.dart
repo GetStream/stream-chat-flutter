@@ -505,8 +505,14 @@ class _MessageListViewState extends State<MessageListView> {
 
                     if (i == 1 || i == itemCount - 4) return const Offstage();
 
-                    final message = messages[i - 1];
-                    final nextMessage = messages[i - 2];
+                    late final Message message, nextMessage;
+                    if (widget.reverse) {
+                      message = messages[i - 1];
+                      nextMessage = messages[i - 2];
+                    } else {
+                      message = messages[i - 2];
+                      nextMessage = messages[i - 1];
+                    }
                     if (!Jiffy(message.createdAt.toLocal()).isSame(
                       nextMessage.createdAt.toLocal(),
                       Units.DAY,
@@ -636,8 +642,7 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Positioned _buildFloatingDateDivider(int itemCount) => Positioned(
-        top: widget.reverse ? 20 : null,
-        bottom: widget.reverse ? null : 20,
+        top: 20,
         left: 0,
         right: 0,
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
@@ -647,19 +652,36 @@ class _MessageListViewState extends State<MessageListView> {
             if (a == null || b == null) {
               return false;
             }
-            final aTop = _getTopElementIndex(a);
-            final bTop = _getTopElementIndex(b);
-            return aTop == bTop;
+            if (widget.reverse) {
+              final aTop = _getTopElementIndex(a);
+              final bTop = _getTopElementIndex(b);
+              return aTop == bTop;
+            } else {
+              final aBottom = _getBottomElementIndex(a);
+              final bBottom = _getBottomElementIndex(b);
+              return aBottom == bBottom;
+            }
           },
           builder: (context, values) {
             if (values.isEmpty || messages.isEmpty) {
               return const Offstage();
             }
 
-            final index = _getTopElementIndex(values);
+            int? index;
+            if (widget.reverse) {
+              index = _getTopElementIndex(values);
+            } else {
+              index = _getBottomElementIndex(values);
+            }
 
-            if (index == null || index <= 2 || index >= itemCount - 3) {
-              return const Offstage();
+            if (index == null) return const Offstage();
+
+            if (index <= 2 || index >= itemCount - 3) {
+              if (widget.reverse) {
+                index = itemCount - 4;
+              } else {
+                index = 2;
+              }
             }
 
             final message = messages[index - 2];
@@ -682,6 +704,15 @@ class _MessageListViewState extends State<MessageListView> {
     return inView
         .reduce((max, position) =>
             position.itemLeadingEdge > max.itemLeadingEdge ? position : max)
+        .index;
+  }
+
+  int? _getBottomElementIndex(Iterable<ItemPosition> values) {
+    final inView = values.where((position) => position.itemLeadingEdge < 1);
+    if (inView.isEmpty) return null;
+    return inView
+        .reduce((min, position) =>
+            position.itemLeadingEdge < min.itemLeadingEdge ? position : min)
         .index;
   }
 
