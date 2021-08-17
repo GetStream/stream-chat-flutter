@@ -674,10 +674,9 @@ class _MessageListViewState extends State<MessageListView> {
               index = _getBottomElementIndex(values);
             }
 
-            if (index == null || index <= 2 || index >= itemCount - 3) {
-              if (index == null) {
-                return const Offstage();
-              }
+            if (index == null) return const Offstage();
+
+            if (index <= 2 || index >= itemCount - 3) {
               if (widget.reverse) {
                 index = itemCount - 4;
               } else {
