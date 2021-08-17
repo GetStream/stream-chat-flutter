@@ -1203,8 +1203,7 @@ class _MessageListViewState extends State<MessageListView> {
           MaterialPageRoute(
             builder: (_) => BetterStreamBuilder<Message>(
               stream: streamChannel!.channel.state!.messagesStream.map(
-                  (messages) =>
-                      messages.firstWhere((m) => m.id == message.id)),
+                  (messages) => messages.firstWhere((m) => m.id == message.id)),
               initialData: message,
               builder: (_, data) => StreamChannel(
                 channel: streamChannel!.channel,
