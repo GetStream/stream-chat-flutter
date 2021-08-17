@@ -667,7 +667,7 @@ class _MessageListViewState extends State<MessageListView> {
               return const Offstage();
             }
 
-            late final int? index;
+            int? index;
             if (widget.reverse) {
               index = _getTopElementIndex(values);
             } else {
@@ -675,7 +675,14 @@ class _MessageListViewState extends State<MessageListView> {
             }
 
             if (index == null || index <= 2 || index >= itemCount - 3) {
-              return const Offstage();
+              if (index == null) {
+                return const Offstage();
+              }
+              if (widget.reverse) {
+                index = itemCount - 4;
+              } else {
+                index = 2;
+              }
             }
 
             final message = messages[index - 2];
