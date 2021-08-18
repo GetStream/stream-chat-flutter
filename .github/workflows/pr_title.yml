@@ -1,4 +1,4 @@
-name: 'PR Title is Conventional and Semantic'
+name: 'PR is Conventional and Semantic'
 on:
   pull_request_target:
     types:
