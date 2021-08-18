@@ -363,7 +363,6 @@ class MessageInputState extends State<MessageInput> {
           if (_timeOut == 0) {
             timer.cancel();
           } else {
-            print('Time left until cooldown is over: $_timeOut');
             setState(() => _timeOut = _timeOut! - 1);
           }
         });
