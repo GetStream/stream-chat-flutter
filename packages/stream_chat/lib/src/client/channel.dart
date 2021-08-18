@@ -213,7 +213,7 @@ class Channel {
     return state?.channelStateStream.map((cs) => cs.channel?.cooldown);
   }
 
-  ///
+  /// Stores time at which cooldown was started
   DateTime? cooldownStartedAt;
 
   /// Channel creation date.
