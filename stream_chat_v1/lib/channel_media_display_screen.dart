@@ -20,7 +20,7 @@ class ChannelMediaDisplayScreen extends StatefulWidget {
 
   final ShowMessageCallback? onShowMessage;
 
-  final MessageTheme messageTheme;
+  final MessageThemeData messageTheme;
 
   const ChannelMediaDisplayScreen({
     required this.messageTheme,

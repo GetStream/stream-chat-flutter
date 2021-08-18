@@ -16,7 +16,7 @@ import 'pinned_messages_screen.dart';
 import 'routes/routes.dart';
 
 class GroupInfoScreen extends StatefulWidget {
-  final MessageTheme messageTheme;
+  final MessageThemeData messageTheme;
 
   const GroupInfoScreen({
     Key? key,
@@ -223,11 +223,15 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0, vertical: 12.0),
+                              horizontal: 8.0,
+                              vertical: 12.0,
+                            ),
                             child: UserAvatar(
                               user: member.user!,
-                              constraints: BoxConstraints(
-                                  maxHeight: 40.0, maxWidth: 40.0),
+                              constraints: BoxConstraints.tightFor(
+                                height: 40.0,
+                                width: 40.0,
+                              ),
                             ),
                           ),
                           Expanded(
@@ -684,7 +688,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               );
               if (res == true) {
                 final channel = StreamChannel.of(context).channel;
-                await channel.removeMembers([StreamChat.of(context).currentUser!.id]);
+                await channel
+                    .removeMembers([StreamChat.of(context).currentUser!.id]);
                 Navigator.pop(context);
               }
             },
@@ -894,9 +899,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       padding: const EdgeInsets.all(16.0),
                       child: UserAvatar(
                         user: user,
-                        constraints: BoxConstraints(
-                          maxHeight: 64.0,
-                          minHeight: 64.0,
+                        constraints: BoxConstraints.tightFor(
+                          height: 64.0,
+                          width: 64.0,
                         ),
                         borderRadius: BorderRadius.circular(32.0),
                       ),

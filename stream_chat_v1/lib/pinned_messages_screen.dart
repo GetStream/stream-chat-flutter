@@ -20,7 +20,7 @@ class PinnedMessagesScreen extends StatefulWidget {
 
   final ShowMessageCallback? onShowMessage;
 
-  final MessageTheme messageTheme;
+  final MessageThemeData messageTheme;
 
   const PinnedMessagesScreen({
     required this.messageTheme,
@@ -168,9 +168,9 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
               return ListTile(
                 leading: UserAvatar(
                   user: user,
-                  constraints: BoxConstraints(
-                    maxWidth: 40.0,
-                    minHeight: 40.0,
+                  constraints: BoxConstraints.tightFor(
+                    width: 40.0,
+                    height: 40.0,
                   ),
                   borderRadius: BorderRadius.circular(28),
                 ),

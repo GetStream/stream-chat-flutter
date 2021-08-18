@@ -15,7 +15,7 @@ class ChatInfoScreen extends StatefulWidget {
   /// User in consideration
   final User? user;
 
-  final MessageTheme messageTheme;
+  final MessageThemeData messageTheme;
 
   const ChatInfoScreen({
     Key? key,
@@ -79,9 +79,9 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: UserAvatar(
                     user: widget.user!,
-                    constraints: BoxConstraints(
-                      maxWidth: 72.0,
-                      maxHeight: 72.0,
+                    constraints: BoxConstraints.tightFor(
+                      width: 72.0,
+                      height: 72.0,
                     ),
                     borderRadius: BorderRadius.circular(36.0),
                     showOnlineStatus: false,
