@@ -835,7 +835,7 @@ class MessageInputState extends State<MessageInput> {
     if (_attachments.isNotEmpty) {
       return context.translations.addACommentOrSendLabel;
     }
-    if(_timeOut != 0 && _timeOut != null) {
+    if (_timeOut != 0 && _timeOut != null) {
       return context.translations.slowModeOnLabel;
     }
 
