@@ -362,4 +362,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
 
   @override
   String get replyToMessageLabel => 'Responder al Mensaje';
+
+  @override
+  String get slowModeOnLabel => 'Modo lento activado';
 }
