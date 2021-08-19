@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -454,7 +455,11 @@ class _MessageListViewState extends State<MessageListView> {
                   _inBetweenList = true;
                 },
                 child: ScrollablePositionedList.separated(
-                  key: ValueKey(initialIndex! + initialAlignment!),
+                  key: (_upToDate ||
+                          initialIndex == null ||
+                          initialAlignment == null)
+                      ? null
+                      : ValueKey(initialIndex! + initialAlignment!),
                   itemPositionsListener: _itemPositionListener,
                   initialScrollIndex: initialIndex ?? 0,
                   initialAlignment: initialAlignment ?? 0,
@@ -1193,6 +1198,15 @@ class _MessageListViewState extends State<MessageListView> {
       _messageNewListener?.cancel();
       initialIndex = _initialIndex;
       initialAlignment = _initialAlignment;
+
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        if (initialIndex != null) {
+          _scrollController?.jumpTo(
+            index: initialIndex!,
+            alignment: initialAlignment ?? 0,
+          );
+        }
+      });
 
       _messageNewListener =
           streamChannel!.channel.on(EventType.messageNew).listen((event) {
