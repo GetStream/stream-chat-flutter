@@ -85,8 +85,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get emptyChatMessagesText => 'チャットがありませんが。。。';
 
   @override
-  String threadSeparatorText(int replyCount)=> '$replyCount件の返信';
-  
+  String threadSeparatorText(int replyCount) => '$replyCount件の返信';
 
   @override
   String get connectedLabel => '接続しています';
