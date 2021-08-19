@@ -318,7 +318,7 @@ class MessageInputState extends State<MessageInput> {
   late DateTime? _cooldownStartedAt;
   int? _timeOut;
 
-  Timer? slowModeTimer;
+  Timer? _slowModeTimer;
 
   @override
   void initState() {
@@ -361,7 +361,7 @@ class MessageInputState extends State<MessageInput> {
           StreamChannel.of(context).channel.cooldown!) {
         _timeOut = StreamChannel.of(context).channel.cooldown! -
             DateTime.now().difference(_cooldownStartedAt!).inSeconds;
-        slowModeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        _slowModeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
           if (_timeOut == 0) {
             timer.cancel();
           } else {
@@ -2267,7 +2267,7 @@ class MessageInputState extends State<MessageInput> {
     _emojiOverlay?.remove();
     _mentionsOverlay?.remove();
     _keyboardListener?.cancel();
-    slowModeTimer?.cancel();
+    _slowModeTimer?.cancel();
     super.dispose();
   }
 
