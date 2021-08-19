@@ -3,10 +3,10 @@ import 'package:collection/collection.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview_paint.png)
@@ -69,7 +69,7 @@ class ChannelPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final channelPreviewTheme = StreamChatTheme.of(context).channelPreviewTheme;
+    final channelPreviewTheme = ChannelPreviewTheme.of(context);
     final streamChatState = StreamChat.of(context);
     return BetterStreamBuilder<bool>(
         stream: channel.isMutedStream,
@@ -91,7 +91,7 @@ class ChannelPreview extends StatelessWidget {
                     Flexible(
                       child: title ??
                           ChannelName(
-                            textStyle: channelPreviewTheme.title,
+                            textStyle: channelPreviewTheme.titleStyle,
                           ),
                     ),
                     BetterStreamBuilder<List<Member>?>(
@@ -132,7 +132,7 @@ class ChannelPreview extends StatelessWidget {
                                   message: lastMessage!,
                                   size: channelPreviewTheme.indicatorIconSize,
                                   isMessageRead: channel.state!.read
-                                          ?.where((element) =>
+                                          .where((element) =>
                                               element.user.id !=
                                               channel
                                                   .client.state.currentUser!.id)
@@ -183,14 +183,13 @@ class ChannelPreview extends StatelessWidget {
 
           return Text(
             stringDate,
-            style:
-                StreamChatTheme.of(context).channelPreviewTheme.lastMessageAt,
+            style: ChannelPreviewTheme.of(context).lastMessageAtStyle,
           );
         },
       );
 
   Widget _buildSubtitle(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final channelPreviewTheme = ChannelPreviewTheme.of(context);
     if (channel.isMuted) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -200,7 +199,7 @@ class ChannelPreview extends StatelessWidget {
           ),
           Text(
             '  ${context.translations.channelIsMutedText}',
-            style: chatThemeData.channelPreviewTheme.subtitle,
+            style: channelPreviewTheme.subtitleStyle,
           ),
         ],
       );
@@ -208,7 +207,7 @@ class ChannelPreview extends StatelessWidget {
     return TypingIndicator(
       channel: channel,
       alternativeWidget: _buildLastMessage(context),
-      style: chatThemeData.channelPreviewTheme.subtitle,
+      style: channelPreviewTheme.subtitleStyle,
     );
   }
 
@@ -243,19 +242,19 @@ class ChannelPreview extends StatelessWidget {
 
             text = parts.join(' ');
 
-            final chatThemeData = StreamChatTheme.of(context);
+            final channelPreviewTheme = ChannelPreviewTheme.of(context);
             return Text.rich(
               _getDisplayText(
                 text,
                 lastMessage.mentionedUsers,
                 lastMessage.attachments,
-                chatThemeData.channelPreviewTheme.subtitle?.copyWith(
-                    color: chatThemeData.channelPreviewTheme.subtitle?.color,
+                channelPreviewTheme.subtitleStyle?.copyWith(
+                    color: channelPreviewTheme.subtitleStyle?.color,
                     fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
                         ? FontStyle.italic
                         : FontStyle.normal),
-                chatThemeData.channelPreviewTheme.subtitle?.copyWith(
-                  color: chatThemeData.channelPreviewTheme.subtitle?.color,
+                channelPreviewTheme.subtitleStyle?.copyWith(
+                  color: channelPreviewTheme.subtitleStyle?.color,
                   fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
                       ? FontStyle.italic
                       : FontStyle.normal,

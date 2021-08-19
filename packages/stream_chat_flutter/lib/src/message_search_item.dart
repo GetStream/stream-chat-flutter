@@ -36,7 +36,7 @@ class MessageSearchItem extends StatelessWidget {
     final channel = getMessageResponse.channel;
     final channelName = channel?.extraData['name'];
     final user = message.user!;
-    final chatThemeData = StreamChatTheme.of(context);
+    final channelPreviewTheme = ChannelPreviewTheme.of(context);
     return ListTile(
       onTap: onTap,
       leading: UserAvatar(
@@ -53,18 +53,18 @@ class MessageSearchItem extends StatelessWidget {
             user.id == StreamChat.of(context).currentUser?.id
                 ? context.translations.youText
                 : user.name,
-            style: chatThemeData.channelPreviewTheme.title,
+            style: channelPreviewTheme.titleStyle,
           ),
           if (channelName != null) ...[
             Text(
               ' ${context.translations.inText} ',
-              style: chatThemeData.channelPreviewTheme.title?.copyWith(
+              style: channelPreviewTheme.titleStyle?.copyWith(
                 fontWeight: FontWeight.normal,
               ),
             ),
             Text(
               channelName as String,
-              style: chatThemeData.channelPreviewTheme.title,
+              style: channelPreviewTheme.titleStyle,
             ),
           ],
         ],
@@ -94,7 +94,7 @@ class MessageSearchItem extends StatelessWidget {
 
     return Text(
       stringDate,
-      style: StreamChatTheme.of(context).channelPreviewTheme.lastMessageAt,
+      style: StreamChatTheme.of(context).channelPreviewTheme.lastMessageAtStyle,
     );
   }
 
@@ -122,18 +122,18 @@ class MessageSearchItem extends StatelessWidget {
       text = parts.join(' ');
     }
 
-    final chatThemeData = StreamChatTheme.of(context);
+    final channelPreviewTheme = ChannelPreviewTheme.of(context);
     return Text.rich(
       _getDisplayText(
         text!,
         message.mentionedUsers,
         message.attachments,
-        chatThemeData.channelPreviewTheme.subtitle?.copyWith(
+        channelPreviewTheme.subtitleStyle?.copyWith(
           fontStyle: (message.isSystem || message.isDeleted)
               ? FontStyle.italic
               : FontStyle.normal,
         ),
-        chatThemeData.channelPreviewTheme.subtitle?.copyWith(
+        channelPreviewTheme.subtitleStyle?.copyWith(
           fontStyle: (message.isSystem || message.isDeleted)
               ? FontStyle.italic
               : FontStyle.normal,

@@ -65,10 +65,7 @@ class ChannelInfo extends StatelessWidget {
       }
       alternativeWidget = Text(
         text,
-        style: StreamChatTheme.of(context)
-            .channelTheme
-            .channelHeaderTheme
-            .subtitle,
+        style: ChannelHeaderTheme.of(context).subtitleStyle,
       );
     } else {
       final userId = StreamChat.of(context).currentUser?.id;

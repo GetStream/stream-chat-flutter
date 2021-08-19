@@ -14,6 +14,7 @@ import 'package:stream_chat_flutter/src/message_widget.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/swipeable.dart';
 import 'package:stream_chat_flutter/src/system_message.dart';
+import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -504,8 +505,14 @@ class _MessageListViewState extends State<MessageListView> {
 
                     if (i == 1 || i == itemCount - 4) return const Offstage();
 
-                    final message = messages[i - 1];
-                    final nextMessage = messages[i - 2];
+                    late final Message message, nextMessage;
+                    if (widget.reverse) {
+                      message = messages[i - 1];
+                      nextMessage = messages[i - 2];
+                    } else {
+                      message = messages[i - 2];
+                      nextMessage = messages[i - 1];
+                    }
                     if (!Jiffy(message.createdAt.toLocal()).isSame(
                       nextMessage.createdAt.toLocal(),
                       Units.DAY,
@@ -628,15 +635,14 @@ class _MessageListViewState extends State<MessageListView> {
         child: Text(
           context.translations.threadSeparatorText(replyCount),
           textAlign: TextAlign.center,
-          style: _streamTheme.channelTheme.channelHeaderTheme.subtitle,
+          style: ChannelHeaderTheme.of(context).subtitleStyle,
         ),
       ),
     );
   }
 
   Positioned _buildFloatingDateDivider(int itemCount) => Positioned(
-        top: widget.reverse ? 20 : null,
-        bottom: widget.reverse ? null : 20,
+        top: 20,
         left: 0,
         right: 0,
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
@@ -646,19 +652,36 @@ class _MessageListViewState extends State<MessageListView> {
             if (a == null || b == null) {
               return false;
             }
-            final aTop = _getTopElementIndex(a);
-            final bTop = _getTopElementIndex(b);
-            return aTop == bTop;
+            if (widget.reverse) {
+              final aTop = _getTopElementIndex(a);
+              final bTop = _getTopElementIndex(b);
+              return aTop == bTop;
+            } else {
+              final aBottom = _getBottomElementIndex(a);
+              final bBottom = _getBottomElementIndex(b);
+              return aBottom == bBottom;
+            }
           },
           builder: (context, values) {
             if (values.isEmpty || messages.isEmpty) {
               return const Offstage();
             }
 
-            final index = _getTopElementIndex(values);
+            int? index;
+            if (widget.reverse) {
+              index = _getTopElementIndex(values);
+            } else {
+              index = _getBottomElementIndex(values);
+            }
 
-            if (index == null || index <= 2 || index >= itemCount - 3) {
-              return const Offstage();
+            if (index == null) return const Offstage();
+
+            if (index <= 2 || index >= itemCount - 3) {
+              if (widget.reverse) {
+                index = itemCount - 4;
+              } else {
+                index = 2;
+              }
             }
 
             final message = messages[index - 2];
@@ -681,6 +704,15 @@ class _MessageListViewState extends State<MessageListView> {
     return inView
         .reduce((max, position) =>
             position.itemLeadingEdge > max.itemLeadingEdge ? position : max)
+        .index;
+  }
+
+  int? _getBottomElementIndex(Iterable<ItemPosition> values) {
+    final inView = values.where((position) => position.itemLeadingEdge < 1);
+    if (inView.isEmpty) return null;
+    return inView
+        .reduce((min, position) =>
+            position.itemLeadingEdge < min.itemLeadingEdge ? position : min)
         .index;
   }
 
@@ -914,7 +946,7 @@ class _MessageListViewState extends State<MessageListView> {
     }
 
     final channel = streamChannel!.channel;
-    final readList = channel.state?.read?.where((read) {
+    final readList = channel.state?.read.where((read) {
           if (read.user.id == userId) return false;
           return read.lastRead.isAfter(message.createdAt) ||
               read.lastRead.isAtSameMomentAs(message.createdAt);
@@ -965,7 +997,7 @@ class _MessageListViewState extends State<MessageListView> {
     final currentUser = StreamChat.of(context).currentUser;
     final members = StreamChannel.of(context).channel.state?.members ?? [];
     final currentUserMember =
-        members.firstWhere((e) => e.user!.id == currentUser!.id);
+        members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
     Widget messageWidget = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
@@ -1072,7 +1104,8 @@ class _MessageListViewState extends State<MessageListView> {
         }
         FocusScope.of(context).unfocus();
       },
-      showPinButton: widget.pinPermissions.contains(currentUserMember.role),
+      showPinButton: currentUserMember != null &&
+          widget.pinPermissions.contains(currentUserMember.role),
     );
 
     if (widget.messageBuilder != null) {
@@ -1201,8 +1234,7 @@ class _MessageListViewState extends State<MessageListView> {
           MaterialPageRoute(
             builder: (_) => BetterStreamBuilder<Message>(
               stream: streamChannel!.channel.state!.messagesStream.map(
-                  (messages) =>
-                      messages!.firstWhere((m) => m.id == message.id)),
+                  (messages) => messages.firstWhere((m) => m.id == message.id)),
               initialData: message,
               builder: (_, data) => StreamChannel(
                 channel: streamChannel!.channel,

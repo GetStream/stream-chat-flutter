@@ -50,6 +50,15 @@ typedef MentionTileBuilder = Widget Function(
   Member member,
 );
 
+/// Widget builder for action button.
+///
+/// [defaultActionButton] is the default [IconButton] configuration,
+/// use [defaultActionButton.copyWith] to easily customize it.
+typedef ActionButtonBuilder = Widget Function(
+  BuildContext context,
+  IconButton defaultActionButton,
+);
+
 /// Location for actions on the [MessageInput]
 enum ActionsLocation {
   /// Align to left
@@ -164,6 +173,8 @@ class MessageInput extends StatefulWidget {
     this.compressedVideoQuality = VideoQuality.DefaultQuality,
     this.compressedVideoFrameRate = 30,
     this.onError,
+    this.attachmentButtonBuilder,
+    this.commandButtonBuilder,
   }) : super(key: key);
 
   /// Message to edit
@@ -247,6 +258,18 @@ class MessageInput extends StatefulWidget {
   /// A callback for error reporting
   final ErrorListener? onError;
 
+  /// Builder for customizing the attachment button.
+  ///
+  /// The builder contains the default [IconButton] that can be customized by
+  /// calling `.copyWith`.
+  final ActionButtonBuilder? attachmentButtonBuilder;
+
+  /// Builder for customizing the command button.
+  ///
+  /// The builder contains the default [IconButton] that can be customized by
+  /// calling `.copyWith`.
+  final ActionButtonBuilder? commandButtonBuilder;
+
   @override
   MessageInputState createState() => MessageInputState();
 
@@ -288,6 +311,7 @@ class MessageInputState extends State<MessageInput> {
   late final TextEditingController textEditingController;
 
   late StreamChatThemeData _streamChatTheme;
+  late MessageInputThemeData _messageInputTheme;
 
   bool get _hasQuotedMessage => widget.quotedMessage != null;
 
@@ -328,7 +352,7 @@ class MessageInputState extends State<MessageInput> {
   Widget build(BuildContext context) {
     Widget child = DecoratedBox(
       decoration: BoxDecoration(
-        color: _streamChatTheme.messageInputTheme.inputBackground,
+        color: _messageInputTheme.inputBackgroundColor,
       ),
       child: SafeArea(
         child: GestureDetector(
@@ -402,11 +426,11 @@ class MessageInputState extends State<MessageInput> {
         children: <Widget>[
           if (!_commandEnabled &&
               widget.actionsLocation == ActionsLocation.left)
-            _buildExpandActionsButton(),
+            _buildExpandActionsButton(context),
           _buildTextInput(context),
           if (!_commandEnabled &&
               widget.actionsLocation == ActionsLocation.right)
-            _buildExpandActionsButton(),
+            _buildExpandActionsButton(context),
           if (widget.sendButtonLocation == SendButtonLocation.outside)
             _animateSendButton(context),
         ],
@@ -484,12 +508,12 @@ class MessageInputState extends State<MessageInput> {
           : CrossFadeState.showSecond,
       firstChild: sendButton,
       secondChild: widget.idleSendButton ?? _buildIdleSendButton(context),
-      duration: _streamChatTheme.messageInputTheme.sendAnimationDuration!,
+      duration: _messageInputTheme.sendAnimationDuration!,
       alignment: Alignment.center,
     );
   }
 
-  Widget _buildExpandActionsButton() {
+  Widget _buildExpandActionsButton(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -509,7 +533,7 @@ class MessageInputState extends State<MessageInput> {
                 ? pi
                 : 0,
             child: StreamSvgIcon.emptyCircleLeft(
-              color: _streamChatTheme.messageInputTheme.expandButtonColor,
+              color: _messageInputTheme.expandButtonColor,
             ),
           ),
           padding: const EdgeInsets.all(0),
@@ -527,12 +551,13 @@ class MessageInputState extends State<MessageInput> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
-                    if (!widget.disableAttachments) _buildAttachmentButton(),
+                    if (!widget.disableAttachments)
+                      _buildAttachmentButton(context),
                     if (widget.showCommandsButton &&
                         widget.editMessage == null &&
                         channel.state != null &&
                         channel.config?.commands.isNotEmpty == true)
-                      _buildCommandButton(),
+                      _buildCommandButton(context),
                     ...widget.actions ?? [],
                   ].insertBetween(const SizedBox(width: 8)),
                 ),
@@ -555,17 +580,17 @@ class MessageInputState extends State<MessageInput> {
         clipBehavior: Clip.hardEdge,
         margin: margin,
         decoration: BoxDecoration(
-          borderRadius: _streamChatTheme.messageInputTheme.borderRadius,
+          borderRadius: _messageInputTheme.borderRadius,
           gradient: _focusNode.hasFocus
-              ? _streamChatTheme.messageInputTheme.activeBorderGradient
-              : _streamChatTheme.messageInputTheme.idleBorderGradient,
+              ? _messageInputTheme.activeBorderGradient
+              : _messageInputTheme.idleBorderGradient,
         ),
         child: Padding(
           padding: const EdgeInsets.all(1.5),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              borderRadius: _streamChatTheme.messageInputTheme.borderRadius,
-              color: _streamChatTheme.messageInputTheme.inputBackground,
+              borderRadius: _messageInputTheme.borderRadius,
+              color: _messageInputTheme.inputBackgroundColor,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -583,7 +608,7 @@ class MessageInputState extends State<MessageInput> {
                     keyboardType: widget.keyboardType,
                     controller: textEditingController,
                     focusNode: _focusNode,
-                    style: _streamChatTheme.messageInputTheme.inputTextStyle,
+                    style: _messageInputTheme.inputTextStyle,
                     autofocus: widget.autofocus,
                     textAlignVertical: TextAlignVertical.center,
                     decoration: _getInputDecoration(context),
@@ -599,11 +624,11 @@ class MessageInputState extends State<MessageInput> {
   }
 
   InputDecoration _getInputDecoration(BuildContext context) {
-    final passedDecoration = _streamChatTheme.messageInputTheme.inputDecoration;
+    final passedDecoration = _messageInputTheme.inputDecoration;
     return InputDecoration(
       isDense: true,
       hintText: _getHint(context),
-      hintStyle: _streamChatTheme.messageInputTheme.inputTextStyle!.copyWith(
+      hintStyle: _messageInputTheme.inputTextStyle!.copyWith(
         color: _streamChatTheme.colorTheme.textLowEmphasis,
       ),
       border: const OutlineInputBorder(
@@ -668,9 +693,7 @@ class MessageInputState extends State<MessageInput> {
           : (widget.actionsLocation == ActionsLocation.leftInside
               ? Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildExpandActionsButton(),
-                  ],
+                  children: [_buildExpandActionsButton(context)],
                 )
               : null),
       suffixIconConstraints: const BoxConstraints.tightFor(height: 40),
@@ -696,7 +719,7 @@ class MessageInputState extends State<MessageInput> {
             ),
           if (!_commandEnabled &&
               widget.actionsLocation == ActionsLocation.rightInside)
-            _buildExpandActionsButton(),
+            _buildExpandActionsButton(context),
           if (widget.sendButtonLocation == SendButtonLocation.inside)
             _animateSendButton(context),
         ],
@@ -1680,16 +1703,15 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  Widget _buildCommandButton() {
+  Widget _buildCommandButton(BuildContext context) {
     final s = textEditingController.text.trim();
-
-    return IconButton(
+    final defaultButton = IconButton(
       icon: StreamSvgIcon.lightning(
         color: s.isNotEmpty
             ? _streamChatTheme.colorTheme.disabled
             : (_commandsOverlay != null
-                ? _streamChatTheme.messageInputTheme.actionButtonColor
-                : _streamChatTheme.messageInputTheme.actionButtonIdleColor),
+                ? _messageInputTheme.actionButtonColor
+                : _messageInputTheme.actionButtonIdleColor),
       ),
       padding: const EdgeInsets.all(0),
       constraints: const BoxConstraints.tightFor(
@@ -1721,38 +1743,46 @@ class MessageInputState extends State<MessageInput> {
         }
       },
     );
+
+    return widget.commandButtonBuilder?.call(context, defaultButton) ??
+        defaultButton;
   }
 
-  Widget _buildAttachmentButton() => IconButton(
-        icon: StreamSvgIcon.attach(
-          color: _openFilePickerSection
-              ? _streamChatTheme.messageInputTheme.actionButtonColor
-              : _streamChatTheme.messageInputTheme.actionButtonIdleColor,
-        ),
-        padding: const EdgeInsets.all(0),
-        constraints: const BoxConstraints.tightFor(
-          height: 24,
-          width: 24,
-        ),
-        splashRadius: 24,
-        onPressed: () async {
-          _emojiOverlay?.remove();
-          _emojiOverlay = null;
-          _commandsOverlay?.remove();
-          _commandsOverlay = null;
-          _mentionsOverlay?.remove();
-          _mentionsOverlay = null;
+  Widget _buildAttachmentButton(BuildContext context) {
+    final defaultButton = IconButton(
+      icon: StreamSvgIcon.attach(
+        color: _openFilePickerSection
+            ? _messageInputTheme.actionButtonColor
+            : _messageInputTheme.actionButtonIdleColor,
+      ),
+      padding: const EdgeInsets.all(0),
+      constraints: const BoxConstraints.tightFor(
+        height: 24,
+        width: 24,
+      ),
+      splashRadius: 24,
+      onPressed: () async {
+        _emojiOverlay?.remove();
+        _emojiOverlay = null;
+        _commandsOverlay?.remove();
+        _commandsOverlay = null;
+        _mentionsOverlay?.remove();
+        _mentionsOverlay = null;
 
-          if (_openFilePickerSection) {
-            setState(() {
-              _openFilePickerSection = false;
-              _filePickerSize = _kMinMediaPickerSize;
-            });
-          } else {
-            showAttachmentModal();
-          }
-        },
-      );
+        if (_openFilePickerSection) {
+          setState(() {
+            _openFilePickerSection = false;
+            _filePickerSize = _kMinMediaPickerSize;
+          });
+        } else {
+          showAttachmentModal();
+        }
+      },
+    );
+
+    return widget.attachmentButtonBuilder?.call(context, defaultButton) ??
+        defaultButton;
+  }
 
   /// Show the attachment modal, making the user choose where to
   /// pick a media from
@@ -1868,15 +1898,14 @@ class MessageInputState extends State<MessageInput> {
       } else if (fileType == DefaultAttachmentTypes.video) {
         pickedFile = await _imagePicker.pickVideo(source: ImageSource.camera);
       }
-      if (pickedFile == null) {
-        return;
+      if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        file = AttachmentFile(
+          size: bytes.length,
+          path: pickedFile.path,
+          bytes: bytes,
+        );
       }
-      final bytes = await pickedFile.readAsBytes();
-      file = AttachmentFile(
-        size: bytes.length,
-        path: pickedFile.path,
-        bytes: bytes,
-      );
     } else {
       late FileType type;
       if (fileType == DefaultAttachmentTypes.image) {
@@ -1963,7 +1992,7 @@ class MessageInputState extends State<MessageInput> {
         padding: const EdgeInsets.all(8),
         child: StreamSvgIcon(
           assetName: _getIdleSendIcon(),
-          color: _streamChatTheme.messageInputTheme.sendButtonIdleColor,
+          color: _messageInputTheme.sendButtonIdleColor,
         ),
       );
 
@@ -1979,7 +2008,7 @@ class MessageInputState extends State<MessageInput> {
           ),
           icon: StreamSvgIcon(
             assetName: _getSendIcon(),
-            color: _streamChatTheme.messageInputTheme.sendButtonColor,
+            color: _messageInputTheme.sendButtonColor,
           ),
         ),
       );
@@ -2186,6 +2215,7 @@ class MessageInputState extends State<MessageInput> {
   @override
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
+    _messageInputTheme = MessageInputTheme.of(context);
     if (widget.editMessage != null && !_initialized) {
       FocusScope.of(context).requestFocus(_focusNode);
       _initialized = true;

@@ -48,7 +48,7 @@ void main() {
   );
 
   testWidgets(
-    'it should show the the other member image',
+    'it should show the other member image',
     (tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -74,9 +74,7 @@ void main() {
               userId: 'user-id2',
               user: User(
                 id: 'user-id2',
-                extraData: const {
-                  'image': 'testimage',
-                },
+                image: 'testimage',
               ),
             )
           ]));
@@ -85,9 +83,7 @@ void main() {
           userId: 'user-id2',
           user: User(
             id: 'user-id2',
-            extraData: const {
-              'image': 'testimage',
-            },
+            image: 'testimage',
           ),
         ),
         Member(
@@ -98,9 +94,7 @@ void main() {
       when(() => clientState.usersStream).thenAnswer((i) => Stream.value({
             'user-id2': User(
               id: 'user-id2',
-              extraData: const {
-                'image': 'testimage',
-              },
+              image: 'testimage',
             ),
           }));
       when(() => channel.extraData).thenReturn({
@@ -149,27 +143,21 @@ void main() {
           userId: 'user-id',
           user: User(
             id: 'user-id',
-            extraData: const {
-              'image': 'testimage1',
-            },
+            image: 'testimage1',
           ),
         ),
         Member(
           userId: 'user-id2',
           user: User(
             id: 'user-id2',
-            extraData: const {
-              'image': 'testimage2',
-            },
+            image: 'testimage2',
           ),
         ),
         Member(
           userId: 'user-id3',
           user: User(
             id: 'user-id3',
-            extraData: const {
-              'image': 'testimage3',
-            },
+            image: 'testimage3',
           ),
         ),
       ];

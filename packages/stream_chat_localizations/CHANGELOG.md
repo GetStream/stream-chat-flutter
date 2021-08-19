@@ -1,9 +1,19 @@
 ## Upcoming
 
+✅ Added
+
 * Added support for [Spanish](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_es.dart) locale.
 * Added support for [Korean](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ko.dart) locale.
 * Added support for [Japanese](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ja.dart) locale.
 
+🔄 Changed
+
+* Some of the `Hindi` translations have been updated/changed for better understanding.
+    - 'रिप्लाई' -> 'जवाब दें'
+    - 'तस्वीरें' -> 'फ़ोटोज'
+    - 'बिता हुआ कल' -> 'कल'
+    - 'चैनल मौन है' -> 'चैनल म्यूट है'
+    
 ## 1.0.2
 
 * Updated `stream_chat_flutter` dependency

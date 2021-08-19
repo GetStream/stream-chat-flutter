@@ -5,6 +5,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/channel_bottom_sheet.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
@@ -583,11 +584,16 @@ class _ChannelListViewState extends State<ChannelListView> {
                 ),
             ],
         child: widget.channelPreviewBuilder?.call(context, channel) ??
-            ChannelPreview(
-              onLongPress: widget.onChannelLongPress,
-              channel: channel,
-              onImageTap: () => widget.onImageTap?.call(channel),
-              onTap: (channel) => onTap(channel, widget.channelWidget),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: chatThemeData.channelListViewTheme.backgroundColor,
+              ),
+              child: ChannelPreview(
+                onLongPress: widget.onChannelLongPress,
+                channel: channel,
+                onImageTap: () => widget.onImageTap?.call(channel),
+                onTap: (channel) => onTap(channel, widget.channelWidget),
+              ),
             ),
       ),
     );

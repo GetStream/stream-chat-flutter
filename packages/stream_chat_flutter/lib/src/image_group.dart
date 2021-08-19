@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/full_screen_media.dart';
+import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -25,8 +26,8 @@ class ImageGroup extends StatelessWidget {
   /// Message which images are attached to
   final Message message;
 
-  /// [MessageTheme] to apply to message
-  final MessageTheme messageTheme;
+  /// [MessageThemeData] to apply to message
+  final MessageThemeData messageTheme;
 
   /// Size of iamges
   final Size size;
