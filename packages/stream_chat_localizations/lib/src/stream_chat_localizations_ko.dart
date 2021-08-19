@@ -85,9 +85,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get emptyChatMessagesText => '아직 채팅이 없습니다...';
 
   @override
-  String threadSeparatorText(int replyCount) {
-    return '$replyCount개의 답장';
-  }
+  String threadSeparatorText(int replyCount) => '$replyCount개의 답장';
 
   @override
   String get connectedLabel => '연결중';
@@ -283,14 +281,10 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get tryAgainLabel => '다시 시도합니다';
 
   @override
-  String membersCountText(int count) {
-    return '$count명';
-  }
+  String membersCountText(int count) => '$count명';
 
   @override
-  String watchersCountText(int count) {
-    return '$count명이 온라인';
-  }
+  String watchersCountText(int count) => '$count명이 온라인';
 
   @override
   String get viewInfoLabel => '정보를 보기';
@@ -336,7 +330,8 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get youText => '당신';
-  // This is the word for 'customer' or 'user' because saying 'you' directly is too informal and rude
+  // This is the word for 'customer' or 'user' because saying 'you' directly
+  // is too informal and rude
 
   @override
   String galleryPaginationText(
