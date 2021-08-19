@@ -1860,15 +1860,17 @@ void main() {
     });
 
     test('`.enableSlowMode`', () async {
+      const cooldown = 10;
+
       final channelModel = ChannelModel(
         cid: channelCid,
-        cooldown: 10,
+        cooldown: cooldown,
       );
 
       when(() => client.enableSlowdown(
-            channelCid,
+            channelId,
             channelType,
-            10,
+            cooldown,
           )).thenAnswer((_) async => PartialUpdateChannelResponse()
         ..channel = channelModel);
 
@@ -1877,32 +1879,28 @@ void main() {
       expect(res, isNotNull);
 
       verify(() => client.enableSlowdown(
-            channelCid,
+            channelId,
             channelType,
-            any(),
+            cooldown,
           )).called(1);
     });
 
     test('`.disableSlowMode`', () async {
       final channelModel = ChannelModel(
         cid: channelCid,
-        cooldown: 0,
       );
 
       when(() => client.disableSlowdown(
-        channelCid,
-        channelType,
-      )).thenAnswer((_) async => PartialUpdateChannelResponse()
+            channelId,
+            channelType,
+          )).thenAnswer((_) async => PartialUpdateChannelResponse()
         ..channel = channelModel);
 
       final res = await channel.disableSlowMode();
 
       expect(res, isNotNull);
 
-      verify(() => client.disableSlowdown(
-        channelCid,
-        channelType,
-      )).called(1);
+      verify(() => client.disableSlowdown(channelId, channelType)).called(1);
     });
 
     test('`.banUser`', () async {
