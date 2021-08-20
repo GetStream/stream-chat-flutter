@@ -1,3 +1,8 @@
+## Upcoming
+
+🐞 Fixed
+- [#612](https://github.com/GetStream/stream-chat-flutter/issues/612) `ChannelListView` pagination doesn't work after refresh
+
 ## 2.1.1
 
 - Updated llc dependency

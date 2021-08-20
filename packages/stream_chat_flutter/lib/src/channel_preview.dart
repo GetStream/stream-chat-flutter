@@ -132,7 +132,7 @@ class ChannelPreview extends StatelessWidget {
                                   message: lastMessage!,
                                   size: channelPreviewTheme.indicatorIconSize,
                                   isMessageRead: channel.state!.read
-                                          ?.where((element) =>
+                                          .where((element) =>
                                               element.user.id !=
                                               channel
                                                   .client.state.currentUser!.id)

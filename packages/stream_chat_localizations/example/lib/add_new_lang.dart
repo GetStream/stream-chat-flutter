@@ -374,7 +374,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get youText => 'You';
 
   @override
-  String get ofText => 'of';
+  String galleryPaginationText(
+          {required int currentPage, required int totalPages}) =>
+      '$currentPage of $totalPages';
 
   @override
   String get fileText => 'File';
@@ -456,6 +458,9 @@ class MyApp extends StatelessWidget {
           Locale('hi'),
           Locale('fr'),
           Locale('it'),
+          Locale('es'),
+          Locale('ja'),
+          Locale('ko'),
           // Add support for additional 'nn' locale
           Locale('nn'),
         ],
