@@ -49,6 +49,7 @@ breakdown:
 - Fixed `MessageInput` textField case where `input` is not enabled if the file picked from the
   camera is null.
 - Fixed date dividers position/alignment in non reversed `MessageListView`.
+- Fixed `MessageListView` not opening to the right initialMessage if `StreamChannel.initialMessageId` is set.
 
 ## 2.1.2
 
