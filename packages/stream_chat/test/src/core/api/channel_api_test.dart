@@ -611,7 +611,7 @@ void main() {
     const channelType = 'test-channel-type';
     const cooldown = 10;
     const set = {
-      'ccooldown': 10,
+      'cooldown': 10,
     };
 
     final path = _getChannelUrl(channelId, channelType);
@@ -623,9 +623,7 @@ void main() {
     );
 
     when(() => client.patch(path, data: {
-          'set': {
-            'cooldown': cooldown,
-          },
+          'set': set,
         })).thenAnswer((_) async => successResponse(path, data: {
           'channel': channelModel.toJson(),
         }));
@@ -636,9 +634,7 @@ void main() {
     expect(res, isNotNull);
 
     verify(() => client.patch(path, data: {
-          'set': {
-            'cooldown': cooldown,
-          },
+          'set': set,
         })).called(1);
     verifyNoMoreInteractions(client);
   });
