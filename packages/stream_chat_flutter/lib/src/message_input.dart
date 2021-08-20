@@ -536,36 +536,10 @@ class MessageInputState extends State<MessageInput> {
           : _buildSendButton(context);
     }
 
-    /*if (_timeOut == null || _timeOut == 0) {
-      sendButton = widget.activeSendButton != null
-          ? InkWell(
-              onTap: sendMessage,
-              child: widget.activeSendButton,
-            )
-          : _buildSendButton(context);
-    } else {
-      sendButton = _CountdownButton(
-        count: _timeOut!,
-      );
-    }
-
-    if (!_messageIsPresent && _attachments.isEmpty) {
-      sendButton = widget.idleSendButton ?? _buildIdleSendButton(context);
-    }*/
-
     return AnimatedSwitcher(
       duration: _streamChatTheme.messageInputTheme.sendAnimationDuration!,
       child: sendButton,
     );
-    /*return AnimatedCrossFade(
-      crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
-          ? CrossFadeState.showFirst
-          : CrossFadeState.showSecond,
-      firstChild: sendButton,
-      secondChild: widget.idleSendButton ?? _buildIdleSendButton(context),
-      duration: _messageInputTheme.sendAnimationDuration!,
-      alignment: Alignment.center,
-    );*/
   }
 
   Widget _buildExpandActionsButton(BuildContext context) {
