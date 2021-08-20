@@ -1258,7 +1258,7 @@ class _MessageWidgetState extends State<MessageWidget>
       );
 
   Widget _buildTextBubble() {
-    if (widget.message.text!.trim().isEmpty) return const Offstage();
+    if (widget.message.text?.trim().isEmpty ?? false) return const Offstage();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

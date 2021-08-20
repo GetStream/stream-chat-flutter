@@ -984,7 +984,7 @@ class _MessageListViewState extends State<MessageListView> {
 
     final showInChannelIndicator = !_isThreadConversation && isThreadMessage;
     final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
-    final isOnlyEmoji = message.text!.isOnlyEmoji;
+    final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
 
     final hasUrlAttachment =
         message.attachments.any((it) => it.ogScrapeUrl != null) == true;
