@@ -329,10 +329,10 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   @override
   String get inText => 'に';
 
-  @override
-  String get youText => 'あなた';
   // This is the word for 'customer' or 'user' because saying 'you' directly
   //is too informal and rude
+  @override
+  String get youText => 'あなた';
 
   @override
   String galleryPaginationText({
