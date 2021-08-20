@@ -42,9 +42,12 @@ breakdown:
 * `MessageTheme` is now `MessageThemeData`
 * `UserListViewTheme` is now `UserListViewThemeData`
 
+- Updated core dependency.
+
 🐞 Fixed
 
-- Fixed `MessageInput` textField case where `input` is not enabled if the file picked from the camera is null.
+- Fixed `MessageInput` textField case where `input` is not enabled if the file picked from the
+  camera is null.
 - Fixed date dividers position/alignment in non reversed `MessageListView`.
 
 ## 2.1.2

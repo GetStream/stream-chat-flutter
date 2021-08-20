@@ -176,16 +176,11 @@ class UserListCoreState extends State<UserListCore>
         },
       );
 
-  StreamBuilder<List<ListItem>> _buildListView() => StreamBuilder(
+  BetterStreamBuilder<List<ListItem>> _buildListView() => BetterStreamBuilder(
         stream: _buildUserStream(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return widget.errorBuilder(context, snapshot.error!);
-          }
-          if (!snapshot.hasData) {
-            return widget.loadingBuilder(context);
-          }
-          final items = snapshot.data!;
+        errorBuilder: widget.errorBuilder,
+        noDataBuilder: widget.loadingBuilder,
+        builder: (context, items) {
           if (items.isEmpty) {
             return widget.emptyBuilder(context);
           }

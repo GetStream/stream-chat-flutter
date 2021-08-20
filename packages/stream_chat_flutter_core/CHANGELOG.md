@@ -1,5 +1,11 @@
 ## Upcoming
 
+🛑️ Breaking Changes from `2.1.1`
+- Renamed `BetterStreamBuilder.loadingBuilder` to `.noDataBuilder`
+
+🔄 Changed
+- `BetterStreamBuilder.initialData` is now nullable/not-required.
+
 🐞 Fixed
 - [#612](https://github.com/GetStream/stream-chat-flutter/issues/612) `ChannelListView` pagination doesn't work after refresh
 
