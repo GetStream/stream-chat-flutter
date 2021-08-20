@@ -355,11 +355,12 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _startSlowMode() {
-    if (StreamChannel.of(context).channel.cooldownStartedAt != null) {
-      _cooldownStartedAt = StreamChannel.of(context).channel.cooldownStartedAt;
+    final channel = StreamChannel.of(context).channel;
+    if (channel.cooldownStartedAt != null) {
+      _cooldownStartedAt = channel.cooldownStartedAt;
       if (DateTime.now().difference(_cooldownStartedAt!).inSeconds <
-          StreamChannel.of(context).channel.cooldown!) {
-        _timeOut = StreamChannel.of(context).channel.cooldown! -
+          channel.cooldown!) {
+        _timeOut = channel.cooldown! -
             DateTime.now().difference(_cooldownStartedAt!).inSeconds;
         _slowModeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
           if (_timeOut == 0) {
