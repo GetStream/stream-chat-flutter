@@ -29,33 +29,39 @@ class ChannelName extends StatelessWidget {
 
     assert(channel.state != null, 'Channel ${channel.id} is not initialized');
 
-    return StreamBuilder<String?>(
+    return BetterStreamBuilder<String>(
       stream: channel.nameStream,
       initialData: channel.name,
-      builder: (context, snapshot) => _buildName(
-        snapshot.data,
+      builder: (context, channelName) => Text(
+        channelName,
+        style: textStyle,
+        overflow: textOverflow,
+      ),
+      noDataBuilder: (context) => _generateName(
+        client.currentUser!,
         channel.state!.members,
-        client,
       ),
     );
   }
 
-  Widget _buildName(
-    String? name,
+  Widget _generateName(
+    User currentUser,
     List<Member> members,
-    StreamChatState client,
   ) =>
       LayoutBuilder(
         builder: (context, constraints) {
-          var title = name;
-          if (title == null && members.isNotEmpty) {
-            final otherMembers = members
-                .where((member) => member.userId != client.currentUser!.id);
+          var channelName = context.translations.noTitleText;
+          final otherMembers = members.where(
+            (member) => member.userId != currentUser.id,
+          );
+
+          if (otherMembers.isNotEmpty) {
             if (otherMembers.length == 1) {
-              if (otherMembers.first.user != null) {
-                title = otherMembers.first.user!.name;
+              final user = otherMembers.first.user;
+              if (user != null) {
+                channelName = user.name;
               }
-            } else if (otherMembers.isNotEmpty == true) {
+            } else {
               final maxWidth = constraints.maxWidth;
               final maxChars = maxWidth / (textStyle?.fontSize ?? 1);
               var currentChars = 0;
@@ -71,13 +77,14 @@ class ChannelName extends StatelessWidget {
 
               final exceedingMembers =
                   otherMembers.length - currentMembers.length;
-              title = '${currentMembers.map((e) => e.user?.name).join(', ')} '
+              channelName =
+                  '${currentMembers.map((e) => e.user?.name).join(', ')} '
                   '${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
             }
           }
 
           return Text(
-            title ?? context.translations.noTitleText,
+            channelName,
             style: textStyle,
             overflow: textOverflow,
           );
