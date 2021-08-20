@@ -346,4 +346,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get replyToMessageLabel => 'メッセージに返信';
+
+  @override
+  String get slowModeOnLabel => 'スローモードオン';
 }
