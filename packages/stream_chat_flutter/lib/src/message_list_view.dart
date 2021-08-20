@@ -845,7 +845,7 @@ class _MessageListViewState extends State<MessageListView> {
   ) {
     final isMyMessage =
         message.user!.id == StreamChat.of(context).currentUser!.id;
-    final isOnlyEmoji = message.text!.isOnlyEmoji;
+    final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
     final currentUser = StreamChat.of(context).currentUser;
     final members = StreamChannel.of(context).channel.state?.members ?? [];
     final currentUserMember =

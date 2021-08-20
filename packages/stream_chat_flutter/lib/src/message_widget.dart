@@ -1048,7 +1048,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 messageWidget: widget.copyWith(
                   key: const Key('MessageWidget'),
                   message: widget.message.copyWith(
-                    text: widget.message.text!.length > 200
+                    text: (widget.message.text?.length ?? 0) > 200
                         ? '${widget.message.text!.substring(0, 200)}...'
                         : widget.message.text,
                   ),
@@ -1111,7 +1111,7 @@ class _MessageWidgetState extends State<MessageWidget>
           messageWidget: widget.copyWith(
             key: const Key('MessageWidget'),
             message: widget.message.copyWith(
-              text: widget.message.text!.length > 200
+              text: (widget.message.text?.length ?? 0) > 200
                   ? '${widget.message.text!.substring(0, 200)}...'
                   : widget.message.text,
             ),
