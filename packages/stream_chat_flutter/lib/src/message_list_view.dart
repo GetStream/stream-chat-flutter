@@ -298,8 +298,9 @@ class _MessageListViewState extends State<MessageListView> {
   StreamChannelState? streamChannel;
   late StreamChatThemeData _streamTheme;
 
-  int? get _initialIndex {
-    if (widget.initialScrollIndex != null) return widget.initialScrollIndex;
+  int get _initialIndex {
+    final initialScrollIndex = widget.initialScrollIndex;
+    if (initialScrollIndex != null) return initialScrollIndex;
     if (streamChannel!.initialMessageId != null) {
       final messages = streamChannel!.channel.state!.messages;
       final totalMessages = messages.length;
@@ -312,8 +313,9 @@ class _MessageListViewState extends State<MessageListView> {
     return 0;
   }
 
-  double? get _initialAlignment {
-    if (widget.initialAlignment != null) return widget.initialAlignment;
+  double get _initialAlignment {
+    final initialAlignment = widget.initialAlignment;
+    if (initialAlignment != null) return initialAlignment;
     return 0;
   }
 
@@ -326,8 +328,8 @@ class _MessageListViewState extends State<MessageListView> {
   bool _topPaginationActive = false;
   bool _bottomPaginationActive = false;
 
-  int? initialIndex;
-  double? initialAlignment;
+  int initialIndex = 0;
+  double initialAlignment = 0;
 
   List<Message> messages = <Message>[];
 
@@ -454,14 +456,12 @@ class _MessageListViewState extends State<MessageListView> {
                   _inBetweenList = true;
                 },
                 child: ScrollablePositionedList.separated(
-                  key: (_upToDate ||
-                          initialIndex == null ||
-                          initialAlignment == null)
+                  key: _upToDate
                       ? null
-                      : ValueKey(initialIndex! + initialAlignment!),
+                      : ValueKey(initialIndex + initialAlignment),
                   itemPositionsListener: _itemPositionListener,
-                  initialScrollIndex: initialIndex ?? 0,
-                  initialAlignment: initialAlignment ?? 0,
+                  initialScrollIndex: initialIndex,
+                  initialAlignment: initialAlignment,
                   physics: widget.scrollPhysics,
                   itemScrollController: _scrollController,
                   reverse: widget.reverse,
@@ -1199,12 +1199,10 @@ class _MessageListViewState extends State<MessageListView> {
       initialAlignment = _initialAlignment;
 
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        if (initialIndex != null) {
-          _scrollController?.jumpTo(
-            index: initialIndex!,
-            alignment: initialAlignment ?? 0,
-          );
-        }
+        _scrollController?.jumpTo(
+          index: initialIndex,
+          alignment: initialAlignment,
+        );
       });
 
       _messageNewListener =
