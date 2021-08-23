@@ -2259,7 +2259,8 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _parseExistingMessage(Message message) {
-    _textEditingController.text = message.text!;
+    final messageText = message.text;
+    if (messageText != null) textEditingController.text = messageText;
     _addAttachments(message.attachments);
   }
 
