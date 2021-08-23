@@ -625,7 +625,7 @@ class MessageInputState extends State<MessageInput> {
     final margin = (widget.sendButtonLocation == SendButtonLocation.inside
             ? const EdgeInsets.only(right: 8)
             : EdgeInsets.zero) +
-        (widget.actionsLocation != ActionsLocation.left
+        (widget.actionsLocation != ActionsLocation.left || _commandEnabled
             ? const EdgeInsets.only(left: 8)
             : EdgeInsets.zero);
     return Expanded(
