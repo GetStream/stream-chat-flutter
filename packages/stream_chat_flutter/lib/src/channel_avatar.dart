@@ -90,57 +90,54 @@ class ChannelAvatar extends StatelessWidget {
     final colorTheme = chatThemeData.colorTheme;
     final previewTheme = chatThemeData.channelPreviewTheme.avatarTheme;
 
-    return BetterStreamBuilder<Map<String, dynamic>>(
-      stream: channel.extraDataStream,
-      initialData: channel.extraData,
-      builder: (context, extraData) {
-        final channelImage = extraData['image'];
-
-        if (channelImage != null) {
-          Widget child = ClipRRect(
-            borderRadius: borderRadius ?? previewTheme?.borderRadius,
-            child: Container(
-              constraints: constraints ?? previewTheme?.constraints,
-              decoration: BoxDecoration(color: colorTheme.accentPrimary),
-              child: InkWell(
-                onTap: onTap,
-                child: CachedNetworkImage(
-                  imageUrl: channelImage,
-                  errorWidget: (_, __, ___) => Center(
-                    child: Text(
-                      extraData['name']?[0] ?? '',
-                      style: TextStyle(
-                        color: colorTheme.barsBg,
-                        fontWeight: FontWeight.bold,
-                      ),
+    return BetterStreamBuilder<String>(
+      stream: channel.imageStream,
+      initialData: channel.image,
+      builder: (context, channelImage) {
+        Widget child = ClipRRect(
+          borderRadius: borderRadius ?? previewTheme?.borderRadius,
+          child: Container(
+            constraints: constraints ?? previewTheme?.constraints,
+            decoration: BoxDecoration(color: colorTheme.accentPrimary),
+            child: InkWell(
+              onTap: onTap,
+              child: CachedNetworkImage(
+                imageUrl: channelImage,
+                errorWidget: (_, __, ___) => Center(
+                  child: Text(
+                    channel.name?[0] ?? '',
+                    style: TextStyle(
+                      color: colorTheme.barsBg,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  fit: BoxFit.cover,
                 ),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        );
+
+        if (selected) {
+          child = ClipRRect(
+            key: const Key('selectedImage'),
+            borderRadius: BorderRadius.circular(selectionThickness) +
+                (borderRadius ??
+                    previewTheme?.borderRadius ??
+                    BorderRadius.zero),
+            child: Container(
+              constraints: constraints ?? previewTheme?.constraints,
+              color: selectionColor ?? colorTheme.accentPrimary,
+              child: Padding(
+                padding: EdgeInsets.all(selectionThickness),
+                child: child,
               ),
             ),
           );
-
-          if (selected) {
-            child = ClipRRect(
-              key: const Key('selectedImage'),
-              borderRadius: BorderRadius.circular(selectionThickness) +
-                  (borderRadius ??
-                      previewTheme?.borderRadius ??
-                      BorderRadius.zero),
-              child: Container(
-                constraints: constraints ?? previewTheme?.constraints,
-                color: selectionColor ?? colorTheme.accentPrimary,
-                child: Padding(
-                  padding: EdgeInsets.all(selectionThickness),
-                  child: child,
-                ),
-              ),
-            );
-          }
-          return child;
         }
-
+        return child;
+      },
+      noDataBuilder: (context) {
         final currentUser = streamChat.currentUser!;
         final otherMembers = channel.state!.members
             .where((it) => it.userId != currentUser.id)
