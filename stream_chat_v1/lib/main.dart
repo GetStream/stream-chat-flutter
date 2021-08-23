@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:example/choose_user_page.dart';
 import 'package:example/home_page.dart';
+import 'package:example/localizations.dart';
 import 'package:example/splash_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
@@ -107,6 +109,16 @@ class _MyAppState extends State<MyApp>
                 0: ThemeMode.system,
                 1: ThemeMode.light,
               }[snapshot],
+              supportedLocales: const [
+                Locale('en'),
+                Locale('it'),
+              ],
+              localizationsDelegates: const [
+                AppLocalizationsDelegate(),
+                GlobalStreamChatLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
               builder: (context, child) => StreamChatTheme(
                 data: StreamChatThemeData(
                   brightness: Theme.of(context).brightness,

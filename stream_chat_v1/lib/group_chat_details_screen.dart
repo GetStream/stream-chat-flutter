@@ -1,3 +1,4 @@
+import 'package:example/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -66,7 +67,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
           backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
           leading: const StreamBackButton(),
           title: Text(
-            'Name of Group Chat',
+            AppLocalizations.of(context).nameOfGroupChat,
             style: TextStyle(
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
               fontSize: 16,
@@ -80,7 +81,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               child: Row(
                 children: [
                   Text(
-                    'NAME',
+                    AppLocalizations.of(context).name.toUpperCase(),
                     style: TextStyle(
                       fontSize: 12,
                       color: StreamChatTheme.of(context)
@@ -100,7 +101,8 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                         errorBorder: InputBorder.none,
                         disabledBorder: InputBorder.none,
                         contentPadding: const EdgeInsets.all(0),
-                        hintText: 'Choose a group chat name',
+                        hintText:
+                            AppLocalizations.of(context).chooseAGroupChatName,
                         hintStyle: TextStyle(
                           fontSize: 14,
                           color: StreamChatTheme.of(context)
@@ -161,14 +163,14 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
 
             switch (status) {
               case ConnectionStatus.connected:
-                statusString = 'Connected';
+                statusString = AppLocalizations.of(context).connected;
                 showStatus = false;
                 break;
               case ConnectionStatus.connecting:
-                statusString = 'Reconnecting...';
+                statusString = AppLocalizations.of(context).reconnecting;
                 break;
               case ConnectionStatus.disconnected:
-                statusString = 'Disconnected';
+                statusString = AppLocalizations.of(context).disconnected;
                 break;
             }
             return InfoTile(
@@ -190,7 +192,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                         horizontal: 8,
                       ),
                       child: Text(
-                        '$_totalUsers ${_totalUsers > 1 ? 'Members' : 'Member'}',
+                        '$_totalUsers ${_totalUsers > 1 ? AppLocalizations.of(context).members : AppLocalizations.of(context).member}',
                         style: TextStyle(
                           color: StreamChatTheme.of(context)
                               .colorTheme
@@ -293,13 +295,13 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               height: 26.0,
             ),
             Text(
-              'Something went wrong',
+              AppLocalizations.of(context).somethingWentWrongErrorMessage,
               style: StreamChatTheme.of(context).textTheme.headlineBold,
             ),
             SizedBox(
               height: 7.0,
             ),
-            Text('The operation couldn\'t be completed.'),
+            Text(AppLocalizations.of(context).operationCouldNotBeCompleted),
             SizedBox(
               height: 36.0,
             ),
@@ -315,7 +317,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               children: [
                 TextButton(
                   child: Text(
-                    'OK',
+                    AppLocalizations.of(context).ok,
                     style: StreamChatTheme.of(context)
                         .textTheme
                         .bodyBold

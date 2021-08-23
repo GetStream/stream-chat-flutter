@@ -1,3 +1,4 @@
+import 'package:example/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
@@ -65,7 +66,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          'Photos & Videos',
+          AppLocalizations.of(context).photosAndVideos,
           style: TextStyle(
             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
             fontSize: 16.0,
@@ -103,7 +104,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                 ),
                 SizedBox(height: 16.0),
                 Text(
-                  'No Media',
+                  AppLocalizations.of(context).noMedia,
                   style: TextStyle(
                     fontSize: 14.0,
                     color:
@@ -112,7 +113,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                 ),
                 SizedBox(height: 8.0),
                 Text(
-                  'Photos or video sent in this chat will \nappear here',
+                  AppLocalizations.of(context).photosOrVideosWillAppearHere,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14.0,

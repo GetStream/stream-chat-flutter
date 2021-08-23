@@ -1,3 +1,4 @@
+import 'package:example/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
@@ -64,7 +65,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          'Pinned Messages',
+          AppLocalizations.of(context).pinnedMessages,
           style: TextStyle(
             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
             fontSize: 16.0,
@@ -102,7 +103,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
                 ),
                 SizedBox(height: 16.0),
                 Text(
-                  'No pinned items',
+                  AppLocalizations.of(context).noPinnedItems,
                   style: TextStyle(
                     fontSize: 17.0,
                     color:
@@ -115,7 +116,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
                   textAlign: TextAlign.center,
                   text: TextSpan(children: [
                     TextSpan(
-                      text: 'Long-press an important message and\nchoose ',
+                      text: '${AppLocalizations.of(context).longPressMessage} ',
                       style: TextStyle(
                         fontSize: 14.0,
                         color: StreamChatTheme.of(context)
@@ -125,7 +126,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
                       ),
                     ),
                     TextSpan(
-                      text: 'Pin to conversation',
+                      text: AppLocalizations.of(context).pinToConversation,
                       style: TextStyle(
                         fontSize: 14.0,
                         fontWeight: FontWeight.bold,
@@ -186,7 +187,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
                   text != ''
                       ? text
                       : (attachments.isNotEmpty
-                          ? '${attachments.length} attachment${attachments.length > 1 ? 's' : ''}'
+                          ? '${attachments.length} ${attachments.length > 1 ? AppLocalizations.of(context).attachments : AppLocalizations.of(context).attachment}'
                           : ''),
                 ),
                 onTap: () {

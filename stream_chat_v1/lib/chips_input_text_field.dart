@@ -1,3 +1,4 @@
+import 'package:example/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -75,7 +76,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: Text(
-                    'TO:',
+                    '${AppLocalizations.of(context).to.toUpperCase()}:',
                     style: StreamChatTheme.of(context)
                         .textTheme
                         .footnote

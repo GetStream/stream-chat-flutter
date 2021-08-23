@@ -1,5 +1,6 @@
 import 'package:example/app_config.dart';
 import 'package:example/home_page.dart';
+import 'package:example/localizations.dart';
 import 'package:example/stream_version.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -41,12 +42,12 @@ class ChooseUserPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 13.0),
               child: Text(
-                'Welcome to Stream Chat',
+                AppLocalizations.of(context).welcomeToStreamChat,
                 style: StreamChatTheme.of(context).textTheme.title,
               ),
             ),
             Text(
-              'Select a user to try the Flutter SDK:',
+              '${AppLocalizations.of(context).selectUserToTryFlutterSDK}:',
               style: StreamChatTheme.of(context).textTheme.body,
             ),
             Expanded(
@@ -135,7 +136,7 @@ class ChooseUserPage extends StatelessWidget {
                                 StreamChatTheme.of(context).textTheme.bodyBold,
                           ),
                           subtitle: Text(
-                            'Stream test account',
+                            AppLocalizations.of(context).streamTestAccount,
                             style: StreamChatTheme.of(context)
                                 .textTheme
                                 .footnote
@@ -166,11 +167,11 @@ class ChooseUserPage extends StatelessWidget {
                               StreamChatTheme.of(context).colorTheme.borders,
                         ),
                         title: Text(
-                          'Advanced Options',
+                          AppLocalizations.of(context).advancedOptions,
                           style: StreamChatTheme.of(context).textTheme.bodyBold,
                         ),
                         subtitle: Text(
-                          'Custom settings',
+                          AppLocalizations.of(context).customSettings,
                           style: StreamChatTheme.of(context)
                               .textTheme
                               .footnote

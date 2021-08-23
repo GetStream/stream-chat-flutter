@@ -1,4 +1,5 @@
 import 'package:example/home_page.dart';
+import 'package:example/localizations.dart';
 import 'package:example/routes/routes.dart';
 import 'package:example/stream_version.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +41,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
         centerTitle: true,
         brightness: Theme.of(context).brightness,
         title: Text(
-          'Advanced Options',
+          AppLocalizations.of(context).advancedOptions,
           style: StreamChatTheme.of(context).textTheme.headlineBold.copyWith(
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis),
         ),
@@ -74,8 +75,9 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     validator: (value) {
                       if (value!.isEmpty) {
                         setState(() {
-                          _apiKeyError =
-                              'Please enter the Chat API Key'.toUpperCase();
+                          _apiKeyError = AppLocalizations.of(context)
+                              .apiKeyError
+                              .toUpperCase();
                         });
                         return _apiKeyError;
                       }
@@ -105,8 +107,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       fillColor: StreamChatTheme.of(context).colorTheme.inputBg,
                       filled: true,
                       labelText: _apiKeyError != null
-                          ? 'CHAT API KEY: $_apiKeyError'
-                          : 'Chat API Key',
+                          ? '${AppLocalizations.of(context).chatApiKey.toUpperCase()}: $_apiKeyError'
+                          : AppLocalizations.of(context).chatApiKey,
                     ),
                     textInputAction: TextInputAction.next,
                   ),
@@ -123,8 +125,9 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     validator: (value) {
                       if (value!.isEmpty) {
                         setState(() {
-                          _userIdError =
-                              'Please enter the User ID'.toUpperCase();
+                          _userIdError = AppLocalizations.of(context)
+                              .userIdError
+                              .toUpperCase();
                         });
                         return _userIdError;
                       }
@@ -155,8 +158,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       fillColor: StreamChatTheme.of(context).colorTheme.inputBg,
                       filled: true,
                       labelText: _userIdError != null
-                          ? 'USER ID: $_userIdError'
-                          : 'User ID',
+                          ? '${AppLocalizations.of(context).userId.toUpperCase()}: $_userIdError'
+                          : AppLocalizations.of(context).userId,
                     ),
                   ),
                   SizedBox(height: 8),
@@ -172,8 +175,9 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     validator: (value) {
                       if (value!.isEmpty) {
                         setState(() {
-                          _userTokenError =
-                              'Please enter the user token'.toUpperCase();
+                          _userTokenError = AppLocalizations.of(context)
+                              .userTokenError
+                              .toUpperCase();
                         });
                         return _userTokenError;
                       }
@@ -204,8 +208,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       fillColor: StreamChatTheme.of(context).colorTheme.inputBg,
                       filled: true,
                       labelText: _userTokenError != null
-                          ? 'USER TOKEN: $_userTokenError'
-                          : 'User Token',
+                          ? '${AppLocalizations.of(context).userToken.toUpperCase()}: $_userTokenError'
+                          : AppLocalizations.of(context).userToken,
                     ),
                   ),
                   SizedBox(height: 8),
@@ -226,7 +230,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       ),
                       fillColor: StreamChatTheme.of(context).colorTheme.inputBg,
                       filled: true,
-                      labelText: 'Username (optional)',
+                      labelText: AppLocalizations.of(context).usernameOptional,
                     ),
                   ),
                   Spacer(),
@@ -248,7 +252,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       ),
                     ),
                     child: Text(
-                      'Login',
+                      AppLocalizations.of(context).login,
                       style: TextStyle(
                         fontSize: 16,
                         color: Theme.of(context).brightness != Brightness.light
@@ -318,7 +322,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                             value: userToken,
                           );
                         } catch (e) {
-                          var errorText = 'Error connecting, retry';
+                          var errorText =
+                              AppLocalizations.of(context).errorConnecting;
                           if (e is Map) {
                             errorText = e['message'] ?? errorText;
                           }

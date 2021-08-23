@@ -1,8 +1,11 @@
+import 'package:example/localizations.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide Message;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-void showLocalNotification(Event event, String currentUserId) async {
+void showLocalNotification(
+    Event event, String currentUserId, BuildContext context) async {
   if (![
         EventType.messageNew,
         EventType.notificationMessageNew,
@@ -27,8 +30,8 @@ void showLocalNotification(Event event, String currentUserId) async {
     NotificationDetails(
       android: AndroidNotificationDetails(
         'message channel',
-        'Message channel',
-        'Channel used for showing messages',
+        AppLocalizations.of(context).messageChannelName,
+        AppLocalizations.of(context).messageChannelDescription,
         priority: Priority.high,
         importance: Importance.high,
       ),

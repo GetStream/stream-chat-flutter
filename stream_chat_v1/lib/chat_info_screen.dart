@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:example/localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
@@ -149,7 +150,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
 
               return OptionListTile(
                 tileColor: StreamChatTheme.of(context).colorTheme.appBg,
-                title: 'Mute user',
+                title: AppLocalizations.of(context).muteUser,
                 titleTextStyle: StreamChatTheme.of(context).textTheme.body,
                 leading: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 22.0),
@@ -201,7 +202,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         //   onTap: () {},
         // ),
         OptionListTile(
-          title: 'Pinned Messages',
+          title: AppLocalizations.of(context).pinnedMessages,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
@@ -262,7 +263,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           },
         ),
         OptionListTile(
-          title: 'Photos & Videos',
+          title: AppLocalizations.of(context).photosAndVideos,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
@@ -323,7 +324,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           },
         ),
         OptionListTile(
-          title: 'Files',
+          title: AppLocalizations.of(context).files,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
@@ -364,7 +365,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           },
         ),
         OptionListTile(
-          title: 'Shared groups',
+          title: AppLocalizations.of(context).sharedGroups,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
@@ -416,10 +417,10 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   void _showDeleteDialog() async {
     final res = await showConfirmationDialog(
       context,
-      title: 'Delete Conversation',
-      okText: 'DELETE',
-      question: 'Are you sure you want to delete this conversation?',
-      cancelText: 'CANCEL',
+      title: AppLocalizations.of(context).deleteConversationTitle,
+      okText: AppLocalizations.of(context).delete.toUpperCase(),
+      question: AppLocalizations.of(context).deleteConversationAreYouSure,
+      cancelText: AppLocalizations.of(context).cancel.toUpperCase(),
       icon: StreamSvgIcon.delete(
         color: StreamChatTheme.of(context).colorTheme.accentError,
       ),
@@ -441,7 +442,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
     if (otherMember != null) {
       if (otherMember.online) {
         alternativeWidget = Text(
-          'Online',
+          AppLocalizations.of(context).online,
           style: TextStyle(
               color: StreamChatTheme.of(context)
                   .colorTheme
@@ -450,7 +451,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         );
       } else {
         alternativeWidget = Text(
-          'Last seen ${Jiffy(otherMember.lastActive).fromNow()}',
+          '${AppLocalizations.of(context).lastSeen} ${Jiffy(otherMember.lastActive).fromNow()}',
           style: TextStyle(
               color: StreamChatTheme.of(context)
                   .colorTheme
@@ -511,7 +512,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          'Shared Groups',
+          AppLocalizations.of(context).sharedGroups,
           style: TextStyle(
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
               fontSize: 16.0),
@@ -544,7 +545,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                   ),
                   SizedBox(height: 16.0),
                   Text(
-                    'No Shared Groups',
+                    AppLocalizations.of(context).noSharedGroups,
                     style: TextStyle(
                       fontSize: 14.0,
                       color: StreamChatTheme.of(context)
@@ -554,7 +555,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                   ),
                   SizedBox(height: 8.0),
                   Text(
-                    'Group shared with User will appear here.',
+                    AppLocalizations.of(context).groupSharedWithUserAppearHere,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14.0,
@@ -602,8 +603,8 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
       child: LayoutBuilder(builder: (context, constraints) {
         String? title;
         if (extraData['name'] == null) {
-          final otherMembers = members.where(
-              (member) => member.userId != StreamChat.of(context).currentUser!.id);
+          final otherMembers = members.where((member) =>
+              member.userId != StreamChat.of(context).currentUser!.id);
           if (otherMembers.isNotEmpty) {
             final maxWidth = constraints.maxWidth;
             final maxChars = maxWidth / textStyle.fontSize!;
@@ -649,7 +650,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      '${channel.memberCount} members',
+                      '${channel.memberCount} ${AppLocalizations.of(context).members.toLowerCase()}',
                       style: TextStyle(
                           color: StreamChatTheme.of(context)
                               .colorTheme

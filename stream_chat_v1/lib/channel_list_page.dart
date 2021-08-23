@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:example/localizations.dart';
 import 'package:example/routes/routes.dart';
 import 'package:example/user_mentions_page.dart';
 import 'package:flutter/foundation.dart';
@@ -43,7 +44,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
             ),
           ],
         ),
-        label: 'Chats',
+        label: AppLocalizations.of(context).chats,
       ),
       BottomNavigationBarItem(
         icon: Stack(
@@ -56,7 +57,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
             ),
           ],
         ),
-        label: 'Mentions',
+        label: AppLocalizations.of(context).mentions,
       ),
     ];
   }
@@ -192,7 +193,7 @@ class LeftDrawer extends StatelessWidget {
                     );
                   },
                   title: Text(
-                    'New direct message',
+                    AppLocalizations.of(context).newDirectMessage,
                     style: TextStyle(
                       fontSize: 14.5,
                     ),
@@ -212,7 +213,7 @@ class LeftDrawer extends StatelessWidget {
                     );
                   },
                   title: Text(
-                    'New group',
+                    AppLocalizations.of(context).newGroup,
                     style: TextStyle(
                       fontSize: 14.5,
                     ),
@@ -249,7 +250,7 @@ class LeftDrawer extends StatelessWidget {
                             .withOpacity(.5),
                       ),
                       title: Text(
-                        'Sign out',
+                        AppLocalizations.of(context).signOut,
                         style: TextStyle(
                           fontSize: 14.5,
                         ),
