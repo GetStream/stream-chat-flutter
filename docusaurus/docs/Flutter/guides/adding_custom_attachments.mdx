@@ -146,21 +146,25 @@ Next, we build the Static Maps URL (Add your API key before using the code snipp
   }
 ```
 
-And then modify the MessageListView and tell it how to build a location attachment:
+And then modify the `MessageListView` and tell it how to build a location attachment, using the `messageBuilder` property and copying the default message implementation overriding the `customAttachmentBuilders` property:
 
 ```dart
 MessageListView(
-  customAttachmentBuilders: {
-    'location': (context, message, attachments) {
-       var attachmentWidget = Image.network(
-         _buildMapAttachment(
-           attachments[0].extraData['latitude'],
-           attachments[0].extraData['longitude'],
-         ),
-       );
+  messageBuilder: (context, details, messages, defaultMessage) {
+    return defaultMessage.copyWith(
+        customAttachmentBuilders: {
+          'location': (context, message, attachments) {
+            final attachmentWidget = Image.network(
+              _buildMapAttachment(
+                attachments[0].extraData['latitude'],
+                attachments[0].extraData['longitude'],
+              ),
+            );
 
-      return wrapAttachmentWidget(context, attachmentWidget, null, true, BorderRadius.circular(8.0));
-    }
+            return wrapAttachmentWidget(context, attachmentWidget, null, true, BorderRadius.circular(8.0));
+          }
+        },
+    );
   },
 ),
 ```

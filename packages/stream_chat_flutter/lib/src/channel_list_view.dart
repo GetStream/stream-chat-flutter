@@ -584,11 +584,16 @@ class _ChannelListViewState extends State<ChannelListView> {
                 ),
             ],
         child: widget.channelPreviewBuilder?.call(context, channel) ??
-            ChannelPreview(
-              onLongPress: widget.onChannelLongPress,
-              channel: channel,
-              onImageTap: () => widget.onImageTap?.call(channel),
-              onTap: (channel) => onTap(channel, widget.channelWidget),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: chatThemeData.channelListViewTheme.backgroundColor,
+              ),
+              child: ChannelPreview(
+                onLongPress: widget.onChannelLongPress,
+                channel: channel,
+                onImageTap: () => widget.onImageTap?.call(channel),
+                onTap: (channel) => onTap(channel, widget.channelWidget),
+              ),
             ),
       ),
     );

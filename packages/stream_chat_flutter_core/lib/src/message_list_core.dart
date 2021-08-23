@@ -138,7 +138,7 @@ class MessageListCoreState extends State<MessageListCore> {
       return true;
     }
 
-    return BetterStreamBuilder<List<Message>?>(
+    return BetterStreamBuilder<List<Message>>(
       initialData: initialData,
       comparator: const ListEquality().equals,
       stream: messagesStream!.map(
@@ -148,9 +148,9 @@ class MessageListCoreState extends State<MessageListCore> {
                 ),
       ),
       errorBuilder: widget.errorBuilder,
-      loadingBuilder: widget.loadingBuilder,
+      noDataBuilder: widget.loadingBuilder,
       builder: (context, data) {
-        final messageList = data?.reversed.toList(growable: false) ?? [];
+        final messageList = data.reversed.toList(growable: false);
         if (messageList.isEmpty && !_isThreadConversation) {
           if (_upToDate) {
             return widget.emptyBuilder(context);

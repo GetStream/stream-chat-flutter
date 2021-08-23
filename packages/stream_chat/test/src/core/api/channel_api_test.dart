@@ -605,4 +605,65 @@ void main() {
     verify(() => client.post(path, data: {})).called(1);
     verifyNoMoreInteractions(client);
   });
+
+  test('enableSlowdown', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    const cooldown = 10;
+    const set = {
+      'cooldown': 10,
+    };
+
+    final path = _getChannelUrl(channelId, channelType);
+
+    final channelModel = ChannelModel(
+      id: channelId,
+      type: channelType,
+      extraData: set,
+    );
+
+    when(() => client.patch(path, data: {
+          'set': set,
+        })).thenAnswer((_) async => successResponse(path, data: {
+          'channel': channelModel.toJson(),
+        }));
+
+    final res =
+        await channelApi.enableSlowdown(channelId, channelType, cooldown);
+
+    expect(res, isNotNull);
+
+    verify(() => client.patch(path, data: {
+          'set': set,
+        })).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('disableSlowdown', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    const unset = ['cooldown'];
+
+    final path = _getChannelUrl(channelId, channelType);
+
+    final channelModel = ChannelModel(
+      id: channelId,
+      type: channelType,
+    );
+
+    when(() => client.patch(path, data: {
+          'unset': unset,
+        })).thenAnswer((_) async => successResponse(path, data: {
+          'channel': channelModel.toJson(),
+        }));
+
+    final res = await channelApi.disableSlowdown(channelId, channelType);
+
+    expect(res, isNotNull);
+
+    verify(() => client.patch(path, data: {
+          'unset': unset,
+        })).called(1);
+    verifyNoMoreInteractions(client);
+  });
 }

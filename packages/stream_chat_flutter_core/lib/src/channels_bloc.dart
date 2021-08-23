@@ -106,6 +106,9 @@ class ChannelsBlocState extends State<ChannelsBloc>
     final client = _streamChatCoreState!.client;
 
     final clear = paginationParams.offset == 0;
+    if (clear && _paginationEnded) {
+      _paginationEnded = false;
+    }
 
     if ((!clear && _paginationEnded) ||
         _queryChannelsLoadingController.value == true) {

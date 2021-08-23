@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/better_stream_builder.dart';
 import 'package:stream_chat_flutter_core/src/channels_bloc.dart';
 import 'package:stream_chat_flutter_core/src/stream_chat_core.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
@@ -137,19 +138,14 @@ class ChannelListCoreState extends State<ChannelListCore> {
   @override
   Widget build(BuildContext context) => _buildListView(_channelsBloc);
 
-  StreamBuilder<List<Channel>> _buildListView(
+  BetterStreamBuilder<List<Channel>> _buildListView(
     ChannelsBlocState channelsBlocState,
   ) =>
-      StreamBuilder<List<Channel>>(
+      BetterStreamBuilder<List<Channel>>(
         stream: channelsBlocState.channelsStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return widget.errorBuilder(context, snapshot.error!);
-          }
-          if (!snapshot.hasData) {
-            return widget.loadingBuilder(context);
-          }
-          final channels = snapshot.data!;
+        errorBuilder: widget.errorBuilder,
+        noDataBuilder: widget.loadingBuilder,
+        builder: (context, channels) {
           if (channels.isEmpty) {
             return widget.emptyBuilder(context);
           }

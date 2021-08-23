@@ -38,7 +38,7 @@ class ConnectionStatusBuilder extends StatelessWidget {
     return BetterStreamBuilder<ConnectionStatus>(
       initialData: client.wsConnectionStatus,
       stream: stream,
-      loadingBuilder: loadingBuilder,
+      noDataBuilder: loadingBuilder,
       errorBuilder: (context, error) {
         if (errorBuilder != null) {
           return errorBuilder!(context, error);

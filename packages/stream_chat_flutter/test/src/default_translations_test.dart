@@ -167,7 +167,7 @@ void main() {
     expect(translations.withText, isNotNull);
     expect(translations.inText, isNotNull);
     expect(translations.youText, isNotNull);
-    expect(translations.ofText, isNotNull);
+    expect(translations.galleryPaginationText, isNotNull);
     expect(translations.fileText, isNotNull);
     expect(translations.replyToMessageLabel, isNotNull);
   });

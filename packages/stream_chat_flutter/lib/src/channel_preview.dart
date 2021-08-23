@@ -94,13 +94,13 @@ class ChannelPreview extends StatelessWidget {
                             textStyle: channelPreviewTheme.titleStyle,
                           ),
                     ),
-                    BetterStreamBuilder<List<Member>?>(
+                    BetterStreamBuilder<List<Member>>(
                       stream: channel.state?.membersStream,
                       initialData: channel.state?.members,
                       comparator: const ListEquality().equals,
                       builder: (context, members) {
-                        if (members?.isEmpty == true ||
-                            members?.any((Member e) =>
+                        if (members.isEmpty ||
+                            members.any((Member e) =>
                                     e.user!.id ==
                                     channel.client.state.currentUser?.id) !=
                                 true) {
@@ -132,7 +132,7 @@ class ChannelPreview extends StatelessWidget {
                                   message: lastMessage!,
                                   size: channelPreviewTheme.indicatorIconSize,
                                   isMessageRead: channel.state!.read
-                                          ?.where((element) =>
+                                          .where((element) =>
                                               element.user.id !=
                                               channel
                                                   .client.state.currentUser!.id)
@@ -153,13 +153,10 @@ class ChannelPreview extends StatelessWidget {
             ));
   }
 
-  Widget _buildDate(BuildContext context) => BetterStreamBuilder<DateTime?>(
+  Widget _buildDate(BuildContext context) => BetterStreamBuilder<DateTime>(
         stream: channel.lastMessageAtStream,
         initialData: channel.lastMessageAt,
         builder: (context, data) {
-          if (data == null) {
-            return const Offstage();
-          }
           final lastMessageAt = data.toLocal();
 
           String stringDate;
@@ -213,12 +210,12 @@ class ChannelPreview extends StatelessWidget {
 
   Widget _buildLastMessage(BuildContext context) => Align(
         alignment: Alignment.centerLeft,
-        child: BetterStreamBuilder<List<Message>?>(
+        child: BetterStreamBuilder<List<Message>>(
           stream: channel.state!.messagesStream,
           initialData: channel.state!.messages,
           builder: (context, data) {
-            final lastMessage = data
-                ?.lastWhereOrNull((m) => m.shadowed != true && !m.isDeleted);
+            final lastMessage =
+                data.lastWhereOrNull((m) => !m.shadowed && !m.isDeleted);
             if (lastMessage == null) {
               return const SizedBox();
             }

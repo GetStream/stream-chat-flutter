@@ -21,6 +21,8 @@ void main() {
       when(() => clientState.currentUser).thenReturn(user);
       when(() => clientState.currentUserStream)
           .thenAnswer((_) => Stream.value(user));
+      when(() => channel.lastMessageAtStream)
+          .thenAnswer((_) => Stream.value(lastMessageAt));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);

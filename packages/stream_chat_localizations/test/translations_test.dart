@@ -174,7 +174,7 @@ void main() {
       expect(localizations.withText, isNotNull);
       expect(localizations.inText, isNotNull);
       expect(localizations.youText, isNotNull);
-      expect(localizations.ofText, isNotNull);
+      expect(localizations.galleryPaginationText, isNotNull);
       expect(localizations.fileText, isNotNull);
       expect(localizations.replyToMessageLabel, isNotNull);
       expect(localizations.attachmentLimitExceedError(3), isNotNull);

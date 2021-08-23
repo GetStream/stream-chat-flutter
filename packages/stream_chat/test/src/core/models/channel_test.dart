@@ -12,6 +12,7 @@ void main() {
       expect(channel.cid, equals('livestream:test'));
       expect(channel.extraData['cats'], equals(true));
       expect(channel.extraData['fruit'], equals(['bananas', 'apples']));
+      expect(channel.cooldown, equals(0));
     });
 
     test('should serialize to json correctly', () {
@@ -24,7 +25,13 @@ void main() {
 
       expect(
         channel.toJson(),
-        {'id': 'id', 'type': 'type', 'frozen': false, 'name': 'cool'},
+        {
+          'id': 'id',
+          'type': 'type',
+          'frozen': false,
+          'cooldown': 0,
+          'name': 'cool',
+        },
       );
     });
 
@@ -38,7 +45,13 @@ void main() {
 
       expect(
         channel.toJson(),
-        {'id': 'id', 'type': 'type', 'name': 'cool', 'frozen': false},
+        {
+          'id': 'id',
+          'type': 'type',
+          'frozen': false,
+          'cooldown': 0,
+          'name': 'cool',
+        },
       );
     });
   });
