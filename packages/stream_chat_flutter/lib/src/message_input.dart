@@ -326,19 +326,18 @@ class MessageInputState extends State<MessageInput> {
   bool _sendAsDm = false;
   bool _openFilePickerSection = false;
   int _filePickerIndex = 0;
-  double _filePickerSize = _kMinMediaPickerSize;
-  final KeyboardVisibilityController _keyboardVisibilityController =
-      KeyboardVisibilityController();
+
+  final _keyboardVisibilityController = KeyboardVisibilityController();
 
   /// The editing controller passed to the input TextField
-  late final TextEditingController _textEditingController;
+  late final TextEditingController textEditingController;
 
   late StreamChatThemeData _streamChatTheme;
   late MessageInputThemeData _messageInputTheme;
 
   bool get _hasQuotedMessage => widget.quotedMessage != null;
 
-  bool get _messageIsPresent => _textEditingController.text.trim().isNotEmpty;
+  bool get _messageIsPresent => textEditingController.text.trim().isNotEmpty;
   late DateTime? _cooldownStartedAt;
   int? _timeOut;
 
@@ -356,19 +355,19 @@ class MessageInputState extends State<MessageInput> {
       _keyboardListener =
           _keyboardVisibilityController.onChange.listen((visible) {
         if (_focusNode.hasFocus) {
-          _onChanged(context, _textEditingController.text);
+          _onChanged(context, textEditingController.text);
         }
       });
     }
 
-    _textEditingController =
+    textEditingController =
         widget.textEditingController ?? TextEditingController();
     if (widget.editMessage != null || widget.initialMessage != null) {
       _parseExistingMessage(widget.editMessage ?? widget.initialMessage!);
     }
 
-    _textEditingController.addListener(() {
-      _onChanged(context, _textEditingController.text);
+    textEditingController.addListener(() {
+      _onChanged(context, textEditingController.text);
     });
 
     _focusNode.addListener(() {
@@ -660,7 +659,7 @@ class MessageInputState extends State<MessageInput> {
                     maxLines: null,
                     onSubmitted: (_) => sendMessage(),
                     keyboardType: widget.keyboardType,
-                    controller: _textEditingController,
+                    controller: textEditingController,
                     focusNode: _focusNode,
                     style: _messageInputTheme.inputTextStyle,
                     autofocus: widget.autofocus,
@@ -843,15 +842,15 @@ class MessageInputState extends State<MessageInput> {
 
   void _checkEmoji(String s, BuildContext context) {
     if (s.isNotEmpty &&
-        _textEditingController.selection.baseOffset > 0 &&
-        _textEditingController.text
+        textEditingController.selection.baseOffset > 0 &&
+        textEditingController.text
             .substring(
               0,
-              _textEditingController.selection.baseOffset,
+              textEditingController.selection.baseOffset,
             )
             .contains(':')) {
-      final textToSelection = _textEditingController.text
-          .substring(0, _textEditingController.value.selection.start);
+      final textToSelection = textEditingController.text
+          .substring(0, textEditingController.value.selection.start);
       final splits = textToSelection.split(':');
       final query = splits[splits.length - 2].toLowerCase();
       final emoji = Emoji.byName(query);
@@ -870,9 +869,9 @@ class MessageInputState extends State<MessageInput> {
 
   void _checkMentions(String s, BuildContext context) {
     if (s.isNotEmpty &&
-        _textEditingController.selection.baseOffset > 0 &&
-        _textEditingController.text
-            .substring(0, _textEditingController.selection.baseOffset)
+        textEditingController.selection.baseOffset > 0 &&
+        textEditingController.text
+            .substring(0, textEditingController.selection.baseOffset)
             .split(' ')
             .last
             .contains('@')) {
@@ -895,7 +894,7 @@ class MessageInputState extends State<MessageInput> {
 
       if (matchedCommandsList.length == 1) {
         _chosenCommand = matchedCommandsList[0];
-        _textEditingController.clear();
+        textEditingController.clear();
         setState(() {
           _commandEnabled = true;
         });
@@ -911,7 +910,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   OverlayEntry? _buildCommandsOverlayEntry() {
-    final text = _textEditingController.text.trimLeft();
+    final text = textEditingController.text.trimLeft();
     final commands = StreamChannel.of(context)
             .channel
             .config
@@ -1086,7 +1085,7 @@ class MessageInputState extends State<MessageInput> {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      height: _openFilePickerSection ? _filePickerSize : 0,
+      height: _openFilePickerSection ? _kMinMediaPickerSize : 0,
       child: Material(
         color: _streamChatTheme.colorTheme.inputBg,
         child: Column(
@@ -1142,66 +1141,50 @@ class MessageInputState extends State<MessageInput> {
                 ),
               ],
             ),
-            GestureDetector(
-              onVerticalDragUpdate: (update) {
-                setState(() {
-                  _filePickerSize = (_filePickerSize - update.delta.dy).clamp(
-                    _kMinMediaPickerSize,
-                    MediaQuery.of(context).size.height / 1.7,
-                  );
-                });
-              },
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: _streamChatTheme.colorTheme.barsBg,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: _streamChatTheme.colorTheme.barsBg,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
                 ),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: SizedBox(
-                        width: 40,
-                        height: 4,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: _streamChatTheme.colorTheme.inputBg,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ),
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: _streamChatTheme.colorTheme.inputBg,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                 ),
               ),
             ),
-            if (_openFilePickerSection)
-              Expanded(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: _streamChatTheme.colorTheme.barsBg,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: _PickerWidget(
-                    filePickerIndex: _filePickerIndex,
-                    streamChatTheme: _streamChatTheme,
-                    containsFile: _attachmentContainsFile,
-                    selectedMedias: _attachments.keys.toList(),
-                    onAddMoreFilesClick: pickFile,
-                    onMediaSelected: (media) {
-                      if (_attachments.containsKey(media.id)) {
-                        setState(() => _attachments.remove(media.id));
-                      } else {
-                        _addAssetAttachment(media);
-                      }
-                    },
-                  ),
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: _streamChatTheme.colorTheme.barsBg,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: _PickerWidget(
+                  filePickerIndex: _filePickerIndex,
+                  streamChatTheme: _streamChatTheme,
+                  containsFile: _attachmentContainsFile,
+                  selectedMedias: _attachments.keys.toList(),
+                  onAddMoreFilesClick: pickFile,
+                  onMediaSelected: (media) {
+                    if (_attachments.containsKey(media.id)) {
+                      setState(() => _attachments.remove(media.id));
+                    } else {
+                      _addAssetAttachment(media);
+                    }
+                  },
                 ),
               ),
+            ),
           ],
         ),
       ),
@@ -1339,8 +1322,8 @@ class MessageInputState extends State<MessageInput> {
   }
 
   OverlayEntry? _buildMentionsOverlayEntry() {
-    final splits = _textEditingController.text
-        .substring(0, _textEditingController.value.selection.start)
+    final splits = textEditingController.text
+        .substring(0, textEditingController.value.selection.start)
         .split('@');
     final query = splits.last.toLowerCase();
 
@@ -1402,10 +1385,10 @@ class MessageInputState extends State<MessageInput> {
                           splits[splits.length - 1] = m.user!.name;
                           final rejoin = splits.join('@');
 
-                          _textEditingController.value = TextEditingValue(
+                          textEditingController.value = TextEditingValue(
                             text: rejoin +
-                                _textEditingController.text.substring(
-                                    _textEditingController.selection.start),
+                                textEditingController.text.substring(
+                                    textEditingController.selection.start),
                             selection: TextSelection.collapsed(
                               offset: rejoin.length,
                             ),
@@ -1449,8 +1432,8 @@ class MessageInputState extends State<MessageInput> {
   }
 
   OverlayEntry? _buildEmojiOverlay() {
-    final splits = _textEditingController.text
-        .substring(0, _textEditingController.value.selection.start)
+    final splits = textEditingController.text
+        .substring(0, textEditingController.value.selection.start)
         .split(':');
     final query = splits.last.toLowerCase();
 
@@ -1561,10 +1544,10 @@ class MessageInputState extends State<MessageInput> {
   void _chooseEmoji(List<String> splits, Emoji emoji) {
     final rejoin = splits.sublist(0, splits.length - 1).join(':') + emoji.char!;
 
-    _textEditingController.value = TextEditingValue(
+    textEditingController.value = TextEditingValue(
       text: rejoin +
-          _textEditingController.text
-              .substring(_textEditingController.selection.start),
+          textEditingController.text
+              .substring(textEditingController.selection.start),
       selection: TextSelection.collapsed(
         offset: rejoin.length,
       ),
@@ -1575,7 +1558,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _setCommand(Command c) {
-    _textEditingController.clear();
+    textEditingController.clear();
     setState(() {
       _chosenCommand = c;
       _commandEnabled = true;
@@ -1769,7 +1752,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildCommandButton(BuildContext context) {
-    final s = _textEditingController.text.trim();
+    final s = textEditingController.text.trim();
     final defaultButton = IconButton(
       icon: StreamSvgIcon.lightning(
         color: s.isNotEmpty
@@ -1786,10 +1769,7 @@ class MessageInputState extends State<MessageInput> {
       splashRadius: 24,
       onPressed: () async {
         if (_openFilePickerSection) {
-          setState(() {
-            _openFilePickerSection = false;
-            _filePickerSize = _kMinMediaPickerSize;
-          });
+          setState(() => _openFilePickerSection = false);
           await Future.delayed(const Duration(milliseconds: 300));
         }
 
@@ -1835,10 +1815,7 @@ class MessageInputState extends State<MessageInput> {
         _mentionsOverlay = null;
 
         if (_openFilePickerSection) {
-          setState(() {
-            _openFilePickerSection = false;
-            _filePickerSize = _kMinMediaPickerSize;
-          });
+          setState(() => _openFilePickerSection = false);
         } else {
           showAttachmentModal();
         }
@@ -1928,6 +1905,14 @@ class MessageInputState extends State<MessageInput> {
         ),
       );
     }
+  }
+
+  /// Add an attachment to the sending message
+  /// Use this to add custom type attachments
+  ///
+  /// Note: Only meant to be used from outside the state.
+  void addAttachment(Attachment attachment) {
+    setState(() => _addAttachments([attachment]));
   }
 
   /// Adds an attachment to the [_attachments] map
@@ -2110,7 +2095,7 @@ class MessageInputState extends State<MessageInput> {
 
   /// Sends the current message
   Future<void> sendMessage() async {
-    var text = _textEditingController.text.trim();
+    var text = textEditingController.text.trim();
     if (text.isEmpty && _attachments.isEmpty) {
       return;
     }
@@ -2123,7 +2108,7 @@ class MessageInputState extends State<MessageInput> {
 
     final attachments = [..._attachments.values];
 
-    _textEditingController.clear();
+    textEditingController.clear();
     _attachments.clear();
     widget.onQuotedMessageCleared?.call();
 
