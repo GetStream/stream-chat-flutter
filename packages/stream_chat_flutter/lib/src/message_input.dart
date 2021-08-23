@@ -1042,6 +1042,9 @@ class MessageInputState extends State<MessageInput> {
     final _attachmentContainsFile =
         _attachments.values.any((it) => it.type == 'file');
 
+    final attachmentLimitCrossed =
+        _attachments.length >= widget.attachmentLimit;
+
     Color _getIconColor(int index) {
       final streamChatThemeData = _streamChatTheme;
       switch (index) {
@@ -1061,15 +1064,21 @@ class MessageInputState extends State<MessageInput> {
                   : streamChatThemeData.colorTheme.textHighEmphasis
                       .withOpacity(0.2));
         case 2:
-          return _attachmentContainsFile && _attachments.isNotEmpty
+          return attachmentLimitCrossed
               ? streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(0.2)
-              : streamChatThemeData.colorTheme.textHighEmphasis
-                  .withOpacity(0.5);
+              : _attachmentContainsFile && _attachments.isNotEmpty
+                  ? streamChatThemeData.colorTheme.textHighEmphasis
+                      .withOpacity(0.2)
+                  : streamChatThemeData.colorTheme.textHighEmphasis
+                      .withOpacity(0.5);
         case 3:
-          return _attachmentContainsFile && _attachments.isNotEmpty
+          return attachmentLimitCrossed
               ? streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(0.2)
-              : streamChatThemeData.colorTheme.textHighEmphasis
-                  .withOpacity(0.5);
+              : _attachmentContainsFile && _attachments.isNotEmpty
+                  ? streamChatThemeData.colorTheme.textHighEmphasis
+                      .withOpacity(0.2)
+                  : streamChatThemeData.colorTheme.textHighEmphasis
+                      .withOpacity(0.5);
         default:
           return Colors.black;
       }
@@ -1112,7 +1121,8 @@ class MessageInputState extends State<MessageInput> {
                   icon: StreamSvgIcon.camera(
                     color: _getIconColor(2),
                   ),
-                  onPressed: _attachmentContainsFile && _attachments.isNotEmpty
+                  onPressed: attachmentLimitCrossed ||
+                          (_attachmentContainsFile && _attachments.isNotEmpty)
                       ? null
                       : () {
                           pickFile(DefaultAttachmentTypes.image, camera: true);
@@ -1123,7 +1133,8 @@ class MessageInputState extends State<MessageInput> {
                   icon: StreamSvgIcon.record(
                     color: _getIconColor(3),
                   ),
-                  onPressed: _attachmentContainsFile && _attachments.isNotEmpty
+                  onPressed: attachmentLimitCrossed ||
+                          (_attachmentContainsFile && _attachments.isNotEmpty)
                       ? null
                       : () {
                           pickFile(DefaultAttachmentTypes.video, camera: true);
