@@ -309,6 +309,8 @@ abstract class Translations {
   /// The label for "Reply to message"
   String get replyToMessageLabel;
 
+  /// Label for "Attachment limit exceeded:
+  /// it's not possible to add more than $limit attachments"
   String attachmentLimitExceedError(int limit);
 }
 
