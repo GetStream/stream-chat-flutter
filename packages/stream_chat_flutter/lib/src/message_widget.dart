@@ -1048,7 +1048,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 messageWidget: widget.copyWith(
                   key: const Key('MessageWidget'),
                   message: widget.message.copyWith(
-                    text: widget.message.text!.length > 200
+                    text: (widget.message.text?.length ?? 0) > 200
                         ? '${widget.message.text!.substring(0, 200)}...'
                         : widget.message.text,
                   ),
@@ -1111,7 +1111,7 @@ class _MessageWidgetState extends State<MessageWidget>
           messageWidget: widget.copyWith(
             key: const Key('MessageWidget'),
             message: widget.message.copyWith(
-              text: widget.message.text!.length > 200
+              text: (widget.message.text?.length ?? 0) > 200
                   ? '${widget.message.text!.substring(0, 200)}...'
                   : widget.message.text,
             ),
@@ -1258,7 +1258,7 @@ class _MessageWidgetState extends State<MessageWidget>
       );
 
   Widget _buildTextBubble() {
-    if (widget.message.text!.trim().isEmpty) return const Offstage();
+    if (widget.message.text?.trim().isEmpty ?? false) return const Offstage();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

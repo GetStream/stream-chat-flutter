@@ -52,6 +52,7 @@ breakdown:
   camera is null.
 - Fixed date dividers position/alignment in non reversed `MessageListView`.
 - Fixed `MessageListView` not opening to the right initialMessage if `StreamChannel.initialMessageId` is set.
+- Fixed null check errors when accessing `message.text` in `MessageWidget` and `MessageListView`; this occurred when sending a message with no text.
 
 ## 2.1.2
 
