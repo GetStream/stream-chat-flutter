@@ -100,6 +100,9 @@ abstract class Translations {
   /// The label for write a message in [MessageInput]
   String get writeAMessageLabel;
 
+  /// The label for slow mode enabled in [MessageInput]
+  String get slowModeOnLabel;
+
   /// The label for instant commands in [MessageInput]
   String get instantCommandsLabel;
 
@@ -667,4 +670,7 @@ class DefaultTranslations implements Translations {
 
   @override
   String get replyToMessageLabel => 'Reply to Message';
+
+  @override
+  String get slowModeOnLabel => 'Slow mode ON';
 }

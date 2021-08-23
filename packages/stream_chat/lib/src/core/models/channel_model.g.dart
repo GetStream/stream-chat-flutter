@@ -33,6 +33,7 @@ ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) {
     memberCount: json['member_count'] as int? ?? 0,
     extraData: json['extra_data'] as Map<String, dynamic>? ?? {},
     team: json['team'] as String?,
+    cooldown: json['cooldown'] as int? ?? 0,
   );
 }
 
@@ -57,6 +58,7 @@ Map<String, dynamic> _$ChannelModelToJson(ChannelModel instance) {
   writeNotNull('updated_at', readonly(instance.updatedAt));
   writeNotNull('deleted_at', readonly(instance.deletedAt));
   writeNotNull('member_count', readonly(instance.memberCount));
+  val['cooldown'] = instance.cooldown;
   val['extra_data'] = instance.extraData;
   writeNotNull('team', readonly(instance.team));
   return val;

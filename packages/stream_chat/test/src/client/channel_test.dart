@@ -1859,6 +1859,50 @@ void main() {
       ).called(1);
     });
 
+    test('`.enableSlowMode`', () async {
+      const cooldown = 10;
+
+      final channelModel = ChannelModel(
+        cid: channelCid,
+        cooldown: cooldown,
+      );
+
+      when(() => client.enableSlowdown(
+            channelId,
+            channelType,
+            cooldown,
+          )).thenAnswer((_) async => PartialUpdateChannelResponse()
+        ..channel = channelModel);
+
+      final res = await channel.enableSlowMode(cooldownInterval: 10);
+
+      expect(res, isNotNull);
+
+      verify(() => client.enableSlowdown(
+            channelId,
+            channelType,
+            cooldown,
+          )).called(1);
+    });
+
+    test('`.disableSlowMode`', () async {
+      final channelModel = ChannelModel(
+        cid: channelCid,
+      );
+
+      when(() => client.disableSlowdown(
+            channelId,
+            channelType,
+          )).thenAnswer((_) async => PartialUpdateChannelResponse()
+        ..channel = channelModel);
+
+      final res = await channel.disableSlowMode();
+
+      expect(res, isNotNull);
+
+      verify(() => client.disableSlowdown(channelId, channelType)).called(1);
+    });
+
     test('`.banUser`', () async {
       const userId = 'test-user-id';
       const options = {'key': 'value'};

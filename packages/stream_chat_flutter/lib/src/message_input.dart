@@ -315,9 +315,15 @@ class MessageInputState extends State<MessageInput> {
 
   bool get _hasQuotedMessage => widget.quotedMessage != null;
 
+  late DateTime? _cooldownStartedAt;
+  int? _timeOut;
+
+  Timer? _slowModeTimer;
+
   @override
   void initState() {
     super.initState();
+    _startSlowMode();
     _focusNode = widget.focusNode ?? FocusNode();
     _emojiNames =
         Emoji.all().where((it) => it.name != null).map((e) => e.name!);
@@ -346,6 +352,25 @@ class MessageInputState extends State<MessageInput> {
         _openFilePickerSection = false;
       }
     });
+  }
+
+  void _startSlowMode() {
+    final channel = StreamChannel.of(context).channel;
+    if (channel.cooldownStartedAt != null) {
+      _cooldownStartedAt = channel.cooldownStartedAt;
+      if (DateTime.now().difference(_cooldownStartedAt!).inSeconds <
+          channel.cooldown!) {
+        _timeOut = channel.cooldown! -
+            DateTime.now().difference(_cooldownStartedAt!).inSeconds;
+        _slowModeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          if (_timeOut == 0) {
+            timer.cancel();
+          } else {
+            setState(() => _timeOut = _timeOut! - 1);
+          }
+        });
+      }
+    }
   }
 
   @override
@@ -496,20 +521,25 @@ class MessageInputState extends State<MessageInput> {
       );
 
   Widget _animateSendButton(BuildContext context) {
-    final sendButton = widget.activeSendButton != null
-        ? InkWell(
-            onTap: sendMessage,
-            child: widget.activeSendButton,
-          )
-        : _buildSendButton(context);
-    return AnimatedCrossFade(
-      crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
-          ? CrossFadeState.showFirst
-          : CrossFadeState.showSecond,
-      firstChild: sendButton,
-      secondChild: widget.idleSendButton ?? _buildIdleSendButton(context),
-      duration: _messageInputTheme.sendAnimationDuration!,
-      alignment: Alignment.center,
+    late Widget sendButton;
+    if (_timeOut != null && _timeOut! > 0) {
+      sendButton = _CountdownButton(
+        count: _timeOut!,
+      );
+    } else if (!_messageIsPresent && _attachments.isEmpty) {
+      sendButton = widget.idleSendButton ?? _buildIdleSendButton(context);
+    } else {
+      sendButton = widget.activeSendButton != null
+          ? InkWell(
+              onTap: sendMessage,
+              child: widget.activeSendButton,
+            )
+          : _buildSendButton(context);
+    }
+
+    return AnimatedSwitcher(
+      duration: _streamChatTheme.messageInputTheme.sendAnimationDuration!,
+      child: sendButton,
     );
   }
 
@@ -781,6 +811,10 @@ class MessageInputState extends State<MessageInput> {
     if (_attachments.isNotEmpty) {
       return context.translations.addACommentOrSendLabel;
     }
+    if (_timeOut != 0 && _timeOut != null) {
+      return context.translations.slowModeOnLabel;
+    }
+
     return context.translations.writeAMessageLabel;
   }
 
@@ -2115,6 +2149,7 @@ class MessageInputState extends State<MessageInput> {
       if (resp.message?.type == 'error') {
         _parseExistingMessage(message);
       }
+      _startSlowMode();
       widget.onMessageSent?.call(resp.message);
     } catch (e, stk) {
       if (widget.onError != null) {
@@ -2207,6 +2242,7 @@ class MessageInputState extends State<MessageInput> {
     _emojiOverlay?.remove();
     _mentionsOverlay?.remove();
     _keyboardListener?.cancel();
+    _slowModeTimer?.cancel();
     super.dispose();
   }
 
@@ -2379,4 +2415,31 @@ class _PickerWidgetState extends State<_PickerWidget> {
           );
         });
   }
+}
+
+class _CountdownButton extends StatelessWidget {
+  const _CountdownButton({
+    Key? key,
+    required this.count,
+  }) : super(key: key);
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(8),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: StreamChatTheme.of(context).colorTheme.disabled,
+            shape: BoxShape.circle,
+          ),
+          child: SizedBox(
+            height: 24,
+            width: 24,
+            child: Center(
+              child: Text('$count'),
+            ),
+          ),
+        ),
+      );
 }

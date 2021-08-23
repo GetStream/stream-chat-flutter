@@ -25,6 +25,8 @@ typedef ActionButtonBuilder = Widget Function(
 > **_NOTE:_** The last parameter is the default `ActionButton`
 You can call `.copyWith` to customize just a subset of properties.
 
+- Added slow mode which allows a cooldown period after a user sends a message.
+
 🔄 Changed
 
 Theming has been upgraded! Most theme classes now have `InheritedTheme` classes associated with

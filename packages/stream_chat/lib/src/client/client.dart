@@ -1252,6 +1252,28 @@ class StreamChatClient {
         language,
       );
 
+  /// Enables slow mode
+  Future<PartialUpdateChannelResponse> enableSlowdown(
+    String channelId,
+    String channelType,
+    int cooldown,
+  ) async =>
+      _chatApi.channel.enableSlowdown(
+        channelId,
+        channelType,
+        cooldown,
+      );
+
+  /// Disables slow mode
+  Future<PartialUpdateChannelResponse> disableSlowdown(
+    String channelId,
+    String channelType,
+  ) async =>
+      _chatApi.channel.disableSlowdown(
+        channelId,
+        channelType,
+      );
+
   /// Pins provided message
   /// [timeoutOrExpirationDate] can either be a [DateTime] or a value in seconds
   /// to be added to [DateTime.now]

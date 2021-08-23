@@ -360,4 +360,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
 
   @override
   String get replyToMessageLabel => 'Rispondi al messaggio';
+
+  @override
+  String get slowModeOnLabel => 'Slowmode attiva';
 }

@@ -201,6 +201,21 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.frozen == true);
   }
 
+  /// Cooldown count
+  int? get cooldown {
+    _checkInitialized();
+    return state?._channelState.channel?.cooldown;
+  }
+
+  /// Cooldown count as a stream
+  Stream<int?>? get cooldownStream {
+    _checkInitialized();
+    return state?.channelStateStream.map((cs) => cs.channel?.cooldown);
+  }
+
+  /// Stores time at which cooldown was started
+  DateTime? cooldownStartedAt;
+
   /// Channel creation date.
   DateTime? get createdAt {
     _checkInitialized();
@@ -525,6 +540,9 @@ class Channel {
         skipPush: skipPush,
       );
       state!.addMessage(response.message);
+      if (cooldown! > 0) {
+        cooldownStartedAt = DateTime.now();
+      }
       return response;
     } catch (e) {
       if (e is StreamChatNetworkError && e.isRetriable) {
@@ -978,6 +996,20 @@ class Channel {
   }) async {
     _checkInitialized();
     return _client.updateChannelPartial(id!, type, set: set, unset: unset);
+  }
+
+  /// Enable slow mode
+  Future<PartialUpdateChannelResponse> enableSlowMode({
+    required int cooldownInterval,
+  }) async {
+    _checkInitialized();
+    return _client.enableSlowdown(id!, type, cooldownInterval);
+  }
+
+  /// Disable slow mode
+  Future<PartialUpdateChannelResponse> disableSlowMode() async {
+    _checkInitialized();
+    return _client.disableSlowdown(id!, type);
   }
 
   /// Delete this channel. Messages are permanently removed.

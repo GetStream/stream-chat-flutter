@@ -344,4 +344,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get replyToMessageLabel => '메시지에 회신합니다.';
+
+  @override
+  String get slowModeOnLabel => '슬로모드 켜짐';
 }
