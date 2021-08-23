@@ -1163,28 +1163,29 @@ class MessageInputState extends State<MessageInput> {
                 ),
               ),
             ),
-            Expanded(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: _streamChatTheme.colorTheme.barsBg,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: _PickerWidget(
-                  filePickerIndex: _filePickerIndex,
-                  streamChatTheme: _streamChatTheme,
-                  containsFile: _attachmentContainsFile,
-                  selectedMedias: _attachments.keys.toList(),
-                  onAddMoreFilesClick: pickFile,
-                  onMediaSelected: (media) {
-                    if (_attachments.containsKey(media.id)) {
-                      setState(() => _attachments.remove(media.id));
-                    } else {
-                      _addAssetAttachment(media);
-                    }
-                  },
+            if (_openFilePickerSection)
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: _streamChatTheme.colorTheme.barsBg,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: _PickerWidget(
+                    filePickerIndex: _filePickerIndex,
+                    streamChatTheme: _streamChatTheme,
+                    containsFile: _attachmentContainsFile,
+                    selectedMedias: _attachments.keys.toList(),
+                    onAddMoreFilesClick: pickFile,
+                    onMediaSelected: (media) {
+                      if (_attachments.containsKey(media.id)) {
+                        setState(() => _attachments.remove(media.id));
+                      } else {
+                        _addAssetAttachment(media);
+                      }
+                    },
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
