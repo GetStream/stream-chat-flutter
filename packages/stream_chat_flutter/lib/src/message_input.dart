@@ -1875,24 +1875,6 @@ class MessageInputState extends State<MessageInput> {
                 Navigator.pop(context);
               },
             ),
-            if (!kIsWeb)
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: Text(context.translations.photoFromCameraLabel),
-                onTap: () {
-                  pickFile(DefaultAttachmentTypes.image, camera: true);
-                  Navigator.pop(context);
-                },
-              ),
-            if (!kIsWeb)
-              ListTile(
-                leading: const Icon(Icons.videocam),
-                title: Text(context.translations.videoFromCameraLabel),
-                onTap: () {
-                  pickFile(DefaultAttachmentTypes.video, camera: true);
-                  Navigator.pop(context);
-                },
-              ),
             ListTile(
               leading: const Icon(Icons.insert_drive_file),
               title: Text(context.translations.uploadAFileLabel),
