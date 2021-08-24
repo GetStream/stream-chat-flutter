@@ -676,9 +676,9 @@ class DefaultTranslations implements Translations {
   String get replyToMessageLabel => 'Reply to Message';
 
   @override
-  String attachmentLimitExceedError(int limit) =>
-      'Attachment limit exceeded, limit: $limit';
+  String get slowModeOnLabel => 'Slow mode ON';
 
   @override
-  String get slowModeOnLabel => 'Slow mode ON';
+  String attachmentLimitExceedError(int limit) => """
+Attachment limit exceeded: it's not possible to add more than $limit attachments""";
 }

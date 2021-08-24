@@ -360,10 +360,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get replyToMessageLabel => 'संदेश का जवाब';
 
   @override
-  String attachmentLimitExceedError(int limit) {
-    // TODO: implement attachmentLimitExceedError
-    throw UnimplementedError();
-  }
+  String attachmentLimitExceedError(int limit) => '''
+अटैचमेंट लिमिट: $limit अटैचमेंट से अधिक जोड़ना संभव नहीं है
+  ''';
 
   @override
   String get slowModeOnLabel => 'स्लो मोड चालू';

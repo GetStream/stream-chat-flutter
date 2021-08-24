@@ -349,8 +349,6 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => '슬로모드 켜짐';
 
   @override
-  String attachmentLimitExceedError(int limit) {
-    // TODO: implement attachmentLimitExceedError
-    throw UnimplementedError();
-  }
+  String attachmentLimitExceedError(int limit) =>
+      '첨부 파일 제한 초과: $limit 이상의 첨부 파일을 추가할 수 없습니다';
 }
