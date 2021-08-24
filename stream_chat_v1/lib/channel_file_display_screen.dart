@@ -1,3 +1,4 @@
+import 'package:example/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -56,7 +57,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          'Files',
+          AppLocalizations.of(context).files,
           style: TextStyle(
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
               fontSize: 16.0),
@@ -107,7 +108,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                 ),
                 SizedBox(height: 16.0),
                 Text(
-                  'No Files',
+                  AppLocalizations.of(context).noFiles,
                   style: TextStyle(
                     fontSize: 14.0,
                     color:
@@ -116,7 +117,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                 ),
                 SizedBox(height: 8.0),
                 Text(
-                  'Files sent in this chat will appear here',
+                  AppLocalizations.of(context).filesAppearHere,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14.0,

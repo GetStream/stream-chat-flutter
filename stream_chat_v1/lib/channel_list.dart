@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:example/localizations.dart';
 import 'package:example/routes/routes.dart';
 import 'package:example/search_text_field.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +68,7 @@ class _ChannelList extends State<ChannelList> {
             child: SearchTextField(
               controller: _controller,
               showCloseButton: _isSearchActive,
+              hintText: AppLocalizations.of(context).search,
             ),
           ),
         ],
@@ -109,7 +111,7 @@ class _ChannelList extends State<ChannelList> {
                                         ),
                                       ),
                                       Text(
-                                        'No results...',
+                                        AppLocalizations.of(context).noResults,
                                       ),
                                     ],
                                   ),

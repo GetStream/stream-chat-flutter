@@ -1,3 +1,4 @@
+import 'package:example/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
@@ -26,7 +27,7 @@ class StreamVersion extends StatelessWidget {
               yaml['packages']['stream_chat_flutter']['version'];
 
           return Text(
-            'Stream SDK v $streamChatDep',
+            '${AppLocalizations.of(context).streamSDK} v $streamChatDep',
             style: TextStyle(
               fontSize: 14,
               color: StreamChatTheme.of(context).colorTheme.disabled,

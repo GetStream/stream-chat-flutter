@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:example/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -57,7 +58,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
         backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
         leading: const StreamBackButton(),
         title: Text(
-          'Add Group Members',
+          AppLocalizations.of(context).addGroupMembers,
           style: TextStyle(
             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
             fontSize: 16,
@@ -94,14 +95,14 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 
           switch (status) {
             case ConnectionStatus.connected:
-              statusString = 'Connected';
+              statusString = AppLocalizations.of(context).connected;
               showStatus = false;
               break;
             case ConnectionStatus.connecting:
-              statusString = 'Reconnecting...';
+              statusString = AppLocalizations.of(context).reconnecting;
               break;
             case ConnectionStatus.disconnected:
-              statusString = 'Disconnected';
+              statusString = AppLocalizations.of(context).disconnected;
               break;
           }
           return InfoTile(
@@ -117,6 +118,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                   SliverToBoxAdapter(
                     child: SearchTextField(
                       controller: _controller,
+                      hintText: AppLocalizations.of(context).search,
                     ),
                   ),
                   if (_selectedUsers.isNotEmpty)
@@ -209,8 +211,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                           ),
                           child: Text(
                             _isSearchActive
-                                ? 'Matches for \"$_userNameQuery\"'
-                                : 'On the platform',
+                                ? '${AppLocalizations.of(context).matchesFor} \"$_userNameQuery\"'
+                                : AppLocalizations.of(context).onThePlatorm,
                             style: TextStyle(
                               color: StreamChatTheme.of(context)
                                   .colorTheme
@@ -248,7 +250,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                     filter: Filter.and([
                       if (_userNameQuery.isNotEmpty)
                         Filter.autoComplete('name', _userNameQuery),
-                      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+                      Filter.notEqual(
+                          'id', StreamChat.of(context).currentUser!.id),
                     ]),
                     sort: [
                       SortOption(
@@ -278,7 +281,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                       ),
                                     ),
                                     Text(
-                                      'No user matches these keywords...',
+                                      AppLocalizations.of(context)
+                                          .noUserMatchesTheseKeywords,
                                       style: StreamChatTheme.of(context)
                                           .textTheme
                                           .footnote

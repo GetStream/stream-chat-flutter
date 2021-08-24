@@ -1,3 +1,4 @@
+import 'package:example/localizations.dart';
 import 'package:example/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -45,7 +46,7 @@ class UserMentionsPage extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'No mentions exist yet...',
+                          AppLocalizations.of(context).noMentionsExistYet,
                           style: StreamChatTheme.of(context)
                               .textTheme
                               .body

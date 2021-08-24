@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:example/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -124,7 +125,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
         backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
         leading: const StreamBackButton(),
         title: Text(
-          'New Chat',
+          AppLocalizations.of(context).newChat,
           style: StreamChatTheme.of(context).textTheme.headlineBold.copyWith(
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis),
         ),
@@ -137,14 +138,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
           switch (status) {
             case ConnectionStatus.connected:
-              statusString = 'Connected';
+              statusString = AppLocalizations.of(context).connected;
               showStatus = false;
               break;
             case ConnectionStatus.connecting:
-              statusString = 'Reconnecting...';
+              statusString = AppLocalizations.of(context).reconnecting;
               break;
             case ConnectionStatus.disconnected:
-              statusString = 'Disconnected';
+              statusString = AppLocalizations.of(context).disconnected;
               break;
           }
           return InfoTile(
@@ -162,6 +163,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     key: _chipInputTextFieldStateKey,
                     controller: _controller,
                     focusNode: _searchFocusNode,
+                    hint: AppLocalizations.of(context).typeANameHint,
                     chipBuilder: (context, user) {
                       return GestureDetector(
                         onTap: () {
@@ -245,7 +247,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                               ),
                               SizedBox(width: 8),
                               Text(
-                                'Create a Group',
+                                AppLocalizations.of(context).createAGroup,
                                 style: StreamChatTheme.of(context)
                                     .textTheme
                                     .bodyBold,
@@ -269,8 +271,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         ),
                         child: Text(
                             _isSearchActive
-                                ? "Matches for \"$_userNameQuery\""
-                                : 'On the platform',
+                                ? '${AppLocalizations.of(context).matchesFor} "$_userNameQuery"'
+                                : AppLocalizations.of(context).onThePlatorm,
                             style: StreamChatTheme.of(context)
                                 .textTheme
                                 .footnote
@@ -307,8 +309,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                 filter: Filter.and([
                                   if (_userNameQuery.isNotEmpty)
                                     Filter.autoComplete('name', _userNameQuery),
-                                  Filter.notEqual(
-                                      'id', StreamChat.of(context).currentUser!.id),
+                                  Filter.notEqual('id',
+                                      StreamChat.of(context).currentUser!.id),
                                 ]),
                                 sort: [
                                   SortOption(
@@ -339,7 +341,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                                   ),
                                                 ),
                                                 Text(
-                                                  'No user matches these keywords...',
+                                                  AppLocalizations.of(context)
+                                                      .noUserMatchesTheseKeywords,
                                                   style: StreamChatTheme.of(
                                                           context)
                                                       .textTheme
@@ -371,7 +374,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
                               return Center(
                                 child: Text(
-                                  'No chats here yet...',
+                                  AppLocalizations.of(context).noChatsHereYet,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: StreamChatTheme.of(context)
