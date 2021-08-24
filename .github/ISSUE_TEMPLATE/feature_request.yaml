@@ -1,0 +1,66 @@
+name: Feature Request
+description: Suggest an idea for this project
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to help us improve!
+  - type: dropdown
+    id: packages
+    attributes:
+      label: Please select which package this feature is related to.
+      description: You may select more than one.
+      multiple: true
+      options:
+        - stream_chat
+        - stream_chat_flutter
+        - stream_chat_flutter_core
+        - stream_chat_persistance
+        - stream_chat_localizations
+    validations:
+      required: true
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Which platforms would this feature impact?
+      description: You may select more than one.
+      multiple: true
+      options:
+        - iOS
+        - Android
+        - Web
+        - Windows
+        - MacOS
+        - Linux
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear description of what the problem is.
+      placeholder: "Example: I'm always frustrated when [...]"
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Describe the solution that you'd like."
+      description: A clear description of what you want to happen.
+      placeholder: "Example: When clicking this I want that."
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Describe alternatives that you have considered"
+      description: "A clear description of any alternative solutions or features you've considered."
+      placeholder: "Example: Instead of this it should do that."
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Additional context"
+      description: "Add any other context or screenshots about the feature request here."
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/GetStream/stream-chat-flutter/blob/develop/CODE_OF_CONDUCT.md)
+      options:
+        - label: "I agree to follow this project's Code of Conduct"
+          required: true
