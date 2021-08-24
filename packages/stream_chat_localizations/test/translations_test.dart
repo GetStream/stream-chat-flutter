@@ -177,6 +177,7 @@ void main() {
       expect(localizations.galleryPaginationText, isNotNull);
       expect(localizations.fileText, isNotNull);
       expect(localizations.replyToMessageLabel, isNotNull);
+      expect(localizations.attachmentLimitExceedError(3), isNotNull);
     });
   }
 

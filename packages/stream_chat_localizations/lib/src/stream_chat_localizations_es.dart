@@ -366,5 +366,10 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get replyToMessageLabel => 'Responder al Mensaje';
 
   @override
+  String attachmentLimitExceedError(int limit) => '''
+No es posible añadir más de $limit archivos adjuntos
+  ''';
+
+  @override
   String get slowModeOnLabel => 'Modo lento activado';
 }

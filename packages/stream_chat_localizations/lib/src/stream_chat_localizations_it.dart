@@ -362,5 +362,10 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get replyToMessageLabel => 'Rispondi al messaggio';
 
   @override
+  String attachmentLimitExceedError(int limit) => '''
+Attenzione: il limite massimo di $limit file è stato superato.
+  ''';
+
+  @override
   String get slowModeOnLabel => 'Slowmode attiva';
 }

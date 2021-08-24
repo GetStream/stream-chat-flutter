@@ -365,5 +365,10 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get replyToMessageLabel => 'Répondre au Message';
 
   @override
+  String attachmentLimitExceedError(int limit) => '''
+Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $limit pièces jointes
+  ''';
+
+  @override
   String get slowModeOnLabel => 'Mode lent activé';
 }

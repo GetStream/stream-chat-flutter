@@ -6,14 +6,15 @@
   Added `StreamChatThemeData.placeholderUserImage` for building a widget when the `UserAvatar` image
   is loading
 - Added a `backgroundColor` property to the following widgets:
-    - `ChannelHeader`
-    - `ChannelListHeader`
-    - `GalleryHeader`
-    - `GalleryFooter`
-    - `ThreadHeader`
-
-- Added `MessageInput.attachmentButtonBuilder` and `MessageInput.commandButtonBuilder` for more
-  customizations.
+  - `ChannelHeader`
+  - `ChannelListHeader`
+  - `GalleryHeader`
+  - `GalleryFooter`
+  - `ThreadHeader`
+- Added `MessageInput.attachmentLimit` in order to limit the no. of attachments that can be sent with a single message.
+- Added `MessageInput.onAttachmentLimitExceed` callback which will be called when the `attachmentLimit` is exceeded.
+  This will override the default error alert behaviour.
+- Added `MessageInput.attachmentButtonBuilder` and `MessageInput.commandButtonBuilder` for more customizations.
 
 ```dart
 typedef ActionButtonBuilder = Widget Function(

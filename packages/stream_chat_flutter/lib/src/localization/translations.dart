@@ -308,6 +308,10 @@ abstract class Translations {
 
   /// The label for "Reply to message"
   String get replyToMessageLabel;
+
+  /// Label for "Attachment limit exceeded:
+  /// it's not possible to add more than $limit attachments"
+  String attachmentLimitExceedError(int limit);
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -673,4 +677,8 @@ class DefaultTranslations implements Translations {
 
   @override
   String get slowModeOnLabel => 'Slow mode ON';
+
+  @override
+  String attachmentLimitExceedError(int limit) => """
+Attachment limit exceeded: it's not possible to add more than $limit attachments""";
 }
