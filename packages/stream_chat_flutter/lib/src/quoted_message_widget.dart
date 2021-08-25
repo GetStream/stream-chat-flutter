@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:video_player/video_player.dart';
@@ -73,7 +74,7 @@ class QuotedMessageWidget extends StatelessWidget {
   final Message message;
 
   /// The message theme
-  final MessageTheme messageTheme;
+  final MessageThemeData messageTheme;
 
   /// If true the widget will be mirrored
   final bool reverse;
@@ -138,11 +139,11 @@ class QuotedMessageWidget extends StatelessWidget {
             message: msg,
             messageTheme: isOnlyEmoji && _containsText
                 ? messageTheme.copyWith(
-                    messageText: messageTheme.messageText?.copyWith(
+                    messageTextStyle: messageTheme.messageTextStyle?.copyWith(
                     fontSize: 32,
                   ))
                 : messageTheme.copyWith(
-                    messageText: messageTheme.messageText?.copyWith(
+                    messageTextStyle: messageTheme.messageTextStyle?.copyWith(
                     fontSize: 12,
                   )),
           ),

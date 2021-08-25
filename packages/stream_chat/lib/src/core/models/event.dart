@@ -184,6 +184,8 @@ class EventChannel extends ChannelModel {
     DateTime? deletedAt,
     required int memberCount,
     Map<String, Object?>? extraData,
+    required int cooldown,
+    String? team,
   }) : super(
           id: id,
           type: type,
@@ -197,6 +199,8 @@ class EventChannel extends ChannelModel {
           deletedAt: deletedAt,
           memberCount: memberCount,
           extraData: extraData ?? {},
+          cooldown: cooldown,
+          team: team,
         );
 
   /// Create a new instance from a json

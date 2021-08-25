@@ -84,7 +84,7 @@ class ChannelApi {
 
   /// Mark all channels for this user as read
   Future<EmptyResponse> markAllRead() async {
-    final response = await _client.post('channels/read');
+    final response = await _client.post('/channels/read');
     return EmptyResponse.fromJson(response.data);
   }
 
@@ -121,6 +121,35 @@ class ChannelApi {
       },
     );
     return PartialUpdateChannelResponse.fromJson(response.data);
+  }
+
+  /// Enable slowdown
+  Future<PartialUpdateChannelResponse> enableSlowdown(
+    String channelId,
+    String channelType,
+    int cooldown,
+  ) async {
+    final response = await updateChannelPartial(
+      channelId,
+      channelType,
+      set: {
+        'cooldown': cooldown,
+      },
+    );
+    return response;
+  }
+
+  /// Disable slowdown
+  Future<PartialUpdateChannelResponse> disableSlowdown(
+    String channelId,
+    String channelType,
+  ) async {
+    final response = await updateChannelPartial(
+      channelId,
+      channelType,
+      unset: ['cooldown'],
+    );
+    return response;
   }
 
   /// Accept invitation to the channel

@@ -70,6 +70,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.onTitleTap,
     this.showTypingIndicator = true,
+    this.backgroundColor,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -102,9 +103,12 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// if a user is typing in this thread
   final bool showTypingIndicator;
 
+  /// The background color of this [ThreadHeader].
+  final Color? backgroundColor;
+
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final channelHeaderTheme = ChannelHeaderTheme.of(context);
 
     final defaultSubtitle = subtitle ??
         Row(
@@ -113,12 +117,11 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
           children: [
             Text(
               '${context.translations.withText} ',
-              style: chatThemeData.channelTheme.channelHeaderTheme.subtitle,
+              style: channelHeaderTheme.subtitleStyle,
             ),
             Flexible(
               child: ChannelName(
-                textStyle:
-                    chatThemeData.channelTheme.channelHeaderTheme.subtitle,
+                textStyle: channelHeaderTheme.subtitleStyle,
               ),
             ),
           ],
@@ -137,7 +140,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                   showUnreads: true,
                 )
               : const SizedBox()),
-      backgroundColor: chatThemeData.channelTheme.channelHeaderTheme.color,
+      backgroundColor: backgroundColor ?? channelHeaderTheme.color,
       centerTitle: true,
       actions: actions,
       title: InkWell(
@@ -151,14 +154,14 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
               title ??
                   Text(
                     context.translations.threadReplyLabel,
-                    style: chatThemeData.channelTheme.channelHeaderTheme.title,
+                    style: channelHeaderTheme.titleStyle,
                   ),
               const SizedBox(height: 2),
               if (showTypingIndicator)
                 TypingIndicator(
                   alignment: Alignment.center,
                   channel: StreamChannel.of(context).channel,
-                  style: chatThemeData.channelTheme.channelHeaderTheme.subtitle,
+                  style: channelHeaderTheme.subtitleStyle,
                   parentId: parent.id,
                   alternativeWidget: defaultSubtitle,
                 )

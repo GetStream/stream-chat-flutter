@@ -1,3 +1,16 @@
+## 2.2.0
+
+🐞 Fixed
+
+- Fixed `channel.markAllRead` throwing failed host lookup.
+
+✅ Added
+
+- `User` and `OwnUser` classes now have an `image` property. Setting an image will also set the 'image' key on `extraData`, so `user.image` and `user.extraData['image']` is the same.
+- `User` and `OwnUser` classes now have a `name` property. Setting a name will also set the 'name' key on `extraData`, so `user.name` and `user.extraData['name']` is the same.
+- `Channel` class now has extra `image` getter and setter. As well as an `updateImage` to do a partial update after a channel has been initialized.
+- `Channel` class now has extra `name` getter and setter. As well as an `updateName` to do a partial update after a channel has been initialized.
+- Added slow mode which allows a cooldown period after a user sends a message.
 ## 2.1.1
 
 🐞 Fixed

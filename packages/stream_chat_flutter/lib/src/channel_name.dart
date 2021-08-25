@@ -27,40 +27,46 @@ class ChannelName extends StatelessWidget {
     final client = StreamChat.of(context);
     final channel = StreamChannel.of(context).channel;
 
-    return BetterStreamBuilder<Map<String, Object?>>(
-      stream: channel.extraDataStream,
-      initialData: channel.extraData,
-      builder: (context, data) => _buildName(
-        data,
-        channel.state?.members,
-        client,
+    assert(channel.state != null, 'Channel ${channel.id} is not initialized');
+
+    return BetterStreamBuilder<String>(
+      stream: channel.nameStream,
+      initialData: channel.name,
+      builder: (context, channelName) => Text(
+        channelName,
+        style: textStyle,
+        overflow: textOverflow,
+      ),
+      noDataBuilder: (context) => _generateName(
+        client.currentUser!,
+        channel.state!.members,
       ),
     );
   }
 
-  Widget _buildName(
-    Map<String, dynamic> extraData,
-    List<Member>? members,
-    StreamChatState client,
+  Widget _generateName(
+    User currentUser,
+    List<Member> members,
   ) =>
       LayoutBuilder(
         builder: (context, constraints) {
-          var title = context.translations.noTitleText;
-          if (extraData['name'] != null) {
-            title = extraData['name'];
-          } else {
-            final otherMembers = members
-                ?.where((member) => member.userId != client.currentUser!.id);
-            if (otherMembers?.length == 1) {
-              if (otherMembers!.first.user != null) {
-                title = otherMembers.first.user!.name;
+          var channelName = context.translations.noTitleText;
+          final otherMembers = members.where(
+            (member) => member.userId != currentUser.id,
+          );
+
+          if (otherMembers.isNotEmpty) {
+            if (otherMembers.length == 1) {
+              final user = otherMembers.first.user;
+              if (user != null) {
+                channelName = user.name;
               }
-            } else if (otherMembers?.isNotEmpty == true) {
+            } else {
               final maxWidth = constraints.maxWidth;
               final maxChars = maxWidth / (textStyle?.fontSize ?? 1);
               var currentChars = 0;
               final currentMembers = <Member>[];
-              otherMembers!.forEach((element) {
+              otherMembers.forEach((element) {
                 final newLength =
                     currentChars + (element.user?.name.length ?? 0);
                 if (newLength < maxChars) {
@@ -71,13 +77,14 @@ class ChannelName extends StatelessWidget {
 
               final exceedingMembers =
                   otherMembers.length - currentMembers.length;
-              title = '${currentMembers.map((e) => e.user?.name).join(', ')} '
+              channelName =
+                  '${currentMembers.map((e) => e.user?.name).join(', ')} '
                   '${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
             }
           }
 
           return Text(
-            title,
+            channelName,
             style: textStyle,
             overflow: textOverflow,
           );

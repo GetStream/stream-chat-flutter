@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_title.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_upload_state_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
+import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -27,8 +28,8 @@ class ImageAttachment extends AttachmentWidget {
           size: size,
         );
 
-  /// [MessageTheme] for showing image title
-  final MessageTheme messageTheme;
+  /// [MessageThemeData] for showing image title
+  final MessageThemeData messageTheme;
 
   /// Flag for showing title
   final bool showTitle;

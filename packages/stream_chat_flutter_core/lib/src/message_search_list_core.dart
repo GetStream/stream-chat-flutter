@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/better_stream_builder.dart';
 import 'package:stream_chat_flutter_core/src/message_search_bloc.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 
@@ -132,16 +133,11 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
   Widget build(BuildContext context) => _buildListView(_messageSearchBloc!);
 
   Widget _buildListView(MessageSearchBlocState messageSearchBloc) =>
-      StreamBuilder<List<GetMessageResponse>>(
+      BetterStreamBuilder<List<GetMessageResponse>>(
         stream: messageSearchBloc.messagesStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return widget.errorBuilder(context, snapshot.error!);
-          }
-          if (!snapshot.hasData) {
-            return widget.loadingBuilder(context);
-          }
-          final items = snapshot.data!;
+        errorBuilder: widget.errorBuilder,
+        noDataBuilder: widget.loadingBuilder,
+        builder: (context, items) {
           if (items.isEmpty) {
             return widget.emptyBuilder(context);
           }

@@ -14,6 +14,7 @@ import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
+import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/src/url_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -290,7 +291,7 @@ class MessageWidget extends StatefulWidget {
   final Message message;
 
   /// The message theme
-  final MessageTheme messageTheme;
+  final MessageThemeData messageTheme;
 
   /// If true the widget will be mirrored
   final bool reverse;
@@ -422,7 +423,7 @@ class MessageWidget extends StatefulWidget {
     Widget Function(BuildContext, Message)? deletedBottomRowBuilder,
     void Function(BuildContext, Message)? onMessageActions,
     Message? message,
-    MessageTheme? messageTheme,
+    MessageThemeData? messageTheme,
     bool? reverse,
     ShapeBorder? shape,
     ShapeBorder? attachmentShape,
@@ -893,14 +894,14 @@ class _MessageWidgetState extends State<MessageWidget>
           ),
         InkWell(
           onTap: widget.onThreadTap != null ? onThreadTap : null,
-          child: Text(msg, style: widget.messageTheme.replies),
+          child: Text(msg, style: widget.messageTheme.repliesStyle),
         ),
       ],
       if (showUsername) _buildUsername(usernameKey),
       if (showTimeStamp)
         Text(
           Jiffy(widget.message.createdAt.toLocal()).jm,
-          style: widget.messageTheme.createdAt,
+          style: widget.messageTheme.createdAtStyle,
         ),
       if (showSendingIndicator) _buildSendingIndicator(),
     ]);
@@ -917,7 +918,7 @@ class _MessageWidgetState extends State<MessageWidget>
           Container(
             margin: EdgeInsets.only(
               bottom: context.textScaleFactor *
-                  ((widget.messageTheme.replies?.fontSize ?? 1) / 2),
+                  ((widget.messageTheme.repliesStyle?.fontSize ?? 1) / 2),
             ),
             child: CustomPaint(
               size: const Size(16, 32) * context.textScaleFactor,
@@ -944,7 +945,7 @@ class _MessageWidgetState extends State<MessageWidget>
           Container(
             margin: EdgeInsets.only(
               bottom: context.textScaleFactor *
-                  ((widget.messageTheme.replies?.fontSize ?? 1) / 2),
+                  ((widget.messageTheme.repliesStyle?.fontSize ?? 1) / 2),
             ),
             child: CustomPaint(
               size: const Size(16, 32) * context.textScaleFactor,
@@ -967,7 +968,7 @@ class _MessageWidgetState extends State<MessageWidget>
       widget.message.user!.name,
       maxLines: 1,
       key: usernameKey,
-      style: widget.messageTheme.messageAuthor,
+      style: widget.messageTheme.messageAuthorStyle,
       overflow: TextOverflow.ellipsis,
     );
   }
@@ -1047,7 +1048,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 messageWidget: widget.copyWith(
                   key: const Key('MessageWidget'),
                   message: widget.message.copyWith(
-                    text: widget.message.text!.length > 200
+                    text: (widget.message.text?.length ?? 0) > 200
                         ? '${widget.message.text!.substring(0, 200)}...'
                         : widget.message.text,
                   ),
@@ -1110,7 +1111,7 @@ class _MessageWidgetState extends State<MessageWidget>
           messageWidget: widget.copyWith(
             key: const Key('MessageWidget'),
             message: widget.message.copyWith(
-              text: widget.message.text!.length > 200
+              text: (widget.message.text?.length ?? 0) > 200
                   ? '${widget.message.text!.substring(0, 200)}...'
                   : widget.message.text,
             ),
@@ -1191,7 +1192,7 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Widget _buildSendingIndicator() {
-    final style = widget.messageTheme.createdAt;
+    final style = widget.messageTheme.createdAtStyle;
     final message = widget.message;
 
     if (hasNonUrlAttachments &&
@@ -1257,7 +1258,7 @@ class _MessageWidgetState extends State<MessageWidget>
       );
 
   Widget _buildTextBubble() {
-    if (widget.message.text!.trim().isEmpty) return const Offstage();
+    if (widget.message.text?.trim().isEmpty ?? false) return const Offstage();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1271,8 +1272,8 @@ class _MessageWidgetState extends State<MessageWidget>
                   onMentionTap: widget.onMentionTap,
                   messageTheme: isOnlyEmoji
                       ? widget.messageTheme.copyWith(
-                          messageText:
-                              widget.messageTheme.messageText!.copyWith(
+                          messageTextStyle:
+                              widget.messageTheme.messageTextStyle!.copyWith(
                           fontSize: 42,
                         ))
                       : widget.messageTheme,

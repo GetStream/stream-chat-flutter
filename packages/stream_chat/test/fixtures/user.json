@@ -2,5 +2,16 @@
   "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
   "role": "test-role",
   "name": "John",
+  "image": "https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow",
+  "extraDataStringTest": "Extra data test",
+  "extraDataIntTest": 1,
+  "extraDataDoubleTest": 1.1,
+  "extraDataBoolTest": true,
+  "banned": true,
+  "online": true,
+  "teams": ["team-1", "team-2"],
+  "created_at": "2021-08-03 12:39:21.817646",
+  "updated_at": "2021-08-04 12:39:21.817646",
+  "last_active" : "2021-08-05 12:39:21.817646",
   "language": "en"
 }

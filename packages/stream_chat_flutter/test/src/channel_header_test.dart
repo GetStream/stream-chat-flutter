@@ -26,12 +26,11 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
-      when(() => channel.extraData).thenReturn({
-        'name': 'test',
-      });
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+      when(() => channel.name).thenReturn('test');
+      when(() => channel.imageStream)
+          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.connected));
@@ -91,12 +90,11 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
-      when(() => channel.extraData).thenReturn({
-        'name': 'test',
-      });
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+      when(() => channel.name).thenReturn('test');
+      when(() => channel.imageStream)
+          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
@@ -159,12 +157,11 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
-      when(() => channel.extraData).thenReturn({
-        'name': 'test',
-      });
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+      when(() => channel.name).thenReturn('test');
+      when(() => channel.imageStream)
+          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
@@ -305,12 +302,11 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
-      when(() => channel.extraData).thenReturn({
-        'name': 'test',
-      });
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+      when(() => channel.name).thenReturn('test');
+      when(() => channel.imageStream)
+          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
@@ -373,12 +369,11 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
-      when(() => channel.extraData).thenReturn({
-        'name': 'test',
-      });
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+      when(() => channel.name).thenReturn('test');
+      when(() => channel.imageStream)
+          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));

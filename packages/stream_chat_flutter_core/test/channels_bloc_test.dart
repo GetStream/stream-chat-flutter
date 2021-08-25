@@ -558,6 +558,7 @@ void main() {
             config: ChannelConfig(),
             createdAt: DateTime.now(),
             memberCount: 1,
+            cooldown: 0,
           ),
         );
 
