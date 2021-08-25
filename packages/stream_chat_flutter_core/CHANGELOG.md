@@ -1,4 +1,4 @@
-## Upcoming
+## 2.2.0
 
 🛑️ Breaking Changes from `2.1.1`
 - Renamed `BetterStreamBuilder.loadingBuilder` to `.noDataBuilder`
