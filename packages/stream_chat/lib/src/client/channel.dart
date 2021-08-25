@@ -202,15 +202,15 @@ class Channel {
   }
 
   /// Cooldown count
-  int? get cooldown {
+  int get cooldown {
     _checkInitialized();
-    return state?._channelState.channel?.cooldown;
+    return state!._channelState.channel?.cooldown ?? 0;
   }
 
   /// Cooldown count as a stream
-  Stream<int?>? get cooldownStream {
+  Stream<int> get cooldownStream {
     _checkInitialized();
-    return state?.channelStateStream.map((cs) => cs.channel?.cooldown);
+    return state!.channelStateStream.map((cs) => cs.channel?.cooldown ?? 0);
   }
 
   /// Stores time at which cooldown was started
@@ -540,9 +540,7 @@ class Channel {
         skipPush: skipPush,
       );
       state!.addMessage(response.message);
-      if (cooldown! > 0) {
-        cooldownStartedAt = DateTime.now();
-      }
+      if (cooldown > 0) cooldownStartedAt = DateTime.now();
       return response;
     } catch (e) {
       if (e is StreamChatNetworkError && e.isRetriable) {

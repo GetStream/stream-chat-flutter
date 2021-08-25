@@ -338,15 +338,10 @@ class MessageInputState extends State<MessageInput> {
   bool get _hasQuotedMessage => widget.quotedMessage != null;
 
   bool get _messageIsPresent => textEditingController.text.trim().isNotEmpty;
-  late DateTime? _cooldownStartedAt;
-  int? _timeOut;
-
-  Timer? _slowModeTimer;
 
   @override
   void initState() {
     super.initState();
-    _startSlowMode();
     _focusNode = widget.focusNode ?? FocusNode();
     _emojiNames =
         Emoji.all().where((it) => it.name != null).map((e) => e.name!);
@@ -377,24 +372,32 @@ class MessageInputState extends State<MessageInput> {
     });
   }
 
+  int _timeOut = 0;
+  Timer? _slowModeTimer;
+
   void _startSlowMode() {
     final channel = StreamChannel.of(context).channel;
-    if (channel.cooldownStartedAt != null) {
-      _cooldownStartedAt = channel.cooldownStartedAt;
-      if (DateTime.now().difference(_cooldownStartedAt!).inSeconds <
-          channel.cooldown!) {
-        _timeOut = channel.cooldown! -
-            DateTime.now().difference(_cooldownStartedAt!).inSeconds;
-        _slowModeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-          if (_timeOut == 0) {
-            timer.cancel();
-          } else {
-            setState(() => _timeOut = _timeOut! - 1);
-          }
-        });
+    final cooldownStartedAt = channel.cooldownStartedAt;
+    if (cooldownStartedAt != null) {
+      final diff = DateTime.now().difference(cooldownStartedAt).inSeconds;
+      if (diff < channel.cooldown) {
+        _timeOut = channel.cooldown - diff;
+        if (_timeOut > 0) {
+          _slowModeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+            if (_timeOut == 0) {
+              timer.cancel();
+            } else {
+              if (mounted) {
+                setState(() => _timeOut -= 1);
+              }
+            }
+          });
+        }
       }
     }
   }
+
+  void _stopSlowMode() => _slowModeTimer?.cancel();
 
   @override
   Widget build(BuildContext context) {
@@ -545,10 +548,8 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _animateSendButton(BuildContext context) {
     late Widget sendButton;
-    if (_timeOut != null && _timeOut! > 0) {
-      sendButton = _CountdownButton(
-        count: _timeOut!,
-      );
+    if (_timeOut > 0) {
+      sendButton = _CountdownButton(count: _timeOut);
     } else if (!_messageIsPresent && _attachments.isEmpty) {
       sendButton = widget.idleSendButton ?? _buildIdleSendButton(context);
     } else {
@@ -833,7 +834,7 @@ class MessageInputState extends State<MessageInput> {
     if (_attachments.isNotEmpty) {
       return context.translations.addACommentOrSendLabel;
     }
-    if (_timeOut != 0 && _timeOut != null) {
+    if (_timeOut != 0) {
       return context.translations.slowModeOnLabel;
     }
 
@@ -2249,7 +2250,8 @@ class MessageInputState extends State<MessageInput> {
     _emojiOverlay?.remove();
     _mentionsOverlay?.remove();
     _keyboardListener?.cancel();
-    _slowModeTimer?.cancel();
+    textEditingController.dispose();
+    _stopSlowMode();
     super.dispose();
   }
 
@@ -2259,6 +2261,8 @@ class MessageInputState extends State<MessageInput> {
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
     _messageInputTheme = MessageInputTheme.of(context);
+    if (widget.editMessage == null) _startSlowMode();
+
     if ((widget.editMessage != null || widget.initialMessage != null) &&
         !_initialized) {
       FocusScope.of(context).requestFocus(_focusNode);
