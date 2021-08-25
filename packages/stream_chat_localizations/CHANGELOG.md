@@ -5,7 +5,7 @@
 * Added support for [Spanish](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_es.dart) locale.
 * Added support for [Korean](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ko.dart) locale.
 * Added support for [Japanese](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ja.dart) locale.
-* Added strings for cooldown mode.
+* Added translations for cooldown mode.
 
 🔄 Changed
 
