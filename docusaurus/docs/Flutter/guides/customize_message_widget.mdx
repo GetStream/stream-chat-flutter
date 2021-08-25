@@ -1,0 +1,62 @@
+---
+id: customize_message_widget
+sidebar_position: 11
+title: Customizing The MessageWidget
+---
+
+Customizing Text Messages
+
+### Introduction
+
+Every application provides a unique look and feel to their own messaging interface including and not
+limited to fonts, colors, and shapes.
+
+This guide details how to customize the `MessageWidget` in the Stream Chat Flutter UI SDK.
+
+### Theming
+
+You can customize the `MessageWidget` using the `StreamChatTheme` class, so that you can change the
+message theme at the top instead of creating your own `MessageWidget` at the lower implementation level.
+
+There are several things you can change in the theme including text styles and colors of various elements.
+
+You can also set a different theme for the user's own messages and messages received by them.
+
+Here is an example:
+
+```dart
+StreamChatThemeData(
+
+  /// Sets theme for user's messages
+  ownMessageTheme: MessageThemeData(
+      messageBackgroundColor: colorTheme.textHighEmphasis,
+    ),
+
+  /// Sets theme for received messages
+  otherMessageTheme: MessageThemeData(
+    avatarTheme: AvatarThemeData(
+      borderRadius: BorderRadius.circular(8),
+    ),
+  ),
+
+)
+```
+
+#### Change message text style
+
+The `MessageWidget` has multiple `Text` widgets that you can manipulate the styles of. The three main
+are the actual message text, user name, message links, and the message timestamp.
+
+```dart
+MessageThemeData(
+  messageTextStyle: TextStyle(...),
+  createdAtStyle: TextStyle(...),
+  messageAuthorStyle: TextStyle(...),
+  messageLinksStyle: TextStyle(...),
+)
+```
+
+#### Change avatar theme
+
+You can change the attributes of the avatar (if displayed) using the `avatarTheme` property.
+
