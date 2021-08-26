@@ -164,9 +164,7 @@ class Event {
 }
 
 /// The channel embedded in the event object
-@JsonSerializable(
-  createToJson: false,
-)
+@JsonSerializable(createToJson: false)
 class EventChannel extends ChannelModel {
   /// Constructor used for json serialization
   EventChannel({

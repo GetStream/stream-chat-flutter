@@ -12,7 +12,7 @@ ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) =>
       commands: (json['commands'] as List<dynamic>?)
               ?.map((e) => Command.fromJson(e as Map<String, dynamic>))
               .toList() ??
-          [],
+          const [],
       connectEvents: json['connect_events'] as bool? ?? false,
       createdAt: json['created_at'] == null
           ? null

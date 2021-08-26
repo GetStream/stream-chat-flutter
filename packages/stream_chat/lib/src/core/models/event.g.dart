@@ -82,8 +82,8 @@ EventChannel _$EventChannelFromJson(Map<String, dynamic> json) => EventChannel(
       deletedAt: json['deleted_at'] == null
           ? null
           : DateTime.parse(json['deleted_at'] as String),
-      memberCount: json['member_count'] as int? ?? 0,
-      extraData: json['extra_data'] as Map<String, dynamic>? ?? {},
-      cooldown: json['cooldown'] as int? ?? 0,
+      memberCount: json['member_count'] as int,
+      extraData: json['extra_data'] as Map<String, dynamic>?,
+      cooldown: json['cooldown'] as int,
       team: json['team'] as String?,
     );
