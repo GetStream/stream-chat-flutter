@@ -7,7 +7,6 @@
     - flutter_keyboard_visibility: ^5.0.1 -> ^5.0.3
     - image_picker: ^0.8.2 -> ^0.8.3+3
     - lottie: ^1.0.1 -> ^1.1.0
-    - meta: ^1.3.0 -> ^1.7.0
     - path_provider: ^2.0.1 -> ^2.0.2
     - photo_manager: ^1.2.6+1 -> ^1.3.1
     - rxdart: ^0.27.0 -> ^0.27.1

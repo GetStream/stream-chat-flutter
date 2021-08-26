@@ -1,7 +1,6 @@
 ## Upcoming
 
 - Bumped dependencies
-    - meta: ^1.3.0 -> ^1.7.0
     - connectivity_plus: ^1.0.1 -> ^1.1.0
     - rxdart: ^0.27.0 -> ^0.27.1
 

@@ -14,7 +14,6 @@ dependencies:
   connectivity_plus: ^1.1.0
   flutter:
     sdk: flutter
-  meta: ^1.7.0
   rxdart: ^0.27.1
   stream_chat: ^2.2.0
 
