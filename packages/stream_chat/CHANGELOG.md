@@ -5,7 +5,6 @@
     - equatable: ^2.0.0 -> ^2.0.3
     - freezed_annotation: ^0.14.0 -> ^0.14.3
     - json_annotation: ^4.0.1 -> ^4.1.0
-    - meta: ^1.3.0 -> ^1.7.0
     - rxdart: ^0.27.0 -> ^0.27.1
     - rxdart: ^0.27.0 -> ^0.27.1
     - web_socket_channel: ^2.0.0 -> ^2.1.0
