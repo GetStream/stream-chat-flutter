@@ -170,7 +170,7 @@ class AppLocalizations {
           'Sei sicuro di voler rimuovere questo membro?',
       'search': 'Cerca',
       'select_user_to_try_flutter_sdk':
-          'Selezione un utente per provare l\'SDK Flutter',
+          'Seleziona un utente per provare l\'SDK Flutter',
       'shared_groups': 'Gruppi in comune',
       'sign_out': 'Sign out',
       'something_went_wrong_error_message': 'Qualcosa é andato storto',
