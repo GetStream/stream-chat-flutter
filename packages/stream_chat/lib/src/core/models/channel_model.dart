@@ -59,7 +59,7 @@ class ChannelModel {
   final User? createdBy;
 
   /// True if this channel is frozen
-  @JsonKey(includeIfNull: false, defaultValue: false)
+  @JsonKey(includeIfNull: false)
   final bool frozen;
 
   /// The date of the last message

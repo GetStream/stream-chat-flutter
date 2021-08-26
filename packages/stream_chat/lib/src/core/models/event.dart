@@ -92,7 +92,6 @@ class Event {
   final bool isLocal;
 
   /// Map of custom channel extraData
-  @JsonKey(defaultValue: {})
   final Map<String, Object?> extraData;
 
   /// Known top level fields.
