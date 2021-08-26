@@ -69,6 +69,12 @@ scripts:
     select-package:
       dir-exists: coverage
 
+  docs:
+    run: |
+      npm install -g https://github.com/GetStream/stream-chat-docusaurus-cli && 
+      npx stream-chat-docusaurus -i -s 
+    description: Runs the docusaurus documentation locally.
+
 environment:
   sdk: '>=2.12.0 <3.0.0'
   flutter: '>=1.22.4 <2.0.0'
