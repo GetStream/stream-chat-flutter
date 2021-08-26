@@ -16,7 +16,7 @@ dependencies:
   freezed_annotation: ^0.14.3
   http_parser: ^4.0.0
   jose: ^0.3.2
-  json_annotation: ^4.1.0
+  json_annotation: ^4.0.1
   logging: ^1.0.1
   meta: ^1.3.0
   mime: ^1.0.0
