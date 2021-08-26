@@ -1,3 +1,10 @@
+## Upcoming
+
+- Bumped dependencies
+    - meta: ^1.3.0 -> ^1.7.0
+    - moor: ^4.4.0 -> ^4.5.0
+    - path_provider: ^2.0.1 -> ^2.0.2
+
 ## 2.2.0
 
 - Updated llc dependency
@@ -11,14 +18,17 @@
 ## 2.1.0
 
 ✅ Added
+
 - Added support for `Message.i18n`
 - Added support for `User.language`
 
 ## 2.0.0
+
 * Migrate this package to null safety
 * Minor fixes and improvements
 
 ## 2.0.0-nullsafety.8
+
 * Updated llc dependency
 * Upgraded moor dependencies and generated files with the latest dependency
 

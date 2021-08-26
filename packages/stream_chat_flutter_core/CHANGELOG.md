@@ -1,13 +1,24 @@
+## Upcoming
+
+- Bumped dependencies
+    - meta: ^1.3.0 -> ^1.7.0
+    - connectivity_plus: ^1.0.1 -> ^1.1.0
+    - rxdart: ^0.27.0 -> ^0.27.1
+
 ## 2.2.0
 
 🛑️ Breaking Changes from `2.1.1`
+
 - Renamed `BetterStreamBuilder.loadingBuilder` to `.noDataBuilder`
 
 🔄 Changed
+
 - `BetterStreamBuilder.initialData` is now nullable/not-required.
 
 🐞 Fixed
-- [#612](https://github.com/GetStream/stream-chat-flutter/issues/612) `ChannelListView` pagination doesn't work after refresh
+
+- [#612](https://github.com/GetStream/stream-chat-flutter/issues/612) `ChannelListView` pagination
+  doesn't work after refresh
 
 ## 2.1.1
 
@@ -16,25 +27,32 @@
 ## 2.1.0
 
 🛑️ Breaking Changes from `2.0.0`
+
 - Changed default message filter of `MessageListCore`
 
 ✅ Added
+
 - Added `MessageListCore.paginationLimit`
 
 🔄 Changed
-- `StreamChatCore.of(context).user` is now deprecated in favor of `StreamChatCore.of(context).currentUser`.
-- `StreamChatCore.of(context).userStream` is now deprecated in favor of `StreamChatCore.of(context).currentUserStream`.
+
+- `StreamChatCore.of(context).user` is now deprecated in favor
+  of `StreamChatCore.of(context).currentUser`.
+- `StreamChatCore.of(context).userStream` is now deprecated in favor
+  of `StreamChatCore.of(context).currentUserStream`.
 
 ## 2.0.0
 
 🛑️ Breaking Changes from `1.5.3`
 
 - migrate this package to null safety
-- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of individual params/properties
+- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of
+  individual params/properties
     - `options.state` -> bool state
     - `options.watch` -> bool watch
     - `options.presence` -> bool presence
-- `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual params/properties
+- `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual
+  params/properties
     - `options.presence` -> bool presence
 
 ✅ Added
@@ -47,18 +65,20 @@
 - Performance improvements
 
 ## 2.0.0-nullsafety.9
+
 - Update llc dependency
 
 ## 2.0.0-nullsafety.8
 
 🛑️ Breaking Changes from `2.0.0-nullsafety.7`
 
-- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of individual
-  params/properties
+- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of
+  individual params/properties
     - `options.state` -> bool state
     - `options.watch` -> bool watch
     - `options.presence` -> bool presence
-- `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual params/properties
+- `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual
+  params/properties
     - `options.presence` -> bool presence
 
 ## 2.0.0-nullsafety.7

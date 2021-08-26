@@ -1,3 +1,22 @@
+## Upcoming
+
+- Bumped dependencies
+    - cached_network_image: ^3.0.0 -> ^3.1.0
+    - chewie: ^1.2.0 -> ^1.2.2
+    - file_picker: ^3.0.1 -> ^4.0.0
+    - flutter_keyboard_visibility: ^5.0.1 -> ^5.0.3
+    - image_picker: ^0.8.2 -> ^0.8.3+3
+    - lottie: ^1.0.1 -> ^1.1.0
+    - meta: ^1.3.0 -> ^1.7.0
+    - path_provider: ^2.0.1 -> ^2.0.2
+    - photo_manager: ^1.2.6+1 -> ^1.3.1
+    - rxdart: ^0.27.0 -> ^0.27.1
+    - share_plus: ^2.0.3 -> ^2.1.4
+    - substring_highlight: ^1.0.26 -> ^1.0.33
+    - video_compress: ^3.0.0 -> ^3.1.0
+    - video_player: ^2.1.0 -> ^2.1.14
+    - video_thumbnail: ^0.3.3 -> ^0.4.3
+
 ## 2.2.0
 
 ✅ Added
@@ -6,15 +25,17 @@
   Added `StreamChatThemeData.placeholderUserImage` for building a widget when the `UserAvatar` image
   is loading
 - Added a `backgroundColor` property to the following widgets:
-  - `ChannelHeader`
-  - `ChannelListHeader`
-  - `GalleryHeader`
-  - `GalleryFooter`
-  - `ThreadHeader`
-- Added `MessageInput.attachmentLimit` in order to limit the no. of attachments that can be sent with a single message.
-- Added `MessageInput.onAttachmentLimitExceed` callback which will be called when the `attachmentLimit` is exceeded.
-  This will override the default error alert behaviour.
-- Added `MessageInput.attachmentButtonBuilder` and `MessageInput.commandButtonBuilder` for more customizations.
+    - `ChannelHeader`
+    - `ChannelListHeader`
+    - `GalleryHeader`
+    - `GalleryFooter`
+    - `ThreadHeader`
+- Added `MessageInput.attachmentLimit` in order to limit the no. of attachments that can be sent
+  with a single message.
+- Added `MessageInput.onAttachmentLimitExceed` callback which will be called when
+  the `attachmentLimit` is exceeded. This will override the default error alert behaviour.
+- Added `MessageInput.attachmentButtonBuilder` and `MessageInput.commandButtonBuilder` for more
+  customizations.
 
 ```dart
 typedef ActionButtonBuilder = Widget Function(
@@ -52,8 +73,10 @@ breakdown:
 - Fixed `MessageInput` textField case where `input` is not enabled if the file picked from the
   camera is null.
 - Fixed date dividers position/alignment in non reversed `MessageListView`.
-- Fixed `MessageListView` not opening to the right initialMessage if `StreamChannel.initialMessageId` is set.
-- Fixed null check errors when accessing `message.text` in `MessageWidget` and `MessageListView`; this occurred when sending a message with no text.
+- Fixed `MessageListView` not opening to the right initialMessage
+  if `StreamChannel.initialMessageId` is set.
+- Fixed null check errors when accessing `message.text` in `MessageWidget` and `MessageListView`;
+  this occurred when sending a message with no text.
 
 ## 2.1.2
 
