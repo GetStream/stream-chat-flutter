@@ -17,5 +17,6 @@ dependencies:
   stream_chat_flutter: ^3.0.0
 
 dev_dependencies:
+  dart_code_metrics: ^4.2.0-dev.1
   flutter_test:
     sdk: flutter

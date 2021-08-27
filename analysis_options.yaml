@@ -1,4 +1,6 @@
 analyzer:
+  plugins:
+    - dart_code_metrics
   exclude:
     - packages/*/lib/**/*.g.dart
     - packages/*/lib/src/emoji
@@ -144,3 +146,42 @@ linter:
     - unnecessary_null_checks
     - tighten_type_of_initializing_formals
     - null_check_on_nullable_type_parameter
+
+# https://dartcodemetrics.dev/docs/getting-started/introduction
+dart_code_metrics:
+  metrics-exclude:
+    - packages/*/test/**
+  metrics:
+    - weight-of-class: 0.33
+    - source-lines-of-code: 90
+    - cyclomatic-complexity: 20
+    - maximum-nesting-level: 5
+  rules:
+    # Dart Specific
+    - avoid-ignoring-return-values
+#    - avoid-non-null-assertion
+    - avoid-unused-parameters
+    - binary-expression-operand-order
+    - double-literal-format
+      #    - member-ordering-extended
+    - member-ordering:
+        alphabetize: false
+        order:
+          - constructors
+          - public-fields
+          - private-fields
+    - no-boolean-literal-compare
+    - no-equal-arguments
+    - no-equal-then-else
+    - no-magic-number:
+        allowed: [ 3.14 ]
+    - prefer-match-file-name
+#    - prefer-trailing-comma:
+#        break-on: 2
+
+    # Flutter specific
+    - always-remove-listener
+    #    - avoid-returning-widgets
+    - avoid-unnecessary-setstate
+    - avoid-wrapping-in-padding
+
