@@ -22,6 +22,12 @@ There are several things you can change in the theme including text styles and c
 
 You can also set a different theme for the user's own messages and messages received by them.
 
+:::note
+Theming allows you to change minor factors like style while using the widget directly allows you much
+more customization such as replacing a certain widget with another. Some things can only be customized
+through the widget and not the theme.
+:::
+
 Here is an example:
 
 ```dart
@@ -59,4 +65,75 @@ MessageThemeData(
 #### Change avatar theme
 
 You can change the attributes of the avatar (if displayed) using the `avatarTheme` property.
+
+```dart
+MessageThemeData(
+    avatarTheme: AvatarThemeData(
+      borderRadius: BorderRadius.circular(8),
+    ),
+)
+```
+
+#### Changing Reaction theme
+
+You also customize the reactions attached to every message using the theme.
+
+```dart
+MessageThemeData(
+  reactionsBackgroundColor: Colors.red,
+  reactionsBorderColor: Colors.redAccent,
+  reactionsMaskColor: Colors.pink,
+),
+```
+
+### Changing Message Actions
+
+When a message is long pressed, the `MessageActionsModal` is shown.
+
+The `MessageWidget` allows showing or hiding some options if you so choose.
+
+```dart
+MessageWidget(
+    ...
+    this.showUsername = true,
+    this.showTimestamp = true,
+    this.showReactions = true,
+    this.showDeleteMessage = true,
+    this.showEditMessage = true,
+    this.showReplyMessage = true,
+    this.showThreadReplyMessage = true,
+    this.showResendMessage = true,
+    this.showCopyMessage = true,
+    this.showFlagButton = true,
+    this.showPinButton = true,
+    this.showPinHighlight = true,
+),
+```
+
+### Building attachments
+
+The `customAttachmentBuilder` property allows you to build any kind of attachment (inbuilt or custom)
+in your own way. While a separate guide is written for this, it is included here because of relevance.
+
+```dart
+MessageListView(
+  messageBuilder: (context, details, messages, defaultMessage) {
+    return defaultMessage.copyWith(
+        customAttachmentBuilders: {
+          'location': (context, message, attachments) {
+            final attachmentWidget = Image.network(
+              _buildMapAttachment(
+                attachments[0].extraData['latitude'],
+                attachments[0].extraData['longitude'],
+              ),
+            );
+
+            return wrapAttachmentWidget(context, attachmentWidget, null, true, BorderRadius.circular(8.0));
+          }
+        },
+    );
+  },
+),
+```
+
 
