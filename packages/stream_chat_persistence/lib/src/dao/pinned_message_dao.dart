@@ -39,8 +39,10 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
     final userEntity = rows.readTableOrNull(users);
     final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
     final msgEntity = rows.readTable(pinnedMessages);
-    final latestReactions = await _db.reactionDao.getReactions(msgEntity.id);
-    final ownReactions = await _db.reactionDao.getReactionsByUserId(
+    final latestReactions =
+        await _db.pinnedMessageReactionDao.getReactions(msgEntity.id);
+    final ownReactions =
+        await _db.pinnedMessageReactionDao.getReactionsByUserId(
       msgEntity.id,
       _db.userId,
     );

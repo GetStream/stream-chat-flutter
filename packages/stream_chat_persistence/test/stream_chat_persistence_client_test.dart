@@ -502,6 +502,21 @@ void main() {
           .called(1);
     });
 
+    test('updatePinnedMessageReactions', () async {
+      final reactions = List.generate(
+        3,
+        (index) => Reaction(type: 'testType$index'),
+      );
+      when(() =>
+              mockDatabase.pinnedMessageReactionDao.updateReactions(reactions))
+          .thenAnswer((_) => Future.value());
+
+      await client.updatePinnedMessageReactions(reactions);
+      verify(() =>
+              mockDatabase.pinnedMessageReactionDao.updateReactions(reactions))
+          .called(1);
+    });
+
     test('deleteReactionsByMessageId', () async {
       final messageIds = <String>[];
       when(() =>
@@ -512,6 +527,17 @@ void main() {
       verify(() =>
               mockDatabase.reactionDao.deleteReactionsByMessageIds(messageIds))
           .called(1);
+    });
+
+    test('deletePinnedMessageReactionsByMessageId', () async {
+      final messageIds = <String>[];
+      when(() => mockDatabase.pinnedMessageReactionDao
+              .deleteReactionsByMessageIds(messageIds))
+          .thenAnswer((_) => Future.value());
+
+      await client.deletePinnedMessageReactionsByMessageId(messageIds);
+      verify(() => mockDatabase.pinnedMessageReactionDao
+          .deleteReactionsByMessageIds(messageIds)).called(1);
     });
 
     test('deleteMembersByCids', () async {

@@ -319,6 +319,15 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> updatePinnedMessageReactions(List<Reaction> reactions) {
+    assert(_debugIsConnected, '');
+    _logger.info('updatePinnedMessageReactions');
+    return _readProtected(
+      () => db!.pinnedMessageReactionDao.updateReactions(reactions),
+    );
+  }
+
+  @override
   Future<void> updateReactions(List<Reaction> reactions) {
     assert(_debugIsConnected, '');
     _logger.info('updateReactions');
@@ -337,6 +346,18 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     assert(_debugIsConnected, '');
     _logger.info('updateUsers');
     return _readProtected(() => db!.userDao.updateUsers(users));
+  }
+
+  @override
+  Future<void> deletePinnedMessageReactionsByMessageId(
+    List<String> messageIds,
+  ) {
+    assert(_debugIsConnected, '');
+    _logger.info('deletePinnedMessageReactionsByMessageId');
+    return _readProtected(
+      () =>
+          db!.pinnedMessageReactionDao.deleteReactionsByMessageIds(messageIds),
+    );
   }
 
   @override

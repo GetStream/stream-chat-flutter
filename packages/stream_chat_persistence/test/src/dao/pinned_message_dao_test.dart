@@ -92,7 +92,7 @@ void main() {
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
     await pinnedMessageDao.updateMessages(cid, allMessages);
-    await database.reactionDao.updateReactions([reaction]);
+    await database.pinnedMessageReactionDao.updateReactions([reaction]);
     return allMessages;
   }
 
@@ -109,7 +109,8 @@ void main() {
     final firstMessageId = messages.first.id;
 
     // Fetched reactions list should have one reaction for given message id
-    final reactions = await database.reactionDao.getReactions(firstMessageId);
+    final reactions =
+        await database.pinnedMessageReactionDao.getReactions(firstMessageId);
     expect(reactions.length, 1);
 
     // Deleting 2 messages from DB
@@ -124,7 +125,7 @@ void main() {
 
     // Reaction for the first message should be deleted too
     final newReactions =
-        await database.reactionDao.getReactions(firstMessageId);
+        await database.pinnedMessageReactionDao.getReactions(firstMessageId);
     expect(newReactions, isEmpty);
   });
 
@@ -147,8 +148,8 @@ void main() {
 
         // Fetched reactions list should have one reaction for given message id
         final cid1firstMessageId = cid1Messages.first.id;
-        final cid1Reactions =
-            await database.reactionDao.getReactions(cid1firstMessageId);
+        final cid1Reactions = await database.pinnedMessageReactionDao
+            .getReactions(cid1firstMessageId);
         expect(cid1Reactions.length, 1);
 
         // Deleting all the messages of cid1
@@ -163,8 +164,8 @@ void main() {
         expect(cid2FetchedMessages, isNotEmpty);
 
         // Reaction for the first message should be deleted too
-        final cid1FetchedReactions =
-            await database.reactionDao.getReactions(cid1firstMessageId);
+        final cid1FetchedReactions = await database.pinnedMessageReactionDao
+            .getReactions(cid1firstMessageId);
         expect(cid1FetchedReactions, isEmpty);
       },
     );
@@ -184,12 +185,12 @@ void main() {
 
         // Fetched reactions list should have one reaction for given message id
         final cid1FirstMessageId = cid1Messages.first.id;
-        final cid1Reactions =
-            await database.reactionDao.getReactions(cid1FirstMessageId);
+        final cid1Reactions = await database.pinnedMessageReactionDao
+            .getReactions(cid1FirstMessageId);
         expect(cid1Reactions.length, 1);
         final cid2FirstMessageId = cid2Messages.first.id;
-        final cid2Reactions =
-            await database.reactionDao.getReactions(cid2FirstMessageId);
+        final cid2Reactions = await database.pinnedMessageReactionDao
+            .getReactions(cid2FirstMessageId);
         expect(cid2Reactions.length, 1);
 
         // Deleting all the messages of cid1
@@ -204,11 +205,11 @@ void main() {
         expect(cid2FetchedMessages, isEmpty);
 
         // Reaction for the first message should be deleted too
-        final cid1FetchedReactions =
-            await database.reactionDao.getReactions(cid1FirstMessageId);
+        final cid1FetchedReactions = await database.pinnedMessageReactionDao
+            .getReactions(cid1FirstMessageId);
         expect(cid1FetchedReactions, isEmpty);
-        final cid2FetchedReactions =
-            await database.reactionDao.getReactions(cid2FirstMessageId);
+        final cid2FetchedReactions = await database.pinnedMessageReactionDao
+            .getReactions(cid2FirstMessageId);
         expect(cid2FetchedReactions, isEmpty);
       },
     );
