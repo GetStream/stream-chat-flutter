@@ -21,13 +21,13 @@ class AppRoutes {
     switch (settings.name) {
       case Routes.APP:
         return MaterialPageRoute(
-            settings: const RouteSettings(name: Routes.APP),
+            settings: RouteSettings(arguments: args, name: Routes.APP),
             builder: (_) {
               return MyApp();
             });
       case Routes.HOME:
         return MaterialPageRoute(
-            settings: const RouteSettings(name: Routes.HOME),
+            settings: RouteSettings(arguments: args, name: Routes.HOME),
             builder: (_) {
               final homePageArgs = args as HomePageArgs;
               return HomePage(
@@ -36,18 +36,19 @@ class AppRoutes {
             });
       case Routes.CHOOSE_USER:
         return MaterialPageRoute(
-            settings: const RouteSettings(name: Routes.CHOOSE_USER),
+            settings: RouteSettings(arguments: args, name: Routes.CHOOSE_USER),
             builder: (_) {
               return ChooseUserPage();
             });
       case Routes.ADVANCED_OPTIONS:
         return MaterialPageRoute(
-          settings: const RouteSettings(name: Routes.ADVANCED_OPTIONS),
+          settings:
+              RouteSettings(arguments: args, name: Routes.ADVANCED_OPTIONS),
           builder: (_) => AdvancedOptionsPage(),
         );
       case Routes.CHANNEL_PAGE:
         return MaterialPageRoute(
-            settings: const RouteSettings(name: Routes.CHANNEL_PAGE),
+            settings: RouteSettings(arguments: args, name: Routes.CHANNEL_PAGE),
             builder: (_) {
               final channelPageArgs = args as ChannelPageArgs;
               return StreamChannel(
@@ -61,19 +62,21 @@ class AppRoutes {
             });
       case Routes.NEW_CHAT:
         return MaterialPageRoute(
-            settings: const RouteSettings(name: Routes.NEW_CHAT),
+            settings: RouteSettings(arguments: args, name: Routes.NEW_CHAT),
             builder: (_) {
               return NewChatScreen();
             });
       case Routes.NEW_GROUP_CHAT:
         return MaterialPageRoute(
-            settings: const RouteSettings(name: Routes.NEW_GROUP_CHAT),
+            settings:
+                RouteSettings(arguments: args, name: Routes.NEW_GROUP_CHAT),
             builder: (_) {
               return NewGroupChatScreen();
             });
       case Routes.NEW_GROUP_CHAT_DETAILS:
         return MaterialPageRoute(
-            settings: const RouteSettings(name: Routes.NEW_GROUP_CHAT_DETAILS),
+            settings: RouteSettings(
+                arguments: args, name: Routes.NEW_GROUP_CHAT_DETAILS),
             builder: (_) {
               return GroupChatDetailsScreen(
                 selectedUsers: args as List<User>?,
@@ -81,7 +84,8 @@ class AppRoutes {
             });
       case Routes.CHAT_INFO_SCREEN:
         return MaterialPageRoute(
-            settings: const RouteSettings(name: Routes.CHAT_INFO_SCREEN),
+            settings:
+                RouteSettings(arguments: args, name: Routes.CHAT_INFO_SCREEN),
             builder: (context) {
               return ChatInfoScreen(
                 user: args as User?,
@@ -90,7 +94,8 @@ class AppRoutes {
             });
       case Routes.GROUP_INFO_SCREEN:
         return MaterialPageRoute(
-            settings: const RouteSettings(name: Routes.GROUP_INFO_SCREEN),
+            settings:
+                RouteSettings(arguments: args, name: Routes.GROUP_INFO_SCREEN),
             builder: (context) {
               return GroupInfoScreen(
                 messageTheme: StreamChatTheme.of(context).ownMessageTheme,
@@ -98,7 +103,8 @@ class AppRoutes {
             });
       case Routes.CHANNEL_LIST_PAGE:
         return MaterialPageRoute(
-            settings: const RouteSettings(name: Routes.CHANNEL_LIST_PAGE),
+            settings:
+                RouteSettings(arguments: args, name: Routes.CHANNEL_LIST_PAGE),
             builder: (context) {
               return ChannelListPage();
             });
