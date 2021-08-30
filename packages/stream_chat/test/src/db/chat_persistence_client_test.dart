@@ -39,6 +39,11 @@ class TestPersistenceClient extends ChatPersistenceClient {
       Future.value();
 
   @override
+  Future<void> deletePinnedMessageReactionsByMessageId(
+          List<String> messageIds) =>
+      Future.value();
+
+  @override
   Future<void> disconnect({bool flush = false}) => throw UnimplementedError();
 
   @override
@@ -115,6 +120,10 @@ class TestPersistenceClient extends ChatPersistenceClient {
 
   @override
   Future<void> updateReactions(List<Reaction> reactions) => Future.value();
+
+  @override
+  Future<void> updatePinnedMessageReactions(List<Reaction> reactions) =>
+      Future.value();
 
   @override
   Future<void> updateReads(String cid, List<Read> reads) => Future.value();

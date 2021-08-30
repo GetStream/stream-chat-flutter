@@ -170,8 +170,14 @@ abstract class ChatPersistenceClient {
   /// Updates the reactions data with the new [reactions] data
   Future<void> updateReactions(List<Reaction> reactions);
 
+  /// Updates the pinned message reactions data with the new [reactions] data
+  Future<void> updatePinnedMessageReactions(List<Reaction> reactions);
+
   /// Deletes all the reactions by [messageIds]
   Future<void> deleteReactionsByMessageId(List<String> messageIds);
+
+  /// Deletes all the pinned messages reactions by [messageIds]
+  Future<void> deletePinnedMessageReactionsByMessageId(List<String> messageIds);
 
   /// Deletes all the members by channel [cids]
   Future<void> deleteMembersByCids(List<String> cids);
@@ -187,6 +193,12 @@ abstract class ChatPersistenceClient {
         .map((m) => m.id)
         .toList(growable: false));
 
+    final deletePinnedMessageReactions =
+        deletePinnedMessageReactionsByMessageId(channelStates
+            .expand((it) => it.pinnedMessages)
+            .map((m) => m.id)
+            .toList(growable: false));
+
     final cleanedChannelStates =
         channelStates.where((it) => it.channel != null);
 
@@ -196,6 +208,7 @@ abstract class ChatPersistenceClient {
 
     await Future.wait([
       deleteReactions,
+      deletePinnedMessageReactions,
       deleteMembers,
     ]);
 
@@ -203,6 +216,16 @@ abstract class ChatPersistenceClient {
 
     final reactions = cleanedChannelStates
         .expand((it) => it.messages)
+        .expand((it) => [
+              if (it.ownReactions != null)
+                ...it.ownReactions!.where((r) => r.userId != null),
+              if (it.latestReactions != null)
+                ...it.latestReactions!.where((r) => r.userId != null),
+            ])
+        .withNullifyer;
+
+    final pinnedMessageReactions = cleanedChannelStates
+        .expand((it) => it.pinnedMessages)
         .expand((it) => [
               if (it.ownReactions != null)
                 ...it.ownReactions!.where((r) => r.userId != null),
@@ -261,6 +284,9 @@ abstract class ChatPersistenceClient {
       updateUsers(users.toList(growable: false)),
       updateChannels(channels.toList(growable: false)),
       updateReactions(reactions.toList(growable: false)),
+      updatePinnedMessageReactions(
+        pinnedMessageReactions.toList(growable: false),
+      ),
     ]);
   }
 }
