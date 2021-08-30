@@ -13,6 +13,21 @@ limited to fonts, colors, and shapes.
 
 This guide details how to customize the `MessageWidget` in the Stream Chat Flutter UI SDK.
 
+### Building Custom Messages
+
+This guide goes into detail about the ability to customize the `MessageWidget`. However, if you want
+to customize the default `MessageWidget` in the `MessageListView` provided, you can use the `.copyWith()` method
+provided inside the `messageBuilder` parameter of the `MessageListView` like this:
+
+```dart
+MessageListView(
+    messageBuilder: (context, details, messageList, defaultImpl) {
+        // Your implementation of the message here
+        // E.g: return Text(details.message.text ?? '');
+    },
+),
+```
+
 ### Theming
 
 You can customize the `MessageWidget` using the `StreamChatTheme` class, so that you can change the
@@ -35,8 +50,8 @@ StreamChatThemeData(
 
   /// Sets theme for user's messages
   ownMessageTheme: MessageThemeData(
-      messageBackgroundColor: colorTheme.textHighEmphasis,
-    ),
+    messageBackgroundColor: colorTheme.textHighEmphasis,
+  ),
 
   /// Sets theme for received messages
   otherMessageTheme: MessageThemeData(
@@ -47,6 +62,8 @@ StreamChatThemeData(
 
 )
 ```
+
+![](../assets/message_theming.png)
 
 #### Change message text style
 
@@ -62,6 +79,8 @@ MessageThemeData(
 )
 ```
 
+![](../assets/message_styles.png)
+
 #### Change avatar theme
 
 You can change the attributes of the avatar (if displayed) using the `avatarTheme` property.
@@ -73,6 +92,8 @@ MessageThemeData(
     ),
 )
 ```
+
+![](../assets/message_rounded_avatar.png)
 
 #### Changing Reaction theme
 
@@ -86,6 +107,8 @@ MessageThemeData(
 ),
 ```
 
+![](../assets/message_reaction_theming.png)
+
 ### Changing Message Actions
 
 When a message is long pressed, the `MessageActionsModal` is shown.
@@ -95,20 +118,22 @@ The `MessageWidget` allows showing or hiding some options if you so choose.
 ```dart
 MessageWidget(
     ...
-    this.showUsername = true,
-    this.showTimestamp = true,
-    this.showReactions = true,
-    this.showDeleteMessage = true,
-    this.showEditMessage = true,
-    this.showReplyMessage = true,
-    this.showThreadReplyMessage = true,
-    this.showResendMessage = true,
-    this.showCopyMessage = true,
-    this.showFlagButton = true,
-    this.showPinButton = true,
-    this.showPinHighlight = true,
+    showUsername = true,
+    showTimestamp = true,
+    showReactions = true,
+    showDeleteMessage = true,
+    showEditMessage = true,
+    showReplyMessage = true,
+    showThreadReplyMessage = true,
+    showResendMessage = true,
+    showCopyMessage = true,
+    showFlagButton = true,
+    showPinButton = true,
+    showPinHighlight = true,
 ),
 ```
+
+![](../assets/message_widget_actions.png)
 
 ### Building attachments
 
@@ -136,4 +161,22 @@ MessageListView(
 ),
 ```
 
+### Widget Builders
 
+Some parameters allow you to construct your own widget in place of some elements in the `MessageWidget`.
+
+These are:
+* `userAvatarBuilder`  : Allows user to substitute their own widget in place of the user avatar.
+* `editMessageInputBuilder` : Allows user to substitute their own widget in place of the input in edit mode.
+* `textBuilder` : Allows user to substitute their own widget in place of the text.
+* `bottomRowBuilder` : Allows user to substitute their own widget in the bottom of the message when not deleted.
+* `deletedBottomRowBuilder` : Allows user to substitute their own widget in the bottom of the message when deleted.
+
+```dart
+MessageWidget(
+    ...
+    textBuilder: (context, message) {
+        // Add your own text implementation here.
+    },
+),
+```
