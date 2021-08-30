@@ -19,6 +19,9 @@ class MyObserver extends NavigatorObserver {
       EventType.notificationMessageNew,
     )
         .listen((event) {
+      if (event.message?.user?.id == client.state.currentUser?.id) {
+        return;
+      }
       final channelId = event.channelId;
       if (currentRoute?.settings.name == Routes.CHANNEL_PAGE) {
         final args = currentRoute?.settings.arguments as ChannelPageArgs;
