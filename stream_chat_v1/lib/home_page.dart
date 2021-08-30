@@ -13,7 +13,12 @@ class MyObserver extends NavigatorObserver {
   late final StreamSubscription _subscription;
 
   MyObserver(StreamChatClient client, BuildContext context) {
-    _subscription = client.on(EventType.messageNew).listen((event) {
+    _subscription = client
+        .on(
+      EventType.messageNew,
+      EventType.notificationMessageNew,
+    )
+        .listen((event) {
       final channelId = event.channelId;
       if (currentRoute?.settings.name == Routes.CHANNEL_PAGE) {
         final args = currentRoute?.settings.arguments as ChannelPageArgs;
