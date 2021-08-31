@@ -44,6 +44,7 @@ breakdown:
 * `MessageSearchListViewTheme` is now `MessageSearchListViewThemeData`
 * `MessageTheme` is now `MessageThemeData`
 * `UserListViewTheme` is now `UserListViewThemeData`
+* `MessageInput` overlays now follow the `MessageInput`
 
 - Updated core dependency.
 
