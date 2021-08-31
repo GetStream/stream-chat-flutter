@@ -1464,7 +1464,7 @@ class MessageInputState extends State<MessageInput> {
 
     return OverlayEntry(
         builder: (context) => Positioned(
-          top: position.dy - widHeight,
+              top: position.dy - widHeight,
               left: 0,
               right: 0,
               child: Card(
