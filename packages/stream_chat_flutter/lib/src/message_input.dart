@@ -927,6 +927,7 @@ class MessageInputState extends State<MessageInput> {
     // ignore: cast_nullable_to_non_nullable
     final renderBox = context.findRenderObject() as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero);
+    final size = MediaQuery.of(context).size;
 
     final child = Padding(
       padding: const EdgeInsets.all(8),
@@ -1021,11 +1022,9 @@ class MessageInputState extends State<MessageInput> {
       ),
     );
 
-    final widHeight = 64 + (40 * commands.length);
-
     return OverlayEntry(
       builder: (context) => Positioned(
-        top: position.dy - widHeight,
+        bottom: size.height - position.dy,
         left: 0,
         right: 0,
         child: TweenAnimationBuilder<double>(
@@ -1353,7 +1352,8 @@ class MessageInputState extends State<MessageInput> {
 
     // ignore: cast_nullable_to_non_nullable
     final renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
+    final position = renderBox.localToGlobal(Offset.zero);
+    final size = MediaQuery.of(context).size;
     final child = Card(
       margin: const EdgeInsets.all(8),
       elevation: 2,
@@ -1420,7 +1420,7 @@ class MessageInputState extends State<MessageInput> {
     );
     return OverlayEntry(
       builder: (context) => Positioned(
-        bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
+        bottom: size.height - position.dy,
         left: 0,
         right: 0,
         child: TweenAnimationBuilder<double>(
@@ -1459,12 +1459,11 @@ class MessageInputState extends State<MessageInput> {
     // ignore: cast_nullable_to_non_nullable
     final renderBox = context.findRenderObject() as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero);
-
-    final widHeight = 38 + (emojis.length > 2 ? 180 : emojis.length * 62.0);
+    final size = MediaQuery.of(context).size;
 
     return OverlayEntry(
         builder: (context) => Positioned(
-              top: position.dy - widHeight,
+              bottom: size.height - position.dy,
               left: 0,
               right: 0,
               child: Card(
