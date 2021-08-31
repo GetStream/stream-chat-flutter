@@ -926,7 +926,7 @@ class MessageInputState extends State<MessageInput> {
 
     // ignore: cast_nullable_to_non_nullable
     final renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
+    final position = renderBox.localToGlobal(Offset.zero);
 
     final child = Padding(
       padding: const EdgeInsets.all(8),
@@ -1020,22 +1020,26 @@ class MessageInputState extends State<MessageInput> {
         ),
       ),
     );
+
+    final widHeight = 66 + (40 * commands.length);
+
     return OverlayEntry(
-        builder: (context) => Positioned(
-              bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
-              left: 0,
-              right: 0,
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: 1),
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOutExpo,
-                builder: (context, val, child) => Transform.scale(
-                  scale: val,
-                  child: child,
-                ),
-                child: child,
-              ),
-            ));
+      builder: (context) => Positioned(
+        top: position.dy - widHeight,
+        left: 0,
+        right: 0,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOutExpo,
+          builder: (context, val, child) => Transform.scale(
+            scale: val,
+            child: child,
+          ),
+          child: child,
+        ),
+      ),
+    );
   }
 
   Widget _buildFilePickerSection() {
@@ -1454,11 +1458,13 @@ class MessageInputState extends State<MessageInput> {
 
     // ignore: cast_nullable_to_non_nullable
     final renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
+    final position = renderBox.localToGlobal(Offset.zero);
+
+    final widHeight = 48 + (emojis.length > 2 ? 180 : emojis.length * 62.0);
 
     return OverlayEntry(
         builder: (context) => Positioned(
-              bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
+          top: position.dy - widHeight,
               left: 0,
               right: 0,
               child: Card(
