@@ -189,10 +189,10 @@ As you can see we generate a local notification whenever a message.new or notifi
 
 ### Foreground notifications
 
-Sometimes you want to show a notification when the app is in the foreground.
-For example, when you're typing a message in a channel and you receive a new message from someone in another channel, you want to get notified about it.
+Sometimes you may want to show a notification when the app is in the foreground.
+For example, when you're in a channel and you receive a new message from someone in another channel.
 
-Even in this case you can use the `flutter_local_notifications` package to show a notification.
+For this scenario, you can also use the `flutter_local_notifications` package to show a notification.
 
 You need to listen for new events using `StreamChatClient.on` and handle them accordingly.
 
@@ -211,8 +211,8 @@ client.on(
 ```
 
 :::note
-You should also check that the channel of the message is different than the channel in foreground.
-How you can do this depends on your app infrastructure and how you handle navigation.
+You should also check that the channel of the message is different than the channel in the foreground.
+How you do this depends on your app infrastructure and how you handle navigation.
 Take a look at the [Stream Chat v1 sample app](https://github.com/GetStream/flutter-samples/blob/main/packages/stream_chat_v1/lib/home_page.dart#L11) to see how we're doing it over there.
 :::
 
