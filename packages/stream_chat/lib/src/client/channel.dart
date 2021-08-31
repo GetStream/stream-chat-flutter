@@ -1934,6 +1934,8 @@ class ChannelClientState {
       read: newReads,
       pinnedMessages: updatedState.pinnedMessages,
     );
+
+    _computeInitialUnread();
   }
 
   int _sortByCreatedAt(Message a, Message b) =>
