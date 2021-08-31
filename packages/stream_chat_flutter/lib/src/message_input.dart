@@ -1021,7 +1021,7 @@ class MessageInputState extends State<MessageInput> {
       ),
     );
 
-    final widHeight = 66 + (40 * commands.length);
+    final widHeight = 64 + (40 * commands.length);
 
     return OverlayEntry(
       builder: (context) => Positioned(
@@ -1460,7 +1460,7 @@ class MessageInputState extends State<MessageInput> {
     final renderBox = context.findRenderObject() as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero);
 
-    final widHeight = 48 + (emojis.length > 2 ? 180 : emojis.length * 62.0);
+    final widHeight = 38 + (emojis.length > 2 ? 180 : emojis.length * 62.0);
 
     return OverlayEntry(
         builder: (context) => Positioned(
