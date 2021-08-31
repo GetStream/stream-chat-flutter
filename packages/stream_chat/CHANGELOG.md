@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed unread indicator not updating correctly
+
 ## 2.2.0
 
 🐞 Fixed
