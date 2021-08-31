@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed unread indicator not updating correctly
+- Fix `channel.show` not working because of null body
+
 ## 2.2.0
 
 🐞 Fixed
