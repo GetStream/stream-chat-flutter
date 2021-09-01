@@ -37,7 +37,7 @@ jobs:
               "llc": "packages/stream_chat",
               "ui": "packages/stream_chat_flutter",
               "core": "packages/stream_chat_flutter_core",
-              "localization": "packages/stream_chat_flutter_localizations",
+              "localization": "packages/stream_chat_localizations",
               "persistence": "packages/stream_chat_persistence"
             }
         env:

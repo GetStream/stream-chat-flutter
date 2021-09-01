@@ -1,3 +1,7 @@
+## 2.2.1
+
+- Updated `stream_chat` dependency to 2.2.1
+
 ## 2.2.0
 
 🛑️ Breaking Changes from `2.1.1`

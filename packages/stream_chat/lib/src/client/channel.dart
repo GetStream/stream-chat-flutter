@@ -1488,7 +1488,7 @@ class ChannelClientState {
 
     _listenMemberRemoved();
 
-    _computeInitialUnread();
+    _computeUnread();
 
     _startCleaning();
 
@@ -1512,11 +1512,11 @@ class ChannelClientState {
 
   final _subscriptions = <StreamSubscription>[];
 
-  void _computeInitialUnread() {
+  void _computeUnread() {
     final userRead = channelState.read.firstWhereOrNull(
       (r) => r.user.id == _channel._client.state.currentUser?.id,
     );
-    if (userRead != null) {
+    if (userRead != null && userRead.unreadMessages > 0) {
       unreadCount = userRead.unreadMessages;
     }
   }
@@ -1934,6 +1934,8 @@ class ChannelClientState {
       read: newReads,
       pinnedMessages: updatedState.pinnedMessages,
     );
+
+    _computeUnread();
   }
 
   int _sortByCreatedAt(Message a, Message b) =>

@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+* Fixed typos in `Italian` translations.
+
 ## 1.1.0
 
 ✅ Added

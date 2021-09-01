@@ -1,3 +1,7 @@
+## 2.2.1
+
+- Updated `stream_chat_flutter_core` dependency to 2.2.1
+
 ## 2.2.0
 
 ✅ Added

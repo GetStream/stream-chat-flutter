@@ -187,8 +187,33 @@ StreamChat(
 
 As you can see we generate a local notification whenever a message.new or notification.message_new event is received.
 
+### Foreground notifications
+
+Sometimes you may want to show a notification when the app is in the foreground.
+For example, when you're in a channel and you receive a new message from someone in another channel.
+
+For this scenario, you can also use the `flutter_local_notifications` package to show a notification.
+
+You need to listen for new events using `StreamChatClient.on` and handle them accordingly.
+
+Here we're checking if the event is a `message.new` or `notification.message_new` event, and if the message is from a different user than the current user. In that case we'll show a notification.
+
+```dart
+client.on(
+  EventType.messageNew,
+  EventType.notificationMessageNew,
+).listen((event) {
+  if (event.message?.user?.id == client.state.currentUser?.id) {
+    return;
+  }
+  showLocalNotification(event, client.state.currentUser!.id, context);
+});
+```
+
 :::note
-Using `flutter_local_notifications` is a great way to implement notifications while the is in foreground too! You can generate a local notification listening to events using the method `streamChatClient.on()` and react to the events you want.
+You should also check that the channel of the message is different than the channel in the foreground.
+How you do this depends on your app infrastructure and how you handle navigation.
+Take a look at the [Stream Chat v1 sample app](https://github.com/GetStream/flutter-samples/blob/main/packages/stream_chat_v1/lib/home_page.dart#L11) to see how we're doing it over there.
 :::
 
 ### Saving notification messages to the offline storage
