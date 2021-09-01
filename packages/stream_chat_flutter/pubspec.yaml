@@ -12,7 +12,6 @@ environment:
 dependencies:
   cached_network_image: ^3.1.0
   characters: ^1.1.0
-  chewie: ^1.2.2
   collection: ^1.15.0
   dio: ^4.0.0
   ezanimation: ^0.5.0
@@ -45,6 +44,9 @@ dependencies:
   video_player: ^2.1.14
   video_thumbnail: ^0.3.3
   visibility_detector: ^0.2.0
+  chewie:
+    git:
+      url: https://github.com/rlee1990/chewie.git
 
 flutter:
   assets:
