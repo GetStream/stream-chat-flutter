@@ -12,7 +12,10 @@ class MyObserver extends NavigatorObserver {
   Route? currentRoute;
   late final StreamSubscription _subscription;
 
-  MyObserver(StreamChatClient client, BuildContext context) {
+  MyObserver(
+    StreamChatClient client,
+    GlobalKey<NavigatorState> navigatorKey,
+  ) {
     _subscription = client
         .on(
       EventType.messageNew,
@@ -30,7 +33,11 @@ class MyObserver extends NavigatorObserver {
         }
       }
 
-      showLocalNotification(event, client.state.currentUser!.id, context);
+      showLocalNotification(
+        event,
+        client.state.currentUser!.id,
+        navigatorKey.currentState!.context,
+      );
     });
   }
 
@@ -103,7 +110,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void didChangeDependencies() {
     _observer?.dispose();
-    _observer = MyObserver(widget.chatClient, context);
+    _observer = MyObserver(widget.chatClient, _navigatorKey);
     super.didChangeDependencies();
   }
 }
