@@ -68,26 +68,32 @@ class UserAvatar extends StatelessWidget {
 
     Widget avatar = FittedBox(
       fit: BoxFit.cover,
-      child: ClipRRect(
-        borderRadius: borderRadius ??
-            streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius,
-        child: Container(
-          constraints: constraints ??
-              streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
-          child: hasImage
-              ? CachedNetworkImage(
-                  fit: BoxFit.cover,
-                  filterQuality: FilterQuality.high,
-                  imageUrl: user.image!,
-                  errorWidget: (context, __, ___) =>
-                      streamChatTheme.defaultUserImage(context, user),
-                  placeholder: placeholder != null
-                      ? (context, __) => placeholder(context, user)
-                      : null,
-                )
-              : streamChatTheme.defaultUserImage(context, user),
-        ),
-      ),
+      child: hasImage
+          ? CachedNetworkImage(
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+              imageUrl: user.image!,
+              imageBuilder: (context, imageProvider) => Container(
+                constraints: constraints ??
+                    streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
+                decoration: BoxDecoration(
+                  borderRadius: borderRadius ??
+                      streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius,
+                  image:
+                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                ),
+              ),
+              errorWidget: (context, __, ___) =>
+                  streamChatTheme.defaultUserImage(context, user),
+              placeholder: placeholder != null
+                  ? (context, __) => placeholder(context, user)
+                  : null,
+            )
+          : ClipRRect(
+              borderRadius: borderRadius ??
+                  streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius,
+              child: streamChatTheme.defaultUserImage(context, user),
+            ),
     );
 
     if (selected) {
