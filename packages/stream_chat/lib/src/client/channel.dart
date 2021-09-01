@@ -1516,7 +1516,7 @@ class ChannelClientState {
     final userRead = channelState.read.firstWhereOrNull(
       (r) => r.user.id == _channel._client.state.currentUser?.id,
     );
-    if (userRead != null) {
+    if (userRead != null && userRead.unreadMessages > 0) {
       unreadCount = userRead.unreadMessages;
     }
   }
