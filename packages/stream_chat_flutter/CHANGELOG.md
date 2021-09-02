@@ -46,7 +46,6 @@ breakdown:
 * `UserListViewTheme` is now `UserListViewThemeData`
 
 - Updated core dependency.
-- `UserAvatar` no longer uses a clipper by default.
 
 🐞 Fixed
 
