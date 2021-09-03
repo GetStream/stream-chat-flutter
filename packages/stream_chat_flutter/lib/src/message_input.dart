@@ -11,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/overlays.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
@@ -318,7 +319,7 @@ class MessageInputState extends State<MessageInput> {
   late final FocusNode _focusNode;
   bool _inputEnabled = true;
   bool _commandEnabled = false;
-  OverlayEntry? _commandsOverlay, _mentionsOverlay, _emojiOverlay;
+  Widget? _commandsOverlay, _mentionsOverlay, _emojiOverlay;
   late Iterable<String> _emojiNames;
 
   Command? _chosenCommand;
@@ -469,7 +470,21 @@ class MessageInputState extends State<MessageInput> {
         child: child,
       );
     }
-    return child;
+    return AnchoredOverlay(
+      showOverlay: _commandsOverlay != null ||
+          _emojiOverlay != null ||
+          _mentionsOverlay != null,
+      overlayBuilder: (context, offset) {
+        if (_commandsOverlay != null) {
+          return _buildCommandsOverlayEntry();
+        } else if (_emojiOverlay != null) {
+          return _buildEmojiOverlay();
+        } else {
+          return _buildMentionsOverlayEntry();
+        }
+      },
+      child: child,
+    );
   }
 
   Flex _buildTextField(BuildContext context) => Flex(
@@ -811,11 +826,8 @@ class MessageInputState extends State<MessageInput> {
                   1);
         });
 
-        _commandsOverlay?.remove();
         _commandsOverlay = null;
-        _mentionsOverlay?.remove();
         _mentionsOverlay = null;
-        _emojiOverlay?.remove();
         _emojiOverlay = null;
 
         _checkCommands(s.trim(), context);
@@ -861,9 +873,9 @@ class MessageInputState extends State<MessageInput> {
       } else {
         _emojiOverlay = _buildEmojiOverlay();
 
-        if (_emojiOverlay != null) {
-          Overlay.of(context)!.insert(_emojiOverlay!);
-        }
+        // if (_emojiOverlay != null) {
+        //   Overlay.of(context)!.insert(_emojiOverlay!);
+        // }
       }
     }
   }
@@ -877,9 +889,6 @@ class MessageInputState extends State<MessageInput> {
             .last
             .contains('@')) {
       _mentionsOverlay = _buildMentionsOverlayEntry();
-      if (_mentionsOverlay != null) {
-        Overlay.of(context)!.insert(_mentionsOverlay!);
-      }
     }
   }
 
@@ -899,18 +908,14 @@ class MessageInputState extends State<MessageInput> {
         setState(() {
           _commandEnabled = true;
         });
-        _commandsOverlay?.remove();
         _commandsOverlay = null;
       } else {
         _commandsOverlay = _buildCommandsOverlayEntry();
-        if (_commandsOverlay != null) {
-          Overlay.of(context)!.insert(_commandsOverlay!);
-        }
       }
     }
   }
 
-  OverlayEntry? _buildCommandsOverlayEntry() {
+  Widget _buildCommandsOverlayEntry() {
     final text = textEditingController.text.trimLeft();
     final commands = StreamChannel.of(context)
             .channel
@@ -920,15 +925,7 @@ class MessageInputState extends State<MessageInput> {
             .toList() ??
         [];
 
-    if (commands.isEmpty) {
-      return null;
-    }
-
-    // ignore: cast_nullable_to_non_nullable
-    final renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-
-    final child = Padding(
+    return Padding(
       padding: const EdgeInsets.all(8),
       child: Card(
         elevation: 2,
@@ -1020,22 +1017,6 @@ class MessageInputState extends State<MessageInput> {
         ),
       ),
     );
-    return OverlayEntry(
-        builder: (context) => Positioned(
-              bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
-              left: 0,
-              right: 0,
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: 1),
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOutExpo,
-                builder: (context, val, child) => Transform.scale(
-                  scale: val,
-                  child: child,
-                ),
-                child: child,
-              ),
-            ));
   }
 
   Widget _buildFilePickerSection() {
@@ -1323,7 +1304,7 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  OverlayEntry? _buildMentionsOverlayEntry() {
+  Widget _buildMentionsOverlayEntry() {
     final splits = textEditingController.text
         .substring(0, textEditingController.value.selection.start)
         .split('@');
@@ -1342,10 +1323,6 @@ class MessageInputState extends State<MessageInput> {
             .where((m) => m.user?.name.toLowerCase().contains(query) == true)
             .toList() ??
         [];
-
-    if (members.isEmpty) {
-      return null;
-    }
 
     // ignore: cast_nullable_to_non_nullable
     final renderBox = context.findRenderObject() as RenderBox;
@@ -1396,7 +1373,6 @@ class MessageInputState extends State<MessageInput> {
                             ),
                           );
                           _debounce!.cancel();
-                          _mentionsOverlay?.remove();
                           _mentionsOverlay = null;
                         },
                         child: widget.mentionsTileBuilder != null
@@ -1414,133 +1390,119 @@ class MessageInputState extends State<MessageInput> {
         ),
       ),
     );
-    return OverlayEntry(
-      builder: (context) => Positioned(
-        bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
-        left: 0,
-        right: 0,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: 1),
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOutExpo,
-          builder: (context, val, child) => Transform.scale(
-            scale: val,
-            child: child,
-          ),
+    return Positioned(
+      bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
+      left: 0,
+      right: 0,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOutExpo,
+        builder: (context, val, child) => Transform.scale(
+          scale: val,
           child: child,
         ),
+        child: child,
       ),
     );
   }
 
-  OverlayEntry? _buildEmojiOverlay() {
+  Widget _buildEmojiOverlay() {
     final splits = textEditingController.text
         .substring(0, textEditingController.value.selection.start)
         .split(':');
     final query = splits.last.toLowerCase();
-
-    if (query.isEmpty) {
-      return null;
-    }
 
     final emojis = _emojiNames
         .where((e) => e.contains(query))
         .map(Emoji.byName)
         .where((e) => e != null);
 
-    if (emojis.isEmpty) {
-      return null;
-    }
-
     // ignore: cast_nullable_to_non_nullable
     final renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
 
-    return OverlayEntry(
-        builder: (context) => Positioned(
-              bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
-              left: 0,
-              right: 0,
-              child: Card(
-                margin: const EdgeInsets.all(8),
-                elevation: 2,
-                color: _streamChatTheme.colorTheme.barsBg,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                clipBehavior: Clip.hardEdge,
-                child: Container(
-                  constraints: BoxConstraints.loose(const Size.fromHeight(200)),
-                  decoration: BoxDecoration(
-                    boxShadow: const [
-                      BoxShadow(
-                        spreadRadius: -8,
-                        blurRadius: 5,
-                        offset: Offset(0, -4),
-                      ),
-                    ],
-                    color: _streamChatTheme.colorTheme.barsBg,
-                  ),
-                  child: ListView.builder(
-                      padding: const EdgeInsets.all(0),
-                      shrinkWrap: true,
-                      itemCount: emojis.length + 1,
-                      itemBuilder: (context, i) {
-                        if (i == 0) {
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 8, top: 8),
-                            child: Row(
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: StreamSvgIcon.smile(
-                                    color: _streamChatTheme
-                                        .colorTheme.accentPrimary,
-                                  ),
-                                ),
-                                Flexible(
-                                  child: Text(
-                                    context.translations.emojiMatchingQueryText(
-                                      query,
-                                    ),
-                                    style: TextStyle(
-                                      color: _streamChatTheme
-                                          .colorTheme.textHighEmphasis
-                                          .withOpacity(.5),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          );
-                        }
-
-                        final emoji = emojis.elementAt(i - 1)!;
-                        final themeData = Theme.of(context);
-                        return ListTile(
-                          title: SubstringHighlight(
-                            text:
-                                // ignore: lines_longer_than_80_chars
-                                "${emoji.char} ${emoji.name!.replaceAll('_', ' ')}",
-                            term: query,
-                            textStyleHighlight:
-                                themeData.textTheme.headline6!.copyWith(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textStyle: themeData.textTheme.headline6!.copyWith(
-                              fontSize: 14.5,
-                            ),
-                          ),
-                          onTap: () {
-                            _chooseEmoji(splits, emoji);
-                          },
-                        );
-                      }),
-                ),
+    return Positioned(
+      bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
+      left: 0,
+      right: 0,
+      child: Card(
+        margin: const EdgeInsets.all(8),
+        elevation: 2,
+        color: _streamChatTheme.colorTheme.barsBg,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: Container(
+          constraints: BoxConstraints.loose(const Size.fromHeight(200)),
+          decoration: BoxDecoration(
+            boxShadow: const [
+              BoxShadow(
+                spreadRadius: -8,
+                blurRadius: 5,
+                offset: Offset(0, -4),
               ),
-            ));
+            ],
+            color: _streamChatTheme.colorTheme.barsBg,
+          ),
+          child: ListView.builder(
+            padding: const EdgeInsets.all(0),
+            shrinkWrap: true,
+            itemCount: emojis.length + 1,
+            itemBuilder: (context, i) {
+              if (i == 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8, top: 8),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: StreamSvgIcon.smile(
+                          color: _streamChatTheme.colorTheme.accentPrimary,
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          context.translations.emojiMatchingQueryText(
+                            query,
+                          ),
+                          style: TextStyle(
+                            color: _streamChatTheme.colorTheme.textHighEmphasis
+                                .withOpacity(.5),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              }
+
+              final emoji = emojis.elementAt(i - 1)!;
+              final themeData = Theme.of(context);
+              return ListTile(
+                title: SubstringHighlight(
+                  text:
+                      // ignore: lines_longer_than_80_chars
+                      "${emoji.char} ${emoji.name!.replaceAll('_', ' ')}",
+                  term: query,
+                  textStyleHighlight: themeData.textTheme.headline6!.copyWith(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textStyle: themeData.textTheme.headline6!.copyWith(
+                    fontSize: 14.5,
+                  ),
+                ),
+                onTap: () {
+                  _chooseEmoji(splits, emoji);
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   void _chooseEmoji(List<String> splits, Emoji emoji) {
@@ -1555,7 +1517,6 @@ class MessageInputState extends State<MessageInput> {
       ),
     );
 
-    _emojiOverlay?.remove();
     _emojiOverlay = null;
   }
 
@@ -1565,7 +1526,6 @@ class MessageInputState extends State<MessageInput> {
       _chosenCommand = c;
       _commandEnabled = true;
     });
-    _commandsOverlay?.remove();
     _commandsOverlay = null;
   }
 
@@ -1778,13 +1738,9 @@ class MessageInputState extends State<MessageInput> {
         if (_commandsOverlay == null) {
           setState(() {
             _commandsOverlay = _buildCommandsOverlayEntry();
-            if (_commandsOverlay != null) {
-              Overlay.of(context)!.insert(_commandsOverlay!);
-            }
           });
         } else {
           setState(() {
-            _commandsOverlay?.remove();
             _commandsOverlay = null;
           });
         }
@@ -1809,11 +1765,8 @@ class MessageInputState extends State<MessageInput> {
       ),
       splashRadius: 24,
       onPressed: () async {
-        _emojiOverlay?.remove();
         _emojiOverlay = null;
-        _commandsOverlay?.remove();
         _commandsOverlay = null;
-        _mentionsOverlay?.remove();
         _mentionsOverlay = null;
 
         if (_openFilePickerSection) {
@@ -2100,9 +2053,7 @@ class MessageInputState extends State<MessageInput> {
       _commandEnabled = false;
     });
 
-    _commandsOverlay?.remove();
     _commandsOverlay = null;
-    _mentionsOverlay?.remove();
     _mentionsOverlay = null;
 
     Message message;
@@ -2246,9 +2197,6 @@ class MessageInputState extends State<MessageInput> {
 
   @override
   void dispose() {
-    _commandsOverlay?.remove();
-    _emojiOverlay?.remove();
-    _mentionsOverlay?.remove();
     _keyboardListener?.cancel();
     textEditingController.dispose();
     _stopSlowMode();
