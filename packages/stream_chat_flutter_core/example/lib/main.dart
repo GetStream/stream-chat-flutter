@@ -329,21 +329,9 @@ class _MessageScreenState extends State<MessageScreen> {
   }
 }
 
-/// Extensions can be used to add functionality to the SDK. In the examples
-/// below, we add two simple extensions to the [StreamChatClient] and [Channel].
+/// Extensions can be used to add functionality to the SDK. In the example
+/// below, we add a simple extensions to the [StreamChatClient].
 extension on StreamChatClient {
   /// Fetches the current user id.
   String get uid => state.currentUser!.id;
-}
-
-extension on Channel {
-  /// Fetches the name of the channel by accessing [extraData] or [cid].
-  String? get name {
-    final _channelName = extraData['name'];
-    if (_channelName != null) {
-      return _channelName as String;
-    } else {
-      return cid;
-    }
-  }
 }

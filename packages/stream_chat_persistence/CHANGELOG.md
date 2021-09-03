@@ -1,3 +1,9 @@
+## 2.2.0
+
+- Updated llc dependency
+- Added support for message.i18n
+- Added support for user.language
+
 ## 2.1.1
 
 - Updated llc dependency

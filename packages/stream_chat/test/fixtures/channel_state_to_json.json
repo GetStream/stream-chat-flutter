@@ -4,6 +4,7 @@
     "id": "dev",
     "type": "team",
     "frozen": true,
+    "cooldown": 0,
     "name": "#dev",
     "image": "https://cdn.chrisshort.net/testing-certificate-chains-in-go/GOPHER_MIC_DROP.png",
     "example": 1

@@ -1,0 +1,182 @@
+---
+id: customize_message_widget
+sidebar_position: 11
+title: Customizing The MessageWidget
+---
+
+Customizing Text Messages
+
+### Introduction
+
+Every application provides a unique look and feel to their own messaging interface including and not
+limited to fonts, colors, and shapes.
+
+This guide details how to customize the `MessageWidget` in the Stream Chat Flutter UI SDK.
+
+### Building Custom Messages
+
+This guide goes into detail about the ability to customize the `MessageWidget`. However, if you want
+to customize the default `MessageWidget` in the `MessageListView` provided, you can use the `.copyWith()` method
+provided inside the `messageBuilder` parameter of the `MessageListView` like this:
+
+```dart
+MessageListView(
+    messageBuilder: (context, details, messageList, defaultImpl) {
+        // Your implementation of the message here
+        // E.g: return Text(details.message.text ?? '');
+    },
+),
+```
+
+### Theming
+
+You can customize the `MessageWidget` using the `StreamChatTheme` class, so that you can change the
+message theme at the top instead of creating your own `MessageWidget` at the lower implementation level.
+
+There are several things you can change in the theme including text styles and colors of various elements.
+
+You can also set a different theme for the user's own messages and messages received by them.
+
+:::note
+Theming allows you to change minor factors like style while using the widget directly allows you much
+more customization such as replacing a certain widget with another. Some things can only be customized
+through the widget and not the theme.
+:::
+
+Here is an example:
+
+```dart
+StreamChatThemeData(
+
+  /// Sets theme for user's messages
+  ownMessageTheme: MessageThemeData(
+    messageBackgroundColor: colorTheme.textHighEmphasis,
+  ),
+
+  /// Sets theme for received messages
+  otherMessageTheme: MessageThemeData(
+    avatarTheme: AvatarThemeData(
+      borderRadius: BorderRadius.circular(8),
+    ),
+  ),
+
+)
+```
+
+![](../assets/message_theming.png)
+
+#### Change message text style
+
+The `MessageWidget` has multiple `Text` widgets that you can manipulate the styles of. The three main
+are the actual message text, user name, message links, and the message timestamp.
+
+```dart
+MessageThemeData(
+  messageTextStyle: TextStyle(...),
+  createdAtStyle: TextStyle(...),
+  messageAuthorStyle: TextStyle(...),
+  messageLinksStyle: TextStyle(...),
+)
+```
+
+![](../assets/message_styles.png)
+
+#### Change avatar theme
+
+You can change the attributes of the avatar (if displayed) using the `avatarTheme` property.
+
+```dart
+MessageThemeData(
+    avatarTheme: AvatarThemeData(
+      borderRadius: BorderRadius.circular(8),
+    ),
+)
+```
+
+![](../assets/message_rounded_avatar.png)
+
+#### Changing Reaction theme
+
+You also customize the reactions attached to every message using the theme.
+
+```dart
+MessageThemeData(
+  reactionsBackgroundColor: Colors.red,
+  reactionsBorderColor: Colors.redAccent,
+  reactionsMaskColor: Colors.pink,
+),
+```
+
+![](../assets/message_reaction_theming.png)
+
+### Changing Message Actions
+
+When a message is long pressed, the `MessageActionsModal` is shown.
+
+The `MessageWidget` allows showing or hiding some options if you so choose.
+
+```dart
+MessageWidget(
+    ...
+    showUsername = true,
+    showTimestamp = true,
+    showReactions = true,
+    showDeleteMessage = true,
+    showEditMessage = true,
+    showReplyMessage = true,
+    showThreadReplyMessage = true,
+    showResendMessage = true,
+    showCopyMessage = true,
+    showFlagButton = true,
+    showPinButton = true,
+    showPinHighlight = true,
+),
+```
+
+![](../assets/message_widget_actions.png)
+
+### Building attachments
+
+The `customAttachmentBuilder` property allows you to build any kind of attachment (inbuilt or custom)
+in your own way. While a separate guide is written for this, it is included here because of relevance.
+
+```dart
+MessageListView(
+  messageBuilder: (context, details, messages, defaultMessage) {
+    return defaultMessage.copyWith(
+        customAttachmentBuilders: {
+          'location': (context, message, attachments) {
+            final attachmentWidget = Image.network(
+              _buildMapAttachment(
+                attachments[0].extraData['latitude'],
+                attachments[0].extraData['longitude'],
+              ),
+            );
+
+            return wrapAttachmentWidget(context, attachmentWidget, null, true, BorderRadius.circular(8.0));
+          }
+        },
+    );
+  },
+),
+```
+
+### Widget Builders
+
+Some parameters allow you to construct your own widget in place of some elements in the `MessageWidget`.
+
+These are:
+* `userAvatarBuilder`  : Allows user to substitute their own widget in place of the user avatar.
+* `editMessageInputBuilder` : Allows user to substitute their own widget in place of the input in edit mode.
+* `textBuilder` : Allows user to substitute their own widget in place of the text.
+* `bottomRowBuilder` : Allows user to substitute their own widget in the bottom of the message when not deleted.
+* `deletedBottomRowBuilder` : Allows user to substitute their own widget in the bottom of the message when deleted.
+
+```dart
+MessageWidget(
+    ...
+    textBuilder: (context, message) {
+        // Add your own text implementation here.
+    },
+),
+```

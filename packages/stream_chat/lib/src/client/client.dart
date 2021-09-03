@@ -767,7 +767,9 @@ class StreamChatClient {
         cancelToken: cancelToken,
       );
 
-  /// Replaces the [channelId] of type [ChannelType] data with [data]
+  /// Replaces the [channelId] of type [ChannelType] data with [data].
+  ///
+  /// Use [updateChannelPartial] for a partial update.
   Future<UpdateChannelResponse> updateChannel(
     String channelId,
     String channelType,
@@ -781,7 +783,10 @@ class StreamChatClient {
         message: message,
       );
 
-  /// Updates the [channelId] of type [ChannelType] data with [data]
+  /// Partial update for the [channelId] of type [ChannelType]. Sets the
+  /// data provided in [set], and removes the attributes given in [unset].
+  ///
+  /// Use [updateChannel] for a full update.
   Future<PartialUpdateChannelResponse> updateChannelPartial(
     String channelId,
     String channelType, {
@@ -1245,6 +1250,28 @@ class StreamChatClient {
       _chatApi.message.translateMessage(
         messageId,
         language,
+      );
+
+  /// Enables slow mode
+  Future<PartialUpdateChannelResponse> enableSlowdown(
+    String channelId,
+    String channelType,
+    int cooldown,
+  ) async =>
+      _chatApi.channel.enableSlowdown(
+        channelId,
+        channelType,
+        cooldown,
+      );
+
+  /// Disables slow mode
+  Future<PartialUpdateChannelResponse> disableSlowdown(
+    String channelId,
+    String channelType,
+  ) async =>
+      _chatApi.channel.disableSlowdown(
+        channelId,
+        channelType,
       );
 
   /// Pins provided message

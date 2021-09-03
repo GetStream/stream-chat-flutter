@@ -97,6 +97,9 @@ class MyApp extends StatelessWidget {
           Locale('hi'),
           Locale('fr'),
           Locale('it'),
+          Locale('es'),
+          Locale('ja'),
+          Locale('ko'),
         ],
         // Add overridden "CustomStreamChatLocalizationsEn.delegate" along with
         // "GlobalStreamChatLocalizations.delegates"

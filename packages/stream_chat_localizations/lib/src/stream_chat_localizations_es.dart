@@ -355,11 +355,21 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get youText => 'Usted';
 
   @override
-  String get ofText => 'de';
+  String galleryPaginationText(
+          {required int currentPage, required int totalPages}) =>
+      '${currentPage + 1} de $totalPages';
 
   @override
   String get fileText => 'Archivo';
 
   @override
   String get replyToMessageLabel => 'Responder al Mensaje';
+
+  @override
+  String attachmentLimitExceedError(int limit) => '''
+No es posible añadir más de $limit archivos adjuntos
+  ''';
+
+  @override
+  String get slowModeOnLabel => 'Modo lento activado';
 }

@@ -100,6 +100,9 @@ abstract class Translations {
   /// The label for write a message in [MessageInput]
   String get writeAMessageLabel;
 
+  /// The label for slow mode enabled in [MessageInput]
+  String get slowModeOnLabel;
+
   /// The label for instant commands in [MessageInput]
   String get instantCommandsLabel;
 
@@ -296,14 +299,19 @@ abstract class Translations {
   /// The text shown for "You"
   String get youText;
 
-  /// The text shown for "Of"
-  String get ofText;
+  /// Gallery footer pagination text
+  String galleryPaginationText(
+      {required int currentPage, required int totalPages});
 
   /// The text shown for "File"
   String get fileText;
 
   /// The label for "Reply to message"
   String get replyToMessageLabel;
+
+  /// Label for "Attachment limit exceeded:
+  /// it's not possible to add more than $limit attachments"
+  String attachmentLimitExceedError(int limit);
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -657,11 +665,20 @@ class DefaultTranslations implements Translations {
   String get youText => 'You';
 
   @override
-  String get ofText => 'of';
+  String galleryPaginationText(
+          {required int currentPage, required int totalPages}) =>
+      '${currentPage + 1} of $totalPages';
 
   @override
   String get fileText => 'File';
 
   @override
   String get replyToMessageLabel => 'Reply to Message';
+
+  @override
+  String get slowModeOnLabel => 'Slow mode ON';
+
+  @override
+  String attachmentLimitExceedError(int limit) => """
+Attachment limit exceeded: it's not possible to add more than $limit attachments""";
 }
