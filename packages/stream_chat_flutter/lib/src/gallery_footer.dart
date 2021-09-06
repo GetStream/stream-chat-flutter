@@ -27,6 +27,7 @@ class GalleryFooter extends StatefulWidget implements PreferredSizeWidget {
     this.totalPages = 0,
     this.mediaAttachments = const [],
     this.mediaSelectedCallBack,
+    this.backgroundColor,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -54,6 +55,9 @@ class GalleryFooter extends StatefulWidget implements PreferredSizeWidget {
 
   /// Callback when media is selected
   final ValueChanged<int>? mediaSelectedCallBack;
+
+  /// The background color of this [GalleryFooter].
+  final Color? backgroundColor;
 
   @override
   _GalleryFooterState createState() => _GalleryFooterState();
@@ -90,7 +94,8 @@ class _GalleryFooterState extends State<GalleryFooter> {
         context: context,
         removeTop: true,
         child: BottomAppBar(
-          color: galleryFooterThemeData.backgroundColor,
+          color:
+              widget.backgroundColor ?? galleryFooterThemeData.backgroundColor,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -137,9 +142,9 @@ class _GalleryFooterState extends State<GalleryFooter> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        '${widget.currentPage + 1} '
-                        '${context.translations.ofText} '
-                        '${widget.totalPages}',
+                        context.translations.galleryPaginationText(
+                            currentPage: widget.currentPage,
+                            totalPages: widget.totalPages),
                         style: galleryFooterThemeData.titleTextStyle,
                       ),
                     ],

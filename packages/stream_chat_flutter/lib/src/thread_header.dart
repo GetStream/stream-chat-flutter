@@ -70,6 +70,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.onTitleTap,
     this.showTypingIndicator = true,
+    this.backgroundColor,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -101,6 +102,9 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// If true the typing indicator will be rendered
   /// if a user is typing in this thread
   final bool showTypingIndicator;
+
+  /// The background color of this [ThreadHeader].
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +140,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                   showUnreads: true,
                 )
               : const SizedBox()),
-      backgroundColor: channelHeaderTheme.color,
+      backgroundColor: backgroundColor ?? channelHeaderTheme.color,
       centerTitle: true,
       actions: actions,
       title: InkWell(

@@ -197,7 +197,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
       'कार्रवाई पूरी नहीं की जा सकी.';
 
   @override
-  String get replyLabel => 'रिप्लाई';
+  String get replyLabel => 'जवाब दें';
 
   @override
   String togglePinUnpinText({required bool pinned}) {
@@ -224,7 +224,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get photosLabel => 'तस्वीरें';
+  String get photosLabel => 'फ़ोटोज';
 
   String _getDay(DateTime dateTime) {
     final now = DateTime.now();
@@ -250,10 +250,10 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get todayLabel => 'आज';
 
   @override
-  String get yesterdayLabel => 'बिता हुआ कल';
+  String get yesterdayLabel => 'कल';
 
   @override
-  String get channelIsMutedText => 'चैनल मौन है';
+  String get channelIsMutedText => 'चैनल म्यूट है';
 
   @override
   String get noTitleText => 'कोई शीर्षक नहीं';
@@ -340,20 +340,30 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get sendLabel => 'भेजें';
 
   @override
-  String get withText => 'विद';
+  String get withText => 'विद'; //TODO: break?
 
   @override
-  String get inText => 'इन';
+  String get inText => 'इन'; //TODO: break?
 
   @override
   String get youText => 'आप';
 
   @override
-  String get ofText => 'ऑफ़';
+  String galleryPaginationText(
+          {required int currentPage, required int totalPages}) =>
+      '${currentPage + 1} ऑफ़ $totalPages';
 
   @override
   String get fileText => 'फ़ाइल';
 
   @override
   String get replyToMessageLabel => 'संदेश का जवाब';
+
+  @override
+  String attachmentLimitExceedError(int limit) => '''
+अटैचमेंट लिमिट: $limit अटैचमेंट से अधिक जोड़ना संभव नहीं है
+  ''';
+
+  @override
+  String get slowModeOnLabel => 'स्लो मोड चालू';
 }

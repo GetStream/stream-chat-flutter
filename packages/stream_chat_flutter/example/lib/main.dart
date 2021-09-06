@@ -73,6 +73,7 @@ class MyApp extends StatelessWidget {
           Locale('hi'),
           Locale('fr'),
           Locale('it'),
+          Locale('es'),
         ],
         localizationsDelegates: GlobalStreamChatLocalizations.delegates,
         builder: (context, widget) => StreamChat(
@@ -105,7 +106,7 @@ class ChannelPage extends StatelessWidget {
             Expanded(
               child: MessageListView(),
             ),
-            MessageInput(),
+            MessageInput(attachmentLimit: 3),
           ],
         ),
       );

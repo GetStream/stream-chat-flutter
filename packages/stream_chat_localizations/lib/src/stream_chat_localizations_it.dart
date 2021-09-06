@@ -255,7 +255,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get yesterdayLabel => 'Ieri';
 
   @override
-  String get channelIsMutedText => 'Il canale è mutato';
+  String get channelIsMutedText => 'Il canale è silenziato';
 
   @override
   String get noTitleText => 'Nessun titolo';
@@ -274,7 +274,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get loadingChannelsError => 'Errore durante il caricamento dei canali';
 
   @override
-  String get deleteConversationLabel => 'Elemina conversazione';
+  String get deleteConversationLabel => 'Elimina conversazione';
 
   @override
   String get deleteConversationQuestion =>
@@ -351,11 +351,21 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get youText => 'te';
 
   @override
-  String get ofText => 'di';
+  String galleryPaginationText(
+          {required int currentPage, required int totalPages}) =>
+      '${currentPage + 1} di $totalPages';
 
   @override
   String get fileText => 'file';
 
   @override
   String get replyToMessageLabel => 'Rispondi al messaggio';
+
+  @override
+  String attachmentLimitExceedError(int limit) => '''
+Attenzione: il limite massimo di $limit file è stato superato.
+  ''';
+
+  @override
+  String get slowModeOnLabel => 'Slowmode attiva';
 }

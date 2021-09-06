@@ -21,17 +21,19 @@ void main() {
       when(() => clientState.currentUser).thenReturn(user);
       when(() => clientState.currentUserStream)
           .thenAnswer((_) => Stream.value(user));
+      when(() => channel.lastMessageAtStream)
+          .thenAnswer((_) => Stream.value(lastMessageAt));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test name',
-          }));
-      when(() => channel.extraData).thenReturn({
-        'name': 'test name',
-      });
+      when(() => channel.nameStream)
+          .thenAnswer((i) => Stream.value('test name'));
+      when(() => channel.name).thenReturn('test name');
+      when(() => channel.imageStream)
+          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => clientState.channels).thenReturn({
         channel.cid!: channel,
       });

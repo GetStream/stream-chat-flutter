@@ -17,7 +17,7 @@ class UnreadIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final client = StreamChat.of(context).client;
     return IgnorePointer(
-      child: BetterStreamBuilder<int?>(
+      child: BetterStreamBuilder<int>(
         stream: cid != null
             ? client.state.channels[cid]?.state?.unreadCountStream
             : client.state.totalUnreadCountStream,
@@ -25,7 +25,7 @@ class UnreadIndicator extends StatelessWidget {
             ? client.state.channels[cid]?.state?.unreadCount
             : client.state.totalUnreadCount,
         builder: (context, data) {
-          if (data == null || data == 0) {
+          if (data == 0) {
             return const Offstage();
           }
           return Material(

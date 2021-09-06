@@ -21,17 +21,13 @@ void main() {
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
-      when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
-      when(() => channel.extraData).thenReturn({
-        'name': 'test',
-      });
+      when(() => channel.isMutedStream).thenAnswer((_) => Stream.value(false));
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+      when(() => channel.name).thenReturn('test');
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
+      when(() => channelState.membersStream).thenAnswer((_) => Stream.value([
             Member(
               userId: 'user-id',
               user: User(id: 'user-id'),
