@@ -16,17 +16,17 @@ class AnchoredOverlay extends StatelessWidget {
     return new Container(
       child: new LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
-            return new OverlayBuilder(
-              showOverlay: showOverlay,
-              overlayBuilder: (BuildContext overlayContext) {
-                RenderBox box = context.findRenderObject() as RenderBox;
-                final center =
+        return new OverlayBuilder(
+          showOverlay: showOverlay,
+          overlayBuilder: (BuildContext overlayContext) {
+            RenderBox box = context.findRenderObject() as RenderBox;
+            final center =
                 box.size.center(box.localToGlobal(const Offset(0.0, 0.0)));
-                return overlayBuilder(overlayContext, center);
-              },
-              child: child,
-            );
-          }),
+            return overlayBuilder(overlayContext, center);
+          },
+          child: child,
+        );
+      }),
     );
   }
 }
@@ -84,7 +84,7 @@ class _OverlayBuilderState extends State<OverlayBuilder> {
   bool isShowingOverlay() => overlayEntry != null;
 
   void showOverlay() {
-    overlayEntry = new OverlayEntry(
+    overlayEntry = OverlayEntry(
       builder: widget.overlayBuilder,
     );
     if (overlayEntry != null) {
@@ -128,12 +128,17 @@ class CenterAbout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Positioned(
-      top: position.dy,
+    var size = MediaQuery.of(context).size;
+
+    return Positioned(
+      bottom: size.height - position.dy,
       left: position.dx,
-      child: new FractionalTranslation(
-        translation: const Offset(-0.5, -0.5),
-        child: child,
+      child: FractionalTranslation(
+        translation: const Offset(-0.5, 0.0),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 32.0),
+          child: child,
+        ),
       ),
     );
   }

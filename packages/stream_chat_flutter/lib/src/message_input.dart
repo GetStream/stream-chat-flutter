@@ -11,7 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/overlays.dart';
+import 'package:stream_chat_flutter/src/overlays.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
@@ -475,13 +475,20 @@ class MessageInputState extends State<MessageInput> {
           _emojiOverlay != null ||
           _mentionsOverlay != null,
       overlayBuilder: (context, offset) {
+        late Widget child;
+
         if (_commandsOverlay != null) {
-          return _buildCommandsOverlayEntry();
+          child = _buildCommandsOverlayEntry();
         } else if (_emojiOverlay != null) {
-          return _buildEmojiOverlay();
+          child = _buildEmojiOverlay();
         } else {
-          return _buildMentionsOverlayEntry();
+          child = _buildMentionsOverlayEntry();
         }
+
+        return CenterAbout(
+          position: Offset(offset.dx, offset.dy),
+          child: child,
+        );
       },
       child: child,
     );
@@ -924,9 +931,10 @@ class MessageInputState extends State<MessageInput> {
             .where((c) => c.name.contains(text.replaceFirst('/', '')))
             .toList() ??
         [];
+    final size = MediaQuery.of(context).size;
 
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(4),
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -935,7 +943,7 @@ class MessageInputState extends State<MessageInput> {
         color: _streamChatTheme.colorTheme.barsBg,
         clipBehavior: Clip.hardEdge,
         child: Container(
-          constraints: BoxConstraints.loose(const Size.fromHeight(400)),
+          constraints: BoxConstraints.loose(Size(size.width - 16, 400)),
           decoration: BoxDecoration(
               color: _streamChatTheme.colorTheme.barsBg,
               borderRadius: BorderRadius.circular(8)),
@@ -1336,7 +1344,7 @@ class MessageInputState extends State<MessageInput> {
       ),
       clipBehavior: Clip.hardEdge,
       child: Container(
-        constraints: BoxConstraints.loose(const Size.fromHeight(240)),
+        constraints: BoxConstraints.loose(Size(size.width - 16, 200)),
         decoration: BoxDecoration(
           color: _streamChatTheme.colorTheme.barsBg,
         ),
@@ -1390,20 +1398,15 @@ class MessageInputState extends State<MessageInput> {
         ),
       ),
     );
-    return Positioned(
-      bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
-      left: 0,
-      right: 0,
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOutExpo,
-        builder: (context, val, child) => Transform.scale(
-          scale: val,
-          child: child,
-        ),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOutExpo,
+      builder: (context, val, child) => Transform.scale(
+        scale: val,
         child: child,
       ),
+      child: child,
     );
   }
 
@@ -1422,84 +1425,79 @@ class MessageInputState extends State<MessageInput> {
     final renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
 
-    return Positioned(
-      bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
-      left: 0,
-      right: 0,
-      child: Card(
-        margin: const EdgeInsets.all(8),
-        elevation: 2,
-        color: _streamChatTheme.colorTheme.barsBg,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+    return Card(
+      margin: const EdgeInsets.all(8),
+      elevation: 2,
+      color: _streamChatTheme.colorTheme.barsBg,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: Container(
+        constraints: BoxConstraints.loose(Size(size.width - 16, 200)),
+        decoration: BoxDecoration(
+          boxShadow: const [
+            BoxShadow(
+              spreadRadius: -8,
+              blurRadius: 5,
+              offset: Offset(0, -4),
+            ),
+          ],
+          color: _streamChatTheme.colorTheme.barsBg,
         ),
-        clipBehavior: Clip.hardEdge,
-        child: Container(
-          constraints: BoxConstraints.loose(const Size.fromHeight(200)),
-          decoration: BoxDecoration(
-            boxShadow: const [
-              BoxShadow(
-                spreadRadius: -8,
-                blurRadius: 5,
-                offset: Offset(0, -4),
-              ),
-            ],
-            color: _streamChatTheme.colorTheme.barsBg,
-          ),
-          child: ListView.builder(
-            padding: const EdgeInsets.all(0),
-            shrinkWrap: true,
-            itemCount: emojis.length + 1,
-            itemBuilder: (context, i) {
-              if (i == 0) {
-                return Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 8),
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: StreamSvgIcon.smile(
-                          color: _streamChatTheme.colorTheme.accentPrimary,
+        child: ListView.builder(
+          padding: const EdgeInsets.all(0),
+          shrinkWrap: true,
+          itemCount: emojis.length + 1,
+          itemBuilder: (context, i) {
+            if (i == 0) {
+              return Padding(
+                padding: const EdgeInsets.only(left: 8, top: 8),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: StreamSvgIcon.smile(
+                        color: _streamChatTheme.colorTheme.accentPrimary,
+                      ),
+                    ),
+                    Flexible(
+                      child: Text(
+                        context.translations.emojiMatchingQueryText(
+                          query,
+                        ),
+                        style: TextStyle(
+                          color: _streamChatTheme.colorTheme.textHighEmphasis
+                              .withOpacity(.5),
                         ),
                       ),
-                      Flexible(
-                        child: Text(
-                          context.translations.emojiMatchingQueryText(
-                            query,
-                          ),
-                          style: TextStyle(
-                            color: _streamChatTheme.colorTheme.textHighEmphasis
-                                .withOpacity(.5),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                );
-              }
-
-              final emoji = emojis.elementAt(i - 1)!;
-              final themeData = Theme.of(context);
-              return ListTile(
-                title: SubstringHighlight(
-                  text:
-                      // ignore: lines_longer_than_80_chars
-                      "${emoji.char} ${emoji.name!.replaceAll('_', ' ')}",
-                  term: query,
-                  textStyleHighlight: themeData.textTheme.headline6!.copyWith(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textStyle: themeData.textTheme.headline6!.copyWith(
-                    fontSize: 14.5,
-                  ),
+                    )
+                  ],
                 ),
-                onTap: () {
-                  _chooseEmoji(splits, emoji);
-                },
               );
-            },
-          ),
+            }
+
+            final emoji = emojis.elementAt(i - 1)!;
+            final themeData = Theme.of(context);
+            return ListTile(
+              title: SubstringHighlight(
+                text:
+                    // ignore: lines_longer_than_80_chars
+                    "${emoji.char} ${emoji.name!.replaceAll('_', ' ')}",
+                term: query,
+                textStyleHighlight: themeData.textTheme.headline6!.copyWith(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.bold,
+                ),
+                textStyle: themeData.textTheme.headline6!.copyWith(
+                  fontSize: 14.5,
+                ),
+              ),
+              onTap: () {
+                _chooseEmoji(splits, emoji);
+              },
+            );
+          },
         ),
       ),
     );
