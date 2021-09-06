@@ -22,8 +22,8 @@ typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 /// Callback for when 'View Info' is tapped
 typedef ViewInfoCallback = void Function(Channel);
 
-/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view.png)
-/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view_paint.png)
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_list_view.png)
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_list_view_paint.png)
 ///
 /// It shows the list of current channels.
 ///
