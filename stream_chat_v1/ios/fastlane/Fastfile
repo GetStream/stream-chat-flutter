@@ -26,7 +26,7 @@ lane :match_appstore do
     app_identifier: [
         "io.getstream.flutter",
     ],
-    readonly: false
+    readonly: is_ci
   )
 end
 
