@@ -58,7 +58,7 @@ class MoorChatDatabase extends _$MoorChatDatabase {
   @override
   MigrationStrategy get migration => MigrationStrategy(
         beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON;');
+          await customStatement('PRAGMA foreign_keys = ON');
         },
         onUpgrade: (openingDetails, before, after) async {
           if (before != after) {

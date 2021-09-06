@@ -107,18 +107,6 @@ class TestPersistenceClient extends ChatPersistenceClient {
       throw UnimplementedError();
 
   @override
-  Future<void> updateMembers(String cid, List<Member> members) =>
-      Future.value();
-
-  @override
-  Future<void> updateMessages(String cid, List<Message> messages) =>
-      Future.value();
-
-  @override
-  Future<void> updatePinnedMessages(String cid, List<Message> messages) =>
-      Future.value();
-
-  @override
   Future<void> updateReactions(List<Reaction> reactions) => Future.value();
 
   @override
@@ -126,10 +114,22 @@ class TestPersistenceClient extends ChatPersistenceClient {
       Future.value();
 
   @override
-  Future<void> updateReads(String cid, List<Read> reads) => Future.value();
+  Future<void> updateUsers(List<User> users) => Future.value();
 
   @override
-  Future<void> updateUsers(List<User> users) => Future.value();
+  Future<void> bulkUpdateMembers(Map<String, List<Member>> members) =>
+      Future.value();
+
+  @override
+  Future<void> bulkUpdateMessages(Map<String, List<Message>> messages) =>
+      Future.value();
+
+  @override
+  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>> messages) =>
+      Future.value();
+
+  @override
+  Future<void> bulkUpdateReads(Map<String, List<Read>> reads) => Future.value();
 }
 
 void main() {

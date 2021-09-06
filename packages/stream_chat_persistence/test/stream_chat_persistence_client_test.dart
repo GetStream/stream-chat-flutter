@@ -397,23 +397,26 @@ void main() {
     test('updateMessages', () async {
       const cid = 'testCid';
       final messages = List.generate(3, (index) => Message());
-      when(() => mockDatabase.messageDao.updateMessages(cid, messages))
+
+      when(() => mockDatabase.messageDao.bulkUpdateMessages({cid: messages}))
           .thenAnswer((_) => Future.value());
 
       await client.updateMessages(cid, messages);
-      verify(() => mockDatabase.messageDao.updateMessages(cid, messages))
+      verify(() => mockDatabase.messageDao.bulkUpdateMessages({cid: messages}))
           .called(1);
     });
 
     test('updatePinnedMessages', () async {
       const cid = 'testCid';
       final messages = List.generate(3, (index) => Message());
-      when(() => mockDatabase.pinnedMessageDao.updateMessages(cid, messages))
-          .thenAnswer((_) => Future.value());
+      when(
+        () => mockDatabase.pinnedMessageDao.bulkUpdateMessages({cid: messages}),
+      ).thenAnswer((_) => Future.value());
 
       await client.updatePinnedMessages(cid, messages);
-      verify(() => mockDatabase.pinnedMessageDao.updateMessages(cid, messages))
-          .called(1);
+      verify(
+        () => mockDatabase.pinnedMessageDao.bulkUpdateMessages({cid: messages}),
+      ).called(1);
     });
 
     test('getChannelThreads', () async {
@@ -456,11 +459,11 @@ void main() {
     test('updateMembers', () async {
       const cid = 'testCid';
       final members = List.generate(3, (index) => Member());
-      when(() => mockDatabase.memberDao.updateMembers(cid, members))
+      when(() => mockDatabase.memberDao.bulkUpdateMembers({cid: members}))
           .thenAnswer((_) => Future.value());
 
       await client.updateMembers(cid, members);
-      verify(() => mockDatabase.memberDao.updateMembers(cid, members))
+      verify(() => mockDatabase.memberDao.bulkUpdateMembers({cid: members}))
           .called(1);
     });
 
@@ -473,11 +476,12 @@ void main() {
           lastRead: DateTime.now(),
         ),
       );
-      when(() => mockDatabase.readDao.updateReads(cid, reads))
+      when(() => mockDatabase.readDao.bulkUpdateReads({cid: reads}))
           .thenAnswer((_) => Future.value());
 
       await client.updateReads(cid, reads);
-      verify(() => mockDatabase.readDao.updateReads(cid, reads)).called(1);
+      verify(() => mockDatabase.readDao.bulkUpdateReads({cid: reads}))
+          .called(1);
     });
 
     test('updateUsers', () async {

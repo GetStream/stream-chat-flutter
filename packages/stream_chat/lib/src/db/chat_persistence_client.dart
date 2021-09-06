@@ -143,11 +143,19 @@ abstract class ChatPersistenceClient {
 
   /// Updates the message data of a particular channel [cid] with
   /// the new [messages] data
-  Future<void> updateMessages(String cid, List<Message> messages);
+  Future<void> updateMessages(String cid, List<Message> messages) =>
+      bulkUpdateMessages({cid: messages});
+
+  /// Bulk updates the message data of multiple channels.
+  Future<void> bulkUpdateMessages(Map<String, List<Message>> messages);
 
   /// Updates the pinned message data of a particular channel [cid] with
   /// the new [messages] data
-  Future<void> updatePinnedMessages(String cid, List<Message> messages);
+  Future<void> updatePinnedMessages(String cid, List<Message> messages) =>
+      bulkUpdatePinnedMessages({cid: messages});
+
+  /// Bulk updates the message data of multiple channels.
+  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>> messages);
 
   /// Returns all the threads by parent message of a particular channel by
   /// providing channel [cid]
@@ -158,11 +166,19 @@ abstract class ChatPersistenceClient {
 
   /// Updates all the members of a particular channle [cid]
   /// with the new [members] data
-  Future<void> updateMembers(String cid, List<Member> members);
+  Future<void> updateMembers(String cid, List<Member> members) =>
+      bulkUpdateMembers({cid: members});
+
+  /// Bulk updates the members data of multiple channels.
+  Future<void> bulkUpdateMembers(Map<String, List<Member>> members);
 
   /// Updates the read data of a particular channel [cid] with
   /// the new [reads] data
-  Future<void> updateReads(String cid, List<Read> reads);
+  Future<void> updateReads(String cid, List<Read> reads) =>
+      bulkUpdateReads({cid: reads});
+
+  /// Bulk updates the read data of multiple channels.
+  Future<void> bulkUpdateReads(Map<String, List<Read>> reads);
 
   /// Updates the users data with the new [users] data
   Future<void> updateUsers(List<User> users);
@@ -188,104 +204,91 @@ abstract class ChatPersistenceClient {
 
   /// Update list of channel states
   Future<void> updateChannelStates(List<ChannelState> channelStates) async {
-    final deleteReactions = deleteReactionsByMessageId(channelStates
-        .expand((it) => it.messages)
-        .map((m) => m.id)
-        .toList(growable: false));
+    final reactionsToDelete = <String>[];
+    final pinnedReactionsToDelete = <String>[];
+    final membersToDelete = <String>[];
 
-    final deletePinnedMessageReactions =
-        deletePinnedMessageReactionsByMessageId(channelStates
-            .expand((it) => it.pinnedMessages)
-            .map((m) => m.id)
-            .toList(growable: false));
+    final channels = <ChannelModel>[];
+    final channelWithMessages = <String, List<Message>>{};
+    final channelWithPinnedMessages = <String, List<Message>>{};
+    final channelWithReads = <String, List<Read>>{};
+    final channelWithMembers = <String, List<Member>>{};
 
-    final cleanedChannelStates =
-        channelStates.where((it) => it.channel != null);
+    final users = <User>[];
+    final reactions = <Reaction>[];
+    final pinnedReactions = <Reaction>[];
 
-    final deleteMembers = deleteMembersByCids(
-      cleanedChannelStates.map((it) => it.channel!.cid).toList(growable: false),
-    );
+    for (final state in channelStates) {
+      final channel = state.channel;
+      if (channel != null) {
+        channels.add(channel);
 
+        final cid = channel.cid;
+        final reads = state.read;
+        final members = state.members;
+        final messages = state.messages;
+        final pinnedMessages = state.pinnedMessages;
+
+        // Preparing deletion data
+        membersToDelete.add(cid);
+        reactionsToDelete.addAll(state.messages.map((it) => it.id));
+        pinnedReactionsToDelete.addAll(state.pinnedMessages.map((it) => it.id));
+
+        // preparing addition data
+        channelWithReads[cid] = reads;
+        channelWithMembers[cid] = members;
+        channelWithMessages[cid] = messages;
+        channelWithPinnedMessages[cid] = pinnedMessages;
+
+        List<Reaction> expandReactions(Message message) {
+          final own = message.ownReactions;
+          final latest = message.latestReactions;
+          return [
+            if (own != null) ...own.where((r) => r.userId != null),
+            if (latest != null) ...latest.where((r) => r.userId != null),
+          ];
+        }
+
+        reactions.addAll(messages.expand(expandReactions));
+        pinnedReactions.addAll(pinnedMessages.expand(expandReactions));
+
+        users.addAll([
+          channel.createdBy,
+          ...reads.map((it) => it.user),
+          ...members.map((it) => it.user),
+          ...reactions.map((it) => it.user),
+          ...pinnedReactions.map((it) => it.user),
+        ].withNullifyer);
+      }
+    }
+
+    // Removing old members and reactions data as they may have
+    // changes over the time.
     await Future.wait([
-      deleteReactions,
-      deletePinnedMessageReactions,
-      deleteMembers,
+      deleteMembersByCids(membersToDelete),
+      deleteReactionsByMessageId(reactionsToDelete),
+      deletePinnedMessageReactionsByMessageId(pinnedReactionsToDelete),
     ]);
 
-    final channels = cleanedChannelStates.map((it) => it.channel).withNullifyer;
-
-    final reactions = cleanedChannelStates
-        .expand((it) => it.messages)
-        .expand((it) => [
-              if (it.ownReactions != null)
-                ...it.ownReactions!.where((r) => r.userId != null),
-              if (it.latestReactions != null)
-                ...it.latestReactions!.where((r) => r.userId != null),
-            ])
-        .withNullifyer;
-
-    final pinnedMessageReactions = cleanedChannelStates
-        .expand((it) => it.pinnedMessages)
-        .expand((it) => [
-              if (it.ownReactions != null)
-                ...it.ownReactions!.where((r) => r.userId != null),
-              if (it.latestReactions != null)
-                ...it.latestReactions!.where((r) => r.userId != null),
-            ])
-        .withNullifyer;
-
-    final users = cleanedChannelStates
-        .map((cs) => [
-              cs.channel?.createdBy,
-              ...cs.messages
-                  .map((m) => [
-                        m.user,
-                        if (m.latestReactions != null)
-                          ...m.latestReactions!.map((r) => r.user),
-                        if (m.ownReactions != null)
-                          ...m.ownReactions!.map((r) => r.user),
-                      ])
-                  .expand((v) => v),
-              ...cs.read.map((r) => r.user),
-              ...cs.members.map((m) => m.user),
-            ])
-        .expand((it) => it)
-        .withNullifyer;
-
-    final updateMessagesFuture = cleanedChannelStates.map((it) {
-      final cid = it.channel!.cid;
-      final messages = it.messages;
-      return updateMessages(cid, messages.toList(growable: false));
-    }).toList(growable: false);
-
-    final updatePinnedMessagesFuture = cleanedChannelStates.map((it) {
-      final cid = it.channel!.cid;
-      final messages = it.pinnedMessages;
-      return updatePinnedMessages(cid, messages.toList(growable: false));
-    }).toList(growable: false);
-
-    final updateReadsFuture = cleanedChannelStates.map((it) {
-      final cid = it.channel!.cid;
-      final reads = it.read;
-      return updateReads(cid, reads.toList(growable: false));
-    }).toList(growable: false);
-
-    final updateMembersFuture = cleanedChannelStates.map((it) {
-      final cid = it.channel!.cid;
-      final members = it.members;
-      return updateMembers(cid, members.toList(growable: false));
-    }).toList(growable: false);
-
+    // Updating first as does not depend on any other table.
     await Future.wait([
-      ...updateMessagesFuture,
-      ...updatePinnedMessagesFuture,
-      ...updateReadsFuture,
-      ...updateMembersFuture,
       updateUsers(users.toList(growable: false)),
       updateChannels(channels.toList(growable: false)),
+    ]);
+
+    // All has a foreign key relation with channels table.
+    await Future.wait([
+      bulkUpdateReads(channelWithReads),
+      bulkUpdateMembers(channelWithMembers),
+      bulkUpdateMessages(channelWithMessages),
+      bulkUpdatePinnedMessages(channelWithPinnedMessages),
+    ]);
+
+    // Both has a foreign key relation with messages, pinnedMessages table.
+    await Future.wait([
       updateReactions(reactions.toList(growable: false)),
       updatePinnedMessageReactions(
-        pinnedMessageReactions.toList(growable: false),
+        pinnedReactions.toList(growable: false),
       ),
     ]);
   }

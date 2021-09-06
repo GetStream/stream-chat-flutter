@@ -30,13 +30,19 @@ class MemberDao extends DatabaseAccessor<MoorChatDatabase>
       }).get();
 
   /// Updates all the members using the new [memberList] data
-  Future<void> updateMembers(String cid, List<Member> memberList) async =>
-      batch(
-        (it) => it.insertAllOnConflictUpdate(
-          members,
-          memberList.map((m) => m.toEntity(cid: cid)).toList(),
-        ),
-      );
+  Future<void> updateMembers(String cid, List<Member> memberList) =>
+      bulkUpdateMembers({cid: memberList});
+
+  /// Bulk updates the members data of multiple channels
+  Future<void> bulkUpdateMembers(Map<String, List<Member>> channelWithMembers) {
+    final entities = channelWithMembers.entries
+        .map((entry) => entry.value.map(
+              (member) => member.toEntity(cid: entry.key),
+            ))
+        .expand((it) => it)
+        .toList(growable: false);
+    return batch((batch) => batch.insertAllOnConflictUpdate(members, entities));
+  }
 
   /// Deletes all the members whose [Members.channelCid] is present in [cids]
   Future<void> deleteMemberByCids(List<String> cids) async => batch((it) {
