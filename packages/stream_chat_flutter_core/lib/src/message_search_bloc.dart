@@ -43,6 +43,9 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
     with AutomaticKeepAliveClientMixin {
   late StreamChatCoreState _streamChatCoreState;
 
+  String? nextId;
+  String? previousId;
+
   /// The current messages list
   List<GetMessageResponse>? get messageResponses =>
       _messageResponses.valueOrNull;
@@ -76,11 +79,17 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
       _queryMessagesLoadingController.add(true);
     }
     try {
-      final clear = pagination == null || pagination.offset == 0;
+      var clear = pagination == null;
+      if (sort != null) {
+        clear |= pagination?.next == null;
+      } else {
+        final offset = pagination?.offset;
+        clear |= offset == null || offset == 0;
+      }
 
       final oldMessages = List<GetMessageResponse>.from(messageResponses ?? []);
 
-      final messages = await client.search(
+      final response = await client.search(
         filter,
         sort: sort,
         query: query,
@@ -88,10 +97,20 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
         messageFilters: messageFilter,
       );
 
+      final next = response.next;
+      final previous = response.previous;
+
+      nextId = next != null && next.isNotEmpty
+          ? next
+          : /*reset nextId if we get nothing*/ null;
+      previousId = previous != null && previous.isNotEmpty
+          ? previous
+          : /*reset previousId if we get nothing*/ null;
+
       if (clear) {
-        _messageResponses.add(messages.results);
+        _messageResponses.add(response.results);
       } else {
-        final temp = oldMessages + messages.results;
+        final temp = oldMessages + response.results;
         _messageResponses.add(temp);
       }
       if (_messageResponses.hasValue && _queryMessagesLoadingController.value) {

@@ -117,8 +117,9 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
           msgList.removeRange(0, greaterThanIndex);
         }
       }
-      if (options?.limit != null) {
-        return msgList.take(options!.limit).toList();
+      final limit = options?.limit;
+      if (limit != null && limit > 0) {
+        return msgList.take(limit).toList();
       }
     }
     return msgList;

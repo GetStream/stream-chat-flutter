@@ -161,7 +161,9 @@ SearchMessagesResponse _$SearchMessagesResponseFromJson(
     ..results = (json['results'] as List<dynamic>?)
             ?.map((e) => GetMessageResponse.fromJson(e as Map<String, dynamic>))
             .toList() ??
-        [];
+        []
+    ..next = json['next'] as String?
+    ..previous = json['previous'] as String?;
 }
 
 GetMessagesByIdResponse _$GetMessagesByIdResponseFromJson(
