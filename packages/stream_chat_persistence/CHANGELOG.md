@@ -1,3 +1,10 @@
+## Upcoming
+
+- [[#604]](https://github.com/GetStream/stream-chat-flutter/issues/604) Fix cascade deletion by
+  enabling `pragma foreign_keys`.
+- Added a new table `PinnedMessageReactions` and dao `PinnedMessageReactionDao` specifically for pinned messages.
+- Updated `stream_chat`: `^2.2.0` -> `TODO`
+
 ## 2.2.0
 
 - Updated llc dependency
@@ -11,14 +18,17 @@
 ## 2.1.0
 
 ✅ Added
+
 - Added support for `Message.i18n`
 - Added support for `User.language`
 
 ## 2.0.0
+
 * Migrate this package to null safety
 * Minor fixes and improvements
 
 ## 2.0.0-nullsafety.8
+
 * Updated llc dependency
 * Upgraded moor dependencies and generated files with the latest dependency
 
