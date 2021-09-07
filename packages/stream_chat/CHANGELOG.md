@@ -10,6 +10,10 @@
     - `updatePinnedMessageReactions`
     - `deletePinnedMessageReactionsByMessageId`
 
+✅ Added
+
+- Added `Filter.contains` and `Filter.empty`
+
 ## 2.2.1
 
 🐞 Fixed
