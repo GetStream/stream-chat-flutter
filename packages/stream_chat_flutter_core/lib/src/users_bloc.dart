@@ -70,7 +70,8 @@ class UsersBlocState extends State<UsersBloc>
   }) async {
     final client = _streamChatCore.client;
 
-    final clear = pagination.offset == null || pagination.offset == 0;
+    final offset = pagination.offset;
+    final clear = offset == null || offset == 0;
 
     if (clear && _paginationEnded) {
       _paginationEnded = false;

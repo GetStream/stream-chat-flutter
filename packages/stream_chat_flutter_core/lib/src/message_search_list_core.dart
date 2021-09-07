@@ -38,7 +38,7 @@ class MessageSearchListCore extends StatefulWidget {
   /// * [errorBuilder]
   /// * [loadingBuilder]
   /// * [childBuilder]
-  MessageSearchListCore({
+  const MessageSearchListCore({
     Key? key,
     required this.emptyBuilder,
     required this.errorBuilder,
@@ -57,12 +57,6 @@ class MessageSearchListCore extends StatefulWidget {
         assert(
           messageQuery == null || messageFilters == null,
           "Can't provide both `query` and `messageFilters` at the same time",
-        ),
-        assert(
-          paginationParams.offset == null ||
-              paginationParams.offset == 0 ||
-              sortOptions == null,
-          'Cannot specify `offset` with `sortOptions` parameter',
         ),
         super(key: key);
 
