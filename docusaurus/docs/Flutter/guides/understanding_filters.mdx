@@ -107,6 +107,36 @@ The 'exists' filter matches values that exist, or don't exist, based on the spec
 Filter.exists('name', true)
 ```
 
+#### Filter.contains
+
+The 'contains' filter matches any list that contains the specified value.
+
+```dart
+Filter.contains('teams', 'red')
+```
+
+#### Filter.empty
+
+The 'empty' filter constructor returns an empty filter. It's the equivalent of an empty map `{}`;
+
+```dart
+Filter.empty();
+```
+
+#### Filter.raw
+
+The 'raw' filter constructor lets you specify a raw filter. We suggest using this only if you can't manage to build what you want using the other constructors.
+
+```dart
+Filter.raw(value: {
+  'members': [
+    ..._selectedUsers.map((e) => e.id),
+    chatState.currentUser!.id,
+  ],
+  'distinct': true,
+});
+```
+
 ### Group Queries
 
 #### Filter.and
