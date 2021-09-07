@@ -322,7 +322,7 @@ void main() {
     (tester) async {
       const messageSearchListCoreKey = Key('messageSearchListCore');
       const childWidgetKey = Key('childWidget');
-      const pagination = PaginationParams();
+      const pagination = PaginationParams(limit: 25);
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
         childBuilder: (List<GetMessageResponse> messages) => Container(
@@ -341,7 +341,7 @@ void main() {
 
       final mockClient = MockClient();
 
-      final messageResponseList = _generateMessages();
+      final messageResponseList = _generateMessages(count: 25);
       when(() => mockClient.search(
             testFilter,
             query: any(named: 'query'),

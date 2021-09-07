@@ -47,7 +47,7 @@ class MessageSearchListCore extends StatefulWidget {
     required this.filters,
     this.messageQuery,
     this.sortOptions,
-    this.paginationParams,
+    this.paginationParams = const PaginationParams(limit: 30),
     this.messageFilters,
     this.messageSearchListController,
   })  : assert(
@@ -84,7 +84,7 @@ class MessageSearchListCore extends StatefulWidget {
   /// Pagination parameters
   /// limit: the number of messages to return (max is 30)
   /// offset: the offset (max is 1000)
-  final PaginationParams? paginationParams;
+  final PaginationParams paginationParams;
 
   /// The message query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -163,13 +163,13 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
 
   /// Fetches more messages with updated pagination and updates the widget
   Future<void> paginateData() {
-    PaginationParams? pagination;
+    PaginationParams pagination;
     if (widget.sortOptions != null) {
-      pagination = widget.paginationParams?.copyWith(
+      pagination = widget.paginationParams.copyWith(
         next: _messageSearchBloc?.nextId,
       );
     } else {
-      pagination = widget.paginationParams?.copyWith(
+      pagination = widget.paginationParams.copyWith(
         offset: _messageSearchBloc?.messageResponses?.length,
       );
     }
@@ -190,8 +190,8 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
         widget.messageQuery?.toString() != oldWidget.messageQuery?.toString() ||
         widget.messageFilters?.toString() !=
             oldWidget.messageFilters?.toString() ||
-        widget.paginationParams?.toJson().toString() !=
-            oldWidget.paginationParams?.toJson().toString()) {
+        widget.paginationParams.toJson().toString() !=
+            oldWidget.paginationParams.toJson().toString()) {
       loadData();
     }
 
