@@ -52,7 +52,7 @@ enum FilterOperator {
   /// Matches none of the values specified in an array.
   nor,
 
-  /// Matches any list that contains the specified values
+  /// Matches any list that contains the specified value
   contains,
 }
 
@@ -162,8 +162,8 @@ class Filter extends Equatable {
       Filter._(operator: FilterOperator.exists, key: key, value: exists);
 
   /// Matches any list that contains the specified values
-  factory Filter.contains(String key, List<Object> values) =>
-      Filter._(operator: FilterOperator.contains, key: key, value: values);
+  factory Filter.contains(String key, Object value) =>
+      Filter._(operator: FilterOperator.contains, key: key, value: value);
 
   /// Creates a custom [Filter] if there isn't one already available.
   const factory Filter.custom({

@@ -145,7 +145,7 @@ void main() {
 
     test('contains', () {
       const key = 'testKey';
-      const values = ['testValue'];
+      const values = 'testValue';
       final filter = Filter.contains(key, values);
       expect(filter.key, key);
       expect(filter.value, values);
