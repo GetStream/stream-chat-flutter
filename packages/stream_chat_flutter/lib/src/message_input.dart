@@ -475,7 +475,7 @@ class MessageInputState extends State<MessageInput> {
           _emojiOverlay != null ||
           _mentionsOverlay != null,
       overlayBuilder: (context, offset) {
-        late Widget child;
+        late Widget? child;
 
         if (_commandsOverlay != null) {
           child = _buildCommandsOverlayEntry();
@@ -487,7 +487,7 @@ class MessageInputState extends State<MessageInput> {
 
         return CenterAbout(
           position: Offset(offset.dx, offset.dy),
-          child: child,
+          child: child ?? const SizedBox(),
         );
       },
       child: child,
@@ -922,7 +922,7 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  Widget _buildCommandsOverlayEntry() {
+  Widget? _buildCommandsOverlayEntry() {
     final text = textEditingController.text.trimLeft();
     final commands = StreamChannel.of(context)
             .channel
@@ -931,6 +931,11 @@ class MessageInputState extends State<MessageInput> {
             .where((c) => c.name.contains(text.replaceFirst('/', '')))
             .toList() ??
         [];
+
+    if (commands.isEmpty) {
+      return null;
+    }
+
     final size = MediaQuery.of(context).size;
 
     return Padding(
@@ -1312,7 +1317,7 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  Widget _buildMentionsOverlayEntry() {
+  Widget? _buildMentionsOverlayEntry() {
     final splits = textEditingController.text
         .substring(0, textEditingController.value.selection.start)
         .split('@');
@@ -1331,6 +1336,10 @@ class MessageInputState extends State<MessageInput> {
             .where((m) => m.user?.name.toLowerCase().contains(query) == true)
             .toList() ??
         [];
+
+    if (members.isEmpty) {
+      return null;
+    }
 
     // ignore: cast_nullable_to_non_nullable
     final renderBox = context.findRenderObject() as RenderBox;
@@ -1410,7 +1419,7 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Widget _buildEmojiOverlay() {
+  Widget? _buildEmojiOverlay() {
     final splits = textEditingController.text
         .substring(0, textEditingController.value.selection.start)
         .split(':');
@@ -1420,6 +1429,10 @@ class MessageInputState extends State<MessageInput> {
         .where((e) => e.contains(query))
         .map(Emoji.byName)
         .where((e) => e != null);
+
+    if (emojis.isEmpty) {
+      return null;
+    }
 
     // ignore: cast_nullable_to_non_nullable
     final renderBox = context.findRenderObject() as RenderBox;
