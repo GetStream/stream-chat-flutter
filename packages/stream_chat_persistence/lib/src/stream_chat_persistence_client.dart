@@ -296,25 +296,34 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
-  Future<void> updateMembers(String cid, List<Member> members) {
+  Future<void> bulkUpdateMembers(Map<String, List<Member>> members) {
     assert(_debugIsConnected, '');
-    _logger.info('updateMembers');
-    return _readProtected(() => db!.memberDao.updateMembers(cid, members));
+    _logger.info('bulkUpdateMembers');
+    return _readProtected(() => db!.memberDao.bulkUpdateMembers(members));
   }
 
   @override
-  Future<void> updateMessages(String cid, List<Message> messages) {
+  Future<void> bulkUpdateMessages(Map<String, List<Message>> messages) {
     assert(_debugIsConnected, '');
-    _logger.info('updateMessages');
-    return _readProtected(() => db!.messageDao.updateMessages(cid, messages));
+    _logger.info('bulkUpdateMessages');
+    return _readProtected(() => db!.messageDao.bulkUpdateMessages(messages));
   }
 
   @override
-  Future<void> updatePinnedMessages(String cid, List<Message> messages) {
+  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>> messages) {
     assert(_debugIsConnected, '');
-    _logger.info('updatePinnedMessages');
+    _logger.info('bulkUpdatePinnedMessages');
     return _readProtected(
-      () => db!.pinnedMessageDao.updateMessages(cid, messages),
+      () => db!.pinnedMessageDao.bulkUpdateMessages(messages),
+    );
+  }
+
+  @override
+  Future<void> updatePinnedMessageReactions(List<Reaction> reactions) {
+    assert(_debugIsConnected, '');
+    _logger.info('updatePinnedMessageReactions');
+    return _readProtected(
+      () => db!.pinnedMessageReactionDao.updateReactions(reactions),
     );
   }
 
@@ -326,10 +335,10 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
-  Future<void> updateReads(String cid, List<Read> reads) {
+  Future<void> bulkUpdateReads(Map<String, List<Read>> reads) {
     assert(_debugIsConnected, '');
-    _logger.info('updateReads');
-    return _readProtected(() => db!.readDao.updateReads(cid, reads));
+    _logger.info('bulkUpdateReads');
+    return _readProtected(() => db!.readDao.bulkUpdateReads(reads));
   }
 
   @override
@@ -337,6 +346,18 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     assert(_debugIsConnected, '');
     _logger.info('updateUsers');
     return _readProtected(() => db!.userDao.updateUsers(users));
+  }
+
+  @override
+  Future<void> deletePinnedMessageReactionsByMessageId(
+    List<String> messageIds,
+  ) {
+    assert(_debugIsConnected, '');
+    _logger.info('deletePinnedMessageReactionsByMessageId');
+    return _readProtected(
+      () =>
+          db!.pinnedMessageReactionDao.deleteReactionsByMessageIds(messageIds),
+    );
   }
 
   @override

@@ -645,7 +645,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   final String? pinnedByUserId;
 
   /// The channel cid of which this message is part of
-  final String? channelCid;
+  final String channelCid;
 
   /// A Map of [messageText] translations.
   final Map<String, String>? i18n;
@@ -675,7 +675,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       this.pinnedAt,
       this.pinExpires,
       this.pinnedByUserId,
-      this.channelCid,
+      required this.channelCid,
       this.i18n,
       this.extraData});
   factory MessageEntity.fromData(
@@ -728,7 +728,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       pinnedByUserId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}pinned_by_user_id']),
       channelCid: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid'])!,
       i18n: $MessagesTable.$converter5.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}i18n'])),
       extraData: $MessagesTable.$converter6.mapToDart(const StringType()
@@ -800,9 +800,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     if (!nullToAbsent || pinnedByUserId != null) {
       map['pinned_by_user_id'] = Variable<String?>(pinnedByUserId);
     }
-    if (!nullToAbsent || channelCid != null) {
-      map['channel_cid'] = Variable<String?>(channelCid);
-    }
+    map['channel_cid'] = Variable<String>(channelCid);
     if (!nullToAbsent || i18n != null) {
       final converter = $MessagesTable.$converter5;
       map['i18n'] = Variable<String?>(converter.mapToSql(i18n));
@@ -842,7 +840,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       pinnedAt: serializer.fromJson<DateTime?>(json['pinnedAt']),
       pinExpires: serializer.fromJson<DateTime?>(json['pinExpires']),
       pinnedByUserId: serializer.fromJson<String?>(json['pinnedByUserId']),
-      channelCid: serializer.fromJson<String?>(json['channelCid']),
+      channelCid: serializer.fromJson<String>(json['channelCid']),
       i18n: serializer.fromJson<Map<String, String>?>(json['i18n']),
       extraData: serializer.fromJson<Map<String, Object?>?>(json['extraData']),
     );
@@ -873,7 +871,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       'pinnedAt': serializer.toJson<DateTime?>(pinnedAt),
       'pinExpires': serializer.toJson<DateTime?>(pinExpires),
       'pinnedByUserId': serializer.toJson<String?>(pinnedByUserId),
-      'channelCid': serializer.toJson<String?>(channelCid),
+      'channelCid': serializer.toJson<String>(channelCid),
       'i18n': serializer.toJson<Map<String, String>?>(i18n),
       'extraData': serializer.toJson<Map<String, Object?>?>(extraData),
     };
@@ -902,7 +900,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           Value<DateTime?> pinnedAt = const Value.absent(),
           Value<DateTime?> pinExpires = const Value.absent(),
           Value<String?> pinnedByUserId = const Value.absent(),
-          Value<String?> channelCid = const Value.absent(),
+          String? channelCid,
           Value<Map<String, String>?> i18n = const Value.absent(),
           Value<Map<String, Object?>?> extraData = const Value.absent()}) =>
       MessageEntity(
@@ -934,7 +932,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         pinExpires: pinExpires.present ? pinExpires.value : this.pinExpires,
         pinnedByUserId:
             pinnedByUserId.present ? pinnedByUserId.value : this.pinnedByUserId,
-        channelCid: channelCid.present ? channelCid.value : this.channelCid,
+        channelCid: channelCid ?? this.channelCid,
         i18n: i18n.present ? i18n.value : this.i18n,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
@@ -1068,7 +1066,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   final Value<DateTime?> pinnedAt;
   final Value<DateTime?> pinExpires;
   final Value<String?> pinnedByUserId;
-  final Value<String?> channelCid;
+  final Value<String> channelCid;
   final Value<Map<String, String>?> i18n;
   final Value<Map<String, Object?>?> extraData;
   const MessagesCompanion({
@@ -1121,12 +1119,13 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.pinnedAt = const Value.absent(),
     this.pinExpires = const Value.absent(),
     this.pinnedByUserId = const Value.absent(),
-    this.channelCid = const Value.absent(),
+    required String channelCid,
     this.i18n = const Value.absent(),
     this.extraData = const Value.absent(),
   })  : id = Value(id),
         attachments = Value(attachments),
-        mentionedUsers = Value(mentionedUsers);
+        mentionedUsers = Value(mentionedUsers),
+        channelCid = Value(channelCid);
   static Insertable<MessageEntity> custom({
     Expression<String>? id,
     Expression<String?>? messageText,
@@ -1150,7 +1149,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     Expression<DateTime?>? pinnedAt,
     Expression<DateTime?>? pinExpires,
     Expression<String?>? pinnedByUserId,
-    Expression<String?>? channelCid,
+    Expression<String>? channelCid,
     Expression<Map<String, String>?>? i18n,
     Expression<Map<String, Object?>?>? extraData,
   }) {
@@ -1206,7 +1205,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       Value<DateTime?>? pinnedAt,
       Value<DateTime?>? pinExpires,
       Value<String?>? pinnedByUserId,
-      Value<String?>? channelCid,
+      Value<String>? channelCid,
       Value<Map<String, String>?>? i18n,
       Value<Map<String, Object?>?>? extraData}) {
     return MessagesCompanion(
@@ -1317,7 +1316,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       map['pinned_by_user_id'] = Variable<String?>(pinnedByUserId.value);
     }
     if (channelCid.present) {
-      map['channel_cid'] = Variable<String?>(channelCid.value);
+      map['channel_cid'] = Variable<String>(channelCid.value);
     }
     if (i18n.present) {
       final converter = $MessagesTable.$converter5;
@@ -1491,11 +1490,10 @@ class $MessagesTable extends Messages
       typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
   late final GeneratedColumn<String?> channelCid = GeneratedColumn<String?>(
-      'channel_cid', aliasedName, true,
+      'channel_cid', aliasedName, false,
       typeName: 'TEXT',
-      requiredDuringInsert: false,
-      $customConstraints:
-          'NULLABLE REFERENCES channels(cid) ON DELETE CASCADE');
+      requiredDuringInsert: true,
+      $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
   final VerificationMeta _i18nMeta = const VerificationMeta('i18n');
   late final GeneratedColumnWithTypeConverter<Map<String, String>, String?>
       i18n = GeneratedColumn<String?>('i18n', aliasedName, true,
@@ -1634,6 +1632,8 @@ class $MessagesTable extends Messages
           _channelCidMeta,
           channelCid.isAcceptableOrUnknown(
               data['channel_cid']!, _channelCidMeta));
+    } else if (isInserting) {
+      context.missing(_channelCidMeta);
     }
     context.handle(_i18nMeta, const VerificationResult.success());
     context.handle(_extraDataMeta, const VerificationResult.success());
@@ -1739,7 +1739,7 @@ class PinnedMessageEntity extends DataClass
   final String? pinnedByUserId;
 
   /// The channel cid of which this message is part of
-  final String? channelCid;
+  final String channelCid;
 
   /// A Map of [messageText] translations.
   final Map<String, String>? i18n;
@@ -1769,7 +1769,7 @@ class PinnedMessageEntity extends DataClass
       this.pinnedAt,
       this.pinExpires,
       this.pinnedByUserId,
-      this.channelCid,
+      required this.channelCid,
       this.i18n,
       this.extraData});
   factory PinnedMessageEntity.fromData(
@@ -1825,7 +1825,7 @@ class PinnedMessageEntity extends DataClass
       pinnedByUserId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}pinned_by_user_id']),
       channelCid: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid'])!,
       i18n: $PinnedMessagesTable.$converter5.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}i18n'])),
       extraData: $PinnedMessagesTable.$converter6.mapToDart(const StringType()
@@ -1897,9 +1897,7 @@ class PinnedMessageEntity extends DataClass
     if (!nullToAbsent || pinnedByUserId != null) {
       map['pinned_by_user_id'] = Variable<String?>(pinnedByUserId);
     }
-    if (!nullToAbsent || channelCid != null) {
-      map['channel_cid'] = Variable<String?>(channelCid);
-    }
+    map['channel_cid'] = Variable<String>(channelCid);
     if (!nullToAbsent || i18n != null) {
       final converter = $PinnedMessagesTable.$converter5;
       map['i18n'] = Variable<String?>(converter.mapToSql(i18n));
@@ -1939,7 +1937,7 @@ class PinnedMessageEntity extends DataClass
       pinnedAt: serializer.fromJson<DateTime?>(json['pinnedAt']),
       pinExpires: serializer.fromJson<DateTime?>(json['pinExpires']),
       pinnedByUserId: serializer.fromJson<String?>(json['pinnedByUserId']),
-      channelCid: serializer.fromJson<String?>(json['channelCid']),
+      channelCid: serializer.fromJson<String>(json['channelCid']),
       i18n: serializer.fromJson<Map<String, String>?>(json['i18n']),
       extraData: serializer.fromJson<Map<String, Object?>?>(json['extraData']),
     );
@@ -1970,7 +1968,7 @@ class PinnedMessageEntity extends DataClass
       'pinnedAt': serializer.toJson<DateTime?>(pinnedAt),
       'pinExpires': serializer.toJson<DateTime?>(pinExpires),
       'pinnedByUserId': serializer.toJson<String?>(pinnedByUserId),
-      'channelCid': serializer.toJson<String?>(channelCid),
+      'channelCid': serializer.toJson<String>(channelCid),
       'i18n': serializer.toJson<Map<String, String>?>(i18n),
       'extraData': serializer.toJson<Map<String, Object?>?>(extraData),
     };
@@ -1999,7 +1997,7 @@ class PinnedMessageEntity extends DataClass
           Value<DateTime?> pinnedAt = const Value.absent(),
           Value<DateTime?> pinExpires = const Value.absent(),
           Value<String?> pinnedByUserId = const Value.absent(),
-          Value<String?> channelCid = const Value.absent(),
+          String? channelCid,
           Value<Map<String, String>?> i18n = const Value.absent(),
           Value<Map<String, Object?>?> extraData = const Value.absent()}) =>
       PinnedMessageEntity(
@@ -2031,7 +2029,7 @@ class PinnedMessageEntity extends DataClass
         pinExpires: pinExpires.present ? pinExpires.value : this.pinExpires,
         pinnedByUserId:
             pinnedByUserId.present ? pinnedByUserId.value : this.pinnedByUserId,
-        channelCid: channelCid.present ? channelCid.value : this.channelCid,
+        channelCid: channelCid ?? this.channelCid,
         i18n: i18n.present ? i18n.value : this.i18n,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
@@ -2165,7 +2163,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
   final Value<DateTime?> pinnedAt;
   final Value<DateTime?> pinExpires;
   final Value<String?> pinnedByUserId;
-  final Value<String?> channelCid;
+  final Value<String> channelCid;
   final Value<Map<String, String>?> i18n;
   final Value<Map<String, Object?>?> extraData;
   const PinnedMessagesCompanion({
@@ -2218,12 +2216,13 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.pinnedAt = const Value.absent(),
     this.pinExpires = const Value.absent(),
     this.pinnedByUserId = const Value.absent(),
-    this.channelCid = const Value.absent(),
+    required String channelCid,
     this.i18n = const Value.absent(),
     this.extraData = const Value.absent(),
   })  : id = Value(id),
         attachments = Value(attachments),
-        mentionedUsers = Value(mentionedUsers);
+        mentionedUsers = Value(mentionedUsers),
+        channelCid = Value(channelCid);
   static Insertable<PinnedMessageEntity> custom({
     Expression<String>? id,
     Expression<String?>? messageText,
@@ -2247,7 +2246,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     Expression<DateTime?>? pinnedAt,
     Expression<DateTime?>? pinExpires,
     Expression<String?>? pinnedByUserId,
-    Expression<String?>? channelCid,
+    Expression<String>? channelCid,
     Expression<Map<String, String>?>? i18n,
     Expression<Map<String, Object?>?>? extraData,
   }) {
@@ -2303,7 +2302,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       Value<DateTime?>? pinnedAt,
       Value<DateTime?>? pinExpires,
       Value<String?>? pinnedByUserId,
-      Value<String?>? channelCid,
+      Value<String>? channelCid,
       Value<Map<String, String>?>? i18n,
       Value<Map<String, Object?>?>? extraData}) {
     return PinnedMessagesCompanion(
@@ -2414,7 +2413,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       map['pinned_by_user_id'] = Variable<String?>(pinnedByUserId.value);
     }
     if (channelCid.present) {
-      map['channel_cid'] = Variable<String?>(channelCid.value);
+      map['channel_cid'] = Variable<String>(channelCid.value);
     }
     if (i18n.present) {
       final converter = $PinnedMessagesTable.$converter5;
@@ -2589,11 +2588,10 @@ class $PinnedMessagesTable extends PinnedMessages
       typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
   late final GeneratedColumn<String?> channelCid = GeneratedColumn<String?>(
-      'channel_cid', aliasedName, true,
+      'channel_cid', aliasedName, false,
       typeName: 'TEXT',
-      requiredDuringInsert: false,
-      $customConstraints:
-          'NULLABLE REFERENCES channels(cid) ON DELETE CASCADE');
+      requiredDuringInsert: true,
+      $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
   final VerificationMeta _i18nMeta = const VerificationMeta('i18n');
   late final GeneratedColumnWithTypeConverter<Map<String, String>, String?>
       i18n = GeneratedColumn<String?>('i18n', aliasedName, true,
@@ -2734,6 +2732,8 @@ class $PinnedMessagesTable extends PinnedMessages
           _channelCidMeta,
           channelCid.isAcceptableOrUnknown(
               data['channel_cid']!, _channelCidMeta));
+    } else if (isInserting) {
+      context.missing(_channelCidMeta);
     }
     context.handle(_i18nMeta, const VerificationResult.success());
     context.handle(_extraDataMeta, const VerificationResult.success());
@@ -2766,6 +2766,340 @@ class $PinnedMessagesTable extends PinnedMessages
   static TypeConverter<Map<String, String>, String> $converter5 =
       MapConverter<String>();
   static TypeConverter<Map<String, Object?>, String> $converter6 =
+      MapConverter<Object?>();
+}
+
+class PinnedMessageReactionEntity extends DataClass
+    implements Insertable<PinnedMessageReactionEntity> {
+  /// The id of the user that sent the reaction
+  final String userId;
+
+  /// The messageId to which the reaction belongs
+  final String messageId;
+
+  /// The type of the reaction
+  final String type;
+
+  /// The DateTime on which the reaction is created
+  final DateTime createdAt;
+
+  /// The score of the reaction (ie. number of reactions sent)
+  final int score;
+
+  /// Reaction custom extraData
+  final Map<String, Object?>? extraData;
+  PinnedMessageReactionEntity(
+      {required this.userId,
+      required this.messageId,
+      required this.type,
+      required this.createdAt,
+      required this.score,
+      this.extraData});
+  factory PinnedMessageReactionEntity.fromData(
+      Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return PinnedMessageReactionEntity(
+      userId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
+      messageId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
+      type: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
+      createdAt: const DateTimeType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
+      score: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}score'])!,
+      extraData: $PinnedMessageReactionsTable.$converter0.mapToDart(
+          const StringType()
+              .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['user_id'] = Variable<String>(userId);
+    map['message_id'] = Variable<String>(messageId);
+    map['type'] = Variable<String>(type);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['score'] = Variable<int>(score);
+    if (!nullToAbsent || extraData != null) {
+      final converter = $PinnedMessageReactionsTable.$converter0;
+      map['extra_data'] = Variable<String?>(converter.mapToSql(extraData));
+    }
+    return map;
+  }
+
+  factory PinnedMessageReactionEntity.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return PinnedMessageReactionEntity(
+      userId: serializer.fromJson<String>(json['userId']),
+      messageId: serializer.fromJson<String>(json['messageId']),
+      type: serializer.fromJson<String>(json['type']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      score: serializer.fromJson<int>(json['score']),
+      extraData: serializer.fromJson<Map<String, Object?>?>(json['extraData']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'userId': serializer.toJson<String>(userId),
+      'messageId': serializer.toJson<String>(messageId),
+      'type': serializer.toJson<String>(type),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'score': serializer.toJson<int>(score),
+      'extraData': serializer.toJson<Map<String, Object?>?>(extraData),
+    };
+  }
+
+  PinnedMessageReactionEntity copyWith(
+          {String? userId,
+          String? messageId,
+          String? type,
+          DateTime? createdAt,
+          int? score,
+          Value<Map<String, Object?>?> extraData = const Value.absent()}) =>
+      PinnedMessageReactionEntity(
+        userId: userId ?? this.userId,
+        messageId: messageId ?? this.messageId,
+        type: type ?? this.type,
+        createdAt: createdAt ?? this.createdAt,
+        score: score ?? this.score,
+        extraData: extraData.present ? extraData.value : this.extraData,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('PinnedMessageReactionEntity(')
+          ..write('userId: $userId, ')
+          ..write('messageId: $messageId, ')
+          ..write('type: $type, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('score: $score, ')
+          ..write('extraData: $extraData')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      userId.hashCode,
+      $mrjc(
+          messageId.hashCode,
+          $mrjc(
+              type.hashCode,
+              $mrjc(createdAt.hashCode,
+                  $mrjc(score.hashCode, extraData.hashCode))))));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PinnedMessageReactionEntity &&
+          other.userId == this.userId &&
+          other.messageId == this.messageId &&
+          other.type == this.type &&
+          other.createdAt == this.createdAt &&
+          other.score == this.score &&
+          other.extraData == this.extraData);
+}
+
+class PinnedMessageReactionsCompanion
+    extends UpdateCompanion<PinnedMessageReactionEntity> {
+  final Value<String> userId;
+  final Value<String> messageId;
+  final Value<String> type;
+  final Value<DateTime> createdAt;
+  final Value<int> score;
+  final Value<Map<String, Object?>?> extraData;
+  const PinnedMessageReactionsCompanion({
+    this.userId = const Value.absent(),
+    this.messageId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.score = const Value.absent(),
+    this.extraData = const Value.absent(),
+  });
+  PinnedMessageReactionsCompanion.insert({
+    required String userId,
+    required String messageId,
+    required String type,
+    this.createdAt = const Value.absent(),
+    this.score = const Value.absent(),
+    this.extraData = const Value.absent(),
+  })  : userId = Value(userId),
+        messageId = Value(messageId),
+        type = Value(type);
+  static Insertable<PinnedMessageReactionEntity> custom({
+    Expression<String>? userId,
+    Expression<String>? messageId,
+    Expression<String>? type,
+    Expression<DateTime>? createdAt,
+    Expression<int>? score,
+    Expression<Map<String, Object?>?>? extraData,
+  }) {
+    return RawValuesInsertable({
+      if (userId != null) 'user_id': userId,
+      if (messageId != null) 'message_id': messageId,
+      if (type != null) 'type': type,
+      if (createdAt != null) 'created_at': createdAt,
+      if (score != null) 'score': score,
+      if (extraData != null) 'extra_data': extraData,
+    });
+  }
+
+  PinnedMessageReactionsCompanion copyWith(
+      {Value<String>? userId,
+      Value<String>? messageId,
+      Value<String>? type,
+      Value<DateTime>? createdAt,
+      Value<int>? score,
+      Value<Map<String, Object?>?>? extraData}) {
+    return PinnedMessageReactionsCompanion(
+      userId: userId ?? this.userId,
+      messageId: messageId ?? this.messageId,
+      type: type ?? this.type,
+      createdAt: createdAt ?? this.createdAt,
+      score: score ?? this.score,
+      extraData: extraData ?? this.extraData,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (score.present) {
+      map['score'] = Variable<int>(score.value);
+    }
+    if (extraData.present) {
+      final converter = $PinnedMessageReactionsTable.$converter0;
+      map['extra_data'] =
+          Variable<String?>(converter.mapToSql(extraData.value));
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PinnedMessageReactionsCompanion(')
+          ..write('userId: $userId, ')
+          ..write('messageId: $messageId, ')
+          ..write('type: $type, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('score: $score, ')
+          ..write('extraData: $extraData')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PinnedMessageReactionsTable extends PinnedMessageReactions
+    with TableInfo<$PinnedMessageReactionsTable, PinnedMessageReactionEntity> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  $PinnedMessageReactionsTable(this._db, [this._alias]);
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
+  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'REFERENCES pinned_messages(id) ON DELETE CASCADE');
+  final VerificationMeta _typeMeta = const VerificationMeta('type');
+  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+      'type', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+      'created_at', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  final VerificationMeta _scoreMeta = const VerificationMeta('score');
+  late final GeneratedColumn<int?> score = GeneratedColumn<int?>(
+      'score', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
+      extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
+              typeName: 'TEXT', requiredDuringInsert: false)
+          .withConverter<Map<String, Object?>>(
+              $PinnedMessageReactionsTable.$converter0);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [userId, messageId, type, createdAt, score, extraData];
+  @override
+  String get aliasedName => _alias ?? 'pinned_message_reactions';
+  @override
+  String get actualTableName => 'pinned_message_reactions';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<PinnedMessageReactionEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('score')) {
+      context.handle(
+          _scoreMeta, score.isAcceptableOrUnknown(data['score']!, _scoreMeta));
+    }
+    context.handle(_extraDataMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId, type, userId};
+  @override
+  PinnedMessageReactionEntity map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    return PinnedMessageReactionEntity.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  $PinnedMessageReactionsTable createAlias(String alias) {
+    return $PinnedMessageReactionsTable(_db, alias);
+  }
+
+  static TypeConverter<Map<String, Object?>, String> $converter0 =
       MapConverter<Object?>();
 }
 
@@ -4897,6 +5231,8 @@ abstract class _$MoorChatDatabase extends GeneratedDatabase {
   late final $ChannelsTable channels = $ChannelsTable(this);
   late final $MessagesTable messages = $MessagesTable(this);
   late final $PinnedMessagesTable pinnedMessages = $PinnedMessagesTable(this);
+  late final $PinnedMessageReactionsTable pinnedMessageReactions =
+      $PinnedMessageReactionsTable(this);
   late final $ReactionsTable reactions = $ReactionsTable(this);
   late final $UsersTable users = $UsersTable(this);
   late final $MembersTable members = $MembersTable(this);
@@ -4909,6 +5245,8 @@ abstract class _$MoorChatDatabase extends GeneratedDatabase {
   late final MessageDao messageDao = MessageDao(this as MoorChatDatabase);
   late final PinnedMessageDao pinnedMessageDao =
       PinnedMessageDao(this as MoorChatDatabase);
+  late final PinnedMessageReactionDao pinnedMessageReactionDao =
+      PinnedMessageReactionDao(this as MoorChatDatabase);
   late final MemberDao memberDao = MemberDao(this as MoorChatDatabase);
   late final ReactionDao reactionDao = ReactionDao(this as MoorChatDatabase);
   late final ReadDao readDao = ReadDao(this as MoorChatDatabase);
@@ -4923,6 +5261,7 @@ abstract class _$MoorChatDatabase extends GeneratedDatabase {
         channels,
         messages,
         pinnedMessages,
+        pinnedMessageReactions,
         reactions,
         users,
         members,

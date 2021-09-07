@@ -34,6 +34,12 @@ class MockChatDatabase extends Mock implements MoorChatDatabase {
   @override
   ReactionDao get reactionDao => _reactionDao ??= MockReactionDao();
 
+  PinnedMessageReactionDao? _pinnedMessageReactionDao;
+
+  @override
+  PinnedMessageReactionDao get pinnedMessageReactionDao =>
+      _pinnedMessageReactionDao ??= MockPinnedMessageReactionDao();
+
   ReadDao? _readDao;
 
   @override
@@ -69,6 +75,9 @@ class MockPinnedMessageDao extends Mock implements PinnedMessageDao {}
 class MockMemberDao extends Mock implements MemberDao {}
 
 class MockReactionDao extends Mock implements ReactionDao {}
+
+class MockPinnedMessageReactionDao extends Mock
+    implements PinnedMessageReactionDao {}
 
 class MockReadDao extends Mock implements ReadDao {}
 

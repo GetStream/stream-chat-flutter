@@ -14,6 +14,7 @@ part 'moor_chat_database.g.dart';
   Channels,
   Messages,
   PinnedMessages,
+  PinnedMessageReactions,
   Reactions,
   Users,
   Members,
@@ -25,6 +26,7 @@ part 'moor_chat_database.g.dart';
   ChannelDao,
   MessageDao,
   PinnedMessageDao,
+  PinnedMessageReactionDao,
   MemberDao,
   ReactionDao,
   ReadDao,
@@ -51,10 +53,13 @@ class MoorChatDatabase extends _$MoorChatDatabase {
 
   // you should bump this number whenever you change or add a table definition.
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+        beforeOpen: (details) async {
+          await customStatement('PRAGMA foreign_keys = ON');
+        },
         onUpgrade: (openingDetails, before, after) async {
           if (before != after) {
             final m = createMigrator();
