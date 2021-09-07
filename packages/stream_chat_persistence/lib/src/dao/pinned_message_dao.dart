@@ -39,8 +39,10 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
     final userEntity = rows.readTableOrNull(users);
     final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
     final msgEntity = rows.readTable(pinnedMessages);
-    final latestReactions = await _db.reactionDao.getReactions(msgEntity.id);
-    final ownReactions = await _db.reactionDao.getReactionsByUserId(
+    final latestReactions =
+        await _db.pinnedMessageReactionDao.getReactions(msgEntity.id);
+    final ownReactions =
+        await _db.pinnedMessageReactionDao.getReactionsByUserId(
       msgEntity.id,
       _db.userId,
     );
@@ -168,13 +170,21 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
 
   /// Updates the message data of a particular channel with
   /// the new [messageList] data
-  Future<void> updateMessages(String cid, List<Message> messageList) => batch(
-        (batch) {
-          batch.insertAll(
-            pinnedMessages,
-            messageList.map((it) => it.toPinnedEntity(cid: cid)).toList(),
-            mode: InsertMode.insertOrReplace,
-          );
-        },
-      );
+  Future<void> updateMessages(String cid, List<Message> messageList) =>
+      bulkUpdateMessages({cid: messageList});
+
+  /// Bulk updates the message data of multiple channels
+  Future<void> bulkUpdateMessages(
+    Map<String, List<Message>> channelWithMessages,
+  ) {
+    final entities = channelWithMessages.entries
+        .map((entry) => entry.value.map(
+              (message) => message.toPinnedEntity(cid: entry.key),
+            ))
+        .expand((it) => it)
+        .toList(growable: false);
+    return batch(
+      (batch) => batch.insertAllOnConflictUpdate(pinnedMessages, entities),
+    );
+  }
 }

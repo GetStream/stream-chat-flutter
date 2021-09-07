@@ -1,30 +1,30 @@
 import 'package:moor/moor.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
-import 'package:stream_chat_persistence/src/entity/reactions.dart';
+import 'package:stream_chat_persistence/src/entity/pinned_message_reactions.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
-part 'reaction_dao.g.dart';
+part 'pinned_message_reaction_dao.g.dart';
 
-/// The Data Access Object for operations in [Reactions] table.
-@UseDao(tables: [Reactions, Users])
-class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
-    with _$ReactionDaoMixin {
+/// The Data Access Object for operations in [PinnedMessageReactions] table.
+@UseDao(tables: [PinnedMessageReactions, Users])
+class PinnedMessageReactionDao extends DatabaseAccessor<MoorChatDatabase>
+    with _$PinnedMessageReactionDaoMixin {
   /// Creates a new reaction dao instance
-  ReactionDao(MoorChatDatabase db) : super(db);
+  PinnedMessageReactionDao(MoorChatDatabase db) : super(db);
 
   /// Returns all the reactions of a particular message by matching
   /// [Reactions.messageId] with [messageId]
   Future<List<Reaction>> getReactions(String messageId) =>
-      (select(reactions).join([
-        leftOuterJoin(users, reactions.userId.equalsExp(users.id)),
+      (select(pinnedMessageReactions).join([
+        leftOuterJoin(users, pinnedMessageReactions.userId.equalsExp(users.id)),
       ])
-            ..where(reactions.messageId.equals(messageId))
-            ..orderBy([OrderingTerm.asc(reactions.createdAt)]))
+            ..where(pinnedMessageReactions.messageId.equals(messageId))
+            ..orderBy([OrderingTerm.asc(pinnedMessageReactions.createdAt)]))
           .map((rows) {
         final userEntity = rows.readTableOrNull(users);
-        final reactionEntity = rows.readTable(reactions);
+        final reactionEntity = rows.readTable(pinnedMessageReactions);
         return reactionEntity.toReaction(user: userEntity?.toUser());
       }).get();
 
@@ -43,8 +43,8 @@ class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
   /// Updates the reactions data with the new [reactionList] data
   Future<void> updateReactions(List<Reaction> reactionList) => batch((it) {
         it.insertAllOnConflictUpdate(
-          reactions,
-          reactionList.map((r) => r.toEntity()).toList(),
+          pinnedMessageReactions,
+          reactionList.map((r) => r.toPinnedEntity()).toList(),
         );
       });
 
@@ -52,8 +52,8 @@ class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
   /// present in [messageIds]
   Future<void> deleteReactionsByMessageIds(List<String> messageIds) =>
       batch((it) {
-        it.deleteWhere<Reactions, ReactionEntity>(
-          reactions,
+        it.deleteWhere<PinnedMessageReactions, PinnedMessageReactionEntity>(
+          pinnedMessageReactions,
           (r) => r.messageId.isIn(messageIds),
         );
       });

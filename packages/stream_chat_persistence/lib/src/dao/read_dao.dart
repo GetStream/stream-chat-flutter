@@ -29,11 +29,17 @@ class ReadDao extends DatabaseAccessor<MoorChatDatabase> with _$ReadDaoMixin {
 
   /// Updates the read data of a particular channel with
   /// the new [readList] data
-  Future<void> updateReads(String cid, List<Read> readList) => batch(
-        (it) => it.insertAll(
-          reads,
-          readList.map((r) => r.toEntity(cid: cid)).toList(),
-          mode: InsertMode.insertOrReplace,
-        ),
-      );
+  Future<void> updateReads(String cid, List<Read> readList) =>
+      bulkUpdateReads({cid: readList});
+
+  /// Bulk updates the reads data of multiple channels
+  Future<void> bulkUpdateReads(Map<String, List<Read>> channelWithReads) {
+    final entities = channelWithReads.entries
+        .map((entry) => entry.value.map(
+              (read) => read.toEntity(cid: entry.key),
+            ))
+        .expand((it) => it)
+        .toList(growable: false);
+    return batch((batch) => batch.insertAllOnConflictUpdate(reads, entities));
+  }
 }

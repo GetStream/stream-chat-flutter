@@ -51,7 +51,7 @@ extension MessageEntityX on MessageEntity {
 /// Useful mapping functions for [Message]
 extension MessageX on Message {
   /// Maps a [Message] into [MessageEntity]
-  MessageEntity toEntity({String? cid}) => MessageEntity(
+  MessageEntity toEntity({required String cid}) => MessageEntity(
         id: id,
         attachments: attachments.map((it) => jsonEncode(it.toData())).toList(),
         channelCid: cid,
