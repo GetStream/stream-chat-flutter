@@ -882,10 +882,6 @@ class MessageInputState extends State<MessageInput> {
         _chooseEmoji(splits.sublist(0, splits.length - 1), emoji);
       } else {
         _emojiOverlay = _buildEmojiOverlay();
-
-        // if (_emojiOverlay != null) {
-        //   Overlay.of(context)!.insert(_emojiOverlay!);
-        // }
       }
     }
   }
