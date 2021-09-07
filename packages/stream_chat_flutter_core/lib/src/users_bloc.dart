@@ -75,7 +75,9 @@ class UsersBlocState extends State<UsersBloc>
     }
 
     try {
-      final clear = pagination == null || pagination.offset == 0;
+      final clear = pagination == null ||
+          pagination.offset == null ||
+          pagination.offset == 0;
 
       final oldUsers = List<User>.from(users ?? []);
 

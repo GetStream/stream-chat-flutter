@@ -74,7 +74,10 @@ void main() {
             messageFilters: any(named: 'messageFilters'),
             paginationParams: any(named: 'paginationParams'),
           )).thenAnswer(
-        (_) async => SearchMessagesResponse()..results = messageResponseList,
+        (_) async => SearchMessagesResponse()
+          ..results = messageResponseList
+          ..next = null
+          ..previous = null,
       );
 
       messageSearchBlocState.search(filter: testFilter);
@@ -177,7 +180,10 @@ void main() {
             messageFilters: any(named: 'messageFilters'),
             paginationParams: any(named: 'paginationParams'),
           )).thenAnswer(
-        (_) async => SearchMessagesResponse()..results = messageResponseList,
+        (_) async => SearchMessagesResponse()
+          ..results = messageResponseList
+          ..next = null
+          ..previous = null,
       );
 
       messageSearchBlocState.search(filter: testFilter);
@@ -206,8 +212,10 @@ void main() {
             messageFilters: any(named: 'messageFilters'),
             paginationParams: pagination,
           )).thenAnswer(
-        (_) async =>
-            SearchMessagesResponse()..results = paginatedMessageResponseList,
+        (_) async => SearchMessagesResponse()
+          ..results = paginatedMessageResponseList
+          ..next = null
+          ..previous = null,
       );
 
       messageSearchBlocState.search(pagination: pagination, filter: testFilter);
@@ -269,7 +277,10 @@ void main() {
             messageFilters: any(named: 'messageFilters'),
             paginationParams: any(named: 'paginationParams'),
           )).thenAnswer(
-        (_) async => SearchMessagesResponse()..results = messageResponseList,
+        (_) async => SearchMessagesResponse()
+          ..results = messageResponseList
+          ..next = null
+          ..previous = null,
       );
 
       messageSearchBlocState.search(filter: testFilter);

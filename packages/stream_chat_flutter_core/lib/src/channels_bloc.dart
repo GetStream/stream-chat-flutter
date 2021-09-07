@@ -105,7 +105,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
   }) async {
     final client = _streamChatCoreState!.client;
 
-    final clear = paginationParams.offset == 0;
+    final offset = paginationParams.offset;
+    final clear = offset == null || offset == 0;
     if (clear && _paginationEnded) {
       _paginationEnded = false;
     }
