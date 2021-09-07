@@ -137,6 +137,18 @@ Filter.raw(value: {
 });
 ```
 
+#### Filter.custom
+
+The 'custom' filter is used to create a custom filter in case it does not exists or it's not been added to the SDK yet.
+Note that the filter must be supported by the Stream backend in order to work.
+
+```dart
+Filter.custom(
+  operator: '\$max',
+  value: 10,
+)
+```
+
 ### Group Queries
 
 #### Filter.and
