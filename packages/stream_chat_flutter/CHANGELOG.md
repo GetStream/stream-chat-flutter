@@ -1,5 +1,22 @@
 ## 2.2.1
 
+🛑️ Breaking Changes from `2.2.1`
+
+- `MessageSearchListView` paginationParams property is now non-nullable with a default value.
+    ```dart
+    paginationParams = const PaginationParams(limit: 30)
+    ```
+- `UserListView` pagination property is now non-nullable with a default value.
+    ```dart
+    pagination = const PaginationParams(limit: 30)
+    ```
+
+🐞 Fixed
+
+- Fixed `MessageSearchListView` pagination.
+
+## 2.2.1
+
 - Updated `stream_chat_flutter_core` dependency to 2.2.1
 
 ## 2.2.0
@@ -7,14 +24,13 @@
 ✅ Added
 
 - [#516](https://github.com/GetStream/stream-chat-flutter/issues/516):
-  Added `StreamChatThemeData.placeholderUserImage` for building a widget when the `UserAvatar` image
-  is loading
+  Added `StreamChatThemeData.placeholderUserImage` for building a widget when the `UserAvatar` image is loading
 - Added a `backgroundColor` property to the following widgets:
-  - `ChannelHeader`
-  - `ChannelListHeader`
-  - `GalleryHeader`
-  - `GalleryFooter`
-  - `ThreadHeader`
+    - `ChannelHeader`
+    - `ChannelListHeader`
+    - `GalleryHeader`
+    - `GalleryFooter`
+    - `ThreadHeader`
 - Added `MessageInput.attachmentLimit` in order to limit the no. of attachments that can be sent with a single message.
 - Added `MessageInput.onAttachmentLimitExceed` callback which will be called when the `attachmentLimit` is exceeded.
   This will override the default error alert behaviour.
@@ -34,9 +50,8 @@ You can call `.copyWith` to customize just a subset of properties.
 
 🔄 Changed
 
-Theming has been upgraded! Most theme classes now have `InheritedTheme` classes associated with
-them, and have been upgraded with some goodies like `lerp` functions. Here's the full naming
-breakdown:
+Theming has been upgraded! Most theme classes now have `InheritedTheme` classes associated with them, and have been
+upgraded with some goodies like `lerp` functions. Here's the full naming breakdown:
 
 * `AvatarTheme` is now `AvatarThemeData`
 * `ChannelHeaderTheme` is now `ChannelHeaderThemeData`
@@ -53,18 +68,18 @@ breakdown:
 
 🐞 Fixed
 
-- Fixed `MessageInput` textField case where `input` is not enabled if the file picked from the
-  camera is null.
+- Fixed `MessageInput` textField case where `input` is not enabled if the file picked from the camera is null.
 - Fixed date dividers position/alignment in non reversed `MessageListView`.
 - Fixed `MessageListView` not opening to the right initialMessage if `StreamChannel.initialMessageId` is set.
-- Fixed null check errors when accessing `message.text` in `MessageWidget` and `MessageListView`; this occurred when sending a message with no text.
+- Fixed null check errors when accessing `message.text` in `MessageWidget` and `MessageListView`; this occurred when
+  sending a message with no text.
 
 ## 2.1.2
 
 🐞 Fixed
 
-- [#590](https://github.com/GetStream/stream-chat-flutter/issues/590): livestream use case, no
-  members when sending message
+- [#590](https://github.com/GetStream/stream-chat-flutter/issues/590): livestream use case, no members when sending
+  message
 
 ## 2.1.1
 
@@ -82,8 +97,7 @@ breakdown:
 🔄 Changed
 
 - `StreamChat.of(context).user` is now deprecated in favor of `StreamChat.of(context).currentUser`.
-- `StreamChat.of(context).userStream` is now deprecated in favor
-  of `StreamChat.of(context).currentUserStream`.
+- `StreamChat.of(context).userStream` is now deprecated in favor of `StreamChat.of(context).currentUserStream`.
 
 🐞 Fixed
 
@@ -136,8 +150,7 @@ You can call `.copyWith` to customize just a subset of properties
 
 - Added video compress options (frame and quality) to `MessageInput`
 - TypingIndicator now has a property called `parentId` to show typing indicator specific to threads
-- [#493](https://github.com/GetStream/stream-chat-flutter/pull/493): add support for messageListView
-  header/footer
+- [#493](https://github.com/GetStream/stream-chat-flutter/pull/493): add support for messageListView header/footer
 - `MessageWidget` accepts a `userAvatarBuilder`
 - Added pinMessage ui support
 - Added `MessageListView.threadSeparatorBuilder` property
@@ -146,12 +159,10 @@ You can call `.copyWith` to customize just a subset of properties
 
 🐞 Fixed
 
-- [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text
-  box when editing message
-- Modals are shown using the nearest `Navigator` to make using the SDK easier in a nested navigator
-  use case
-- [#484](https://github.com/GetStream/stream-chat-flutter/issues/484): messages don't update without
-  a reload
+- [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text box when editing
+  message
+- Modals are shown using the nearest `Navigator` to make using the SDK easier in a nested navigator use case
+- [#484](https://github.com/GetStream/stream-chat-flutter/issues/484): messages don't update without a reload
 - `MessageListView` not rendering if the user is not a member of the channel
 - Fix `MessageInput` overflow when there are no actions
 - Minor fixes and improvements
@@ -204,18 +215,15 @@ You can call `.copyWith` to customize just a subset of properties.
 ✅ Added
 
 - TypingIndicator now has a property called `parentId` to show typing indicator specific to threads
-- [#493](https://github.com/GetStream/stream-chat-flutter/pull/493): add support for messageListView
-  header/footer
+- [#493](https://github.com/GetStream/stream-chat-flutter/pull/493): add support for messageListView header/footer
 - `MessageWidget` accepts a `userAvatarBuilder`
 
 🐞 Fixed
 
-- [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text
-  box when editing message
-- Modals are shown using the nearest `Navigator` to make using the SDK easier in a nested navigator
-  use case
-- [#484](https://github.com/GetStream/stream-chat-flutter/issues/484): messages don't update without
-  a reload
+- [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text box when editing
+  message
+- Modals are shown using the nearest `Navigator` to make using the SDK easier in a nested navigator use case
+- [#484](https://github.com/GetStream/stream-chat-flutter/issues/484): messages don't update without a reload
 - `MessageListView` not rendering if the user is not a member of the channel
 
 ## 2.0.0-nullsafety.7
@@ -285,8 +293,7 @@ You can call `.copyWith` to customize just a subset of properties.
 - Show error messages as system and keep them in the message input
 - Remove notification badge logic
 - Use shimmer while loading images
-- Polished `StreamChatTheme` adding more options and a new `MessageInputTheme` dedicated
-  to `MessageInput`
+- Polished `StreamChatTheme` adding more options and a new `MessageInputTheme` dedicated to `MessageInput`
 - Add possibility to specify custom message actions using `MessageWidget.customActions`
 - Added `MessageListView.onAttachmentTap` callback
 - Fixed message newline issue
@@ -343,8 +350,7 @@ You can call `.copyWith` to customize just a subset of properties.
 - Improved api documentation
 - Updated `stream_chat` dependency to `^1.0.0-beta`
 - Extracted sample app into dedicated [repo](https://github.com/GetStream/flutter-samples)
-- Reimplemented existing widgets
-  using [stream_chat_flutter_core](https://pub.dev/packages/stream_chat_flutter_core)
+- Reimplemented existing widgets using [stream_chat_flutter_core](https://pub.dev/packages/stream_chat_flutter_core)
 
 ## 0.2.21
 
@@ -361,8 +367,8 @@ You can call `.copyWith` to customize just a subset of properties.
 
 ## 0.2.20+2
 
-- Added `shouldAddChannel` to ChannelsBloc in order to check if a channel has to be added to the
-  list when a new message arrives
+- Added `shouldAddChannel` to ChannelsBloc in order to check if a channel has to be added to the list when a new message
+  arrives
 
 ## 0.2.20+1
 
@@ -396,8 +402,7 @@ You can call `.copyWith` to customize just a subset of properties.
 
 ## 0.2.16
 
-- Do not wrap channel preview builder. Users will have to implement they're custom onTap/onLongPress
-  implementation
+- Do not wrap channel preview builder. Users will have to implement they're custom onTap/onLongPress implementation
 - Make public autofocus field of the TextField of message_input
 
 ## 0.2.15
@@ -582,11 +587,10 @@ You can call `.copyWith` to customize just a subset of properties.
 
 ## 0.2.1-alpha+1
 
-- Removed the additional `Navigator` in `StreamChat` widget. It was added to make the app have
-  the `StreamChat` widget as ancestor in every route. Now the recommended way to add `StreamChat` to
-  your app is using the `builder` property of your `MaterialApp` widget. Otherwise you can use it in
-  the usual way, but you need to add a `StreamChat` widget to every route of your app.
-  Read [this issue](https://github.com/GetStream/stream-chat-flutter/issues/47) for more
+- Removed the additional `Navigator` in `StreamChat` widget. It was added to make the app have the `StreamChat` widget
+  as ancestor in every route. Now the recommended way to add `StreamChat` to your app is using the `builder` property of
+  your `MaterialApp` widget. Otherwise you can use it in the usual way, but you need to add a `StreamChat` widget to
+  every route of your app. Read [this issue](https://github.com/GetStream/stream-chat-flutter/issues/47) for more
   information.
 
 ```dart
@@ -688,8 +692,8 @@ Widget build(BuildContext context) {
 
 - Add gesture (vertical drag down) to close the keyboard
 
-- Add keyboard type parameters (set it to TextInputType.text to show the submit button that will
-  even close the keyboard)
+- Add keyboard type parameters (set it to TextInputType.text to show the submit button that will even close the
+  keyboard)
 
 The property showVideoFullScreen was added mainly because of this issue brianegan/chewie#261
 
