@@ -1371,12 +1371,16 @@ class ClientState {
           .on()
           .map((event) => event.unreadChannels)
           .whereType<int>()
-          .listen(_unreadChannelsController.add),
+          .listen((count) {
+        currentUser = currentUser?.copyWith(unreadChannels: count);
+      }),
       _client
           .on()
           .map((event) => event.totalUnreadCount)
           .whereType<int>()
-          .listen(_totalUnreadCountController.add),
+          .listen((count) {
+        currentUser = currentUser?.copyWith(totalUnreadCount: count);
+      }),
     ]);
 
     _listenChannelDeleted();
