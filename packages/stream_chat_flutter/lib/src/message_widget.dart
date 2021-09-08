@@ -74,7 +74,6 @@ class MessageWidget extends StatefulWidget {
     this.showInChannelIndicator = false,
     this.onReplyTap,
     this.onThreadTap,
-    this.actualIndex,
     this.showUsername = true,
     this.showTimestamp = true,
     this.showReactions = true,
@@ -257,8 +256,6 @@ class MessageWidget extends StatefulWidget {
           },
         }..addAll(customAttachmentBuilders ?? {}),
         super(key: key);
-
-  final int? actualIndex;
 
   /// Function called on mention tap
   final void Function(User)? onMentionTap;
@@ -593,10 +590,6 @@ class _MessageWidgetState extends State<MessageWidget>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Container(
-      decoration: BoxDecoration(border: Border.all()),
-      child: Text('${widget.message.text ?? 'valu'} ${widget.actualIndex}'),
-    );
     final avatarWidth =
         widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
     final bottomRowPadding =

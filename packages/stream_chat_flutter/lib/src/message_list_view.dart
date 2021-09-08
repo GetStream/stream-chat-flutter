@@ -455,7 +455,7 @@ class _MessageListViewState extends State<MessageListView> {
                 onInBetweenOfPage: () {
                   _inBetweenList = true;
                 },
-                child: ScrollablePositionedList.builder(
+                child: ScrollablePositionedList.separated(
                   key: _upToDate
                       ? null
                       : ValueKey(initialIndex + initialAlignment),
@@ -470,7 +470,7 @@ class _MessageListViewState extends State<MessageListView> {
                     final String data = (key as ValueKey).value;
                     final index =
                         messages.indexWhere((element) => element.id == data);
-                    return index + 1;
+                    return ((index + 2) * 2) - 1;
                   },
 
                   // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
@@ -491,74 +491,72 @@ class _MessageListViewState extends State<MessageListView> {
                   //        Separator(Footer -> 8??30)          ->           0                                      (count-8)
                   //     Footer         ->        0                                             (count-8)
 
-                  // separatorBuilder: (context, i) {
-                  //   if (i == itemCount - 2) {
-                  //     if (widget.parentMessage == null) {
-                  //       return const Offstage();
-                  //     }
-                  //     return _buildThreadSeparator();
-                  //   }
-                  //   if (i == itemCount - 3) {
-                  //     if (widget.headerBuilder == null) {
-                  //       if (_isThreadConversation) return const Offstage();
-                  //       return const SizedBox(height: 52);
-                  //     }
-                  //     return const SizedBox(height: 8);
-                  //   }
-                  //   if (i == 0) {
-                  //     if (widget.footerBuilder == null) {
-                  //       return const SizedBox(height: 30);
-                  //     }
-                  //     return const SizedBox(height: 8);
-                  //   }
+                  separatorBuilder: (context, i) {
+                    if (i == itemCount - 2) {
+                      if (widget.parentMessage == null) {
+                        return const Offstage();
+                      }
+                      return _buildThreadSeparator();
+                    }
+                    if (i == itemCount - 3) {
+                      if (widget.headerBuilder == null) {
+                        if (_isThreadConversation) return const Offstage();
+                        return const SizedBox(height: 52);
+                      }
+                      return const SizedBox(height: 8);
+                    }
+                    if (i == 0) {
+                      if (widget.footerBuilder == null) {
+                        return const SizedBox(height: 30);
+                      }
+                      return const SizedBox(height: 8);
+                    }
 
-                  //   if (i == 1 || i == itemCount - 4) return const Offstage();
+                    if (i == 1 || i == itemCount - 4) return const Offstage();
 
-                  //   late final Message message, nextMessage;
-                  //   if (widget.reverse) {
-                  //     message = messages[i - 1];
-                  //     nextMessage = messages[i - 2];
-                  //   } else {
-                  //     message = messages[i - 2];
-                  //     nextMessage = messages[i - 1];
-                  //   }
-                  //   if (!Jiffy(message.createdAt.toLocal()).isSame(
-                  //     nextMessage.createdAt.toLocal(),
-                  //     Units.DAY,
-                  //   )) {
-                  //     final divider = widget.dateDividerBuilder != null
-                  //         ? widget.dateDividerBuilder!(
-                  //             nextMessage.createdAt.toLocal(),
-                  //           )
-                  //         : DateDivider(
-                  //             dateTime: nextMessage.createdAt.toLocal(),
-                  //           );
-                  //     return Padding(
-                  //       padding: const EdgeInsets.symmetric(vertical: 12),
-                  //       child: divider,
-                  //     );
-                  //   }
-                  //   final timeDiff =
-                  //       Jiffy(nextMessage.createdAt.toLocal()).diff(
-                  //     message.createdAt.toLocal(),
-                  //     Units.MINUTE,
-                  //   );
+                    late final Message message, nextMessage;
+                    if (widget.reverse) {
+                      message = messages[i - 1];
+                      nextMessage = messages[i - 2];
+                    } else {
+                      message = messages[i - 2];
+                      nextMessage = messages[i - 1];
+                    }
+                    if (!Jiffy(message.createdAt.toLocal()).isSame(
+                      nextMessage.createdAt.toLocal(),
+                      Units.DAY,
+                    )) {
+                      final divider = widget.dateDividerBuilder != null
+                          ? widget.dateDividerBuilder!(
+                              nextMessage.createdAt.toLocal(),
+                            )
+                          : DateDivider(
+                              dateTime: nextMessage.createdAt.toLocal(),
+                            );
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: divider,
+                      );
+                    }
+                    final timeDiff =
+                        Jiffy(nextMessage.createdAt.toLocal()).diff(
+                      message.createdAt.toLocal(),
+                      Units.MINUTE,
+                    );
 
-                  //   final isNextUserSame =
-                  //       message.user!.id == nextMessage.user?.id;
-                  //   final isThread = message.replyCount! > 0;
-                  //   final isDeleted = message.isDeleted;
-                  //   if (timeDiff >= 1 ||
-                  //       !isNextUserSame ||
-                  //       isThread ||
-                  //       isDeleted) {
-                  //     return const SizedBox(height: 8);
-                  //   }
-                  //   return const SizedBox(height: 2);
-                  // },
+                    final isNextUserSame =
+                        message.user!.id == nextMessage.user?.id;
+                    final isThread = message.replyCount! > 0;
+                    final isDeleted = message.isDeleted;
+                    if (timeDiff >= 1 ||
+                        !isNextUserSame ||
+                        isThread ||
+                        isDeleted) {
+                      return const SizedBox(height: 8);
+                    }
+                    return const SizedBox(height: 2);
+                  },
                   itemBuilder: (context, i) {
-                    // final myMessage = messages[i];
-                    // return buildMessage(myMessage, messages, i, i);
                     if (i == itemCount - 1) {
                       if (widget.parentMessage == null) {
                         return const Offstage();
@@ -604,7 +602,7 @@ class _MessageListViewState extends State<MessageListView> {
                         i - 2,
                       );
                     } else {
-                      messageWidget = buildMessage(message, messages, i - 2, i);
+                      messageWidget = buildMessage(message, messages, i - 2);
                     }
                     return messageWidget;
                   },
@@ -830,7 +828,7 @@ class _MessageListViewState extends State<MessageListView> {
     final messageWidget = buildMessage(message, messages, index);
 
     return VisibilityDetector(
-      key: ValueKey<String>('BOTTOM-MESSAGE-${message.id}'),
+      key: ValueKey<String>(message.id),
       onVisibilityChanged: (visibility) {
         final isVisible = visibility.visibleBounds != Rect.zero;
         if (isVisible) {
@@ -922,8 +920,7 @@ class _MessageListViewState extends State<MessageListView> {
     return defaultMessageWidget;
   }
 
-  Widget buildMessage(Message message, List<Message> messages, int index,
-      [int? actualIndex]) {
+  Widget buildMessage(Message message, List<Message> messages, int index) {
     if ((message.type == 'system' || message.type == 'error') &&
         message.text?.isNotEmpty == true) {
       return widget.systemMessageBuilder?.call(context, message) ??
@@ -1009,7 +1006,6 @@ class _MessageListViewState extends State<MessageListView> {
 
     Widget messageWidget = MessageWidget(
       key: ValueKey<String>(message.id),
-      actualIndex: actualIndex,
       message: message,
       reverse: isMyMessage,
       showReactions: !message.isDeleted,
