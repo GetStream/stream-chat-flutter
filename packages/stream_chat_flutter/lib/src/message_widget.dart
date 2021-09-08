@@ -595,6 +595,8 @@ class _MessageWidgetState extends State<MessageWidget>
     final bottomRowPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
+    final showReactions = _shouldShowReactions;
+
     return Material(
       type: widget.message.pinned && widget.showPinHighlight
           ? MaterialType.card
@@ -658,15 +660,21 @@ class _MessageWidgetState extends State<MessageWidget>
                                   SizedBox(width: avatarWidth + 4),
                                 Flexible(
                                   child: PortalEntry(
-                                    visible: _shouldShowReactions,
-                                    portal: Container(
-                                      transform: Matrix4.translationValues(
-                                          widget.reverse ? 12 : -12, 0, 0),
-                                      constraints: const BoxConstraints(
-                                        maxWidth: 22 * 6.0,
-                                      ),
-                                      child: _buildReactionIndicator(context),
-                                    ),
+                                    visible: showReactions,
+                                    portal: showReactions
+                                        ? Container(
+                                            transform:
+                                                Matrix4.translationValues(
+                                                    widget.reverse ? 12 : -12,
+                                                    0,
+                                                    0),
+                                            constraints: const BoxConstraints(
+                                              maxWidth: 22 * 6.0,
+                                            ),
+                                            child: _buildReactionIndicator(
+                                                context),
+                                          )
+                                        : null,
                                     portalAnchor:
                                         Alignment(widget.reverse ? 1 : -1, -1),
                                     childAnchor:
