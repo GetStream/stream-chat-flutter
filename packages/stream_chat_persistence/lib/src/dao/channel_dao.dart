@@ -42,10 +42,9 @@ class ChannelDao extends DatabaseAccessor<MoorChatDatabase>
 
   /// Updates all the channels using the new [channelList] data
   Future<void> updateChannels(List<ChannelModel> channelList) => batch(
-        (it) => it.insertAll(
+        (it) => it.insertAllOnConflictUpdate(
           channels,
           channelList.map((c) => c.toEntity()).toList(),
-          mode: InsertMode.insertOrReplace,
         ),
       );
 }

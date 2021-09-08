@@ -14,10 +14,9 @@ class UserDao extends DatabaseAccessor<MoorChatDatabase> with _$UserDaoMixin {
 
   /// Updates the users data with the new [userList] data
   Future<void> updateUsers(List<User> userList) => batch(
-        (it) => it.insertAll(
+        (it) => it.insertAllOnConflictUpdate(
           users,
           userList.map((u) => u.toEntity()).toList(),
-          mode: InsertMode.insertOrReplace,
         ),
       );
 

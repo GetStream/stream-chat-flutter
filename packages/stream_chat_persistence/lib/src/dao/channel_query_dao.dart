@@ -45,13 +45,12 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
         }
 
         await batch((it) {
-          it.insertAll(
+          it.insertAllOnConflictUpdate(
             channelQueries,
             cids
                 .map((cid) =>
                     ChannelQueryEntity(queryHash: hash, channelCid: cid))
                 .toList(),
-            mode: InsertMode.insertOrReplace,
           );
         });
       });

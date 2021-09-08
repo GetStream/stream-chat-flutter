@@ -138,6 +138,20 @@ void main() {
       expect(filter.value, value);
     });
 
+    test('empty', () {
+      final filter = Filter.empty();
+      expect(filter.value, {});
+    });
+
+    test('contains', () {
+      const key = 'testKey';
+      const values = 'testValue';
+      final filter = Filter.contains(key, values);
+      expect(filter.key, key);
+      expect(filter.value, values);
+      expect(filter.operator, FilterOperator.contains.rawValue);
+    });
+
     group('groupedOperator', () {
       final filter1 = Filter.equal('testKey', 'testValue');
       final filter2 = Filter.in_('testKey', const ['testValue']);

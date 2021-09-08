@@ -16,6 +16,7 @@ void main() {
   });
 
   Future<List<Read>> _prepareReadData(String cid, {int count = 3}) async {
+    final channels = [ChannelModel(cid: cid)];
     final users = List.generate(count, (index) => User(id: 'testUserId$index'));
     final reads = List.generate(
       count,
@@ -27,12 +28,13 @@ void main() {
     );
 
     await database.userDao.updateUsers(users);
+    await database.channelDao.updateChannels(channels);
     await readDao.updateReads(cid, reads);
     return reads;
   }
 
   test('getReadsByCid', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
 
     // Should be empty initially
     final reads = await readDao.getReadsByCid(cid);
@@ -55,7 +57,7 @@ void main() {
   });
 
   test('updateReads', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
 
     // Preparing test data
     final insertedReads = await _prepareReadData(cid);
