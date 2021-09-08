@@ -658,7 +658,7 @@ class _MessageWidgetState extends State<MessageWidget>
                                   SizedBox(width: avatarWidth + 4),
                                 Flexible(
                                   child: PortalEntry(
-                                    visible: false,
+                                    visible: _shouldShowReactions,
                                     portal: Container(
                                       transform: Matrix4.translationValues(
                                           widget.reverse ? 12 : -12, 0, 0),
@@ -1014,9 +1014,7 @@ class _MessageWidgetState extends State<MessageWidget>
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
-      child: (widget.showReactions &&
-              (widget.message.reactionCounts?.isNotEmpty == true) &&
-              !widget.message.isDeleted)
+      child: _shouldShowReactions
           ? GestureDetector(
               onTap: () => _showMessageReactionsModalBottomSheet(context),
               child: ReactionBubble(
@@ -1035,6 +1033,11 @@ class _MessageWidgetState extends State<MessageWidget>
           : const SizedBox(),
     );
   }
+
+  bool get _shouldShowReactions =>
+      widget.showReactions &&
+      (widget.message.reactionCounts?.isNotEmpty == true) &&
+      !widget.message.isDeleted;
 
   void _showMessageActionModalBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
