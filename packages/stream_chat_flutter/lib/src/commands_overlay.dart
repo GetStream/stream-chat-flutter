@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 
+/// Overlay for displaying commands that can be used
 class CommandsOverlay extends StatelessWidget {
-  final BuildContext context;
-  final String text;
-  final ValueChanged<Command> onCommandResult;
-
+  /// Constructor for creating a [CommandsOverlay]
   const CommandsOverlay(
     this.context, {
     required this.text,
@@ -14,9 +12,18 @@ class CommandsOverlay extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  /// Context of the upper tree
+  final BuildContext context;
+
+  /// Query for searching commands
+  final String text;
+
+  /// Callback called when a command is selected
+  final ValueChanged<Command> onCommandResult;
+
   @override
   Widget build(BuildContext otherContext) {
-    var _streamChatTheme = StreamChatTheme.of(context);
+    final _streamChatTheme = StreamChatTheme.of(context);
     final commands = StreamChannel.of(context)
             .channel
             .config

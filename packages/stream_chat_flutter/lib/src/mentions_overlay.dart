@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// Overlay for displaying users that can be mentioned
 class MentionsOverlay extends StatelessWidget {
-  final BuildContext context;
-  final String query;
-  final ValueChanged<User?> onMentionResult;
-
-  /// Customize the tile for the mentions overlay
-  final MentionTileBuilder? mentionsTileBuilder;
-
+  /// Constructor for creating a [MentionsOverlay]
   const MentionsOverlay(
     this.context, {
     required this.query,
@@ -18,9 +12,21 @@ class MentionsOverlay extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  /// Context of the upper tree
+  final BuildContext context;
+
+  /// Query for searching users
+  final String query;
+
+  /// Callback called when a user is selected
+  final ValueChanged<User?> onMentionResult;
+
+  /// Customize the tile for the mentions overlay
+  final MentionTileBuilder? mentionsTileBuilder;
+
   @override
   Widget build(BuildContext otherContext) {
-    var _streamChatTheme = StreamChatTheme.of(context);
+    final _streamChatTheme = StreamChatTheme.of(context);
 
     Future<List<Member>>? queryMembers;
 

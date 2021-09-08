@@ -4,11 +4,9 @@ import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 
+/// Overlay for displaying emoji that can be used
 class EmojiOverlay extends StatelessWidget {
-  final BuildContext context;
-  final String query;
-  final ValueChanged<Emoji> onEmojiResult;
-
+  /// Constructor for creating a [EmojiOverlay]
   const EmojiOverlay(
     this.context, {
     required this.query,
@@ -16,10 +14,19 @@ class EmojiOverlay extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  /// Context of the upper tree
+  final BuildContext context;
+
+  /// Query for searching emoji
+  final String query;
+
+  /// Callback called when an emoji is selected
+  final ValueChanged<Emoji> onEmojiResult;
+
   @override
   Widget build(BuildContext otherContext) {
-    var _streamChatTheme = StreamChatTheme.of(context);
-    var _emojiNames =
+    final _streamChatTheme = StreamChatTheme.of(context);
+    final _emojiNames =
         Emoji.all().where((it) => it.name != null).map((e) => e.name!);
 
     final emojis = _emojiNames
