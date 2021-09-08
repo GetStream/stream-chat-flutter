@@ -43,7 +43,10 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
     with AutomaticKeepAliveClientMixin {
   late StreamChatCoreState _streamChatCoreState;
 
+  /// The key used to paginate next items.
   String? nextId;
+
+  /// The key used to paginate previous items.
   String? previousId;
 
   /// The current messages list
