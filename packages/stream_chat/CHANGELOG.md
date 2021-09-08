@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Add support for `next`, `previous` value pagination in `client.search`.
+- Add support for `next`, `previous` value pagination in `client.search`, [read more.](https://getstream.io/chat/docs/other-rest/search/#pagination)
 
 ## 2.2.1
 
