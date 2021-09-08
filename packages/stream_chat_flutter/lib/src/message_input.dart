@@ -2311,75 +2311,78 @@ class _PickerWidgetState extends State<_PickerWidget> {
     if (widget.filePickerIndex != 0) {
       return const Offstage();
     }
-    return FutureBuilder<bool>(
-      future: requestPermission,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.data!) {
-          if (widget.containsFile) {
-            return GestureDetector(
-              onTap: () {
-                widget.onAddMoreFilesClick(DefaultAttachmentTypes.file);
-              },
-              child: Container(
-                constraints: const BoxConstraints.expand(),
-                color: widget.streamChatTheme.colorTheme.inputBg,
-                alignment: Alignment.center,
-                child: Text(
-                  context.translations.addMoreFilesLabel,
-                  style: TextStyle(
-                    color: widget.streamChatTheme.colorTheme.accentPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            );
+    return RepaintBoundary(
+      child: FutureBuilder<bool>(
+        future: requestPermission,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
           }
-          return MediaListView(
-            selectedIds: widget.selectedMedias,
-            onSelect: widget.onMediaSelected,
-          );
-        }
 
-        return InkWell(
-          onTap: () async {
-            PhotoManager.openSetting();
-          },
-          child: Container(
-            color: widget.streamChatTheme.colorTheme.inputBg,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SvgPicture.asset(
-                  'svgs/icon_picture_empty_state.svg',
-                  package: 'stream_chat_flutter',
-                  height: 140,
-                  color: widget.streamChatTheme.colorTheme.disabled,
-                ),
-                Text(
-                  context.translations.enablePhotoAndVideoAccessMessage,
-                  style: widget.streamChatTheme.textTheme.body.copyWith(
-                      color: widget.streamChatTheme.colorTheme.textLowEmphasis),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 6),
-                Center(
+          if (snapshot.data!) {
+            if (widget.containsFile) {
+              return GestureDetector(
+                onTap: () {
+                  widget.onAddMoreFilesClick(DefaultAttachmentTypes.file);
+                },
+                child: Container(
+                  constraints: const BoxConstraints.expand(),
+                  color: widget.streamChatTheme.colorTheme.inputBg,
+                  alignment: Alignment.center,
                   child: Text(
-                    context.translations.allowGalleryAccessMessage,
-                    style: widget.streamChatTheme.textTheme.bodyBold.copyWith(
+                    context.translations.addMoreFilesLabel,
+                    style: TextStyle(
                       color: widget.streamChatTheme.colorTheme.accentPrimary,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-              ],
+              );
+            }
+            return MediaListView(
+              selectedIds: widget.selectedMedias,
+              onSelect: widget.onMediaSelected,
+            );
+          }
+
+          return InkWell(
+            onTap: () async {
+              PhotoManager.openSetting();
+            },
+            child: Container(
+              color: widget.streamChatTheme.colorTheme.inputBg,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SvgPicture.asset(
+                    'svgs/icon_picture_empty_state.svg',
+                    package: 'stream_chat_flutter',
+                    height: 140,
+                    color: widget.streamChatTheme.colorTheme.disabled,
+                  ),
+                  Text(
+                    context.translations.enablePhotoAndVideoAccessMessage,
+                    style: widget.streamChatTheme.textTheme.body.copyWith(
+                        color:
+                            widget.streamChatTheme.colorTheme.textLowEmphasis),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Center(
+                    child: Text(
+                      context.translations.allowGalleryAccessMessage,
+                      style: widget.streamChatTheme.textTheme.bodyBold.copyWith(
+                        color: widget.streamChatTheme.colorTheme.accentPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
