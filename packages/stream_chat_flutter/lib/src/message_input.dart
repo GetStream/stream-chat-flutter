@@ -11,6 +11,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/src/commands_overlay.dart';
+import 'package:stream_chat_flutter/src/emoji_overlay.dart';
+import 'package:stream_chat_flutter/src/mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
@@ -23,7 +26,6 @@ import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
 
 export 'package:video_compress/video_compress.dart' show VideoQuality;
@@ -323,7 +325,6 @@ class MessageInputState extends State<MessageInput> {
   bool _inputEnabled = true;
   bool _commandEnabled = false;
   Widget? _commandsOverlay, _mentionsOverlay, _emojiOverlay;
-  late Iterable<String> _emojiNames;
 
   Command? _chosenCommand;
   bool _actionsShrunk = false;
@@ -347,8 +348,6 @@ class MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
     _focusNode = widget.focusNode ?? FocusNode();
-    _emojiNames =
-        Emoji.all().where((it) => it.name != null).map((e) => e.name!);
 
     if (!kIsWeb) {
       _keyboardListener =
@@ -478,7 +477,7 @@ class MessageInputState extends State<MessageInput> {
           _emojiOverlay != null ||
           _mentionsOverlay != null,
       overlayBuilder: (context, offset) {
-        late Widget? child;
+        late Widget child;
 
         if (_commandsOverlay != null) {
           child = _buildCommandsOverlayEntry();
@@ -490,7 +489,7 @@ class MessageInputState extends State<MessageInput> {
 
         return CenterAbout(
           position: Offset(offset.dx, offset.dy),
-          child: child ?? const SizedBox(),
+          child: child,
         );
       },
       child: child,
@@ -921,114 +920,10 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  Widget? _buildCommandsOverlayEntry() {
+  Widget _buildCommandsOverlayEntry() {
     final text = textEditingController.text.trimLeft();
-    final commands = StreamChannel.of(context)
-            .channel
-            .config
-            ?.commands
-            .where((c) => c.name.contains(text.replaceFirst('/', '')))
-            .toList() ??
-        [];
 
-    if (commands.isEmpty) {
-      return null;
-    }
-
-    final size = MediaQuery.of(context).size;
-
-    return Padding(
-      padding: const EdgeInsets.all(4),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        color: _streamChatTheme.colorTheme.barsBg,
-        clipBehavior: Clip.hardEdge,
-        child: Container(
-          constraints: BoxConstraints.loose(Size(size.width - 16, 400)),
-          decoration: BoxDecoration(
-              color: _streamChatTheme.colorTheme.barsBg,
-              borderRadius: BorderRadius.circular(8)),
-          child: ListView(
-            padding: const EdgeInsets.all(0),
-            shrinkWrap: true,
-            children: [
-              if (commands.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                        ),
-                        child: StreamSvgIcon.lightning(
-                          color: _streamChatTheme.colorTheme.accentPrimary,
-                        ),
-                      ),
-                      Text(
-                        context.translations.instantCommandsLabel,
-                        style: TextStyle(
-                          color: _streamChatTheme.colorTheme.textHighEmphasis
-                              .withOpacity(.5),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              const SizedBox(
-                height: 10,
-              ),
-              ...commands
-                  .map(
-                    (c) => InkWell(
-                      onTap: () {
-                        _setCommand(c);
-                      },
-                      child: SizedBox(
-                        height: 40,
-                        child: Row(
-                          children: [
-                            const SizedBox(
-                              width: 16,
-                            ),
-                            _buildCommandIcon(c.name),
-                            const SizedBox(
-                              width: 8,
-                            ),
-                            Text.rich(
-                              TextSpan(
-                                text: c.name.capitalize(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                                children: [
-                                  TextSpan(
-                                    text: '   /${c.name} ${c.args}',
-                                    style: _streamChatTheme.textTheme.body
-                                        .copyWith(
-                                      // ignore: lines_longer_than_80_chars
-                                      color: _streamChatTheme
-                                          // ignore: lines_longer_than_80_chars
-                                          .colorTheme
-                                          .textLowEmphasis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ],
-          ),
-        ),
-      ),
-    );
+    return CommandsOverlay(context, text: text, onCommandResult: _setCommand);
   }
 
   Widget _buildFilePickerSection() {
@@ -1240,278 +1135,48 @@ class MessageInputState extends State<MessageInput> {
     });
   }
 
-  Widget _buildCommandIcon(String iconType) {
-    switch (iconType) {
-      case 'giphy':
-        return CircleAvatar(
-          radius: 12,
-          child: StreamSvgIcon.giphyIcon(
-            size: 24,
-          ),
-        );
-      case 'ban':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: StreamSvgIcon.iconUserDelete(
-            size: 16,
-            color: Colors.white,
-          ),
-        );
-      case 'flag':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: StreamSvgIcon.flag(
-            size: 14,
-            color: Colors.white,
-          ),
-        );
-      case 'imgur':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: ClipOval(
-            child: StreamSvgIcon.imgur(
-              size: 24,
-            ),
-          ),
-        );
-      case 'mute':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: StreamSvgIcon.mute(
-            size: 16,
-            color: Colors.white,
-          ),
-        );
-      case 'unban':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: StreamSvgIcon.userAdd(
-            size: 16,
-            color: Colors.white,
-          ),
-        );
-      case 'unmute':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: StreamSvgIcon.volumeUp(
-            size: 16,
-            color: Colors.white,
-          ),
-        );
-      default:
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: StreamSvgIcon.lightning(
-            size: 16,
-            color: Colors.white,
-          ),
-        );
-    }
-  }
-
-  Widget? _buildMentionsOverlayEntry() {
+  Widget _buildMentionsOverlayEntry() {
     final splits = textEditingController.text
         .substring(0, textEditingController.value.selection.start)
         .split('@');
     final query = splits.last.toLowerCase();
 
-    Future<List<Member>>? queryMembers;
+    return MentionsOverlay(context, query: query, onMentionResult: (user) {
+      if (user != null) {
+        _mentionedUsers.add(user);
+      }
 
-    final channelState = StreamChannel.of(context);
-    if (query.isNotEmpty) {
-      queryMembers = channelState.channel
-          .queryMembers(filter: Filter.autoComplete('name', query))
-          .then((res) => res.members);
-    }
+      splits[splits.length - 1] = user!.name;
+      final rejoin = splits.join('@');
 
-    final members = channelState.channel.state?.members
-            .where((m) => m.user?.name.toLowerCase().contains(query) == true)
-            .toList() ??
-        [];
-
-    if (members.isEmpty) {
-      return null;
-    }
-
-    // ignore: cast_nullable_to_non_nullable
-    final renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-    final child = Card(
-      margin: const EdgeInsets.all(8),
-      elevation: 2,
-      color: _streamChatTheme.colorTheme.barsBg,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Container(
-        constraints: BoxConstraints.loose(Size(size.width - 16, 200)),
-        decoration: BoxDecoration(
-          color: _streamChatTheme.colorTheme.barsBg,
+      textEditingController.value = TextEditingValue(
+        text: rejoin +
+            textEditingController.text
+                .substring(textEditingController.selection.start),
+        selection: TextSelection.collapsed(
+          offset: rejoin.length,
         ),
-        child: FutureBuilder<List<Member>>(
-          future: queryMembers ?? Future.value(members),
-          initialData: members,
-          builder: (context, snapshot) => ListView(
-            padding: const EdgeInsets.all(0),
-            shrinkWrap: true,
-            children: [
-              const SizedBox(
-                height: 8,
-              ),
-              ...snapshot.data!
-                  .where((it) => it.user != null)
-                  .map(
-                    (m) => Material(
-                      color: _streamChatTheme.colorTheme.barsBg,
-                      child: InkWell(
-                        onTap: () {
-                          if (m.user != null) {
-                            _mentionedUsers.add(m.user!);
-                          }
-
-                          splits[splits.length - 1] = m.user!.name;
-                          final rejoin = splits.join('@');
-
-                          textEditingController.value = TextEditingValue(
-                            text: rejoin +
-                                textEditingController.text.substring(
-                                    textEditingController.selection.start),
-                            selection: TextSelection.collapsed(
-                              offset: rejoin.length,
-                            ),
-                          );
-                          _debounce!.cancel();
-                          _mentionsOverlay = null;
-                        },
-                        child: widget.mentionsTileBuilder != null
-                            ? widget.mentionsTileBuilder!(context, m)
-                            : MentionTile(m),
-                      ),
-                    ),
-                  )
-                  .toList(),
-              const SizedBox(
-                height: 8,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOutExpo,
-      builder: (context, val, child) => Transform.scale(
-        scale: val,
-        child: child,
-      ),
-      child: child,
-    );
+      );
+      _debounce!.cancel();
+      setState(() {
+        _mentionsOverlay = null;
+      });
+    });
   }
 
-  Widget? _buildEmojiOverlay() {
+  Widget _buildEmojiOverlay() {
     final splits = textEditingController.text
         .substring(0, textEditingController.value.selection.start)
         .split(':');
+
     final query = splits.last.toLowerCase();
 
-    final emojis = _emojiNames
-        .where((e) => e.contains(query))
-        .map(Emoji.byName)
-        .where((e) => e != null);
-
-    if (emojis.isEmpty) {
-      return null;
-    }
-
-    // ignore: cast_nullable_to_non_nullable
-    final renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-
-    return Card(
-      margin: const EdgeInsets.all(8),
-      elevation: 2,
-      color: _streamChatTheme.colorTheme.barsBg,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Container(
-        constraints: BoxConstraints.loose(Size(size.width - 16, 200)),
-        decoration: BoxDecoration(
-          boxShadow: const [
-            BoxShadow(
-              spreadRadius: -8,
-              blurRadius: 5,
-              offset: Offset(0, -4),
-            ),
-          ],
-          color: _streamChatTheme.colorTheme.barsBg,
-        ),
-        child: ListView.builder(
-          padding: const EdgeInsets.all(0),
-          shrinkWrap: true,
-          itemCount: emojis.length + 1,
-          itemBuilder: (context, i) {
-            if (i == 0) {
-              return Padding(
-                padding: const EdgeInsets.only(left: 8, top: 8),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: StreamSvgIcon.smile(
-                        color: _streamChatTheme.colorTheme.accentPrimary,
-                      ),
-                    ),
-                    Flexible(
-                      child: Text(
-                        context.translations.emojiMatchingQueryText(
-                          query,
-                        ),
-                        style: TextStyle(
-                          color: _streamChatTheme.colorTheme.textHighEmphasis
-                              .withOpacity(.5),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              );
-            }
-
-            final emoji = emojis.elementAt(i - 1)!;
-            final themeData = Theme.of(context);
-            return ListTile(
-              title: SubstringHighlight(
-                text:
-                    // ignore: lines_longer_than_80_chars
-                    "${emoji.char} ${emoji.name!.replaceAll('_', ' ')}",
-                term: query,
-                textStyleHighlight: themeData.textTheme.headline6!.copyWith(
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.bold,
-                ),
-                textStyle: themeData.textTheme.headline6!.copyWith(
-                  fontSize: 14.5,
-                ),
-              ),
-              onTap: () {
-                _chooseEmoji(splits, emoji);
-              },
-            );
-          },
-        ),
-      ),
+    return EmojiOverlay(
+      context,
+      query: query,
+      onEmojiResult: (emoji) {
+        _chooseEmoji(splits, emoji);
+      },
     );
   }
 
