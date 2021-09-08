@@ -31,8 +31,7 @@ void main() {
       );
 
   testWidgets(
-    'messageSearchBlocState.search() should throw if used where '
-    'StreamChat is not present in the widget tree',
+    '''messageSearchBlocState.search() should throw if used where StreamChat is not present in the widget tree''',
     (tester) async {
       const messageSearchBloc = MessageSearchBloc(
         child: Offstage(),
@@ -98,8 +97,7 @@ void main() {
   );
 
   testWidgets(
-    'messageSearchBlocState.messagesStream should emit error '
-    'if client.search() throws',
+    '''messageSearchBlocState.messagesStream should emit error if client.search() throws''',
     (tester) async {
       const messageSearchBlocKey = Key('messageSearchBloc');
       const childKey = Key('child');
@@ -147,9 +145,7 @@ void main() {
   );
 
   testWidgets(
-    'calling messageSearchBlocState.search() again with an offset '
-    'should emit new data through messagesStream and also emit loading state '
-    'through queryMessagesLoading',
+    '''calling messageSearchBlocState.search() again with an offset should emit new data through messagesStream and also emit loading state through queryMessagesLoading''',
     (tester) async {
       const messageSearchBlocKey = Key('messageSearchBloc');
       const childKey = Key('child');
@@ -171,14 +167,15 @@ void main() {
         find.byKey(messageSearchBlocKey),
       );
 
-      final messageResponseList = _generateMessages();
+      const pagination = PaginationParams(limit: 25);
+      final messageResponseList = _generateMessages(count: 25);
 
       when(() => mockClient.search(
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
-            paginationParams: any(named: 'paginationParams'),
+            paginationParams: pagination,
           )).thenAnswer(
         (_) async => SearchMessagesResponse()
           ..results = messageResponseList
@@ -186,7 +183,7 @@ void main() {
           ..previous = null,
       );
 
-      messageSearchBlocState.search(filter: testFilter);
+      messageSearchBlocState.search(pagination: pagination, filter: testFilter);
 
       await expectLater(
         messageSearchBlocState.messagesStream,
@@ -198,19 +195,19 @@ void main() {
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
-            paginationParams: any(named: 'paginationParams'),
+            paginationParams: pagination,
           )).called(1);
 
       final offset = messageResponseList.length;
       final paginatedMessageResponseList = _generateMessages(offset: offset);
-      final pagination = PaginationParams(offset: offset);
+      final newPagination = pagination.copyWith(offset: offset);
 
       when(() => mockClient.search(
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
-            paginationParams: pagination,
+            paginationParams: newPagination,
           )).thenAnswer(
         (_) async => SearchMessagesResponse()
           ..results = paginatedMessageResponseList
@@ -244,9 +241,7 @@ void main() {
   );
 
   testWidgets(
-    'calling messageSearchBlocState.search() again with an offset '
-    'should emit error through queryUsersLoading if '
-    'client.search() throws',
+    '''calling messageSearchBlocState.search() again with an offset should emit error through queryUsersLoading if client.search() throws''',
     (tester) async {
       const messageSearchBlocKey = Key('messageSearchBloc');
       const childKey = Key('child');
@@ -268,14 +263,15 @@ void main() {
         find.byKey(messageSearchBlocKey),
       );
 
-      final messageResponseList = _generateMessages();
+      const pagination = PaginationParams(limit: 25);
+      final messageResponseList = _generateMessages(count: 25);
 
       when(() => mockClient.search(
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
-            paginationParams: any(named: 'paginationParams'),
+            paginationParams: pagination,
           )).thenAnswer(
         (_) async => SearchMessagesResponse()
           ..results = messageResponseList
@@ -283,7 +279,7 @@ void main() {
           ..previous = null,
       );
 
-      messageSearchBlocState.search(filter: testFilter);
+      messageSearchBlocState.search(pagination: pagination, filter: testFilter);
 
       await expectLater(
         messageSearchBlocState.messagesStream,
@@ -295,11 +291,11 @@ void main() {
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
-            paginationParams: any(named: 'paginationParams'),
+            paginationParams: pagination,
           )).called(1);
 
       final offset = messageResponseList.length;
-      final pagination = PaginationParams(offset: offset);
+      final newPagination = pagination.copyWith(offset: offset);
 
       const error = 'Error! Error! Error!';
       when(() => mockClient.search(
@@ -307,10 +303,13 @@ void main() {
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
-            paginationParams: pagination,
+            paginationParams: newPagination,
           )).thenThrow(error);
 
-      messageSearchBlocState.search(pagination: pagination, filter: testFilter);
+      messageSearchBlocState.search(
+        pagination: newPagination,
+        filter: testFilter,
+      );
 
       await expectLater(
         messageSearchBlocState.queryMessagesLoading,
@@ -322,8 +321,80 @@ void main() {
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
+            paginationParams: newPagination,
+          )).called(1);
+    },
+  );
+
+  testWidgets(
+    '''calling messageSearchBlocState.search() again with an offset should do nothing and return if pagination is completed''',
+    (tester) async {
+      const messageSearchBlocKey = Key('messageSearchBloc');
+      const childKey = Key('child');
+      const messageSearchBloc = MessageSearchBloc(
+        key: messageSearchBlocKey,
+        child: Offstage(key: childKey),
+      );
+
+      final mockClient = MockClient();
+
+      await tester.pumpWidget(
+        StreamChatCore(
+          client: mockClient,
+          child: messageSearchBloc,
+        ),
+      );
+
+      final messageSearchBlocState = tester.state<MessageSearchBlocState>(
+        find.byKey(messageSearchBlocKey),
+      );
+
+      const pagination = PaginationParams(limit: 25);
+
+      final messageResponseList = _generateMessages(count: 20);
+
+      when(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
+            paginationParams: pagination,
+          )).thenAnswer(
+        (_) async => SearchMessagesResponse()
+          ..results = messageResponseList
+          ..next = null
+          ..previous = null,
+      );
+
+      messageSearchBlocState.search(pagination: pagination, filter: testFilter);
+
+      await expectLater(
+        messageSearchBlocState.messagesStream,
+        emits(isSameMessageResponseListAs(messageResponseList)),
+      );
+
+      verify(() => mockClient.search(
+            testFilter,
+            query: any(named: 'query'),
+            sort: any(named: 'sort'),
+            messageFilters: any(named: 'messageFilters'),
             paginationParams: pagination,
           )).called(1);
+
+      final offset = messageResponseList.length;
+      final newPagination = pagination.copyWith(offset: offset);
+
+      messageSearchBlocState.search(
+        filter: testFilter,
+        pagination: newPagination,
+      );
+
+      // should emit nothing.
+      await expectLater(
+        // skipping the initial data (behaviorSubject).
+        messageSearchBlocState.messagesStream.skip(1),
+        emitsInOrder([]),
+      );
     },
   );
 }

@@ -66,7 +66,7 @@ class UserListCore extends StatefulWidget {
     this.filter,
     this.sort,
     this.presence,
-    this.pagination,
+    this.pagination = const PaginationParams(limit: 30),
     this.groupAlphabetically = false,
     this.userListController,
   }) : super(key: key);
@@ -106,7 +106,7 @@ class UserListCore extends StatefulWidget {
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams? pagination;
+  final PaginationParams pagination;
 
   /// Set it to true to group users by their first character
   ///
@@ -201,7 +201,7 @@ class UserListCoreState extends State<UserListCore>
         filter: widget.filter,
         sort: widget.sort,
         presence: widget.presence,
-        pagination: widget.pagination!.copyWith(
+        pagination: widget.pagination.copyWith(
           offset: _usersBloc!.users?.length ?? 0,
         ),
       );
@@ -212,8 +212,8 @@ class UserListCoreState extends State<UserListCore>
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
         widget.presence != oldWidget.presence ||
-        widget.pagination?.toJson().toString() !=
-            oldWidget.pagination?.toJson().toString()) {
+        widget.pagination.toJson().toString() !=
+            oldWidget.pagination.toJson().toString()) {
       loadData();
     }
 
