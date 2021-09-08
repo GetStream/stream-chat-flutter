@@ -467,9 +467,9 @@ class _MessageListViewState extends State<MessageListView> {
                   reverse: widget.reverse,
                   itemCount: messages.length,
                   findChildIndexCallback: (Key key) {
-                    final String data = (key as ValueKey).value;
-                    final index =
-                        messages.indexWhere((element) => element.id == data);
+                    final indexedKey = key as IndexedKey;
+                    final index = messages.indexWhere(
+                        (element) => element.id == indexedKey.value);
                     return ((index + 2) * 2) - 1;
                   },
 
@@ -600,9 +600,10 @@ class _MessageListViewState extends State<MessageListView> {
                         messages,
                         streamChannel!,
                         i - 2,
+                        i,
                       );
                     } else {
-                      messageWidget = buildMessage(message, messages, i - 2);
+                      messageWidget = buildMessage(message, messages, i - 2, i);
                     }
                     return messageWidget;
                   },
@@ -824,11 +825,13 @@ class _MessageListViewState extends State<MessageListView> {
     List<Message> messages,
     StreamChannelState streamChannel,
     int index,
+    int buildItemIndex,
   ) {
-    final messageWidget = buildMessage(message, messages, index);
+    final messageWidget =
+        buildMessage(message, messages, index, buildItemIndex);
 
     return VisibilityDetector(
-      key: ValueKey<String>(message.id),
+      key: IndexedKey(message.id, buildItemIndex),
       onVisibilityChanged: (visibility) {
         final isVisible = visibility.visibleBounds != Rect.zero;
         if (isVisible) {
@@ -920,12 +923,13 @@ class _MessageListViewState extends State<MessageListView> {
     return defaultMessageWidget;
   }
 
-  Widget buildMessage(Message message, List<Message> messages, int index) {
+  Widget buildMessage(
+      Message message, List<Message> messages, int index, int buildItemIndex) {
     if ((message.type == 'system' || message.type == 'error') &&
         message.text?.isNotEmpty == true) {
       return widget.systemMessageBuilder?.call(context, message) ??
           SystemMessage(
-            key: ValueKey<String>(message.id),
+            key: IndexedKey(message.id, buildItemIndex),
             message: message,
             onMessageTap: (message) {
               if (widget.onSystemMessageTap != null) {
@@ -1005,7 +1009,7 @@ class _MessageListViewState extends State<MessageListView> {
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
     Widget messageWidget = MessageWidget(
-      key: ValueKey<String>(message.id),
+      key: IndexedKey(message.id, buildItemIndex),
       message: message,
       reverse: isMyMessage,
       showReactions: !message.isDeleted,
