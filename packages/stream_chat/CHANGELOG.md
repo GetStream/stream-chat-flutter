@@ -14,6 +14,10 @@
 
 - Added `Filter.contains` and `Filter.empty`
 
+🐞 Fixed
+
+- [[#659]](https://github.com/GetStream/stream-chat-flutter/issues/659) Fixed unread count not updating correctly.
+
 ## 2.2.1
 
 🐞 Fixed

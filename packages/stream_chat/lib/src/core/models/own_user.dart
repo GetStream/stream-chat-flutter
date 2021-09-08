@@ -17,7 +17,7 @@ class OwnUser extends User {
     this.devices = const [],
     this.mutes = const [],
     this.totalUnreadCount = 0,
-    this.unreadChannels,
+    this.unreadChannels = 0,
     this.channelMutes = const [],
     required String id,
     String? role,
@@ -151,8 +151,8 @@ class OwnUser extends User {
   final int totalUnreadCount;
 
   /// Total unread channels by the user.
-  @JsonKey(includeIfNull: false)
-  final int? unreadChannels;
+  @JsonKey(includeIfNull: false, defaultValue: 0)
+  final int unreadChannels;
 
   /// Known top level fields.
   ///

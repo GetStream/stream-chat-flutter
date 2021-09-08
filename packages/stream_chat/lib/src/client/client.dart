@@ -1366,16 +1366,7 @@ class ClientState {
           .where((event) =>
               event.me != null && event.type != EventType.healthCheck)
           .map((e) => e.me!)
-          .listen((user) {
-        currentUser = currentUser?.merge(user) ?? user;
-        final totalUnreadCount = user.totalUnreadCount;
-        _totalUnreadCountController.add(totalUnreadCount);
-
-        final unreadChannels = user.unreadChannels;
-        if (unreadChannels != null) {
-          _unreadChannelsController.add(unreadChannels);
-        }
-      }),
+          .listen((user) => currentUser = currentUser?.merge(user) ?? user),
       _client
           .on()
           .map((event) => event.unreadChannels)
@@ -1441,6 +1432,7 @@ class ClientState {
   /// Sets the user currently interacting with the client
   /// note: this fully overrides the [currentUser]
   set currentUser(OwnUser? user) {
+    _computeUnreadCounts(user);
     _currentUserController.add(user);
   }
 
@@ -1504,6 +1496,18 @@ class ClientState {
   set channels(Map<String, Channel> channelMap) {
     final newChannels = {...channels, ...channelMap};
     _channelsController.add(newChannels);
+  }
+
+  void _computeUnreadCounts(OwnUser? user) {
+    final totalUnreadCount = user?.totalUnreadCount;
+    if (totalUnreadCount != null) {
+      _totalUnreadCountController.add(totalUnreadCount);
+    }
+
+    final unreadChannels = user?.unreadChannels;
+    if (unreadChannels != null) {
+      _unreadChannelsController.add(unreadChannels);
+    }
   }
 
   final _channelsController = BehaviorSubject<Map<String, Channel>>.seeded({});
