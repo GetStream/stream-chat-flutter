@@ -7,15 +7,15 @@ import 'package:substring_highlight/substring_highlight.dart';
 /// Overlay for displaying emoji that can be used
 class EmojiOverlay extends StatelessWidget {
   /// Constructor for creating a [EmojiOverlay]
-  const EmojiOverlay(
-    this.context, {
+  const EmojiOverlay({
     required this.query,
     required this.onEmojiResult,
+    required this.size,
     Key? key,
   }) : super(key: key);
 
-  /// Context of the upper tree
-  final BuildContext context;
+  /// The size of the overlay
+  final Size size;
 
   /// Query for searching emoji
   final String query;
@@ -24,7 +24,7 @@ class EmojiOverlay extends StatelessWidget {
   final ValueChanged<Emoji> onEmojiResult;
 
   @override
-  Widget build(BuildContext otherContext) {
+  Widget build(BuildContext context) {
     final _streamChatTheme = StreamChatTheme.of(context);
     final _emojiNames =
         Emoji.all().where((it) => it.name != null).map((e) => e.name!);
@@ -38,10 +38,6 @@ class EmojiOverlay extends StatelessWidget {
       return const SizedBox();
     }
 
-    // ignore: cast_nullable_to_non_nullable
-    final renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-
     return Card(
       margin: const EdgeInsets.all(8),
       elevation: 2,
@@ -51,7 +47,7 @@ class EmojiOverlay extends StatelessWidget {
       ),
       clipBehavior: Clip.hardEdge,
       child: Container(
-        constraints: BoxConstraints.loose(Size(size.width - 16, 200)),
+        constraints: BoxConstraints.loose(size),
         decoration: BoxDecoration(
           boxShadow: const [
             BoxShadow(

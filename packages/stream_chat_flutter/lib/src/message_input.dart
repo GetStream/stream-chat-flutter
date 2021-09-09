@@ -1170,9 +1170,11 @@ class MessageInputState extends State<MessageInput> {
         .split(':');
 
     final query = splits.last.toLowerCase();
+    // ignore: cast_nullable_to_non_nullable
+    final renderObject = context.findRenderObject() as RenderBox;
 
     return EmojiOverlay(
-      context,
+      size: Size(renderObject.size.width - 16, 200),
       query: query,
       onEmojiResult: (emoji) {
         _chooseEmoji(splits, emoji);
