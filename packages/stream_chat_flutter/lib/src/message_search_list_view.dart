@@ -58,7 +58,7 @@ class MessageSearchListView extends StatefulWidget {
     required this.filters,
     this.messageQuery,
     this.sortOptions,
-    this.paginationParams,
+    this.paginationParams = const PaginationParams(limit: 30),
     this.messageFilters,
     this.separatorBuilder,
     this.itemBuilder,
@@ -93,7 +93,7 @@ class MessageSearchListView extends StatefulWidget {
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams? paginationParams;
+  final PaginationParams paginationParams;
 
   /// The message query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].

@@ -43,6 +43,12 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
     with AutomaticKeepAliveClientMixin {
   late StreamChatCoreState _streamChatCoreState;
 
+  /// The key used to paginate next items.
+  String? nextId;
+
+  /// The key used to paginate previous items.
+  String? previousId;
+
   /// The current messages list
   List<GetMessageResponse>? get messageResponses =>
       _messageResponses.valueOrNull;
@@ -59,6 +65,8 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
   Stream<bool> get queryMessagesLoading =>
       _queryMessagesLoadingController.stream;
 
+  bool _paginationEnded = false;
+
   /// Calls [StreamChatClient.search] updating
   /// [messagesStream] and [queryMessagesLoading] stream
   Future<void> search({
@@ -66,21 +74,34 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
     Filter? messageFilter,
     List<SortOption>? sort,
     String? query,
-    PaginationParams? pagination,
+    PaginationParams pagination = const PaginationParams(limit: 30),
   }) async {
     final client = _streamChatCoreState.client;
 
-    if (_queryMessagesLoadingController.value == true) return;
+    var clear = false;
+    if (sort != null) {
+      clear |= pagination.next == null;
+    } else {
+      final offset = pagination.offset;
+      clear |= offset == null || offset == 0;
+    }
+
+    if (clear && _paginationEnded) {
+      _paginationEnded = false;
+    }
+
+    if ((!clear && _paginationEnded) ||
+        _queryMessagesLoadingController.value == true) {
+      return;
+    }
 
     if (_messageResponses.hasValue) {
       _queryMessagesLoadingController.add(true);
     }
     try {
-      final clear = pagination == null || pagination.offset == 0;
-
       final oldMessages = List<GetMessageResponse>.from(messageResponses ?? []);
 
-      final messages = await client.search(
+      final response = await client.search(
         filter,
         sort: sort,
         query: query,
@@ -88,14 +109,28 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
         messageFilters: messageFilter,
       );
 
+      final next = response.next;
+      final previous = response.previous;
+
+      nextId = next != null && next.isNotEmpty
+          ? next
+          : /*reset nextId if we get nothing*/ null;
+      previousId = previous != null && previous.isNotEmpty
+          ? previous
+          : /*reset previousId if we get nothing*/ null;
+
+      final newMessages = response.results;
       if (clear) {
-        _messageResponses.add(messages.results);
+        _messageResponses.add(newMessages);
       } else {
-        final temp = oldMessages + messages.results;
+        final temp = oldMessages + newMessages;
         _messageResponses.add(temp);
       }
       if (_messageResponses.hasValue && _queryMessagesLoadingController.value) {
         _queryMessagesLoadingController.add(false);
+      }
+      if (newMessages.isEmpty || newMessages.length < pagination.limit) {
+        _paginationEnded = true;
       }
     } catch (e, stk) {
       // reset loading controller

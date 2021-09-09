@@ -321,7 +321,7 @@ void main() {
     (tester) async {
       const userListCoreKey = Key('userListCore');
       const listWidgetKey = Key('listWidget');
-      const pagination = PaginationParams();
+      const pagination = PaginationParams(limit: 15);
       final userListCore = UserListCore(
         key: userListCoreKey,
         listBuilder: (_, items) => Container(
@@ -347,7 +347,7 @@ void main() {
 
       final mockClient = MockClient();
 
-      final users = _generateUsers();
+      final users = _generateUsers(count: 15);
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),

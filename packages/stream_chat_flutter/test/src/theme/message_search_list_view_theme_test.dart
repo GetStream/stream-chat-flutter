@@ -69,6 +69,7 @@ void main() {
               body: MessageSearchBloc(
                 child: MessageSearchListView(
                   filters: Filter.in_('members', const ['test_id']),
+                  messageQuery: 'test query',
                 ),
               ),
             );
@@ -100,6 +101,7 @@ void main() {
               body: MessageSearchBloc(
                 child: MessageSearchListView(
                   filters: Filter.in_('members', const ['test_id']),
+                  messageQuery: 'test query',
                 ),
               ),
             );
