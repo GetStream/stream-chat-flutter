@@ -16,6 +16,10 @@
 - Added support for `next`, `previous` value pagination in `client.search`
   , [read more.](https://getstream.io/chat/docs/other-rest/search/#pagination)
 
+🐞 Fixed
+
+- [[#659]](https://github.com/GetStream/stream-chat-flutter/issues/659) Fixed unread count not updating correctly.
+
 ## 2.2.1
 
 🐞 Fixed

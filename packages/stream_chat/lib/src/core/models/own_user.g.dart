@@ -17,7 +17,7 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) {
             .toList() ??
         [],
     totalUnreadCount: json['total_unread_count'] as int? ?? 0,
-    unreadChannels: json['unread_channels'] as int?,
+    unreadChannels: json['unread_channels'] as int? ?? 0,
     channelMutes: (json['channel_mutes'] as List<dynamic>?)
             ?.map((e) => Mute.fromJson(e as Map<String, dynamic>))
             .toList() ??
