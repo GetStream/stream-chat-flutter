@@ -4,19 +4,23 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// Overlay for displaying users that can be mentioned
 class MentionsOverlay extends StatelessWidget {
   /// Constructor for creating a [MentionsOverlay]
-  const MentionsOverlay(
-    this.context, {
+  const MentionsOverlay({
     required this.query,
     required this.onMentionResult,
+    required this.size,
+    required this.channel,
     this.mentionsTileBuilder,
     Key? key,
   }) : super(key: key);
 
-  /// Context of the upper tree
-  final BuildContext context;
+  /// The size of the overlay
+  final Size size;
 
   /// Query for searching users
   final String query;
+
+  /// The channel to search for users
+  final Channel channel;
 
   /// Callback called when a user is selected
   final ValueChanged<User?> onMentionResult;
@@ -25,19 +29,18 @@ class MentionsOverlay extends StatelessWidget {
   final MentionTileBuilder? mentionsTileBuilder;
 
   @override
-  Widget build(BuildContext otherContext) {
+  Widget build(BuildContext context) {
     final _streamChatTheme = StreamChatTheme.of(context);
 
     Future<List<Member>>? queryMembers;
 
-    final channelState = StreamChannel.of(context);
     if (query.isNotEmpty) {
-      queryMembers = channelState.channel
+      queryMembers = channel
           .queryMembers(filter: Filter.autoComplete('name', query))
           .then((res) => res.members);
     }
 
-    final members = channelState.channel.state?.members
+    final members = channel.state?.members
             .where((m) => m.user?.name.toLowerCase().contains(query) == true)
             .toList() ??
         [];
@@ -46,9 +49,6 @@ class MentionsOverlay extends StatelessWidget {
       return const SizedBox();
     }
 
-    // ignore: cast_nullable_to_non_nullable
-    final renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
     final child = Card(
       margin: const EdgeInsets.all(8),
       elevation: 2,
@@ -58,7 +58,7 @@ class MentionsOverlay extends StatelessWidget {
       ),
       clipBehavior: Clip.hardEdge,
       child: Container(
-        constraints: BoxConstraints.loose(Size(size.width - 16, 200)),
+        constraints: BoxConstraints.loose(size),
         decoration: BoxDecoration(
           color: _streamChatTheme.colorTheme.barsBg,
         ),

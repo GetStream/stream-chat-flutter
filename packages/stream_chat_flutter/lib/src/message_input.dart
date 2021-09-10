@@ -14,7 +14,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/mentions_overlay.dart';
-import 'package:stream_chat_flutter/src/overlays.dart';
+import 'package:stream_chat_flutter/src/anchored_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
@@ -923,7 +923,14 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildCommandsOverlayEntry() {
     final text = textEditingController.text.trimLeft();
 
-    return CommandsOverlay(context, text: text, onCommandResult: _setCommand);
+// ignore: cast_nullable_to_non_nullable
+    final renderObject = context.findRenderObject() as RenderBox;
+    return CommandsOverlay(
+      channel: StreamChannel.of(context).channel,
+      size: Size(renderObject.size.width - 16, 400),
+      text: text,
+      onCommandResult: _setCommand,
+    );
   }
 
   Widget _buildFilePickerSection() {
@@ -1141,27 +1148,35 @@ class MessageInputState extends State<MessageInput> {
         .split('@');
     final query = splits.last.toLowerCase();
 
-    return MentionsOverlay(context, query: query, onMentionResult: (user) {
-      if (user != null) {
-        _mentionedUsers.add(user);
-      }
+    // ignore: cast_nullable_to_non_nullable
+    final renderObject = context.findRenderObject() as RenderBox;
 
-      splits[splits.length - 1] = user!.name;
-      final rejoin = splits.join('@');
+    return MentionsOverlay(
+      channel: StreamChannel.of(context).channel,
+      size: Size(renderObject.size.width - 16, 400),
+      query: query,
+      onMentionResult: (user) {
+        if (user != null) {
+          _mentionedUsers.add(user);
+        }
 
-      textEditingController.value = TextEditingValue(
-        text: rejoin +
-            textEditingController.text
-                .substring(textEditingController.selection.start),
-        selection: TextSelection.collapsed(
-          offset: rejoin.length,
-        ),
-      );
-      _debounce!.cancel();
-      setState(() {
-        _mentionsOverlay = null;
-      });
-    });
+        splits[splits.length - 1] = user!.name;
+        final rejoin = splits.join('@');
+
+        textEditingController.value = TextEditingValue(
+          text: rejoin +
+              textEditingController.text
+                  .substring(textEditingController.selection.start),
+          selection: TextSelection.collapsed(
+            offset: rejoin.length,
+          ),
+        );
+        _debounce!.cancel();
+        setState(() {
+          _mentionsOverlay = null;
+        });
+      },
+    );
   }
 
   Widget _buildEmojiOverlay() {

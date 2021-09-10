@@ -1,33 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Overlay for displaying commands that can be used
 class CommandsOverlay extends StatelessWidget {
   /// Constructor for creating a [CommandsOverlay]
-  const CommandsOverlay(
-    this.context, {
+  const CommandsOverlay({
     required this.text,
     required this.onCommandResult,
+    required this.size,
+    required this.channel,
     Key? key,
   }) : super(key: key);
 
-  /// Context of the upper tree
-  final BuildContext context;
+  /// The size of the overlay
+  final Size size;
 
   /// Query for searching commands
   final String text;
+
+  /// The channel to search for users
+  final Channel channel;
 
   /// Callback called when a command is selected
   final ValueChanged<Command> onCommandResult;
 
   @override
-  Widget build(BuildContext otherContext) {
+  Widget build(BuildContext context) {
     final _streamChatTheme = StreamChatTheme.of(context);
-    final commands = StreamChannel.of(context)
-            .channel
-            .config
-            ?.commands
+    final commands = channel.config?.commands
             .where((c) => c.name.contains(text.replaceFirst('/', '')))
             .toList() ??
         [];
@@ -35,8 +36,6 @@ class CommandsOverlay extends StatelessWidget {
     if (commands.isEmpty) {
       return const SizedBox();
     }
-
-    final size = MediaQuery.of(context).size;
 
     return Padding(
       padding: const EdgeInsets.all(4),
@@ -48,7 +47,7 @@ class CommandsOverlay extends StatelessWidget {
         color: _streamChatTheme.colorTheme.barsBg,
         clipBehavior: Clip.hardEdge,
         child: Container(
-          constraints: BoxConstraints.loose(Size(size.width - 16, 400)),
+          constraints: BoxConstraints.loose(size),
           decoration: BoxDecoration(
               color: _streamChatTheme.colorTheme.barsBg,
               borderRadius: BorderRadius.circular(8)),
