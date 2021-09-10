@@ -604,20 +604,18 @@ class MessageInputState extends State<MessageInput> {
                 !widget.showCommandsButton &&
                 widget.actions?.isNotEmpty != true
             ? const Offstage()
-            : FittedBox(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    if (!widget.disableAttachments)
-                      _buildAttachmentButton(context),
-                    if (widget.showCommandsButton &&
-                        widget.editMessage == null &&
-                        channel.state != null &&
-                        channel.config?.commands.isNotEmpty == true)
-                      _buildCommandButton(context),
-                    ...widget.actions ?? [],
-                  ].insertBetween(const SizedBox(width: 8)),
-                ),
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  if (!widget.disableAttachments)
+                    _buildAttachmentButton(context),
+                  if (widget.showCommandsButton &&
+                      widget.editMessage == null &&
+                      channel.state != null &&
+                      channel.config?.commands.isNotEmpty == true)
+                    _buildCommandButton(context),
+                  ...widget.actions ?? [],
+                ].insertBetween(const SizedBox(width: 8)),
               ),
         duration: const Duration(milliseconds: 300),
         alignment: Alignment.center,
