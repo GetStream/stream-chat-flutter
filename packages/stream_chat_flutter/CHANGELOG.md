@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#668]](https://github.com/GetStream/stream-chat-flutter/issues/668): Fix `MessageInput` rendering errors in case
+  there are no actions available to show.
+
 ## 2.2.1
 
 🛑️ Breaking Changes from `2.2.1`
