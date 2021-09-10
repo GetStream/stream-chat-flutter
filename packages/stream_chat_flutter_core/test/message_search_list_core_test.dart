@@ -7,6 +7,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'mocks.dart';
 
 const testFilter = Filter.custom(operator: '\$test', value: 'testValue');
+const testMessageFilter = Filter.custom(operator: '\$test', value: 'testValue');
 
 void main() {
   List<GetMessageResponse> _generateMessages({
@@ -29,6 +30,40 @@ void main() {
       );
 
   testWidgets(
+    'should throw if both `messageQuery` and `messageFilters` are provided',
+    (tester) async {
+      expect(
+        () => MessageSearchListCore(
+          childBuilder: (_) => const Offstage(),
+          loadingBuilder: (_) => const Offstage(),
+          emptyBuilder: (_) => const Offstage(),
+          errorBuilder: (_, __) => const Offstage(),
+          filters: testFilter,
+          messageFilters: testMessageFilter,
+          messageQuery: 'test',
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
+
+  testWidgets(
+    'should throw if both `messageQuery` and `messageFilters` are not provided',
+    (tester) async {
+      expect(
+        () => MessageSearchListCore(
+          childBuilder: (_) => const Offstage(),
+          loadingBuilder: (_) => const Offstage(),
+          emptyBuilder: (_) => const Offstage(),
+          errorBuilder: (_, __) => const Offstage(),
+          filters: testFilter,
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
+
+  testWidgets(
     'should throw if MessageSearchListCore is used where MessageSearchBloc '
     'is not present in the widget tree',
     (tester) async {
@@ -40,6 +75,7 @@ void main() {
         emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object? error) => const Offstage(),
         filters: testFilter,
+        messageFilters: testMessageFilter,
       );
 
       await tester.pumpWidget(messageSearchListCore);
@@ -61,6 +97,7 @@ void main() {
         emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object? error) => const Offstage(),
         filters: testFilter,
+        messageFilters: testMessageFilter,
       );
 
       final mockClient = MockClient();
@@ -92,6 +129,7 @@ void main() {
         errorBuilder: (BuildContext context, Object error) => const Offstage(),
         messageSearchListController: controller,
         filters: testFilter,
+        messageFilters: testMessageFilter,
       );
 
       expect(controller.loadData, isNull);
@@ -129,6 +167,7 @@ void main() {
           key: errorWidgetKey,
         ),
         filters: testFilter,
+        messageFilters: testMessageFilter,
       );
 
       final mockClient = MockClient();
@@ -138,7 +177,7 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: any(named: 'paginationParams'),
           )).thenThrow(error);
 
@@ -159,7 +198,7 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: any(named: 'paginationParams'),
           )).called(1);
     },
@@ -179,6 +218,7 @@ void main() {
             const Offstage(key: emptyWidgetKey),
         errorBuilder: (BuildContext context, Object error) => const Offstage(),
         filters: testFilter,
+        messageFilters: testMessageFilter,
       );
 
       final mockClient = MockClient();
@@ -188,10 +228,13 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: any(named: 'paginationParams'),
           )).thenAnswer(
-        (_) async => SearchMessagesResponse()..results = messageResponseList,
+        (_) async => SearchMessagesResponse()
+          ..results = messageResponseList
+          ..next = null
+          ..previous = null,
       );
 
       await tester.pumpWidget(
@@ -211,7 +254,7 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: any(named: 'paginationParams'),
           )).called(1);
     },
@@ -231,6 +274,7 @@ void main() {
         emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object error) => const Offstage(),
         filters: testFilter,
+        messageFilters: testMessageFilter,
       );
 
       final mockClient = MockClient();
@@ -240,10 +284,13 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: any(named: 'paginationParams'),
           )).thenAnswer(
-        (_) async => SearchMessagesResponse()..results = messageResponseList,
+        (_) async => SearchMessagesResponse()
+          ..results = messageResponseList
+          ..next = null
+          ..previous = null,
       );
 
       await tester.pumpWidget(
@@ -263,7 +310,7 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: any(named: 'paginationParams'),
           )).called(1);
     },
@@ -275,7 +322,7 @@ void main() {
     (tester) async {
       const messageSearchListCoreKey = Key('messageSearchListCore');
       const childWidgetKey = Key('childWidget');
-      const pagination = PaginationParams();
+      const pagination = PaginationParams(limit: 25);
       final messageSearchListCore = MessageSearchListCore(
         key: messageSearchListCoreKey,
         childBuilder: (List<GetMessageResponse> messages) => Container(
@@ -289,19 +336,23 @@ void main() {
         errorBuilder: (BuildContext context, Object error) => const Offstage(),
         paginationParams: pagination,
         filters: testFilter,
+        messageFilters: testMessageFilter,
       );
 
       final mockClient = MockClient();
 
-      final messageResponseList = _generateMessages();
+      final messageResponseList = _generateMessages(count: 25);
       when(() => mockClient.search(
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: pagination,
           )).thenAnswer(
-        (_) async => SearchMessagesResponse()..results = messageResponseList,
+        (_) async => SearchMessagesResponse()
+          ..results = messageResponseList
+          ..next = null
+          ..previous = null,
       );
 
       await tester.pumpWidget(
@@ -332,7 +383,7 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: pagination,
           )).called(1);
 
@@ -348,11 +399,13 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: updatedPagination,
           )).thenAnswer(
-        (_) async =>
-            SearchMessagesResponse()..results = paginatedMessageResponseList,
+        (_) async => SearchMessagesResponse()
+          ..results = paginatedMessageResponseList
+          ..next = null
+          ..previous = null,
       );
 
       await messageSearchListCoreState.paginateData();
@@ -372,7 +425,7 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: updatedPagination,
           )).called(1);
     },
@@ -406,6 +459,7 @@ void main() {
                 const Offstage(),
             paginationParams: pagination.copyWith(limit: limit),
             filters: testFilter,
+            messageFilters: testMessageFilter,
           );
 
       final mockClient = MockClient();
@@ -415,10 +469,13 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: pagination,
           )).thenAnswer(
-        (_) async => SearchMessagesResponse()..results = messageResponseList,
+        (_) async => SearchMessagesResponse()
+          ..results = messageResponseList
+          ..next = null
+          ..previous = null,
       );
 
       await tester.pumpWidget(
@@ -453,7 +510,7 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: pagination,
           )).called(1);
 
@@ -466,11 +523,13 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: updatedPagination,
           )).thenAnswer(
-        (_) async =>
-            SearchMessagesResponse()..results = updatedMessageResponseList,
+        (_) async => SearchMessagesResponse()
+          ..results = updatedMessageResponseList
+          ..next = null
+          ..previous = null,
       );
 
       await tester.pumpAndSettle();
@@ -487,7 +546,7 @@ void main() {
             testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
-            messageFilters: any(named: 'messageFilters'),
+            messageFilters: testMessageFilter,
             paginationParams: updatedPagination,
           )).called(1);
     },

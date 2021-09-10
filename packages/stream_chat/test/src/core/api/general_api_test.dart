@@ -86,6 +86,24 @@ void main() {
       },
     );
 
+    test(
+      'should throw if `pagination.offset` and `sort` both are provided',
+      () async {
+        final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
+        const sort = [SortOption<ChannelModel>('test-field')];
+        const pagination = PaginationParams(offset: 10);
+        try {
+          await generalApi.searchMessages(
+            filter,
+            sort: sort,
+            pagination: pagination,
+          );
+        } catch (e) {
+          expect(e, isA<AssertionError>());
+        }
+      },
+    );
+
     test('should run successfully with `query`', () async {
       final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
       const query = 'test-query';

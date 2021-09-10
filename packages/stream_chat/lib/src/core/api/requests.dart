@@ -60,12 +60,16 @@ class PaginationParams extends Equatable {
   /// ```
   const PaginationParams({
     this.limit = 10,
-    this.offset = 0,
+    this.offset,
+    this.next,
     this.greaterThan,
     this.greaterThanOrEqual,
     this.lessThan,
     this.lessThanOrEqual,
-  });
+  }) : assert(
+          offset == null || offset == 0 || next == null,
+          'Cannot specify non-zero `offset` with `next` parameter',
+        );
 
   /// Create a new instance from a json
   factory PaginationParams.fromJson(Map<String, dynamic> json) =>
@@ -75,7 +79,10 @@ class PaginationParams extends Equatable {
   final int limit;
 
   /// The offset of requesting items.
-  final int offset;
+  final int? offset;
+
+  /// A key used to paginate.
+  final String? next;
 
   /// Filter on ids greater than the given value.
   @JsonKey(name: 'id_gt')
@@ -100,6 +107,7 @@ class PaginationParams extends Equatable {
   PaginationParams copyWith({
     int? limit,
     int? offset,
+    String? next,
     String? greaterThan,
     String? greaterThanOrEqual,
     String? lessThan,
@@ -108,6 +116,7 @@ class PaginationParams extends Equatable {
       PaginationParams(
         limit: limit ?? this.limit,
         offset: offset ?? this.offset,
+        next: next ?? this.next,
         greaterThan: greaterThan ?? this.greaterThan,
         greaterThanOrEqual: greaterThanOrEqual ?? this.greaterThanOrEqual,
         lessThan: lessThan ?? this.lessThan,
@@ -118,6 +127,7 @@ class PaginationParams extends Equatable {
   List<Object?> get props => [
         limit,
         offset,
+        next,
         greaterThan,
         greaterThanOrEqual,
         lessThan,

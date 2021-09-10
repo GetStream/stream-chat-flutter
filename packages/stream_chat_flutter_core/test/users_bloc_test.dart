@@ -164,16 +164,17 @@ void main() {
         find.byKey(usersBlocKey),
       );
 
-      final users = _generateUsers();
+      const pagination = PaginationParams(limit: 25);
+      final users = _generateUsers(count: 25);
 
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
             presence: any(named: 'presence'),
-            pagination: any(named: 'pagination'),
+            pagination: pagination,
           )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
-      usersBlocState.queryUsers();
+      usersBlocState.queryUsers(pagination: pagination);
 
       await expectLater(
         usersBlocState.usersStream,
@@ -184,23 +185,23 @@ void main() {
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
             presence: any(named: 'presence'),
-            pagination: any(named: 'pagination'),
+            pagination: pagination,
           )).called(1);
 
       final offset = users.length;
       final paginatedUsers = _generateUsers(offset: offset);
-      final pagination = PaginationParams(offset: offset);
+      final newPagination = pagination.copyWith(offset: offset);
 
       when(() => mockClient.queryUsers(
-                filter: any(named: 'filter'),
-                sort: any(named: 'sort'),
-                presence: any(named: 'presence'),
-                pagination: pagination,
-              ))
-          .thenAnswer(
-              (_) async => QueryUsersResponse()..users = paginatedUsers);
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            presence: any(named: 'presence'),
+            pagination: newPagination,
+          )).thenAnswer(
+        (_) async => QueryUsersResponse()..users = paginatedUsers,
+      );
 
-      usersBlocState.queryUsers(pagination: pagination);
+      usersBlocState.queryUsers(pagination: newPagination);
 
       await Future.wait([
         expectLater(
@@ -217,7 +218,7 @@ void main() {
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
             presence: any(named: 'presence'),
-            pagination: pagination,
+            pagination: newPagination,
           )).called(1);
     },
   );
@@ -247,13 +248,89 @@ void main() {
         find.byKey(usersBlocKey),
       );
 
-      final users = _generateUsers();
+      const pagination = PaginationParams(limit: 25);
+      final users = _generateUsers(count: 25);
 
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
             presence: any(named: 'presence'),
-            pagination: any(named: 'pagination'),
+            pagination: pagination,
+          )).thenAnswer((_) async => QueryUsersResponse()..users = users);
+
+      usersBlocState.queryUsers(pagination: pagination);
+
+      await expectLater(
+        usersBlocState.usersStream,
+        emits(isSameUserListAs(users)),
+      );
+
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            presence: any(named: 'presence'),
+            pagination: pagination,
+          )).called(1);
+
+      final offset = users.length;
+      final newPagination = pagination.copyWith(offset: offset);
+
+      const error = 'Error! Error! Error!';
+
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            presence: any(named: 'presence'),
+            pagination: newPagination,
+          )).thenThrow(error);
+
+      usersBlocState.queryUsers(pagination: newPagination);
+
+      await expectLater(
+        usersBlocState.queryUsersLoading,
+        emitsError(error),
+      );
+
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            presence: any(named: 'presence'),
+            pagination: newPagination,
+          )).called(1);
+    },
+  );
+
+  testWidgets(
+    '''calling usersBlocState.queryUsers() again with an offset should do nothing and return if pagination is completed''',
+    (tester) async {
+      const usersBlocKey = Key('usersBloc');
+      const childKey = Key('child');
+      const usersBloc = UsersBloc(
+        key: usersBlocKey,
+        child: Offstage(key: childKey),
+      );
+
+      final mockClient = MockClient();
+
+      await tester.pumpWidget(
+        StreamChatCore(
+          client: mockClient,
+          child: usersBloc,
+        ),
+      );
+
+      final usersBlocState = tester.state<UsersBlocState>(
+        find.byKey(usersBlocKey),
+      );
+
+      const pagination = PaginationParams(limit: 30);
+      final users = _generateUsers(count: 25);
+
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            presence: any(named: 'presence'),
+            pagination: pagination,
           )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
       usersBlocState.queryUsers();
@@ -271,30 +348,16 @@ void main() {
           )).called(1);
 
       final offset = users.length;
-      final pagination = PaginationParams(offset: offset);
+      final newPagination = pagination.copyWith(offset: offset);
 
-      const error = 'Error! Error! Error!';
+      usersBlocState.queryUsers(pagination: newPagination);
 
-      when(() => mockClient.queryUsers(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            presence: any(named: 'presence'),
-            pagination: pagination,
-          )).thenThrow(error);
-
-      usersBlocState.queryUsers(pagination: pagination);
-
+      // should emit nothing.
       await expectLater(
-        usersBlocState.queryUsersLoading,
-        emitsError(error),
+        // skipping the initial data (behaviorSubject).
+        usersBlocState.usersStream,
+        emitsInOrder([]),
       );
-
-      verify(() => mockClient.queryUsers(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            presence: any(named: 'presence'),
-            pagination: pagination,
-          )).called(1);
     },
   );
 }

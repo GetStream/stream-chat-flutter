@@ -2,7 +2,7 @@ name: stream_flutter_workflow
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  flutter_version: "2.2.2"
+  flutter_version: "2.5.0"
 
 on:
   pull_request:

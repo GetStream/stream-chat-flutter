@@ -51,7 +51,8 @@ extension PinnedMessageEntityX on PinnedMessageEntity {
 /// Useful mapping functions for [Message]
 extension PMessageX on Message {
   /// Maps a [Message] into [PinnedMessageEntity]
-  PinnedMessageEntity toPinnedEntity({String? cid}) => PinnedMessageEntity(
+  PinnedMessageEntity toPinnedEntity({required String cid}) =>
+      PinnedMessageEntity(
         id: id,
         attachments: attachments.map((it) => jsonEncode(it.toData())).toList(),
         channelCid: cid,

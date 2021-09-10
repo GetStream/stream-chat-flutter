@@ -1,19 +1,19 @@
 import 'dart:math' as math;
 
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/dao/reaction_dao.dart';
+import 'package:stream_chat_persistence/src/dao/pinned_message_reaction_dao.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:test/test.dart';
 
 import '../../stream_chat_persistence_client_test.dart';
 
 void main() {
-  late ReactionDao reactionDao;
+  late PinnedMessageReactionDao pinnedMessageReactionDao;
   late MoorChatDatabase database;
 
   setUp(() {
     database = testDatabaseProvider('testUserId');
-    reactionDao = database.reactionDao;
+    pinnedMessageReactionDao = database.pinnedMessageReactionDao;
   });
 
   Future<List<Reaction>> _prepareReactionData(
@@ -53,8 +53,8 @@ void main() {
 
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
-    await database.messageDao.updateMessages(cid, [message]);
-    await reactionDao.updateReactions(reactions);
+    await database.pinnedMessageDao.updateMessages(cid, [message]);
+    await pinnedMessageReactionDao.updateReactions(reactions);
 
     return reactions;
   }
@@ -63,7 +63,7 @@ void main() {
     const messageId = 'testMessageId';
 
     // Should be empty initially
-    final reactions = await reactionDao.getReactions(messageId);
+    final reactions = await pinnedMessageReactionDao.getReactions(messageId);
     expect(reactions, isEmpty);
 
     // Adding sample reactions
@@ -72,7 +72,8 @@ void main() {
 
     // Fetched reaction length should match inserted reactions length.
     // Every reaction messageId should match the provided messageId.
-    final fetchedReactions = await reactionDao.getReactions(messageId);
+    final fetchedReactions =
+        await pinnedMessageReactionDao.getReactions(messageId);
     expect(fetchedReactions.length, insertedReactions.length);
     expect(fetchedReactions.every((it) => it.messageId == messageId), true);
   });
@@ -82,7 +83,8 @@ void main() {
     const userId = 'testUserId';
 
     // Should be empty initially
-    final reactions = await reactionDao.getReactionsByUserId(messageId, userId);
+    final reactions =
+        await pinnedMessageReactionDao.getReactionsByUserId(messageId, userId);
     expect(reactions, isEmpty);
 
     // Adding sample reactions
@@ -94,7 +96,7 @@ void main() {
     // Every reaction messageId should match the provided messageId.
     // Every reaction userId should match the provided userId.
     final fetchedReactions =
-        await reactionDao.getReactionsByUserId(messageId, userId);
+        await pinnedMessageReactionDao.getReactionsByUserId(messageId, userId);
     expect(fetchedReactions.length, insertedReactions.length);
     expect(fetchedReactions.every((it) => it.messageId == messageId), true);
     expect(fetchedReactions.every((it) => it.userId == userId), true);
@@ -117,12 +119,13 @@ void main() {
       extraData: {'extra_test_field': 'extraTestData'},
     );
 
-    await reactionDao.updateReactions([copyReaction, newReaction]);
+    await pinnedMessageReactionDao.updateReactions([copyReaction, newReaction]);
 
     // Fetched reaction length should be one more than inserted reactions.
     // copyReaction `score` modified field should be 33.
     // Fetched reactions should contain the newReaction.
-    final fetchedReactions = await reactionDao.getReactions(messageId);
+    final fetchedReactions =
+        await pinnedMessageReactionDao.getReactions(messageId);
     expect(fetchedReactions.length, reactions.length + 1);
     expect(
       fetchedReactions
@@ -150,17 +153,21 @@ void main() {
 
       // Fetched reaction list length should match
       // the inserted reactions list length
-      final reactions1 = await reactionDao.getReactions(messageId1);
-      final reactions2 = await reactionDao.getReactions(messageId2);
+      final reactions1 =
+          await pinnedMessageReactionDao.getReactions(messageId1);
+      final reactions2 =
+          await pinnedMessageReactionDao.getReactions(messageId2);
       expect(reactions1.length, insertedReactions1.length);
       expect(reactions2.length, insertedReactions2.length);
 
       // Deleting all the reactions of messageId1
-      await reactionDao.deleteReactionsByMessageIds([messageId1]);
+      await pinnedMessageReactionDao.deleteReactionsByMessageIds([messageId1]);
 
       // Fetched reactions length of only messageId1 should be empty
-      final fetchedReactions1 = await reactionDao.getReactions(messageId1);
-      final fetchedReactions2 = await reactionDao.getReactions(messageId2);
+      final fetchedReactions1 =
+          await pinnedMessageReactionDao.getReactions(messageId1);
+      final fetchedReactions2 =
+          await pinnedMessageReactionDao.getReactions(messageId2);
       expect(fetchedReactions1, isEmpty);
       expect(fetchedReactions2, isNotEmpty);
     });
@@ -171,17 +178,22 @@ void main() {
 
       // Fetched reaction list length should match
       // the inserted reactions list length
-      final reactions1 = await reactionDao.getReactions(messageId1);
-      final reactions2 = await reactionDao.getReactions(messageId2);
+      final reactions1 =
+          await pinnedMessageReactionDao.getReactions(messageId1);
+      final reactions2 =
+          await pinnedMessageReactionDao.getReactions(messageId2);
       expect(reactions1.length, insertedReactions1.length);
       expect(reactions2.length, insertedReactions2.length);
 
       // Deleting all the reactions of messageId1 and messageId2
-      await reactionDao.deleteReactionsByMessageIds([messageId1, messageId2]);
+      await pinnedMessageReactionDao
+          .deleteReactionsByMessageIds([messageId1, messageId2]);
 
       // Fetched reactions length of both messages should be empty
-      final fetchedReactions1 = await reactionDao.getReactions(messageId1);
-      final fetchedReactions2 = await reactionDao.getReactions(messageId2);
+      final fetchedReactions1 =
+          await pinnedMessageReactionDao.getReactions(messageId1);
+      final fetchedReactions2 =
+          await pinnedMessageReactionDao.getReactions(messageId2);
       expect(fetchedReactions1, isEmpty);
       expect(fetchedReactions2, isEmpty);
     });

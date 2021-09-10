@@ -47,10 +47,18 @@ class MessageSearchListCore extends StatefulWidget {
     required this.filters,
     this.messageQuery,
     this.sortOptions,
-    this.paginationParams,
+    this.paginationParams = const PaginationParams(limit: 30),
     this.messageFilters,
     this.messageSearchListController,
-  }) : super(key: key);
+  })  : assert(
+          messageQuery != null || messageFilters != null,
+          'Provide at least `query` or `messageFilters`',
+        ),
+        assert(
+          messageQuery == null || messageFilters == null,
+          "Can't provide both `query` and `messageFilters` at the same time",
+        ),
+        super(key: key);
 
   /// A [MessageSearchListController] allows reloading and pagination.
   /// Use [MessageSearchListController.loadData] and
@@ -74,10 +82,9 @@ class MessageSearchListCore extends StatefulWidget {
   final List<SortOption>? sortOptions;
 
   /// Pagination parameters
-  /// limit: the number of users to return (max is 30)
+  /// limit: the number of messages to return (max is 30)
   /// offset: the offset (max is 1000)
-  /// message_limit: how many messages should be included to each channel
-  final PaginationParams? paginationParams;
+  final PaginationParams paginationParams;
 
   /// The message query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -155,15 +162,25 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
       );
 
   /// Fetches more messages with updated pagination and updates the widget
-  Future<void> paginateData() => _messageSearchBloc!.search(
-        filter: widget.filters,
-        sort: widget.sortOptions,
-        pagination: widget.paginationParams!.copyWith(
-          offset: _messageSearchBloc!.messageResponses?.length ?? 0,
-        ),
-        query: widget.messageQuery,
-        messageFilter: widget.messageFilters,
+  Future<void> paginateData() {
+    PaginationParams pagination;
+    if (widget.sortOptions != null) {
+      pagination = widget.paginationParams.copyWith(
+        next: _messageSearchBloc?.nextId,
       );
+    } else {
+      pagination = widget.paginationParams.copyWith(
+        offset: _messageSearchBloc?.messageResponses?.length,
+      );
+    }
+    return _messageSearchBloc!.search(
+      filter: widget.filters,
+      sort: widget.sortOptions,
+      pagination: pagination,
+      query: widget.messageQuery,
+      messageFilter: widget.messageFilters,
+    );
+  }
 
   @override
   void didUpdateWidget(MessageSearchListCore oldWidget) {
@@ -173,8 +190,8 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
         widget.messageQuery?.toString() != oldWidget.messageQuery?.toString() ||
         widget.messageFilters?.toString() !=
             oldWidget.messageFilters?.toString() ||
-        widget.paginationParams?.toJson().toString() !=
-            oldWidget.paginationParams?.toJson().toString()) {
+        widget.paginationParams.toJson().toString() !=
+            oldWidget.paginationParams.toJson().toString()) {
       loadData();
     }
 

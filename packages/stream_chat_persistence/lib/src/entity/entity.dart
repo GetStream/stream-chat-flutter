@@ -3,6 +3,7 @@ export 'channels.dart';
 export 'connection_events.dart';
 export 'members.dart';
 export 'messages.dart';
+export 'pinned_message_reactions.dart';
 export 'pinned_messages.dart';
 export 'reactions.dart';
 export 'reads.dart';

@@ -117,8 +117,9 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
           msgList.removeRange(0, greaterThanIndex);
         }
       }
-      if (options?.limit != null) {
-        return msgList.take(options!.limit).toList();
+      final limit = options?.limit;
+      if (limit != null && limit > 0) {
+        return msgList.take(limit).toList();
       }
     }
     return msgList;
@@ -169,13 +170,21 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
 
   /// Updates the message data of a particular channel with
   /// the new [messageList] data
-  Future<void> updateMessages(String cid, List<Message> messageList) => batch(
-        (batch) {
-          batch.insertAll(
-            messages,
-            messageList.map((it) => it.toEntity(cid: cid)).toList(),
-            mode: InsertMode.insertOrReplace,
-          );
-        },
-      );
+  Future<void> updateMessages(String cid, List<Message> messageList) =>
+      bulkUpdateMessages({cid: messageList});
+
+  /// Bulk updates the message data of multiple channels
+  Future<void> bulkUpdateMessages(
+    Map<String, List<Message>> channelWithMessages,
+  ) {
+    final entities = channelWithMessages.entries
+        .map((entry) => entry.value.map(
+              (message) => message.toEntity(cid: entry.key),
+            ))
+        .expand((it) => it)
+        .toList(growable: false);
+    return batch(
+      (batch) => batch.insertAllOnConflictUpdate(messages, entities),
+    );
+  }
 }

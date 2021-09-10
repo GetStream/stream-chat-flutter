@@ -18,6 +18,7 @@ void main() {
   });
 
   Future<List<Member>> _prepareTestData(String cid) async {
+    final channels = [ChannelModel(cid: cid)];
     final users = List.generate(3, (index) => User(id: 'testUserId$index'));
     final memberList = List.generate(
       3,
@@ -34,12 +35,13 @@ void main() {
       ),
     );
     await database.userDao.updateUsers(users);
+    await database.channelDao.updateChannels(channels);
     await memberDao.updateMembers(cid, memberList);
     return memberList;
   }
 
   test('getMembersByCid', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
 
     // Should be empty initially
     final members = await memberDao.getMembersByCid(cid);
@@ -70,7 +72,7 @@ void main() {
   });
 
   test('updateMembers', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
 
     // Preparing test data
     final memberList = await _prepareTestData(cid);
@@ -132,7 +134,7 @@ void main() {
   });
 
   test('deleteMemberByCids', () async {
-    const cid = 'testCid';
+    const cid = 'test:Cid';
 
     // Preparing test data
     final members = await _prepareTestData(cid);

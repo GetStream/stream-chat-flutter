@@ -51,7 +51,7 @@ class UserListView extends StatefulWidget {
     this.filter,
     this.sort,
     this.presence,
-    this.pagination,
+    this.pagination = const PaginationParams(limit: 30),
     this.onUserTap,
     this.onUserLongPress,
     this.userWidget,
@@ -93,7 +93,7 @@ class UserListView extends StatefulWidget {
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams? pagination;
+  final PaginationParams pagination;
 
   /// Function called when tapping on a channel
   /// By default it calls [Navigator.push] building a [MaterialPageRoute]

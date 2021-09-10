@@ -45,13 +45,12 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
         }
 
         await batch((it) {
-          it.insertAll(
+          it.insertAllOnConflictUpdate(
             channelQueries,
             cids
                 .map((cid) =>
                     ChannelQueryEntity(queryHash: hash, channelCid: cid))
                 .toList(),
-            mode: InsertMode.insertOrReplace,
           );
         });
       });
@@ -113,8 +112,9 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
 
     cachedChannels.sort(chainedComparator);
 
-    if (paginationParams?.offset != null && cachedChannels.isNotEmpty) {
-      cachedChannels.removeRange(0, paginationParams!.offset);
+    final offset = paginationParams?.offset;
+    if (offset != null && offset > 0 && cachedChannels.isNotEmpty) {
+      cachedChannels.removeRange(0, offset);
     }
 
     if (paginationParams?.limit != null) {

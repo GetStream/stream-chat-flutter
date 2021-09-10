@@ -39,8 +39,5 @@ class Members extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
-  Set<Column> get primaryKey => {
-        userId,
-        channelCid,
-      };
+  Set<Column> get primaryKey => {userId, channelCid};
 }
