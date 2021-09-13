@@ -1,5 +1,8 @@
 name: Dart Code Metrics
 
+env:
+  folders: "example, lib, test"
+
 on:
   pull_request:
   push:
@@ -10,13 +13,41 @@ on:
 jobs:
   check:
     name: dart-code-metrics
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-      - name: dart-code-metrics
+
+      - name: "Stream Chat Metrics"
         uses: dart-code-checker/dart-code-metrics-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          folders: 'packages'
+          relative_path: 'packages/stream_chat'
+          folders: ${{ env.folders }}
+
+      - name: "Stream Chat Flutter Metrics"
+        uses: dart-code-checker/dart-code-metrics-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          relative_path: 'packages/stream_chat_flutter'
+          folders: ${{ env.folders }}
+
+      - name: "Stream Chat Flutter Core Metrics"
+        uses: dart-code-checker/dart-code-metrics-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          relative_path: 'packages/stream_chat_flutter_core'
+          folders: ${{ env.folders }}
+
+      - name: "Stream Chat Localizations Metrics"
+        uses: dart-code-checker/dart-code-metrics-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          relative_path: 'packages/stream_chat_localizations'
+          folders: ${{ env.folders }}
+
+      - name: "Stream Chat Persistence Metrics"
+        uses: dart-code-checker/dart-code-metrics-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          relative_path: 'packages/stream_chat_persistence'
+          folders: ${{ env.folders }}
