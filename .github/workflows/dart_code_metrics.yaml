@@ -1,6 +1,7 @@
 name: Dart Code Metrics
 
 env:
+  flutter_version: "2.5.0"
   folders: "lib, test"
 
 on:
@@ -15,7 +16,26 @@ jobs:
     name: dart-code-metrics
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: "Git Checkout"
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: "Cache Flutter dependencies"
+        uses: actions/cache@v2
+        with:
+          path: /opt/hostedtoolcache/flutter
+          key: ${{ env.flutter_version }}-flutter
+
+      - name: "Install Flutter"
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ env.flutter_version }}
+
+      - name: "Install Tools"
+        run: flutter pub global activate melos
+      - name: "Bootstrap Workspace"
+        run: melos bootstrap
 
       - name: "Stream Chat Metrics"
         uses: dart-code-checker/dart-code-metrics-action@v1
