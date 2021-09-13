@@ -59,7 +59,7 @@ final _channelPreviewThemeControl = ChannelPreviewThemeData(
         color: const Color(0xff7A7A7A),
       ),
   lastMessageAtStyle: TextTheme.light().footnote.copyWith(
-        color: ColorTheme.light().textHighEmphasis.withOpacity(.5),
+        color: ColorTheme.light().textHighEmphasis.withOpacity(0.5),
       ),
   indicatorIconSize: 16,
 );
@@ -83,7 +83,7 @@ final _channelPreviewThemeControlMidLerp = ChannelPreviewThemeData(
     fontSize: 12,
   ),
   lastMessageAtStyle: TextTheme.light().footnote.copyWith(
-        color: const Color(0x807f7f7f).withOpacity(.5),
+        color: const Color(0x807f7f7f).withOpacity(0.5),
       ),
   indicatorIconSize: 16,
 );
@@ -102,7 +102,7 @@ final _channelPreviewThemeControlDark = ChannelPreviewThemeData(
         color: const Color(0xff7A7A7A),
       ),
   lastMessageAtStyle: TextTheme.dark().footnote.copyWith(
-        color: ColorTheme.dark().textHighEmphasis.withOpacity(.5),
+        color: ColorTheme.dark().textHighEmphasis.withOpacity(0.5),
       ),
   indicatorIconSize: 16,
 );

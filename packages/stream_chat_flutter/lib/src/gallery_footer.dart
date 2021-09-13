@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -67,19 +66,6 @@ class GalleryFooter extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _GalleryFooterState extends State<GalleryFooter> {
-  final TextEditingController _messageController = TextEditingController();
-  final FocusNode _messageFocusNode = FocusNode();
-
-  final List<Channel> _selectedChannels = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _messageFocusNode.addListener(() {
-      setState(() {});
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     const showShareButton = !kIsWeb;
@@ -143,8 +129,9 @@ class _GalleryFooterState extends State<GalleryFooter> {
                     children: <Widget>[
                       Text(
                         context.translations.galleryPaginationText(
-                            currentPage: widget.currentPage,
-                            totalPages: widget.totalPages),
+                          currentPage: widget.currentPage,
+                          totalPages: widget.totalPages,
+                        ),
                         style: galleryFooterThemeData.titleTextStyle,
                       ),
                     ],
@@ -264,29 +251,26 @@ class _GalleryFooterState extends State<GalleryFooter> {
                         children: [
                           media,
                           if (widget.message.user != null)
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Container(
-                                clipBehavior: Clip.antiAlias,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withOpacity(0.6),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      blurRadius: 8,
-                                      color: chatThemeData
-                                          .colorTheme.textHighEmphasis
-                                          .withOpacity(0.3),
-                                    ),
-                                  ],
-                                ),
-                                padding: const EdgeInsets.all(2),
-                                child: UserAvatar(
-                                  user: widget.message.user!,
-                                  constraints:
-                                      BoxConstraints.tight(const Size(24, 24)),
-                                  showOnlineStatus: false,
-                                ),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              clipBehavior: Clip.antiAlias,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withOpacity(0.6),
+                                boxShadow: [
+                                  BoxShadow(
+                                    blurRadius: 8,
+                                    color: chatThemeData
+                                        .colorTheme.textHighEmphasis
+                                        .withOpacity(0.3),
+                                  ),
+                                ],
+                              ),
+                              child: UserAvatar(
+                                user: widget.message.user!,
+                                constraints:
+                                    BoxConstraints.tight(const Size(24, 24)),
+                                showOnlineStatus: false,
                               ),
                             ),
                         ],
@@ -300,26 +284,5 @@ class _GalleryFooterState extends State<GalleryFooter> {
         );
       },
     );
-  }
-
-  /// Sends the current message
-  Future sendMessage() async {
-    final text = _messageController.text.trim();
-
-    final attachments = widget.message.attachments;
-
-    _messageController.clear();
-
-    for (final channel in _selectedChannels) {
-      final message = Message(
-        text: text,
-        attachments: [attachments[widget.currentPage]],
-      );
-
-      await channel.sendMessage(message);
-    }
-
-    _selectedChannels.clear();
-    Navigator.pop(context);
   }
 }

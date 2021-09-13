@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
 
 /// Class for getting message theme
+// ignore: prefer-match-file-name
 class MessageThemeData with Diagnosticable {
   /// Creates a [MessageThemeData].
   const MessageThemeData({
@@ -99,7 +100,7 @@ class MessageThemeData with Diagnosticable {
         messageTextStyle:
             TextStyle.lerp(a.messageTextStyle, b.messageTextStyle, t),
         reactionsBackgroundColor: Color.lerp(
-            a.reactionsBackgroundColor, b.reactionsBackgroundColor, t),
+            a.reactionsBackgroundColor, b.reactionsBackgroundColor, t,),
         reactionsBorderColor:
             Color.lerp(a.messageBorderColor, b.reactionsBorderColor, t),
         reactionsMaskColor:

@@ -118,12 +118,18 @@ class User extends Equatable {
 
   /// True if user is online.
   @JsonKey(
-      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: false)
+    includeIfNull: false,
+    toJson: Serializer.readOnly,
+    defaultValue: false,
+  )
   final bool online;
 
   /// True if user is banned from the chat.
   @JsonKey(
-      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: false)
+    includeIfNull: false,
+    toJson: Serializer.readOnly,
+    defaultValue: false,
+  )
   final bool banned;
 
   /// Map of custom user extraData.

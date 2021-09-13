@@ -373,11 +373,13 @@ class MessageInputState extends State<MessageInput> {
       _parseExistingMessage(widget.editMessage ?? widget.initialMessage!);
     }
     textEditingController.addListener(_onChangedDebounced);
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus) {
-        _openFilePickerSection = false;
-      }
-    });
+    _focusNode.addListener(_focusNodeListener);
+  }
+
+  void _focusNodeListener() {
+    if (_focusNode.hasFocus) {
+      _openFilePickerSection = false;
+    }
   }
 
   int _timeOut = 0;
@@ -533,7 +535,7 @@ class MessageInputState extends State<MessageInput> {
                   ? null
                   : Border.all(
                       color: _streamChatTheme.colorTheme.textHighEmphasis
-                          .withOpacity(.5),
+                          .withOpacity(0.5),
                       width: 2,
                     ),
               borderRadius: BorderRadius.circular(3),
@@ -703,7 +705,7 @@ class MessageInputState extends State<MessageInput> {
                     decoration: _getInputDecoration(context),
                     textCapitalization: TextCapitalization.sentences,
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -750,31 +752,28 @@ class MessageInputState extends State<MessageInput> {
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Padding(
+                Container(
                   padding: const EdgeInsets.all(8),
-                  child: Container(
-                    constraints: BoxConstraints.tight(const Size(64, 24)),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: _streamChatTheme.colorTheme.accentPrimary,
-                    ),
-                    alignment: Alignment.center,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        StreamSvgIcon.lightning(
+                  constraints: BoxConstraints.tight(const Size(64, 24)),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: _streamChatTheme.colorTheme.accentPrimary,
+                  ),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      StreamSvgIcon.lightning(
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                      Text(
+                        _chosenCommand?.name.toUpperCase() ?? '',
+                        style: _streamChatTheme.textTheme.footnoteBold.copyWith(
                           color: Colors.white,
-                          size: 16,
                         ),
-                        Text(
-                          _chosenCommand?.name.toUpperCase() ?? '',
-                          style:
-                              _streamChatTheme.textTheme.footnoteBold.copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -1054,15 +1053,13 @@ class MessageInputState extends State<MessageInput> {
                     ),
                   ),
                   child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: _streamChatTheme.colorTheme.inputBg,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
+                    child: Container(
+                  width: 40,
+                  height: 4,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _streamChatTheme.colorTheme.inputBg,
+                    borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                   ),
@@ -1193,12 +1190,13 @@ class MessageInputState extends State<MessageInput> {
         textEditingController.value = TextEditingValue(
           text: rejoin +
               textEditingController.text
-                  .substring(textEditingController.selection.start),
-          selection: TextSelection.collapsed(
-            offset: rejoin.length,
-          ),
-        );
-        _onChangedDebounced.cancel();
+                                  .substring(textEditingController.selection.start,
+                                ),
+                            selection: TextSelection.collapsed(
+                              offset: rejoin.length,
+                            ),
+                          );
+                          _onChangedDebounced.cancel();
         setState(() => _showMentionsOverlay = false);
       },
     );
@@ -1251,8 +1249,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return const Offstage();
     final containsUrl = widget.quotedMessage!.attachments
-            .any((element) => element.titleLink != null) ==
-        true;
+        .any((element) => element.titleLink != null);
     return QuotedMessageWidget(
       reverse: true,
       showBorder: !containsUrl,
@@ -1357,7 +1354,7 @@ class MessageInputState extends State<MessageInput> {
             setState(() => _attachments.remove(attachment.id));
           },
           fillColor:
-              _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(.5),
+              _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
           child: Center(
             child: StreamSvgIcon.close(
               size: 24,
@@ -1836,10 +1833,11 @@ class MessageInputState extends State<MessageInput> {
       backgroundColor: _streamChatTheme.colorTheme.barsBg,
       context: context,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16),
-        topRight: Radius.circular(16),
-      )),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1872,7 +1870,7 @@ class MessageInputState extends State<MessageInput> {
           ),
           Container(
             color:
-                _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(.08),
+                _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.08),
             height: 1,
           ),
           Row(
@@ -1905,6 +1903,7 @@ class MessageInputState extends State<MessageInput> {
   @override
   void dispose() {
     textEditingController.dispose();
+    _focusNode.removeListener(_focusNodeListener);
     _stopSlowMode();
     _onChangedDebounced.cancel();
     super.dispose();
@@ -2015,7 +2014,8 @@ class _PickerWidgetState extends State<_PickerWidget> {
                 Text(
                   context.translations.enablePhotoAndVideoAccessMessage,
                   style: widget.streamChatTheme.textTheme.body.copyWith(
-                      color: widget.streamChatTheme.colorTheme.textLowEmphasis),
+                    color: widget.streamChatTheme.colorTheme.textLowEmphasis,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 6),

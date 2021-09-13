@@ -38,7 +38,8 @@ class ChannelModel {
   /// Create a new instance from a json
   factory ChannelModel.fromJson(Map<String, dynamic> json) =>
       _$ChannelModelFromJson(
-          Serializer.moveToExtraDataFromRoot(json, topLevelFields));
+        Serializer.moveToExtraDataFromRoot(json, topLevelFields),
+      );
 
   /// The id of this channel
   final String id;

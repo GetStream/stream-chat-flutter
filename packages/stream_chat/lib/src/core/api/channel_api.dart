@@ -75,7 +75,7 @@ class ChannelApi {
           if (messageLimit != null) 'message_limit': messageLimit,
 
           // pagination
-          ...paginationParams.toJson()
+          ...paginationParams.toJson(),
         }),
       },
     );

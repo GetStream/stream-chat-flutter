@@ -87,7 +87,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
     await Future.wait(videoPackages.values.map(
       (it) => it.initialize(),
     ));
-    setState(() {});
+    setState(() {}); // ignore: no-empty-block
   }
 
   @override
@@ -96,83 +96,83 @@ class _FullScreenMediaState extends State<FullScreenMedia>
         body: Stack(
           children: [
             AnimatedBuilder(
-                animation: _controller,
-                builder: (context, snapshot) => PageView.builder(
-                      controller: _pageController,
-                      onPageChanged: (val) {
+              animation: _controller,
+              builder: (context, snapshot) => PageView.builder(
+                controller: _pageController,
+                onPageChanged: (val) {
+                  setState(() {
+                    _currentPage = val;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  final attachment = widget.mediaAttachments[index];
+                  if (attachment.type == 'image' ||
+                      attachment.type == 'giphy') {
+                    final imageUrl = attachment.imageUrl ??
+                        attachment.assetUrl ??
+                        attachment.thumbUrl;
+                    return PhotoView(
+                      loadingBuilder: (context, image) =>
+                                const Offstage(),imageProvider: (imageUrl == null &&
+                              attachment.localUri != null &&
+                              attachment.file?.bytes != null)
+                          ? Image.memory(attachment.file!.bytes!).image
+                          : CachedNetworkImageProvider(imageUrl!),
+                      maxScale: PhotoViewComputedScale.covered,
+                      minScale: PhotoViewComputedScale.contained,
+                      heroAttributes: PhotoViewHeroAttributes(
+                        tag: widget.mediaAttachments,
+                      ),
+                      backgroundDecoration: BoxDecoration(
+                        color: ColorTween(
+                          begin: ChannelHeaderTheme.of(context).color,
+                          end: Colors.black,
+                        ).lerp(_controller.value),
+                      ),
+                      onTapUp: (a, b, c) {
                         setState(() {
-                          _currentPage = val;
+                          _optionsShown = !_optionsShown;
                         });
-                      },
-                      itemBuilder: (context, index) {
-                        final attachment = widget.mediaAttachments[index];
-                        if (attachment.type == 'image' ||
-                            attachment.type == 'giphy') {
-                          final imageUrl = attachment.imageUrl ??
-                              attachment.assetUrl ??
-                              attachment.thumbUrl;
-                          return PhotoView(
-                            loadingBuilder: (context, image) =>
-                                const Offstage(),
-                            imageProvider: (imageUrl == null &&
-                                    attachment.localUri != null &&
-                                    attachment.file?.bytes != null)
-                                ? Image.memory(attachment.file!.bytes!).image
-                                : CachedNetworkImageProvider(imageUrl!),
-                            maxScale: PhotoViewComputedScale.covered,
-                            minScale: PhotoViewComputedScale.contained,
-                            heroAttributes: PhotoViewHeroAttributes(
-                              tag: widget.mediaAttachments,
-                            ),
-                            backgroundDecoration: BoxDecoration(
-                              color: ColorTween(
-                                begin: ChannelHeaderTheme.of(context).color,
-                                end: Colors.black,
-                              ).lerp(_controller.value),
-                            ),
-                            onTapUp: (a, b, c) {
-                              setState(() {
-                                _optionsShown = !_optionsShown;
-                              });
-                              if (_controller.isCompleted) {
-                                _controller.reverse();
-                              } else {
-                                _controller.forward();
-                              }
-                            },
-                          );
-                        } else if (attachment.type == 'video') {
-                          final controller = videoPackages[attachment.id]!;
-                          if (!controller.initialized) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          return InkWell(
-                            onTap: () {
-                              setState(() {
-                                _optionsShown = !_optionsShown;
-                              });
-                              if (_controller.isCompleted) {
-                                _controller.reverse();
-                              } else {
-                                _controller.forward();
-                              }
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 50,
-                              ),
-                              child: Chewie(
-                                controller: controller.chewieController!,
-                              ),
-                            ),
-                          );
+                        if (_controller.isCompleted) {
+                          _controller.reverse();
+                        } else {
+                          _controller.forward();
                         }
-                        return Container();
                       },
-                      itemCount: widget.mediaAttachments.length,
-                    )),
+                    );
+                  } else if (attachment.type == 'video') {
+                    final controller = videoPackages[attachment.id]!;
+                    if (!controller.initialized) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _optionsShown = !_optionsShown;
+                        });
+                        if (_controller.isCompleted) {
+                          _controller.reverse();
+                        } else {
+                          _controller.forward();
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 50,
+                        ),
+                        child: Chewie(
+                          controller: controller.chewieController!,
+                        ),
+                      ),
+                    );
+                  }
+                  return Container();
+                },
+                itemCount: widget.mediaAttachments.length,
+              ),
+            ),
             AnimatedOpacity(
               opacity: _optionsShown ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 300),

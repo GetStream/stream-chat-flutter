@@ -146,11 +146,12 @@ class MessageSearchItem extends StatelessWidget {
   }
 
   TextSpan _getDisplayText(
-      String text,
-      List<User> mentions,
-      List<Attachment> attachments,
-      TextStyle? normalTextStyle,
-      TextStyle? mentionsTextStyle) {
+    String text,
+    List<User> mentions,
+    List<Attachment> attachments,
+    TextStyle? normalTextStyle,
+    TextStyle? mentionsTextStyle,
+  ) {
     final textList = text.split(' ');
     final resList = <TextSpan>[];
     for (final e in textList) {

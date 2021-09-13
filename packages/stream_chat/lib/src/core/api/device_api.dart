@@ -7,7 +7,7 @@ enum PushProvider {
   firebase,
 
   /// Send notifications using Apple's Push Notification service
-  apn
+  apn,
 }
 
 /// Helper extension for [PushProvider]

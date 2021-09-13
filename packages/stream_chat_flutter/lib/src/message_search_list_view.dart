@@ -217,7 +217,9 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       );
 
   Widget _listItemBuilder(
-      BuildContext context, GetMessageResponse getMessageResponse) {
+    BuildContext context,
+    GetMessageResponse getMessageResponse,
+  ) {
     if (widget.itemBuilder != null) {
       return widget.itemBuilder!(context, getMessageResponse);
     }
@@ -231,33 +233,34 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     final messageSearchBloc = MessageSearchBloc.of(context);
 
     return StreamBuilder<bool>(
-        stream: messageSearchBloc.queryMessagesLoading,
-        initialData: false,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Container(
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .accentError
-                  .withOpacity(.2),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Center(
-                  child: Text(context.translations.loadingMessagesError),
-                ),
-              ),
-            );
-          }
+      stream: messageSearchBloc.queryMessagesLoading,
+      initialData: false,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
           return Container(
-            height: 100,
-            padding: const EdgeInsets.all(32),
-            child: Center(
-              child: snapshot.data!
-                  ? const CircularProgressIndicator()
-                  : Container(),
+            color: StreamChatTheme.of(context)
+                .colorTheme
+                .accentError
+                .withOpacity(0.2),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: Text(context.translations.loadingMessagesError),
+              ),
             ),
           );
-        });
+        }
+        return Container(
+          height: 100,
+          padding: const EdgeInsets.all(32),
+          child: Center(
+            child: snapshot.data!
+                ? const CircularProgressIndicator()
+                : Container(),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildListView(List<GetMessageResponse> data) {

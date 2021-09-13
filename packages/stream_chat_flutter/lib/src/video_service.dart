@@ -6,6 +6,7 @@ import 'package:video_compress/video_compress.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 ///
+// ignore: prefer-match-file-name
 class IVideoService {
   IVideoService._();
 

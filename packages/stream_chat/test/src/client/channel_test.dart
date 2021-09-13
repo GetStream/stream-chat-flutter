@@ -291,7 +291,7 @@ void main() {
           (index) => Attachment(
             id: 'test-attachment-id-$index',
             type: index.isEven ? 'image' : 'file',
-            file: AttachmentFile(size: 33 * index, path: 'test-file-path'),
+            file: AttachmentFile(size: index * 33, path: 'test-file-path'),
           ),
         );
 
@@ -498,7 +498,7 @@ void main() {
           (index) => Attachment(
             id: 'test-attachment-id-$index',
             type: index.isEven ? 'image' : 'file',
-            file: AttachmentFile(size: 33 * index, path: 'test-file-path'),
+            file: AttachmentFile(size: index * 33, path: 'test-file-path'),
           ),
         );
 
