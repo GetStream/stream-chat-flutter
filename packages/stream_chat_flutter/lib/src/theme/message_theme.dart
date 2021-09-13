@@ -100,7 +100,10 @@ class MessageThemeData with Diagnosticable {
         messageTextStyle:
             TextStyle.lerp(a.messageTextStyle, b.messageTextStyle, t),
         reactionsBackgroundColor: Color.lerp(
-            a.reactionsBackgroundColor, b.reactionsBackgroundColor, t,),
+          a.reactionsBackgroundColor,
+          b.reactionsBackgroundColor,
+          t,
+        ),
         reactionsBorderColor:
             Color.lerp(a.messageBorderColor, b.reactionsBorderColor, t),
         reactionsMaskColor:
