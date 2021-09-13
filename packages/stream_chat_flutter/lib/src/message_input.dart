@@ -477,19 +477,19 @@ class MessageInputState extends State<MessageInput> {
           _emojiOverlay != null ||
           _mentionsOverlay != null,
       overlayBuilder: (context, offset) {
-        late Widget child;
+        late Widget? child;
 
         if (_commandsOverlay != null) {
-          child = _buildCommandsOverlayEntry();
+          child = _commandsOverlay;
         } else if (_emojiOverlay != null) {
-          child = _buildEmojiOverlay();
+          child = _emojiOverlay;
         } else {
-          child = _buildMentionsOverlayEntry();
+          child = _mentionsOverlay;
         }
 
         return CenterAbout(
           position: Offset(offset.dx, offset.dy),
-          child: child,
+          child: child!,
         );
       },
       child: child,
@@ -827,14 +827,6 @@ class MessageInputState extends State<MessageInput> {
             .keyStroke(widget.parentMessage?.id)
             .catchError((e) {});
 
-        setState(() {
-          _actionsShrunk = s.trim().isNotEmpty &&
-              ((widget.actions?.length ?? 0) +
-                      (widget.showCommandsButton ? 1 : 0) +
-                      (widget.disableAttachments ? 0 : 1) >
-                  1);
-        });
-
         _commandsOverlay = null;
         _mentionsOverlay = null;
         _emojiOverlay = null;
@@ -844,6 +836,14 @@ class MessageInputState extends State<MessageInput> {
         _checkMentions(s, context);
 
         _checkEmoji(s, context);
+
+        setState(() {
+          _actionsShrunk = s.trim().isNotEmpty &&
+              ((widget.actions?.length ?? 0) +
+                  (widget.showCommandsButton ? 1 : 0) +
+                  (widget.disableAttachments ? 0 : 1) >
+                  1);
+        });
       },
     );
   }
