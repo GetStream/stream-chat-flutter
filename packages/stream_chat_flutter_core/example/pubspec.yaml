@@ -26,8 +26,12 @@ dependencies:
   cupertino_icons: ^1.0.3
   flutter:
     sdk: flutter
+
+dependency_overrides:
+  stream_chat:
+    path: ../../stream_chat
   stream_chat_flutter_core:
-    path: ../
+    path: ../../stream_chat_flutter_core
 
 
 dev_dependencies:

@@ -4,7 +4,7 @@ versioning:
   mode: independent
 
 packages:
-  - packages/**
+  - packages/stream_chat*/*
 
 scripts:
   lint:all:
