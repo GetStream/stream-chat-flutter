@@ -1,7 +1,7 @@
 name: Dart Code Metrics
 
 env:
-  folders: "example, lib, test"
+  folders: "lib, test"
 
 on:
   pull_request:
@@ -24,18 +24,18 @@ jobs:
           relative_path: 'packages/stream_chat'
           folders: ${{ env.folders }}
 
-      - name: "Stream Chat Flutter Metrics"
-        uses: dart-code-checker/dart-code-metrics-action@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          relative_path: 'packages/stream_chat_flutter'
-          folders: ${{ env.folders }}
-
       - name: "Stream Chat Flutter Core Metrics"
         uses: dart-code-checker/dart-code-metrics-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           relative_path: 'packages/stream_chat_flutter_core'
+          folders: ${{ env.folders }}
+
+      - name: "Stream Chat Flutter Metrics"
+        uses: dart-code-checker/dart-code-metrics-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          relative_path: 'packages/stream_chat_flutter'
           folders: ${{ env.folders }}
 
       - name: "Stream Chat Localizations Metrics"
