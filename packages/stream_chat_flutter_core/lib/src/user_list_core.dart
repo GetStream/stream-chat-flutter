@@ -209,11 +209,10 @@ class UserListCoreState extends State<UserListCore>
   @override
   void didUpdateWidget(UserListCore oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.filter?.toString() != oldWidget.filter?.toString() ||
+    if (jsonEncode(widget.filter) != jsonEncode(oldWidget.filter) ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
         widget.presence != oldWidget.presence ||
-        widget.pagination.toJson().toString() !=
-            oldWidget.pagination.toJson().toString()) {
+        jsonEncode(widget.pagination) != jsonEncode(oldWidget.pagination)) {
       loadData();
     }
 

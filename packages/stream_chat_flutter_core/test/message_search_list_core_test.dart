@@ -6,8 +6,8 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
 
-const testFilter = Filter.custom(operator: '\$test', value: 'testValue');
-const testMessageFilter = Filter.custom(operator: '\$test', value: 'testValue');
+const testFilter = Filter.custom(key: 'test', value: 'testValue');
+const testMessageFilter = Filter.custom(key: 'test', value: 'testValue');
 
 void main() {
   List<GetMessageResponse> _generateMessages({

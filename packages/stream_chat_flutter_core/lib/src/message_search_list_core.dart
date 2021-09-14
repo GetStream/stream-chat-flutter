@@ -185,13 +185,13 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
   @override
   void didUpdateWidget(MessageSearchListCore oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.filters.toString() != oldWidget.filters.toString() ||
+    if (jsonEncode(widget.filters) != jsonEncode(oldWidget.filters) ||
         jsonEncode(widget.sortOptions) != jsonEncode(oldWidget.sortOptions) ||
-        widget.messageQuery?.toString() != oldWidget.messageQuery?.toString() ||
-        widget.messageFilters?.toString() !=
-            oldWidget.messageFilters?.toString() ||
-        widget.paginationParams.toJson().toString() !=
-            oldWidget.paginationParams.toJson().toString()) {
+        widget.messageQuery != oldWidget.messageQuery ||
+        jsonEncode(widget.messageFilters) !=
+            jsonEncode(oldWidget.messageFilters) ||
+        jsonEncode(widget.paginationParams) !=
+            jsonEncode(oldWidget.paginationParams)) {
       loadData();
     }
 
