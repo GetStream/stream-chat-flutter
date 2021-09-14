@@ -214,6 +214,11 @@ class MessageWidget extends StatefulWidget {
                     ),
                     onShowMessage: onShowMessage,
                     onReturnAction: onReturnAction,
+                    onAttachmentTap: onAttachmentTap != null
+                        ? () {
+                            onAttachmentTap(message, attachment);
+                          }
+                        : null,
                   );
                 }).toList(),
               ),
@@ -243,6 +248,11 @@ class MessageWidget extends StatefulWidget {
                           mediaQueryData.size.width * 0.8,
                           mediaQueryData.size.height * 0.3,
                         ),
+                        onAttachmentTap: onAttachmentTap != null
+                            ? () {
+                                onAttachmentTap(message, attachment);
+                              }
+                            : null,
                       ),
                       border,
                       reverse,
