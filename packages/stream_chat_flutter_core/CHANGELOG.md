@@ -14,6 +14,7 @@
 🐞 Fixed
 
 - Fixed `MessageSearchBloc` pagination.
+- [[#673]](https://github.com/GetStream/stream-chat-flutter/issues/673): Fix `Core Widgets` not getting rebuild with new data on configuration change.
 
 ## 2.2.1
 
