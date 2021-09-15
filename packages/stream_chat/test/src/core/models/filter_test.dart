@@ -226,6 +226,12 @@ void main() {
           json.encode(value),
         );
       });
+
+      test('empty', () {
+        const filter = Filter.empty();
+        final encoded = json.encode(filter);
+        expect(encoded, '{}');
+      });
     });
 
     test('groupedFilter', () {

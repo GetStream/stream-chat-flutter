@@ -104,7 +104,7 @@ class Filter extends Equatable {
 
   /// An empty filter
   const Filter.empty()
-      : value = const {},
+      : value = const <String, Object?>{},
         operator = null,
         key = null;
 
