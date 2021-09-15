@@ -11,6 +11,13 @@
     pagination = const PaginationParams(limit: 30)
     ```
 
+🔄 Changed
+
+- `UserListViewCore` filter property now has a default value.
+    ```dart
+    filter = const Filter.empty()
+    ```
+
 🐞 Fixed
 
 - Fixed `MessageSearchListView` pagination.
