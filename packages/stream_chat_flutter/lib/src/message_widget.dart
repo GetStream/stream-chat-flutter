@@ -133,6 +133,7 @@ class MessageWidget extends StatefulWidget {
                       messageTheme: messageTheme,
                       onShowMessage: onShowMessage,
                       onReturnAction: onReturnAction,
+                      onAttachmentTap: onAttachmentTap,
                     ),
                   ),
                   border,
