@@ -53,12 +53,17 @@ typedef EmptyMessageSearchBuilder = Widget Function(
 /// Modify it to change the widget appearance.
 class MessageSearchListView extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
-  const MessageSearchListView({
+  MessageSearchListView({
     Key? key,
     required this.filters,
     this.messageQuery,
     this.sortOptions,
-    this.paginationParams = const PaginationParams(limit: 30),
+    @Deprecated(
+      "'paginationParams' is deprecated and shouldn't be used. "
+      "This property is no longer used, Please use 'limit' instead",
+    )
+        this.paginationParams,
+    int? limit,
     this.messageFilters,
     this.separatorBuilder,
     this.itemBuilder,
@@ -71,7 +76,8 @@ class MessageSearchListView extends StatefulWidget {
     this.loadingBuilder,
     this.childBuilder,
     this.messageSearchListController,
-  }) : super(key: key);
+  })  : limit = limit ?? paginationParams?.limit ?? 30,
+        super(key: key);
 
   /// Message String to search on
   final String? messageQuery;
@@ -93,7 +99,14 @@ class MessageSearchListView extends StatefulWidget {
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams paginationParams;
+  @Deprecated(
+    "'paginationParams' is deprecated and shouldn't be used. "
+    "This property is no longer used, Please use 'limit' instead",
+  )
+  final PaginationParams? paginationParams;
+
+  /// The amount of messages requested per API call.
+  final int limit;
 
   /// The message query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -152,7 +165,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       filters: widget.filters,
       sortOptions: widget.sortOptions,
       messageQuery: widget.messageQuery,
-      paginationParams: widget.paginationParams,
+      limit: widget.limit,
       messageFilters: widget.messageFilters,
       messageSearchListController: _messageSearchListController,
       emptyBuilder: widget.emptyBuilder ??

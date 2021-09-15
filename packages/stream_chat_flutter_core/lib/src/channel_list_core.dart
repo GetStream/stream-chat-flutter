@@ -56,7 +56,7 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 /// information about the channels.
 class ChannelListCore extends StatefulWidget {
   /// Instantiate a new ChannelListView
-  const ChannelListCore({
+  ChannelListCore({
     Key? key,
     required this.errorBuilder,
     required this.emptyBuilder,
@@ -69,11 +69,15 @@ class ChannelListCore extends StatefulWidget {
     this.memberLimit,
     this.messageLimit,
     this.sort,
-    this.pagination = const PaginationParams(
-      limit: 25,
-    ),
+    @Deprecated(
+      "'pagination' is deprecated and shouldn't be used. "
+      "This property is no longer used, Please use 'limit' instead",
+    )
+        this.pagination,
     this.channelListController,
-  }) : super(key: key);
+    int? limit,
+  })  : limit = limit ?? pagination?.limit ?? 25,
+        super(key: key);
 
   /// A [ChannelListController] allows reloading and pagination.
   /// Use [ChannelListController.loadData] and
@@ -124,7 +128,14 @@ class ChannelListCore extends StatefulWidget {
   /// limit: the number of channels to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams pagination;
+  @Deprecated(
+    "'pagination' is deprecated and shouldn't be used. "
+    "This property is no longer used, Please use 'limit' instead",
+  )
+  final PaginationParams? pagination;
+
+  /// The amount of channels requested per API call.
+  final int limit;
 
   @override
   ChannelListCoreState createState() => ChannelListCoreState();
@@ -162,7 +173,7 @@ class ChannelListCoreState extends State<ChannelListCore> {
         presence: widget.presence,
         memberLimit: widget.memberLimit,
         messageLimit: widget.messageLimit,
-        paginationParams: widget.pagination,
+        paginationParams: PaginationParams(limit: widget.limit),
       );
 
   /// Fetches more channels with updated pagination and updates the widget
@@ -174,7 +185,8 @@ class ChannelListCoreState extends State<ChannelListCore> {
         presence: widget.presence,
         memberLimit: widget.memberLimit,
         messageLimit: widget.messageLimit,
-        paginationParams: widget.pagination.copyWith(
+        paginationParams: PaginationParams(
+          limit: widget.limit,
           offset: _channelsBloc.channels?.length ?? 0,
         ),
       );
@@ -221,7 +233,7 @@ class ChannelListCoreState extends State<ChannelListCore> {
         widget.presence != oldWidget.presence ||
         widget.messageLimit != oldWidget.messageLimit ||
         widget.memberLimit != oldWidget.memberLimit ||
-        jsonEncode(widget.pagination) != jsonEncode(oldWidget.pagination)) {
+        widget.limit != oldWidget.limit) {
       loadData();
     }
 
