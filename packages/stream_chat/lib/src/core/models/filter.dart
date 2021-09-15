@@ -102,6 +102,12 @@ class Filter extends Equatable {
     this.key,
   }) : operator = operator.rawValue;
 
+  /// An empty filter
+  const Filter.empty()
+      : value = const {},
+        operator = null,
+        key = null;
+
   /// Combines the provided filters and matches the values
   /// matched by all filters.
   factory Filter.and(List<Filter> filters) =>
@@ -171,9 +177,6 @@ class Filter extends Equatable {
     String? operator,
     String? key,
   }) = Filter.__;
-
-  /// An empty filter
-  factory Filter.empty() => const Filter.raw(value: {});
 
   /// Creates a custom [Filter] from a raw map value
   ///

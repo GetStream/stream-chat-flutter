@@ -139,7 +139,7 @@ void main() {
     });
 
     test('empty', () {
-      final filter = Filter.empty();
+      const filter = Filter.empty();
       expect(filter.value, {});
     });
 
