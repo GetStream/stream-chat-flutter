@@ -578,6 +578,8 @@ class MessageInputState extends State<MessageInput> {
         crossFadeState: _actionsShrunk
             ? CrossFadeState.showFirst
             : CrossFadeState.showSecond,
+        firstCurve: Curves.easeOut,
+        secondCurve: Curves.easeIn,
         firstChild: IconButton(
           onPressed: () {
             if (_actionsShrunk) {
@@ -1086,6 +1088,7 @@ class MessageInputState extends State<MessageInput> {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
       height: _openFilePickerSection ? _kMinMediaPickerSize : 0,
       child: Material(
         color: _streamChatTheme.colorTheme.inputBg,
