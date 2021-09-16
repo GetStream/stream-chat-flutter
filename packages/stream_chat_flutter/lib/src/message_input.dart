@@ -2315,7 +2315,7 @@ class _PickerWidgetState extends State<_PickerWidget> {
       future: requestPermission,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Offstage();
         }
 
         if (snapshot.data!) {
