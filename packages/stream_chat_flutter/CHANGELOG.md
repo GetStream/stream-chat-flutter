@@ -1,14 +1,30 @@
 ## 2.2.1
 
-🛑️ Breaking Changes from `2.2.1`
+⚠️ Deprecated
 
-- `MessageSearchListView` paginationParams property is now non-nullable with a default value.
+- `MessageSearchListView` `paginationParams` property is now deprecated in favor of `limit`.
     ```dart
+    // previous
     paginationParams = const PaginationParams(limit: 30)
+    
+    // new
+    limit = 30
     ```
-- `UserListView` pagination property is now non-nullable with a default value.
+- `UserListView` `pagination` property is now deprecated in favor of `limit`.
     ```dart
+    // previous
     pagination = const PaginationParams(limit: 30)
+    
+    // new
+    limit = 30
+    ```
+- `ChannelListView` `pagination` property is now deprecated in favor of `limit`.
+    ```dart
+    // previous
+    pagination = const PaginationParams(limit: 30)
+    
+    // new
+    limit = 30
     ```
 
 🔄 Changed

@@ -551,4 +551,19 @@ void main() {
           )).called(1);
     },
   );
+
+  test('`widget.limit` should match `widget.pagination.limit`', () {
+    const pagination = PaginationParams(limit: 30);
+    final messageSearchListCore = MessageSearchListCore(
+      childBuilder: (List<GetMessageResponse> messages) => const Offstage(),
+      loadingBuilder: (BuildContext context) => const Offstage(),
+      emptyBuilder: (BuildContext context) => const Offstage(),
+      errorBuilder: (BuildContext context, Object? error) => const Offstage(),
+      filters: testFilter,
+      messageFilters: testMessageFilter,
+      paginationParams: pagination,
+    );
+
+    expect(messageSearchListCore.limit, pagination.limit);
+  });
 }

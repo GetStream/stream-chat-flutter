@@ -520,4 +520,17 @@ void main() {
           )).called(1);
     },
   );
+
+  test('`widget.limit` should match `widget.pagination.limit`', () {
+    const pagination = PaginationParams(limit: 30);
+    final userListCore = UserListCore(
+      listBuilder: (_, __) => const Offstage(),
+      loadingBuilder: (BuildContext context) => const Offstage(),
+      emptyBuilder: (BuildContext context) => const Offstage(),
+      errorBuilder: (BuildContext context, Object error) => const Offstage(),
+      pagination: pagination,
+    );
+
+    expect(userListCore.limit, pagination.limit);
+  });
 }

@@ -38,7 +38,7 @@ class MessageSearchListCore extends StatefulWidget {
   /// * [errorBuilder]
   /// * [loadingBuilder]
   /// * [childBuilder]
-  const MessageSearchListCore({
+  MessageSearchListCore({
     Key? key,
     required this.emptyBuilder,
     required this.errorBuilder,
@@ -47,9 +47,14 @@ class MessageSearchListCore extends StatefulWidget {
     required this.filters,
     this.messageQuery,
     this.sortOptions,
-    this.paginationParams = const PaginationParams(limit: 30),
+    @Deprecated(
+      "'pagination' is deprecated and shouldn't be used. "
+      "This property is no longer used, Please use 'limit' instead",
+    )
+        this.paginationParams,
     this.messageFilters,
     this.messageSearchListController,
+    int? limit,
   })  : assert(
           messageQuery != null || messageFilters != null,
           'Provide at least `query` or `messageFilters`',
@@ -58,6 +63,13 @@ class MessageSearchListCore extends StatefulWidget {
           messageQuery == null || messageFilters == null,
           "Can't provide both `query` and `messageFilters` at the same time",
         ),
+        assert(
+          paginationParams?.offset == null ||
+              paginationParams?.offset == 0 ||
+              sortOptions == null,
+          'Cannot specify `offset` with `sortOptions` parameter',
+        ),
+        limit = limit ?? paginationParams?.limit ?? 30,
         super(key: key);
 
   /// A [MessageSearchListController] allows reloading and pagination.
@@ -84,7 +96,14 @@ class MessageSearchListCore extends StatefulWidget {
   /// Pagination parameters
   /// limit: the number of messages to return (max is 30)
   /// offset: the offset (max is 1000)
-  final PaginationParams paginationParams;
+  @Deprecated(
+    "'pagination' is deprecated and shouldn't be used. "
+    "This property is no longer used, Please use 'limit' instead",
+  )
+  final PaginationParams? paginationParams;
+
+  /// The amount of messages requested per API call.
+  final int limit;
 
   /// The message query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -157,19 +176,19 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
         filter: widget.filters,
         sort: widget.sortOptions,
         query: widget.messageQuery,
-        pagination: widget.paginationParams,
         messageFilter: widget.messageFilters,
+        pagination: PaginationParams(limit: widget.limit),
       );
 
   /// Fetches more messages with updated pagination and updates the widget
   Future<void> paginateData() {
-    PaginationParams pagination;
+    var pagination = PaginationParams(limit: widget.limit);
     if (widget.sortOptions != null) {
-      pagination = widget.paginationParams.copyWith(
+      pagination = pagination.copyWith(
         next: _messageSearchBloc?.nextId,
       );
     } else {
-      pagination = widget.paginationParams.copyWith(
+      pagination = pagination.copyWith(
         offset: _messageSearchBloc?.messageResponses?.length,
       );
     }
@@ -190,8 +209,7 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
         widget.messageQuery != oldWidget.messageQuery ||
         jsonEncode(widget.messageFilters) !=
             jsonEncode(oldWidget.messageFilters) ||
-        jsonEncode(widget.paginationParams) !=
-            jsonEncode(oldWidget.paginationParams)) {
+        widget.limit != oldWidget.limit) {
       loadData();
     }
 

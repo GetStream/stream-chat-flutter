@@ -56,7 +56,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             _context = context;
-            return const Scaffold(
+            return Scaffold(
               body: UsersBloc(
                 child: UserListView(),
               ),
@@ -85,7 +85,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             _context = context;
-            return const Scaffold(
+            return Scaffold(
               body: UsersBloc(
                 child: UserListView(),
               ),

@@ -57,7 +57,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// [errorBuilder] must all be supplied and not null.
 class UserListCore extends StatefulWidget {
   /// Instantiate a new [UserListCore]
-  const UserListCore({
+  UserListCore({
     required this.errorBuilder,
     required this.emptyBuilder,
     required this.loadingBuilder,
@@ -66,10 +66,16 @@ class UserListCore extends StatefulWidget {
     this.filter = const Filter.empty(),
     this.sort,
     this.presence,
-    this.pagination = const PaginationParams(limit: 30),
+    @Deprecated(
+      "'pagination' is deprecated and shouldn't be used. "
+      "This property is no longer used, Please use 'limit' instead",
+    )
+        this.pagination,
     this.groupAlphabetically = false,
     this.userListController,
-  }) : super(key: key);
+    int? limit,
+  })  : limit = limit ?? pagination?.limit ?? 30,
+        super(key: key);
 
   /// A [UserListController] allows reloading and pagination.
   /// Use [UserListController.loadData] and [UserListController.paginateData]
@@ -107,7 +113,14 @@ class UserListCore extends StatefulWidget {
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams pagination;
+  @Deprecated(
+    "'pagination' is deprecated and shouldn't be used. "
+    "This property is no longer used, Please use 'limit' instead",
+  )
+  final PaginationParams? pagination;
+
+  /// The amount of users requested per API call.
+  final int limit;
 
   /// Set it to true to group users by their first character
   ///
@@ -194,7 +207,7 @@ class UserListCoreState extends State<UserListCore>
         filter: widget.filter,
         sort: widget.sort,
         presence: widget.presence,
-        pagination: widget.pagination,
+        pagination: PaginationParams(limit: widget.limit),
       );
 
   /// Fetches more users with updated pagination and updates the widget
@@ -202,7 +215,8 @@ class UserListCoreState extends State<UserListCore>
         filter: widget.filter,
         sort: widget.sort,
         presence: widget.presence,
-        pagination: widget.pagination.copyWith(
+        pagination: PaginationParams(
+          limit: widget.limit,
           offset: _usersBloc!.users?.length ?? 0,
         ),
       );
@@ -213,7 +227,7 @@ class UserListCoreState extends State<UserListCore>
     if (jsonEncode(widget.filter) != jsonEncode(oldWidget.filter) ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
         widget.presence != oldWidget.presence ||
-        jsonEncode(widget.pagination) != jsonEncode(oldWidget.pagination)) {
+        widget.limit != oldWidget.limit) {
       loadData();
     }
 
