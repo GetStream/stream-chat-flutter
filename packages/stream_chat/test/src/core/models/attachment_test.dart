@@ -43,7 +43,7 @@ void main() {
       );
     });
 
-    test('name property and extraData manipulation', () {
+    test('fileName, mimeType property and extraData manipulation', () {
       final file = AttachmentFile(size: 3, path: 'myfolder/myfile.txt');
       final attachment = Attachment(file: file);
 
