@@ -97,8 +97,8 @@ class QuotedMessageWidget extends StatelessWidget {
 
   bool get _hasAttachments => message.attachments.isNotEmpty == true;
 
-  bool get _containsScrapeUrl =>
-      message.attachments.any((element) => element.ogScrapeUrl != null) == true;
+  bool get _containsLinkAttachment =>
+      message.attachments.any((element) => element.titleLink != null) == true;
 
   bool get _containsText => message.text?.isNotEmpty == true;
 
@@ -198,9 +198,9 @@ class QuotedMessageWidget extends StatelessWidget {
   Widget _parseAttachments(BuildContext context) {
     Widget child;
     Attachment attachment;
-    if (_containsScrapeUrl) {
+    if (_containsLinkAttachment) {
       attachment = message.attachments.firstWhere(
-        (element) => element.ogScrapeUrl != null,
+        (element) => element.titleLink != null,
       );
       child = _buildUrlAttachment(attachment);
     } else {
@@ -280,7 +280,7 @@ class QuotedMessageWidget extends StatelessWidget {
           };
 
   Color? _getBackgroundColor(BuildContext context) {
-    if (_containsScrapeUrl) {
+    if (_containsLinkAttachment) {
       return StreamChatTheme.of(context).colorTheme.linkBg;
     }
     return messageTheme.messageBackgroundColor;
