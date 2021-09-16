@@ -98,7 +98,13 @@ class GiphyAttachment extends AttachmentWidget {
               Padding(
                 padding: const EdgeInsets.all(2),
                 child: GestureDetector(
-                  onTap: () => onAttachmentTap ?? _onImageTap(context),
+                  onTap: () {
+                    if (onAttachmentTap != null) {
+                      onAttachmentTap?.call();
+                    } else {
+                      _onImageTap(context);
+                    }
+                  },
                   child: CachedNetworkImage(
                     height: size?.height,
                     width: size?.width,
@@ -253,7 +259,13 @@ class GiphyAttachment extends AttachmentWidget {
   Widget _buildSentAttachment(BuildContext context, String imageUrl) =>
       SizedBox(
         child: GestureDetector(
-          onTap: () => onAttachmentTap ?? _onImageTap(context),
+          onTap: () {
+            if (onAttachmentTap != null) {
+              onAttachmentTap?.call();
+            } else {
+              _onImageTap(context);
+            }
+          },
           child: Stack(
             children: [
               CachedNetworkImage(
