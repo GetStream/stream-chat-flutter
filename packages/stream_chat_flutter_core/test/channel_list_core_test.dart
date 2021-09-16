@@ -521,5 +521,4 @@ void main() {
 
     expect(channelListCore.limit, pagination.limit);
   });
-
 }
