@@ -11,7 +11,7 @@ void main() async {
   /// from your project dashboard.
   final client = StreamChatClient(
     's2dxdhpxd94g',
-    logLevel: Level.INFO,
+    logLevel: Level.OFF,
   );
 
   /// Set the current user and connect the websocket. In a production

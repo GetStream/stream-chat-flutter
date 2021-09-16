@@ -324,7 +324,9 @@ class MessageInputState extends State<MessageInput> {
   late final FocusNode _focusNode;
   bool _inputEnabled = true;
   bool _commandEnabled = false;
-  Widget? _commandsOverlay, _mentionsOverlay, _emojiOverlay;
+  bool _showCommandsOverlay = false;
+  bool _showEmojiOverlay = false;
+  bool _showMentionsOverlay = false;
 
   Command? _chosenCommand;
   bool _actionsShrunk = false;
@@ -473,26 +475,33 @@ class MessageInputState extends State<MessageInput> {
       );
     }
     return AnchoredOverlay(
-      showOverlay: _commandsOverlay != null ||
-          _emojiOverlay != null ||
-          _mentionsOverlay != null,
-      overlayBuilder: (context, offset) {
-        late Widget? child;
-
-        if (_commandsOverlay != null) {
-          child = _commandsOverlay;
-        } else if (_emojiOverlay != null) {
-          child = _emojiOverlay;
-        } else {
-          child = _mentionsOverlay;
-        }
-
-        return CenterAbout(
+      showOverlay: _showMentionsOverlay,
+      overlayBuilder: (context, offset) => CenterAbout(
+        position: Offset(offset.dx, offset.dy),
+        child: _buildMentionsOverlayEntry(),
+      ),
+      child: AnchoredOverlay(
+        showOverlay: _showCommandsOverlay,
+        overlayBuilder: (context, offset) => CenterAbout(
           position: Offset(offset.dx, offset.dy),
-          child: child!,
-        );
-      },
-      child: child,
+          child: _buildCommandsOverlayEntry(),
+        ),
+        child: AnchoredOverlay(
+          showOverlay: textEditingController.text.isNotEmpty &&
+              textEditingController.selection.baseOffset > 0 &&
+              textEditingController.text
+                  .substring(
+                    0,
+                    textEditingController.selection.baseOffset,
+                  )
+                  .contains(':'),
+          overlayBuilder: (context, offset) => CenterAbout(
+            position: Offset(offset.dx, offset.dy),
+            child: _buildEmojiOverlay(),
+          ),
+          child: child,
+        ),
+      ),
     );
   }
 
@@ -827,10 +836,6 @@ class MessageInputState extends State<MessageInput> {
             .keyStroke(widget.parentMessage?.id)
             .catchError((e) {});
 
-        _commandsOverlay = null;
-        _mentionsOverlay = null;
-        _emojiOverlay = null;
-
         _checkCommands(s.trim(), context);
 
         _checkMentions(s, context);
@@ -840,8 +845,8 @@ class MessageInputState extends State<MessageInput> {
         setState(() {
           _actionsShrunk = s.trim().isNotEmpty &&
               ((widget.actions?.length ?? 0) +
-                  (widget.showCommandsButton ? 1 : 0) +
-                  (widget.disableAttachments ? 0 : 1) >
+                      (widget.showCommandsButton ? 1 : 0) +
+                      (widget.disableAttachments ? 0 : 1) >
                   1);
         });
       },
@@ -879,8 +884,6 @@ class MessageInputState extends State<MessageInput> {
 
       if (textToSelection.endsWith(':') && emoji != null) {
         _chooseEmoji(splits.sublist(0, splits.length - 1), emoji);
-      } else {
-        _emojiOverlay = _buildEmojiOverlay();
       }
     }
   }
@@ -893,7 +896,15 @@ class MessageInputState extends State<MessageInput> {
             .split(' ')
             .last
             .contains('@')) {
-      _mentionsOverlay = _buildMentionsOverlayEntry();
+      if (!_showMentionsOverlay) {
+        setState(() {
+          _showMentionsOverlay = true;
+        });
+      }
+    } else if (_showMentionsOverlay) {
+      setState(() {
+        _showMentionsOverlay = false;
+      });
     }
   }
 
@@ -910,20 +921,29 @@ class MessageInputState extends State<MessageInput> {
       if (matchedCommandsList.length == 1) {
         _chosenCommand = matchedCommandsList[0];
         textEditingController.clear();
+
+        if (_showCommandsOverlay) {
+          setState(() {
+            _commandEnabled = true;
+            _showCommandsOverlay = false;
+          });
+        }
+      } else if (!_showCommandsOverlay) {
         setState(() {
-          _commandEnabled = true;
+          _showCommandsOverlay = true;
         });
-        _commandsOverlay = null;
-      } else {
-        _commandsOverlay = _buildCommandsOverlayEntry();
       }
+    } else if (_showCommandsOverlay) {
+      setState(() {
+        _showCommandsOverlay = false;
+      });
     }
   }
 
   Widget _buildCommandsOverlayEntry() {
     final text = textEditingController.text.trimLeft();
 
-// ignore: cast_nullable_to_non_nullable
+    // ignore: cast_nullable_to_non_nullable
     final renderObject = context.findRenderObject() as RenderBox;
     return CommandsOverlay(
       channel: StreamChannel.of(context).channel,
@@ -1143,6 +1163,10 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildMentionsOverlayEntry() {
+    if (textEditingController.value.selection.start < 0) {
+      return const Offstage();
+    }
+
     final splits = textEditingController.text
         .substring(0, textEditingController.value.selection.start)
         .split('@');
@@ -1173,7 +1197,7 @@ class MessageInputState extends State<MessageInput> {
         );
         _debounce!.cancel();
         setState(() {
-          _mentionsOverlay = null;
+          _showMentionsOverlay = false;
         });
       },
     );
@@ -1208,8 +1232,6 @@ class MessageInputState extends State<MessageInput> {
         offset: rejoin.length,
       ),
     );
-
-    _emojiOverlay = null;
   }
 
   void _setCommand(Command c) {
@@ -1217,8 +1239,8 @@ class MessageInputState extends State<MessageInput> {
     setState(() {
       _chosenCommand = c;
       _commandEnabled = true;
+      _showCommandsOverlay = false;
     });
-    _commandsOverlay = null;
   }
 
   Widget _buildReplyToMessage() {
@@ -1411,7 +1433,7 @@ class MessageInputState extends State<MessageInput> {
       icon: StreamSvgIcon.lightning(
         color: s.isNotEmpty
             ? _streamChatTheme.colorTheme.disabled
-            : (_commandsOverlay != null
+            : (_showCommandsOverlay
                 ? _messageInputTheme.actionButtonColor
                 : _messageInputTheme.actionButtonIdleColor),
       ),
@@ -1427,15 +1449,9 @@ class MessageInputState extends State<MessageInput> {
           await Future.delayed(const Duration(milliseconds: 300));
         }
 
-        if (_commandsOverlay == null) {
-          setState(() {
-            _commandsOverlay = _buildCommandsOverlayEntry();
-          });
-        } else {
-          setState(() {
-            _commandsOverlay = null;
-          });
-        }
+        setState(() {
+          _showCommandsOverlay = !_showCommandsOverlay;
+        });
       },
     );
 
@@ -1457,9 +1473,8 @@ class MessageInputState extends State<MessageInput> {
       ),
       splashRadius: 24,
       onPressed: () async {
-        _emojiOverlay = null;
-        _commandsOverlay = null;
-        _mentionsOverlay = null;
+        _showCommandsOverlay = false;
+        _showMentionsOverlay = false;
 
         if (_openFilePickerSection) {
           setState(() => _openFilePickerSection = false);
@@ -1744,9 +1759,6 @@ class MessageInputState extends State<MessageInput> {
     setState(() {
       _commandEnabled = false;
     });
-
-    _commandsOverlay = null;
-    _mentionsOverlay = null;
 
     Message message;
     if (widget.editMessage != null) {
