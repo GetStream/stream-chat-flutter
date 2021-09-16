@@ -15,6 +15,9 @@
 - Added `Filter.contains` and `Filter.empty`
 - Added support for `next`, `previous` value pagination in `client.search`
   , [read more.](https://getstream.io/chat/docs/other-rest/search/#pagination)
+- `Attachment` class now have a `fileSize` and `mimeType` property. Setting an `file` will also set the `file_size`
+  , `mime_type` key on `extraData`, so `user.fileSize`, `user.mimetype` and `user.extraData['file_size']`
+  , `user.extraData['mime_type]` is same respectively.
 
 🐞 Fixed
 
