@@ -604,8 +604,7 @@ class MessageInputState extends State<MessageInput> {
                 !widget.showCommandsButton &&
                 widget.actions?.isNotEmpty != true
             ? const Offstage()
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            : Wrap(
                 children: <Widget>[
                   if (!widget.disableAttachments)
                     _buildAttachmentButton(context),
