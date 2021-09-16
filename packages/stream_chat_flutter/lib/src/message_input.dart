@@ -1090,107 +1090,118 @@ class MessageInputState extends State<MessageInput> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
       height: _openFilePickerSection ? _kMinMediaPickerSize : 0,
-      child: Material(
-        color: _streamChatTheme.colorTheme.inputBg,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
+      child: SingleChildScrollView(
+        child: SizedBox(
+          height: _kMinMediaPickerSize,
+          child: Material(
+            color: _streamChatTheme.colorTheme.inputBg,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: StreamSvgIcon.pictures(
-                    color: _getIconColor(0),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: StreamSvgIcon.pictures(
+                        color: _getIconColor(0),
+                      ),
+                      onPressed:
+                          _attachmentContainsFile && _attachments.isNotEmpty
+                              ? null
+                              : () {
+                                  setState(() {
+                                    _filePickerIndex = 0;
+                                  });
+                                },
+                    ),
+                    IconButton(
+                      iconSize: 32,
+                      icon: StreamSvgIcon.files(
+                        color: _getIconColor(1),
+                      ),
+                      onPressed:
+                          !_attachmentContainsFile && _attachments.isNotEmpty
+                              ? null
+                              : () {
+                                  pickFile(DefaultAttachmentTypes.file);
+                                },
+                    ),
+                    IconButton(
+                      icon: StreamSvgIcon.camera(
+                        color: _getIconColor(2),
+                      ),
+                      onPressed: attachmentLimitCrossed ||
+                              (_attachmentContainsFile &&
+                                  _attachments.isNotEmpty)
+                          ? null
+                          : () {
+                              pickFile(DefaultAttachmentTypes.image,
+                                  camera: true);
+                            },
+                    ),
+                    IconButton(
+                      padding: const EdgeInsets.all(0),
+                      icon: StreamSvgIcon.record(
+                        color: _getIconColor(3),
+                      ),
+                      onPressed: attachmentLimitCrossed ||
+                              (_attachmentContainsFile &&
+                                  _attachments.isNotEmpty)
+                          ? null
+                          : () {
+                              pickFile(DefaultAttachmentTypes.video,
+                                  camera: true);
+                            },
+                    ),
+                  ],
+                ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: _streamChatTheme.colorTheme.barsBg,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
                   ),
-                  onPressed: _attachmentContainsFile && _attachments.isNotEmpty
-                      ? null
-                      : () {
-                          setState(() {
-                            _filePickerIndex = 0;
-                          });
-                        },
-                ),
-                IconButton(
-                  iconSize: 32,
-                  icon: StreamSvgIcon.files(
-                    color: _getIconColor(1),
-                  ),
-                  onPressed: !_attachmentContainsFile && _attachments.isNotEmpty
-                      ? null
-                      : () {
-                          pickFile(DefaultAttachmentTypes.file);
-                        },
-                ),
-                IconButton(
-                  icon: StreamSvgIcon.camera(
-                    color: _getIconColor(2),
-                  ),
-                  onPressed: attachmentLimitCrossed ||
-                          (_attachmentContainsFile && _attachments.isNotEmpty)
-                      ? null
-                      : () {
-                          pickFile(DefaultAttachmentTypes.image, camera: true);
-                        },
-                ),
-                IconButton(
-                  padding: const EdgeInsets.all(0),
-                  icon: StreamSvgIcon.record(
-                    color: _getIconColor(3),
-                  ),
-                  onPressed: attachmentLimitCrossed ||
-                          (_attachmentContainsFile && _attachments.isNotEmpty)
-                      ? null
-                      : () {
-                          pickFile(DefaultAttachmentTypes.video, camera: true);
-                        },
-                ),
-              ],
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: _streamChatTheme.colorTheme.barsBg,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
-              ),
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: _streamChatTheme.colorTheme.inputBg,
-                      borderRadius: BorderRadius.circular(4),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: _streamChatTheme.colorTheme.inputBg,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+                if (_openFilePickerSection)
+                  Expanded(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: _streamChatTheme.colorTheme.barsBg,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: _PickerWidget(
+                        filePickerIndex: _filePickerIndex,
+                        streamChatTheme: _streamChatTheme,
+                        containsFile: _attachmentContainsFile,
+                        selectedMedias: _attachments.keys.toList(),
+                        onAddMoreFilesClick: pickFile,
+                        onMediaSelected: (media) {
+                          if (_attachments.containsKey(media.id)) {
+                            setState(() => _attachments.remove(media.id));
+                          } else {
+                            _addAssetAttachment(media);
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            if (_openFilePickerSection)
-              Expanded(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: _streamChatTheme.colorTheme.barsBg,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: _PickerWidget(
-                    filePickerIndex: _filePickerIndex,
-                    streamChatTheme: _streamChatTheme,
-                    containsFile: _attachmentContainsFile,
-                    selectedMedias: _attachments.keys.toList(),
-                    onAddMoreFilesClick: pickFile,
-                    onMediaSelected: (media) {
-                      if (_attachments.containsKey(media.id)) {
-                        setState(() => _attachments.remove(media.id));
-                      } else {
-                        _addAssetAttachment(media);
-                      }
-                    },
-                  ),
-                ),
-              ),
-          ],
+          ),
         ),
       ),
     );
