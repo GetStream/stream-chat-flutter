@@ -253,22 +253,7 @@ class GiphyAttachment extends AttachmentWidget {
   Widget _buildSentAttachment(BuildContext context, String imageUrl) =>
       SizedBox(
         child: GestureDetector(
-          onTap: () async {
-            final res =
-                await Navigator.push(context, MaterialPageRoute(builder: (_) {
-              final channel = StreamChannel.of(context).channel;
-              return StreamChannel(
-                channel: channel,
-                child: FullScreenMedia(
-                  mediaAttachments: [attachment],
-                  userName: message.user?.name,
-                  message: message,
-                  onShowMessage: onShowMessage,
-                ),
-              );
-            }));
-            if (res != null) onReturnAction!(res);
-          },
+          onTap: () => onAttachmentTap ?? _onImageTap(context),
           child: Stack(
             children: [
               CachedNetworkImage(
