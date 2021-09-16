@@ -15,6 +15,7 @@ class ImageGroup extends StatelessWidget {
     required this.size,
     this.onReturnAction,
     this.onShowMessage,
+    this.onAttachmentTap,
   }) : super(key: key);
 
   /// List of attachments to show
@@ -22,6 +23,9 @@ class ImageGroup extends StatelessWidget {
 
   /// Callback when attachment is returned to from other screens
   final ValueChanged<ReturnActionType>? onReturnAction;
+
+  /// Callback when attachment is tapped
+  final void Function(Message message, Attachment attachment)? onAttachmentTap;
 
   /// Message which images are attached to
   final Message message;
@@ -117,6 +121,10 @@ class ImageGroup extends StatelessWidget {
     BuildContext context,
     int index,
   ) async {
+    if (onAttachmentTap != null) {
+      return onAttachmentTap!(message, images[index]);
+    }
+
     final channel = StreamChannel.of(context).channel;
 
     final res = await Navigator.push(

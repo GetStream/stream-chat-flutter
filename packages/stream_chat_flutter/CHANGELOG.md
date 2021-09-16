@@ -37,6 +37,7 @@
 🐞 Fixed
 
 - Fixed `MessageSearchListView` pagination.
+- Fixed `MessageWidget` attachment tap callbacks.
 
 ## 2.2.1
 

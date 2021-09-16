@@ -96,7 +96,7 @@ class MessageWidget extends StatefulWidget {
     this.bottomRowBuilder,
     this.deletedBottomRowBuilder,
     this.onReturnAction,
-    Map<String, AttachmentBuilder>? customAttachmentBuilders,
+    this.customAttachmentBuilders,
     this.readList,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
@@ -133,6 +133,7 @@ class MessageWidget extends StatefulWidget {
                       messageTheme: messageTheme,
                       onShowMessage: onShowMessage,
                       onReturnAction: onReturnAction,
+                      onAttachmentTap: onAttachmentTap,
                     ),
                   ),
                   border,
@@ -214,6 +215,11 @@ class MessageWidget extends StatefulWidget {
                     ),
                     onShowMessage: onShowMessage,
                     onReturnAction: onReturnAction,
+                    onAttachmentTap: onAttachmentTap != null
+                        ? () {
+                            onAttachmentTap(message, attachment);
+                          }
+                        : null,
                   );
                 }).toList(),
               ),
@@ -243,6 +249,11 @@ class MessageWidget extends StatefulWidget {
                           mediaQueryData.size.width * 0.8,
                           mediaQueryData.size.height * 0.3,
                         ),
+                        onAttachmentTap: onAttachmentTap != null
+                            ? () {
+                                onAttachmentTap(message, attachment);
+                              }
+                            : null,
                       ),
                       border,
                       reverse,
@@ -395,6 +406,9 @@ class MessageWidget extends StatefulWidget {
   /// Builder for respective attachment types
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
+  /// Builder for respective attachment types (user facing builder)
+  final Map<String, AttachmentBuilder>? customAttachmentBuilders;
+
   /// Center user avatar with bottom of the message
   final bool translateUserAvatar;
 
@@ -519,7 +533,7 @@ class MessageWidget extends StatefulWidget {
         showPinButton: showPinButton ?? this.showPinButton,
         showPinHighlight: showPinHighlight ?? this.showPinHighlight,
         customAttachmentBuilders:
-            customAttachmentBuilders ?? attachmentBuilders,
+            customAttachmentBuilders ?? this.customAttachmentBuilders,
         translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
         onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
         onMessageTap: onMessageTap ?? this.onMessageTap,
