@@ -566,12 +566,11 @@ class _MessageWidgetState extends State<MessageWidget>
 
   bool get isOnlyEmoji => widget.message.text?.isOnlyEmoji == true;
 
-  bool get hasNonUrlAttachments => widget.message.attachments
-      .where((it) => it.ogScrapeUrl == null)
-      .isNotEmpty;
+  bool get hasNonUrlAttachments =>
+      widget.message.attachments.where((it) => it.titleLink == null).isNotEmpty;
 
   bool get hasUrlAttachments =>
-      widget.message.attachments.any((it) => it.ogScrapeUrl != null) == true;
+      widget.message.attachments.any((it) => it.titleLink != null) == true;
 
   bool get showBottomRow =>
       showThreadReplyIndicator ||
@@ -975,9 +974,9 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget _buildUrlAttachment() {
     final urlAttachment = widget.message.attachments
-        .firstWhere((element) => element.ogScrapeUrl != null);
+        .firstWhere((element) => element.titleLink != null);
 
-    final host = Uri.parse(urlAttachment.ogScrapeUrl!).host;
+    final host = Uri.parse(urlAttachment.titleLink!).host;
     final splitList = host.split('.');
     final hostName = splitList.length == 3 ? splitList[1] : splitList[0];
     final hostDisplayName = urlAttachment.authorName?.capitalize() ??
@@ -1143,7 +1142,7 @@ class _MessageWidgetState extends State<MessageWidget>
     final attachmentGroups = <String, List<Attachment>>{};
 
     widget.message.attachments
-        .where((element) => element.ogScrapeUrl == null && element.type != null)
+        .where((element) => element.titleLink == null && element.type != null)
         .forEach((e) {
       if (attachmentGroups[e.type] == null) {
         attachmentGroups[e.type!] = [];

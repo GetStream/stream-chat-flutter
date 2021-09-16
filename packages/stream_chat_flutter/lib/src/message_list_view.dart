@@ -991,7 +991,7 @@ class _MessageListViewState extends State<MessageListView> {
     final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
 
     final hasUrlAttachment =
-        message.attachments.any((it) => it.ogScrapeUrl != null) == true;
+        message.attachments.any((it) => it.titleLink != null) == true;
 
     final borderSide =
         isOnlyEmoji || hasUrlAttachment || (isMyMessage && !hasFileAttachment)

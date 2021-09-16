@@ -19,42 +19,36 @@ class AttachmentTitle extends StatelessWidget {
   final Attachment attachment;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: () {
-          if (attachment.titleLink != null) {
-            launchURL(context, attachment.titleLink);
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              if (attachment.title != null)
-                Text(
-                  attachment.title!,
-                  overflow: TextOverflow.ellipsis,
-                  style: messageTheme.messageTextStyle?.copyWith(
-                    color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
+  Widget build(BuildContext context) {
+    final normalizedTitleLink = attachment.titleLink?.replaceFirst(
+      RegExp(r'https?://(www\.)?'),
+      '',
+    );
+    return GestureDetector(
+      onTap: () {
+        final titleLink = attachment.titleLink;
+        if (titleLink != null) launchURL(context, titleLink);
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            if (attachment.title != null)
+              Text(
+                attachment.title!,
+                overflow: TextOverflow.ellipsis,
+                style: messageTheme.messageTextStyle?.copyWith(
+                  color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+                  fontWeight: FontWeight.bold,
                 ),
-              if (attachment.titleLink != null ||
-                  attachment.ogScrapeUrl != null)
-                Text(
-                  Uri.parse(attachment.titleLink ?? attachment.ogScrapeUrl!)
-                      .authority
-                      .split('.')
-                      .reversed
-                      .take(2)
-                      .toList()
-                      .reversed
-                      .join('.'),
-                  style: messageTheme.messageTextStyle,
-                ),
-            ],
-          ),
+              ),
+            if (normalizedTitleLink != null)
+              Text(normalizedTitleLink, style: messageTheme.messageTextStyle),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }
