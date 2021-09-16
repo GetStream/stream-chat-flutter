@@ -48,7 +48,7 @@ class UserListView extends StatefulWidget {
   /// Instantiate a new UserListView
   const UserListView({
     Key? key,
-    this.filter,
+    this.filter = const Filter.empty(),
     this.sort,
     this.presence,
     this.pagination = const PaginationParams(limit: 30),
@@ -76,6 +76,7 @@ class UserListView extends StatefulWidget {
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
+  // TODO: Make it non-nullable in a future breaking release
   final Filter? filter;
 
   /// The sorting used for the channels matching the filters.

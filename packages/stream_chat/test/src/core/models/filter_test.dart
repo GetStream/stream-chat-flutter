@@ -139,7 +139,7 @@ void main() {
     });
 
     test('empty', () {
-      final filter = Filter.empty();
+      const filter = Filter.empty();
       expect(filter.value, {});
     });
 
@@ -225,6 +225,12 @@ void main() {
           encoded,
           json.encode(value),
         );
+      });
+
+      test('empty', () {
+        const filter = Filter.empty();
+        final encoded = json.encode(filter);
+        expect(encoded, '{}');
       });
     });
 
