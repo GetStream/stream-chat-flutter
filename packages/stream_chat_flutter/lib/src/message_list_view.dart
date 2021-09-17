@@ -1199,7 +1199,7 @@ class _MessageListViewState extends State<MessageListView> {
       initialAlignment = _initialAlignment;
 
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        if (_scrollController?.isAttached ?? false) {
+        if (_scrollController?.isAttached == true) {
           _scrollController?.jumpTo(
             index: initialIndex,
             alignment: initialAlignment,
