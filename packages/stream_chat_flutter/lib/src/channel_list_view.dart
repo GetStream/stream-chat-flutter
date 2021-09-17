@@ -59,7 +59,7 @@ typedef ViewInfoCallback = void Function(Channel);
 /// Modify it to change the widget appearance.
 class ChannelListView extends StatefulWidget {
   /// Instantiate a new ChannelListView
-  const ChannelListView({
+  ChannelListView({
     Key? key,
     this.filter,
     this.sort,
@@ -68,9 +68,12 @@ class ChannelListView extends StatefulWidget {
     this.presence = false,
     this.memberLimit,
     this.messageLimit,
-    this.pagination = const PaginationParams(
-      limit: 25,
-    ),
+    @Deprecated(
+      "'pagination' is deprecated and shouldn't be used. "
+      "This property is no longer used, Please use 'limit' instead",
+    )
+        this.pagination,
+    int? limit,
     this.onChannelTap,
     this.onChannelLongPress,
     this.channelWidget,
@@ -92,7 +95,8 @@ class ChannelListView extends StatefulWidget {
     this.onDeletePressed,
     this.swipeActions,
     this.channelListController,
-  }) : super(key: key);
+  })  : limit = limit ?? pagination?.limit ?? 25,
+        super(key: key);
 
   /// If true a default swipe to action behaviour will be added to this widget
   final bool swipeToAction;
@@ -129,7 +133,14 @@ class ChannelListView extends StatefulWidget {
   /// limit: the number of channels to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams pagination;
+  @Deprecated(
+    "'pagination' is deprecated and shouldn't be used. "
+    "This property is no longer used, Please use 'limit' instead",
+  )
+  final PaginationParams? pagination;
+
+  /// The amount of channels requested per API call.
+  final int limit;
 
   /// Function called when tapping on a channel
   /// By default it calls [Navigator.push] building a [MaterialPageRoute]
@@ -218,7 +229,7 @@ class _ChannelListViewState extends State<ChannelListView> {
       presence: widget.presence,
       memberLimit: widget.memberLimit,
       messageLimit: widget.messageLimit,
-      pagination: widget.pagination,
+      limit: widget.limit,
       channelListController: _channelListController,
       listBuilder: widget.listBuilder ?? _buildListView,
       emptyBuilder: widget.emptyBuilder ?? _buildEmptyWidget,

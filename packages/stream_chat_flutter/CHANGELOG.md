@@ -1,19 +1,55 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#668]](https://github.com/GetStream/stream-chat-flutter/issues/668): Fix `MessageInput` rendering errors in case
+  there are no actions available to show.
+- [[#349]](https://github.com/GetStream/stream-chat-flutter/issues/349): Fix `MessageInput` attachment render overflow error.
+
+🔄 Changed
+
+- Animation curves changed from default `Curves.linear` to `Curves.easeOut` and `Curves.easeIn` for attachment controls.
+
 ## 2.2.1
 
-🛑️ Breaking Changes from `2.2.1`
+⚠️ Deprecated
 
-- `MessageSearchListView` paginationParams property is now non-nullable with a default value.
+- `MessageSearchListView` `paginationParams` property is now deprecated in favor of `limit`.
     ```dart
+    // previous
     paginationParams = const PaginationParams(limit: 30)
+    
+    // new
+    limit = 30
     ```
-- `UserListView` pagination property is now non-nullable with a default value.
+- `UserListView` `pagination` property is now deprecated in favor of `limit`.
     ```dart
+    // previous
     pagination = const PaginationParams(limit: 30)
+    
+    // new
+    limit = 30
+    ```
+- `ChannelListView` `pagination` property is now deprecated in favor of `limit`.
+    ```dart
+    // previous
+    pagination = const PaginationParams(limit: 30)
+    
+    // new
+    limit = 30
+    ```
+
+🔄 Changed
+
+- `UserListViewCore` filter property now has a default value.
+    ```dart
+    filter = const Filter.empty()
     ```
 
 🐞 Fixed
 
 - Fixed `MessageSearchListView` pagination.
+- Fixed `MessageWidget` attachment tap callbacks.
 
 ## 2.2.1
 

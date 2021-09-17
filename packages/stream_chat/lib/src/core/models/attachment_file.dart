@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart' show MultipartFile;
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/core/util/extension.dart';
@@ -65,7 +66,7 @@ class AttachmentFile {
   AttachmentFile({
     required this.size,
     this.path,
-    this.name,
+    String? name,
     this.bytes,
   })  : assert(
           path != null || bytes != null,
@@ -74,7 +75,12 @@ class AttachmentFile {
         assert(
           !CurrentPlatform.isWeb || bytes != null,
           'File by path is not supported in web, Please provide bytes',
-        );
+        ),
+        assert(
+          name?.contains('.') ?? true,
+          'Invalid file name, should also contain file extension',
+        ),
+        _name = name;
 
   /// Create a new instance from a json
   factory AttachmentFile.fromJson(Map<String, dynamic> json) =>
@@ -87,8 +93,10 @@ class AttachmentFile {
   /// ```
   final String? path;
 
+  final String? _name;
+
   /// File name including its extension.
-  final String? name;
+  String? get name => _name ?? path?.split('/').last;
 
   /// Byte data for this file. Particularly useful if you want to manipulate
   /// its data or easily upload to somewhere else.
@@ -101,26 +109,26 @@ class AttachmentFile {
   /// File extension for this file.
   String? get extension => name?.split('.').last;
 
+  /// The mime type of this file.
+  MediaType? get mimeType => name?.mimeType;
+
   /// Serialize to json
   Map<String, dynamic> toJson() => _$AttachmentFileToJson(this);
 
   /// Converts this into a [MultipartFile]
   Future<MultipartFile> toMultipartFile() async {
-    final filename = path?.split('/').last ?? name;
-    final mimeType = filename?.mimeType;
-
-    late MultipartFile multiPartFile;
+    MultipartFile multiPartFile;
 
     if (CurrentPlatform.isWeb) {
       multiPartFile = MultipartFile.fromBytes(
         bytes!,
-        filename: filename,
+        filename: name,
         contentType: mimeType,
       );
     } else {
       multiPartFile = await MultipartFile.fromFile(
         path!,
-        filename: filename,
+        filename: name,
         contentType: mimeType,
       );
     }

@@ -46,12 +46,17 @@ typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 /// Modify it to change the widget appearance.
 class UserListView extends StatefulWidget {
   /// Instantiate a new UserListView
-  const UserListView({
+  UserListView({
     Key? key,
-    this.filter,
+    this.filter = const Filter.empty(),
     this.sort,
     this.presence,
-    this.pagination = const PaginationParams(limit: 30),
+    @Deprecated(
+      "'pagination' is deprecated and shouldn't be used. "
+      "This property is no longer used, Please use 'limit' instead",
+    )
+        this.pagination,
+    int? limit,
     this.onUserTap,
     this.onUserLongPress,
     this.userWidget,
@@ -71,11 +76,13 @@ class UserListView extends StatefulWidget {
           crossAxisCount == 1 || groupAlphabetically == false,
           'Cannot group alphabetically when crossAxisCount > 1',
         ),
+        limit = limit ?? pagination?.limit ?? 30,
         super(key: key);
 
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
+  // TODO: Make it non-nullable in a future breaking release
   final Filter? filter;
 
   /// The sorting used for the channels matching the filters.
@@ -93,7 +100,14 @@ class UserListView extends StatefulWidget {
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams pagination;
+  @Deprecated(
+    "'pagination' is deprecated and shouldn't be used. "
+    "This property is no longer used, Please use 'limit' instead",
+  )
+  final PaginationParams? pagination;
+
+  /// The amount of users requested per API call.
+  final int limit;
 
   /// Function called when tapping on a channel
   /// By default it calls [Navigator.push] building a [MaterialPageRoute]
@@ -184,7 +198,7 @@ class _UserListViewState extends State<UserListView>
               ),
       listBuilder:
           widget.listBuilder ?? (context, list) => _buildListView(list),
-      pagination: widget.pagination,
+      limit: widget.limit,
       sort: widget.sort,
       filter: widget.filter,
       presence: widget.presence,

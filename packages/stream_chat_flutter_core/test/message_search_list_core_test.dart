@@ -6,8 +6,8 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
 
-const testFilter = Filter.custom(operator: '\$test', value: 'testValue');
-const testMessageFilter = Filter.custom(operator: '\$test', value: 'testValue');
+const testFilter = Filter.custom(key: 'test', value: 'testValue');
+const testMessageFilter = Filter.custom(key: 'test', value: 'testValue');
 
 void main() {
   List<GetMessageResponse> _generateMessages({
@@ -551,4 +551,19 @@ void main() {
           )).called(1);
     },
   );
+
+  test('`widget.limit` should match `widget.pagination.limit`', () {
+    const pagination = PaginationParams(limit: 30);
+    final messageSearchListCore = MessageSearchListCore(
+      childBuilder: (List<GetMessageResponse> messages) => const Offstage(),
+      loadingBuilder: (BuildContext context) => const Offstage(),
+      emptyBuilder: (BuildContext context) => const Offstage(),
+      errorBuilder: (BuildContext context, Object? error) => const Offstage(),
+      filters: testFilter,
+      messageFilters: testMessageFilter,
+      paginationParams: pagination,
+    );
+
+    expect(messageSearchListCore.limit, pagination.limit);
+  });
 }

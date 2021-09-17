@@ -258,7 +258,8 @@ class FileAttachment extends AttachmentWidget {
         visualDensity: VisualDensity.compact,
         splashRadius: 16,
         onPressed: () {
-          launchURL(context, attachment.assetUrl);
+          final assetUrl = attachment.assetUrl;
+          if (assetUrl != null) launchURL(context, assetUrl);
         },
       );
     }
