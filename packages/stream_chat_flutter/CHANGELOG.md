@@ -1,3 +1,15 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#668]](https://github.com/GetStream/stream-chat-flutter/issues/668): Fix `MessageInput` rendering errors in case
+  there are no actions available to show.
+- [[#349]](https://github.com/GetStream/stream-chat-flutter/issues/349): Fix `MessageInput` attachment render overflow error.
+
+🔄 Changed
+
+- Animation curves changed from default `Curves.linear` to `Curves.easeOut` and `Curves.easeIn` for attachment controls.
+
 ## 2.2.1
 
 ⚠️ Deprecated
