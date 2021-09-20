@@ -192,6 +192,7 @@ class MessageInput extends StatefulWidget {
     this.onAttachmentLimitExceed,
     this.attachmentButtonBuilder,
     this.commandButtonBuilder,
+    this.customOverlays = const [],
   })  : assert(
           initialMessage == null || editMessage == null,
           "Can't provide both `initialMessage` and `editMessage`",
@@ -221,6 +222,9 @@ class MessageInput extends StatefulWidget {
   /// Function called right before sending the message
   /// Use this to transform the message
   final FutureOr<Message> Function(Message)? preMessageSending;
+
+  /// List of custom overlays
+  final List<OverlayOption> customOverlays;
 
   /// Parent message in case of a thread
   final Message? parentMessage;
@@ -324,7 +328,6 @@ class MessageInputState extends State<MessageInput> {
   bool _inputEnabled = true;
   bool _commandEnabled = false;
   bool _showCommandsOverlay = false;
-  bool _showEmojiOverlay = false;
   bool _showMentionsOverlay = false;
 
   Command? _chosenCommand;

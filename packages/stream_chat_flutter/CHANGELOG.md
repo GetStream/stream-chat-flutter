@@ -5,10 +5,15 @@
 - [[#668]](https://github.com/GetStream/stream-chat-flutter/issues/668): Fix `MessageInput` rendering errors in case
   there are no actions available to show.
 - [[#349]](https://github.com/GetStream/stream-chat-flutter/issues/349): Fix `MessageInput` attachment render overflow error.
+- `MessageInput` overlays now follow the `MessageInput` focus.
 
 🔄 Changed
 
 - Animation curves changed from default `Curves.linear` to `Curves.easeOut` and `Curves.easeIn` for attachment controls.
+
+✅ Added
+
+- Added `MessageInput.customOverlays` property to add custom overlays to the `MessageInput`.
 
 ## 2.2.1
 
@@ -109,7 +114,6 @@ upgraded with some goodies like `lerp` functions. Here's the full naming breakdo
 - Fixed `MessageListView` not opening to the right initialMessage if `StreamChannel.initialMessageId` is set.
 - Fixed null check errors when accessing `message.text` in `MessageWidget` and `MessageListView`; this occurred when
   sending a message with no text.
-- MessageInput can now be placed in any position on the screen.
 
 ## 2.1.2
 
