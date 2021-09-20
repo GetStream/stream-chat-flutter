@@ -26,7 +26,8 @@ class AnchoredOverlay extends StatelessWidget {
     required this.child,
   }) : super(key: key);
 
-  /// Builder for creating overlay widget
+  /// List of overlay options
+  /// The first one which showOverlay is true will be used
   final List<OverlayOption> overlayOptions;
 
   /// Child to which overlay is anchored
