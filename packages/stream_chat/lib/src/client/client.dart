@@ -406,10 +406,6 @@ class StreamChatClient {
     if (event.type == EventType.healthCheck) {
       return _handleHealthCheckEvent(event);
     }
-    if (!event.isLocal && _synced) {
-      _lastSyncedAt = event.createdAt;
-      _chatPersistenceClient?.updateLastSyncAt(event.createdAt);
-    }
     state.updateUser(event.user);
     return _eventController.add(event);
   }
@@ -1325,6 +1321,7 @@ class StreamChatClient {
     // resetting state
     state.dispose();
     state = ClientState(this);
+    _lastSyncedAt = null;
 
     // resetting credentials
     _tokenManager.reset();
