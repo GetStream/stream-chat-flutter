@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -34,7 +36,7 @@ class AnchoredOverlay extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext otherContext) {
     final overlay =
         overlayOptions.firstWhereOrNull((option) => option.showOverlay);
     return SizedBox(
@@ -190,12 +192,19 @@ class CenterAbout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final halfHeight = size.height / 2;
+    final screenRatio = position.dy / size.height;
+    final midScreenRatio = screenRatio > 0.5
+        ? ((position.dy - halfHeight) / halfHeight)
+        : 1.0;
 
     return Positioned(
       bottom: size.height - position.dy,
       left: position.dx,
       child: FractionalTranslation(
-        translation: const Offset(-0.5, 0),
+        translation: Platform.isIOS
+            ? Offset(-0.5, screenRatio > 0.5 ? (midScreenRatio * -0.1) : 0.0)
+            : const Offset(0.5, 0),
         child: Padding(
           padding: const EdgeInsets.only(bottom: 32),
           child: child,
