@@ -36,7 +36,7 @@ class AnchoredOverlay extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext otherContext) {
+  Widget build(BuildContext context) {
     final overlay =
         overlayOptions.firstWhereOrNull((option) => option.showOverlay);
     return SizedBox(
