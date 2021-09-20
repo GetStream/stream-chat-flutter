@@ -49,7 +49,7 @@ class MentionsOverlay extends StatelessWidget {
       return const SizedBox();
     }
 
-    final child = Card(
+    return Card(
       margin: const EdgeInsets.all(8),
       elevation: 2,
       color: _streamChatTheme.colorTheme.barsBg,
@@ -96,15 +96,6 @@ class MentionsOverlay extends StatelessWidget {
         ),
       ),
     );
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOutExpo,
-      builder: (context, val, child) => Transform.scale(
-        scale: val,
-        child: child,
-      ),
-      child: child,
-    );
+    ;
   }
 }

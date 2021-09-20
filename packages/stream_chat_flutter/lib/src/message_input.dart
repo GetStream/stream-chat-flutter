@@ -6,18 +6,17 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/src/commands_overlay.dart';
-import 'package:stream_chat_flutter/src/emoji_overlay.dart';
-import 'package:stream_chat_flutter/src/mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/anchored_overlay.dart';
+import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
+import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
+import 'package:stream_chat_flutter/src/mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
@@ -334,8 +333,6 @@ class MessageInputState extends State<MessageInput> {
   bool _openFilePickerSection = false;
   int _filePickerIndex = 0;
 
-  final _keyboardVisibilityController = KeyboardVisibilityController();
-
   /// The editing controller passed to the input TextField
   late final TextEditingController textEditingController;
 
@@ -350,15 +347,6 @@ class MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
     _focusNode = widget.focusNode ?? FocusNode();
-
-    if (!kIsWeb) {
-      _keyboardListener =
-          _keyboardVisibilityController.onChange.listen((visible) {
-        if (_focusNode.hasFocus) {
-          _onChanged(context, textEditingController.text);
-        }
-      });
-    }
 
     textEditingController =
         widget.textEditingController ?? TextEditingController();
@@ -474,20 +462,26 @@ class MessageInputState extends State<MessageInput> {
         child: child,
       );
     }
+
     return AnchoredOverlay(
-      showOverlay: _showMentionsOverlay,
-      overlayBuilder: (context, offset) => CenterAbout(
-        position: Offset(offset.dx, offset.dy),
-        child: _buildMentionsOverlayEntry(),
-      ),
-      child: AnchoredOverlay(
-        showOverlay: _showCommandsOverlay,
-        overlayBuilder: (context, offset) => CenterAbout(
-          position: Offset(offset.dx, offset.dy),
-          child: _buildCommandsOverlayEntry(),
+      overlayOptions: [
+        OverlayOption(
+          overlayBuilder: (context, offset) => CenterAbout(
+            position: Offset(offset.dx, offset.dy),
+            child: _buildMentionsOverlayEntry(),
+          ),
+          showOverlay: _showMentionsOverlay,
         ),
-        child: AnchoredOverlay(
-          showOverlay: textEditingController.text.isNotEmpty &&
+        OverlayOption(
+          showOverlay: _showCommandsOverlay,
+          overlayBuilder: (context, offset) => CenterAbout(
+            position: Offset(offset.dx, offset.dy),
+            child: _buildCommandsOverlayEntry(),
+          ),
+        ),
+        OverlayOption(
+          showOverlay: _focusNode.hasFocus &&
+              textEditingController.text.isNotEmpty &&
               textEditingController.selection.baseOffset > 0 &&
               textEditingController.text
                   .substring(
@@ -499,9 +493,9 @@ class MessageInputState extends State<MessageInput> {
             position: Offset(offset.dx, offset.dy),
             child: _buildEmojiOverlay(),
           ),
-          child: child,
         ),
-      ),
+      ],
+      child: child,
     );
   }
 
@@ -817,7 +811,10 @@ class MessageInputState extends State<MessageInput> {
 
   String? _previousValue;
 
-  void _onChanged(BuildContext context, String s) {
+  void _onChanged(
+    BuildContext context,
+    String s,
+  ) {
     if (s == _previousValue) {
       return;
     }
@@ -830,10 +827,13 @@ class MessageInputState extends State<MessageInput> {
         if (!mounted) {
           return;
         }
-        StreamChannel.of(context)
-            .channel
-            .keyStroke(widget.parentMessage?.id)
-            .catchError((e) {});
+
+        if (s.isNotEmpty) {
+          StreamChannel.of(context)
+              .channel
+              .keyStroke(widget.parentMessage?.id)
+              .catchError((e) {});
+        }
 
         _checkCommands(s.trim(), context);
 
@@ -999,7 +999,9 @@ class MessageInputState extends State<MessageInput> {
     }
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
+      duration: _openFilePickerSection
+          ? const Duration(milliseconds: 300)
+          : const Duration(),
       curve: Curves.easeOut,
       height: _openFilePickerSection ? _kMinMediaPickerSize : 0,
       child: SingleChildScrollView(
@@ -1215,8 +1217,12 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildEmojiOverlay() {
+    if (textEditingController.value.selection.baseOffset < 0) {
+      return const Offstage();
+    }
+
     final splits = textEditingController.text
-        .substring(0, textEditingController.value.selection.start)
+        .substring(0, textEditingController.value.selection.baseOffset)
         .split(':');
 
     final query = splits.last.toLowerCase();
@@ -1837,8 +1843,6 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  StreamSubscription? _keyboardListener;
-
   void _showErrorAlert(String description) {
     showModalBottomSheet(
       backgroundColor: _streamChatTheme.colorTheme.barsBg,
@@ -1912,7 +1916,6 @@ class MessageInputState extends State<MessageInput> {
 
   @override
   void dispose() {
-    _keyboardListener?.cancel();
     textEditingController.dispose();
     _stopSlowMode();
     super.dispose();

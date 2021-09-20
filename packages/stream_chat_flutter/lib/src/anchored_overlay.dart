@@ -1,43 +1,62 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
-/// Class to create an overlay anchored to a child widget
-class AnchoredOverlay extends StatelessWidget {
-  /// Constructor for creating an [AnchoredOverlay]
-  const AnchoredOverlay({
-    Key? key,
-    this.showOverlay = false,
+/// Options for building an [Overlay]
+class OverlayOption {
+  /// Constructor for creating an [OverlayOption].
+  OverlayOption({
+    required this.showOverlay,
     required this.overlayBuilder,
-    required this.child,
-  }) : super(key: key);
+  });
 
   /// Show or hide overlay
   final bool showOverlay;
 
   /// Builder for creating overlay widget
   final Widget Function(BuildContext, Offset anchor) overlayBuilder;
+}
+
+/// Class to create an overlay anchored to a child widget
+class AnchoredOverlay extends StatelessWidget {
+  /// Constructor for creating an [AnchoredOverlay]
+  const AnchoredOverlay({
+    Key? key,
+    required this.overlayOptions,
+    required this.child,
+  }) : super(key: key);
+
+  /// Builder for creating overlay widget
+  final List<OverlayOption> overlayOptions;
 
   /// Child to which overlay is anchored
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        child: LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) =>
-                OverlayBuilder(
-                  showOverlay: showOverlay,
-                  overlayBuilder: (BuildContext overlayContext) {
-                    final box = context.findRenderObject() as RenderBox?;
-                    if (box != null) {
-                      final center = box.size
-                          .center(box.localToGlobal(const Offset(0, 0)));
-                      return overlayBuilder(overlayContext, center);
-                    } else {
-                      return const SizedBox();
-                    }
-                  },
-                  child: child,
-                )),
-      );
+  Widget build(BuildContext context) {
+    final overlay =
+        overlayOptions.firstWhereOrNull((option) => option.showOverlay);
+    return SizedBox(
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) =>
+            OverlayBuilder(
+          showOverlay: overlay != null,
+          overlayBuilder: (BuildContext overlayContext) {
+            final box = context.findRenderObject() as RenderBox?;
+            if (box != null) {
+              final center =
+                  box.size.center(box.localToGlobal(const Offset(0, 0)));
+              return overlay?.overlayBuilder(overlayContext, center) ??
+                  const Offstage();
+            } else {
+              return const Offstage();
+            }
+          },
+          child: child,
+        ),
+      ),
+    );
+  }
 }
 
 /// Class for creating a declarative-ish overlay
@@ -63,16 +82,29 @@ class OverlayBuilder extends StatefulWidget {
   _OverlayBuilderState createState() => _OverlayBuilderState();
 }
 
-class _OverlayBuilderState extends State<OverlayBuilder> {
+class _OverlayBuilderState extends State<OverlayBuilder>
+    with WidgetsBindingObserver {
   OverlayEntry? overlayEntry;
 
   @override
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance!.addObserver(this);
+
     if (widget.showOverlay) {
       WidgetsBinding.instance?.addPostFrameCallback((_) => showOverlay());
     }
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      hideOverlay();
+      syncWidgetAndOverlay();
+    });
   }
 
   @override
@@ -91,6 +123,7 @@ class _OverlayBuilderState extends State<OverlayBuilder> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance!.removeObserver(this);
     if (isShowingOverlay()) {
       hideOverlay();
     }

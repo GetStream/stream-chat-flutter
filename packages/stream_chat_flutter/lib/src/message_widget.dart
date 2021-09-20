@@ -580,11 +580,12 @@ class _MessageWidgetState extends State<MessageWidget>
 
   bool get isOnlyEmoji => widget.message.text?.isOnlyEmoji == true;
 
-  bool get hasNonUrlAttachments =>
-      widget.message.attachments.where((it) => it.titleLink == null).isNotEmpty;
+  bool get hasNonUrlAttachments => widget.message.attachments
+      .where((it) => it.titleLink == null || it.type == 'giphy')
+      .isNotEmpty;
 
-  bool get hasUrlAttachments =>
-      widget.message.attachments.any((it) => it.titleLink != null) == true;
+  bool get hasUrlAttachments => widget.message.attachments
+      .any((it) => it.titleLink != null && it.type != 'giphy');
 
   bool get showBottomRow =>
       showThreadReplyIndicator ||
@@ -603,6 +604,9 @@ class _MessageWidgetState extends State<MessageWidget>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    if (widget.message.isEphemeral) {
+      print('EPHEMERAL');
+    }
     final avatarWidth =
         widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
     final bottomRowPadding =
@@ -1153,10 +1157,15 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Widget _parseAttachments() {
+    if (widget.message.isEphemeral) {
+      print('EPHEMERAL');
+    }
     final attachmentGroups = <String, List<Attachment>>{};
 
     widget.message.attachments
-        .where((element) => element.titleLink == null && element.type != null)
+        .where((element) =>
+            (element.titleLink == null && element.type != null) ||
+            element.type == 'giphy')
         .forEach((e) {
       if (attachmentGroups[e.type] == null) {
         attachmentGroups[e.type!] = [];

@@ -1081,10 +1081,10 @@ class Channel {
       // remove regular message if present
       if (oldIndex != -1) {
         final oldMessage = state!.messages[oldIndex];
-        state!.updateChannelState(state!._channelState.copyWith(
-          messages: state?.messages?..remove(oldMessage),
+        state!._channelState = state!._channelState.copyWith(
+          messages: [...(state!.messages..remove(oldMessage))],
           channel: state?._channelState.channel,
-        ));
+        );
       } else {
         // remove thread message if present
         // also reduces total reply count
@@ -1773,9 +1773,8 @@ class ChannelClientState {
   List<Message> get messages => _channelState.messages;
 
   /// Channel message list as a stream.
-  Stream<List<Message>> get messagesStream => channelStateStream
-      .map((cs) => cs.messages)
-      .distinct(const ListEquality().equals);
+  Stream<List<Message>> get messagesStream =>
+      channelStateStream.map((cs) => cs.messages);
 
   /// Channel pinned message list.
   List<Message> get pinnedMessages => _channelState.pinnedMessages.toList();
