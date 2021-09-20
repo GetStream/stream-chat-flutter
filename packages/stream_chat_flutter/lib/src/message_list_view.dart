@@ -494,18 +494,14 @@ class _MessageListViewState extends State<MessageListView> {
                       return _buildThreadSeparator();
                     }
                     if (i == itemCount - 3) {
-                      if (widget.reverse
-                          ? widget.headerBuilder == null
-                          : widget.footerBuilder == null) {
+                      if (widget.headerBuilder == null) {
                         if (_isThreadConversation) return const Offstage();
                         return const SizedBox(height: 52);
                       }
                       return const SizedBox(height: 8);
                     }
                     if (i == 0) {
-                      if (widget.reverse
-                          ? widget.footerBuilder == null
-                          : widget.headerBuilder == null) {
+                      if (widget.footerBuilder == null) {
                         return const SizedBox(height: 30);
                       }
                       return const SizedBox(height: 8);
@@ -564,13 +560,8 @@ class _MessageListViewState extends State<MessageListView> {
                     }
 
                     if (i == itemCount - 2) {
-                      if (widget.reverse) {
-                        return widget.headerBuilder?.call(context) ??
-                            const Offstage();
-                      } else {
-                        return widget.footerBuilder?.call(context) ??
-                            const Offstage();
-                      }
+                      return widget.headerBuilder?.call(context) ??
+                          const Offstage();
                     }
 
                     if (i == itemCount - 3) {
@@ -588,13 +579,8 @@ class _MessageListViewState extends State<MessageListView> {
                     }
 
                     if (i == 0) {
-                      if (widget.reverse) {
-                        return widget.footerBuilder?.call(context) ??
-                            const Offstage();
-                      } else {
-                        return widget.headerBuilder?.call(context) ??
-                            const Offstage();
-                      }
+                      return widget.footerBuilder?.call(context) ??
+                          const Offstage();
                     }
 
                     const bottomMessageIndex = 2; // 1 -> loader // 0 -> footer
@@ -1213,10 +1199,12 @@ class _MessageListViewState extends State<MessageListView> {
       initialAlignment = _initialAlignment;
 
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        _scrollController?.jumpTo(
-          index: initialIndex,
-          alignment: initialAlignment,
-        );
+        if (_scrollController?.isAttached == true) {
+          _scrollController?.jumpTo(
+            index: initialIndex,
+            alignment: initialAlignment,
+          );
+        }
       });
 
       _messageNewListener =
