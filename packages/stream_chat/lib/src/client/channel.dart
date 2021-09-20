@@ -1082,7 +1082,7 @@ class Channel {
       if (oldIndex != -1) {
         final oldMessage = state!.messages[oldIndex];
         state!._channelState = state!._channelState.copyWith(
-          messages: [...(state!.messages..remove(oldMessage))],
+          messages: state!.messages..remove(oldMessage),
           channel: state?._channelState.channel,
         );
       } else {
