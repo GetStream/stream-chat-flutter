@@ -6,6 +6,7 @@
   there are no actions available to show.
 - [[#349]](https://github.com/GetStream/stream-chat-flutter/issues/349): Fix `MessageInput` attachment render overflow error.
 - `MessageInput` overlays now follow the `MessageInput` focus.
+- [[#674]](https://github.com/GetStream/stream-chat-flutter/issues/674): Check scrollController is attached before calling jump in MessageListView.
 
 🔄 Changed
 
