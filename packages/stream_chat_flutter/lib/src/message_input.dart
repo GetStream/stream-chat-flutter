@@ -470,7 +470,7 @@ class MessageInputState extends State<MessageInput> {
       overlayOptions: [
         OverlayOption(
           overlayBuilder: (context, offset) => CenterAbout(
-            position: Offset(offset.dx, offset.dy),
+            position: offset,
             child: _buildMentionsOverlayEntry(),
           ),
           showOverlay: _showMentionsOverlay,
@@ -478,7 +478,7 @@ class MessageInputState extends State<MessageInput> {
         OverlayOption(
           showOverlay: _showCommandsOverlay,
           overlayBuilder: (context, offset) => CenterAbout(
-            position: Offset(offset.dx, offset.dy),
+            position: offset,
             child: _buildCommandsOverlayEntry(),
           ),
         ),
@@ -493,10 +493,11 @@ class MessageInputState extends State<MessageInput> {
                   )
                   .contains(':'),
           overlayBuilder: (context, offset) => CenterAbout(
-            position: Offset(offset.dx, offset.dy),
+            position: offset,
             child: _buildEmojiOverlay(),
           ),
         ),
+        ...widget.customOverlays,
       ],
       child: child,
     );

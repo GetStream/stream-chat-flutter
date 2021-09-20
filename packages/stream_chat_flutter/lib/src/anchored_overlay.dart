@@ -98,14 +98,22 @@ class _OverlayBuilderState extends State<OverlayBuilder>
     }
   }
 
+  EdgeInsets? _previousInsets;
+
   @override
   void didChangeMetrics() {
     super.didChangeMetrics();
 
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
-      hideOverlay();
-      syncWidgetAndOverlay();
-    });
+    final newInsets = MediaQuery.of(context).viewPadding;
+
+    if (newInsets.bottom != _previousInsets?.bottom) {
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        hideOverlay();
+        syncWidgetAndOverlay();
+      });
+
+      _previousInsets = newInsets;
+    }
   }
 
   @override
