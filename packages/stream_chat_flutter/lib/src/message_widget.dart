@@ -604,9 +604,6 @@ class _MessageWidgetState extends State<MessageWidget>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (widget.message.isEphemeral) {
-      print('EPHEMERAL');
-    }
     final avatarWidth =
         widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
     final bottomRowPadding =
@@ -1157,9 +1154,6 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Widget _parseAttachments() {
-    if (widget.message.isEphemeral) {
-      print('EPHEMERAL');
-    }
     final attachmentGroups = <String, List<Attachment>>{};
 
     widget.message.attachments

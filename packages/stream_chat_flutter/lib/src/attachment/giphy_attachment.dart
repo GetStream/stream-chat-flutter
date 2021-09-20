@@ -48,7 +48,6 @@ class GiphyAttachment extends AttachmentWidget {
   }
 
   Widget _buildSendingAttachment(BuildContext context, String imageUrl) {
-    print('sending attachment GIPHY $imageUrl');
     final streamChannel = StreamChannel.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
