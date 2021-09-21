@@ -10,7 +10,7 @@ import 'package:stream_chat_flutter_core/src/stream_chat_core.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-typedef EventListModificationCallback = List<Channel> Function(
+typedef EventListModificationCallback = List<Channel>? Function(
     List<Channel>?, Event event);
 
 /// [ChannelListCore] is a simplified class that allows fetching a list of
@@ -80,7 +80,7 @@ class ChannelListCore extends StatefulWidget {
         this.pagination,
     this.channelListController,
     int? limit,
-    this.onEventReceived,
+    this.customEventMap = const {},
   })  : limit = limit ?? pagination?.limit ?? 25,
         super(key: key);
 
@@ -142,7 +142,7 @@ class ChannelListCore extends StatefulWidget {
   /// The amount of channels requested per API call.
   final int limit;
 
-  final EventListModificationCallback? onEventReceived;
+  final Map<String, EventListModificationCallback> customEventMap;
 
   @override
   ChannelListCoreState createState() => ChannelListCoreState();
@@ -198,14 +198,15 @@ class ChannelListCoreState extends State<ChannelListCore> {
         ),
       );
 
-  StreamSubscription<Event>? _basicSubscription;
-  StreamSubscription<Event>? _modificationWithDefaultsSubscriptions;
-  StreamSubscription<Event>? _customModificationSubscriptions;
+  StreamSubscription<Event>? _subscription;
+
+  late Map<String, EventListModificationCallback> eventMap;
 
   @override
   void initState() {
     super.initState();
     _setupController();
+    _setupEventMap();
   }
 
   @override
@@ -218,45 +219,15 @@ class ChannelListCoreState extends State<ChannelListCore> {
       loadData();
       final client = _streamChatCoreState!.client;
 
-      _basicSubscription?.cancel();
-      _modificationWithDefaultsSubscriptions?.cancel();
-      _customModificationSubscriptions?.cancel();
+      _subscription?.cancel();
+      _subscription =
+          client.on().where((e) => eventMap.containsKey(e.type)).listen((e) {
+        final list = eventMap[e.type]?.call(_channelsBloc.channels, e);
 
-      _basicSubscription = client
-          .on(
-            EventType.connectionRecovered,
-          )
-          .listen((event) => loadData());
-
-      _modificationWithDefaultsSubscriptions = client
-          .on(
-        EventType.notificationAddedToChannel,
-        EventType.notificationMessageNew,
-        EventType.channelVisible,
-      )
-          .listen((event) {
-        if (widget.onEventReceived != null) {
-          var list = widget.onEventReceived!(_channelsBloc.channels, event);
+        if (list != null) {
           _channelsBloc.channelsController.add(list);
-        } else {
-          loadData();
         }
       });
-
-      if (widget.onEventReceived != null) {
-        _customModificationSubscriptions = client
-            .on(
-          EventType.channelDeleted,
-          EventType.channelHidden,
-          EventType.channelTruncated,
-          EventType.channelUpdated,
-          EventType.notificationRemovedFromChannel,
-        )
-            .listen((event) {
-          final list = widget.onEventReceived!(_channelsBloc.channels, event);
-          _channelsBloc.channelsController.add(list);
-        });
-      }
     }
 
     super.didChangeDependencies();
@@ -280,6 +251,10 @@ class ChannelListCoreState extends State<ChannelListCore> {
     if (widget.channelListController != oldWidget.channelListController) {
       _setupController();
     }
+
+    if (widget.customEventMap != oldWidget.customEventMap) {
+      _setupEventMap();
+    }
   }
 
   void _setupController() {
@@ -289,11 +264,27 @@ class ChannelListCoreState extends State<ChannelListCore> {
     }
   }
 
+  void _setupEventMap() {
+    eventMap = {
+      EventType.connectionRecovered: (list, event) {
+        loadData();
+      },
+      EventType.notificationAddedToChannel: (list, event) {
+        loadData();
+      },
+      EventType.notificationMessageNew: (list, event) {
+        loadData();
+      },
+      EventType.channelVisible: (list, event) {
+        loadData();
+      },
+      ...widget.customEventMap,
+    };
+  }
+
   @override
   void dispose() {
-    _basicSubscription?.cancel();
-    _modificationWithDefaultsSubscriptions?.cancel();
-    _customModificationSubscriptions?.cancel();
+    _subscription?.cancel();
     super.dispose();
   }
 }

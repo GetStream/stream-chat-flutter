@@ -95,6 +95,7 @@ class ChannelListView extends StatefulWidget {
     this.onDeletePressed,
     this.swipeActions,
     this.channelListController,
+    this.customEventMap = const {},
   })  : limit = limit ?? pagination?.limit ?? 25,
         super(key: key);
 
@@ -207,6 +208,8 @@ class ChannelListView extends StatefulWidget {
   /// pagination.
   final ChannelListController? channelListController;
 
+  final Map<String, EventListModificationCallback> customEventMap;
+
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
 }
@@ -231,6 +234,7 @@ class _ChannelListViewState extends State<ChannelListView> {
       messageLimit: widget.messageLimit,
       limit: widget.limit,
       channelListController: _channelListController,
+      customEventMap: widget.customEventMap,
       listBuilder: widget.listBuilder ?? _buildListView,
       emptyBuilder: widget.emptyBuilder ?? _buildEmptyWidget,
       errorBuilder: widget.errorBuilder ?? _buildErrorWidget,
