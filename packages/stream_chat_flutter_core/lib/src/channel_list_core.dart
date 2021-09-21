@@ -10,6 +10,9 @@ import 'package:stream_chat_flutter_core/src/stream_chat_core.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// Callback used for modifying the list when an event is received.
+/// Returning a List<Channel> will modify the current list to that one.
+/// Return null for not modifying the list.
 typedef EventListModificationCallback = List<Channel>? Function(
     List<Channel>?, Event event);
 
@@ -142,6 +145,9 @@ class ChannelListCore extends StatefulWidget {
   /// The amount of channels requested per API call.
   final int limit;
 
+  /// Used to modify list or trigger some action when an event is received.
+  /// Returning a List<Channel> will modify the current list to that one.
+  /// Return null for not changing the list.
   final Map<String, EventListModificationCallback> customEventMap;
 
   @override
@@ -200,7 +206,7 @@ class ChannelListCoreState extends State<ChannelListCore> {
 
   StreamSubscription<Event>? _subscription;
 
-  late Map<String, EventListModificationCallback> eventMap;
+  late Map<String, EventListModificationCallback> _eventMap;
 
   @override
   void initState() {
@@ -221,8 +227,8 @@ class ChannelListCoreState extends State<ChannelListCore> {
 
       _subscription?.cancel();
       _subscription =
-          client.on().where((e) => eventMap.containsKey(e.type)).listen((e) {
-        final list = eventMap[e.type]?.call(_channelsBloc.channels, e);
+          client.on().where((e) => _eventMap.containsKey(e.type)).listen((e) {
+        final list = _eventMap[e.type]?.call(_channelsBloc.channels, e);
 
         if (list != null) {
           _channelsBloc.channelsController.add(list);
@@ -265,7 +271,7 @@ class ChannelListCoreState extends State<ChannelListCore> {
   }
 
   void _setupEventMap() {
-    eventMap = {
+    _eventMap = {
       EventType.connectionRecovered: (list, event) {
         loadData();
       },

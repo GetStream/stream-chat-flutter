@@ -78,6 +78,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
   final _queryChannelsLoadingController = BehaviorSubject.seeded(false);
 
+  /// Controller for the list of channels available
   final BehaviorSubject<List<Channel>> channelsController =
       BehaviorSubject<List<Channel>>();
 

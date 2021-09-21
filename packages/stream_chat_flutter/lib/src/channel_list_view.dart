@@ -208,6 +208,8 @@ class ChannelListView extends StatefulWidget {
   /// pagination.
   final ChannelListController? channelListController;
 
+  /// Used to modify list or trigger some action when an event is received.
+  /// Returning a List<Channel> will modify the current list to that one.
   final Map<String, EventListModificationCallback> customEventMap;
 
   @override
