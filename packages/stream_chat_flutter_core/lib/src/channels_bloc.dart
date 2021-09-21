@@ -71,14 +71,14 @@ class ChannelsBlocState extends State<ChannelsBloc>
   }
 
   /// The current channel list
-  List<Channel>? get channels => _channelsController.valueOrNull;
+  List<Channel>? get channels => channelsController.valueOrNull;
 
   /// The current channel list as a stream
-  Stream<List<Channel>> get channelsStream => _channelsController.stream;
+  Stream<List<Channel>> get channelsStream => channelsController.stream;
 
   final _queryChannelsLoadingController = BehaviorSubject.seeded(false);
 
-  final BehaviorSubject<List<Channel>> _channelsController =
+  final BehaviorSubject<List<Channel>> channelsController =
       BehaviorSubject<List<Channel>>();
 
   /// The stream notifying the state of queryChannel call
@@ -116,7 +116,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
       return;
     }
 
-    if (_channelsController.hasValue) {
+    if (channelsController.hasValue) {
       _queryChannelsLoadingController.add(true);
     }
 
@@ -136,12 +136,12 @@ class ChannelsBlocState extends State<ChannelsBloc>
       )) {
         newChannels = channels;
         if (clear) {
-          _channelsController.add(channels);
+          channelsController.add(channels);
         } else {
           final temp = oldChannels + channels;
-          _channelsController.add(temp);
+          channelsController.add(temp);
         }
-        if (_channelsController.hasValue &&
+        if (channelsController.hasValue &&
             _queryChannelsLoadingController.value) {
           _queryChannelsLoadingController.sink.add(false);
         }
@@ -152,10 +152,10 @@ class ChannelsBlocState extends State<ChannelsBloc>
     } catch (e, stk) {
       // reset loading controller
       _queryChannelsLoadingController.sink.add(false);
-      if (_channelsController.hasValue) {
+      if (channelsController.hasValue) {
         _queryChannelsLoadingController.addError(e, stk);
       } else {
-        _channelsController.addError(e, stk);
+        channelsController.addError(e, stk);
       }
     }
   }
@@ -198,7 +198,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
           if (widget.channelsComparator != null) {
             newChannels.sort(widget.channelsComparator);
           }
-          _channelsController.add(newChannels);
+          channelsController.add(newChannels);
         }));
       }
 
@@ -210,7 +210,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
           if (channelIndex > -1) {
             final channel = newChannels.removeAt(channelIndex);
             _hiddenChannels.add(channel);
-            _channelsController.add(newChannels);
+            channelsController.add(newChannels);
           }
         }))
         ..add(client
@@ -220,7 +220,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
         )
             .listen((e) {
           final channel = e.channel;
-          _channelsController.add(List.from(
+          channelsController.add(List.from(
               (channels ?? [])..removeWhere((c) => c.cid == channel?.cid)));
         }));
     }
@@ -230,7 +230,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
   @override
   void dispose() {
-    _channelsController.close();
+    channelsController.close();
     _queryChannelsLoadingController.close();
     _cancelSubscriptions();
     super.dispose();

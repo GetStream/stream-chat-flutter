@@ -445,18 +445,19 @@ class StreamChatClient {
 
   /// Stream of [Event] coming from [_ws] connection
   /// Pass an eventType as parameter in order to filter just a type of event
-  Stream<Event> on([
-    String? eventType,
-    String? eventType2,
-    String? eventType3,
-    String? eventType4,
-  ]) {
+  Stream<Event> on(
+      [String? eventType,
+      String? eventType2,
+      String? eventType3,
+      String? eventType4,
+      String? eventType5]) {
     if (eventType == null) return eventStream;
     return eventStream.where((event) =>
         event.type == eventType ||
         event.type == eventType2 ||
         event.type == eventType3 ||
-        event.type == eventType4);
+        event.type == eventType4 ||
+        event.type == eventType5);
   }
 
   /// Get the events missed while offline to sync the offline storage

@@ -8,6 +8,10 @@ import 'package:stream_chat_flutter_core/src/better_stream_builder.dart';
 import 'package:stream_chat_flutter_core/src/channels_bloc.dart';
 import 'package:stream_chat_flutter_core/src/stream_chat_core.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+
+typedef EventListModificationCallback = List<Channel> Function(
+    List<Channel>?, Event event);
 
 /// [ChannelListCore] is a simplified class that allows fetching a list of
 /// channels while exposing UI builders.
@@ -76,6 +80,7 @@ class ChannelListCore extends StatefulWidget {
         this.pagination,
     this.channelListController,
     int? limit,
+    this.onEventReceived,
   })  : limit = limit ?? pagination?.limit ?? 25,
         super(key: key);
 
@@ -137,6 +142,8 @@ class ChannelListCore extends StatefulWidget {
   /// The amount of channels requested per API call.
   final int limit;
 
+  final EventListModificationCallback? onEventReceived;
+
   @override
   ChannelListCoreState createState() => ChannelListCoreState();
 }
@@ -191,7 +198,9 @@ class ChannelListCoreState extends State<ChannelListCore> {
         ),
       );
 
-  StreamSubscription<Event>? _subscription;
+  StreamSubscription<Event>? _basicSubscription;
+  StreamSubscription<Event>? _modificationWithDefaultsSubscriptions;
+  StreamSubscription<Event>? _customModificationSubscriptions;
 
   @override
   void initState() {
@@ -208,15 +217,46 @@ class ChannelListCoreState extends State<ChannelListCore> {
       _streamChatCoreState = newStreamChatCoreState;
       loadData();
       final client = _streamChatCoreState!.client;
-      _subscription?.cancel();
-      _subscription = client
+
+      _basicSubscription?.cancel();
+      _modificationWithDefaultsSubscriptions?.cancel();
+      _customModificationSubscriptions?.cancel();
+
+      _basicSubscription = client
           .on(
             EventType.connectionRecovered,
-            EventType.notificationAddedToChannel,
-            EventType.notificationMessageNew,
-            EventType.channelVisible,
           )
           .listen((event) => loadData());
+
+      _modificationWithDefaultsSubscriptions = client
+          .on(
+        EventType.notificationAddedToChannel,
+        EventType.notificationMessageNew,
+        EventType.channelVisible,
+      )
+          .listen((event) {
+        if (widget.onEventReceived != null) {
+          var list = widget.onEventReceived!(_channelsBloc.channels, event);
+          _channelsBloc.channelsController.add(list);
+        } else {
+          loadData();
+        }
+      });
+
+      if (widget.onEventReceived != null) {
+        _customModificationSubscriptions = client
+            .on(
+          EventType.channelDeleted,
+          EventType.channelHidden,
+          EventType.channelTruncated,
+          EventType.channelUpdated,
+          EventType.notificationRemovedFromChannel,
+        )
+            .listen((event) {
+          final list = widget.onEventReceived!(_channelsBloc.channels, event);
+          _channelsBloc.channelsController.add(list);
+        });
+      }
     }
 
     super.didChangeDependencies();
@@ -251,7 +291,9 @@ class ChannelListCoreState extends State<ChannelListCore> {
 
   @override
   void dispose() {
-    _subscription?.cancel();
+    _basicSubscription?.cancel();
+    _modificationWithDefaultsSubscriptions?.cancel();
+    _customModificationSubscriptions?.cancel();
     super.dispose();
   }
 }
