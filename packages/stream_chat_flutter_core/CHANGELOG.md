@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- `ChannelListCore` now allows manipulation of the list / any extra processing when events are received.
+
 ⚠️ Deprecated
 
 - `MessageSearchListViewCore` `paginationParams` property is now deprecated in favor of `limit`.

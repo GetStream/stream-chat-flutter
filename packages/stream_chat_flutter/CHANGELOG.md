@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- `ChannelListView` now allows manipulation of the list / any extra processing when events are received.
+
 🐞 Fixed
 
 - [[#668]](https://github.com/GetStream/stream-chat-flutter/issues/668): Fix `MessageInput` rendering errors in case
