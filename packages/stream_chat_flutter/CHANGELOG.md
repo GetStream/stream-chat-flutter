@@ -12,10 +12,6 @@
 
 - Animation curves changed from default `Curves.linear` to `Curves.easeOut` and `Curves.easeIn` for attachment controls.
 
-✅ Added
-
-- Added `MessageInput.customOverlays` property to add custom overlays to the `MessageInput`.
-
 ## 2.2.1
 
 ⚠️ Deprecated

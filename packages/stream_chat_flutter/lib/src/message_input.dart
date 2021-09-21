@@ -6,11 +6,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/src/anchored_overlay.dart';
 import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
@@ -192,7 +192,6 @@ class MessageInput extends StatefulWidget {
     this.onAttachmentLimitExceed,
     this.attachmentButtonBuilder,
     this.commandButtonBuilder,
-    this.customOverlays = const [],
   })  : assert(
           initialMessage == null || editMessage == null,
           "Can't provide both `initialMessage` and `editMessage`",
@@ -222,9 +221,6 @@ class MessageInput extends StatefulWidget {
   /// Function called right before sending the message
   /// Use this to transform the message
   final FutureOr<Message> Function(Message)? preMessageSending;
-
-  /// List of custom overlays
-  final List<OverlayOption> customOverlays;
 
   /// Parent message in case of a thread
   final Message? parentMessage;
@@ -466,40 +462,32 @@ class MessageInputState extends State<MessageInput> {
       );
     }
 
-    return AnchoredOverlay(
-      overlayOptions: [
-        OverlayOption(
-          overlayBuilder: (context, offset) => CenterAbout(
-            position: offset,
-            child: _buildMentionsOverlayEntry(),
-          ),
-          showOverlay: _showMentionsOverlay,
+    return PortalEntry(
+      portal: _buildCommandsOverlayEntry(),
+      visible: _showCommandsOverlay,
+      childAnchor: Alignment.topCenter,
+      portalAnchor: Alignment.bottomCenter,
+      child: PortalEntry(
+        portal: _buildEmojiOverlay(),
+        visible: _focusNode.hasFocus &&
+            textEditingController.text.isNotEmpty &&
+            textEditingController.selection.baseOffset > 0 &&
+            textEditingController.text
+                .substring(
+                  0,
+                  textEditingController.selection.baseOffset,
+                )
+                .contains(':'),
+        childAnchor: Alignment.topCenter,
+        portalAnchor: Alignment.bottomCenter,
+        child: PortalEntry(
+          portal: _buildMentionsOverlayEntry(),
+          visible: _showMentionsOverlay,
+          childAnchor: Alignment.topCenter,
+          portalAnchor: Alignment.bottomCenter,
+          child: child,
         ),
-        OverlayOption(
-          showOverlay: _showCommandsOverlay,
-          overlayBuilder: (context, offset) => CenterAbout(
-            position: offset,
-            child: _buildCommandsOverlayEntry(),
-          ),
-        ),
-        OverlayOption(
-          showOverlay: _focusNode.hasFocus &&
-              textEditingController.text.isNotEmpty &&
-              textEditingController.selection.baseOffset > 0 &&
-              textEditingController.text
-                  .substring(
-                    0,
-                    textEditingController.selection.baseOffset,
-                  )
-                  .contains(':'),
-          overlayBuilder: (context, offset) => CenterAbout(
-            position: offset,
-            child: _buildEmojiOverlay(),
-          ),
-        ),
-        ...widget.customOverlays,
-      ],
-      child: child,
+      ),
     );
   }
 
@@ -946,8 +934,10 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildCommandsOverlayEntry() {
     final text = textEditingController.text.trimLeft();
 
-    // ignore: cast_nullable_to_non_nullable
-    final renderObject = context.findRenderObject() as RenderBox;
+    final renderObject = context.findRenderObject() as RenderBox?;
+    if (renderObject == null) {
+      return const Offstage();
+    }
     return CommandsOverlay(
       channel: StreamChannel.of(context).channel,
       size: Size(renderObject.size.width - 16, 400),

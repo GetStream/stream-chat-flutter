@@ -83,7 +83,7 @@ class MentionsOverlay extends StatelessWidget {
                         },
                         child: mentionsTileBuilder != null
                             ? mentionsTileBuilder!(context, m)
-                            : MentionTile(m),
+                            : MentionTile(m, key: ValueKey(m.user?.id)),
                       ),
                     ),
                   )

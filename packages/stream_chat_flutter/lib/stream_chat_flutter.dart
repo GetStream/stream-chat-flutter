@@ -1,7 +1,6 @@
 export 'package:jiffy/jiffy.dart';
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-export 'src/anchored_overlay.dart';
 export 'src/attachment/attachment.dart';
 export 'src/back_button.dart';
 export 'src/channel_avatar.dart';
