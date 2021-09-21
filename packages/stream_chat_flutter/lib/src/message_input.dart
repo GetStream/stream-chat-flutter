@@ -6,7 +6,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -18,6 +17,7 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
+import 'package:stream_chat_flutter/src/overlays.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
@@ -192,11 +192,15 @@ class MessageInput extends StatefulWidget {
     this.onAttachmentLimitExceed,
     this.attachmentButtonBuilder,
     this.commandButtonBuilder,
+    this.customPortalOptions = const [],
   })  : assert(
           initialMessage == null || editMessage == null,
           "Can't provide both `initialMessage` and `editMessage`",
         ),
         super(key: key);
+
+  /// List of portal options for showing overlays
+  final List<PortalOptions> customPortalOptions;
 
   /// Message to edit
   final Message? editMessage;
@@ -462,32 +466,33 @@ class MessageInputState extends State<MessageInput> {
       );
     }
 
-    return PortalEntry(
-      portal: _buildCommandsOverlayEntry(),
-      visible: _showCommandsOverlay,
+    return MultiPortal(
       childAnchor: Alignment.topCenter,
       portalAnchor: Alignment.bottomCenter,
-      child: PortalEntry(
-        portal: _buildEmojiOverlay(),
-        visible: _focusNode.hasFocus &&
-            textEditingController.text.isNotEmpty &&
-            textEditingController.selection.baseOffset > 0 &&
-            textEditingController.text
-                .substring(
-                  0,
-                  textEditingController.selection.baseOffset,
-                )
-                .contains(':'),
-        childAnchor: Alignment.topCenter,
-        portalAnchor: Alignment.bottomCenter,
-        child: PortalEntry(
-          portal: _buildMentionsOverlayEntry(),
-          visible: _showMentionsOverlay,
-          childAnchor: Alignment.topCenter,
-          portalAnchor: Alignment.bottomCenter,
-          child: child,
+      portalOptions: [
+        PortalOptions(
+          visible: _showCommandsOverlay,
+          widget: _buildCommandsOverlayEntry(),
         ),
-      ),
+        PortalOptions(
+          visible: _focusNode.hasFocus &&
+              textEditingController.text.isNotEmpty &&
+              textEditingController.selection.baseOffset > 0 &&
+              textEditingController.text
+                  .substring(
+                    0,
+                    textEditingController.selection.baseOffset,
+                  )
+                  .contains(':'),
+          widget: _buildEmojiOverlay(),
+        ),
+        PortalOptions(
+          visible: _showMentionsOverlay,
+          widget: _buildMentionsOverlayEntry(),
+        ),
+        ...widget.customPortalOptions,
+      ],
+      child: child,
     );
   }
 
