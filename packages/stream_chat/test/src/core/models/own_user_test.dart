@@ -175,5 +175,26 @@ void main() {
       expect(newUser.teams, ['team1', 'team2']);
       expect(newUser.language, 'fr');
     });
+
+    test(
+      'fromUser should not override name with id if not available in extraData',
+      () {
+        final user = User(id: 'test-id');
+        expect(user.id, 'test-id');
+        expect(user.name, 'test-id');
+
+        final encodedUser = user.toJson();
+        expect(encodedUser['id'], 'test-id');
+        expect(encodedUser['name'], null);
+
+        final ownUser = OwnUser.fromUser(user);
+        expect(user.id, 'test-id');
+        expect(user.name, 'test-id');
+
+        final encodedOwnUser = ownUser.toJson();
+        expect(encodedOwnUser['id'], 'test-id');
+        expect(encodedOwnUser['name'], null);
+      },
+    );
   });
 }
