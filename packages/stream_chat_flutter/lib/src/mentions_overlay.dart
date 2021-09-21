@@ -96,6 +96,5 @@ class MentionsOverlay extends StatelessWidget {
         ),
       ),
     );
-    ;
   }
 }
