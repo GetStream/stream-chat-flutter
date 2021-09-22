@@ -1,4 +1,7 @@
-## Upcoming
+## 3.0.0
+🛑️ Breaking Changes from `2.2.1`
+
+- `UserListView` `filter` property now is non-nullable.
 
 🐞 Fixed
 
