@@ -30,13 +30,13 @@ typedef EmptyMessageSearchBuilder = Widget Function(
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: MessageSearchListView(
-///               messageQuery: _channelQuery,
-///               filters: {
-///                 'members': {
-///                   r'$in': [user.id]
-///                 }
-///               },
-///               paginationParams: PaginationParams(limit: 20),
+///         messageQuery: _channelQuery,
+///         filters: {
+///           'members': {
+///             r'$in': [user.id]
+///           }
+///         },
+///         limit: 20,
 ///       ),
 ///     );
 ///   }
