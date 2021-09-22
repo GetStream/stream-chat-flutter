@@ -74,7 +74,9 @@ That means that with a version number x.y.z (major.minor.patch):
 
 See the [semantic versioning](https://dart.dev/tools/pub/versioning#semantic-versions) section from the Dart docs for more information.
 
-This versioning policy does not apply to prerelease packages (below major version of 1). See this [StackOverflow thread](https://stackoverflow.com/questions/66201337/how-do-dart-package-versions-work-how-should-i-version-my-flutter-plugins) for more information on Dart package versioning.
+This versioning policy does not apply to prerelease packages (below major version of 1). See this
+[StackOverflow thread](https://stackoverflow.com/questions/66201337/how-do-dart-package-versions-work-how-should-i-version-my-flutter-plugins)
+for more information on Dart package versioning.
 
 Whenever possible, we will add deprecation warnings in preparation for future breaking changes.
 
