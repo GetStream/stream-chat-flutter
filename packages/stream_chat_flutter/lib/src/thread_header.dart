@@ -128,12 +128,14 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
           ],
         );
 
+    final theme = Theme.of(context);
     return AppBar(
       automaticallyImplyLeading: false,
-      titleTextStyle: Theme.of(context).appBarTheme.titleTextStyle,
-      systemOverlayStyle: Theme.of(context).brightness == Brightness.dark
-          ? SystemUiOverlayStyle.dark
-          : SystemUiOverlayStyle.light,
+      toolbarTextStyle: theme.textTheme.bodyText2,
+      titleTextStyle: theme.textTheme.headline6,
+      systemOverlayStyle: theme.brightness == Brightness.dark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
       elevation: 1,
       leading: leading ??
           (showBackButton

@@ -58,11 +58,13 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final galleryHeaderThemeData = GalleryHeaderTheme.of(context);
+    final theme = Theme.of(context);
     return AppBar(
-      titleTextStyle: Theme.of(context).appBarTheme.titleTextStyle,
-      systemOverlayStyle: Theme.of(context).brightness == Brightness.dark
-          ? SystemUiOverlayStyle.dark
-          : SystemUiOverlayStyle.light,
+      toolbarTextStyle: theme.textTheme.bodyText2,
+      titleTextStyle: theme.textTheme.headline6,
+      systemOverlayStyle: theme.brightness == Brightness.dark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
       elevation: 1,
       leading: showBackButton
           ? IconButton(

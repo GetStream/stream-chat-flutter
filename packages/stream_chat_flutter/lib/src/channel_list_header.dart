@@ -122,14 +122,16 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
 
         final chatThemeData = StreamChatTheme.of(context);
         final channelListHeaderThemeData = ChannelListHeaderTheme.of(context);
+        final theme = Theme.of(context);
         return InfoTile(
           showMessage: showConnectionStateTile && showStatus,
           message: statusString,
           child: AppBar(
-            titleTextStyle: Theme.of(context).appBarTheme.titleTextStyle,
-            systemOverlayStyle: Theme.of(context).brightness == Brightness.dark
-                ? SystemUiOverlayStyle.dark
-                : SystemUiOverlayStyle.light,
+            toolbarTextStyle: theme.textTheme.bodyText2,
+            titleTextStyle: theme.textTheme.headline6,
+            systemOverlayStyle: theme.brightness == Brightness.dark
+                ? SystemUiOverlayStyle.light
+                : SystemUiOverlayStyle.dark,
             elevation: 1,
             backgroundColor:
                 backgroundColor ?? channelListHeaderThemeData.color,
