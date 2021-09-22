@@ -522,7 +522,7 @@ void main() {
   );
 
   test('`widget.limit` should match `widget.pagination.limit`', () {
-    const limit = 30;
+    const limit = 20;
     final userListCore = UserListCore(
       listBuilder: (_, __) => const Offstage(),
       loadingBuilder: (BuildContext context) => const Offstage(),
