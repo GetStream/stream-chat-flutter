@@ -131,7 +131,7 @@ class StreamChatThemeData {
     final defaultTheme = StreamChatThemeData(brightness: theme.brightness);
     final customizedTheme = StreamChatThemeData.fromColorAndTextTheme(
       defaultTheme.colorTheme.copyWith(
-        accentPrimary: theme.accentColor,
+        accentPrimary: theme.colorScheme.secondary,
       ),
       defaultTheme.textTheme,
     );

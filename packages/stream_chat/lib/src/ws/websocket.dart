@@ -6,15 +6,15 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/core/error/error.dart';
-import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/timer_helper.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// Typedef which exposes an [Event] as the only parameter.
 typedef EventHandler = void Function(Event);

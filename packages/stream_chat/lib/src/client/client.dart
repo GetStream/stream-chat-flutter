@@ -143,9 +143,6 @@ class StreamChatClient {
 
   late final RetryPolicy _retryPolicy;
 
-  /// sync state of the channels present inside state, defaults to false
-  bool _synced = false;
-
   /// the last dateTime at the which all the channels were synced
   DateTime? _lastSyncedAt;
 
@@ -434,8 +431,6 @@ class StreamChatClient {
         type: EventType.connectionRecovered,
         online: true,
       ));
-    } else {
-      _synced = false;
     }
   }
 
@@ -460,13 +455,11 @@ class StreamChatClient {
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) async {
     cids ??= await _chatPersistenceClient?.getChannelCids();
     if (cids == null || cids.isEmpty) {
-      _synced = true;
       return;
     }
 
     lastSyncAt ??= await _chatPersistenceClient?.getLastSyncAt();
     if (lastSyncAt == null) {
-      _synced = true;
       return;
     }
 
@@ -484,12 +477,10 @@ class StreamChatClient {
         handleEvent(event);
       }
 
-      _synced = true;
       final now = DateTime.now();
       _lastSyncedAt = now;
       _chatPersistenceClient?.updateLastSyncAt(now);
     } catch (e, stk) {
-      _synced = false;
       logger.severe('Error during sync', e, stk);
     }
   }

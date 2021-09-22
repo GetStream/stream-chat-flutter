@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:test/test.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('operators', () {

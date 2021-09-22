@@ -1,7 +1,7 @@
-import 'package:test/test.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/mapper/read_mapper.dart';
+import 'package:test/test.dart';
 
 import '../utils/date_matcher.dart';
 
