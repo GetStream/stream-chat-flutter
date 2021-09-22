@@ -525,13 +525,13 @@ class _MessageListViewState extends State<MessageListView> {
                           ? widget.dateDividerBuilder!(
                               nextMessage.createdAt.toLocal(),
                             )
-                          : DateDivider(
-                              dateTime: nextMessage.createdAt.toLocal(),
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: DateDivider(
+                                dateTime: nextMessage.createdAt.toLocal(),
+                              ),
                             );
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: divider,
-                      );
+                      return divider;
                     }
                     final timeDiff =
                         Jiffy(nextMessage.createdAt.toLocal()).diff(

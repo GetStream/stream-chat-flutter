@@ -10,6 +10,7 @@
 🔄 Changed
 
 - Animation curves changed from default `Curves.linear` to `Curves.easeOut` and `Curves.easeIn` for attachment controls.
+- Removed default padding in `DateDivider` in `MessageListView`
 
 ## 2.2.1
 
