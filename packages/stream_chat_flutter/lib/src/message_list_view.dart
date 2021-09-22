@@ -1213,10 +1213,12 @@ class _MessageListViewState extends State<MessageListView> {
       initialAlignment = _initialAlignment;
 
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        _scrollController?.jumpTo(
-          index: initialIndex,
-          alignment: initialAlignment,
-        );
+        if (_scrollController?.isAttached == true) {
+          _scrollController?.jumpTo(
+            index: initialIndex,
+            alignment: initialAlignment,
+          );
+        }
       });
 
       _messageNewListener =
