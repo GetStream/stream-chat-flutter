@@ -177,6 +177,24 @@ Develop is merged into master after the team performs various automated and QA t
 
 ---
 
+# Versioning Policy
+
+All of the Stream Chat packages follow [semantic versioning (semver)](https://semver.org/).
+
+That means that with a version number x.y.z (major.minor.patch):
+
+- When releasing critical bug fixes, we make a patch release by changing the z number (ex: 3.6.2 to 3.6.3).
+- When releasing new features or non-critical fixes, we make a minor release by changing the y number (ex: 3.6.2 to 3.7.0).
+- When releasing breaking changes (backward incompatible), we make a major release by changing the x number (ex: 3.6.2 to 4.0.0).
+
+See the [semantic versioning](https://dart.dev/tools/pub/versioning#semantic-versions) section from the Dart docs for more information.
+
+This versioning policy does not apply to prerelease packages (below major version of 1). See this [StackOverflow thread](https://stackoverflow.com/questions/66201337/how-do-dart-package-versions-work-how-should-i-version-my-flutter-plugins) for more information on Dart package versioning.
+
+Whenever possible, we will add deprecation warnings in preparation for future breaking changes.
+
+---
+
 # Styleguides 💅
 
 ![image](https://user-images.githubusercontent.com/20601437/124241186-d17a8680-db1b-11eb-9a21-3df305674ca9.png)
