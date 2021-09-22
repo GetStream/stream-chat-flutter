@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/back_button.dart';
 import 'package:stream_chat_flutter/src/channel_info.dart';
 import 'package:stream_chat_flutter/src/channel_name.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header_paint.png)
@@ -137,12 +138,17 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             break;
         }
 
+        final theme = Theme.of(context);
+
         return InfoTile(
           showMessage: showConnectionStateTile && showStatus,
           message: statusString,
           child: AppBar(
-            textTheme: Theme.of(context).textTheme,
-            brightness: Theme.of(context).brightness,
+            toolbarTextStyle: theme.textTheme.bodyText2,
+            titleTextStyle: theme.textTheme.headline6,
+            systemOverlayStyle: theme.brightness == Brightness.dark
+                ? SystemUiOverlayStyle.light
+                : SystemUiOverlayStyle.dark,
             elevation: 1,
             leading: leadingWidget,
             backgroundColor: backgroundColor ?? channelHeaderTheme.color,

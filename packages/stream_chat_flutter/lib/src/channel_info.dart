@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget which shows channel info
 class ChannelInfo extends StatelessWidget {

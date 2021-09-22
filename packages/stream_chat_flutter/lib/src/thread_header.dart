@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header_paint.png)
@@ -127,10 +128,14 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
           ],
         );
 
+    final theme = Theme.of(context);
     return AppBar(
       automaticallyImplyLeading: false,
-      textTheme: Theme.of(context).textTheme,
-      brightness: Theme.of(context).brightness,
+      toolbarTextStyle: theme.textTheme.bodyText2,
+      titleTextStyle: theme.textTheme.headline6,
+      systemOverlayStyle: theme.brightness == Brightness.dark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
       elevation: 1,
       leading: leading ??
           (showBackButton

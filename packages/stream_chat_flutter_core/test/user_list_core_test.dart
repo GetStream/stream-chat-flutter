@@ -341,7 +341,7 @@ void main() {
         loadingBuilder: (BuildContext context) => const Offstage(),
         emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object error) => const Offstage(),
-        pagination: pagination,
+        limit: pagination.limit,
         groupAlphabetically: true,
       );
 
@@ -447,7 +447,7 @@ void main() {
             emptyBuilder: (BuildContext context) => const Offstage(),
             errorBuilder: (BuildContext context, Object error) =>
                 const Offstage(),
-            pagination: pagination.copyWith(limit: limit),
+            limit: limit,
             groupAlphabetically: true,
           );
 
@@ -522,15 +522,15 @@ void main() {
   );
 
   test('`widget.limit` should match `widget.pagination.limit`', () {
-    const pagination = PaginationParams(limit: 30);
+    const limit = 30;
     final userListCore = UserListCore(
       listBuilder: (_, __) => const Offstage(),
       loadingBuilder: (BuildContext context) => const Offstage(),
       emptyBuilder: (BuildContext context) => const Offstage(),
       errorBuilder: (BuildContext context, Object error) => const Offstage(),
-      pagination: pagination,
+      limit: limit,
     );
 
-    expect(userListCore.limit, pagination.limit);
+    expect(userListCore.limit, limit);
   });
 }
