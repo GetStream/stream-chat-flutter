@@ -2,47 +2,47 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
-/// Class that contains the parameters for building a portal entry
-class PortalOptions {
-  /// Constructs a new portal options object
-  /// [visible] - the visibility of the portal
+/// Class that contains the parameters for building an overlay entry
+class OverlayOptions {
+  /// Constructs a new overlay options object
+  /// [visible] - the visibility of the overlay
   /// [widget] - the widget to be displayed
-  PortalOptions({
+  OverlayOptions({
     required this.visible,
     required this.widget,
   });
 
-  /// the visibility of the portal
+  /// the visibility of the overlay
   final bool visible;
 
   /// the widget to be displayed
   final Widget widget;
 }
 
-/// Widget that renders a single portal widget from a list of [portalOptions]
+/// Widget that renders a single overlay widget from a list of [overlayOptions]
 /// It shows the first one that is visible
-class MultiPortal extends StatelessWidget {
-  /// Constructs a new MultiPortal widget
-  /// [portalOptions] - the list of portal options
-  /// [portalAnchor] - the anchor relative to the portal
+class MultiOverlay extends StatelessWidget {
+  /// Constructs a new MultiOverlay widget
+  /// [overlayOptions] - the list of overlay options
+  /// [overlayAnchor] - the anchor relative to the overlay
   /// [childAnchor] - the anchor relative to the child
   /// [child] - the child widget
-  const MultiPortal({
+  const MultiOverlay({
     Key? key,
-    required this.portalOptions,
+    required this.overlayOptions,
     required this.child,
-    required this.portalAnchor,
+    required this.overlayAnchor,
     required this.childAnchor,
   }) : super(key: key);
 
-  /// The list of portal options
-  final List<PortalOptions> portalOptions;
+  /// The list of overlay options
+  final List<OverlayOptions> overlayOptions;
 
   /// The child widget
   final Widget child;
 
-  /// The anchor relative to the portal
-  final Alignment? portalAnchor;
+  /// The anchor relative to the overlay
+  final Alignment? overlayAnchor;
 
   /// The anchor relative to the child
   final Alignment? childAnchor;
@@ -50,11 +50,11 @@ class MultiPortal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visibleOverlay =
-        portalOptions.firstWhereOrNull((element) => element.visible);
+        overlayOptions.firstWhereOrNull((element) => element.visible);
 
     return PortalEntry(
       childAnchor: childAnchor,
-      portalAnchor: portalAnchor,
+      portalAnchor: overlayAnchor,
       visible: visibleOverlay != null,
       portal: visibleOverlay?.widget,
       child: child,

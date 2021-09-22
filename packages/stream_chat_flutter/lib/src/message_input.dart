@@ -192,15 +192,15 @@ class MessageInput extends StatefulWidget {
     this.onAttachmentLimitExceed,
     this.attachmentButtonBuilder,
     this.commandButtonBuilder,
-    this.customPortalOptions = const [],
+    this.customOverlays = const [],
   })  : assert(
           initialMessage == null || editMessage == null,
           "Can't provide both `initialMessage` and `editMessage`",
         ),
         super(key: key);
 
-  /// List of portal options for showing overlays
-  final List<PortalOptions> customPortalOptions;
+  /// List of options for showing overlays
+  final List<OverlayOptions> customOverlays;
 
   /// Message to edit
   final Message? editMessage;
@@ -466,15 +466,15 @@ class MessageInputState extends State<MessageInput> {
       );
     }
 
-    return MultiPortal(
+    return MultiOverlay(
       childAnchor: Alignment.topCenter,
-      portalAnchor: Alignment.bottomCenter,
-      portalOptions: [
-        PortalOptions(
+      overlayAnchor: Alignment.bottomCenter,
+      overlayOptions: [
+        OverlayOptions(
           visible: _showCommandsOverlay,
           widget: _buildCommandsOverlayEntry(),
         ),
-        PortalOptions(
+        OverlayOptions(
           visible: _focusNode.hasFocus &&
               textEditingController.text.isNotEmpty &&
               textEditingController.selection.baseOffset > 0 &&
@@ -486,11 +486,11 @@ class MessageInputState extends State<MessageInput> {
                   .contains(':'),
           widget: _buildEmojiOverlay(),
         ),
-        PortalOptions(
+        OverlayOptions(
           visible: _showMentionsOverlay,
           widget: _buildMentionsOverlayEntry(),
         ),
-        ...widget.customPortalOptions,
+        ...widget.customOverlays,
       ],
       child: child,
     );
