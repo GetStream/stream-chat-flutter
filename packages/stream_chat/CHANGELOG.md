@@ -1,6 +1,6 @@
 ## Upcoming
 
-🛑️ Breaking Changes from `3.0.0`
+✅ Added
 
 - `Filter.notExists` now replaces `Filter.exists(key, exists: false)`.
 

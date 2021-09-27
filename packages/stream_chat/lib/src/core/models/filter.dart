@@ -167,12 +167,11 @@ class Filter extends Equatable {
       Filter._(operator: FilterOperator.autoComplete, key: key, value: text);
 
   /// Matches values that exist.
-  factory Filter.exists(String key) =>
-      Filter._(operator: FilterOperator.exists, key: key, value: true);
+  factory Filter.exists(String key, {bool exists = true}) =>
+      Filter._(operator: FilterOperator.exists, key: key, value: exists);
 
   /// Matches values that don't exist.
-  factory Filter.notExists(String key) =>
-      Filter._(operator: FilterOperator.exists, key: key, value: false);
+  factory Filter.notExists(String key) => Filter.exists(key, exists: false);
 
   /// Matches any list that contains the specified values
   factory Filter.contains(String key, Object value) =>
