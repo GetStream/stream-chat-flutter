@@ -27,11 +27,11 @@
     limit = 30
     ```
 
-- `UserListViewCore` `filter` property now is non-nullable.
+- `UserListCore` `filter` property now is non-nullable.
 
 🔄 Changed
 
-- `UserListViewCore` filter property now has a default value.
+- `UserListCore` filter property now has a default value.
     ```dart
     filter = const Filter.empty()
     ```
