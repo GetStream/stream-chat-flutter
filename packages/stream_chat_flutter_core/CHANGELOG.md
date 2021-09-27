@@ -1,5 +1,7 @@
 ## 3.0.0
 
+- Updated `stream_chat` dependency to [`3.0.0`](https://pub.dev/packages/stream_chat/changelog).
+
 🛑️ Breaking Changes from `2.2.1`
 
 - `MessageSearchListViewCore` `paginationParams` property is now deprecated in favor of `limit`.

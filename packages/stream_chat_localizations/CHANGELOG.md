@@ -1,5 +1,7 @@
 ## 2.0.0
 
+- Updated `stream_chat_flutter` dependency to [`3.0.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
 🐞 Fixed
 
 * Fixed typos in `Italian` translations.
