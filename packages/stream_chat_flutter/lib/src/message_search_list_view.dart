@@ -53,17 +53,12 @@ typedef EmptyMessageSearchBuilder = Widget Function(
 /// Modify it to change the widget appearance.
 class MessageSearchListView extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
-  MessageSearchListView({
+  const MessageSearchListView({
     Key? key,
     required this.filters,
     this.messageQuery,
     this.sortOptions,
-    @Deprecated(
-      "'paginationParams' is deprecated and shouldn't be used. "
-      "This property is no longer used, Please use 'limit' instead",
-    )
-        this.paginationParams,
-    int? limit,
+    this.limit = 30,
     this.messageFilters,
     this.separatorBuilder,
     this.itemBuilder,
@@ -76,8 +71,7 @@ class MessageSearchListView extends StatefulWidget {
     this.loadingBuilder,
     this.childBuilder,
     this.messageSearchListController,
-  })  : limit = limit ?? paginationParams?.limit ?? 30,
-        super(key: key);
+  }) : super(key: key);
 
   /// Message String to search on
   final String? messageQuery;
@@ -94,16 +88,6 @@ class MessageSearchListView extends StatefulWidget {
   /// created_at or member_count.
   /// Direction can be ascending or descending.
   final List<SortOption>? sortOptions;
-
-  /// Pagination parameters
-  /// limit: the number of users to return (max is 30)
-  /// offset: the offset (max is 1000)
-  /// message_limit: how many messages should be included to each channel
-  @Deprecated(
-    "'paginationParams' is deprecated and shouldn't be used. "
-    "This property is no longer used, Please use 'limit' instead",
-  )
-  final PaginationParams? paginationParams;
 
   /// The amount of messages requested per API call.
   final int limit;
