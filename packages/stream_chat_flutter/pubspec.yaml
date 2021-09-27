@@ -37,7 +37,7 @@ dependencies:
   scrollable_positioned_list: ^0.2.0-nullsafety.0
   share_plus: ^2.0.3
   shimmer: ^2.0.0
-  stream_chat_flutter_core: 3.0.0
+  stream_chat_flutter_core: ^3.0.0
   substring_highlight: ^1.0.26
   synchronized: ^3.0.0
   url_launcher: ^6.0.3
