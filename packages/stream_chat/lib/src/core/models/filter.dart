@@ -40,8 +40,11 @@ enum FilterOperator {
   /// Matches values with the specified prefix.
   autoComplete,
 
-  /// Matches values that exist/don't exist based on the specified boolean value.
+  /// Matches values that exist.
   exists,
+
+  /// Matches values that don't exist.
+  notExists,
 
   /// Matches all the values specified in an array.
   and,
@@ -163,9 +166,13 @@ class Filter extends Equatable {
   factory Filter.autoComplete(String key, String text) =>
       Filter._(operator: FilterOperator.autoComplete, key: key, value: text);
 
-  /// Matches values that exist/don't exist based on the specified boolean value.
-  factory Filter.exists(String key, {bool exists = true}) =>
-      Filter._(operator: FilterOperator.exists, key: key, value: exists);
+  /// Matches values that exist.
+  factory Filter.exists(String key) =>
+      Filter._(operator: FilterOperator.exists, key: key, value: true);
+
+  /// Matches values that don't exist.
+  factory Filter.notExists(String key) =>
+      Filter._(operator: FilterOperator.exists, key: key, value: false);
 
   /// Matches any list that contains the specified values
   factory Filter.contains(String key, Object value) =>

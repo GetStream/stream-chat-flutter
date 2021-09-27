@@ -114,7 +114,7 @@ void main() {
 
     test('notExists', () {
       const key = 'testKey';
-      final filter = Filter.exists(key, exists: false);
+      final filter = Filter.notExists(key);
       expect(filter.key, key);
       expect(filter.value, isFalse);
       expect(filter.operator, FilterOperator.exists.rawValue);
