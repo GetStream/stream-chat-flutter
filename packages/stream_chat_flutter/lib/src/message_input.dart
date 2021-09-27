@@ -15,7 +15,7 @@ import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
-import 'package:stream_chat_flutter/src/mentions_overlay.dart';
+import 'package:stream_chat_flutter/src/user_mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/overlays.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
@@ -193,6 +193,7 @@ class MessageInput extends StatefulWidget {
     this.attachmentButtonBuilder,
     this.commandButtonBuilder,
     this.customOverlays = const [],
+    this.mentionAllAppUsers = false,
   })  : assert(
           initialMessage == null || editMessage == null,
           "Can't provide both `initialMessage` and `editMessage`",
@@ -302,6 +303,11 @@ class MessageInput extends StatefulWidget {
   /// The builder contains the default [IconButton] that can be customized by
   /// calling `.copyWith`.
   final ActionButtonBuilder? commandButtonBuilder;
+
+  /// When enabled mentions search users across the entire app.
+  ///
+  /// Defaults to false.
+  final bool mentionAllAppUsers;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -1159,16 +1165,15 @@ class MessageInputState extends State<MessageInput> {
     // ignore: cast_nullable_to_non_nullable
     final renderObject = context.findRenderObject() as RenderBox;
 
-    return MentionsOverlay(
+    return UserMentionsOverlay(
+      query: query,
+      mentionAllAppUsers: widget.mentionAllAppUsers,
+      client: StreamChat.of(context).client,
       channel: StreamChannel.of(context).channel,
       size: Size(renderObject.size.width - 16, 400),
-      query: query,
-      onMentionResult: (user) {
-        if (user != null) {
-          _mentionedUsers.add(user);
-        }
-
-        splits[splits.length - 1] = user!.name;
+      onMentionUserTap: (user) {
+        _mentionedUsers.add(user);
+        splits[splits.length - 1] = user.name;
         final rejoin = splits.join('@');
 
         textEditingController.value = TextEditingValue(
@@ -1180,9 +1185,7 @@ class MessageInputState extends State<MessageInput> {
           ),
         );
         _onChangedDebounced.cancel();
-        setState(() {
-          _showMentionsOverlay = false;
-        });
+        setState(() => _showMentionsOverlay = false);
       },
     );
   }
