@@ -1227,8 +1227,9 @@ class _MessageListViewState extends State<MessageListView> {
           _bottomPaginationActive = false;
           _topPaginationActive = false;
         }
-        if (event.message!.user!.id ==
-            streamChannel!.channel.client.state.currentUser!.id) {
+        if (event.message?.parentId == widget.parentMessage?.id &&
+            event.message!.user!.id ==
+                streamChannel!.channel.client.state.currentUser!.id) {
           WidgetsBinding.instance!.addPostFrameCallback((_) {
             _scrollController?.jumpTo(
               index: 0,
