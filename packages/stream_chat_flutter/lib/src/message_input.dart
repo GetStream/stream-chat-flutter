@@ -171,7 +171,7 @@ class MessageInput extends StatefulWidget {
     this.disableAttachments = false,
     this.initialMessage,
     this.textEditingController,
-    this.actions,
+    this.actions = const [],
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
     this.focusNode,
@@ -248,7 +248,7 @@ class MessageInput extends StatefulWidget {
   final TextEditingController? textEditingController;
 
   /// List of action widgets
-  final List<Widget>? actions;
+  final List<Widget> actions;
 
   /// The location of the custom actions
   final ActionsLocation actionsLocation;
@@ -324,7 +324,7 @@ class MessageInputState extends State<MessageInput> {
   final List<User> _mentionedUsers = [];
 
   final _imagePicker = ImagePicker();
-  late final FocusNode _focusNode;
+  late final _focusNode = widget.focusNode ?? FocusNode();
   bool _inputEnabled = true;
   bool _commandEnabled = false;
   bool _showCommandsOverlay = false;
@@ -337,7 +337,8 @@ class MessageInputState extends State<MessageInput> {
   int _filePickerIndex = 0;
 
   /// The editing controller passed to the input TextField
-  late final TextEditingController textEditingController;
+  late final TextEditingController textEditingController =
+      widget.textEditingController ?? TextEditingController();
 
   late StreamChatThemeData _streamChatTheme;
   late MessageInputThemeData _messageInputTheme;
@@ -349,18 +350,10 @@ class MessageInputState extends State<MessageInput> {
   @override
   void initState() {
     super.initState();
-    _focusNode = widget.focusNode ?? FocusNode();
-
-    textEditingController =
-        widget.textEditingController ?? TextEditingController();
     if (widget.editMessage != null || widget.initialMessage != null) {
       _parseExistingMessage(widget.editMessage ?? widget.initialMessage!);
     }
-
-    textEditingController.addListener(() {
-      _onChanged(context, textEditingController.text);
-    });
-
+    textEditingController.addListener(_onChangedDebounced);
     _focusNode.addListener(() {
       if (_focusNode.hasFocus) {
         _openFilePickerSection = false;
@@ -625,7 +618,7 @@ class MessageInputState extends State<MessageInput> {
         ),
         secondChild: widget.disableAttachments &&
                 !widget.showCommandsButton &&
-                widget.actions?.isNotEmpty != true
+                widget.actions.isNotEmpty != true
             ? const Offstage()
             : Wrap(
                 children: <Widget>[
@@ -636,7 +629,7 @@ class MessageInputState extends State<MessageInput> {
                       channel.state != null &&
                       channel.config?.commands.isNotEmpty == true)
                     _buildCommandButton(context),
-                  ...widget.actions ?? [],
+                  ...widget.actions,
                 ].insertBetween(const SizedBox(width: 8)),
               ),
         duration: const Duration(milliseconds: 300),
@@ -804,50 +797,32 @@ class MessageInputState extends State<MessageInput> {
     ).merge(passedDecoration);
   }
 
-  Timer? _debounce;
+  late final _onChangedDebounced = debounce(
+    () {
+      var value = textEditingController.text;
+      if (!mounted) return;
+      value = value.trim();
 
-  String? _previousValue;
+      final channel = StreamChannel.of(context).channel;
+      if (value.isNotEmpty) {
+        channel.keyStroke(widget.parentMessage?.id).catchError((e) {});
+      }
 
-  void _onChanged(
-    BuildContext context,
-    String s,
-  ) {
-    if (s == _previousValue) {
-      return;
-    }
-    _previousValue = s;
+      var actionsLength = widget.actions.length;
+      if (widget.showCommandsButton) actionsLength += 1;
+      if (!widget.disableAttachments) actionsLength += 1;
 
-    if (_debounce?.isActive == true) _debounce!.cancel();
-    _debounce = Timer(
-      const Duration(milliseconds: 350),
-      () {
-        if (!mounted) {
-          return;
-        }
+      setState(() {
+        _actionsShrunk = value.isNotEmpty && actionsLength > 1;
+      });
 
-        if (s.isNotEmpty) {
-          StreamChannel.of(context)
-              .channel
-              .keyStroke(widget.parentMessage?.id)
-              .catchError((e) {});
-        }
-
-        _checkCommands(s.trim(), context);
-
-        _checkMentions(s, context);
-
-        _checkEmoji(s, context);
-
-        setState(() {
-          _actionsShrunk = s.trim().isNotEmpty &&
-              ((widget.actions?.length ?? 0) +
-                      (widget.showCommandsButton ? 1 : 0) +
-                      (widget.disableAttachments ? 0 : 1) >
-                  1);
-        });
-      },
-    );
-  }
+      _checkCommands(value, context);
+      _checkMentions(value, context);
+      _checkEmoji(value, context);
+    },
+    const Duration(milliseconds: 350),
+    leading: true,
+  );
 
   String _getHint(BuildContext context) {
     if (_commandEnabled && _chosenCommand!.name == 'giphy') {
@@ -867,10 +842,7 @@ class MessageInputState extends State<MessageInput> {
     if (s.isNotEmpty &&
         textEditingController.selection.baseOffset > 0 &&
         textEditingController.text
-            .substring(
-              0,
-              textEditingController.selection.baseOffset,
-            )
+            .substring(0, textEditingController.selection.baseOffset)
             .contains(':')) {
       final textToSelection = textEditingController.text
           .substring(0, textEditingController.value.selection.start);
@@ -1207,7 +1179,7 @@ class MessageInputState extends State<MessageInput> {
             offset: rejoin.length,
           ),
         );
-        _debounce!.cancel();
+        _onChangedDebounced.cancel();
         setState(() {
           _showMentionsOverlay = false;
         });
