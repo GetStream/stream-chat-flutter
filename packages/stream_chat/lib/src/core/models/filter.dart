@@ -40,7 +40,7 @@ enum FilterOperator {
   /// Matches values with the specified prefix.
   autoComplete,
 
-  /// Matches values that exist.
+  /// Matches values that exist/don't exist based on the specified boolean value.
   exists,
 
   /// Matches values that don't exist.
