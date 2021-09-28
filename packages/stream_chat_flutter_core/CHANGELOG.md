@@ -4,7 +4,11 @@
 
 - `ChannelListCore` now allows manipulation of the list / any extra processing when events are received.
 
-⚠️ Deprecated
+## 3.0.0
+
+- Updated `stream_chat` dependency to [`3.0.0`](https://pub.dev/packages/stream_chat/changelog).
+
+🛑️ Breaking Changes from `2.2.1`
 
 - `MessageSearchListViewCore` `paginationParams` property is now deprecated in favor of `limit`.
     ```dart
@@ -14,7 +18,7 @@
     // new
     limit = 30
     ```
-- `UserListViewCore` `pagination` property is now deprecated in favor of `limit`.
+- `UserListCore` `pagination` property is now deprecated in favor of `limit`.
     ```dart
     // previous
     pagination = const PaginationParams(limit: 30)
@@ -22,7 +26,7 @@
     // new
     limit = 30
     ```
-- `ChannelListViewCore` `pagination` property is now deprecated in favor of `limit`.
+- `ChannelListCore` `pagination` property is now deprecated in favor of `limit`.
     ```dart
     // previous
     pagination = const PaginationParams(limit: 30)
@@ -30,10 +34,12 @@
     // new
     limit = 30
     ```
+
+- `UserListCore` `filter` property now is non-nullable.
 
 🔄 Changed
 
-- `UserListViewCore` filter property now has a default value.
+- `UserListCore` filter property now has a default value.
     ```dart
     filter = const Filter.empty()
     ```

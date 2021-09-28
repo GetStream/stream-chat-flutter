@@ -63,7 +63,7 @@ typedef EventListModificationCallback = List<Channel>? Function(
 /// information about the channels.
 class ChannelListCore extends StatefulWidget {
   /// Instantiate a new ChannelListView
-  ChannelListCore({
+  const ChannelListCore({
     Key? key,
     required this.errorBuilder,
     required this.emptyBuilder,
@@ -76,16 +76,10 @@ class ChannelListCore extends StatefulWidget {
     this.memberLimit,
     this.messageLimit,
     this.sort,
-    @Deprecated(
-      "'pagination' is deprecated and shouldn't be used. "
-      "This property is no longer used, Please use 'limit' instead",
-    )
-        this.pagination,
     this.channelListController,
-    int? limit,
     this.customEventMap = const {},
-  })  : limit = limit ?? pagination?.limit ?? 25,
-        super(key: key);
+    this.limit = 25,
+  }) : super(key: key);
 
   /// A [ChannelListController] allows reloading and pagination.
   /// Use [ChannelListController.loadData] and
@@ -131,16 +125,6 @@ class ChannelListCore extends StatefulWidget {
 
   /// Number of messages to fetch in each channel
   final int? messageLimit;
-
-  /// Pagination parameters
-  /// limit: the number of channels to return (max is 30)
-  /// offset: the offset (max is 1000)
-  /// message_limit: how many messages should be included to each channel
-  @Deprecated(
-    "'pagination' is deprecated and shouldn't be used. "
-    "This property is no longer used, Please use 'limit' instead",
-  )
-  final PaginationParams? pagination;
 
   /// The amount of channels requested per API call.
   final int limit;

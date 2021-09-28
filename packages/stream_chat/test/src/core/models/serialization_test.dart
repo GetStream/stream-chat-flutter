@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('src/models/serialization', () {

@@ -334,7 +334,7 @@ void main() {
         loadingBuilder: (BuildContext context) => const Offstage(),
         emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object error) => const Offstage(),
-        paginationParams: pagination,
+        limit: pagination.limit,
         filters: testFilter,
         messageFilters: testMessageFilter,
       );
@@ -457,7 +457,7 @@ void main() {
             emptyBuilder: (BuildContext context) => const Offstage(),
             errorBuilder: (BuildContext context, Object error) =>
                 const Offstage(),
-            paginationParams: pagination.copyWith(limit: limit),
+            limit: limit,
             filters: testFilter,
             messageFilters: testMessageFilter,
           );
@@ -561,7 +561,7 @@ void main() {
       errorBuilder: (BuildContext context, Object? error) => const Offstage(),
       filters: testFilter,
       messageFilters: testMessageFilter,
-      paginationParams: pagination,
+      limit: pagination.limit,
     );
 
     expect(messageSearchListCore.limit, pagination.limit);

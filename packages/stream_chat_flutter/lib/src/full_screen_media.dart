@@ -5,11 +5,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/gallery_footer.dart';
 import 'package:stream_chat_flutter/src/gallery_header.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Return action for coming back from pages
 enum ReturnActionType {
@@ -112,6 +112,8 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                               attachment.assetUrl ??
                               attachment.thumbUrl;
                           return PhotoView(
+                            loadingBuilder: (context, image) =>
+                                const Offstage(),
                             imageProvider: (imageUrl == null &&
                                     attachment.localUri != null &&
                                     attachment.file?.bytes != null)

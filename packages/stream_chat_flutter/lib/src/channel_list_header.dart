@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_neumorphic_button.dart';
@@ -121,12 +122,16 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
 
         final chatThemeData = StreamChatTheme.of(context);
         final channelListHeaderThemeData = ChannelListHeaderTheme.of(context);
+        final theme = Theme.of(context);
         return InfoTile(
           showMessage: showConnectionStateTile && showStatus,
           message: statusString,
           child: AppBar(
-            textTheme: Theme.of(context).textTheme,
-            brightness: Theme.of(context).brightness,
+            toolbarTextStyle: theme.textTheme.bodyText2,
+            titleTextStyle: theme.textTheme.headline6,
+            systemOverlayStyle: theme.brightness == Brightness.dark
+                ? SystemUiOverlayStyle.light
+                : SystemUiOverlayStyle.dark,
             elevation: 1,
             backgroundColor:
                 backgroundColor ?? channelListHeaderThemeData.color,
