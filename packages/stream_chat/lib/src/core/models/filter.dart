@@ -166,7 +166,7 @@ class Filter extends Equatable {
   factory Filter.autoComplete(String key, String text) =>
       Filter._(operator: FilterOperator.autoComplete, key: key, value: text);
 
-  /// Matches values that exist.
+  /// Matches values that exist/don't exist based on the specified boolean value.
   factory Filter.exists(String key, {bool exists = true}) =>
       Filter._(operator: FilterOperator.exists, key: key, value: exists);
 
