@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- `Filter.notExists` now replaces `Filter.exists(key, exists: false)`.
+- Added `Filter.notExists`.
 
 ## 3.0.0
 
