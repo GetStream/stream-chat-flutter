@@ -26,7 +26,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import 'package:collection/collection.dart' show IterableExtension;
+import 'package:collection/collection.dart'
+    show IterableExtension, ListEquality;
 
 /// All Groups
 enum EmojiGroup {
@@ -114240,7 +114241,6 @@ final emojiRegex = RegExp(
 class Emoji {
   static const variationSelector16 = 65039;
   static const ZWJ = 8205;
-
   final String? name;
   final String? char;
   final String? shortName;
@@ -114252,14 +114252,39 @@ class Emoji {
 
   /// Emoji class.
   /// [name] of emoji. [char] and character of emoji. [shortName] and a digest name of emoji, [emojiGroup] is emoji's group and [emojiSubgroup] is emoji's subgroup. [keywords] list of keywords for emoji. [modifiable] `true` if emoji has skin.
-  Emoji(
-      {this.name,
-      this.char,
-      this.shortName,
-      this.emojiGroup,
-      this.emojiSubgroup,
-      this.keywords = const [],
-      this.modifiable = false});
+  Emoji({
+    this.name,
+    this.char,
+    this.shortName,
+    this.emojiGroup,
+    this.emojiSubgroup,
+    this.keywords = const [],
+    this.modifiable = false,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Emoji &&
+          runtimeType == other.runtimeType &&
+          name == other.name &&
+          char == other.char &&
+          shortName == other.shortName &&
+          emojiGroup == other.emojiGroup &&
+          emojiSubgroup == other.emojiSubgroup &&
+          const ListEquality().equals(keywords, other.keywords) &&
+          modifiable == other.modifiable;
+
+  @override
+  int get hashCode => Object.hash(
+        name.hashCode,
+        char.hashCode,
+        shortName.hashCode,
+        emojiGroup.hashCode,
+        emojiSubgroup.hashCode,
+        keywords.hashCode,
+        modifiable.hashCode,
+      );
 
   /// Runes of Emoji Character
   List<int> get charRunes {
@@ -114339,9 +114364,11 @@ class Emoji {
     return _emojis.firstWhereOrNull((Emoji emoji) => emoji.name == name);
   }
 
-  /// Returns Emoji by [name] as short name.
-  static Emoji? byShortName(String name) {
-    return _emojis.firstWhereOrNull((Emoji emoji) => emoji.char == name);
+  /// Returns Emoji by [shortName] as short name.
+  static Emoji? byShortName(String shortName) {
+    return _emojis.firstWhereOrNull(
+      (Emoji emoji) => emoji.shortName == shortName,
+    );
   }
 
   /// Returns list of Emojis in a same [group]

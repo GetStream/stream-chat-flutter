@@ -85,9 +85,7 @@ class ChannelListPage extends StatelessWidget {
           ),
           channelPreviewBuilder: _channelPreviewBuilder,
           // sort: [SortOption('last_message_at')],
-          pagination: const PaginationParams(
-            limit: 20,
-          ),
+          limit: 20,
           channelWidget: const ChannelPage(),
         ),
       ),
