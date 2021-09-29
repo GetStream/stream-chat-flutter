@@ -46,12 +46,12 @@ class Token extends Equatable {
   /// Creates a [Token] instance from the provided [rawValue] if it's valid.
   factory Token.fromRawValue(String rawValue) {
     final jwtBody = JsonWebToken.unverified(rawValue);
-    final userId = jwtBody.claims.getTyped<String>('user_id');
+    final userId = jwtBody.claims.getTyped('user_id');
     assert(
       userId != null,
       'Invalid `token`, It should contain `user_id`',
     );
-    return Token._(rawValue: rawValue, userId: userId!, authType: AuthType.jwt);
+    return Token._(rawValue: rawValue, userId: userId!.toString(), authType: AuthType.jwt);
   }
 
   /// The token which can be used during the development.
