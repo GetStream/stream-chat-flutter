@@ -67,7 +67,6 @@ class UserMentionsOverlay extends StatefulWidget {
 
 class _UserMentionsOverlayState extends State<UserMentionsOverlay> {
   late Future<List<User>> userMentionsFuture;
-  late List<User> initialMentions = membersAndWatchers;
 
   @override
   void initState() {
@@ -102,8 +101,9 @@ class _UserMentionsOverlayState extends State<UserMentionsOverlay> {
         decoration: BoxDecoration(color: theme.colorTheme.barsBg),
         child: FutureBuilder<List<User>>(
           future: userMentionsFuture,
-          initialData: initialMentions,
           builder: (context, snapshot) {
+            if (snapshot.hasError) return const Offstage();
+            if (!snapshot.hasData) return const Offstage();
             final users = snapshot.data!;
             return ListView.builder(
               padding: const EdgeInsets.all(0),
