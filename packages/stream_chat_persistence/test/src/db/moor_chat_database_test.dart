@@ -1,8 +1,8 @@
-import 'package:test/test.dart';
 import 'package:moor/ffi.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart' hide isNotNull;
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
+import 'package:test/test.dart';
 
 DatabaseConnection _backgroundConnection() =>
     DatabaseConnection.fromExecutor(VmDatabase.memory());

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
 /// It shows a date divider depending on the date difference
 class DateDivider extends StatelessWidget {

@@ -9,7 +9,6 @@ void main() {
       final thierry = User(id: 'thierry', name: 'Thierry');
       final users = [tommaso, thierry];
 
-      final a = users.search('Tom');
       expect(users.search('Tom'), [tommaso]);
       expect(users.search('Thier'), [thierry]);
     });
