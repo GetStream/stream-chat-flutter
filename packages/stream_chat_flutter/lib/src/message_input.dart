@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -878,24 +879,11 @@ class MessageInputState extends State<MessageInput> {
 
   void _checkCommands(String s, BuildContext context) {
     if (s.startsWith('/')) {
-      final matchedCommandsList = StreamChannel.of(context)
-              .channel
-              .config
-              ?.commands
-              .where((element) => element.name == s.substring(1))
-              .toList() ??
-          [];
-
-      if (matchedCommandsList.length == 1) {
-        _chosenCommand = matchedCommandsList[0];
-        textEditingController.clear();
-
-        if (_showCommandsOverlay) {
-          setState(() {
-            _commandEnabled = true;
-            _showCommandsOverlay = false;
-          });
-        }
+      final allCommands = StreamChannel.of(context).channel.config?.commands;
+      final command =
+          allCommands?.firstWhereOrNull((it) => it.name == s.substring(1));
+      if (command != null) {
+        return _setCommand(command);
       } else if (!_showCommandsOverlay) {
         setState(() {
           _showCommandsOverlay = true;
