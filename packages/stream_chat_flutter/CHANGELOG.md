@@ -34,6 +34,10 @@
 
 - `UserListView` `filter` property now is non-nullable.
 
+✅ Added
+
+- `MessageListViewThemeData` now accepts a `DecorationImage` as a background image for `MessageListView`.
+
 🐞 Fixed
 
 - [[#668]](https://github.com/GetStream/stream-chat-flutter/issues/668): Fix `MessageInput` rendering errors in case
