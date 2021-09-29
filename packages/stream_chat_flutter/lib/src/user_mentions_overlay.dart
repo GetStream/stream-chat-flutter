@@ -30,7 +30,7 @@ class UserMentionsOverlay extends StatefulWidget {
           'Channel ${channel.cid} is not yet initialized',
         ),
         assert(
-          mentionAllAppUsers && client != null,
+          !mentionAllAppUsers || (mentionAllAppUsers && client != null),
           'StreamChatClient is required in order to use mentionAllAppUsers',
         ),
         super(key: key);
