@@ -56,11 +56,23 @@ typedef AttachmentThumbnailBuilder = Widget Function(
   Attachment,
 );
 
-/// Builder function for building a mention tile
-/// Use [MentionTile] for the default implementation
+/// Builder function for building a mention tile.
+///
+/// Use [MentionTile] for the default implementation.
+@Deprecated(
+  'Use `UserMentionTileBuilder` instead. Will be removed in future release',
+)
 typedef MentionTileBuilder = Widget Function(
   BuildContext context,
   Member member,
+);
+
+/// Builder function for building a user mention tile.
+///
+/// Use [UserMentionTile] for the default implementation.
+typedef UserMentionTileBuilder = Widget Function(
+  BuildContext context,
+  User user,
 );
 
 /// Widget builder for action button.
@@ -184,7 +196,9 @@ class MessageInput extends StatefulWidget {
     this.idleSendButton,
     this.activeSendButton,
     this.showCommandsButton = true,
-    this.mentionsTileBuilder,
+    @Deprecated('''Use `userMentionsTileBuilder` instead. Will be removed in future release''')
+        this.mentionsTileBuilder,
+    this.userMentionsTileBuilder,
     this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
     this.compressedVideoQuality = VideoQuality.DefaultQuality,
     this.compressedVideoFrameRate = 30,
@@ -279,8 +293,11 @@ class MessageInput extends StatefulWidget {
   /// Send button widget in an active state
   final Widget? activeSendButton;
 
-  /// Customize the tile for the mentions overlay
+  /// Customize the tile for the mentions overlay.
   final MentionTileBuilder? mentionsTileBuilder;
+
+  /// Customize the tile for the mentions overlay.
+  final UserMentionTileBuilder? userMentionsTileBuilder;
 
   /// A callback for error reporting
   final ErrorListener? onError;
@@ -1153,12 +1170,26 @@ class MessageInputState extends State<MessageInput> {
     // ignore: cast_nullable_to_non_nullable
     final renderObject = context.findRenderObject() as RenderBox;
 
+    var tileBuilder = widget.userMentionsTileBuilder;
+    if (tileBuilder == null && widget.mentionsTileBuilder != null) {
+      tileBuilder = (context, user) {
+        final member = Member(
+          user: user,
+          userId: user.id,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        );
+        return widget.mentionsTileBuilder!.call(context, member);
+      };
+    }
+
     return UserMentionsOverlay(
       query: query,
       mentionAllAppUsers: widget.mentionAllAppUsers,
       client: StreamChat.of(context).client,
       channel: StreamChannel.of(context).channel,
       size: Size(renderObject.size.width - 16, 400),
+      mentionsTileBuilder: tileBuilder,
       onMentionUserTap: (user) {
         _mentionedUsers.add(user);
         splits[splits.length - 1] = user.name;
