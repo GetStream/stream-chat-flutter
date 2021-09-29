@@ -57,11 +57,6 @@ typedef AttachmentThumbnailBuilder = Widget Function(
 );
 
 /// Builder function for building a mention tile.
-///
-/// Use [UserMentionTile] for the default implementation.
-@Deprecated(
-  'Use `UserMentionTileBuilder` instead. Will be removed in future release',
-)
 typedef MentionTileBuilder = Widget Function(
   BuildContext context,
   Member member,
