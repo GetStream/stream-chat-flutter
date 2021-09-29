@@ -152,13 +152,9 @@ class StreamChannelState extends State<StreamChannel> {
     int limit = 20,
   }) {
     if (direction == QueryDirection.top) {
-      return _queryTopMessages(
-        limit: limit,
-      );
+      return _queryTopMessages(limit: limit);
     }
-    return _queryBottomMessages(
-      limit: limit,
-    );
+    return _queryBottomMessages(limit: limit);
   }
 
   /// Calls [channel.getReplies] updating [queryMessage] stream
@@ -309,6 +305,20 @@ class StreamChannelState extends State<StreamChannel> {
       message = response.messages.first;
     }
     return message;
+  }
+
+  /// Query channel members.
+  Future<List<Member>> queryMembers({
+    Filter? filter,
+    List<SortOption>? sort,
+    PaginationParams? pagination,
+  }) async {
+    final response = await channel.queryMembers(
+      filter: filter,
+      sort: sort,
+      pagination: pagination,
+    );
+    return response.members;
   }
 
   /// Reloads the channel with latest message
