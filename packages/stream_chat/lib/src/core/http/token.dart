@@ -51,7 +51,11 @@ class Token extends Equatable {
       userId != null,
       'Invalid `token`, It should contain `user_id`',
     );
-    return Token._(rawValue: rawValue, userId: userId!.toString(), authType: AuthType.jwt);
+    return Token._(
+      rawValue: rawValue,
+      userId: userId!.toString(),
+      authType: AuthType.jwt,
+    );
   }
 
   /// The token which can be used during the development.
