@@ -43,9 +43,6 @@ enum FilterOperator {
   /// Matches values that exist/don't exist based on the specified boolean value.
   exists,
 
-  /// Matches values that don't exist.
-  notExists,
-
   /// Matches all the values specified in an array.
   and,
 
