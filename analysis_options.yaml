@@ -149,12 +149,6 @@ linter:
 
 # https://dartcodemetrics.dev/docs/getting-started/introduction
 dart_code_metrics:
-  metrics-exclude:
-    - packages/*/test/**
-  metrics:
-    source-lines-of-code: 90
-    maximum-nesting-level: 5
-    halstead-volume: 150
   rules:
     # Dart Specific
     - binary-expression-operand-order
@@ -162,6 +156,7 @@ dart_code_metrics:
     - prefer-match-file-name:
         exclude:
           - packages/*/test/**
+          - packages/*/example/**
           - packages/**/util/**
           - packages/**/utils.dart
           - packages/stream_chat/lib/src/client/client.dart
@@ -182,4 +177,3 @@ dart_code_metrics:
     # Flutter specific
     - always-remove-listener
     - avoid-unnecessary-setstate
-    - avoid-wrapping-in-padding

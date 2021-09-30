@@ -251,26 +251,29 @@ class _GalleryFooterState extends State<GalleryFooter> {
                         children: [
                           media,
                           if (widget.message.user != null)
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              clipBehavior: Clip.antiAlias,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.6),
-                                boxShadow: [
-                                  BoxShadow(
-                                    blurRadius: 8,
-                                    color: chatThemeData
-                                        .colorTheme.textHighEmphasis
-                                        .withOpacity(0.3),
-                                  ),
-                                ],
-                              ),
-                              child: UserAvatar(
-                                user: widget.message.user!,
-                                constraints:
-                                    BoxConstraints.tight(const Size(24, 24)),
-                                showOnlineStatus: false,
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                clipBehavior: Clip.antiAlias,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withOpacity(0.6),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      blurRadius: 8,
+                                      color: chatThemeData
+                                          .colorTheme.textHighEmphasis
+                                          .withOpacity(0.3),
+                                    ),
+                                  ],
+                                ),
+                                child: UserAvatar(
+                                  user: widget.message.user!,
+                                  constraints:
+                                      BoxConstraints.tight(const Size(24, 24)),
+                                  showOnlineStatus: false,
+                                ),
                               ),
                             ),
                         ],

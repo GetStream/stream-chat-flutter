@@ -1,4 +1,4 @@
-name: example
+name: stream_chat_flutter_example
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -27,18 +27,9 @@ dependencies:
   cupertino_icons: ^1.0.3
   flutter:
     sdk: flutter
-
-dependency_overrides:
-  stream_chat:
-    path: ../../stream_chat
-  stream_chat_flutter:
-    path: ../../stream_chat_flutter
-  stream_chat_flutter_core:
-    path: ../../stream_chat_flutter_core
-  stream_chat_localizations:
-    path: ../../stream_chat_localizations
-  stream_chat_persistence:
-    path: ../../stream_chat_persistence
+  stream_chat_flutter: ^2.2.1
+  stream_chat_localizations: ^1.1.0
+  stream_chat_persistence: ^2.2.0
 
 dev_dependencies:
   flutter_test:

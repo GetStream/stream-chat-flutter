@@ -1,4 +1,4 @@
-name: example
+name: stream_chat_persistence_example
 description: A new Flutter project.
 
 publish_to: 'none' 
@@ -11,12 +11,8 @@ dependencies:
   cupertino_icons: ^1.0.3
   flutter:
     sdk: flutter
-
-dependency_overrides:
-  stream_chat:
-    path: ../../stream_chat
-  stream_chat_persistence:
-    path: ../../stream_chat_persistence
+  stream_chat: ^2.2.1
+  stream_chat_persistence: ^2.2.0
 
 dev_dependencies:
   flutter_test:

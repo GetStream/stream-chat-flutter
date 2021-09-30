@@ -752,28 +752,31 @@ class MessageInputState extends State<MessageInput> {
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
+                Padding(
                   padding: const EdgeInsets.all(8),
-                  constraints: BoxConstraints.tight(const Size(64, 24)),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: _streamChatTheme.colorTheme.accentPrimary,
-                  ),
-                  alignment: Alignment.center,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      StreamSvgIcon.lightning(
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                      Text(
-                        _chosenCommand?.name.toUpperCase() ?? '',
-                        style: _streamChatTheme.textTheme.footnoteBold.copyWith(
+                  child: Container(
+                    constraints: BoxConstraints.tight(const Size(64, 24)),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: _streamChatTheme.colorTheme.accentPrimary,
+                    ),
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        StreamSvgIcon.lightning(
                           color: Colors.white,
+                          size: 16,
                         ),
-                      ),
-                    ],
+                        Text(
+                          _chosenCommand?.name.toUpperCase() ?? '',
+                          style:
+                              _streamChatTheme.textTheme.footnoteBold.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -1024,8 +1027,10 @@ class MessageInputState extends State<MessageInput> {
                                   _attachments.isNotEmpty)
                           ? null
                           : () {
-                              pickFile(DefaultAttachmentTypes.image,
-                                  camera: true);
+                              pickFile(
+                                DefaultAttachmentTypes.image,
+                                camera: true,
+                              );
                             },
                     ),
                     IconButton(
@@ -1038,8 +1043,10 @@ class MessageInputState extends State<MessageInput> {
                                   _attachments.isNotEmpty)
                           ? null
                           : () {
-                              pickFile(DefaultAttachmentTypes.video,
-                                  camera: true);
+                              pickFile(
+                                DefaultAttachmentTypes.video,
+                                camera: true,
+                              );
                             },
                     ),
                   ],
@@ -1053,13 +1060,15 @@ class MessageInputState extends State<MessageInput> {
                     ),
                   ),
                   child: Center(
-                    child: Container(
-                  width: 40,
-                  height: 4,
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: _streamChatTheme.colorTheme.inputBg,
-                    borderRadius: BorderRadius.circular(4),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: _streamChatTheme.colorTheme.inputBg,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                       ),
                     ),
                   ),

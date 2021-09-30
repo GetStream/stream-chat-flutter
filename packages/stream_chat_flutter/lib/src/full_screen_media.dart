@@ -112,8 +112,8 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                         attachment.assetUrl ??
                         attachment.thumbUrl;
                     return PhotoView(
-                      loadingBuilder: (context, image) =>
-                                const Offstage(),imageProvider: (imageUrl == null &&
+                      loadingBuilder: (context, image) => const Offstage(),
+                      imageProvider: (imageUrl == null &&
                               attachment.localUri != null &&
                               attachment.file?.bytes != null)
                           ? Image.memory(attachment.file!.bytes!).image

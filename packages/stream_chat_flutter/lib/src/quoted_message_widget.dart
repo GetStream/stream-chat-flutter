@@ -189,7 +189,7 @@ class QuotedMessageWidget extends StatelessWidget {
           image: DecorationImage(
             fit: BoxFit.cover,
             image: CachedNetworkImageProvider(
-              attachment.imageUrl!,
+              attachment.thumbUrl!,
             ),
           ),
         ),
