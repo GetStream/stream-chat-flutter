@@ -1174,7 +1174,7 @@ class MessageInputState extends State<MessageInput> {
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         );
-        return widget.mentionsTileBuilder!.call(context, member);
+        return widget.mentionsTileBuilder!(context, member);
       };
     }
 
