@@ -1,3 +1,16 @@
+## Upcoming
+
+✅ Added
+
+- Added `MessageInput.customOverlays` property to add custom overlays to the message input.
+- Added `MessageInput.mentionAllAppUsers` property to mention all app users in the message input.
+- The `MessageInput` now supports local search for channels with less than 100 members.
+
+⚠️ Deprecated
+
+- `MessageInput.mentionsTileBuilder` is now deprecated in favor of `MessageInput.userMentionsTileBuilder`.
+- `MentionTile` is now deprecated in favor of `UserMentionsTile`.
+
 ## 3.0.0
 
 - Updated `stream_chat_flutter_core` dependency to [`3.0.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
