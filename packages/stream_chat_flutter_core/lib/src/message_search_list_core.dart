@@ -18,9 +18,9 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: MessageSearchListCore(
-///               messageQuery: _messageFilter,
-///               filters: _channelsFilter,
-///               paginationParams: PaginationParams(limit: 20),
+///         messageQuery: _messageFilter,
+///         filters: _channelsFilter,
+///         limit: 20,
 ///       ),
 ///     );
 ///   }

@@ -7,10 +7,9 @@ import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
-
-import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 
 /// A Helper class to construct new instances of [MoorChatDatabase] specifically
 /// for native platform applications

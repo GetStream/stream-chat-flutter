@@ -263,9 +263,11 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       final channel = MockChannel();
+      final channelState = MockChannelState();
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.state).thenReturn(channelState);
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);

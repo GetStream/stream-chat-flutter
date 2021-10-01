@@ -351,7 +351,7 @@ class Channel {
   Future<bool> get initialized => _initializedCompleter.future;
 
   final _cancelableAttachmentUploadRequest = <String, CancelToken>{};
-  final _messageAttachmentsUploadCompleter = <String, Completer>{};
+  final _messageAttachmentsUploadCompleter = <String, Completer<Message>>{};
 
   /// Cancels [attachmentId] upload request. Throws exception if the request
   /// hasn't even started yet, Already completed or Already cancelled.
@@ -382,12 +382,10 @@ class Channel {
     String messageId,
     Iterable<String> attachmentIds,
   ) {
-    final message = [
+    var message = [
       ...state!.messages,
       ...state!.threads.values.expand((messages) => messages),
-    ].firstWhereOrNull(
-      (it) => it.id == messageId,
-    );
+    ].firstWhereOrNull((it) => it.id == messageId);
 
     if (message == null) {
       throw const StreamChatError('Error, Message not found');
@@ -409,11 +407,15 @@ class Channel {
     client.logger.info('Found ${attachments.length} attachments');
 
     void updateAttachment(Attachment attachment) {
-      final index =
-          message.attachments.indexWhere((it) => it.id == attachment.id);
+      final index = message!.attachments.indexWhere(
+        (it) => it.id == attachment.id,
+      );
       if (index != -1) {
-        message.attachments[index] = attachment;
-        state?.addMessage(message);
+        final newAttachments = [...message!.attachments]..[index] = attachment;
+        final updatedMessage = message!.copyWith(attachments: newAttachments);
+        state?.addMessage(updatedMessage);
+        // updating original message for next iteration
+        message = message!.merge(updatedMessage);
       }
     }
 
@@ -476,7 +478,7 @@ class Channel {
         _cancelableAttachmentUploadRequest.remove(it.id);
       });
     })).whenComplete(() {
-      if (message.attachments.every((it) => it.uploadState.isSuccess)) {
+      if (message!.attachments.every((it) => it.uploadState.isSuccess)) {
         _messageAttachmentsUploadCompleter.remove(messageId)?.complete(message);
       }
     });
@@ -1076,33 +1078,7 @@ class Channel {
     } else {
       // remove the passed message if response does
       // not contain message
-      final oldIndex = state!.messages.indexWhere((m) => m.id == messageId);
-
-      // remove regular message if present
-      if (oldIndex != -1) {
-        final oldMessage = state!.messages[oldIndex];
-        state!.updateChannelState(state!._channelState.copyWith(
-          messages: state?.messages?..remove(oldMessage),
-          channel: state?._channelState.channel,
-        ));
-      } else {
-        // remove thread message if present
-        // also reduces total reply count
-        final oldMessage = state!.threads.values
-            .expand((messages) => messages)
-            .firstWhereOrNull((m) => m.id == messageId);
-        if (oldMessage?.parentId != null) {
-          final parentMessage = state!.messages.firstWhereOrNull(
-            (element) => element.id == oldMessage!.parentId,
-          );
-          if (parentMessage != null) {
-            state!.addMessage(parentMessage.copyWith(
-                replyCount: parentMessage.replyCount! - 1));
-          }
-          state!.updateThreadInfo(oldMessage!.parentId!,
-              state!.threads[oldMessage.parentId!]!..remove(oldMessage));
-        }
-      }
+      state!.removeMessage(message);
       await _client.chatPersistenceClient?.deleteMessageById(messageId);
     }
     return res;
@@ -1704,7 +1680,7 @@ class ChannelClientState {
     }));
   }
 
-  /// Add a message to this channel.
+  /// Add a [message] to this [channelState].
   void addMessage(Message message) {
     if (message.parentId == null || message.showInChannel == true) {
       final newMessages = List<Message>.from(_channelState.messages);
@@ -1732,6 +1708,35 @@ class ChannelClientState {
 
     if (message.parentId != null) {
       updateThreadInfo(message.parentId!, [message]);
+    }
+  }
+
+  /// Remove a [message] from this [channelState].
+  void removeMessage(Message message) {
+    final parentId = message.parentId;
+    // i.e. it's a thread message
+    // 1. Remove the thread message
+    // 2. Reduce total reply count of parent message
+    if (parentId != null) {
+      final allMessages = [...messages];
+      final parentMessage = allMessages.firstWhereOrNull(
+        (it) => it.id == parentId,
+      );
+
+      // return if message not available in the memory
+      if (parentMessage == null) return;
+      final replyCount = parentMessage.replyCount;
+      // return if reply count is null or zero
+      if (replyCount == null || replyCount == 0) return;
+
+      addMessage(parentMessage.copyWith(replyCount: replyCount - 1));
+      updateThreadInfo(parentId, threads[parentId]!..remove(message));
+    } else {
+      // Remove regular message
+      final allMessages = [...messages];
+      if (allMessages.remove(message)) {
+        _channelState = _channelState.copyWith(messages: allMessages);
+      }
     }
   }
 
@@ -1862,15 +1867,11 @@ class ChannelClientState {
 
     if (newThreads.containsKey(parentId)) {
       newThreads[parentId] = [
-        ...newThreads[parentId]
-                ?.where(
-                    (newMessage) => !messages.any((m) => m.id == newMessage.id))
-                .toList() ??
-            [],
         ...messages,
-      ];
-
-      newThreads[parentId]!.sort(_sortByCreatedAt);
+        ...newThreads[parentId]!.where(
+          (newMessage) => !messages.any((m) => m.id == newMessage.id),
+        ),
+      ]..sort(_sortByCreatedAt);
     } else {
       newThreads[parentId] = messages;
     }

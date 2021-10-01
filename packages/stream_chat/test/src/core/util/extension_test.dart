@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:stream_chat/src/core/util/extension.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('`.withNullifyer` converts the type into non-nullable', () {

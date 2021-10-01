@@ -66,6 +66,12 @@ class UserAvatar extends StatelessWidget {
     final placeholder =
         this.placeholder ?? streamChatTheme.placeholderUserImage;
 
+    final backupGradientAvatar = ClipRRect(
+      borderRadius: borderRadius ??
+          streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius,
+      child: streamChatTheme.defaultUserImage(context, user),
+    );
+
     Widget avatar = FittedBox(
       fit: BoxFit.cover,
       child: Container(
@@ -76,8 +82,7 @@ class UserAvatar extends StatelessWidget {
                 fit: BoxFit.cover,
                 filterQuality: FilterQuality.high,
                 imageUrl: user.image!,
-                errorWidget: (context, __, ___) =>
-                    streamChatTheme.defaultUserImage(context, user),
+                errorWidget: (context, __, ___) => backupGradientAvatar,
                 placeholder: placeholder != null
                     ? (context, __) => placeholder(context, user)
                     : null,
@@ -91,11 +96,7 @@ class UserAvatar extends StatelessWidget {
                   ),
                 ),
               )
-            : ClipRRect(
-                borderRadius: borderRadius ??
-                    streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius,
-                child: streamChatTheme.defaultUserImage(context, user),
-              ),
+            : backupGradientAvatar,
       ),
     );
 

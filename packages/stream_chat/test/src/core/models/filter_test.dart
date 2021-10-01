@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:test/test.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('operators', () {
@@ -114,7 +114,7 @@ void main() {
 
     test('notExists', () {
       const key = 'testKey';
-      final filter = Filter.exists(key, exists: false);
+      final filter = Filter.notExists(key);
       expect(filter.key, key);
       expect(filter.value, isFalse);
       expect(filter.operator, FilterOperator.exists.rawValue);

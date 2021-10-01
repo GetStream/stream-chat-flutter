@@ -44,5 +44,6 @@ export 'src/unread_indicator.dart';
 export 'src/user_avatar.dart';
 export 'src/user_item.dart';
 export 'src/user_list_view.dart';
+export 'src/user_mention_tile.dart';
 export 'src/utils.dart';
 export 'src/visible_footnote.dart';

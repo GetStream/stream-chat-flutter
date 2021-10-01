@@ -1,15 +1,41 @@
 ## Upcoming
 
+✅ Added
+
+- Added `MessageInput.customOverlays` property to add custom overlays to the message input.
+- Added `MessageInput.mentionAllAppUsers` property to mention all app users in the message input.
+- The `MessageInput` now supports local search for channels with less than 100 members.
+
+⚠️ Deprecated
+
+- `MessageInput.mentionsTileBuilder` is now deprecated in favor of `MessageInput.userMentionsTileBuilder`.
+- `MentionTile` is now deprecated in favor of `UserMentionsTile`.
+
+## 3.0.0
+
+- Updated `stream_chat_flutter_core` dependency to [`3.0.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
+🛑️ Breaking Changes from `2.2.1`
+
+- `UserListView` `filter` property now is non-nullable.
+
 🐞 Fixed
 
 - [[#668]](https://github.com/GetStream/stream-chat-flutter/issues/668): Fix `MessageInput` rendering errors in case
   there are no actions available to show.
 - [[#349]](https://github.com/GetStream/stream-chat-flutter/issues/349): Fix `MessageInput` attachment render overflow error.
+- `MessageInput` overlays now follow the `MessageInput` focus.
 - [[#674]](https://github.com/GetStream/stream-chat-flutter/issues/674): Check scrollController is attached before calling jump in MessageListView.
+- Fixed `MessageListView` header and footer when `reverse: false`.
 
 🔄 Changed
 
 - Animation curves changed from default `Curves.linear` to `Curves.easeOut` and `Curves.easeIn` for attachment controls.
+- Removed default padding in `DateDivider` in `MessageListView`
+
+✅ Added
+
+- Added `MessageInput.customPortalOptions` property to add custom overlays to the `MessageInput`.
 
 ## 2.2.1
 
