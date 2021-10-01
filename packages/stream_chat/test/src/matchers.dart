@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart' show MultipartFile;
 import 'package:stream_chat/src/client/channel.dart';
+import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/message.dart';
@@ -46,12 +47,16 @@ Matcher isSameMessageAs(
   bool matchText = false,
   bool matchReactions = false,
   bool matchSendingStatus = false,
+  bool matchAttachments = false,
+  bool matchAttachmentsUploadState = false,
 }) =>
     _IsSameMessageAs(
       targetMessage: targetMessage,
       matchText: matchText,
       matchReactions: matchReactions,
       matchSendingStatus: matchSendingStatus,
+      matchAttachments: matchAttachments,
+      matchAttachmentsUploadState: matchAttachmentsUploadState,
     );
 
 class _IsSameMessageAs extends Matcher {
@@ -60,12 +65,16 @@ class _IsSameMessageAs extends Matcher {
     this.matchText = false,
     this.matchReactions = false,
     this.matchSendingStatus = false,
+    this.matchAttachments = false,
+    this.matchAttachmentsUploadState = false,
   });
 
   final Message targetMessage;
   final bool matchText;
   final bool matchReactions;
   final bool matchSendingStatus;
+  final bool matchAttachments;
+  final bool matchAttachmentsUploadState;
 
   @override
   Description describe(Description description) =>
@@ -95,6 +104,56 @@ class _IsSameMessageAs extends Matcher {
           targetMessage.latestReactions
               ?.map((it) => '${it.type}-${it.messageId}')
               .toList());
+    }
+    if (matchAttachments) {
+      bool matchAttachments() {
+        final attachments = message.attachments;
+        final targetAttachments = targetMessage.attachments;
+        if (identical(attachments, targetAttachments)) return true;
+        final length = attachments.length;
+        if (length != targetAttachments.length) return false;
+        for (var i = 0; i < length; i++) {
+          if (!isSameAttachmentAs(
+            attachments[i],
+            matchUploadState: matchAttachmentsUploadState,
+          ).matches(targetAttachments[i], matchState)) return false;
+        }
+        return true;
+      }
+
+      matches &= matchAttachments();
+    }
+    return matches;
+  }
+}
+
+Matcher isSameAttachmentAs(
+  Attachment targetAttachment, {
+  bool matchUploadState = false,
+}) =>
+    _IsSameAttachmentAs(
+      targetAttachment: targetAttachment,
+      matchUploadState: matchUploadState,
+    );
+
+class _IsSameAttachmentAs extends Matcher {
+  const _IsSameAttachmentAs({
+    required this.targetAttachment,
+    this.matchUploadState = false,
+  });
+
+  final Attachment targetAttachment;
+  final bool matchUploadState;
+
+  @override
+  Description describe(Description description) =>
+      description.add('is same attachment as $targetAttachment');
+
+  @override
+  bool matches(covariant Attachment attachment, Map matchState) {
+    var matches = attachment.id == targetAttachment.id;
+    if (matchUploadState) {
+      matches &= attachment.uploadState == targetAttachment.uploadState;
     }
     return matches;
   }

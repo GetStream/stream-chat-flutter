@@ -104,7 +104,16 @@ Filter.autoComplete('name', 'demo')
 The 'exists' filter matches values that exist, or don't exist, based on the specified boolean value.
 
 ```dart
-Filter.exists('name', true)
+Filter.exists('name')
+```
+
+#### Filter.notExists
+
+The 'notExists' filter checks if the specified key doesn't exist. This is a simplified call to `Filter.exists`
+with the value set to false.
+
+```dart
+Filter.notExists('name')
 ```
 
 #### Filter.contains

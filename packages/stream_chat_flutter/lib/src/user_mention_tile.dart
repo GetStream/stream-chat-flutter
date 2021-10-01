@@ -4,11 +4,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// This widget is used for showing user tiles for mentions
 /// Use [title], [subtitle], [leading], [trailing] for
 /// substituting widgets in respective positions
-@Deprecated('Use `UserMentionTile` instead. Will be removed in future release')
-class MentionTile extends StatelessWidget {
-  /// Constructor for creating a [MentionTile] widget
-  const MentionTile(
-    this.member, {
+class UserMentionTile extends StatelessWidget {
+  /// Constructor for creating a [UserMentionTile] widget
+  const UserMentionTile(
+    this.user, {
     Key? key,
     this.title,
     this.subtitle,
@@ -16,8 +15,8 @@ class MentionTile extends StatelessWidget {
     this.trailing,
   }) : super(key: key);
 
-  /// Member to display in the tile
-  final Member member;
+  /// User to display in the tile
+  final User user;
 
   /// Widget to display as title
   final Widget? title;
@@ -43,17 +42,10 @@ class MentionTile extends StatelessWidget {
           ),
           leading ??
               UserAvatar(
-                constraints: BoxConstraints.tight(
-                  const Size(
-                    40,
-                    40,
-                  ),
-                ),
-                user: member.user!,
+                user: user,
+                constraints: BoxConstraints.tight(const Size(40, 40)),
               ),
-          const SizedBox(
-            width: 8,
-          ),
+          const SizedBox(width: 8),
           Expanded(
             child: Align(
               alignment: Alignment.centerLeft,
@@ -63,17 +55,15 @@ class MentionTile extends StatelessWidget {
                 children: [
                   title ??
                       Text(
-                        member.user!.name,
+                        user.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: chatThemeData.textTheme.bodyBold,
                       ),
-                  const SizedBox(
-                    height: 2,
-                  ),
+                  const SizedBox(height: 2),
                   subtitle ??
                       Text(
-                        '@${member.userId}',
+                        '@${user.id}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: chatThemeData.textTheme.footnoteBold.copyWith(
