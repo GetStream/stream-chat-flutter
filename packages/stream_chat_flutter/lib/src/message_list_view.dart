@@ -293,7 +293,6 @@ class _MessageListViewState extends State<MessageListView> {
   void Function(Message)? _onThreadTap;
   bool _showScrollToBottom = false;
   late final ItemPositionsListener _itemPositionListener;
-  late final Stream<Iterable<ItemPosition>> _itemPositionStream;
   int? _messageListLength;
   StreamChannelState? streamChannel;
   late StreamChatThemeData _streamTheme;
@@ -665,7 +664,8 @@ class _MessageListViewState extends State<MessageListView> {
         right: 0,
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
           initialData: _itemPositionListener.itemPositions.value,
-          stream: _itemPositionStream,
+          stream: _valueListenableToStreamAdapter(
+              _itemPositionListener.itemPositions),
           comparator: (a, b) {
             if (a == null || b == null) {
               return false;
@@ -1194,8 +1194,6 @@ class _MessageListViewState extends State<MessageListView> {
     _scrollController = widget.scrollController ?? ItemScrollController();
     _itemPositionListener =
         widget.itemPositionListener ?? ItemPositionsListener.create();
-    _itemPositionStream =
-        _valueListenableToStreamAdapter(_itemPositionListener.itemPositions);
 
     _getOnThreadTap();
     super.initState();
