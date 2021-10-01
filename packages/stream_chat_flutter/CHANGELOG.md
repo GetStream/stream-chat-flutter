@@ -3,6 +3,7 @@
 🐞 Fixed
 
 -[[#687]](https://github.com/GetStream/stream-chat-flutter/issues/687): Fix Users losing their place in the conversation after replying in threads.
+- Fixed floating date stream subscription causing "Bad state: stream has already been listened.” error.
 
 ✅ Added
 
