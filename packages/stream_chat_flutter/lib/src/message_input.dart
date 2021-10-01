@@ -1198,14 +1198,14 @@ class MessageInputState extends State<MessageInput> {
 
         textEditingController.value = TextEditingValue(
           text: rejoin +
-              textEditingController.text
-                                  .substring(textEditingController.selection.start,
-                                ),
-                            selection: TextSelection.collapsed(
-                              offset: rejoin.length,
-                            ),
-                          );
-                          _onChangedDebounced.cancel();
+              textEditingController.text.substring(
+                textEditingController.selection.start,
+              ),
+          selection: TextSelection.collapsed(
+            offset: rejoin.length,
+          ),
+        );
+        _onChangedDebounced.cancel();
         setState(() => _showMentionsOverlay = false);
       },
     );
