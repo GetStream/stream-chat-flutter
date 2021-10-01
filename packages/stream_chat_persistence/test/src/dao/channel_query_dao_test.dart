@@ -1,7 +1,7 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/dao/channel_query_dao.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
-import 'package:test/test.dart';
 
 import '../../stream_chat_persistence_client_test.dart';
 import '../utils/date_matcher.dart';
