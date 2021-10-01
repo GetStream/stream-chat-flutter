@@ -1497,7 +1497,7 @@ class ChannelClientState {
     }
   }
 
-  void _checkExpiredAttachmentMessages(ChannelState channelState) {
+  void _checkExpiredAttachmentMessages(ChannelState channelState) async {
     final expiredAttachmentMessagesId = channelState.messages
         .where((m) =>
             !_updatedMessagesIds.contains(m.id) &&
@@ -1508,20 +1508,24 @@ class ChannelClientState {
                     return false;
                   }
                   final uri = Uri.parse(url);
-                  if (uri.host != 'stream-io-cdn.com' ||
+                  if (!uri.host.endsWith('stream-io-cdn.com') ||
                       uri.queryParameters['Expires'] == null) {
                     return false;
                   }
-                  final expiration =
-                      DateTime.parse(uri.queryParameters['Expires']!);
+                  final secondsFromEpoch =
+                      int.parse(uri.queryParameters['Expires']!);
+                  final expiration = DateTime.fromMillisecondsSinceEpoch(
+                      secondsFromEpoch * 1000);
                   return expiration.isBefore(DateTime.now());
                 }) ==
                 true)
         .map((e) => e.id)
         .toList();
+
     if (expiredAttachmentMessagesId.isNotEmpty == true) {
-      _channel.getMessagesById(expiredAttachmentMessagesId);
+      await _channel._initializedCompleter.future;
       _updatedMessagesIds.addAll(expiredAttachmentMessagesId);
+      _channel.getMessagesById(expiredAttachmentMessagesId);
     }
   }
 
