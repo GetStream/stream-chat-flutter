@@ -167,6 +167,9 @@ class Filter extends Equatable {
   factory Filter.exists(String key, {bool exists = true}) =>
       Filter._(operator: FilterOperator.exists, key: key, value: exists);
 
+  /// Matches values that don't exist.
+  factory Filter.notExists(String key) => Filter.exists(key, exists: false);
+
   /// Matches any list that contains the specified values
   factory Filter.contains(String key, Object value) =>
       Filter._(operator: FilterOperator.contains, key: key, value: value);
