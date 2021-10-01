@@ -2,23 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
-/// Class that contains the parameters for building an overlay entry
-class OverlayOptions {
-  /// Constructs a new overlay options object
-  /// [visible] - the visibility of the overlay
-  /// [widget] - the widget to be displayed
-  OverlayOptions({
-    required this.visible,
-    required this.widget,
-  });
-
-  /// the visibility of the overlay
-  final bool visible;
-
-  /// the widget to be displayed
-  final Widget widget;
-}
-
 /// Widget that renders a single overlay widget from a list of [overlayOptions]
 /// It shows the first one that is visible
 class MultiOverlay extends StatelessWidget {
@@ -60,4 +43,21 @@ class MultiOverlay extends StatelessWidget {
       child: child,
     );
   }
+}
+
+/// Class that contains the parameters for building an overlay entry
+class OverlayOptions {
+  /// Constructs a new overlay options object
+  /// [visible] - the visibility of the overlay
+  /// [widget] - the widget to be displayed
+  OverlayOptions({
+    required this.visible,
+    required this.widget,
+  });
+
+  /// the visibility of the overlay
+  final bool visible;
+
+  /// the widget to be displayed
+  final Widget widget;
 }

@@ -17,7 +17,7 @@ import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
-import 'package:stream_chat_flutter/src/overlays.dart';
+import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
@@ -639,7 +639,7 @@ class MessageInputState extends State<MessageInput> {
         ),
         secondChild: widget.disableAttachments &&
                 !widget.showCommandsButton &&
-                widget.actions.isNotEmpty != true
+                !widget.actions.isNotEmpty
             ? const Offstage()
             : Wrap(
                 children: <Widget>[
@@ -826,6 +826,7 @@ class MessageInputState extends State<MessageInput> {
 
       final channel = StreamChannel.of(context).channel;
       if (value.isNotEmpty) {
+        // ignore: no-empty-block
         channel.keyStroke(widget.parentMessage?.id).catchError((e) {});
       }
 
