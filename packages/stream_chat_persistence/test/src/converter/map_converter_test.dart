@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
-import 'package:test/test.dart';
 
 void main() {
   group('mapToDart', () {
