@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added `Filter.notExists`.
+
 🐞 Fixed
 
 - [[#710]](https://github.com/GetStream/stream-chat-flutter/issues/710) Fixed JWT requiring using `String` as id.
