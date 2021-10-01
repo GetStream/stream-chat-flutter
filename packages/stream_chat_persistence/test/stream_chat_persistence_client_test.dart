@@ -1,9 +1,10 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:moor/ffi.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';
-import 'package:test/test.dart';
+
 import 'mock_chat_database.dart';
 import 'src/utils/date_matcher.dart';
 
