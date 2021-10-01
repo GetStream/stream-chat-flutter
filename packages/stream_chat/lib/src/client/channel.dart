@@ -1516,8 +1516,8 @@ class ChannelClientState {
               }
               final secondsFromEpoch =
                   int.parse(uri.queryParameters['Expires']!);
-                  final expiration = DateTime.fromMillisecondsSinceEpoch(
-                      secondsFromEpoch * 1000);
+              final expiration =
+                  DateTime.fromMillisecondsSinceEpoch(secondsFromEpoch * 1000);
               return expiration.isBefore(DateTime.now());
             }))
         .map((e) => e.id)
