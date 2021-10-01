@@ -1,5 +1,9 @@
 ## Upcoming
 
+🐞 Fixed
+
+-[[#687]](https://github.com/GetStream/stream-chat-flutter/issues/687): Fix Users losing their place in the conversation after replying in threads.
+
 ✅ Added
 
 - Added `MessageInput.customOverlays` property to add custom overlays to the message input.
