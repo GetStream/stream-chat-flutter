@@ -223,6 +223,7 @@ class StreamChatThemeData {
         messageLinksStyle: TextStyle(
           color: accentColor,
         ),
+        linkBackgroundColor: colorTheme.linkBg,
       ),
       otherMessageTheme: MessageThemeData(
         reactionsBackgroundColor: colorTheme.disabled,
@@ -246,6 +247,7 @@ class StreamChatThemeData {
             width: 32,
           ),
         ),
+        linkBackgroundColor: colorTheme.linkBg,
       ),
       messageInputTheme: MessageInputThemeData(
         borderRadius: BorderRadius.circular(20),
