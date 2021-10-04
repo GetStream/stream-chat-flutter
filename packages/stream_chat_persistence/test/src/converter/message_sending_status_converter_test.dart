@@ -1,6 +1,6 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/converter/message_sending_status_converter.dart';
-import 'package:test/test.dart';
 
 void main() {
   group('mapToDart', () {
