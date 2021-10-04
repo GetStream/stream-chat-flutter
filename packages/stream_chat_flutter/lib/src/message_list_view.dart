@@ -169,6 +169,7 @@ class MessageListView extends StatefulWidget {
     this.messageListController,
     this.reverse = true,
     this.paginationLimit = 20,
+    this.paginationLoadingIndicatorBuilder,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -283,6 +284,9 @@ class MessageListView extends StatefulWidget {
   /// A [MessageListController] allows pagination.
   /// Use [ChannelListController.paginateData] pagination.
   final MessageListController? messageListController;
+
+  /// Builder used to build the loading indicator shown while paginating.
+  final WidgetBuilder? paginationLoadingIndicatorBuilder;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -572,17 +576,22 @@ class _MessageListViewState extends State<MessageListView> {
                       }
                     }
 
+                    final indicatorBuilder =
+                        widget.paginationLoadingIndicatorBuilder;
+
                     if (i == itemCount - 3) {
-                      return _buildLoadingIndicator(
+                      return _loadingIndicator(
                         streamChannel!,
                         QueryDirection.top,
+                        indicatorBuilder: indicatorBuilder,
                       );
                     }
 
                     if (i == 1) {
-                      return _buildLoadingIndicator(
+                      return _loadingIndicator(
                         streamChannel!,
                         QueryDirection.bottom,
+                        indicatorBuilder: indicatorBuilder,
                       );
                     }
 
@@ -816,15 +825,17 @@ class _MessageListViewState extends State<MessageListView> {
         },
       );
 
-  Widget _buildLoadingIndicator(
+  Widget _loadingIndicator(
     StreamChannelState streamChannel,
-    QueryDirection direction,
-  ) =>
+    QueryDirection direction, {
+    WidgetBuilder? indicatorBuilder,
+  }) =>
       _LoadingIndicator(
         direction: direction,
         streamTheme: _streamTheme,
         streamChannel: streamChannel,
         isThreadConversation: _isThreadConversation,
+        indicatorBuilder: indicatorBuilder,
       );
 
   Widget _buildBottomMessage(
@@ -1290,12 +1301,14 @@ class _LoadingIndicator extends StatelessWidget {
     required this.isThreadConversation,
     required this.direction,
     required this.streamChannel,
+    this.indicatorBuilder,
   }) : super(key: key);
 
   final StreamChatThemeData streamTheme;
   final bool isThreadConversation;
   final QueryDirection direction;
   final StreamChannelState streamChannel;
+  final WidgetBuilder? indicatorBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -1314,12 +1327,13 @@ class _LoadingIndicator extends StatelessWidget {
       ),
       builder: (context, data) {
         if (!data) return const Offstage();
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(8),
-            child: CircularProgressIndicator(),
-          ),
-        );
+        return indicatorBuilder?.call(context) ??
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(8),
+                child: CircularProgressIndicator(),
+              ),
+            );
       },
     );
   }
