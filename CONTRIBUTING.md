@@ -177,6 +177,14 @@ Develop is merged into master after the team performs various automated and QA t
 
 ---
 
+# Versioning Policy
+
+All of the Stream Chat packages follow [semantic versioning (semver)](https://semver.org/).
+
+See our [versioning policy documentation](https://getstream.io/chat/docs/sdk/flutter/basics/versioning_policy/) for more information.
+
+---
+
 # Styleguides 💅
 
 ![image](https://user-images.githubusercontent.com/20601437/124241186-d17a8680-db1b-11eb-9a21-3df305674ca9.png)
