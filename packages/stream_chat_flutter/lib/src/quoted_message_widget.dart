@@ -281,7 +281,7 @@ class QuotedMessageWidget extends StatelessWidget {
 
   Color? _getBackgroundColor(BuildContext context) {
     if (_containsLinkAttachment) {
-      return StreamChatTheme.of(context).colorTheme.linkBg;
+      return messageTheme.linkBackgroundColor;
     }
     return messageTheme.messageBackgroundColor;
   }

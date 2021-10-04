@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:stream_chat_flutter/src/attachment/url_attachment.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/image_group.dart';
 import 'package:stream_chat_flutter/src/message_action.dart';
@@ -15,7 +16,6 @@ import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
-import 'package:stream_chat_flutter/src/url_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget builder for building attachments
@@ -1002,6 +1002,7 @@ class _MessageWidgetState extends State<MessageWidget>
       urlAttachment: urlAttachment,
       hostDisplayName: hostDisplayName,
       textPadding: widget.textPadding,
+      messageTheme: widget.messageTheme,
     );
   }
 
@@ -1339,7 +1340,7 @@ class _MessageWidgetState extends State<MessageWidget>
     }
 
     if (hasUrlAttachments) {
-      return _streamChatTheme.colorTheme.linkBg;
+      return widget.messageTheme.linkBackgroundColor;
     }
 
     if (isOnlyEmoji) {
