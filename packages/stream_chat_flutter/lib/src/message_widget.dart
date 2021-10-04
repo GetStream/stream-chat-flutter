@@ -987,7 +987,7 @@ class _MessageWidgetState extends State<MessageWidget>
       return widget.usernameBuilder!(context, widget.message);
     }
     return Text(
-      widget.message.user!.name,
+      widget.message.user?.name ?? '',
       maxLines: 1,
       key: usernameKey,
       style: widget.messageTheme.messageAuthorStyle,

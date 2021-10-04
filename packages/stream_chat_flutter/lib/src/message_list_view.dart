@@ -969,7 +969,7 @@ class _MessageListViewState extends State<MessageListView> {
     }
 
     final userId = StreamChat.of(context).currentUser!.id;
-    final isMyMessage = message.user!.id == userId;
+    final isMyMessage = message.user?.id == userId;
     final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
     final isNextUserSame =
         nextMessage != null && message.user!.id == nextMessage.user!.id;

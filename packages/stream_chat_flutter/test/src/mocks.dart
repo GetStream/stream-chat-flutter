@@ -5,6 +5,8 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 class MockClient extends Mock implements StreamChatClient {
   MockClient() {
     when(() => wsConnectionStatus).thenReturn(ConnectionStatus.connected);
+    when(() => wsConnectionStatusStream)
+        .thenAnswer((_) => Stream.value(ConnectionStatus.connected));
   }
 }
 
