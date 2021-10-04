@@ -11,6 +11,7 @@
 - Added `MessageInput.customOverlays` property to add custom overlays to the message input.
 - Added `MessageInput.mentionAllAppUsers` property to mention all app users in the message input.
 - The `MessageInput` now supports local search for channels with less than 100 members.
+- Added `MessageListView.paginationLoadingIndicatorBuilder` to override the default loading indicator shown while paginating the message list.
 - Added new `linkBackgroundColor` in `MessageTheme` for setting background colors of link attachments.
 
 ⚠️ Deprecated
