@@ -41,7 +41,6 @@ class Reaction {
   final User? user;
 
   /// The score of the reaction (ie. number of reactions sent)
-  @JsonKey(defaultValue: 0)
   final int score;
 
   /// The userId that sent the reaction
@@ -49,10 +48,7 @@ class Reaction {
   final String? userId;
 
   /// Reaction custom extraData
-  @JsonKey(
-    includeIfNull: false,
-    defaultValue: {},
-  )
+  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// Map of custom user extraData

@@ -31,15 +31,12 @@ class ChannelConfig {
       _$ChannelConfigFromJson(json);
 
   /// Moderation configuration
-  @JsonKey(defaultValue: 'flag')
   final String automod;
 
   /// List of available commands
-  @JsonKey(defaultValue: [])
   final List<Command> commands;
 
   /// True if the channel should send connect events
-  @JsonKey(defaultValue: false)
   final bool connectEvents;
 
   /// Date of channel creation
@@ -49,43 +46,33 @@ class ChannelConfig {
   final DateTime updatedAt;
 
   /// Max channel message length
-  @JsonKey(defaultValue: 0)
   final int maxMessageLength;
 
   /// Duration of message retention
-  @JsonKey(defaultValue: '')
   final String messageRetention;
 
   /// True if users can be muted
-  @JsonKey(defaultValue: false)
   final bool mutes;
 
   /// True if reaction are active for this channel
-  @JsonKey(defaultValue: false)
   final bool reactions;
 
   /// True if readEvents are active for this channel
-  @JsonKey(defaultValue: false)
   final bool readEvents;
 
   /// True if reply message are active for this channel
-  @JsonKey(defaultValue: false)
   final bool replies;
 
   /// True if it's possible to perform a search in this channel
-  @JsonKey(defaultValue: false)
   final bool search;
 
   /// True if typing events should be sent for this channel
-  @JsonKey(defaultValue: false)
   final bool typingEvents;
 
   /// True if it's possible to upload files to this channel
-  @JsonKey(defaultValue: false)
   final bool uploads;
 
   /// True if urls appears as attachments
-  @JsonKey(defaultValue: false)
   final bool urlEnrichment;
 
   /// Serialize to json

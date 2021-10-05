@@ -384,6 +384,9 @@ class MessageInputState extends State<MessageInput> {
   Timer? _slowModeTimer;
 
   void _startSlowMode() {
+    if (!mounted) {
+      return;
+    }
     final channel = StreamChannel.of(context).channel;
     final cooldownStartedAt = channel.cooldownStartedAt;
     if (cooldownStartedAt != null) {

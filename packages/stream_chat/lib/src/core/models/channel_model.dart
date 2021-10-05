@@ -59,7 +59,7 @@ class ChannelModel {
   final User? createdBy;
 
   /// True if this channel is frozen
-  @JsonKey(includeIfNull: false, defaultValue: false)
+  @JsonKey(includeIfNull: false)
   final bool frozen;
 
   /// The date of the last message
@@ -79,18 +79,15 @@ class ChannelModel {
   final DateTime? deletedAt;
 
   /// The count of this channel members
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly, defaultValue: 0)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final int memberCount;
 
   /// The number of seconds in a cooldown
-  @JsonKey(includeIfNull: false, defaultValue: 0)
+  @JsonKey(includeIfNull: false)
   final int cooldown;
 
   /// Map of custom channel extraData
-  @JsonKey(
-    includeIfNull: false,
-    defaultValue: {},
-  )
+  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// The team the channel belongs to

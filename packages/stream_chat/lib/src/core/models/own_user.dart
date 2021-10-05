@@ -131,23 +131,23 @@ class OwnUser extends User {
   }
 
   /// List of user devices.
-  @JsonKey(includeIfNull: false, defaultValue: <Device>[])
+  @JsonKey(includeIfNull: false)
   final List<Device> devices;
 
   /// List of users muted by the user.
-  @JsonKey(includeIfNull: false, defaultValue: <Mute>[])
+  @JsonKey(includeIfNull: false)
   final List<Mute> mutes;
 
   /// List of users muted by the user.
-  @JsonKey(includeIfNull: false, defaultValue: <Mute>[])
+  @JsonKey(includeIfNull: false)
   final List<Mute> channelMutes;
 
   /// Total unread messages by the user.
-  @JsonKey(includeIfNull: false, defaultValue: 0)
+  @JsonKey(includeIfNull: false)
   final int totalUnreadCount;
 
   /// Total unread channels by the user.
-  @JsonKey(includeIfNull: false, defaultValue: 0)
+  @JsonKey(includeIfNull: false)
   final int unreadChannels;
 
   /// Known top level fields.

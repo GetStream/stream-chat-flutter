@@ -42,7 +42,6 @@ class Member extends Equatable {
   final DateTime? inviteRejectedAt;
 
   /// True if the user has been invited to the channel
-  @JsonKey(defaultValue: false)
   final bool invited;
 
   /// The role of the user in the channel
@@ -52,15 +51,12 @@ class Member extends Equatable {
   final String? userId;
 
   /// True if the user is a moderator of the channel
-  @JsonKey(defaultValue: false)
   final bool isModerator;
 
   /// True if the member is banned from the channel
-  @JsonKey(defaultValue: false)
   final bool banned;
 
   /// True if the member is shadow banned from the channel
-  @JsonKey(defaultValue: false)
   final bool shadowBanned;
 
   /// The date of creation
