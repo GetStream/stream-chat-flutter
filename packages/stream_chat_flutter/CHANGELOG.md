@@ -1,6 +1,6 @@
-## 3.1.0
+## 3.1.1
 
-- Updated `stream_chat_flutter_core` dependency to [`3.1.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Updated `stream_chat_flutter_core` dependency to [`3.1.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 - Updated `file_picker`, `image_gallery_saver`, and `video_thumbnail` to the latest versions.
 
 🐞 Fixed
