@@ -16,6 +16,10 @@
 - `MessageInput.mentionsTileBuilder` is now deprecated in favor of `MessageInput.userMentionsTileBuilder`.
 - `MentionTile` is now deprecated in favor of `UserMentionsTile`.
 
+🔄 Changed
+
+- Add `didUpdateWidget` override in `MessageInput` widget to handle changes to `focusNode`, `textEditingController`, `initialMessage` and `editMessage`.
+
 ## 3.0.0
 
 - Updated `stream_chat_flutter_core` dependency to [`3.0.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).

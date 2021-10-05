@@ -343,7 +343,7 @@ class MessageInputState extends State<MessageInput> {
   final List<User> _mentionedUsers = [];
 
   final _imagePicker = ImagePicker();
-  late final _focusNode = widget.focusNode ?? FocusNode();
+  late FocusNode _focusNode = widget.focusNode ?? FocusNode();
   bool _inputEnabled = true;
   bool _commandEnabled = false;
   bool _showCommandsOverlay = false;
@@ -356,7 +356,7 @@ class MessageInputState extends State<MessageInput> {
   int _filePickerIndex = 0;
 
   /// The editing controller passed to the input TextField
-  late final TextEditingController textEditingController =
+  late TextEditingController textEditingController =
       widget.textEditingController ?? TextEditingController();
 
   late StreamChatThemeData _streamChatTheme;
@@ -373,11 +373,35 @@ class MessageInputState extends State<MessageInput> {
       _parseExistingMessage(widget.editMessage ?? widget.initialMessage!);
     }
     textEditingController.addListener(_onChangedDebounced);
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus) {
-        _openFilePickerSection = false;
-      }
-    });
+    _focusNode.addListener(_focusNodeListener);
+  }
+
+  @override
+  void didUpdateWidget(MessageInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update textEditingController
+    if (widget.textEditingController != null &&
+        oldWidget.textEditingController != widget.textEditingController) {
+      textEditingController.removeListener(_onChangedDebounced);
+      textEditingController = widget.textEditingController!;
+      textEditingController.addListener(_onChangedDebounced);
+    }
+
+    // Update _focusNode
+    if (widget.focusNode != null && oldWidget.focusNode != widget.focusNode) {
+      _focusNode.removeListener(_focusNodeListener);
+      _focusNode = widget.focusNode!;
+      _focusNode.addListener(_focusNodeListener);
+    }
+
+    // Parse existing message
+    if (widget.editMessage != null &&
+        oldWidget.editMessage != widget.editMessage) {
+      _parseExistingMessage(widget.editMessage!);
+    } else if (widget.initialMessage != null &&
+        oldWidget.initialMessage != widget.initialMessage) {
+      _parseExistingMessage(widget.initialMessage!);
+    }
   }
 
   int _timeOut = 0;
@@ -842,6 +866,12 @@ class MessageInputState extends State<MessageInput> {
     const Duration(milliseconds: 350),
     leading: true,
   );
+
+  void _focusNodeListener() {
+    if (_focusNode.hasFocus) {
+      _openFilePickerSection = false;
+    }
+  }
 
   String _getHint(BuildContext context) {
     if (_commandEnabled && _chosenCommand!.name == 'giphy') {
