@@ -1,4 +1,6 @@
-## Upcoming
+## 3.1.0
+
+- Updated `stream_chat_flutter_core` dependency to [`3.1.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 🐞 Fixed
 
