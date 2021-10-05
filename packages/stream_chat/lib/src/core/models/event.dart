@@ -183,7 +183,7 @@ class EventChannel extends ChannelModel {
     DateTime? deletedAt,
     required int memberCount,
     Map<String, Object?>? extraData,
-    required int cooldown,
+    int cooldown = 0,
     String? team,
   }) : super(
           id: id,
