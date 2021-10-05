@@ -303,9 +303,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                     _chipInputTextFieldState!.removeItem(user);
                                   }
                                 },
-                                pagination: PaginationParams(
-                                  limit: 25,
-                                ),
+                                limit: 25,
                                 filter: Filter.and([
                                   if (_userNameQuery.isNotEmpty)
                                     Filter.autoComplete('name', _userNameQuery),

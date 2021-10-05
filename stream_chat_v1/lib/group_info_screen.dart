@@ -525,7 +525,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           direction: SortOption.ASC,
                         ),
                       ],
-                      paginationParams: PaginationParams(limit: 20),
                       onShowMessage: (m, c) async {
                         final client = StreamChat.of(context).client;
                         final message = m;
@@ -737,9 +736,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                             setState(() {});
                           },
                           crossAxisCount: 4,
-                          pagination: PaginationParams(
-                            limit: 25,
-                          ),
+                          limit: 25,
                           filter: Filter.and(
                             [
                               if (_searchController!.text.isNotEmpty)

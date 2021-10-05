@@ -90,7 +90,7 @@ class _ChannelList extends State<ChannelList> {
                         ),
                       ],
                       pullToRefresh: false,
-                      paginationParams: PaginationParams(limit: 20),
+                      limit: 20,
                       emptyBuilder: (_) {
                         return LayoutBuilder(
                           builder: (context, viewportConstraints) {
@@ -160,9 +160,7 @@ class _ChannelList extends State<ChannelList> {
                       swipeToAction: true,
                       filter: Filter.in_('members', [user!.id]),
                       presence: true,
-                      pagination: PaginationParams(
-                        limit: 20,
-                      ),
+                      limit: 20,
                       onViewInfoTap: (channel) {
                         Navigator.pop(context);
                         if (channel.memberCount == 2 && channel.isDistinct) {
