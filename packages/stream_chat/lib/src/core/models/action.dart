@@ -21,7 +21,6 @@ class Action {
   final String name;
 
   /// The style of the action
-  @JsonKey(defaultValue: 'default')
   final String style;
 
   /// The test of the action

@@ -15,7 +15,7 @@ class SortOption<T> {
   /// ```
   const SortOption(
     this.field, {
-    this.direction = DESC,
+    this.direction = SortOption.DESC,
     this.comparator,
   });
 

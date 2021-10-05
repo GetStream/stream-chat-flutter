@@ -1,5 +1,6 @@
+// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
 
 part of 'attachment_file.dart';
 
@@ -13,7 +14,7 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more informations: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 UploadState _$UploadStateFromJson(Map<String, dynamic> json) {
-  switch (json['runtimeType'] as String) {
+  switch (json['runtimeType'] as String?) {
     case 'preparing':
       return Preparing.fromJson(json);
     case 'inProgress':
@@ -24,7 +25,8 @@ UploadState _$UploadStateFromJson(Map<String, dynamic> json) {
       return Failed.fromJson(json);
 
     default:
-      throw FallThroughError();
+      throw CheckedFromJsonException(json, 'runtimeType', 'UploadState',
+          'Invalid union type "${json['runtimeType']}"!');
   }
 }
 
@@ -72,6 +74,14 @@ mixin _$UploadState {
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function()? preparing,
+    TResult Function(int uploaded, int total)? inProgress,
+    TResult Function()? success,
+    TResult Function(String error)? failed,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? preparing,
     TResult Function(int uploaded, int total)? inProgress,
@@ -86,6 +96,14 @@ mixin _$UploadState {
     required TResult Function(InProgress value) inProgress,
     required TResult Function(Success value) success,
     required TResult Function(Failed value) failed,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(Preparing value)? preparing,
+    TResult Function(InProgress value)? inProgress,
+    TResult Function(Success value)? success,
+    TResult Function(Failed value)? failed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -138,7 +156,7 @@ class _$Preparing implements Preparing {
   const _$Preparing();
 
   factory _$Preparing.fromJson(Map<String, dynamic> json) =>
-      _$_$PreparingFromJson(json);
+      _$$PreparingFromJson(json);
 
   @override
   String toString() {
@@ -162,6 +180,17 @@ class _$Preparing implements Preparing {
     required TResult Function(String error) failed,
   }) {
     return preparing();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function()? preparing,
+    TResult Function(int uploaded, int total)? inProgress,
+    TResult Function()? success,
+    TResult Function(String error)? failed,
+  }) {
+    return preparing?.call();
   }
 
   @override
@@ -192,6 +221,17 @@ class _$Preparing implements Preparing {
 
   @override
   @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(Preparing value)? preparing,
+    TResult Function(InProgress value)? inProgress,
+    TResult Function(Success value)? success,
+    TResult Function(Failed value)? failed,
+  }) {
+    return preparing?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Preparing value)? preparing,
     TResult Function(InProgress value)? inProgress,
@@ -207,7 +247,7 @@ class _$Preparing implements Preparing {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$PreparingToJson(this)..['runtimeType'] = 'preparing';
+    return _$$PreparingToJson(this)..['runtimeType'] = 'preparing';
   }
 }
 
@@ -258,7 +298,7 @@ class _$InProgress implements InProgress {
   const _$InProgress({required this.uploaded, required this.total});
 
   factory _$InProgress.fromJson(Map<String, dynamic> json) =>
-      _$_$InProgressFromJson(json);
+      _$$InProgressFromJson(json);
 
   @override
   final int uploaded;
@@ -305,6 +345,17 @@ class _$InProgress implements InProgress {
 
   @override
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function()? preparing,
+    TResult Function(int uploaded, int total)? inProgress,
+    TResult Function()? success,
+    TResult Function(String error)? failed,
+  }) {
+    return inProgress?.call(uploaded, total);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? preparing,
     TResult Function(int uploaded, int total)? inProgress,
@@ -331,6 +382,17 @@ class _$InProgress implements InProgress {
 
   @override
   @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(Preparing value)? preparing,
+    TResult Function(InProgress value)? inProgress,
+    TResult Function(Success value)? success,
+    TResult Function(Failed value)? failed,
+  }) {
+    return inProgress?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Preparing value)? preparing,
     TResult Function(InProgress value)? inProgress,
@@ -346,7 +408,7 @@ class _$InProgress implements InProgress {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$InProgressToJson(this)..['runtimeType'] = 'inProgress';
+    return _$$InProgressToJson(this)..['runtimeType'] = 'inProgress';
   }
 }
 
@@ -386,7 +448,7 @@ class _$Success implements Success {
   const _$Success();
 
   factory _$Success.fromJson(Map<String, dynamic> json) =>
-      _$_$SuccessFromJson(json);
+      _$$SuccessFromJson(json);
 
   @override
   String toString() {
@@ -410,6 +472,17 @@ class _$Success implements Success {
     required TResult Function(String error) failed,
   }) {
     return success();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function()? preparing,
+    TResult Function(int uploaded, int total)? inProgress,
+    TResult Function()? success,
+    TResult Function(String error)? failed,
+  }) {
+    return success?.call();
   }
 
   @override
@@ -440,6 +513,17 @@ class _$Success implements Success {
 
   @override
   @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(Preparing value)? preparing,
+    TResult Function(InProgress value)? inProgress,
+    TResult Function(Success value)? success,
+    TResult Function(Failed value)? failed,
+  }) {
+    return success?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Preparing value)? preparing,
     TResult Function(InProgress value)? inProgress,
@@ -455,7 +539,7 @@ class _$Success implements Success {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$SuccessToJson(this)..['runtimeType'] = 'success';
+    return _$$SuccessToJson(this)..['runtimeType'] = 'success';
   }
 }
 
@@ -500,7 +584,7 @@ class _$Failed implements Failed {
   const _$Failed({required this.error});
 
   factory _$Failed.fromJson(Map<String, dynamic> json) =>
-      _$_$FailedFromJson(json);
+      _$$FailedFromJson(json);
 
   @override
   final String error;
@@ -540,6 +624,17 @@ class _$Failed implements Failed {
 
   @override
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function()? preparing,
+    TResult Function(int uploaded, int total)? inProgress,
+    TResult Function()? success,
+    TResult Function(String error)? failed,
+  }) {
+    return failed?.call(error);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? preparing,
     TResult Function(int uploaded, int total)? inProgress,
@@ -566,6 +661,17 @@ class _$Failed implements Failed {
 
   @override
   @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(Preparing value)? preparing,
+    TResult Function(InProgress value)? inProgress,
+    TResult Function(Success value)? success,
+    TResult Function(Failed value)? failed,
+  }) {
+    return failed?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Preparing value)? preparing,
     TResult Function(InProgress value)? inProgress,
@@ -581,7 +687,7 @@ class _$Failed implements Failed {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$FailedToJson(this)..['runtimeType'] = 'failed';
+    return _$$FailedToJson(this)..['runtimeType'] = 'failed';
   }
 }
 
