@@ -62,7 +62,7 @@ platform :ios do
 
         settings_to_override = {
           :BUNDLE_IDENTIFIER => "io.getstream.flutter",
-          :PROVISIONING_PROFILE_SPECIFIER => "match AppStore io.getstream.flutter 1620032657"
+          :PROVISIONING_PROFILE_SPECIFIER => "match AppStore io.getstream.flutter 1630916072"
         }
 
         gym(
@@ -83,6 +83,7 @@ platform :ios do
             groups: ['Public'],
             distribute_external: true,
             changelog: message,
+            username: 'salvatore@getstream.io',
             reject_build_waiting_for_review: true
         )
     end
