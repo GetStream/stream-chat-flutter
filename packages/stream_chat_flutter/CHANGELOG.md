@@ -1,3 +1,7 @@
+## Upcoming
+
+- Updated Dart SDK constraints to `>=2.14.0 <3.0.0`
+
 ## 3.1.1
 
 - Updated `stream_chat_flutter_core` dependency to [`3.1.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
@@ -5,7 +9,7 @@
 
 🐞 Fixed
 
--[[#687]](https://github.com/GetStream/stream-chat-flutter/issues/687): Fix Users losing their place in the conversation after replying in threads.
+- [[#687]](https://github.com/GetStream/stream-chat-flutter/issues/687): Fix Users losing their place in the conversation after replying in threads.
 - Fixed floating date stream subscription causing "Bad state: stream has already been listened.” error.
 - Fixed `String` capitalize extension not working on empty strings.
 
