@@ -145,6 +145,15 @@ class _ChannelList extends State<ChannelList> {
                   )
                 : ChannelsBloc(
                     child: ChannelListView(
+                      onChannelTap: (channel, _) {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.CHANNEL_PAGE,
+                          arguments: ChannelPageArgs(
+                            channel: channel,
+                          ),
+                        );
+                      },
                       onStartChatPressed: () {
                         Navigator.pushNamed(context, Routes.NEW_CHAT);
                       },
@@ -154,7 +163,6 @@ class _ChannelList extends State<ChannelList> {
                       pagination: PaginationParams(
                         limit: 20,
                       ),
-                      channelWidget: ChannelPage(),
                       onViewInfoTap: (channel) {
                         Navigator.pop(context);
                         if (channel.memberCount == 2 && channel.isDistinct) {
