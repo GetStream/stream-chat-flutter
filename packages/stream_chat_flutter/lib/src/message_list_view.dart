@@ -336,6 +336,8 @@ class _MessageListViewState extends State<MessageListView> {
 
   List<Message> messages = <Message>[];
 
+  Map<String, int> messagesIndex = {};
+
   bool initialMessageHighlightComplete = false;
 
   bool _inBetweenList = false;
@@ -379,6 +381,9 @@ class _MessageListViewState extends State<MessageListView> {
 
   Widget _buildListView(List<Message> data) {
     messages = data;
+    for (var index = 0; index < messages.length; index++) {
+      messagesIndex[messages[index].id] = index;
+    }
     final newMessagesListLength = messages.length;
 
     if (_messageListLength != null) {
@@ -471,9 +476,10 @@ class _MessageListViewState extends State<MessageListView> {
                   itemCount: messages.length,
                   findChildIndexCallback: (Key key) {
                     final indexedKey = key as IndexedKey;
-                    final index = messages.indexWhere(
-                        (element) => element.id == indexedKey.value);
-                    return ((index + 2) * 2) - 1;
+                    final index = messagesIndex[indexedKey.value];
+                    if (index != null) {
+                      return ((index + 2) * 2) - 1;
+                    }
                   },
 
                   // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
