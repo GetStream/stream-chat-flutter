@@ -57,6 +57,8 @@ class UsersBlocState extends State<UsersBloc>
 
   late StreamChatCoreState _streamChatCore;
 
+  bool _paginationEnded = false;
+
   /// The Query Users method allows you to search for users and see if they are
   /// online/offline.
   /// [API Reference](https://getstream.io/chat/docs/flutter-dart/query_users/?language=dart)
@@ -64,19 +66,27 @@ class UsersBlocState extends State<UsersBloc>
     Filter? filter,
     List<SortOption>? sort,
     bool? presence,
-    PaginationParams? pagination,
+    PaginationParams pagination = const PaginationParams(limit: 30),
   }) async {
     final client = _streamChatCore.client;
 
-    if (_queryUsersLoadingController.value == true) return;
+    final offset = pagination.offset;
+    final clear = offset == null || offset == 0;
+
+    if (clear && _paginationEnded) {
+      _paginationEnded = false;
+    }
+
+    if ((!clear && _paginationEnded) ||
+        _queryUsersLoadingController.value == true) {
+      return;
+    }
 
     if (_usersController.hasValue) {
       _queryUsersLoadingController.add(true);
     }
 
     try {
-      final clear = pagination == null || pagination.offset == 0;
-
       final oldUsers = List<User>.from(users ?? []);
 
       final usersResponse = await client.queryUsers(
@@ -86,6 +96,7 @@ class UsersBlocState extends State<UsersBloc>
         pagination: pagination,
       );
 
+      final newUsers = usersResponse.users;
       if (clear) {
         _usersController.add(usersResponse.users);
       } else {
@@ -94,6 +105,9 @@ class UsersBlocState extends State<UsersBloc>
       }
       if (_usersController.hasValue && _queryUsersLoadingController.value) {
         _queryUsersLoadingController.add(false);
+      }
+      if (newUsers.isEmpty || newUsers.length < pagination.limit) {
+        _paginationEnded = true;
       }
     } catch (e, stk) {
       // reset loading controller

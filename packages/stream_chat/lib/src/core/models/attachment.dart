@@ -33,13 +33,20 @@ class Attachment extends Equatable {
     this.authorIcon,
     this.assetUrl,
     List<Action>? actions,
-    this.extraData = const {},
+    Map<String, Object?> extraData = const {},
     this.file,
     UploadState? uploadState,
   })  : id = id ?? const Uuid().v4(),
         title = title ?? file?.name,
         localUri = file?.path != null ? Uri.parse(file!.path!) : null,
-        actions = actions ?? [] {
+        actions = actions ?? [],
+        // For backwards compatibility,
+        // set 'file_size', 'mime_type' in [extraData].
+        extraData = {
+          ...extraData,
+          if (file?.size != null) 'file_size': file?.size,
+          if (file?.mimeType != null) 'mime_type': file?.mimeType?.mimeType,
+        } {
     this.uploadState = uploadState ??
         ((assetUrl != null || imageUrl != null)
             ? const UploadState.success()
@@ -110,16 +117,25 @@ class Attachment extends Equatable {
   late final UploadState uploadState;
 
   /// Map of custom channel extraData
-  @JsonKey(
-    includeIfNull: false,
-    defaultValue: {},
-  )
+  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// The attachment ID.
   ///
   /// This is created locally for uniquely identifying a attachment.
   final String id;
+
+  /// Shortcut for file size.
+  ///
+  /// {@macro fileSize}
+  @JsonKey(ignore: true)
+  int? get fileSize => extraData['file_size'] as int?;
+
+  /// Shortcut for file mimeType.
+  ///
+  /// {@macro mimeType}
+  @JsonKey(ignore: true)
+  String? get mimeType => extraData['mime_type'] as String?;
 
   /// Known top level fields.
   /// Useful for [Serializer] methods.

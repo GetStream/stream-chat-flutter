@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_persistence/src/converter/list_converter.dart';
 
 void main() {

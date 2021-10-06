@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/attachment_actions_modal.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
@@ -57,9 +58,13 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final galleryHeaderThemeData = GalleryHeaderTheme.of(context);
+    final theme = Theme.of(context);
     return AppBar(
-      textTheme: Theme.of(context).textTheme,
-      brightness: Theme.of(context).brightness,
+      toolbarTextStyle: theme.textTheme.bodyText2,
+      titleTextStyle: theme.textTheme.headline6,
+      systemOverlayStyle: theme.brightness == Brightness.dark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
       elevation: 1,
       leading: showBackButton
           ? IconButton(

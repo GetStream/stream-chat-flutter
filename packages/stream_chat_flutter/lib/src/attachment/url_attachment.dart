@@ -10,6 +10,7 @@ class UrlAttachment extends StatelessWidget {
     Key? key,
     required this.urlAttachment,
     required this.hostDisplayName,
+    required this.messageTheme,
     this.textPadding = const EdgeInsets.symmetric(
       horizontal: 16,
       vertical: 8,
@@ -25,15 +26,16 @@ class UrlAttachment extends StatelessWidget {
   /// Padding for text
   final EdgeInsets textPadding;
 
+  /// [MessageThemeData] for showing image title
+  final MessageThemeData messageTheme;
+
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
     return GestureDetector(
       onTap: () {
-        launchURL(
-          context,
-          urlAttachment.ogScrapeUrl,
-        );
+        final titleLink = urlAttachment.titleLink;
+        if (titleLink != null) launchURL(context, titleLink);
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -60,7 +62,7 @@ class UrlAttachment extends StatelessWidget {
                         borderRadius: const BorderRadius.only(
                           topRight: Radius.circular(16),
                         ),
-                        color: chatThemeData.colorTheme.linkBg,
+                        color: messageTheme.linkBackgroundColor,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.only(

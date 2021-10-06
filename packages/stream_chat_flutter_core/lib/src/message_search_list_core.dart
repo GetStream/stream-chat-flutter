@@ -18,9 +18,9 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: MessageSearchListCore(
-///               messageQuery: _messageFilter,
-///               filters: _channelsFilter,
-///               paginationParams: PaginationParams(limit: 20),
+///         messageQuery: _messageFilter,
+///         filters: _channelsFilter,
+///         limit: 20,
 ///       ),
 ///     );
 ///   }
@@ -38,7 +38,7 @@ class MessageSearchListCore extends StatefulWidget {
   /// * [errorBuilder]
   /// * [loadingBuilder]
   /// * [childBuilder]
-  const MessageSearchListCore({
+  MessageSearchListCore({
     Key? key,
     required this.emptyBuilder,
     required this.errorBuilder,
@@ -47,10 +47,30 @@ class MessageSearchListCore extends StatefulWidget {
     required this.filters,
     this.messageQuery,
     this.sortOptions,
-    this.paginationParams,
+    @Deprecated(
+      "'pagination' is deprecated and shouldn't be used. "
+      "This property is no longer used, Please use 'limit' instead",
+    )
+        this.paginationParams,
     this.messageFilters,
     this.messageSearchListController,
-  }) : super(key: key);
+    int? limit,
+  })  : assert(
+          messageQuery != null || messageFilters != null,
+          'Provide at least `query` or `messageFilters`',
+        ),
+        assert(
+          messageQuery == null || messageFilters == null,
+          "Can't provide both `query` and `messageFilters` at the same time",
+        ),
+        assert(
+          paginationParams?.offset == null ||
+              paginationParams?.offset == 0 ||
+              sortOptions == null,
+          'Cannot specify `offset` with `sortOptions` parameter',
+        ),
+        limit = limit ?? paginationParams?.limit ?? 30,
+        super(key: key);
 
   /// A [MessageSearchListController] allows reloading and pagination.
   /// Use [MessageSearchListController.loadData] and
@@ -74,10 +94,16 @@ class MessageSearchListCore extends StatefulWidget {
   final List<SortOption>? sortOptions;
 
   /// Pagination parameters
-  /// limit: the number of users to return (max is 30)
+  /// limit: the number of messages to return (max is 30)
   /// offset: the offset (max is 1000)
-  /// message_limit: how many messages should be included to each channel
+  @Deprecated(
+    "'pagination' is deprecated and shouldn't be used. "
+    "This property is no longer used, Please use 'limit' instead",
+  )
   final PaginationParams? paginationParams;
+
+  /// The amount of messages requested per API call.
+  final int limit;
 
   /// The message query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -150,31 +176,40 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
         filter: widget.filters,
         sort: widget.sortOptions,
         query: widget.messageQuery,
-        pagination: widget.paginationParams,
         messageFilter: widget.messageFilters,
+        pagination: PaginationParams(limit: widget.limit),
       );
 
   /// Fetches more messages with updated pagination and updates the widget
-  Future<void> paginateData() => _messageSearchBloc!.search(
-        filter: widget.filters,
-        sort: widget.sortOptions,
-        pagination: widget.paginationParams!.copyWith(
-          offset: _messageSearchBloc!.messageResponses?.length ?? 0,
-        ),
-        query: widget.messageQuery,
-        messageFilter: widget.messageFilters,
+  Future<void> paginateData() {
+    var pagination = PaginationParams(limit: widget.limit);
+    if (widget.sortOptions != null) {
+      pagination = pagination.copyWith(
+        next: _messageSearchBloc?.nextId,
       );
+    } else {
+      pagination = pagination.copyWith(
+        offset: _messageSearchBloc?.messageResponses?.length,
+      );
+    }
+    return _messageSearchBloc!.search(
+      filter: widget.filters,
+      sort: widget.sortOptions,
+      pagination: pagination,
+      query: widget.messageQuery,
+      messageFilter: widget.messageFilters,
+    );
+  }
 
   @override
   void didUpdateWidget(MessageSearchListCore oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.filters.toString() != oldWidget.filters.toString() ||
+    if (jsonEncode(widget.filters) != jsonEncode(oldWidget.filters) ||
         jsonEncode(widget.sortOptions) != jsonEncode(oldWidget.sortOptions) ||
-        widget.messageQuery?.toString() != oldWidget.messageQuery?.toString() ||
-        widget.messageFilters?.toString() !=
-            oldWidget.messageFilters?.toString() ||
-        widget.paginationParams?.toJson().toString() !=
-            oldWidget.paginationParams?.toJson().toString()) {
+        widget.messageQuery != oldWidget.messageQuery ||
+        jsonEncode(widget.messageFilters) !=
+            jsonEncode(oldWidget.messageFilters) ||
+        widget.limit != oldWidget.limit) {
       loadData();
     }
 

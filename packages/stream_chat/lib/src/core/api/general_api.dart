@@ -36,6 +36,10 @@ class GeneralApi {
     PaginationParams? pagination,
     Filter? messageFilters,
   }) async {
+    assert(
+      pagination?.offset == null || pagination?.offset == 0 || sort == null,
+      'Cannot specify `offset` with `sort` parameter',
+    );
     assert(() {
       if (query == null && messageFilters == null) {
         throw ArgumentError('Provide at least `query` or `messageFilters`');

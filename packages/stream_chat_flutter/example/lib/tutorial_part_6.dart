@@ -34,7 +34,7 @@ Future<void> main() async {
 
   await client.connectUser(
     User(id: 'super-band-9'),
-    '''eyJ0eXAiO«iJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A''',
+    '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A''',
   );
 
   runApp(
@@ -102,9 +102,7 @@ class ChannelListPage extends StatelessWidget {
             [StreamChat.of(context).currentUser!.id],
           ),
           sort: const [SortOption('last_message_at')],
-          pagination: const PaginationParams(
-            limit: 20,
-          ),
+          limit: 20,
           channelWidget: const ChannelPage(),
         ),
       ),

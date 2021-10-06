@@ -69,10 +69,8 @@ class ChannelListCore extends StatefulWidget {
     this.memberLimit,
     this.messageLimit,
     this.sort,
-    this.pagination = const PaginationParams(
-      limit: 25,
-    ),
     this.channelListController,
+    this.limit = 25,
   }) : super(key: key);
 
   /// A [ChannelListController] allows reloading and pagination.
@@ -120,11 +118,8 @@ class ChannelListCore extends StatefulWidget {
   /// Number of messages to fetch in each channel
   final int? messageLimit;
 
-  /// Pagination parameters
-  /// limit: the number of channels to return (max is 30)
-  /// offset: the offset (max is 1000)
-  /// message_limit: how many messages should be included to each channel
-  final PaginationParams pagination;
+  /// The amount of channels requested per API call.
+  final int limit;
 
   @override
   ChannelListCoreState createState() => ChannelListCoreState();
@@ -162,7 +157,7 @@ class ChannelListCoreState extends State<ChannelListCore> {
         presence: widget.presence,
         memberLimit: widget.memberLimit,
         messageLimit: widget.messageLimit,
-        paginationParams: widget.pagination,
+        paginationParams: PaginationParams(limit: widget.limit),
       );
 
   /// Fetches more channels with updated pagination and updates the widget
@@ -174,7 +169,8 @@ class ChannelListCoreState extends State<ChannelListCore> {
         presence: widget.presence,
         memberLimit: widget.memberLimit,
         messageLimit: widget.messageLimit,
-        paginationParams: widget.pagination.copyWith(
+        paginationParams: PaginationParams(
+          limit: widget.limit,
           offset: _channelsBloc.channels?.length ?? 0,
         ),
       );
@@ -214,15 +210,14 @@ class ChannelListCoreState extends State<ChannelListCore> {
   void didUpdateWidget(ChannelListCore oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.filter?.toString() != oldWidget.filter?.toString() ||
+    if (jsonEncode(widget.filter) != jsonEncode(oldWidget.filter) ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
         widget.state != oldWidget.state ||
         widget.watch != oldWidget.watch ||
         widget.presence != oldWidget.presence ||
         widget.messageLimit != oldWidget.messageLimit ||
         widget.memberLimit != oldWidget.memberLimit ||
-        widget.pagination.toJson().toString() !=
-            oldWidget.pagination.toJson().toString()) {
+        widget.limit != oldWidget.limit) {
       loadData();
     }
 

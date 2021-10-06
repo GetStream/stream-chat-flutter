@@ -62,7 +62,7 @@ void main() {
             return Scaffold(
               body: StreamChannel(
                 channel: MockChannel(),
-                child: const ChannelListView(),
+                child: ChannelListView(),
               ),
             );
           },

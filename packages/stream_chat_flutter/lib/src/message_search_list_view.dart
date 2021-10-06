@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/message_search_item.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Callback called when tapping on a user
 typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
@@ -30,13 +30,13 @@ typedef EmptyMessageSearchBuilder = Widget Function(
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: MessageSearchListView(
-///               messageQuery: _channelQuery,
-///               filters: {
-///                 'members': {
-///                   r'$in': [user.id]
-///                 }
-///               },
-///               paginationParams: PaginationParams(limit: 20),
+///         messageQuery: _channelQuery,
+///         filters: {
+///           'members': {
+///             r'$in': [user.id]
+///           }
+///         },
+///         limit: 20,
 ///       ),
 ///     );
 ///   }
@@ -58,7 +58,7 @@ class MessageSearchListView extends StatefulWidget {
     required this.filters,
     this.messageQuery,
     this.sortOptions,
-    this.paginationParams,
+    this.limit = 30,
     this.messageFilters,
     this.separatorBuilder,
     this.itemBuilder,
@@ -89,11 +89,8 @@ class MessageSearchListView extends StatefulWidget {
   /// Direction can be ascending or descending.
   final List<SortOption>? sortOptions;
 
-  /// Pagination parameters
-  /// limit: the number of users to return (max is 30)
-  /// offset: the offset (max is 1000)
-  /// message_limit: how many messages should be included to each channel
-  final PaginationParams? paginationParams;
+  /// The amount of messages requested per API call.
+  final int limit;
 
   /// The message query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -152,7 +149,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       filters: widget.filters,
       sortOptions: widget.sortOptions,
       messageQuery: widget.messageQuery,
-      paginationParams: widget.paginationParams,
+      limit: widget.limit,
       messageFilters: widget.messageFilters,
       messageSearchListController: _messageSearchListController,
       emptyBuilder: widget.emptyBuilder ??

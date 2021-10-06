@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// This widget is used for showing user tiles for mentions
 /// Use [title], [subtitle], [leading], [trailing] for
 /// substituting widgets in respective positions
+@Deprecated('Use `UserMentionTile` instead. Will be removed in future release')
 class MentionTile extends StatelessWidget {
   /// Constructor for creating a [MentionTile] widget
   const MentionTile(

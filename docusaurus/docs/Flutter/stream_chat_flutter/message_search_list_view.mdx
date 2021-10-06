@@ -29,7 +29,7 @@ class MessageSearchPage extends StatelessWidget {
         child: MessageSearchListView(
           filters: Filter.in_('members', [StreamChat.of(context).user!.id],),
           messageQuery: 'your query here',
-          paginationParams: PaginationParams(limit: 20),
+          limit: 20,
         ),
       ),
     );

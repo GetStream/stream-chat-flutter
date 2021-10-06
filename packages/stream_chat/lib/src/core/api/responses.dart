@@ -253,6 +253,12 @@ class SearchMessagesResponse extends _BaseResponse {
   @JsonKey(defaultValue: [])
   late List<GetMessageResponse> results;
 
+  /// Message id of where to start searching from for next [results]
+  late String? next;
+
+  /// Message id of where to start searching from for previous [results]
+  late String? previous;
+
   /// Create a new instance from a json
   static SearchMessagesResponse fromJson(Map<String, dynamic> json) =>
       _$SearchMessagesResponseFromJson(json);

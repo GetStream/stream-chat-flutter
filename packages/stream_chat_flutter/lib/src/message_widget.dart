@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:stream_chat_flutter/src/attachment/url_attachment.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/image_group.dart';
 import 'package:stream_chat_flutter/src/message_action.dart';
@@ -15,7 +16,6 @@ import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
-import 'package:stream_chat_flutter/src/url_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget builder for building attachments
@@ -96,7 +96,7 @@ class MessageWidget extends StatefulWidget {
     this.bottomRowBuilder,
     this.deletedBottomRowBuilder,
     this.onReturnAction,
-    Map<String, AttachmentBuilder>? customAttachmentBuilders,
+    this.customAttachmentBuilders,
     this.readList,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
@@ -133,6 +133,7 @@ class MessageWidget extends StatefulWidget {
                       messageTheme: messageTheme,
                       onShowMessage: onShowMessage,
                       onReturnAction: onReturnAction,
+                      onAttachmentTap: onAttachmentTap,
                     ),
                   ),
                   border,
@@ -214,6 +215,11 @@ class MessageWidget extends StatefulWidget {
                     ),
                     onShowMessage: onShowMessage,
                     onReturnAction: onReturnAction,
+                    onAttachmentTap: onAttachmentTap != null
+                        ? () {
+                            onAttachmentTap(message, attachment);
+                          }
+                        : null,
                   );
                 }).toList(),
               ),
@@ -243,6 +249,11 @@ class MessageWidget extends StatefulWidget {
                           mediaQueryData.size.width * 0.8,
                           mediaQueryData.size.height * 0.3,
                         ),
+                        onAttachmentTap: onAttachmentTap != null
+                            ? () {
+                                onAttachmentTap(message, attachment);
+                              }
+                            : null,
                       ),
                       border,
                       reverse,
@@ -395,6 +406,9 @@ class MessageWidget extends StatefulWidget {
   /// Builder for respective attachment types
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
+  /// Builder for respective attachment types (user facing builder)
+  final Map<String, AttachmentBuilder>? customAttachmentBuilders;
+
   /// Center user avatar with bottom of the message
   final bool translateUserAvatar;
 
@@ -519,7 +533,7 @@ class MessageWidget extends StatefulWidget {
         showPinButton: showPinButton ?? this.showPinButton,
         showPinHighlight: showPinHighlight ?? this.showPinHighlight,
         customAttachmentBuilders:
-            customAttachmentBuilders ?? attachmentBuilders,
+            customAttachmentBuilders ?? this.customAttachmentBuilders,
         translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
         onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
         onMessageTap: onMessageTap ?? this.onMessageTap,
@@ -567,11 +581,11 @@ class _MessageWidgetState extends State<MessageWidget>
   bool get isOnlyEmoji => widget.message.text?.isOnlyEmoji == true;
 
   bool get hasNonUrlAttachments => widget.message.attachments
-      .where((it) => it.ogScrapeUrl == null)
+      .where((it) => it.titleLink == null || it.type == 'giphy')
       .isNotEmpty;
 
-  bool get hasUrlAttachments =>
-      widget.message.attachments.any((it) => it.ogScrapeUrl != null) == true;
+  bool get hasUrlAttachments => widget.message.attachments
+      .any((it) => it.titleLink != null && it.type != 'giphy');
 
   bool get showBottomRow =>
       showThreadReplyIndicator ||
@@ -984,9 +998,9 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget _buildUrlAttachment() {
     final urlAttachment = widget.message.attachments
-        .firstWhere((element) => element.ogScrapeUrl != null);
+        .firstWhere((element) => element.titleLink != null);
 
-    final host = Uri.parse(urlAttachment.ogScrapeUrl!).host;
+    final host = Uri.parse(urlAttachment.titleLink!).host;
     final splitList = host.split('.');
     final hostName = splitList.length == 3 ? splitList[1] : splitList[0];
     final hostDisplayName = urlAttachment.authorName?.capitalize() ??
@@ -997,6 +1011,7 @@ class _MessageWidgetState extends State<MessageWidget>
       urlAttachment: urlAttachment,
       hostDisplayName: hostDisplayName,
       textPadding: widget.textPadding,
+      messageTheme: widget.messageTheme,
     );
   }
 
@@ -1155,7 +1170,9 @@ class _MessageWidgetState extends State<MessageWidget>
     final attachmentGroups = <String, List<Attachment>>{};
 
     widget.message.attachments
-        .where((element) => element.ogScrapeUrl == null && element.type != null)
+        .where((element) =>
+            (element.titleLink == null && element.type != null) ||
+            element.type == 'giphy')
         .forEach((e) {
       if (attachmentGroups[e.type] == null) {
         attachmentGroups[e.type!] = [];
@@ -1335,7 +1352,7 @@ class _MessageWidgetState extends State<MessageWidget>
     }
 
     if (hasUrlAttachments) {
-      return _streamChatTheme.colorTheme.linkBg;
+      return widget.messageTheme.linkBackgroundColor;
     }
 
     if (isOnlyEmoji) {

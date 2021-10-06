@@ -59,6 +59,7 @@ final _messageThemeControl = MessageThemeData(
   messageLinksStyle: TextStyle(
     color: ColorTheme.light().accentPrimary,
   ),
+  linkBackgroundColor: ColorTheme.light().linkBg,
 );
 
 final _messageThemeControlDark = MessageThemeData(
@@ -87,4 +88,5 @@ final _messageThemeControlDark = MessageThemeData(
   messageLinksStyle: TextStyle(
     color: ColorTheme.dark().accentPrimary,
   ),
+  linkBackgroundColor: ColorTheme.dark().linkBg,
 );

@@ -1,4 +1,5 @@
 import 'package:characters/characters.dart';
+import 'package:diacritic/diacritic.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
@@ -11,7 +12,7 @@ final _emojiChars = Emoji.chars();
 extension StringExtension on String {
   /// Returns the capitalized string
   String capitalize() =>
-      '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
+      isNotEmpty ? '${this[0].toUpperCase()}${substring(1).toLowerCase()}' : '';
 
   /// Returns whether the string contains only emoji's or not.
   ///
@@ -24,6 +25,12 @@ extension StringExtension on String {
     final characters = trim().characters;
     return characters.every(_emojiChars.contains);
   }
+
+  /// Removes accents and diacritics from the given String.
+  String get diacriticsInsensitive => removeDiacritics(this);
+
+  /// Levenshtein distance between this and [t].
+  int levenshteinDistance(String t) => levenshtein(this, t);
 }
 
 /// List extension
@@ -169,4 +176,50 @@ extension IconButtonX on IconButton {
         constraints: constraints ?? this.constraints,
         icon: icon ?? this.icon,
       );
+}
+
+/// Extensions on List<User>
+extension UserListX on List<User> {
+  /// It does an search on a list of [User] and returns users with
+  /// `id` or `name` containing the [query].
+  ///
+  /// Results are returned sorted by their edit distance from the
+  /// searched string, distance is calculated using the [levenshtein] algorithm.
+  List<User> search(String query) {
+    String normalize(String input) => input.toLowerCase().diacriticsInsensitive;
+
+    final normalizedQuery = normalize(query);
+
+    final matchingUsers = <User, int>{}; // User:lDistance
+
+    for (final user in this) {
+      final normalizedId = normalize(user.id);
+      final normalizedUserName = normalize(user.name);
+      final lDistance = normalizedUserName.levenshteinDistance(normalizedQuery);
+      final containsId = normalizedId.contains(normalizedQuery);
+      final containsName = normalizedUserName.contains(normalizedQuery);
+      if (lDistance < 3 || containsId || containsName) {
+        matchingUsers[user] = lDistance;
+      }
+    }
+
+    final entries = matchingUsers.entries.toList(growable: false)
+      ..sort((prev, curr) {
+        bool containsQuery(User user) =>
+            normalize(user.id).contains(normalizedQuery) ||
+            normalize(user.name).contains(normalizedQuery);
+
+        final containsInPrev = containsQuery(prev.key);
+        final containsInCurr = containsQuery(curr.key);
+
+        if (containsInPrev && !containsInCurr) {
+          return -1;
+        } else if (!containsInPrev && containsInCurr) {
+          return 1;
+        }
+        return prev.value.compareTo(curr.value);
+      });
+
+    return entries.map((e) => e.key).toList(growable: false);
+  }
 }

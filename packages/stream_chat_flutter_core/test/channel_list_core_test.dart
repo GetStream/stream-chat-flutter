@@ -129,7 +129,7 @@ void main() {
         emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object error) =>
             Container(key: errorWidgetKey),
-        pagination: pagination,
+        limit: pagination.limit,
       );
 
       final mockClient = MockClient();
@@ -186,7 +186,7 @@ void main() {
         loadingBuilder: (BuildContext context) => const Offstage(),
         emptyBuilder: (BuildContext context) => Container(key: emptyWidgetKey),
         errorBuilder: (BuildContext context, Object error) => const Offstage(),
-        pagination: pagination,
+        limit: pagination.limit,
       );
 
       final mockClient = MockClient();
@@ -243,7 +243,7 @@ void main() {
         loadingBuilder: (BuildContext context) => const Offstage(),
         emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object error) => const Offstage(),
-        pagination: pagination,
+        limit: pagination.limit,
       );
 
       final mockClient = MockClient();
@@ -306,7 +306,7 @@ void main() {
         loadingBuilder: (BuildContext context) => const Offstage(),
         emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object error) => const Offstage(),
-        pagination: pagination,
+        limit: pagination.limit,
       );
 
       final mockClient = MockClient();
@@ -420,7 +420,7 @@ void main() {
             emptyBuilder: (BuildContext context) => const Offstage(),
             errorBuilder: (BuildContext context, Object error) =>
                 const Offstage(),
-            pagination: pagination.copyWith(limit: limit),
+            limit: limit,
           );
 
       final mockClient = MockClient();
@@ -508,4 +508,17 @@ void main() {
           )).called(1);
     },
   );
+
+  test('`widget.limit` should match `widget.pagination.limit`', () {
+    const pagination = PaginationParams(limit: 30);
+    final channelListCore = ChannelListCore(
+      listBuilder: (_, __) => const Offstage(),
+      loadingBuilder: (BuildContext context) => const Offstage(),
+      emptyBuilder: (BuildContext context) => const Offstage(),
+      errorBuilder: (BuildContext context, Object error) => const Offstage(),
+      limit: pagination.limit,
+    );
+
+    expect(channelListCore.limit, pagination.limit);
+  });
 }

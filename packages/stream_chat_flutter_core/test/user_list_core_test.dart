@@ -321,7 +321,7 @@ void main() {
     (tester) async {
       const userListCoreKey = Key('userListCore');
       const listWidgetKey = Key('listWidget');
-      const pagination = PaginationParams();
+      const pagination = PaginationParams(limit: 15);
       final userListCore = UserListCore(
         key: userListCoreKey,
         listBuilder: (_, items) => Container(
@@ -341,13 +341,13 @@ void main() {
         loadingBuilder: (BuildContext context) => const Offstage(),
         emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object error) => const Offstage(),
-        pagination: pagination,
+        limit: pagination.limit,
         groupAlphabetically: true,
       );
 
       final mockClient = MockClient();
 
-      final users = _generateUsers();
+      final users = _generateUsers(count: 15);
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
@@ -447,7 +447,7 @@ void main() {
             emptyBuilder: (BuildContext context) => const Offstage(),
             errorBuilder: (BuildContext context, Object error) =>
                 const Offstage(),
-            pagination: pagination.copyWith(limit: limit),
+            limit: limit,
             groupAlphabetically: true,
           );
 
@@ -520,4 +520,17 @@ void main() {
           )).called(1);
     },
   );
+
+  test('`widget.limit` should match `widget.pagination.limit`', () {
+    const limit = 20;
+    final userListCore = UserListCore(
+      listBuilder: (_, __) => const Offstage(),
+      loadingBuilder: (BuildContext context) => const Offstage(),
+      emptyBuilder: (BuildContext context) => const Offstage(),
+      errorBuilder: (BuildContext context, Object error) => const Offstage(),
+      limit: limit,
+    );
+
+    expect(userListCore.limit, limit);
+  });
 }

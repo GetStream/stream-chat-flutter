@@ -63,12 +63,12 @@ class UserListCore extends StatefulWidget {
     required this.loadingBuilder,
     required this.listBuilder,
     Key? key,
-    this.filter,
+    this.filter = const Filter.empty(),
     this.sort,
     this.presence,
-    this.pagination,
     this.groupAlphabetically = false,
     this.userListController,
+    this.limit = 30,
   }) : super(key: key);
 
   /// A [UserListController] allows reloading and pagination.
@@ -91,7 +91,7 @@ class UserListCore extends StatefulWidget {
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
-  final Filter? filter;
+  final Filter filter;
 
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can be
@@ -102,11 +102,8 @@ class UserListCore extends StatefulWidget {
   /// If true you’ll receive user presence updates via the websocket events
   final bool? presence;
 
-  /// Pagination parameters
-  /// limit: the number of users to return (max is 30)
-  /// offset: the offset (max is 1000)
-  /// message_limit: how many messages should be included to each channel
-  final PaginationParams? pagination;
+  /// The amount of users requested per API call.
+  final int limit;
 
   /// Set it to true to group users by their first character
   ///
@@ -193,7 +190,7 @@ class UserListCoreState extends State<UserListCore>
         filter: widget.filter,
         sort: widget.sort,
         presence: widget.presence,
-        pagination: widget.pagination,
+        pagination: PaginationParams(limit: widget.limit),
       );
 
   /// Fetches more users with updated pagination and updates the widget
@@ -201,7 +198,8 @@ class UserListCoreState extends State<UserListCore>
         filter: widget.filter,
         sort: widget.sort,
         presence: widget.presence,
-        pagination: widget.pagination!.copyWith(
+        pagination: PaginationParams(
+          limit: widget.limit,
           offset: _usersBloc!.users?.length ?? 0,
         ),
       );
@@ -209,11 +207,10 @@ class UserListCoreState extends State<UserListCore>
   @override
   void didUpdateWidget(UserListCore oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.filter?.toString() != oldWidget.filter?.toString() ||
+    if (jsonEncode(widget.filter) != jsonEncode(oldWidget.filter) ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
         widget.presence != oldWidget.presence ||
-        widget.pagination?.toJson().toString() !=
-            oldWidget.pagination?.toJson().toString()) {
+        widget.limit != oldWidget.limit) {
       loadData();
     }
 

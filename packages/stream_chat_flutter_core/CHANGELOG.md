@@ -1,3 +1,53 @@
+## 3.1.1
+
+- Updated `stream_chat` dependency to [`3.1.1`](https://pub.dev/packages/stream_chat/changelog).
+
+## 3.0.0
+
+- Updated `stream_chat` dependency to [`3.0.0`](https://pub.dev/packages/stream_chat/changelog).
+
+🛑️ Breaking Changes from `2.2.1`
+
+- `MessageSearchListViewCore` `paginationParams` property is now deprecated in favor of `limit`.
+    ```dart
+    // previous
+    paginationParams = const PaginationParams(limit: 30)
+    
+    // new
+    limit = 30
+    ```
+- `UserListCore` `pagination` property is now deprecated in favor of `limit`.
+    ```dart
+    // previous
+    pagination = const PaginationParams(limit: 30)
+    
+    // new
+    limit = 30
+    ```
+- `ChannelListCore` `pagination` property is now deprecated in favor of `limit`.
+    ```dart
+    // previous
+    pagination = const PaginationParams(limit: 30)
+    
+    // new
+    limit = 30
+    ```
+
+- `UserListCore` `filter` property now is non-nullable.
+
+🔄 Changed
+
+- `UserListCore` filter property now has a default value.
+    ```dart
+    filter = const Filter.empty()
+    ```
+
+🐞 Fixed
+
+- Fixed `MessageSearchBloc` pagination.
+- [[#673]](https://github.com/GetStream/stream-chat-flutter/issues/673): Fix `Core Widgets` not getting rebuild with new
+  data on configuration change.
+
 ## 2.2.1
 
 - Updated `stream_chat` dependency to 2.2.1
@@ -5,13 +55,17 @@
 ## 2.2.0
 
 🛑️ Breaking Changes from `2.1.1`
+
 - Renamed `BetterStreamBuilder.loadingBuilder` to `.noDataBuilder`
 
 🔄 Changed
+
 - `BetterStreamBuilder.initialData` is now nullable/not-required.
 
 🐞 Fixed
-- [#612](https://github.com/GetStream/stream-chat-flutter/issues/612) `ChannelListView` pagination doesn't work after refresh
+
+- [#612](https://github.com/GetStream/stream-chat-flutter/issues/612) `ChannelListView` pagination doesn't work after
+  refresh
 
 ## 2.1.1
 
@@ -20,12 +74,15 @@
 ## 2.1.0
 
 🛑️ Breaking Changes from `2.0.0`
+
 - Changed default message filter of `MessageListCore`
 
 ✅ Added
+
 - Added `MessageListCore.paginationLimit`
 
 🔄 Changed
+
 - `StreamChatCore.of(context).user` is now deprecated in favor of `StreamChatCore.of(context).currentUser`.
 - `StreamChatCore.of(context).userStream` is now deprecated in favor of `StreamChatCore.of(context).currentUserStream`.
 
@@ -34,7 +91,8 @@
 🛑️ Breaking Changes from `1.5.3`
 
 - migrate this package to null safety
-- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of individual params/properties
+- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of individual
+  params/properties
     - `options.state` -> bool state
     - `options.watch` -> bool watch
     - `options.presence` -> bool presence
@@ -51,6 +109,7 @@
 - Performance improvements
 
 ## 2.0.0-nullsafety.9
+
 - Update llc dependency
 
 ## 2.0.0-nullsafety.8

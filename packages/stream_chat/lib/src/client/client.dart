@@ -143,9 +143,6 @@ class StreamChatClient {
 
   late final RetryPolicy _retryPolicy;
 
-  /// sync state of the channels present inside state, defaults to false
-  bool _synced = false;
-
   /// the last dateTime at the which all the channels were synced
   DateTime? _lastSyncedAt;
 
@@ -406,10 +403,6 @@ class StreamChatClient {
     if (event.type == EventType.healthCheck) {
       return _handleHealthCheckEvent(event);
     }
-    if (!event.isLocal && _synced) {
-      _lastSyncedAt = event.createdAt;
-      _chatPersistenceClient?.updateLastSyncAt(event.createdAt);
-    }
     state.updateUser(event.user);
     return _eventController.add(event);
   }
@@ -438,8 +431,6 @@ class StreamChatClient {
         type: EventType.connectionRecovered,
         online: true,
       ));
-    } else {
-      _synced = false;
     }
   }
 
@@ -464,13 +455,11 @@ class StreamChatClient {
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) async {
     cids ??= await _chatPersistenceClient?.getChannelCids();
     if (cids == null || cids.isEmpty) {
-      _synced = true;
       return;
     }
 
     lastSyncAt ??= await _chatPersistenceClient?.getLastSyncAt();
     if (lastSyncAt == null) {
-      _synced = true;
       return;
     }
 
@@ -488,12 +477,10 @@ class StreamChatClient {
         handleEvent(event);
       }
 
-      _synced = true;
       final now = DateTime.now();
       _lastSyncedAt = now;
       _chatPersistenceClient?.updateLastSyncAt(now);
     } catch (e, stk) {
-      _synced = false;
       logger.severe('Error during sync', e, stk);
     }
   }
@@ -1325,6 +1312,7 @@ class StreamChatClient {
     // resetting state
     state.dispose();
     state = ClientState(this);
+    _lastSyncedAt = null;
 
     // resetting credentials
     _tokenManager.reset();
@@ -1366,26 +1354,21 @@ class ClientState {
           .where((event) =>
               event.me != null && event.type != EventType.healthCheck)
           .map((e) => e.me!)
-          .listen((user) {
-        currentUser = currentUser?.merge(user) ?? user;
-        final totalUnreadCount = user.totalUnreadCount;
-        _totalUnreadCountController.add(totalUnreadCount);
-
-        final unreadChannels = user.unreadChannels;
-        if (unreadChannels != null) {
-          _unreadChannelsController.add(unreadChannels);
-        }
-      }),
+          .listen((user) => currentUser = currentUser?.merge(user) ?? user),
       _client
           .on()
           .map((event) => event.unreadChannels)
           .whereType<int>()
-          .listen(_unreadChannelsController.add),
+          .listen((count) {
+        currentUser = currentUser?.copyWith(unreadChannels: count);
+      }),
       _client
           .on()
           .map((event) => event.totalUnreadCount)
           .whereType<int>()
-          .listen(_totalUnreadCountController.add),
+          .listen((count) {
+        currentUser = currentUser?.copyWith(totalUnreadCount: count);
+      }),
     ]);
 
     _listenChannelDeleted();
@@ -1441,6 +1424,7 @@ class ClientState {
   /// Sets the user currently interacting with the client
   /// note: this fully overrides the [currentUser]
   set currentUser(OwnUser? user) {
+    _computeUnreadCounts(user);
     _currentUserController.add(user);
   }
 
@@ -1504,6 +1488,18 @@ class ClientState {
   set channels(Map<String, Channel> channelMap) {
     final newChannels = {...channels, ...channelMap};
     _channelsController.add(newChannels);
+  }
+
+  void _computeUnreadCounts(OwnUser? user) {
+    final totalUnreadCount = user?.totalUnreadCount;
+    if (totalUnreadCount != null) {
+      _totalUnreadCountController.add(totalUnreadCount);
+    }
+
+    final unreadChannels = user?.unreadChannels;
+    if (unreadChannels != null) {
+      _unreadChannelsController.add(unreadChannels);
+    }
   }
 
   final _channelsController = BehaviorSubject<Map<String, Channel>>.seeded({});

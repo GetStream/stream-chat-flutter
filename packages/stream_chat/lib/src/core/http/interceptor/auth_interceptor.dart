@@ -38,7 +38,9 @@ class AuthInterceptor extends Interceptor {
       'Authorization': token.rawValue,
       'stream-auth-type': token.authType.raw,
     };
-    options..queryParameters.addAll(params)..headers.addAll(headers);
+    options
+      ..queryParameters.addAll(params)
+      ..headers.addAll(headers);
     return handler.next(options);
   }
 

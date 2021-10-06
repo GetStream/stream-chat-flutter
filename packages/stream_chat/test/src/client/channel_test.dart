@@ -334,20 +334,87 @@ void main() {
         expectLater(
           // skipping first seed message list -> [] messages
           channel.state?.messagesStream.skip(1),
-          emitsInOrder([
+          emitsInOrder(
             [
-              isSameMessageAs(
-                message.copyWith(status: MessageSendingStatus.sending),
-                matchSendingStatus: true,
-              ),
+              // preparing attachments to upload
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    status: MessageSendingStatus.sending,
+                    attachments: [
+                      ...attachments.map((it) => it.copyWith(
+                          uploadState: const UploadState.preparing()))
+                    ],
+                  ),
+                  matchSendingStatus: true,
+                  matchAttachments: true,
+                  matchAttachmentsUploadState: true,
+                ),
+              ],
+              // 0th attachment is successfully uploaded
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    status: MessageSendingStatus.sending,
+                    attachments: [...attachments]..[0] =
+                          attachments[0].copyWith(
+                        uploadState: const UploadState.success(),
+                      ),
+                  ),
+                  matchSendingStatus: true,
+                  matchAttachments: true,
+                  matchAttachmentsUploadState: true,
+                ),
+              ],
+              // 0th and 1st attachment is successfully uploaded
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    status: MessageSendingStatus.sending,
+                    attachments: [...attachments]
+                      ..[0] = attachments[0].copyWith(
+                        uploadState: const UploadState.success(),
+                      )
+                      ..[1] = attachments[1].copyWith(
+                        uploadState: const UploadState.success(),
+                      ),
+                  ),
+                  matchSendingStatus: true,
+                  matchAttachments: true,
+                  matchAttachmentsUploadState: true,
+                ),
+              ],
+              // all the attachments are successfully uploaded
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    status: MessageSendingStatus.sending,
+                    attachments: [
+                      ...attachments.map((it) =>
+                          it.copyWith(uploadState: const UploadState.success()))
+                    ],
+                  ),
+                  matchSendingStatus: true,
+                  matchAttachments: true,
+                  matchAttachmentsUploadState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    status: MessageSendingStatus.sent,
+                    attachments: [
+                      ...attachments.map((it) =>
+                          it.copyWith(uploadState: const UploadState.success()))
+                    ],
+                  ),
+                  matchSendingStatus: true,
+                  matchAttachments: true,
+                  matchAttachmentsUploadState: true,
+                ),
+              ],
             ],
-            [
-              isSameMessageAs(
-                message.copyWith(status: MessageSendingStatus.sent),
-                matchSendingStatus: true,
-              ),
-            ],
-          ]),
+          ),
         );
 
         final res = await channel.sendMessage(message);
@@ -472,20 +539,87 @@ void main() {
         expectLater(
           // skipping first seed message list -> [] messages
           channel.state?.messagesStream.skip(1),
-          emitsInOrder([
+          emitsInOrder(
             [
-              isSameMessageAs(
-                message.copyWith(status: MessageSendingStatus.updating),
-                matchSendingStatus: true,
-              ),
+              // preparing attachments to upload
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    status: MessageSendingStatus.updating,
+                    attachments: [
+                      ...attachments.map((it) => it.copyWith(
+                          uploadState: const UploadState.preparing()))
+                    ],
+                  ),
+                  matchSendingStatus: true,
+                  matchAttachments: true,
+                  matchAttachmentsUploadState: true,
+                ),
+              ],
+              // 0th attachment is successfully uploaded
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    status: MessageSendingStatus.updating,
+                    attachments: [...attachments]..[0] =
+                          attachments[0].copyWith(
+                        uploadState: const UploadState.success(),
+                      ),
+                  ),
+                  matchSendingStatus: true,
+                  matchAttachments: true,
+                  matchAttachmentsUploadState: true,
+                ),
+              ],
+              // 0th and 1st attachment is successfully uploaded
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    status: MessageSendingStatus.updating,
+                    attachments: [...attachments]
+                      ..[0] = attachments[0].copyWith(
+                        uploadState: const UploadState.success(),
+                      )
+                      ..[1] = attachments[1].copyWith(
+                        uploadState: const UploadState.success(),
+                      ),
+                  ),
+                  matchSendingStatus: true,
+                  matchAttachments: true,
+                  matchAttachmentsUploadState: true,
+                ),
+              ],
+              // all the attachments are successfully uploaded
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    status: MessageSendingStatus.updating,
+                    attachments: [
+                      ...attachments.map((it) =>
+                          it.copyWith(uploadState: const UploadState.success()))
+                    ],
+                  ),
+                  matchSendingStatus: true,
+                  matchAttachments: true,
+                  matchAttachmentsUploadState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    status: MessageSendingStatus.sent,
+                    attachments: [
+                      ...attachments.map((it) =>
+                          it.copyWith(uploadState: const UploadState.success()))
+                    ],
+                  ),
+                  matchSendingStatus: true,
+                  matchAttachments: true,
+                  matchAttachmentsUploadState: true,
+                ),
+              ],
             ],
-            [
-              isSameMessageAs(
-                message.copyWith(status: MessageSendingStatus.sent),
-                matchSendingStatus: true,
-              ),
-            ],
-          ]),
+          ),
         );
 
         final res = await channel.updateMessage(message);
