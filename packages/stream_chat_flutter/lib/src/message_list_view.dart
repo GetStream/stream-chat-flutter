@@ -1226,7 +1226,7 @@ class _MessageListViewState extends State<MessageListView> {
       streamChannel = newStreamChannel;
       _messageNewListener?.cancel();
 
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
         final messages = (_isThreadConversation
                     ? streamChannel!
                         .channel.state?.threads[widget.parentMessage!.id]
