@@ -1,3 +1,8 @@
+## Upcoming
+
+🐞 Fixed
+- `MessageListView` initial index and alignment now take into account the message filter.
+
 ## 3.1.1
 
 - Updated `stream_chat_flutter_core` dependency to [`3.1.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
