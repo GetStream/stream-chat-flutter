@@ -61,7 +61,6 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       appBar: AppBar(
-        brightness: Theme.of(context).brightness,
         elevation: 1,
         centerTitle: true,
         title: Text(

@@ -63,7 +63,8 @@ void showLocalNotification(
       android: AndroidNotificationDetails(
         'message channel',
         AppLocalizations.of(context).messageChannelName,
-        AppLocalizations.of(context).messageChannelDescription,
+        channelDescription:
+            AppLocalizations.of(context).messageChannelDescription,
         priority: Priority.high,
         importance: Importance.high,
       ),

@@ -62,7 +62,6 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       appBar: AppBar(
-        brightness: Theme.of(context).brightness,
         elevation: 1,
         centerTitle: true,
         title: Text(

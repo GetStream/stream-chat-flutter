@@ -39,7 +39,6 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
         backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
         elevation: 1,
         centerTitle: true,
-        brightness: Theme.of(context).brightness,
         title: Text(
           AppLocalizations.of(context).advancedOptions,
           style: StreamChatTheme.of(context).textTheme.headlineBold.copyWith(
