@@ -9,6 +9,17 @@ import 'package:stream_chat_flutter_core/src/better_stream_builder.dart';
 import 'package:stream_chat_flutter_core/src/stream_channel.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 
+/// Default filter for the message list
+bool Function(Message) defaultFilter(BuildContext context) {
+  final streamChannel = StreamChannel.of(context);
+  return (Message m) {
+    final isMyMessage =
+        m.user?.id == streamChannel.channel.client.state.currentUser?.id;
+    if (m.shadowed && !isMyMessage) return false;
+    return true;
+  };
+}
+
 /// [MessageListCore] is a simplified class that allows fetching a list of
 /// messages while exposing UI builders.
 ///
@@ -116,8 +127,6 @@ class MessageListCoreState extends State<MessageListCore> {
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
-  OwnUser? get _currentUser => _streamChannel!.channel.client.state.currentUser;
-
   var _messages = <Message>[];
 
   @override
@@ -132,20 +141,15 @@ class MessageListCoreState extends State<MessageListCore> {
         ? _streamChannel!.channel.state?.threads[widget.parentMessage!.id]
         : _streamChannel!.channel.state?.messages;
 
-    bool defaultFilter(Message m) {
-      final isMyMessage = m.user?.id == _currentUser?.id;
-      if (m.shadowed && !isMyMessage) return false;
-      return true;
-    }
-
     return BetterStreamBuilder<List<Message>>(
       initialData: initialData,
       comparator: const ListEquality().equals,
       stream: messagesStream!.map(
-        (messages) =>
-            messages?.where(widget.messageFilter ?? defaultFilter).toList(
-                  growable: false,
-                ),
+        (messages) => messages
+            ?.where(widget.messageFilter ?? defaultFilter(context))
+            .toList(
+              growable: false,
+            ),
       ),
       errorBuilder: widget.errorBuilder,
       noDataBuilder: widget.loadingBuilder,

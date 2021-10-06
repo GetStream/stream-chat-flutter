@@ -305,10 +305,18 @@ class _MessageListViewState extends State<MessageListView> {
     final initialScrollIndex = widget.initialScrollIndex;
     if (initialScrollIndex != null) return initialScrollIndex;
     if (streamChannel!.initialMessageId != null) {
-      final messages = streamChannel!.channel.state!.messages;
-      final totalMessages = messages.length;
-      final messageIndex =
-          messages.indexWhere((e) => e.id == streamChannel!.initialMessageId);
+      final messages = (_isThreadConversation
+              ? streamChannel!.channel.state?.threads[widget.parentMessage!.id]
+              : streamChannel!.channel.state?.messages)
+          ?.where(widget.messageFilter ?? defaultFilter(context))
+          .toList();
+
+      final totalMessages = messages?.length ?? 0;
+      final messageIndex = messages
+              ?.indexWhere((e) => e.id == streamChannel!.initialMessageId) ??
+          -1;
+      print('messageIndex: $messageIndex');
+
       final index = totalMessages - messageIndex;
       if (index != 0) return index - 1;
       return index;
@@ -1218,10 +1226,26 @@ class _MessageListViewState extends State<MessageListView> {
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
       _messageNewListener?.cancel();
-      initialIndex = _initialIndex;
-      initialAlignment = _initialAlignment;
 
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+        final messages = (_isThreadConversation
+                    ? streamChannel!
+                        .channel.state?.threads[widget.parentMessage!.id]
+                    : streamChannel!.channel.state?.messages)
+                ?.where(widget.messageFilter ?? defaultFilter(context))
+                .toList() ??
+            [];
+
+        initialIndex = _initialIndex;
+        initialAlignment = _initialAlignment;
+
+        final messageIndex =
+            messages.indexWhere((e) => e.id == streamChannel!.initialMessageId);
+        if (messageIndex > -1 &&
+            messageIndex + 1 < messages.length &&
+            messages[messageIndex + 1].attachments.isNotEmpty) {
+          initialAlignment = -0.5;
+        }
         if (_scrollController?.isAttached == true) {
           _scrollController?.jumpTo(
             index: initialIndex,
