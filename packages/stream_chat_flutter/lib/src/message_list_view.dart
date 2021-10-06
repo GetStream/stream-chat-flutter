@@ -315,7 +315,6 @@ class _MessageListViewState extends State<MessageListView> {
       final messageIndex = messages
               ?.indexWhere((e) => e.id == streamChannel!.initialMessageId) ??
           -1;
-      print('messageIndex: $messageIndex');
 
       final index = totalMessages - messageIndex;
       if (index != 0) return index - 1;
