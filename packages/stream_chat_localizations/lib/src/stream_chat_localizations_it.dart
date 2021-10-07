@@ -351,8 +351,10 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get youText => 'te';
 
   @override
-  String galleryPaginationText(
-          {required int currentPage, required int totalPages}) =>
+  String galleryPaginationText({
+    required int currentPage,
+    required int totalPages,
+  }) =>
       '${currentPage + 1} di $totalPages';
 
   @override

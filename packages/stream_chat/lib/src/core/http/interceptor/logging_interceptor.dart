@@ -105,8 +105,11 @@ class LoggingInterceptor extends Interceptor {
           final formDataMap = <String, dynamic>{}
             ..addEntries(data.fields)
             ..addEntries(data.files);
-          _printMapAsTable(_logPrintRequest, formDataMap,
-              header: 'Form data | ${data.boundary}');
+          _printMapAsTable(
+            _logPrintRequest,
+            formDataMap,
+            header: 'Form data | ${data.boundary}',
+          );
         } else {
           _printBlock(_logPrintRequest, data.toString());
         }
@@ -201,14 +204,19 @@ class LoggingInterceptor extends Interceptor {
   }
 
   void _printRequestHeader(
-      void Function(Object) logPrint, RequestOptions options) {
+    void Function(Object) logPrint,
+    RequestOptions options,
+  ) {
     final uri = options.uri;
     final method = options.method;
     _printBoxed(logPrint, header: 'Request ║ $method ', text: uri.toString());
   }
 
-  void _printLine(void Function(Object) logPrint,
-          [String pre = '', String suf = '╝']) =>
+  void _printLine(
+    void Function(Object) logPrint, [
+    String pre = '',
+    String suf = '╝',
+  ]) =>
       logPrint('$pre${'═' * maxWidth}$suf');
 
   void _printKV(void Function(Object) logPrint, String? key, Object? v) {
@@ -227,8 +235,10 @@ class LoggingInterceptor extends Interceptor {
     final lines = (msg.length / maxWidth).ceil();
     for (var i = 0; i < lines; ++i) {
       logPrint((i >= 0 ? '║ ' : '') +
-          msg.substring(i * maxWidth,
-              math.min<int>(i * maxWidth + maxWidth, msg.length)));
+          msg.substring(
+            i * maxWidth,
+            math.min<int>(i * maxWidth + maxWidth, msg.length),
+          ));
     }
   }
 
@@ -301,8 +311,13 @@ class LoggingInterceptor extends Interceptor {
         if (compact) {
           logPrint('║${_indent(tabs)}  $e${!isLast ? ',' : ''}');
         } else {
-          _printPrettyMap(logPrint, e,
-              tabs: tabs + 1, isListItem: true, isLast: isLast);
+          _printPrettyMap(
+            logPrint,
+            e,
+            tabs: tabs + 1,
+            isListItem: true,
+            isLast: isLast,
+          );
         }
       } else {
         logPrint('║${_indent(tabs + 2)} $e${isLast ? '' : ','}');

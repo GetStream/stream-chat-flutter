@@ -62,10 +62,11 @@ class _ReactionPickerState extends State<ReactionPicker>
           mainAxisSize: MainAxisSize.min,
           children: reactionIcons
               .map<Widget>((reactionIcon) {
-                final ownReactionIndex = widget.message.ownReactions
-                        ?.indexWhere(
-                            (reaction) => reaction.type == reactionIcon.type) ??
-                    -1;
+                final ownReactionIndex =
+                    widget.message.ownReactions?.indexWhere(
+                          (reaction) => reaction.type == reactionIcon.type,
+                        ) ??
+                        -1;
                 final index = reactionIcons.indexOf(reactionIcon);
 
                 final child = reactionIcon.builder(

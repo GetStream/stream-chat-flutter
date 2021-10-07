@@ -145,7 +145,7 @@ class StreamChatThemeData {
   ) {
     final accentColor = colorTheme.accentPrimary;
     final iconTheme =
-        IconThemeData(color: colorTheme.textHighEmphasis.withOpacity(.5));
+        IconThemeData(color: colorTheme.textHighEmphasis.withOpacity(0.5));
     final channelHeaderTheme = ChannelHeaderThemeData(
       avatarTheme: AvatarThemeData(
         borderRadius: BorderRadius.circular(20),
@@ -174,7 +174,7 @@ class StreamChatThemeData {
         color: const Color(0xff7A7A7A),
       ),
       lastMessageAtStyle: textTheme.footnote.copyWith(
-        color: colorTheme.textHighEmphasis.withOpacity(.5),
+        color: colorTheme.textHighEmphasis.withOpacity(0.5),
       ),
       indicatorIconSize: 16,
     );
@@ -280,7 +280,7 @@ class StreamChatThemeData {
             return StreamSvgIcon.loveReaction(
               color: highlighted
                   ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(.5),
+                  : theme.primaryIconTheme.color!.withOpacity(0.5),
               size: size,
             );
           },
@@ -292,7 +292,7 @@ class StreamChatThemeData {
             return StreamSvgIcon.thumbsUpReaction(
               color: highlighted
                   ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(.5),
+                  : theme.primaryIconTheme.color!.withOpacity(0.5),
               size: size,
             );
           },
@@ -304,7 +304,7 @@ class StreamChatThemeData {
             return StreamSvgIcon.thumbsDownReaction(
               color: highlighted
                   ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(.5),
+                  : theme.primaryIconTheme.color!.withOpacity(0.5),
               size: size,
             );
           },
@@ -316,7 +316,7 @@ class StreamChatThemeData {
             return StreamSvgIcon.lolReaction(
               color: highlighted
                   ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(.5),
+                  : theme.primaryIconTheme.color!.withOpacity(0.5),
               size: size,
             );
           },
@@ -328,7 +328,7 @@ class StreamChatThemeData {
             return StreamSvgIcon.wutReaction(
               color: highlighted
                   ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(.5),
+                  : theme.primaryIconTheme.color!.withOpacity(0.5),
               size: size,
             );
           },

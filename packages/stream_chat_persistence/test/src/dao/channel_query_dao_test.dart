@@ -82,9 +82,9 @@ void main() {
         cid: cids[index],
         createdBy: users[index],
         config: ChannelConfig(),
-        extraData: {'test_custom_field': 3 + index},
+        extraData: {'test_custom_field': index + 3},
         createdAt: now,
-        memberCount: 3 + index,
+        memberCount: index + 3,
         lastMessageAt: now.add(Duration(hours: index)),
       ),
     ).reversed.toList(growable: false);

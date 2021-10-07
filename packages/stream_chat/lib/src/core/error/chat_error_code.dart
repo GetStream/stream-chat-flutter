@@ -90,7 +90,7 @@ enum ChatErrorCode {
   internalSystemError,
 
   /// No access to requested channels
-  noAccessToChannels
+  noAccessToChannels,
 }
 
 const _errorCodeWithDescription = {
@@ -98,14 +98,20 @@ const _errorCodeWithDescription = {
       MapEntry(1000, 'Unauthorised, token not defined'),
   ChatErrorCode.inputError:
       MapEntry(4, 'Wrong data/parameter is sent to the API'),
-  ChatErrorCode.duplicateUsername: MapEntry(6,
-      'Duplicate username is sent while enforce_unique_usernames is enabled'),
+  ChatErrorCode.duplicateUsername: MapEntry(
+    6,
+    'Duplicate username is sent while enforce_unique_usernames is enabled',
+  ),
   ChatErrorCode.messageTooLong: MapEntry(20, 'Message is too long'),
   ChatErrorCode.eventNotSupported: MapEntry(18, 'Event is not supported'),
-  ChatErrorCode.channelFeatureNotSupported: MapEntry(19,
-      'The feature is currently disabled on the dashboard (i.e. Reactions & Replies)'),
-  ChatErrorCode.multipleNestling: MapEntry(21,
-      'Multiple Levels Reply is not supported - the API only supports 1 level deep reply threads'),
+  ChatErrorCode.channelFeatureNotSupported: MapEntry(
+    19,
+    'The feature is currently disabled on the dashboard (i.e. Reactions & Replies)',
+  ),
+  ChatErrorCode.multipleNestling: MapEntry(
+    21,
+    'Multiple Levels Reply is not supported - the API only supports 1 level deep reply threads',
+  ),
   ChatErrorCode.customCommandEndpointCall:
       MapEntry(45, 'Custom Command handler returned an error'),
   ChatErrorCode.customCommandEndpointMissing:

@@ -73,7 +73,7 @@ class UserListView extends StatefulWidget {
     this.listBuilder,
     this.userListController,
   })  : assert(
-          crossAxisCount == 1 || groupAlphabetically == false,
+          crossAxisCount == 1 || !groupAlphabetically,
           'Cannot group alphabetically when crossAxisCount > 1',
         ),
         limit = limit ?? pagination?.limit ?? 30,
@@ -407,33 +407,34 @@ class _UserListViewState extends State<UserListView>
 
   Widget _buildQueryProgressIndicator(context, UsersBlocState usersProvider) =>
       StreamBuilder<bool>(
-          stream: usersProvider.queryUsersLoading,
-          initialData: false,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Container(
-                color: StreamChatTheme.of(context)
-                    .colorTheme
-                    .accentError
-                    .withOpacity(.2),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Center(
-                    child: Text(context.translations.loadingUsersError),
-                  ),
-                ),
-              );
-            }
+        stream: usersProvider.queryUsersLoading,
+        initialData: false,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
             return Container(
-              height: 100,
-              padding: const EdgeInsets.all(32),
-              child: Center(
-                child: snapshot.data!
-                    ? const CircularProgressIndicator()
-                    : Container(),
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .accentError
+                  .withOpacity(0.2),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: Text(context.translations.loadingUsersError),
+                ),
               ),
             );
-          });
+          }
+          return Container(
+            height: 100,
+            padding: const EdgeInsets.all(32),
+            child: Center(
+              child: snapshot.data!
+                  ? const CircularProgressIndicator()
+                  : Container(),
+            ),
+          );
+        },
+      );
 
   Widget _separatorBuilder(context, i) => Container(
         height: 1,

@@ -56,12 +56,15 @@ class Attachment extends Equatable {
   /// Create a new instance from a json
   factory Attachment.fromJson(Map<String, dynamic> json) =>
       _$AttachmentFromJson(
-          Serializer.moveToExtraDataFromRoot(json, topLevelFields));
+        Serializer.moveToExtraDataFromRoot(json, topLevelFields),
+      );
 
   /// Create a new instance from a db data
   factory Attachment.fromData(Map<String, dynamic> json) =>
       _$AttachmentFromJson(Serializer.moveToExtraDataFromRoot(
-          json, topLevelFields + dbSpecificTopLevelFields));
+        json,
+        topLevelFields + dbSpecificTopLevelFields,
+      ));
 
   ///The attachment type based on the URL resource. This can be: audio,
   ///image or video

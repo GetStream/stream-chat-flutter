@@ -575,8 +575,7 @@ class _MessageWidgetState extends State<MessageWidget>
   bool get isFailedState => isSendFailed || isUpdateFailed || isDeleteFailed;
 
   bool get isGiphy =>
-      widget.message.attachments.any((element) => element.type == 'giphy') ==
-      true;
+      widget.message.attachments.any((element) => element.type == 'giphy');
 
   bool get isOnlyEmoji => widget.message.text?.isOnlyEmoji == true;
 
@@ -596,7 +595,7 @@ class _MessageWidgetState extends State<MessageWidget>
       isDeleted;
 
   @override
-  bool get wantKeepAlive => widget.message.attachments.isNotEmpty == true;
+  bool get wantKeepAlive => widget.message.attachments.isNotEmpty;
 
   late StreamChatThemeData _streamChatTheme;
   late StreamChatState _streamChat;
@@ -674,7 +673,10 @@ class _MessageWidgetState extends State<MessageWidget>
                                   child: PortalEntry(
                                     portal: Container(
                                       transform: Matrix4.translationValues(
-                                          widget.reverse ? 12 : -12, 0, 0),
+                                        widget.reverse ? 12 : -12,
+                                        0,
+                                        0,
+                                      ),
                                       constraints: const BoxConstraints(
                                         maxWidth: 22 * 6.0,
                                       ),
@@ -704,13 +706,15 @@ class _MessageWidgetState extends State<MessageWidget>
                                               ? Container(
                                                   // ignore: lines_longer_than_80_chars
                                                   margin: EdgeInsets.symmetric(
-                                                      horizontal:
-                                                          // ignore: lines_longer_than_80_chars
-                                                          widget.showUserAvatar ==
-                                                                  // ignore: lines_longer_than_80_chars
-                                                                  DisplayWidget.gone
-                                                              ? 0
-                                                              : 4.0),
+                                                    horizontal:
+                                                        // ignore: lines_longer_than_80_chars
+                                                        widget.showUserAvatar ==
+                                                                // ignore: lines_longer_than_80_chars
+                                                                DisplayWidget
+                                                                    .gone
+                                                            ? 0
+                                                            : 4.0,
+                                                  ),
                                                   child: DeletedMessage(
                                                     borderRadiusGeometry: widget
                                                         .borderRadiusGeometry,
@@ -794,7 +798,7 @@ class _MessageWidgetState extends State<MessageWidget>
                                     widget.message.user != null) ...[
                                   _buildUserAvatar(),
                                   const SizedBox(width: 4),
-                                ]
+                                ],
                               ],
                             ),
                             if (showBottomRow)
@@ -856,7 +860,11 @@ class _MessageWidgetState extends State<MessageWidget>
           : chatThemeData.ownMessageTheme,
       reverse: widget.reverse,
       padding: EdgeInsets.only(
-          right: 8, left: 8, top: 8, bottom: hasNonUrlAttachments ? 8 : 0),
+        right: 8,
+        left: 8,
+        top: 8,
+        bottom: hasNonUrlAttachments ? 8 : 0,
+      ),
     );
   }
 
@@ -1054,64 +1062,64 @@ class _MessageWidgetState extends State<MessageWidget>
     final channel = StreamChannel.of(context).channel;
 
     showDialog(
-        useRootNavigator: false,
-        context: context,
-        barrierColor: _streamChatTheme.colorTheme.overlay,
-        builder: (context) => StreamChannel(
-              channel: channel,
-              child: MessageActionsModal(
-                messageWidget: widget.copyWith(
-                  key: const Key('MessageWidget'),
-                  message: widget.message.copyWith(
-                    text: (widget.message.text?.length ?? 0) > 200
-                        ? '${widget.message.text!.substring(0, 200)}...'
-                        : widget.message.text,
-                  ),
-                  showReactions: false,
-                  showUsername: false,
-                  showTimestamp: false,
-                  translateUserAvatar: false,
-                  showSendingIndicator: false,
-                  padding: const EdgeInsets.all(0),
-                  showReactionPickerIndicator: widget.showReactions &&
-                      (widget.message.status == MessageSendingStatus.sent),
-                  showPinHighlight: false,
-                  showUserAvatar: widget.message.user!.id ==
-                          channel.client.state.currentUser!.id
-                      ? DisplayWidget.gone
-                      : DisplayWidget.show,
-                ),
-                onCopyTap: (message) =>
-                    Clipboard.setData(ClipboardData(text: message.text)),
-                messageTheme: widget.messageTheme,
-                reverse: widget.reverse,
-                showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
-                message: widget.message,
-                editMessageInputBuilder: widget.editMessageInputBuilder,
-                onReplyTap: widget.onReplyTap,
-                onThreadReplyTap: widget.onThreadTap,
-                showResendMessage: widget.showResendMessage &&
-                    (isSendFailed || isUpdateFailed),
-                showCopyMessage: widget.showCopyMessage &&
-                    !isFailedState &&
-                    widget.message.text?.trim().isNotEmpty == true,
-                showEditMessage: widget.showEditMessage &&
-                    !isDeleteFailed &&
-                    widget.message.attachments
-                            .any((element) => element.type == 'giphy') !=
-                        true,
-                showReactions: widget.showReactions,
-                showReplyMessage: widget.showReplyMessage &&
-                    !isFailedState &&
-                    widget.onReplyTap != null,
-                showThreadReplyMessage: widget.showThreadReplyMessage &&
-                    !isFailedState &&
-                    widget.onThreadTap != null,
-                showFlagButton: widget.showFlagButton,
-                showPinButton: widget.showPinButton,
-                customActions: widget.customActions,
-              ),
-            ));
+      useRootNavigator: false,
+      context: context,
+      barrierColor: _streamChatTheme.colorTheme.overlay,
+      builder: (context) => StreamChannel(
+        channel: channel,
+        child: MessageActionsModal(
+          messageWidget: widget.copyWith(
+            key: const Key('MessageWidget'),
+            message: widget.message.copyWith(
+              text: (widget.message.text?.length ?? 0) > 200
+                  ? '${widget.message.text!.substring(0, 200)}...'
+                  : widget.message.text,
+            ),
+            showReactions: false,
+            showUsername: false,
+            showTimestamp: false,
+            translateUserAvatar: false,
+            showSendingIndicator: false,
+            padding: const EdgeInsets.all(0),
+            showReactionPickerIndicator: widget.showReactions &&
+                (widget.message.status == MessageSendingStatus.sent),
+            showPinHighlight: false,
+            showUserAvatar:
+                widget.message.user!.id == channel.client.state.currentUser!.id
+                    ? DisplayWidget.gone
+                    : DisplayWidget.show,
+          ),
+          onCopyTap: (message) =>
+              Clipboard.setData(ClipboardData(text: message.text)),
+          messageTheme: widget.messageTheme,
+          reverse: widget.reverse,
+          showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
+          message: widget.message,
+          editMessageInputBuilder: widget.editMessageInputBuilder,
+          onReplyTap: widget.onReplyTap,
+          onThreadReplyTap: widget.onThreadTap,
+          showResendMessage:
+              widget.showResendMessage && (isSendFailed || isUpdateFailed),
+          showCopyMessage: widget.showCopyMessage &&
+              !isFailedState &&
+              widget.message.text?.trim().isNotEmpty == true,
+          showEditMessage: widget.showEditMessage &&
+              !isDeleteFailed &&
+              !widget.message.attachments
+                  .any((element) => element.type == 'giphy'),
+          showReactions: widget.showReactions,
+          showReplyMessage: widget.showReplyMessage &&
+              !isFailedState &&
+              widget.onReplyTap != null,
+          showThreadReplyMessage: widget.showThreadReplyMessage &&
+              !isFailedState &&
+              widget.onThreadTap != null,
+          showFlagButton: widget.showFlagButton,
+          showPinButton: widget.showPinButton,
+          customActions: widget.customActions,
+        ),
+      ),
+    );
   }
 
   void _showMessageReactionsModalBottomSheet(BuildContext context) {
@@ -1291,8 +1299,9 @@ class _MessageWidgetState extends State<MessageWidget>
                       ? widget.messageTheme.copyWith(
                           messageTextStyle:
                               widget.messageTheme.messageTextStyle!.copyWith(
-                          fontSize: 42,
-                        ))
+                            fontSize: 42,
+                          ),
+                        )
                       : widget.messageTheme,
                 ),
         ),
@@ -1326,7 +1335,7 @@ class _MessageWidgetState extends State<MessageWidget>
               fontSize: 13,
               fontWeight: FontWeight.w400,
             ),
-          )
+          ),
         ],
       ),
     );
@@ -1432,8 +1441,12 @@ class _ThreadReplyPainter extends CustomPainter {
 
     final path = Path()
       ..moveTo(reverse ? size.width : 0, 0)
-      ..quadraticBezierTo(reverse ? size.width : 0, size.height * 0.38,
-          reverse ? size.width : 0, size.height * 0.50)
+      ..quadraticBezierTo(
+        reverse ? size.width : 0,
+        size.height * 0.38,
+        reverse ? size.width : 0,
+        size.height * 0.5,
+      )
       ..quadraticBezierTo(
         reverse ? size.width : 0,
         size.height,

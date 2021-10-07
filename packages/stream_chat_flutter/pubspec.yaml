@@ -55,10 +55,9 @@ flutter:
   uses-material-design: true
 
 dev_dependencies:
+  dart_code_metrics: ^4.4.0
   flutter_test:
     sdk: flutter
   golden_toolkit: ^0.10.0
   mocktail: ^0.1.2
   path: ^1.8.0
-  pedantic: ^1.11.0
-

@@ -48,7 +48,8 @@ class OwnUser extends User {
 
   /// Create a new instance from json.
   factory OwnUser.fromJson(Map<String, dynamic> json) => _$OwnUserFromJson(
-      Serializer.moveToExtraDataFromRoot(json, topLevelFields));
+        Serializer.moveToExtraDataFromRoot(json, topLevelFields),
+      );
 
   /// Create a new instance from [User] object.
   factory OwnUser.fromUser(User user) => OwnUser(

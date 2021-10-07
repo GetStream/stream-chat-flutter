@@ -72,85 +72,82 @@ class ChannelPreview extends StatelessWidget {
     final channelPreviewTheme = ChannelPreviewTheme.of(context);
     final streamChatState = StreamChat.of(context);
     return BetterStreamBuilder<bool>(
-        stream: channel.isMutedStream,
-        initialData: channel.isMuted,
-        builder: (context, data) => AnimatedOpacity(
-              opacity: data ? 0.5 : 1,
-              duration: const Duration(milliseconds: 300),
-              child: ListTile(
-                visualDensity: VisualDensity.compact,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                ),
-                onTap: () => onTap?.call(channel),
-                onLongPress: () => onLongPress?.call(channel),
-                leading: leading ?? ChannelAvatar(onTap: onImageTap),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Flexible(
-                      child: title ??
-                          ChannelName(
-                            textStyle: channelPreviewTheme.titleStyle,
-                          ),
+      stream: channel.isMutedStream,
+      initialData: channel.isMuted,
+      builder: (context, data) => AnimatedOpacity(
+        opacity: data ? 0.5 : 1,
+        duration: const Duration(milliseconds: 300),
+        child: ListTile(
+          visualDensity: VisualDensity.compact,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 8,
+          ),
+          onTap: () => onTap?.call(channel),
+          onLongPress: () => onLongPress?.call(channel),
+          leading: leading ?? ChannelAvatar(onTap: onImageTap),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Flexible(
+                child: title ??
+                    ChannelName(
+                      textStyle: channelPreviewTheme.titleStyle,
                     ),
-                    BetterStreamBuilder<List<Member>>(
-                      stream: channel.state?.membersStream,
-                      initialData: channel.state?.members,
-                      comparator: const ListEquality().equals,
-                      builder: (context, members) {
-                        if (members.isEmpty ||
-                            members.any((Member e) =>
-                                    e.user!.id ==
-                                    channel.client.state.currentUser?.id) !=
-                                true) {
-                          return const SizedBox();
-                        }
-                        return UnreadIndicator(
-                          cid: channel.cid,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                subtitle: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Flexible(child: subtitle ?? _buildSubtitle(context)),
-                    sendingIndicator ??
-                        Builder(
-                          builder: (context) {
-                            final lastMessage =
-                                channel.state?.messages.lastWhereOrNull(
-                              (m) => !m.isDeleted && m.shadowed != true,
-                            );
-                            if (lastMessage?.user?.id ==
-                                streamChatState.currentUser?.id) {
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 4),
-                                child: SendingIndicator(
-                                  message: lastMessage!,
-                                  size: channelPreviewTheme.indicatorIconSize,
-                                  isMessageRead: channel.state!.read
-                                          .where((element) =>
-                                              element.user.id !=
-                                              channel
-                                                  .client.state.currentUser!.id)
-                                          .where((element) => element.lastRead
-                                              .isAfter(lastMessage.createdAt))
-                                          .isNotEmpty ==
-                                      true,
-                                ),
-                              );
-                            }
-                            return const SizedBox();
-                          },
-                        ),
-                    trailing ?? _buildDate(context),
-                  ],
-                ),
               ),
-            ));
+              BetterStreamBuilder<List<Member>>(
+                stream: channel.state?.membersStream,
+                initialData: channel.state?.members,
+                comparator: const ListEquality().equals,
+                builder: (context, members) {
+                  if (members.isEmpty ||
+                      !members.any((Member e) =>
+                          e.user!.id == channel.client.state.currentUser?.id)) {
+                    return const SizedBox();
+                  }
+                  return UnreadIndicator(
+                    cid: channel.cid,
+                  );
+                },
+              ),
+            ],
+          ),
+          subtitle: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Flexible(child: subtitle ?? _buildSubtitle(context)),
+              sendingIndicator ??
+                  Builder(
+                    builder: (context) {
+                      final lastMessage =
+                          channel.state?.messages.lastWhereOrNull(
+                        (m) => !m.isDeleted && !m.shadowed,
+                      );
+                      if (lastMessage?.user?.id ==
+                          streamChatState.currentUser?.id) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: SendingIndicator(
+                            message: lastMessage!,
+                            size: channelPreviewTheme.indicatorIconSize,
+                            isMessageRead: channel.state!.read
+                                .where((element) =>
+                                    element.user.id !=
+                                    channel.client.state.currentUser!.id)
+                                .where((element) => element.lastRead
+                                    .isAfter(lastMessage.createdAt))
+                                .isNotEmpty,
+                          ),
+                        );
+                      }
+                      return const SizedBox();
+                    },
+                  ),
+              trailing ?? _buildDate(context),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildDate(BuildContext context) => BetterStreamBuilder<DateTime>(
@@ -246,10 +243,11 @@ class ChannelPreview extends StatelessWidget {
                 lastMessage.mentionedUsers,
                 lastMessage.attachments,
                 channelPreviewTheme.subtitleStyle?.copyWith(
-                    color: channelPreviewTheme.subtitleStyle?.color,
-                    fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
-                        ? FontStyle.italic
-                        : FontStyle.normal),
+                  color: channelPreviewTheme.subtitleStyle?.color,
+                  fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                      ? FontStyle.italic
+                      : FontStyle.normal,
+                ),
                 channelPreviewTheme.subtitleStyle?.copyWith(
                   color: channelPreviewTheme.subtitleStyle?.color,
                   fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)

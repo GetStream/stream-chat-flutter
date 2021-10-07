@@ -129,7 +129,7 @@ class _MediaListViewState extends State<MediaListView> {
                           ),
                         ),
                       ),
-                    ]
+                    ],
                   ],
                 ),
               ),
@@ -144,9 +144,9 @@ class _MediaListViewState extends State<MediaListView> {
     _getMedia();
   }
 
-  void _getMedia() async {
+  Future<void> _getMedia() async {
     final assetList = await PhotoManager.getAssetPathList().then((value) {
-      if (value.isNotEmpty == true) {
+      if (value.isNotEmpty) {
         return value.singleWhere((element) => element.isAll);
       }
     });
@@ -178,7 +178,9 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
 
   @override
   ImageStreamCompleter load(
-          MediaThumbnailProvider key, DecoderCallback decode) =>
+    MediaThumbnailProvider key,
+    DecoderCallback decode,
+  ) =>
       MultiFrameImageStreamCompleter(
         codec: _loadAsync(key, decode),
         scale: 1,
@@ -188,7 +190,9 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
       );
 
   Future<ui.Codec> _loadAsync(
-      MediaThumbnailProvider key, DecoderCallback decode) async {
+    MediaThumbnailProvider key,
+    DecoderCallback decode,
+  ) async {
     assert(key == this, 'Checks MediaThumbnailProvider');
     final bytes = await media.thumbData;
 

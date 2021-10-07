@@ -21,25 +21,16 @@ class DateDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final createdAt = Jiffy(dateTime);
-    final now = DateTime.now();
+    final now = Jiffy(DateTime.now());
 
-    String dayInfo;
-    if (Jiffy(createdAt).isSame(now, Units.DAY)) {
+    var dayInfo = createdAt.MMMd;
+    if (createdAt.isSame(now, Units.DAY)) {
       dayInfo = context.translations.todayLabel;
-    } else if (Jiffy(createdAt)
-        .isSame(now.subtract(const Duration(days: 1)), Units.DAY)) {
+    } else if (createdAt.isSame(now.subtract(days: 1), Units.DAY)) {
       dayInfo = context.translations.yesterdayLabel;
-    } else if (Jiffy(createdAt).isAfter(
-      now.subtract(const Duration(days: 7)),
-      Units.DAY,
-    )) {
+    } else if (createdAt.isAfter(now.subtract(days: 7), Units.DAY)) {
       dayInfo = createdAt.EEEE;
-    } else if (Jiffy(createdAt).isAfter(
-      Jiffy(now).subtract(years: 1),
-      Units.DAY,
-    )) {
-      dayInfo = createdAt.MMMd;
-    } else {
+    } else if (createdAt.isAfter(now.subtract(years: 1), Units.DAY)) {
       dayInfo = createdAt.MMMd;
     }
 

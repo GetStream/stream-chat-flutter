@@ -11,6 +11,10 @@ scripts:
     run: melos run analyze && melos run format
     description: Run all static analysis checks
 
+  analyze:all:
+    run: melos run analyze && melos run metrics
+    description: Run all
+
   analyze:
     run: |
       melos exec -c 5 --ignore="*example*" -- \
@@ -23,6 +27,14 @@ scripts:
     run: flutter format --set-exit-if-changed .
     description: |
       Run `flutter format --set-exit-if-changed .` in all packages.
+
+  metrics:
+    run: |
+      melos exec -c 1 --ignore="*example*" -- \
+        flutter pub run dart_code_metrics:metrics analyze lib
+    description: |
+      Run `dart_code_metrics` in all packages.
+       - Note: you can also rely on your IDEs Dart Analysis / Issues window.
 
   lint:pub:
     run: |
@@ -71,10 +83,13 @@ scripts:
 
   docs:
     run: |
-      npm install -g https://github.com/GetStream/stream-chat-docusaurus-cli && 
-      npx stream-chat-docusaurus -i -s 
+      npm install -g https://github.com/GetStream/stream-chat-docusaurus-cli &&
+      npx stream-chat-docusaurus -i -s
     description: Runs the docusaurus documentation locally.
+
+dev_dependencies:
+  dart_code_metrics: ^4.4.0
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
-  flutter: '>=1.22.4 <2.0.0'
+  flutter: '>=1.17.0 <2.0.0'

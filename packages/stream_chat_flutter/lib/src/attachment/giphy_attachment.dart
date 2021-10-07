@@ -297,7 +297,7 @@ class GiphyAttachment extends AttachmentWidget {
                   color: StreamChatTheme.of(context)
                       .colorTheme
                       .textHighEmphasis
-                      .withOpacity(.5),
+                      .withOpacity(0.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
