@@ -18,6 +18,7 @@ class MessageThemeData with Diagnosticable {
     this.reactionsMaskColor,
     this.avatarTheme,
     this.createdAtStyle,
+    this.linkBackgroundColor,
   });
 
   /// Text style for message text
@@ -53,6 +54,9 @@ class MessageThemeData with Diagnosticable {
   /// Theme of the avatar
   final AvatarThemeData? avatarTheme;
 
+  /// Background color for messages with url attachments.
+  final Color? linkBackgroundColor;
+
   /// Copy with a theme
   MessageThemeData copyWith({
     TextStyle? messageTextStyle,
@@ -66,6 +70,7 @@ class MessageThemeData with Diagnosticable {
     Color? reactionsBackgroundColor,
     Color? reactionsBorderColor,
     Color? reactionsMaskColor,
+    Color? linkBackgroundColor,
   }) =>
       MessageThemeData(
         messageTextStyle: messageTextStyle ?? this.messageTextStyle,
@@ -81,6 +86,7 @@ class MessageThemeData with Diagnosticable {
             reactionsBackgroundColor ?? this.reactionsBackgroundColor,
         reactionsBorderColor: reactionsBorderColor ?? this.reactionsBorderColor,
         reactionsMaskColor: reactionsMaskColor ?? this.reactionsMaskColor,
+        linkBackgroundColor: linkBackgroundColor ?? this.linkBackgroundColor,
       );
 
   /// Linearly interpolate from one [MessageThemeData] to another.
@@ -109,6 +115,8 @@ class MessageThemeData with Diagnosticable {
         reactionsMaskColor:
             Color.lerp(a.reactionsMaskColor, b.reactionsMaskColor, t),
         repliesStyle: TextStyle.lerp(a.repliesStyle, b.repliesStyle, t),
+        linkBackgroundColor:
+            Color.lerp(a.linkBackgroundColor, b.linkBackgroundColor, t),
       );
 
   /// Merge with a theme
@@ -131,6 +139,7 @@ class MessageThemeData with Diagnosticable {
       reactionsBackgroundColor: other.reactionsBackgroundColor,
       reactionsBorderColor: other.reactionsBorderColor,
       reactionsMaskColor: other.reactionsMaskColor,
+      linkBackgroundColor: other.linkBackgroundColor,
     );
   }
 
@@ -149,7 +158,8 @@ class MessageThemeData with Diagnosticable {
           reactionsBackgroundColor == other.reactionsBackgroundColor &&
           reactionsBorderColor == other.reactionsBorderColor &&
           reactionsMaskColor == other.reactionsMaskColor &&
-          avatarTheme == other.avatarTheme;
+          avatarTheme == other.avatarTheme &&
+          linkBackgroundColor == other.linkBackgroundColor;
 
   @override
   int get hashCode =>
@@ -163,7 +173,8 @@ class MessageThemeData with Diagnosticable {
       reactionsBackgroundColor.hashCode ^
       reactionsBorderColor.hashCode ^
       reactionsMaskColor.hashCode ^
-      avatarTheme.hashCode;
+      avatarTheme.hashCode ^
+      linkBackgroundColor.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -179,6 +190,7 @@ class MessageThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('avatarTheme', avatarTheme))
       ..add(ColorProperty('reactionsBackgroundColor', reactionsBackgroundColor))
       ..add(ColorProperty('reactionsBorderColor', reactionsBorderColor))
-      ..add(ColorProperty('reactionsMaskColor', reactionsMaskColor));
+      ..add(ColorProperty('reactionsMaskColor', reactionsMaskColor))
+      ..add(ColorProperty('linkBackgroundColor', linkBackgroundColor));
   }
 }

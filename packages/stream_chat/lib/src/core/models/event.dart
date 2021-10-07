@@ -92,7 +92,6 @@ class Event {
   final bool isLocal;
 
   /// Map of custom channel extraData
-  @JsonKey(defaultValue: {})
   final Map<String, Object?> extraData;
 
   /// Known top level fields.
@@ -184,7 +183,7 @@ class EventChannel extends ChannelModel {
     DateTime? deletedAt,
     required int memberCount,
     Map<String, Object?>? extraData,
-    required int cooldown,
+    int cooldown = 0,
     String? team,
   }) : super(
           id: id,

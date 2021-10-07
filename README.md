@@ -62,6 +62,11 @@ Every package folder includes a fully functional example with setup instructions
 
 We also provide a set of sample apps created using the Stream Flutter SDK at [this location](https://github.com/GetStream/flutter-samples).
 
+## Versioning Policy
+
+All of the Stream Chat packages follow [semantic versioning (semver)](https://semver.org/).
+
+See our [versioning policy documentation](https://getstream.io/chat/docs/sdk/flutter/basics/versioning_policy/) for more information.
 
 ## We are hiring
 

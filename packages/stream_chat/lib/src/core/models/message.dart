@@ -99,23 +99,16 @@ class Message extends Equatable {
   @JsonKey(
     includeIfNull: false,
     toJson: Serializer.readOnly,
-    defaultValue: 'regular',
   )
   final String type;
 
   /// The list of attachments, either provided by the user or generated from a
   /// command or as a result of URL scraping.
-  @JsonKey(
-    includeIfNull: false,
-    defaultValue: [],
-  )
+  @JsonKey(includeIfNull: false)
   final List<Attachment> attachments;
 
   /// The list of user mentioned in the message
-  @JsonKey(
-    toJson: User.toIds,
-    defaultValue: [],
-  )
+  @JsonKey(toJson: User.toIds)
   final List<User> mentionedUsers;
 
   /// A map describing the count of number of every reaction
@@ -156,14 +149,12 @@ class Message extends Equatable {
   final bool? showInChannel;
 
   /// If true the message is silent
-  @JsonKey(defaultValue: false)
   final bool silent;
 
   /// If true the message is shadowed
   @JsonKey(
     includeIfNull: false,
     toJson: Serializer.readOnly,
-    defaultValue: false,
   )
   final bool shadowed;
 
@@ -184,7 +175,6 @@ class Message extends Equatable {
   final User? user;
 
   /// If true the message is pinned
-  @JsonKey(defaultValue: false)
   final bool pinned;
 
   /// Reserved field indicating when the message was pinned
@@ -201,10 +191,7 @@ class Message extends Equatable {
   final User? pinnedBy;
 
   /// Message custom extraData
-  @JsonKey(
-    includeIfNull: false,
-    defaultValue: {},
-  )
+  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// True if the message is a system info

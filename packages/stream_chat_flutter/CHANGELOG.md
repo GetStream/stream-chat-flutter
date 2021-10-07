@@ -1,14 +1,25 @@
 ## Upcoming
 
+- Updated Dart SDK constraints to `>=2.14.0 <3.0.0`
+
+## 3.1.1
+
+- Updated `stream_chat_flutter_core` dependency to [`3.1.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Updated `file_picker`, `image_gallery_saver`, and `video_thumbnail` to the latest versions.
+
 🐞 Fixed
 
--[[#687]](https://github.com/GetStream/stream-chat-flutter/issues/687): Fix Users losing their place in the conversation after replying in threads.
+- [[#687]](https://github.com/GetStream/stream-chat-flutter/issues/687): Fix Users losing their place in the conversation after replying in threads.
+- Fixed floating date stream subscription causing "Bad state: stream has already been listened.” error.
+- Fixed `String` capitalize extension not working on empty strings.
 
 ✅ Added
 
 - Added `MessageInput.customOverlays` property to add custom overlays to the message input.
 - Added `MessageInput.mentionAllAppUsers` property to mention all app users in the message input.
 - The `MessageInput` now supports local search for channels with less than 100 members.
+- Added `MessageListView.paginationLoadingIndicatorBuilder` to override the default loading indicator shown while paginating the message list.
+- Added new `linkBackgroundColor` in `MessageTheme` for setting background colors of link attachments.
 
 ⚠️ Deprecated
 

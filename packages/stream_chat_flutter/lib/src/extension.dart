@@ -12,7 +12,7 @@ final _emojiChars = Emoji.chars();
 extension StringExtension on String {
   /// Returns the capitalized string
   String capitalize() =>
-      '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
+      isNotEmpty ? '${this[0].toUpperCase()}${substring(1).toLowerCase()}' : '';
 
   /// Returns whether the string contains only emoji's or not.
   ///

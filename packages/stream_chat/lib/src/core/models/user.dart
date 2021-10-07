@@ -100,7 +100,6 @@ class User extends Equatable {
   @JsonKey(
     includeIfNull: false,
     toJson: Serializer.readOnly,
-    defaultValue: <String>[],
   )
   final List<String> teams;
 
@@ -120,7 +119,6 @@ class User extends Equatable {
   @JsonKey(
     includeIfNull: false,
     toJson: Serializer.readOnly,
-    defaultValue: false,
   )
   final bool online;
 
@@ -128,15 +126,11 @@ class User extends Equatable {
   @JsonKey(
     includeIfNull: false,
     toJson: Serializer.readOnly,
-    defaultValue: false,
   )
   final bool banned;
 
   /// Map of custom user extraData.
-  @JsonKey(
-    includeIfNull: false,
-    defaultValue: {},
-  )
+  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// The language this user prefers.

@@ -6,14 +6,13 @@ part of 'attachment_file.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-AttachmentFile _$AttachmentFileFromJson(Map<String, dynamic> json) {
-  return AttachmentFile(
-    size: json['size'] as int?,
-    path: json['path'] as String?,
-    name: json['name'] as String?,
-    bytes: _fromString(json['bytes'] as String?),
-  );
-}
+AttachmentFile _$AttachmentFileFromJson(Map<String, dynamic> json) =>
+    AttachmentFile(
+      size: json['size'] as int?,
+      path: json['path'] as String?,
+      name: json['name'] as String?,
+      bytes: _fromString(json['bytes'] as String?),
+    );
 
 Map<String, dynamic> _$AttachmentFileToJson(AttachmentFile instance) =>
     <String, dynamic>{
@@ -23,39 +22,31 @@ Map<String, dynamic> _$AttachmentFileToJson(AttachmentFile instance) =>
       'size': instance.size,
     };
 
-_$Preparing _$_$PreparingFromJson(Map<String, dynamic> json) {
-  return _$Preparing();
-}
+_$Preparing _$$PreparingFromJson(Map<String, dynamic> json) => _$Preparing();
 
-Map<String, dynamic> _$_$PreparingToJson(_$Preparing instance) =>
+Map<String, dynamic> _$$PreparingToJson(_$Preparing instance) =>
     <String, dynamic>{};
 
-_$InProgress _$_$InProgressFromJson(Map<String, dynamic> json) {
-  return _$InProgress(
-    uploaded: json['uploaded'] as int,
-    total: json['total'] as int,
-  );
-}
+_$InProgress _$$InProgressFromJson(Map<String, dynamic> json) => _$InProgress(
+      uploaded: json['uploaded'] as int,
+      total: json['total'] as int,
+    );
 
-Map<String, dynamic> _$_$InProgressToJson(_$InProgress instance) =>
+Map<String, dynamic> _$$InProgressToJson(_$InProgress instance) =>
     <String, dynamic>{
       'uploaded': instance.uploaded,
       'total': instance.total,
     };
 
-_$Success _$_$SuccessFromJson(Map<String, dynamic> json) {
-  return _$Success();
-}
+_$Success _$$SuccessFromJson(Map<String, dynamic> json) => _$Success();
 
-Map<String, dynamic> _$_$SuccessToJson(_$Success instance) =>
+Map<String, dynamic> _$$SuccessToJson(_$Success instance) =>
     <String, dynamic>{};
 
-_$Failed _$_$FailedFromJson(Map<String, dynamic> json) {
-  return _$Failed(
-    error: json['error'] as String,
-  );
-}
+_$Failed _$$FailedFromJson(Map<String, dynamic> json) => _$Failed(
+      error: json['error'] as String,
+    );
 
-Map<String, dynamic> _$_$FailedToJson(_$Failed instance) => <String, dynamic>{
+Map<String, dynamic> _$$FailedToJson(_$Failed instance) => <String, dynamic>{
       'error': instance.error,
     };
