@@ -88,7 +88,7 @@ scripts:
     description: Runs the docusaurus documentation locally.
 
 dev_dependencies:
-  dart_code_metrics: ^4.2.0-dev.5
+  dart_code_metrics: ^4.4.0
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
