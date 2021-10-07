@@ -677,7 +677,8 @@ class _MessageListViewState extends State<MessageListView> {
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
           initialData: _itemPositionListener.itemPositions.value,
           stream: _valueListenableToStreamAdapter(
-              _itemPositionListener.itemPositions),
+            _itemPositionListener.itemPositions,
+          ),
           comparator: (a, b) {
             if (a == null || b == null) {
               return false;
