@@ -34,6 +34,7 @@ platform :ios do
     desc "Deploy build to Firebase"
     lane :deploy_to_firebase do
         match_me
+        xcode_install(version: "13.0")
         xcversion(version: "~> 13.0.0")
        
         gym(
@@ -60,6 +61,7 @@ platform :ios do
     desc "Deploy build to TestFlight"
     lane :deploy_to_testflight do
         match_appstore
+        xcode_install(version: "13.0")
         xcversion(version: "~> 13.0.0")
 
         settings_to_override = {
