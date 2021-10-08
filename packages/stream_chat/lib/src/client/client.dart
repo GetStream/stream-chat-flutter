@@ -1411,10 +1411,9 @@ class ClientState {
     _subscriptions
         .add(_client.on(EventType.notificationMarkRead).listen((event) {
       if (event.cid == null) {
-        channels
-          .forEach((key, value) {
-            value.state?.unreadCount = 0;
-          });
+        channels.forEach((key, value) {
+          value.state?.unreadCount = 0;
+        });
       }
     }));
   }

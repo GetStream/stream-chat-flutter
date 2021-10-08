@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- markAllRead() now updates channel states.
+
 ## 3.1.1
 
 ✅ Added
