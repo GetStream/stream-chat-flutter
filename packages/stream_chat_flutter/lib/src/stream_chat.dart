@@ -75,7 +75,8 @@ class StreamChat extends StatefulWidget {
 
     if (streamChatState == null) {
       throw Exception(
-          'You must have a StreamChat widget at the top of your widget tree');
+        'You must have a StreamChat widget at the top of your widget tree',
+      );
     }
 
     return streamChatState;

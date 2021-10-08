@@ -10,29 +10,32 @@ export 'shared/shared_db.dart';
 part 'moor_chat_database.g.dart';
 
 /// A chat database implemented using moor
-@UseMoor(tables: [
-  Channels,
-  Messages,
-  PinnedMessages,
-  PinnedMessageReactions,
-  Reactions,
-  Users,
-  Members,
-  Reads,
-  ChannelQueries,
-  ConnectionEvents,
-], daos: [
-  UserDao,
-  ChannelDao,
-  MessageDao,
-  PinnedMessageDao,
-  PinnedMessageReactionDao,
-  MemberDao,
-  ReactionDao,
-  ReadDao,
-  ChannelQueryDao,
-  ConnectionEventDao,
-])
+@UseMoor(
+  tables: [
+    Channels,
+    Messages,
+    PinnedMessages,
+    PinnedMessageReactions,
+    Reactions,
+    Users,
+    Members,
+    Reads,
+    ChannelQueries,
+    ConnectionEvents,
+  ],
+  daos: [
+    UserDao,
+    ChannelDao,
+    MessageDao,
+    PinnedMessageDao,
+    PinnedMessageReactionDao,
+    MemberDao,
+    ReactionDao,
+    ReadDao,
+    ChannelQueryDao,
+    ConnectionEventDao,
+  ],
+)
 class MoorChatDatabase extends _$MoorChatDatabase {
   /// Creates a new moor chat database instance
   MoorChatDatabase(

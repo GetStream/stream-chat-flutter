@@ -32,7 +32,7 @@ const kStreamChatSupportedLanguages = {
   'it',
   'es',
   'ja',
-  'ko'
+  'ko',
 };
 
 /// Creates a [GlobalStreamChatLocalizations] instance for the given `locale`.

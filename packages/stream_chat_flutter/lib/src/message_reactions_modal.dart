@@ -46,11 +46,11 @@ class MessageReactionsModal extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final user = StreamChat.of(context).currentUser;
 
-    final roughMaxSize = 2 * size.width / 3;
+    final roughMaxSize = size.width * 2 / 3;
     var messageTextLength = message.text!.length;
     if (message.quotedMessage != null) {
       var quotedMessageLength = message.quotedMessage!.text!.length + 40;
-      if (message.quotedMessage!.attachments.isNotEmpty == true) {
+      if (message.quotedMessage!.attachments.isNotEmpty) {
         quotedMessageLength += 40;
       }
       if (quotedMessageLength > messageTextLength) {
@@ -60,7 +60,7 @@ class MessageReactionsModal extends StatelessWidget {
     final roughSentenceSize = messageTextLength *
         (messageTheme.messageTextStyle?.fontSize ?? 1) *
         1.2;
-    final divFactor = message.attachments.isNotEmpty == true
+    final divFactor = message.attachments.isNotEmpty
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
@@ -80,14 +80,15 @@ class MessageReactionsModal extends StatelessWidget {
                   (message.status == MessageSendingStatus.sent))
                 Align(
                   alignment: Alignment(
-                      user!.id == message.user!.id
-                          ? (divFactor >= 1.0
-                              ? -0.2 - shiftFactor
-                              : (1.2 - divFactor))
-                          : (divFactor >= 1.0
-                              ? 0.2 + shiftFactor
-                              : -(1.2 - divFactor)),
-                      0),
+                    user!.id == message.user!.id
+                        ? (divFactor >= 1.0
+                            ? -0.2 - shiftFactor
+                            : (1.2 - divFactor))
+                        : (divFactor >= 1.0
+                            ? shiftFactor + 0.2
+                            : -(1.2 - divFactor)),
+                    0,
+                  ),
                   child: ReactionPicker(
                     message: message,
                   ),
@@ -102,7 +103,7 @@ class MessageReactionsModal extends StatelessWidget {
                   context,
                   user,
                 ),
-              ]
+              ],
             ],
           ),
         ),

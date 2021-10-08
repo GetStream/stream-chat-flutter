@@ -111,8 +111,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
       _paginationEnded = false;
     }
 
-    if ((!clear && _paginationEnded) ||
-        _queryChannelsLoadingController.value == true) {
+    if ((!clear && _paginationEnded) || _queryChannelsLoadingController.value) {
       return;
     }
 
@@ -221,7 +220,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
             .listen((e) {
           final channel = e.channel;
           _channelsController.add(List.from(
-              (channels ?? [])..removeWhere((c) => c.cid == channel?.cid)));
+            (channels ?? [])..removeWhere((c) => c.cid == channel?.cid),
+          ));
         }));
     }
 

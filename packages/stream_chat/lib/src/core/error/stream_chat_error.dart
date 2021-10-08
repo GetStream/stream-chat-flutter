@@ -35,7 +35,8 @@ class StreamWebSocketError extends StreamChatError {
 
   ///
   factory StreamWebSocketError.fromWebSocketChannelError(
-      WebSocketChannelException error) {
+    WebSocketChannelException error,
+  ) {
     final message = error.message ?? '';
     return StreamWebSocketError(message);
   }

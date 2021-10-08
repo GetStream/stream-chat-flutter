@@ -99,12 +99,14 @@ class AttachmentActionsModal extends StatelessWidget {
                     () {
                       final attachment = message.attachments[currentIndex];
                       final isImage = attachment.type == 'image';
-                      final Future<String?> Function(Attachment,
-                              {void Function(int, int) progressCallback})
-                          saveFile = fileDownloader ?? _downloadAttachment;
-                      final Future<String?> Function(Attachment,
-                              {void Function(int, int) progressCallback})
-                          saveImage = imageDownloader ?? _downloadAttachment;
+                      final Future<String?> Function(
+                        Attachment, {
+                        void Function(int, int) progressCallback,
+                      }) saveFile = fileDownloader ?? _downloadAttachment;
+                      final Future<String?> Function(
+                        Attachment, {
+                        void Function(int, int) progressCallback,
+                      }) saveImage = imageDownloader ?? _downloadAttachment;
                       final downloader = isImage ? saveImage : saveFile;
 
                       final progressNotifier =
@@ -183,7 +185,7 @@ class AttachmentActionsModal extends StatelessWidget {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }

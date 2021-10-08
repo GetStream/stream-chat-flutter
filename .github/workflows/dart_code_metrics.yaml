@@ -1,0 +1,73 @@
+name: Dart Code Metrics
+
+env:
+  flutter_version: "2.5.0"
+  folders: "lib, test"
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - develop
+
+jobs:
+  check:
+    name: dart-code-metrics
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: "Cache Flutter dependencies"
+        uses: actions/cache@v2
+        with:
+          path: /opt/hostedtoolcache/flutter
+          key: ${{ env.flutter_version }}-flutter
+
+      - name: "Install Flutter"
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ env.flutter_version }}
+
+      - name: "Install Tools"
+        run: flutter pub global activate melos 1.0.0-dev.3
+      - name: "Bootstrap Workspace"
+        run: melos bootstrap
+
+      - name: "Stream Chat Metrics"
+        uses: dart-code-checker/dart-code-metrics-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          relative_path: 'packages/stream_chat'
+          folders: ${{ env.folders }}
+
+      - name: "Stream Chat Flutter Core Metrics"
+        uses: dart-code-checker/dart-code-metrics-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          relative_path: 'packages/stream_chat_flutter_core'
+          folders: ${{ env.folders }}
+
+      - name: "Stream Chat Flutter Metrics"
+        uses: dart-code-checker/dart-code-metrics-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          relative_path: 'packages/stream_chat_flutter'
+          folders: ${{ env.folders }}
+
+      - name: "Stream Chat Localizations Metrics"
+        uses: dart-code-checker/dart-code-metrics-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          relative_path: 'packages/stream_chat_localizations'
+          folders: ${{ env.folders }}
+
+      - name: "Stream Chat Persistence Metrics"
+        uses: dart-code-checker/dart-code-metrics-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          relative_path: 'packages/stream_chat_persistence'
+          folders: ${{ env.folders }}

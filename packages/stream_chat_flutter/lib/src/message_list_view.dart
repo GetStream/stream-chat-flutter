@@ -60,6 +60,7 @@ typedef OnMessageTap = void Function(Message);
 typedef ReplyTapCallback = void Function(Message);
 
 /// Class for message details
+// ignore: prefer-match-file-name
 class MessageDetails {
   /// Constructor for creating [MessageDetails]
   MessageDetails(
@@ -358,8 +359,9 @@ class _MessageListViewState extends State<MessageListView> {
                   child: Text(
                     context.translations.emptyChatMessagesText,
                     style: _streamTheme.textTheme.footnote.copyWith(
-                        color: _streamTheme.colorTheme.textHighEmphasis
-                            .withOpacity(.5)),
+                      color: _streamTheme.colorTheme.textHighEmphasis
+                          .withOpacity(0.5),
+                    ),
                   ),
                 ),
         messageListBuilder: widget.messageListBuilder ??
@@ -371,8 +373,9 @@ class _MessageListViewState extends State<MessageListView> {
                   child: Text(
                     context.translations.genericErrorText,
                     style: _streamTheme.textTheme.footnote.copyWith(
-                        color: _streamTheme.colorTheme.textHighEmphasis
-                            .withOpacity(.5)),
+                      color: _streamTheme.colorTheme.textHighEmphasis
+                          .withOpacity(0.5),
+                    ),
                   ),
                 ),
       );
@@ -383,7 +386,7 @@ class _MessageListViewState extends State<MessageListView> {
 
     if (_messageListLength != null) {
       if (_bottomPaginationActive || (_inBetweenList && _upToDate)) {
-        if (_itemPositionListener.itemPositions.value.isNotEmpty == true) {
+        if (_itemPositionListener.itemPositions.value.isNotEmpty) {
           final first = _itemPositionListener.itemPositions.value.first;
           final diff = newMessagesListLength - _messageListLength!;
           if (diff > 0) {
@@ -674,7 +677,8 @@ class _MessageListViewState extends State<MessageListView> {
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
           initialData: _itemPositionListener.itemPositions.value,
           stream: _valueListenableToStreamAdapter(
-              _itemPositionListener.itemPositions),
+            _itemPositionListener.itemPositions,
+          ),
           comparator: (a, b) {
             if (a == null || b == null) {
               return false;
@@ -984,7 +988,7 @@ class _MessageListViewState extends State<MessageListView> {
 
     final allRead = readList.length >= (channel.memberCount ?? 0) - 1;
     final hasFileAttachment =
-        message.attachments.any((it) => it.type == 'file') == true;
+        message.attachments.any((it) => it.type == 'file');
 
     final isThreadMessage =
         message.parentId != null && message.showInChannel == true;
@@ -1016,7 +1020,7 @@ class _MessageListViewState extends State<MessageListView> {
     final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
 
     final hasUrlAttachment =
-        message.attachments.any((it) => it.titleLink != null) == true;
+        message.attachments.any((it) => it.titleLink != null);
 
     final borderSide =
         isOnlyEmoji || hasUrlAttachment || (isMyMessage && !hasFileAttachment)
@@ -1259,10 +1263,11 @@ class _MessageListViewState extends State<MessageListView> {
     if (widget.onThreadTap != null) {
       _onThreadTap = (Message message) {
         widget.onThreadTap!(
-            message,
-            widget.threadBuilder != null
-                ? widget.threadBuilder!(context, message)
-                : null);
+          message,
+          widget.threadBuilder != null
+              ? widget.threadBuilder!(context, message)
+              : null,
+        );
       };
     } else if (widget.threadBuilder != null) {
       _onThreadTap = (Message message) {
@@ -1271,7 +1276,8 @@ class _MessageListViewState extends State<MessageListView> {
           MaterialPageRoute(
             builder: (_) => BetterStreamBuilder<Message>(
               stream: streamChannel!.channel.state!.messagesStream.map(
-                  (messages) => messages.firstWhere((m) => m.id == message.id)),
+                (messages) => messages.firstWhere((m) => m.id == message.id),
+              ),
               initialData: message,
               builder: (_, data) => StreamChannel(
                 channel: streamChannel!.channel,
@@ -1320,7 +1326,7 @@ class _LoadingIndicator extends StatelessWidget {
       stream: stream,
       initialData: false,
       errorBuilder: (context, error) => Container(
-        color: streamTheme.colorTheme.accentError.withOpacity(.2),
+        color: streamTheme.colorTheme.accentError.withOpacity(0.2),
         child: Center(
           child: Text(context.translations.loadingMessagesError),
         ),

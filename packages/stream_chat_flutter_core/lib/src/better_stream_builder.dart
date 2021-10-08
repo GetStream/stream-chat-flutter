@@ -94,6 +94,7 @@ class _BetterStreamBuilderState<T extends Object>
     if (widget.errorBuilder != null && error != _lastError) {
       _lastError = error;
       if (mounted) {
+        // ignore: no-empty-block
         setState(() {});
       }
     }
@@ -106,7 +107,7 @@ class _BetterStreamBuilderState<T extends Object>
     if (!isEqual) {
       _lastEvent = event;
       if (mounted) {
-        setState(() {});
+        setState(() {}); // ignore: no-empty-block
       }
     }
   }

@@ -90,8 +90,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
       _paginationEnded = false;
     }
 
-    if ((!clear && _paginationEnded) ||
-        _queryMessagesLoadingController.value == true) {
+    if ((!clear && _paginationEnded) || _queryMessagesLoadingController.value) {
       return;
     }
 
