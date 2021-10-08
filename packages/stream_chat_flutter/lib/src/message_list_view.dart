@@ -473,12 +473,15 @@ class _MessageListViewState extends State<MessageListView> {
                   physics: widget.scrollPhysics,
                   itemScrollController: _scrollController,
                   reverse: widget.reverse,
-                  itemCount: messages.length,
+                  itemCount: itemCount,
                   findChildIndexCallback: (Key key) {
                     final indexedKey = key as IndexedKey;
-                    final index = messagesIndex[indexedKey.value];
-                    if (index != null) {
-                      return ((index + 2) * 2) - 1;
+                    final valueKey = indexedKey.key as ValueKey<String>?;
+                    if (valueKey != null) {
+                      final index = messagesIndex[valueKey.value];
+                      if (index != null) {
+                        return ((index + 2) * 2) - 1;
+                      }
                     }
                   },
 
@@ -628,12 +631,14 @@ class _MessageListViewState extends State<MessageListView> {
                         messages,
                         streamChannel!,
                         i - 2,
-                        i,
                       );
                     } else {
-                      messageWidget = buildMessage(message, messages, i - 2, i);
+                      messageWidget = buildMessage(message, messages, i - 2);
                     }
-                    return messageWidget;
+                    return KeyedSubtree(
+                      key: ValueKey(message.id),
+                      child: messageWidget,
+                    );
                   },
                 ),
               ),
@@ -856,13 +861,10 @@ class _MessageListViewState extends State<MessageListView> {
     List<Message> messages,
     StreamChannelState streamChannel,
     int index,
-    int buildItemIndex,
   ) {
-    final messageWidget =
-        buildMessage(message, messages, index, buildItemIndex);
-
+    final messageWidget = buildMessage(message, messages, index);
     return VisibilityDetector(
-      key: IndexedKey(message.id, buildItemIndex),
+      key: ValueKey('visibility: ${message.id}'),
       onVisibilityChanged: (visibility) {
         final isVisible = visibility.visibleBounds != Rect.zero;
         if (isVisible) {
@@ -954,13 +956,11 @@ class _MessageListViewState extends State<MessageListView> {
     return defaultMessageWidget;
   }
 
-  Widget buildMessage(
-      Message message, List<Message> messages, int index, int buildItemIndex) {
+  Widget buildMessage(Message message, List<Message> messages, int index) {
     if ((message.type == 'system' || message.type == 'error') &&
         message.text?.isNotEmpty == true) {
       return widget.systemMessageBuilder?.call(context, message) ??
           SystemMessage(
-            key: IndexedKey(message.id, buildItemIndex),
             message: message,
             onMessageTap: (message) {
               if (widget.onSystemMessageTap != null) {
@@ -1040,7 +1040,6 @@ class _MessageListViewState extends State<MessageListView> {
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
     Widget messageWidget = MessageWidget(
-      key: IndexedKey(message.id, buildItemIndex),
       message: message,
       reverse: isMyMessage,
       showReactions: !message.isDeleted,
