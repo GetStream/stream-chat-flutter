@@ -34,7 +34,8 @@ platform :ios do
     desc "Deploy build to Firebase"
     lane :deploy_to_firebase do
         match_me
-
+        xcversion(version: "~> 13.0.0")
+       
         gym(
             workspace: "./Runner.xcworkspace",
             scheme: "Runner",
@@ -59,6 +60,7 @@ platform :ios do
     desc "Deploy build to TestFlight"
     lane :deploy_to_testflight do
         match_appstore
+        xcversion(version: "~> 13.0.0")
 
         settings_to_override = {
           :BUNDLE_IDENTIFIER => "io.getstream.flutter",
