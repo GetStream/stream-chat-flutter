@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,14 +23,14 @@ void main() {
     when(() => channel.on(any(), any(), any(), any()))
         .thenAnswer((_) => const Stream.empty());
     channelClientState = MockChannelState();
+    when(() => channel.client).thenReturn(client);
     when(() => channel.state).thenReturn(channelClientState);
     when(() => channelClientState.threadsStream)
         .thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.messagesStream)
         .thenAnswer((_) => const Stream.empty());
-    when(() => channelClientState.messages).thenReturn([]);
-    when(() => channelClientState.isUpToDateStream)
-        .thenAnswer((_) => Stream.value(true));
+    when(() => channelClientState.messages)
+        .thenReturn([Message(text: 'Hello World!')]);
     when(() => channelClientState.isUpToDate).thenReturn(true);
     when(() => channelClientState.unreadCountStream)
         .thenAnswer((_) => Stream.value(0));
@@ -69,58 +66,64 @@ void main() {
     expect(find.byKey(emptyWidgetKey), findsOneWidget);
   });
 
-  testWidgets('renders empty message list view with custom background',
+  testWidgets('renders a non empty message list view with custom background',
       (tester) async {
-    when(() => channelClientState.messagesStream)
-        .thenAnswer((_) => Stream.value([Message(text: 'Hello world!')]));
-    when(() => channelClientState.messages)
-        .thenReturn([Message(text: 'Hello world!')]);
+    final message = Message(
+      id: 'message1',
+      text: 'Hello world!',
+      user: User(
+        id: 'user',
+        name: 'Test User',
+      ),
+    );
 
-    const emptyWidgetKey = Key('empty_widget');
+    when(() => channelClientState.messagesStream).thenAnswer(
+      (_) => Stream.value([message]),
+    );
+    when(() => channelClientState.messages).thenReturn([message]);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: DefaultAssetBundle(
-          bundle: _TestAssetBundle(),
-          child: StreamChat(
-            client: client,
-            streamChatThemeData: StreamChatThemeData.light().copyWith(
-              messageListViewTheme: const MessageListViewThemeData(
-                backgroundColor: Colors.grey,
-                backgroundImage: DecorationImage(
-                  image: AssetImage('assets/background.png'),
-                  fit: BoxFit.cover,
+    const nonEmptyWidgetKey = Key('non_empty_widget');
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DefaultAssetBundle(
+            bundle: rootBundle,
+            child: StreamChat(
+              client: client,
+              streamChatThemeData: StreamChatThemeData.light().copyWith(
+                messageListViewTheme: const MessageListViewThemeData(
+                  backgroundColor: Colors.grey,
+                  backgroundImage: DecorationImage(
+                    image: AssetImage('images/placeholder.png'),
+                    fit: BoxFit.none,
+                  ),
                 ),
               ),
-            ),
-            child: StreamChannel(
-              channel: channel,
-              child: MessageListView(
-                emptyBuilder: (_) => Container(key: emptyWidgetKey),
+              child: StreamChannel(
+                channel: channel,
+                child: const MessageListView(
+                  key: nonEmptyWidgetKey,
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
+    });
+
+    bool findBackground(Widget widget) =>
+        widget is Container &&
+        widget.decoration is BoxDecoration &&
+        (widget.decoration! as BoxDecoration).image != null;
 
     expect(find.byType(MessageListView), findsOneWidget);
-    expect(find.byKey(emptyWidgetKey), findsNothing);
-    expect(find.byType(DecorationImage, skipOffstage: false), findsOneWidget);
+    expect(find.byKey(nonEmptyWidgetKey), findsOneWidget);
+    expect(
+        find.byWidgetPredicate(
+          findBackground,
+          description: 'findBackground',
+        ),
+        findsOneWidget);
   });
-}
-
-class _TestAssetBundle extends CachingAssetBundle {
-  @override
-  Future<ByteData> load(String key) async {
-    if (key == 'assets/background.png') {
-      return ByteData.view(
-        Uint8List.fromList(
-          utf8.encode('Background'),
-        ).buffer,
-      );
-    }
-    return ByteData(0);
-  }
 }
