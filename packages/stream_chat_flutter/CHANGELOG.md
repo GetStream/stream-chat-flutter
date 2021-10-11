@@ -2,6 +2,10 @@
 
 - Updated Dart SDK constraints to `>=2.14.0 <3.0.0`
 
+✅ Added
+
+- `MessageListViewThemeData` now accepts a `DecorationImage` as a background image for `MessageListView`.
+
 ## 3.1.1
 
 - Updated `stream_chat_flutter_core` dependency to [`3.1.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
@@ -33,10 +37,6 @@
 🛑️ Breaking Changes from `2.2.1`
 
 - `UserListView` `filter` property now is non-nullable.
-
-✅ Added
-
-- `MessageListViewThemeData` now accepts a `DecorationImage` as a background image for `MessageListView`.
 
 🐞 Fixed
 
