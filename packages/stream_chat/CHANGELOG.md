@@ -2,7 +2,7 @@
 
 🐞 Fixed
 
-- markAllRead() now updates channel states.
+- markAllRead() now updates local channel states.
 
 ## 3.1.1
 
