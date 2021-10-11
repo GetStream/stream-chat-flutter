@@ -60,17 +60,23 @@ class MessageListViewThemeData with Diagnosticable {
   /// Creates a [MessageListViewThemeData].
   const MessageListViewThemeData({
     this.backgroundColor,
+    this.backgroundImage,
   });
 
   /// The color of the [MessageListView] background.
   final Color? backgroundColor;
 
+  /// The image of the [MessageListView] background.
+  final DecorationImage? backgroundImage;
+
   /// Copies this [MessageListViewThemeData] to another.
   MessageListViewThemeData copyWith({
     Color? backgroundColor,
+    DecorationImage? backgroundImage,
   }) =>
       MessageListViewThemeData(
         backgroundColor: backgroundColor ?? this.backgroundColor,
+        backgroundImage: backgroundImage ?? this.backgroundImage,
       );
 
   /// Linearly interpolate between two [MessageListView] themes.
@@ -83,6 +89,7 @@ class MessageListViewThemeData with Diagnosticable {
   ) =>
       MessageListViewThemeData(
         backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+        backgroundImage: t < 0.5 ? a.backgroundImage : b.backgroundImage,
       );
 
   /// Merges one [MessageListViewThemeData] with another.
@@ -90,6 +97,7 @@ class MessageListViewThemeData with Diagnosticable {
     if (other == null) return this;
     return copyWith(
       backgroundColor: other.backgroundColor,
+      backgroundImage: other.backgroundImage,
     );
   }
 
@@ -98,14 +106,20 @@ class MessageListViewThemeData with Diagnosticable {
       identical(this, other) ||
       other is MessageListViewThemeData &&
           runtimeType == other.runtimeType &&
-          backgroundColor == other.backgroundColor;
+          backgroundColor == other.backgroundColor &&
+          backgroundImage == other.backgroundImage;
 
   @override
-  int get hashCode => backgroundColor.hashCode;
+  int get hashCode => backgroundColor.hashCode + backgroundImage.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorProperty('backgroundColor', backgroundColor));
+    properties
+      ..add(ColorProperty('backgroundColor', backgroundColor))
+      ..add(
+        DiagnosticsProperty<DecorationImage>('backgroundImage', backgroundImage,
+            defaultValue: null),
+      );
   }
 }

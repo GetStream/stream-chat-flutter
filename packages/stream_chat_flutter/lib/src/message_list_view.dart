@@ -638,10 +638,14 @@ class _MessageListViewState extends State<MessageListView> {
     );
 
     final backgroundColor = MessageListViewTheme.of(context).backgroundColor;
+    final backgroundImage = MessageListViewTheme.of(context).backgroundImage;
 
-    if (backgroundColor != null) {
-      return ColoredBox(
-        color: backgroundColor,
+    if (backgroundColor != null || backgroundImage != null) {
+      return Container(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          image: backgroundImage,
+        ),
         child: child,
       );
     }
@@ -965,7 +969,7 @@ class _MessageListViewState extends State<MessageListView> {
     }
 
     final userId = StreamChat.of(context).currentUser!.id;
-    final isMyMessage = message.user!.id == userId;
+    final isMyMessage = message.user?.id == userId;
     final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
     final isNextUserSame =
         nextMessage != null && message.user!.id == nextMessage.user!.id;
