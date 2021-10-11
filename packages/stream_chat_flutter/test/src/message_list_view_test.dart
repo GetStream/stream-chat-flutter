@@ -29,9 +29,10 @@ void main() {
         .thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.messagesStream)
         .thenAnswer((_) => const Stream.empty());
-    when(() => channelClientState.messages)
-        .thenReturn([Message(text: 'Hello World!')]);
+    when(() => channelClientState.messages).thenReturn([]);
     when(() => channelClientState.isUpToDate).thenReturn(true);
+    when(() => channelClientState.isUpToDateStream)
+        .thenAnswer((_) => Stream.value(true));
     when(() => channelClientState.unreadCountStream)
         .thenAnswer((_) => Stream.value(0));
     when(() => channelClientState.unreadCount).thenReturn(0);
