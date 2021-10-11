@@ -22,6 +22,8 @@ void main() {
         .thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.messages).thenReturn([]);
     when(() => channelClientState.isUpToDate).thenReturn(true);
+    when(() => channelClientState.isUpToDateStream)
+        .thenAnswer((_) => Stream.value(true));
   });
 
   // https://github.com/GetStream/stream-chat-flutter/issues/674
