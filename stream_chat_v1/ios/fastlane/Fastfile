@@ -1,4 +1,4 @@
-fastlane_version "2.187.0"
+fastlane_version "2.195.0"
 default_platform :ios
 
 before_all do
@@ -34,7 +34,7 @@ platform :ios do
     desc "Deploy build to Firebase"
     lane :deploy_to_firebase do
         match_me
-
+       
         gym(
             workspace: "./Runner.xcworkspace",
             scheme: "Runner",
