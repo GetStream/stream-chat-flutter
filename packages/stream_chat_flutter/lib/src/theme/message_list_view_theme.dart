@@ -118,8 +118,11 @@ class MessageListViewThemeData with Diagnosticable {
     properties
       ..add(ColorProperty('backgroundColor', backgroundColor))
       ..add(
-        DiagnosticsProperty<DecorationImage>('backgroundImage', backgroundImage,
-            defaultValue: null),
+        DiagnosticsProperty<DecorationImage>(
+          'backgroundImage',
+          backgroundImage,
+          defaultValue: null,
+        ),
       );
   }
 }
