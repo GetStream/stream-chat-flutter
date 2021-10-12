@@ -146,12 +146,14 @@ class _MediaListViewState extends State<MediaListView> {
 
   Future<void> _getMedia() async {
     final assetList = (await PhotoManager.getAssetPathList(
-      filterOption: FilterOptionGroup(orders: [
-        const OrderOption(
-          // ignore: avoid_redundant_argument_values
-          type: OrderOptionType.createDate,
-        ),
-      ]),
+      filterOption: FilterOptionGroup(
+        orders: [
+          const OrderOption(
+            // ignore: avoid_redundant_argument_values
+            type: OrderOptionType.createDate,
+          ),
+        ],
+      ),
       onlyAll: true,
     ))
         .first;
