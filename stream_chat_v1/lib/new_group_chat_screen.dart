@@ -244,9 +244,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                         });
                       }
                     },
-                    pagination: PaginationParams(
-                      limit: 25,
-                    ),
+                    limit: 25,
                     filter: Filter.and([
                       if (_userNameQuery.isNotEmpty)
                         Filter.autoComplete('name', _userNameQuery),

@@ -13,14 +13,14 @@ class ChannelFileDisplayScreen extends StatefulWidget {
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams? paginationParams;
+  final PaginationParams paginationParams;
 
   /// The builder used when the file list is empty.
   final WidgetBuilder? emptyBuilder;
 
   const ChannelFileDisplayScreen({
     this.sortOptions,
-    this.paginationParams,
+    this.paginationParams = const PaginationParams(limit: 20),
     this.emptyBuilder,
   });
 
@@ -53,7 +53,6 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       appBar: AppBar(
-        brightness: Theme.of(context).brightness,
         elevation: 1,
         centerTitle: true,
         title: Text(
@@ -151,7 +150,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
               ['file'],
             ),
             sort: widget.sortOptions,
-            pagination: widget.paginationParams!.copyWith(
+            pagination: widget.paginationParams.copyWith(
               offset: messageSearchBloc.messageResponses?.length ?? 0,
             ),
           ),

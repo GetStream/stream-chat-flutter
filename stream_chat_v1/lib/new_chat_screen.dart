@@ -120,7 +120,6 @@ class _NewChatScreenState extends State<NewChatScreen> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: AppBar(
-        brightness: Theme.of(context).brightness,
         elevation: 0,
         backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
         leading: const StreamBackButton(),
@@ -303,9 +302,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                     _chipInputTextFieldState!.removeItem(user);
                                   }
                                 },
-                                pagination: PaginationParams(
-                                  limit: 25,
-                                ),
+                                limit: 25,
                                 filter: Filter.and([
                                   if (_userNameQuery.isNotEmpty)
                                     Filter.autoComplete('name', _userNameQuery),

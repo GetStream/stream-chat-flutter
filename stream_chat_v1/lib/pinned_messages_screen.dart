@@ -14,7 +14,7 @@ class PinnedMessagesScreen extends StatefulWidget {
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams? paginationParams;
+  final PaginationParams paginationParams;
 
   /// The builder used when the file list is empty.
   final WidgetBuilder? emptyBuilder;
@@ -26,7 +26,7 @@ class PinnedMessagesScreen extends StatefulWidget {
   const PinnedMessagesScreen({
     required this.messageTheme,
     this.sortOptions,
-    this.paginationParams,
+    this.paginationParams = const PaginationParams(limit: 20),
     this.emptyBuilder,
     this.onShowMessage,
   });
@@ -61,7 +61,6 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       appBar: AppBar(
-        brightness: Theme.of(context).brightness,
         elevation: 1,
         centerTitle: true,
         title: Text(
@@ -156,7 +155,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
               true,
             ),
             sort: widget.sortOptions,
-            pagination: widget.paginationParams!.copyWith(
+            pagination: widget.paginationParams.copyWith(
               offset: messageSearchBloc.messageResponses?.length ?? 0,
             ),
           ),

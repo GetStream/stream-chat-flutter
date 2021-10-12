@@ -235,7 +235,6 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                           direction: SortOption.ASC,
                         ),
                       ],
-                      paginationParams: PaginationParams(limit: 20),
                       onShowMessage: (m, c) async {
                         final client = StreamChat.of(context).client;
                         final message = m;
@@ -296,7 +295,6 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                           direction: SortOption.ASC,
                         ),
                       ],
-                      paginationParams: PaginationParams(limit: 20),
                       onShowMessage: (m, c) async {
                         final client = StreamChat.of(context).client;
                         final message = m;
@@ -356,7 +354,6 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                           direction: SortOption.ASC,
                         ),
                       ],
-                      paginationParams: PaginationParams(limit: 20),
                     ),
                   ),
                 ),
@@ -508,7 +505,6 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: AppBar(
-        brightness: Theme.of(context).brightness,
         elevation: 1,
         centerTitle: true,
         title: Text(

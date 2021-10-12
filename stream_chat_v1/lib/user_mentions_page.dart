@@ -23,7 +23,7 @@ class UserMentionsPage extends StatelessWidget {
             direction: SortOption.ASC,
           ),
         ],
-        paginationParams: PaginationParams(limit: 20),
+        limit: 20,
         showResultCount: false,
         emptyBuilder: (_) {
           return LayoutBuilder(
