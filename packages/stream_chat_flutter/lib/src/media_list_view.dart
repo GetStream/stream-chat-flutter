@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'package:collection/collection.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 extension on Duration {
@@ -156,13 +157,13 @@ class _MediaListViewState extends State<MediaListView> {
       ),
       onlyAll: true,
     ))
-        .first;
+        .firstOrNull;
 
-    final media = await assetList.getAssetListPaged(_currentPage, 50);
+    final media = await assetList?.getAssetListPaged(_currentPage, 50);
 
-    if (media.isNotEmpty) {
+    if (media?.isNotEmpty == true) {
       setState(() {
-        _media.addAll(media);
+        _media.addAll(media!);
       });
     }
     ++_currentPage;
