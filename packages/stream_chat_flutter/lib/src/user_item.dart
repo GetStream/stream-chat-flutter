@@ -90,12 +90,13 @@ class UserItem extends StatelessWidget {
   Widget _buildLastActive(BuildContext context) {
     final chatTheme = StreamChatTheme.of(context);
     return Text(
-      user.online == true
+      user.online
           ? context.translations.userOnlineText
           : '${context.translations.userLastOnlineText} '
               '${Jiffy(user.lastActive).fromNow()}',
       style: chatTheme.textTheme.footnote.copyWith(
-          color: chatTheme.colorTheme.textHighEmphasis.withOpacity(.5)),
+        color: chatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
+      ),
     );
   }
 }

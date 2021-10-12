@@ -1,4 +1,4 @@
-name: example
+name: stream_chat_example
 description: A new Flutter project.
 
 publish_to: "none"
@@ -11,8 +11,7 @@ dependencies:
   cupertino_icons: ^1.0.0
   flutter:
     sdk: flutter
-  stream_chat:
-    path: ../
+  stream_chat: ^2.2.1
 
 dev_dependencies:
   flutter_test:

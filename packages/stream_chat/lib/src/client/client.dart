@@ -1376,6 +1376,8 @@ class ClientState {
     _listenChannelHidden();
 
     _listenUserUpdated();
+
+    _listenAllChannelsRead();
   }
 
   final _subscriptions = <StreamSubscription>[];
@@ -1402,6 +1404,17 @@ class ClientState {
         currentUser = OwnUser.fromJson(event.user!.toJson());
       }
       updateUser(event.user);
+    }));
+  }
+
+  void _listenAllChannelsRead() {
+    _subscriptions
+        .add(_client.on(EventType.notificationMarkRead).listen((event) {
+      if (event.cid == null) {
+        channels.forEach((key, value) {
+          value.state?.unreadCount = 0;
+        });
+      }
     }));
   }
 

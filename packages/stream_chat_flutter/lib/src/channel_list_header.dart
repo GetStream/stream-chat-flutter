@@ -185,7 +185,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
                       ),
                       onPressed: onNewChatButtonTap,
                     ),
-                  )
+                  ),
                 ],
             title: Column(
               children: [

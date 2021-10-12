@@ -151,11 +151,20 @@ class GalleryFooterThemeData with Diagnosticable {
         bottomSheetBarrierColor:
             Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
         bottomSheetBackgroundColor: Color.lerp(
-            a.bottomSheetBackgroundColor, b.bottomSheetBackgroundColor, t),
+          a.bottomSheetBackgroundColor,
+          b.bottomSheetBackgroundColor,
+          t,
+        ),
         bottomSheetPhotosTextStyle: TextStyle.lerp(
-            a.bottomSheetPhotosTextStyle, b.bottomSheetPhotosTextStyle, t),
+          a.bottomSheetPhotosTextStyle,
+          b.bottomSheetPhotosTextStyle,
+          t,
+        ),
         bottomSheetCloseIconColor: Color.lerp(
-            a.bottomSheetCloseIconColor, b.bottomSheetCloseIconColor, t),
+          a.bottomSheetCloseIconColor,
+          b.bottomSheetCloseIconColor,
+          t,
+        ),
       );
 
   /// Merges one [GalleryFooterThemeData] with another.
@@ -208,10 +217,16 @@ class GalleryFooterThemeData with Diagnosticable {
       ..add(ColorProperty('gridIconButtonColor', gridIconButtonColor))
       ..add(ColorProperty('bottomSheetBarrierColor', bottomSheetBarrierColor))
       ..add(ColorProperty(
-          'bottomSheetBackgroundColor', bottomSheetBackgroundColor))
+        'bottomSheetBackgroundColor',
+        bottomSheetBackgroundColor,
+      ))
       ..add(DiagnosticsProperty(
-          'bottomSheetPhotosTextStyle', bottomSheetPhotosTextStyle))
+        'bottomSheetPhotosTextStyle',
+        bottomSheetPhotosTextStyle,
+      ))
       ..add(ColorProperty(
-          'bottomSheetCloseIconColor', bottomSheetCloseIconColor));
+        'bottomSheetCloseIconColor',
+        bottomSheetCloseIconColor,
+      ));
   }
 }

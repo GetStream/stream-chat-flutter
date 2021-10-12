@@ -6,11 +6,12 @@ import 'package:video_compress/video_compress.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 ///
-class IVideoService {
-  IVideoService._();
+// ignore: prefer-match-file-name
+class _IVideoService {
+  _IVideoService._();
 
-  /// Singleton instance of [IVideoService]
-  static final IVideoService instance = IVideoService._();
+  /// Singleton instance of [_IVideoService]
+  static final _IVideoService instance = _IVideoService._();
   final _lock = Lock();
 
   /// compress video from [path]
@@ -64,6 +65,6 @@ class IVideoService {
       );
 }
 
-/// Get instance of [IVideoService]
+/// Get instance of [_IVideoService]
 // ignore: non_constant_identifier_names
-IVideoService get VideoService => IVideoService.instance;
+_IVideoService get VideoService => _IVideoService.instance;

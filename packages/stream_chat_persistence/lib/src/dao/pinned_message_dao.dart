@@ -64,8 +64,10 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
   Future<Message?> getMessageById(String id) async =>
       await (select(pinnedMessages).join([
         leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-        leftOuterJoin(_pinnedByUsers,
-            pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
+        leftOuterJoin(
+          _pinnedByUsers,
+          pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+        ),
       ])
             ..where(pinnedMessages.id.equals(id)))
           .map(_messageFromJoinRow)
@@ -76,8 +78,10 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
   Future<List<Message>> getThreadMessages(String cid) async =>
       Future.wait(await (select(pinnedMessages).join([
         leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-        leftOuterJoin(_pinnedByUsers,
-            pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
+        leftOuterJoin(
+          _pinnedByUsers,
+          pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+        ),
       ])
             ..where(pinnedMessages.channelCid.equals(cid))
             ..where(pinnedMessages.parentId.isNotNull())
@@ -93,8 +97,10 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
   }) async {
     final msgList = await Future.wait(await (select(pinnedMessages).join([
       leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-      leftOuterJoin(_pinnedByUsers,
-          pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
+      leftOuterJoin(
+        _pinnedByUsers,
+        pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+      ),
     ])
           ..where(pinnedMessages.parentId.isNotNull())
           ..where(pinnedMessages.parentId.equals(parentId))
@@ -134,8 +140,10 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
   }) async {
     final msgList = await Future.wait(await (select(pinnedMessages).join([
       leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-      leftOuterJoin(_pinnedByUsers,
-          pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
+      leftOuterJoin(
+        _pinnedByUsers,
+        pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+      ),
     ])
           ..where(pinnedMessages.channelCid.equals(cid))
           ..where(pinnedMessages.parentId.isNull() |

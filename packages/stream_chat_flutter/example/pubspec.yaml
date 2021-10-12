@@ -1,4 +1,4 @@
-name: example
+name: stream_chat_flutter_example
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -27,17 +27,9 @@ dependencies:
   cupertino_icons: ^1.0.3
   flutter:
     sdk: flutter
-  #  stream_chat:
-  #    path: ../../stream_chat
-  #  stream_chat_flutter_core:
-  #    path: ../../stream_chat_flutter_core
-  stream_chat_flutter:
-    path: ../
-  stream_chat_localizations:
-    path: ../../stream_chat_localizations
-  stream_chat_persistence:
-    path: ../../stream_chat_persistence
-
+  stream_chat_flutter: ^2.2.1
+  stream_chat_localizations: ^1.1.0
+  stream_chat_persistence: ^2.2.0
 
 dev_dependencies:
   flutter_test:
@@ -55,8 +47,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/background_doodle.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

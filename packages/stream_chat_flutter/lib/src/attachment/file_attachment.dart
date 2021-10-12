@@ -253,7 +253,8 @@ class FileAttachment extends AttachmentWidget {
     if (message.status == MessageSendingStatus.sent) {
       trailingWidget = IconButton(
         icon: StreamSvgIcon.cloudDownload(
-            color: theme.colorTheme.textHighEmphasis),
+          color: theme.colorTheme.textHighEmphasis,
+        ),
         visualDensity: VisualDensity.compact,
         splashRadius: 16,
         onPressed: () {

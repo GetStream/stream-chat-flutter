@@ -349,8 +349,10 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get youText => 'आप';
 
   @override
-  String galleryPaginationText(
-          {required int currentPage, required int totalPages}) =>
+  String galleryPaginationText({
+    required int currentPage,
+    required int totalPages,
+  }) =>
       '${currentPage + 1} ऑफ़ $totalPages';
 
   @override

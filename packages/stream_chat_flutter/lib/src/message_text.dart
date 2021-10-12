@@ -88,7 +88,9 @@ class MessageText extends StatelessWidget {
     for (final user in message.mentionedUsers.toSet()) {
       final userName = user.name;
       messageTextToRender = messageTextToRender.replaceAll(
-          '@$userName', '[@$userName](@${userName.replaceAll(' ', '')})');
+        '@$userName',
+        '[@$userName](@${userName.replaceAll(' ', '')})',
+      );
     }
     return messageTextToRender;
   }

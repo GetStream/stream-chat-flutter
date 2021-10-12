@@ -109,6 +109,37 @@ void main() {
     expect(messageListViewTheme.backgroundColor,
         _messageListViewThemeDataControlDark.backgroundColor);
   });
+
+  testWidgets(
+      'Pass backgroundImage to MessageListViewThemeData return backgroundImage',
+      (WidgetTester tester) async {
+    late BuildContext _context;
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => StreamChat(
+          client: MockStreamChatClient(),
+          streamChatThemeData: StreamChatThemeData.light()
+              .copyWith(messageListViewTheme: _messageListViewThemeDataImage),
+          child: child,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            _context = context;
+            return Scaffold(
+              body: StreamChannel(
+                channel: MockChannel(),
+                child: const MessageListView(),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final messageListViewTheme = MessageListViewTheme.of(_context);
+    expect(messageListViewTheme.backgroundImage,
+        _messageListViewThemeDataImage.backgroundImage);
+  });
 }
 
 final _messageListViewThemeDataControl = MessageListViewThemeData(
@@ -121,4 +152,11 @@ const _messageListViewThemeDataControlHalfLerp = MessageListViewThemeData(
 
 final _messageListViewThemeDataControlDark = MessageListViewThemeData(
   backgroundColor: ColorTheme.dark().barsBg,
+);
+
+const _messageListViewThemeDataImage = MessageListViewThemeData(
+  backgroundImage: DecorationImage(
+    image: AssetImage('example/assets/background_doodle.png'),
+    fit: BoxFit.cover,
+  ),
 );

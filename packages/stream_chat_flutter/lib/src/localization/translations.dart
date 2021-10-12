@@ -300,8 +300,10 @@ abstract class Translations {
   String get youText;
 
   /// Gallery footer pagination text
-  String galleryPaginationText(
-      {required int currentPage, required int totalPages});
+  String galleryPaginationText({
+    required int currentPage,
+    required int totalPages,
+  });
 
   /// The text shown for "File"
   String get fileText;
@@ -665,8 +667,10 @@ class DefaultTranslations implements Translations {
   String get youText => 'You';
 
   @override
-  String galleryPaginationText(
-          {required int currentPage, required int totalPages}) =>
+  String galleryPaginationText({
+    required int currentPage,
+    required int totalPages,
+  }) =>
       '${currentPage + 1} of $totalPages';
 
   @override

@@ -106,7 +106,8 @@ class DemoPainter extends CustomPainter {
         final p4 = pointsList.indexOf(off4);
 
         squares.add(
-            Offset4(p1, p2, p3, p4, i, j, rowCount, columnCount, gradient));
+          Offset4(p1, p2, p3, p4, i, j, rowCount, columnCount, gradient),
+        );
       }
     }
 
@@ -123,17 +124,18 @@ class DemoPainter extends CustomPainter {
     final fontSize = username.length == 2 ? textSize : textSize * 1.5;
 
     TextPainter(
-        text: TextSpan(
-          text: username,
-          style: TextStyle(
-            fontFamily: fontFamily,
-            fontSize: fontSize,
-            fontWeight: FontWeight.w500,
-            color: Colors.white.withOpacity(0.7),
-          ),
+      text: TextSpan(
+        text: username,
+        style: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          fontWeight: FontWeight.w500,
+          color: Colors.white.withOpacity(0.7),
         ),
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.ltr)
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    )
       ..layout(maxWidth: size.width)
       ..paint(
         canvas,
@@ -168,8 +170,8 @@ class DemoPainter extends CustomPainter {
       final sign1 = rand.nextInt(2) == 1 ? 1 : -1;
       final sign2 = rand.nextInt(2) == 1 ? 1 : -1;
 
-      final dx = 0.6 * sign1 * rand.nextInt(size.width ~/ columnCount);
-      final dy = 0.6 * sign2 * rand.nextInt(size.height ~/ rowCount);
+      final dx = sign1 * 0.6 * rand.nextInt(size.width ~/ columnCount);
+      final dy = sign2 * 0.6 * rand.nextInt(size.height ~/ rowCount);
 
       transformedList.add(Offset(orgDx + dx, orgDy + dy));
     }
@@ -223,8 +225,12 @@ class Offset4 {
   /// Draw the polygon on canvas
   void draw(Canvas canvas, List<Offset> points) {
     final paint = Paint()
-      ..color = Color.fromARGB(255, Random().nextInt(255),
-          Random().nextInt(255), Random().nextInt(255))
+      ..color = Color.fromARGB(
+        255,
+        Random().nextInt(255),
+        Random().nextInt(255),
+        Random().nextInt(255),
+      )
       ..shader = ui.Gradient.linear(
         points[p1],
         points[p3],
