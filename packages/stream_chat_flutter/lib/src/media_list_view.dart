@@ -145,15 +145,16 @@ class _MediaListViewState extends State<MediaListView> {
   }
 
   Future<void> _getMedia() async {
-    final assetList = await PhotoManager.getAssetPathList().then((value) {
-      if (value.isNotEmpty) {
-        return value.singleWhere((element) => element.isAll);
-      }
-    });
-
-    if (assetList == null) {
-      return;
-    }
+    final assetList = (await PhotoManager.getAssetPathList(
+      filterOption: FilterOptionGroup(orders: [
+        const OrderOption(
+          // ignore: avoid_redundant_argument_values
+          type: OrderOptionType.createDate,
+        ),
+      ]),
+      onlyAll: true,
+    ))
+        .first;
 
     final media = await assetList.getAssetListPaged(_currentPage, 50);
 
