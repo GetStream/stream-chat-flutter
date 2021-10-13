@@ -1,7 +1,6 @@
 # Official Localizations for [Stream Chat Flutter](https://getstream.io/chat/sdk/flutter/) library.
 
-> The Official localizations for Stream Chat Flutter, a service for
-> building chat applications.
+> The Official localizations for Stream Chat Flutter, a service for building chat applications.
 
 [![Pub](https://img.shields.io/pub/v/stream_chat_localizations.svg)](https://pub.dartlang.org/packages/stream_chat_localizations)
 ![](https://img.shields.io/badge/platform-flutter%20%7C%20flutter%20web-ff69b4.svg?style=flat-square)
@@ -37,6 +36,9 @@ At the moment we support the following languages:
 - [Spanish](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_es.dart)
 - [Japanese](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ja.dart)
 - [Korean](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ko.dart)
+
+- [Nepali](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ne.dart)
+
 
 More languages will be added in the future. Feel free to [contribute](https://github.com/GetStream/stream-chat-flutter/blob/master/CONTRIBUTING.md) to add more languages.
 
@@ -74,6 +76,7 @@ class MyApp extends StatelessWidget {
         Locale('es'),
         Locale('ja'),
         Locale('ko'),
+        Locale(ne),
       ],
       // Add GlobalStreamChatLocalizations.delegates
       localizationsDelegates: GlobalStreamChatLocalizations.delegates,
@@ -117,14 +120,17 @@ Example:
 	<string>fr</string>
 	<string>it</string>
 	<string>es</string>
-  <string>ja</string>
-  <string>ko</string>
+    <string>ja</string>
+    <string>ko</string>
+    <string>ne</string>
 </array>
 ```
 
 ## Contributing
 
 We welcome code changes that improve this library or fix a problem. Please make sure to follow all best practices and add tests if applicable before submitting a Pull Request on Github.
-We are pleased to merge your code into the official repository.
-Make sure to sign our [Contributor License Agreement (CLA)](https://docs.google.com/forms/d/e/1FAIpQLScFKsKkAJI7mhCr7K9rEIOpqIDThrWxuvxnwUq2XkHyG154vQ/viewform) first.
+
+We are pleased to merge your code into the official repository. Make sure to sign our [Contributor License Agreement (CLA)](https://docs.google.com/forms/d/e/1FAIpQLScFKsKkAJI7mhCr7K9rEIOpqIDThrWxuvxnwUq2XkHyG154vQ/viewform) first.
+
 See our license file for more details.
+

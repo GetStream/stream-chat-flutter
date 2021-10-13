@@ -8,7 +8,9 @@ void main() {
     test('translations exist for $language', () async {
       final locale = Locale(language);
       expect(
-          GlobalStreamChatLocalizations.delegate.isSupported(locale), isTrue);
+        GlobalStreamChatLocalizations.delegate.isSupported(locale),
+        isTrue,
+      );
       final localizations =
           await GlobalStreamChatLocalizations.delegate.load(locale);
       expect(localizations.launchUrlError, isNotNull);

@@ -21,10 +21,12 @@ void main() {
     ));
 
     final LocalizationTrackerState outerTracker = tester.state(
-        find.byKey(const ValueKey<String>('outer'), skipOffstage: false));
+      find.byKey(const ValueKey<String>('outer'), skipOffstage: false),
+    );
     expect(outerTracker.captionFontSize, 12.0);
     final LocalizationTrackerState innerTracker = tester.state(
-        find.byKey(const ValueKey<String>('inner'), skipOffstage: false));
+      find.byKey(const ValueKey<String>('inner'), skipOffstage: false),
+    );
     expect(innerTracker.captionFontSize, 13.0);
   });
 
@@ -53,6 +55,7 @@ void main() {
 
   testWidgets('Locale without countryCode', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/16782
+
     await tester.pumpWidget(MaterialApp(
       localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
         GlobalStreamChatLocalizations.delegate,
@@ -73,6 +76,7 @@ void main() {
 
 /// A localizations delegate that does not contain any useful data, and is only
 /// used to trigger didChangeDependencies upon locale change.
+
 class _DummyLocalizationsDelegate
     extends LocalizationsDelegate<DummyLocalizations> {
   const _DummyLocalizationsDelegate();

@@ -59,7 +59,8 @@ Widget buildFrame({
       localizationsDelegates: delegates,
       localeResolutionCallback: localeResolutionCallback,
       onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(
-          builder: (BuildContext context) => buildContent(context)),
+        builder: (BuildContext context) => buildContent(context),
+      ),
     );
 
 void main() {
@@ -130,35 +131,37 @@ void main() {
     },
   );
 
-  testWidgets('Localizations.override widget with hardwired locale',
-      (WidgetTester tester) async {
-    Widget buildLocaleFrame(Locale locale) => buildFrame(
-          locale: locale,
-          buildContent: (BuildContext context) {
-            return Localizations.override(
-              context: context,
-              locale: const Locale('en', 'US'),
-              child: Builder(
-                builder: (BuildContext context) {
-                  // No StreamChatLocalizations are defined for the first
-                  // Localizations ancestor, so we should get the values from
-                  // the default one, i.e. the one created by WidgetsApp via
-                  // the LocalizationsDelegate provided by MaterialApp.
-                  return Text(
-                    StreamChatLocalizations.of(context)!.launchUrlError,
-                  );
-                },
-              ),
-            );
-          },
-        );
+  testWidgets(
+    'Localizations.override widget with hardwired locale',
+    (WidgetTester tester) async {
+      Widget buildLocaleFrame(Locale locale) => buildFrame(
+            locale: locale,
+            buildContent: (BuildContext context) {
+              return Localizations.override(
+                context: context,
+                locale: const Locale('en', 'US'),
+                child: Builder(
+                  builder: (BuildContext context) {
+                    // No StreamChatLocalizations are defined for the first
+                    // Localizations ancestor, so we should get the values from
+                    // the default one, i.e. the one created by WidgetsApp via
+                    // the LocalizationsDelegate provided by MaterialApp.
+                    return Text(
+                      StreamChatLocalizations.of(context)!.launchUrlError,
+                    );
+                  },
+                ),
+              );
+            },
+          );
 
-    await tester.pumpWidget(buildLocaleFrame(const Locale('en', 'US')));
-    expect(find.text('Cannot launch the url'), findsOneWidget);
+      await tester.pumpWidget(buildLocaleFrame(const Locale('en', 'US')));
+      expect(find.text('Cannot launch the url'), findsOneWidget);
 
-    await tester.pumpWidget(buildLocaleFrame(const Locale('hi', 'IN')));
-    expect(find.text('Cannot launch the url'), findsOneWidget);
-  });
+      await tester.pumpWidget(buildLocaleFrame(const Locale('hi', 'IN')));
+      expect(find.text('Cannot launch the url'), findsOneWidget);
+    },
+  );
 
   testWidgets(
     'MaterialApp adds StreamChatLocalizations for additional languages',
