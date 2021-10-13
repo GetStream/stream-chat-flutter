@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -145,21 +146,24 @@ class _MediaListViewState extends State<MediaListView> {
   }
 
   Future<void> _getMedia() async {
-    final assetList = await PhotoManager.getAssetPathList().then((value) {
-      if (value.isNotEmpty) {
-        return value.singleWhere((element) => element.isAll);
-      }
-    });
+    final assetList = (await PhotoManager.getAssetPathList(
+      filterOption: FilterOptionGroup(
+        orders: [
+          const OrderOption(
+            // ignore: avoid_redundant_argument_values
+            type: OrderOptionType.createDate,
+          ),
+        ],
+      ),
+      onlyAll: true,
+    ))
+        .firstOrNull;
 
-    if (assetList == null) {
-      return;
-    }
+    final media = await assetList?.getAssetListPaged(_currentPage, 50);
 
-    final media = await assetList.getAssetListPaged(_currentPage, 50);
-
-    if (media.isNotEmpty) {
+    if (media?.isNotEmpty == true) {
       setState(() {
-        _media.addAll(media);
+        _media.addAll(media!);
       });
     }
     ++_currentPage;

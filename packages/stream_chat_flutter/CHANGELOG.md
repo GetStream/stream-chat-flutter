@@ -5,6 +5,7 @@
 🐞 Fixed
 
 - Fixed message highlight animation alignment in `MessageListView`
+- [[#491]](https://github.com/GetStream/stream-chat-flutter/issues/491): Fix `MediaListView` showing media in wrong order.
 
 ✅ Added
 
