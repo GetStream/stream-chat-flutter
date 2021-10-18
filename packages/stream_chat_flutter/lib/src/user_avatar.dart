@@ -92,7 +92,9 @@ class UserAvatar extends StatelessWidget {
                         streamChatTheme
                             .ownMessageTheme.avatarTheme?.borderRadius,
                     image: DecorationImage(
-                        image: imageProvider, fit: BoxFit.cover),
+                      image: imageProvider,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               )

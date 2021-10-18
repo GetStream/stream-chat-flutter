@@ -35,6 +35,7 @@ class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
     super.initState();
     _controller = VideoPlayerController.network(widget.attachment.assetUrl!)
       ..initialize().then((_) {
+        // ignore: no-empty-block
         setState(() {}); //when your thumbnail will show.
       });
   }
@@ -95,10 +96,10 @@ class QuotedMessageWidget extends StatelessWidget {
   /// Callback for tap on widget
   final GestureTapCallback? onTap;
 
-  bool get _hasAttachments => message.attachments.isNotEmpty == true;
+  bool get _hasAttachments => message.attachments.isNotEmpty;
 
   bool get _containsLinkAttachment =>
-      message.attachments.any((element) => element.titleLink != null) == true;
+      message.attachments.any((element) => element.titleLink != null);
 
   bool get _containsText => message.text?.isNotEmpty == true;
 
@@ -140,12 +141,14 @@ class QuotedMessageWidget extends StatelessWidget {
             messageTheme: isOnlyEmoji && _containsText
                 ? messageTheme.copyWith(
                     messageTextStyle: messageTheme.messageTextStyle?.copyWith(
-                    fontSize: 32,
-                  ))
+                      fontSize: 32,
+                    ),
+                  )
                 : messageTheme.copyWith(
                     messageTextStyle: messageTheme.messageTextStyle?.copyWith(
-                    fontSize: 12,
-                  )),
+                      fontSize: 12,
+                    ),
+                  ),
           ),
         ),
     ].insertBetween(const SizedBox(width: 8));
@@ -186,7 +189,7 @@ class QuotedMessageWidget extends StatelessWidget {
           image: DecorationImage(
             fit: BoxFit.cover,
             image: CachedNetworkImageProvider(
-              attachment.imageUrl!,
+              attachment.thumbUrl!,
             ),
           ),
         ),
@@ -275,7 +278,8 @@ class QuotedMessageWidget extends StatelessWidget {
                   height: 32,
                   width: 32,
                   child: getFileTypeImage(
-                      attachment.extraData['mime_type'] as String?),
+                    attachment.extraData['mime_type'] as String?,
+                  ),
                 ),
           };
 

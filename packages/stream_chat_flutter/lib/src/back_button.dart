@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter/src/unread_indicator.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Back button implementation
+// ignore: prefer-match-file-name
 class StreamBackButton extends StatelessWidget {
   /// Constructor for creating back button
   const StreamBackButton({

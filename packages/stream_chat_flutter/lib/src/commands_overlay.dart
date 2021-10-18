@@ -49,8 +49,9 @@ class CommandsOverlay extends StatelessWidget {
         child: Container(
           constraints: BoxConstraints.loose(size),
           decoration: BoxDecoration(
-              color: _streamChatTheme.colorTheme.barsBg,
-              borderRadius: BorderRadius.circular(8)),
+            color: _streamChatTheme.colorTheme.barsBg,
+            borderRadius: BorderRadius.circular(8),
+          ),
           child: ListView(
             padding: const EdgeInsets.all(0),
             shrinkWrap: true,
@@ -72,9 +73,9 @@ class CommandsOverlay extends StatelessWidget {
                         context.translations.instantCommandsLabel,
                         style: TextStyle(
                           color: _streamChatTheme.colorTheme.textHighEmphasis
-                              .withOpacity(.5),
+                              .withOpacity(0.5),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -102,7 +103,8 @@ class CommandsOverlay extends StatelessWidget {
                               TextSpan(
                                 text: c.name.capitalize(),
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
+                                  fontWeight: FontWeight.bold,
+                                ),
                                 children: [
                                   TextSpan(
                                     text: '   /${c.name} ${c.args}',
@@ -132,7 +134,9 @@ class CommandsOverlay extends StatelessWidget {
   }
 
   Widget _buildCommandIcon(
-      StreamChatThemeData _streamChatTheme, String iconType) {
+    StreamChatThemeData _streamChatTheme,
+    String iconType,
+  ) {
     switch (iconType) {
       case 'giphy':
         return CircleAvatar(

@@ -78,7 +78,7 @@ class AttachmentError extends StatelessWidget {
           color: StreamChatTheme.of(context)
               .colorTheme
               .accentError
-              .withOpacity(.1),
+              .withOpacity(0.1),
           child: Center(
             child: Icon(
               Icons.error_outline,

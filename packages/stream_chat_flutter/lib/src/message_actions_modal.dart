@@ -104,7 +104,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final size = mediaQueryData.size;
     final user = StreamChat.of(context).currentUser;
 
-    final roughMaxSize = 2 * size.width / 3;
+    final roughMaxSize = size.width * 2 / 3;
     var messageTextLength = widget.message.text!.length;
     if (widget.message.quotedMessage != null) {
       var quotedMessageLength =
@@ -119,7 +119,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final roughSentenceSize = messageTextLength *
         (widget.messageTheme.messageTextStyle?.fontSize ?? 1) *
         1.2;
-    final divFactor = widget.message.attachments.isNotEmpty == true
+    final divFactor = widget.message.attachments.isNotEmpty
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
@@ -142,14 +142,15 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   (widget.message.status == MessageSendingStatus.sent))
                 Align(
                   alignment: Alignment(
-                      user?.id == widget.message.user?.id
-                          ? (divFactor >= 1.0
-                              ? -0.2 - shiftFactor
-                              : (1.2 - divFactor))
-                          : (divFactor >= 1.0
-                              ? 0.2 + shiftFactor
-                              : -(1.2 - divFactor)),
-                      0),
+                    user?.id == widget.message.user?.id
+                        ? (divFactor >= 1.0
+                            ? -0.2 - shiftFactor
+                            : (1.2 - divFactor))
+                        : (divFactor >= 1.0
+                            ? shiftFactor + 0.2
+                            : -(1.2 - divFactor)),
+                    0,
+                  ),
                   child: ReactionPicker(
                     message: widget.message,
                   ),
@@ -194,7 +195,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             .map((action) => _buildCustomAction(
                                   context,
                                   action,
-                                ))
+                                )),
                       ].insertBetween(
                         Container(
                           height: 1,

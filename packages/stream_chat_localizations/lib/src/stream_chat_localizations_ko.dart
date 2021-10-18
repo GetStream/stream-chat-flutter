@@ -334,9 +334,12 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get youText => '당신';
 
   @override
-  String galleryPaginationText(
-          {required int currentPage, required int totalPages}) =>
+  String galleryPaginationText({
+    required int currentPage,
+    required int totalPages,
+  }) =>
       '${currentPage + 1} / $totalPages';
+
   //3 / 11
 
   @override

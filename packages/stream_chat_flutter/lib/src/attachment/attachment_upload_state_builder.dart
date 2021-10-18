@@ -141,7 +141,7 @@ class _PreparingState extends StatelessWidget {
             uploaded: 0,
             total: double.maxFinite.toInt(),
           ),
-        )
+        ),
       ],
     );
   }
@@ -181,7 +181,7 @@ class _InProgressState extends StatelessWidget {
             uploaded: sent,
             total: total,
           ),
-        )
+        ),
       ],
     );
   }
@@ -234,7 +234,7 @@ class _FailedState extends StatelessWidget {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }

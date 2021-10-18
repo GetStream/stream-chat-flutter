@@ -88,7 +88,7 @@ class StreamChannelState extends State<StreamChannel> {
     bool preferOffline = false,
   }) async {
     if (_topPaginationEnded ||
-        _queryTopMessagesController.value == true ||
+        _queryTopMessagesController.value ||
         channel.state == null) {
       return;
     }
@@ -120,9 +120,9 @@ class StreamChannelState extends State<StreamChannel> {
     bool preferOffline = false,
   }) async {
     if (_bottomPaginationEnded ||
-        _queryBottomMessagesController.value == true ||
+        _queryBottomMessagesController.value ||
         channel.state == null ||
-        channel.state!.isUpToDate == true) return;
+        channel.state!.isUpToDate) return;
     _queryBottomMessagesController.add(true);
 
     if (channel.state!.messages.isEmpty) {
@@ -164,7 +164,7 @@ class StreamChannelState extends State<StreamChannel> {
     bool preferOffline = false,
   }) async {
     if (_topPaginationEnded ||
-        _queryTopMessagesController.value == true ||
+        _queryTopMessagesController.value ||
         channel.state == null) return;
     _queryTopMessagesController.add(true);
 

@@ -17,7 +17,7 @@ import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
-import 'package:stream_chat_flutter/src/overlays.dart';
+import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
@@ -373,11 +373,13 @@ class MessageInputState extends State<MessageInput> {
       _parseExistingMessage(widget.editMessage ?? widget.initialMessage!);
     }
     textEditingController.addListener(_onChangedDebounced);
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus) {
-        _openFilePickerSection = false;
-      }
-    });
+    _focusNode.addListener(_focusNodeListener);
+  }
+
+  void _focusNodeListener() {
+    if (_focusNode.hasFocus) {
+      _openFilePickerSection = false;
+    }
   }
 
   int _timeOut = 0;
@@ -536,7 +538,7 @@ class MessageInputState extends State<MessageInput> {
                   ? null
                   : Border.all(
                       color: _streamChatTheme.colorTheme.textHighEmphasis
-                          .withOpacity(.5),
+                          .withOpacity(0.5),
                       width: 2,
                     ),
               borderRadius: BorderRadius.circular(3),
@@ -640,7 +642,7 @@ class MessageInputState extends State<MessageInput> {
         ),
         secondChild: widget.disableAttachments &&
                 !widget.showCommandsButton &&
-                widget.actions.isNotEmpty != true
+                !widget.actions.isNotEmpty
             ? const Offstage()
             : Wrap(
                 children: <Widget>[
@@ -706,7 +708,7 @@ class MessageInputState extends State<MessageInput> {
                     decoration: _getInputDecoration(context),
                     textCapitalization: TextCapitalization.sentences,
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -827,6 +829,7 @@ class MessageInputState extends State<MessageInput> {
 
       final channel = StreamChannel.of(context).channel;
       if (value.isNotEmpty) {
+        // ignore: no-empty-block
         channel.keyStroke(widget.parentMessage?.id).catchError((e) {});
       }
 
@@ -1028,8 +1031,10 @@ class MessageInputState extends State<MessageInput> {
                                   _attachments.isNotEmpty)
                           ? null
                           : () {
-                              pickFile(DefaultAttachmentTypes.image,
-                                  camera: true);
+                              pickFile(
+                                DefaultAttachmentTypes.image,
+                                camera: true,
+                              );
                             },
                     ),
                     IconButton(
@@ -1042,8 +1047,10 @@ class MessageInputState extends State<MessageInput> {
                                   _attachments.isNotEmpty)
                           ? null
                           : () {
-                              pickFile(DefaultAttachmentTypes.video,
-                                  camera: true);
+                              pickFile(
+                                DefaultAttachmentTypes.video,
+                                camera: true,
+                              );
                             },
                     ),
                   ],
@@ -1195,8 +1202,9 @@ class MessageInputState extends State<MessageInput> {
 
         textEditingController.value = TextEditingValue(
           text: rejoin +
-              textEditingController.text
-                  .substring(textEditingController.selection.start),
+              textEditingController.text.substring(
+                textEditingController.selection.start,
+              ),
           selection: TextSelection.collapsed(
             offset: rejoin.length,
           ),
@@ -1254,8 +1262,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return const Offstage();
     final containsUrl = widget.quotedMessage!.attachments
-            .any((element) => element.titleLink != null) ==
-        true;
+        .any((element) => element.titleLink != null);
     return QuotedMessageWidget(
       reverse: true,
       showBorder: !containsUrl,
@@ -1360,7 +1367,7 @@ class MessageInputState extends State<MessageInput> {
             setState(() => _attachments.remove(attachment.id));
           },
           fillColor:
-              _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(.5),
+              _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
           child: Center(
             child: StreamSvgIcon.close(
               size: 24,
@@ -1839,10 +1846,11 @@ class MessageInputState extends State<MessageInput> {
       backgroundColor: _streamChatTheme.colorTheme.barsBg,
       context: context,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16),
-        topRight: Radius.circular(16),
-      )),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1875,7 +1883,7 @@ class MessageInputState extends State<MessageInput> {
           ),
           Container(
             color:
-                _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(.08),
+                _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.08),
             height: 1,
           ),
           Row(
@@ -1908,6 +1916,7 @@ class MessageInputState extends State<MessageInput> {
   @override
   void dispose() {
     textEditingController.dispose();
+    _focusNode.removeListener(_focusNodeListener);
     _stopSlowMode();
     _onChangedDebounced.cancel();
     super.dispose();
@@ -2018,7 +2027,8 @@ class _PickerWidgetState extends State<_PickerWidget> {
                 Text(
                   context.translations.enablePhotoAndVideoAccessMessage,
                   style: widget.streamChatTheme.textTheme.body.copyWith(
-                      color: widget.streamChatTheme.colorTheme.textLowEmphasis),
+                    color: widget.streamChatTheme.colorTheme.textLowEmphasis,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 6),

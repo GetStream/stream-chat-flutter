@@ -81,7 +81,8 @@ class Message extends Equatable {
 
   /// Create a new instance from a json
   factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(
-      Serializer.moveToExtraDataFromRoot(json, topLevelFields));
+        Serializer.moveToExtraDataFromRoot(json, topLevelFields),
+      );
 
   /// The message ID. This is either created by Stream or set client side when
   /// the message is added.

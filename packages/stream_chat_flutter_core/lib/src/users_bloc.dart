@@ -77,8 +77,7 @@ class UsersBlocState extends State<UsersBloc>
       _paginationEnded = false;
     }
 
-    if ((!clear && _paginationEnded) ||
-        _queryUsersLoadingController.value == true) {
+    if ((!clear && _paginationEnded) || _queryUsersLoadingController.value) {
       return;
     }
 

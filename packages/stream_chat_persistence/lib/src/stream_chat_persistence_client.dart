@@ -229,7 +229,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
         final parentId = message.parentId!;
         messageByParentIdDictionary[parentId] = [
           ...messageByParentIdDictionary[parentId] ?? [],
-          message
+          message,
         ];
       }
       return messageByParentIdDictionary;

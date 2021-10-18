@@ -81,10 +81,10 @@ class EmojiOverlay extends StatelessWidget {
                         ),
                         style: TextStyle(
                           color: _streamChatTheme.colorTheme.textHighEmphasis
-                              .withOpacity(.5),
+                              .withOpacity(0.5),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               );

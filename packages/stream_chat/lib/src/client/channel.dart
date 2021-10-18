@@ -521,7 +521,7 @@ class Channel {
     state!.addMessage(message);
 
     try {
-      if (message.attachments.any((it) => !it.uploadState.isSuccess) == true) {
+      if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
         final attachmentsUploadCompleter = Completer<Message>();
         _messageAttachmentsUploadCompleter[message.id] =
             attachmentsUploadCompleter;
@@ -849,12 +849,12 @@ class Channel {
         ..update(type, (value) {
           if (enforceUnique) return value;
           return value + 1;
-        }, ifAbsent: () => 1),
+        }, ifAbsent: () => 1), // ignore: prefer-trailing-comma
       reactionScores: {...message.reactionScores ?? <String, int>{}}
         ..update(type, (value) {
           if (enforceUnique) return value;
           return value + 1;
-        }, ifAbsent: () => 1),
+        }, ifAbsent: () => 1), // ignore: prefer-trailing-comma
       latestReactions: latestReactions,
       ownReactions: ownReactions,
     );
@@ -878,7 +878,9 @@ class Channel {
 
   /// Delete a reaction from this channel.
   Future<EmptyResponse> deleteReaction(
-      Message message, Reaction reaction) async {
+    Message message,
+    Reaction reaction,
+  ) async {
     final type = reaction.type;
     final user = _client.state.currentUser;
 
@@ -1336,7 +1338,7 @@ class Channel {
       type,
       clearHistory: clearHistory,
     );
-    if (clearHistory == true) {
+    if (clearHistory) {
       state!.truncate();
       final cid = _cid;
       if (cid != null) {
@@ -1501,28 +1503,27 @@ class ChannelClientState {
     final expiredAttachmentMessagesId = channelState.messages
         .where((m) =>
             !_updatedMessagesIds.contains(m.id) &&
-            m.attachments.isNotEmpty == true &&
+            m.attachments.isNotEmpty &&
             m.attachments.any((e) {
-                  final url = e.imageUrl ?? e.assetUrl;
-                  if (url == null || !url.contains('')) {
-                    return false;
-                  }
-                  final uri = Uri.parse(url);
-                  if (!uri.host.endsWith('stream-io-cdn.com') ||
-                      uri.queryParameters['Expires'] == null) {
-                    return false;
-                  }
-                  final secondsFromEpoch =
-                      int.parse(uri.queryParameters['Expires']!);
-                  final expiration = DateTime.fromMillisecondsSinceEpoch(
-                      secondsFromEpoch * 1000);
-                  return expiration.isBefore(DateTime.now());
-                }) ==
-                true)
+              final url = e.imageUrl ?? e.assetUrl;
+              if (url == null || !url.contains('')) {
+                return false;
+              }
+              final uri = Uri.parse(url);
+              if (!uri.host.endsWith('stream-io-cdn.com') ||
+                  uri.queryParameters['Expires'] == null) {
+                return false;
+              }
+              final secondsFromEpoch =
+                  int.parse(uri.queryParameters['Expires']!);
+              final expiration =
+                  DateTime.fromMillisecondsSinceEpoch(secondsFromEpoch * 1000);
+              return expiration.isBefore(DateTime.now());
+            }))
         .map((e) => e.id)
         .toList();
 
-    if (expiredAttachmentMessagesId.isNotEmpty == true) {
+    if (expiredAttachmentMessagesId.isNotEmpty) {
       await _channel._initializedCompleter.future;
       _updatedMessagesIds.addAll(expiredAttachmentMessagesId);
       _channel.getMessagesById(expiredAttachmentMessagesId);
@@ -1546,7 +1547,8 @@ class ChannelClientState {
       final user = e.user;
       updateChannelState(channelState.copyWith(
         members: List.from(
-            channelState.members..removeWhere((m) => m.userId == user!.id)),
+          channelState.members..removeWhere((m) => m.userId == user!.id),
+        ),
       ));
     }));
   }
@@ -1647,7 +1649,7 @@ class ChannelClientState {
       );
       addMessage(message);
 
-      if (message.pinned == true) {
+      if (message.pinned) {
         _channelState = _channelState.copyWith(
           pinnedMessages: [
             ..._channelState.pinnedMessages,
@@ -1794,9 +1796,8 @@ class ChannelClientState {
       channelStateStream.map((cs) => cs.pinnedMessages.toList());
 
   /// Get channel last message.
-  Message? get lastMessage => _channelState.messages.isNotEmpty == true
-      ? _channelState.messages.last
-      : null;
+  Message? get lastMessage =>
+      _channelState.messages.isNotEmpty ? _channelState.messages.last : null;
 
   /// Get channel last message.
   Stream<Message?> get lastMessageStream =>
@@ -1859,8 +1860,8 @@ class ChannelClientState {
               (m) => m.user.id == message.user?.id,
             ) !=
             null;
-    return message.silent != true &&
-        message.shadowed != true &&
+    return !message.silent &&
+        !message.shadowed &&
         message.user?.id != userId &&
         !userIsMuted;
   }
@@ -1898,9 +1899,7 @@ class ChannelClientState {
       ...updatedState.messages,
       ..._channelState.messages
           .where((m) =>
-              updatedState.messages
-                  .any((newMessage) => newMessage.id == m.id) !=
-              true)
+              !updatedState.messages.any((newMessage) => newMessage.id == m.id))
           .toList(),
     ]..sort(_sortByCreatedAt);
 
@@ -1908,9 +1907,7 @@ class ChannelClientState {
       ...updatedState.watchers,
       ..._channelState.watchers
           .where((w) =>
-              updatedState.watchers
-                  .any((newWatcher) => newWatcher.id == w.id) !=
-              true)
+              !updatedState.watchers.any((newWatcher) => newWatcher.id == w.id))
           .toList(),
     ];
 
@@ -1922,9 +1919,7 @@ class ChannelClientState {
       ...updatedState.read,
       ..._channelState.read
           .where((r) =>
-              updatedState.read
-                  .any((newRead) => newRead.user.id == r.user.id) !=
-              true)
+              !updatedState.read.any((newRead) => newRead.user.id == r.user.id))
           .toList(),
     ];
 
@@ -2031,7 +2026,7 @@ class ChannelClientState {
             .on()
             .where((event) =>
                 event.user != null &&
-                members.any((m) => m.userId == event.user!.id) == true)
+                members.any((m) => m.userId == event.user!.id))
             .listen(
           (event) {
             final newMembers = List<Member>.from(members);

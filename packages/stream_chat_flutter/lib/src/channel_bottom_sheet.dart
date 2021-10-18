@@ -77,7 +77,8 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                       UserAvatar(
                         user: members
                             .firstWhere(
-                                (e) => e.user?.id != userAsMember.user?.id)
+                              (e) => e.user?.id != userAsMember.user?.id,
+                            )
                             .user!,
                         constraints: const BoxConstraints(
                           maxHeight: 64,
@@ -93,7 +94,8 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                       Text(
                         members
                                 .firstWhere(
-                                    (e) => e.user?.id != userAsMember.user?.id)
+                                  (e) => e.user?.id != userAsMember.user?.id,
+                                )
                                 .user
                                 ?.name ??
                             '',

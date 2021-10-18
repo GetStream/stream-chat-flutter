@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -129,7 +130,7 @@ class _MediaListViewState extends State<MediaListView> {
                           ),
                         ),
                       ),
-                    ]
+                    ],
                   ],
                 ),
               ),
@@ -144,22 +145,25 @@ class _MediaListViewState extends State<MediaListView> {
     _getMedia();
   }
 
-  void _getMedia() async {
-    final assetList = await PhotoManager.getAssetPathList().then((value) {
-      if (value.isNotEmpty == true) {
-        return value.singleWhere((element) => element.isAll);
-      }
-    });
+  Future<void> _getMedia() async {
+    final assetList = (await PhotoManager.getAssetPathList(
+      filterOption: FilterOptionGroup(
+        orders: [
+          const OrderOption(
+            // ignore: avoid_redundant_argument_values
+            type: OrderOptionType.createDate,
+          ),
+        ],
+      ),
+      onlyAll: true,
+    ))
+        .firstOrNull;
 
-    if (assetList == null) {
-      return;
-    }
+    final media = await assetList?.getAssetListPaged(_currentPage, 50);
 
-    final media = await assetList.getAssetListPaged(_currentPage, 50);
-
-    if (media.isNotEmpty) {
+    if (media?.isNotEmpty == true) {
       setState(() {
-        _media.addAll(media);
+        _media.addAll(media!);
       });
     }
     ++_currentPage;
@@ -178,7 +182,9 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
 
   @override
   ImageStreamCompleter load(
-          MediaThumbnailProvider key, DecoderCallback decode) =>
+    MediaThumbnailProvider key,
+    DecoderCallback decode,
+  ) =>
       MultiFrameImageStreamCompleter(
         codec: _loadAsync(key, decode),
         scale: 1,
@@ -188,7 +194,9 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
       );
 
   Future<ui.Codec> _loadAsync(
-      MediaThumbnailProvider key, DecoderCallback decode) async {
+    MediaThumbnailProvider key,
+    DecoderCallback decode,
+  ) async {
     assert(key == this, 'Checks MediaThumbnailProvider');
     final bytes = await media.thumbData;
 
