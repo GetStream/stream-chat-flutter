@@ -208,9 +208,9 @@ void main() {
 
     expect(tester.getTopLeft(find.text('Item 0')), const Offset(10, 10));
     expect(tester.getTopLeft(find.text('Item 1')),
-        const Offset(10 + itemWidth, 10));
+        const Offset(itemWidth + 10, 10));
     expect(tester.getBottomRight(find.text('Item 1')),
-        const Offset(10 + 2 * itemWidth, screenHeight - 10));
+        const Offset(10 + itemWidth * 2, screenHeight - 10));
 
     unawaited(
         itemScrollController.scrollTo(index: 490, duration: scrollDuration));
@@ -240,9 +240,9 @@ void main() {
 
     expect(tester.getTopLeft(find.text('Item 0')), const Offset(10, 10));
     expect(tester.getTopLeft(find.text('Item 2')),
-        const Offset(10 + 2 * itemWidth, 10));
+        const Offset(10 + itemWidth * 2, 10));
     expect(tester.getTopLeft(find.text('Item 3')),
-        const Offset(10 + 3 * itemWidth, 10));
+        const Offset(10 + itemWidth * 3, 10));
   });
 
   testWidgets('padding test - reversed - centered sliver at right',
@@ -258,9 +258,9 @@ void main() {
     expect(tester.getTopRight(find.text('Item 0')),
         const Offset(screenWidth - 10, 10));
     expect(tester.getTopRight(find.text('Item 1')),
-        const Offset(screenWidth - (10 + itemWidth), 10));
+        const Offset(screenWidth - (itemWidth + 10), 10));
     expect(tester.getBottomLeft(find.text('Item 1')),
-        const Offset(screenWidth - (10 + 2 * itemWidth), screenHeight - 10));
+        const Offset(screenWidth - (10 + itemWidth * 2), screenHeight - 10));
 
     unawaited(
         itemScrollController.scrollTo(index: 490, duration: scrollDuration));
@@ -291,8 +291,8 @@ void main() {
     expect(tester.getTopRight(find.text('Item 0')),
         const Offset(screenWidth - 10, 10));
     expect(tester.getTopRight(find.text('Item 2')),
-        const Offset(screenWidth - (10 + 2 * itemWidth), 10));
+        const Offset(screenWidth - (10 + itemWidth * 2), 10));
     expect(tester.getTopRight(find.text('Item 3')),
-        const Offset(screenWidth - (10 + 3 * itemWidth), 10));
+        const Offset(screenWidth - (10 + itemWidth * 3), 10));
   });
 }

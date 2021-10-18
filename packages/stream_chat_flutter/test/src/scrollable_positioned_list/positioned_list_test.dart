@@ -197,7 +197,7 @@ void main() {
     await setUpWidgetTest(tester, topItem: 5);
 
     await tester.drag(
-        find.byType(PositionedList), const Offset(0, 2 * itemHeight));
+        find.byType(PositionedList), const Offset(0, itemHeight * 2));
     await tester.pump();
 
     expect(find.text('Item 2'), findsNothing);
@@ -248,7 +248,7 @@ void main() {
     await setUpWidgetTest(tester, scrollController: scrollController);
     await tester.pump();
 
-    scrollController.jumpTo(5 * itemHeight);
+    scrollController.jumpTo(itemHeight * 5);
     await tester.pump();
     await tester.pumpAndSettle();
 
@@ -307,7 +307,7 @@ void main() {
     await setUpWidgetTest(tester,
         topItem: 5, scrollController: scrollController);
 
-    scrollController.jumpTo(20 * itemHeight);
+    scrollController.jumpTo(itemHeight * 20);
     await tester.pump();
 
     expect(

@@ -678,14 +678,16 @@ class _MessageWidgetState extends State<MessageWidget>
                                         ? Container(
                                             transform:
                                                 Matrix4.translationValues(
-                                                    widget.reverse ? 12 : -12,
-                                                    0,
-                                                    0),
+                                              widget.reverse ? 12 : -12,
+                                              0,
+                                              0,
+                                            ),
                                             constraints: const BoxConstraints(
                                               maxWidth: 22 * 6.0,
                                             ),
                                             child: _buildReactionIndicator(
-                                                context),
+                                              context,
+                                            ),
                                           )
                                         : null,
                                     portalAnchor:

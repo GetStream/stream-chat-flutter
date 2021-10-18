@@ -187,10 +187,11 @@ class _PositionedListState extends State<PositionedList> {
                     (context, index) => widget.separatorBuilder == null
                         ? _buildItem(widget.positionedIndex - (index + 1))
                         : _buildSeparatedListElement(
-                            2 * widget.positionedIndex - (index + 1)),
+                            widget.positionedIndex * 2 - (index + 1),
+                          ),
                     childCount: widget.separatorBuilder == null
                         ? widget.positionedIndex
-                        : 2 * widget.positionedIndex,
+                        : widget.positionedIndex * 2,
                     addSemanticIndexes: false,
                     findChildIndexCallback: widget.findChildIndexCallback,
                     addRepaintBoundaries: widget.addRepaintBoundaries,
@@ -206,7 +207,8 @@ class _PositionedListState extends State<PositionedList> {
                   (context, index) => widget.separatorBuilder == null
                       ? _buildItem(index + widget.positionedIndex)
                       : _buildSeparatedListElement(
-                          index + 2 * widget.positionedIndex),
+                          index + widget.positionedIndex * 2,
+                        ),
                   childCount: widget.itemCount != 0 ? 1 : 0,
                   findChildIndexCallback: widget.findChildIndexCallback,
                   addSemanticIndexes: false,
@@ -224,7 +226,8 @@ class _PositionedListState extends State<PositionedList> {
                     (context, index) => widget.separatorBuilder == null
                         ? _buildItem(index + widget.positionedIndex + 1)
                         : _buildSeparatedListElement(
-                            index + 2 * widget.positionedIndex + 1),
+                            index + widget.positionedIndex * 2 + 1,
+                          ),
                     childCount: widget.separatorBuilder == null
                         ? widget.itemCount - widget.positionedIndex - 1
                         : 2 * (widget.itemCount - widget.positionedIndex - 1),
@@ -270,27 +273,27 @@ class _PositionedListState extends State<PositionedList> {
   EdgeInsets get _centerSliverPadding => widget.scrollDirection == Axis.vertical
       ? widget.reverse
           ? widget.padding?.copyWith(
-                  top: widget.positionedIndex == widget.itemCount - 1
-                      ? widget.padding!.top
-                      : 0,
-                  bottom: widget.positionedIndex == 0
-                      ? widget.padding!.bottom
-                      : 0) ??
+                top: widget.positionedIndex == widget.itemCount - 1
+                    ? widget.padding!.top
+                    : 0,
+                bottom:
+                    widget.positionedIndex == 0 ? widget.padding!.bottom : 0,
+              ) ??
               const EdgeInsets.all(0)
           : widget.padding?.copyWith(
-                  top: widget.positionedIndex == 0 ? widget.padding!.top : 0,
-                  bottom: widget.positionedIndex == widget.itemCount - 1
-                      ? widget.padding!.bottom
-                      : 0) ??
+                top: widget.positionedIndex == 0 ? widget.padding!.top : 0,
+                bottom: widget.positionedIndex == widget.itemCount - 1
+                    ? widget.padding!.bottom
+                    : 0,
+              ) ??
               const EdgeInsets.all(0)
       : widget.reverse
           ? widget.padding?.copyWith(
-                  left: widget.positionedIndex == widget.itemCount - 1
-                      ? widget.padding!.left
-                      : 0,
-                  right: widget.positionedIndex == 0
-                      ? widget.padding!.right
-                      : 0) ??
+                left: widget.positionedIndex == widget.itemCount - 1
+                    ? widget.padding!.left
+                    : 0,
+                right: widget.positionedIndex == 0 ? widget.padding!.right : 0,
+              ) ??
               const EdgeInsets.all(0)
           : widget.padding?.copyWith(
                 left: widget.positionedIndex == 0 ? widget.padding!.left : 0,
@@ -329,28 +332,30 @@ class _PositionedListState extends State<PositionedList> {
                 viewport.offset.pixels +
                 viewport.anchor * viewport.size.height;
             positions.add(ItemPosition(
-                index: key.index,
-                itemLeadingEdge: itemOffset.round() /
-                    scrollController.position.viewportDimension,
-                itemTrailingEdge: (itemOffset + box.size.height).round() /
-                    scrollController.position.viewportDimension));
+              index: key.index,
+              itemLeadingEdge: itemOffset.round() /
+                  scrollController.position.viewportDimension,
+              itemTrailingEdge: (itemOffset + box.size.height).round() /
+                  scrollController.position.viewportDimension,
+            ));
           } else {
             final itemOffset =
                 box.localToGlobal(Offset.zero, ancestor: viewport).dx;
             positions.add(ItemPosition(
-                index: key.index,
-                itemLeadingEdge: (widget.reverse
-                            ? scrollController.position.viewportDimension -
-                                (itemOffset + box.size.width)
-                            : itemOffset)
-                        .round() /
-                    scrollController.position.viewportDimension,
-                itemTrailingEdge: (widget.reverse
-                            ? scrollController.position.viewportDimension -
-                                itemOffset
-                            : (itemOffset + box.size.width))
-                        .round() /
-                    scrollController.position.viewportDimension));
+              index: key.index,
+              itemLeadingEdge: (widget.reverse
+                          ? scrollController.position.viewportDimension -
+                              (itemOffset + box.size.width)
+                          : itemOffset)
+                      .round() /
+                  scrollController.position.viewportDimension,
+              itemTrailingEdge: (widget.reverse
+                          ? scrollController.position.viewportDimension -
+                              itemOffset
+                          : (itemOffset + box.size.width))
+                      .round() /
+                  scrollController.position.viewportDimension,
+            ));
           }
         }
         widget.itemPositionsNotifier?.itemPositions.value = positions;

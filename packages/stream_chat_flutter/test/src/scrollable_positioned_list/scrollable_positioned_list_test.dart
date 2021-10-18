@@ -1211,7 +1211,7 @@ void main() {
         itemScrollController: itemScrollController, initialIndex: 5);
 
     await tester.drag(
-        find.byType(ScrollablePositionedList), const Offset(0, 2 * itemHeight));
+        find.byType(ScrollablePositionedList), const Offset(0, itemHeight * 2));
     await tester.pumpAndSettle();
 
     final indexSemantics3 = tester.widget<IndexedSemantics>(find.ancestor(
@@ -1234,7 +1234,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.drag(
-        find.byType(ScrollablePositionedList), const Offset(0, 2 * itemHeight));
+        find.byType(ScrollablePositionedList), const Offset(0, itemHeight * 2));
     await tester.pumpAndSettle();
 
     final indexSemantics3b = tester.widget<IndexedSemantics>(find.ancestor(
@@ -1339,9 +1339,9 @@ void main() {
 
     expect(tester.getTopLeft(find.text('Item 0')), const Offset(10, 10));
     expect(tester.getTopLeft(find.text('Item 1')),
-        const Offset(10, 10 + itemHeight));
+        const Offset(10, itemHeight + 10));
     expect(tester.getTopRight(find.text('Item 1')),
-        const Offset(screenWidth - 10, 10 + itemHeight));
+        const Offset(screenWidth - 10, itemHeight + 10));
 
     unawaited(
         itemScrollController.scrollTo(index: 490, duration: scrollDuration));
@@ -1371,9 +1371,9 @@ void main() {
 
     expect(tester.getTopLeft(find.text('Item 0')), const Offset(10, 10));
     expect(tester.getTopLeft(find.text('Item 2')),
-        const Offset(10, 10 + 2 * itemHeight));
+        const Offset(10, 10 + itemHeight * 2));
     expect(tester.getTopLeft(find.text('Item 3')),
-        const Offset(10, 10 + 3 * itemHeight));
+        const Offset(10, 10 + itemHeight * 3));
   });
 
   testWidgets('padding - first element centered - scroll up',
@@ -1862,7 +1862,7 @@ void main() {
   });
 
   testWidgets('Large minCacheExtent', (WidgetTester tester) async {
-    await setUpWidgetTest(tester, minCacheExtent: 200 * itemHeight);
+    await setUpWidgetTest(tester, minCacheExtent: itemHeight * 200);
 
     expect(find.text('Item 100', skipOffstage: false), findsOneWidget);
   });
@@ -1911,7 +1911,7 @@ void main() {
     await setUpWidgetTest(
       tester,
       itemScrollController: itemScrollController,
-      minCacheExtent: 200 * itemHeight,
+      minCacheExtent: itemHeight * 200,
     );
 
     var fadeTransition = tester.widget<FadeTransition>(find

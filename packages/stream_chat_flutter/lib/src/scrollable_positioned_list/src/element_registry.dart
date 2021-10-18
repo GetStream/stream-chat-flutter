@@ -46,9 +46,11 @@ class _RegistryWidgetState extends State<RegistryWidget> {
 }
 
 class _InheritedRegistryWidget extends InheritedWidget {
-  const _InheritedRegistryWidget(
-      {Key? key, required this.state, required Widget child})
-      : super(key: key, child: child);
+  const _InheritedRegistryWidget({
+    Key? key,
+    required this.state,
+    required Widget child,
+  }) : super(key: key, child: child);
 
   final _RegistryWidgetState state;
 

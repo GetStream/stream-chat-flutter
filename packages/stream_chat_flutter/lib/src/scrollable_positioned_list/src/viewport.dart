@@ -29,13 +29,14 @@ class UnboundedViewport extends Viewport {
     List<Widget> slivers = const <Widget>[],
   })  : _anchor = anchor,
         super(
-            key: key,
-            axisDirection: axisDirection,
-            crossAxisDirection: crossAxisDirection,
-            offset: offset,
-            center: center,
-            cacheExtent: cacheExtent,
-            slivers: slivers);
+          key: key,
+          axisDirection: axisDirection,
+          crossAxisDirection: crossAxisDirection,
+          offset: offset,
+          center: center,
+          cacheExtent: cacheExtent,
+          slivers: slivers,
+        );
 
   // [Viewport] enforces constraints on [Viewport.anchor], so we need our own
   // version.
@@ -76,12 +77,13 @@ class UnboundedRenderViewport extends RenderViewport {
     double? cacheExtent,
   })  : _anchor = anchor,
         super(
-            axisDirection: axisDirection,
-            crossAxisDirection: crossAxisDirection,
-            offset: offset,
-            center: center,
-            cacheExtent: cacheExtent,
-            children: children);
+          axisDirection: axisDirection,
+          crossAxisDirection: crossAxisDirection,
+          offset: offset,
+          center: center,
+          cacheExtent: cacheExtent,
+          children: children,
+        );
 
   static const int _maxLayoutCycles = 10;
 
@@ -179,8 +181,11 @@ class UnboundedRenderViewport extends RenderViewport {
     double correction;
     var count = 0;
     do {
-      correction = _attemptLayout(mainAxisExtent, crossAxisExtent,
-          offset.pixels + centerOffsetAdjustment);
+      correction = _attemptLayout(
+        mainAxisExtent,
+        crossAxisExtent,
+        offset.pixels + centerOffsetAdjustment,
+      );
       if (correction != 0.0) {
         offset.correctBy(correction);
       } else {
@@ -200,29 +205,33 @@ class UnboundedRenderViewport extends RenderViewport {
       if (count >= _maxLayoutCycles) {
         assert(count != 1, 'count not equal to 1');
         throw FlutterError(
-            'A RenderViewport exceeded its maximum number of layout cycles.\n'
-            'RenderViewport render objects, during layout, can retry if either their '
-            'slivers or their ViewportOffset decide that the offset should be corrected '
-            'to take into account information collected during that layout.\n'
-            'In the case of this RenderViewport object, however, this happened $count '
-            'times and still there was no consensus on the scroll offset. This usually '
-            'indicates a bug. Specifically, it means that one of the following three '
-            'problems is being experienced by the RenderViewport object:\n'
-            ' * One of the RenderSliver children or the ViewportOffset have a bug such'
-            ' that they always think that they need to correct the offset regardless.\n'
-            ' * Some combination of the RenderSliver children and the ViewportOffset'
-            ' have a bad interaction such that one applies a correction then another'
-            ' applies a reverse correction, leading to an infinite loop of corrections.\n'
-            ' * There is a pathological case that would eventually resolve, but it is'
-            ' so complicated that it cannot be resolved in any reasonable number of'
-            ' layout passes.');
+          'A RenderViewport exceeded its maximum number of layout cycles.\n'
+          'RenderViewport render objects, during layout, can retry if either their '
+          'slivers or their ViewportOffset decide that the offset should be corrected '
+          'to take into account information collected during that layout.\n'
+          'In the case of this RenderViewport object, however, this happened $count '
+          'times and still there was no consensus on the scroll offset. This usually '
+          'indicates a bug. Specifically, it means that one of the following three '
+          'problems is being experienced by the RenderViewport object:\n'
+          ' * One of the RenderSliver children or the ViewportOffset have a bug such'
+          ' that they always think that they need to correct the offset regardless.\n'
+          ' * Some combination of the RenderSliver children and the ViewportOffset'
+          ' have a bad interaction such that one applies a correction then another'
+          ' applies a reverse correction, leading to an infinite loop of corrections.\n'
+          ' * There is a pathological case that would eventually resolve, but it is'
+          ' so complicated that it cannot be resolved in any reasonable number of'
+          ' layout passes.',
+        );
       }
       return true;
     }(), 'count needs to be bigger than _maxLayoutCycles');
   }
 
   double _attemptLayout(
-      double mainAxisExtent, double crossAxisExtent, double correctedOffset) {
+    double mainAxisExtent,
+    double crossAxisExtent,
+    double correctedOffset,
+  ) {
     assert(!mainAxisExtent.isNaN, 'assert mainAxisExtent.isNaN');
     assert(mainAxisExtent >= 0.0, 'assert mainAxisExtent >= 0.0');
     assert(crossAxisExtent.isFinite, 'assert crossAxisExtent.isFinite');
@@ -301,7 +310,9 @@ class UnboundedRenderViewport extends RenderViewport {
 
   @override
   void updateOutOfBandData(
-      GrowthDirection growthDirection, SliverGeometry childLayoutGeometry) {
+    GrowthDirection growthDirection,
+    SliverGeometry childLayoutGeometry,
+  ) {
     switch (growthDirection) {
       case GrowthDirection.forward:
         _maxScrollExtent += childLayoutGeometry.scrollExtent;

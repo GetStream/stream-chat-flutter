@@ -200,9 +200,9 @@ void main() {
     expect(tester.getBottomLeft(find.text('Item 0')),
         const Offset(10, screenHeight - 10));
     expect(tester.getBottomLeft(find.text('Item 1')),
-        const Offset(10, screenHeight - (10 + itemHeight)));
+        const Offset(10, screenHeight - (itemHeight + 10)));
     expect(tester.getTopRight(find.text('Item 1')),
-        const Offset(screenWidth - 10, screenHeight - (10 + 2 * itemHeight)));
+        const Offset(screenWidth - 10, screenHeight - (10 + itemHeight * 2)));
 
     unawaited(
         itemScrollController.scrollTo(index: 490, duration: scrollDuration));
@@ -232,8 +232,8 @@ void main() {
     expect(tester.getBottomLeft(find.text('Item 0')),
         const Offset(10, screenHeight - 10));
     expect(tester.getBottomLeft(find.text('Item 2')),
-        const Offset(10, screenHeight - (10 + 2 * itemHeight)));
+        const Offset(10, screenHeight - (10 + itemHeight * 2)));
     expect(tester.getBottomLeft(find.text('Item 3')),
-        const Offset(10, screenHeight - (10 + 3 * itemHeight)));
+        const Offset(10, screenHeight - (10 + itemHeight * 3)));
   });
 }

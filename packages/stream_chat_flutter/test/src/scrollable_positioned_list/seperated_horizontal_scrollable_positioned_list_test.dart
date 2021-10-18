@@ -166,9 +166,9 @@ void main() {
 
     expect(tester.getTopLeft(find.text('Item 0')), const Offset(10, 10));
     expect(tester.getTopLeft(find.text('Item 1')),
-        const Offset(10 + itemWidth + separatorWidth, 10));
+        const Offset(itemWidth + 10 + separatorWidth, 10));
     expect(tester.getBottomRight(find.text('Item 1')),
-        const Offset(10 + 2 * itemWidth + separatorWidth, screenHeight - 10));
+        const Offset(10 + itemWidth * 2 + separatorWidth, screenHeight - 10));
 
     unawaited(
         itemScrollController.scrollTo(index: 494, duration: scrollDuration));

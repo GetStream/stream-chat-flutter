@@ -86,7 +86,7 @@ void main() {
     await setUpWidgetTest(tester, itemCount: 3, topItem: 1);
 
     await tester.drag(
-        find.byType(PositionedList), const Offset(0, 2 * itemHeight));
+        find.byType(PositionedList), const Offset(0, itemHeight * 2));
     await tester.pumpAndSettle();
 
     expect(find.text('Item 0'), findsOneWidget);

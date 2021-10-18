@@ -320,7 +320,7 @@ void main() {
     await setUpWidgetTest(tester, initialIndex: 5);
 
     await tester.drag(
-        find.byType(ScrollablePositionedList), const Offset(0, 4 * itemHeight));
+        find.byType(ScrollablePositionedList), const Offset(0, itemHeight * 4));
     await tester.pumpAndSettle();
 
     final indexSemantics3 = tester.widget<IndexedSemantics>(find.ancestor(
@@ -401,9 +401,9 @@ void main() {
 
     expect(tester.getTopLeft(find.text('Item 0')), const Offset(10, 10));
     expect(tester.getTopLeft(find.text('Item 1')),
-        const Offset(10, 10 + itemHeight + separatorHeight));
+        const Offset(10, itemHeight + 10 + separatorHeight));
     expect(tester.getTopRight(find.text('Item 1')),
-        const Offset(screenWidth - 10, 10 + itemHeight + separatorHeight));
+        const Offset(screenWidth - 10, itemHeight + 10 + separatorHeight));
 
     unawaited(
         itemScrollController.scrollTo(index: 494, duration: scrollDuration));
