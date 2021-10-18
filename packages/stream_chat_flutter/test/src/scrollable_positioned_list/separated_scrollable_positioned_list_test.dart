@@ -270,7 +270,7 @@ void main() {
         initialAlignment: 0.5);
 
     unawaited(itemScrollController.scrollTo(
-        index: 16, duration: scrollDuration, alignment: 1.0));
+        index: 16, duration: scrollDuration, alignment: 1));
     await tester.pump();
     await tester.pump();
     await tester.pump(scrollDuration + scrollDurationTolerance);
@@ -477,7 +477,7 @@ void main() {
   });
 
   testWidgets('List can be keyed', (WidgetTester tester) async {
-    final key = ValueKey('key');
+    const key = ValueKey('key');
 
     await setUpWidgetTest(tester, key: key);
 
@@ -498,23 +498,20 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<int>(
           valueListenable: itemCount,
-          builder: (context, itemCount, child) {
-            return ScrollablePositionedList.separated(
-              initialScrollIndex: 0,
-              initialAlignment: 0,
-              itemCount: itemCount,
-              itemScrollController: itemScrollController,
-              itemPositionsListener: itemPositionsListener,
-              itemBuilder: (context, index) => SizedBox(
-                height: itemHeight,
-                child: Text('Item $index'),
-              ),
-              separatorBuilder: (context, index) => SizedBox(
-                height: separatorHeight,
-                child: Text('Separator $index'),
-              ),
-            );
-          },
+          builder: (context, itemCount, child) =>
+              ScrollablePositionedList.separated(
+            itemCount: itemCount,
+            itemScrollController: itemScrollController,
+            itemPositionsListener: itemPositionsListener,
+            itemBuilder: (context, index) => SizedBox(
+              height: itemHeight,
+              child: Text('Item $index'),
+            ),
+            separatorBuilder: (context, index) => SizedBox(
+              height: separatorHeight,
+              child: Text('Separator $index'),
+            ),
+          ),
         ),
       ),
     );
@@ -542,23 +539,20 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<int>(
           valueListenable: itemCount,
-          builder: (context, itemCount, child) {
-            return ScrollablePositionedList.separated(
-              initialScrollIndex: 0,
-              initialAlignment: 0,
-              itemCount: itemCount,
-              itemScrollController: itemScrollController,
-              itemPositionsListener: itemPositionsListener,
-              itemBuilder: (context, index) => SizedBox(
-                height: itemHeight,
-                child: Text('Item $index'),
-              ),
-              separatorBuilder: (context, index) => SizedBox(
-                height: separatorHeight,
-                child: Text('Separator $index'),
-              ),
-            );
-          },
+          builder: (context, itemCount, child) =>
+              ScrollablePositionedList.separated(
+            itemCount: itemCount,
+            itemScrollController: itemScrollController,
+            itemPositionsListener: itemPositionsListener,
+            itemBuilder: (context, index) => SizedBox(
+              height: itemHeight,
+              child: Text('Item $index'),
+            ),
+            separatorBuilder: (context, index) => SizedBox(
+              height: separatorHeight,
+              child: Text('Separator $index'),
+            ),
+          ),
         ),
       ),
     );

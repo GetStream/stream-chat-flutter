@@ -117,7 +117,7 @@ void main() {
   });
 
   testWidgets('List positioned with 15 at bottom', (WidgetTester tester) async {
-    await setUpWidgetTest(tester, topItem: 15, anchor: 0);
+    await setUpWidgetTest(tester, topItem: 15);
     await tester.pump();
 
     expect(find.text('Item 14'), findsNothing);

@@ -10,10 +10,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-import 'item_positions_listener.dart';
-import 'item_positions_notifier.dart';
-import 'positioned_list.dart';
-import 'post_mount_callback.dart';
+import 'package:stream_chat_flutter/src/scrollable_positioned_list/src/item_positions_listener.dart';
+import 'package:stream_chat_flutter/src/scrollable_positioned_list/src/item_positions_notifier.dart';
+import 'package:stream_chat_flutter/src/scrollable_positioned_list/src/positioned_list.dart';
+import 'package:stream_chat_flutter/src/scrollable_positioned_list/src/post_mount_callback.dart';
 
 /// Number of screens to scroll when scrolling a long distance.
 const int _screenScrollCount = 2;
@@ -52,9 +52,7 @@ class ScrollablePositionedList extends StatefulWidget {
     this.addRepaintBoundaries = true,
     this.minCacheExtent,
     this.findChildIndexCallback,
-  })  : assert(itemCount != null),
-        assert(itemBuilder != null),
-        itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?,
+  })  : itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?,
         separatorBuilder = null,
         super(key: key);
 
@@ -79,13 +77,12 @@ class ScrollablePositionedList extends StatefulWidget {
     this.addRepaintBoundaries = true,
     this.minCacheExtent,
     this.findChildIndexCallback,
-  })  : assert(itemCount != null),
-        assert(itemBuilder != null),
-        assert(separatorBuilder != null),
+  })  : assert(separatorBuilder != null, 'seperatorBuilder cannot be null'),
         itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?,
         super(key: key);
 
-  /// Called to find the new index of a child based on its key in case of reordering.
+  /// Called to find the new index of a child based on its key in case of
+  /// reordering.
   ///
   /// If not provided, a child widget may not map to its existing [RenderObject]
   /// when the order in which children are returned from [builder] changes.
@@ -235,9 +232,11 @@ class ItemScrollController {
     Curve curve = Curves.linear,
     List<double> opacityAnimationWeights = const [40, 20, 40],
   }) {
-    assert(_scrollableListState != null);
-    assert(opacityAnimationWeights.length == 3);
-    assert(duration > Duration.zero);
+    assert(_scrollableListState != null, '_scrollableListState cannot be null');
+    assert(opacityAnimationWeights.length == 3,
+        'opacityAnimationWeights.length is not equal to 3');
+    assert(duration > Duration.zero,
+        'duration needs to be bigger than Duration.zero');
     return _scrollableListState!._scrollTo(
       index: index,
       alignment: alignment,
@@ -248,7 +247,8 @@ class ItemScrollController {
   }
 
   void _attach(_ScrollablePositionedListState scrollableListState) {
-    assert(_scrollableListState == null);
+    assert(
+        _scrollableListState == null, '_scrollableListState needs to be null');
     _scrollableListState = scrollableListState;
   }
 
@@ -260,11 +260,11 @@ class ItemScrollController {
 class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     with TickerProviderStateMixin {
   /// Details for the primary (active) [ListView].
-  var primary = _ListDisplayDetails(const ValueKey('Ping'));
+  _ListDisplayDetails primary = _ListDisplayDetails(const ValueKey('Ping'));
 
   /// Details for the secondary (transitional) [ListView] that is temporarily
   /// shown when scrolling a long distance.
-  var secondary = _ListDisplayDetails(const ValueKey('Pong'));
+  _ListDisplayDetails secondary = _ListDisplayDetails(const ValueKey('Pong'));
 
   final opacity = ProxyAnimation(const AlwaysStoppedAnimation<double>(0));
 
@@ -275,10 +275,11 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
   @override
   void initState() {
     super.initState();
-    ItemPosition? initialPosition = PageStorage.of(context)!.readState(context);
-    primary.target = initialPosition?.index ?? widget.initialScrollIndex;
-    primary.alignment =
-        initialPosition?.itemLeadingEdge ?? widget.initialAlignment;
+    final ItemPosition? initialPosition =
+        PageStorage.of(context)!.readState(context);
+    primary
+      ..target = initialPosition?.index ?? widget.initialScrollIndex
+      ..alignment = initialPosition?.itemLeadingEdge ?? widget.initialAlignment;
     if (widget.itemCount > 0 && primary.target > widget.itemCount - 1) {
       primary.target = widget.itemCount - 1;
     }
@@ -333,79 +334,78 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final cacheExtent = _cacheExtent(constraints);
-        return GestureDetector(
-          onPanDown: (_) => _stopScroll(canceled: true),
-          excludeFromSemantics: true,
-          child: Stack(
-            children: <Widget>[
-              PostMountCallback(
-                key: primary.key,
-                callback: startAnimationCallback,
-                child: FadeTransition(
-                  opacity: ReverseAnimation(opacity),
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (_) => _isTransitioning,
-                    child: PositionedList(
-                      itemBuilder: widget.itemBuilder,
-                      separatorBuilder: widget.separatorBuilder,
-                      itemCount: widget.itemCount,
-                      positionedIndex: primary.target,
-                      controller: primary.scrollController,
-                      itemPositionsNotifier: primary.itemPositionsNotifier,
-                      scrollDirection: widget.scrollDirection,
-                      reverse: widget.reverse,
-                      cacheExtent: cacheExtent,
-                      alignment: primary.alignment,
-                      physics: widget.physics,
-                      addSemanticIndexes: widget.addSemanticIndexes,
-                      semanticChildCount: widget.semanticChildCount,
-                      padding: widget.padding,
-                      addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
-                      addRepaintBoundaries: widget.addRepaintBoundaries,
-                      findChildIndexCallback: widget.findChildIndexCallback,
-                    ),
-                  ),
-                ),
-              ),
-              if (_isTransitioning)
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final cacheExtent = _cacheExtent(constraints);
+          return GestureDetector(
+            onPanDown: (_) => _stopScroll(canceled: true),
+            excludeFromSemantics: true,
+            child: Stack(
+              children: <Widget>[
                 PostMountCallback(
-                  key: secondary.key,
+                  key: primary.key,
                   callback: startAnimationCallback,
                   child: FadeTransition(
-                    opacity: opacity,
+                    opacity: ReverseAnimation(opacity),
                     child: NotificationListener<ScrollNotification>(
-                      onNotification: (_) => false,
+                      onNotification: (_) => _isTransitioning,
                       child: PositionedList(
                         itemBuilder: widget.itemBuilder,
                         separatorBuilder: widget.separatorBuilder,
                         itemCount: widget.itemCount,
-                        itemPositionsNotifier: secondary.itemPositionsNotifier,
-                        positionedIndex: secondary.target,
-                        controller: secondary.scrollController,
+                        positionedIndex: primary.target,
+                        controller: primary.scrollController,
+                        itemPositionsNotifier: primary.itemPositionsNotifier,
                         scrollDirection: widget.scrollDirection,
                         reverse: widget.reverse,
                         cacheExtent: cacheExtent,
-                        alignment: secondary.alignment,
+                        alignment: primary.alignment,
                         physics: widget.physics,
                         addSemanticIndexes: widget.addSemanticIndexes,
                         semanticChildCount: widget.semanticChildCount,
                         padding: widget.padding,
                         addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
                         addRepaintBoundaries: widget.addRepaintBoundaries,
+                        findChildIndexCallback: widget.findChildIndexCallback,
                       ),
                     ),
                   ),
                 ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+                if (_isTransitioning)
+                  PostMountCallback(
+                    key: secondary.key,
+                    callback: startAnimationCallback,
+                    child: FadeTransition(
+                      opacity: opacity,
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: (_) => false,
+                        child: PositionedList(
+                          itemBuilder: widget.itemBuilder,
+                          separatorBuilder: widget.separatorBuilder,
+                          itemCount: widget.itemCount,
+                          itemPositionsNotifier:
+                              secondary.itemPositionsNotifier,
+                          positionedIndex: secondary.target,
+                          controller: secondary.scrollController,
+                          scrollDirection: widget.scrollDirection,
+                          reverse: widget.reverse,
+                          cacheExtent: cacheExtent,
+                          alignment: secondary.alignment,
+                          physics: widget.physics,
+                          addSemanticIndexes: widget.addSemanticIndexes,
+                          semanticChildCount: widget.semanticChildCount,
+                          padding: widget.padding,
+                          addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+                          addRepaintBoundaries: widget.addRepaintBoundaries,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      );
 
   double _cacheExtent(BoxConstraints constraints) => max(
         constraints.maxHeight * _screenScrollCount,
@@ -419,8 +419,9 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     }
     setState(() {
       primary.scrollController.jumpTo(0);
-      primary.target = index;
-      primary.alignment = alignment;
+      primary
+        ..target = index
+        ..alignment = alignment;
     });
   }
 
@@ -505,8 +506,9 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
       setState(() {
         // TODO: _startScroll can be re-entrant, which invalidates this assert.
         // assert(!_isTransitioning);
-        secondary.target = index;
-        secondary.alignment = alignment;
+        secondary
+          ..target = index
+          ..alignment = alignment;
         _isTransitioning = true;
       });
       await Future.wait<void>([startCompleter.future, endCompleter.future]);
@@ -532,7 +534,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
       if (opacity.value >= 0.5) {
         // Secondary [ListView] is more visible than the primary; make it the
         // new primary.
-        var temp = primary;
+        final temp = primary;
         primary = secondary;
         secondary = temp;
       }
@@ -542,8 +544,8 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
   }
 
   Animatable<double> _opacityAnimation(List<double> opacityAnimationWeights) {
-    final startOpacity = 0.0;
-    final endOpacity = 1.0;
+    const startOpacity = 0.0;
+    const endOpacity = 1.0;
     return TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
           tween: ConstantTween<double>(startOpacity),

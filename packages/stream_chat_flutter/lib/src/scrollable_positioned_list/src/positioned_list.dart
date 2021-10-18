@@ -8,11 +8,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-import 'element_registry.dart';
-import 'indexed_key.dart';
-import 'item_positions_listener.dart';
-import 'item_positions_notifier.dart';
-import 'scroll_view.dart';
+import 'package:stream_chat_flutter/src/scrollable_positioned_list/src/element_registry.dart';
+import 'package:stream_chat_flutter/src/scrollable_positioned_list/src/indexed_key.dart';
+import 'package:stream_chat_flutter/src/scrollable_positioned_list/src/item_positions_listener.dart';
+import 'package:stream_chat_flutter/src/scrollable_positioned_list/src/item_positions_notifier.dart';
+import 'package:stream_chat_flutter/src/scrollable_positioned_list/src/scroll_view.dart';
 
 /// A list of widgets similar to [ListView], except scroll control
 /// and position reporting is based on index rather than pixel offset.
@@ -27,6 +27,7 @@ import 'scroll_view.dart';
 class PositionedList extends StatefulWidget {
   /// Create a [PositionedList].
   const PositionedList({
+    Key? key,
     required this.itemCount,
     required this.itemBuilder,
     this.separatorBuilder,
@@ -44,11 +45,12 @@ class PositionedList extends StatefulWidget {
     this.addSemanticIndexes = true,
     this.addRepaintBoundaries = true,
     this.addAutomaticKeepAlives = true,
-  })  : assert(itemCount != null),
-        assert(itemBuilder != null),
-        assert((positionedIndex == 0) || (positionedIndex < itemCount));
+  })  : assert((positionedIndex == 0) || (positionedIndex < itemCount),
+            'positionedIndex cannot be 0 and must be smaller than itemCount'),
+        super(key: key);
 
-  /// Called to find the new index of a child based on its key in case of reordering.
+  /// Called to find the new index of a child based on its key in case of
+  /// reordering.
   ///
   /// If not provided, a child widget may not map to its existing [RenderObject]
   /// when the order in which children are returned from [builder] changes.
@@ -263,7 +265,7 @@ class _PositionedListState extends State<PositionedList> {
           : widget.reverse
               ? widget.padding?.copyWith(left: 0)
               : widget.padding?.copyWith(right: 0)) ??
-      EdgeInsets.all(0);
+      const EdgeInsets.all(0);
 
   EdgeInsets get _centerSliverPadding => widget.scrollDirection == Axis.vertical
       ? widget.reverse
@@ -274,13 +276,13 @@ class _PositionedListState extends State<PositionedList> {
                   bottom: widget.positionedIndex == 0
                       ? widget.padding!.bottom
                       : 0) ??
-              EdgeInsets.all(0)
+              const EdgeInsets.all(0)
           : widget.padding?.copyWith(
                   top: widget.positionedIndex == 0 ? widget.padding!.top : 0,
                   bottom: widget.positionedIndex == widget.itemCount - 1
                       ? widget.padding!.bottom
                       : 0) ??
-              EdgeInsets.all(0)
+              const EdgeInsets.all(0)
       : widget.reverse
           ? widget.padding?.copyWith(
                   left: widget.positionedIndex == widget.itemCount - 1
@@ -289,23 +291,23 @@ class _PositionedListState extends State<PositionedList> {
                   right: widget.positionedIndex == 0
                       ? widget.padding!.right
                       : 0) ??
-              EdgeInsets.all(0)
+              const EdgeInsets.all(0)
           : widget.padding?.copyWith(
                 left: widget.positionedIndex == 0 ? widget.padding!.left : 0,
                 right: widget.positionedIndex == widget.itemCount - 1
                     ? widget.padding!.right
                     : 0,
               ) ??
-              EdgeInsets.all(0);
+              const EdgeInsets.all(0);
 
   EdgeInsets get _trailingSliverPadding =>
       widget.scrollDirection == Axis.vertical
           ? widget.reverse
-              ? widget.padding?.copyWith(bottom: 0) ?? EdgeInsets.all(0)
-              : widget.padding?.copyWith(top: 0) ?? EdgeInsets.all(0)
+              ? widget.padding?.copyWith(bottom: 0) ?? const EdgeInsets.all(0)
+              : widget.padding?.copyWith(top: 0) ?? const EdgeInsets.all(0)
           : widget.reverse
-              ? widget.padding?.copyWith(right: 0) ?? EdgeInsets.all(0)
-              : widget.padding?.copyWith(left: 0) ?? EdgeInsets.all(0);
+              ? widget.padding?.copyWith(right: 0) ?? const EdgeInsets.all(0)
+              : widget.padding?.copyWith(left: 0) ?? const EdgeInsets.all(0);
 
   void _schedulePositionNotificationUpdate() {
     if (!updateScheduled) {
@@ -317,10 +319,10 @@ class _PositionedListState extends State<PositionedList> {
         }
         final positions = <ItemPosition>[];
         RenderViewport? viewport;
-        for (var element in registeredElements.value!) {
-          final RenderBox box = element.renderObject as RenderBox;
+        for (final element in registeredElements.value!) {
+          final box = element.renderObject as RenderBox;
           viewport ??= RenderAbstractViewport.of(box) as RenderViewport?;
-          final IndexedKey key = element.widget.key as IndexedKey;
+          final key = element.widget.key as IndexedKey;
           if (widget.scrollDirection == Axis.vertical) {
             final reveal = viewport!.getOffsetToReveal(box, 0).offset;
             final itemOffset = reveal -

@@ -50,7 +50,8 @@ void main() {
           itemCount: itemCount,
           itemScrollController: itemScrollController,
           itemBuilder: (context, index) {
-            assert(index >= 0 && index <= itemCount - 1);
+            assert(index >= 0 && index <= itemCount - 1,
+                '''index needs to be bigger or equal to 0 and smallert than itemCount -1''');
             return SizedBox(
               height:
                   variableHeight ? (itemHeight + (index % 13) * 5) : itemHeight,
@@ -256,7 +257,7 @@ void main() {
         initialAlignment: 0.5);
 
     unawaited(itemScrollController.scrollTo(
-        index: 16, duration: scrollDuration, alignment: 1.0));
+        index: 16, duration: scrollDuration, alignment: 1));
     await tester.pump();
     await tester.pump();
     await tester.pump(scrollDuration + scrollDurationTolerance);
@@ -457,7 +458,7 @@ void main() {
     final itemScrollController = ItemScrollController();
     await setUpWidgetTest(tester, itemScrollController: itemScrollController);
 
-    var fadeTransitionFinder = find.descendant(
+    final fadeTransitionFinder = find.descendant(
         of: find.byType(ScrollablePositionedList),
         matching: find.byType(FadeTransition));
 
@@ -687,7 +688,7 @@ void main() {
         itemScrollController: itemScrollController,
         itemPositionsListener: itemPositionsListener);
 
-    itemScrollController.jumpTo(index: 100, alignment: 1.0);
+    itemScrollController.jumpTo(index: 100, alignment: 1);
     await tester.pump();
     await tester.pump();
     await tester.pump(scrollDuration + scrollDurationTolerance);
@@ -758,7 +759,7 @@ void main() {
         itemPositionsListener: itemPositionsListener);
 
     unawaited(itemScrollController.scrollTo(
-        index: 100, alignment: 1.0, duration: scrollDuration));
+        index: 100, alignment: 1, duration: scrollDuration));
     await tester.pump();
     await tester.pump();
     await tester.pump(scrollDuration + scrollDurationTolerance);
@@ -1138,13 +1139,13 @@ void main() {
     expect(find.text('Item 100'), findsNothing);
     expect(find.text('Item 200'), findsNothing);
 
-    var itemFinder = find.text('Item 300');
+    final itemFinder = find.text('Item 300');
     expect(itemFinder, findsOneWidget);
     expect(tester.getTopLeft(itemFinder).dy, 0);
   }, skip: true);
 
   testWidgets(
-      'Jump to 400 at bottom, manually scroll, scroll to 100 at bottom and back',
+      '''Jump to 400 at bottom, manually scroll, scroll to 100 at bottom and back''',
       (WidgetTester tester) async {
     final itemScrollController = ItemScrollController();
     final itemPositionsListener = ItemPositionsListener.create();
@@ -1168,7 +1169,7 @@ void main() {
         index: 400, alignment: 1, duration: scrollDuration));
     await tester.pumpAndSettle();
 
-    var itemFinder = find.text('Item 399');
+    final itemFinder = find.text('Item 399');
     expect(itemFinder, findsOneWidget);
     expect(tester.getBottomLeft(itemFinder).dy, screenHeight);
   });
@@ -1537,7 +1538,7 @@ void main() {
   });
 
   testWidgets('List can be keyed', (WidgetTester tester) async {
-    final key = ValueKey('key');
+    const key = ValueKey('key');
 
     await setUpWidgetTest(tester, key: key);
 
@@ -1559,7 +1560,7 @@ void main() {
         home: PageView(
           children: [
             KeyedSubtree(
-              key: PageStorageKey('key'),
+              key: const PageStorageKey('key'),
               child: ScrollablePositionedList.builder(
                 itemCount: defaultItemCount,
                 itemScrollController: itemScrollController,
@@ -1570,7 +1571,7 @@ void main() {
                 itemPositionsListener: itemPositionsListener,
               ),
             ),
-            Center(
+            const Center(
               child: Text('Test'),
             )
           ],
@@ -1616,7 +1617,7 @@ void main() {
         home: PageView(
           children: [
             KeyedSubtree(
-              key: PageStorageKey('key'),
+              key: const PageStorageKey('key'),
               child: ScrollablePositionedList.builder(
                 itemCount: defaultItemCount,
                 itemScrollController: itemScrollController,
@@ -1627,7 +1628,7 @@ void main() {
                 itemPositionsListener: itemPositionsListener,
               ),
             ),
-            Center(
+            const Center(
               child: Text('Test'),
             )
           ],
@@ -1663,7 +1664,7 @@ void main() {
   });
 
   testWidgets(
-      'Maintain programmatic and user position (9 half way off top) in page view',
+      '''Maintain programmatic and user position (9 half way off top) in page view''',
       (WidgetTester tester) async {
     final itemPositionsListener = ItemPositionsListener.create();
     final itemScrollController = ItemScrollController();
@@ -1677,7 +1678,7 @@ void main() {
         home: PageView(
           children: [
             KeyedSubtree(
-              key: PageStorageKey('key'),
+              key: const PageStorageKey('key'),
               child: ScrollablePositionedList.builder(
                 itemCount: defaultItemCount,
                 itemScrollController: itemScrollController,
@@ -1688,7 +1689,7 @@ void main() {
                 itemPositionsListener: itemPositionsListener,
               ),
             ),
-            Center(
+            const Center(
               child: Text('Test'),
             )
           ],
@@ -1728,7 +1729,7 @@ void main() {
         (itemHeight / screenHeight) / 2);
   });
 
-  testWidgets("List with no items", (WidgetTester tester) async {
+  testWidgets('List with no items', (WidgetTester tester) async {
     final itemScrollController = ItemScrollController();
     await setUpWidgetTest(tester,
         itemScrollController: itemScrollController, itemCount: 0);
@@ -1750,22 +1751,21 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<int>(
           valueListenable: itemCount,
-          builder: (context, itemCount, child) {
-            return ScrollablePositionedList.builder(
-              initialScrollIndex: min(100, itemCount),
-              initialAlignment: 0,
-              itemCount: itemCount,
-              itemScrollController: itemScrollController,
-              itemPositionsListener: itemPositionsListener,
-              itemBuilder: (context, index) {
-                assert(index >= 0 && index <= itemCount - 1);
-                return SizedBox(
-                  height: itemHeight,
-                  child: Text('Item $index'),
-                );
-              },
-            );
-          },
+          builder: (context, itemCount, child) =>
+              ScrollablePositionedList.builder(
+            initialScrollIndex: min(100, itemCount),
+            itemCount: itemCount,
+            itemScrollController: itemScrollController,
+            itemPositionsListener: itemPositionsListener,
+            itemBuilder: (context, index) {
+              assert(index >= 0 && index <= itemCount - 1,
+                  'index not bigger than 0 and smaller than itemCount - 1');
+              return SizedBox(
+                height: itemHeight,
+                child: Text('Item $index'),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1795,20 +1795,19 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<int>(
           valueListenable: itemCount,
-          builder: (context, itemCount, child) {
-            return ScrollablePositionedList.builder(
-              initialScrollIndex: min(100, itemCount - 1),
-              initialAlignment: 0,
-              itemCount: itemCount,
-              itemBuilder: (context, index) {
-                assert(index >= 0 && index <= itemCount - 1);
-                return SizedBox(
-                  height: itemHeight,
-                  child: Text('Item $index'),
-                );
-              },
-            );
-          },
+          builder: (context, itemCount, child) =>
+              ScrollablePositionedList.builder(
+            initialScrollIndex: min(100, itemCount - 1),
+            itemCount: itemCount,
+            itemBuilder: (context, index) {
+              assert(index >= 0 && index <= itemCount - 1,
+                  'index not bigger than 0 and smaller than itemCount -1');
+              return SizedBox(
+                height: itemHeight,
+                child: Text('Item $index'),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1835,19 +1834,19 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<int>(
           valueListenable: itemCount,
-          builder: (context, itemCount, child) {
-            return ScrollablePositionedList.builder(
-              initialScrollIndex: itemCount - 1,
-              itemCount: itemCount,
-              itemBuilder: (context, index) {
-                assert(index >= 0 && index <= itemCount - 1);
-                return SizedBox(
-                  height: itemHeight,
-                  child: Text('Item $index'),
-                );
-              },
-            );
-          },
+          builder: (context, itemCount, child) =>
+              ScrollablePositionedList.builder(
+            initialScrollIndex: itemCount - 1,
+            itemCount: itemCount,
+            itemBuilder: (context, index) {
+              assert(index >= 0 && index <= itemCount - 1,
+                  'index not bigger than 0 and smaller than itemCount -1');
+              return SizedBox(
+                height: itemHeight,
+                child: Text('Item $index'),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1948,7 +1947,6 @@ void main() {
       tester,
       itemCount: 2,
       initialAlignment: alignment,
-      initialIndex: 0,
     );
 
     await tester.pumpAndSettle();
@@ -1960,35 +1958,31 @@ void main() {
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     tester.binding.window.physicalSizeTestValue =
         const Size(screenWidth, screenHeight);
-    final key = ValueNotifier<Key>(ValueKey('key'));
+    final key = ValueNotifier<Key>(const ValueKey('key'));
     final itemScrollController = ItemScrollController();
 
     await tester.pumpWidget(
       MaterialApp(
         home: ValueListenableBuilder<Key>(
           valueListenable: key,
-          builder: (context, key, child) {
-            return Container(
-              key: key,
-              child: ScrollablePositionedList.builder(
-                itemCount: 200,
-                itemScrollController: itemScrollController,
-                itemBuilder: (context, index) {
-                  return SizedBox(
-                    height: itemHeight,
-                    child: Text('Item $index'),
-                  );
-                },
+          builder: (context, key, child) => Container(
+            key: key,
+            child: ScrollablePositionedList.builder(
+              itemCount: 200,
+              itemScrollController: itemScrollController,
+              itemBuilder: (context, index) => SizedBox(
+                height: itemHeight,
+                child: Text('Item $index'),
               ),
-            );
-          },
+            ),
+          ),
         ),
       ),
     );
 
     await tester.pumpAndSettle();
 
-    key.value = ValueKey('newKey');
+    key.value = const ValueKey('newKey');
     await tester.pumpAndSettle();
 
     unawaited(
@@ -2003,9 +1997,9 @@ void main() {
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     tester.binding.window.physicalSizeTestValue =
         const Size(screenWidth, screenHeight);
-    final outerKey = ValueNotifier<Key>(ValueKey('outerKey'));
+    final outerKey = ValueNotifier<Key>(const ValueKey('outerKey'));
     final innerKey = GlobalKey();
-    final listKey = ValueNotifier<Key>(ValueKey(null));
+    final listKey = ValueNotifier<Key>(const ValueKey(null));
     final itemScrollController = ItemScrollController();
 
     await tester.pumpWidget(
@@ -2038,8 +2032,8 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    outerKey.value = ValueKey('newOuterKey');
-    listKey.value = ValueKey('newListKey');
+    outerKey.value = const ValueKey('newOuterKey');
+    listKey.value = const ValueKey('newListKey');
     await tester.pumpAndSettle();
 
     unawaited(
@@ -2053,33 +2047,29 @@ void main() {
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     tester.binding.window.physicalSizeTestValue =
         const Size(screenWidth, screenHeight);
-    final key = ValueNotifier<Key>(ValueKey('key'));
+    final key = ValueNotifier<Key>(const ValueKey('key'));
     final itemScrollController = ItemScrollController();
 
     await tester.pumpWidget(
       MaterialApp(
         home: ValueListenableBuilder<Key>(
           valueListenable: key,
-          builder: (context, key, child) {
-            return ScrollablePositionedList.builder(
-              key: key,
-              itemCount: 10,
-              itemScrollController: itemScrollController,
-              itemBuilder: (context, index) {
-                return SizedBox(
-                  height: itemHeight,
-                  child: Text('Item $index'),
-                );
-              },
-            );
-          },
+          builder: (context, key, child) => ScrollablePositionedList.builder(
+            key: key,
+            itemCount: 10,
+            itemScrollController: itemScrollController,
+            itemBuilder: (context, index) => SizedBox(
+              height: itemHeight,
+              child: Text('Item $index'),
+            ),
+          ),
         ),
       ),
     );
 
     await tester.pumpAndSettle();
 
-    key.value = ValueKey('newKey');
+    key.value = const ValueKey('newKey');
     await tester.pumpAndSettle();
   });
 
@@ -2087,35 +2077,31 @@ void main() {
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     tester.binding.window.physicalSizeTestValue =
         const Size(screenWidth, screenHeight);
-    final key = ValueNotifier<Key>(ValueKey('key'));
+    final key = ValueNotifier<Key>(const ValueKey('key'));
     final itemScrollController = ItemScrollController();
 
     await tester.pumpWidget(
       MaterialApp(
         home: ValueListenableBuilder<Key>(
           valueListenable: key,
-          builder: (context, key, child) {
-            return Container(
-              key: key,
-              child: ScrollablePositionedList.builder(
-                itemCount: 100,
-                itemScrollController: itemScrollController,
-                itemBuilder: (context, index) {
-                  return SizedBox(
-                    height: itemHeight,
-                    child: Text('Item $index'),
-                  );
-                },
+          builder: (context, key, child) => Container(
+            key: key,
+            child: ScrollablePositionedList.builder(
+              itemCount: 100,
+              itemScrollController: itemScrollController,
+              itemBuilder: (context, index) => SizedBox(
+                height: itemHeight,
+                child: Text('Item $index'),
               ),
-            );
-          },
+            ),
+          ),
         ),
       ),
     );
 
     await tester.pumpAndSettle();
 
-    key.value = ValueKey('newKey');
+    key.value = const ValueKey('newKey');
     await tester.pumpAndSettle();
 
     unawaited(
@@ -2130,7 +2116,7 @@ void main() {
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     tester.binding.window.physicalSizeTestValue =
         const Size(screenWidth, screenHeight);
-    final containerKey = ValueNotifier<Key>(ValueKey('key'));
+    final containerKey = ValueNotifier<Key>(const ValueKey('key'));
     final scrollKey = GlobalKey();
     final itemScrollController = ItemScrollController();
 
@@ -2138,29 +2124,25 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<Key>(
           valueListenable: containerKey,
-          builder: (context, key, child) {
-            return Container(
-              key: key,
-              child: ScrollablePositionedList.builder(
-                key: scrollKey,
-                itemCount: 100,
-                itemScrollController: itemScrollController,
-                itemBuilder: (context, index) {
-                  return SizedBox(
-                    height: itemHeight,
-                    child: Text('Item $index'),
-                  );
-                },
+          builder: (context, key, child) => Container(
+            key: key,
+            child: ScrollablePositionedList.builder(
+              key: scrollKey,
+              itemCount: 100,
+              itemScrollController: itemScrollController,
+              itemBuilder: (context, index) => SizedBox(
+                height: itemHeight,
+                child: Text('Item $index'),
               ),
-            );
-          },
+            ),
+          ),
         ),
       ),
     );
 
     await tester.pumpAndSettle();
 
-    containerKey.value = ValueKey('newKey');
+    containerKey.value = const ValueKey('newKey');
     await tester.pumpAndSettle();
 
     unawaited(
@@ -2184,18 +2166,15 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<ItemScrollController>(
           valueListenable: itemScrollControllerListenable,
-          builder: (context, itemScrollController, child) {
-            return ScrollablePositionedList.builder(
-              itemCount: 100,
-              itemScrollController: itemScrollController,
-              itemBuilder: (context, index) {
-                return SizedBox(
-                  height: itemHeight,
-                  child: Text('Item $index'),
-                );
-              },
-            );
-          },
+          builder: (context, itemScrollController, child) =>
+              ScrollablePositionedList.builder(
+            itemCount: 100,
+            itemScrollController: itemScrollController,
+            itemBuilder: (context, index) => SizedBox(
+              height: itemHeight,
+              child: Text('Item $index'),
+            ),
+          ),
         ),
       ),
     );
@@ -2236,35 +2215,29 @@ void main() {
           Expanded(
             child: ValueListenableBuilder<ItemScrollController>(
               valueListenable: topItemScrollControllerListenable,
-              builder: (context, itemScrollController, child) {
-                return ScrollablePositionedList.builder(
-                  itemCount: 100,
-                  itemScrollController: itemScrollController,
-                  itemBuilder: (context, index) {
-                    return SizedBox(
-                      height: itemHeight,
-                      child: Text('Item $index'),
-                    );
-                  },
-                );
-              },
+              builder: (context, itemScrollController, child) =>
+                  ScrollablePositionedList.builder(
+                itemCount: 100,
+                itemScrollController: itemScrollController,
+                itemBuilder: (context, index) => SizedBox(
+                  height: itemHeight,
+                  child: Text('Item $index'),
+                ),
+              ),
             ),
           ),
           Expanded(
             child: ValueListenableBuilder<ItemScrollController>(
               valueListenable: bottomItemScrollControllerListenable,
-              builder: (context, itemScrollController, child) {
-                return ScrollablePositionedList.builder(
-                  itemCount: 100,
-                  itemScrollController: itemScrollController,
-                  itemBuilder: (context, index) {
-                    return SizedBox(
-                      height: itemHeight,
-                      child: Text('Item $index'),
-                    );
-                  },
-                );
-              },
+              builder: (context, itemScrollController, child) =>
+                  ScrollablePositionedList.builder(
+                itemCount: 100,
+                itemScrollController: itemScrollController,
+                itemBuilder: (context, index) => SizedBox(
+                  height: itemHeight,
+                  child: Text('Item $index'),
+                ),
+              ),
             ),
           ),
         ],

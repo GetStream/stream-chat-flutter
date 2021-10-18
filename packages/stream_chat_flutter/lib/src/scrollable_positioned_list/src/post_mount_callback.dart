@@ -29,7 +29,7 @@ class _PostMountCallbackElement extends StatelessElement {
   @override
   void mount(Element? parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    final PostMountCallback postMountCallback = widget as PostMountCallback;
+    final postMountCallback = widget as PostMountCallback;
     postMountCallback.callback?.call();
   }
 }

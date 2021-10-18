@@ -6,11 +6,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'viewport.dart';
+import 'package:stream_chat_flutter/src/scrollable_positioned_list/src/viewport.dart';
 
-/// A version of [CustomScrollView] that allows does not constrict the extents
+/// {@template custom_scroll_view}
+/// A version of [CustomScrollView] that does not constrict the extents
 /// to be within 0 and 1. See [CustomScrollView] for more information.
+/// {@endtemplate}
 class UnboundedCustomScrollView extends CustomScrollView {
+  /// {@macro custom_scroll_view}
   const UnboundedCustomScrollView({
     Key? key,
     Axis scrollDirection = Axis.vertical,

@@ -2,10 +2,13 @@ import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 
+/// {@template indexed_key}
+/// Creates an indexed key that delegates its [operator==] to the given key.
+///
+/// It contains an index used in [ScrollablePositionedList].
+/// {@endtemplate}
 class IndexedKey extends LocalKey {
-  /// Creates an indexed key that delegates its [operator==] to the given key.
-  ///
-  /// It contains an index used in [ScrollablePositionedList].
+  /// {@macro indexed_key}
   const IndexedKey(this.key, this.index);
 
   /// The key to which this this delegates its [operator==].
@@ -24,7 +27,5 @@ class IndexedKey extends LocalKey {
   int get hashCode => hashValues(runtimeType, key);
 
   @override
-  String toString() {
-    return '(IndexedKey) index: $index, key: $key';
-  }
+  String toString() => '(IndexedKey) index: $index, key: $key';
 }
