@@ -306,7 +306,12 @@ class _MessageListViewState extends State<MessageListView> {
     final initialScrollIndex = widget.initialScrollIndex;
     if (initialScrollIndex != null) return initialScrollIndex;
     if (streamChannel!.initialMessageId != null) {
-      final messages = streamChannel!.channel.state!.messages;
+      final messages = streamChannel!.channel.state!.messages
+          .where(widget.messageFilter ??
+              defaultMessageFilter(
+                streamChannel!.channel.client.state.currentUser!.id,
+              ))
+          .toList(growable: false);
       final totalMessages = messages.length;
       final messageIndex =
           messages.indexWhere((e) => e.id == streamChannel!.initialMessageId);
