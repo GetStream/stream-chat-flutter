@@ -354,6 +354,20 @@ class _MessageListViewState extends State<MessageListView> {
       widget.messageListController ?? _defaultController;
 
   @override
+  void didUpdateWidget(MessageListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialScrollIndex != oldWidget.initialScrollIndex ||
+        widget.initialAlignment != oldWidget.initialAlignment) {
+      initialIndex = _initialIndex;
+      initialAlignment = _initialAlignment;
+      _scrollController?.jumpTo(
+        index: initialIndex,
+        alignment: initialAlignment,
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) => MessageListCore(
         paginationLimit: widget.paginationLimit,
         messageFilter: widget.messageFilter,
@@ -472,9 +486,6 @@ class _MessageListViewState extends State<MessageListView> {
                   _inBetweenList = true;
                 },
                 child: ScrollablePositionedList.separated(
-                  key: _upToDate
-                      ? null
-                      : ValueKey(initialIndex + initialAlignment),
                   itemPositionsListener: _itemPositionListener,
                   initialScrollIndex: initialIndex,
                   initialAlignment: initialAlignment,
