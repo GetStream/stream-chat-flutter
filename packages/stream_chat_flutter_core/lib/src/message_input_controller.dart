@@ -44,9 +44,24 @@ class MessageInputController extends ValueNotifier<Message> {
     _textEditingController.text = newText ?? '';
   }
 
+  ///
   set textEditingValue(TextEditingValue newValue) {
     _textEditingController.value = newValue;
     value = value.copyWith(text: _textEditingController.text);
+  }
+
+  ///
+  get baseOffset {
+    return textEditingController.selection.baseOffset;
+  }
+
+  set showInChannel(bool newValue) {
+    value = value.copyWith(showInChannel: newValue);
+  }
+
+  ///
+  bool get showInChannel {
+    return value.showInChannel ?? false;
   }
 
   ///
@@ -54,11 +69,6 @@ class MessageInputController extends ValueNotifier<Message> {
 
   set attachments(List<Attachment> attachments) {
     value = value.copyWith(attachments: attachments);
-  }
-
-  ///
-  get baseOffset {
-    return textEditingController.selection.baseOffset;
   }
 
   ///
@@ -87,6 +97,11 @@ class MessageInputController extends ValueNotifier<Message> {
   }
 
   ///
+  void clearAttachments() {
+    attachments = [];
+  }
+
+  ///
   List<User> get mentionedUsers => value.mentionedUsers;
 
   set mentionedUsers(List<User> users) {
@@ -106,6 +121,11 @@ class MessageInputController extends ValueNotifier<Message> {
   ///
   void removeMentionedUserById(String userId) {
     mentionedUsers = [...mentionedUsers]..removeWhere((it) => it.id == userId);
+  }
+
+  ///
+  void clearMentionedUsers() {
+    mentionedUsers = [];
   }
 
   /// Set the [value] to empty.

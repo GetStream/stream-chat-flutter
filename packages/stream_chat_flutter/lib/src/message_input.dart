@@ -348,7 +348,6 @@ class MessageInputState extends State<MessageInput> {
 
   Command? _chosenCommand;
   bool _actionsShrunk = false;
-  bool _sendAsDm = false;
   bool _openFilePickerSection = false;
   int _filePickerIndex = 0;
 
@@ -535,7 +534,7 @@ class MessageInputState extends State<MessageInput> {
             height: 16,
             width: 16,
             foregroundDecoration: BoxDecoration(
-              border: _sendAsDm
+              border: messageInputController.showInChannel
                   ? null
                   : Border.all(
                       color: _streamChatTheme.colorTheme.textHighEmphasis
@@ -547,19 +546,20 @@ class MessageInputState extends State<MessageInput> {
             child: Center(
               child: Material(
                 borderRadius: BorderRadius.circular(3),
-                color: _sendAsDm
+                color: messageInputController.showInChannel
                     ? _streamChatTheme.colorTheme.accentPrimary
                     : _streamChatTheme.colorTheme.barsBg,
                 child: InkWell(
                   onTap: () {
                     setState(() {
-                      _sendAsDm = !_sendAsDm;
+                      messageInputController.showInChannel =
+                          !messageInputController.showInChannel;
                     });
                   },
                   child: AnimatedCrossFade(
                     duration: const Duration(milliseconds: 300),
                     reverseDuration: const Duration(milliseconds: 300),
-                    crossFadeState: _sendAsDm
+                    crossFadeState: messageInputController.showInChannel
                         ? CrossFadeState.showFirst
                         : CrossFadeState.showSecond,
                     firstChild: StreamSvgIcon.check(
@@ -1216,7 +1216,7 @@ class MessageInputState extends State<MessageInput> {
       size: Size(renderObject.size.width - 16, 400),
       mentionsTileBuilder: tileBuilder,
       onMentionUserTap: (user) {
-        messageInputController.mentionedUsers.add(user);
+        messageInputController.addMentionedUser(user);
         splits[splits.length - 1] = user.name;
         final rejoin = splits.join('@');
 
@@ -1794,8 +1794,8 @@ class MessageInputState extends State<MessageInput> {
       text = '${'/${_chosenCommand!.name} '}$text';
     }
 
-    messageInputController.clear();
-    messageInputController.attachments.clear();
+    messageInputController.text = '';
+    messageInputController.clearAttachments();
     widget.onQuotedMessageCleared?.call();
 
     setState(() {
@@ -1819,7 +1819,9 @@ class MessageInputState extends State<MessageInput> {
         mentionedUsers: messageInputController.mentionedUsers
             .where((u) => text.contains('@${u.name}'))
             .toList(),
-        showInChannel: widget.parentMessage != null ? _sendAsDm : null,
+        showInChannel: widget.parentMessage != null
+            ? messageInputController.showInChannel
+            : null,
       );
     }
 
@@ -1839,7 +1841,7 @@ class MessageInputState extends State<MessageInput> {
       await streamChannel.reloadChannel();
     }
 
-    messageInputController.mentionedUsers.clear();
+    messageInputController.clearMentionedUsers();
 
     try {
       Future sendingFuture;
