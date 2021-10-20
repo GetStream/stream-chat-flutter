@@ -34,23 +34,23 @@ Check out the diagram below for an example:
 
 ## Setup
 
-### Add dependency
+### Dependencies
 
-Add the [webcrypto](https://pub.dev/packages/webcrypto) package in your pubspec.yaml.
+Add the [webcrypto](https://pub.dev/packages/webcrypto) package in your `pubspec.yaml` file.
 
-```dart
+```yaml
 dependencies:
   webcrypto: ^0.5.2 # latest version
 ```
 
-### Generate key pair
+### Generate Key Pair
 
-You will write a function that generates a key pair using the ECDH algorithm and the P-256 elliptic curve (P-256 is well-supported and
+Write a function that generates a key pair using the **ECDH** algorithm and the **P-256** elliptic curve (**P-256** is well-supported and
 offers the right balance of security and performance).
 
-The pair will consist of two keys
-1. PublicKey: The key that is linked to a user to encrypt messages.
-2. PrivateKey: The key that is stored locally to decrypt messages.
+The pair will consist of two keys:
+- **PublicKey**: The key that is linked to a user to encrypt messages.
+- **PrivateKey**: The key that is stored locally to decrypt messages.
 
 ```dart
 Future<JsonWebKeyPair> generateKeys() async {
@@ -107,8 +107,8 @@ Future<List<int>> deriveKey(String senderJwk, String receiverJwk) async {
 
 ### Encrypting Messages
 
-Once you have generated the Crypto Key, you're ready to encrypt the message.
-You can use the AES-GCM algorithm for its known security/performance balance and browser availability.
+Once you have generated the **Crypto Key**, you're ready to encrypt the message.
+You can use the **AES-GCM** algorithm for its known security and performance balance and good browser availability.
 
 ```dart
 // The "iv" stands for initialization vector (IV). To ensure the encryption’s strength,
@@ -162,10 +162,10 @@ Future<String> decryptMessage(String encryptedMessage, List<int> deriveKey) asyn
 
 Now that your setup is complete you can use it to implement end-to-end encryption in your app.
 
-### Store User's PublicKey
+### Store User's Public Key
 
 The first thing you need to do is store the generated `publicKey` as an `extraData` property, in order
-for other users to use it for encrypting the messages.
+for other users to encrypt messages.
 
 ```dart
 // Generating keyPair using the function defined in above steps
@@ -190,7 +190,7 @@ await client.connectUser(
 
 Now you will use the `encryptMessage()` function created in the previous steps to encrypt the message.
 
-To do that, you need to make some minor changes to the `MessageInput` widget.
+To do that, you need to make some minor changes to the **MessageInput** widget.
 
 ```dart
 final receiverJwk = receiver.extraData['publicKey'];
@@ -201,7 +201,9 @@ final derivedKey = await deriveKey(keyPair.privateKey, receiverJwk);
 
 ```dart
 MessageInput(
+  
   ...
+  
   preMessageSending: (message) async {
     // Encrypting the message text using derivedKey
     final encryptedMessage = await encryptMessage(message.text, derivedKey);
@@ -221,7 +223,7 @@ Here, you have used it to encrypt the message before sending it to Stream’s ba
 
 Now, it’s time to decrypt the message and present it in a human-readable format to the receiver.
 
-You can customize the `MessageListView` widget to have a custom `messagebuilder`, that can decrypt the message.
+You can customize the **MessageListView** widget to have a custom `messagebuilder`, that can decrypt the message.
 
 ```dart
 MessageListView(
