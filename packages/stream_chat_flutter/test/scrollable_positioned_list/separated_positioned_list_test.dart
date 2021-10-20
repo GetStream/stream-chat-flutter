@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter/src/scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:stream_chat_flutter/src/scrollable_positioned_list/src/item_positions_notifier.dart';
-import 'package:stream_chat_flutter/src/scrollable_positioned_list/src/positioned_list.dart';
+import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:stream_chat_flutter/scrollable_positioned_list/src/item_positions_notifier.dart';
+import 'package:stream_chat_flutter/scrollable_positioned_list/src/positioned_list.dart';
 
 const screenHeight = 400.0;
 const screenWidth = 400.0;

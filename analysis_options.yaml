@@ -4,7 +4,7 @@ analyzer:
   exclude:
     - packages/*/lib/**/*.g.dart
     - packages/*/lib/src/emoji/**
-    - packages/*/lib/src/scrollable_positioned_list/**
+    - packages/*/lib/scrollable_positioned_list/**
     - packages/*/lib/**/*.freezed.dart
 
 linter:
