@@ -8,7 +8,7 @@ title: End To End Chat Encryption
 
 When you communicate over a chat application with another person or group,
 you may exchange sensitive information, like personally identifiable information, financial details, or passwords.
-To ensure that your data stays secure, a chat application must use end-to-end encryption.
+A chat application should use end-to-end encryption to ensure that users' data stays secure.
 
 :::note
 Before you start, keep in mind that this guide is a basic example intended for educational purposes only.
@@ -19,14 +19,14 @@ There’s a lot more to consider from a security perspective that isn’t covere
 ## What is End-to-End Encryption?
 
 End-to-end encryption (E2EE) is the process of securing a message from third parties so that only the sender and receiver can access the message.
-E2EE provides security by storing the message in an encrypted form on the server or database running the application.
+E2EE provides security by storing the message in an encrypted form on the application's server or database.
 
 You can only access the message by decrypting and signing it using a known public key (distributed freely)
 and a corresponding private key (only known by the owner).
 
 Each user in the application has their own public-private key pair.
 Public keys are distributed publicly and encrypt the sender’s messages.
-The receiver can only decrypt the sender’s message with the matching private key, which is used to decrypt messages and to verify or sign them.
+The receiver can only decrypt the sender’s message with the matching private key.
 
 Check out the diagram below for an example:
 
@@ -45,12 +45,12 @@ dependencies:
 
 ### Generate key pair
 
-We will write a function that generates a key pair using the ECDH algorithm and the P-256 elliptic curve (P-256 is well-supported and
+You will write a function that generates a key pair using the ECDH algorithm and the P-256 elliptic curve (P-256 is well-supported and
 offers the right balance of security and performance).
 
 The pair will consist of two keys
-1. PublicKey: The key we will link and send with every user in order to encrypt message.
-2. PrivateKey: The key we will store locally to decrypt messages.
+1. PublicKey: The key that is linked to a user to encrypt messages.
+2. PrivateKey: The key that is stored locally to decrypt messages.
 
 ```dart
 Future<JsonWebKeyPair> generateKeys() async {
@@ -78,8 +78,8 @@ class JsonWebKeyPair {
 
 ### Generate a Crypto Key
 
-The symmetric Crypto Key is generated using the keys generated in the previous step.
-We will use those keys to encrypt and decrypt messages.
+Next, create a symmetric **Crypto Key** using the keys generated in the previous step.
+You will use those keys to encrypt and decrypt messages.
 
 ```dart
 // SendersJwk -> sender.privateKey
@@ -107,8 +107,8 @@ Future<List<int>> deriveKey(String senderJwk, String receiverJwk) async {
 
 ### Encrypting Messages
 
-Once we have generated the Crypto Key, we’re ready to encrypt the message.
-We can use the AES-GCM algorithm for its known security/performance balance and browser availability.
+Once you have generated the Crypto Key, you're ready to encrypt the message.
+You can use the AES-GCM algorithm for its known security/performance balance and browser availability.
 
 ```dart
 // The "iv" stands for initialization vector (IV). To ensure the encryption’s strength,
@@ -160,12 +160,12 @@ Future<String> decryptMessage(String encryptedMessage, List<int> deriveKey) asyn
 
 ## Implement as a Stream Chat Feature
 
-Now that our setup is complete, let's use it to implement end-to-end encryption in our app.
+Now that your setup is complete you can use it to implement end-to-end encryption in your app.
 
 ### Store User's PublicKey
 
-The first thing we will do is to store the generated `publicKey` as a `extraData` property, in order
-for other user's to use it for encrypting the messages.
+The first thing you need to do is store the generated `publicKey` as an `extraData` property, in order
+for other users to use it for encrypting the messages.
 
 ```dart
 // Generating keyPair using the function defined in above steps
@@ -188,9 +188,9 @@ await client.connectUser(
 
 ### Sending Encrypted Messages
 
-Now we will use the `encryptMessage()` function created in our previous steps to encrypt the message.
+Now you will use the `encryptMessage()` function created in the previous steps to encrypt the message.
 
-To do that, we will also make some minor changes in our `MessageInput` widget.
+To do that, you need to make some minor changes to the `MessageInput` widget.
 
 ```dart
 final receiverJwk = receiver.extraData['publicKey'];
@@ -215,13 +215,13 @@ MessageInput(
 ```
 
 `preMessageSending` is a parameter that allows your app to process the message before it goes to Stream’s server.
-Here, we have used it to encrypt the message before sending it to Stream’s backend.
+Here, you have used it to encrypt the message before sending it to Stream’s backend.
 
 ### Showing Decrypted Messages
 
 Now, it’s time to decrypt the message and present it in a human-readable format to the receiver.
 
-We will customize the `MessageListView` widget to have your own `messagebuilder`, including a method to decrypt messages.
+You can customize the `MessageListView` widget to have a custom `messagebuilder`, that can decrypt the message.
 
 ```dart
 MessageListView(
@@ -251,5 +251,6 @@ MessageListView(
 ),
 ```
 
-That’s it! that's all we need to do add E2EE in a Stream powered chat app.
-For more details, checkout this [blogpost](https://getstream.io/blog/end-to-end-encrypted-chat-in-flutter/#whats-end-to-end-encryption) on our Stream blog.
+That's it! That's all you need to implement E2EE in a Stream powered chat app.
+
+For more details, check out our [end-to-end encrypted chat article](https://getstream.io/blog/end-to-end-encrypted-chat-in-flutter/#whats-end-to-end-encryption).
