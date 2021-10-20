@@ -1,3 +1,4 @@
+import 'package:collection/src/iterable_extensions.dart';
 import 'package:example/channel_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -12,6 +13,7 @@ import '../home_page.dart';
 import '../main.dart';
 import '../new_chat_screen.dart';
 import '../new_group_chat_screen.dart';
+import '../thread_page.dart';
 import 'routes.dart';
 
 class AppRoutes {
@@ -48,18 +50,35 @@ class AppRoutes {
         );
       case Routes.CHANNEL_PAGE:
         return MaterialPageRoute(
-            settings: RouteSettings(arguments: args, name: Routes.CHANNEL_PAGE),
-            builder: (_) {
-              final channelPageArgs = args as ChannelPageArgs;
-              return StreamChannel(
-                channel: channelPageArgs.channel!,
-                initialMessageId: channelPageArgs.initialMessage?.id,
-                child: ChannelPage(
-                  highlightInitialMessage:
-                      channelPageArgs.initialMessage != null,
-                ),
-              );
-            });
+          settings: RouteSettings(arguments: args, name: Routes.CHANNEL_PAGE),
+          builder: (context) {
+            final channelPageArgs = args as ChannelPageArgs;
+            final initialMessage = channelPageArgs.initialMessage;
+
+            return StreamChannel(
+              channel: channelPageArgs.channel!,
+              initialMessageId: initialMessage?.id,
+              child: Builder(
+                builder: (context) {
+                  final parentId = initialMessage?.parentId;
+                  Message? parentMessage;
+                  if (parentId != null) {
+                    final channel = StreamChannel.of(context).channel;
+                    parentMessage = channel.state!.messages
+                        .firstWhereOrNull((it) => it.id == parentId);
+                  }
+                  if (parentMessage != null) {
+                    return ThreadPage(parent: parentMessage);
+                  }
+                  return ChannelPage(
+                    highlightInitialMessage:
+                        channelPageArgs.initialMessage != null,
+                  );
+                },
+              ),
+            );
+          },
+        );
       case Routes.NEW_CHAT:
         return MaterialPageRoute(
             settings: RouteSettings(arguments: args, name: Routes.NEW_CHAT),

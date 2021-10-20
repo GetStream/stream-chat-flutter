@@ -142,9 +142,7 @@ class _ChannelPageState extends State<ChannelPage> {
                     );
                   },
                   threadBuilder: (_, parentMessage) {
-                    return ThreadPage(
-                      parent: parentMessage,
-                    );
+                    return ThreadPage(parent: parentMessage!);
                   },
                   pinPermissions: ['owner', 'admin', 'member'],
                 ),
