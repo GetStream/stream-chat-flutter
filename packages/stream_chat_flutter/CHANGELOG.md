@@ -5,6 +5,8 @@
 🐞 Fixed
 
 - [[#491]](https://github.com/GetStream/stream-chat-flutter/issues/491): Fix `MediaListView` showing media in wrong order.
+- Fixed `MessageListView` initialIndex not working in some cases.
+- Improved `MessageListView` rendering in case of reordering.
 
 ✅ Added
 
