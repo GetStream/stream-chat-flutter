@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ThreadPage extends StatefulWidget {
-  final Message? parent;
+  final Message parent;
   final int? initialScrollIndex;
   final double? initialAlignment;
 
   ThreadPage({
     Key? key,
-    this.parent,
+    required this.parent,
     this.initialScrollIndex,
     this.initialAlignment,
   }) : super(key: key);
@@ -39,7 +39,7 @@ class _ThreadPageState extends State<ThreadPage> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: ThreadHeader(
-        parent: widget.parent!,
+        parent: widget.parent,
       ),
       body: Column(
         children: <Widget>[
@@ -50,6 +50,8 @@ class _ThreadPageState extends State<ThreadPage> {
               initialAlignment: widget.initialAlignment,
               onMessageSwiped: _reply,
               messageFilter: defaultFilter,
+              showScrollToBottom: false,
+              highlightInitialMessage: true,
               messageBuilder: (context, details, messages, defaultMessage) {
                 return defaultMessage.copyWith(
                   onReplyTap: _reply,
@@ -61,7 +63,7 @@ class _ThreadPageState extends State<ThreadPage> {
               pinPermissions: ['owner', 'admin', 'member'],
             ),
           ),
-          if (widget.parent!.type != 'deleted')
+          if (widget.parent.type != 'deleted')
             MessageInput(
               parentMessage: widget.parent,
               focusNode: _focusNode,
