@@ -354,20 +354,6 @@ class _MessageListViewState extends State<MessageListView> {
       widget.messageListController ?? _defaultController;
 
   @override
-  void didUpdateWidget(MessageListView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.initialScrollIndex != oldWidget.initialScrollIndex ||
-        widget.initialAlignment != oldWidget.initialAlignment) {
-      initialIndex = _initialIndex;
-      initialAlignment = _initialAlignment;
-      _scrollController?.jumpTo(
-        index: initialIndex,
-        alignment: initialAlignment,
-      );
-    }
-  }
-
-  @override
   Widget build(BuildContext context) => MessageListCore(
         paginationLimit: widget.paginationLimit,
         messageFilter: widget.messageFilter,
@@ -1255,14 +1241,12 @@ class _MessageListViewState extends State<MessageListView> {
       initialIndex = _initialIndex;
       initialAlignment = _initialAlignment;
 
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        if (_scrollController?.isAttached == true) {
-          _scrollController?.jumpTo(
-            index: initialIndex,
-            alignment: initialAlignment,
-          );
-        }
-      });
+      if (_scrollController?.isAttached == true) {
+        _scrollController?.jumpTo(
+          index: initialIndex,
+          alignment: initialAlignment,
+        );
+      }
 
       _messageNewListener =
           streamChannel!.channel.on(EventType.messageNew).listen((event) {
