@@ -5,6 +5,7 @@
 🐞 Fixed
 
 - [[#491]](https://github.com/GetStream/stream-chat-flutter/issues/491): Fix `MediaListView` showing media in wrong order.
+- Fix image thumbnail generation when using Stream CDN
 
 ✅ Added
 
