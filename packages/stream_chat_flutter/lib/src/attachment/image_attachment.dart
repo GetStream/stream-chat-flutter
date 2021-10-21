@@ -72,7 +72,7 @@ class ImageAttachment extends AttachmentWidget {
           }
 
           var imageUri = Uri.parse(imageUrl);
-          if (imageUri.host == 'stream-io-cdn.com') {
+          if (imageUri.host.endsWith('stream-io-cdn.com')) {
             imageUri = imageUri.replace(queryParameters: {
               ...imageUri.queryParameters,
               'h': '400',
@@ -80,7 +80,7 @@ class ImageAttachment extends AttachmentWidget {
               'crop': 'center',
               'resize': 'crop',
             });
-          } else if (imageUri.host == 'stream-cloud-uploads.imgix.net') {
+          } else if (imageUri.host.endsWith('stream-cloud-uploads.imgix.net')) {
             imageUri = imageUri.replace(queryParameters: {
               ...imageUri.queryParameters,
               'height': '400',
