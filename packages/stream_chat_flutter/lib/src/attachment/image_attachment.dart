@@ -72,7 +72,11 @@ class ImageAttachment extends AttachmentWidget {
           }
 
           var imageUri = Uri.parse(imageUrl);
-          if (imageUri.host.endsWith('stream-io-cdn.com')) {
+          if (imageUri.host.endsWith('stream-io-cdn.com') &&
+              imageUri.queryParameters['h'] == '*' &&
+              imageUri.queryParameters['w'] == '*' &&
+              imageUri.queryParameters['crop'] == '*' &&
+              imageUri.queryParameters['resize'] == '*') {
             imageUri = imageUri.replace(queryParameters: {
               ...imageUri.queryParameters,
               'h': '400',
