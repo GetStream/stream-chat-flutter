@@ -32,16 +32,20 @@ class MessageInputController extends ValueNotifier<Message> {
   final TextEditingController _textEditingController;
 
   ///
-  String get text => value.text ?? '';
+  String get text => _textEditingController.text;
 
   ///
   set message(Message message) {
     value = message;
   }
 
-  set text(String? newText) {
+  set text(String newText) {
     value = value.copyWith(text: newText);
-    _textEditingController.text = newText ?? '';
+    _textEditingController
+      ..text = newText
+      ..selection = TextSelection.fromPosition(
+        TextPosition(offset: _textEditingController.text.length),
+      );
   }
 
   ///
@@ -53,6 +57,11 @@ class MessageInputController extends ValueNotifier<Message> {
   ///
   get baseOffset {
     return textEditingController.selection.baseOffset;
+  }
+
+  ///
+  get selectionStart {
+    return textEditingController.selection.start;
   }
 
   set showInChannel(bool newValue) {

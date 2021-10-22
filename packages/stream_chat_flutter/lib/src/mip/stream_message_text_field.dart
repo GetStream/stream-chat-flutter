@@ -710,17 +710,13 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
     registerForRestoration(_controller!, 'controller');
   }
 
-  late final _onChangedDebounced = debounce(
-    (String newText) => _effectiveController.text = newText,
-    const Duration(milliseconds: 350),
-    leading: true,
-  );
-
   @override
   Widget build(BuildContext context) => TextField(
         key: widget.key,
         controller: _effectiveController.textEditingController,
-        onChanged: (newText) => _onChangedDebounced([newText]),
+        onChanged: (newText) {
+          _effectiveController.text = newText;
+        },
         focusNode: widget.focusNode,
         decoration: widget.decoration,
         keyboardType: widget.keyboardType,
@@ -775,7 +771,6 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
 
   @override
   void dispose() {
-    _onChangedDebounced.cancel();
     _controller?.dispose();
     super.dispose();
   }

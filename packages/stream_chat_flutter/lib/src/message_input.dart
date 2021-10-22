@@ -696,13 +696,13 @@ class MessageInputState extends State<MessageInput> {
                 _buildAttachments(),
                 LimitedBox(
                   maxHeight: widget.maxHeight,
-                  child: TextField(
+                  child: StreamMessageTextField(
                     key: const Key('messageInputText'),
                     enabled: _inputEnabled,
                     maxLines: null,
                     onSubmitted: (_) => sendMessage(),
                     keyboardType: widget.keyboardType,
-                    controller: messageInputController.textEditingController,
+                    controller: messageInputController,
                     focusNode: _focusNode,
                     style: _messageInputTheme.inputTextStyle,
                     autofocus: widget.autofocus,
@@ -876,7 +876,7 @@ class MessageInputState extends State<MessageInput> {
             .contains(':')) {
       final textToSelection = messageInputController.text.substring(
         0,
-        messageInputController.textEditingController.value.selection.start,
+        messageInputController.selectionStart,
       );
       final splits = textToSelection.split(':');
       final query = splits[splits.length - 2].toLowerCase();
@@ -1179,15 +1179,14 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildMentionsOverlayEntry() {
-    if (messageInputController.textEditingController.value.selection.start <
-        0) {
+    if (messageInputController.selectionStart < 0) {
       return const Offstage();
     }
 
     final splits = messageInputController.text
         .substring(
           0,
-          messageInputController.textEditingController.value.selection.start,
+          messageInputController.selectionStart,
         )
         .split('@');
     final query = splits.last.toLowerCase();
@@ -1223,8 +1222,7 @@ class MessageInputState extends State<MessageInput> {
         messageInputController.textEditingController.value = TextEditingValue(
           text: rejoin +
               messageInputController.text.substring(
-                messageInputController
-                    .textEditingController.value.selection.start,
+                messageInputController.selectionStart,
               ),
           selection: TextSelection.collapsed(
             offset: rejoin.length,
@@ -1267,7 +1265,7 @@ class MessageInputState extends State<MessageInput> {
     messageInputController.textEditingController.value = TextEditingValue(
       text: rejoin +
           messageInputController.text.substring(
-            messageInputController.textEditingController.selection.start,
+            messageInputController.selectionStart,
           ),
       selection: TextSelection.collapsed(
         offset: rejoin.length,
@@ -1794,8 +1792,9 @@ class MessageInputState extends State<MessageInput> {
       text = '${'/${_chosenCommand!.name} '}$text';
     }
 
-    messageInputController.text = '';
-    messageInputController.clearAttachments();
+    messageInputController
+      ..text = ''
+      ..clearAttachments();
     widget.onQuotedMessageCleared?.call();
 
     setState(() {
