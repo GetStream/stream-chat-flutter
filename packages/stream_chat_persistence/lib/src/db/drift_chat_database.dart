@@ -1,4 +1,4 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'package:stream_chat_persistence/src/converter/converter.dart';
@@ -7,10 +7,10 @@ import 'package:stream_chat_persistence/src/entity/entity.dart';
 
 export 'shared/shared_db.dart';
 
-part 'moor_chat_database.g.dart';
+part 'drift_chat_database.g.dart';
 
 /// A chat database implemented using moor
-@UseMoor(
+@DriftDatabase(
   tables: [
     Channels,
     Messages,
@@ -36,15 +36,15 @@ part 'moor_chat_database.g.dart';
     ConnectionEventDao,
   ],
 )
-class MoorChatDatabase extends _$MoorChatDatabase {
+class DriftChatDatabase extends _$DriftChatDatabase {
   /// Creates a new moor chat database instance
-  MoorChatDatabase(
+  DriftChatDatabase(
     this._userId,
     QueryExecutor executor,
   ) : super(executor);
 
   /// Instantiate a new database instance
-  MoorChatDatabase.connect(
+  DriftChatDatabase.connect(
     this._userId,
     DatabaseConnection connection,
   ) : super.connect(connection);

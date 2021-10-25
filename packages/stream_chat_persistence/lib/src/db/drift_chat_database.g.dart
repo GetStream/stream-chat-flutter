@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'moor_chat_database.dart';
+part of 'drift_chat_database.dart';
 
 // **************************************************************************
 // MoorGenerator
@@ -56,9 +56,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       required this.memberCount,
       this.createdById,
       this.extraData});
-  factory ChannelEntity.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory ChannelEntity.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return ChannelEntity(
       id: const StringType()
@@ -119,7 +117,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
 
   factory ChannelEntity.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return ChannelEntity(
       id: serializer.fromJson<String>(json['id']),
       type: serializer.fromJson<String>(json['type']),
@@ -137,7 +135,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'type': serializer.toJson<String>(type),
@@ -202,28 +200,8 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      id.hashCode,
-      $mrjc(
-          type.hashCode,
-          $mrjc(
-              cid.hashCode,
-              $mrjc(
-                  config.hashCode,
-                  $mrjc(
-                      frozen.hashCode,
-                      $mrjc(
-                          lastMessageAt.hashCode,
-                          $mrjc(
-                              createdAt.hashCode,
-                              $mrjc(
-                                  updatedAt.hashCode,
-                                  $mrjc(
-                                      deletedAt.hashCode,
-                                      $mrjc(
-                                          memberCount.hashCode,
-                                          $mrjc(createdById.hashCode,
-                                              extraData.hashCode))))))))))));
+  int get hashCode => Object.hash(id, type, cid, config, frozen, lastMessageAt,
+      createdAt, updatedAt, deletedAt, memberCount, createdById, extraData);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -561,7 +539,7 @@ class $ChannelsTable extends Channels
   Set<GeneratedColumn> get $primaryKey => {cid};
   @override
   ChannelEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ChannelEntity.fromData(data, _db,
+    return ChannelEntity.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -678,9 +656,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       required this.channelCid,
       this.i18n,
       this.extraData});
-  factory MessageEntity.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory MessageEntity.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return MessageEntity(
       id: const StringType()
@@ -814,7 +790,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
 
   factory MessageEntity.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return MessageEntity(
       id: serializer.fromJson<String>(json['id']),
       messageText: serializer.fromJson<String?>(json['messageText']),
@@ -847,7 +823,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'messageText': serializer.toJson<String?>(messageText),
@@ -969,49 +945,33 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      id.hashCode,
-      $mrjc(
-          messageText.hashCode,
-          $mrjc(
-              attachments.hashCode,
-              $mrjc(
-                  status.hashCode,
-                  $mrjc(
-                      type.hashCode,
-                      $mrjc(
-                          mentionedUsers.hashCode,
-                          $mrjc(
-                              reactionCounts.hashCode,
-                              $mrjc(
-                                  reactionScores.hashCode,
-                                  $mrjc(
-                                      parentId.hashCode,
-                                      $mrjc(
-                                          quotedMessageId.hashCode,
-                                          $mrjc(
-                                              replyCount.hashCode,
-                                              $mrjc(
-                                                  showInChannel.hashCode,
-                                                  $mrjc(
-                                                      shadowed.hashCode,
-                                                      $mrjc(
-                                                          command.hashCode,
-                                                          $mrjc(
-                                                              createdAt
-                                                                  .hashCode,
-                                                              $mrjc(
-                                                                  updatedAt
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      deletedAt
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          userId
-                                                                              .hashCode,
-                                                                          $mrjc(
-                                                                              pinned.hashCode,
-                                                                              $mrjc(pinnedAt.hashCode, $mrjc(pinExpires.hashCode, $mrjc(pinnedByUserId.hashCode, $mrjc(channelCid.hashCode, $mrjc(i18n.hashCode, extraData.hashCode)))))))))))))))))))))))));
+  int get hashCode => Object.hashAll([
+        id,
+        messageText,
+        attachments,
+        status,
+        type,
+        mentionedUsers,
+        reactionCounts,
+        reactionScores,
+        parentId,
+        quotedMessageId,
+        replyCount,
+        showInChannel,
+        shadowed,
+        command,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        userId,
+        pinned,
+        pinnedAt,
+        pinExpires,
+        pinnedByUserId,
+        channelCid,
+        i18n,
+        extraData
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1644,7 +1604,7 @@ class $MessagesTable extends Messages
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   MessageEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return MessageEntity.fromData(data, _db,
+    return MessageEntity.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -1772,8 +1732,7 @@ class PinnedMessageEntity extends DataClass
       required this.channelCid,
       this.i18n,
       this.extraData});
-  factory PinnedMessageEntity.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
+  factory PinnedMessageEntity.fromData(Map<String, dynamic> data,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return PinnedMessageEntity(
@@ -1911,7 +1870,7 @@ class PinnedMessageEntity extends DataClass
 
   factory PinnedMessageEntity.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return PinnedMessageEntity(
       id: serializer.fromJson<String>(json['id']),
       messageText: serializer.fromJson<String?>(json['messageText']),
@@ -1944,7 +1903,7 @@ class PinnedMessageEntity extends DataClass
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'messageText': serializer.toJson<String?>(messageText),
@@ -2066,49 +2025,33 @@ class PinnedMessageEntity extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      id.hashCode,
-      $mrjc(
-          messageText.hashCode,
-          $mrjc(
-              attachments.hashCode,
-              $mrjc(
-                  status.hashCode,
-                  $mrjc(
-                      type.hashCode,
-                      $mrjc(
-                          mentionedUsers.hashCode,
-                          $mrjc(
-                              reactionCounts.hashCode,
-                              $mrjc(
-                                  reactionScores.hashCode,
-                                  $mrjc(
-                                      parentId.hashCode,
-                                      $mrjc(
-                                          quotedMessageId.hashCode,
-                                          $mrjc(
-                                              replyCount.hashCode,
-                                              $mrjc(
-                                                  showInChannel.hashCode,
-                                                  $mrjc(
-                                                      shadowed.hashCode,
-                                                      $mrjc(
-                                                          command.hashCode,
-                                                          $mrjc(
-                                                              createdAt
-                                                                  .hashCode,
-                                                              $mrjc(
-                                                                  updatedAt
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      deletedAt
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          userId
-                                                                              .hashCode,
-                                                                          $mrjc(
-                                                                              pinned.hashCode,
-                                                                              $mrjc(pinnedAt.hashCode, $mrjc(pinExpires.hashCode, $mrjc(pinnedByUserId.hashCode, $mrjc(channelCid.hashCode, $mrjc(i18n.hashCode, extraData.hashCode)))))))))))))))))))))))));
+  int get hashCode => Object.hashAll([
+        id,
+        messageText,
+        attachments,
+        status,
+        type,
+        mentionedUsers,
+        reactionCounts,
+        reactionScores,
+        parentId,
+        quotedMessageId,
+        replyCount,
+        showInChannel,
+        shadowed,
+        command,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        userId,
+        pinned,
+        pinnedAt,
+        pinExpires,
+        pinnedByUserId,
+        channelCid,
+        i18n,
+        extraData
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2744,7 +2687,7 @@ class $PinnedMessagesTable extends PinnedMessages
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   PinnedMessageEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return PinnedMessageEntity.fromData(data, _db,
+    return PinnedMessageEntity.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -2795,8 +2738,7 @@ class PinnedMessageReactionEntity extends DataClass
       required this.createdAt,
       required this.score,
       this.extraData});
-  factory PinnedMessageReactionEntity.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
+  factory PinnedMessageReactionEntity.fromData(Map<String, dynamic> data,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return PinnedMessageReactionEntity(
@@ -2832,7 +2774,7 @@ class PinnedMessageReactionEntity extends DataClass
 
   factory PinnedMessageReactionEntity.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return PinnedMessageReactionEntity(
       userId: serializer.fromJson<String>(json['userId']),
       messageId: serializer.fromJson<String>(json['messageId']),
@@ -2844,7 +2786,7 @@ class PinnedMessageReactionEntity extends DataClass
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'userId': serializer.toJson<String>(userId),
       'messageId': serializer.toJson<String>(messageId),
@@ -2884,14 +2826,8 @@ class PinnedMessageReactionEntity extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      userId.hashCode,
-      $mrjc(
-          messageId.hashCode,
-          $mrjc(
-              type.hashCode,
-              $mrjc(createdAt.hashCode,
-                  $mrjc(score.hashCode, extraData.hashCode))))));
+  int get hashCode =>
+      Object.hash(userId, messageId, type, createdAt, score, extraData);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3090,7 +3026,7 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
   @override
   PinnedMessageReactionEntity map(Map<String, dynamic> data,
       {String? tablePrefix}) {
-    return PinnedMessageReactionEntity.fromData(data, _db,
+    return PinnedMessageReactionEntity.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -3128,9 +3064,7 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
       required this.createdAt,
       required this.score,
       this.extraData});
-  factory ReactionEntity.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory ReactionEntity.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return ReactionEntity(
       userId: const StringType()
@@ -3164,7 +3098,7 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
 
   factory ReactionEntity.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return ReactionEntity(
       userId: serializer.fromJson<String>(json['userId']),
       messageId: serializer.fromJson<String>(json['messageId']),
@@ -3176,7 +3110,7 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'userId': serializer.toJson<String>(userId),
       'messageId': serializer.toJson<String>(messageId),
@@ -3216,14 +3150,8 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      userId.hashCode,
-      $mrjc(
-          messageId.hashCode,
-          $mrjc(
-              type.hashCode,
-              $mrjc(createdAt.hashCode,
-                  $mrjc(score.hashCode, extraData.hashCode))))));
+  int get hashCode =>
+      Object.hash(userId, messageId, type, createdAt, score, extraData);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3418,7 +3346,7 @@ class $ReactionsTable extends Reactions
   Set<GeneratedColumn> get $primaryKey => {messageId, type, userId};
   @override
   ReactionEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ReactionEntity.fromData(data, _db,
+    return ReactionEntity.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -3468,8 +3396,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       required this.online,
       required this.banned,
       required this.extraData});
-  factory UserEntity.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory UserEntity.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return UserEntity(
       id: const StringType()
@@ -3518,7 +3445,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
 
   factory UserEntity.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return UserEntity(
       id: serializer.fromJson<String>(json['id']),
       role: serializer.fromJson<String?>(json['role']),
@@ -3533,7 +3460,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'role': serializer.toJson<String?>(role),
@@ -3585,22 +3512,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      id.hashCode,
-      $mrjc(
-          role.hashCode,
-          $mrjc(
-              language.hashCode,
-              $mrjc(
-                  createdAt.hashCode,
-                  $mrjc(
-                      updatedAt.hashCode,
-                      $mrjc(
-                          lastActive.hashCode,
-                          $mrjc(
-                              online.hashCode,
-                              $mrjc(
-                                  banned.hashCode, extraData.hashCode)))))))));
+  int get hashCode => Object.hash(id, role, language, createdAt, updatedAt,
+      lastActive, online, banned, extraData);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3863,7 +3776,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   UserEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return UserEntity.fromData(data, _db,
+    return UserEntity.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -3921,8 +3834,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       required this.isModerator,
       required this.createdAt,
       required this.updatedAt});
-  factory MemberEntity.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory MemberEntity.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return MemberEntity(
       userId: const StringType()
@@ -3974,7 +3886,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
 
   factory MemberEntity.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return MemberEntity(
       userId: serializer.fromJson<String>(json['userId']),
       channelCid: serializer.fromJson<String>(json['channelCid']),
@@ -3993,7 +3905,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'userId': serializer.toJson<String>(userId),
       'channelCid': serializer.toJson<String>(channelCid),
@@ -4057,26 +3969,18 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      userId.hashCode,
-      $mrjc(
-          channelCid.hashCode,
-          $mrjc(
-              role.hashCode,
-              $mrjc(
-                  inviteAcceptedAt.hashCode,
-                  $mrjc(
-                      inviteRejectedAt.hashCode,
-                      $mrjc(
-                          invited.hashCode,
-                          $mrjc(
-                              banned.hashCode,
-                              $mrjc(
-                                  shadowBanned.hashCode,
-                                  $mrjc(
-                                      isModerator.hashCode,
-                                      $mrjc(createdAt.hashCode,
-                                          updatedAt.hashCode)))))))))));
+  int get hashCode => Object.hash(
+      userId,
+      channelCid,
+      role,
+      inviteAcceptedAt,
+      inviteRejectedAt,
+      invited,
+      banned,
+      shadowBanned,
+      isModerator,
+      createdAt,
+      updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4405,7 +4309,7 @@ class $MembersTable extends Members
   Set<GeneratedColumn> get $primaryKey => {userId, channelCid};
   @override
   MemberEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return MemberEntity.fromData(data, _db,
+    return MemberEntity.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -4432,8 +4336,7 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
       required this.userId,
       required this.channelCid,
       required this.unreadMessages});
-  factory ReadEntity.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory ReadEntity.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return ReadEntity(
       lastRead: const DateTimeType()
@@ -4458,7 +4361,7 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
 
   factory ReadEntity.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return ReadEntity(
       lastRead: serializer.fromJson<DateTime>(json['lastRead']),
       userId: serializer.fromJson<String>(json['userId']),
@@ -4468,7 +4371,7 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'lastRead': serializer.toJson<DateTime>(lastRead),
       'userId': serializer.toJson<String>(userId),
@@ -4500,10 +4403,7 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      lastRead.hashCode,
-      $mrjc(userId.hashCode,
-          $mrjc(channelCid.hashCode, unreadMessages.hashCode))));
+  int get hashCode => Object.hash(lastRead, userId, channelCid, unreadMessages);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4660,7 +4560,7 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
   Set<GeneratedColumn> get $primaryKey => {userId, channelCid};
   @override
   ReadEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ReadEntity.fromData(data, _db,
+    return ReadEntity.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -4678,8 +4578,7 @@ class ChannelQueryEntity extends DataClass
   /// The channel cid of this query
   final String channelCid;
   ChannelQueryEntity({required this.queryHash, required this.channelCid});
-  factory ChannelQueryEntity.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
+  factory ChannelQueryEntity.fromData(Map<String, dynamic> data,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return ChannelQueryEntity(
@@ -4699,7 +4598,7 @@ class ChannelQueryEntity extends DataClass
 
   factory ChannelQueryEntity.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return ChannelQueryEntity(
       queryHash: serializer.fromJson<String>(json['queryHash']),
       channelCid: serializer.fromJson<String>(json['channelCid']),
@@ -4707,7 +4606,7 @@ class ChannelQueryEntity extends DataClass
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'queryHash': serializer.toJson<String>(queryHash),
       'channelCid': serializer.toJson<String>(channelCid),
@@ -4729,7 +4628,7 @@ class ChannelQueryEntity extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(queryHash.hashCode, channelCid.hashCode));
+  int get hashCode => Object.hash(queryHash, channelCid);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4835,7 +4734,7 @@ class $ChannelQueriesTable extends ChannelQueries
   Set<GeneratedColumn> get $primaryKey => {queryHash, channelCid};
   @override
   ChannelQueryEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ChannelQueryEntity.fromData(data, _db,
+    return ChannelQueryEntity.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -4875,8 +4774,7 @@ class ConnectionEventEntity extends DataClass
       this.unreadChannels,
       this.lastEventAt,
       this.lastSyncAt});
-  factory ConnectionEventEntity.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
+  factory ConnectionEventEntity.fromData(Map<String, dynamic> data,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return ConnectionEventEntity(
@@ -4922,7 +4820,7 @@ class ConnectionEventEntity extends DataClass
 
   factory ConnectionEventEntity.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return ConnectionEventEntity(
       id: serializer.fromJson<int>(json['id']),
       type: serializer.fromJson<String>(json['type']),
@@ -4935,7 +4833,7 @@ class ConnectionEventEntity extends DataClass
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'type': serializer.toJson<String>(type),
@@ -4982,16 +4880,8 @@ class ConnectionEventEntity extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      id.hashCode,
-      $mrjc(
-          type.hashCode,
-          $mrjc(
-              ownUser.hashCode,
-              $mrjc(
-                  totalUnreadCount.hashCode,
-                  $mrjc(unreadChannels.hashCode,
-                      $mrjc(lastEventAt.hashCode, lastSyncAt.hashCode)))))));
+  int get hashCode => Object.hash(id, type, ownUser, totalUnreadCount,
+      unreadChannels, lastEventAt, lastSyncAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5212,7 +5102,7 @@ class $ConnectionEventsTable extends ConnectionEvents
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   ConnectionEventEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ConnectionEventEntity.fromData(data, _db,
+    return ConnectionEventEntity.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -5225,9 +5115,10 @@ class $ConnectionEventsTable extends ConnectionEvents
       MapConverter();
 }
 
-abstract class _$MoorChatDatabase extends GeneratedDatabase {
-  _$MoorChatDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
-  _$MoorChatDatabase.connect(DatabaseConnection c) : super.connect(c);
+abstract class _$DriftChatDatabase extends GeneratedDatabase {
+  _$DriftChatDatabase(QueryExecutor e)
+      : super(SqlTypeSystem.defaultInstance, e);
+  _$DriftChatDatabase.connect(DatabaseConnection c) : super.connect(c);
   late final $ChannelsTable channels = $ChannelsTable(this);
   late final $MessagesTable messages = $MessagesTable(this);
   late final $PinnedMessagesTable pinnedMessages = $PinnedMessagesTable(this);
@@ -5240,20 +5131,20 @@ abstract class _$MoorChatDatabase extends GeneratedDatabase {
   late final $ChannelQueriesTable channelQueries = $ChannelQueriesTable(this);
   late final $ConnectionEventsTable connectionEvents =
       $ConnectionEventsTable(this);
-  late final UserDao userDao = UserDao(this as MoorChatDatabase);
-  late final ChannelDao channelDao = ChannelDao(this as MoorChatDatabase);
-  late final MessageDao messageDao = MessageDao(this as MoorChatDatabase);
+  late final UserDao userDao = UserDao(this as DriftChatDatabase);
+  late final ChannelDao channelDao = ChannelDao(this as DriftChatDatabase);
+  late final MessageDao messageDao = MessageDao(this as DriftChatDatabase);
   late final PinnedMessageDao pinnedMessageDao =
-      PinnedMessageDao(this as MoorChatDatabase);
+      PinnedMessageDao(this as DriftChatDatabase);
   late final PinnedMessageReactionDao pinnedMessageReactionDao =
-      PinnedMessageReactionDao(this as MoorChatDatabase);
-  late final MemberDao memberDao = MemberDao(this as MoorChatDatabase);
-  late final ReactionDao reactionDao = ReactionDao(this as MoorChatDatabase);
-  late final ReadDao readDao = ReadDao(this as MoorChatDatabase);
+      PinnedMessageReactionDao(this as DriftChatDatabase);
+  late final MemberDao memberDao = MemberDao(this as DriftChatDatabase);
+  late final ReactionDao reactionDao = ReactionDao(this as DriftChatDatabase);
+  late final ReadDao readDao = ReadDao(this as DriftChatDatabase);
   late final ChannelQueryDao channelQueryDao =
-      ChannelQueryDao(this as MoorChatDatabase);
+      ChannelQueryDao(this as DriftChatDatabase);
   late final ConnectionEventDao connectionEventDao =
-      ConnectionEventDao(this as MoorChatDatabase);
+      ConnectionEventDao(this as DriftChatDatabase);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override

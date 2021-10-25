@@ -6,6 +6,6 @@ part of 'user_dao.dart';
 // DaoGenerator
 // **************************************************************************
 
-mixin _$UserDaoMixin on DatabaseAccessor<MoorChatDatabase> {
+mixin _$UserDaoMixin on DatabaseAccessor<DriftChatDatabase> {
   $UsersTable get users => attachedDatabase.users;
 }

@@ -1,19 +1,19 @@
+import 'package:drift/drift.dart' hide isNotNull;
+import 'package:drift/isolate.dart';
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:moor/ffi.dart';
-import 'package:moor/isolate.dart';
-import 'package:moor/moor.dart' hide isNotNull;
-import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 
 DatabaseConnection _backgroundConnection() =>
-    DatabaseConnection.fromExecutor(VmDatabase.memory());
+    DatabaseConnection.fromExecutor(NativeDatabase.memory());
 
 void main() {
   test(
     'default constructor should create a new instance of MoorChatDatabase',
     () async {
       const userId = 'testUserId';
-      final executor = VmDatabase.memory();
-      final database = MoorChatDatabase(userId, executor);
+      final executor = NativeDatabase.memory();
+      final database = DriftChatDatabase(userId, executor);
       expect(database, isNotNull);
       expect(database.userId, userId);
 
@@ -27,10 +27,10 @@ void main() {
     'connect constructor should create a new instance of MoorChatDatabase',
     () async {
       const userId = 'testUserId';
-      final isolate = await MoorIsolate.spawn(_backgroundConnection);
+      final isolate = await DriftIsolate.spawn(_backgroundConnection);
       final connection = DatabaseConnection.delayed(isolate.connect());
 
-      final database = MoorChatDatabase.connect(userId, connection);
+      final database = DriftChatDatabase.connect(userId, connection);
       expect(database, isNotNull);
       expect(database.userId, userId);
 
