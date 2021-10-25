@@ -1,6 +1,6 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
@@ -8,11 +8,11 @@ import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 part 'channel_dao.g.dart';
 
 /// The Data Access Object for operations in [Channels] table.
-@UseDao(tables: [Channels, Users])
-class ChannelDao extends DatabaseAccessor<MoorChatDatabase>
+@DriftAccessor(tables: [Channels, Users])
+class ChannelDao extends DatabaseAccessor<DriftChatDatabase>
     with _$ChannelDaoMixin {
   /// Creates a new channel dao instance
-  ChannelDao(MoorChatDatabase db) : super(db);
+  ChannelDao(DriftChatDatabase db) : super(db);
 
   /// Get channel by cid
   Future<ChannelModel?> getChannelByCid(String cid) async =>
