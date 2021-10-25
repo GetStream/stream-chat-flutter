@@ -145,7 +145,7 @@ class MessageListView extends StatefulWidget {
     this.threadBuilder,
     this.onThreadTap,
     this.dateDividerBuilder,
-    this.scrollPhysics = const ClampingScrollPhysics(),
+    this.scrollPhysics,
     this.initialScrollIndex,
     this.initialAlignment,
     this.scrollController,
@@ -225,7 +225,7 @@ class MessageListView extends StatefulWidget {
   final ItemPositionsListener? itemPositionListener;
 
   /// The ScrollPhysics used by the ListView
-  final ScrollPhysics scrollPhysics;
+  final ScrollPhysics? scrollPhysics;
 
   /// Called when message item gets swiped
   final OnMessageSwiped? onMessageSwiped;
@@ -296,7 +296,7 @@ class MessageListView extends StatefulWidget {
 class _MessageListViewState extends State<MessageListView> {
   ItemScrollController? _scrollController;
   void Function(Message)? _onThreadTap;
-  bool _showScrollToBottom = false;
+  final ValueNotifier<bool> _showScrollToBottom = ValueNotifier(false);
   late final ItemPositionsListener _itemPositionListener;
   int? _messageListLength;
   StreamChannelState? streamChannel;
@@ -334,7 +334,6 @@ class _MessageListViewState extends State<MessageListView> {
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
-  bool _topPaginationActive = false;
   bool _bottomPaginationActive = false;
 
   int initialIndex = 0;
@@ -404,10 +403,6 @@ class _MessageListViewState extends State<MessageListView> {
             initialAlignment = first.itemLeadingEdge;
           }
         }
-      } else if (!_topPaginationActive && _upToDate) {
-        // Reset the index in-case we send any new message
-        initialIndex = 0;
-        initialAlignment = 0;
       }
     }
 
@@ -451,7 +446,6 @@ class _MessageListViewState extends State<MessageListView> {
                 onStartOfPage: () async {
                   _inBetweenList = false;
                   if (!_upToDate) {
-                    _topPaginationActive = false;
                     _bottomPaginationActive = true;
                     return _paginateData(
                       streamChannel,
@@ -461,7 +455,6 @@ class _MessageListViewState extends State<MessageListView> {
                 },
                 onEndOfPage: () async {
                   _inBetweenList = false;
-                  _topPaginationActive = true;
                   _bottomPaginationActive = false;
                   return _paginateData(
                     streamChannel,
@@ -650,7 +643,16 @@ class _MessageListViewState extends State<MessageListView> {
             );
           },
         ),
-        if (widget.showScrollToBottom) _buildScrollToBottom(),
+        ValueListenableBuilder<bool>(
+          valueListenable: _showScrollToBottom,
+          child: _buildScrollToBottom(),
+          builder: (context, value, child) {
+            if (!streamChannel!.channel.state!.isUpToDate || value) {
+              return child!;
+            }
+            return const Offstage();
+          },
+        ),
         if (widget.showFloatingDateDivider)
           _buildFloatingDateDivider(itemCount),
       ],
@@ -770,24 +772,15 @@ class _MessageListViewState extends State<MessageListView> {
         .index;
   }
 
-  Widget _buildScrollToBottom() => StreamBuilder<Tuple2<bool, int>>(
-        stream: Rx.combineLatest2(
-          streamChannel!.channel.state!.isUpToDateStream.distinct(),
-          streamChannel!.channel.state!.unreadCountStream.distinct(),
-          (bool isUpToDate, int unreadCount) => Tuple2(isUpToDate, unreadCount),
-        ),
+  Widget _buildScrollToBottom() => StreamBuilder<int>(
+        stream: streamChannel!.channel.state!.unreadCountStream,
         builder: (_, snapshot) {
           if (snapshot.hasError) {
             return const Offstage();
           } else if (!snapshot.hasData) {
             return const Offstage();
           }
-          final isUpToDate = snapshot.data!.item1;
-          final showScrollToBottom = !isUpToDate || _showScrollToBottom;
-          if (!showScrollToBottom) {
-            return const Offstage();
-          }
-          final unreadCount = snapshot.data!.item2;
+          final unreadCount = snapshot.data!;
           final showUnreadCount = unreadCount > 0 &&
               streamChannel!.channel.state!.members.any((e) =>
                   e.userId ==
@@ -808,10 +801,9 @@ class _MessageListViewState extends State<MessageListView> {
                     }
                     if (!_upToDate) {
                       _bottomPaginationActive = false;
-                      _topPaginationActive = false;
                       streamChannel!.reloadChannel();
                     } else {
-                      setState(() => _showScrollToBottom = false);
+                      _showScrollToBottom.value = false;
                       _scrollController!.scrollTo(
                         index: 0,
                         duration: const Duration(seconds: 1),
@@ -886,8 +878,8 @@ class _MessageListViewState extends State<MessageListView> {
           }
         }
         if (mounted) {
-          if (_showScrollToBottom == isVisible) {
-            setState(() => _showScrollToBottom = !isVisible);
+          if (_showScrollToBottom.value == isVisible) {
+            _showScrollToBottom.value = !isVisible;
           }
         }
       },
@@ -1252,7 +1244,6 @@ class _MessageListViewState extends State<MessageListView> {
           streamChannel!.channel.on(EventType.messageNew).listen((event) {
         if (_upToDate) {
           _bottomPaginationActive = false;
-          _topPaginationActive = false;
         }
         if (event.message?.parentId == widget.parentMessage?.id &&
             event.message!.user!.id ==
