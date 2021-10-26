@@ -465,6 +465,9 @@ class _MessageListViewState extends State<MessageListView> {
                   _inBetweenList = true;
                 },
                 child: ScrollablePositionedList.separated(
+                  key: (initialIndex != 0 && initialAlignment != 0)
+                      ? ValueKey('$initialIndex-$initialAlignment')
+                      : null,
                   itemPositionsListener: _itemPositionListener,
                   initialScrollIndex: initialIndex,
                   initialAlignment: initialAlignment,
@@ -795,13 +798,19 @@ class _MessageListViewState extends State<MessageListView> {
               children: [
                 FloatingActionButton(
                   backgroundColor: _streamTheme.colorTheme.barsBg,
-                  onPressed: () {
+                  onPressed: () async {
                     if (unreadCount > 0) {
                       streamChannel!.channel.markRead();
                     }
                     if (!_upToDate) {
                       _bottomPaginationActive = false;
-                      streamChannel!.reloadChannel();
+                      initialAlignment = 0;
+                      initialIndex = 0;
+                      await streamChannel!.reloadChannel();
+
+                      WidgetsBinding.instance?.addPostFrameCallback((_) {
+                        _scrollController!.jumpTo(index: 0);
+                      });
                     } else {
                       _showScrollToBottom.value = false;
                       _scrollController!.scrollTo(
@@ -1057,8 +1066,10 @@ class _MessageListViewState extends State<MessageListView> {
         final scrollToIndex = () {
           final index = messages.indexWhere((m) => m.id == quotedMessageId);
           _scrollController?.scrollTo(
-            index: index,
-            duration: const Duration(milliseconds: 350),
+            index: index + 2, // +2 to account for loader and footer
+            duration: const Duration(seconds: 1),
+            curve: Curves.easeInOut,
+            alignment: 0.1,
           );
         };
         if (messages.map((e) => e.id).contains(quotedMessageId)) {
