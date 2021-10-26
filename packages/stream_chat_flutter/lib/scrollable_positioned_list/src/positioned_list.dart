@@ -323,9 +323,9 @@ class _PositionedListState extends State<PositionedList> {
         final positions = <ItemPosition>[];
         RenderViewport? viewport;
         for (final element in registeredElements.value!) {
-          final box = element.renderObject as RenderBox;
+          final box = element.renderObject as RenderBox?;
           viewport ??= RenderAbstractViewport.of(box) as RenderViewport?;
-          if (viewport == null) {
+          if (viewport == null || box == null) {
             continue;
           }
           final key = element.widget.key as IndexedKey;

@@ -1062,8 +1062,7 @@ class _MessageListViewState extends State<MessageListView> {
       showSendingIndicator: showSendingIndicator,
       showUserAvatar: showUserAvatar,
       onQuotedMessageTap: (quotedMessageId) async {
-        // ignore: prefer_function_declarations_over_variables
-        final scrollToIndex = () {
+        if (messages.map((e) => e.id).contains(quotedMessageId)) {
           final index = messages.indexWhere((m) => m.id == quotedMessageId);
           _scrollController?.scrollTo(
             index: index + 2, // +2 to account for loader and footer
@@ -1071,16 +1070,12 @@ class _MessageListViewState extends State<MessageListView> {
             curve: Curves.easeInOut,
             alignment: 0.1,
           );
-        };
-        if (messages.map((e) => e.id).contains(quotedMessageId)) {
-          scrollToIndex();
         } else {
-          await streamChannel!.loadChannelAtMessage(quotedMessageId).then((_) {
-            WidgetsBinding.instance!.addPostFrameCallback((_) {
-              if (messages.map((e) => e.id).contains(quotedMessageId)) {
-                scrollToIndex();
-              }
-            });
+          await streamChannel!
+              .loadChannelAtMessage(quotedMessageId)
+              .then((_) async {
+            initialIndex = 21; // 19 + 2 | 19 is the index of the message
+            initialAlignment = 0.1;
           });
         }
       },
