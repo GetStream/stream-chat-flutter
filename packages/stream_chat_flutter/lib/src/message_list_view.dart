@@ -145,7 +145,8 @@ class MessageListView extends StatefulWidget {
     this.threadBuilder,
     this.onThreadTap,
     this.dateDividerBuilder,
-    this.scrollPhysics,
+    this.scrollPhysics =
+        const ClampingScrollPhysics(), // we need to use ClampingScrollPhysics to avoid the list view to animate and break while loading
     this.initialScrollIndex,
     this.initialAlignment,
     this.scrollController,
