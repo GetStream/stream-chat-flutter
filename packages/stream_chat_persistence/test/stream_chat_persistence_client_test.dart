@@ -1,15 +1,15 @@
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:moor/ffi.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';
 
 import 'mock_chat_database.dart';
 import 'src/utils/date_matcher.dart';
 
-MoorChatDatabase testDatabaseProvider(String userId, [ConnectionMode? mode]) =>
-    MoorChatDatabase(userId, VmDatabase.memory());
+DriftChatDatabase testDatabaseProvider(String userId, [ConnectionMode? mode]) =>
+    DriftChatDatabase(userId, NativeDatabase.memory());
 
 void main() {
   group('connect', () {
@@ -19,7 +19,7 @@ void main() {
       expect(client.db, isNull);
       await client.connect(userId, databaseProvider: testDatabaseProvider);
       expect(client.db, isNotNull);
-      expect(client.db, isA<MoorChatDatabase>());
+      expect(client.db, isA<DriftChatDatabase>());
       expect(client.db!.userId, userId);
 
       addTearDown(() async {
@@ -33,7 +33,7 @@ void main() {
       await client.connect(userId, databaseProvider: testDatabaseProvider);
       expect(client.db, isNotNull);
       expect(client.db, isNotNull);
-      expect(client.db, isA<MoorChatDatabase>());
+      expect(client.db, isA<DriftChatDatabase>());
       expect(client.db!.userId, userId);
       expect(
         () => client.connect(userId, databaseProvider: testDatabaseProvider),
@@ -58,7 +58,7 @@ void main() {
   group('client functions', () {
     const userId = 'testUserId';
     final mockDatabase = MockChatDatabase();
-    MoorChatDatabase _mockDatabaseProvider(_, __) => mockDatabase;
+    DriftChatDatabase _mockDatabaseProvider(_, __) => mockDatabase;
     late StreamChatPersistenceClient client;
 
     setUp(() async {

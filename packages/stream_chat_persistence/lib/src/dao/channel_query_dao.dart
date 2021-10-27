@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/channel_queries.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
@@ -11,11 +11,11 @@ import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 part 'channel_query_dao.g.dart';
 
 /// The Data Access Object for operations in [ChannelQueries] table.
-@UseDao(tables: [ChannelQueries, Channels, Users])
-class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
+@DriftAccessor(tables: [ChannelQueries, Channels, Users])
+class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
     with _$ChannelQueryDaoMixin {
   /// Creates a new channel query dao instance
-  ChannelQueryDao(MoorChatDatabase db) : super(db);
+  ChannelQueryDao(DriftChatDatabase db) : super(db);
 
   String _computeHash(Filter? filter) {
     if (filter == null) {

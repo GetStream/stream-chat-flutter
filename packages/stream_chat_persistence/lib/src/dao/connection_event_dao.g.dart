@@ -6,7 +6,7 @@ part of 'connection_event_dao.dart';
 // DaoGenerator
 // **************************************************************************
 
-mixin _$ConnectionEventDaoMixin on DatabaseAccessor<MoorChatDatabase> {
+mixin _$ConnectionEventDaoMixin on DatabaseAccessor<DriftChatDatabase> {
   $ConnectionEventsTable get connectionEvents =>
       attachedDatabase.connectionEvents;
 }

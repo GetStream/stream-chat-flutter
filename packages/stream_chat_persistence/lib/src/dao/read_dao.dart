@@ -1,6 +1,6 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/reads.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
@@ -8,10 +8,10 @@ import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 part 'read_dao.g.dart';
 
 /// The Data Access Object for operations in [Reads] table.
-@UseDao(tables: [Reads, Users])
-class ReadDao extends DatabaseAccessor<MoorChatDatabase> with _$ReadDaoMixin {
+@DriftAccessor(tables: [Reads, Users])
+class ReadDao extends DatabaseAccessor<DriftChatDatabase> with _$ReadDaoMixin {
   /// Creates a new read dao instance
-  ReadDao(MoorChatDatabase db) : super(db);
+  ReadDao(DriftChatDatabase db) : super(db);
 
   /// Get all reads where [Reads.channelCid] matches [cid]
   Future<List<Read>> getReadsByCid(String cid) async => (select(reads).join([
