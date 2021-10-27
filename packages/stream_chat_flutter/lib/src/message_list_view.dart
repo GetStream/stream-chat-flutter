@@ -647,15 +647,19 @@ class _MessageListViewState extends State<MessageListView> {
             );
           },
         ),
-        ValueListenableBuilder<bool>(
-          valueListenable: _showScrollToBottom,
-          child: _buildScrollToBottom(),
-          builder: (context, value, child) {
-            if (!streamChannel!.channel.state!.isUpToDate || value) {
-              return child!;
-            }
-            return const Offstage();
-          },
+        BetterStreamBuilder<bool>(
+          stream: streamChannel!.channel.state!.isUpToDateStream,
+          initialData: streamChannel!.channel.state!.isUpToDate,
+          builder: (context, snapshot) => ValueListenableBuilder<bool>(
+            valueListenable: _showScrollToBottom,
+            child: _buildScrollToBottom(),
+            builder: (context, value, child) {
+              if (!snapshot || value) {
+                return child!;
+              }
+              return const Offstage();
+            },
+          ),
         ),
         if (widget.showFloatingDateDivider)
           _buildFloatingDateDivider(itemCount),
