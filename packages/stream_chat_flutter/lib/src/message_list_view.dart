@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
