@@ -142,7 +142,9 @@ class GiphyAttachment extends AttachmentWidget {
                           });
                         },
                         child: Text(
-                          context.translations.cancelLabel.toLowerCase(),
+                          context.translations.cancelLabel
+                              .toLowerCase()
+                              .capitalize(),
                           style: StreamChatTheme.of(context)
                               .textTheme
                               .bodyBold
