@@ -97,7 +97,7 @@ class ImageAttachment extends AttachmentWidget {
           return _buildImageAttachment(
             context,
             CachedNetworkImage(
-              cacheKey: imageUrl,
+              cacheKey: imageUri.replace(queryParameters: {}).toString(),
               height: size?.height,
               width: size?.width,
               placeholder: (context, __) {
