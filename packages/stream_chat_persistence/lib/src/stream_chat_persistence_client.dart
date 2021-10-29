@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:mutex/mutex.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 
 /// Various connection modes on which [StreamChatPersistenceClient] can work
 enum ConnectionMode {
@@ -15,8 +15,8 @@ enum ConnectionMode {
   background,
 }
 
-/// Signature for a function which provides instance of [MoorChatDatabase]
-typedef DatabaseProvider = MoorChatDatabase Function(String, ConnectionMode);
+/// Signature for a function which provides instance of [DriftChatDatabase]
+typedef DatabaseProvider = DriftChatDatabase Function(String, ConnectionMode);
 
 final _levelEmojiMapper = {
   Level.INFO: 'ℹ️',
@@ -24,7 +24,7 @@ final _levelEmojiMapper = {
   Level.SEVERE: '🚨',
 };
 
-/// A [MoorChatDatabase] based implementation of the [ChatPersistenceClient]
+/// A [DriftChatDatabase] based implementation of the [ChatPersistenceClient]
 class StreamChatPersistenceClient extends ChatPersistenceClient {
   /// Creates a new instance of the stream chat persistence client
   StreamChatPersistenceClient({
@@ -37,9 +37,9 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     _logger.onRecord.listen(logHandlerFunction ?? _defaultLogHandler);
   }
 
-  /// [MoorChatDatabase] instance used by this client.
+  /// [DriftChatDatabase] instance used by this client.
   @visibleForTesting
-  MoorChatDatabase? db;
+  DriftChatDatabase? db;
 
   final Logger _logger;
   final ConnectionMode _connectionMode;
@@ -70,7 +70,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     return true;
   }
 
-  MoorChatDatabase _defaultDatabaseProvider(
+  DriftChatDatabase _defaultDatabaseProvider(
     String userId,
     ConnectionMode mode,
   ) =>

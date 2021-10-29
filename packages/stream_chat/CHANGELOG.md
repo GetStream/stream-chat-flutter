@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - markAllRead() now updates local channel states.
+- [[#744]](https://github.com/GetStream/stream-chat-flutter/issues/744) Fixed unread count not updating correctly
 
 ## 3.1.1
 

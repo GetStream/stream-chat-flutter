@@ -1212,7 +1212,7 @@ class _MessageListViewState extends State<MessageListView> {
           child: child,
         ),
         child: Padding(
-          padding: const EdgeInsets.only(top: 4),
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: child,
         ),
       );

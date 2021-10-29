@@ -1,5 +1,5 @@
 // coverage:ignore-file
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import 'package:stream_chat_persistence/src/entity/messages.dart';
 

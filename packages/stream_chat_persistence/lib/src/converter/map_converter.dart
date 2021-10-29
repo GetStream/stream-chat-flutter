@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 /// Maps a [Map] of type [String], [T] into a [String] understood
 /// by the sqlite backend.

@@ -1,6 +1,6 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/reactions.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
@@ -8,11 +8,11 @@ import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 part 'reaction_dao.g.dart';
 
 /// The Data Access Object for operations in [Reactions] table.
-@UseDao(tables: [Reactions, Users])
-class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
+@DriftAccessor(tables: [Reactions, Users])
+class ReactionDao extends DatabaseAccessor<DriftChatDatabase>
     with _$ReactionDaoMixin {
   /// Creates a new reaction dao instance
-  ReactionDao(MoorChatDatabase db) : super(db);
+  ReactionDao(DriftChatDatabase db) : super(db);
 
   /// Returns all the reactions of a particular message by matching
   /// [Reactions.messageId] with [messageId]
