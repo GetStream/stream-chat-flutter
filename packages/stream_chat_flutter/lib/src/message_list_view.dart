@@ -399,8 +399,11 @@ class _MessageListViewState extends State<MessageListView> {
           final first = _itemPositionListener.itemPositions.value.first;
           final diff = newMessagesListLength - _messageListLength!;
           if (diff > 0) {
-            initialIndex = first.index + diff;
-            initialAlignment = first.itemLeadingEdge;
+            if (messages[0].user?.id !=
+                streamChannel!.channel.client.state.currentUser?.id) {
+              initialIndex = first.index + diff;
+              initialAlignment = first.itemLeadingEdge;
+            }
           }
         }
       }
@@ -1259,8 +1262,9 @@ class _MessageListViewState extends State<MessageListView> {
             event.message!.user!.id ==
                 streamChannel!.channel.client.state.currentUser!.id) {
           WidgetsBinding.instance!.addPostFrameCallback((_) {
-            _scrollController?.jumpTo(
+            _scrollController?.scrollTo(
               index: 0,
+              duration: const Duration(seconds: 1),
             );
           });
         }

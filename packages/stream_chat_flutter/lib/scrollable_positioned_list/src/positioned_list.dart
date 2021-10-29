@@ -326,7 +326,7 @@ class _PositionedListState extends State<PositionedList> {
           final box = element.renderObject as RenderBox?;
           viewport ??= RenderAbstractViewport.of(box) as RenderViewport?;
           if (viewport == null || box == null) {
-            continue;
+            break;
           }
           final key = element.widget.key as IndexedKey;
           if (widget.scrollDirection == Axis.vertical) {
