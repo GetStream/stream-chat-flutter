@@ -6,8 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:rxdart/rxdart.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/message_widget.dart';
@@ -145,7 +144,8 @@ class MessageListView extends StatefulWidget {
     this.threadBuilder,
     this.onThreadTap,
     this.dateDividerBuilder,
-    this.scrollPhysics = const ClampingScrollPhysics(),
+    this.scrollPhysics =
+        const ClampingScrollPhysics(), // we need to use ClampingScrollPhysics to avoid the list view to animate and break while loading
     this.initialScrollIndex,
     this.initialAlignment,
     this.scrollController,
@@ -225,7 +225,7 @@ class MessageListView extends StatefulWidget {
   final ItemPositionsListener? itemPositionListener;
 
   /// The ScrollPhysics used by the ListView
-  final ScrollPhysics scrollPhysics;
+  final ScrollPhysics? scrollPhysics;
 
   /// Called when message item gets swiped
   final OnMessageSwiped? onMessageSwiped;
@@ -296,7 +296,7 @@ class MessageListView extends StatefulWidget {
 class _MessageListViewState extends State<MessageListView> {
   ItemScrollController? _scrollController;
   void Function(Message)? _onThreadTap;
-  bool _showScrollToBottom = false;
+  final ValueNotifier<bool> _showScrollToBottom = ValueNotifier(false);
   late final ItemPositionsListener _itemPositionListener;
   int? _messageListLength;
   StreamChannelState? streamChannel;
@@ -306,12 +306,17 @@ class _MessageListViewState extends State<MessageListView> {
     final initialScrollIndex = widget.initialScrollIndex;
     if (initialScrollIndex != null) return initialScrollIndex;
     if (streamChannel!.initialMessageId != null) {
-      final messages = streamChannel!.channel.state!.messages;
+      final messages = streamChannel!.channel.state!.messages
+          .where(widget.messageFilter ??
+              defaultMessageFilter(
+                streamChannel!.channel.client.state.currentUser!.id,
+              ))
+          .toList(growable: false);
       final totalMessages = messages.length;
       final messageIndex =
           messages.indexWhere((e) => e.id == streamChannel!.initialMessageId);
       final index = totalMessages - messageIndex;
-      if (index != 0) return index - 1;
+      if (index != 0) return index + 1;
       return index;
     }
     return 0;
@@ -320,7 +325,7 @@ class _MessageListViewState extends State<MessageListView> {
   double get _initialAlignment {
     final initialAlignment = widget.initialAlignment;
     if (initialAlignment != null) return initialAlignment;
-    return 0;
+    return 0.1;
   }
 
   bool _isInitialMessage(String id) => streamChannel!.initialMessageId == id;
@@ -329,13 +334,14 @@ class _MessageListViewState extends State<MessageListView> {
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
-  bool _topPaginationActive = false;
   bool _bottomPaginationActive = false;
 
   int initialIndex = 0;
   double initialAlignment = 0;
 
   List<Message> messages = <Message>[];
+
+  Map<String, int> messagesIndex = {};
 
   bool initialMessageHighlightComplete = false;
 
@@ -382,6 +388,9 @@ class _MessageListViewState extends State<MessageListView> {
 
   Widget _buildListView(List<Message> data) {
     messages = data;
+    for (var index = 0; index < messages.length; index++) {
+      messagesIndex[messages[index].id] = index;
+    }
     final newMessagesListLength = messages.length;
 
     if (_messageListLength != null) {
@@ -394,10 +403,6 @@ class _MessageListViewState extends State<MessageListView> {
             initialAlignment = first.itemLeadingEdge;
           }
         }
-      } else if (!_topPaginationActive && _upToDate) {
-        // Reset the index in-case we send any new message
-        initialIndex = 0;
-        initialAlignment = 0;
       }
     }
 
@@ -441,7 +446,6 @@ class _MessageListViewState extends State<MessageListView> {
                 onStartOfPage: () async {
                   _inBetweenList = false;
                   if (!_upToDate) {
-                    _topPaginationActive = false;
                     _bottomPaginationActive = true;
                     return _paginateData(
                       streamChannel,
@@ -451,7 +455,6 @@ class _MessageListViewState extends State<MessageListView> {
                 },
                 onEndOfPage: () async {
                   _inBetweenList = false;
-                  _topPaginationActive = true;
                   _bottomPaginationActive = false;
                   return _paginateData(
                     streamChannel,
@@ -462,17 +465,26 @@ class _MessageListViewState extends State<MessageListView> {
                   _inBetweenList = true;
                 },
                 child: ScrollablePositionedList.separated(
-                  key: _upToDate
-                      ? null
-                      : ValueKey(initialIndex + initialAlignment),
+                  key: (initialIndex != 0 && initialAlignment != 0)
+                      ? ValueKey('$initialIndex-$initialAlignment')
+                      : null,
                   itemPositionsListener: _itemPositionListener,
                   initialScrollIndex: initialIndex,
                   initialAlignment: initialAlignment,
                   physics: widget.scrollPhysics,
                   itemScrollController: _scrollController,
                   reverse: widget.reverse,
-                  addAutomaticKeepAlives: false,
                   itemCount: itemCount,
+                  findChildIndexCallback: (Key key) {
+                    final indexedKey = key as IndexedKey;
+                    final valueKey = indexedKey.key as ValueKey<String>?;
+                    if (valueKey != null) {
+                      final index = messagesIndex[valueKey.value];
+                      if (index != null) {
+                        return ((index + 2) * 2) - 1;
+                      }
+                    }
+                  },
 
                   // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
                   // eg:     |Type|         rev(|Index(item)|)     rev(|Index(separator)|)    |Index(item)|    |Index(separator)|
@@ -624,14 +636,30 @@ class _MessageListViewState extends State<MessageListView> {
                     } else {
                       messageWidget = buildMessage(message, messages, i - 2);
                     }
-                    return messageWidget;
+                    return KeyedSubtree(
+                      key: ValueKey(message.id),
+                      child: messageWidget,
+                    );
                   },
                 ),
               ),
             );
           },
         ),
-        if (widget.showScrollToBottom) _buildScrollToBottom(),
+        BetterStreamBuilder<bool>(
+          stream: streamChannel!.channel.state!.isUpToDateStream,
+          initialData: streamChannel!.channel.state!.isUpToDate,
+          builder: (context, snapshot) => ValueListenableBuilder<bool>(
+            valueListenable: _showScrollToBottom,
+            child: _buildScrollToBottom(),
+            builder: (context, value, child) {
+              if (!snapshot || value) {
+                return child!;
+              }
+              return const Offstage();
+            },
+          ),
+        ),
         if (widget.showFloatingDateDivider)
           _buildFloatingDateDivider(itemCount),
       ],
@@ -751,24 +779,15 @@ class _MessageListViewState extends State<MessageListView> {
         .index;
   }
 
-  Widget _buildScrollToBottom() => StreamBuilder<Tuple2<bool, int>>(
-        stream: Rx.combineLatest2(
-          streamChannel!.channel.state!.isUpToDateStream.distinct(),
-          streamChannel!.channel.state!.unreadCountStream.distinct(),
-          (bool isUpToDate, int unreadCount) => Tuple2(isUpToDate, unreadCount),
-        ),
+  Widget _buildScrollToBottom() => StreamBuilder<int>(
+        stream: streamChannel!.channel.state!.unreadCountStream,
         builder: (_, snapshot) {
           if (snapshot.hasError) {
             return const Offstage();
           } else if (!snapshot.hasData) {
             return const Offstage();
           }
-          final isUpToDate = snapshot.data!.item1;
-          final showScrollToBottom = !isUpToDate || _showScrollToBottom;
-          if (!showScrollToBottom) {
-            return const Offstage();
-          }
-          final unreadCount = snapshot.data!.item2;
+          final unreadCount = snapshot.data!;
           final showUnreadCount = unreadCount > 0 &&
               streamChannel!.channel.state!.members.any((e) =>
                   e.userId ==
@@ -783,16 +802,21 @@ class _MessageListViewState extends State<MessageListView> {
               children: [
                 FloatingActionButton(
                   backgroundColor: _streamTheme.colorTheme.barsBg,
-                  onPressed: () {
+                  onPressed: () async {
                     if (unreadCount > 0) {
                       streamChannel!.channel.markRead();
                     }
                     if (!_upToDate) {
                       _bottomPaginationActive = false;
-                      _topPaginationActive = false;
-                      streamChannel!.reloadChannel();
+                      initialAlignment = 0;
+                      initialIndex = 0;
+                      await streamChannel!.reloadChannel();
+
+                      WidgetsBinding.instance?.addPostFrameCallback((_) {
+                        _scrollController!.jumpTo(index: 0);
+                      });
                     } else {
-                      setState(() => _showScrollToBottom = false);
+                      _showScrollToBottom.value = false;
                       _scrollController!.scrollTo(
                         index: 0,
                         duration: const Duration(seconds: 1),
@@ -854,9 +878,8 @@ class _MessageListViewState extends State<MessageListView> {
     int index,
   ) {
     final messageWidget = buildMessage(message, messages, index);
-
     return VisibilityDetector(
-      key: ValueKey<String>('BOTTOM-MESSAGE-${message.id}'),
+      key: ValueKey('visibility: ${message.id}'),
       onVisibilityChanged: (visibility) {
         final isVisible = visibility.visibleBounds != Rect.zero;
         if (isVisible) {
@@ -868,8 +891,8 @@ class _MessageListViewState extends State<MessageListView> {
           }
         }
         if (mounted) {
-          if (_showScrollToBottom == isVisible) {
-            setState(() => _showScrollToBottom = !isVisible);
+          if (_showScrollToBottom.value == isVisible) {
+            _showScrollToBottom.value = !isVisible;
           }
         }
       },
@@ -948,16 +971,11 @@ class _MessageListViewState extends State<MessageListView> {
     return defaultMessageWidget;
   }
 
-  Widget buildMessage(
-    Message message,
-    List<Message> messages,
-    int index,
-  ) {
+  Widget buildMessage(Message message, List<Message> messages, int index) {
     if ((message.type == 'system' || message.type == 'error') &&
         message.text?.isNotEmpty == true) {
       return widget.systemMessageBuilder?.call(context, message) ??
           SystemMessage(
-            key: ValueKey<String>('MESSAGE-${message.id}'),
             message: message,
             onMessageTap: (message) {
               if (widget.onSystemMessageTap != null) {
@@ -1037,7 +1055,6 @@ class _MessageListViewState extends State<MessageListView> {
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
     Widget messageWidget = MessageWidget(
-      key: ValueKey<String>('MESSAGE-${message.id}'),
       message: message,
       reverse: isMyMessage,
       showReactions: !message.isDeleted,
@@ -1049,23 +1066,20 @@ class _MessageListViewState extends State<MessageListView> {
       showSendingIndicator: showSendingIndicator,
       showUserAvatar: showUserAvatar,
       onQuotedMessageTap: (quotedMessageId) async {
-        // ignore: prefer_function_declarations_over_variables
-        final scrollToIndex = () {
+        if (messages.map((e) => e.id).contains(quotedMessageId)) {
           final index = messages.indexWhere((m) => m.id == quotedMessageId);
           _scrollController?.scrollTo(
-            index: index,
-            duration: const Duration(milliseconds: 350),
+            index: index + 2, // +2 to account for loader and footer
+            duration: const Duration(seconds: 1),
+            curve: Curves.easeInOut,
+            alignment: 0.1,
           );
-        };
-        if (messages.map((e) => e.id).contains(quotedMessageId)) {
-          scrollToIndex();
         } else {
-          await streamChannel!.loadChannelAtMessage(quotedMessageId).then((_) {
-            WidgetsBinding.instance!.addPostFrameCallback((_) {
-              if (messages.map((e) => e.id).contains(quotedMessageId)) {
-                scrollToIndex();
-              }
-            });
+          await streamChannel!
+              .loadChannelAtMessage(quotedMessageId)
+              .then((_) async {
+            initialIndex = 21; // 19 + 2 | 19 is the index of the message
+            initialAlignment = 0.1;
           });
         }
       },
@@ -1229,20 +1243,17 @@ class _MessageListViewState extends State<MessageListView> {
       initialIndex = _initialIndex;
       initialAlignment = _initialAlignment;
 
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        if (_scrollController?.isAttached == true) {
-          _scrollController?.jumpTo(
-            index: initialIndex,
-            alignment: initialAlignment,
-          );
-        }
-      });
+      if (_scrollController?.isAttached == true) {
+        _scrollController?.jumpTo(
+          index: initialIndex,
+          alignment: initialAlignment,
+        );
+      }
 
       _messageNewListener =
           streamChannel!.channel.on(EventType.messageNew).listen((event) {
         if (_upToDate) {
           _bottomPaginationActive = false;
-          _topPaginationActive = false;
         }
         if (event.message?.parentId == widget.parentMessage?.id &&
             event.message!.user!.id ==
