@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 Future<void> main() async {
   /// Create a new instance of [StreamChatClient] passing the apikey obtained
   /// from your project dashboard.
-  final client = StreamChatClient('b67pax5b2wdq');
+  final client = StreamChatClient('b67pax5b2wdq', logLevel: Level.INFO);
 
   /// Set the current user. In a production scenario, this should be done using
   /// a backend to generate a user token using our server SDK.
@@ -120,7 +120,7 @@ class HomeScreen extends StatelessWidget {
                 itemBuilder: (BuildContext context, int index) {
                   final _item = channels[index];
                   return ListTile(
-                    title: Text(_item.name!),
+                    title: Text(_item.name ?? ''),
                     subtitle: StreamBuilder<Message?>(
                       stream: _item.state!.lastMessageStream,
                       initialData: _item.state!.lastMessage,

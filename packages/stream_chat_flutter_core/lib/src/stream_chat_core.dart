@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat/version.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 
 /// Widget used to provide information about the chat to the widget tree.
@@ -89,6 +90,11 @@ class StreamChatCore extends StatefulWidget {
 /// State class associated with [StreamChatCore].
 class StreamChatCoreState extends State<StreamChatCore>
     with WidgetsBindingObserver {
+  /// Constructor used for creating a new instance of [StreamChatCoreState].
+  StreamChatCoreState() {
+    usedPackage = Package.core;
+  }
+
   /// Initialized client used throughout the application.
   StreamChatClient get client => widget.client;
 

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:stream_chat/version.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -110,7 +111,12 @@ class StreamChatState extends State<StreamChat> {
                 onBackgroundEventReceived: widget.onBackgroundEventReceived,
                 backgroundKeepAlive: widget.backgroundKeepAlive,
                 connectivityStream: widget.connectivityStream,
-                child: widget.child ?? const Offstage(),
+                child: Builder(
+                  builder: (context) {
+                    usedPackage = Package.ui;
+                    return widget.child ?? const Offstage();
+                  },
+                ),
               ),
             );
           },
