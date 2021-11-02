@@ -118,9 +118,9 @@ void main() {
 
     setUpAll(() {
       // Fallback values
-      registerFallbackValue<Message>(FakeMessage());
-      registerFallbackValue<List<Message>>(<Message>[]);
-      registerFallbackValue<AttachmentFile>(FakeAttachmentFile());
+      registerFallbackValue(FakeMessage());
+      registerFallbackValue(<Message>[]);
+      registerFallbackValue(FakeAttachmentFile());
 
       // detached loggers
       when(() => client.detachedLogger(any())).thenAnswer((invocation) {
@@ -176,9 +176,9 @@ void main() {
 
     setUpAll(() {
       // Fallback values
-      registerFallbackValue<Message>(FakeMessage());
-      registerFallbackValue<AttachmentFile>(FakeAttachmentFile());
-      registerFallbackValue<Event>(FakeEvent());
+      registerFallbackValue(FakeMessage());
+      registerFallbackValue(FakeAttachmentFile());
+      registerFallbackValue(FakeEvent());
 
       // detached loggers
       when(() => client.detachedLogger(any())).thenAnswer((invocation) {

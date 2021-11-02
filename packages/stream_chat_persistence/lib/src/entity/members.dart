@@ -1,5 +1,5 @@
 // coverage:ignore-file
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 /// Represents a [Members] table in [MoorChatDatabase].
 @DataClassName('MemberEntity')

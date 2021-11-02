@@ -1,6 +1,6 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/messages.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
 
@@ -9,13 +9,13 @@ import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 part 'message_dao.g.dart';
 
 /// The Data Access Object for operations in [Messages] table.
-@UseDao(tables: [Messages, Users])
-class MessageDao extends DatabaseAccessor<MoorChatDatabase>
+@DriftAccessor(tables: [Messages, Users])
+class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     with _$MessageDaoMixin {
   /// Creates a new message dao instance
   MessageDao(this._db) : super(_db);
 
-  final MoorChatDatabase _db;
+  final DriftChatDatabase _db;
 
   $UsersTable get _users => alias(users, 'users');
 

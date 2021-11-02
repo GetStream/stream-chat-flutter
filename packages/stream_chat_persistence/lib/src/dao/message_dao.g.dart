@@ -6,7 +6,7 @@ part of 'message_dao.dart';
 // DaoGenerator
 // **************************************************************************
 
-mixin _$MessageDaoMixin on DatabaseAccessor<MoorChatDatabase> {
+mixin _$MessageDaoMixin on DatabaseAccessor<DriftChatDatabase> {
   $MessagesTable get messages => attachedDatabase.messages;
   $UsersTable get users => attachedDatabase.users;
 }

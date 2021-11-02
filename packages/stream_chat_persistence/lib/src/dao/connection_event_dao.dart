@@ -1,6 +1,6 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/connection_events.dart';
 
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
@@ -8,11 +8,11 @@ import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 part 'connection_event_dao.g.dart';
 
 /// The Data Access Object for operations in [ConnectionEvents] table.
-@UseDao(tables: [ConnectionEvents])
-class ConnectionEventDao extends DatabaseAccessor<MoorChatDatabase>
+@DriftAccessor(tables: [ConnectionEvents])
+class ConnectionEventDao extends DatabaseAccessor<DriftChatDatabase>
     with _$ConnectionEventDaoMixin {
   /// Creates a new connection event dao instance
-  ConnectionEventDao(MoorChatDatabase db) : super(db);
+  ConnectionEventDao(DriftChatDatabase db) : super(db);
 
   /// Get the latest stored connection event
   Future<Event?> get connectionEvent => select(connectionEvents)

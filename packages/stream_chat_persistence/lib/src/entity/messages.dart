@@ -1,5 +1,5 @@
 // coverage:ignore-file
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/converter/list_converter.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
 import 'package:stream_chat_persistence/src/converter/message_sending_status_converter.dart';

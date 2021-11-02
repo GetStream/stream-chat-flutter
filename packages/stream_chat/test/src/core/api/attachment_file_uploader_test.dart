@@ -15,7 +15,7 @@ void main() {
 
   setUp(() {
     fileUploader = StreamAttachmentFileUploader(client);
-    registerFallbackValue<MultipartFile>(FakeMultiPartFile());
+    registerFallbackValue(FakeMultiPartFile());
   });
 
   Response successResponse(String path, {Object? data}) => Response(
