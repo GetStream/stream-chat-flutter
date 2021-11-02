@@ -1,10 +1,10 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+/// Controller for storing and mutating a [Message] value.
 class MessageInputController extends ValueNotifier<Message> {
   /// Creates a controller for an editable text field.
   ///
@@ -17,7 +17,8 @@ class MessageInputController extends ValueNotifier<Message> {
   factory MessageInputController.fromText(String? text) =>
       MessageInputController._(Message(text: text));
 
-  /// Creates a controller for an editable text field from an initial [attachments].
+  /// Creates a controller for an editable text field from an initial
+  /// [attachments].
   factory MessageInputController.fromAttachments(
     List<Attachment> attachments,
   ) =>
@@ -55,23 +56,17 @@ class MessageInputController extends ValueNotifier<Message> {
   }
 
   ///
-  get baseOffset {
-    return textEditingController.selection.baseOffset;
-  }
+  int get baseOffset => textEditingController.selection.baseOffset;
 
   ///
-  get selectionStart {
-    return textEditingController.selection.start;
-  }
+  int get selectionStart => textEditingController.selection.start;
 
   set showInChannel(bool newValue) {
     value = value.copyWith(showInChannel: newValue);
   }
 
   ///
-  bool get showInChannel {
-    return value.showInChannel ?? false;
-  }
+  bool get showInChannel => value.showInChannel ?? false;
 
   ///
   List<Attachment> get attachments => value.attachments;
@@ -142,8 +137,9 @@ class MessageInputController extends ValueNotifier<Message> {
   /// After calling this function, [text], [attachments] and [mentionedUsers]
   /// all will be empty.
   ///
-  /// Calling this will notify all the listeners of this [MessageInputController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// Calling this will notify all the listeners of this
+  /// [MessageInputController] that they need to update
+  /// (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   void clear() {

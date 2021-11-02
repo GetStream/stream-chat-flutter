@@ -79,6 +79,11 @@ typedef ActionButtonBuilder = Widget Function(
   IconButton defaultActionButton,
 );
 
+typedef AttachmentsPickerBuilder = Widget Function(
+  BuildContext context,
+  List<Attachment> attachments,
+);
+
 /// Location for actions on the [MessageInput]
 enum ActionsLocation {
   /// Align to left
@@ -204,6 +209,7 @@ class MessageInput extends StatefulWidget {
     this.commandButtonBuilder,
     this.customOverlays = const [],
     this.mentionAllAppUsers = false,
+    this.attachmentsPickerBuilder,
   })  : assert(
           initialMessage == null || editMessage == null,
           "Can't provide both `initialMessage` and `editMessage`",
@@ -321,6 +327,9 @@ class MessageInput extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool mentionAllAppUsers;
+
+  /// Builds bottom sheet when attachment picker is opened.
+  final AttachmentsPickerBuilder? attachmentsPickerBuilder;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -524,7 +533,7 @@ class MessageInputState extends State<MessageInput> {
               widget.actionsLocation == ActionsLocation.right)
             _buildExpandActionsButton(context),
           if (widget.sendButtonLocation == SendButtonLocation.outside)
-            _animateSendButton(context),
+            _buildSendButton(context),
         ],
       );
 
@@ -588,27 +597,15 @@ class MessageInputState extends State<MessageInput> {
         ],
       );
 
-  Widget _animateSendButton(BuildContext context) {
-    late Widget sendButton;
-    if (_timeOut > 0) {
-      sendButton = _CountdownButton(count: _timeOut);
-    } else if (!_messageIsPresent &&
-        messageInputController.attachments.isEmpty) {
-      sendButton = widget.idleSendButton ?? _buildIdleSendButton(context);
-    } else {
-      sendButton = widget.activeSendButton != null
-          ? InkWell(
-              onTap: sendMessage,
-              child: widget.activeSendButton,
-            )
-          : _buildSendButton(context);
-    }
-
-    return AnimatedSwitcher(
-      duration: _streamChatTheme.messageInputTheme.sendAnimationDuration!,
-      child: sendButton,
-    );
-  }
+  Widget _buildSendButton(BuildContext context) => StreamMessageSendButton(
+        onSendMessage: sendMessage,
+        timeOut: _timeOut,
+        isIdle:
+            !_messageIsPresent && messageInputController.attachments.isEmpty,
+        isEditEnabled: widget.editMessage != null,
+        idleSendButton: widget.idleSendButton,
+        activeSendButton: widget.activeSendButton,
+      );
 
   Widget _buildExpandActionsButton(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
@@ -817,7 +814,7 @@ class MessageInputState extends State<MessageInput> {
               widget.actionsLocation == ActionsLocation.rightInside)
             _buildExpandActionsButton(context),
           if (widget.sendButtonLocation == SendButtonLocation.inside)
-            _animateSendButton(context),
+            _buildSendButton(context),
         ],
       ),
     ).merge(passedDecoration);
@@ -991,6 +988,13 @@ class MessageInputState extends State<MessageInput> {
         default:
           return Colors.black;
       }
+    }
+
+    if (_openFilePickerSection && widget.attachmentsPickerBuilder != null) {
+      return widget.attachmentsPickerBuilder!(
+        context,
+        messageInputController.attachments,
+      );
     }
 
     return AnimatedContainer(
@@ -1736,49 +1740,6 @@ class MessageInputState extends State<MessageInput> {
     });
   }
 
-  Widget _buildIdleSendButton(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: StreamSvgIcon(
-          assetName: _getIdleSendIcon(),
-          color: _messageInputTheme.sendButtonIdleColor,
-        ),
-      );
-
-  Widget _buildSendButton(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: IconButton(
-          onPressed: sendMessage,
-          padding: const EdgeInsets.all(0),
-          splashRadius: 24,
-          constraints: const BoxConstraints.tightFor(
-            height: 24,
-            width: 24,
-          ),
-          icon: StreamSvgIcon(
-            assetName: _getSendIcon(),
-            color: _messageInputTheme.sendButtonColor,
-          ),
-        ),
-      );
-
-  String _getIdleSendIcon() {
-    if (_commandEnabled) {
-      return 'Icon_search.svg';
-    } else {
-      return 'Icon_circle_right.svg';
-    }
-  }
-
-  String _getSendIcon() {
-    if (widget.editMessage != null) {
-      return 'Icon_circle_up.svg';
-    } else if (_commandEnabled) {
-      return 'Icon_search.svg';
-    } else {
-      return 'Icon_circle_up.svg';
-    }
-  }
-
   /// Sends the current message
   Future<void> sendMessage() async {
     var text = messageInputController.text.trim();
@@ -2079,31 +2040,4 @@ class _PickerWidgetState extends State<_PickerWidget> {
       },
     );
   }
-}
-
-class _CountdownButton extends StatelessWidget {
-  const _CountdownButton({
-    Key? key,
-    required this.count,
-  }) : super(key: key);
-
-  final int count;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: StreamChatTheme.of(context).colorTheme.disabled,
-            shape: BoxShape.circle,
-          ),
-          child: SizedBox(
-            height: 24,
-            width: 24,
-            child: Center(
-              child: Text('$count'),
-            ),
-          ),
-        ),
-      );
 }
