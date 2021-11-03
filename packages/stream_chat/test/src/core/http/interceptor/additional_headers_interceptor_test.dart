@@ -3,8 +3,6 @@ import 'package:stream_chat/src/core/http/interceptor/additional_headers_interce
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
-import '../../../mocks.dart';
-
 void main() {
   late AdditionalHeadersInterceptor additionalHeadersInterceptor;
 
