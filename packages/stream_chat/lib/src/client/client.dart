@@ -127,10 +127,12 @@ class StreamChatClient {
     _originalChatPersistenceClient = value;
   }
 
+  /// Default user agent for all requests
   static String defaultUserAgent = 'stream-chat-dart-client-'
       '${CurrentPlatform.name}-'
       '${PACKAGE_VERSION.split('+')[0]}';
 
+  /// Additionals headers for all requests
   static Map<String, Object?> additionalHeaders = {};
 
   ChatPersistenceClient? _originalChatPersistenceClient;
