@@ -115,7 +115,7 @@ class StreamChatState extends State<StreamChat> {
                   builder: (context) {
                     StreamChatClient.additionalHeaders = {
                       'X-Stream-Client':
-                          '${StreamChatClient.defaultUserAgent}-${Package.ui}',
+                          '${StreamChatClient.defaultUserAgent}-ui',
                     };
                     return widget.child ?? const Offstage();
                   },

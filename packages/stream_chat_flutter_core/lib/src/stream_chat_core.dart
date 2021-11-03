@@ -90,20 +90,18 @@ class StreamChatCore extends StatefulWidget {
 /// State class associated with [StreamChatCore].
 class StreamChatCoreState extends State<StreamChatCore>
     with WidgetsBindingObserver {
-  /// Constructor used for creating a new instance of [StreamChatCoreState].
-  StreamChatCoreState() {
-    StreamChatClient.additionalHeaders = {
-      'X-Stream-Client': '${StreamChatClient.defaultUserAgent}-${Package.ui}',
-    };
-  }
-
   /// Initialized client used throughout the application.
   StreamChatClient get client => widget.client;
 
   Timer? _disconnectTimer;
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    StreamChatClient.additionalHeaders = {
+      'X-Stream-Client': '${StreamChatClient.defaultUserAgent}-ui',
+    };
+    return widget.child;
+  }
 
   // coverage:ignore-start
 
