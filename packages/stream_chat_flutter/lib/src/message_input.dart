@@ -79,9 +79,11 @@ typedef ActionButtonBuilder = Widget Function(
   IconButton defaultActionButton,
 );
 
-typedef AttachmentsPickerBuilder = Widget Function(
+/// Widget builder for widgets that require may required data from the
+/// [MessageInputController]
+typedef MessageRelatedBuilder = Widget Function(
   BuildContext context,
-  List<Attachment> attachments,
+  MessageInputController messageInputController,
 );
 
 /// Location for actions on the [MessageInput]
@@ -210,6 +212,7 @@ class MessageInput extends StatefulWidget {
     this.customOverlays = const [],
     this.mentionAllAppUsers = false,
     this.attachmentsPickerBuilder,
+    this.sendButtonBuilder,
   })  : assert(
           initialMessage == null || editMessage == null,
           "Can't provide both `initialMessage` and `editMessage`",
@@ -329,7 +332,10 @@ class MessageInput extends StatefulWidget {
   final bool mentionAllAppUsers;
 
   /// Builds bottom sheet when attachment picker is opened.
-  final AttachmentsPickerBuilder? attachmentsPickerBuilder;
+  final MessageRelatedBuilder? attachmentsPickerBuilder;
+
+  /// Builder for creating send button
+  final MessageRelatedBuilder? sendButtonBuilder;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -597,15 +603,20 @@ class MessageInputState extends State<MessageInput> {
         ],
       );
 
-  Widget _buildSendButton(BuildContext context) => StreamMessageSendButton(
-        onSendMessage: sendMessage,
-        timeOut: _timeOut,
-        isIdle:
-            !_messageIsPresent && messageInputController.attachments.isEmpty,
-        isEditEnabled: widget.editMessage != null,
-        idleSendButton: widget.idleSendButton,
-        activeSendButton: widget.activeSendButton,
-      );
+  Widget _buildSendButton(BuildContext context) {
+    if (widget.sendButtonBuilder != null) {
+      return widget.sendButtonBuilder!(context, messageInputController);
+    }
+
+    return StreamMessageSendButton(
+      onSendMessage: sendMessage,
+      timeOut: _timeOut,
+      isIdle: !_messageIsPresent && messageInputController.attachments.isEmpty,
+      isEditEnabled: widget.editMessage != null,
+      idleSendButton: widget.idleSendButton,
+      activeSendButton: widget.activeSendButton,
+    );
+  }
 
   Widget _buildExpandActionsButton(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
@@ -993,7 +1004,7 @@ class MessageInputState extends State<MessageInput> {
     if (_openFilePickerSection && widget.attachmentsPickerBuilder != null) {
       return widget.attachmentsPickerBuilder!(
         context,
-        messageInputController.attachments,
+        messageInputController,
       );
     }
 
