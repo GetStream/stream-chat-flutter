@@ -29,6 +29,7 @@ export 'src/message_search_list_view.dart';
 export 'src/message_text.dart';
 export 'src/message_widget.dart';
 export 'src/mip/countdown_button.dart';
+export 'src/mip/stream_attachment_picker.dart';
 export 'src/mip/stream_message_send_button.dart';
 export 'src/mip/stream_message_text_field.dart';
 export 'src/option_list_tile.dart';
