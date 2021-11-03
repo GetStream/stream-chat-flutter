@@ -25,6 +25,7 @@ import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
@@ -125,6 +126,12 @@ class StreamChatClient {
   set chatPersistenceClient(ChatPersistenceClient? value) {
     _originalChatPersistenceClient = value;
   }
+
+  static String defaultUserAgent = 'stream-chat-dart-client-'
+      '${CurrentPlatform.name}-'
+      '${PACKAGE_VERSION.split('+')[0]}';
+
+  static Map<String, Object?> additionalHeaders = {};
 
   ChatPersistenceClient? _originalChatPersistenceClient;
 

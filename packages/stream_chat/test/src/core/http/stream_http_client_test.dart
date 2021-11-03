@@ -7,7 +7,7 @@ import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/interceptor/auth_interceptor.dart';
 import 'package:stream_chat/src/core/http/interceptor/connection_id_interceptor.dart';
 import 'package:stream_chat/src/core/http/interceptor/logging_interceptor.dart';
-import 'package:stream_chat/src/core/http/interceptor/user_agent_interceptor.dart';
+import 'package:stream_chat/src/core/http/interceptor/additional_headers_interceptor.dart';
 import 'package:stream_chat/src/core/http/stream_chat_dio_error.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
@@ -54,7 +54,9 @@ void main() {
     final client = StreamHttpClient(apiKey);
 
     expect(
-        client.httpClient.interceptors.whereType<UserAgentInterceptor>().length,
+        client.httpClient.interceptors
+            .whereType<AdditionalHeadersInterceptor>()
+            .length,
         1);
   });
 

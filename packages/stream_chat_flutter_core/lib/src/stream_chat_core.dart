@@ -92,7 +92,9 @@ class StreamChatCoreState extends State<StreamChatCore>
     with WidgetsBindingObserver {
   /// Constructor used for creating a new instance of [StreamChatCoreState].
   StreamChatCoreState() {
-    usedPackage = Package.core;
+    StreamChatClient.additionalHeaders = {
+      'X-Stream-Client': '${StreamChatClient.defaultUserAgent}-${Package.ui}',
+    };
   }
 
   /// Initialized client used throughout the application.
