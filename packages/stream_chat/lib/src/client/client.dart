@@ -44,10 +44,6 @@ final _levelEmojiMapper = {
   Level.SEVERE: '🚨',
 };
 
-final _userAgent = 'stream-chat-dart-client-'
-    '${CurrentPlatform.name}-'
-    '${PACKAGE_VERSION.split('+')[0]}';
-
 /// The official Dart client for Stream Chat,
 /// a service for building chat applications.
 /// This library can be used on any Dart project and on both mobile and web apps
@@ -86,7 +82,7 @@ class StreamChatClient {
       location: location,
       connectTimeout: connectTimeout,
       receiveTimeout: receiveTimeout,
-      headers: {'X-Stream-Client': _userAgent},
+      headers: {'X-Stream-Client': defaultUserAgent},
     );
 
     _chatApi = chatApi ??
@@ -106,7 +102,7 @@ class StreamChatClient {
           tokenManager: _tokenManager,
           handler: handleEvent,
           logger: detachedLogger('🔌'),
-          queryParameters: {'X-Stream-Client': _userAgent},
+          queryParameters: {'X-Stream-Client': defaultUserAgent},
         );
 
     _retryPolicy = retryPolicy ??
@@ -130,6 +126,14 @@ class StreamChatClient {
   set chatPersistenceClient(ChatPersistenceClient? value) {
     _originalChatPersistenceClient = value;
   }
+
+  /// Default user agent for all requests
+  static String defaultUserAgent = 'stream-chat-dart-client-'
+      '${CurrentPlatform.name}-'
+      '${PACKAGE_VERSION.split('+')[0]}';
+
+  /// Additionals headers for all requests
+  static Map<String, Object?> additionalHeaders = {};
 
   ChatPersistenceClient? _originalChatPersistenceClient;
 
