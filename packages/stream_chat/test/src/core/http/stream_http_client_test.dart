@@ -7,6 +7,7 @@ import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/interceptor/auth_interceptor.dart';
 import 'package:stream_chat/src/core/http/interceptor/connection_id_interceptor.dart';
 import 'package:stream_chat/src/core/http/interceptor/logging_interceptor.dart';
+import 'package:stream_chat/src/core/http/interceptor/user_agent_interceptor.dart';
 import 'package:stream_chat/src/core/http/stream_chat_dio_error.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
@@ -48,12 +49,21 @@ void main() {
     return dioError;
   }
 
+  test('UserAgentInterceptor should be added', () {
+    const apiKey = 'api-key';
+    final client = StreamHttpClient(apiKey);
+
+    expect(
+        client.httpClient.interceptors.whereType<UserAgentInterceptor>().length,
+        1);
+  });
+
   test('AuthInterceptor should be added if tokenManager is provided', () {
     const apiKey = 'api-key';
     final client = StreamHttpClient(apiKey, tokenManager: TokenManager());
 
-    expect(client.httpClient.interceptors.length, 1);
-    expect(client.httpClient.interceptors.first, isA<AuthInterceptor>());
+    expect(
+        client.httpClient.interceptors.whereType<AuthInterceptor>().length, 1);
   });
 
   test(
@@ -65,10 +75,11 @@ void main() {
         connectionIdManager: ConnectionIdManager(),
       );
 
-      expect(client.httpClient.interceptors.length, 1);
       expect(
-        client.httpClient.interceptors.first,
-        isA<ConnectionIdInterceptor>(),
+        client.httpClient.interceptors
+            .whereType<ConnectionIdInterceptor>()
+            .length,
+        1,
       );
     },
   );
@@ -80,10 +91,9 @@ void main() {
       logger: Logger('test-logger'),
     );
 
-    expect(client.httpClient.interceptors.length, 1);
     expect(
-      client.httpClient.interceptors.first,
-      isA<LoggingInterceptor>(),
+      client.httpClient.interceptors.whereType<LoggingInterceptor>().length,
+      1,
     );
   });
 
