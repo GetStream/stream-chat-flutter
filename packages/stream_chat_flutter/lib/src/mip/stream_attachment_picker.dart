@@ -36,6 +36,8 @@ class StreamAttachmentPicker extends StatefulWidget {
   /// do not set it if you're using our default CDN
   final int maxAttachmentSize;
 
+  final List<DefaultAttachmentTypes> allowedAttachmentTypes;
+
   const StreamAttachmentPicker({
     Key? key,
     required this.messageInputController,
@@ -49,6 +51,11 @@ class StreamAttachmentPicker extends StatefulWidget {
     this.compressedVideoFrameRate = 30,
     this.onChangeInputState,
     this.onError,
+    this.allowedAttachmentTypes = const [
+      DefaultAttachmentTypes.image,
+      DefaultAttachmentTypes.file,
+      DefaultAttachmentTypes.video,
+    ],
   }) : super(key: key);
 
   @override
@@ -125,62 +132,73 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
               children: [
                 Row(
                   children: [
-                    IconButton(
-                      icon: StreamSvgIcon.pictures(
-                        color: _getIconColor(0),
+                    if (widget.allowedAttachmentTypes
+                        .contains(DefaultAttachmentTypes.image))
+                      IconButton(
+                        icon: StreamSvgIcon.pictures(
+                          color: _getIconColor(0),
+                        ),
+                        onPressed: _attachmentContainsFile &&
+                                messageInputController.attachments.isNotEmpty
+                            ? null
+                            : () {
+                                setState(() {
+                                  _filePickerIndex = 0;
+                                });
+                              },
                       ),
-                      onPressed: _attachmentContainsFile &&
-                              messageInputController.attachments.isNotEmpty
-                          ? null
-                          : () {
-                              setState(() {
-                                _filePickerIndex = 0;
-                              });
-                            },
-                    ),
-                    IconButton(
-                      iconSize: 32,
-                      icon: StreamSvgIcon.files(
-                        color: _getIconColor(1),
+                    if (widget.allowedAttachmentTypes
+                        .contains(DefaultAttachmentTypes.file))
+                      IconButton(
+                        iconSize: 32,
+                        icon: StreamSvgIcon.files(
+                          color: _getIconColor(1),
+                        ),
+                        onPressed: !_attachmentContainsFile &&
+                                messageInputController.attachments.isNotEmpty
+                            ? null
+                            : () {
+                                widget
+                                    .onFilePicked(DefaultAttachmentTypes.file);
+                              },
                       ),
-                      onPressed: !_attachmentContainsFile &&
-                              messageInputController.attachments.isNotEmpty
-                          ? null
-                          : () {
-                              widget.onFilePicked(DefaultAttachmentTypes.file);
-                            },
-                    ),
-                    IconButton(
-                      icon: StreamSvgIcon.camera(
-                        color: _getIconColor(2),
+                    if (widget.allowedAttachmentTypes
+                        .contains(DefaultAttachmentTypes.image))
+                      IconButton(
+                        icon: StreamSvgIcon.camera(
+                          color: _getIconColor(2),
+                        ),
+                        onPressed: attachmentLimitCrossed ||
+                                (_attachmentContainsFile &&
+                                    messageInputController
+                                        .attachments.isNotEmpty)
+                            ? null
+                            : () {
+                                widget.onFilePicked(
+                                  DefaultAttachmentTypes.image,
+                                  camera: true,
+                                );
+                              },
                       ),
-                      onPressed: attachmentLimitCrossed ||
-                              (_attachmentContainsFile &&
-                                  messageInputController.attachments.isNotEmpty)
-                          ? null
-                          : () {
-                              widget.onFilePicked(
-                                DefaultAttachmentTypes.image,
-                                camera: true,
-                              );
-                            },
-                    ),
-                    IconButton(
-                      padding: const EdgeInsets.all(0),
-                      icon: StreamSvgIcon.record(
-                        color: _getIconColor(3),
+                    if (widget.allowedAttachmentTypes
+                        .contains(DefaultAttachmentTypes.video))
+                      IconButton(
+                        padding: const EdgeInsets.all(0),
+                        icon: StreamSvgIcon.record(
+                          color: _getIconColor(3),
+                        ),
+                        onPressed: attachmentLimitCrossed ||
+                                (_attachmentContainsFile &&
+                                    messageInputController
+                                        .attachments.isNotEmpty)
+                            ? null
+                            : () {
+                                widget.onFilePicked(
+                                  DefaultAttachmentTypes.video,
+                                  camera: true,
+                                );
+                              },
                       ),
-                      onPressed: attachmentLimitCrossed ||
-                              (_attachmentContainsFile &&
-                                  messageInputController.attachments.isNotEmpty)
-                          ? null
-                          : () {
-                              widget.onFilePicked(
-                                DefaultAttachmentTypes.video,
-                                camera: true,
-                              );
-                            },
-                    ),
                   ],
                 ),
                 DecoratedBox(
@@ -205,7 +223,11 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                     ),
                   ),
                 ),
-                if (widget.isOpen)
+                if (widget.isOpen &&
+                    (widget.allowedAttachmentTypes
+                            .contains(DefaultAttachmentTypes.image) ||
+                        (widget.allowedAttachmentTypes
+                            .contains(DefaultAttachmentTypes.file))))
                   Expanded(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
@@ -229,6 +251,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                             _addAssetAttachment(media);
                           }
                         },
+                        allowedAttachmentTypes: widget.allowedAttachmentTypes,
                       ),
                     ),
                   ),
@@ -326,6 +349,7 @@ class _PickerWidget extends StatefulWidget {
     required this.onAddMoreFilesClick,
     required this.onMediaSelected,
     required this.streamChatTheme,
+    required this.allowedAttachmentTypes,
   }) : super(key: key);
 
   final int filePickerIndex;
@@ -334,6 +358,7 @@ class _PickerWidget extends StatefulWidget {
   final void Function(DefaultAttachmentTypes) onAddMoreFilesClick;
   final void Function(AssetEntity) onMediaSelected;
   final StreamChatThemeData streamChatTheme;
+  final List<DefaultAttachmentTypes> allowedAttachmentTypes;
 
   @override
   _PickerWidgetState createState() => _PickerWidgetState();
@@ -361,7 +386,9 @@ class _PickerWidgetState extends State<_PickerWidget> {
         }
 
         if (snapshot.data!) {
-          if (widget.containsFile) {
+          if (widget.containsFile ||
+              !widget.allowedAttachmentTypes
+                  .contains(DefaultAttachmentTypes.image)) {
             return GestureDetector(
               onTap: () {
                 widget.onAddMoreFilesClick(DefaultAttachmentTypes.file);
