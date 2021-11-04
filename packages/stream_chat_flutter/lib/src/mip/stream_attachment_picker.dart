@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
@@ -14,6 +13,11 @@ typedef FilePickerCallback = void Function(
   DefaultAttachmentTypes fileType, {
   bool camera,
 });
+
+typedef CustomAttachmentIconBuilder = Widget Function(
+  BuildContext context,
+  bool active,
+);
 
 class StreamAttachmentPicker extends StatefulWidget {
   final bool isOpen;
@@ -38,6 +42,8 @@ class StreamAttachmentPicker extends StatefulWidget {
 
   final List<DefaultAttachmentTypes> allowedAttachmentTypes;
 
+  final List<CustomAttachmentType> customAttachmentTypes;
+
   const StreamAttachmentPicker({
     Key? key,
     required this.messageInputController,
@@ -56,6 +62,7 @@ class StreamAttachmentPicker extends StatefulWidget {
       DefaultAttachmentTypes.file,
       DefaultAttachmentTypes.video,
     ],
+    this.customAttachmentTypes = const [],
   }) : super(key: key);
 
   @override
@@ -70,8 +77,14 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
     var _streamChatTheme = StreamChatTheme.of(context);
     var messageInputController = widget.messageInputController;
 
+    final _attachmentContainsImage =
+        messageInputController.attachments.any((it) => it.type == 'image');
+
     final _attachmentContainsFile =
         messageInputController.attachments.any((it) => it.type == 'file');
+
+    final _attachmentContainsVideo =
+        messageInputController.attachments.any((it) => it.type == 'video');
 
     final attachmentLimitCrossed =
         messageInputController.attachments.length >= widget.attachmentLimit;
@@ -80,12 +93,13 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
       final streamChatThemeData = _streamChatTheme;
       switch (index) {
         case 0:
-          return messageInputController.attachments.isEmpty
+          return _filePickerIndex == 0 || _attachmentContainsImage
               ? streamChatThemeData.colorTheme.accentPrimary
-              : (!_attachmentContainsFile
+              : (_attachmentContainsImage
                   ? streamChatThemeData.colorTheme.accentPrimary
-                  : streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.2));
+                  : streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(
+                      messageInputController.attachments.isEmpty ? 0.5 : 0.2,
+                    ));
         case 1:
           return _attachmentContainsFile
               ? streamChatThemeData.colorTheme.accentPrimary
@@ -95,7 +109,8 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                   : streamChatThemeData.colorTheme.textHighEmphasis
                       .withOpacity(0.2));
         case 2:
-          return attachmentLimitCrossed
+          return widget.messageInputController.attachments.isNotEmpty &&
+                  (!_attachmentContainsImage || attachmentLimitCrossed)
               ? streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(0.2)
               : _attachmentContainsFile &&
                       messageInputController.attachments.isNotEmpty
@@ -104,7 +119,8 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                   : streamChatThemeData.colorTheme.textHighEmphasis
                       .withOpacity(0.5);
         case 3:
-          return attachmentLimitCrossed
+          return widget.messageInputController.attachments.isNotEmpty &&
+                  (!_attachmentContainsVideo || attachmentLimitCrossed)
               ? streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(0.2)
               : _attachmentContainsFile &&
                       messageInputController.attachments.isNotEmpty
@@ -138,14 +154,15 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                         icon: StreamSvgIcon.pictures(
                           color: _getIconColor(0),
                         ),
-                        onPressed: _attachmentContainsFile &&
-                                messageInputController.attachments.isNotEmpty
-                            ? null
-                            : () {
-                                setState(() {
-                                  _filePickerIndex = 0;
-                                });
-                              },
+                        onPressed:
+                            messageInputController.attachments.isNotEmpty &&
+                                    !_attachmentContainsImage
+                                ? null
+                                : () {
+                                    setState(() {
+                                      _filePickerIndex = 0;
+                                    });
+                                  },
                       ),
                     if (widget.allowedAttachmentTypes
                         .contains(DefaultAttachmentTypes.file))
@@ -154,8 +171,9 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                         icon: StreamSvgIcon.files(
                           color: _getIconColor(1),
                         ),
-                        onPressed: !_attachmentContainsFile &&
-                                messageInputController.attachments.isNotEmpty
+                        onPressed: messageInputController
+                                    .attachments.isNotEmpty &&
+                                !_attachmentContainsFile
                             ? null
                             : () {
                                 widget
@@ -169,9 +187,9 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                           color: _getIconColor(2),
                         ),
                         onPressed: attachmentLimitCrossed ||
-                                (_attachmentContainsFile &&
-                                    messageInputController
-                                        .attachments.isNotEmpty)
+                                (messageInputController
+                                        .attachments.isNotEmpty &&
+                                    !_attachmentContainsVideo)
                             ? null
                             : () {
                                 widget.onFilePicked(
@@ -188,9 +206,9 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                           color: _getIconColor(3),
                         ),
                         onPressed: attachmentLimitCrossed ||
-                                (_attachmentContainsFile &&
-                                    messageInputController
-                                        .attachments.isNotEmpty)
+                                (messageInputController
+                                        .attachments.isNotEmpty &&
+                                    !_attachmentContainsVideo)
                             ? null
                             : () {
                                 widget.onFilePicked(
@@ -198,6 +216,26 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                                   camera: true,
                                 );
                               },
+                      ),
+                    for (int i = 0;
+                        i < widget.customAttachmentTypes.length;
+                        i++)
+                      IconButton(
+                        onPressed: () {
+                          if (messageInputController.attachments.isNotEmpty) {
+                            if (!messageInputController.attachments.any((e) =>
+                                e.type ==
+                                widget.customAttachmentTypes[i].type)) {
+                              return;
+                            }
+                          }
+
+                          setState(() {
+                            _filePickerIndex = i + 1;
+                          });
+                        },
+                        icon: widget.customAttachmentTypes[i]
+                            .iconBuilder(context, _filePickerIndex == i + 1),
                       ),
                   ],
                 ),
@@ -252,6 +290,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                           }
                         },
                         allowedAttachmentTypes: widget.allowedAttachmentTypes,
+                        customAttachmentTypes: widget.customAttachmentTypes,
                       ),
                     ),
                   ),
@@ -350,6 +389,7 @@ class _PickerWidget extends StatefulWidget {
     required this.onMediaSelected,
     required this.streamChatTheme,
     required this.allowedAttachmentTypes,
+    required this.customAttachmentTypes,
   }) : super(key: key);
 
   final int filePickerIndex;
@@ -359,6 +399,7 @@ class _PickerWidget extends StatefulWidget {
   final void Function(AssetEntity) onMediaSelected;
   final StreamChatThemeData streamChatTheme;
   final List<DefaultAttachmentTypes> allowedAttachmentTypes;
+  final List<CustomAttachmentType> customAttachmentTypes;
 
   @override
   _PickerWidgetState createState() => _PickerWidgetState();
@@ -376,7 +417,8 @@ class _PickerWidgetState extends State<_PickerWidget> {
   @override
   Widget build(BuildContext context) {
     if (widget.filePickerIndex != 0) {
-      return const Offstage();
+      return widget.customAttachmentTypes[widget.filePickerIndex - 1]
+          .pickerBuilder(context);
     }
     return FutureBuilder<bool>(
       future: requestPermission,
@@ -452,4 +494,16 @@ class _PickerWidgetState extends State<_PickerWidget> {
       },
     );
   }
+}
+
+class CustomAttachmentType {
+  String type;
+  CustomAttachmentIconBuilder iconBuilder;
+  WidgetBuilder pickerBuilder;
+
+  CustomAttachmentType({
+    required this.type,
+    required this.iconBuilder,
+    required this.pickerBuilder,
+  });
 }
