@@ -1718,7 +1718,7 @@ class MessageInputState extends State<MessageInput> {
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
     _messageInputTheme = MessageInputTheme.of(context);
-    if (widget.editMessage == null) _startSlowMode();
+    if (widget.editMessage == null && _timeOut <= 0) _startSlowMode();
 
     if ((widget.editMessage != null || widget.initialMessage != null) &&
         !_initialized) {
