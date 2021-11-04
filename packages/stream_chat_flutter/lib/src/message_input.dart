@@ -1538,7 +1538,9 @@ class MessageInputState extends State<MessageInput> {
   /// Sends the current message
   Future<void> sendMessage() async {
     var text = messageInputController.text.trim();
-    if (text.isEmpty && messageInputController.attachments.isEmpty) {
+    var attachments = messageInputController.attachments;
+
+    if (text.isEmpty && attachments.isEmpty) {
       return;
     }
 
@@ -1561,7 +1563,7 @@ class MessageInputState extends State<MessageInput> {
     if (widget.editMessage != null) {
       message = widget.editMessage!.copyWith(
         text: text,
-        attachments: messageInputController.attachments,
+        attachments: attachments,
         mentionedUsers: messageInputController.mentionedUsers
             .where((u) => text.contains('@${u.name}'))
             .toList(),
@@ -1570,7 +1572,7 @@ class MessageInputState extends State<MessageInput> {
       message = (widget.initialMessage ?? Message()).copyWith(
         parentId: widget.parentMessage?.id,
         text: text,
-        attachments: messageInputController.attachments,
+        attachments: attachments,
         mentionedUsers: messageInputController.mentionedUsers
             .where((u) => text.contains('@${u.name}'))
             .toList(),
