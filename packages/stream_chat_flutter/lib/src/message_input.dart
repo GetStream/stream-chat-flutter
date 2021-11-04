@@ -1538,7 +1538,7 @@ class MessageInputState extends State<MessageInput> {
   /// Sends the current message
   Future<void> sendMessage() async {
     var text = messageInputController.text.trim();
-    var attachments = messageInputController.attachments;
+    final attachments = messageInputController.attachments;
 
     if (text.isEmpty && attachments.isEmpty) {
       return;
