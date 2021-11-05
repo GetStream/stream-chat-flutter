@@ -1,3 +1,9 @@
+## 3.2.1
+
+🐞 Fixed
+
+- Fixed `StreamChatClient.markAllRead` api call
+
 ## 3.2.0
 
 🐞 Fixed
