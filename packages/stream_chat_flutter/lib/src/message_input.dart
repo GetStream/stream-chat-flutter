@@ -84,6 +84,13 @@ typedef MessageRelatedBuilder = Widget Function(
   MessageInputController messageInputController,
 );
 
+/// Widget builder for a custom attachment picker.
+typedef AttachmentsPickerBuilder = Widget Function(
+  BuildContext context,
+  MessageInputController messageInputController,
+  StreamAttachmentPicker defaultPicker,
+);
+
 /// Location for actions on the [MessageInput]
 enum ActionsLocation {
   /// Align to left
@@ -330,7 +337,7 @@ class MessageInput extends StatefulWidget {
   final bool mentionAllAppUsers;
 
   /// Builds bottom sheet when attachment picker is opened.
-  final MessageRelatedBuilder? attachmentsPickerBuilder;
+  final AttachmentsPickerBuilder? attachmentsPickerBuilder;
 
   /// Builder for creating send button
   final MessageRelatedBuilder? sendButtonBuilder;
@@ -951,14 +958,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildFilePickerSection() {
-    if (_openFilePickerSection && widget.attachmentsPickerBuilder != null) {
-      return widget.attachmentsPickerBuilder!(
-        context,
-        messageInputController,
-      );
-    }
-
-    return StreamAttachmentPicker(
+    final picker = StreamAttachmentPicker(
       messageInputController: messageInputController,
       onFilePicked: pickFile,
       isOpen: _openFilePickerSection,
@@ -975,6 +975,16 @@ class MessageInputState extends State<MessageInput> {
       },
       onError: _showErrorAlert,
     );
+
+    if (_openFilePickerSection && widget.attachmentsPickerBuilder != null) {
+      return widget.attachmentsPickerBuilder!(
+        context,
+        messageInputController,
+        picker,
+      );
+    }
+
+    return picker;
   }
 
   Widget _buildMentionsOverlayEntry() {

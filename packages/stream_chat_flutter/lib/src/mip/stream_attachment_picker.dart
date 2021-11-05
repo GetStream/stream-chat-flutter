@@ -9,16 +9,19 @@ import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_compress/video_compress.dart';
 
+/// Callback for when a file has to be picked.
 typedef FilePickerCallback = void Function(
   DefaultAttachmentTypes fileType, {
   bool camera,
 });
 
+/// Callback for building an icon for a custom attachment type.
 typedef CustomAttachmentIconBuilder = Widget Function(
   BuildContext context,
   bool active,
 );
 
+///
 class StreamAttachmentPicker extends StatefulWidget {
   final bool isOpen;
   final double pickerSize;
@@ -64,6 +67,45 @@ class StreamAttachmentPicker extends StatefulWidget {
     ],
     this.customAttachmentTypes = const [],
   }) : super(key: key);
+
+  StreamAttachmentPicker copyWith({
+    Key? key,
+    MessageInputController? messageInputController,
+    FilePickerCallback? onFilePicked,
+    bool? isOpen,
+    double? pickerSize,
+    int? attachmentLimit,
+    AttachmentLimitExceedListener? onAttachmentLimitExceeded,
+    int? maxAttachmentSize,
+    VideoQuality? compressedVideoQuality,
+    int? compressedVideoFrameRate,
+    ValueChanged<bool>? onChangeInputState,
+    ValueChanged<String>? onError,
+    List<DefaultAttachmentTypes>? allowedAttachmentTypes,
+    List<CustomAttachmentType>? customAttachmentTypes = const [],
+  }) =>
+      StreamAttachmentPicker(
+        key: key ?? this.key,
+        messageInputController:
+            messageInputController ?? this.messageInputController,
+        onFilePicked: onFilePicked ?? this.onFilePicked,
+        isOpen: isOpen ?? this.isOpen,
+        pickerSize: pickerSize ?? this.pickerSize,
+        attachmentLimit: attachmentLimit ?? this.attachmentLimit,
+        onAttachmentLimitExceeded:
+            onAttachmentLimitExceeded ?? this.onAttachmentLimitExceeded,
+        maxAttachmentSize: maxAttachmentSize ?? this.maxAttachmentSize,
+        compressedVideoQuality:
+            compressedVideoQuality ?? this.compressedVideoQuality,
+        compressedVideoFrameRate:
+            compressedVideoFrameRate ?? this.compressedVideoFrameRate,
+        onChangeInputState: onChangeInputState ?? this.onChangeInputState,
+        onError: onError ?? this.onError,
+        allowedAttachmentTypes:
+            allowedAttachmentTypes ?? this.allowedAttachmentTypes,
+        customAttachmentTypes:
+            customAttachmentTypes ?? this.customAttachmentTypes,
+      );
 
   @override
   State<StreamAttachmentPicker> createState() => _StreamAttachmentPickerState();
