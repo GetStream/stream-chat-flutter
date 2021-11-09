@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Constructs a modal with actions for a message
 class MessageActionsModal extends StatefulWidget {
@@ -18,13 +19,17 @@ class MessageActionsModal extends StatefulWidget {
     required this.message,
     required this.messageWidget,
     required this.messageTheme,
+    this.showReactions,
+    this.showDeleteMessage,
+    this.showEditMessage,
     this.onReplyTap,
     this.onThreadReplyTap,
     this.showCopyMessage = true,
     this.showReplyMessage = true,
     this.showResendMessage = true,
-    this.showThreadReplyMessage = true,
+    this.showThreadReplyMessage,
     this.showFlagButton = true,
+    this.showPinButton,
     this.editMessageInputBuilder,
     this.reverse = false,
     this.customActions = const [],
@@ -49,11 +54,20 @@ class MessageActionsModal extends StatefulWidget {
   /// [MessageThemeData] for message
   final MessageThemeData messageTheme;
 
+  /// Flag for showing reactions
+  final bool? showReactions;
+
   /// Callback when copy is tapped
   final OnMessageTap? onCopyTap;
 
+  /// Callback when delete is tapped
+  final bool? showDeleteMessage;
+
   /// Flag for showing copy action
   final bool showCopyMessage;
+
+  /// Flag for showing edit action
+  final bool? showEditMessage;
 
   /// Flag for showing resend action
   final bool showResendMessage;
@@ -62,10 +76,13 @@ class MessageActionsModal extends StatefulWidget {
   final bool showReplyMessage;
 
   /// Flag for showing thread reply action
-  final bool showThreadReplyMessage;
+  final bool? showThreadReplyMessage;
 
   /// Flag for showing flag action
   final bool showFlagButton;
+
+  /// Flag for showing pin action
+  final bool? showPinButton;
 
   /// Flag for reversing message
   final bool reverse;
@@ -80,6 +97,7 @@ class MessageActionsModal extends StatefulWidget {
 class _MessageActionsModalState extends State<MessageActionsModal> {
   bool _showActions = true;
   late List<String> _userPermissions;
+  late bool _isMyMessage;
 
   @override
   Widget build(BuildContext context) => _showMessageOptionsModal();
@@ -114,6 +132,23 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final shiftFactor =
         numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
 
+    final hasEditPermission =
+        _userPermissions.contains(
+          PermissionType.updateAnyMessage,
+        ) ||
+        _userPermissions.contains(PermissionType.updateOwnMessage);
+
+    final hasDeletePermission =
+        _userPermissions.contains(
+          PermissionType.deleteAnyMessage,
+        ) ||
+        _userPermissions.contains(PermissionType.deleteOwnMessage);
+
+    final hasReactionPermission =
+        _userPermissions.contains(PermissionType.sendReaction);
+
+    print(widget.showReactions);
+
     final child = Center(
       child: SingleChildScrollView(
         child: Padding(
@@ -123,7 +158,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                 ? CrossAxisAlignment.end
                 : CrossAxisAlignment.start,
             children: <Widget>[
-              if (_userPermissions.contains(PermissionType.sendReaction) &&
+              if ((widget.showReactions ?? hasReactionPermission) &&
                   (widget.message.status == MessageSendingStatus.sent))
                 Align(
                   alignment: Alignment(
@@ -163,23 +198,26 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                         if (widget.showReplyMessage &&
                             widget.message.status == MessageSendingStatus.sent)
                           _buildReplyButton(context),
-                        if (widget.showThreadReplyMessage &&
+                        if ((widget.showThreadReplyMessage ??
+                                _userPermissions
+                                    .contains(PermissionType.sendReply)) &&
                             (widget.message.status ==
                                 MessageSendingStatus.sent) &&
                             widget.message.parentId == null)
                           _buildThreadReplyButton(context),
                         if (widget.showResendMessage)
                           _buildResendMessage(context),
-                        if (_userPermissions
-                            .contains(PermissionType.updateOwnMessage))
+                        if (widget.showEditMessage ??
+                            _isMyMessage && hasEditPermission)
                           _buildEditMessage(context),
                         if (widget.showCopyMessage) _buildCopyButton(context),
                         if (widget.showFlagButton) _buildFlagButton(context),
-                        if (_userPermissions
-                            .contains(PermissionType.pinMessage))
+                        if (widget.showPinButton ??
+                            _userPermissions
+                                .contains(PermissionType.pinMessage))
                           _buildPinButton(context),
-                        if (_userPermissions
-                            .contains(PermissionType.deleteOwnMessage))
+                        if (widget.showDeleteMessage ??
+                            _isMyMessage && hasDeletePermission)
                           _buildDeleteButton(context),
                         ...widget.customActions
                             .map((action) => _buildCustomAction(
@@ -647,6 +685,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     _userPermissions =
         newStreamChannel.channel.state?.channelState.channel?.ownCapabilities ??
             [];
+    _isMyMessage = widget.message.user!.id ==
+        newStreamChannel.channel.client.state.currentUser!.id;
     super.didChangeDependencies();
   }
 }
