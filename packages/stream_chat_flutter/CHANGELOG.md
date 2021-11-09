@@ -1,3 +1,9 @@
+## Upcoming
+
+🛑️ Breaking Changes from `3.2.0`
+
+- `pinPermissions` is no longer needed in `MessageListView`.
+
 ## 3.2.0
 
 - Updated Dart SDK constraints to `>=2.14.0 <3.0.0`

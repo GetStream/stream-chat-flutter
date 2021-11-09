@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- `ChannelModel` now supplies individual user capabilities.
+
 ## 3.2.0
 
 🐞 Fixed
