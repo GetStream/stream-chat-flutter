@@ -132,14 +132,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final shiftFactor =
         numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
 
-    final hasEditPermission =
-        _userPermissions.contains(
+    final hasEditPermission = _userPermissions.contains(
           PermissionType.updateAnyMessage,
         ) ||
         _userPermissions.contains(PermissionType.updateOwnMessage);
 
-    final hasDeletePermission =
-        _userPermissions.contains(
+    final hasDeletePermission = _userPermissions.contains(
           PermissionType.deleteAnyMessage,
         ) ||
         _userPermissions.contains(PermissionType.deleteOwnMessage);
