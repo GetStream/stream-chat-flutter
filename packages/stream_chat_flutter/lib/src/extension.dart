@@ -46,7 +46,7 @@ extension IterableX<T> on Iterable<T> {
 extension PlatformFileX on PlatformFile {
   /// Converts the [PlatformFile] into [AttachmentFile]
   AttachmentFile get toAttachmentFile => AttachmentFile(
-        path: path,
+        path: kIsWeb ? null : path,
         name: name,
         bytes: bytes,
         size: size,
