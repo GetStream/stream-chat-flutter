@@ -1104,7 +1104,6 @@ class _MessageWidgetState extends State<MessageWidget>
               Clipboard.setData(ClipboardData(text: message.text)),
           messageTheme: widget.messageTheme,
           reverse: widget.reverse,
-          showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
           message: widget.message,
           editMessageInputBuilder: widget.editMessageInputBuilder,
           onReplyTap: widget.onReplyTap,
@@ -1114,11 +1113,6 @@ class _MessageWidgetState extends State<MessageWidget>
           showCopyMessage: widget.showCopyMessage &&
               !isFailedState &&
               widget.message.text?.trim().isNotEmpty == true,
-          showEditMessage: widget.showEditMessage &&
-              !isDeleteFailed &&
-              !widget.message.attachments
-                  .any((element) => element.type == 'giphy'),
-          showReactions: widget.showReactions,
           showReplyMessage: widget.showReplyMessage &&
               !isFailedState &&
               widget.onReplyTap != null,
@@ -1126,7 +1120,6 @@ class _MessageWidgetState extends State<MessageWidget>
               !isFailedState &&
               widget.onThreadTap != null,
           showFlagButton: widget.showFlagButton,
-          showPinButton: widget.showPinButton,
           customActions: widget.customActions,
         ),
       ),

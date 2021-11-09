@@ -78,9 +78,7 @@ void main() {
             client: client,
             child: SizedBox(
               child: MessageActionsModal(
-                showEditMessage: false,
                 showCopyMessage: false,
-                showDeleteMessage: false,
                 showReplyMessage: false,
                 showThreadReplyMessage: false,
                 message: Message(

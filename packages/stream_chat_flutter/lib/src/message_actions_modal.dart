@@ -18,9 +18,6 @@ class MessageActionsModal extends StatefulWidget {
     required this.message,
     required this.messageWidget,
     required this.messageTheme,
-    this.showReactions = true,
-    this.showDeleteMessage = true,
-    this.showEditMessage = true,
     this.onReplyTap,
     this.onThreadReplyTap,
     this.showCopyMessage = true,
@@ -28,7 +25,6 @@ class MessageActionsModal extends StatefulWidget {
     this.showResendMessage = true,
     this.showThreadReplyMessage = true,
     this.showFlagButton = true,
-    this.showPinButton = true,
     this.editMessageInputBuilder,
     this.reverse = false,
     this.customActions = const [],
@@ -53,20 +49,11 @@ class MessageActionsModal extends StatefulWidget {
   /// [MessageThemeData] for message
   final MessageThemeData messageTheme;
 
-  /// Flag for showing reactions
-  final bool showReactions;
-
   /// Callback when copy is tapped
   final OnMessageTap? onCopyTap;
 
-  /// Callback when delete is tapped
-  final bool showDeleteMessage;
-
   /// Flag for showing copy action
   final bool showCopyMessage;
-
-  /// Flag for showing edit action
-  final bool showEditMessage;
 
   /// Flag for showing resend action
   final bool showResendMessage;
@@ -80,9 +67,6 @@ class MessageActionsModal extends StatefulWidget {
   /// Flag for showing flag action
   final bool showFlagButton;
 
-  /// Flag for showing pin action
-  final bool showPinButton;
-
   /// Flag for reversing message
   final bool reverse;
 
@@ -95,6 +79,7 @@ class MessageActionsModal extends StatefulWidget {
 
 class _MessageActionsModalState extends State<MessageActionsModal> {
   bool _showActions = true;
+  late List<String> _userPermissions;
 
   @override
   Widget build(BuildContext context) => _showMessageOptionsModal();
@@ -138,7 +123,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                 ? CrossAxisAlignment.end
                 : CrossAxisAlignment.start,
             children: <Widget>[
-              if (widget.showReactions &&
+              if (_userPermissions.contains(PermissionType.sendReaction) &&
                   (widget.message.status == MessageSendingStatus.sent))
                 Align(
                   alignment: Alignment(
@@ -185,11 +170,16 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                           _buildThreadReplyButton(context),
                         if (widget.showResendMessage)
                           _buildResendMessage(context),
-                        if (widget.showEditMessage) _buildEditMessage(context),
+                        if (_userPermissions
+                            .contains(PermissionType.updateOwnMessage))
+                          _buildEditMessage(context),
                         if (widget.showCopyMessage) _buildCopyButton(context),
                         if (widget.showFlagButton) _buildFlagButton(context),
-                        if (widget.showPinButton) _buildPinButton(context),
-                        if (widget.showDeleteMessage)
+                        if (_userPermissions
+                            .contains(PermissionType.pinMessage))
+                          _buildPinButton(context),
+                        if (_userPermissions
+                            .contains(PermissionType.deleteOwnMessage))
                           _buildDeleteButton(context),
                         ...widget.customActions
                             .map((action) => _buildCustomAction(
@@ -649,5 +639,14 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         ),
       ),
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    final newStreamChannel = StreamChannel.of(context);
+    _userPermissions =
+        newStreamChannel.channel.state?.channelState.channel?.ownCapabilities ??
+            [];
+    super.didChangeDependencies();
   }
 }
