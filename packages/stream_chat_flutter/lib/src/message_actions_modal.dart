@@ -145,8 +145,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final hasReactionPermission =
         _userPermissions.contains(PermissionType.sendReaction);
 
-    print(widget.showReactions);
-
     final child = Center(
       child: SingleChildScrollView(
         child: Padding(
