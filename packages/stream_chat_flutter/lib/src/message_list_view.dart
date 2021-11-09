@@ -164,7 +164,6 @@ class MessageListView extends StatefulWidget {
     this.messageFilter,
     this.onMessageTap,
     this.onSystemMessageTap,
-    this.pinPermissions = const [],
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
     this.messageListController,
@@ -276,9 +275,6 @@ class MessageListView extends StatefulWidget {
   /// Called when system message is tapped
   final OnMessageTap? onSystemMessageTap;
 
-  /// A List of user types that have permission to pin messages
-  final List<String> pinPermissions;
-
   /// Builder used to build the thread separator in case it's a thread view
   final WidgetBuilder? threadSeparatorBuilder;
 
@@ -301,6 +297,7 @@ class _MessageListViewState extends State<MessageListView> {
   int? _messageListLength;
   StreamChannelState? streamChannel;
   late StreamChatThemeData _streamTheme;
+  late List<String> _userPermissions;
 
   int get _initialIndex {
     final initialScrollIndex = widget.initialScrollIndex;
@@ -960,7 +957,7 @@ class _MessageListViewState extends State<MessageListView> {
         FocusScope.of(context).unfocus();
       },
       showPinButton: currentUserMember != null &&
-          widget.pinPermissions.contains(currentUserMember.role),
+          _userPermissions.contains(PermissionType.pinMessage),
     );
 
     if (widget.parentMessageBuilder != null) {
@@ -1159,7 +1156,7 @@ class _MessageListViewState extends State<MessageListView> {
         FocusScope.of(context).unfocus();
       },
       showPinButton: currentUserMember != null &&
-          widget.pinPermissions.contains(currentUserMember.role),
+          _userPermissions.contains(PermissionType.pinMessage),
     );
 
     if (widget.messageBuilder != null) {
@@ -1239,6 +1236,9 @@ class _MessageListViewState extends State<MessageListView> {
   void didChangeDependencies() {
     final newStreamChannel = StreamChannel.of(context);
     _streamTheme = StreamChatTheme.of(context);
+    _userPermissions =
+        newStreamChannel.channel.state?.channelState.channel?.ownCapabilities ??
+            [];
 
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
