@@ -249,18 +249,30 @@ class StreamChannelState extends State<StreamChannel> {
     }
 
     return Future.wait([
-      queryBeforeMessage(
+      queryAroundMessage(
         messageId,
-        limit: before,
-        preferOffline: preferOffline,
-      ),
-      queryAfterMessage(
-        messageId,
-        limit: after,
+        before: before,
+        after: after,
         preferOffline: preferOffline,
       ),
     ]);
   }
+
+  ///
+  Future<ChannelState> queryAroundMessage(
+    String messageId, {
+    int before = 20,
+    int after = 20,
+    bool preferOffline = false,
+  }) =>
+      channel.query(
+        messagesPagination: PaginationParams(
+          aroundId: messageId,
+          before: before,
+          after: after,
+        ),
+        preferOffline: preferOffline,
+      );
 
   ///
   Future<ChannelState> queryBeforeMessage(

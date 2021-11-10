@@ -60,8 +60,11 @@ class PaginationParams extends Equatable {
   /// ```
   const PaginationParams({
     this.limit = 10,
+    this.before = 10,
+    this.after = 10,
     this.offset,
     this.next,
+    this.aroundId,
     this.greaterThan,
     this.greaterThanOrEqual,
     this.lessThan,
@@ -78,11 +81,21 @@ class PaginationParams extends Equatable {
   /// The amount of items requested from the APIs.
   final int limit;
 
+  /// The amount of items requested before message ID from the APIs.
+  final int before;
+
+  /// The amount of items requested after message ID from the APIs.
+  final int after;
+
   /// The offset of requesting items.
   final int? offset;
 
   /// A key used to paginate.
   final String? next;
+
+  /// Message ID to fetch messages around
+  @JsonKey(name: 'around_id')
+  final String? aroundId;
 
   /// Filter on ids greater than the given value.
   @JsonKey(name: 'id_gt')
@@ -106,7 +119,10 @@ class PaginationParams extends Equatable {
   /// Creates a copy of [PaginationParams] with specified attributes overridden.
   PaginationParams copyWith({
     int? limit,
+    int? before,
+    int? after,
     int? offset,
+    String? aroundId,
     String? next,
     String? greaterThan,
     String? greaterThanOrEqual,
@@ -115,7 +131,10 @@ class PaginationParams extends Equatable {
   }) =>
       PaginationParams(
         limit: limit ?? this.limit,
+        before: before ?? this.before,
+        after: limit ?? this.after,
         offset: offset ?? this.offset,
+        aroundId: aroundId ?? this.aroundId,
         next: next ?? this.next,
         greaterThan: greaterThan ?? this.greaterThan,
         greaterThanOrEqual: greaterThanOrEqual ?? this.greaterThanOrEqual,
@@ -126,8 +145,11 @@ class PaginationParams extends Equatable {
   @override
   List<Object?> get props => [
         limit,
+        before,
+        after,
         offset,
         next,
+        aroundId,
         greaterThan,
         greaterThanOrEqual,
         lessThan,
