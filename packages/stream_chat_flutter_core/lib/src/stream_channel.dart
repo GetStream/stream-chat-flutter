@@ -219,13 +219,16 @@ class StreamChannelState extends State<StreamChannel> {
     int before = 20,
     int after = 20,
     bool preferOffline = false,
-  }) =>
-      _queryAtMessage(
+  }) {
+    // TODO: REMOVE (TEMP FOR TEST HERE)
+    print('CALLED AROUND');
+    return _queryAtMessage(
         messageId: messageId,
         before: before,
         after: after,
         preferOffline: preferOffline,
       );
+  }
 
   Future<List<ChannelState>> _queryAtMessage({
     String? messageId,
