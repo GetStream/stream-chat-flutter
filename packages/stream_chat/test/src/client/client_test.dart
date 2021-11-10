@@ -31,7 +31,7 @@ void main() {
 
     setUpAll(() {
       // fallback values
-      registerFallbackValue<User>(FakeUser());
+      registerFallbackValue(FakeUser());
     });
 
     setUp(() {
@@ -230,7 +230,7 @@ void main() {
 
     setUpAll(() {
       // fallback values
-      registerFallbackValue<User>(FakeUser());
+      registerFallbackValue(FakeUser());
     });
 
     setUp(() {
@@ -311,7 +311,7 @@ void main() {
 
     setUpAll(() {
       // fallback values
-      registerFallbackValue<User>(FakeUser());
+      registerFallbackValue(FakeUser());
     });
 
     setUp(() {
@@ -399,7 +399,7 @@ void main() {
 
     setUpAll(() {
       // fallback values
-      registerFallbackValue<User>(FakeUser());
+      registerFallbackValue(FakeUser());
     });
 
     setUp(() {
@@ -523,9 +523,9 @@ void main() {
 
     setUpAll(() {
       // fallback values
-      registerFallbackValue<Event>(FakeEvent());
-      registerFallbackValue<PaginationParams>(const PaginationParams());
-      registerFallbackValue<ChannelState>(FakeChannelState());
+      registerFallbackValue(FakeEvent());
+      registerFallbackValue(const PaginationParams());
+      registerFallbackValue(FakeChannelState());
     });
 
     setUp(() async {
@@ -827,9 +827,9 @@ void main() {
 
     setUpAll(() {
       // fallback values
-      registerFallbackValue<Event>(FakeEvent());
-      registerFallbackValue<Message>(FakeMessage());
-      registerFallbackValue<PaginationParams>(const PaginationParams());
+      registerFallbackValue(FakeEvent());
+      registerFallbackValue(FakeMessage());
+      registerFallbackValue(const PaginationParams());
     });
 
     setUp(() async {

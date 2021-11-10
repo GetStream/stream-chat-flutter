@@ -120,7 +120,7 @@ class HomeScreen extends StatelessWidget {
                 itemBuilder: (BuildContext context, int index) {
                   final _item = channels[index];
                   return ListTile(
-                    title: Text(_item.name!),
+                    title: Text(_item.name ?? ''),
                     subtitle: StreamBuilder<Message?>(
                       stream: _item.state!.lastMessageStream,
                       initialData: _item.state!.lastMessage,
