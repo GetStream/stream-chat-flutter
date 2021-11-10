@@ -1,10 +1,23 @@
 ## Upcoming
 
+✅ Added
+
+🛑️ Breaking Changes from `3.2.0`
+
+- `MessageInput` now works with a `MessageInputController` instead of a `TextEditingController`
+
+## 3.2.0
+
 - Updated Dart SDK constraints to `>=2.14.0 <3.0.0`
+- Updated `stream_chat_flutter_core` dependency to [`3.2.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 🐞 Fixed
 
+- Fixed message highlight animation alignment in `MessageListView`
 - [[#491]](https://github.com/GetStream/stream-chat-flutter/issues/491): Fix `MediaListView` showing media in wrong order.
+- Fixed `MessageListView` initialIndex not working in some cases.
+- Improved `MessageListView` rendering in case of reordering.
+- Fix image thumbnail generation when using Stream CDN
 
 ✅ Added
 

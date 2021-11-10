@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-/// A Controller for storing and handling the [Message]
+/// Controller for storing and mutating a [Message] value.
 class MessageInputController extends ValueNotifier<Message> {
   /// Creates a controller for an editable text field.
   ///
@@ -17,7 +17,8 @@ class MessageInputController extends ValueNotifier<Message> {
   factory MessageInputController.fromText(String? text) =>
       MessageInputController._(Message(text: text));
 
-  /// Creates a controller for an editable textfield from initial [attachments].
+  /// Creates a controller for an editable text field from an initial
+  /// [attachments].
   factory MessageInputController.fromAttachments(
     List<Attachment> attachments,
   ) =>
@@ -136,8 +137,9 @@ class MessageInputController extends ValueNotifier<Message> {
   /// After calling this function, [text], [attachments] and [mentionedUsers]
   /// all will be empty.
   ///
-  /// Calling this will notify the listeners of this [MessageInputController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// Calling this will notify all the listeners of this
+  /// [MessageInputController] that they need to update
+  /// (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   void clear() {

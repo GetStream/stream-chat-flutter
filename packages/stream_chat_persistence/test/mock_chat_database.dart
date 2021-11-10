@@ -1,8 +1,8 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_persistence/src/dao/dao.dart';
-import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 
-class MockChatDatabase extends Mock implements MoorChatDatabase {
+class MockChatDatabase extends Mock implements DriftChatDatabase {
   UserDao? _userDao;
 
   @override

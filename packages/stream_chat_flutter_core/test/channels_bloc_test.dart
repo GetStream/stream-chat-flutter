@@ -10,7 +10,7 @@ import 'mocks.dart';
 
 void main() {
   setUpAll(() {
-    registerFallbackValue<PaginationParams>(const PaginationParams());
+    registerFallbackValue(const PaginationParams());
   });
 
   List<Channel> _generateChannels(
