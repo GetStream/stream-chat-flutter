@@ -264,8 +264,10 @@ class StreamChannelState extends State<StreamChannel> {
     int before = 20,
     int after = 20,
     bool preferOffline = false,
-  }) =>
-      channel.query(
+  }) {
+    // TODO: REMOVE (TEMP FOR TEST HERE)
+    print('CALLED AROUND');
+    return channel.query(
         messagesPagination: PaginationParams(
           aroundId: messageId,
           before: before,
@@ -273,6 +275,7 @@ class StreamChannelState extends State<StreamChannel> {
         ),
         preferOffline: preferOffline,
       );
+  }
 
   ///
   Future<ChannelState> queryBeforeMessage(
