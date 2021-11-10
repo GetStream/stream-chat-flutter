@@ -25,7 +25,7 @@ PaginationParams _$PaginationParamsFromJson(Map<String, dynamic> json) =>
       after: json['after'] as int? ?? 10,
       offset: json['offset'] as int?,
       next: json['next'] as String?,
-      aroundId: json['around_id'] as String?,
+      idAround: json['id_around'] as String?,
       greaterThan: json['id_gt'] as String?,
       greaterThanOrEqual: json['id_gte'] as String?,
       lessThan: json['id_lt'] as String?,
@@ -47,7 +47,7 @@ Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) {
 
   writeNotNull('offset', instance.offset);
   writeNotNull('next', instance.next);
-  writeNotNull('around_id', instance.aroundId);
+  writeNotNull('id_around', instance.idAround);
   writeNotNull('id_gt', instance.greaterThan);
   writeNotNull('id_gte', instance.greaterThanOrEqual);
   writeNotNull('id_lt', instance.lessThan);

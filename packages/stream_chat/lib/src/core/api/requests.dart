@@ -64,7 +64,7 @@ class PaginationParams extends Equatable {
     this.after = 10,
     this.offset,
     this.next,
-    this.aroundId,
+    this.idAround,
     this.greaterThan,
     this.greaterThanOrEqual,
     this.lessThan,
@@ -94,8 +94,8 @@ class PaginationParams extends Equatable {
   final String? next;
 
   /// Message ID to fetch messages around
-  @JsonKey(name: 'around_id')
-  final String? aroundId;
+  @JsonKey(name: 'id_around')
+  final String? idAround;
 
   /// Filter on ids greater than the given value.
   @JsonKey(name: 'id_gt')
@@ -122,7 +122,7 @@ class PaginationParams extends Equatable {
     int? before,
     int? after,
     int? offset,
-    String? aroundId,
+    String? idAround,
     String? next,
     String? greaterThan,
     String? greaterThanOrEqual,
@@ -134,7 +134,7 @@ class PaginationParams extends Equatable {
         before: before ?? this.before,
         after: limit ?? this.after,
         offset: offset ?? this.offset,
-        aroundId: aroundId ?? this.aroundId,
+        idAround: idAround ?? this.idAround,
         next: next ?? this.next,
         greaterThan: greaterThan ?? this.greaterThan,
         greaterThanOrEqual: greaterThanOrEqual ?? this.greaterThanOrEqual,
@@ -149,7 +149,7 @@ class PaginationParams extends Equatable {
         after,
         offset,
         next,
-        aroundId,
+        idAround,
         greaterThan,
         greaterThanOrEqual,
         lessThan,
