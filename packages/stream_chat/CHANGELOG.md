@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Extra properties added to `PaginationParams` to aid in fetching messages.
+
 ## 3.2.0
 
 🐞 Fixed

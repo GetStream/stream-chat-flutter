@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- `StreamChannel` can now fetch messages around a message ID with the `queryAroundMessage` call.
+
 ## 3.2.0
 
 - Updated Dart SDK constraints to `>=2.14.0 <3.0.0`
