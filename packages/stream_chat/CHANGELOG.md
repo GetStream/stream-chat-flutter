@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added hard delete functionality.
+
 ## 3.2.0
 
 🐞 Fixed

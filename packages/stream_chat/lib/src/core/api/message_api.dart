@@ -80,10 +80,14 @@ class MessageApi {
 
   /// Deletes the given [messageId]
   Future<EmptyResponse> deleteMessage(
-    String messageId,
-  ) async {
+    String messageId, {
+    bool? hard,
+  }) async {
     final response = await _client.delete(
       '/messages/$messageId',
+      queryParameters: {
+        if (hard != null) 'hard': hard,
+      },
     );
     return EmptyResponse.fromJson(response.data);
   }

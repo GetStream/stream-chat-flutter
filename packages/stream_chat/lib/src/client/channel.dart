@@ -648,7 +648,7 @@ class Channel {
   }
 
   /// Deletes the [message] from the channel.
-  Future<EmptyResponse> deleteMessage(Message message) async {
+  Future<EmptyResponse> deleteMessage(Message message, {bool? hard}) async {
     // Directly deleting the local messages which are not yet sent to server
     if (message.status == MessageSendingStatus.sending ||
         message.status == MessageSendingStatus.failed) {
@@ -675,7 +675,7 @@ class Channel {
 
       state?.addMessage(message);
 
-      final response = await _client.deleteMessage(message.id);
+      final response = await _client.deleteMessage(message.id, hard: hard);
 
       state?.addMessage(message.copyWith(status: MessageSendingStatus.sent));
 

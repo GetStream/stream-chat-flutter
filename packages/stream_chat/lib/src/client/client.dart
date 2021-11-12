@@ -1213,8 +1213,8 @@ class StreamChatClient {
       );
 
   /// Deletes the given message
-  Future<EmptyResponse> deleteMessage(String messageId) =>
-      _chatApi.message.deleteMessage(messageId);
+  Future<EmptyResponse> deleteMessage(String messageId, {bool? hard}) =>
+      _chatApi.message.deleteMessage(messageId, hard: hard);
 
   /// Get a message by [messageId]
   Future<GetMessageResponse> getMessage(String messageId) =>
