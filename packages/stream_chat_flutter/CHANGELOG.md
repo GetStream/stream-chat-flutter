@@ -76,36 +76,36 @@
 ⚠️ Deprecated
 
 - `MessageSearchListView` `paginationParams` property is now deprecated in favor of `limit`.
-  ```dart
-  // previous
-  paginationParams = const PaginationParams(limit: 30)
-
-  // new
-  limit = 30
-  ```
+    ```dart
+    // previous
+    paginationParams = const PaginationParams(limit: 30)
+    
+    // new
+    limit = 30
+    ```
 - `UserListView` `pagination` property is now deprecated in favor of `limit`.
-  ```dart
-  // previous
-  pagination = const PaginationParams(limit: 30)
-
-  // new
-  limit = 30
-  ```
+    ```dart
+    // previous
+    pagination = const PaginationParams(limit: 30)
+    
+    // new
+    limit = 30
+    ```
 - `ChannelListView` `pagination` property is now deprecated in favor of `limit`.
-  ```dart
-  // previous
-  pagination = const PaginationParams(limit: 30)
-
-  // new
-  limit = 30
-  ```
+    ```dart
+    // previous
+    pagination = const PaginationParams(limit: 30)
+    
+    // new
+    limit = 30
+    ```
 
 🔄 Changed
 
 - `UserListViewCore` filter property now has a default value.
-  ```dart
-  filter = const Filter.empty()
-  ```
+    ```dart
+    filter = const Filter.empty()
+    ```
 
 🐞 Fixed
 
@@ -123,11 +123,11 @@
 - [#516](https://github.com/GetStream/stream-chat-flutter/issues/516):
   Added `StreamChatThemeData.placeholderUserImage` for building a widget when the `UserAvatar` image is loading
 - Added a `backgroundColor` property to the following widgets:
-  - `ChannelHeader`
-  - `ChannelListHeader`
-  - `GalleryHeader`
-  - `GalleryFooter`
-  - `ThreadHeader`
+    - `ChannelHeader`
+    - `ChannelListHeader`
+    - `GalleryHeader`
+    - `GalleryFooter`
+    - `ThreadHeader`
 - Added `MessageInput.attachmentLimit` in order to limit the no. of attachments that can be sent with a single message.
 - Added `MessageInput.onAttachmentLimitExceed` callback which will be called when the `attachmentLimit` is exceeded.
   This will override the default error alert behaviour.
@@ -141,7 +141,7 @@ typedef ActionButtonBuilder = Widget Function(
 ```
 
 > **_NOTE:_** The last parameter is the default `ActionButton`
-> You can call `.copyWith` to customize just a subset of properties.
+You can call `.copyWith` to customize just a subset of properties.
 
 - Added slow mode which allows a cooldown period after a user sends a message.
 
@@ -150,18 +150,18 @@ typedef ActionButtonBuilder = Widget Function(
 Theming has been upgraded! Most theme classes now have `InheritedTheme` classes associated with them, and have been
 upgraded with some goodies like `lerp` functions. Here's the full naming breakdown:
 
-- `AvatarTheme` is now `AvatarThemeData`
-- `ChannelHeaderTheme` is now `ChannelHeaderThemeData`
-- `ChannelListHeaderTheme` is now `ChannelListHeaderThemeData`
-- `ChannelListViewTheme` is now `ChannelListViewThemeData`
-- `ChannelPreviewTheme` is now `ChannelPreviewThemeData`
-- `MessageInputTheme` is now `MessageInputThemeData`
-- `MessageListViewTheme` is now `MessageListViewTheme`
-- `MessageSearchListViewTheme` is now `MessageSearchListViewThemeData`
-- `MessageTheme` is now `MessageThemeData`
-- `UserListViewTheme` is now `UserListViewThemeData`
+* `AvatarTheme` is now `AvatarThemeData`
+* `ChannelHeaderTheme` is now `ChannelHeaderThemeData`
+* `ChannelListHeaderTheme` is now `ChannelListHeaderThemeData`
+* `ChannelListViewTheme` is now `ChannelListViewThemeData`
+* `ChannelPreviewTheme` is now `ChannelPreviewThemeData`
+* `MessageInputTheme` is now `MessageInputThemeData`
+* `MessageListViewTheme` is now `MessageListViewTheme`
+* `MessageSearchListViewTheme` is now `MessageSearchListViewThemeData`
+* `MessageTheme` is now `MessageThemeData`
+* `UserListViewTheme` is now `UserListViewThemeData`
 
-* Updated core dependency.
+- Updated core dependency.
 
 🐞 Fixed
 
@@ -208,25 +208,24 @@ upgraded with some goodies like `lerp` functions. Here's the full naming breakdo
 - Renamed `ChannelImage` to `ChannelAvatar`
 - Updated `StreamChatThemeData.reactionIcons` to accept custom builder
 - Renamed `ColorTheme` properties to reflect the purpose of the colors
-
-  - `ColorTheme.black` -> `ColorTheme.textHighEmphasis`
-  - `ColorTheme.grey` -> `ColorTheme.textLowEmphasis`
-  - `ColorTheme.greyGainsboro` -> `ColorTheme.disabled`
-  - `ColorTheme.greyWhisper` -> `ColorTheme.borders`
-  - `ColorTheme.whiteSmoke` -> `ColorTheme.inputBg`
-  - `ColorTheme.whiteSnow` -> `ColorTheme.appBg`
-  - `ColorTheme.white` -> `ColorTheme.barsBg`
-  - `ColorTheme.blueAlice` -> `ColorTheme.linkBg`
-  - `ColorTheme.accentBlue` -> `ColorTheme.accentPrimary`
-  - `ColorTheme.accentRed` -> `ColorTheme.accentError`
-  - `ColorTheme.accentGreen` -> `ColorTheme.accentInfo`
+    - `ColorTheme.black` -> `ColorTheme.textHighEmphasis`
+    - `ColorTheme.grey` -> `ColorTheme.textLowEmphasis`
+    - `ColorTheme.greyGainsboro` -> `ColorTheme.disabled`
+    - `ColorTheme.greyWhisper` -> `ColorTheme.borders`
+    - `ColorTheme.whiteSmoke` -> `ColorTheme.inputBg`
+    - `ColorTheme.whiteSnow` -> `ColorTheme.appBg`
+    - `ColorTheme.white` -> `ColorTheme.barsBg`
+    - `ColorTheme.blueAlice` -> `ColorTheme.linkBg`
+    - `ColorTheme.accentBlue` -> `ColorTheme.accentPrimary`
+    - `ColorTheme.accentRed` -> `ColorTheme.accentError`
+    - `ColorTheme.accentGreen` -> `ColorTheme.accentInfo`
 
 - `ChannelListCore` options property is removed in favor of individual properties
-  - `options.state` -> bool state
-  - `options.watch` -> bool watch
-  - `options.presence` -> bool presence
+    - `options.state` -> bool state
+    - `options.watch` -> bool watch
+    - `options.presence` -> bool presence
 - `UserListView` options property is removed in favor of individual properties
-  - `options.presence` -> bool presence
+    - `options.presence` -> bool presence
 - Renamed `ImageHeader` to `GalleryHeader`
 - Renamed `ImageFooter` to `GalleryFooter`
 - `MessageBuilder` and `ParentMessageBuilder` signature is now
@@ -241,7 +240,8 @@ typedef MessageBuilder = Widget Function(
 ```
 
 > **_NOTE:_** the last parameter is the default `MessageWidget`
-> You can call `.copyWith` to customize just a subset of properties
+You can call `.copyWith` to customize just a subset of properties
+
 
 ✅ Added
 
@@ -269,17 +269,17 @@ typedef MessageBuilder = Widget Function(
 🛑️ Breaking Changes from `2.0.0-nullsafety.8`
 
 - Renamed `ColorTheme` properties to reflect the purpose of the colors
-  - `ColorTheme.black` -> `ColorTheme.textHighEmphasis`
-  - `ColorTheme.grey` -> `ColorTheme.textLowEmphasis`
-  - `ColorTheme.greyGainsboro` -> `ColorTheme.disabled`
-  - `ColorTheme.greyWhisper` -> `ColorTheme.borders`
-  - `ColorTheme.whiteSmoke` -> `ColorTheme.inputBg`
-  - `ColorTheme.whiteSnow` -> `ColorTheme.appBg`
-  - `ColorTheme.white` -> `ColorTheme.barsBg`
-  - `ColorTheme.blueAlice` -> `ColorTheme.linkBg`
-  - `ColorTheme.accentBlue` -> `ColorTheme.accentPrimary`
-  - `ColorTheme.accentRed` -> `ColorTheme.accentError`
-  - `ColorTheme.accentGreen` -> `ColorTheme.accentInfo`
+    - `ColorTheme.black` -> `ColorTheme.textHighEmphasis`
+    - `ColorTheme.grey` -> `ColorTheme.textLowEmphasis`
+    - `ColorTheme.greyGainsboro` -> `ColorTheme.disabled`
+    - `ColorTheme.greyWhisper` -> `ColorTheme.borders`
+    - `ColorTheme.whiteSmoke` -> `ColorTheme.inputBg`
+    - `ColorTheme.whiteSnow` -> `ColorTheme.appBg`
+    - `ColorTheme.white` -> `ColorTheme.barsBg`
+    - `ColorTheme.blueAlice` -> `ColorTheme.linkBg`
+    - `ColorTheme.accentBlue` -> `ColorTheme.accentPrimary`
+    - `ColorTheme.accentRed` -> `ColorTheme.accentError`
+    - `ColorTheme.accentGreen` -> `ColorTheme.accentInfo`
 
 ✅ Added
 
@@ -290,11 +290,11 @@ typedef MessageBuilder = Widget Function(
 🛑️ Breaking Changes from `2.0.0-nullsafety.7`
 
 - `ChannelListCore` options property is removed in favor of individual properties
-  - `options.state` -> bool state
-  - `options.watch` -> bool watch
-  - `options.presence` -> bool presence
+    - `options.state` -> bool state
+    - `options.watch` -> bool watch
+    - `options.presence` -> bool presence
 - `UserListView` options property is removed in favor of individual properties
-  - `options.presence` -> bool presence
+    - `options.presence` -> bool presence
 - `MessageBuilder` and `ParentMessageBuilder` signature is now
 
 ```dart
@@ -307,7 +307,7 @@ typedef MessageBuilder = Widget Function(
 ```
 
 > **_NOTE:_** The last parameter is the default `MessageWidget`
-> You can call `.copyWith` to customize just a subset of properties.
+You can call `.copyWith` to customize just a subset of properties.
 
 ✅ Added
 
