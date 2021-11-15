@@ -1,3 +1,9 @@
+## Upcoming 
+
+✅ Added
+
+- `MessageListView` now allows more better control over spacing after messages using `spacingWidgetBuilder`.
+
 ## 3.2.0
 
 - Updated Dart SDK constraints to `>=2.14.0 <3.0.0`
