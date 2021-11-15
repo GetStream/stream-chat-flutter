@@ -24,6 +24,10 @@ class AttachmentActionsModal extends StatelessWidget {
     this.onShowMessage,
     this.imageDownloader,
     this.fileDownloader,
+    this.showReply = true,
+    this.showShowInChat = true,
+    this.showSave = true,
+    this.showDelete = true,
   }) : super(key: key);
 
   /// The message containing the attachments
@@ -40,6 +44,18 @@ class AttachmentActionsModal extends StatelessWidget {
 
   /// Callback to provide download files
   final AttachmentDownloader? fileDownloader;
+
+  /// Show reply option
+  final bool showReply;
+
+  /// Show show in chat option
+  final bool showShowInChat;
+
+  /// Show save option
+  final bool showSave;
+
+  /// Show delete option
+  final bool showDelete;
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -67,82 +83,86 @@ class AttachmentActionsModal extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildButton(
-                    context,
-                    context.translations.replyLabel,
-                    StreamSvgIcon.iconCurveLineLeftUp(
-                      size: 24,
-                      color: theme.colorTheme.textLowEmphasis,
+                  if (showReply)
+                    _buildButton(
+                      context,
+                      context.translations.replyLabel,
+                      StreamSvgIcon.iconCurveLineLeftUp(
+                        size: 24,
+                        color: theme.colorTheme.textLowEmphasis,
+                      ),
+                      () {
+                        Navigator.pop(context, ReturnActionType.reply);
+                      },
                     ),
-                    () {
-                      Navigator.pop(context, ReturnActionType.reply);
-                    },
-                  ),
-                  _buildButton(
-                    context,
-                    context.translations.showInChatLabel,
-                    StreamSvgIcon.eye(
-                      size: 24,
-                      color: theme.colorTheme.textHighEmphasis,
+                  if (showShowInChat)
+                    _buildButton(
+                      context,
+                      context.translations.showInChatLabel,
+                      StreamSvgIcon.eye(
+                        size: 24,
+                        color: theme.colorTheme.textHighEmphasis,
+                      ),
+                      onShowMessage,
                     ),
-                    onShowMessage,
-                  ),
-                  _buildButton(
-                    context,
-                    message.attachments[currentIndex].type == 'video'
-                        ? context.translations.saveVideoLabel
-                        : context.translations.saveImageLabel,
-                    StreamSvgIcon.iconSave(
-                      size: 24,
-                      color: theme.colorTheme.textLowEmphasis,
+                  if (showSave)
+                    _buildButton(
+                      context,
+                      message.attachments[currentIndex].type == 'video'
+                          ? context.translations.saveVideoLabel
+                          : context.translations.saveImageLabel,
+                      StreamSvgIcon.iconSave(
+                        size: 24,
+                        color: theme.colorTheme.textLowEmphasis,
+                      ),
+                      () {
+                        final attachment = message.attachments[currentIndex];
+                        final isImage = attachment.type == 'image';
+                        final Future<String?> Function(
+                          Attachment, {
+                          void Function(int, int) progressCallback,
+                        }) saveFile = fileDownloader ?? _downloadAttachment;
+                        final Future<String?> Function(
+                          Attachment, {
+                          void Function(int, int) progressCallback,
+                        }) saveImage = imageDownloader ?? _downloadAttachment;
+                        final downloader = isImage ? saveImage : saveFile;
+
+                        final progressNotifier =
+                            ValueNotifier<_DownloadProgress?>(
+                          _DownloadProgress.initial(),
+                        );
+
+                        downloader(
+                          attachment,
+                          progressCallback: (received, total) {
+                            progressNotifier.value = _DownloadProgress(
+                              total,
+                              received,
+                            );
+                          },
+                        ).catchError((e, stk) {
+                          progressNotifier.value = null;
+                        });
+
+                        // Closing attachment actions modal before opening
+                        // attachment download dialog
+                        Navigator.pop(context);
+
+                        showDialog(
+                          barrierDismissible: false,
+                          context: context,
+                          barrierColor: theme.colorTheme.overlay,
+                          builder: (context) => _buildDownloadProgressDialog(
+                            context,
+                            progressNotifier,
+                          ),
+                        );
+                      },
                     ),
-                    () {
-                      final attachment = message.attachments[currentIndex];
-                      final isImage = attachment.type == 'image';
-                      final Future<String?> Function(
-                        Attachment, {
-                        void Function(int, int) progressCallback,
-                      }) saveFile = fileDownloader ?? _downloadAttachment;
-                      final Future<String?> Function(
-                        Attachment, {
-                        void Function(int, int) progressCallback,
-                      }) saveImage = imageDownloader ?? _downloadAttachment;
-                      final downloader = isImage ? saveImage : saveFile;
-
-                      final progressNotifier =
-                          ValueNotifier<_DownloadProgress?>(
-                        _DownloadProgress.initial(),
-                      );
-
-                      downloader(
-                        attachment,
-                        progressCallback: (received, total) {
-                          progressNotifier.value = _DownloadProgress(
-                            total,
-                            received,
-                          );
-                        },
-                      ).catchError((e, stk) {
-                        progressNotifier.value = null;
-                      });
-
-                      // Closing attachment actions modal before opening
-                      // attachment download dialog
-                      Navigator.pop(context);
-
-                      showDialog(
-                        barrierDismissible: false,
-                        context: context,
-                        barrierColor: theme.colorTheme.overlay,
-                        builder: (context) => _buildDownloadProgressDialog(
-                          context,
-                          progressNotifier,
-                        ),
-                      );
-                    },
-                  ),
                   if (StreamChat.of(context).currentUser?.id ==
-                      message.user?.id)
+                          message.user?.id &&
+                      showDelete)
                     _buildButton(
                       context,
                       context.translations.deleteLabel.capitalize(),

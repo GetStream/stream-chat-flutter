@@ -21,6 +21,10 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
     this.userName = '',
     this.sentAt = '',
     this.backgroundColor,
+    this.showReply = true,
+    this.showShowInChat = true,
+    this.showSave = true,
+    this.showDelete = true,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -54,6 +58,18 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
 
   /// The background color of this [GalleryHeader].
   final Color? backgroundColor;
+
+  /// Show reply option
+  final bool showReply;
+
+  /// Show show in chat option
+  final bool showShowInChat;
+
+  /// Show save option
+  final bool showSave;
+
+  /// Show delete option
+  final bool showDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -133,6 +149,10 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
           message: message,
           currentIndex: currentIndex,
           onShowMessage: onShowMessage,
+          showReply: showReply,
+          showShowInChat: showShowInChat,
+          showSave: showSave,
+          showDelete: showDelete,
         ),
       ),
     );
