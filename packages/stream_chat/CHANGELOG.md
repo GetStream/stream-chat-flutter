@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- `closeConnection()` now uses `normalClosure` status when closing websocket.
+
 ## 3.2.0
 
 🐞 Fixed
@@ -21,12 +27,12 @@
 🛑️ Breaking Changes from `2.2.1`
 
 - Added 6 new methods in `ChatPersistenceClient`.
-    - `bulkUpdateMessages`
-    - `bulkUpdatePinnedMessages`
-    - `bulkUpdateMembers`
-    - `bulkUpdateReads`
-    - `updatePinnedMessageReactions`
-    - `deletePinnedMessageReactionsByMessageId`
+  - `bulkUpdateMessages`
+  - `bulkUpdatePinnedMessages`
+  - `bulkUpdateMembers`
+  - `bulkUpdateReads`
+  - `updatePinnedMessageReactions`
+  - `deletePinnedMessageReactionsByMessageId`
 
 ✅ Added
 
@@ -104,19 +110,19 @@
 - migrate this package to null safety
 - `ConnectUserWithProvider` now requires `tokenProvider` as a required param. (Removed from the constructor)
 - `client.disconnect()` is now divided into two different functions
-    - `client.closeConnection()` -> for closing user websocket connection.
-    - `client.disconnectUser()` -> for disconnecting user and resetting client state.
+  - `client.closeConnection()` -> for closing user websocket connection.
+  - `client.disconnectUser()` -> for disconnecting user and resetting client state.
 - `client.devToken()` now returns a `Token` model instead of `String`.
 - `ApiError` is removed in favor of `StreamChatError`
-    - `StreamChatError` -> parent type for all the stream errors.
-    - `StreamWebSocketError` -> for user websocket related errors.
-    - `StreamChatNetworkError` -> for network related errors.
+  - `StreamChatError` -> parent type for all the stream errors.
+  - `StreamWebSocketError` -> for user websocket related errors.
+  - `StreamChatNetworkError` -> for network related errors.
 - `client.queryChannels()`, `channel.query()` options param is removed in favor of individual params
-    - `option.state` -> bool state
-    - `option.watch` -> bool watch
-    - `option.presence` -> bool presence
+  - `option.state` -> bool state
+  - `option.watch` -> bool watch
+  - `option.presence` -> bool presence
 - `client.queryUsers()` options param is removed in favor of individual params
-    - `option.presence` -> bool presence
+  - `option.presence` -> bool presence
 - Migrate this package to null safety
 - Added typed filters
 
@@ -150,19 +156,19 @@
 
 - `ConnectUserWithProvider` now requires `tokenProvider` as a required param. (Removed from the constructor)
 - `client.disconnect()` is now divided into two different functions
-    - `client.closeConnection()` -> for closing user websocket connection.
-    - `client.disconnectUser()` -> for disconnecting user and resetting client state.
+  - `client.closeConnection()` -> for closing user websocket connection.
+  - `client.disconnectUser()` -> for disconnecting user and resetting client state.
 - `client.devToken()` now returns a `Token` model instead of `String`.
 - `ApiError` is removed in favor of `StreamChatError`
-    - `StreamChatError` -> parent type for all the stream errors.
-    - `StreamWebSocketError` -> for user websocket related errors.
-    - `StreamChatNetworkError` -> for network related errors.
+  - `StreamChatError` -> parent type for all the stream errors.
+  - `StreamWebSocketError` -> for user websocket related errors.
+  - `StreamChatNetworkError` -> for network related errors.
 - `client.queryChannels()`, `channel.query()` options param is removed in favor of individual params
-    - `option.state` -> bool state
-    - `option.watch` -> bool watch
-    - `option.presence` -> bool presence
+  - `option.state` -> bool state
+  - `option.watch` -> bool watch
+  - `option.presence` -> bool presence
 - `client.queryUsers()` options param is removed in favor of individual params
-    - `option.presence` -> bool presence
+  - `option.presence` -> bool presence
 
 ✅ Added
 
