@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
+import 'package:stream_chat_flutter/src/attachment_actions_modal.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/visible_footnote.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -35,6 +36,9 @@ class GiphyAttachment extends AttachmentWidget {
   /// Callback when attachment is tapped
   final VoidCallback? onAttachmentTap;
 
+  /// Widget builder for attachment actions modal
+  /// [defaultActionsModal] is the default [AttachmentActionsModal] config
+  /// Use [defaultActionsModal.copyWith] to easily customize it
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override

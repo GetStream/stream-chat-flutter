@@ -6,6 +6,9 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// Widget builder for attachment actions modal
+/// [defaultActionsModal] is the default [AttachmentActionsModal] config
+/// Use [defaultActionsModal.copyWith] to easily customize it
 typedef AttachmentActionsBuilder = Widget Function(
   BuildContext context,
   Attachment attachment,
@@ -62,6 +65,9 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   /// The background color of this [GalleryHeader].
   final Color? backgroundColor;
 
+  /// Widget builder for attachment actions modal
+  /// [defaultActionsModal] is the default [AttachmentActionsModal] config
+  /// Use [defaultActionsModal.copyWith] to easily customize it
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override

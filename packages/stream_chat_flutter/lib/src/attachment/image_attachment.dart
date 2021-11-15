@@ -44,6 +44,9 @@ class ImageAttachment extends AttachmentWidget {
   /// Callback when attachment is tapped
   final VoidCallback? onAttachmentTap;
 
+  /// Widget builder for attachment actions modal
+  /// [defaultActionsModal] is the default [AttachmentActionsModal] config
+  /// Use [defaultActionsModal.copyWith] to easily customize it
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override

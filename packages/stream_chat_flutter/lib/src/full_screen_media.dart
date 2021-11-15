@@ -52,6 +52,9 @@ class FullScreenMedia extends StatefulWidget {
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
 
+  /// Widget builder for attachment actions modal
+  /// [defaultActionsModal] is the default [AttachmentActionsModal] config
+  /// Use [defaultActionsModal.copyWith] to easily customize it
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override
