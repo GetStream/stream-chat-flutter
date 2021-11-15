@@ -1,3 +1,9 @@
+## Upcoming 
+
+🐞 Fixed
+
+- [[#766]]`AttachmentActionsModal` now has customisation options for actions.
+
 ## 3.2.0
 
 - Updated Dart SDK constraints to `>=2.14.0 <3.0.0`
