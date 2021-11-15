@@ -94,7 +94,9 @@ enum SpacingType {
 ///                 },
 ///               ),
 typedef SpacingWidgetBuilder = Widget Function(
-    BuildContext context, List<SpacingType> spacingTypes);
+  BuildContext context,
+  List<SpacingType> spacingTypes,
+);
 
 /// Class for message details
 // ignore: prefer-match-file-name
