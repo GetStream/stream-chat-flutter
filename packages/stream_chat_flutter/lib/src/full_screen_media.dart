@@ -33,10 +33,7 @@ class FullScreenMedia extends StatefulWidget {
     this.startIndex = 0,
     String? userName,
     this.onShowMessage,
-    this.showReply = true,
-    this.showShowInChat = true,
-    this.showSave = true,
-    this.showDelete = true,
+    this.attachmentActionsModalBuilder,
   })  : userName = userName ?? '',
         super(key: key);
 
@@ -55,17 +52,7 @@ class FullScreenMedia extends StatefulWidget {
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
 
-  /// Show reply option
-  final bool showReply;
-
-  /// Show show in chat option
-  final bool showShowInChat;
-
-  /// Show save option
-  final bool showSave;
-
-  /// Show delete option
-  final bool showDelete;
+  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override
   _FullScreenMediaState createState() => _FullScreenMediaState();
@@ -212,10 +199,8 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                         StreamChannel.of(context).channel,
                       );
                     },
-                    showReply: widget.showReply,
-                    showShowInChat: widget.showShowInChat,
-                    showSave: widget.showSave,
-                    showDelete: widget.showDelete,
+                    attachmentActionsModalBuilder:
+                        widget.attachmentActionsModalBuilder,
                   ),
                   if (!widget.message.isEphemeral)
                     GalleryFooter(

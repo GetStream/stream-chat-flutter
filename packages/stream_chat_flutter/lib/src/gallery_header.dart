@@ -6,6 +6,12 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+typedef AttachmentActionsBuilder = Widget Function(
+  BuildContext context,
+  Attachment attachment,
+  AttachmentActionsModal defaultActionsModal,
+);
+
 /// Header/AppBar widget for media display screen
 class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a channel header
@@ -21,10 +27,7 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
     this.userName = '',
     this.sentAt = '',
     this.backgroundColor,
-    this.showReply = true,
-    this.showShowInChat = true,
-    this.showSave = true,
-    this.showDelete = true,
+    this.attachmentActionsModalBuilder,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -59,17 +62,7 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   /// The background color of this [GalleryHeader].
   final Color? backgroundColor;
 
-  /// Show reply option
-  final bool showReply;
-
-  /// Show show in chat option
-  final bool showShowInChat;
-
-  /// Show save option
-  final bool showSave;
-
-  /// Show delete option
-  final bool showDelete;
+  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -139,21 +132,26 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
     final galleryHeaderThemeData =
         StreamChatTheme.of(context).galleryHeaderTheme;
 
+    final defaultModal = AttachmentActionsModal(
+      message: message,
+      currentIndex: currentIndex,
+      onShowMessage: onShowMessage,
+    );
+
+    final effectiveModal = attachmentActionsModalBuilder?.call(
+          context,
+          message.attachments[currentIndex],
+          defaultModal,
+        ) ??
+        defaultModal;
+
     final result = await showDialog(
       useRootNavigator: false,
       context: context,
       barrierColor: galleryHeaderThemeData.bottomSheetBarrierColor,
       builder: (context) => StreamChannel(
         channel: channel,
-        child: AttachmentActionsModal(
-          message: message,
-          currentIndex: currentIndex,
-          onShowMessage: onShowMessage,
-          showReply: showReply,
-          showShowInChat: showShowInChat,
-          showSave: showSave,
-          showDelete: showDelete,
-        ),
+        child: effectiveModal,
       ),
     );
 

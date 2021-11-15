@@ -16,6 +16,7 @@ class ImageGroup extends StatelessWidget {
     this.onReturnAction,
     this.onShowMessage,
     this.onAttachmentTap,
+    this.attachmentActionsModalBuilder,
   }) : super(key: key);
 
   /// List of attachments to show
@@ -38,6 +39,8 @@ class ImageGroup extends StatelessWidget {
 
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
+
+  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(
@@ -138,6 +141,7 @@ class ImageGroup extends StatelessWidget {
             userName: message.user?.name,
             message: message,
             onShowMessage: onShowMessage,
+            attachmentActionsModalBuilder: attachmentActionsModalBuilder,
           ),
         ),
       ),
@@ -151,5 +155,6 @@ class ImageGroup extends StatelessWidget {
         message: message,
         messageTheme: messageTheme,
         onAttachmentTap: () => _onTap(context, index),
+        attachmentActionsModalBuilder: attachmentActionsModalBuilder,
       );
 }

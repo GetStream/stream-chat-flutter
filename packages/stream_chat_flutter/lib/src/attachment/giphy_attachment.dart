@@ -18,6 +18,7 @@ class GiphyAttachment extends AttachmentWidget {
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
+    this.attachmentActionsModalBuilder,
   }) : super(
           key: key,
           message: message,
@@ -33,6 +34,8 @@ class GiphyAttachment extends AttachmentWidget {
 
   /// Callback when attachment is tapped
   final VoidCallback? onAttachmentTap;
+
+  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -250,6 +253,7 @@ class GiphyAttachment extends AttachmentWidget {
               userName: message.user?.name,
               message: message,
               onShowMessage: onShowMessage,
+              attachmentActionsModalBuilder: attachmentActionsModalBuilder,
             ),
           );
         },

@@ -57,6 +57,32 @@ class AttachmentActionsModal extends StatelessWidget {
   /// Show delete option
   final bool showDelete;
 
+  /// Creates a copy of [MessageWidget] with specified attributes overridden.
+  AttachmentActionsModal copyWith({
+    Key? key,
+    int? currentIndex,
+    Message? message,
+    VoidCallback? onShowMessage,
+    AttachmentDownloader? imageDownloader,
+    AttachmentDownloader? fileDownloader,
+    bool? showReply,
+    bool? showShowInChat,
+    bool? showSave,
+    bool? showDelete,
+  }) =>
+      AttachmentActionsModal(
+        key: key ?? this.key,
+        currentIndex: currentIndex ?? this.currentIndex,
+        message: message ?? this.message,
+        onShowMessage: onShowMessage ?? this.onShowMessage,
+        imageDownloader: imageDownloader ?? this.imageDownloader,
+        fileDownloader: fileDownloader ?? this.fileDownloader,
+        showReply: showReply ?? this.showReply,
+        showShowInChat: showShowInChat ?? this.showShowInChat,
+        showSave: showSave ?? this.showSave,
+        showDelete: showDelete ?? this.showDelete,
+      );
+
   @override
   Widget build(BuildContext context) => GestureDetector(
         behavior: HitTestBehavior.translucent,
