@@ -444,7 +444,7 @@ class _MessageListViewState extends State<MessageListView> {
               message: statusString,
               child: LazyLoadScrollView(
                 onPageScrollStart: () {
-                  FocusScope.of(context).unfocus();
+                  //FocusScope.of(context).unfocus();
                 },
                 onStartOfPage: () async {
                   _inBetweenList = false;
