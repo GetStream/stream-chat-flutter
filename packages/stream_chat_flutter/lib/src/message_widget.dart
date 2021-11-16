@@ -1230,6 +1230,7 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildSendingIndicator() {
     final style = widget.messageTheme.createdAtStyle;
     final message = widget.message;
+    final memberCount = StreamChannel.of(context).channel.memberCount ?? 0;
 
     if (hasNonUrlAttachments &&
         (message.status == MessageSendingStatus.sending ||
@@ -1260,7 +1261,7 @@ class _MessageWidgetState extends State<MessageWidget>
     if (isMessageRead) {
       child = Row(
         children: [
-          if (StreamChannel.of(context).channel.memberCount! > 2)
+          if (memberCount > 2)
             Text(
               widget.readList!.length.toString(),
               style: style.copyWith(
