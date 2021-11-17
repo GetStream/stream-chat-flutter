@@ -28,6 +28,7 @@ class AttachmentActionsModal extends StatelessWidget {
     this.showShowInChat = true,
     this.showSave = true,
     this.showDelete = true,
+    this.customActions = const [],
   }) : super(key: key);
 
   /// The message containing the attachments
@@ -57,6 +58,9 @@ class AttachmentActionsModal extends StatelessWidget {
   /// Show delete option
   final bool showDelete;
 
+  /// List of custom actions
+  final List<AttachmentAction> customActions;
+
   /// Creates a copy of [MessageWidget] with specified attributes overridden.
   AttachmentActionsModal copyWith({
     Key? key,
@@ -69,6 +73,7 @@ class AttachmentActionsModal extends StatelessWidget {
     bool? showShowInChat,
     bool? showSave,
     bool? showDelete,
+    List<AttachmentAction>? customActions,
   }) =>
       AttachmentActionsModal(
         key: key ?? this.key,
@@ -81,6 +86,7 @@ class AttachmentActionsModal extends StatelessWidget {
         showShowInChat: showShowInChat ?? this.showShowInChat,
         showSave: showSave ?? this.showSave,
         showDelete: showDelete ?? this.showDelete,
+        customActions: customActions ?? this.customActions,
       );
 
   @override
@@ -217,6 +223,16 @@ class AttachmentActionsModal extends StatelessWidget {
                       },
                       color: theme.colorTheme.accentError,
                     ),
+                  ...customActions
+                      .map(
+                        (e) => _buildButton(
+                          context,
+                          e.actionTitle,
+                          e.icon,
+                          e.onTap,
+                        ),
+                      )
+                      .toList(),
                 ]
                     .map<Widget>((e) => Align(
                           alignment: Alignment.centerRight,
@@ -239,7 +255,7 @@ class AttachmentActionsModal extends StatelessWidget {
   Widget _buildButton(
     context,
     String title,
-    StreamSvgIcon icon,
+    Widget icon,
     VoidCallback? onTap, {
     Color? color,
     Key? key,
@@ -376,4 +392,16 @@ class _DownloadProgress {
   double get toProgressIndicatorValue => received / total;
 
   int get toPercentage => (received * 100) ~/ total;
+}
+
+class AttachmentAction {
+  String actionTitle;
+  Widget icon;
+  VoidCallback onTap;
+
+  AttachmentAction({
+    required this.actionTitle,
+    required this.icon,
+    required this.onTap,
+  });
 }
