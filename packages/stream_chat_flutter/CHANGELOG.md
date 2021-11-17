@@ -1,3 +1,9 @@
+## Upcoming 
+
+🐞 Fixed
+
+- Fixed `MessageWidget` null errors associated with `channel.memberCount`.
+
 ## 3.2.0
 
 - Updated Dart SDK constraints to `>=2.14.0 <3.0.0`
