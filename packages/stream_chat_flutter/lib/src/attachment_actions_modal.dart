@@ -394,14 +394,21 @@ class _DownloadProgress {
   int get toPercentage => (received * 100) ~/ total;
 }
 
+/// Class for custom attachment action
 class AttachmentAction {
-  String actionTitle;
-  Widget icon;
-  VoidCallback onTap;
-
+  /// Constructor for custom attachment action
   AttachmentAction({
     required this.actionTitle,
     required this.icon,
     required this.onTap,
   });
+
+  /// Title for the attachment action
+  String actionTitle;
+
+  /// Icon for the attachment action
+  Widget icon;
+
+  /// Callback for when the action is tapped
+  VoidCallback onTap;
 }
