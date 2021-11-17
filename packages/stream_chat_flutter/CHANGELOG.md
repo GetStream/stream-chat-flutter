@@ -1,8 +1,9 @@
-## Upcoming 
+## Upcoming
 
 🐞 Fixed
 
 - Fixed `MessageWidget` null errors associated with `channel.memberCount`.
+- Fixed adding attachments on web.
 
 ## 3.2.0
 

@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- `closeConnection()` now uses `normalClosure` status when closing websocket.
+
 ## 3.2.0
 
 🐞 Fixed

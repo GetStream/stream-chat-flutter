@@ -121,7 +121,8 @@ class WebSocket with TimerHelper {
     _logger?.info('Closing connection with $baseUrl');
     if (_webSocketChannel != null) {
       _unsubscribeFromWebSocketChannel();
-      _webSocketChannel?.sink.close(status.goingAway);
+      _webSocketChannel?.sink
+          .close(_manuallyClosed ? status.normalClosure : status.goingAway);
       _webSocketChannel = null;
     }
   }
