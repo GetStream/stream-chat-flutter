@@ -62,29 +62,52 @@ class MyApp extends StatelessWidget {
         client: client,
         child: child,
       ),
-      home: const ChannelListPage(),
+      home: ChannelListPage(
+        client: client,
+      ),
     );
   }
 }
 
-class ChannelListPage extends StatelessWidget {
-  const ChannelListPage({
+class ChannelListPage extends StatefulWidget {
+  ChannelListPage({
     Key? key,
+    required this.client,
   }) : super(key: key);
+
+  final StreamChatClient client;
+
+  @override
+  State<ChannelListPage> createState() => _ChannelListPageState();
+}
+
+class _ChannelListPageState extends State<ChannelListPage> {
+  late final _controller = StreamChannelListController(
+    client: widget.client,
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).currentUser!.id],
+    ),
+    sort: const [SortOption('last_message_at')],
+  );
 
   @override
   // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ChannelsBloc(
-        child: ChannelListView(
-          filter: Filter.in_(
-            'members',
-            [StreamChat.of(context).currentUser!.id],
+      body: RefreshIndicator(
+        onRefresh: _controller.refresh,
+        child: StreamChannelListView(
+          controller: _controller,
+          onChannelTap: (channel) => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => StreamChannel(
+                channel: channel,
+                child: const ChannelPage(),
+              ),
+            ),
           ),
-          sort: const [SortOption('last_message_at')],
-          limit: 20,
-          channelWidget: const ChannelPage(),
         ),
       ),
     );
