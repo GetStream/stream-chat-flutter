@@ -163,12 +163,13 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                   ),
               const SizedBox(height: 2),
               if (showTypingIndicator)
-                TypingIndicator(
-                  alignment: Alignment.center,
-                  channel: StreamChannel.of(context).channel,
-                  style: channelHeaderTheme.subtitleStyle,
-                  parentId: parent.id,
-                  alternativeWidget: defaultSubtitle,
+                Align(
+                  child: TypingIndicator(
+                    channel: StreamChannel.of(context).channel,
+                    style: channelHeaderTheme.subtitleStyle,
+                    parentId: parent.id,
+                    alternativeWidget: defaultSubtitle,
+                  ),
                 )
               else
                 defaultSubtitle,
