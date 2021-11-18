@@ -4,8 +4,6 @@
 
 - `MessageListView` now allows more better control over spacing after messages using `spacingWidgetBuilder`.
 
-## Upcoming
-
 🐞 Fixed
 
 - Fixed `MessageWidget` null errors associated with `channel.memberCount`.
