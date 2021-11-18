@@ -33,6 +33,7 @@ class FullScreenMedia extends StatefulWidget {
     this.startIndex = 0,
     String? userName,
     this.onShowMessage,
+    this.attachmentActionsModalBuilder,
   })  : userName = userName ?? '',
         super(key: key);
 
@@ -50,6 +51,11 @@ class FullScreenMedia extends StatefulWidget {
 
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
+
+  /// Widget builder for attachment actions modal
+  /// [defaultActionsModal] is the default [AttachmentActionsModal] config
+  /// Use [defaultActionsModal.copyWith] to easily customize it
+  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override
   _FullScreenMediaState createState() => _FullScreenMediaState();
@@ -196,6 +202,8 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                         StreamChannel.of(context).channel,
                       );
                     },
+                    attachmentActionsModalBuilder:
+                        widget.attachmentActionsModalBuilder,
                   ),
                   if (!widget.message.isEphemeral)
                     GalleryFooter(

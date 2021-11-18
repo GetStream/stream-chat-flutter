@@ -6,6 +6,7 @@
 
 🐞 Fixed
 
+- [[#766]]`AttachmentActionsModal` now has customisation options for actions.
 - Fixed `MessageWidget` null errors associated with `channel.memberCount`.
 - Fixed adding attachments on web.
 
