@@ -4,6 +4,13 @@
 
 - `MessageListView` now allows more better control over spacing after messages using `spacingWidgetBuilder`.
 
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `MessageWidget` null errors associated with `channel.memberCount`.
+- Fixed adding attachments on web.
+
 ## 3.2.0
 
 - Updated Dart SDK constraints to `>=2.14.0 <3.0.0`
