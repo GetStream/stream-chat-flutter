@@ -4,6 +4,10 @@
 
 - Extra properties added to `PaginationParams` to aid in fetching messages.
 
+🐞 Fixed
+
+- `closeConnection()` now uses `normalClosure` status when closing websocket.
+
 ## 3.2.0
 
 🐞 Fixed
