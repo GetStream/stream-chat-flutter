@@ -1,4 +1,8 @@
-## Upcoming
+## Upcoming 
+
+✅ Added
+
+- `MessageListView` now allows more better control over spacing after messages using `spacingWidgetBuilder`.
 
 🐞 Fixed
 
