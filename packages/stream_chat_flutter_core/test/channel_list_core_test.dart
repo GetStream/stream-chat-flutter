@@ -476,7 +476,7 @@ void main() {
       _stateSetter?.call(() => limit = 6);
 
       final updatedChannels = _generateChannels(mockClient, count: limit);
-      final updatedPagination = pagination.copyWith(limit: limit);
+      final updatedPagination = PaginationParams(limit: limit);
       when(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
