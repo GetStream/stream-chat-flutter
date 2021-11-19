@@ -171,7 +171,12 @@ class MessageListView extends StatefulWidget {
     this.reverse = true,
     this.paginationLimit = 20,
     this.paginationLoadingIndicatorBuilder,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
   }) : super(key: key);
+
+  /// [ScrollViewKeyboardDismissBehavior] the defines how this [PositionedList] will
+  /// dismiss the keyboard automatically.
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   /// Function used to build a custom message widget
   final MessageBuilder? messageBuilder;
@@ -443,9 +448,6 @@ class _MessageListViewState extends State<MessageListView> {
               childAnchor: Alignment.topCenter,
               message: statusString,
               child: LazyLoadScrollView(
-                onPageScrollStart: () {
-                  //FocusScope.of(context).unfocus();
-                },
                 onStartOfPage: () async {
                   _inBetweenList = false;
                   if (!_upToDate) {
@@ -471,6 +473,7 @@ class _MessageListViewState extends State<MessageListView> {
                   key: (initialIndex != 0 && initialAlignment != 0)
                       ? ValueKey('$initialIndex-$initialAlignment')
                       : null,
+                  keyboardDismissBehavior: widget.keyboardDismissBehavior,
                   itemPositionsListener: _itemPositionListener,
                   initialScrollIndex: initialIndex,
                   initialAlignment: initialAlignment,

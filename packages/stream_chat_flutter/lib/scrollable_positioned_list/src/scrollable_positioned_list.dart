@@ -52,6 +52,7 @@ class ScrollablePositionedList extends StatefulWidget {
     this.addRepaintBoundaries = true,
     this.minCacheExtent,
     this.findChildIndexCallback,
+    this.keyboardDismissBehavior,
   })  : itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?,
         separatorBuilder = null,
         super(key: key);
@@ -77,6 +78,7 @@ class ScrollablePositionedList extends StatefulWidget {
     this.addRepaintBoundaries = true,
     this.minCacheExtent,
     this.findChildIndexCallback,
+    this.keyboardDismissBehavior,
   })  : assert(separatorBuilder != null, 'seperatorBuilder cannot be null'),
         itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?,
         super(key: key);
@@ -91,6 +93,10 @@ class ScrollablePositionedList extends StatefulWidget {
   /// This callback should take an input [Key], and it should return the
   /// index of the child element with that associated key, or null if not found.
   final ChildIndexGetter? findChildIndexCallback;
+
+  /// [ScrollViewKeyboardDismissBehavior] the defines how this [PositionedList] will
+  /// dismiss the keyboard automatically.
+  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
 
   /// Number of items the [itemBuilder] can produce.
   final int itemCount;
@@ -344,6 +350,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
                     child: NotificationListener<ScrollNotification>(
                       onNotification: (_) => _isTransitioning,
                       child: PositionedList(
+                        keyboardDismissBehavior: widget.keyboardDismissBehavior,
                         itemBuilder: widget.itemBuilder,
                         separatorBuilder: widget.separatorBuilder,
                         itemCount: widget.itemCount,
@@ -374,6 +381,8 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
                       child: NotificationListener<ScrollNotification>(
                         onNotification: (_) => false,
                         child: PositionedList(
+                          keyboardDismissBehavior:
+                              widget.keyboardDismissBehavior,
                           itemBuilder: widget.itemBuilder,
                           separatorBuilder: widget.separatorBuilder,
                           itemCount: widget.itemCount,
