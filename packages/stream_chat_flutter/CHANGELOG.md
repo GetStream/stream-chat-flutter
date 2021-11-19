@@ -1,3 +1,16 @@
+## Upcoming 
+
+✅ Added
+
+- `MessageListView` now allows more better control over spacing after messages using `spacingWidgetBuilder`.
+- `StreamChannel` can now fetch messages around a message ID with the `queryAroundMessage` call.
+
+🐞 Fixed
+
+- [[#766]]`AttachmentActionsModal` now has customisation options for actions.
+- Fixed `MessageWidget` null errors associated with `channel.memberCount`.
+- Fixed adding attachments on web.
+
 ## 3.2.0
 
 - Updated Dart SDK constraints to `>=2.14.0 <3.0.0`

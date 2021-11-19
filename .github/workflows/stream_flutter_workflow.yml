@@ -31,7 +31,7 @@ jobs:
           flutter-version: ${{ env.flutter_version }}
       - name: "Install Tools"
         run: |
-          flutter pub global activate melos 1.0.0-dev.6
+          flutter pub global activate melos 1.0.0-dev.10
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: "Dart Analyze"
