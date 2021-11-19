@@ -3,6 +3,7 @@
 ✅ Added
 
 - `MessageListView` now allows more better control over spacing after messages using `spacingWidgetBuilder`.
+- `StreamChannel` can now fetch messages around a message ID with the `queryAroundMessage` call.
 
 🐞 Fixed
 
