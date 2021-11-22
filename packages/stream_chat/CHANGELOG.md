@@ -1,15 +1,13 @@
-## Upcoming 
-
-🐞 Fixed
-
-- `closeConnection()` now uses `normalClosure` status when closing websocket.
-- Fixed unread count indicator
-
 ## Upcoming
 
 ✅ Added
 
 - Extra properties added to `PaginationParams` to aid in fetching messages.
+
+🐞 Fixed
+
+- `closeConnection()` now uses `normalClosure` status when closing websocket.
+- Fixed unread count indicator
 
 ## 3.2.0
 
