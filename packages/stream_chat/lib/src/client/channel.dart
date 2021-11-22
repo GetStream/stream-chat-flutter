@@ -1860,13 +1860,13 @@ class ChannelClientState {
               (m) => m.user.id == message.user?.id,
             ) !=
             null;
-    final isThreadMessage = message.parentId != null;
+    //final isThreadMessage = message.parentId != null;
 
     return !message.silent &&
         !message.shadowed &&
         message.user?.id != userId &&
-        !userIsMuted &&
-        !isThreadMessage;
+        !userIsMuted;
+    //&& !isThreadMessage;
   }
 
   /// Update threads with updated information about messages.
