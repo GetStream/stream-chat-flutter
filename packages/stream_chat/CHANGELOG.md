@@ -1,3 +1,9 @@
+## Upcoming 
+
+🐞 Fixed
+
+- Fixed unread count indicator
+
 ## 3.2.0
 
 🐞 Fixed
