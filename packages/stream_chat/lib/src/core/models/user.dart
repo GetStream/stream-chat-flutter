@@ -179,5 +179,16 @@ class User extends Equatable {
       );
 
   @override
-  List<Object?> get props => [id, role];
+  List<Object?> get props => [
+        id,
+        role,
+        createdAt,
+        updatedAt,
+        lastActive,
+        online,
+        extraData,
+        banned,
+        teams,
+        language,
+      ];
 }
