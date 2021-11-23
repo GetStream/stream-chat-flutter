@@ -7,6 +7,7 @@
 🐞 Fixed
 
 - `closeConnection()` now uses `normalClosure` status when closing websocket.
+- Fixed local unread count indicator increasing for thread replies
 
 ## 3.2.0
 
