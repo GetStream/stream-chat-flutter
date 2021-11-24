@@ -182,8 +182,6 @@ class User extends Equatable {
   List<Object?> get props => [
         id,
         role,
-        createdAt,
-        updatedAt,
         lastActive,
         online,
         extraData,

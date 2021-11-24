@@ -45,7 +45,6 @@ void main() {
       role: 'testRole',
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
-      lastActive: DateTime.now(),
       online: math.Random().nextBool(),
       banned: math.Random().nextBool(),
     );
