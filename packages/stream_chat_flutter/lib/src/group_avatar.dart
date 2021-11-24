@@ -81,6 +81,7 @@ class GroupAvatar extends StatelessWidget {
                                 ),
                                 initialData: member,
                                 builder: (context, member) => UserAvatar(
+                                  showOnlineStatus: false,
                                   user: member.user!,
                                   borderRadius: BorderRadius.zero,
                                 ),
@@ -118,6 +119,7 @@ class GroupAvatar extends StatelessWidget {
                                   ),
                                   initialData: member,
                                   builder: (context, member) => UserAvatar(
+                                    showOnlineStatus: false,
                                     user: member.user!,
                                     borderRadius: BorderRadius.zero,
                                   ),
