@@ -1645,7 +1645,6 @@ class MessageInputState extends State<MessageInput> {
       }
       final res = await FilePicker.platform.pickFiles(
         type: type,
-        withData: true,
       );
       if (res?.files.isNotEmpty == true) {
         file = res!.files.single.toAttachmentFile;
