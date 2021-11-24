@@ -79,9 +79,10 @@ void main() {
         messageId: 'test',
         score: 2,
         user: User(
-            id: 'test',
-            createdAt: newUserCreateTime,
-            updatedAt: newUserCreateTime),
+          id: 'test',
+          createdAt: newUserCreateTime,
+          updatedAt: newUserCreateTime,
+        ),
         userId: 'test',
       );
 
@@ -94,11 +95,13 @@ void main() {
       expect(newReaction.messageId, 'test');
       expect(newReaction.score, 2);
       expect(
-          newReaction.user,
-          User(
-              id: 'test',
-              createdAt: newUserCreateTime,
-              updatedAt: newUserCreateTime));
+        newReaction.user,
+        User(
+          id: 'test',
+          createdAt: newUserCreateTime,
+          updatedAt: newUserCreateTime,
+        ),
+      );
       expect(newReaction.userId, 'test');
     });
 
