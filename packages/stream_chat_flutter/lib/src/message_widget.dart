@@ -97,14 +97,20 @@ class MessageWidget extends StatefulWidget {
     this.deletedBottomRowBuilder,
     this.onReturnAction,
     this.customAttachmentBuilders,
-    this.readList,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
       horizontal: 16,
       vertical: 8,
     ),
     this.attachmentPadding = EdgeInsets.zero,
-    this.allRead = false,
+    @Deprecated('''
+    allRead is now deprecated and it will be removed in future releases. 
+    The MessageWidget now listens for read events on its own.
+    ''') this.allRead = false,
+    @Deprecated('''
+    readList is now deprecated and it will be removed in future releases. 
+    The MessageWidget now listens for read events on its own.
+    ''') this.readList,
     this.onQuotedMessageTap,
     this.customActions = const [],
     this.onAttachmentTap,
@@ -557,8 +563,6 @@ class _MessageWidgetState extends State<MessageWidget>
   bool get showUsername => widget.showUsername;
 
   bool get showTimeStamp => widget.showTimestamp;
-
-  bool get isMessageRead => widget.readList?.isNotEmpty == true;
 
   bool get showInChannel => widget.showInChannelIndicator;
 
@@ -1253,27 +1257,40 @@ class _MessageWidgetState extends State<MessageWidget>
       );
     }
 
-    Widget child = SendingIndicator(
-      message: message,
-      isMessageRead: isMessageRead,
-      size: style!.fontSize,
+    final channel = StreamChannel.of(context).channel;
+
+    return BetterStreamBuilder<List<Read>>(
+      stream: channel.state?.readStream,
+      initialData: channel.state?.read,
+      builder: (context, data) {
+        final readList = data.where((it) =>
+            it.user.id != _streamChat.currentUser?.id &&
+            (it.lastRead.isAfter(message.createdAt) ||
+                it.lastRead.isAtSameMomentAs(message.createdAt)));
+        final isMessageRead = readList.length >= (channel.memberCount ?? 0) - 1;
+        Widget child = SendingIndicator(
+          message: message,
+          isMessageRead: isMessageRead,
+          size: style!.fontSize,
+        );
+        if (isMessageRead) {
+          child = Row(
+            children: [
+              if (memberCount > 2)
+                Text(
+                  readList.length.toString(),
+                  style: style.copyWith(
+                    color: _streamChatTheme.colorTheme.accentPrimary,
+                  ),
+                ),
+              const SizedBox(width: 2),
+              child,
+            ],
+          );
+        }
+        return child;
+      },
     );
-    if (isMessageRead) {
-      child = Row(
-        children: [
-          if (memberCount > 2)
-            Text(
-              widget.readList!.length.toString(),
-              style: style.copyWith(
-                color: _streamChatTheme.colorTheme.accentPrimary,
-              ),
-            ),
-          const SizedBox(width: 2),
-          child,
-        ],
-      );
-    }
-    return child;
   }
 
   Widget _buildUserAvatar() => Transform.translate(
