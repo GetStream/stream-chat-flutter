@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 
@@ -5,7 +6,7 @@ part 'read.g.dart';
 
 /// The class that defines a read event
 @JsonSerializable()
-class Read {
+class Read extends Equatable {
   /// Constructor used for json serialization
   Read({
     required this.lastRead,
@@ -39,4 +40,11 @@ class Read {
         user: user ?? this.user,
         unreadMessages: unreadMessages ?? this.unreadMessages,
       );
+
+  @override
+  List<Object?> get props => [
+        lastRead,
+        user,
+        unreadMessages,
+      ];
 }

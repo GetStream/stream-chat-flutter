@@ -126,16 +126,26 @@ class ChannelPreview extends StatelessWidget {
                           streamChatState.currentUser?.id) {
                         return Padding(
                           padding: const EdgeInsets.only(right: 4),
-                          child: SendingIndicator(
-                            message: lastMessage!,
-                            size: channelPreviewTheme.indicatorIconSize,
-                            isMessageRead: channel.state!.read
-                                .where((element) =>
-                                    element.user.id !=
-                                    channel.client.state.currentUser!.id)
-                                .where((element) => element.lastRead
-                                    .isAfter(lastMessage.createdAt))
-                                .isNotEmpty,
+                          child: BetterStreamBuilder<List<Read>>(
+                            stream: channel.state?.readStream,
+                            initialData: channel.state?.read,
+                            builder: (context, data) {
+                              final readList = data.where((it) =>
+                                  it.user.id !=
+                                      channel.client.state.currentUser?.id &&
+                                  (it.lastRead
+                                          .isAfter(lastMessage!.createdAt) ||
+                                      it.lastRead.isAtSameMomentAs(
+                                        lastMessage.createdAt,
+                                      )));
+                              final isMessageRead = readList.length >=
+                                  (channel.memberCount ?? 0) - 1;
+                              return SendingIndicator(
+                                message: lastMessage!,
+                                size: channelPreviewTheme.indicatorIconSize,
+                                isMessageRead: isMessageRead,
+                              );
+                            },
                           ),
                         );
                       }
