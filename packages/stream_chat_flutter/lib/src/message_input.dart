@@ -323,6 +323,8 @@ class MessageInput extends StatefulWidget {
   /// Defaults to false.
   final bool mentionAllAppUsers;
 
+  /// Defines if the [MessageInput] loses focuses after a message is sent.
+  /// The default behaviour keeps focus until a command is enabled.
   final bool? shouldKeepFocusAfterMessage;
 
   @override
