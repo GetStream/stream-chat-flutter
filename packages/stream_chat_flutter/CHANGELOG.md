@@ -12,7 +12,8 @@
 - Fixed `MessageWidget` null errors associated with `channel.memberCount`.
 - Fixed adding attachments on web.
 - [[#767]](https://github.com/GetStream/stream-chat-flutter/issues/767): Fix `MessageInput` focus behaviour when sending messages.
-- Fixed user presence indicator not updating correctly
+- Fixed user presence indicator not updating correctly.
+- Do not use `withData: true` in `FilePicker` calls.
 
 ## 3.2.0
 
