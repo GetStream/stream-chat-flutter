@@ -70,13 +70,18 @@ void main() {
       expect(
           newReaction.extraData, {'updated_at': '2020-01-28T22:17:31.108742Z'});
 
+      final newUserCreateTime = DateTime.now();
+
       newReaction = reaction.copyWith(
         type: 'lol',
         createdAt: DateTime.parse('2021-01-28T22:17:31.108742Z'),
         extraData: {},
         messageId: 'test',
         score: 2,
-        user: User(id: 'test'),
+        user: User(
+            id: 'test',
+            createdAt: newUserCreateTime,
+            updatedAt: newUserCreateTime),
         userId: 'test',
       );
 
@@ -88,12 +93,19 @@ void main() {
       expect(newReaction.extraData, {});
       expect(newReaction.messageId, 'test');
       expect(newReaction.score, 2);
-      expect(newReaction.user, User(id: 'test'));
+      expect(
+          newReaction.user,
+          User(
+              id: 'test',
+              createdAt: newUserCreateTime,
+              updatedAt: newUserCreateTime));
       expect(newReaction.userId, 'test');
     });
 
     test('merge', () {
       final reaction = Reaction.fromJson(jsonFixture('reaction.json'));
+      final newUserCreateTime = DateTime.now();
+
       final newReaction = reaction.merge(
         Reaction(
           type: 'lol',
@@ -101,7 +113,11 @@ void main() {
           extraData: {},
           messageId: 'test',
           score: 2,
-          user: User(id: 'test'),
+          user: User(
+            id: 'test',
+            createdAt: newUserCreateTime,
+            updatedAt: newUserCreateTime,
+          ),
           userId: 'test',
         ),
       );
@@ -114,7 +130,14 @@ void main() {
       expect(newReaction.extraData, {});
       expect(newReaction.messageId, 'test');
       expect(newReaction.score, 2);
-      expect(newReaction.user, User(id: 'test'));
+      expect(
+        newReaction.user,
+        User(
+          id: 'test',
+          createdAt: newUserCreateTime,
+          updatedAt: newUserCreateTime,
+        ),
+      );
       expect(newReaction.userId, 'test');
     });
   });
