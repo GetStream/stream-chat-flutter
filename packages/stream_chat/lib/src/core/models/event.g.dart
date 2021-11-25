@@ -37,6 +37,7 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       channelId: json['channel_id'] as String?,
       channelType: json['channel_type'] as String?,
       parentId: json['parent_id'] as String?,
+      hardDelete: json['hard_delete'] as bool?,
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       isLocal: json['is_local'] as bool? ?? false,
     );
@@ -59,6 +60,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'online': instance.online,
       'parent_id': instance.parentId,
       'is_local': instance.isLocal,
+      'hard_delete': instance.hardDelete,
       'extra_data': instance.extraData,
     };
 
