@@ -10,9 +10,12 @@ import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list
 import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list_tile.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-Widget defaultSeparatorBuilder(context, index) =>
+/// Default separator builder for [StreamChannelListView].
+Widget defaultSeparatorBuilder(BuildContext context, int index) =>
     const StreamChannelListSeparator();
 
+/// Signature for the item builder that creates the children of the
+/// [StreamChannelListView].
 typedef StreamChannelListViewItemBuilder = Widget Function(
   BuildContext context,
   Channel channel,
@@ -265,13 +268,13 @@ class _StreamChannelListViewState extends State<StreamChannelListView> {
               separatorBuilder: widget.separatorBuilder,
               itemBuilder: (context, index) {
                 if (!_hasRequestedNextPage) {
-                  final newPageRequestTriggerIndex = value.itemCount - 3;
+                  final newPageRequestTriggerIndex = channels.length - 3;
                   final isBuildingTriggerIndexItem =
                       index == newPageRequestTriggerIndex;
                   if (nextPageKey != null && isBuildingTriggerIndexItem) {
                     // Schedules the request for the end of this frame.
                     WidgetsBinding.instance?.addPostFrameCallback((_) async {
-                      if (!value.hasError) {
+                      if (error == null) {
                         await _controller.loadMore(nextPageKey);
                       }
                       _hasRequestedNextPage = false;

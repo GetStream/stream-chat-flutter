@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// A shimmering list item which shows a loading effect.
+///
+/// This is used by [StreamChannelListView] to show a loading effect while
+/// the list is being loaded.
 class StreamChannelListLoadingTile extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListLoadingTile] widget.
   const StreamChannelListLoadingTile({
     Key? key,
     this.visualDensity = VisualDensity.standard,
