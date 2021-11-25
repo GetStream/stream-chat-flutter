@@ -21,6 +21,7 @@ class StreamChannelName extends StatelessWidget {
         ),
         super(key: key);
 
+  /// The [Channel] to show the name for.
   final Channel channel;
 
   /// The style of the text displayed

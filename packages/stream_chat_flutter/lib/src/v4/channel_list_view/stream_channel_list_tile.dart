@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart' show Channel;
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/sending_indicator.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/channel_preview_theme.dart';
@@ -10,9 +11,20 @@ import 'package:stream_chat_flutter/src/unread_indicator.dart';
 import 'package:stream_chat_flutter/src/v4/stream_channel_avatar.dart';
 import 'package:stream_chat_flutter/src/v4/stream_channel_name.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
+/// A widget that displays a channel preview.
+///
+/// This widget is intended to be used as a Tile in [StreamChannelListView]
+///
+/// It shows the last message of the channel, the last message time, the unread
+/// message count, the typing indicator, the sending indicator and the channel
+/// avatar.
+///
+/// See also:
+/// * [StreamChannelAvatar]
+/// * [StreamChannelName]
 class StreamChannelListTile extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListTile] widget.
   StreamChannelListTile({
     Key? key,
     required this.channel,
@@ -29,50 +41,22 @@ class StreamChannelListTile extends StatelessWidget {
         ),
         super(key: key);
 
+  /// The channel to display.
   final Channel channel;
 
   /// A widget to display before the title.
-  ///
-  /// Typically an [Icon] or a [CircleAvatar] widget.
   final Widget? leading;
 
   /// The primary content of the list tile.
-  ///
-  /// Typically a [Text] widget.
-  ///
-  /// This should not wrap. To enforce the single line limit, use
-  /// [Text.maxLines].
   final Widget? title;
 
   /// Additional content displayed below the title.
-  ///
-  /// Typically a [Text] widget.
-  ///
-  /// If [isThreeLine] is false, this should not wrap.
-  ///
-  /// If [isThreeLine] is true, this should be configured to take a maximum of
-  /// two lines. For example, you can use [Text.maxLines] to enforce the number
-  /// of lines.
-  ///
-  /// The subtitle's default [TextStyle] depends on [TextTheme.bodyText2] except
-  /// [TextStyle.color]. The [TextStyle.color] depends on the value of [enabled]
-  /// and [selected].
-  ///
-  /// When [enabled] is false, the text color is set to [ThemeData.disabledColor].
-  ///
-  /// When [selected] is false, the text color is set to [ListTileTheme.textColor]
-  /// if it's not null and to [TextTheme.caption]'s color if [ListTileTheme.textColor]
-  /// is null.
   final Widget? subtitle;
 
   /// Called when the user taps this list tile.
-  ///
-  /// Inoperative if [enabled] is false.
   final GestureTapCallback? onTap;
 
   /// Called when the user long-presses on this list tile.
-  ///
-  /// Inoperative if [enabled] is false.
   final GestureLongPressCallback? onLongPress;
 
   /// Defines how compact the list tile's layout will be.
@@ -196,7 +180,9 @@ class StreamChannelListTile extends StatelessWidget {
   }
 }
 
+/// A widget that displays the channel last message date.
 class ChannelLastMessageDate extends StatelessWidget {
+  /// Creates a new instance of the [ChannelLastMessageDate] widget.
   ChannelLastMessageDate({
     Key? key,
     required this.channel,
@@ -207,6 +193,7 @@ class ChannelLastMessageDate extends StatelessWidget {
         ),
         super(key: key);
 
+  /// The channel to display the last message date for.
   final Channel channel;
 
   /// The style of the text displayed
@@ -246,7 +233,9 @@ class ChannelLastMessageDate extends StatelessWidget {
       );
 }
 
+/// A widget that displays the subtitle for [StreamChannelListTile].
 class ChannelListTileSubtitle extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListTileSubtitle] widget.
   ChannelListTileSubtitle({
     Key? key,
     required this.channel,
@@ -257,6 +246,7 @@ class ChannelListTileSubtitle extends StatelessWidget {
         ),
         super(key: key);
 
+  /// The channel to create the subtitle from.
   final Channel channel;
 
   /// The style of the text displayed
@@ -287,7 +277,9 @@ class ChannelListTileSubtitle extends StatelessWidget {
   }
 }
 
+/// A widget that displays the last message of a channel.
 class ChannelLastMessageText extends StatelessWidget {
+  /// Creates a new instance of [ChannelLastMessageText] widget.
   ChannelLastMessageText({
     Key? key,
     required this.channel,
@@ -298,6 +290,7 @@ class ChannelLastMessageText extends StatelessWidget {
         ),
         super(key: key);
 
+  /// The channel to display the last message of.
   final Channel channel;
 
   /// The style of the text displayed
