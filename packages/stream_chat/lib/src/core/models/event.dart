@@ -93,6 +93,7 @@ class Event {
   final bool isLocal;
 
   /// This is true if the message has been hard deleted
+  @JsonKey(includeIfNull: false)
   final bool? hardDelete;
 
   /// Map of custom channel extraData
