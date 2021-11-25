@@ -58,6 +58,46 @@ typedef OnMessageTap = void Function(Message);
 /// Callback on reply tapped
 typedef ReplyTapCallback = void Function(Message);
 
+/// Spacing Types (These are properties of a message to help inform the decision
+/// of how much space / which widget to build after it)
+enum SpacingType {
+  /// Message is a thread
+  thread,
+
+  /// There is a >1s time diff between current and last message
+  timeDiff,
+
+  /// Next message is by a different user
+  otherUser,
+
+  /// Message is deleted
+  deleted,
+
+  /// No other conditions are valid, default spacing (This will likely be the
+  /// only rule in the list provided)
+  defaultSpacing,
+}
+
+/// Builder for building certain spacing after widgets.
+/// This spacing can be in form of any widgets you like.
+/// A List of [SpacingType] is provided to help inform the decision of
+/// what to build after the message.
+///
+/// As an example:
+///               MessageListView(
+///                 spacingWidgetBuilder: (context, list) {
+///                   if(list.contains(SpacingType.defaultSpacing)) {
+///                     return SizedBox(height: 2.0,);
+///                   } else {
+///                     return SizedBox(height: 8.0,);
+///                   }
+///                 },
+///               ),
+typedef SpacingWidgetBuilder = Widget Function(
+  BuildContext context,
+  List<SpacingType> spacingTypes,
+);
+
 /// Class for message details
 // ignore: prefer-match-file-name
 class MessageDetails {
@@ -171,7 +211,13 @@ class MessageListView extends StatefulWidget {
     this.reverse = true,
     this.paginationLimit = 20,
     this.paginationLoadingIndicatorBuilder,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
+    this.spacingWidgetBuilder,
   }) : super(key: key);
+
+  /// [ScrollViewKeyboardDismissBehavior] the defines how this [PositionedList] will
+  /// dismiss the keyboard automatically.
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   /// Function used to build a custom message widget
   final MessageBuilder? messageBuilder;
@@ -288,6 +334,12 @@ class MessageListView extends StatefulWidget {
 
   /// Builder used to build the loading indicator shown while paginating.
   final WidgetBuilder? paginationLoadingIndicatorBuilder;
+
+  /// This allows a user to customise the space after a message
+  /// A List of [SpacingType] is provided to provide more data about the
+  /// type of message (thread, difference in time between current and last
+  /// message, default spacing, etc)
+  final SpacingWidgetBuilder? spacingWidgetBuilder;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -443,9 +495,6 @@ class _MessageListViewState extends State<MessageListView> {
               childAnchor: Alignment.topCenter,
               message: statusString,
               child: LazyLoadScrollView(
-                onPageScrollStart: () {
-                  FocusScope.of(context).unfocus();
-                },
                 onStartOfPage: () async {
                   _inBetweenList = false;
                   if (!_upToDate) {
@@ -471,6 +520,7 @@ class _MessageListViewState extends State<MessageListView> {
                   key: (initialIndex != 0 && initialAlignment != 0)
                       ? ValueKey('$initialIndex-$initialAlignment')
                       : null,
+                  keyboardDismissBehavior: widget.keyboardDismissBehavior,
                   itemPositionsListener: _itemPositionListener,
                   initialScrollIndex: initialIndex,
                   initialAlignment: initialAlignment,
@@ -564,17 +614,38 @@ class _MessageListViewState extends State<MessageListView> {
                       Units.MINUTE,
                     );
 
+                    final spacingRules = <SpacingType>[];
+
                     final isNextUserSame =
                         message.user!.id == nextMessage.user?.id;
                     final isThread = message.replyCount! > 0;
                     final isDeleted = message.isDeleted;
-                    if (timeDiff >= 1 ||
-                        !isNextUserSame ||
-                        isThread ||
-                        isDeleted) {
-                      return const SizedBox(height: 8);
+                    final hasTimeDiff = timeDiff >= 1;
+
+                    if (hasTimeDiff) {
+                      spacingRules.add(SpacingType.timeDiff);
                     }
-                    return const SizedBox(height: 2);
+
+                    if (!isNextUserSame) {
+                      spacingRules.add(SpacingType.otherUser);
+                    }
+
+                    if (isThread) {
+                      spacingRules.add(SpacingType.thread);
+                    }
+
+                    if (isDeleted) {
+                      spacingRules.add(SpacingType.deleted);
+                    }
+
+                    if (spacingRules.isNotEmpty) {
+                      return widget.spacingWidgetBuilder
+                              ?.call(context, spacingRules) ??
+                          const SizedBox(height: 8);
+                    }
+                    return widget.spacingWidgetBuilder
+                            ?.call(context, [SpacingType.defaultSpacing]) ??
+                        const SizedBox(height: 2);
                   },
                   itemBuilder: (context, i) {
                     if (i == itemCount - 1) {

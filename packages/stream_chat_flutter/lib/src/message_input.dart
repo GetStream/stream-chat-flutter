@@ -204,6 +204,7 @@ class MessageInput extends StatefulWidget {
     this.commandButtonBuilder,
     this.customOverlays = const [],
     this.mentionAllAppUsers = false,
+    this.shouldKeepFocusAfterMessage,
   })  : assert(
           initialMessage == null || editMessage == null,
           "Can't provide both `initialMessage` and `editMessage`",
@@ -321,6 +322,10 @@ class MessageInput extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool mentionAllAppUsers;
+
+  /// Defines if the [MessageInput] loses focuses after a message is sent.
+  /// The default behaviour keeps focus until a command is enabled.
+  final bool? shouldKeepFocusAfterMessage;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -1640,7 +1645,6 @@ class MessageInputState extends State<MessageInput> {
       }
       final res = await FilePicker.platform.pickFiles(
         type: type,
-        withData: true,
       );
       if (res?.files.isNotEmpty == true) {
         file = res!.files.single.toAttachmentFile;
@@ -1759,7 +1763,9 @@ class MessageInputState extends State<MessageInput> {
       return;
     }
 
-    final shouldUnfocus = _commandEnabled;
+    var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
+
+    shouldKeepFocus ??= !_commandEnabled;
 
     if (_commandEnabled) {
       text = '${'/${_chosenCommand!.name} '}$text';
@@ -1822,8 +1828,10 @@ class MessageInputState extends State<MessageInput> {
         sendingFuture = channel.updateMessage(message);
       }
 
-      if (!shouldUnfocus) {
+      if (shouldKeepFocus) {
         FocusScope.of(context).requestFocus(_focusNode);
+      } else {
+        FocusScope.of(context).unfocus();
       }
 
       final resp = await sendingFuture;

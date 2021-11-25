@@ -28,9 +28,12 @@ class UnboundedCustomScrollView extends CustomScrollView {
     List<Widget> slivers = const <Widget>[],
     int? semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
   })  : _anchor = anchor,
         super(
           key: key,
+          keyboardDismissBehavior: keyboardDismissBehavior ??
+              ScrollViewKeyboardDismissBehavior.manual,
           scrollDirection: scrollDirection,
           reverse: reverse,
           controller: controller,

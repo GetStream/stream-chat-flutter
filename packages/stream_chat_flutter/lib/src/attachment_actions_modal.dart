@@ -24,6 +24,11 @@ class AttachmentActionsModal extends StatelessWidget {
     this.onShowMessage,
     this.imageDownloader,
     this.fileDownloader,
+    this.showReply = true,
+    this.showShowInChat = true,
+    this.showSave = true,
+    this.showDelete = true,
+    this.customActions = const [],
   }) : super(key: key);
 
   /// The message containing the attachments
@@ -40,6 +45,49 @@ class AttachmentActionsModal extends StatelessWidget {
 
   /// Callback to provide download files
   final AttachmentDownloader? fileDownloader;
+
+  /// Show reply option
+  final bool showReply;
+
+  /// Show show in chat option
+  final bool showShowInChat;
+
+  /// Show save option
+  final bool showSave;
+
+  /// Show delete option
+  final bool showDelete;
+
+  /// List of custom actions
+  final List<AttachmentAction> customActions;
+
+  /// Creates a copy of [MessageWidget] with specified attributes overridden.
+  AttachmentActionsModal copyWith({
+    Key? key,
+    int? currentIndex,
+    Message? message,
+    VoidCallback? onShowMessage,
+    AttachmentDownloader? imageDownloader,
+    AttachmentDownloader? fileDownloader,
+    bool? showReply,
+    bool? showShowInChat,
+    bool? showSave,
+    bool? showDelete,
+    List<AttachmentAction>? customActions,
+  }) =>
+      AttachmentActionsModal(
+        key: key ?? this.key,
+        currentIndex: currentIndex ?? this.currentIndex,
+        message: message ?? this.message,
+        onShowMessage: onShowMessage ?? this.onShowMessage,
+        imageDownloader: imageDownloader ?? this.imageDownloader,
+        fileDownloader: fileDownloader ?? this.fileDownloader,
+        showReply: showReply ?? this.showReply,
+        showShowInChat: showShowInChat ?? this.showShowInChat,
+        showSave: showSave ?? this.showSave,
+        showDelete: showDelete ?? this.showDelete,
+        customActions: customActions ?? this.customActions,
+      );
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -67,82 +115,86 @@ class AttachmentActionsModal extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildButton(
-                    context,
-                    context.translations.replyLabel,
-                    StreamSvgIcon.iconCurveLineLeftUp(
-                      size: 24,
-                      color: theme.colorTheme.textLowEmphasis,
+                  if (showReply)
+                    _buildButton(
+                      context,
+                      context.translations.replyLabel,
+                      StreamSvgIcon.iconCurveLineLeftUp(
+                        size: 24,
+                        color: theme.colorTheme.textLowEmphasis,
+                      ),
+                      () {
+                        Navigator.pop(context, ReturnActionType.reply);
+                      },
                     ),
-                    () {
-                      Navigator.pop(context, ReturnActionType.reply);
-                    },
-                  ),
-                  _buildButton(
-                    context,
-                    context.translations.showInChatLabel,
-                    StreamSvgIcon.eye(
-                      size: 24,
-                      color: theme.colorTheme.textHighEmphasis,
+                  if (showShowInChat)
+                    _buildButton(
+                      context,
+                      context.translations.showInChatLabel,
+                      StreamSvgIcon.eye(
+                        size: 24,
+                        color: theme.colorTheme.textHighEmphasis,
+                      ),
+                      onShowMessage,
                     ),
-                    onShowMessage,
-                  ),
-                  _buildButton(
-                    context,
-                    message.attachments[currentIndex].type == 'video'
-                        ? context.translations.saveVideoLabel
-                        : context.translations.saveImageLabel,
-                    StreamSvgIcon.iconSave(
-                      size: 24,
-                      color: theme.colorTheme.textLowEmphasis,
+                  if (showSave)
+                    _buildButton(
+                      context,
+                      message.attachments[currentIndex].type == 'video'
+                          ? context.translations.saveVideoLabel
+                          : context.translations.saveImageLabel,
+                      StreamSvgIcon.iconSave(
+                        size: 24,
+                        color: theme.colorTheme.textLowEmphasis,
+                      ),
+                      () {
+                        final attachment = message.attachments[currentIndex];
+                        final isImage = attachment.type == 'image';
+                        final Future<String?> Function(
+                          Attachment, {
+                          void Function(int, int) progressCallback,
+                        }) saveFile = fileDownloader ?? _downloadAttachment;
+                        final Future<String?> Function(
+                          Attachment, {
+                          void Function(int, int) progressCallback,
+                        }) saveImage = imageDownloader ?? _downloadAttachment;
+                        final downloader = isImage ? saveImage : saveFile;
+
+                        final progressNotifier =
+                            ValueNotifier<_DownloadProgress?>(
+                          _DownloadProgress.initial(),
+                        );
+
+                        downloader(
+                          attachment,
+                          progressCallback: (received, total) {
+                            progressNotifier.value = _DownloadProgress(
+                              total,
+                              received,
+                            );
+                          },
+                        ).catchError((e, stk) {
+                          progressNotifier.value = null;
+                        });
+
+                        // Closing attachment actions modal before opening
+                        // attachment download dialog
+                        Navigator.pop(context);
+
+                        showDialog(
+                          barrierDismissible: false,
+                          context: context,
+                          barrierColor: theme.colorTheme.overlay,
+                          builder: (context) => _buildDownloadProgressDialog(
+                            context,
+                            progressNotifier,
+                          ),
+                        );
+                      },
                     ),
-                    () {
-                      final attachment = message.attachments[currentIndex];
-                      final isImage = attachment.type == 'image';
-                      final Future<String?> Function(
-                        Attachment, {
-                        void Function(int, int) progressCallback,
-                      }) saveFile = fileDownloader ?? _downloadAttachment;
-                      final Future<String?> Function(
-                        Attachment, {
-                        void Function(int, int) progressCallback,
-                      }) saveImage = imageDownloader ?? _downloadAttachment;
-                      final downloader = isImage ? saveImage : saveFile;
-
-                      final progressNotifier =
-                          ValueNotifier<_DownloadProgress?>(
-                        _DownloadProgress.initial(),
-                      );
-
-                      downloader(
-                        attachment,
-                        progressCallback: (received, total) {
-                          progressNotifier.value = _DownloadProgress(
-                            total,
-                            received,
-                          );
-                        },
-                      ).catchError((e, stk) {
-                        progressNotifier.value = null;
-                      });
-
-                      // Closing attachment actions modal before opening
-                      // attachment download dialog
-                      Navigator.pop(context);
-
-                      showDialog(
-                        barrierDismissible: false,
-                        context: context,
-                        barrierColor: theme.colorTheme.overlay,
-                        builder: (context) => _buildDownloadProgressDialog(
-                          context,
-                          progressNotifier,
-                        ),
-                      );
-                    },
-                  ),
                   if (StreamChat.of(context).currentUser?.id ==
-                      message.user?.id)
+                          message.user?.id &&
+                      showDelete)
                     _buildButton(
                       context,
                       context.translations.deleteLabel.capitalize(),
@@ -171,6 +223,16 @@ class AttachmentActionsModal extends StatelessWidget {
                       },
                       color: theme.colorTheme.accentError,
                     ),
+                  ...customActions
+                      .map(
+                        (e) => _buildButton(
+                          context,
+                          e.actionTitle,
+                          e.icon,
+                          e.onTap,
+                        ),
+                      )
+                      .toList(),
                 ]
                     .map<Widget>((e) => Align(
                           alignment: Alignment.centerRight,
@@ -193,7 +255,7 @@ class AttachmentActionsModal extends StatelessWidget {
   Widget _buildButton(
     context,
     String title,
-    StreamSvgIcon icon,
+    Widget icon,
     VoidCallback? onTap, {
     Color? color,
     Key? key,
@@ -330,4 +392,23 @@ class _DownloadProgress {
   double get toProgressIndicatorValue => received / total;
 
   int get toPercentage => (received * 100) ~/ total;
+}
+
+/// Class for custom attachment action
+class AttachmentAction {
+  /// Constructor for custom attachment action
+  AttachmentAction({
+    required this.actionTitle,
+    required this.icon,
+    required this.onTap,
+  });
+
+  /// Title for the attachment action
+  String actionTitle;
+
+  /// Icon for the attachment action
+  Widget icon;
+
+  /// Callback for when the action is tapped
+  VoidCallback onTap;
 }
