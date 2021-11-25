@@ -10,32 +10,44 @@ import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list
 import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list_tile.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-/// Signature for a function that creates a widget for a given index, e.g., in a
-/// list.
-///
-/// Used by [GridView.builder] and other APIs that use lazily-generated widgets.
-///
-/// See also:
-///
-///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-///  * [TransitionBuilder], which is similar but also takes a child.
-///  * [NullableIndexedWidgetBuilder], which is similar but may return null.
+Widget defaultSeparatorBuilder(context, index) =>
+    const StreamChannelListSeparator();
+
 typedef StreamChannelListViewItemBuilder = Widget Function(
   BuildContext context,
   Channel channel,
 );
 
-typedef StreamChannelTapCallback = void Function(Channel);
-
-Widget _defaultSeparatorBuilder(context, index) =>
-    const _ChannelListSeparator();
-
+/// A [ListView] that shows a list of [Channel]s,
+/// it uses [StreamChannelListTile] as a default item.
+///
+/// This is the new version of [ChannelListView] that uses
+/// [StreamChannelListController].
+///
+/// Example:
+///
+/// ```dart
+/// StreamChannelListView(
+///   controller: controller,
+///   onChannelTap: (channel) {
+///     // Handle channel tap event
+///   },
+///   onChannelLongPress: (channel) {
+///     // Handle channel long press event
+///   },
+/// )
+/// ```
+///
+/// See also:
+/// * [StreamChannelListTile]
+/// * [StreamChannelListController]
 class StreamChannelListView extends StatefulWidget {
+  /// Creates a new instance of [StreamChannelListView].
   const StreamChannelListView({
     Key? key,
     required this.controller,
     this.itemBuilder,
-    this.separatorBuilder = _defaultSeparatorBuilder,
+    this.separatorBuilder = defaultSeparatorBuilder,
     this.onChannelTap,
     this.onChannelLongPress,
     this.padding,
@@ -51,21 +63,23 @@ class StreamChannelListView extends StatefulWidget {
     this.restorationId,
   }) : super(key: key);
 
+  /// The [StreamChannelListController] used to control the list of channels.
   final StreamChannelListController controller;
 
+  /// A builder that is called to build items in the [ListView].
+  ///
+  /// The `index` parameter is the index of the list tile in the list and the
+  /// `channel` parameter is the [Channel] at that position.
   final StreamChannelListViewItemBuilder? itemBuilder;
 
+  /// A builder that is called to build the list separator.
   final IndexedWidgetBuilder separatorBuilder;
 
   /// Called when the user taps this list tile.
-  ///
-  /// Inoperative if [enabled] is false.
-  final StreamChannelTapCallback? onChannelTap;
+  final void Function(Channel)? onChannelTap;
 
   /// Called when the user long-presses on this list tile.
-  ///
-  /// Inoperative if [enabled] is false.
-  final StreamChannelTapCallback? onChannelLongPress;
+  final void Function(Channel)? onChannelLongPress;
 
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry? padding;
@@ -254,11 +268,11 @@ class _StreamChannelListViewState extends State<StreamChannelListView> {
                   final newPageRequestTriggerIndex = value.itemCount - 3;
                   final isBuildingTriggerIndexItem =
                       index == newPageRequestTriggerIndex;
-                  if (value.hasNextPage && isBuildingTriggerIndexItem) {
+                  if (nextPageKey != null && isBuildingTriggerIndexItem) {
                     // Schedules the request for the end of this frame.
                     WidgetsBinding.instance?.addPostFrameCallback((_) async {
                       if (!value.hasError) {
-                        await _controller.loadMore(nextPageKey!);
+                        await _controller.loadMore(nextPageKey);
                       }
                       _hasRequestedNextPage = false;
                     });
@@ -267,15 +281,15 @@ class _StreamChannelListViewState extends State<StreamChannelListView> {
                 }
 
                 if (index == channels.length) {
-                  if (value.hasError) {
-                    return _ChannelListLoadMoreError(
+                  if (error != null) {
+                    return ChannelListLoadMoreError(
                       onTap: _controller.retry,
                     );
                   }
                   return const Center(
                     child: Padding(
                       padding: EdgeInsets.all(16),
-                      child: _ChannelListLoadMoreIndicator(),
+                      child: ChannelListLoadMoreIndicator(),
                     ),
                   );
                 }
@@ -309,8 +323,12 @@ class _StreamChannelListViewState extends State<StreamChannelListView> {
       );
 }
 
-class _ChannelListLoadMoreIndicator extends StatelessWidget {
-  const _ChannelListLoadMoreIndicator({Key? key}) : super(key: key);
+/// A [StreamChannelListTile] that can be used in a [ListView] to show a
+/// loading tile while waiting for the [StreamChannelListController] to load
+/// more channels.
+class ChannelListLoadMoreIndicator extends StatelessWidget {
+  /// Creates a new instance of [ChannelListLoadMoreIndicator].
+  const ChannelListLoadMoreIndicator({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => const SizedBox(
@@ -320,12 +338,16 @@ class _ChannelListLoadMoreIndicator extends StatelessWidget {
       );
 }
 
-class _ChannelListLoadMoreError extends StatelessWidget {
-  const _ChannelListLoadMoreError({
+/// A [StreamChannelListTile] that is used to display the error indicator when
+/// loading more channels fails.
+class ChannelListLoadMoreError extends StatelessWidget {
+  /// Creates a new instance of [ChannelListLoadMoreError].
+  const ChannelListLoadMoreError({
     Key? key,
     required this.onTap,
   }) : super(key: key);
 
+  /// The callback to invoke when the user taps on the error indicator.
   final GestureTapCallback onTap;
 
   @override
@@ -355,8 +377,11 @@ class _ChannelListLoadMoreError extends StatelessWidget {
   }
 }
 
-class _ChannelListSeparator extends StatelessWidget {
-  const _ChannelListSeparator({Key? key}) : super(key: key);
+/// A widget that is used to display a separator between
+/// [StreamChannelListTile] items.
+class StreamChannelListSeparator extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListSeparator].
+  const StreamChannelListSeparator({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
