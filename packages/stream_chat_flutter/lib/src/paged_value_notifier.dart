@@ -10,6 +10,14 @@ const defaultInitialPagedLimitMultiplier = 3;
 typedef PagedValueListenableBuilder<Key, Value>
     = ValueListenableBuilder<PagedValue<Key, Value>>;
 
+/// A [PagedValueNotifier] that uses a [PagedListenable] to load data.
+///
+/// This class is useful when you need to load data from a server
+/// using a [PagedListenable] and want to keep the UI-driven refresh
+/// signals in the [PagedListenable].
+///
+/// [PagedValueNotifier] is a [ValueNotifier] that emits a [PagedValue]
+/// whenever the data is loaded or an error occurs.
 abstract class PagedValueNotifier<Key, Value>
     extends ValueNotifier<PagedValue<Key, Value>> {
   /// Creates a [PagedValueNotifier]
@@ -18,14 +26,33 @@ abstract class PagedValueNotifier<Key, Value>
   /// Stores initialValue in case we need to call [refresh].
   final PagedValue<Key, Value> _initialValue;
 
+  /// Returns the currently loaded items
+  List<Value> get currentItems => value.asSuccess.items;
+
+  /// Appends [newItems] to the previously loaded ones and replaces
+  /// the next page's key.
+  void appendPage({
+    required List<Value> newItems,
+    required Key nextPageKey,
+  }) {
+    final updatedItems = currentItems + newItems;
+    value = PagedValue(items: updatedItems, nextPageKey: nextPageKey);
+  }
+
+  /// Appends [newItems] to the previously loaded ones and sets the next page
+  /// key to `null`.
+  void appendLastPage(List<Value> newItems) {
+    final updatedItems = currentItems + newItems;
+    value = PagedValue(items: updatedItems);
+  }
+
   /// Retry any failed load requests.
   ///
   /// Unlike [refresh], this does not resets the whole [value],
   /// it only retries the last failed load request.
   Future<void> retry() {
-    var lastValue = value;
+    final lastValue = value.asSuccess;
     assert(lastValue.hasError, '');
-    lastValue = lastValue as Success<Key, Value>;
 
     final nextPageKey = lastValue.nextPageKey;
     // resetting the error
@@ -53,7 +80,7 @@ abstract class PagedValueNotifier<Key, Value>
 abstract class PagedValue<Key, Value> with _$PagedValue<Key, Value> {
   const PagedValue._();
 
-  /// Creates a new instance of [PagedValue] with the given [key] and [value].
+  /// Represents the success state of the [PagedValue]
   // @Assert(
   //   'nextPageKey != null',
   //   'Cannot set an error if all the pages are already fetched',
@@ -69,24 +96,35 @@ abstract class PagedValue<Key, Value> with _$PagedValue<Key, Value> {
     StreamChatError? error,
   }) = Success<Key, Value>;
 
-  bool get hasNextPage {
-    assert(this is Success<Key, Value>, '');
-    return (this as Success<Key, Value>).nextPageKey != null;
+  /// Represents the loading state of the [PagedValue].
+  const factory PagedValue.loading() = Loading;
+
+  /// Represents the error state of the [PagedValue].
+  const factory PagedValue.error(StreamChatError error) = Error;
+
+  /// Returns `true` if the [PagedValue] is [Success].
+  bool get isSuccess => this is Success<Key, Value>;
+
+  /// Returns the [PagedValue] as [Success].
+  Success<Key, Value> get asSuccess {
+    assert(
+      isSuccess,
+      'Cannot get asSuccess if the PagedValue is not in the Success state',
+    );
+    return this as Success<Key, Value>;
   }
 
-  bool get hasError {
-    assert(this is Success<Key, Value>, '');
-    return (this as Success<Key, Value>).error != null;
-  }
+  /// Returns `true` if the [PagedValue] is [Success]
+  /// and has more items to load.
+  bool get hasNextPage => asSuccess.nextPageKey != null;
 
+  /// Returns `true` if the [PagedValue] is [Success] and has an error.
+  bool get hasError => asSuccess.error != null;
+
+  /// 
   int get itemCount {
-    assert(this is Success<Key, Value>, '');
-    final count = (this as Success<Key, Value>).items.length;
+    final count = asSuccess.items.length;
     if (hasNextPage || hasError) return count + 1;
     return count;
   }
-
-  const factory PagedValue.loading() = Loading;
-
-  const factory PagedValue.error(StreamChatError error) = Error;
 }
