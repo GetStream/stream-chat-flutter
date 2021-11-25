@@ -8,7 +8,7 @@ part 'read.g.dart';
 @JsonSerializable()
 class Read extends Equatable {
   /// Constructor used for json serialization
-  Read({
+  const Read({
     required this.lastRead,
     required this.user,
     this.unreadMessages = 0,

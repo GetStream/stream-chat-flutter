@@ -85,9 +85,11 @@ class MessageApi {
   }) async {
     final response = await _client.delete(
       '/messages/$messageId',
-      queryParameters: {
-        if (hard != null) 'hard': hard,
-      },
+      queryParameters: hard != null
+          ? {
+              'hard': hard,
+            }
+          : null,
     );
     return EmptyResponse.fromJson(response.data);
   }
