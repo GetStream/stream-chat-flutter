@@ -1462,6 +1462,8 @@ class ChannelClientState {
 
     _listenChannelUpdated();
 
+    _listenChannelDeleted();
+
     _listenMemberAdded();
 
     _listenMemberRemoved();
@@ -1560,6 +1562,12 @@ class ChannelClientState {
         channel: channel,
         members: channel.members,
       ));
+    }));
+  }
+
+  void _listenChannelDeleted() {
+    _subscriptions.add(_channel.on(EventType.channelDeleted).listen((Event e) {
+      _channel.dispose();
     }));
   }
 
