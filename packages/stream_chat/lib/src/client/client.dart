@@ -1432,8 +1432,7 @@ class ClientState {
         .listen((Event event) async {
       final eventChannel = event.channel!;
       await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-      final channel = channels[eventChannel.cid];
-      channel?.dispose();
+      channels[eventChannel.cid]?.dispose();
       channels = channels..remove(eventChannel.cid);
     }));
   }
