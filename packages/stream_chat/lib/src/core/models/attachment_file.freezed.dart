@@ -14,7 +14,7 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more informations: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 UploadState _$UploadStateFromJson(Map<String, dynamic> json) {
-  switch (json['type']) {
+  switch (json['runtimeType']) {
     case 'preparing':
       return Preparing.fromJson(json);
     case 'inProgress':
@@ -25,8 +25,8 @@ UploadState _$UploadStateFromJson(Map<String, dynamic> json) {
       return Failed.fromJson(json);
 
     default:
-      throw CheckedFromJsonException(
-          json, 'type', 'UploadState', 'Invalid union type "${json['type']}"!');
+      throw CheckedFromJsonException(json, 'runtimeType', 'UploadState',
+          'Invalid union type "${json['runtimeType']}"!');
   }
 }
 
@@ -158,7 +158,7 @@ class _$Preparing implements Preparing {
   factory _$Preparing.fromJson(Map<String, dynamic> json) =>
       _$$PreparingFromJson(json);
 
-  @JsonKey(name: 'type')
+  @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
@@ -311,7 +311,7 @@ class _$InProgress implements InProgress {
   @override
   final int total;
 
-  @JsonKey(name: 'type')
+  @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
@@ -455,7 +455,7 @@ class _$Success implements Success {
   factory _$Success.fromJson(Map<String, dynamic> json) =>
       _$$SuccessFromJson(json);
 
-  @JsonKey(name: 'type')
+  @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
@@ -599,7 +599,7 @@ class _$Failed implements Failed {
   @override
   final String error;
 
-  @JsonKey(name: 'type')
+  @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
