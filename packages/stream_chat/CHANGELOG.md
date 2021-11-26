@@ -3,6 +3,7 @@
 ✅ Added
 
 - Extra properties added to `PaginationParams` to aid in fetching messages.
+- Added hard delete functionality.
 
 🐞 Fixed
 

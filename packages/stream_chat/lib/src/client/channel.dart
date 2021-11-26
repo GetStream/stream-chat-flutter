@@ -648,7 +648,7 @@ class Channel {
   }
 
   /// Deletes the [message] from the channel.
-  Future<EmptyResponse> deleteMessage(Message message) async {
+  Future<EmptyResponse> deleteMessage(Message message, {bool? hard}) async {
     // Directly deleting the local messages which are not yet sent to server
     if (message.status == MessageSendingStatus.sending ||
         message.status == MessageSendingStatus.failed) {
@@ -675,7 +675,7 @@ class Channel {
 
       state?.addMessage(message);
 
-      final response = await _client.deleteMessage(message.id);
+      final response = await _client.deleteMessage(message.id, hard: hard);
 
       state?.addMessage(message.copyWith(status: MessageSendingStatus.sent));
 
@@ -1663,7 +1663,11 @@ class ChannelClientState {
   void _listenMessageDeleted() {
     _subscriptions.add(_channel.on(EventType.messageDeleted).listen((event) {
       final message = event.message!;
-      addMessage(message);
+      if (event.hardDelete == true) {
+        removeMessage(message, hardDelete: true);
+      } else {
+        addMessage(message);
+      }
     }));
   }
 
@@ -1718,7 +1722,7 @@ class ChannelClientState {
   }
 
   /// Remove a [message] from this [channelState].
-  void removeMessage(Message message) {
+  void removeMessage(Message message, {bool hardDelete = false}) {
     final parentId = message.parentId;
     // i.e. it's a thread message
     // 1. Remove the thread message
@@ -1740,7 +1744,10 @@ class ChannelClientState {
     } else {
       // Remove regular message
       final allMessages = [...messages];
-      if (allMessages.remove(message)) {
+      if (hardDelete) {
+        allMessages.removeWhere((e) => e.id == message.id);
+        _channelState = _channelState.copyWith(messages: allMessages);
+      } else if (allMessages.remove(message)) {
         _channelState = _channelState.copyWith(messages: allMessages);
       }
     }
