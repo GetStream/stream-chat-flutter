@@ -310,7 +310,10 @@ class WebSocket with TimerHelper {
     Event? event;
     try {
       event = Event.fromJson(jsonData);
-    } catch (_) {}
+    } catch (e, stk) {
+      _logger?.warning('Error parsing an event: $e');
+      _logger?.warning('Stack trace: $stk');
+    }
 
     if (event == null) return;
 

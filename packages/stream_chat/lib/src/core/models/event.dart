@@ -181,7 +181,7 @@ class EventChannel extends ChannelModel {
     required DateTime createdAt,
     required DateTime updatedAt,
     DateTime? deletedAt,
-    required int memberCount,
+    int memberCount = 0,
     Map<String, Object?>? extraData,
     int cooldown = 0,
     String? team,
