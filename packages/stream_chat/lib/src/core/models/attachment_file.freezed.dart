@@ -14,7 +14,7 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more informations: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 UploadState _$UploadStateFromJson(Map<String, dynamic> json) {
-  switch (json['runtimeType'] as String?) {
+  switch (json['type']) {
     case 'preparing':
       return Preparing.fromJson(json);
     case 'inProgress':
@@ -25,8 +25,8 @@ UploadState _$UploadStateFromJson(Map<String, dynamic> json) {
       return Failed.fromJson(json);
 
     default:
-      throw CheckedFromJsonException(json, 'runtimeType', 'UploadState',
-          'Invalid union type "${json['runtimeType']}"!');
+      throw CheckedFromJsonException(
+          json, 'type', 'UploadState', 'Invalid union type "${json['type']}"!');
   }
 }
 
@@ -55,7 +55,7 @@ class _$UploadStateTearOff {
     );
   }
 
-  UploadState fromJson(Map<String, Object> json) {
+  UploadState fromJson(Map<String, Object?> json) {
     return UploadState.fromJson(json);
   }
 }
@@ -153,10 +153,13 @@ class _$PreparingCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$Preparing implements Preparing {
-  const _$Preparing();
+  const _$Preparing({String? $type}) : $type = $type ?? 'preparing';
 
   factory _$Preparing.fromJson(Map<String, dynamic> json) =>
       _$$PreparingFromJson(json);
+
+  @JsonKey(name: 'type')
+  final String $type;
 
   @override
   String toString() {
@@ -165,7 +168,8 @@ class _$Preparing implements Preparing {
 
   @override
   bool operator ==(dynamic other) {
-    return identical(this, other) || (other is Preparing);
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is Preparing);
   }
 
   @override
@@ -247,7 +251,7 @@ class _$Preparing implements Preparing {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$PreparingToJson(this)..['runtimeType'] = 'preparing';
+    return _$$PreparingToJson(this);
   }
 }
 
@@ -295,7 +299,9 @@ class _$InProgressCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$InProgress implements InProgress {
-  const _$InProgress({required this.uploaded, required this.total});
+  const _$InProgress(
+      {required this.uploaded, required this.total, String? $type})
+      : $type = $type ?? 'inProgress';
 
   factory _$InProgress.fromJson(Map<String, dynamic> json) =>
       _$$InProgressFromJson(json);
@@ -305,6 +311,9 @@ class _$InProgress implements InProgress {
   @override
   final int total;
 
+  @JsonKey(name: 'type')
+  final String $type;
+
   @override
   String toString() {
     return 'UploadState.inProgress(uploaded: $uploaded, total: $total)';
@@ -313,19 +322,15 @@ class _$InProgress implements InProgress {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is InProgress &&
+        (other.runtimeType == runtimeType &&
+            other is InProgress &&
             (identical(other.uploaded, uploaded) ||
-                const DeepCollectionEquality()
-                    .equals(other.uploaded, uploaded)) &&
-            (identical(other.total, total) ||
-                const DeepCollectionEquality().equals(other.total, total)));
+                other.uploaded == uploaded) &&
+            (identical(other.total, total) || other.total == total));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(uploaded) ^
-      const DeepCollectionEquality().hash(total);
+  int get hashCode => Object.hash(runtimeType, uploaded, total);
 
   @JsonKey(ignore: true)
   @override
@@ -408,7 +413,7 @@ class _$InProgress implements InProgress {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$InProgressToJson(this)..['runtimeType'] = 'inProgress';
+    return _$$InProgressToJson(this);
   }
 }
 
@@ -419,8 +424,8 @@ abstract class InProgress implements UploadState {
   factory InProgress.fromJson(Map<String, dynamic> json) =
       _$InProgress.fromJson;
 
-  int get uploaded => throw _privateConstructorUsedError;
-  int get total => throw _privateConstructorUsedError;
+  int get uploaded;
+  int get total;
   @JsonKey(ignore: true)
   $InProgressCopyWith<InProgress> get copyWith =>
       throw _privateConstructorUsedError;
@@ -445,10 +450,13 @@ class _$SuccessCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$Success implements Success {
-  const _$Success();
+  const _$Success({String? $type}) : $type = $type ?? 'success';
 
   factory _$Success.fromJson(Map<String, dynamic> json) =>
       _$$SuccessFromJson(json);
+
+  @JsonKey(name: 'type')
+  final String $type;
 
   @override
   String toString() {
@@ -457,7 +465,8 @@ class _$Success implements Success {
 
   @override
   bool operator ==(dynamic other) {
-    return identical(this, other) || (other is Success);
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is Success);
   }
 
   @override
@@ -539,7 +548,7 @@ class _$Success implements Success {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SuccessToJson(this)..['runtimeType'] = 'success';
+    return _$$SuccessToJson(this);
   }
 }
 
@@ -581,13 +590,17 @@ class _$FailedCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$Failed implements Failed {
-  const _$Failed({required this.error});
+  const _$Failed({required this.error, String? $type})
+      : $type = $type ?? 'failed';
 
   factory _$Failed.fromJson(Map<String, dynamic> json) =>
       _$$FailedFromJson(json);
 
   @override
   final String error;
+
+  @JsonKey(name: 'type')
+  final String $type;
 
   @override
   String toString() {
@@ -597,14 +610,13 @@ class _$Failed implements Failed {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is Failed &&
-            (identical(other.error, error) ||
-                const DeepCollectionEquality().equals(other.error, error)));
+        (other.runtimeType == runtimeType &&
+            other is Failed &&
+            (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^ const DeepCollectionEquality().hash(error);
+  int get hashCode => Object.hash(runtimeType, error);
 
   @JsonKey(ignore: true)
   @override
@@ -687,7 +699,7 @@ class _$Failed implements Failed {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$FailedToJson(this)..['runtimeType'] = 'failed';
+    return _$$FailedToJson(this);
   }
 }
 
@@ -696,7 +708,7 @@ abstract class Failed implements UploadState {
 
   factory Failed.fromJson(Map<String, dynamic> json) = _$Failed.fromJson;
 
-  String get error => throw _privateConstructorUsedError;
+  String get error;
   @JsonKey(ignore: true)
   $FailedCopyWith<Failed> get copyWith => throw _privateConstructorUsedError;
 }
