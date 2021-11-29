@@ -1,15 +1,33 @@
+## 3.3.0 
+
+✅ Added
+
+- `MessageListView` now allows more better control over spacing after messages using `spacingWidgetBuilder`.
+- `StreamChannel` can now fetch messages around a message ID with the `queryAroundMessage` call.
+- Added `MessageListView.keyboardDismissBehavior` property.
+
+🐞 Fixed
+
+- [[#766]]`AttachmentActionsModal` now has customisation options for actions.
+- Fixed `MessageWidget` null errors associated with `channel.memberCount`.
+- Fixed adding attachments on web.
+- [[#767]](https://github.com/GetStream/stream-chat-flutter/issues/767): Fix `MessageInput` focus behaviour when sending messages.
+- Fixed user presence indicator not updating correctly.
+- Do not use `withData: true` in `FilePicker` calls.
+- Fixed read indicator not updating correctly in specific situations.
+
 ## 3.2.0
 
-- Updated Dart SDK constraints to `>=2.14.0 <3.0.0`
+- Updated Dart SDK constraints to `>=2.14.0 <3.0.0`.
 - Updated `stream_chat_flutter_core` dependency to [`3.2.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 🐞 Fixed
 
-- Fixed message highlight animation alignment in `MessageListView`
+- Fixed message highlight animation alignment in `MessageListView`.
 - [[#491]](https://github.com/GetStream/stream-chat-flutter/issues/491): Fix `MediaListView` showing media in wrong order.
 - Fixed `MessageListView` initialIndex not working in some cases.
 - Improved `MessageListView` rendering in case of reordering.
-- Fix image thumbnail generation when using Stream CDN
+- Fix image thumbnail generation when using Stream CDN.
 
 ✅ Added
 

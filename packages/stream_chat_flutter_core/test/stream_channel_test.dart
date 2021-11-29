@@ -189,9 +189,7 @@ void main() {
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
             preferOffline: any(named: 'preferOffline'),
-          )).called(
-        2, // Fetching After messages + Fetching Before messages,
-      );
+          )).called(1);
     },
   );
 
@@ -214,14 +212,10 @@ void main() {
             child: const Offstage(key: childKey),
           );
 
-      final beforePagination = PaginationParams(
-        lessThan: initialMessageId,
-        limit: 20,
-      );
-
-      final afterPagination = PaginationParams(
-        greaterThanOrEqual: initialMessageId,
-        limit: 20,
+      final paginationParams = PaginationParams(
+        idAround: initialMessageId,
+        after: 20,
+        before: 20,
       );
 
       when(() => mockChannel.initialized).thenAnswer((_) async => true);
@@ -232,17 +226,7 @@ void main() {
             state: any(named: 'state'),
             watch: any(named: 'watch'),
             presence: any(named: 'presence'),
-            messagesPagination: beforePagination,
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-            preferOffline: any(named: 'preferOffline'),
-          )).thenAnswer((_) async => ChannelState(messages: messages));
-
-      when(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: afterPagination,
+            messagesPagination: paginationParams,
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
             preferOffline: any(named: 'preferOffline'),
@@ -267,17 +251,7 @@ void main() {
             state: any(named: 'state'),
             watch: any(named: 'watch'),
             presence: any(named: 'presence'),
-            messagesPagination: beforePagination,
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-            preferOffline: any(named: 'preferOffline'),
-          )).called(1);
-
-      verify(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: afterPagination,
+            messagesPagination: paginationParams,
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
             preferOffline: any(named: 'preferOffline'),
@@ -285,29 +259,15 @@ void main() {
 
       _stateSetter?.call(() => initialMessageId = 'testInitialMessageId2');
 
-      final updatedBeforePagination = beforePagination.copyWith(
-        lessThan: initialMessageId,
-      );
-
-      final updatedAfterPagination = afterPagination.copyWith(
-        greaterThanOrEqual: initialMessageId,
+      final updatedPaginationParams = paginationParams.copyWith(
+        idAround: initialMessageId,
       );
 
       when(() => mockChannel.query(
             state: any(named: 'state'),
             watch: any(named: 'watch'),
             presence: any(named: 'presence'),
-            messagesPagination: updatedBeforePagination,
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-            preferOffline: any(named: 'preferOffline'),
-          )).thenAnswer((_) async => ChannelState(messages: messages));
-
-      when(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: updatedAfterPagination,
+            messagesPagination: updatedPaginationParams,
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
             preferOffline: any(named: 'preferOffline'),
@@ -319,17 +279,7 @@ void main() {
             state: any(named: 'state'),
             watch: any(named: 'watch'),
             presence: any(named: 'presence'),
-            messagesPagination: updatedBeforePagination,
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-            preferOffline: any(named: 'preferOffline'),
-          )).called(1);
-
-      verify(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: updatedAfterPagination,
+            messagesPagination: updatedPaginationParams,
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
             preferOffline: any(named: 'preferOffline'),

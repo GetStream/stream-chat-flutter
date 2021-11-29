@@ -83,9 +83,12 @@ class HomeScreen extends StatelessWidget {
             channelListController: channelListController,
             filter: Filter.and([
               Filter.equal('type', 'messaging'),
-              Filter.in_('members', [
-                StreamChatCore.of(context).currentUser!.id,
-              ])
+              Filter.in_(
+                'members',
+                [
+                  StreamChatCore.of(context).currentUser!.id,
+                ],
+              )
             ]),
             emptyBuilder: (BuildContext context) => const Center(
               child: Text('Looks like you are not in any channels'),
@@ -120,7 +123,7 @@ class HomeScreen extends StatelessWidget {
                 itemBuilder: (BuildContext context, int index) {
                   final _item = channels[index];
                   return ListTile(
-                    title: Text(_item.name!),
+                    title: Text(_item.name ?? ''),
                     subtitle: StreamBuilder<Message?>(
                       stream: _item.state!.lastMessageStream,
                       initialData: _item.state!.lastMessage,
@@ -318,10 +321,10 @@ class _MessageScreenState extends State<MessageScreen> {
                         ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

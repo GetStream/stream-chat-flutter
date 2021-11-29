@@ -27,6 +27,7 @@ class Event {
     this.channelId,
     this.channelType,
     this.parentId,
+    this.hardDelete,
     this.extraData = const {},
     this.isLocal = true,
   }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
@@ -91,6 +92,10 @@ class Event {
   @JsonKey(defaultValue: false)
   final bool isLocal;
 
+  /// This is true if the message has been hard deleted
+  @JsonKey(includeIfNull: false)
+  final bool? hardDelete;
+
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;
 
@@ -113,6 +118,7 @@ class Event {
     'channel_id',
     'channel_type',
     'parent_id',
+    'hard_delete',
     'is_local',
   ];
 
@@ -139,6 +145,7 @@ class Event {
     int? unreadChannels,
     bool? online,
     String? parentId,
+    bool? hardDelete,
     Map<String, Object?>? extraData,
   }) =>
       Event(
@@ -158,6 +165,7 @@ class Event {
         channelId: channelId ?? this.channelId,
         channelType: channelType ?? this.channelType,
         parentId: parentId ?? this.parentId,
+        hardDelete: hardDelete ?? this.hardDelete,
         extraData: extraData ?? this.extraData,
         isLocal: isLocal,
       );
@@ -181,7 +189,7 @@ class EventChannel extends ChannelModel {
     required DateTime createdAt,
     required DateTime updatedAt,
     DateTime? deletedAt,
-    required int memberCount,
+    int memberCount = 0,
     Map<String, Object?>? extraData,
     int cooldown = 0,
     String? team,

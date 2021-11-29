@@ -1,3 +1,17 @@
+## 3.3.0
+
+✅ Added
+
+- Extra properties added to `PaginationParams` to aid in fetching messages.
+- Added hard delete functionality.
+
+🐞 Fixed
+
+- `closeConnection()` now uses `normalClosure` status when closing websocket.
+- Fixed local unread count indicator increasing for thread replies.
+- Fixed user presence indicator not updating correctly.
+- `ChannelEvent.membersCount` defaults to 0 avoiding parsing errors due to missing `members_count` field.
+
 ## 3.2.1
 
 🐞 Fixed
