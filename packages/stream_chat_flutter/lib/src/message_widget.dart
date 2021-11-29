@@ -514,7 +514,6 @@ class MessageWidget extends StatefulWidget {
         showUserAvatar: showUserAvatar ?? this.showUserAvatar,
         showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
         showReactions: showReactions ?? this.showReactions,
-        allRead: allRead ?? this.allRead,
         showThreadReplyIndicator:
             showThreadReplyIndicator ?? this.showThreadReplyIndicator,
         showInChannelIndicator:
@@ -523,7 +522,6 @@ class MessageWidget extends StatefulWidget {
         onLinkTap: onLinkTap ?? this.onLinkTap,
         showReactionPickerIndicator:
             showReactionPickerIndicator ?? this.showReactionPickerIndicator,
-        readList: readList ?? this.readList,
         onShowMessage: onShowMessage ?? this.onShowMessage,
         onReturnAction: onReturnAction ?? this.onReturnAction,
         showUsername: showUsername ?? this.showUsername,
