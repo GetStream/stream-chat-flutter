@@ -1074,15 +1074,6 @@ class _MessageListViewState extends State<MessageListView> {
       );
     }
 
-    final channel = streamChannel!.channel;
-    final readList = channel.state?.read.where((read) {
-          if (read.user.id == userId) return false;
-          return read.lastRead.isAfter(message.createdAt) ||
-              read.lastRead.isAtSameMomentAs(message.createdAt);
-        }).toList() ??
-        [];
-
-    final allRead = readList.length >= (channel.memberCount ?? 0) - 1;
     final hasFileAttachment =
         message.attachments.any((it) => it.type == 'file');
 
@@ -1211,8 +1202,6 @@ class _MessageListViewState extends State<MessageListView> {
       messageTheme: isMyMessage
           ? _streamTheme.ownMessageTheme
           : _streamTheme.otherMessageTheme,
-      readList: readList,
-      allRead: allRead,
       onReturnAction: (action) {
         switch (action) {
           case ReturnActionType.none:
