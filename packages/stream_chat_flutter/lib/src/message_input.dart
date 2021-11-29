@@ -1168,7 +1168,9 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildMentionsOverlayEntry() {
-    if (textEditingController.value.selection.start < 0) {
+    final channel = StreamChannel.of(context).channel;
+    if (textEditingController.value.selection.start < 0 ||
+        channel.state == null) {
       return const Offstage();
     }
 
@@ -1197,7 +1199,7 @@ class MessageInputState extends State<MessageInput> {
       query: query,
       mentionAllAppUsers: widget.mentionAllAppUsers,
       client: StreamChat.of(context).client,
-      channel: StreamChannel.of(context).channel,
+      channel: channel,
       size: Size(renderObject.size.width - 16, 400),
       mentionsTileBuilder: tileBuilder,
       onMentionUserTap: (user) {

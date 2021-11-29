@@ -1603,7 +1603,7 @@ class ChannelClientState {
                   message.createdAt.isBefore(
                     DateTime.now().subtract(
                       const Duration(
-                        seconds: 1,
+                        seconds: 5,
                       ),
                     ),
                   ),
