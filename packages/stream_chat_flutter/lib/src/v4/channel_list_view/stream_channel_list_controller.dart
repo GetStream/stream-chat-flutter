@@ -12,13 +12,14 @@ typedef ChannelListEventHandler = void Function(
   StreamChannelListController controller,
 );
 
-/// A controller for the channel list view.
+/// 
 class StreamChannelListController extends PagedValueNotifier<int, Channel> {
-  /// Creates a [StreamChannelListController].
+  /// Creates a new instance of [StreamChannelListController].
   StreamChannelListController({
     required this.client,
     this.filter,
     this.sort,
+    this.presence = true,
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
@@ -43,6 +44,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     required this.client,
     this.filter,
     this.sort,
+    this.presence = true,
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
@@ -64,20 +66,30 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   /// The client to use for the channel list.
   final StreamChatClient client;
 
-  /// The filter to apply to the channel list.
+  /// The query filters to use.
+  /// You can query on any of the custom fields you've defined on the [Channel].
+  /// You can also filter other built-in channel fields.
   final Filter? filter;
 
-  /// The sort to apply to the channel list.
+  /// The sorting used for the channels matching the filters.
+  /// Sorting is based on field and direction, multiple sorting options
+  /// can be provided.
+  /// You can sort based on last_updated, last_message_at, updated_at,
+  /// created_at or member_count.
+  /// Direction can be ascending or descending.
   final List<SortOption<ChannelModel>>? sort;
+
+  /// If true you’ll receive user presence updates via the websocket events
+  final bool presence;
 
   /// The limit to apply to the channel list.
   final int limit;
 
-  /// The limit to apply to the message list.
-  final int? messageLimit;
-
-  /// The limit to apply to the member list.
+  /// Number of members to fetch in each channel
   final int? memberLimit;
+
+  /// Number of messages to fetch in each channel
+  final int? messageLimit;
 
   /// Callback function which gets called for the event
   /// [EventType.channelDeleted].
@@ -164,6 +176,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         sort: sort,
         memberLimit: memberLimit,
         messageLimit: messageLimit,
+        presence: presence,
         paginationParams: PaginationParams(limit: limit),
       )) {
         final nextKey = channels.length < limit ? null : channels.length;
@@ -176,6 +189,9 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       _subscribeToChannelListEvents();
     } on StreamChatError catch (error) {
       value = PagedValue.error(error);
+    } catch (error) {
+      final chatError = StreamChatError(error.toString());
+      value = PagedValue.error(chatError);
     }
   }
 
@@ -189,6 +205,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         sort: sort,
         memberLimit: memberLimit,
         messageLimit: messageLimit,
+        presence: presence,
         paginationParams: PaginationParams(limit: limit, offset: nextPageKey),
       )) {
         final previousItems = previousValue.items;
@@ -201,6 +218,9 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       }
     } on StreamChatError catch (error) {
       value = previousValue.copyWith(error: error);
+    } catch (error) {
+      final chatError = StreamChatError(error.toString());
+      value = previousValue.copyWith(error: chatError);
     }
   }
 
