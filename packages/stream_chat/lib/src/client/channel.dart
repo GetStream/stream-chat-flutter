@@ -1860,6 +1860,9 @@ class ChannelClientState {
   set unreadCount(int count) {
     final reads = [..._channelState.read];
     final currentUserReadIndex = reads.indexWhere(_isCurrentUserRead);
+
+    if (currentUserReadIndex < 0) return;
+
     reads[currentUserReadIndex] =
         reads[currentUserReadIndex].copyWith(unreadMessages: count);
     _channelState = _channelState.copyWith(read: reads);
