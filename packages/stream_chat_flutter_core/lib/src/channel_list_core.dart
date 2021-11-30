@@ -157,10 +157,7 @@ class ChannelListCoreState extends State<ChannelListCore> {
         presence: widget.presence,
         memberLimit: widget.memberLimit,
         messageLimit: widget.messageLimit,
-        paginationParams: PaginationParams(
-          limit: widget.limit,
-          offset: 0,
-        ),
+        paginationParams: PaginationParams(limit: widget.limit, offset: 0),
       );
 
   /// Fetches more channels with updated pagination and updates the widget
