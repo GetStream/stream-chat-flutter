@@ -1,6 +1,12 @@
+# Upcoming
+
 ✅ Added
 
 - Added `MessageInputController` to hold `Message` related data.
+
+## 3.3.0
+
+- Updated `stream_chat` dependency to [`3.3.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 3.2.0
 

@@ -45,6 +45,7 @@ class PositionedList extends StatefulWidget {
     this.addSemanticIndexes = true,
     this.addRepaintBoundaries = true,
     this.addAutomaticKeepAlives = true,
+    this.keyboardDismissBehavior,
   })  : assert((positionedIndex == 0) || (positionedIndex < itemCount),
             'positionedIndex cannot be 0 and must be smaller than itemCount'),
         super(key: key);
@@ -134,6 +135,10 @@ class PositionedList extends StatefulWidget {
   /// See [SliverChildBuilderDelegate.addAutomaticKeepAlives].
   final bool addAutomaticKeepAlives;
 
+  /// [ScrollViewKeyboardDismissBehavior] the defines how this [PositionedList] will
+  /// dismiss the keyboard automatically.
+  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
+
   @override
   State<StatefulWidget> createState() => _PositionedListState();
 }
@@ -173,6 +178,7 @@ class _PositionedListState extends State<PositionedList> {
           anchor: widget.alignment,
           center: _centerKey,
           controller: scrollController,
+          keyboardDismissBehavior: widget.keyboardDismissBehavior,
           scrollDirection: widget.scrollDirection,
           reverse: widget.reverse,
           cacheExtent: widget.cacheExtent,

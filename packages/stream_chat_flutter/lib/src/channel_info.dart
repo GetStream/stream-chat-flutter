@@ -59,9 +59,10 @@ class ChannelInfo extends StatelessWidget {
     final memberCount = channel.memberCount;
     if (memberCount != null && memberCount > 2) {
       var text = context.translations.membersCountText(memberCount);
-      final watcherCount = channel.state?.watcherCount ?? 0;
-      if (watcherCount > 0) {
-        text += ' ${context.translations.watchersCountText(watcherCount)}';
+      final onlineCount =
+          members?.where((m) => m.user?.online == true).length ?? 0;
+      if (onlineCount > 0) {
+        text += ', ${context.translations.watchersCountText(onlineCount)}';
       }
       alternativeWidget = Text(
         text,

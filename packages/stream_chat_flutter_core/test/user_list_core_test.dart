@@ -496,7 +496,7 @@ void main() {
       _stateSetter?.call(() => limit = 6);
 
       final updatedUsers = _generateUsers(count: limit);
-      final updatedPagination = pagination.copyWith(limit: limit);
+      final updatedPagination = PaginationParams(limit: limit);
       when(() => mockClient.queryUsers(
                 filter: any(named: 'filter'),
                 sort: any(named: 'sort'),

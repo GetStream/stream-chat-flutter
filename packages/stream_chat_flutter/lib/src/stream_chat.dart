@@ -110,7 +110,15 @@ class StreamChatState extends State<StreamChat> {
                 onBackgroundEventReceived: widget.onBackgroundEventReceived,
                 backgroundKeepAlive: widget.backgroundKeepAlive,
                 connectivityStream: widget.connectivityStream,
-                child: widget.child ?? const Offstage(),
+                child: Builder(
+                  builder: (context) {
+                    StreamChatClient.additionalHeaders = {
+                      'X-Stream-Client':
+                          '${StreamChatClient.defaultUserAgent}-ui',
+                    };
+                    return widget.child ?? const Offstage();
+                  },
+                ),
               ),
             );
           },

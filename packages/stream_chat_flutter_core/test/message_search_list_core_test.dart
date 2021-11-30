@@ -518,7 +518,7 @@ void main() {
       _stateSetter?.call(() => limit = 6);
 
       final updatedMessageResponseList = _generateMessages(count: limit);
-      final updatedPagination = pagination.copyWith(limit: limit);
+      final updatedPagination = PaginationParams(limit: limit);
       when(() => mockClient.search(
             testFilter,
             query: any(named: 'query'),

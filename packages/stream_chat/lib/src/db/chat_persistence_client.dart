@@ -82,7 +82,6 @@ abstract class ChatPersistenceClient {
       members: data[0] as List<Member>,
       // ignore: cast_nullable_to_non_nullable
       read: data[1] as List<Read>,
-      // ignore: cast_nullable_to_non_nullable
       channel: data[2] as ChannelModel?,
       // ignore: cast_nullable_to_non_nullable
       messages: data[3] as List<Message>,

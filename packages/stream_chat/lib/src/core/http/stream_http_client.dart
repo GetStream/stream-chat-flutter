@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
+import 'package:stream_chat/src/core/http/interceptor/additional_headers_interceptor.dart';
 import 'package:stream_chat/src/core/http/interceptor/auth_interceptor.dart';
 import 'package:stream_chat/src/core/http/interceptor/connection_id_interceptor.dart';
 import 'package:stream_chat/src/core/http/interceptor/logging_interceptor.dart';
@@ -41,6 +42,7 @@ class StreamHttpClient {
         ..._options.headers,
       }
       ..interceptors.addAll([
+        AdditionalHeadersInterceptor(),
         if (tokenManager != null) AuthInterceptor(this, tokenManager),
         if (connectionIdManager != null)
           ConnectionIdInterceptor(connectionIdManager),

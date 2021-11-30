@@ -64,11 +64,12 @@ class MyApp extends StatelessWidget {
         ),
       ),
       messageListViewTheme: const MessageListViewThemeData(
-          backgroundColor: Colors.grey,
-          backgroundImage: DecorationImage(
-            image: AssetImage('assets/background_doodle.png'),
-            fit: BoxFit.cover,
-          )),
+        backgroundColor: Colors.grey,
+        backgroundImage: DecorationImage(
+          image: AssetImage('assets/background_doodle.png'),
+          fit: BoxFit.cover,
+        ),
+      ),
       otherMessageTheme: MessageThemeData(
         messageBackgroundColor: colorTheme.textHighEmphasis,
         messageTextStyle: TextStyle(
