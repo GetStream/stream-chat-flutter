@@ -395,6 +395,9 @@ class StreamChatClient {
   }
 
   void _handleHealthCheckEvent(Event event) {
+    final user = event.me;
+    if (user != null) state.currentUser = user;
+
     final connectionId = event.connectionId;
     if (connectionId != null) {
       _connectionIdManager.setConnectionId(connectionId);
