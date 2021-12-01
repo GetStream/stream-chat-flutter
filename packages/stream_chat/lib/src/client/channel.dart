@@ -1466,8 +1466,6 @@ class ChannelClientState {
 
     _listenMemberRemoved();
 
-    _computeUnread();
-
     _startCleaning();
 
     _startCleaningPinnedMessages();
@@ -1489,15 +1487,6 @@ class ChannelClientState {
   }
 
   final _subscriptions = <StreamSubscription>[];
-
-  void _computeUnread() {
-    final userRead = channelState.read.firstWhereOrNull(
-      (r) => r.user.id == _channel._client.state.currentUser?.id,
-    );
-    if (userRead != null && userRead.unreadMessages > 0) {
-      unreadCount = userRead.unreadMessages;
-    }
-  }
 
   void _checkExpiredAttachmentMessages(ChannelState channelState) async {
     final expiredAttachmentMessagesId = channelState.messages
@@ -1850,15 +1839,34 @@ class ChannelClientState {
   /// Channel read list as a stream.
   Stream<List<Read>> get readStream => channelStateStream.map((cs) => cs.read);
 
-  final BehaviorSubject<int> _unreadCountController = BehaviorSubject.seeded(0);
+  bool _isCurrentUserRead(Read read) =>
+      read.user.id == _channel._client.state.currentUser!.id;
 
-  set unreadCount(int value) => _unreadCountController.add(value);
+  /// Channel read for the logged in user.
+  Read? get currentUserRead => read.firstWhereOrNull(_isCurrentUserRead);
+
+  /// Channel read for the logged in user as a stream.
+  Stream<Read?> get currentUserReadStream =>
+      readStream.map((read) => read.firstWhereOrNull(_isCurrentUserRead));
 
   /// Unread count getter as a stream.
-  Stream<int> get unreadCountStream => _unreadCountController.stream.distinct();
+  Stream<int> get unreadCountStream =>
+      currentUserReadStream.map((read) => read?.unreadMessages ?? 0);
 
   /// Unread count getter.
-  int get unreadCount => _unreadCountController.value;
+  int get unreadCount => currentUserRead?.unreadMessages ?? 0;
+
+  /// Setter for unread count.
+  set unreadCount(int count) {
+    final reads = [..._channelState.read];
+    final currentUserReadIndex = reads.indexWhere(_isCurrentUserRead);
+
+    if (currentUserReadIndex < 0) return;
+
+    reads[currentUserReadIndex] =
+        reads[currentUserReadIndex].copyWith(unreadMessages: count);
+    _channelState = _channelState.copyWith(read: reads);
+  }
 
   bool _countMessageAsUnread(Message message) {
     final userId = _channel.client.state.currentUser?.id;
@@ -2118,7 +2126,6 @@ class ChannelClientState {
   /// Call this method to dispose this object.
   void dispose() {
     _debouncedUpdatePersistenceChannelState.cancel();
-    _unreadCountController.close();
     _retryQueue.dispose();
     _subscriptions.forEach((s) => s.cancel());
     _channelStateController.close();
