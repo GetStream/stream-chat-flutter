@@ -4,29 +4,82 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+typedef MessageValidator = bool Function(Message message);
+
 /// Controller for storing and mutating a [Message] value.
 class MessageInputController extends ValueNotifier<Message> {
   /// Creates a controller for an editable text field.
   ///
   /// This constructor treats a null [message] argument as if it were the empty
   /// message.
-  factory MessageInputController({Message? message}) =>
-      MessageInputController._(message ?? Message());
+  factory MessageInputController({
+    Message? message,
+    MessageValidator? validator,
+  }) =>
+      MessageInputController._(
+        initialMessage: message ?? Message(),
+        validator: validator ?? _defaultValidator,
+      );
 
   /// Creates a controller for an editable text field from an initial [text].
-  factory MessageInputController.fromText(String? text) =>
-      MessageInputController._(Message(text: text));
+  factory MessageInputController.fromText(
+    String? text, {
+    MessageValidator? validator,
+  }) =>
+      MessageInputController._(
+        initialMessage: Message(text: text),
+        validator: validator ?? _defaultValidator,
+      );
 
   /// Creates a controller for an editable text field from an initial
   /// [attachments].
   factory MessageInputController.fromAttachments(
-    List<Attachment> attachments,
-  ) =>
-      MessageInputController._(Message(attachments: attachments));
+    List<Attachment> attachments, {
+    MessageValidator? validator,
+  }) =>
+      MessageInputController._(
+        initialMessage: Message(attachments: attachments),
+        validator: validator ?? _defaultValidator,
+      );
 
-  MessageInputController._(Message message)
-      : _textEditingController = TextEditingController(text: message.text),
-        super(message);
+  MessageInputController._({
+    required Message initialMessage,
+    this.validator = _defaultValidator,
+  })  : _textEditingController =
+            TextEditingController(text: initialMessage.text),
+        _initialMessage = initialMessage,
+        super(initialMessage) {
+    addListener(_textEditingSyncer);
+  }
+
+  /// A callback function that validates the message.
+  final MessageValidator validator;
+
+  /// Checks if the message is valid.
+  bool get isValid => validator(value);
+
+  static bool _defaultValidator(Message message) =>
+      message.text?.isNotEmpty != true && message.attachments.isEmpty;
+
+  void _textEditingSyncer() {
+    final cleanText = value.command == null
+        ? value.text
+        : value.text?.replaceFirst(
+            '/${value.command} ',
+            '',
+          );
+
+    if (cleanText != _textEditingController.text) {
+      final previousOffset = _textEditingController.value.selection.start;
+      final previousText = _textEditingController.text;
+      final diff = (cleanText?.length ?? 0) - previousText.length;
+      _textEditingController
+        ..text = cleanText ?? ''
+        ..selection = TextSelection.collapsed(
+          offset: previousOffset + diff,
+        );
+    }
+  }
 
   ///
   TextEditingController get textEditingController => _textEditingController;
@@ -35,24 +88,29 @@ class MessageInputController extends ValueNotifier<Message> {
   ///
   String get text => _textEditingController.text;
 
+  final Message _initialMessage;
+
   ///
   set message(Message message) {
     value = message;
   }
 
-  set text(String newText) {
-    value = value.copyWith(text: newText);
-    _textEditingController
-      ..text = newText
-      ..selection = TextSelection.fromPosition(
-        TextPosition(offset: _textEditingController.text.length),
-      );
+  ///
+  set command(Command command) {
+    value = value.copyWith(
+      command: command.name,
+      text: '/${command.name} ',
+    );
   }
 
-  ///
-  set textEditingValue(TextEditingValue newValue) {
-    _textEditingController.value = newValue;
-    value = value.copyWith(text: _textEditingController.text);
+  set text(String newText) {
+    var newTextWithCommand = newText;
+    if (value.command != null) {
+      if (!newText.startsWith('/${value.command}')) {
+        newTextWithCommand = '/${value.command} $newText';
+      }
+    }
+    value = value.copyWith(text: newTextWithCommand);
   }
 
   ///
@@ -147,9 +205,13 @@ class MessageInputController extends ValueNotifier<Message> {
     _textEditingController.clear();
   }
 
+  /// Set the [value] to the initial [Message] value.
+  void reset() => value = _initialMessage;
+
   @override
   void dispose() {
     super.dispose();
+    removeListener(_textEditingSyncer);
     _textEditingController.dispose();
   }
 }

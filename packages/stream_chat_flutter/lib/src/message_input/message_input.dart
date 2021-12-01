@@ -184,12 +184,9 @@ class MessageInput extends StatefulWidget {
     Key? key,
     this.onMessageSent,
     this.preMessageSending,
-    this.parentMessage,
-    this.editMessage,
     this.maxHeight = 150,
     this.keyboardType = TextInputType.multiline,
     this.disableAttachments = false,
-    this.initialMessage,
     this.messageInputController,
     this.actions = const [],
     this.actionsLocation = ActionsLocation.left,
@@ -219,17 +216,10 @@ class MessageInput extends StatefulWidget {
     this.attachmentsPickerBuilder,
     this.sendButtonBuilder,
     this.shouldKeepFocusAfterMessage,
-  })  : assert(
-          initialMessage == null || editMessage == null,
-          "Can't provide both `initialMessage` and `editMessage`",
-        ),
-        super(key: key);
+  }) : super(key: key);
 
   /// List of options for showing overlays
   final List<OverlayOptions> customOverlays;
-
-  /// Message to edit
-  final Message? editMessage;
 
   /// Video quality to use when compressing the videos
   final VideoQuality compressedVideoQuality;
@@ -242,18 +232,12 @@ class MessageInput extends StatefulWidget {
   /// do not set it if you're using our default CDN
   final int maxAttachmentSize;
 
-  /// Message to start with
-  final Message? initialMessage;
-
   /// Function called after sending the message
   final void Function(Message)? onMessageSent;
 
   /// Function called right before sending the message
   /// Use this to transform the message
   final FutureOr<Message> Function(Message)? preMessageSending;
-
-  /// Parent message in case of a thread
-  final Message? parentMessage;
 
   /// Maximum Height for the TextField to grow before it starts scrolling
   final double maxHeight;
@@ -367,11 +351,10 @@ class MessageInputState extends State<MessageInput> {
   final _imagePicker = ImagePicker();
   late final _focusNode = widget.focusNode ?? FocusNode();
   bool _inputEnabled = true;
-  bool _commandEnabled = false;
+  bool get _commandEnabled => messageInputController.value.command != null;
   bool _showCommandsOverlay = false;
   bool _showMentionsOverlay = false;
 
-  Command? _chosenCommand;
   bool _actionsShrunk = false;
   bool _openFilePickerSection = false;
 
@@ -382,16 +365,17 @@ class MessageInputState extends State<MessageInput> {
   late StreamChatThemeData _streamChatTheme;
   late MessageInputThemeData _messageInputTheme;
 
-  bool get _hasQuotedMessage => widget.quotedMessage != null;
+  bool get _hasQuotedMessage =>
+      messageInputController.value.quotedMessage != null;
 
   bool get _messageIsPresent => messageInputController.text.trim().isNotEmpty;
+
+  bool get _isEditing =>
+      messageInputController.value.status != MessageSendingStatus.sending;
 
   @override
   void initState() {
     super.initState();
-    if (widget.editMessage != null || widget.initialMessage != null) {
-      _parseExistingMessage(widget.editMessage ?? widget.initialMessage!);
-    }
     messageInputController.textEditingController
         .addListener(_onChangedDebounced);
     _focusNode.addListener(_focusNodeListener);
@@ -437,70 +421,74 @@ class MessageInputState extends State<MessageInput> {
   Widget build(BuildContext context) {
     Widget child = ValueListenableBuilder<Message>(
       valueListenable: messageInputController,
-      builder: (context, value, wid) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: _messageInputTheme.inputBackgroundColor,
-        ),
-        child: SafeArea(
-          child: GestureDetector(
-            onPanUpdate: (details) {
-              if (details.delta.dy > 0) {
-                _focusNode.unfocus();
-                if (_openFilePickerSection) {
-                  setState(() {
-                    _openFilePickerSection = false;
-                  });
+      builder: (context, value, wid) {
+        print('VALUE ${value.text}');
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: _messageInputTheme.inputBackgroundColor,
+          ),
+          child: SafeArea(
+            child: GestureDetector(
+              onPanUpdate: (details) {
+                if (details.delta.dy > 0) {
+                  _focusNode.unfocus();
+                  if (_openFilePickerSection) {
+                    setState(() {
+                      _openFilePickerSection = false;
+                    });
+                  }
                 }
-              }
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_hasQuotedMessage)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: StreamSvgIcon.reply(
-                            color: _streamChatTheme.colorTheme.disabled,
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_hasQuotedMessage)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: StreamSvgIcon.reply(
+                              color: _streamChatTheme.colorTheme.disabled,
+                            ),
                           ),
-                        ),
-                        Text(
-                          context.translations.replyToMessageLabel,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          icon: StreamSvgIcon.closeSmall(),
-                          onPressed: widget.onQuotedMessageCleared,
-                        ),
-                      ],
+                          Text(
+                            context.translations.replyToMessageLabel,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            icon: StreamSvgIcon.closeSmall(),
+                            onPressed: widget.onQuotedMessageCleared,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: _buildTextField(context),
-                ),
-                if (widget.parentMessage != null && !widget.hideSendAsDm)
                   Padding(
-                    padding: const EdgeInsets.only(
-                      right: 12,
-                      left: 12,
-                      bottom: 12,
-                    ),
-                    child: _buildDmCheckbox(),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: _buildTextField(context),
                   ),
-                _buildFilePickerSection(),
-              ],
+                  if (messageInputController.value.parentId != null &&
+                      !widget.hideSendAsDm)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        right: 12,
+                        left: 12,
+                        bottom: 12,
+                      ),
+                      child: _buildDmCheckbox(),
+                    ),
+                  _buildFilePickerSection(),
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
-    if (widget.editMessage == null) {
+    if (_isEditing) {
       child = Material(
         elevation: 8,
         child: child,
@@ -575,10 +563,8 @@ class MessageInputState extends State<MessageInput> {
                     : _streamChatTheme.colorTheme.barsBg,
                 child: InkWell(
                   onTap: () {
-                    setState(() {
-                      messageInputController.showInChannel =
-                          !messageInputController.showInChannel;
-                    });
+                    messageInputController.showInChannel =
+                        !messageInputController.showInChannel;
                   },
                   child: AnimatedCrossFade(
                     duration: const Duration(milliseconds: 300),
@@ -621,7 +607,7 @@ class MessageInputState extends State<MessageInput> {
       onSendMessage: sendMessage,
       timeOut: _timeOut,
       isIdle: !_messageIsPresent && messageInputController.attachments.isEmpty,
-      isEditEnabled: widget.editMessage != null,
+      isEditEnabled: _isEditing,
       idleSendButton: widget.idleSendButton,
       activeSendButton: widget.activeSendButton,
     );
@@ -668,7 +654,7 @@ class MessageInputState extends State<MessageInput> {
                   if (!widget.disableAttachments)
                     _buildAttachmentButton(context),
                   if (widget.showCommandsButton &&
-                      widget.editMessage == null &&
+                      !_isEditing &&
                       channel.state != null &&
                       channel.config?.commands.isNotEmpty == true)
                     _buildCommandButton(context),
@@ -791,7 +777,7 @@ class MessageInputState extends State<MessageInput> {
                           size: 16,
                         ),
                         Text(
-                          _chosenCommand?.name.toUpperCase() ?? '',
+                          messageInputController.value.command!.toUpperCase(),
                           style:
                               _streamChatTheme.textTheme.footnoteBold.copyWith(
                             color: Colors.white,
@@ -825,9 +811,7 @@ class MessageInputState extends State<MessageInput> {
                   height: 24,
                   width: 24,
                 ),
-                onPressed: () {
-                  setState(() => _commandEnabled = false);
-                },
+                onPressed: messageInputController.clear,
               ),
             ),
           if (!_commandEnabled &&
@@ -848,8 +832,10 @@ class MessageInputState extends State<MessageInput> {
 
       final channel = StreamChannel.of(context).channel;
       if (value.isNotEmpty) {
-        // ignore: no-empty-block
-        channel.keyStroke(widget.parentMessage?.id).catchError((e) {});
+        channel
+            .keyStroke(messageInputController.value.parentId)
+            // ignore: no-empty-block
+            .catchError((e) {});
       }
 
       var actionsLength = widget.actions.length;
@@ -869,7 +855,7 @@ class MessageInputState extends State<MessageInput> {
   );
 
   String _getHint(BuildContext context) {
-    if (_commandEnabled && _chosenCommand!.name == 'giphy') {
+    if (_commandEnabled && messageInputController.value.command == 'giphy') {
       return context.translations.searchGifLabel;
     }
     if (messageInputController.attachments.isNotEmpty) {
@@ -1034,15 +1020,11 @@ class MessageInputState extends State<MessageInput> {
         splits[splits.length - 1] = user.name;
         final rejoin = splits.join('@');
 
-        messageInputController.textEditingController.value = TextEditingValue(
-          text: rejoin +
-              messageInputController.text.substring(
-                messageInputController.selectionStart,
-              ),
-          selection: TextSelection.collapsed(
-            offset: rejoin.length,
-          ),
-        );
+        messageInputController.text = rejoin +
+            messageInputController.text.substring(
+              messageInputController.selectionStart,
+            );
+
         _onChangedDebounced.cancel();
         setState(() => _showMentionsOverlay = false);
       },
@@ -1077,22 +1059,17 @@ class MessageInputState extends State<MessageInput> {
   void _chooseEmoji(List<String> splits, Emoji emoji) {
     final rejoin = splits.sublist(0, splits.length - 1).join(':') + emoji.char!;
 
-    messageInputController.textEditingController.value = TextEditingValue(
-      text: rejoin +
-          messageInputController.text.substring(
-            messageInputController.selectionStart,
-          ),
-      selection: TextSelection.collapsed(
-        offset: rejoin.length,
-      ),
-    );
+    messageInputController.text = rejoin +
+        messageInputController.text.substring(
+          messageInputController.selectionStart,
+        );
   }
 
   void _setCommand(Command c) {
-    messageInputController.clear();
+    messageInputController
+      ..clear()
+      ..command = c;
     setState(() {
-      _chosenCommand = c;
-      _commandEnabled = true;
       _showCommandsOverlay = false;
     });
   }
@@ -1133,9 +1110,7 @@ class MessageInputState extends State<MessageInput> {
                       (e) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: FileAttachment(
-                          message: Message(
-                            status: MessageSendingStatus.sending,
-                          ), // dummy message
+                          message: Message(), // dummy message
                           attachment: e,
                           size: Size(
                             MediaQuery.of(context).size.width * 0.65,
@@ -1202,9 +1177,11 @@ class MessageInputState extends State<MessageInput> {
           focusElevation: 0,
           hoverElevation: 0,
           onPressed: () {
-            setState(
-              () => messageInputController.attachments
-                  .removeWhere((e) => e.id == attachment.id),
+            messageInputController.value =
+                messageInputController.value.copyWith(
+              attachments: messageInputController.attachments
+                  .where((it) => it.id != attachment.id)
+                  .toList(),
             );
           },
           fillColor:
@@ -1412,7 +1389,7 @@ class MessageInputState extends State<MessageInput> {
   ///
   /// Note: Only meant to be used from outside the state.
   void addAttachment(Attachment attachment) {
-    setState(() => _addAttachments([attachment]));
+    _addAttachments([attachment]);
   }
 
   /// Adds an attachment to the [messageInputController.attachments] map
@@ -1539,23 +1516,20 @@ class MessageInputState extends State<MessageInput> {
       }
     }
 
-    setState(() {
-      _addAttachments([
-        attachment.copyWith(
-          file: file,
-          extraData: {...attachment.extraData}
-            ..update('file_size', ((_) => file!.size!)),
-        ),
-      ]);
-    });
+    _addAttachments([
+      attachment.copyWith(
+        file: file,
+        extraData: {...attachment.extraData}
+          ..update('file_size', ((_) => file!.size!)),
+      ),
+    ]);
   }
 
   /// Sends the current message
   Future<void> sendMessage() async {
-    var text = messageInputController.text.trim();
-    final attachments = messageInputController.attachments;
+    var message = messageInputController.value;
 
-    if (text.isEmpty && attachments.isEmpty) {
+    if (messageInputController.isValid) {
       return;
     }
 
@@ -1563,47 +1537,8 @@ class MessageInputState extends State<MessageInput> {
 
     shouldKeepFocus ??= !_commandEnabled;
 
-    if (_commandEnabled) {
-      text = '${'/${_chosenCommand!.name} '}$text';
-    }
-
-    messageInputController
-      ..text = ''
-      ..clearAttachments();
+    messageInputController.reset();
     widget.onQuotedMessageCleared?.call();
-
-    setState(() {
-      _commandEnabled = false;
-    });
-
-    Message message;
-    if (widget.editMessage != null) {
-      message = widget.editMessage!.copyWith(
-        text: text,
-        attachments: attachments,
-        mentionedUsers: messageInputController.mentionedUsers
-            .where((u) => text.contains('@${u.name}'))
-            .toList(),
-      );
-    } else {
-      message = (widget.initialMessage ?? Message()).copyWith(
-        parentId: widget.parentMessage?.id,
-        text: text,
-        attachments: attachments,
-        mentionedUsers: messageInputController.mentionedUsers
-            .where((u) => text.contains('@${u.name}'))
-            .toList(),
-        showInChannel: widget.parentMessage != null
-            ? messageInputController.showInChannel
-            : null,
-      );
-    }
-
-    if (widget.quotedMessage != null) {
-      message = message.copyWith(
-        quotedMessageId: widget.quotedMessage!.id,
-      );
-    }
 
     if (widget.preMessageSending != null) {
       message = await widget.preMessageSending!(message);
@@ -1615,13 +1550,9 @@ class MessageInputState extends State<MessageInput> {
       await streamChannel.reloadChannel();
     }
 
-    messageInputController.clearMentionedUsers();
-
     try {
       Future sendingFuture;
-      if (widget.editMessage == null ||
-          widget.editMessage!.status == MessageSendingStatus.failed ||
-          widget.editMessage!.status == MessageSendingStatus.sending) {
+      if (!_isEditing) {
         sendingFuture = channel.sendMessage(message);
       } else {
         sendingFuture = channel.updateMessage(message);
@@ -1635,7 +1566,7 @@ class MessageInputState extends State<MessageInput> {
 
       final resp = await sendingFuture;
       if (resp.message?.type == 'error') {
-        _parseExistingMessage(message);
+        messageInputController.value = message;
       }
       _startSlowMode();
       widget.onMessageSent?.call(resp.message);
@@ -1714,12 +1645,6 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  void _parseExistingMessage(Message message) {
-    final messageText = message.text;
-    if (messageText != null) messageInputController.text = messageText;
-    _addAttachments(message.attachments);
-  }
-
   @override
   void dispose() {
     messageInputController.textEditingController
@@ -1731,19 +1656,12 @@ class MessageInputState extends State<MessageInput> {
     super.dispose();
   }
 
-  bool _initialized = false;
-
   @override
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
     _messageInputTheme = MessageInputTheme.of(context);
-    if (widget.editMessage == null && _timeOut <= 0) _startSlowMode();
+    if (!_isEditing && _timeOut <= 0) _startSlowMode();
 
-    if ((widget.editMessage != null || widget.initialMessage != null) &&
-        !_initialized) {
-      FocusScope.of(context).requestFocus(_focusNode);
-      _initialized = true;
-    }
     super.didChangeDependencies();
   }
 }

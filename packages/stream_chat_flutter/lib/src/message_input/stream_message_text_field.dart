@@ -1,3 +1,5 @@
+// ignore_for_file: prefer-trailing-comma, cascade_invocations
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';

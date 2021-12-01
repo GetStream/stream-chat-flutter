@@ -58,7 +58,7 @@ class Message extends Equatable {
     this.ownReactions,
     this.parentId,
     this.quotedMessage,
-    this.quotedMessageId,
+    String? quotedMessageId,
     this.replyCount = 0,
     this.threadParticipants,
     this.showInChannel,
@@ -72,16 +72,19 @@ class Message extends Equatable {
     this.pinnedBy,
     this.extraData = const {},
     this.deletedAt,
-    this.status = MessageSendingStatus.sent,
+    this.status = MessageSendingStatus.sending,
     this.i18n,
   })  : id = id ?? const Uuid().v4(),
         pinExpires = pinExpires?.toUtc(),
-        createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+        _createdAt = createdAt,
+        _updatedAt = updatedAt,
+        _quotedMessageId = quotedMessageId;
 
   /// Create a new instance from a json
   factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(
         Serializer.moveToExtraDataFromRoot(json, topLevelFields),
+      ).copyWith(
+        status: MessageSendingStatus.sent,
       );
 
   /// The message ID. This is either created by Stream or set client side when
@@ -134,8 +137,10 @@ class Message extends Equatable {
   @JsonKey(toJson: Serializer.readOnly)
   final Message? quotedMessage;
 
+  final String? _quotedMessageId;
+
   /// The ID of the quoted message, if the message is a quoted reply.
-  final String? quotedMessageId;
+  String? get quotedMessageId => _quotedMessageId ?? quotedMessage?.id;
 
   /// Reserved field indicating the number of replies for this message.
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
@@ -162,13 +167,17 @@ class Message extends Equatable {
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final String? command;
 
+  final DateTime? _createdAt;
+
   /// Reserved field indicating when the message was created.
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
-  final DateTime createdAt;
+  DateTime get createdAt => _createdAt ?? DateTime.now();
+
+  final DateTime? _updatedAt;
 
   /// Reserved field indicating when the message was updated last time.
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
-  final DateTime updatedAt;
+  DateTime get updatedAt => _updatedAt ?? DateTime.now();
 
   /// User who sent the message
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
@@ -301,17 +310,17 @@ class Message extends Equatable {
       ownReactions: ownReactions ?? this.ownReactions,
       parentId: parentId ?? this.parentId,
       quotedMessage: quotedMessage ?? this.quotedMessage,
-      quotedMessageId: quotedMessageId ?? this.quotedMessageId,
+      quotedMessageId: quotedMessageId ?? _quotedMessageId,
       replyCount: replyCount ?? this.replyCount,
       threadParticipants: threadParticipants ?? this.threadParticipants,
       showInChannel: showInChannel ?? this.showInChannel,
       command: command ?? this.command,
-      createdAt: createdAt ?? this.createdAt,
+      createdAt: createdAt ?? _createdAt,
       silent: silent ?? this.silent,
       extraData: extraData ?? this.extraData,
       user: user ?? this.user,
       shadowed: shadowed ?? this.shadowed,
-      updatedAt: updatedAt ?? this.updatedAt,
+      updatedAt: updatedAt ?? _updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       status: status ?? this.status,
       pinned: pinned ?? this.pinned,

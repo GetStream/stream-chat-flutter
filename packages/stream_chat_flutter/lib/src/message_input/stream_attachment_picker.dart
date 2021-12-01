@@ -116,8 +116,8 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
 
   @override
   Widget build(BuildContext context) {
-    var _streamChatTheme = StreamChatTheme.of(context);
-    var messageInputController = widget.messageInputController;
+    final _streamChatTheme = StreamChatTheme.of(context);
+    final messageInputController = widget.messageInputController;
 
     final _attachmentContainsImage =
         messageInputController.attachments.any((it) => it.type == 'image');

@@ -23,7 +23,7 @@ class StreamMessageSendButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var _streamChatTheme = StreamChatTheme.of(context);
+    final _streamChatTheme = StreamChatTheme.of(context);
 
     late Widget sendButton;
     if (timeOut > 0) {
@@ -46,7 +46,7 @@ class StreamMessageSendButton extends StatelessWidget {
   }
 
   Widget _buildIdleSendButton(BuildContext context) {
-    var _messageInputTheme = MessageInputTheme.of(context);
+    final _messageInputTheme = MessageInputTheme.of(context);
 
     return Padding(
       padding: const EdgeInsets.all(8),
@@ -58,7 +58,7 @@ class StreamMessageSendButton extends StatelessWidget {
   }
 
   Widget _buildSendButton(BuildContext context) {
-    var _messageInputTheme = MessageInputTheme.of(context);
+    final _messageInputTheme = MessageInputTheme.of(context);
 
     return Padding(
       padding: const EdgeInsets.all(8),
