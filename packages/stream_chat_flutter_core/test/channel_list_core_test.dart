@@ -9,7 +9,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'mocks.dart';
 
 void main() {
-  const pagination = PaginationParams(limit: 3);
+  const pagination = PaginationParams(limit: 3, offset: 0);
 
   List<Channel> _generateChannels(
     StreamChatClient client, {
@@ -476,7 +476,7 @@ void main() {
       _stateSetter?.call(() => limit = 6);
 
       final updatedChannels = _generateChannels(mockClient, count: limit);
-      final updatedPagination = PaginationParams(limit: limit);
+      final updatedPagination = PaginationParams(limit: limit, offset: 0);
       when(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
