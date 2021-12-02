@@ -2,68 +2,72 @@ import 'dart:async';
 
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter/src/paged_value_notifier.dart';
-import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list_event_handler.dart'
-    as event_handler;
+import 'package:stream_chat_flutter/src/v4/channel_list_view/channel_events.dart';
 
+/// The default channel page limit to load.
 const defaultChannelPagedLimit = 10;
 
-typedef ChannelListEventHandler = void Function(
-  Event event,
-  StreamChannelListController controller,
-);
-
-/// 
+/// A controller for a Channel list.
+///
+/// This class lets you perform tasks such as:
+/// * Load initial data.
+/// * Load more data using [loadMore].
+/// * Replace the previously loaded channels.
+/// * Return/Create a new channel and start watching it.
+/// * Unsubscribe from all channel list events.
+/// * Pause and Resume all subscriptions added to this composite.
 class StreamChannelListController extends PagedValueNotifier<int, Channel> {
-  /// Creates a new instance of [StreamChannelListController].
+  /// Creates a Stream channel list controller.
+  ///
+  /// * `client` is the Stream chat client to use for the channels list.
+  ///
+  /// * `channelEvents` is the channel events to use for the channels list.
+  /// This class can be mixed in or extended to create custom overrides. See
+  /// [ChannelEvents] for advice.
+  ///
+  /// * `filter` is the query filters to use.
+  ///
+  /// * `sort` is the sorting used for the channels matching the filters.
+  ///
+  /// * `presence` sets whether you'll receive user presence updates via the
+  /// websocket events.
+  ///
+  /// * `limit` is the limit to apply to the channel list.
+  ///
+  /// * `messageLimit` is the number of messages to fetch in each channel.
+  ///
+  /// * `memberLimit` is the number of members to fetch in each channel.
   StreamChannelListController({
     required this.client,
+    ChannelEvents? channelEvents,
     this.filter,
     this.sort,
     this.presence = true,
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
-    this.onChannelDeleted = event_handler.onChannelDeleted,
-    this.onChannelHidden = event_handler.onChannelHidden,
-    this.onChannelTruncated = event_handler.onChannelTruncated,
-    this.onChannelUpdated = event_handler.onChannelUpdated,
-    this.onChannelVisible = event_handler.onChannelVisible,
-    this.onConnectionRecovered = event_handler.onConnectionRecovered,
-    this.onMessageNew = event_handler.onMessageNew,
-    this.onNotificationAddedToChannel =
-        event_handler.onNotificationAddedToChannel,
-    this.onNotificationMessageNew = event_handler.onNotificationMessageNew,
-    this.onNotificationRemovedFromChannel =
-        event_handler.onNotificationRemovedFromChannel,
-    this.onUserPresenceChanged = event_handler.onUserPresenceChanged,
-  }) : super(const PagedValue.loading());
+  })  : channelEvents = channelEvents ?? ChannelEvents(),
+        super(const PagedValue.loading()) {
+    this.channelEvents.test();
+  }
 
   /// Creates a [StreamChannelListController] from the passed [value].
   StreamChannelListController.fromValue(
     PagedValue<int, Channel> value, {
     required this.client,
+    required this.channelEvents,
     this.filter,
     this.sort,
     this.presence = true,
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
-    this.onChannelDeleted = event_handler.onChannelDeleted,
-    this.onChannelHidden = event_handler.onChannelHidden,
-    this.onChannelTruncated = event_handler.onChannelTruncated,
-    this.onChannelUpdated = event_handler.onChannelUpdated,
-    this.onChannelVisible = event_handler.onChannelVisible,
-    this.onConnectionRecovered = event_handler.onConnectionRecovered,
-    this.onMessageNew = event_handler.onMessageNew,
-    this.onNotificationAddedToChannel =
-        event_handler.onNotificationAddedToChannel,
-    this.onNotificationMessageNew = event_handler.onNotificationMessageNew,
-    this.onNotificationRemovedFromChannel =
-        event_handler.onNotificationRemovedFromChannel,
-    this.onUserPresenceChanged = event_handler.onUserPresenceChanged,
   }) : super(value);
 
-  /// The client to use for the channel list.
+  /// The channel events to use for the channels list.
+  final ChannelEvents channelEvents;
+
+  /// The client to use for the channels list.
   final StreamChatClient client;
 
   /// The query filters to use.
@@ -82,90 +86,15 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   /// If true you’ll receive user presence updates via the websocket events
   final bool presence;
 
-  /// The limit to apply to the channel list.
+  /// The limit to apply to the channel list. The default is set to
+  /// [defaultChannelPagedLimit].
   final int limit;
 
-  /// Number of members to fetch in each channel
-  final int? memberLimit;
-
-  /// Number of messages to fetch in each channel
+  /// Number of messages to fetch in each channel.
   final int? messageLimit;
 
-  /// Callback function which gets called for the event
-  /// [EventType.channelDeleted].
-  ///
-  /// By default, calls [event_handler.onChannelDeleted]
-  /// with the [Event] and the [StreamChannelListController].
-  final ChannelListEventHandler onChannelDeleted;
-
-  /// Callback function which gets called for the event
-  /// [EventType.channelHidden].
-  ///
-  /// By default, calls [event_handler.onChannelHidden]
-  /// with the [Event] and the [StreamChannelListController].
-  final ChannelListEventHandler onChannelHidden;
-
-  /// Callback function which gets called for the event
-  /// [EventType.channelTruncated].
-  ///
-  /// By default, calls [event_handler.onChannelTruncated]
-  /// with the [Event] and the [StreamChannelListController].
-  final ChannelListEventHandler onChannelTruncated;
-
-  /// Callback function which gets called for the event
-  /// [EventType.channelUpdated].
-  ///
-  /// By default, calls [event_handler.onChannelUpdated]
-  /// with the [Event] and the [StreamChannelListController].
-  final ChannelListEventHandler onChannelUpdated;
-
-  /// Callback function which gets called for the event
-  /// [EventType.channelVisible].
-  ///
-  /// By default, calls [event_handler.onChannelVisible]
-  /// with the [Event] and the [StreamChannelListController].
-  final ChannelListEventHandler onChannelVisible;
-
-  /// Callback function which gets called for the event
-  /// [EventType.connectionRecovered].
-  ///
-  /// By default, calls [event_handler.onConnectionRecovered]
-  /// with the [Event] and the [StreamChannelListController].
-  final ChannelListEventHandler onConnectionRecovered;
-
-  /// Callback function which gets called for the event [EventType.messageNew].
-  ///
-  /// By default, calls [event_handler.onMessageNew]
-  /// with the [Event] and the [StreamChannelListController].
-  final ChannelListEventHandler onMessageNew;
-
-  /// Callback function which gets called for the event
-  /// [EventType.notificationAddedToChannel].
-  ///
-  /// By default, calls [event_handler.onNotificationAddedToChannel]
-  /// with the [Event] and the [StreamChannelListController].
-  final ChannelListEventHandler onNotificationAddedToChannel;
-
-  /// Callback function which gets called for the event
-  /// [EventType.notificationMessageNew].
-  ///
-  /// By default, calls [event_handler.onNotificationMessageNew]
-  /// with the [Event] and the [StreamChannelListController].
-  final ChannelListEventHandler onNotificationMessageNew;
-
-  /// Callback function which gets called for the event
-  /// [EventType.notificationRemovedFromChannel].
-  ///
-  /// By default, calls [event_handler.onNotificationRemovedFromChannel]
-  /// with the [Event] and the [StreamChannelListController].
-  final ChannelListEventHandler onNotificationRemovedFromChannel;
-
-  /// Callback function which gets called for the event
-  /// 'user.presence.changed' and [EventType.userUpdated].
-  ///
-  /// By default, calls [event_handler.onUserPresenceChanged]
-  /// with the [Event] and the [StreamChannelListController].
-  final ChannelListEventHandler onUserPresenceChanged;
+  /// Number of members to fetch in each channel.
+  final int? memberLimit;
 
   @override
   Future<void> doInitialLoad() async {
@@ -185,7 +114,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
           nextPageKey: nextKey,
         );
       }
-      // start listening events
+      // start listening to events
       _subscribeToChannelListEvents();
     } on StreamChatError catch (error) {
       value = PagedValue.error(error);
@@ -254,30 +183,32 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     _channelEventSubscription = client.on().listen((event) {
       final eventType = event.type;
       if (eventType == EventType.channelDeleted) {
-        onChannelDeleted(event, this);
+        channelEvents.onChannelDeleted(event, this);
       } else if (eventType == EventType.channelHidden) {
-        onChannelHidden(event, this);
+        channelEvents.onChannelDeleted(event, this);
       } else if (eventType == EventType.channelTruncated) {
-        onChannelTruncated(event, this);
+        channelEvents.onChannelTruncated(event, this);
       } else if (eventType == EventType.channelUpdated) {
-        onChannelUpdated(event, this);
+        channelEvents.onChannelUpdated(event, this);
       } else if (eventType == EventType.channelVisible) {
-        onChannelVisible(event, this);
+        channelEvents.onChannelVisible(event, this);
       } else if (eventType == EventType.connectionRecovered) {
-        onConnectionRecovered(event, this);
+        channelEvents.onConnectionRecovered(event, this);
       } else if (eventType == EventType.connectionChanged) {
-        if (event.online != null) onConnectionRecovered(event, this);
+        if (event.online != null) {
+          channelEvents.onConnectionRecovered(event, this);
+        }
       } else if (eventType == EventType.messageNew) {
-        onMessageNew(event, this);
+        channelEvents.onMessageNew(event, this);
       } else if (eventType == EventType.notificationAddedToChannel) {
-        onNotificationAddedToChannel(event, this);
+        channelEvents.onNotificationAddedToChannel(event, this);
       } else if (eventType == EventType.notificationMessageNew) {
-        onNotificationMessageNew(event, this);
+        channelEvents.onNotificationMessageNew(event, this);
       } else if (eventType == EventType.notificationRemovedFromChannel) {
-        onNotificationRemovedFromChannel(event, this);
+        channelEvents.onNotificationRemovedFromChannel(event, this);
       } else if (eventType == 'user.presence.changed' ||
           eventType == EventType.userUpdated) {
-        onUserPresenceChanged(event, this);
+        channelEvents.onUserPresenceChanged(event, this);
       }
     });
   }
