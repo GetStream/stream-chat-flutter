@@ -3,11 +3,11 @@ import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list
 import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list_event_handler.dart'
     as event_handler;
 
-/// Contains methods that are called for certain [Event]s. These methods are
-/// called from the [StreamChannelListController].
+/// Contains handlers that are called from [StreamChannelListController] for
+/// certain [Event]s.
 ///
 /// This class can be mixed in or extended to create custom overrides.
-class ChannelEvents {
+class ChannelEventHandlers {
   /// Function which gets called for the event
   /// [EventType.channelDeleted].
   ///
