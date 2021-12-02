@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter/src/paged_value_notifier.dart';
-import 'package:stream_chat_flutter/src/v4/channel_list_view/channel_events.dart';
+import 'package:stream_chat_flutter/src/v4/channel_list_view/channel_event_handlers.dart';
 
 /// The default channel page limit to load.
 const defaultChannelPagedLimit = 10;
@@ -11,6 +11,7 @@ const defaultChannelPagedLimit = 10;
 ///
 /// This class lets you perform tasks such as:
 /// * Load initial data.
+/// * Use channel events handlers.
 /// * Load more data using [loadMore].
 /// * Replace the previously loaded channels.
 /// * Return/Create a new channel and start watching it.
@@ -21,9 +22,9 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   ///
   /// * `client` is the Stream chat client to use for the channels list.
   ///
-  /// * `channelEvents` is the channel events to use for the channels list.
-  /// This class can be mixed in or extended to create custom overrides. See
-  /// [ChannelEvents] for advice.
+  /// * `channelEventHandlers` is the channel events to use for the channels
+  /// list. This class can be mixed in or extended to create custom overrides.
+  /// See [ChannelEventHandlers] for advice.
   ///
   /// * `filter` is the query filters to use.
   ///
@@ -39,33 +40,32 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   /// * `memberLimit` is the number of members to fetch in each channel.
   StreamChannelListController({
     required this.client,
-    ChannelEvents? channelEvents,
+    ChannelEventHandlers? channelEventHandlers,
     this.filter,
     this.sort,
     this.presence = true,
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
-  })  : channelEvents = channelEvents ?? ChannelEvents(),
-        super(const PagedValue.loading()) {
-    this.channelEvents.test();
-  }
+  })  : _channelEventHandlers = channelEventHandlers ?? ChannelEventHandlers(),
+        super(const PagedValue.loading());
 
   /// Creates a [StreamChannelListController] from the passed [value].
   StreamChannelListController.fromValue(
     PagedValue<int, Channel> value, {
     required this.client,
-    required this.channelEvents,
+    ChannelEventHandlers? channelEventHandlers,
     this.filter,
     this.sort,
     this.presence = true,
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
-  }) : super(value);
+  })  : _channelEventHandlers = channelEventHandlers ?? ChannelEventHandlers(),
+        super(value);
 
   /// The channel events to use for the channels list.
-  final ChannelEvents channelEvents;
+  final ChannelEventHandlers _channelEventHandlers;
 
   /// The client to use for the channels list.
   final StreamChatClient client;
@@ -183,32 +183,32 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     _channelEventSubscription = client.on().listen((event) {
       final eventType = event.type;
       if (eventType == EventType.channelDeleted) {
-        channelEvents.onChannelDeleted(event, this);
+        _channelEventHandlers.onChannelDeleted(event, this);
       } else if (eventType == EventType.channelHidden) {
-        channelEvents.onChannelDeleted(event, this);
+        _channelEventHandlers.onChannelHidden(event, this);
       } else if (eventType == EventType.channelTruncated) {
-        channelEvents.onChannelTruncated(event, this);
+        _channelEventHandlers.onChannelTruncated(event, this);
       } else if (eventType == EventType.channelUpdated) {
-        channelEvents.onChannelUpdated(event, this);
+        _channelEventHandlers.onChannelUpdated(event, this);
       } else if (eventType == EventType.channelVisible) {
-        channelEvents.onChannelVisible(event, this);
+        _channelEventHandlers.onChannelVisible(event, this);
       } else if (eventType == EventType.connectionRecovered) {
-        channelEvents.onConnectionRecovered(event, this);
+        _channelEventHandlers.onConnectionRecovered(event, this);
       } else if (eventType == EventType.connectionChanged) {
         if (event.online != null) {
-          channelEvents.onConnectionRecovered(event, this);
+          _channelEventHandlers.onConnectionRecovered(event, this);
         }
       } else if (eventType == EventType.messageNew) {
-        channelEvents.onMessageNew(event, this);
+        _channelEventHandlers.onMessageNew(event, this);
       } else if (eventType == EventType.notificationAddedToChannel) {
-        channelEvents.onNotificationAddedToChannel(event, this);
+        _channelEventHandlers.onNotificationAddedToChannel(event, this);
       } else if (eventType == EventType.notificationMessageNew) {
-        channelEvents.onNotificationMessageNew(event, this);
+        _channelEventHandlers.onNotificationMessageNew(event, this);
       } else if (eventType == EventType.notificationRemovedFromChannel) {
-        channelEvents.onNotificationRemovedFromChannel(event, this);
+        _channelEventHandlers.onNotificationRemovedFromChannel(event, this);
       } else if (eventType == 'user.presence.changed' ||
           eventType == EventType.userUpdated) {
-        channelEvents.onUserPresenceChanged(event, this);
+        _channelEventHandlers.onUserPresenceChanged(event, this);
       }
     });
   }

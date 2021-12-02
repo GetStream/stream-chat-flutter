@@ -47,7 +47,7 @@ export 'src/user_item.dart';
 export 'src/user_list_view.dart';
 export 'src/user_mention_tile.dart';
 export 'src/utils.dart';
-export 'src/v4/channel_list_view/channel_events.dart';
+export 'src/v4/channel_list_view/channel_event_handlers.dart';
 export 'src/v4/channel_list_view/stream_channel_list_controller.dart';
 export 'src/v4/channel_list_view/stream_channel_list_view.dart';
 export 'src/visible_footnote.dart';
