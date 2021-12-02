@@ -70,7 +70,7 @@ class MyApp extends StatelessWidget {
 }
 
 class ChannelListPage extends StatefulWidget {
-  ChannelListPage({
+  const ChannelListPage({
     Key? key,
     required this.client,
   }) : super(key: key);
