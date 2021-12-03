@@ -3,7 +3,8 @@
 🐞 Fixed
 
 - [[#799]](https://github.com/GetStream/stream-chat-flutter/issues/799) Fixed `totalUnreadCount` is not updating when
-  app is resumed from background mode
+  app is resumed from background mode.
+- Fix retry mechanism failing in some cases.
 
 ## 3.3.0
 
