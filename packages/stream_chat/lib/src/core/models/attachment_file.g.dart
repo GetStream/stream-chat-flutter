@@ -22,31 +22,42 @@ Map<String, dynamic> _$AttachmentFileToJson(AttachmentFile instance) =>
       'size': instance.size,
     };
 
-_$Preparing _$$PreparingFromJson(Map<String, dynamic> json) => _$Preparing();
+_$Preparing _$$PreparingFromJson(Map<String, dynamic> json) => _$Preparing(
+      $type: json['runtimeType'] as String?,
+    );
 
 Map<String, dynamic> _$$PreparingToJson(_$Preparing instance) =>
-    <String, dynamic>{};
+    <String, dynamic>{
+      'runtimeType': instance.$type,
+    };
 
 _$InProgress _$$InProgressFromJson(Map<String, dynamic> json) => _$InProgress(
       uploaded: json['uploaded'] as int,
       total: json['total'] as int,
+      $type: json['runtimeType'] as String?,
     );
 
 Map<String, dynamic> _$$InProgressToJson(_$InProgress instance) =>
     <String, dynamic>{
       'uploaded': instance.uploaded,
       'total': instance.total,
+      'runtimeType': instance.$type,
     };
 
-_$Success _$$SuccessFromJson(Map<String, dynamic> json) => _$Success();
+_$Success _$$SuccessFromJson(Map<String, dynamic> json) => _$Success(
+      $type: json['runtimeType'] as String?,
+    );
 
-Map<String, dynamic> _$$SuccessToJson(_$Success instance) =>
-    <String, dynamic>{};
+Map<String, dynamic> _$$SuccessToJson(_$Success instance) => <String, dynamic>{
+      'runtimeType': instance.$type,
+    };
 
 _$Failed _$$FailedFromJson(Map<String, dynamic> json) => _$Failed(
       error: json['error'] as String,
+      $type: json['runtimeType'] as String?,
     );
 
 Map<String, dynamic> _$$FailedToJson(_$Failed instance) => <String, dynamic>{
       'error': instance.error,
+      'runtimeType': instance.$type,
     };

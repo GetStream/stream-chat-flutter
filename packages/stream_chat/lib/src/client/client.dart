@@ -395,6 +395,9 @@ class StreamChatClient {
   }
 
   void _handleHealthCheckEvent(Event event) {
+    final user = event.me;
+    if (user != null) state.currentUser = user;
+
     final connectionId = event.connectionId;
     if (connectionId != null) {
       _connectionIdManager.setConnectionId(connectionId);
@@ -1213,8 +1216,14 @@ class StreamChatClient {
       );
 
   /// Deletes the given message
-  Future<EmptyResponse> deleteMessage(String messageId) =>
-      _chatApi.message.deleteMessage(messageId);
+  Future<EmptyResponse> deleteMessage(String messageId, {bool? hard}) async {
+    final response =
+        await _chatApi.message.deleteMessage(messageId, hard: hard);
+    if (hard == true) {
+      await _chatPersistenceClient?.deleteMessageById(messageId);
+    }
+    return response;
+  }
 
   /// Get a message by [messageId]
   Future<GetMessageResponse> getMessage(String messageId) =>
@@ -1432,6 +1441,7 @@ class ClientState {
         .listen((Event event) async {
       final eventChannel = event.channel!;
       await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
+      channels[eventChannel.cid]?.dispose();
       channels = channels..remove(eventChannel.cid);
     }));
   }

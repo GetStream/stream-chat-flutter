@@ -123,27 +123,6 @@ void main() {
     verify(() => logger.severe(any())).called(greaterThan(0));
   });
 
-  test('`.lock` should lock the dio client', () async {
-    final client = StreamHttpClient('api-key');
-    expect(client.httpClient.interceptors.requestLock.locked, isFalse);
-    client.lock();
-    expect(client.httpClient.interceptors.requestLock.locked, isTrue);
-  });
-
-  test('`.unlock` should unlock the dio client', () async {
-    final client = StreamHttpClient('api-key');
-    expect(client.httpClient.interceptors.requestLock.locked, isFalse);
-    client.lock();
-    expect(client.httpClient.interceptors.requestLock.locked, isTrue);
-    client.unlock();
-    expect(client.httpClient.interceptors.requestLock.locked, isFalse);
-  });
-
-  test('`.clear` should clear and unlock the dio client', () async {
-    final client = StreamHttpClient('api-key')..clear();
-    expect(client.httpClient.interceptors.requestLock.locked, isFalse);
-  });
-
   test('`.close` should close the dio client', () async {
     final client = StreamHttpClient('api-key')..close(force: true);
     try {

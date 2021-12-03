@@ -37,30 +37,42 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       channelId: json['channel_id'] as String?,
       channelType: json['channel_type'] as String?,
       parentId: json['parent_id'] as String?,
+      hardDelete: json['hard_delete'] as bool?,
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       isLocal: json['is_local'] as bool? ?? false,
     );
 
-Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
-      'type': instance.type,
-      'cid': instance.cid,
-      'channel_id': instance.channelId,
-      'channel_type': instance.channelType,
-      'connection_id': instance.connectionId,
-      'created_at': instance.createdAt.toIso8601String(),
-      'me': instance.me?.toJson(),
-      'user': instance.user?.toJson(),
-      'message': instance.message?.toJson(),
-      'channel': instance.channel?.toJson(),
-      'member': instance.member?.toJson(),
-      'reaction': instance.reaction?.toJson(),
-      'total_unread_count': instance.totalUnreadCount,
-      'unread_channels': instance.unreadChannels,
-      'online': instance.online,
-      'parent_id': instance.parentId,
-      'is_local': instance.isLocal,
-      'extra_data': instance.extraData,
-    };
+Map<String, dynamic> _$EventToJson(Event instance) {
+  final val = <String, dynamic>{
+    'type': instance.type,
+    'cid': instance.cid,
+    'channel_id': instance.channelId,
+    'channel_type': instance.channelType,
+    'connection_id': instance.connectionId,
+    'created_at': instance.createdAt.toIso8601String(),
+    'me': instance.me?.toJson(),
+    'user': instance.user?.toJson(),
+    'message': instance.message?.toJson(),
+    'channel': instance.channel?.toJson(),
+    'member': instance.member?.toJson(),
+    'reaction': instance.reaction?.toJson(),
+    'total_unread_count': instance.totalUnreadCount,
+    'unread_channels': instance.unreadChannels,
+    'online': instance.online,
+    'parent_id': instance.parentId,
+    'is_local': instance.isLocal,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('hard_delete', instance.hardDelete);
+  val['extra_data'] = instance.extraData;
+  return val;
+}
 
 EventChannel _$EventChannelFromJson(Map<String, dynamic> json) => EventChannel(
       members: (json['members'] as List<dynamic>?)
@@ -82,7 +94,7 @@ EventChannel _$EventChannelFromJson(Map<String, dynamic> json) => EventChannel(
       deletedAt: json['deleted_at'] == null
           ? null
           : DateTime.parse(json['deleted_at'] as String),
-      memberCount: json['member_count'] as int,
+      memberCount: json['member_count'] as int? ?? 0,
       extraData: json['extra_data'] as Map<String, dynamic>?,
       cooldown: json['cooldown'] as int? ?? 0,
       team: json['team'] as String?,

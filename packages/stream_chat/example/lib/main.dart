@@ -233,10 +233,10 @@ class _MessageViewState extends State<MessageView> {
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
-          )
+          ),
         ],
       );
 }
