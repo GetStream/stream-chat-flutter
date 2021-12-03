@@ -71,14 +71,15 @@ class RetryQueue {
   /// Add a list of messages
   void add(List<Message> messages) {
     if (messages.isEmpty) return;
-    if (_messageQueue.containsAllMessage(messages)) return;
+    if (!_messageQueue.containsAllMessage(messages)) {
+      logger?.info('Adding ${messages.length} messages');
+      final messageList = _messageQueue.toList();
+      // we should not add message if already available in the queue
+      _messageQueue.addAll(messages.where(
+        (it) => !messageList.any((m) => m.id == it.id),
+      ));
+    }
 
-    logger?.info('Adding ${messages.length} messages');
-    final messageList = _messageQueue.toList();
-    // we should not add message if already available in the queue
-    _messageQueue.addAll(messages.where(
-      (it) => !messageList.any((m) => m.id == it.id),
-    ));
     _startRetrying();
   }
 
@@ -87,9 +88,9 @@ class RetryQueue {
     _isRetrying = true;
 
     logger?.info('Started retrying failed messages');
-    while (_messageQueue.isNotEmpty) {
+    for (var i = 0; i < _messageQueue.length; ++i) {
       logger?.info('${_messageQueue.length} messages remaining in the queue');
-      final message = _messageQueue.first;
+      final message = _messageQueue.toList()[i];
       await _runAndRetry(message);
     }
     _isRetrying = false;
@@ -109,8 +110,12 @@ class RetryQueue {
         await _retryMessage(message);
         logger?.info('Message (${message.id}) sent successfully');
         _messageQueue.removeMessage(message);
-        break;
-      } on StreamChatError catch (e) {
+        return;
+      } catch (e) {
+        if (e is! StreamChatNetworkError || !e.isRetriable) {
+          _messageQueue.removeMessage(message);
+          return;
+        }
         // retry logic
         final maxAttempt = _retryPolicy.maxRetryAttempts;
         if (attempt < maxAttempt) {
@@ -143,14 +148,6 @@ class RetryQueue {
           _sendFailedEvent(message);
           break;
         }
-      } catch (e) {
-        logger?.info(
-          'API call failed due to unknown error (attempt $attempt). '
-          'Giving up for now, will retry when connection recovers. '
-          'Error was $e',
-        );
-        _sendFailedEvent(message);
-        break;
       }
     }
   }
