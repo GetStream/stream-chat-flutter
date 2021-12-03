@@ -88,20 +88,24 @@ class RetryQueue {
     _isRetrying = true;
 
     logger?.info('Started retrying failed messages');
-    for (var i = 0; i < _messageQueue.length; ++i) {
+    while (_messageQueue.isNotEmpty) {
       logger?.info('${_messageQueue.length} messages remaining in the queue');
-      final message = _messageQueue.toList()[i];
-      await _runAndRetry(message);
+      final message = _messageQueue.first;
+      final succeeded = await _runAndRetry(message);
+      if (!succeeded) {
+        _messageQueue.toList().forEach(_sendFailedEvent);
+        break;
+      }
     }
     _isRetrying = false;
   }
 
-  Future<void> _runAndRetry(Message message) async {
+  Future<bool> _runAndRetry(Message message) async {
     var attempt = 1;
 
     final maxAttempt = _retryPolicy.maxRetryAttempts;
     // early return in case maxAttempt is less than 0
-    if (attempt > maxAttempt) return;
+    if (attempt > maxAttempt) return false;
 
     // ignore: literal_only_boolean_expressions
     while (true) {
@@ -110,11 +114,11 @@ class RetryQueue {
         await _retryMessage(message);
         logger?.info('Message (${message.id}) sent successfully');
         _messageQueue.removeMessage(message);
-        return;
+        return true;
       } catch (e) {
         if (e is! StreamChatNetworkError || !e.isRetriable) {
           _messageQueue.removeMessage(message);
-          return;
+          return true;
         }
         // retry logic
         final maxAttempt = _retryPolicy.maxRetryAttempts;
@@ -150,6 +154,7 @@ class RetryQueue {
         }
       }
     }
+    return false;
   }
 
   void _sendFailedEvent(Message message) {

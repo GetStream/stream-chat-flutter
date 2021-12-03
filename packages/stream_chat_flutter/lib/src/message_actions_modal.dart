@@ -533,11 +533,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       onTap: () {
         Navigator.pop(context);
         final channel = StreamChannel.of(context).channel;
-        if (isUpdateFailed) {
-          channel.updateMessage(widget.message);
-        } else {
-          channel.sendMessage(widget.message);
-        }
+        channel.state?.retryFailedMessages();
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
