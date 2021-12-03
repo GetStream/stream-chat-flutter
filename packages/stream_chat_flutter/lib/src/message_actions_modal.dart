@@ -533,7 +533,11 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       onTap: () {
         Navigator.pop(context);
         final channel = StreamChannel.of(context).channel;
-        channel.state?.retryFailedMessages();
+        if (isUpdateFailed) {
+          channel.updateMessage(widget.message);
+        } else {
+          channel.sendMessage(widget.message);
+        }
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
@@ -606,7 +610,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                 widget.editMessageInputBuilder!(context, widget.message)
               else
                 MessageInput(
-                  editMessage: widget.message,
+                  messageInputController: MessageInputController(
+                    message: widget.message,
+                  ),
                   preMessageSending: (m) {
                     FocusScope.of(context).unfocus();
                     Navigator.pop(context);
