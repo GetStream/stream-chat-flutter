@@ -3,6 +3,7 @@ name: stream_flutter_workflow
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
   flutter_version: "2.5.1"
+  melos_version: "1.0.0-dev.10"
 
 on:
   pull_request:
@@ -31,7 +32,7 @@ jobs:
           flutter-version: ${{ env.flutter_version }}
       - name: "Install Tools"
         run: |
-          flutter pub global activate melos 1.0.0-dev.10
+          flutter pub global activate melos ${{ env.melos_version }}
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: "Dart Analyze"
@@ -60,7 +61,8 @@ jobs:
         with:
           flutter-version: ${{ env.flutter_version }}
       - name: "Install Tools"
-        run: flutter pub global activate melos
+        run: |
+          flutter pub global activate melos ${{ env.melos_version }}
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: "Melos Format"
@@ -71,7 +73,7 @@ jobs:
 
   test:
     runs-on: macos-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v2
@@ -88,7 +90,7 @@ jobs:
           flutter-version: ${{ env.flutter_version }}
       - name: "Install Tools"
         run: |
-          flutter pub global activate melos
+          flutter pub global activate melos ${{ env.melos_version }}
           pub global activate remove_from_coverage
       - name: "Bootstrap Workspace"
         run: melos bootstrap

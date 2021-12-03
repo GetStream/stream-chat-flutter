@@ -6,7 +6,7 @@
 
 - `MessageInput` now works with a `MessageInputController` instead of a `TextEditingController`
 
-## 3.3.0 
+## 3.3.1
 
 ✅ Added
 
