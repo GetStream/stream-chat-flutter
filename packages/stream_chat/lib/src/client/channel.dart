@@ -1698,7 +1698,7 @@ class ChannelClientState {
       }
 
       _channelState = _channelState.copyWith(
-        messages: newMessages,
+        messages: newMessages..sort(_sortByCreatedAt),
         channel: _channelState.channel?.copyWith(
           lastMessageAt: message.createdAt,
         ),

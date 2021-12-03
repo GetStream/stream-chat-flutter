@@ -832,8 +832,8 @@ class _MessageWidgetState extends State<MessageWidget>
                         ),
                       if (isFailedState)
                         Positioned(
-                          left: widget.reverse ? 0 : null,
-                          right: widget.reverse ? null : 0,
+                          right: widget.reverse ? 0 : null,
+                          left: widget.reverse ? null : 0,
                           bottom: showBottomRow ? 18 : -2,
                           child: StreamSvgIcon.error(size: 20),
                         ),
