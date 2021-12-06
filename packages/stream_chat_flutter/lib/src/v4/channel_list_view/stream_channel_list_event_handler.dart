@@ -1,4 +1,4 @@
-import 'package:stream_chat/stream_chat.dart' hide Success;
+import 'package:stream_chat/stream_chat.dart' show ChannelState, Event;
 import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list_controller.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for

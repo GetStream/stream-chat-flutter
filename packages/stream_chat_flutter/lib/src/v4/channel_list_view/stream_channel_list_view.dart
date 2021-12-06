@@ -250,7 +250,12 @@ class _StreamChannelListViewState extends State<StreamChannelListView> {
         builder: (context, value, _) => value.when(
           (channels, nextPageKey, error) {
             if (channels.isEmpty) {
-              return const Center(child: Text('No channels'));
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: StreamChannelListEmpty(),
+                ),
+              );
             }
 
             return ListView.separated(
@@ -321,7 +326,11 @@ class _StreamChannelListViewState extends State<StreamChannelListView> {
             separatorBuilder: widget.separatorBuilder,
             itemBuilder: (_, __) => const StreamChannelListLoadingTile(),
           ),
-          error: (error) => Center(child: Text('Error: $error')),
+          error: (error) => Center(
+            child: StreamChannelListError(
+              onPressed: _controller.refresh,
+            ),
+          ),
         ),
       );
 }
@@ -347,11 +356,11 @@ class ChannelListLoadMoreError extends StatelessWidget {
   /// Creates a new instance of [ChannelListLoadMoreError].
   const ChannelListLoadMoreError({
     Key? key,
-    required this.onTap,
+    this.onTap,
   }) : super(key: key);
 
   /// The callback to invoke when the user taps on the error indicator.
-  final GestureTapCallback onTap;
+  final GestureTapCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -392,6 +401,95 @@ class StreamChannelListSeparator extends StatelessWidget {
     return Container(
       height: 1,
       color: effect.color!.withOpacity(effect.alpha ?? 1.0),
+    );
+  }
+}
+
+/// A widget that is used to display an error screen
+/// when [StreamChannelListController] fails to load initial channels.
+class StreamChannelListError extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListError] widget.
+  const StreamChannelListError({
+    Key? key,
+    this.onPressed,
+  }) : super(key: key);
+
+  /// The callback to invoke when the user taps on the retry button.
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text.rich(
+            TextSpan(
+              children: [
+                const WidgetSpan(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 2),
+                    child: Icon(Icons.error_outline),
+                  ),
+                ),
+                TextSpan(text: context.translations.loadingChannelsError),
+              ],
+            ),
+            style: Theme.of(context).textTheme.headline6,
+          ),
+          TextButton(
+            onPressed: onPressed,
+            child: Text(context.translations.retryLabel),
+          ),
+        ],
+      );
+}
+
+/// A widget that is used to display an empty state when
+/// [StreamChannelListController] loads zero channels.
+class StreamChannelListEmpty extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListEmpty] widget.
+  const StreamChannelListEmpty({
+    Key? key,
+    this.onPressed,
+  }) : super(key: key);
+
+  /// The callback to invoke when the user taps on the start a chat button.
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final chatThemeData = StreamChatTheme.of(context);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Spacer(),
+        StreamSvgIcon.message(
+          size: 148,
+          color: chatThemeData.colorTheme.disabled,
+        ),
+        const SizedBox(height: 28),
+        Text(
+          context.translations.letsStartChattingLabel,
+          style: chatThemeData.textTheme.headline,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          context.translations.sendingFirstMessageLabel,
+          textAlign: TextAlign.center,
+          style: chatThemeData.textTheme.body.copyWith(
+            color: chatThemeData.colorTheme.textLowEmphasis,
+          ),
+        ),
+        const Spacer(),
+        TextButton(
+          onPressed: onPressed,
+          child: Text(
+            context.translations.startAChatLabel,
+            style: chatThemeData.textTheme.bodyBold.copyWith(
+              color: chatThemeData.colorTheme.accentPrimary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
