@@ -1833,6 +1833,14 @@ class ChannelClientState {
         (watchers, users) => watchers!.map((e) => users[e.id] ?? e).toList(),
       );
 
+  /// Channel member for the current user.
+  Member? get currentUserMember => members.firstWhereOrNull(
+        (m) => m.user?.id == _channel.client.state.currentUser?.id,
+      );
+
+  /// User role for the current user.
+  String? get currentUserRole => currentUserMember?.role;
+
   /// Channel read list.
   List<Read> get read => _channelState.read;
 

@@ -31,10 +31,14 @@ class StreamChannelListTile extends StatelessWidget {
     this.leading,
     this.title,
     this.subtitle,
+    this.trailing,
     this.onTap,
     this.onLongPress,
+    this.tileColor,
     this.visualDensity = VisualDensity.compact,
     this.contentPadding = const EdgeInsets.symmetric(horizontal: 8),
+    this.unreadIndicatorBuilder,
+    this.sendingIndicatorBuilder,
   })  : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
@@ -53,11 +57,22 @@ class StreamChannelListTile extends StatelessWidget {
   /// Additional content displayed below the title.
   final Widget? subtitle;
 
+  /// A widget to display at the end of tile.
+  final Widget? trailing;
+
   /// Called when the user taps this list tile.
   final GestureTapCallback? onTap;
 
   /// Called when the user long-presses on this list tile.
   final GestureLongPressCallback? onLongPress;
+
+  /// {@template flutter.material.ListTile.tileColor}
+  /// Defines the background color of `ListTile` when [selected] is false.
+  ///
+  /// When the value is null, the `tileColor` is set to [ListTileTheme.tileColor]
+  /// if it's not null and to [Colors.transparent] if it's null.
+  /// {@endtemplate}
+  final Color? tileColor;
 
   /// Defines how compact the list tile's layout will be.
   ///
@@ -76,6 +91,40 @@ class StreamChannelListTile extends StatelessWidget {
   ///
   /// If null, `EdgeInsets.symmetric(horizontal: 16.0)` is used.
   final EdgeInsetsGeometry contentPadding;
+
+  /// The widget builder for the unread indicator.
+  final WidgetBuilder? unreadIndicatorBuilder;
+
+  /// The widget builder for the sending indicator.
+  ///
+  /// `Message` is the last message in the channel, Use it to determine the
+  /// status using [Message.status].
+  final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
+
+  /// Creates a copy of this tile but with the given fields replaced with
+  /// the new values.
+  StreamChannelListTile copyWith({
+    Key? key,
+    Channel? channel,
+    Widget? leading,
+    Widget? title,
+    Widget? subtitle,
+    VoidCallback? onTap,
+    VoidCallback? onLongPress,
+    VisualDensity? visualDensity,
+    EdgeInsetsGeometry? contentPadding,
+  }) =>
+      StreamChannelListTile(
+        key: key ?? this.key,
+        channel: channel ?? this.channel,
+        leading: leading ?? this.leading,
+        title: title ?? this.title,
+        subtitle: subtitle ?? this.subtitle,
+        onTap: onTap ?? this.onTap,
+        onLongPress: onLongPress ?? this.onLongPress,
+        visualDensity: visualDensity ?? this.visualDensity,
+        contentPadding: contentPadding ?? this.contentPadding,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +150,12 @@ class StreamChannelListTile extends StatelessWidget {
           textStyle: channelPreviewTheme.subtitleStyle,
         );
 
+    final trailing = this.trailing ??
+        ChannelLastMessageDate(
+          channel: channel,
+          textStyle: channelPreviewTheme.lastMessageAtStyle,
+        );
+
     return BetterStreamBuilder<bool>(
       stream: channel.isMutedStream,
       initialData: channel.isMuted,
@@ -113,6 +168,7 @@ class StreamChannelListTile extends StatelessWidget {
           visualDensity: visualDensity,
           contentPadding: contentPadding,
           leading: leading,
+          tileColor: tileColor,
           title: Row(
             children: [
               Expanded(child: title),
@@ -125,7 +181,8 @@ class StreamChannelListTile extends StatelessWidget {
                       !members.any((it) => it.user!.id == currentUser.id)) {
                     return const Offstage();
                   }
-                  return UnreadIndicator(cid: channel.cid);
+                  return unreadIndicatorBuilder?.call(context) ??
+                      UnreadIndicator(cid: channel.cid);
                 },
               ),
             ],
@@ -154,24 +211,19 @@ class StreamChannelListTile extends StatelessWidget {
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 4),
-                    child: SendingIndicator(
-                      message: lastMessage,
-                      size: channelPreviewTheme.indicatorIconSize,
-                      isMessageRead: channelState.read
-                          .where((it) => it.user.id != currentUser.id)
-                          .where(
-                            (it) => it.lastRead.isAfter(lastMessage.createdAt),
-                          )
-                          .isNotEmpty,
-                    ),
+                    child:
+                        sendingIndicatorBuilder?.call(context, lastMessage) ??
+                            SendingIndicator(
+                              message: lastMessage,
+                              size: channelPreviewTheme.indicatorIconSize,
+                              isMessageRead: channelState
+                                  .currentUserRead!.lastRead
+                                  .isAfter(lastMessage.createdAt),
+                            ),
                   );
                 },
               ),
-              ChannelLastMessageDate(
-                channel: channel,
-                textStyle: channelPreviewTheme.lastMessageAtStyle,
-              ),
-              // trailing ?? _buildDate(context),
+              trailing,
             ],
           ),
         ),

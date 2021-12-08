@@ -19,6 +19,7 @@ Widget defaultSeparatorBuilder(BuildContext context, int index) =>
 typedef StreamChannelListViewItemBuilder = Widget Function(
   BuildContext context,
   Channel channel,
+  StreamChannelListTile defaultWidget,
 );
 
 /// A [ListView] that shows a list of [Channel]s,
@@ -51,6 +52,9 @@ class StreamChannelListView extends StatefulWidget {
     required this.controller,
     this.itemBuilder,
     this.separatorBuilder = defaultSeparatorBuilder,
+    this.emptyBuilder,
+    this.loadingBuilder,
+    this.errorBuilder,
     this.onChannelTap,
     this.onChannelLongPress,
     this.padding,
@@ -71,12 +75,28 @@ class StreamChannelListView extends StatefulWidget {
 
   /// A builder that is called to build items in the [ListView].
   ///
-  /// The `index` parameter is the index of the list tile in the list and the
-  /// `channel` parameter is the [Channel] at that position.
+  /// The `channel` parameter is the [Channel] at this position in the list
+  /// and the `defaultWidget` is the default widget used
+  /// i.e: [StreamChannelListTile].
   final StreamChannelListViewItemBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.
   final IndexedWidgetBuilder separatorBuilder;
+
+  /// A builder that is called to build the empty state of the list.
+  ///
+  /// If not provider, [StreamChannelListEmptyWidget] will be used.
+  final WidgetBuilder? emptyBuilder;
+
+  /// A builder that is called to build the loading state of the list.
+  ///
+  /// If not provided, [StreamChannelListLoadingTile] will be used.
+  final WidgetBuilder? loadingBuilder;
+
+  /// A builder that is called to build the error state of the list.
+  ///
+  /// If not provided, [StreamChannelListErrorWidget] will be used.
+  final Widget Function(BuildContext, StreamChatError)? errorBuilder;
 
   /// Called when the user taps this list tile.
   final void Function(Channel)? onChannelTap;
@@ -250,12 +270,13 @@ class _StreamChannelListViewState extends State<StreamChannelListView> {
         builder: (context, value, _) => value.when(
           (channels, nextPageKey, error) {
             if (channels.isEmpty) {
-              return const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(8),
-                  child: StreamChannelListEmpty(),
-                ),
-              );
+              return widget.emptyBuilder?.call(context) ??
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: StreamChannelListEmptyWidget(),
+                    ),
+                  );
             }
 
             return ListView.separated(
@@ -290,47 +311,61 @@ class _StreamChannelListViewState extends State<StreamChannelListView> {
 
                 if (index == channels.length) {
                   if (error != null) {
-                    return ChannelListLoadMoreError(
+                    return StreamChannelListLoadMoreError(
                       onTap: _controller.retry,
                     );
                   }
                   return const Center(
                     child: Padding(
                       padding: EdgeInsets.all(16),
-                      child: ChannelListLoadMoreIndicator(),
+                      child: StreamChannelListLoadMoreIndicator(),
                     ),
                   );
                 }
 
                 final channel = channels[index];
-                final itemBuilder = widget.itemBuilder;
-                if (itemBuilder != null) return itemBuilder(context, channel);
 
                 final onTap = widget.onChannelTap;
                 final onLongPress = widget.onChannelLongPress;
 
-                return StreamChannelListTile(
+                final streamChannelListTile = StreamChannelListTile(
                   channel: channel,
                   onTap: onTap == null ? null : () => onTap(channel),
                   onLongPress:
                       onLongPress == null ? null : () => onLongPress(channel),
                 );
+
+                final itemBuilder = widget.itemBuilder;
+
+                if (itemBuilder != null) {
+                  return itemBuilder(
+                    context,
+                    channel,
+                    streamChannelListTile,
+                  );
+                }
+
+                return streamChannelListTile;
               },
             );
           },
-          loading: () => ListView.separated(
-            padding: widget.padding,
-            physics: widget.physics,
-            reverse: widget.reverse,
-            itemCount: 25,
-            separatorBuilder: widget.separatorBuilder,
-            itemBuilder: (_, __) => const StreamChannelListLoadingTile(),
-          ),
-          error: (error) => Center(
-            child: StreamChannelListError(
-              onPressed: _controller.refresh,
-            ),
-          ),
+          loading: () =>
+              widget.loadingBuilder?.call(context) ??
+              ListView.separated(
+                padding: widget.padding,
+                physics: widget.physics,
+                reverse: widget.reverse,
+                itemCount: 25,
+                separatorBuilder: widget.separatorBuilder,
+                itemBuilder: (_, __) => const StreamChannelListLoadingTile(),
+              ),
+          error: (error) =>
+              widget.errorBuilder?.call(context, error) ??
+              Center(
+                child: StreamChannelListErrorWidget(
+                  onPressed: _controller.refresh,
+                ),
+              ),
         ),
       );
 }
@@ -338,9 +373,9 @@ class _StreamChannelListViewState extends State<StreamChannelListView> {
 /// A [StreamChannelListTile] that can be used in a [ListView] to show a
 /// loading tile while waiting for the [StreamChannelListController] to load
 /// more channels.
-class ChannelListLoadMoreIndicator extends StatelessWidget {
-  /// Creates a new instance of [ChannelListLoadMoreIndicator].
-  const ChannelListLoadMoreIndicator({Key? key}) : super(key: key);
+class StreamChannelListLoadMoreIndicator extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListLoadMoreIndicator].
+  const StreamChannelListLoadMoreIndicator({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => const SizedBox(
@@ -352,9 +387,9 @@ class ChannelListLoadMoreIndicator extends StatelessWidget {
 
 /// A [StreamChannelListTile] that is used to display the error indicator when
 /// loading more channels fails.
-class ChannelListLoadMoreError extends StatelessWidget {
-  /// Creates a new instance of [ChannelListLoadMoreError].
-  const ChannelListLoadMoreError({
+class StreamChannelListLoadMoreError extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListLoadMoreError].
+  const StreamChannelListLoadMoreError({
     Key? key,
     this.onTap,
   }) : super(key: key);
@@ -407,9 +442,9 @@ class StreamChannelListSeparator extends StatelessWidget {
 
 /// A widget that is used to display an error screen
 /// when [StreamChannelListController] fails to load initial channels.
-class StreamChannelListError extends StatelessWidget {
-  /// Creates a new instance of [StreamChannelListError] widget.
-  const StreamChannelListError({
+class StreamChannelListErrorWidget extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListErrorWidget] widget.
+  const StreamChannelListErrorWidget({
     Key? key,
     this.onPressed,
   }) : super(key: key);
@@ -445,15 +480,9 @@ class StreamChannelListError extends StatelessWidget {
 
 /// A widget that is used to display an empty state when
 /// [StreamChannelListController] loads zero channels.
-class StreamChannelListEmpty extends StatelessWidget {
-  /// Creates a new instance of [StreamChannelListEmpty] widget.
-  const StreamChannelListEmpty({
-    Key? key,
-    this.onPressed,
-  }) : super(key: key);
-
-  /// The callback to invoke when the user taps on the start a chat button.
-  final VoidCallback? onPressed;
+class StreamChannelListEmptyWidget extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListEmptyWidget] widget.
+  const StreamChannelListEmptyWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -461,7 +490,6 @@ class StreamChannelListEmpty extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Spacer(),
         StreamSvgIcon.message(
           size: 148,
           color: chatThemeData.colorTheme.disabled,
@@ -470,24 +498,6 @@ class StreamChannelListEmpty extends StatelessWidget {
         Text(
           context.translations.letsStartChattingLabel,
           style: chatThemeData.textTheme.headline,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          context.translations.sendingFirstMessageLabel,
-          textAlign: TextAlign.center,
-          style: chatThemeData.textTheme.body.copyWith(
-            color: chatThemeData.colorTheme.textLowEmphasis,
-          ),
-        ),
-        const Spacer(),
-        TextButton(
-          onPressed: onPressed,
-          child: Text(
-            context.translations.startAChatLabel,
-            style: chatThemeData.textTheme.bodyBold.copyWith(
-              color: chatThemeData.colorTheme.accentPrimary,
-            ),
-          ),
         ),
       ],
     );

@@ -176,6 +176,32 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     return channel;
   }
 
+  /// Leaves the [channel] and updates the list.
+  Future<void> leaveChannel(Channel channel) async {
+    final user = client.state.currentUser;
+    assert(user != null, 'You must be logged in to leave a channel.');
+    await channel.removeMembers([user!.id]);
+  }
+
+  /// Deletes the [channel] and updates the list.
+  Future<void> deleteChannel(Channel channel) async {
+    await channel.delete();
+  }
+
+  /// Mutes the [channel] and updates the list.
+  Future<void> muteChannel(Channel channel) async {
+    await channel.mute();
+  }
+
+  /// Un-mutes the [channel] and updates the list.
+  Future<void> unmuteChannel(Channel channel) async {
+    await channel.unmute();
+  }
+
+  /// Event listener, which can be set in order to listen
+  /// [client] web-socket events.
+  bool Function(Event event)? eventListener;
+
   StreamSubscription<Event>? _channelEventSubscription;
 
   // Subscribes to the channel list events.
@@ -185,6 +211,9 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     }
 
     _channelEventSubscription = client.on().listen((event) {
+      // Returns early if the event is already handled by the listener.
+      if (eventListener?.call(event) ?? false) return;
+
       final eventType = event.type;
       if (eventType == EventType.channelDeleted) {
         _eventHandler.onChannelDeleted(event, this);
