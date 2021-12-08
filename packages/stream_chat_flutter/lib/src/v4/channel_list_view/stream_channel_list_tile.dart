@@ -67,7 +67,7 @@ class StreamChannelListTile extends StatelessWidget {
   final GestureLongPressCallback? onLongPress;
 
   /// {@template flutter.material.ListTile.tileColor}
-  /// Defines the background color of `ListTile` when [selected] is false.
+  /// Defines the background color of `ListTile`.
   ///
   /// When the value is null, the `tileColor` is set to [ListTileTheme.tileColor]
   /// if it's not null and to [Colors.transparent] if it's null.
