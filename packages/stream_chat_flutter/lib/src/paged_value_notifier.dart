@@ -62,10 +62,12 @@ abstract class PagedValueNotifier<Key, Value>
 
   /// Refresh the data presented by this [PagedValueNotifier].
   ///
+  /// Resets the [value] to the initial value in case [resetValue] is true.
+  ///
   /// Note: This API is intended for UI-driven refresh signals,
   /// such as swipe-to-refresh.
-  Future<void> refresh() {
-    value = _initialValue;
+  Future<void> refresh({bool resetValue = true}) {
+    if (resetValue) value = _initialValue;
     return doInitialLoad();
   }
 
