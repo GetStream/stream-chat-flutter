@@ -85,126 +85,124 @@ class _ChannelList extends State<ChannelList> {
               ),
             ),
           ],
-          body: MessageSearchBloc(
-            child: _isSearchActive
-                ? MessageSearchListView(
-                    showErrorTile: true,
-                    messageQuery: _channelQuery,
-                    filters: Filter.in_('members', [user!.id]),
-                    sortOptions: [
-                      SortOption(
-                        'created_at',
-                        direction: SortOption.ASC,
+          body: _isSearchActive
+              ? MessageSearchListView(
+                  showErrorTile: true,
+                  messageQuery: _channelQuery,
+                  filters: Filter.in_('members', [user!.id]),
+                  sortOptions: [
+                    SortOption(
+                      'created_at',
+                      direction: SortOption.ASC,
+                    ),
+                  ],
+                  pullToRefresh: false,
+                  limit: 30,
+                  emptyBuilder: (_) {
+                    return LayoutBuilder(
+                      builder: (context, viewportConstraints) {
+                        return SingleChildScrollView(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: viewportConstraints.maxHeight,
+                            ),
+                            child: Center(
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(24),
+                                    child: StreamSvgIcon.search(
+                                      size: 96,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  Text(
+                                    AppLocalizations.of(context).noResults,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  onItemTap: (messageResponse) async {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    final client = StreamChat.of(context).client;
+                    final message = messageResponse.message;
+                    final channel = client.channel(
+                      messageResponse.channel!.type,
+                      id: messageResponse.channel!.id,
+                    );
+                    if (channel.state == null) {
+                      await channel.watch();
+                    }
+                    Navigator.pushNamed(
+                      context,
+                      Routes.CHANNEL_PAGE,
+                      arguments: ChannelPageArgs(
+                        channel: channel,
+                        initialMessage: message,
                       ),
-                    ],
-                    pullToRefresh: false,
-                    limit: 30,
-                    emptyBuilder: (_) {
-                      return LayoutBuilder(
-                        builder: (context, viewportConstraints) {
-                          return SingleChildScrollView(
-                            physics: AlwaysScrollableScrollPhysics(),
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                minHeight: viewportConstraints.maxHeight,
-                              ),
-                              child: Center(
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(24),
-                                      child: StreamSvgIcon.search(
-                                        size: 96,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    Text(
-                                      AppLocalizations.of(context).noResults,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    onItemTap: (messageResponse) async {
-                      FocusScope.of(context).requestFocus(FocusNode());
-                      final client = StreamChat.of(context).client;
-                      final message = messageResponse.message;
-                      final channel = client.channel(
-                        messageResponse.channel!.type,
-                        id: messageResponse.channel!.id,
-                      );
-                      if (channel.state == null) {
-                        await channel.watch();
-                      }
-                      Navigator.pushNamed(
+                    );
+                  },
+                )
+              : ChannelListView(
+                  onChannelTap: (channel, _) {
+                    Navigator.pushNamed(
+                      context,
+                      Routes.CHANNEL_PAGE,
+                      arguments: ChannelPageArgs(
+                        channel: channel,
+                      ),
+                    );
+                  },
+                  onStartChatPressed: () {
+                    Navigator.pushNamed(context, Routes.NEW_CHAT);
+                  },
+                  swipeToAction: true,
+                  filter: Filter.in_('members', [user!.id]),
+                  presence: true,
+                  limit: 30,
+                  onViewInfoTap: (channel) {
+                    Navigator.pop(context);
+                    if (channel.memberCount == 2 && channel.isDistinct) {
+                      Navigator.push(
                         context,
-                        Routes.CHANNEL_PAGE,
-                        arguments: ChannelPageArgs(
-                          channel: channel,
-                          initialMessage: message,
-                        ),
-                      );
-                    },
-                  )
-                : ChannelListView(
-                    onChannelTap: (channel, _) {
-                      Navigator.pushNamed(
-                        context,
-                        Routes.CHANNEL_PAGE,
-                        arguments: ChannelPageArgs(
-                          channel: channel,
-                        ),
-                      );
-                    },
-                    onStartChatPressed: () {
-                      Navigator.pushNamed(context, Routes.NEW_CHAT);
-                    },
-                    swipeToAction: true,
-                    filter: Filter.in_('members', [user!.id]),
-                    presence: true,
-                    limit: 30,
-                    onViewInfoTap: (channel) {
-                      Navigator.pop(context);
-                      if (channel.memberCount == 2 && channel.isDistinct) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => StreamChannel(
-                              channel: channel,
-                              child: ChatInfoScreen(
-                                messageTheme:
-                                    StreamChatTheme.of(context).ownMessageTheme,
-                                user: channel.state!.members
-                                    .where((m) =>
-                                        m.userId !=
-                                        channel.client.state.currentUser!.id)
-                                    .first
-                                    .user,
-                              ),
+                        MaterialPageRoute(
+                          builder: (context) => StreamChannel(
+                            channel: channel,
+                            child: ChatInfoScreen(
+                              messageTheme:
+                                  StreamChatTheme.of(context).ownMessageTheme,
+                              user: channel.state!.members
+                                  .where((m) =>
+                                      m.userId !=
+                                      channel.client.state.currentUser!.id)
+                                  .first
+                                  .user,
                             ),
                           ),
-                        );
-                      } else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => StreamChannel(
-                              channel: channel,
-                              child: GroupInfoScreen(
-                                messageTheme:
-                                    StreamChatTheme.of(context).ownMessageTheme,
-                              ),
+                        ),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StreamChannel(
+                            channel: channel,
+                            child: GroupInfoScreen(
+                              messageTheme:
+                                  StreamChatTheme.of(context).ownMessageTheme,
                             ),
                           ),
-                        );
-                      }
-                    },
-                  ),
-          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
         ),
       ),
     );
