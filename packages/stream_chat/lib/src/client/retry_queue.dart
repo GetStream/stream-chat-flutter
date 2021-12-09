@@ -71,14 +71,15 @@ class RetryQueue {
   /// Add a list of messages
   void add(List<Message> messages) {
     if (messages.isEmpty) return;
-    if (_messageQueue.containsAllMessage(messages)) return;
+    if (!_messageQueue.containsAllMessage(messages)) {
+      logger?.info('Adding ${messages.length} messages');
+      final messageList = _messageQueue.toList();
+      // we should not add message if already available in the queue
+      _messageQueue.addAll(messages.where(
+        (it) => !messageList.any((m) => m.id == it.id),
+      ));
+    }
 
-    logger?.info('Adding ${messages.length} messages');
-    final messageList = _messageQueue.toList();
-    // we should not add message if already available in the queue
-    _messageQueue.addAll(messages.where(
-      (it) => !messageList.any((m) => m.id == it.id),
-    ));
     _startRetrying();
   }
 
@@ -90,17 +91,21 @@ class RetryQueue {
     while (_messageQueue.isNotEmpty) {
       logger?.info('${_messageQueue.length} messages remaining in the queue');
       final message = _messageQueue.first;
-      await _runAndRetry(message);
+      final succeeded = await _runAndRetry(message);
+      if (!succeeded) {
+        _messageQueue.toList().forEach(_sendFailedEvent);
+        break;
+      }
     }
     _isRetrying = false;
   }
 
-  Future<void> _runAndRetry(Message message) async {
+  Future<bool> _runAndRetry(Message message) async {
     var attempt = 1;
 
     final maxAttempt = _retryPolicy.maxRetryAttempts;
     // early return in case maxAttempt is less than 0
-    if (attempt > maxAttempt) return;
+    if (attempt > maxAttempt) return false;
 
     // ignore: literal_only_boolean_expressions
     while (true) {
@@ -109,8 +114,12 @@ class RetryQueue {
         await _retryMessage(message);
         logger?.info('Message (${message.id}) sent successfully');
         _messageQueue.removeMessage(message);
-        break;
-      } on StreamChatError catch (e) {
+        return true;
+      } catch (e) {
+        if (e is! StreamChatNetworkError || !e.isRetriable) {
+          _messageQueue.removeMessage(message);
+          return true;
+        }
         // retry logic
         final maxAttempt = _retryPolicy.maxRetryAttempts;
         if (attempt < maxAttempt) {
@@ -143,16 +152,9 @@ class RetryQueue {
           _sendFailedEvent(message);
           break;
         }
-      } catch (e) {
-        logger?.info(
-          'API call failed due to unknown error (attempt $attempt). '
-          'Giving up for now, will retry when connection recovers. '
-          'Error was $e',
-        );
-        _sendFailedEvent(message);
-        break;
       }
     }
+    return false;
   }
 
   void _sendFailedEvent(Message message) {
