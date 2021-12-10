@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+/// A value listenable builder related to a [Message]
+typedef MessageValueListenableBuilder = ValueListenableBuilder<Message>;
+
+/// A function that returns true if the message is valid and can be sent.
 typedef MessageValidator = bool Function(Message message);
 
 /// Controller for storing and mutating a [Message] value.
@@ -81,21 +85,24 @@ class MessageInputController extends ValueNotifier<Message> {
     }
   }
 
-  ///
+  /// Returns the current message associated with this controller.
+  Message get message => value;
+
+  /// Returns the controller of the text field linked to this controller.
   TextEditingController get textEditingController => _textEditingController;
   final TextEditingController _textEditingController;
 
-  ///
+  /// Returns the text of the message.
   String get text => _textEditingController.text;
 
   Message _initialMessage;
 
-  ///
+  /// Sets the message.
   set message(Message message) {
     value = message;
   }
 
-  ///
+  /// Sets a command for the message.
   set command(Command command) {
     value = value.copyWith(
       command: command.name,
@@ -103,6 +110,7 @@ class MessageInputController extends ValueNotifier<Message> {
     );
   }
 
+  /// Sets the text of the message.
   set text(String newText) {
     var newTextWithCommand = newText;
     if (value.command != null) {
@@ -113,79 +121,83 @@ class MessageInputController extends ValueNotifier<Message> {
     value = value.copyWith(text: newTextWithCommand);
   }
 
-  ///
+  /// Returns the baseOffset of the text field.
   int get baseOffset => textEditingController.selection.baseOffset;
 
-  ///
+  /// Returns the start of the selection of the text field.
   int get selectionStart => textEditingController.selection.start;
 
+  /// Sets the showInChannel flag of the message.
   set showInChannel(bool newValue) {
     value = value.copyWith(showInChannel: newValue);
   }
 
-  ///
+  /// Returns true if the message is in a thread and
+  /// should be shown in the main channel as well.
   bool get showInChannel => value.showInChannel ?? false;
 
-  ///
+  /// Returns the attachments of the message.
   List<Attachment> get attachments => value.attachments;
 
+  /// Sets the list of [attachments] for the message.
   set attachments(List<Attachment> attachments) {
     value = value.copyWith(attachments: attachments);
   }
 
-  ///
+  /// Adds a new attachment to the message.
   void addAttachment(Attachment attachment) {
     attachments = [...attachments, attachment];
   }
 
-  ///
+  /// Adds a new attachment at the specified [index].
   void addAttachmentAt(int index, Attachment attachment) {
     attachments = [...attachments]..insert(index, attachment);
   }
 
-  ///
+  /// Removes the specified [attachment] from the message.
   void removeAttachment(Attachment attachment) {
     attachments = [...attachments]..remove(attachment);
   }
 
-  ///
+  /// Remove the attachment with the given [attachmentId].
   void removeAttachmentById(String attachmentId) {
     attachments = [...attachments]..removeWhere((it) => it.id == attachmentId);
   }
 
-  ///
+  /// Removes the attachment at the given [index].
   void removeAttachmentAt(int index) {
     attachments = [...attachments]..removeAt(index);
   }
 
-  ///
+  /// Clears the message attachments.
   void clearAttachments() {
     attachments = [];
   }
 
-  ///
+  /// Returns the list of mentioned users in the message.
   List<User> get mentionedUsers => value.mentionedUsers;
 
+  /// Sets the mentioned users.
   set mentionedUsers(List<User> users) {
     value = value.copyWith(mentionedUsers: users);
   }
 
-  ///
+  /// Adds a user to the list of mentioned users.
   void addMentionedUser(User user) {
     mentionedUsers = [...mentionedUsers, user];
   }
 
-  ///
+  /// Removes the specified [user] from the mentioned users list.
   void removeMentionedUser(User user) {
     mentionedUsers = [...mentionedUsers]..remove(user);
   }
 
-  ///
+  /// Removes the mentioned user with the given [userId].
   void removeMentionedUserById(String userId) {
     mentionedUsers = [...mentionedUsers]..removeWhere((it) => it.id == userId);
   }
 
-  ///
+  /// Removes all mentioned users from the message.
   void clearMentionedUsers() {
     mentionedUsers = [];
   }

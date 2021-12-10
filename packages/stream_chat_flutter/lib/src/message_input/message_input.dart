@@ -419,9 +419,9 @@ class MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = ValueListenableBuilder<Message>(
+    Widget child = MessageValueListenableBuilder(
       valueListenable: messageInputController,
-      builder: (context, value, wid) => DecoratedBox(
+      builder: (context, value, _) => DecoratedBox(
         decoration: BoxDecoration(
           color: _messageInputTheme.inputBackgroundColor,
         ),
