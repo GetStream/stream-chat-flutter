@@ -63,7 +63,7 @@ class MessageInputController extends ValueNotifier<Message> {
   bool get isValid => validator(value);
 
   static bool _defaultValidator(Message message) =>
-      message.text?.isNotEmpty != true && message.attachments.isEmpty;
+      message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
 
   void _textEditingSyncer() {
     final cleanText = value.command == null
