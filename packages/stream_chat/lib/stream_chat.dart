@@ -7,6 +7,7 @@ export 'package:dio/src/options.dart';
 export 'package:dio/src/options.dart' show ProgressCallback;
 export 'package:logging/logging.dart' show Logger, Level;
 export 'package:rate_limiter/rate_limiter.dart';
+export 'package:uuid/uuid.dart';
 
 export './src/core/api/attachment_file_uploader.dart'
     show AttachmentFileUploader;

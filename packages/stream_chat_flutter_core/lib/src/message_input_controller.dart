@@ -88,7 +88,7 @@ class MessageInputController extends ValueNotifier<Message> {
   ///
   String get text => _textEditingController.text;
 
-  final Message _initialMessage;
+  Message _initialMessage;
 
   ///
   set message(Message message) {
@@ -206,13 +206,20 @@ class MessageInputController extends ValueNotifier<Message> {
   }
 
   /// Set the [value] to the initial [Message] value.
-  void reset() => value = _initialMessage;
+  void reset({bool resetId = true}) {
+    if (resetId) {
+      _initialMessage = _initialMessage.copyWith(
+        id: const Uuid().v4(),
+      );
+    }
+    value = _initialMessage;
+  }
 
   @override
   void dispose() {
-    super.dispose();
     removeListener(_textEditingSyncer);
     _textEditingController.dispose();
+    super.dispose();
   }
 }
 

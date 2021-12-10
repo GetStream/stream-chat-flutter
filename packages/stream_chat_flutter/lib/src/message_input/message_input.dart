@@ -421,72 +421,69 @@ class MessageInputState extends State<MessageInput> {
   Widget build(BuildContext context) {
     Widget child = ValueListenableBuilder<Message>(
       valueListenable: messageInputController,
-      builder: (context, value, wid) {
-        print('VALUE ${value.text}');
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: _messageInputTheme.inputBackgroundColor,
-          ),
-          child: SafeArea(
-            child: GestureDetector(
-              onPanUpdate: (details) {
-                if (details.delta.dy > 0) {
-                  _focusNode.unfocus();
-                  if (_openFilePickerSection) {
-                    setState(() {
-                      _openFilePickerSection = false;
-                    });
-                  }
+      builder: (context, value, wid) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: _messageInputTheme.inputBackgroundColor,
+        ),
+        child: SafeArea(
+          child: GestureDetector(
+            onPanUpdate: (details) {
+              if (details.delta.dy > 0) {
+                _focusNode.unfocus();
+                if (_openFilePickerSection) {
+                  setState(() {
+                    _openFilePickerSection = false;
+                  });
                 }
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (_hasQuotedMessage)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: StreamSvgIcon.reply(
-                              color: _streamChatTheme.colorTheme.disabled,
-                            ),
-                          ),
-                          Text(
-                            context.translations.replyToMessageLabel,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          IconButton(
-                            visualDensity: VisualDensity.compact,
-                            icon: StreamSvgIcon.closeSmall(),
-                            onPressed: widget.onQuotedMessageCleared,
-                          ),
-                        ],
-                      ),
-                    ),
+              }
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_hasQuotedMessage)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: _buildTextField(context),
-                  ),
-                  if (messageInputController.value.parentId != null &&
-                      !widget.hideSendAsDm)
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        right: 12,
-                        left: 12,
-                        bottom: 12,
-                      ),
-                      child: _buildDmCheckbox(),
+                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: StreamSvgIcon.reply(
+                            color: _streamChatTheme.colorTheme.disabled,
+                          ),
+                        ),
+                        Text(
+                          context.translations.replyToMessageLabel,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          icon: StreamSvgIcon.closeSmall(),
+                          onPressed: widget.onQuotedMessageCleared,
+                        ),
+                      ],
                     ),
-                  _buildFilePickerSection(),
-                ],
-              ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: _buildTextField(context),
+                ),
+                if (messageInputController.value.parentId != null &&
+                    !widget.hideSendAsDm)
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      right: 12,
+                      left: 12,
+                      bottom: 12,
+                    ),
+                    child: _buildDmCheckbox(),
+                  ),
+                _buildFilePickerSection(),
+              ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
     if (_isEditing) {
       child = Material(

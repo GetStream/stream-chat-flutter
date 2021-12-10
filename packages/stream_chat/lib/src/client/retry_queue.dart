@@ -118,6 +118,7 @@ class RetryQueue {
       } catch (e) {
         if (e is! StreamChatNetworkError || !e.isRetriable) {
           _messageQueue.removeMessage(message);
+          _sendFailedEvent(message);
           return true;
         }
         // retry logic
