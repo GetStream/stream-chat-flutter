@@ -4,6 +4,10 @@
 
  - Added `swipeActionsBuilder` in `ChannelListView` to allow building conditional actions based on `Channel` properties.
 
+ ⚠️ Deprecated
+
+- `ChannelListView.swipeActions` is now deprecated in favor of `ChannelListView.swipeActionsBuilder`.
+
 ## 3.3.2
 
 - Updated `stream_chat_flutter_core` dependency to [`3.3.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
