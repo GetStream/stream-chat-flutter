@@ -94,6 +94,7 @@ class ChannelListView extends StatefulWidget {
     this.onMoreDetailsPressed,
     this.onDeletePressed,
     this.swipeActions,
+    this.swipeActionsBuilder,
     this.channelListController,
   })  : limit = limit ?? pagination?.limit ?? 25,
         super(key: key);
@@ -199,7 +200,11 @@ class ChannelListView extends StatefulWidget {
   final ChannelInfoCallback? onDeletePressed;
 
   /// List of actions for slidable
+  @Deprecated('Use `.swipeActionsBuilder` instead.')
   final List<SwipeAction>? swipeActions;
+
+  /// List of actions for slidable
+  final List<SwipeAction>? Function(Channel)? swipeActionsBuilder;
 
   /// A [ChannelListController] allows reloading and pagination.
   /// Use [ChannelListController.loadData] and
@@ -522,7 +527,9 @@ class _ChannelListViewState extends State<ChannelListView> {
         enabled: widget.swipeToAction,
         actionPane: const SlidableBehindActionPane(),
         actionExtentRatio: 0.12,
-        secondaryActions: widget.swipeActions
+        secondaryActions: (widget.swipeActionsBuilder ??
+                    (_) => widget.swipeActions)
+                .call(channel)
                 ?.map((e) => IconSlideAction(
                       color: e.color,
                       iconWidget: e.iconWidget,
