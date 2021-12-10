@@ -6,6 +6,10 @@
 
 - `MessageInput` now works with a `MessageInputController` instead of a `TextEditingController`
 
+## 3.3.2
+
+- Updated `stream_chat_flutter_core` dependency to [`3.3.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 3.3.1
 
 ✅ Added

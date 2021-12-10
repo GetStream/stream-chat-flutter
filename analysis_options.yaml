@@ -154,18 +154,6 @@ dart_code_metrics:
     # Dart Specific
     - binary-expression-operand-order
     - double-literal-format
-    - prefer-match-file-name:
-        exclude:
-          - packages/*/test/**
-          - packages/*/example/**
-          - packages/**/util/**
-          - packages/**/utils.dart
-          - packages/stream_chat/lib/src/client/client.dart
-          - packages/stream_chat/lib/src/core/api/responses.dart
-          - packages/stream_chat/lib/src/core/api/requests.dart
-          - packages/stream_chat/lib/src/core/platform_detector/**
-          - packages/stream_chat_persistence/lib/src/db/shared/**
-          - packages/stream_chat_localizations/lib/src/stream_chat_localizations.dart
     - no-boolean-literal-compare
     - no-equal-then-else
     - no-empty-block:
