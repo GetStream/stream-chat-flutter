@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -14,16 +13,12 @@ import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:video_compress/video_compress.dart';
 
 export 'package:video_compress/video_compress.dart' show VideoQuality;
@@ -42,13 +37,14 @@ typedef ErrorListener = void Function(
 ///
 /// This callback should not throw.
 ///
-/// It exists merely for showing custom error, and should not be used otherwise.
+/// It exists merely for showing a custom error, and should not be used
+/// otherwise.
 typedef AttachmentLimitExceedListener = void Function(
   int limit,
   String error,
 );
 
-/// Builder for attachment thumbnails
+/// Builder for attachment thumbnails.
 typedef AttachmentThumbnailBuilder = Widget Function(
   BuildContext,
   Attachment,
@@ -77,8 +73,8 @@ typedef ActionButtonBuilder = Widget Function(
   IconButton defaultActionButton,
 );
 
-/// Widget builder for widgets that require may required data from the
-/// [MessageInputController]
+/// Widget builder for widgets that may require data from the
+/// [MessageInputController].
 typedef MessageRelatedBuilder = Widget Function(
   BuildContext context,
   MessageInputController messageInputController,
@@ -91,7 +87,7 @@ typedef AttachmentsPickerBuilder = Widget Function(
   StreamAttachmentPicker defaultPicker,
 );
 
-/// Location for actions on the [MessageInput]
+/// Location for actions on the [MessageInput].
 enum ActionsLocation {
   /// Align to left
   left,
@@ -106,7 +102,7 @@ enum ActionsLocation {
   rightInside,
 }
 
-/// Default attachments for widget
+/// Default attachments for widget.
 enum DefaultAttachmentTypes {
   /// Image Attachment
   image,
@@ -118,7 +114,7 @@ enum DefaultAttachmentTypes {
   file,
 }
 
-/// Available locations for the sendMessage button relative to the textField
+/// Available locations for the `sendMessage` button relative to the textField.
 enum SendButtonLocation {
   /// inside the textField
   inside,
@@ -131,17 +127,17 @@ const _kMinMediaPickerSize = 360.0;
 
 const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 
-/// Inactive state
+/// Inactive state:
 ///
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input_paint.png)
 ///
-/// Focused state
+/// Focused state:
 ///
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input2.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input2_paint.png)
 ///
-/// Widget used to enter the message and add attachments
+/// Widget used to enter a message and add attachments:
 ///
 /// ```dart
 /// class ChannelPage extends StatelessWidget {
@@ -176,8 +172,7 @@ const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 /// as the bottom widget.
 ///
 /// The widget renders the ui based on the first ancestor of
-/// type [StreamChatTheme].
-/// Modify it to change the widget appearance.
+/// type [StreamChatTheme]. Modify it to change the widget appearance.
 class MessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
   const MessageInput({
@@ -218,61 +213,60 @@ class MessageInput extends StatefulWidget {
     this.shouldKeepFocusAfterMessage,
   }) : super(key: key);
 
-  /// List of options for showing overlays
+  /// List of options for showing overlays.
   final List<OverlayOptions> customOverlays;
 
-  /// Video quality to use when compressing the videos
+  /// Video quality to use when compressing the videos.
   final VideoQuality compressedVideoQuality;
 
-  /// Frame rate to use when compressing the videos
+  /// Frame rate to use when compressing the videos.
   final int compressedVideoFrameRate;
 
-  /// Max attachment size in bytes
-  /// Defaults to 20 MB
-  /// do not set it if you're using our default CDN
+  /// Max attachment size in bytes:
+  /// - Defaults to 20 MB
+  /// - Do not set it if you're using our default CDN
   final int maxAttachmentSize;
 
-  /// Function called after sending the message
+  /// Function called after sending the message.
   final void Function(Message)? onMessageSent;
 
-  /// Function called right before sending the message
-  /// Use this to transform the message
+  /// Function called right before sending the message.
+  ///
+  /// Use this to transform the message.
   final FutureOr<Message> Function(Message)? preMessageSending;
 
-  /// Maximum Height for the TextField to grow before it starts scrolling
+  /// Maximum Height for the TextField to grow before it starts scrolling.
   final double maxHeight;
 
-  /// The keyboard type assigned to the TextField
+  /// The keyboard type assigned to the TextField.
   final TextInputType keyboardType;
 
-  /// If true the attachments button will not be displayed
+  /// If true the attachments button will not be displayed.
   final bool disableAttachments;
 
-  /// Use this property to hide/show the commands button
+  /// Use this property to hide/show the commands button.
   final bool showCommandsButton;
 
-  /// Hide send as dm checkbox
+  /// Hide send as dm checkbox.
   final bool hideSendAsDm;
 
-  /// The text controller of the TextField
+  /// The text controller of the TextField.
   final MessageInputController? messageInputController;
 
-  /// List of action widgets
+  /// List of action widgets.
   final List<Widget> actions;
 
-  /// The location of the custom actions
+  /// The location of the custom actions.
   final ActionsLocation actionsLocation;
 
-  /// Map that defines a thumbnail builder for an attachment type
+  /// Map that defines a thumbnail builder for an attachment type.
   final Map<String, AttachmentThumbnailBuilder>? attachmentThumbnailBuilders;
 
-  /// The focus node associated to the TextField
+  /// The focus node associated to the TextField.
   final FocusNode? focusNode;
 
-  ///
   final Message? quotedMessage;
 
-  ///
   final VoidCallback? onQuotedMessageCleared;
 
   /// The location of the send button

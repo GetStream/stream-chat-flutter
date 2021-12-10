@@ -21,7 +21,6 @@ typedef CustomAttachmentIconBuilder = Widget Function(
   bool active,
 );
 
-///
 class StreamAttachmentPicker extends StatefulWidget {
   final bool isOpen;
   final double pickerSize;
@@ -32,15 +31,15 @@ class StreamAttachmentPicker extends StatefulWidget {
   final ValueChanged<String>? onError;
   final FilePickerCallback onFilePicked;
 
-  /// Video quality to use when compressing the videos
+  /// Video quality to use when compressing the videos.
   final VideoQuality compressedVideoQuality;
 
-  /// Frame rate to use when compressing the videos
+  /// Frame rate to use when compressing the videos.
   final int compressedVideoFrameRate;
 
-  /// Max attachment size in bytes
-  /// Defaults to 20 MB
-  /// do not set it if you're using our default CDN
+  /// Max attachment size in bytes:
+  /// - Defaults to 20 MB
+  /// - Do not set it if you're using our default CDN
   final int maxAttachmentSize;
 
   final List<DefaultAttachmentTypes> allowedAttachmentTypes;
