@@ -385,7 +385,7 @@ class MessageInputState extends State<MessageInput>
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
     _controller = RestorableMessageInputController(message: message);
-    print('_controller?.value: ${_controller?.value}');
+    _registerController();
   }
 
   void _registerController() {
