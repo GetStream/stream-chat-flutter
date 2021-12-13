@@ -1,20 +1,7 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/client/client.dart';
 import 'package:stream_chat/src/core/api/device_api.dart';
-import 'package:stream_chat/src/core/api/requests.dart';
-import 'package:stream_chat/src/core/api/responses.dart';
-import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/http/token.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/event.dart';
-import 'package:stream_chat/src/core/models/filter.dart';
-import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/own_user.dart';
-import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:test/scaffolding.dart';
 import 'package:test/test.dart';
 
 import '../fakes.dart';
@@ -2312,6 +2299,33 @@ void main() {
             set: {'pinned': false},
           )).called(1);
       verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.enrichUrl`', () async {
+      const url =
+          'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
+
+      when(() => api.general.enrichUrl(url)).thenAnswer(
+        (_) async => OGAttachmentResponse()
+          ..type = 'image'
+          ..ogScrapeUrl = url
+          ..authorName = 'TechYourChance'
+          ..title = 'Finite State Machine with Unit Tests: Real World Example',
+      );
+
+      final res = await client.enrichUrl(url);
+
+      expect(res, isNotNull);
+      expect(res.type, 'image');
+      expect(res.ogScrapeUrl, url);
+      expect(res.authorName, 'TechYourChance');
+      expect(
+        res.title,
+        'Finite State Machine with Unit Tests: Real World Example',
+      );
+
+      verify(() => api.general.enrichUrl(url)).called(1);
+      verifyNoMoreInteractions(api.general);
     });
 
     test(
