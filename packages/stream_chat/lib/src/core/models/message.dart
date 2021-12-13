@@ -76,8 +76,8 @@ class Message extends Equatable {
     this.i18n,
   })  : id = id ?? const Uuid().v4(),
         pinExpires = pinExpires?.toUtc(),
-        createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now(),
+        _createdAt = createdAt,
+        _updatedAt = updatedAt,
         _quotedMessageId = quotedMessageId;
 
   /// Create a new instance from a json
@@ -167,13 +167,17 @@ class Message extends Equatable {
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final String? command;
 
+  final DateTime? _createdAt;
+
   /// Reserved field indicating when the message was created.
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
-  final DateTime createdAt;
+  DateTime get createdAt => _createdAt ?? DateTime.now();
+
+  final DateTime? _updatedAt;
 
   /// Reserved field indicating when the message was updated last time.
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
-  final DateTime updatedAt;
+  DateTime get updatedAt => _updatedAt ?? DateTime.now();
 
   /// User who sent the message
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
@@ -311,12 +315,12 @@ class Message extends Equatable {
       threadParticipants: threadParticipants ?? this.threadParticipants,
       showInChannel: showInChannel ?? this.showInChannel,
       command: command ?? this.command,
-      createdAt: createdAt ?? this.createdAt,
+      createdAt: createdAt ?? _createdAt,
       silent: silent ?? this.silent,
       extraData: extraData ?? this.extraData,
       user: user ?? this.user,
       shadowed: shadowed ?? this.shadowed,
-      updatedAt: updatedAt ?? this.updatedAt,
+      updatedAt: updatedAt ?? _updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       status: status ?? this.status,
       pinned: pinned ?? this.pinned,

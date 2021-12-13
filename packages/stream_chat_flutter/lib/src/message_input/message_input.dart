@@ -1526,7 +1526,7 @@ class MessageInputState extends State<MessageInput> {
   Future<void> sendMessage() async {
     var message = messageInputController.value;
 
-    if (messageInputController.isValid) {
+    if (!messageInputController.isValid) {
       return;
     }
 
