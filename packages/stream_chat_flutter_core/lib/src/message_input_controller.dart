@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-/// A value listenable builder related to a [Message]
+/// A value listenable builder related to a [Message].
+///
+/// Pass in a [MessageInputController] as the `valueListenable`.
 typedef MessageValueListenableBuilder = ValueListenableBuilder<Message>;
 
 /// A function that returns true if the message is valid and can be sent.
@@ -35,7 +37,7 @@ class MessageInputController extends ValueNotifier<Message> {
         validator: validator ?? _defaultValidator,
       );
 
-  /// Creates a controller for an editable text field from an initial
+  /// Creates a controller for an editable text field from initial
   /// [attachments].
   factory MessageInputController.fromAttachments(
     List<Attachment> attachments, {
@@ -127,7 +129,7 @@ class MessageInputController extends ValueNotifier<Message> {
   /// Returns the start of the selection of the text field.
   int get selectionStart => textEditingController.selection.start;
 
-  /// Sets the showInChannel flag of the message.
+  /// Sets the [showInChannel] flag of the message.
   set showInChannel(bool newValue) {
     value = value.copyWith(showInChannel: newValue);
   }
@@ -202,14 +204,14 @@ class MessageInputController extends ValueNotifier<Message> {
     mentionedUsers = [];
   }
 
-  /// Set the [value] to empty.
+  /// Sets the [message], or [value], to empty.
   ///
   /// After calling this function, [text], [attachments] and [mentionedUsers]
-  /// all will be empty.
+  /// will all be empty.
   ///
   /// Calling this will notify all the listeners of this
   /// [MessageInputController] that they need to update
-  /// (it calls [notifyListeners]). For this reason,
+  /// (calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   void clear() {
@@ -217,7 +219,7 @@ class MessageInputController extends ValueNotifier<Message> {
     _textEditingController.clear();
   }
 
-  /// Set the [value] to the initial [Message] value.
+  /// Sets the [value] to the initial [Message] value.
   void reset({bool resetId = true}) {
     if (resetId) {
       _initialMessage = _initialMessage.copyWith(
@@ -246,16 +248,13 @@ class RestorableMessageInputController
     extends RestorableChangeNotifier<MessageInputController> {
   /// Creates a [RestorableMessageInputController].
   ///
-  /// This constructor treats a null `text` argument as if it were the empty
-  /// string.
+  /// This constructor creates a default [Message] when no `message` argument
+  /// is supplied.
   RestorableMessageInputController({Message? message})
       : _initialValue = message ?? Message();
 
   /// Creates a [RestorableMessageInputController] from an initial
-  /// [TextEditingValue].
-  ///
-  /// This constructor treats a null `value` argument as if it were
-  /// [TextEditingValue.empty].
+  /// [text] value.
   factory RestorableMessageInputController.fromText(String? text) =>
       RestorableMessageInputController(message: Message(text: text));
 
