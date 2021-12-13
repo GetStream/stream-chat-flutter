@@ -227,13 +227,13 @@ class StreamChannelState extends State<StreamChannel> {
         preferOffline: preferOffline,
       );
 
-  Future<List<ChannelState>> _queryAtMessage({
+  Future<ChannelState?> _queryAtMessage({
     String? messageId,
     int before = 20,
     int after = 20,
     bool preferOffline = false,
   }) async {
-    if (channel.state == null) return [];
+    if (channel.state == null) return null;
     channel.state!.isUpToDate = false;
     channel.state!.truncate();
 
@@ -245,22 +245,32 @@ class StreamChannelState extends State<StreamChannel> {
         preferOffline: preferOffline,
       );
       channel.state!.isUpToDate = true;
-      return [];
+      return null;
     }
 
-    return Future.wait([
-      queryBeforeMessage(
-        messageId,
-        limit: before,
-        preferOffline: preferOffline,
-      ),
-      queryAfterMessage(
-        messageId,
-        limit: after,
-        preferOffline: preferOffline,
-      ),
-    ]);
+    return queryAroundMessage(
+      messageId,
+      before: before,
+      after: after,
+      preferOffline: preferOffline,
+    );
   }
+
+  ///
+  Future<ChannelState> queryAroundMessage(
+    String messageId, {
+    int before = 20,
+    int after = 20,
+    bool preferOffline = false,
+  }) =>
+      channel.query(
+        messagesPagination: PaginationParams(
+          idAround: messageId,
+          before: before,
+          after: after,
+        ),
+        preferOffline: preferOffline,
+      );
 
   ///
   Future<ChannelState> queryBeforeMessage(

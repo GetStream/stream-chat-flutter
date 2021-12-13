@@ -121,7 +121,8 @@ class WebSocket with TimerHelper {
     _logger?.info('Closing connection with $baseUrl');
     if (_webSocketChannel != null) {
       _unsubscribeFromWebSocketChannel();
-      _webSocketChannel?.sink.close(status.goingAway);
+      _webSocketChannel?.sink
+          .close(_manuallyClosed ? status.normalClosure : status.goingAway);
       _webSocketChannel = null;
     }
   }
@@ -309,7 +310,10 @@ class WebSocket with TimerHelper {
     Event? event;
     try {
       event = Event.fromJson(jsonData);
-    } catch (_) {}
+    } catch (e, stk) {
+      _logger?.warning('Error parsing an event: $e');
+      _logger?.warning('Stack trace: $stk');
+    }
 
     if (event == null) return;
 

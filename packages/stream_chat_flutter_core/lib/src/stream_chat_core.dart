@@ -95,7 +95,12 @@ class StreamChatCoreState extends State<StreamChatCore>
   Timer? _disconnectTimer;
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    StreamChatClient.additionalHeaders = {
+      'X-Stream-Client': '${StreamChatClient.defaultUserAgent}-core',
+    };
+    return widget.child;
+  }
 
   // coverage:ignore-start
 

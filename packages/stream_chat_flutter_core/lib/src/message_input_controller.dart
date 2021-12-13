@@ -4,142 +4,193 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+/// A value listenable builder related to a [Message].
+///
+/// Pass in a [MessageInputController] as the `valueListenable`.
+typedef MessageValueListenableBuilder = ValueListenableBuilder<Message>;
+
 /// Controller for storing and mutating a [Message] value.
 class MessageInputController extends ValueNotifier<Message> {
   /// Creates a controller for an editable text field.
   ///
   /// This constructor treats a null [message] argument as if it were the empty
   /// message.
-  factory MessageInputController({Message? message}) =>
-      MessageInputController._(message ?? Message());
+  factory MessageInputController({
+    Message? message,
+  }) =>
+      MessageInputController._(
+        initialMessage: message ?? Message(),
+      );
 
   /// Creates a controller for an editable text field from an initial [text].
   factory MessageInputController.fromText(String? text) =>
-      MessageInputController._(Message(text: text));
+      MessageInputController._(
+        initialMessage: Message(text: text),
+      );
 
-  /// Creates a controller for an editable text field from an initial
+  /// Creates a controller for an editable text field from initial
   /// [attachments].
   factory MessageInputController.fromAttachments(
     List<Attachment> attachments,
   ) =>
-      MessageInputController._(Message(attachments: attachments));
+      MessageInputController._(
+        initialMessage: Message(attachments: attachments),
+      );
 
-  MessageInputController._(Message message)
-      : _textEditingController = TextEditingController(text: message.text),
-        super(message);
+  MessageInputController._({
+    required Message initialMessage,
+  })  : _textEditingController =
+            TextEditingController(text: initialMessage.text),
+        _initialMessage = initialMessage,
+        super(initialMessage) {
+    addListener(_textEditingSyncer);
+  }
 
-  ///
+  void _textEditingSyncer() {
+    final cleanText = value.command == null
+        ? value.text
+        : value.text?.replaceFirst(
+            '/${value.command} ',
+            '',
+          );
+
+    if (cleanText != _textEditingController.text) {
+      final previousOffset = _textEditingController.value.selection.start;
+      final previousText = _textEditingController.text;
+      final diff = (cleanText?.length ?? 0) - previousText.length;
+      _textEditingController
+        ..text = cleanText ?? ''
+        ..selection = TextSelection.collapsed(
+          offset: previousOffset + diff,
+        );
+    }
+  }
+
+  /// Returns the current message associated with this controller.
+  Message get message => value;
+
+  /// Returns the controller of the text field linked to this controller.
   TextEditingController get textEditingController => _textEditingController;
   final TextEditingController _textEditingController;
 
-  ///
+  /// Returns the text of the message.
   String get text => _textEditingController.text;
 
-  ///
+  Message _initialMessage;
+
+  /// Sets the message.
   set message(Message message) {
     value = message;
   }
 
+  /// Sets a command for the message.
+  set command(Command command) {
+    value = value.copyWith(
+      command: command.name,
+      text: '/${command.name} ',
+    );
+  }
+
+  /// Sets the text of the message.
   set text(String newText) {
-    value = value.copyWith(text: newText);
-    _textEditingController
-      ..text = newText
-      ..selection = TextSelection.fromPosition(
-        TextPosition(offset: _textEditingController.text.length),
-      );
+    var newTextWithCommand = newText;
+    if (value.command != null) {
+      if (!newText.startsWith('/${value.command}')) {
+        newTextWithCommand = '/${value.command} $newText';
+      }
+    }
+    value = value.copyWith(text: newTextWithCommand);
   }
 
-  ///
-  set textEditingValue(TextEditingValue newValue) {
-    _textEditingController.value = newValue;
-    value = value.copyWith(text: _textEditingController.text);
-  }
-
-  ///
+  /// Returns the baseOffset of the text field.
   int get baseOffset => textEditingController.selection.baseOffset;
 
-  ///
+  /// Returns the start of the selection of the text field.
   int get selectionStart => textEditingController.selection.start;
 
+  /// Sets the [showInChannel] flag of the message.
   set showInChannel(bool newValue) {
     value = value.copyWith(showInChannel: newValue);
   }
 
-  ///
+  /// Returns true if the message is in a thread and
+  /// should be shown in the main channel as well.
   bool get showInChannel => value.showInChannel ?? false;
 
-  ///
+  /// Returns the attachments of the message.
   List<Attachment> get attachments => value.attachments;
 
+  /// Sets the list of [attachments] for the message.
   set attachments(List<Attachment> attachments) {
     value = value.copyWith(attachments: attachments);
   }
 
-  ///
+  /// Adds a new attachment to the message.
   void addAttachment(Attachment attachment) {
     attachments = [...attachments, attachment];
   }
 
-  ///
+  /// Adds a new attachment at the specified [index].
   void addAttachmentAt(int index, Attachment attachment) {
     attachments = [...attachments]..insert(index, attachment);
   }
 
-  ///
+  /// Removes the specified [attachment] from the message.
   void removeAttachment(Attachment attachment) {
     attachments = [...attachments]..remove(attachment);
   }
 
-  ///
+  /// Remove the attachment with the given [attachmentId].
   void removeAttachmentById(String attachmentId) {
     attachments = [...attachments]..removeWhere((it) => it.id == attachmentId);
   }
 
-  ///
+  /// Removes the attachment at the given [index].
   void removeAttachmentAt(int index) {
     attachments = [...attachments]..removeAt(index);
   }
 
-  ///
+  /// Clears the message attachments.
   void clearAttachments() {
     attachments = [];
   }
 
-  ///
+  /// Returns the list of mentioned users in the message.
   List<User> get mentionedUsers => value.mentionedUsers;
 
+  /// Sets the mentioned users.
   set mentionedUsers(List<User> users) {
     value = value.copyWith(mentionedUsers: users);
   }
 
-  ///
+  /// Adds a user to the list of mentioned users.
   void addMentionedUser(User user) {
     mentionedUsers = [...mentionedUsers, user];
   }
 
-  ///
+  /// Removes the specified [user] from the mentioned users list.
   void removeMentionedUser(User user) {
     mentionedUsers = [...mentionedUsers]..remove(user);
   }
 
-  ///
+  /// Removes the mentioned user with the given [userId].
   void removeMentionedUserById(String userId) {
     mentionedUsers = [...mentionedUsers]..removeWhere((it) => it.id == userId);
   }
 
-  ///
+  /// Removes all mentioned users from the message.
   void clearMentionedUsers() {
     mentionedUsers = [];
   }
 
-  /// Set the [value] to empty.
+  /// Sets the [message], or [value], to empty.
   ///
   /// After calling this function, [text], [attachments] and [mentionedUsers]
-  /// all will be empty.
+  /// will all be empty.
   ///
   /// Calling this will notify all the listeners of this
   /// [MessageInputController] that they need to update
-  /// (it calls [notifyListeners]). For this reason,
+  /// (calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   void clear() {
@@ -147,10 +198,21 @@ class MessageInputController extends ValueNotifier<Message> {
     _textEditingController.clear();
   }
 
+  /// Sets the [value] to the initial [Message] value.
+  void reset({bool resetId = true}) {
+    if (resetId) {
+      _initialMessage = _initialMessage.copyWith(
+        id: const Uuid().v4(),
+      );
+    }
+    value = _initialMessage;
+  }
+
   @override
   void dispose() {
-    super.dispose();
+    removeListener(_textEditingSyncer);
     _textEditingController.dispose();
+    super.dispose();
   }
 }
 
@@ -165,16 +227,13 @@ class RestorableMessageInputController
     extends RestorableChangeNotifier<MessageInputController> {
   /// Creates a [RestorableMessageInputController].
   ///
-  /// This constructor treats a null `text` argument as if it were the empty
-  /// string.
+  /// This constructor creates a default [Message] when no `message` argument
+  /// is supplied.
   RestorableMessageInputController({Message? message})
       : _initialValue = message ?? Message();
 
   /// Creates a [RestorableMessageInputController] from an initial
-  /// [TextEditingValue].
-  ///
-  /// This constructor treats a null `value` argument as if it were
-  /// [TextEditingValue.empty].
+  /// [text] value.
   factory RestorableMessageInputController.fromText(String? text) =>
       RestorableMessageInputController(message: Message(text: text));
 

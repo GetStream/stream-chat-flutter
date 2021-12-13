@@ -244,9 +244,13 @@ void main() {
 
     group('`.sendMessage`', () {
       test('should work fine', () async {
-        final message = Message(id: 'test-message-id');
+        final message = Message(
+          id: 'test-message-id',
+          user: client.state.currentUser,
+        );
 
-        final sendMessageResponse = SendMessageResponse()..message = message;
+        final sendMessageResponse = SendMessageResponse()
+          ..message = message.copyWith(status: MessageSendingStatus.sent);
 
         when(() => client.sendMessage(
               any(that: isSameMessageAs(message)),
@@ -329,6 +333,7 @@ void main() {
                 .map((it) =>
                     it.copyWith(uploadState: const UploadState.success()))
                 .toList(growable: false),
+            status: MessageSendingStatus.sent,
           ));
 
         expectLater(
@@ -455,7 +460,10 @@ void main() {
 
     group('`.updateMessage`', () {
       test('should work fine', () async {
-        final message = Message(id: 'test-message-id');
+        final message = Message(
+          id: 'test-message-id',
+          status: MessageSendingStatus.sent,
+        );
 
         final updateMessageResponse = UpdateMessageResponse()
           ..message = message;
@@ -530,6 +538,7 @@ void main() {
               any(that: isSameMessageAs(message)),
             )).thenAnswer((_) async => UpdateMessageResponse()
           ..message = message.copyWith(
+            status: MessageSendingStatus.sent,
             attachments: attachments
                 .map((it) =>
                     it.copyWith(uploadState: const UploadState.success()))
@@ -678,7 +687,7 @@ void main() {
           [
             isSameMessageAs(
               updateMessageResponse.message.copyWith(
-                status: MessageSendingStatus.sent,
+                status: MessageSendingStatus.sending,
               ),
               matchText: true,
               matchSendingStatus: true,
@@ -707,7 +716,10 @@ void main() {
     group('`.deleteMessage`', () {
       test('should work fine', () async {
         const messageId = 'test-message-id';
-        final message = Message(id: messageId);
+        final message = Message(
+          id: messageId,
+          status: MessageSendingStatus.sent,
+        );
 
         when(() => client.deleteMessage(messageId))
             .thenAnswer((_) async => EmptyResponse());
@@ -1077,7 +1089,10 @@ void main() {
     group('`.sendReaction`', () {
       test('should work fine', () async {
         const type = 'test-reaction-type';
-        final message = Message(id: 'test-message-id');
+        final message = Message(
+          id: 'test-message-id',
+          status: MessageSendingStatus.sent,
+        );
 
         final reaction = Reaction(type: type, messageId: message.id);
 
@@ -1120,7 +1135,10 @@ void main() {
         'should restore previous message if `client.sendReaction` throws',
         () async {
           const type = 'test-reaction-type';
-          final message = Message(id: 'test-message-id');
+          final message = Message(
+            id: 'test-message-id',
+            status: MessageSendingStatus.sent,
+          );
 
           final reaction = Reaction(type: type, messageId: message.id);
 
@@ -1181,6 +1199,7 @@ void main() {
             latestReactions: [prevReaction],
             reactionScores: const {prevType: 1},
             reactionCounts: const {prevType: 1},
+            status: MessageSendingStatus.sent,
           );
 
           const type = 'test-reaction-type-2';
@@ -1212,7 +1231,7 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  newMessage.copyWith(status: MessageSendingStatus.sent),
+                  newMessage,
                   matchReactions: true,
                   matchSendingStatus: true,
                 ),
@@ -1255,6 +1274,7 @@ void main() {
           latestReactions: [reaction],
           reactionScores: const {type: 1},
           reactionCounts: const {type: 1},
+          status: MessageSendingStatus.sent,
         );
 
         when(() => client.deleteReaction(messageId, type))
@@ -1302,6 +1322,7 @@ void main() {
             latestReactions: [reaction],
             reactionScores: const {type: 1},
             reactionCounts: const {type: 1},
+            status: MessageSendingStatus.sent,
           );
 
           when(() => client.deleteReaction(messageId, type))

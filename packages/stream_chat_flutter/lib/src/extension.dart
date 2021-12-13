@@ -1,6 +1,7 @@
 import 'package:characters/characters.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/localization/translations.dart';
@@ -46,7 +47,7 @@ extension IterableX<T> on Iterable<T> {
 extension PlatformFileX on PlatformFile {
   /// Converts the [PlatformFile] into [AttachmentFile]
   AttachmentFile get toAttachmentFile => AttachmentFile(
-        path: path,
+        path: kIsWeb ? null : path,
         name: name,
         bytes: bytes,
         size: size,

@@ -1,3 +1,5 @@
+// ignore_for_file: prefer-trailing-comma, cascade_invocations
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
@@ -16,11 +18,12 @@ export 'package:flutter/services.dart'
         SmartQuotesType,
         SmartDashesType;
 
+/// A widget the wraps the [TextField] and adds some StreamChat specifics.
 class StreamMessageTextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
-  /// If [decoration] is non-null (which is the default), the text field requires
-  /// one of its ancestors to be a [Material] widget.
+  /// If [decoration] is non-null (which is the default), the text field
+  /// requires one of its ancestors to be a [Material] widget.
   ///
   /// To remove the decoration entirely (including the extra padding introduced
   /// by the decoration to save space for the labels), set the [decoration] to
@@ -45,10 +48,6 @@ class StreamMessageTextField extends StatefulWidget {
   /// which is evaluated after the supplied [inputFormatters], if any.
   /// The [maxLength] value must be either null or greater than zero.
   ///
-  /// If [maxLengthEnforced] is set to false, then more than [maxLength]
-  /// characters may be entered, and the error counter and divider will
-  /// switch to the [decoration].errorStyle when the limit is exceeded.
-  ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
   ///
@@ -58,7 +57,7 @@ class StreamMessageTextField extends StatefulWidget {
   /// must not be null.
   ///
   /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
-  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
+  /// [scrollPadding], [maxLines], [maxLength],
   /// [selectionHeightStyle], [selectionWidthStyle], [enableSuggestions], and
   /// [enableIMEPersonalizedLearning] arguments must not be null.
   ///
@@ -113,7 +112,7 @@ class StreamMessageTextField extends StatefulWidget {
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
     this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.keyboardAppearance,
-    this.scrollPadding = const EdgeInsets.all(20.0),
+    this.scrollPadding = const EdgeInsets.all(20),
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection = true,
     this.selectionControls,
@@ -125,51 +124,44 @@ class StreamMessageTextField extends StatefulWidget {
     this.autofillHints,
     this.restorationId,
     this.enableIMEPersonalizedLearning = true,
-  })  : assert(textAlign != null),
-        assert(readOnly != null),
-        assert(autofocus != null),
-        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-        assert(obscureText != null),
-        assert(autocorrect != null),
+  })  : assert(obscuringCharacter.length == 1,
+            '`obscuringCharacter.length` must be 1'),
         smartDashesType = smartDashesType ??
             (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
         smartQuotesType = smartQuotesType ??
             (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-        assert(enableSuggestions != null),
-        assert(enableInteractiveSelection != null),
-        assert(maxLengthEnforced != null),
         assert(
           maxLengthEnforced || maxLengthEnforcement == null,
           'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
         ),
-        assert(scrollPadding != null),
-        assert(dragStartBehavior != null),
-        assert(selectionHeightStyle != null),
-        assert(selectionWidthStyle != null),
-        assert(maxLines == null || maxLines > 0),
-        assert(minLines == null || minLines > 0),
+        assert(maxLines == null || maxLines > 0,
+            '`maxLines` needs to be left as null or bigger than 0'),
+        assert(minLines == null || minLines > 0,
+            '`minLines` needs to be left as null or bigger than 0'),
         assert(
           (maxLines == null) || (minLines == null) || (maxLines >= minLines),
           "minLines can't be greater than maxLines",
         ),
-        assert(expands != null),
         assert(
           !expands || (maxLines == null && minLines == null),
           'minLines and maxLines must be null when expands is true.',
         ),
         assert(!obscureText || maxLines == 1,
             'Obscured fields cannot be multiline.'),
-        assert(maxLength == null ||
-            maxLength == TextField.noMaxLength ||
-            maxLength > 0),
-        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
+        assert(
+            maxLength == null ||
+                maxLength == TextField.noMaxLength ||
+                maxLength > 0,
+            '`maxLength` needs to be null or a positive integer'),
+
+        // Assert the following instead of setting it directly to avoid
+        // surprising the user by silently changing the value they set.
         assert(
           !identical(textInputAction, TextInputAction.newline) ||
               maxLines == 1 ||
               !identical(keyboardType, TextInputType.text),
-          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
+          '''Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.''',
         ),
-        assert(enableIMEPersonalizedLearning != null),
         keyboardType = keyboardType ??
             (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
         toolbarOptions = toolbarOptions ??
@@ -228,7 +220,8 @@ class StreamMessageTextField extends StatefulWidget {
   /// cause the focus to change, and will not make the keyboard visible.
   ///
   /// This widget builds an [EditableText] and will ensure that the keyboard is
-  /// showing when it is tapped by calling [EditableTextState.requestKeyboard()].
+  /// showing when it is tapped by calling
+  /// [EditableTextState.requestKeyboard()].
   final FocusNode? focusNode;
 
   /// The decoration to show around the text field.
@@ -328,28 +321,26 @@ class StreamMessageTextField extends StatefulWidget {
   /// If set, a character counter will be displayed below the
   /// field showing how many characters have been entered. If set to a number
   /// greater than 0, it will also display the maximum number allowed. If set
-  /// to [TextField.noMaxLength] then only the current character count is displayed.
+  /// to [TextField.noMaxLength] then only the current character count is
+  /// displayed.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforcement] is set to
   /// [MaxLengthEnforcement.none].
   ///
-  /// The text field enforces the length with a [LengthLimitingTextInputFormatter],
-  /// which is evaluated after the supplied [inputFormatters], if any.
+  /// The text field enforces the length with a
+  /// [LengthLimitingTextInputFormatter], which is evaluated after the supplied
+  /// [inputFormatters], if any.
   ///
-  /// This value must be either null, [TextField.noMaxLength], or greater than 0.
+  /// This value must be either null, [TextField.noMaxLength], or greater than
+  /// 0.
+  ///
   /// If null (the default) then there is no limit to the number of characters
   /// that can be entered. If set to [TextField.noMaxLength], then no limit will
   /// be enforced, but the number of characters entered will still be displayed.
   ///
   /// Whitespace characters (e.g. newline, space, tab) are included in the
   /// character count.
-  ///
-  /// If [maxLengthEnforced] is set to false or [maxLengthEnforcement] is
-  /// [MaxLengthEnforcement.none], then more than [maxLength]
-  /// characters may be entered, but the error counter and divider will switch
-  /// to the [decoration]'s [InputDecoration.errorStyle] when the limit is
-  /// exceeded.
   ///
   /// {@macro flutter.services.lengthLimitingTextInputFormatter.maxLength}
   final int? maxLength;
@@ -444,7 +435,8 @@ class StreamMessageTextField extends StatefulWidget {
   ///
   /// This setting is only honored on iOS devices.
   ///
-  /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
+  /// If unset, defaults to the brightness of
+  /// [ThemeData.primaryColorBrightness].
   final Brightness? keyboardAppearance;
 
   /// {@macro flutter.widgets.editableText.scrollPadding}
@@ -488,14 +480,16 @@ class StreamMessageTextField extends StatefulWidget {
   /// widget.
   ///
   /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// [MaterialStateProperty.resolve] is used for the following
+  /// [MaterialState]s:
   ///
   ///  * [MaterialState.error].
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// If this property is null, [MaterialStateMouseCursor.textable] will be used.
+  /// If this property is null, [MaterialStateMouseCursor.textable] will be
+  /// used.
   ///
   /// The [mouseCursor] is the only property of [TextField] that controls the
   /// appearance of the mouse pointer. All other properties related to "cursor"
@@ -610,10 +604,6 @@ class StreamMessageTextField extends StatefulWidget {
     properties.add(
         DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
-    properties.add(FlagProperty('maxLengthEnforced',
-        value: maxLengthEnforced,
-        defaultValue: true,
-        ifFalse: 'maxLength not enforced'));
     properties.add(EnumProperty<MaxLengthEnforcement>(
         'maxLengthEnforcement', maxLengthEnforcement,
         defaultValue: null));
@@ -741,7 +731,6 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
         minLines: widget.minLines,
         expands: widget.expands,
         maxLength: widget.maxLength,
-        maxLengthEnforced: widget.maxLengthEnforced,
         maxLengthEnforcement: widget.maxLengthEnforcement,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
