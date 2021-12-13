@@ -23,6 +23,9 @@ import 'package:video_compress/video_compress.dart';
 
 export 'package:video_compress/video_compress.dart' show VideoQuality;
 
+/// A function that returns true if the message is valid and can be sent.
+typedef MessageValidator = bool Function(Message message);
+
 /// A callback that can be passed to [MessageInput.onError].
 ///
 /// This callback should not throw.
@@ -211,6 +214,8 @@ class MessageInput extends StatefulWidget {
     this.attachmentsPickerBuilder,
     this.sendButtonBuilder,
     this.shouldKeepFocusAfterMessage,
+    this.validator = _defaultValidator,
+    this.restorationId,
   }) : super(key: key);
 
   /// List of options for showing overlays.
@@ -265,8 +270,10 @@ class MessageInput extends StatefulWidget {
   /// The focus node associated to the TextField.
   final FocusNode? focusNode;
 
+  /// The message that is being quoted.
   final Message? quotedMessage;
 
+  /// Callback invoked when the quoted message is cleared.
   final VoidCallback? onQuotedMessageCleared;
 
   /// The location of the send button
@@ -325,6 +332,15 @@ class MessageInput extends StatefulWidget {
   /// The default behaviour keeps focus until a command is enabled.
   final bool? shouldKeepFocusAfterMessage;
 
+  /// A callback function that validates the message.
+  final MessageValidator validator;
+
+  /// Restoration ID to save and restore the state of the MessageInput.
+  final String? restorationId;
+
+  static bool _defaultValidator(Message message) =>
+      message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
+
   @override
   MessageInputState createState() => MessageInputState();
 
@@ -341,39 +357,76 @@ class MessageInput extends StatefulWidget {
 }
 
 /// State of [MessageInput]
-class MessageInputState extends State<MessageInput> {
+class MessageInputState extends State<MessageInput>
+    with RestorationMixin<MessageInput> {
   final _imagePicker = ImagePicker();
   late final _focusNode = widget.focusNode ?? FocusNode();
   bool _inputEnabled = true;
-  bool get _commandEnabled => messageInputController.value.command != null;
+  bool get _commandEnabled => _effectiveController.value.command != null;
   bool _showCommandsOverlay = false;
   bool _showMentionsOverlay = false;
 
   bool _actionsShrunk = false;
   bool _openFilePickerSection = false;
 
-  /// The editing controller passed to the input TextField
-  late final MessageInputController messageInputController =
-      widget.messageInputController ?? MessageInputController();
-
   late StreamChatThemeData _streamChatTheme;
   late MessageInputThemeData _messageInputTheme;
 
   bool get _hasQuotedMessage =>
-      messageInputController.value.quotedMessage != null;
-
-  bool get _messageIsPresent => messageInputController.text.trim().isNotEmpty;
+      _effectiveController.value.quotedMessage != null;
 
   bool get _isEditing =>
-      messageInputController.value.status != MessageSendingStatus.sending;
+      _effectiveController.value.status != MessageSendingStatus.sending;
+
+  RestorableMessageInputController? _controller;
+  MessageInputController get _effectiveController =>
+      widget.messageInputController ?? _controller!.value;
+
+  void _createLocalController([Message? message]) {
+    assert(_controller == null, '');
+    _controller = RestorableMessageInputController(message: message);
+    print('_controller?.value: ${_controller?.value}');
+  }
+
+  void _registerController() {
+    assert(_controller != null, '');
+    registerForRestoration(_controller!, 'messageInputController');
+  }
 
   @override
   void initState() {
     super.initState();
-    messageInputController.textEditingController
-        .addListener(_onChangedDebounced);
+    if (widget.messageInputController == null) {
+      _createLocalController();
+      print('_controller?.value: ${_controller?.value}');
+    }
+    _effectiveController.textEditingController.addListener(_onChangedDebounced);
     _focusNode.addListener(_focusNodeListener);
   }
+
+  @override
+  void didUpdateWidget(covariant MessageInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.messageInputController == null &&
+        oldWidget.messageInputController != null) {
+      _createLocalController(oldWidget.messageInputController!.value);
+    } else if (widget.messageInputController != null &&
+        oldWidget.messageInputController == null) {
+      unregisterFromRestoration(_controller!);
+      _controller!.dispose();
+      _controller = null;
+    }
+  }
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    if (_controller != null) {
+      _registerController();
+    }
+  }
+
+  @override
+  String? get restorationId => widget.restorationId;
 
   void _focusNodeListener() {
     if (_focusNode.hasFocus) {
@@ -414,7 +467,7 @@ class MessageInputState extends State<MessageInput> {
   @override
   Widget build(BuildContext context) {
     Widget child = MessageValueListenableBuilder(
-      valueListenable: messageInputController,
+      valueListenable: _effectiveController,
       builder: (context, value, _) => DecoratedBox(
         decoration: BoxDecoration(
           color: _messageInputTheme.inputBackgroundColor,
@@ -462,7 +515,7 @@ class MessageInputState extends State<MessageInput> {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: _buildTextField(context),
                 ),
-                if (messageInputController.value.parentId != null &&
+                if (_effectiveController.value.parentId != null &&
                     !widget.hideSendAsDm)
                   Padding(
                     padding: const EdgeInsets.only(
@@ -496,12 +549,12 @@ class MessageInputState extends State<MessageInput> {
         ),
         OverlayOptions(
           visible: _focusNode.hasFocus &&
-              messageInputController.text.isNotEmpty &&
-              messageInputController.baseOffset > 0 &&
-              messageInputController.text
+              _effectiveController.text.isNotEmpty &&
+              _effectiveController.baseOffset > 0 &&
+              _effectiveController.text
                   .substring(
                     0,
-                    messageInputController.baseOffset,
+                    _effectiveController.baseOffset,
                   )
                   .contains(':'),
           widget: _buildEmojiOverlay(),
@@ -537,7 +590,7 @@ class MessageInputState extends State<MessageInput> {
             height: 16,
             width: 16,
             foregroundDecoration: BoxDecoration(
-              border: messageInputController.showInChannel
+              border: _effectiveController.showInChannel
                   ? null
                   : Border.all(
                       color: _streamChatTheme.colorTheme.textHighEmphasis
@@ -549,18 +602,18 @@ class MessageInputState extends State<MessageInput> {
             child: Center(
               child: Material(
                 borderRadius: BorderRadius.circular(3),
-                color: messageInputController.showInChannel
+                color: _effectiveController.showInChannel
                     ? _streamChatTheme.colorTheme.accentPrimary
                     : _streamChatTheme.colorTheme.barsBg,
                 child: InkWell(
                   onTap: () {
-                    messageInputController.showInChannel =
-                        !messageInputController.showInChannel;
+                    _effectiveController.showInChannel =
+                        !_effectiveController.showInChannel;
                   },
                   child: AnimatedCrossFade(
                     duration: const Duration(milliseconds: 300),
                     reverseDuration: const Duration(milliseconds: 300),
-                    crossFadeState: messageInputController.showInChannel
+                    crossFadeState: _effectiveController.showInChannel
                         ? CrossFadeState.showFirst
                         : CrossFadeState.showSecond,
                     firstChild: StreamSvgIcon.check(
@@ -591,13 +644,13 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildSendButton(BuildContext context) {
     if (widget.sendButtonBuilder != null) {
-      return widget.sendButtonBuilder!(context, messageInputController);
+      return widget.sendButtonBuilder!(context, _effectiveController);
     }
 
     return StreamMessageSendButton(
       onSendMessage: sendMessage,
       timeOut: _timeOut,
-      isIdle: !_messageIsPresent && messageInputController.attachments.isEmpty,
+      isIdle: !widget.validator(_effectiveController.message),
       isEditEnabled: _isEditing,
       idleSendButton: widget.idleSendButton,
       activeSendButton: widget.activeSendButton,
@@ -696,7 +749,7 @@ class MessageInputState extends State<MessageInput> {
                     maxLines: null,
                     onSubmitted: (_) => sendMessage(),
                     keyboardType: widget.keyboardType,
-                    controller: messageInputController,
+                    controller: _effectiveController,
                     focusNode: _focusNode,
                     style: _messageInputTheme.inputTextStyle,
                     autofocus: widget.autofocus,
@@ -768,7 +821,7 @@ class MessageInputState extends State<MessageInput> {
                           size: 16,
                         ),
                         Text(
-                          messageInputController.value.command!.toUpperCase(),
+                          _effectiveController.value.command!.toUpperCase(),
                           style:
                               _streamChatTheme.textTheme.footnoteBold.copyWith(
                             color: Colors.white,
@@ -802,7 +855,7 @@ class MessageInputState extends State<MessageInput> {
                   height: 24,
                   width: 24,
                 ),
-                onPressed: messageInputController.clear,
+                onPressed: _effectiveController.clear,
               ),
             ),
           if (!_commandEnabled &&
@@ -817,14 +870,14 @@ class MessageInputState extends State<MessageInput> {
 
   late final _onChangedDebounced = debounce(
     () {
-      var value = messageInputController.text;
+      var value = _effectiveController.text;
       if (!mounted) return;
       value = value.trim();
 
       final channel = StreamChannel.of(context).channel;
       if (value.isNotEmpty) {
         channel
-            .keyStroke(messageInputController.value.parentId)
+            .keyStroke(_effectiveController.value.parentId)
             // ignore: no-empty-block
             .catchError((e) {});
       }
@@ -846,10 +899,10 @@ class MessageInputState extends State<MessageInput> {
   );
 
   String _getHint(BuildContext context) {
-    if (_commandEnabled && messageInputController.value.command == 'giphy') {
+    if (_commandEnabled && _effectiveController.value.command == 'giphy') {
       return context.translations.searchGifLabel;
     }
-    if (messageInputController.attachments.isNotEmpty) {
+    if (_effectiveController.attachments.isNotEmpty) {
       return context.translations.addACommentOrSendLabel;
     }
     if (_timeOut != 0) {
@@ -861,16 +914,16 @@ class MessageInputState extends State<MessageInput> {
 
   void _checkEmoji(String s, BuildContext context) {
     if (s.isNotEmpty &&
-        messageInputController.baseOffset > 0 &&
-        messageInputController.text
+        _effectiveController.baseOffset > 0 &&
+        _effectiveController.text
             .substring(
               0,
-              messageInputController.baseOffset,
+              _effectiveController.baseOffset,
             )
             .contains(':')) {
-      final textToSelection = messageInputController.text.substring(
+      final textToSelection = _effectiveController.text.substring(
         0,
-        messageInputController.selectionStart,
+        _effectiveController.selectionStart,
       );
       final splits = textToSelection.split(':');
       final query = splits[splits.length - 2].toLowerCase();
@@ -884,11 +937,11 @@ class MessageInputState extends State<MessageInput> {
 
   void _checkMentions(String s, BuildContext context) {
     if (s.isNotEmpty &&
-        messageInputController.baseOffset > 0 &&
-        messageInputController.text
+        _effectiveController.baseOffset > 0 &&
+        _effectiveController.text
             .substring(
               0,
-              messageInputController.baseOffset,
+              _effectiveController.baseOffset,
             )
             .split(' ')
             .last
@@ -925,7 +978,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildCommandsOverlayEntry() {
-    final text = messageInputController.text.trimLeft();
+    final text = _effectiveController.text.trimLeft();
 
     final renderObject = context.findRenderObject() as RenderBox?;
     if (renderObject == null) {
@@ -941,7 +994,7 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildFilePickerSection() {
     final picker = StreamAttachmentPicker(
-      messageInputController: messageInputController,
+      messageInputController: _effectiveController,
       onFilePicked: pickFile,
       isOpen: _openFilePickerSection,
       pickerSize: _openFilePickerSection ? _kMinMediaPickerSize : 0,
@@ -950,18 +1003,13 @@ class MessageInputState extends State<MessageInput> {
       maxAttachmentSize: widget.maxAttachmentSize,
       compressedVideoQuality: widget.compressedVideoQuality,
       compressedVideoFrameRate: widget.compressedVideoFrameRate,
-      onChangeInputState: (val) {
-        setState(() {
-          _inputEnabled = val;
-        });
-      },
       onError: _showErrorAlert,
     );
 
     if (_openFilePickerSection && widget.attachmentsPickerBuilder != null) {
       return widget.attachmentsPickerBuilder!(
         context,
-        messageInputController,
+        _effectiveController,
         picker,
       );
     }
@@ -971,14 +1019,14 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildMentionsOverlayEntry() {
     final channel = StreamChannel.of(context).channel;
-    if (messageInputController.selectionStart < 0 || channel.state == null) {
+    if (_effectiveController.selectionStart < 0 || channel.state == null) {
       return const Offstage();
     }
 
-    final splits = messageInputController.text
+    final splits = _effectiveController.text
         .substring(
           0,
-          messageInputController.selectionStart,
+          _effectiveController.selectionStart,
         )
         .split('@');
     final query = splits.last.toLowerCase();
@@ -1007,13 +1055,13 @@ class MessageInputState extends State<MessageInput> {
       size: Size(renderObject.size.width - 16, 400),
       mentionsTileBuilder: tileBuilder,
       onMentionUserTap: (user) {
-        messageInputController.addMentionedUser(user);
+        _effectiveController.addMentionedUser(user);
         splits[splits.length - 1] = user.name;
         final rejoin = splits.join('@');
 
-        messageInputController.text = rejoin +
-            messageInputController.text.substring(
-              messageInputController.selectionStart,
+        _effectiveController.text = rejoin +
+            _effectiveController.text.substring(
+              _effectiveController.selectionStart,
             );
 
         _onChangedDebounced.cancel();
@@ -1023,14 +1071,14 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildEmojiOverlay() {
-    if (messageInputController.baseOffset < 0) {
+    if (_effectiveController.baseOffset < 0) {
       return const Offstage();
     }
 
-    final splits = messageInputController.text
+    final splits = _effectiveController.text
         .substring(
           0,
-          messageInputController.baseOffset,
+          _effectiveController.baseOffset,
         )
         .split(':');
 
@@ -1050,14 +1098,14 @@ class MessageInputState extends State<MessageInput> {
   void _chooseEmoji(List<String> splits, Emoji emoji) {
     final rejoin = splits.sublist(0, splits.length - 1).join(':') + emoji.char!;
 
-    messageInputController.text = rejoin +
-        messageInputController.text.substring(
-          messageInputController.selectionStart,
+    _effectiveController.text = rejoin +
+        _effectiveController.text.substring(
+          _effectiveController.selectionStart,
         );
   }
 
   void _setCommand(Command c) {
-    messageInputController
+    _effectiveController
       ..clear()
       ..command = c;
     setState(() {
@@ -1079,11 +1127,11 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildAttachments() {
-    if (messageInputController.attachments.isEmpty) return const Offstage();
-    final fileAttachments = messageInputController.attachments
+    if (_effectiveController.attachments.isEmpty) return const Offstage();
+    final fileAttachments = _effectiveController.attachments
         .where((it) => it.type == 'file')
         .toList(growable: false);
-    final remainingAttachments = messageInputController.attachments
+    final remainingAttachments = _effectiveController.attachments
         .where((it) => it.type != 'file')
         .toList(growable: false);
     return Column(
@@ -1168,9 +1216,8 @@ class MessageInputState extends State<MessageInput> {
           focusElevation: 0,
           hoverElevation: 0,
           onPressed: () {
-            messageInputController.value =
-                messageInputController.value.copyWith(
-              attachments: messageInputController.attachments
+            _effectiveController.value = _effectiveController.value.copyWith(
+              attachments: _effectiveController.attachments
                   .where((it) => it.id != attachment.id)
                   .toList(),
             );
@@ -1252,7 +1299,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildCommandButton(BuildContext context) {
-    final s = messageInputController.text.trim();
+    final s = _effectiveController.text.trim();
     final defaultButton = IconButton(
       icon: StreamSvgIcon.lightning(
         color: s.isNotEmpty
@@ -1386,8 +1433,7 @@ class MessageInputState extends State<MessageInput> {
   /// Adds an attachment to the [messageInputController.attachments] map
   void _addAttachments(Iterable<Attachment> attachments) {
     final limit = widget.attachmentLimit;
-    final length =
-        messageInputController.attachments.length + attachments.length;
+    final length = _effectiveController.attachments.length + attachments.length;
     if (length > limit) {
       final onAttachmentLimitExceed = widget.onAttachmentLimitExceed;
       if (onAttachmentLimitExceed != null) {
@@ -1401,7 +1447,7 @@ class MessageInputState extends State<MessageInput> {
       );
     }
     for (final attachment in attachments) {
-      messageInputController.addAttachment(attachment);
+      _effectiveController.addAttachment(attachment);
     }
   }
 
@@ -1518,17 +1564,13 @@ class MessageInputState extends State<MessageInput> {
 
   /// Sends the current message
   Future<void> sendMessage() async {
-    var message = messageInputController.value;
-
-    if (!messageInputController.isValid) {
-      return;
-    }
+    var message = _effectiveController.value;
 
     var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
 
     shouldKeepFocus ??= !_commandEnabled;
 
-    messageInputController.reset();
+    _effectiveController.reset();
     widget.onQuotedMessageCleared?.call();
 
     if (widget.preMessageSending != null) {
@@ -1557,7 +1599,7 @@ class MessageInputState extends State<MessageInput> {
 
       final resp = await sendingFuture;
       if (resp.message?.type == 'error') {
-        messageInputController.value = message;
+        _effectiveController.value = message;
       }
       _startSlowMode();
       widget.onMessageSent?.call(resp.message);
@@ -1638,9 +1680,9 @@ class MessageInputState extends State<MessageInput> {
 
   @override
   void dispose() {
-    messageInputController.textEditingController
+    _effectiveController.textEditingController
         .removeListener(_onChangedDebounced);
-    messageInputController.dispose();
+    _controller?.dispose();
     _focusNode.removeListener(_focusNodeListener);
     _stopSlowMode();
     _onChangedDebounced.cancel();

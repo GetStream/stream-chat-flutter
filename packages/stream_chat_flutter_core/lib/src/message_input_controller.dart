@@ -9,9 +9,6 @@ import 'package:stream_chat/stream_chat.dart';
 /// Pass in a [MessageInputController] as the `valueListenable`.
 typedef MessageValueListenableBuilder = ValueListenableBuilder<Message>;
 
-/// A function that returns true if the message is valid and can be sent.
-typedef MessageValidator = bool Function(Message message);
-
 /// Controller for storing and mutating a [Message] value.
 class MessageInputController extends ValueNotifier<Message> {
   /// Creates a controller for an editable text field.
@@ -20,52 +17,34 @@ class MessageInputController extends ValueNotifier<Message> {
   /// message.
   factory MessageInputController({
     Message? message,
-    MessageValidator? validator,
   }) =>
       MessageInputController._(
         initialMessage: message ?? Message(),
-        validator: validator ?? _defaultValidator,
       );
 
   /// Creates a controller for an editable text field from an initial [text].
-  factory MessageInputController.fromText(
-    String? text, {
-    MessageValidator? validator,
-  }) =>
+  factory MessageInputController.fromText(String? text) =>
       MessageInputController._(
         initialMessage: Message(text: text),
-        validator: validator ?? _defaultValidator,
       );
 
   /// Creates a controller for an editable text field from initial
   /// [attachments].
   factory MessageInputController.fromAttachments(
-    List<Attachment> attachments, {
-    MessageValidator? validator,
-  }) =>
+    List<Attachment> attachments,
+  ) =>
       MessageInputController._(
         initialMessage: Message(attachments: attachments),
-        validator: validator ?? _defaultValidator,
       );
 
   MessageInputController._({
     required Message initialMessage,
-    this.validator = _defaultValidator,
   })  : _textEditingController =
             TextEditingController(text: initialMessage.text),
         _initialMessage = initialMessage,
         super(initialMessage) {
     addListener(_textEditingSyncer);
   }
-
-  /// A callback function that validates the message.
-  final MessageValidator validator;
-
-  /// Checks if the message is valid.
-  bool get isValid => validator(value);
-
-  static bool _defaultValidator(Message message) =>
-      message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
 
   void _textEditingSyncer() {
     final cleanText = value.command == null

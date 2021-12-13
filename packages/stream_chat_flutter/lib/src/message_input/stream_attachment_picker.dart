@@ -21,13 +21,23 @@ typedef CustomAttachmentIconBuilder = Widget Function(
   bool active,
 );
 
+/// A widget that allows to pick an attachment.
 class StreamAttachmentPicker extends StatefulWidget {
+  /// True if the picker is open.
   final bool isOpen;
+
+  /// The picker size in height.
   final double pickerSize;
+
+  /// The [MessageInputController] linked to this picker.
   final MessageInputController messageInputController;
+
+  /// The limit of attachments that can be picked.
   final int attachmentLimit;
+
+  /// The callback for when the attachment limit is exceeded.
   final AttachmentLimitExceedListener? onAttachmentLimitExceeded;
-  final ValueChanged<bool>? onChangeInputState;
+
   final ValueChanged<String>? onError;
   final FilePickerCallback onFilePicked;
 
@@ -42,8 +52,10 @@ class StreamAttachmentPicker extends StatefulWidget {
   /// - Do not set it if you're using our default CDN
   final int maxAttachmentSize;
 
+  /// The list of attachment types that can be picked.
   final List<DefaultAttachmentTypes> allowedAttachmentTypes;
 
+  /// The list of custom attachment types that can be picked.
   final List<CustomAttachmentType> customAttachmentTypes;
 
   const StreamAttachmentPicker({
@@ -57,7 +69,6 @@ class StreamAttachmentPicker extends StatefulWidget {
     this.maxAttachmentSize = 20971520,
     this.compressedVideoQuality = VideoQuality.DefaultQuality,
     this.compressedVideoFrameRate = 30,
-    this.onChangeInputState,
     this.onError,
     this.allowedAttachmentTypes = const [
       DefaultAttachmentTypes.image,
@@ -98,7 +109,6 @@ class StreamAttachmentPicker extends StatefulWidget {
             compressedVideoQuality ?? this.compressedVideoQuality,
         compressedVideoFrameRate:
             compressedVideoFrameRate ?? this.compressedVideoFrameRate,
-        onChangeInputState: onChangeInputState ?? this.onChangeInputState,
         onError: onError ?? this.onError,
         allowedAttachmentTypes:
             allowedAttachmentTypes ?? this.allowedAttachmentTypes,

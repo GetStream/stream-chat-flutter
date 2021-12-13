@@ -18,6 +18,7 @@ export 'package:flutter/services.dart'
         SmartQuotesType,
         SmartDashesType;
 
+/// A widget the wraps the [TextField] and adds some StreamChat specifics.
 class StreamMessageTextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
@@ -47,10 +48,6 @@ class StreamMessageTextField extends StatefulWidget {
   /// which is evaluated after the supplied [inputFormatters], if any.
   /// The [maxLength] value must be either null or greater than zero.
   ///
-  /// If [maxLengthEnforced] is set to false, then more than [maxLength]
-  /// characters may be entered, and the error counter and divider will
-  /// switch to the [decoration].errorStyle when the limit is exceeded.
-  ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
   ///
@@ -60,7 +57,7 @@ class StreamMessageTextField extends StatefulWidget {
   /// must not be null.
   ///
   /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
-  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
+  /// [scrollPadding], [maxLines], [maxLength],
   /// [selectionHeightStyle], [selectionWidthStyle], [enableSuggestions], and
   /// [enableIMEPersonalizedLearning] arguments must not be null.
   ///
@@ -151,9 +148,11 @@ class StreamMessageTextField extends StatefulWidget {
         ),
         assert(!obscureText || maxLines == 1,
             'Obscured fields cannot be multiline.'),
-        assert(maxLength == null ||
-            maxLength == TextField.noMaxLength ||
-            maxLength > 0),
+        assert(
+            maxLength == null ||
+                maxLength == TextField.noMaxLength ||
+                maxLength > 0,
+            '`maxLength` needs to be null or a positive integer'),
 
         // Assert the following instead of setting it directly to avoid
         // surprising the user by silently changing the value they set.
@@ -342,12 +341,6 @@ class StreamMessageTextField extends StatefulWidget {
   ///
   /// Whitespace characters (e.g. newline, space, tab) are included in the
   /// character count.
-  ///
-  /// If [maxLengthEnforced] is set to false or [maxLengthEnforcement] is
-  /// [MaxLengthEnforcement.none], then more than [maxLength]
-  /// characters may be entered, but the error counter and divider will switch
-  /// to the [decoration]'s [InputDecoration.errorStyle] when the limit is
-  /// exceeded.
   ///
   /// {@macro flutter.services.lengthLimitingTextInputFormatter.maxLength}
   final int? maxLength;
@@ -611,10 +604,6 @@ class StreamMessageTextField extends StatefulWidget {
     properties.add(
         DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
-    properties.add(FlagProperty('maxLengthEnforced',
-        value: maxLengthEnforced,
-        defaultValue: true,
-        ifFalse: 'maxLength not enforced'));
     properties.add(EnumProperty<MaxLengthEnforcement>(
         'maxLengthEnforcement', maxLengthEnforcement,
         defaultValue: null));
@@ -742,7 +731,6 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
         minLines: widget.minLines,
         expands: widget.expands,
         maxLength: widget.maxLength,
-        maxLengthEnforced: widget.maxLengthEnforced,
         maxLengthEnforcement: widget.maxLengthEnforcement,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
