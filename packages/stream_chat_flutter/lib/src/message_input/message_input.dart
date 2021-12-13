@@ -398,7 +398,6 @@ class MessageInputState extends State<MessageInput>
     super.initState();
     if (widget.messageInputController == null) {
       _createLocalController();
-      print('_controller?.value: ${_controller?.value}');
     }
     _effectiveController.textEditingController.addListener(_onChangedDebounced);
     _focusNode.addListener(_focusNodeListener);
