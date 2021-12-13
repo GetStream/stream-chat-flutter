@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `client.enrichUrl` endpoint for enriching URLs with metadata.
+
 ## 3.3.1
 
 🐞 Fixed

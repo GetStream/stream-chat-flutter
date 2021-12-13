@@ -1316,6 +1316,10 @@ class StreamChatClient {
         },
       );
 
+  /// Get OpenGraph data of the given [url].
+  Future<OGAttachmentResponse> enrichUrl(String url) =>
+      _chatApi.general.enrichUrl(url);
+
   /// Closes the [_ws] connection and resets the [state]
   /// If [flushChatPersistence] is true the client deletes all offline
   /// user's data.

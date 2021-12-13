@@ -442,3 +442,43 @@ class ChannelStateResponse extends _BaseResponse {
   static ChannelStateResponse fromJson(Map<String, dynamic> json) =>
       _$ChannelStateResponseFromJson(json);
 }
+
+/// Model response for [Client.enrichUrl] api call.
+@JsonSerializable(createToJson: false)
+class OGAttachmentResponse extends _BaseResponse {
+  /// The URL of the page that was scraped.
+  late String ogScrapeUrl;
+
+  /// The URL of the asset.
+  String? assetUrl;
+
+  /// The URL of the author.
+  String? authorLink;
+
+  /// The name of the author.
+  String? authorName;
+
+  /// The URL of the image.
+  String? imageUrl;
+
+  /// The text of the attachment.
+  String? text;
+
+  /// The URL of the thumbnail.
+  String? thumbUrl;
+
+  /// The title of the attachment.
+  String? title;
+
+  /// The URL of the title.
+  String? titleLink;
+
+  /// The type of the attachment.
+  ///
+  /// 'video' | 'audio' | 'image'
+  String? type;
+
+  /// Create a new instance from a [json].
+  static OGAttachmentResponse fromJson(Map<String, dynamic> json) =>
+      _$OGAttachmentResponseFromJson(json);
+}
