@@ -464,109 +464,109 @@ class MessageInputState extends State<MessageInput>
   void _stopSlowMode() => _slowModeTimer?.cancel();
 
   @override
-  Widget build(BuildContext context) {
-    Widget child = MessageValueListenableBuilder(
-      valueListenable: _effectiveController,
-      builder: (context, value, _) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: _messageInputTheme.inputBackgroundColor,
-        ),
-        child: SafeArea(
-          child: GestureDetector(
-            onPanUpdate: (details) {
-              if (details.delta.dy > 0) {
-                _focusNode.unfocus();
-                if (_openFilePickerSection) {
-                  setState(() {
-                    _openFilePickerSection = false;
-                  });
-                }
-              }
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_hasQuotedMessage)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: StreamSvgIcon.reply(
-                            color: _streamChatTheme.colorTheme.disabled,
-                          ),
-                        ),
-                        Text(
-                          context.translations.replyToMessageLabel,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          icon: StreamSvgIcon.closeSmall(),
-                          onPressed: widget.onQuotedMessageCleared,
-                        ),
-                      ],
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: _buildTextField(context),
-                ),
-                if (_effectiveController.value.parentId != null &&
-                    !widget.hideSendAsDm)
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      right: 12,
-                      left: 12,
-                      bottom: 12,
-                    ),
-                    child: _buildDmCheckbox(),
-                  ),
-                _buildFilePickerSection(),
-              ],
+  Widget build(BuildContext context) => MessageValueListenableBuilder(
+        valueListenable: _effectiveController,
+        builder: (context, value, _) {
+          Widget child = DecoratedBox(
+            decoration: BoxDecoration(
+              color: _messageInputTheme.inputBackgroundColor,
             ),
-          ),
-        ),
-      ),
-    );
-    if (_isEditing) {
-      child = Material(
-        elevation: 8,
-        child: child,
+            child: SafeArea(
+              child: GestureDetector(
+                onPanUpdate: (details) {
+                  if (details.delta.dy > 0) {
+                    _focusNode.unfocus();
+                    if (_openFilePickerSection) {
+                      setState(() {
+                        _openFilePickerSection = false;
+                      });
+                    }
+                  }
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_hasQuotedMessage)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: StreamSvgIcon.reply(
+                                color: _streamChatTheme.colorTheme.disabled,
+                              ),
+                            ),
+                            Text(
+                              context.translations.replyToMessageLabel,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            IconButton(
+                              visualDensity: VisualDensity.compact,
+                              icon: StreamSvgIcon.closeSmall(),
+                              onPressed: widget.onQuotedMessageCleared,
+                            ),
+                          ],
+                        ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: _buildTextField(context),
+                    ),
+                    if (_effectiveController.value.parentId != null &&
+                        !widget.hideSendAsDm)
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          right: 12,
+                          left: 12,
+                          bottom: 12,
+                        ),
+                        child: _buildDmCheckbox(),
+                      ),
+                    _buildFilePickerSection(),
+                  ],
+                ),
+              ),
+            ),
+          );
+          if (_isEditing) {
+            child = Material(
+              elevation: 8,
+              child: child,
+            );
+          }
+          return MultiOverlay(
+            childAnchor: Alignment.topCenter,
+            overlayAnchor: Alignment.bottomCenter,
+            overlayOptions: [
+              OverlayOptions(
+                visible: _showCommandsOverlay,
+                widget: _buildCommandsOverlayEntry(),
+              ),
+              OverlayOptions(
+                visible: _focusNode.hasFocus &&
+                    _effectiveController.text.isNotEmpty &&
+                    _effectiveController.baseOffset > 0 &&
+                    _effectiveController.text
+                        .substring(
+                          0,
+                          _effectiveController.baseOffset,
+                        )
+                        .contains(':'),
+                widget: _buildEmojiOverlay(),
+              ),
+              OverlayOptions(
+                visible: _showMentionsOverlay,
+                widget: _buildMentionsOverlayEntry(),
+              ),
+              ...widget.customOverlays,
+            ],
+            child: child,
+          );
+        },
       );
-    }
-
-    return MultiOverlay(
-      childAnchor: Alignment.topCenter,
-      overlayAnchor: Alignment.bottomCenter,
-      overlayOptions: [
-        OverlayOptions(
-          visible: _showCommandsOverlay,
-          widget: _buildCommandsOverlayEntry(),
-        ),
-        OverlayOptions(
-          visible: _focusNode.hasFocus &&
-              _effectiveController.text.isNotEmpty &&
-              _effectiveController.baseOffset > 0 &&
-              _effectiveController.text
-                  .substring(
-                    0,
-                    _effectiveController.baseOffset,
-                  )
-                  .contains(':'),
-          widget: _buildEmojiOverlay(),
-        ),
-        OverlayOptions(
-          visible: _showMentionsOverlay,
-          widget: _buildMentionsOverlayEntry(),
-        ),
-        ...widget.customOverlays,
-      ],
-      child: child,
-    );
-  }
 
   Flex _buildTextField(BuildContext context) => Flex(
         direction: Axis.horizontal,
@@ -646,6 +646,9 @@ class MessageInputState extends State<MessageInput>
       return widget.sendButtonBuilder!(context, _effectiveController);
     }
 
+    print(
+        'widget.validator(_effectiveController.message): ${widget.validator(_effectiveController.message)}');
+
     return StreamMessageSendButton(
       onSendMessage: sendMessage,
       timeOut: _timeOut,
@@ -711,6 +714,7 @@ class MessageInputState extends State<MessageInput>
   }
 
   Expanded _buildTextInput(BuildContext context) {
+    print('build text input');
     final margin = (widget.sendButtonLocation == SendButtonLocation.inside
             ? const EdgeInsets.only(right: 8)
             : EdgeInsets.zero) +
@@ -869,6 +873,7 @@ class MessageInputState extends State<MessageInput>
 
   late final _onChangedDebounced = debounce(
     () {
+      print('onchangeddebounce');
       var value = _effectiveController.text;
       if (!mounted) return;
       value = value.trim();
@@ -888,6 +893,7 @@ class MessageInputState extends State<MessageInput>
       setState(() {
         _actionsShrunk = value.isNotEmpty && actionsLength > 1;
       });
+      print('CHECK COMMANDS 00');
 
       _checkCommands(value, context);
       _checkMentions(value, context);
@@ -959,6 +965,7 @@ class MessageInputState extends State<MessageInput>
 
   void _checkCommands(String s, BuildContext context) {
     if (s.startsWith('/')) {
+      print('CHECK COMMANDS');
       final allCommands = StreamChannel.of(context).channel.config?.commands;
       final command =
           allCommands?.firstWhereOrNull((it) => it.name == s.substring(1));
