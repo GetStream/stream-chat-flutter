@@ -190,8 +190,6 @@ class MessageInput extends StatefulWidget {
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
     this.focusNode,
-    this.quotedMessage,
-    this.onQuotedMessageCleared,
     this.sendButtonLocation = SendButtonLocation.outside,
     this.autofocus = false,
     this.hideSendAsDm = false,
@@ -269,12 +267,6 @@ class MessageInput extends StatefulWidget {
 
   /// The focus node associated to the TextField.
   final FocusNode? focusNode;
-
-  /// The message that is being quoted.
-  final Message? quotedMessage;
-
-  /// Callback invoked when the quoted message is cleared.
-  final VoidCallback? onQuotedMessageCleared;
 
   /// The location of the send button
   final SendButtonLocation sendButtonLocation;
@@ -385,12 +377,19 @@ class MessageInputState extends State<MessageInput>
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
     _controller = RestorableMessageInputController(message: message);
-    _registerController();
   }
 
   void _registerController() {
     assert(_controller != null, '');
-    registerForRestoration(_controller!, 'messageInputController');
+
+    registerForRestoration(
+      _controller!,
+      widget.restorationId ?? 'messageInputController',
+    );
+    _effectiveController.textEditingController
+        .removeListener(_onChangedDebounced);
+    _effectiveController.textEditingController.addListener(_onChangedDebounced);
+    if (!_isEditing && _timeOut <= 0) _startSlowMode();
   }
 
   @override
@@ -398,8 +397,13 @@ class MessageInputState extends State<MessageInput>
     super.initState();
     if (widget.messageInputController == null) {
       _createLocalController();
+    } else {
+      _effectiveController.textEditingController
+          .removeListener(_onChangedDebounced);
+      _effectiveController.textEditingController
+          .addListener(_onChangedDebounced);
+      if (!_isEditing && _timeOut <= 0) _startSlowMode();
     }
-    _effectiveController.textEditingController.addListener(_onChangedDebounced);
     _focusNode.addListener(_focusNodeListener);
   }
 
@@ -506,7 +510,10 @@ class MessageInputState extends State<MessageInput>
                             IconButton(
                               visualDensity: VisualDensity.compact,
                               icon: StreamSvgIcon.closeSmall(),
-                              onPressed: widget.onQuotedMessageCleared,
+                              onPressed: () {
+                                _effectiveController.clearQuotedMessage();
+                                _focusNode.unfocus();
+                              },
                             ),
                           ],
                         ),
@@ -646,9 +653,6 @@ class MessageInputState extends State<MessageInput>
       return widget.sendButtonBuilder!(context, _effectiveController);
     }
 
-    print(
-        'widget.validator(_effectiveController.message): ${widget.validator(_effectiveController.message)}');
-
     return StreamMessageSendButton(
       onSendMessage: sendMessage,
       timeOut: _timeOut,
@@ -714,7 +718,6 @@ class MessageInputState extends State<MessageInput>
   }
 
   Expanded _buildTextInput(BuildContext context) {
-    print('build text input');
     final margin = (widget.sendButtonLocation == SendButtonLocation.inside
             ? const EdgeInsets.only(right: 8)
             : EdgeInsets.zero) +
@@ -873,7 +876,6 @@ class MessageInputState extends State<MessageInput>
 
   late final _onChangedDebounced = debounce(
     () {
-      print('onchangeddebounce');
       var value = _effectiveController.text;
       if (!mounted) return;
       value = value.trim();
@@ -893,7 +895,6 @@ class MessageInputState extends State<MessageInput>
       setState(() {
         _actionsShrunk = value.isNotEmpty && actionsLength > 1;
       });
-      print('CHECK COMMANDS 00');
 
       _checkCommands(value, context);
       _checkMentions(value, context);
@@ -965,7 +966,6 @@ class MessageInputState extends State<MessageInput>
 
   void _checkCommands(String s, BuildContext context) {
     if (s.startsWith('/')) {
-      print('CHECK COMMANDS');
       final allCommands = StreamChannel.of(context).channel.config?.commands;
       final command =
           allCommands?.firstWhereOrNull((it) => it.name == s.substring(1));
@@ -1121,12 +1121,12 @@ class MessageInputState extends State<MessageInput>
 
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return const Offstage();
-    final containsUrl = widget.quotedMessage!.attachments
+    final containsUrl = _effectiveController.value.quotedMessage!.attachments
         .any((element) => element.titleLink != null);
     return QuotedMessageWidget(
       reverse: true,
       showBorder: !containsUrl,
-      message: widget.quotedMessage!,
+      message: _effectiveController.value.quotedMessage!,
       messageTheme: _streamChatTheme.otherMessageTheme,
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
     );
@@ -1577,7 +1577,6 @@ class MessageInputState extends State<MessageInput>
     shouldKeepFocus ??= !_commandEnabled;
 
     _effectiveController.reset();
-    widget.onQuotedMessageCleared?.call();
 
     if (widget.preMessageSending != null) {
       message = await widget.preMessageSending!(message);
@@ -1699,7 +1698,6 @@ class MessageInputState extends State<MessageInput>
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
     _messageInputTheme = MessageInputTheme.of(context);
-    if (!_isEditing && _timeOut <= 0) _startSlowMode();
 
     super.didChangeDependencies();
   }

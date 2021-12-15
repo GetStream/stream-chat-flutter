@@ -8,11 +8,11 @@ import 'package:uuid/uuid.dart';
 
 part 'message.g.dart';
 
-class _PinExpires {
-  const _PinExpires();
+class _NullConst {
+  const _NullConst();
 }
 
-const _pinExpires = _PinExpires();
+const _nullConst = _NullConst();
 
 /// Enum defining the status of a sending message.
 enum MessageSendingStatus {
@@ -273,8 +273,8 @@ class Message extends Equatable {
     List<Reaction>? latestReactions,
     List<Reaction>? ownReactions,
     String? parentId,
-    Message? quotedMessage,
-    String? quotedMessageId,
+    Object? quotedMessage = _nullConst,
+    Object? quotedMessageId = _nullConst,
     int? replyCount,
     List<User>? threadParticipants,
     bool? showInChannel,
@@ -285,7 +285,7 @@ class Message extends Equatable {
     User? user,
     bool? pinned,
     DateTime? pinnedAt,
-    Object? pinExpires = _pinExpires,
+    Object? pinExpires = _nullConst,
     User? pinnedBy,
     Map<String, Object?>? extraData,
     MessageSendingStatus? status,
@@ -294,11 +294,32 @@ class Message extends Equatable {
     assert(() {
       if (pinExpires is! DateTime &&
           pinExpires != null &&
-          pinExpires is! _PinExpires) {
+          pinExpires is! _NullConst) {
         throw ArgumentError('`pinExpires` can only be set as DateTime or null');
       }
       return true;
     }(), 'Validate type for pinExpires');
+
+    assert(() {
+      if (quotedMessage is! Message &&
+          quotedMessage != null &&
+          quotedMessage is! _NullConst) {
+        throw ArgumentError(
+            '`quotedMessage` can only be set as Message or null');
+      }
+      return true;
+    }(), 'Validate type for quotedMessage');
+
+    assert(() {
+      if (quotedMessageId is! String &&
+          quotedMessageId != null &&
+          quotedMessageId is! _NullConst) {
+        throw ArgumentError(
+            '`quotedMessage` can only be set as String or null');
+      }
+      return true;
+    }(), 'Validate type for quotedMessage');
+
     return Message(
       id: id ?? this.id,
       text: text ?? this.text,
@@ -312,8 +333,12 @@ class Message extends Equatable {
       latestReactions: latestReactions ?? this.latestReactions,
       ownReactions: ownReactions ?? this.ownReactions,
       parentId: parentId ?? this.parentId,
-      quotedMessage: quotedMessage ?? this.quotedMessage,
-      quotedMessageId: quotedMessageId ?? _quotedMessageId,
+      quotedMessage: quotedMessage == _nullConst
+          ? this.quotedMessage
+          : quotedMessage as Message?,
+      quotedMessageId: quotedMessageId == _nullConst
+          ? _quotedMessageId
+          : quotedMessageId as String?,
       replyCount: replyCount ?? this.replyCount,
       threadParticipants: threadParticipants ?? this.threadParticipants,
       showInChannel: showInChannel ?? this.showInChannel,
@@ -325,7 +350,7 @@ class Message extends Equatable {
       pinned: pinned ?? this.pinned,
       pinnedAt: pinnedAt ?? this.pinnedAt,
       pinExpires:
-          pinExpires == _pinExpires ? this.pinExpires : pinExpires as DateTime?,
+          pinExpires == _nullConst ? this.pinExpires : pinExpires as DateTime?,
       pinnedBy: pinnedBy ?? this.pinnedBy,
       extraData: extraData ?? this.extraData,
       status: status ?? this.status,

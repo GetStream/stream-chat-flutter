@@ -40,7 +40,10 @@ class MessageInputController extends ValueNotifier<Message> {
   MessageInputController._({
     required Message initialMessage,
   })  : _textEditingController =
-            TextEditingController(text: initialMessage.text),
+            TextEditingController.fromValue(TextEditingValue(
+          text: initialMessage.text ?? '',
+          composing: TextRange.collapsed(initialMessage.text?.length ?? 0),
+        )),
         _initialMessage = initialMessage,
         super(initialMessage) {
     addListener(_textEditingSyncer);
@@ -81,6 +84,22 @@ class MessageInputController extends ValueNotifier<Message> {
   /// Sets the message.
   set message(Message message) {
     value = message;
+  }
+
+  /// Sets the message that's being quoted.
+  set quotedMessage(Message message) {
+    value = value.copyWith(
+      quotedMessage: message,
+      quotedMessageId: message.id,
+    );
+  }
+
+  /// Clears the quoted message.
+  void clearQuotedMessage() {
+    value = value.copyWith(
+      quotedMessageId: null,
+      quotedMessage: null,
+    );
   }
 
   /// Sets a command for the message.

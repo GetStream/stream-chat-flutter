@@ -697,7 +697,7 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
 
   void _registerController() {
     assert(_controller != null, '');
-    registerForRestoration(_controller!, 'controller');
+    registerForRestoration(_controller!, restorationId ?? 'controller');
   }
 
   @override
