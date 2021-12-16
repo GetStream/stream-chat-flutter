@@ -58,6 +58,7 @@ class FullScreenMedia extends StatefulWidget {
   /// Use [defaultActionsModal.copyWith] to easily customize it
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
+  /// Auto-play videos when page is opened
   final bool autoplayVideos;
 
   @override
