@@ -174,6 +174,9 @@ class ChannelsBlocState extends State<ChannelsBloc>
           EventType.messageNew,
         )
             .listen((e) {
+          if (e.message?.parentId != null && e.message?.showInChannel != true) {
+            return;
+          }
           final newChannels = List<Channel>.from(channels ?? []);
           final index = newChannels.indexWhere((c) => c.cid == e.cid);
           if (index != -1) {
