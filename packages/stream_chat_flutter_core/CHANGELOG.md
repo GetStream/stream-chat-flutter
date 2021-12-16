@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Do not move a channel to top if the new message is from a thread.
+
 ## 3.3.1
 
 - Updated `stream_chat` dependency to [`3.3.1`](https://pub.dev/packages/stream_chat/changelog).
