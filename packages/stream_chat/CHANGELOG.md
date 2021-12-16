@@ -4,6 +4,10 @@
 
 - Added `client.enrichUrl` endpoint for enriching URLs with metadata.
 
+🐞 Fixed
+
+- Avoid invalid url
+
 ## 3.3.1
 
 🐞 Fixed
