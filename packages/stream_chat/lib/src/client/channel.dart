@@ -1498,16 +1498,20 @@ class ChannelClientState {
               if (url == null || !url.contains('')) {
                 return false;
               }
-              final uri = Uri.parse(url);
-              if (!uri.host.endsWith('stream-io-cdn.com') ||
-                  uri.queryParameters['Expires'] == null) {
+              try {
+                final uri = Uri.parse(url);
+                if (!uri.host.endsWith('stream-io-cdn.com') ||
+                    uri.queryParameters['Expires'] == null) {
+                  return false;
+                }
+                final secondsFromEpoch =
+                    int.parse(uri.queryParameters['Expires']!);
+                final expiration =
+                    DateTime.fromMillisecondsSinceEpoch(secondsFromEpoch * 1000);
+                return expiration.isBefore(DateTime.now());
+              } catch (_) {
                 return false;
               }
-              final secondsFromEpoch =
-                  int.parse(uri.queryParameters['Expires']!);
-              final expiration =
-                  DateTime.fromMillisecondsSinceEpoch(secondsFromEpoch * 1000);
-              return expiration.isBefore(DateTime.now());
             }))
         .map((e) => e.id)
         .toList();
