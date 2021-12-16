@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Use file extension instead of mimeType for downloading files
+
 ## 3.3.2
 
 - Updated `stream_chat_flutter_core` dependency to [`3.3.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
