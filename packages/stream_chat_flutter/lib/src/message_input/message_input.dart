@@ -538,7 +538,7 @@ class MessageInputState extends State<MessageInput>
               ),
             ),
           );
-          if (_isEditing) {
+          if (!_isEditing) {
             child = Material(
               elevation: 8,
               child: child,
