@@ -942,10 +942,15 @@ class MessageInputState extends State<MessageInput>
       if (_lastSearchedContainsUrlText == value) return;
       _lastSearchedContainsUrlText = value;
 
-      final regex =
-          RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
-      final matchedUrls = regex.allMatches(value);
-      if (matchedUrls.isEmpty) return;
+      final matchedUrls =
+          RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+')
+              .allMatches(value);
+
+      // Reset the og attachment if the text doesn't contain any url
+      if (matchedUrls.isEmpty) {
+        setState(() => _ogAttachment = null);
+        return;
+      }
 
       final firstMatchedUrl = matchedUrls.first.group(0)!;
 
@@ -955,19 +960,20 @@ class MessageInputState extends State<MessageInput>
       final client = StreamChat.of(context).client;
 
       _enrichUrlOperation = CancelableOperation.fromFuture(
-        client.enrichUrl(firstMatchedUrl).then((ogAttachment) {
+        client.enrichUrl(firstMatchedUrl),
+      ).then(
+        (ogAttachment) {
           final attachment = Attachment.fromOGAttachment(ogAttachment);
           setState(() => _ogAttachment = attachment);
-        }).onError((error, stackTrace) {
+        },
+        onError: (error, stackTrace) {
           // Reset the ogAttachment if there was an error
           setState(() => _ogAttachment = null);
-          if (error != null) {
-            widget.onError?.call(error, stackTrace);
-          }
-        }),
+          widget.onError?.call(error, stackTrace);
+        },
       );
     },
-    const Duration(seconds: 1),
+    const Duration(milliseconds: 650),
   );
 
   void _checkEmoji(String value, BuildContext context) {
