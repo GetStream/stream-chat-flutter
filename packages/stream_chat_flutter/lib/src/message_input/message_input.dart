@@ -354,6 +354,7 @@ class MessageInputState extends State<MessageInput>
   final _imagePicker = ImagePicker();
   late final _focusNode = widget.focusNode ?? FocusNode();
   bool _inputEnabled = true;
+
   bool get _commandEnabled => _effectiveController.value.command != null;
   bool _showCommandsOverlay = false;
   bool _showMentionsOverlay = false;
@@ -371,6 +372,7 @@ class MessageInputState extends State<MessageInput>
       _effectiveController.value.status != MessageSendingStatus.sending;
 
   RestorableMessageInputController? _controller;
+
   MessageInputController get _effectiveController =>
       widget.messageInputController ?? _controller!.value;
 
@@ -517,6 +519,14 @@ class MessageInputState extends State<MessageInput>
                             ),
                           ],
                         ),
+                      )
+                    else if (_ogAttachment != null)
+                      OGAttachmentPreview(
+                        attachment: _ogAttachment!,
+                        onDismissPreviewPressed: () {
+                          setState(() => _ogAttachment = null);
+                          _focusNode.unfocus();
+                        },
                       ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -538,7 +548,7 @@ class MessageInputState extends State<MessageInput>
               ),
             ),
           );
-          if (_isEditing) {
+          if (!_isEditing) {
             child = Material(
               elevation: 8,
               child: child,
@@ -896,6 +906,7 @@ class MessageInputState extends State<MessageInput>
         _actionsShrunk = value.isNotEmpty && actionsLength > 1;
       });
 
+      _checkContainsUrlDebounced.call([value, context]);
       _checkCommands(value, context);
       _checkMentions(value, context);
       _checkEmoji(value, context);
@@ -918,14 +929,52 @@ class MessageInputState extends State<MessageInput>
     return context.translations.writeAMessageLabel;
   }
 
-  void _checkEmoji(String s, BuildContext context) {
-    if (s.isNotEmpty &&
+  Attachment? _ogAttachment;
+  String? _lastSearchedContainsUrlText;
+  CancelableOperation? _enrichUrlOperation;
+
+  late final _checkContainsUrlDebounced = debounce(
+    (String value, BuildContext context) async {
+      // Cancel the previous operation if it's still running
+      _enrichUrlOperation?.cancel();
+
+      // If the text is same as the last time, don't do anything
+      if (_lastSearchedContainsUrlText == value) return;
+      _lastSearchedContainsUrlText = value;
+
+      final regex =
+          RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
+      final matchedUrls = regex.allMatches(value);
+      if (matchedUrls.isEmpty) return;
+
+      final firstMatchedUrl = matchedUrls.first.group(0)!;
+
+      // If the parsed url matches the ogAttachment url, don't do anything
+      if (_ogAttachment?.titleLink == firstMatchedUrl) return;
+
+      final client = StreamChat.of(context).client;
+
+      _enrichUrlOperation = CancelableOperation.fromFuture(
+        client.enrichUrl(firstMatchedUrl).then((ogAttachment) {
+          final attachment = Attachment.fromOGAttachment(ogAttachment);
+          setState(() => _ogAttachment = attachment);
+        }).onError((error, stackTrace) {
+          // Reset the ogAttachment if there was an error
+          setState(() => _ogAttachment = null);
+          if (error != null) {
+            widget.onError?.call(error, stackTrace);
+          }
+        }),
+      );
+    },
+    const Duration(seconds: 1),
+  );
+
+  void _checkEmoji(String value, BuildContext context) {
+    if (value.isNotEmpty &&
         _effectiveController.baseOffset > 0 &&
         _effectiveController.text
-            .substring(
-              0,
-              _effectiveController.baseOffset,
-            )
+            .substring(0, _effectiveController.baseOffset)
             .contains(':')) {
       final textToSelection = _effectiveController.text.substring(
         0,
@@ -941,14 +990,11 @@ class MessageInputState extends State<MessageInput>
     }
   }
 
-  void _checkMentions(String s, BuildContext context) {
-    if (s.isNotEmpty &&
+  void _checkMentions(String value, BuildContext context) {
+    if (value.isNotEmpty &&
         _effectiveController.baseOffset > 0 &&
         _effectiveController.text
-            .substring(
-              0,
-              _effectiveController.baseOffset,
-            )
+            .substring(0, _effectiveController.baseOffset)
             .split(' ')
             .last
             .contains('@')) {
@@ -964,11 +1010,11 @@ class MessageInputState extends State<MessageInput>
     }
   }
 
-  void _checkCommands(String s, BuildContext context) {
-    if (s.startsWith('/')) {
+  void _checkCommands(String value, BuildContext context) {
+    if (value.startsWith('/')) {
       final allCommands = StreamChannel.of(context).channel.config?.commands;
       final command =
-          allCommands?.firstWhereOrNull((it) => it.name == s.substring(1));
+          allCommands?.firstWhereOrNull((it) => it.name == value.substring(1));
       if (command != null) {
         return _setCommand(command);
       } else if (!_showCommandsOverlay) {
@@ -1030,10 +1076,7 @@ class MessageInputState extends State<MessageInput>
     }
 
     final splits = _effectiveController.text
-        .substring(
-          0,
-          _effectiveController.selectionStart,
-        )
+        .substring(0, _effectiveController.selectionStart)
         .split('@');
     final query = splits.last.toLowerCase();
 
@@ -1082,10 +1125,7 @@ class MessageInputState extends State<MessageInput>
     }
 
     final splits = _effectiveController.text
-        .substring(
-          0,
-          _effectiveController.baseOffset,
-        )
+        .substring(0, _effectiveController.baseOffset)
         .split(':');
 
     final query = splits.last.toLowerCase();
@@ -1222,11 +1262,7 @@ class MessageInputState extends State<MessageInput>
           focusElevation: 0,
           hoverElevation: 0,
           onPressed: () {
-            _effectiveController.value = _effectiveController.value.copyWith(
-              attachments: _effectiveController.attachments
-                  .where((it) => it.id != attachment.id)
-                  .toList(),
-            );
+            _effectiveController.removeAttachmentById(attachment.id);
           },
           fillColor:
               _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
@@ -1572,10 +1608,19 @@ class MessageInputState extends State<MessageInput>
   Future<void> sendMessage() async {
     var message = _effectiveController.value;
 
+    // Add ogAttachment if present
+    final skipEnrichUrl = _ogAttachment == null;
+    if (!skipEnrichUrl) {
+      message = message.copyWith(
+        attachments: [...message.attachments, _ogAttachment!],
+      );
+    }
+
     var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
 
     shouldKeepFocus ??= !_commandEnabled;
 
+    _ogAttachment = null;
     _effectiveController.reset();
 
     if (widget.preMessageSending != null) {
@@ -1590,10 +1635,16 @@ class MessageInputState extends State<MessageInput>
 
     try {
       Future sendingFuture;
-      if (!_isEditing) {
-        sendingFuture = channel.sendMessage(message);
+      if (_isEditing) {
+        sendingFuture = channel.updateMessage(
+          message,
+          skipEnrichUrl: skipEnrichUrl,
+        );
       } else {
-        sendingFuture = channel.updateMessage(message);
+        sendingFuture = channel.sendMessage(
+          message,
+          skipEnrichUrl: skipEnrichUrl,
+        );
       }
 
       if (shouldKeepFocus) {
@@ -1700,5 +1751,75 @@ class MessageInputState extends State<MessageInput>
     _messageInputTheme = MessageInputTheme.of(context);
 
     super.didChangeDependencies();
+  }
+}
+
+class OGAttachmentPreview extends StatelessWidget {
+  const OGAttachmentPreview({
+    Key? key,
+    required this.attachment,
+    this.onDismissPreviewPressed,
+  }) : super(key: key);
+
+  final Attachment attachment;
+  final VoidCallback? onDismissPreviewPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final chatTheme = StreamChatTheme.of(context);
+    final textTheme = chatTheme.textTheme;
+    final colorTheme = chatTheme.colorTheme;
+
+    final attachmentTitle = attachment.title;
+    final attachmentText = attachment.text;
+
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(
+            Icons.link,
+            color: colorTheme.accentPrimary,
+          ),
+        ),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(
+                  color: colorTheme.accentPrimary,
+                  width: 2,
+                ),
+              ),
+            ),
+            padding: const EdgeInsets.only(left: 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (attachmentTitle != null)
+                  Text(
+                    attachmentTitle.trim(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.body.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                if (attachmentText != null)
+                  Text(
+                    attachmentText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.body.copyWith(fontWeight: FontWeight.w400),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          icon: StreamSvgIcon.closeSmall(),
+          onPressed: onDismissPreviewPressed,
+        ),
+      ],
+    );
   }
 }
