@@ -34,6 +34,7 @@ class FullScreenMedia extends StatefulWidget {
     String? userName,
     this.onShowMessage,
     this.attachmentActionsModalBuilder,
+    this.autoplayVideos = false,
   })  : userName = userName ?? '',
         super(key: key);
 
@@ -56,6 +57,9 @@ class FullScreenMedia extends StatefulWidget {
   /// [defaultActionsModal] is the default [AttachmentActionsModal] config
   /// Use [defaultActionsModal.copyWith] to easily customize it
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
+
+  /// Auto-play videos when page is opened
+  final bool autoplayVideos;
 
   @override
   _FullScreenMediaState createState() => _FullScreenMediaState();
@@ -81,7 +85,8 @@ class _FullScreenMediaState extends State<FullScreenMedia>
     );
     _pageController = PageController(initialPage: widget.startIndex);
     _currentPage = widget.startIndex;
-    for (final attachment in widget.mediaAttachments) {
+    for (var i = 0; i < widget.mediaAttachments.length; i++) {
+      final attachment = widget.mediaAttachments[i];
       if (attachment.type != 'video') continue;
       final package = VideoPackage(attachment, showControls: true);
       videoPackages[attachment.id] = package;
@@ -90,9 +95,21 @@ class _FullScreenMediaState extends State<FullScreenMedia>
   }
 
   Future<void> initializePlayers() async {
+    if (videoPackages.isEmpty) {
+      return;
+    }
+
+    final currentAttachment = widget.mediaAttachments[widget.startIndex];
+
     await Future.wait(videoPackages.values.map(
       (it) => it.initialize(),
     ));
+
+    if (widget.autoplayVideos && currentAttachment.type == 'video') {
+      final package = videoPackages.values
+          .firstWhere((e) => e._attachment == currentAttachment);
+      package._chewieController?.play();
+    }
     setState(() {}); // ignore: no-empty-block
   }
 
@@ -109,6 +126,24 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                   setState(() {
                     _currentPage = val;
                   });
+
+                  if (videoPackages.isEmpty) {
+                    return;
+                  }
+
+                  final currentAttachment = widget.mediaAttachments[val];
+
+                  for (final e in videoPackages.values) {
+                    if (e._attachment != currentAttachment) {
+                      e._chewieController?.pause();
+                    }
+                  }
+
+                  if (widget.autoplayVideos &&
+                      currentAttachment.type == 'video') {
+                    final controller = videoPackages[currentAttachment.id]!;
+                    controller._chewieController?.play();
+                  }
                 },
                 itemBuilder: (context, index) {
                   final attachment = widget.mediaAttachments[index];
@@ -243,15 +278,16 @@ class _FullScreenMediaState extends State<FullScreenMedia>
 class VideoPackage {
   /// Constructor for creating [VideoPackage]
   VideoPackage(
-    Attachment attachment, {
+    this._attachment, {
     bool showControls = false,
     bool autoInitialize = true,
   })  : _showControls = showControls,
         _autoInitialize = autoInitialize,
-        _videoPlayerController = attachment.localUri != null
-            ? VideoPlayerController.file(File.fromUri(attachment.localUri!))
-            : VideoPlayerController.network(attachment.assetUrl!);
+        _videoPlayerController = _attachment.localUri != null
+            ? VideoPlayerController.file(File.fromUri(_attachment.localUri!))
+            : VideoPlayerController.network(_attachment.assetUrl!);
 
+  final Attachment _attachment;
   final bool _showControls;
   final bool _autoInitialize;
   final VideoPlayerController _videoPlayerController;
