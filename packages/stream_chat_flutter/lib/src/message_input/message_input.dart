@@ -335,17 +335,6 @@ class MessageInput extends StatefulWidget {
 
   @override
   MessageInputState createState() => MessageInputState();
-
-  /// Use this method to get the current [StreamChatState] instance
-  static MessageInputState of(BuildContext context) {
-    MessageInputState? messageInputState;
-    messageInputState = context.findAncestorStateOfType<MessageInputState>();
-    assert(
-      messageInputState != null,
-      'You must have a MessageInput widget as ancestor of your widget tree',
-    );
-    return messageInputState!;
-  }
 }
 
 /// State of [MessageInput]
@@ -520,11 +509,11 @@ class MessageInputState extends State<MessageInput>
                           ],
                         ),
                       )
-                    else if (_ogAttachment != null)
+                    else if (_effectiveController.ogAttachment != null)
                       OGAttachmentPreview(
-                        attachment: _ogAttachment!,
+                        attachment: _effectiveController.ogAttachment!,
                         onDismissPreviewPressed: () {
-                          setState(() => _ogAttachment = null);
+                          _effectiveController.clearOGAttachment();
                           _focusNode.unfocus();
                         },
                       ),
@@ -929,7 +918,6 @@ class MessageInputState extends State<MessageInput>
     return context.translations.writeAMessageLabel;
   }
 
-  Attachment? _ogAttachment;
   String? _lastSearchedContainsUrlText;
   CancelableOperation? _enrichUrlOperation;
 
@@ -948,14 +936,16 @@ class MessageInputState extends State<MessageInput>
 
       // Reset the og attachment if the text doesn't contain any url
       if (matchedUrls.isEmpty) {
-        setState(() => _ogAttachment = null);
+        _effectiveController.clearOGAttachment();
         return;
       }
 
       final firstMatchedUrl = matchedUrls.first.group(0)!;
 
       // If the parsed url matches the ogAttachment url, don't do anything
-      if (_ogAttachment?.titleLink == firstMatchedUrl) return;
+      if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
+        return;
+      }
 
       final client = StreamChat.of(context).client;
 
@@ -964,11 +954,11 @@ class MessageInputState extends State<MessageInput>
       ).then(
         (ogAttachment) {
           final attachment = Attachment.fromOGAttachment(ogAttachment);
-          setState(() => _ogAttachment = attachment);
+          _effectiveController.setOGAttachment(attachment);
         },
         onError: (error, stackTrace) {
           // Reset the ogAttachment if there was an error
-          setState(() => _ogAttachment = null);
+          _effectiveController.clearOGAttachment();
           widget.onError?.call(error, stackTrace);
         },
       );
@@ -1470,14 +1460,6 @@ class MessageInputState extends State<MessageInput>
     }
   }
 
-  /// Add an attachment to the sending message
-  /// Use this to add custom type attachments
-  ///
-  /// Note: Only meant to be used from outside the state.
-  void addAttachment(Attachment attachment) {
-    _addAttachments([attachment]);
-  }
-
   /// Adds an attachment to the [messageInputController.attachments] map
   void _addAttachments(Iterable<Attachment> attachments) {
     final limit = widget.attachmentLimit;
@@ -1612,21 +1594,14 @@ class MessageInputState extends State<MessageInput>
 
   /// Sends the current message
   Future<void> sendMessage() async {
-    var message = _effectiveController.value;
+    final skipEnrichUrl = _effectiveController.ogAttachment == null;
 
-    // Add ogAttachment if present
-    final skipEnrichUrl = _ogAttachment == null;
-    if (!skipEnrichUrl) {
-      message = message.copyWith(
-        attachments: [...message.attachments, _ogAttachment!],
-      );
-    }
+    var message = _effectiveController.value;
 
     var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
 
     shouldKeepFocus ??= !_commandEnabled;
 
-    _ogAttachment = null;
     _effectiveController.reset();
 
     if (widget.preMessageSending != null) {
