@@ -23,41 +23,8 @@ typedef CustomAttachmentIconBuilder = Widget Function(
 
 /// A widget that allows to pick an attachment.
 class StreamAttachmentPicker extends StatefulWidget {
-  /// True if the picker is open.
-  final bool isOpen;
-
-  /// The picker size in height.
-  final double pickerSize;
-
-  /// The [MessageInputController] linked to this picker.
-  final MessageInputController messageInputController;
-
-  /// The limit of attachments that can be picked.
-  final int attachmentLimit;
-
-  /// The callback for when the attachment limit is exceeded.
-  final AttachmentLimitExceedListener? onAttachmentLimitExceeded;
-
-  final ValueChanged<String>? onError;
-  final FilePickerCallback onFilePicked;
-
-  /// Video quality to use when compressing the videos.
-  final VideoQuality compressedVideoQuality;
-
-  /// Frame rate to use when compressing the videos.
-  final int compressedVideoFrameRate;
-
-  /// Max attachment size in bytes:
-  /// - Defaults to 20 MB
-  /// - Do not set it if you're using our default CDN
-  final int maxAttachmentSize;
-
-  /// The list of attachment types that can be picked.
-  final List<DefaultAttachmentTypes> allowedAttachmentTypes;
-
-  /// The list of custom attachment types that can be picked.
-  final List<CustomAttachmentType> customAttachmentTypes;
-
+  /// Default constructor for [StreamAttachmentPicker] which creates the Stream
+  /// attachment picker widget.
   const StreamAttachmentPicker({
     Key? key,
     required this.messageInputController,
@@ -78,6 +45,46 @@ class StreamAttachmentPicker extends StatefulWidget {
     this.customAttachmentTypes = const [],
   }) : super(key: key);
 
+  /// True if the picker is open.
+  final bool isOpen;
+
+  /// The picker size in height.
+  final double pickerSize;
+
+  /// The [MessageInputController] linked to this picker.
+  final MessageInputController messageInputController;
+
+  /// The limit of attachments that can be picked.
+  final int attachmentLimit;
+
+  /// The callback for when the attachment limit is exceeded.
+  final AttachmentLimitExceedListener? onAttachmentLimitExceeded;
+
+  /// Callback for when an error occurs in the attachment picker.
+  final ValueChanged<String>? onError;
+
+  /// Callback for when file is picked.
+  final FilePickerCallback onFilePicked;
+
+  /// Video quality to use when compressing the videos.
+  final VideoQuality compressedVideoQuality;
+
+  /// Frame rate to use when compressing the videos.
+  final int compressedVideoFrameRate;
+
+  /// Max attachment size in bytes:
+  /// - Defaults to 20 MB
+  /// - Do not set it if you're using our default CDN
+  final int maxAttachmentSize;
+
+  /// The list of attachment types that can be picked.
+  final List<DefaultAttachmentTypes> allowedAttachmentTypes;
+
+  /// The list of custom attachment types that can be picked.
+  final List<CustomAttachmentType> customAttachmentTypes;
+
+  /// Used to create a new copy of [StreamAttachmentPicker] with modified
+  /// properties.
   StreamAttachmentPicker copyWith({
     Key? key,
     MessageInputController? messageInputController,
@@ -549,14 +556,22 @@ class _PickerWidgetState extends State<_PickerWidget> {
   }
 }
 
+/// Class which holds data for a custom attachment type in the attachment picker
 class CustomAttachmentType {
-  String type;
-  CustomAttachmentIconBuilder iconBuilder;
-  WidgetBuilder pickerBuilder;
-
+  /// Default constructor for creating a custom attachment for the attachment
+  /// picker.
   CustomAttachmentType({
     required this.type,
     required this.iconBuilder,
     required this.pickerBuilder,
   });
+
+  /// Type name.
+  String type;
+
+  /// Builds the icon in the attachment picker top row.
+  CustomAttachmentIconBuilder iconBuilder;
+
+  /// Builds content in the attachment builder when icon is selected.
+  WidgetBuilder pickerBuilder;
 }
