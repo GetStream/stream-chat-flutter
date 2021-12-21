@@ -66,10 +66,7 @@ class MessageInputController extends ValueNotifier<Message> {
   void _textEditingSyncer() {
     final cleanText = value.command == null
         ? value.text
-        : value.text?.replaceFirst(
-            '/${value.command} ',
-            '',
-          );
+        : value.text?.replaceFirst('/${value.command} ', '');
 
     if (cleanText != _textEditingController.text) {
       final previousOffset = _textEditingController.value.selection.start;
@@ -207,7 +204,9 @@ class MessageInputController extends ValueNotifier<Message> {
 
   /// Removes the og attachment.
   void clearOGAttachment() {
-    attachments = [...attachments]..remove(_ogAttachment);
+    if (_ogAttachment != null) {
+      removeAttachment(_ogAttachment!);
+    }
     _ogAttachment = null;
   }
 

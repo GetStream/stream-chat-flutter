@@ -895,7 +895,7 @@ class MessageInputState extends State<MessageInput>
         _actionsShrunk = value.isNotEmpty && actionsLength > 1;
       });
 
-      _checkContainsUrlDebounced.call([value, context]);
+      _checkContainsUrl(value, context);
       _checkCommands(value, context);
       _checkMentions(value, context);
       _checkEmoji(value, context);
@@ -920,51 +920,64 @@ class MessageInputState extends State<MessageInput>
 
   String? _lastSearchedContainsUrlText;
   CancelableOperation? _enrichUrlOperation;
-
-  late final _checkContainsUrlDebounced = debounce(
-    (String value, BuildContext context) async {
-      // Cancel the previous operation if it's still running
-      _enrichUrlOperation?.cancel();
-
-      // If the text is same as the last time, don't do anything
-      if (_lastSearchedContainsUrlText == value) return;
-      _lastSearchedContainsUrlText = value;
-
-      final matchedUrls =
-          RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+')
-              .allMatches(value);
-
-      // Reset the og attachment if the text doesn't contain any url
-      if (matchedUrls.isEmpty) {
-        _effectiveController.clearOGAttachment();
-        return;
-      }
-
-      final firstMatchedUrl = matchedUrls.first.group(0)!;
-
-      // If the parsed url matches the ogAttachment url, don't do anything
-      if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
-        return;
-      }
-
-      final client = StreamChat.of(context).client;
-
-      _enrichUrlOperation = CancelableOperation.fromFuture(
-        client.enrichUrl(firstMatchedUrl),
-      ).then(
-        (ogAttachment) {
-          final attachment = Attachment.fromOGAttachment(ogAttachment);
-          _effectiveController.setOGAttachment(attachment);
-        },
-        onError: (error, stackTrace) {
-          // Reset the ogAttachment if there was an error
-          _effectiveController.clearOGAttachment();
-          widget.onError?.call(error, stackTrace);
-        },
-      );
-    },
-    const Duration(milliseconds: 650),
+  final _urlRegex = RegExp(
+    r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+',
   );
+
+  void _checkContainsUrl(String value, BuildContext context) async {
+    // Cancel the previous operation if it's still running
+    _enrichUrlOperation?.cancel();
+
+    // If the text is same as the last time, don't do anything
+    if (_lastSearchedContainsUrlText == value) return;
+    _lastSearchedContainsUrlText = value;
+
+    final matchedUrls = _urlRegex.allMatches(value);
+
+    // Reset the og attachment if the text doesn't contain any url
+    if (matchedUrls.isEmpty) {
+      _effectiveController.clearOGAttachment();
+      return;
+    }
+
+    final firstMatchedUrl = matchedUrls.first.group(0)!;
+
+    // If the parsed url matches the ogAttachment url, don't do anything
+    if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
+      return;
+    }
+
+    final client = StreamChat.of(context).client;
+
+    _enrichUrlOperation = CancelableOperation.fromFuture(
+      _enrichUrl(firstMatchedUrl, client),
+    ).then(
+      (ogAttachment) {
+        final attachment = Attachment.fromOGAttachment(ogAttachment);
+        _effectiveController.setOGAttachment(attachment);
+      },
+      onError: (error, stackTrace) {
+        // Reset the ogAttachment if there was an error
+        _effectiveController.clearOGAttachment();
+        widget.onError?.call(error, stackTrace);
+      },
+    );
+  }
+
+  final _ogAttachmentCache = <String, OGAttachmentResponse>{};
+
+  Future<OGAttachmentResponse> _enrichUrl(
+    String url,
+    StreamChatClient client,
+  ) async {
+    var response = _ogAttachmentCache[url];
+    if (response == null) {
+      final client = StreamChat.of(context).client;
+      response = await client.enrichUrl(url);
+      _ogAttachmentCache[url] = response;
+    }
+    return response;
+  }
 
   void _checkEmoji(String value, BuildContext context) {
     if (value.isNotEmpty &&
@@ -1169,11 +1182,14 @@ class MessageInputState extends State<MessageInput>
   }
 
   Widget _buildAttachments() {
-    if (_effectiveController.attachments.isEmpty) return const Offstage();
-    final fileAttachments = _effectiveController.attachments
+    final nonOGAttachments = _effectiveController.attachments.where(
+      (it) => it.titleLink == null,
+    );
+    if (nonOGAttachments.isEmpty) return const Offstage();
+    final fileAttachments = nonOGAttachments
         .where((it) => it.type == 'file')
         .toList(growable: false);
-    final remainingAttachments = _effectiveController.attachments
+    final remainingAttachments = nonOGAttachments
         .where((it) => it.type != 'file')
         .toList(growable: false);
     return Column(
