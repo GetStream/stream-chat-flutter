@@ -343,8 +343,6 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                               .any((e) => e.id == media.id)) {
                             messageInputController
                                 .removeAttachmentById(media.id);
-                            // setState(() => messageInputController.attachments
-                            //     .removeWhere((e) => e.id == media.id));
                           } else {
                             _addAssetAttachment(media);
                           }
