@@ -1,10 +1,12 @@
 ## Upcoming
 
-✅ Added
-
-🛑️ Breaking Changes from `3.2.0`
+🛑️ Breaking Changes
 
 - `MessageInput` now works with a `MessageInputController` instead of a `TextEditingController`
+
+✅ Added
+
+- Videos can now be auto-played in `FullScreenMedia`
 
 ## 3.3.2
 
