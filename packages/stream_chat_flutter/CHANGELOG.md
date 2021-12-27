@@ -1,5 +1,9 @@
 ## Upcoming
 
+🐞 Fixed
+
+- SVG rendering fixes
+
 ✅ Added
 
 - Videos can now be auto-played in `FullScreenMedia`
