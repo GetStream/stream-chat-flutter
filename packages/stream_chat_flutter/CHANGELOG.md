@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - SVG rendering fixes
+- Use file extension instead of mimeType for downloading files
 
 ✅ Added
 
