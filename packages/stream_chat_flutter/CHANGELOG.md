@@ -1,5 +1,9 @@
 ## Upcoming
 
+🐞 Fixed
+
+- Use file extension instead of mimeType for downloading files
+
 ✅ Added
 
 - Videos can now be auto-played in `FullScreenMedia`
