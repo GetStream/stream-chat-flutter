@@ -703,7 +703,6 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
 
   @override
   Widget build(BuildContext context) => TextField(
-        key: widget.key,
         controller: _effectiveController.textEditingController,
         onChanged: (newText) {
           _effectiveController.text = newText;
