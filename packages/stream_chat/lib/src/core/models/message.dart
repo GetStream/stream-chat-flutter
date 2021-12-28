@@ -305,7 +305,8 @@ class Message extends Equatable {
           quotedMessage != null &&
           quotedMessage is! _NullConst) {
         throw ArgumentError(
-            '`quotedMessage` can only be set as Message or null');
+          '`quotedMessage` can only be set as Message or null',
+        );
       }
       return true;
     }(), 'Validate type for quotedMessage');
@@ -315,7 +316,8 @@ class Message extends Equatable {
           quotedMessageId != null &&
           quotedMessageId is! _NullConst) {
         throw ArgumentError(
-            '`quotedMessage` can only be set as String or null');
+          '`quotedMessage` can only be set as String or null',
+        );
       }
       return true;
     }(), 'Validate type for quotedMessage');
@@ -412,8 +414,8 @@ class Message extends Equatable {
         shadowed,
         silent,
         command,
-        createdAt,
-        updatedAt,
+        _createdAt,
+        _updatedAt,
         deletedAt,
         user,
         pinned,

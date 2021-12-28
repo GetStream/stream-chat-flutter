@@ -756,7 +756,6 @@ void main() {
           const messageId = 'test-message-id';
           final message = Message(
             id: messageId,
-            status: MessageSendingStatus.sending,
           );
 
           expectLater(

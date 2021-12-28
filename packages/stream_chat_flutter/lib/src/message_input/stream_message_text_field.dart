@@ -1,4 +1,4 @@
-// ignore_for_file: prefer-trailing-comma, cascade_invocations
+// ignore_for_file: prefer-trailing-comma, cascade_invocations, lines_longer_than_80_chars
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
@@ -44,7 +44,8 @@ class StreamMessageTextField extends StatefulWidget {
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforcement] is set to
   /// [MaxLengthEnforcement.none].
-  /// The text field enforces the length with a [LengthLimitingTextInputFormatter],
+  /// The text field enforces the length with a
+  /// [LengthLimitingTextInputFormatter],
   /// which is evaluated after the supplied [inputFormatters], if any.
   /// The [maxLength] value must be either null or greater than zero.
   ///
@@ -633,7 +634,7 @@ class StreamMessageTextField extends StatefulWidget {
         defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>(
         'scrollPadding', scrollPadding,
-        defaultValue: const EdgeInsets.all(20.0)));
+        defaultValue: const EdgeInsets.all(20)));
     properties.add(FlagProperty('selectionEnabled',
         value: selectionEnabled,
         defaultValue: true,
@@ -702,7 +703,6 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
 
   @override
   Widget build(BuildContext context) => TextField(
-        key: widget.key,
         controller: _effectiveController.textEditingController,
         onChanged: (newText) {
           _effectiveController.text = newText;
