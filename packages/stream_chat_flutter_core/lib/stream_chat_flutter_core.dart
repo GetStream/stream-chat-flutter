@@ -7,7 +7,6 @@ export 'src/better_stream_builder.dart';
 export 'src/channel_list_core.dart' hide ChannelListCoreState;
 export 'src/channels_bloc.dart';
 export 'src/lazy_load_scroll_view.dart';
-export 'src/message_input_controller.dart';
 export 'src/message_list_core.dart' hide MessageListCoreState;
 export 'src/message_search_bloc.dart';
 export 'src/message_search_list_core.dart' hide MessageSearchListCoreState;
