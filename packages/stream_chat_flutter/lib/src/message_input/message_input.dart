@@ -1751,14 +1751,19 @@ class MessageInputState extends State<MessageInput>
   }
 }
 
+/// Preview of an Open Graph attachment.
 class OGAttachmentPreview extends StatelessWidget {
+  /// Returns a new instance of [OGAttachmentPreview]
   const OGAttachmentPreview({
     Key? key,
     required this.attachment,
     this.onDismissPreviewPressed,
   }) : super(key: key);
 
+  /// The attachment to be rendered.
   final Attachment attachment;
+
+  /// Called when the dismiss button is pressed.
   final VoidCallback? onDismissPreviewPressed;
 
   @override
@@ -1773,7 +1778,7 @@ class OGAttachmentPreview extends StatelessWidget {
     return Row(
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Icon(
             Icons.link,
             color: colorTheme.accentPrimary,

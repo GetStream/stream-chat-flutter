@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 
+/// Controller for the [StreamTextField] widget.
 class MessageTextFieldController extends TextEditingController {
+  /// Returns a new MessageTextFieldController
   MessageTextFieldController({
     String? text,
     this.textPatternStyle,
   }) : super(text: text);
 
+  /// Returns a new MessageTextFieldController with the given text [value].
   MessageTextFieldController.fromValue(
     TextEditingValue? value, {
     this.textPatternStyle,
   }) : super.fromValue(value);
 
+  /// A map of style to apply to the text matching the RegExp patterns.
   final Map<RegExp, TextStyle>? textPatternStyle;
 
-  ///
+  /// Builds a [TextSpan] from the current text,
+  /// highlighting the matches for [textPatternStyle].
   @override
   TextSpan buildTextSpan({
     required BuildContext context,
