@@ -1538,6 +1538,7 @@ class ChannelClientState {
         members: List.from(
           channelState.members..removeWhere((m) => m.userId == user!.id),
         ),
+        read: channelState.read..removeWhere((r) => r.user.id == user!.id),
       ));
     }));
   }
