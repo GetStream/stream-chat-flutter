@@ -4,6 +4,7 @@
 
 - SVG rendering fixes
 - Use file extension instead of mimeType for downloading files
+- Fixed `unreadCount` after removing user from a channel.
 
 ✅ Added
 
