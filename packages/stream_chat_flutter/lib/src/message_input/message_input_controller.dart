@@ -17,7 +17,7 @@ class MessageInputController extends ValueNotifier<Message> {
   /// message.
   factory MessageInputController({
     Message? message,
-    Map<RegExp, TextStyle>? textPatternStyle,
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
   }) =>
       MessageInputController._(
         initialMessage: message ?? Message(),
@@ -27,7 +27,7 @@ class MessageInputController extends ValueNotifier<Message> {
   /// Creates a controller for an editable text field from an initial [text].
   factory MessageInputController.fromText(
     String? text, {
-    Map<RegExp, TextStyle>? textPatternStyle,
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
   }) =>
       MessageInputController._(
         initialMessage: Message(text: text),
@@ -38,7 +38,7 @@ class MessageInputController extends ValueNotifier<Message> {
   /// [attachments].
   factory MessageInputController.fromAttachments(
     List<Attachment> attachments, {
-    Map<RegExp, TextStyle>? textPatternStyle,
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
   }) =>
       MessageInputController._(
         initialMessage: Message(attachments: attachments),
@@ -47,7 +47,7 @@ class MessageInputController extends ValueNotifier<Message> {
 
   MessageInputController._({
     required Message initialMessage,
-    Map<RegExp, TextStyle>? textPatternStyle,
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
   })  : _textEditingController = MessageTextFieldController.fromValue(
           initialMessage.text == null
               ? const TextEditingValue()

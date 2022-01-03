@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+/// A function that takes a [BuildContext] and returns a [TextStyle].
+typedef TextStyleBuilder = TextStyle Function(BuildContext context);
 
 /// Controller for the [StreamTextField] widget.
 class MessageTextFieldController extends TextEditingController {
@@ -15,7 +19,7 @@ class MessageTextFieldController extends TextEditingController {
   }) : super.fromValue(value);
 
   /// A map of style to apply to the text matching the RegExp patterns.
-  final Map<RegExp, TextStyle>? textPatternStyle;
+  final Map<RegExp, TextStyleBuilder>? textPatternStyle;
 
   /// Builds a [TextSpan] from the current text,
   /// highlighting the matches for [textPatternStyle].
@@ -25,8 +29,14 @@ class MessageTextFieldController extends TextEditingController {
     TextStyle? style,
     required bool withComposing,
   }) {
-    final pattern = textPatternStyle;
-    if (pattern == null) {
+    final pattern = textPatternStyle ??
+        {
+          RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+'):
+              (context) => TextStyle(
+                    color: MessageInputTheme.of(context).linkHighlightColor,
+                  ),
+        };
+    if (pattern.isEmpty) {
       return super.buildTextSpan(
         context: context,
         style: style,
@@ -41,7 +51,7 @@ class MessageTextFieldController extends TextEditingController {
         final key = pattern.keys.firstWhere((it) => it.hasMatch(text));
         return TextSpan(
           text: text,
-          style: pattern[key],
+          style: pattern[key]?.call(context),
         );
       },
     );
