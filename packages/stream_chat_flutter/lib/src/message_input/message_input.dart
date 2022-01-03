@@ -13,6 +13,7 @@ import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/user_mentions_overlay.dart';
@@ -932,7 +933,8 @@ class MessageInputState extends State<MessageInput>
     if (_lastSearchedContainsUrlText == value) return;
     _lastSearchedContainsUrlText = value;
 
-    final matchedUrls = _urlRegex.allMatches(value);
+    final matchedUrls = _urlRegex.allMatches(value).toList()
+      ..removeWhere((it) => it.group(0)?.split('.').last.isValidTLD() == false);
 
     // Reset the og attachment if the text doesn't contain any url
     if (matchedUrls.isEmpty) {

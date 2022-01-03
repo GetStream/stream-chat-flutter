@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A function that takes a [BuildContext] and returns a [TextStyle].
-typedef TextStyleBuilder = TextStyle Function(BuildContext context);
+typedef TextStyleBuilder = TextStyle? Function(
+  BuildContext context,
+  String text,
+);
 
 /// Controller for the [StreamTextField] widget.
 class MessageTextFieldController extends TextEditingController {
@@ -32,9 +36,12 @@ class MessageTextFieldController extends TextEditingController {
     final pattern = textPatternStyle ??
         {
           RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+'):
-              (context) => TextStyle(
-                    color: MessageInputTheme.of(context).linkHighlightColor,
-                  ),
+              (context, text) {
+            if (!text.split('.').last.isValidTLD()) return null;
+            return TextStyle(
+              color: MessageInputTheme.of(context).linkHighlightColor,
+            );
+          },
         };
     if (pattern.isEmpty) {
       return super.buildTextSpan(
@@ -51,7 +58,10 @@ class MessageTextFieldController extends TextEditingController {
         final key = pattern.keys.firstWhere((it) => it.hasMatch(text));
         return TextSpan(
           text: text,
-          style: pattern[key]?.call(context),
+          style: pattern[key]?.call(
+            context,
+            text,
+          ),
         );
       },
     );
