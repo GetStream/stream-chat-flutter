@@ -938,7 +938,9 @@ class MessageInputState extends State<MessageInput>
 
     // Reset the og attachment if the text doesn't contain any url
     if (matchedUrls.isEmpty) {
-      _effectiveController.clearOGAttachment();
+      _effectiveController
+        ..text = value
+        ..clearOGAttachment();
       return;
     }
 
