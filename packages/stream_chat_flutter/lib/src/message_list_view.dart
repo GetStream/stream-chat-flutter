@@ -1147,7 +1147,10 @@ class _MessageListViewState extends State<MessageListView> {
       },
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
-      showThreadReplyMessage: !isThreadMessage,
+      showThreadReplyMessage: !isThreadMessage &&
+          streamChannel?.channel.ownCapabilities
+                  .contains(PermissionType.sendReply) ==
+              true,
       showFlagButton: !isMyMessage,
       borderSide: borderSide,
       onThreadTap: _onThreadTap,

@@ -1095,7 +1095,8 @@ class _MessageWidgetState extends State<MessageWidget>
             showSendingIndicator: false,
             padding: const EdgeInsets.all(0),
             showReactionPickerIndicator: widget.showReactions &&
-                (widget.message.status == MessageSendingStatus.sent),
+                (widget.message.status == MessageSendingStatus.sent) &&
+                channel.ownCapabilities.contains(PermissionType.sendReaction),
             showPinHighlight: false,
             showUserAvatar:
                 widget.message.user!.id == channel.client.state.currentUser!.id
@@ -1151,7 +1152,8 @@ class _MessageWidgetState extends State<MessageWidget>
             showSendingIndicator: false,
             padding: const EdgeInsets.all(0),
             showReactionPickerIndicator: widget.showReactions &&
-                (widget.message.status == MessageSendingStatus.sent),
+                (widget.message.status == MessageSendingStatus.sent) &&
+                channel.ownCapabilities.contains(PermissionType.sendReaction),
             showPinHighlight: false,
             showUserAvatar:
                 widget.message.user!.id == channel.client.state.currentUser!.id
@@ -1162,7 +1164,8 @@ class _MessageWidgetState extends State<MessageWidget>
           messageTheme: widget.messageTheme,
           reverse: widget.reverse,
           message: widget.message,
-          showReactions: widget.showReactions,
+          showReactions: widget.showReactions &&
+              channel.ownCapabilities.contains(PermissionType.sendReaction),
         ),
       ),
     );

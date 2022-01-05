@@ -473,9 +473,12 @@ class MessageInputState extends State<MessageInput>
         .channel
         .ownCapabilities
         .contains(PermissionType.sendMessage)) {
-      return SizedBox(
-        height: 50,
-        child: FittedBox(
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 15,
+          ),
           child: Text(
             context.translations.sendMessagePermissionError,
             style: _messageInputTheme.inputTextStyle,
