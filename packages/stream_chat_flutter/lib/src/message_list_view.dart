@@ -861,6 +861,7 @@ class _MessageListViewState extends State<MessageListView> {
           } else if (!snapshot.hasData) {
             return const Offstage();
           }
+          const arrowColor = Color(0xff1774F2);
           final unreadCount = snapshot.data!;
           final showUnreadCount = unreadCount > 0 &&
               streamChannel!.channel.state!.members.any((e) =>
@@ -899,12 +900,8 @@ class _MessageListViewState extends State<MessageListView> {
                     }
                   },
                   child: widget.reverse
-                      ? StreamSvgIcon.down(
-                          color: _streamTheme.colorTheme.textHighEmphasis,
-                        )
-                      : StreamSvgIcon.up(
-                          color: _streamTheme.colorTheme.textHighEmphasis,
-                        ),
+                      ? const Icon(Icons.arrow_downward, color: arrowColor)
+                      : const Icon(Icons.arrow_upward, color: arrowColor),
                 ),
                 if (showUnreadCount)
                   Positioned(
