@@ -273,3 +273,18 @@ ChannelStateResponse _$ChannelStateResponseFromJson(
               ?.map((e) => Read.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [];
+
+OGAttachmentResponse _$OGAttachmentResponseFromJson(
+        Map<String, dynamic> json) =>
+    OGAttachmentResponse()
+      ..duration = json['duration'] as String?
+      ..ogScrapeUrl = json['og_scrape_url'] as String
+      ..assetUrl = json['asset_url'] as String?
+      ..authorLink = json['author_link'] as String?
+      ..authorName = json['author_name'] as String?
+      ..imageUrl = json['image_url'] as String?
+      ..text = json['text'] as String?
+      ..thumbUrl = json['thumb_url'] as String?
+      ..title = json['title'] as String?
+      ..titleLink = json['title_link'] as String?
+      ..type = json['type'] as String?;

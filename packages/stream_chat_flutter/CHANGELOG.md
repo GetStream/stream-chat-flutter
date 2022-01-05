@@ -1,8 +1,21 @@
 ## Upcoming
 
-🛑️ Breaking Changes from `3.2.0`
+🛑️ Breaking Changes
 
 - `pinPermissions` is no longer needed in `MessageListView`.
+
+🐞 Fixed
+
+- SVG rendering fixes
+- Use file extension instead of mimeType for downloading files
+
+✅ Added
+
+- Videos can now be auto-played in `FullScreenMedia`
+
+## 3.3.2
+
+- Updated `stream_chat_flutter_core` dependency to [`3.3.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 3.3.1
 
