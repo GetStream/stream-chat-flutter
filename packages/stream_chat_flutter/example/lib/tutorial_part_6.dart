@@ -166,7 +166,9 @@ class ThreadPage extends StatelessWidget {
             ),
           ),
           MessageInput(
-            parentMessage: parent,
+            messageInputController: MessageInputController(
+              message: Message(parentId: parent!.id),
+            ),
           ),
         ],
       ),

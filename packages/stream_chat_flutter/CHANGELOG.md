@@ -3,6 +3,7 @@
 🛑️ Breaking Changes
 
 - `pinPermissions` is no longer needed in `MessageListView`.
+- `MessageInput` now works with a `MessageInputController` instead of a `TextEditingController`
 
 🐞 Fixed
 

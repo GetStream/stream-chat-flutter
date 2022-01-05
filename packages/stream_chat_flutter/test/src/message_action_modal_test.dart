@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
 
@@ -37,6 +38,7 @@ void main() {
                   user: User(
                     id: 'user-id',
                   ),
+                  status: MessageSendingStatus.sent,
                 ),
                 messageWidget: const Text(
                   'test',
@@ -194,6 +196,7 @@ void main() {
                   user: User(
                     id: 'user-id',
                   ),
+                  status: MessageSendingStatus.sent,
                 ),
                 messageTheme: streamTheme.ownMessageTheme,
               ),
@@ -240,6 +243,7 @@ void main() {
                   user: User(
                     id: 'user-id',
                   ),
+                  status: MessageSendingStatus.sent,
                 ),
                 messageTheme: streamTheme.ownMessageTheme,
               ),
