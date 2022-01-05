@@ -45,13 +45,7 @@ class MessageReactionsModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final user = StreamChat.of(context).currentUser;
-    final _userPermissions = StreamChannel.of(context)
-            .channel
-            .state
-            ?.channelState
-            .channel
-            ?.ownCapabilities ??
-        [];
+    final _userPermissions = StreamChannel.of(context).channel.ownCapabilities;
 
     final hasReactionPermission =
         _userPermissions.contains(PermissionType.sendReaction);

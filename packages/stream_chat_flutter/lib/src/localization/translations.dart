@@ -93,6 +93,9 @@ abstract class Translations {
   /// The label for search Gif
   String get searchGifLabel;
 
+  /// The label for the MessageInput hint when permission denied on sendMessage
+  String get sendMessagePermissionError;
+
   /// The label for add a comment or send in case of
   /// attachments inside [MessageInput]
   String get addACommentOrSendLabel;
@@ -376,6 +379,10 @@ class DefaultTranslations implements Translations {
     if (pinnedByCurrentUser) return 'Pinned by You';
     return 'Pinned by ${pinnedBy.name}';
   }
+
+  @override
+  String get sendMessagePermissionError =>
+      'You don\'t have permission to send messages';
 
   @override
   String get emptyMessagesText => 'There are no messages currently';

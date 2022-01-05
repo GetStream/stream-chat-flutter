@@ -560,14 +560,8 @@ class _ChannelListViewState extends State<ChannelListView> {
                         );
                       },
               ),
-              if ([
-                'admin',
-                'owner',
-              ].contains(channel.state!.members
-                  .firstWhereOrNull(
-                    (m) => m.userId == channel.client.state.currentUser?.id,
-                  )
-                  ?.role))
+              if (channel.ownCapabilities
+                  .contains(PermissionType.deleteChannel))
                 IconSlideAction(
                   color: backgroundColor,
                   iconWidget: StreamSvgIcon.delete(

@@ -1250,6 +1250,13 @@ class _MessageWidgetState extends State<MessageWidget>
 
     final channel = StreamChannel.of(context).channel;
 
+    if (!channel.ownCapabilities.contains(PermissionType.readEvents)) {
+      return SendingIndicator(
+        message: message,
+        size: style!.fontSize,
+      );
+    }
+
     return BetterStreamBuilder<List<Read>>(
       stream: channel.state?.readStream,
       initialData: channel.state?.read,

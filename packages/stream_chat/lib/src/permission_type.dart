@@ -5,6 +5,9 @@ class PermissionType {
   /// and user has CreateMessage permission.
   static const String sendMessage = 'send-message';
 
+  /// Capability required to receive connect events in the channel
+  static const String connectEvents = 'connect-events';
+
   /// Capability required to send a message
   /// Reactions are enabled for the channel, channel is not frozen
   /// (or user has UseFrozenChannel permission) and user has
@@ -32,9 +35,18 @@ class PermissionType {
   /// User has RemoveOwnChannelMembership or UpdateChannelMembers permission
   static const String leaveChannel = 'leave-channel';
 
+  /// Ability to receive read events
+  static const String readEvents = 'read-events';
+
   /// Capability required to pin a message in a channel
   /// Corresponds to PinMessage permission
   static const String pinMessage = 'pin-message';
+
+  /// Capability required to quote a message in a channel
+  static const String quoteMessage = 'quote-message';
+
+  /// Capability required to flag a message in a channel
+  static const String flagMessage = 'flag-message';
 
   /// User has ability to delete any message in the channel
   /// User has DeleteMessage permission

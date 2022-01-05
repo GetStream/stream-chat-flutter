@@ -191,7 +191,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (widget.showReplyMessage &&
+                        if (_userPermissions
+                                .contains(PermissionType.quoteMessage) &&
+                            widget.showReplyMessage &&
                             widget.message.status == MessageSendingStatus.sent)
                           _buildReplyButton(context),
                         if ((widget.showThreadReplyMessage ??
@@ -207,7 +209,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             _isMyMessage && hasEditPermission)
                           _buildEditMessage(context),
                         if (widget.showCopyMessage) _buildCopyButton(context),
-                        if (widget.showFlagButton) _buildFlagButton(context),
+                        if (_userPermissions
+                                .contains(PermissionType.flagMessage) &&
+                            widget.showFlagButton)
+                          _buildFlagButton(context),
                         if (widget.showPinButton ??
                             _userPermissions
                                 .contains(PermissionType.pinMessage))
@@ -680,9 +685,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   @override
   void didChangeDependencies() {
     final newStreamChannel = StreamChannel.of(context);
-    _userPermissions =
-        newStreamChannel.channel.state?.channelState.channel?.ownCapabilities ??
-            [];
+    _userPermissions = newStreamChannel.channel.ownCapabilities;
     _isMyMessage = widget.message.user!.id ==
         newStreamChannel.channel.client.state.currentUser!.id;
     super.didChangeDependencies();

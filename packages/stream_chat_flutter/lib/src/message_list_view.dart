@@ -1296,9 +1296,7 @@ class _MessageListViewState extends State<MessageListView> {
   void didChangeDependencies() {
     final newStreamChannel = StreamChannel.of(context);
     _streamTheme = StreamChatTheme.of(context);
-    _userPermissions =
-        newStreamChannel.channel.state?.channelState.channel?.ownCapabilities ??
-            [];
+    _userPermissions = newStreamChannel.channel.ownCapabilities;
 
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
