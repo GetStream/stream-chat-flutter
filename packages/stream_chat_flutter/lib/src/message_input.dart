@@ -616,7 +616,15 @@ class MessageInputState extends State<MessageInput> {
       sendButton = widget.activeSendButton != null
           ? InkWell(
               onTap: sendMessage,
-              child: widget.activeSendButton,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal:
+                      widget.sendButtonLocation == SendButtonLocation.outside
+                          ? 8
+                          : 0,
+                ),
+                child: widget.activeSendButton,
+              ),
             )
           : _buildSendButton(context);
     }
