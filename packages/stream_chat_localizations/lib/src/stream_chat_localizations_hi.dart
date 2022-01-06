@@ -61,6 +61,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get sendMessagePermissionError => 'आपको संदेश भेजने की अनुमति नहीं है';
+
+  @override
   String get emptyMessagesText => 'वर्तमान में कोई संदेश नहीं है';
 
   @override

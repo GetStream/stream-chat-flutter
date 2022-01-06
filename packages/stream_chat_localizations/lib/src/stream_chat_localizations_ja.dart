@@ -61,6 +61,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get sendMessagePermissionError => 'メッセージを送信する権限がありません';
+
+  @override
   String get emptyMessagesText => '現在、メッセージはありません。';
 
   @override

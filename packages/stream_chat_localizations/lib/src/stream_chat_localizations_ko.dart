@@ -61,6 +61,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get sendMessagePermissionError => '메시지를 보낼 수 있는 권한이 없습니다';
+
+  @override
   String get emptyMessagesText => '현재 메시지가 없습니다';
 
   @override

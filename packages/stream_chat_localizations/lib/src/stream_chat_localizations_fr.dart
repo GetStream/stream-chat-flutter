@@ -62,6 +62,10 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get sendMessagePermissionError =>
+      'Vous n\'êtes pas autorisé à envoyer des messages';
+
+  @override
   String get emptyMessagesText => "Il n'y a pas de messages actuellement";
 
   @override
