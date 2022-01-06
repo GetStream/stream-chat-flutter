@@ -35,6 +35,9 @@ class PermissionType {
   /// User has RemoveOwnChannelMembership or UpdateChannelMembers permission
   static const String leaveChannel = 'leave-channel';
 
+  /// User can mute channel
+  static const String muteChannel = 'mute-channel';
+
   /// Ability to receive read events
   static const String readEvents = 'read-events';
 
