@@ -12,6 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/commands_overlay.dart';
+import 'package:stream_chat_flutter/src/custom_text_controller.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
@@ -365,8 +366,10 @@ class MessageInputState extends State<MessageInput> {
   int _filePickerIndex = 0;
 
   /// The editing controller passed to the input TextField
-  late final TextEditingController textEditingController =
-      widget.textEditingController ?? TextEditingController();
+  // late final TextEditingController textEditingController =
+  //     widget.textEditingController ?? TextEditingController();
+  late final CustomTextController textEditingController =
+      CustomTextController();
 
   late StreamChatThemeData _streamChatTheme;
   late MessageInputThemeData _messageInputTheme;
@@ -969,44 +972,44 @@ class MessageInputState extends State<MessageInput> {
     final attachmentLimitCrossed =
         _attachments.length >= widget.attachmentLimit;
 
-    Color _getIconColor(int index) {
-      final streamChatThemeData = _streamChatTheme;
-      switch (index) {
-        case 0:
-          return _attachments.isEmpty
-              ? streamChatThemeData.colorTheme.accentPrimary
-              : (!_attachmentContainsFile
-                  ? streamChatThemeData.colorTheme.accentPrimary
-                  : streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.2));
-        case 1:
-          return _attachmentContainsFile
-              ? streamChatThemeData.colorTheme.accentPrimary
-              : (_attachments.isEmpty
-                  ? streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.5)
-                  : streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.2));
-        case 2:
-          return attachmentLimitCrossed
-              ? streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(0.2)
-              : _attachmentContainsFile && _attachments.isNotEmpty
-                  ? streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.2)
-                  : streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.5);
-        case 3:
-          return attachmentLimitCrossed
-              ? streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(0.2)
-              : _attachmentContainsFile && _attachments.isNotEmpty
-                  ? streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.2)
-                  : streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.5);
-        default:
-          return Colors.black;
-      }
-    }
+    // Color _getIconColor(int index) {
+    //   final streamChatThemeData = _streamChatTheme;
+    //   switch (index) {
+    //     case 0:
+    //       return _attachments.isEmpty
+    //           ? streamChatThemeData.colorTheme.accentPrimary
+    //           : (!_attachmentContainsFile
+    //               ? streamChatThemeData.colorTheme.accentPrimary
+    //               : streamChatThemeData.colorTheme.textHighEmphasis
+    //                   .withOpacity(0.2));
+    //     case 1:
+    //       return _attachmentContainsFile
+    //           ? streamChatThemeData.colorTheme.accentPrimary
+    //           : (_attachments.isEmpty
+    //               ? streamChatThemeData.colorTheme.textHighEmphasis
+    //                   .withOpacity(0.5)
+    //               : streamChatThemeData.colorTheme.textHighEmphasis
+    //                   .withOpacity(0.2));
+    //     case 2:
+    //       return attachmentLimitCrossed
+    //           ? streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(0.2)
+    //           : _attachmentContainsFile && _attachments.isNotEmpty
+    //               ? streamChatThemeData.colorTheme.textHighEmphasis
+    //                   .withOpacity(0.2)
+    //               : streamChatThemeData.colorTheme.textHighEmphasis
+    //                   .withOpacity(0.5);
+    //     case 3:
+    //       return attachmentLimitCrossed
+    //           ? streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(0.2)
+    //           : _attachmentContainsFile && _attachments.isNotEmpty
+    //               ? streamChatThemeData.colorTheme.textHighEmphasis
+    //                   .withOpacity(0.2)
+    //               : streamChatThemeData.colorTheme.textHighEmphasis
+    //                   .withOpacity(0.5);
+    //     default:
+    //       return Colors.black;
+    //   }
+    // }
 
     return AnimatedContainer(
       duration: _openFilePickerSection
@@ -1222,6 +1225,7 @@ class MessageInputState extends State<MessageInput> {
     }
 
     return UserMentionsOverlay(
+      controller: textEditingController,
       query: query,
       mentionAllAppUsers: widget.mentionAllAppUsers,
       client: StreamChat.of(context).client,

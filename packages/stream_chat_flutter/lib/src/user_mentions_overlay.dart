@@ -4,6 +4,8 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_mention_tile.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+import 'custom_text_controller.dart';
+
 /// Builder function for building a mention tile.
 ///
 /// Use [UserMentionTile] for the default implementation.
@@ -17,6 +19,7 @@ class UserMentionsOverlay extends StatefulWidget {
   /// Constructor for creating a [UserMentionsOverlay].
   UserMentionsOverlay({
     Key? key,
+    required this.controller,
     required this.query,
     required this.channel,
     required this.size,
@@ -34,6 +37,9 @@ class UserMentionsOverlay extends StatefulWidget {
           'StreamChatClient is required in order to use mentionAllAppUsers',
         ),
         super(key: key);
+
+  /// Query for searching users.
+  final CustomTextController controller;
 
   /// Query for searching users.
   final String query;
@@ -88,42 +94,64 @@ class _UserMentionsOverlayState extends State<UserMentionsOverlay> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
-    return Card(
-      margin: const EdgeInsets.all(8),
-      elevation: 2,
-      color: theme.colorTheme.barsBg,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Container(
-        constraints: BoxConstraints.loose(widget.size),
-        decoration: BoxDecoration(color: theme.colorTheme.barsBg),
-        child: FutureBuilder<List<User>>(
-          future: userMentionsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) return const Offstage();
-            if (!snapshot.hasData) return const Offstage();
-            final users = snapshot.data!;
-            return ListView.builder(
-              padding: const EdgeInsets.all(0),
-              shrinkWrap: true,
-              itemCount: users.length,
-              itemBuilder: (context, index) {
-                final user = users[index];
-                return Material(
-                  color: theme.colorTheme.barsBg,
-                  child: InkWell(
-                    onTap: () => widget.onMentionUserTap?.call(user),
-                    child: widget.mentionsTileBuilder?.call(context, user) ??
-                        UserMentionTile(user),
-                  ),
-                );
-              },
-            );
-          },
+
+    return Stack(
+      children: [
+        Container(
+          color: Colors.black.withOpacity(0.6),
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
         ),
-      ),
+        Positioned(
+          bottom: 0,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
+            clipBehavior: Clip.hardEdge,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              constraints: BoxConstraints.loose(widget.size),
+              decoration: BoxDecoration(color: theme.colorTheme.barsBg),
+              child: FutureBuilder<List<User>>(
+                future: userMentionsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) return const Offstage();
+                  if (!snapshot.hasData) return const Offstage();
+                  final now = DateTime.now();
+                  widget.controller.addUsers(snapshot.data!.toSet());
+                  final users = snapshot.data!.take(4).toList()
+                    ..sort((a, b) =>
+                        (b.lastActive ?? now).compareTo(a.lastActive ?? now));
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(0),
+                    shrinkWrap: true,
+                    itemCount: users.length,
+                    itemBuilder: (context, index) {
+                      final user = users[index];
+                      return Material(
+                        color: theme.colorTheme.barsBg,
+                        child: InkWell(
+                          onTap: () => widget.onMentionUserTap?.call(user),
+                          child:
+                              widget.mentionsTileBuilder?.call(context, user) ??
+                                  UserMentionTile(user),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -179,12 +207,12 @@ class _UserMentionsOverlayState extends State<UserMentionsOverlay> {
     final response = await widget.client!.queryUsers(
       pagination: PaginationParams(limit: widget.limit),
       filter: query.isEmpty
-          ? const Filter.empty()
-          : Filter.or([
-              Filter.autoComplete('id', query),
+          ? Filter.notEqual('id', 'system')
+          : Filter.and([
               Filter.autoComplete('name', query),
+              Filter.notEqual('id', 'system'),
             ]),
-      sort: [const SortOption('id', direction: SortOption.ASC)],
+      sort: [const SortOption('last_active', direction: SortOption.DESC)],
     );
     return response.users;
   }
