@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -74,7 +76,8 @@ class MessageWidget extends StatefulWidget {
     this.showInChannelIndicator = false,
     this.onReplyTap,
     this.onThreadTap,
-    this.showUsername = true,
+    this.showUserNameAtTop = false,
+    this.showUserNameAtBottom = true,
     this.showTimestamp = true,
     this.showReactions = true,
     this.showDeleteMessage = true,
@@ -376,8 +379,13 @@ class MessageWidget extends StatefulWidget {
   /// Handle return actions like reply message
   final ValueChanged<ReturnActionType>? onReturnAction;
 
-  /// If true show the users username next to the timestamp of the message
-  final bool showUsername;
+  /// If true show the users username at the bottom
+  /// of the message next to the timestamp
+  final bool showUserNameAtBottom;
+
+  /// If true show the users username at the top of
+  /// the message next to the user avatar
+  final bool showUserNameAtTop;
 
   /// Show message timestamp
   final bool showTimestamp;
@@ -466,7 +474,8 @@ class MessageWidget extends StatefulWidget {
     List<Read>? readList,
     ShowMessageCallback? onShowMessage,
     ValueChanged<ReturnActionType>? onReturnAction,
-    bool? showUsername,
+    bool? showUserNameAtTop,
+    bool? showUserNameAtBottom,
     bool? showTimestamp,
     bool? showReplyMessage,
     bool? showThreadReplyMessage,
@@ -524,7 +533,8 @@ class MessageWidget extends StatefulWidget {
             showReactionPickerIndicator ?? this.showReactionPickerIndicator,
         onShowMessage: onShowMessage ?? this.onShowMessage,
         onReturnAction: onReturnAction ?? this.onReturnAction,
-        showUsername: showUsername ?? this.showUsername,
+        showUserNameAtBottom: showUserNameAtBottom ?? this.showUserNameAtBottom,
+        showUserNameAtTop: showUserNameAtTop ?? this.showUserNameAtTop,
         showTimestamp: showTimestamp ?? this.showTimestamp,
         showReplyMessage: showReplyMessage ?? this.showReplyMessage,
         showThreadReplyMessage:
@@ -558,7 +568,9 @@ class _MessageWidgetState extends State<MessageWidget>
 
   bool get isDeleted => widget.message.isDeleted;
 
-  bool get showUsername => widget.showUsername;
+  bool get showUserNameAtBottom => widget.showUserNameAtBottom;
+
+  bool get showUsernameAtTop => widget.showUserNameAtBottom;
 
   bool get showTimeStamp => widget.showTimestamp;
 
@@ -590,7 +602,7 @@ class _MessageWidgetState extends State<MessageWidget>
 
   bool get showBottomRow =>
       showThreadReplyIndicator ||
-      showUsername ||
+      showUserNameAtBottom ||
       showTimeStamp ||
       showInChannel ||
       showSendingIndicator ||
@@ -609,7 +621,7 @@ class _MessageWidgetState extends State<MessageWidget>
         widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
     final bottomRowPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
-
+    final isMyMessage = widget.message.user?.id == _streamChat.currentUser?.id;
     final showReactions = _shouldShowReactions;
 
     return Material(
@@ -637,7 +649,6 @@ class _MessageWidgetState extends State<MessageWidget>
                 crossAxisAlignment: widget.reverse
                     ? CrossAxisAlignment.end
                     : CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Stack(
                     clipBehavior: Clip.none,
@@ -661,7 +672,7 @@ class _MessageWidgetState extends State<MessageWidget>
                                 widget.showPinHighlight)
                               _buildPinnedMessage(widget.message),
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 if (!widget.reverse &&
@@ -692,10 +703,14 @@ class _MessageWidgetState extends State<MessageWidget>
                                             ),
                                           )
                                         : null,
-                                    portalAnchor:
-                                        Alignment(widget.reverse ? 1 : -1, -1),
-                                    childAnchor:
-                                        Alignment(widget.reverse ? -1 : 1, -1),
+                                    portalAnchor: Alignment(
+                                      widget.reverse ? 1 : -1,
+                                      -1,
+                                    ),
+                                    childAnchor: Alignment(
+                                      widget.reverse ? -1 : 1,
+                                      -1,
+                                    ),
                                     child: Stack(
                                       clipBehavior: Clip.none,
                                       children: [
@@ -711,15 +726,28 @@ class _MessageWidgetState extends State<MessageWidget>
                                                       : 0,
                                                 )
                                               : EdgeInsets.zero,
-                                          child: (widget.message.isDeleted &&
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              if (widget.showUserNameAtTop &&
+                                                  !isMyMessage)
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                    left: 8,
+                                                    bottom: 8,
+                                                  ),
+                                                  child: _buildUsername(
+                                                    const Key('username'),
+                                                  ),
+                                                ),
+                                              if (widget.message.isDeleted &&
                                                   !isFailedState)
-                                              ? Container(
-                                                  // ignore: lines_longer_than_80_chars
+                                                Container(
                                                   margin: EdgeInsets.symmetric(
                                                     horizontal:
-                                                        // ignore: lines_longer_than_80_chars
                                                         widget.showUserAvatar ==
-                                                                // ignore: lines_longer_than_80_chars
                                                                 DisplayWidget
                                                                     .gone
                                                             ? 0
@@ -735,14 +763,14 @@ class _MessageWidgetState extends State<MessageWidget>
                                                         widget.messageTheme,
                                                   ),
                                                 )
-                                              : Card(
+                                              else
+                                                Card(
                                                   clipBehavior: Clip.hardEdge,
                                                   elevation: 0,
                                                   margin: EdgeInsets.symmetric(
                                                     horizontal: (isFailedState
                                                             ? 15.0
                                                             : 0.0) +
-                                                        // ignore: lines_longer_than_80_chars
                                                         (widget.showUserAvatar ==
                                                                 DisplayWidget
                                                                     .gone
@@ -755,14 +783,11 @@ class _MessageWidgetState extends State<MessageWidget>
                                                                 .borderSide ??
                                                             BorderSide(
                                                               color: widget
-                                                                      // ignore: lines_longer_than_80_chars
                                                                       .messageTheme
-                                                                      // ignore: lines_longer_than_80_chars
                                                                       .messageBorderColor ??
                                                                   Colors.grey,
                                                             ),
                                                         borderRadius: widget
-                                                                // ignore: lines_longer_than_80_chars
                                                                 .borderRadiusGeometry ??
                                                             BorderRadius.zero,
                                                       ),
@@ -782,6 +807,8 @@ class _MessageWidgetState extends State<MessageWidget>
                                                     ],
                                                   ),
                                                 ),
+                                            ],
+                                          ),
                                         ),
                                         if (widget.showReactionPickerIndicator)
                                           Positioned(
@@ -807,12 +834,16 @@ class _MessageWidgetState extends State<MessageWidget>
                                         DisplayWidget.show &&
                                     widget.message.user != null) ...[
                                   _buildUserAvatar(),
+                                  if (showUserNameAtBottom)
+                                    _buildUsername(const Key('username')),
                                   const SizedBox(width: 4),
                                 ],
                               ],
                             ),
                             if (showBottomRow)
-                              SizedBox(height: context.textScaleFactor * 18.0),
+                              SizedBox(
+                                height: context.textScaleFactor * 14.0,
+                              ),
                           ],
                         ),
                       ),
@@ -929,7 +960,7 @@ class _MessageWidgetState extends State<MessageWidget>
           child: Text(msg, style: widget.messageTheme.repliesStyle),
         ),
       ],
-      if (showUsername) _buildUsername(usernameKey),
+      if (showUserNameAtBottom) _buildUsername(usernameKey),
       if (showTimeStamp)
         Text(
           Jiffy(widget.message.createdAt.toLocal()).jm,
@@ -1089,7 +1120,7 @@ class _MessageWidgetState extends State<MessageWidget>
                   : widget.message.text,
             ),
             showReactions: false,
-            showUsername: false,
+            showUserNameAtBottom: false,
             showTimestamp: false,
             translateUserAvatar: false,
             showSendingIndicator: false,
@@ -1152,7 +1183,7 @@ class _MessageWidgetState extends State<MessageWidget>
                   : widget.message.text,
             ),
             showReactions: false,
-            showUsername: false,
+            showUserNameAtBottom: false,
             showTimestamp: false,
             translateUserAvatar: false,
             showSendingIndicator: false,

@@ -341,6 +341,9 @@ class MessageListView extends StatefulWidget {
   /// message, default spacing, etc)
   final SpacingWidgetBuilder? spacingWidgetBuilder;
 
+  ///If true shows user name at the top of the message next to the user avatar
+  final bool showUserNameAtTop = false;
+
   @override
   _MessageListViewState createState() => _MessageListViewState();
 }
@@ -991,7 +994,8 @@ class _MessageListViewState extends State<MessageListView> {
       showEditMessage: false,
       message: message,
       reverse: isMyMessage,
-      showUsername: !isMyMessage,
+      showUserNameAtTop: widget.showUserNameAtTop,
+      showUserNameAtBottom: !isMyMessage && !widget.showUserNameAtTop,
       padding: const EdgeInsets.all(8),
       showSendingIndicator: false,
       borderRadiusGeometry: BorderRadius.only(
@@ -1085,7 +1089,7 @@ class _MessageListViewState extends State<MessageListView> {
         !hasReplies &&
         (timeDiff >= 1 || !isNextUserSame);
 
-    final showUsername = !isMyMessage &&
+    final showUserNameAtBottom = !isMyMessage &&
         (!isThreadMessage || _isThreadConversation) &&
         !hasReplies &&
         (timeDiff >= 1 || !isNextUserSame);
@@ -1123,7 +1127,7 @@ class _MessageListViewState extends State<MessageListView> {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       showInChannelIndicator: showInChannelIndicator,
       showThreadReplyIndicator: showThreadReplyIndicator,
-      showUsername: showUsername,
+      showUserNameAtBottom: showUserNameAtBottom,
       showTimestamp: showTimeStamp,
       showSendingIndicator: showSendingIndicator,
       showUserAvatar: showUserAvatar,
