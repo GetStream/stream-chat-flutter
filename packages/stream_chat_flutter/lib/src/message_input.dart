@@ -170,6 +170,7 @@ class MessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
   const MessageInput({
     Key? key,
+    this.audioRecordWidget,
     this.onMessageSent,
     this.preMessageSending,
     this.parentMessage,
@@ -210,6 +211,9 @@ class MessageInput extends StatefulWidget {
           "Can't provide both `initialMessage` and `editMessage`",
         ),
         super(key: key);
+
+  /// Audio record button for Roger app
+  final Widget? audioRecordWidget;
 
   /// List of options for showing overlays
   final List<OverlayOptions> customOverlays;
@@ -462,10 +466,7 @@ class MessageInputState extends State<MessageInput> {
                     ],
                   ),
                 ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: _buildTextField(context),
-              ),
+              _buildTextField(context),
               if (widget.parentMessage != null && !widget.hideSendAsDm)
                 Padding(
                   padding: const EdgeInsets.only(
@@ -482,9 +483,18 @@ class MessageInputState extends State<MessageInput> {
       ),
     );
     if (widget.editMessage == null) {
-      child = Material(
-        elevation: 8,
-        child: child,
+      child = Stack(
+        children: [
+          Material(
+            elevation: 8,
+            child: child,
+          ),
+          if (widget.audioRecordWidget != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: widget.audioRecordWidget,
+            ),
+        ],
       );
     }
 
@@ -518,19 +528,23 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Flex _buildTextField(BuildContext context) => Flex(
-        direction: Axis.horizontal,
-        children: <Widget>[
-          if (!_commandEnabled &&
-              widget.actionsLocation == ActionsLocation.left)
-            _buildExpandActionsButton(context),
-          _buildTextInput(context),
-          if (!_commandEnabled &&
-              widget.actionsLocation == ActionsLocation.right)
-            _buildExpandActionsButton(context),
-          if (widget.sendButtonLocation == SendButtonLocation.outside)
-            _animateSendButton(context),
-        ],
+  Widget _buildTextField(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Flex(
+          direction: Axis.horizontal,
+          children: <Widget>[
+            if (!_commandEnabled &&
+                widget.actionsLocation == ActionsLocation.left)
+              _buildExpandActionsButton(context),
+            _buildTextInput(context),
+            if (!_commandEnabled &&
+                widget.actionsLocation == ActionsLocation.right)
+              _buildExpandActionsButton(context),
+            if (widget.sendButtonLocation == SendButtonLocation.outside)
+              _animateSendButton(context),
+            if (widget.audioRecordWidget != null) const SizedBox(width: 36),
+          ],
+        ),
       );
 
   Widget _buildDmCheckbox() => Row(
@@ -602,7 +616,15 @@ class MessageInputState extends State<MessageInput> {
       sendButton = widget.activeSendButton != null
           ? InkWell(
               onTap: sendMessage,
-              child: widget.activeSendButton,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal:
+                      widget.sendButtonLocation == SendButtonLocation.outside
+                          ? 8
+                          : 0,
+                ),
+                child: widget.activeSendButton,
+              ),
             )
           : _buildSendButton(context);
     }
