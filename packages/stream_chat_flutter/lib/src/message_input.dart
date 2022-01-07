@@ -1024,9 +1024,11 @@ class MessageInputState extends State<MessageInput> {
               children: [
                 Row(
                   children: [
+                    const SizedBox(width: 12),
                     IconButton(
-                      icon: StreamSvgIcon.pictures(
-                        color: _getIconColor(0),
+                      icon: const Icon(
+                        Icons.photo_library_outlined,
+                        color: Colors.blueAccent,
                       ),
                       onPressed:
                           _attachmentContainsFile && _attachments.isNotEmpty
@@ -1037,21 +1039,23 @@ class MessageInputState extends State<MessageInput> {
                                   });
                                 },
                     ),
+
+                    // IconButton(
+                    //   iconSize: 32,
+                    //   icon: StreamSvgIcon.files(
+                    //     color: _getIconColor(1),
+                    //   ),
+                    //   onPressed:
+                    //       !_attachmentContainsFile && _attachments.isNotEmpty
+                    //           ? null
+                    //           : () {
+                    //               pickFile(DefaultAttachmentTypes.file);
+                    //             },
+                    // ),
                     IconButton(
-                      iconSize: 32,
-                      icon: StreamSvgIcon.files(
-                        color: _getIconColor(1),
-                      ),
-                      onPressed:
-                          !_attachmentContainsFile && _attachments.isNotEmpty
-                              ? null
-                              : () {
-                                  pickFile(DefaultAttachmentTypes.file);
-                                },
-                    ),
-                    IconButton(
-                      icon: StreamSvgIcon.camera(
-                        color: _getIconColor(2),
+                      icon: const Icon(
+                        Icons.camera_alt_outlined,
+                        color: Colors.black54,
                       ),
                       onPressed: attachmentLimitCrossed ||
                               (_attachmentContainsFile &&
@@ -1064,22 +1068,22 @@ class MessageInputState extends State<MessageInput> {
                               );
                             },
                     ),
-                    IconButton(
-                      padding: const EdgeInsets.all(0),
-                      icon: StreamSvgIcon.record(
-                        color: _getIconColor(3),
-                      ),
-                      onPressed: attachmentLimitCrossed ||
-                              (_attachmentContainsFile &&
-                                  _attachments.isNotEmpty)
-                          ? null
-                          : () {
-                              pickFile(
-                                DefaultAttachmentTypes.video,
-                                camera: true,
-                              );
-                            },
-                    ),
+                    // IconButton(
+                    //   padding: const EdgeInsets.all(0),
+                    //   icon: StreamSvgIcon.record(
+                    //     color: _getIconColor(3),
+                    //   ),
+                    //   onPressed: attachmentLimitCrossed ||
+                    //           (_attachmentContainsFile &&
+                    //               _attachments.isNotEmpty)
+                    //       ? null
+                    //       : () {
+                    //           pickFile(
+                    //             DefaultAttachmentTypes.video,
+                    //             camera: true,
+                    //           );
+                    //         },
+                    // ),
                   ],
                 ),
                 DecoratedBox(
