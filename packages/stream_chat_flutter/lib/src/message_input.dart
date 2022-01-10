@@ -262,7 +262,7 @@ class MessageInput extends StatefulWidget {
   final bool hideSendAsDm;
 
   /// The text controller of the TextField
-  final TextEditingController? textEditingController;
+  final CustomTextController? textEditingController;
 
   /// List of action widgets
   final List<Widget> actions;
@@ -366,10 +366,8 @@ class MessageInputState extends State<MessageInput> {
   int _filePickerIndex = 0;
 
   /// The editing controller passed to the input TextField
-  // late final TextEditingController textEditingController =
-  //     widget.textEditingController ?? TextEditingController();
   late final CustomTextController textEditingController =
-      CustomTextController();
+      widget.textEditingController ?? CustomTextController();
 
   late StreamChatThemeData _streamChatTheme;
   late MessageInputThemeData _messageInputTheme;
@@ -971,45 +969,6 @@ class MessageInputState extends State<MessageInput> {
 
     final attachmentLimitCrossed =
         _attachments.length >= widget.attachmentLimit;
-
-    // Color _getIconColor(int index) {
-    //   final streamChatThemeData = _streamChatTheme;
-    //   switch (index) {
-    //     case 0:
-    //       return _attachments.isEmpty
-    //           ? streamChatThemeData.colorTheme.accentPrimary
-    //           : (!_attachmentContainsFile
-    //               ? streamChatThemeData.colorTheme.accentPrimary
-    //               : streamChatThemeData.colorTheme.textHighEmphasis
-    //                   .withOpacity(0.2));
-    //     case 1:
-    //       return _attachmentContainsFile
-    //           ? streamChatThemeData.colorTheme.accentPrimary
-    //           : (_attachments.isEmpty
-    //               ? streamChatThemeData.colorTheme.textHighEmphasis
-    //                   .withOpacity(0.5)
-    //               : streamChatThemeData.colorTheme.textHighEmphasis
-    //                   .withOpacity(0.2));
-    //     case 2:
-    //       return attachmentLimitCrossed
-    //           ? streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(0.2)
-    //           : _attachmentContainsFile && _attachments.isNotEmpty
-    //               ? streamChatThemeData.colorTheme.textHighEmphasis
-    //                   .withOpacity(0.2)
-    //               : streamChatThemeData.colorTheme.textHighEmphasis
-    //                   .withOpacity(0.5);
-    //     case 3:
-    //       return attachmentLimitCrossed
-    //           ? streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(0.2)
-    //           : _attachmentContainsFile && _attachments.isNotEmpty
-    //               ? streamChatThemeData.colorTheme.textHighEmphasis
-    //                   .withOpacity(0.2)
-    //               : streamChatThemeData.colorTheme.textHighEmphasis
-    //                   .withOpacity(0.5);
-    //     default:
-    //       return Colors.black;
-    //   }
-    // }
 
     return AnimatedContainer(
       duration: _openFilePickerSection
