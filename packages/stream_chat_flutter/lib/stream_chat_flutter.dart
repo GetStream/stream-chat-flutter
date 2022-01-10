@@ -11,6 +11,7 @@ export 'src/channel_list_view.dart';
 export 'src/channel_name.dart';
 export 'src/channel_preview.dart';
 export 'src/connection_status_builder.dart';
+export 'src/custom_text_controller.dart';
 export 'src/date_divider.dart';
 export 'src/deleted_message.dart';
 export 'src/extension.dart' show IconButtonX;
