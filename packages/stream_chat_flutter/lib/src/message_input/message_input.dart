@@ -352,7 +352,7 @@ class MessageInput extends StatefulWidget {
 class MessageInputState extends State<MessageInput>
     with RestorationMixin<MessageInput> {
   final _imagePicker = ImagePicker();
-  late var _focusNode = widget.focusNode ?? FocusNode();
+  late FocusNode _focusNode = widget.focusNode ?? FocusNode();
   bool _inputEnabled = true;
   bool get _commandEnabled => _effectiveController.value.command != null;
   bool _showCommandsOverlay = false;
