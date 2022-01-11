@@ -352,7 +352,7 @@ class MessageInput extends StatefulWidget {
 class MessageInputState extends State<MessageInput>
     with RestorationMixin<MessageInput> {
   final _imagePicker = ImagePicker();
-  late final _focusNode = widget.focusNode ?? FocusNode();
+  late FocusNode _focusNode = widget.focusNode ?? FocusNode();
   bool _inputEnabled = true;
   bool get _commandEnabled => _effectiveController.value.command != null;
   bool _showCommandsOverlay = false;
@@ -398,11 +398,7 @@ class MessageInputState extends State<MessageInput>
     if (widget.messageInputController == null) {
       _createLocalController();
     } else {
-      _effectiveController.textEditingController
-          .removeListener(_onChangedDebounced);
-      _effectiveController.textEditingController
-          .addListener(_onChangedDebounced);
-      if (!_isEditing && _timeOut <= 0) _startSlowMode();
+      _initialiseEffectiveController();
     }
     _focusNode.addListener(_focusNodeListener);
   }
@@ -418,6 +414,14 @@ class MessageInputState extends State<MessageInput>
       unregisterFromRestoration(_controller!);
       _controller!.dispose();
       _controller = null;
+      _initialiseEffectiveController();
+    }
+
+    // Update _focusNode
+    if (widget.focusNode != null && oldWidget.focusNode != widget.focusNode) {
+      _focusNode.removeListener(_focusNodeListener);
+      _focusNode = widget.focusNode!;
+      _focusNode.addListener(_focusNodeListener);
     }
   }
 
@@ -439,6 +443,13 @@ class MessageInputState extends State<MessageInput>
 
   int _timeOut = 0;
   Timer? _slowModeTimer;
+
+  void _initialiseEffectiveController() {
+    _effectiveController.textEditingController
+        .removeListener(_onChangedDebounced);
+    _effectiveController.textEditingController.addListener(_onChangedDebounced);
+    if (!_isEditing && _timeOut <= 0) _startSlowMode();
+  }
 
   void _startSlowMode() {
     if (!mounted) {
