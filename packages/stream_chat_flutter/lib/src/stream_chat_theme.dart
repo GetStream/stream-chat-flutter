@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TextTheme;
 import 'package:stream_chat_flutter/src/channel_preview.dart';
 import 'package:stream_chat_flutter/src/gradient_avatar.dart';
-import 'package:stream_chat_flutter/src/message_input.dart';
+import 'package:stream_chat_flutter/src/message_input/message_input.dart';
 import 'package:stream_chat_flutter/src/reaction_icon.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -259,6 +259,7 @@ class StreamChatThemeData {
         sendButtonIdleColor: colorTheme.disabled,
         inputBackgroundColor: colorTheme.barsBg,
         inputTextStyle: textTheme.body,
+        linkHighlightColor: colorTheme.accentPrimary,
         idleBorderGradient: LinearGradient(
           colors: [
             colorTheme.disabled,

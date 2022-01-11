@@ -1,5 +1,11 @@
 ## Upcoming
 
+✅ Added
+
+- Added `client.enrichUrl` endpoint for enriching URLs with metadata.
+
+## 3.3.1
+
 🐞 Fixed
 
 - [[#799]](https://github.com/GetStream/stream-chat-flutter/issues/799) Fixed `totalUnreadCount` is not updating when

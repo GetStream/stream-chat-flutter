@@ -1,6 +1,6 @@
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/connection_status_builder.dart';
-import 'package:stream_chat_flutter/src/message_input.dart';
+import 'package:stream_chat_flutter/src/message_input/message_input.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/message_search_list_view.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart'
