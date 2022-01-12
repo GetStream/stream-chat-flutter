@@ -75,6 +75,7 @@ class MyApp extends StatelessWidget {
           Locale('es'),
           Locale('ja'),
           Locale('ko'),
+          Locale('pt'),
         ],
         // Add GlobalStreamChatLocalizations.delegates
         localizationsDelegates: GlobalStreamChatLocalizations.delegates,
