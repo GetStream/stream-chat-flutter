@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A value listenable builder related to a [Message].
 ///
@@ -17,33 +17,46 @@ class MessageInputController extends ValueNotifier<Message> {
   /// message.
   factory MessageInputController({
     Message? message,
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
   }) =>
       MessageInputController._(
         initialMessage: message ?? Message(),
+        textPatternStyle: textPatternStyle,
       );
 
   /// Creates a controller for an editable text field from an initial [text].
-  factory MessageInputController.fromText(String? text) =>
+  factory MessageInputController.fromText(
+    String? text, {
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
+  }) =>
       MessageInputController._(
         initialMessage: Message(text: text),
+        textPatternStyle: textPatternStyle,
       );
 
   /// Creates a controller for an editable text field from initial
   /// [attachments].
   factory MessageInputController.fromAttachments(
-    List<Attachment> attachments,
-  ) =>
+    List<Attachment> attachments, {
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
+  }) =>
       MessageInputController._(
         initialMessage: Message(attachments: attachments),
+        textPatternStyle: textPatternStyle,
       );
 
   MessageInputController._({
     required Message initialMessage,
-  })  : _textEditingController =
-            TextEditingController.fromValue(TextEditingValue(
-          text: initialMessage.text ?? '',
-          composing: TextRange.collapsed(initialMessage.text?.length ?? 0),
-        )),
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
+  })  : _textEditingController = MessageTextFieldController.fromValue(
+          initialMessage.text == null
+              ? const TextEditingValue()
+              : TextEditingValue(
+                  text: initialMessage.text!,
+                  composing: TextRange.collapsed(initialMessage.text!.length),
+                ),
+          textPatternStyle: textPatternStyle,
+        ),
         _initialMessage = initialMessage,
         super(initialMessage) {
     addListener(_textEditingSyncer);
@@ -52,10 +65,7 @@ class MessageInputController extends ValueNotifier<Message> {
   void _textEditingSyncer() {
     final cleanText = value.command == null
         ? value.text
-        : value.text?.replaceFirst(
-            '/${value.command} ',
-            '',
-          );
+        : value.text?.replaceFirst('/${value.command} ', '');
 
     if (cleanText != _textEditingController.text) {
       final previousOffset = _textEditingController.value.selection.start;
@@ -73,8 +83,9 @@ class MessageInputController extends ValueNotifier<Message> {
   Message get message => value;
 
   /// Returns the controller of the text field linked to this controller.
-  TextEditingController get textEditingController => _textEditingController;
-  final TextEditingController _textEditingController;
+  MessageTextFieldController get textEditingController =>
+      _textEditingController;
+  final MessageTextFieldController _textEditingController;
 
   /// Returns the text of the message.
   String get text => _textEditingController.text;
@@ -174,6 +185,30 @@ class MessageInputController extends ValueNotifier<Message> {
     attachments = [];
   }
 
+  // Only used to store the value locally in order to remove it if we call
+  // [clearOGAttachment] or [setOGAttachment] again.
+  Attachment? _ogAttachment;
+
+  /// Returns the og attachment of the message if set
+  Attachment? get ogAttachment =>
+      attachments.firstWhereOrNull((it) => it.id == _ogAttachment?.id);
+
+  /// Sets the og attachment in the message.
+  void setOGAttachment(Attachment attachment) {
+    attachments = [...attachments]
+      ..remove(_ogAttachment)
+      ..insert(0, attachment);
+    _ogAttachment = attachment;
+  }
+
+  /// Removes the og attachment.
+  void clearOGAttachment() {
+    if (_ogAttachment != null) {
+      removeAttachment(_ogAttachment!);
+    }
+    _ogAttachment = null;
+  }
+
   /// Returns the list of mentioned users in the message.
   List<User> get mentionedUsers => value.mentionedUsers;
 
@@ -220,9 +255,8 @@ class MessageInputController extends ValueNotifier<Message> {
   /// Sets the [value] to the initial [Message] value.
   void reset({bool resetId = true}) {
     if (resetId) {
-      _initialMessage = _initialMessage.copyWith(
-        id: const Uuid().v4(),
-      );
+      final newId = const Uuid().v4();
+      _initialMessage = _initialMessage.copyWith(id: newId);
     }
     value = _initialMessage;
   }

@@ -65,6 +65,7 @@ class MessageInputThemeData with Diagnosticable {
     this.idleBorderGradient,
     this.borderRadius,
     this.expandButtonColor,
+    this.linkHighlightColor,
   });
 
   /// Duration of the [MessageInput] send button animation
@@ -72,6 +73,9 @@ class MessageInputThemeData with Diagnosticable {
 
   /// Background color of [MessageInput] send button
   final Color? sendButtonColor;
+
+  /// Color of a link
+  final Color? linkHighlightColor;
 
   /// Background color of [MessageInput] action buttons
   final Color? actionButtonColor;
@@ -110,6 +114,7 @@ class MessageInputThemeData with Diagnosticable {
     Color? actionButtonColor,
     Color? sendButtonColor,
     Color? actionButtonIdleColor,
+    Color? linkHighlightColor,
     Color? sendButtonIdleColor,
     Color? expandButtonColor,
     TextStyle? inputTextStyle,
@@ -133,6 +138,7 @@ class MessageInputThemeData with Diagnosticable {
         activeBorderGradient: activeBorderGradient ?? this.activeBorderGradient,
         idleBorderGradient: idleBorderGradient ?? this.idleBorderGradient,
         borderRadius: borderRadius ?? this.borderRadius,
+        linkHighlightColor: linkHighlightColor ?? this.linkHighlightColor,
       );
 
   /// Linearly interpolate from one [MessageInputThemeData] to another.
@@ -161,6 +167,8 @@ class MessageInputThemeData with Diagnosticable {
             Color.lerp(a.sendButtonIdleColor, b.sendButtonIdleColor, t),
         sendAnimationDuration: a.sendAnimationDuration,
         inputDecoration: a.inputDecoration,
+        linkHighlightColor:
+            Color.lerp(a.linkHighlightColor, b.linkHighlightColor, t),
       );
 
   /// Merges [this] [MessageInputThemeData] with the [other]
@@ -181,6 +189,7 @@ class MessageInputThemeData with Diagnosticable {
       idleBorderGradient: other.idleBorderGradient,
       borderRadius: other.borderRadius,
       expandButtonColor: other.expandButtonColor,
+      linkHighlightColor: other.linkHighlightColor,
     );
   }
 
@@ -200,7 +209,8 @@ class MessageInputThemeData with Diagnosticable {
           inputDecoration == other.inputDecoration &&
           idleBorderGradient == other.idleBorderGradient &&
           activeBorderGradient == other.activeBorderGradient &&
-          borderRadius == other.borderRadius;
+          borderRadius == other.borderRadius &&
+          linkHighlightColor == other.linkHighlightColor;
 
   @override
   int get hashCode =>
@@ -215,7 +225,8 @@ class MessageInputThemeData with Diagnosticable {
       inputDecoration.hashCode ^
       idleBorderGradient.hashCode ^
       activeBorderGradient.hashCode ^
-      borderRadius.hashCode;
+      borderRadius.hashCode ^
+      linkHighlightColor.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -232,6 +243,7 @@ class MessageInputThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('activeBorderGradient', activeBorderGradient))
       ..add(DiagnosticsProperty('idleBorderGradient', idleBorderGradient))
       ..add(DiagnosticsProperty('borderRadius', borderRadius))
-      ..add(ColorProperty('expandButtonColor', expandButtonColor));
+      ..add(ColorProperty('expandButtonColor', expandButtonColor))
+      ..add(ColorProperty('linkHighlightColor', linkHighlightColor));
   }
 }

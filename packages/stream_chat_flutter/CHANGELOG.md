@@ -14,6 +14,10 @@
 
 - Videos can now be auto-played in `FullScreenMedia`
 
+🔄 Changed
+
+- Add `didUpdateWidget` override in `MessageInput` widget to handle changes to `focusNode`.
+
 ## 3.3.2
 
 - Updated `stream_chat_flutter_core` dependency to [`3.3.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).

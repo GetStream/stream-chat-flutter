@@ -13,6 +13,7 @@ import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/user_mentions_overlay.dart';
@@ -335,25 +336,15 @@ class MessageInput extends StatefulWidget {
 
   @override
   MessageInputState createState() => MessageInputState();
-
-  /// Use this method to get the current [StreamChatState] instance
-  static MessageInputState of(BuildContext context) {
-    MessageInputState? messageInputState;
-    messageInputState = context.findAncestorStateOfType<MessageInputState>();
-    assert(
-      messageInputState != null,
-      'You must have a MessageInput widget as ancestor of your widget tree',
-    );
-    return messageInputState!;
-  }
 }
 
 /// State of [MessageInput]
 class MessageInputState extends State<MessageInput>
     with RestorationMixin<MessageInput> {
   final _imagePicker = ImagePicker();
-  late final _focusNode = widget.focusNode ?? FocusNode();
+  late FocusNode _focusNode = widget.focusNode ?? FocusNode();
   bool _inputEnabled = true;
+
   bool get _commandEnabled => _effectiveController.value.command != null;
   bool _showCommandsOverlay = false;
   bool _showMentionsOverlay = false;
@@ -371,6 +362,7 @@ class MessageInputState extends State<MessageInput>
       _effectiveController.value.status != MessageSendingStatus.sending;
 
   RestorableMessageInputController? _controller;
+
   MessageInputController get _effectiveController =>
       widget.messageInputController ?? _controller!.value;
 
@@ -398,11 +390,7 @@ class MessageInputState extends State<MessageInput>
     if (widget.messageInputController == null) {
       _createLocalController();
     } else {
-      _effectiveController.textEditingController
-          .removeListener(_onChangedDebounced);
-      _effectiveController.textEditingController
-          .addListener(_onChangedDebounced);
-      if (!_isEditing && _timeOut <= 0) _startSlowMode();
+      _initialiseEffectiveController();
     }
     _focusNode.addListener(_focusNodeListener);
   }
@@ -418,6 +406,14 @@ class MessageInputState extends State<MessageInput>
       unregisterFromRestoration(_controller!);
       _controller!.dispose();
       _controller = null;
+      _initialiseEffectiveController();
+    }
+
+    // Update _focusNode
+    if (widget.focusNode != null && oldWidget.focusNode != widget.focusNode) {
+      _focusNode.removeListener(_focusNodeListener);
+      _focusNode = widget.focusNode!;
+      _focusNode.addListener(_focusNodeListener);
     }
   }
 
@@ -439,6 +435,13 @@ class MessageInputState extends State<MessageInput>
 
   int _timeOut = 0;
   Timer? _slowModeTimer;
+
+  void _initialiseEffectiveController() {
+    _effectiveController.textEditingController
+        .removeListener(_onChangedDebounced);
+    _effectiveController.textEditingController.addListener(_onChangedDebounced);
+    if (!_isEditing && _timeOut <= 0) _startSlowMode();
+  }
 
   void _startSlowMode() {
     if (!mounted) {
@@ -487,110 +490,119 @@ class MessageInputState extends State<MessageInput>
       );
     }
     return MessageValueListenableBuilder(
-      valueListenable: _effectiveController,
-      builder: (context, value, _) {
-        Widget child = DecoratedBox(
-          decoration: BoxDecoration(
-            color: _messageInputTheme.inputBackgroundColor,
-          ),
-          child: SafeArea(
-            child: GestureDetector(
-              onPanUpdate: (details) {
-                if (details.delta.dy > 0) {
-                  _focusNode.unfocus();
-                  if (_openFilePickerSection) {
-                    setState(() {
-                      _openFilePickerSection = false;
-                    });
+        valueListenable: _effectiveController,
+        builder: (context, value, _) {
+          Widget child = DecoratedBox(
+            decoration: BoxDecoration(
+              color: _messageInputTheme.inputBackgroundColor,
+            ),
+            child: SafeArea(
+              child: GestureDetector(
+                onPanUpdate: (details) {
+                  if (details.delta.dy > 0) {
+                    _focusNode.unfocus();
+                    if (_openFilePickerSection) {
+                      setState(() {
+                        _openFilePickerSection = false;
+                      });
+                    }
                   }
-                }
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (_hasQuotedMessage)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: StreamSvgIcon.reply(
-                              color: _streamChatTheme.colorTheme.disabled,
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_hasQuotedMessage)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: StreamSvgIcon.reply(
+                                color: _streamChatTheme.colorTheme.disabled,
+                              ),
                             ),
-                          ),
-                          Text(
-                            context.translations.replyToMessageLabel,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          IconButton(
-                            visualDensity: VisualDensity.compact,
-                            icon: StreamSvgIcon.closeSmall(),
-                            onPressed: () {
-                              _effectiveController.clearQuotedMessage();
-                              _focusNode.unfocus();
-                            },
-                          ),
-                        ],
+                            Text(
+                              context.translations.replyToMessageLabel,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            IconButton(
+                              visualDensity: VisualDensity.compact,
+                              icon: StreamSvgIcon.closeSmall(),
+                              onPressed: () {
+                                _effectiveController.clearQuotedMessage();
+                                _focusNode.unfocus();
+                              },
+                            ),
+                          ],
+                        ),
+                      )
+                    else if (_effectiveController.ogAttachment != null)
+                      OGAttachmentPreview(
+                        attachment: _effectiveController.ogAttachment!,
+                        onDismissPreviewPressed: () {
+                          _effectiveController.clearOGAttachment();
+                          _focusNode.unfocus();
+                        },
                       ),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: _buildTextField(context),
-                  ),
-                  if (_effectiveController.value.parentId != null &&
-                      !widget.hideSendAsDm)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        right: 12,
-                        left: 12,
-                        bottom: 12,
-                      ),
-                      child: _buildDmCheckbox(),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: _buildTextField(context),
                     ),
-                  _buildFilePickerSection(),
-                ],
+                    if (_effectiveController.value.parentId != null &&
+                        !widget.hideSendAsDm)
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          right: 12,
+                          left: 12,
+                          bottom: 12,
+                        ),
+                        child: _buildDmCheckbox(),
+                      ),
+                    _buildFilePickerSection(),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-        if (!_isEditing) {
-          child = Material(
-            elevation: 8,
+          );
+          if (!_isEditing) {
+            child = Material(
+              elevation: 8,
+              child: child,
+            );
+          }
+          return MultiOverlay(
+            childAnchor: Alignment.topCenter,
+            overlayAnchor: Alignment.bottomCenter,
+            overlayOptions: [
+              OverlayOptions(
+                visible: _showCommandsOverlay,
+                widget: _buildCommandsOverlayEntry(),
+              ),
+              OverlayOptions(
+                visible: _focusNode.hasFocus &&
+                    _effectiveController.text.isNotEmpty &&
+                    _effectiveController.baseOffset > 0 &&
+                    _effectiveController.text
+                        .substring(
+                          0,
+                          _effectiveController.baseOffset,
+                        )
+                        .contains(':'),
+                widget: _buildEmojiOverlay(),
+              ),
+              OverlayOptions(
+                visible: _showMentionsOverlay,
+                widget: _buildMentionsOverlayEntry(),
+              ),
+              ...widget.customOverlays,
+            ],
             child: child,
           );
-        }
-        return MultiOverlay(
-          childAnchor: Alignment.topCenter,
-          overlayAnchor: Alignment.bottomCenter,
-          overlayOptions: [
-            OverlayOptions(
-              visible: _showCommandsOverlay,
-              widget: _buildCommandsOverlayEntry(),
-            ),
-            OverlayOptions(
-              visible: _focusNode.hasFocus &&
-                  _effectiveController.text.isNotEmpty &&
-                  _effectiveController.baseOffset > 0 &&
-                  _effectiveController.text
-                      .substring(
-                        0,
-                        _effectiveController.baseOffset,
-                      )
-                      .contains(':'),
-              widget: _buildEmojiOverlay(),
-            ),
-            OverlayOptions(
-              visible: _showMentionsOverlay,
-              widget: _buildMentionsOverlayEntry(),
-            ),
-            ...widget.customOverlays,
-          ],
-          child: child,
-        );
-      },
-    );
+        },
+      );
   }
 
   Flex _buildTextField(BuildContext context) => Flex(
@@ -917,6 +929,7 @@ class MessageInputState extends State<MessageInput>
         _actionsShrunk = value.isNotEmpty && actionsLength > 1;
       });
 
+      _checkContainsUrl(value, context);
       _checkCommands(value, context);
       _checkMentions(value, context);
       _checkEmoji(value, context);
@@ -939,14 +952,75 @@ class MessageInputState extends State<MessageInput>
     return context.translations.writeAMessageLabel;
   }
 
-  void _checkEmoji(String s, BuildContext context) {
-    if (s.isNotEmpty &&
+  String? _lastSearchedContainsUrlText;
+  CancelableOperation? _enrichUrlOperation;
+  final _urlRegex = RegExp(
+    r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+',
+  );
+
+  void _checkContainsUrl(String value, BuildContext context) async {
+    // Cancel the previous operation if it's still running
+    _enrichUrlOperation?.cancel();
+
+    // If the text is same as the last time, don't do anything
+    if (_lastSearchedContainsUrlText == value) return;
+    _lastSearchedContainsUrlText = value;
+
+    final matchedUrls = _urlRegex.allMatches(value).toList()
+      ..removeWhere((it) => it.group(0)?.split('.').last.isValidTLD() == false);
+
+    // Reset the og attachment if the text doesn't contain any url
+    if (matchedUrls.isEmpty) {
+      _effectiveController
+        ..text = value
+        ..clearOGAttachment();
+      return;
+    }
+
+    final firstMatchedUrl = matchedUrls.first.group(0)!;
+
+    // If the parsed url matches the ogAttachment url, don't do anything
+    if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
+      return;
+    }
+
+    final client = StreamChat.of(context).client;
+
+    _enrichUrlOperation = CancelableOperation.fromFuture(
+      _enrichUrl(firstMatchedUrl, client),
+    ).then(
+      (ogAttachment) {
+        final attachment = Attachment.fromOGAttachment(ogAttachment);
+        _effectiveController.setOGAttachment(attachment);
+      },
+      onError: (error, stackTrace) {
+        // Reset the ogAttachment if there was an error
+        _effectiveController.clearOGAttachment();
+        widget.onError?.call(error, stackTrace);
+      },
+    );
+  }
+
+  final _ogAttachmentCache = <String, OGAttachmentResponse>{};
+
+  Future<OGAttachmentResponse> _enrichUrl(
+    String url,
+    StreamChatClient client,
+  ) async {
+    var response = _ogAttachmentCache[url];
+    if (response == null) {
+      final client = StreamChat.of(context).client;
+      response = await client.enrichUrl(url);
+      _ogAttachmentCache[url] = response;
+    }
+    return response;
+  }
+
+  void _checkEmoji(String value, BuildContext context) {
+    if (value.isNotEmpty &&
         _effectiveController.baseOffset > 0 &&
         _effectiveController.text
-            .substring(
-              0,
-              _effectiveController.baseOffset,
-            )
+            .substring(0, _effectiveController.baseOffset)
             .contains(':')) {
       final textToSelection = _effectiveController.text.substring(
         0,
@@ -962,14 +1036,11 @@ class MessageInputState extends State<MessageInput>
     }
   }
 
-  void _checkMentions(String s, BuildContext context) {
-    if (s.isNotEmpty &&
+  void _checkMentions(String value, BuildContext context) {
+    if (value.isNotEmpty &&
         _effectiveController.baseOffset > 0 &&
         _effectiveController.text
-            .substring(
-              0,
-              _effectiveController.baseOffset,
-            )
+            .substring(0, _effectiveController.baseOffset)
             .split(' ')
             .last
             .contains('@')) {
@@ -985,11 +1056,11 @@ class MessageInputState extends State<MessageInput>
     }
   }
 
-  void _checkCommands(String s, BuildContext context) {
-    if (s.startsWith('/')) {
+  void _checkCommands(String value, BuildContext context) {
+    if (value.startsWith('/')) {
       final allCommands = StreamChannel.of(context).channel.config?.commands;
       final command =
-          allCommands?.firstWhereOrNull((it) => it.name == s.substring(1));
+          allCommands?.firstWhereOrNull((it) => it.name == value.substring(1));
       if (command != null) {
         return _setCommand(command);
       } else if (!_showCommandsOverlay) {
@@ -1051,10 +1122,7 @@ class MessageInputState extends State<MessageInput>
     }
 
     final splits = _effectiveController.text
-        .substring(
-          0,
-          _effectiveController.selectionStart,
-        )
+        .substring(0, _effectiveController.selectionStart)
         .split('@');
     final query = splits.last.toLowerCase();
 
@@ -1103,10 +1171,7 @@ class MessageInputState extends State<MessageInput>
     }
 
     final splits = _effectiveController.text
-        .substring(
-          0,
-          _effectiveController.baseOffset,
-        )
+        .substring(0, _effectiveController.baseOffset)
         .split(':');
 
     final query = splits.last.toLowerCase();
@@ -1154,11 +1219,14 @@ class MessageInputState extends State<MessageInput>
   }
 
   Widget _buildAttachments() {
-    if (_effectiveController.attachments.isEmpty) return const Offstage();
-    final fileAttachments = _effectiveController.attachments
+    final nonOGAttachments = _effectiveController.attachments.where(
+      (it) => it.titleLink == null,
+    );
+    if (nonOGAttachments.isEmpty) return const Offstage();
+    final fileAttachments = nonOGAttachments
         .where((it) => it.type == 'file')
         .toList(growable: false);
-    final remainingAttachments = _effectiveController.attachments
+    final remainingAttachments = nonOGAttachments
         .where((it) => it.type != 'file')
         .toList(growable: false);
     return Column(
@@ -1243,11 +1311,7 @@ class MessageInputState extends State<MessageInput>
           focusElevation: 0,
           hoverElevation: 0,
           onPressed: () {
-            _effectiveController.value = _effectiveController.value.copyWith(
-              attachments: _effectiveController.attachments
-                  .where((it) => it.id != attachment.id)
-                  .toList(),
-            );
+            _effectiveController.removeAttachmentById(attachment.id);
           },
           fillColor:
               _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
@@ -1449,14 +1513,6 @@ class MessageInputState extends State<MessageInput>
     }
   }
 
-  /// Add an attachment to the sending message
-  /// Use this to add custom type attachments
-  ///
-  /// Note: Only meant to be used from outside the state.
-  void addAttachment(Attachment attachment) {
-    _addAttachments([attachment]);
-  }
-
   /// Adds an attachment to the [messageInputController.attachments] map
   void _addAttachments(Iterable<Attachment> attachments) {
     final limit = widget.attachmentLimit;
@@ -1591,6 +1647,8 @@ class MessageInputState extends State<MessageInput>
 
   /// Sends the current message
   Future<void> sendMessage() async {
+    final skipEnrichUrl = _effectiveController.ogAttachment == null;
+
     var message = _effectiveController.value;
 
     var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
@@ -1611,10 +1669,16 @@ class MessageInputState extends State<MessageInput>
 
     try {
       Future sendingFuture;
-      if (!_isEditing) {
-        sendingFuture = channel.sendMessage(message);
+      if (_isEditing) {
+        sendingFuture = channel.updateMessage(
+          message,
+          skipEnrichUrl: skipEnrichUrl,
+        );
       } else {
-        sendingFuture = channel.updateMessage(message);
+        sendingFuture = channel.sendMessage(
+          message,
+          skipEnrichUrl: skipEnrichUrl,
+        );
       }
 
       if (shouldKeepFocus) {
@@ -1721,5 +1785,80 @@ class MessageInputState extends State<MessageInput>
     _messageInputTheme = MessageInputTheme.of(context);
 
     super.didChangeDependencies();
+  }
+}
+
+/// Preview of an Open Graph attachment.
+class OGAttachmentPreview extends StatelessWidget {
+  /// Returns a new instance of [OGAttachmentPreview]
+  const OGAttachmentPreview({
+    Key? key,
+    required this.attachment,
+    this.onDismissPreviewPressed,
+  }) : super(key: key);
+
+  /// The attachment to be rendered.
+  final Attachment attachment;
+
+  /// Called when the dismiss button is pressed.
+  final VoidCallback? onDismissPreviewPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final chatTheme = StreamChatTheme.of(context);
+    final textTheme = chatTheme.textTheme;
+    final colorTheme = chatTheme.colorTheme;
+
+    final attachmentTitle = attachment.title;
+    final attachmentText = attachment.text;
+
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            Icons.link,
+            color: colorTheme.accentPrimary,
+          ),
+        ),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(
+                  color: colorTheme.accentPrimary,
+                  width: 2,
+                ),
+              ),
+            ),
+            padding: const EdgeInsets.only(left: 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (attachmentTitle != null)
+                  Text(
+                    attachmentTitle.trim(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.body.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                if (attachmentText != null)
+                  Text(
+                    attachmentText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.body.copyWith(fontWeight: FontWeight.w400),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          icon: StreamSvgIcon.closeSmall(),
+          onPressed: onDismissPreviewPressed,
+        ),
+      ],
+    );
   }
 }
