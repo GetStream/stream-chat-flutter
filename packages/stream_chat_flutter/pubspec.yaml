@@ -23,7 +23,7 @@ dependencies:
   flutter_markdown: ^0.6.1
   flutter_portal: ^0.4.0
   flutter_slidable: ^0.6.0
-  flutter_svg: ^0.23.0+1
+  flutter_svg: ^1.0.1
   http_parser: ^4.0.0
   image_gallery_saver: ^1.7.0
   image_picker: ^0.8.2
