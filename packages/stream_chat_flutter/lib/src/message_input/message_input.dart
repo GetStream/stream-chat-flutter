@@ -490,119 +490,118 @@ class MessageInputState extends State<MessageInput>
       );
     }
     return MessageValueListenableBuilder(
-        valueListenable: _effectiveController,
-        builder: (context, value, _) {
-          Widget child = DecoratedBox(
-            decoration: BoxDecoration(
-              color: _messageInputTheme.inputBackgroundColor,
-            ),
-            child: SafeArea(
-              child: GestureDetector(
-                onPanUpdate: (details) {
-                  if (details.delta.dy > 0) {
-                    _focusNode.unfocus();
-                    if (_openFilePickerSection) {
-                      setState(() {
-                        _openFilePickerSection = false;
-                      });
-                    }
+      valueListenable: _effectiveController,
+      builder: (context, value, _) {
+        Widget child = DecoratedBox(
+          decoration: BoxDecoration(
+            color: _messageInputTheme.inputBackgroundColor,
+          ),
+          child: SafeArea(
+            child: GestureDetector(
+              onPanUpdate: (details) {
+                if (details.delta.dy > 0) {
+                  _focusNode.unfocus();
+                  if (_openFilePickerSection) {
+                    setState(() {
+                      _openFilePickerSection = false;
+                    });
                   }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (_hasQuotedMessage)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: StreamSvgIcon.reply(
-                                color: _streamChatTheme.colorTheme.disabled,
-                              ),
-                            ),
-                            Text(
-                              context.translations.replyToMessageLabel,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            IconButton(
-                              visualDensity: VisualDensity.compact,
-                              icon: StreamSvgIcon.closeSmall(),
-                              onPressed: () {
-                                _effectiveController.clearQuotedMessage();
-                                _focusNode.unfocus();
-                              },
-                            ),
-                          ],
-                        ),
-                      )
-                    else if (_effectiveController.ogAttachment != null)
-                      OGAttachmentPreview(
-                        attachment: _effectiveController.ogAttachment!,
-                        onDismissPreviewPressed: () {
-                          _effectiveController.clearOGAttachment();
-                          _focusNode.unfocus();
-                        },
-                      ),
+                }
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_hasQuotedMessage)
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: _buildTextField(context),
-                    ),
-                    if (_effectiveController.value.parentId != null &&
-                        !widget.hideSendAsDm)
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          right: 12,
-                          left: 12,
-                          bottom: 12,
-                        ),
-                        child: _buildDmCheckbox(),
+                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: StreamSvgIcon.reply(
+                              color: _streamChatTheme.colorTheme.disabled,
+                            ),
+                          ),
+                          Text(
+                            context.translations.replyToMessageLabel,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            icon: StreamSvgIcon.closeSmall(),
+                            onPressed: () {
+                              _effectiveController.clearQuotedMessage();
+                              _focusNode.unfocus();
+                            },
+                          ),
+                        ],
                       ),
-                    _buildFilePickerSection(),
-                  ],
-                ),
+                    )
+                  else if (_effectiveController.ogAttachment != null)
+                    OGAttachmentPreview(
+                      attachment: _effectiveController.ogAttachment!,
+                      onDismissPreviewPressed: () {
+                        _effectiveController.clearOGAttachment();
+                        _focusNode.unfocus();
+                      },
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: _buildTextField(context),
+                  ),
+                  if (_effectiveController.value.parentId != null &&
+                      !widget.hideSendAsDm)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        right: 12,
+                        left: 12,
+                        bottom: 12,
+                      ),
+                      child: _buildDmCheckbox(),
+                    ),
+                  _buildFilePickerSection(),
+                ],
               ),
             ),
-          );
-          if (!_isEditing) {
-            child = Material(
-              elevation: 8,
-              child: child,
-            );
-          }
-          return MultiOverlay(
-            childAnchor: Alignment.topCenter,
-            overlayAnchor: Alignment.bottomCenter,
-            overlayOptions: [
-              OverlayOptions(
-                visible: _showCommandsOverlay,
-                widget: _buildCommandsOverlayEntry(),
-              ),
-              OverlayOptions(
-                visible: _focusNode.hasFocus &&
-                    _effectiveController.text.isNotEmpty &&
-                    _effectiveController.baseOffset > 0 &&
-                    _effectiveController.text
-                        .substring(
-                          0,
-                          _effectiveController.baseOffset,
-                        )
-                        .contains(':'),
-                widget: _buildEmojiOverlay(),
-              ),
-              OverlayOptions(
-                visible: _showMentionsOverlay,
-                widget: _buildMentionsOverlayEntry(),
-              ),
-              ...widget.customOverlays,
-            ],
+          ),
+        );
+        if (!_isEditing) {
+          child = Material(
+            elevation: 8,
             child: child,
           );
-        },
-      );
+        }
+        return MultiOverlay(
+          childAnchor: Alignment.topCenter,
+          overlayAnchor: Alignment.bottomCenter,
+          overlayOptions: [
+            OverlayOptions(
+              visible: _showCommandsOverlay,
+              widget: _buildCommandsOverlayEntry(),
+            ),
+            OverlayOptions(
+              visible: _focusNode.hasFocus &&
+                  _effectiveController.text.isNotEmpty &&
+                  _effectiveController.baseOffset > 0 &&
+                  _effectiveController.text
+                      .substring(
+                        0,
+                        _effectiveController.baseOffset,
+                      )
+                      .contains(':'),
+              widget: _buildEmojiOverlay(),
+            ),
+            OverlayOptions(
+              visible: _showMentionsOverlay,
+              widget: _buildMentionsOverlayEntry(),
+            ),
+            ...widget.customOverlays,
+          ],
+          child: child,
+        );
+      },
+    );
   }
 
   Flex _buildTextField(BuildContext context) => Flex(
