@@ -198,11 +198,11 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                     MessageSendingStatus.sent))
                           _buildReplyButton(context),
                         if (widget.showThreadReplyMessage ??
-                                _userPermissions
+                            _userPermissions
                                     .contains(PermissionType.sendReply) &&
-                            (widget.message.status ==
-                                MessageSendingStatus.sent) &&
-                            widget.message.parentId == null)
+                                (widget.message.status ==
+                                    MessageSendingStatus.sent) &&
+                                widget.message.parentId == null)
                           _buildThreadReplyButton(context),
                         if (widget.showResendMessage)
                           _buildResendMessage(context),
