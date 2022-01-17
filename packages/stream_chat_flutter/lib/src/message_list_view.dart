@@ -2,20 +2,12 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/info_tile.dart';
-import 'package:stream_chat_flutter/src/message_widget.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/swipeable.dart';
-import 'package:stream_chat_flutter/src/system_message.dart';
-import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 /// Widget builder for message
@@ -184,8 +176,7 @@ class MessageListView extends StatefulWidget {
     this.threadBuilder,
     this.onThreadTap,
     this.dateDividerBuilder,
-    this.scrollPhysics =
-        const ClampingScrollPhysics(), // we need to use ClampingScrollPhysics to avoid the list view to animate and break while loading
+    this.scrollBehavior = const StreamChatScrollBehaviour(),
     this.initialScrollIndex,
     this.initialAlignment,
     this.scrollController,
@@ -210,16 +201,20 @@ class MessageListView extends StatefulWidget {
     this.messageListController,
     this.reverse = true,
     this.paginationLimit = 20,
+    this.artificialDelayBeforePaginate = const Duration(milliseconds: 500),
     this.paginationLoadingIndicatorBuilder,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
     this.spacingWidgetBuilder,
+    this.scrollOffset = 0,
+    this.scrollToDuration = const Duration(milliseconds: 750),
+    this.scrollToCurve = Curves.easeInOut,
   }) : super(key: key);
 
   /// [ScrollViewKeyboardDismissBehavior] the defines how this [PositionedList] will
   /// dismiss the keyboard automatically.
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
-  /// Function used to build a custom message widget
+  /// Function used to build a custom message widget.
   final MessageBuilder? messageBuilder;
 
   /// Whether the view scrolls in the reading direction.
@@ -229,31 +224,40 @@ class MessageListView extends StatefulWidget {
   /// See [ScrollView.reverse].
   final bool reverse;
 
-  /// Limit used during pagination
+  /// Limit used during pagination.
   final int paginationLimit;
 
-  /// Function used to build a custom system message widget
+  /// Forces a delay before loading/paginating more messages. This is used
+  /// to ensure a loading indicator is displayed for a certain amount of time
+  /// before paginating.
+  ///
+  /// If null, then no delay will be applied. Default is
+  /// `Duration(milliseconds: 500)`
+  final Duration? artificialDelayBeforePaginate;
+
+  /// Function used to build a custom system message widget.
   final SystemMessageBuilder? systemMessageBuilder;
 
-  /// Function used to build a custom parent message widget
+  /// Function used to build a custom parent message widget.
   final ParentMessageBuilder? parentMessageBuilder;
 
-  /// Function used to build a custom thread widget
+  /// Function used to build a custom thread widget.
   final ThreadBuilder? threadBuilder;
 
-  /// Function called when tapping on a thread
+  /// Function called when tapping on a thread.
+  ///
   /// By default it calls [Navigator.push] using the widget
-  /// built using [threadBuilder]
+  /// built using [threadBuilder].
   final ThreadTapCallback? onThreadTap;
 
   /// If true will show a scroll to bottom message when there are new
-  /// messages and the scroll offset is not zero
+  /// messages and the scroll offset is not zero.
   final bool showScrollToBottom;
 
-  /// Parent message in case of a thread
+  /// Parent message in case of a thread.
   final Message? parentMessage;
 
-  /// Builder used to render date dividers
+  /// Builder used to render date dividers.
   final Widget Function(DateTime)? dateDividerBuilder;
 
   /// Index of an item to initially align within the viewport.
@@ -270,10 +274,10 @@ class MessageListView extends StatefulWidget {
   /// screen and their locations.
   final ItemPositionsListener? itemPositionListener;
 
-  /// The ScrollPhysics used by the ListView
-  final ScrollPhysics? scrollPhysics;
+  /// The [ScrollBehaviour] used by the ListView.
+  final ScrollBehavior scrollBehavior;
 
-  /// Called when message item gets swiped
+  /// Called when message item gets swiped.
   final OnMessageSwiped? onMessageSwiped;
 
   /// If true the list will highlight the initialMessage if there is any.
@@ -281,51 +285,51 @@ class MessageListView extends StatefulWidget {
   /// Also See [StreamChannel]
   final bool highlightInitialMessage;
 
-  /// Color used while highlighting initial message
+  /// Color used while highlighting initial message.
   final Color? messageHighlightColor;
 
-  /// Flag for showing tile on header
+  /// Flag for showing tile on header.
   final bool showConnectionStateTile;
 
-  /// Flag for showing the floating date divider
+  /// Flag for showing the floating date divider.
   final bool showFloatingDateDivider;
 
-  /// Function called when messages are fetched
+  /// Function called when messages are fetched.
   final Widget Function(BuildContext, List<Message>)? messageListBuilder;
 
-  /// Function used to build a header widget
+  /// Function used to build a header widget.
   final WidgetBuilder? headerBuilder;
 
-  /// Function used to build a footer widget
+  /// Function used to build a footer widget.
   final WidgetBuilder? footerBuilder;
 
-  /// Function used to build a loading widget
+  /// Function used to build a loading widget.
   final WidgetBuilder? loadingBuilder;
 
-  /// Function used to build an empty widget
+  /// Function used to build an empty widget.
   final WidgetBuilder? emptyBuilder;
 
   /// Callback triggered when an error occurs while performing the
   /// given request.
+  ///
   /// This parameter can be used to display an error message to
-  /// users in the event
-  /// of a connection failure.
+  /// users in the event of a connection failure.
   final ErrorBuilder? errorBuilder;
 
-  /// Predicate used to filter messages
+  /// Predicate used to filter messages.
   final bool Function(Message)? messageFilter;
 
   /// Called when any message is tapped except a system message
   /// (use [onSystemMessageTap] instead)
   final OnMessageTap? onMessageTap;
 
-  /// Called when system message is tapped
+  /// Called when system message is tapped.
   final OnMessageTap? onSystemMessageTap;
 
-  /// A List of user types that have permission to pin messages
+  /// A List of user types that have permission to pin messages.
   final List<String> pinPermissions;
 
-  /// Builder used to build the thread separator in case it's a thread view
+  /// Builder used to build the thread separator in case it's a thread view.
   final WidgetBuilder? threadSeparatorBuilder;
 
   /// A [MessageListController] allows pagination.
@@ -335,11 +339,23 @@ class MessageListView extends StatefulWidget {
   /// Builder used to build the loading indicator shown while paginating.
   final WidgetBuilder? paginationLoadingIndicatorBuilder;
 
-  /// This allows a user to customise the space after a message
+  /// This allows a user to customise the space after a message.
+  ///
   /// A List of [SpacingType] is provided to provide more data about the
   /// type of message (thread, difference in time between current and last
   /// message, default spacing, etc)
   final SpacingWidgetBuilder? spacingWidgetBuilder;
+
+  /// The offset to take into account when triggering [onEndOfPage]/[onStartOfPage] in pixels.
+  final double scrollOffset;
+
+  /// The [Duration] used in `scrollController.scrollTo`, when jumping to a
+  /// specific message, or to the bottom of the list.
+  final Duration scrollToDuration;
+
+  /// The [Curve] used in `scrollController.scrollTo`, when jumping to a
+  /// specific message, or to the bottom of the list.
+  final Curve scrollToCurve;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -407,6 +423,7 @@ class _MessageListViewState extends State<MessageListView> {
   @override
   Widget build(BuildContext context) => MessageListCore(
         paginationLimit: widget.paginationLimit,
+        artificialDelayBeforePaginate: widget.artificialDelayBeforePaginate,
         messageFilter: widget.messageFilter,
         loadingBuilder: widget.loadingBuilder ??
             (context) => const Center(
@@ -495,6 +512,7 @@ class _MessageListViewState extends State<MessageListView> {
               childAnchor: Alignment.topCenter,
               message: statusString,
               child: LazyLoadScrollView(
+                scrollOffset: widget.scrollOffset,
                 onStartOfPage: () async {
                   _inBetweenList = false;
                   if (!_upToDate) {
@@ -516,205 +534,209 @@ class _MessageListViewState extends State<MessageListView> {
                 onInBetweenOfPage: () {
                   _inBetweenList = true;
                 },
-                child: ScrollablePositionedList.separated(
-                  key: (initialIndex != 0 && initialAlignment != 0)
-                      ? ValueKey('$initialIndex-$initialAlignment')
-                      : null,
-                  keyboardDismissBehavior: widget.keyboardDismissBehavior,
-                  itemPositionsListener: _itemPositionListener,
-                  initialScrollIndex: initialIndex,
-                  initialAlignment: initialAlignment,
-                  physics: widget.scrollPhysics,
-                  itemScrollController: _scrollController,
-                  reverse: widget.reverse,
-                  itemCount: itemCount,
-                  findChildIndexCallback: (Key key) {
-                    final indexedKey = key as IndexedKey;
-                    final valueKey = indexedKey.key as ValueKey<String>?;
-                    if (valueKey != null) {
-                      final index = messagesIndex[valueKey.value];
-                      if (index != null) {
-                        return ((index + 2) * 2) - 1;
+                child: ScrollConfiguration(
+                  behavior: widget.scrollBehavior,
+                  child: ScrollablePositionedList.separated(
+                    key: (initialIndex != 0 && initialAlignment != 0)
+                        ? ValueKey('$initialIndex-$initialAlignment')
+                        : null,
+                    keyboardDismissBehavior: widget.keyboardDismissBehavior,
+                    itemPositionsListener: _itemPositionListener,
+                    initialScrollIndex: initialIndex,
+                    initialAlignment: initialAlignment,
+                    itemScrollController: _scrollController,
+                    reverse: widget.reverse,
+                    itemCount: itemCount,
+                    findChildIndexCallback: (Key key) {
+                      final indexedKey = key as IndexedKey;
+                      final valueKey = indexedKey.key as ValueKey<String>?;
+                      if (valueKey != null) {
+                        final index = messagesIndex[valueKey.value];
+                        if (index != null) {
+                          return ((index + 2) * 2) - 1;
+                        }
                       }
-                    }
-                  },
+                    },
 
-                  // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
-                  // eg:     |Type|         rev(|Index(item)|)     rev(|Index(separator)|)    |Index(item)|    |Index(separator)|
-                  //     ParentMessage  ->        7                                             (count-1)
-                  //        Separator(ThreadSeparator)          ->           6                                      (count-2)
-                  //     Header         ->        6                                             (count-2)
-                  //        Separator(Header -> 8??T -> 0||52)  ->           5                                      (count-3)
-                  //     TopLoader      ->        5                                             (count-3)
-                  //        Separator(0)                        ->           4                                      (count-4)
-                  //     Message        ->        4                                             (count-4)
-                  //        Separator(2||8)                     ->           3                                      (count-5)
-                  //     Message        ->        3                                             (count-5)
-                  //        Separator(2||8)                     ->           2                                      (count-6)
-                  //     Message        ->        2                                             (count-6)
-                  //        Separator(0)                        ->           1                                      (count-7)
-                  //     BottomLoader   ->        1                                             (count-7)
-                  //        Separator(Footer -> 8??30)          ->           0                                      (count-8)
-                  //     Footer         ->        0                                             (count-8)
+                    // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
+                    // eg:     |Type|         rev(|Index(item)|)     rev(|Index(separator)|)    |Index(item)|    |Index(separator)|
+                    //     ParentMessage  ->        7                                             (count-1)
+                    //        Separator(ThreadSeparator)          ->           6                                      (count-2)
+                    //     Header         ->        6                                             (count-2)
+                    //        Separator(Header -> 8??T -> 0||52)  ->           5                                      (count-3)
+                    //     TopLoader      ->        5                                             (count-3)
+                    //        Separator(0)                        ->           4                                      (count-4)
+                    //     Message        ->        4                                             (count-4)
+                    //        Separator(2||8)                     ->           3                                      (count-5)
+                    //     Message        ->        3                                             (count-5)
+                    //        Separator(2||8)                     ->           2                                      (count-6)
+                    //     Message        ->        2                                             (count-6)
+                    //        Separator(0)                        ->           1                                      (count-7)
+                    //     BottomLoader   ->        1                                             (count-7)
+                    //        Separator(Footer -> 8??30)          ->           0                                      (count-8)
+                    //     Footer         ->        0                                             (count-8)
 
-                  separatorBuilder: (context, i) {
-                    if (i == itemCount - 2) {
-                      if (widget.parentMessage == null) {
-                        return const Offstage();
+                    separatorBuilder: (context, i) {
+                      if (i == itemCount - 2) {
+                        if (widget.parentMessage == null) {
+                          return const Offstage();
+                        }
+                        return _buildThreadSeparator();
                       }
-                      return _buildThreadSeparator();
-                    }
-                    if (i == itemCount - 3) {
-                      if (widget.reverse
-                          ? widget.headerBuilder == null
-                          : widget.footerBuilder == null) {
-                        if (_isThreadConversation) return const Offstage();
-                        return const SizedBox(height: 52);
+                      if (i == itemCount - 3) {
+                        if (widget.reverse
+                            ? widget.headerBuilder == null
+                            : widget.footerBuilder == null) {
+                          if (_isThreadConversation) return const Offstage();
+                          return const SizedBox(height: 52);
+                        }
+                        return const SizedBox(height: 8);
                       }
-                      return const SizedBox(height: 8);
-                    }
-                    if (i == 0) {
-                      if (widget.reverse
-                          ? widget.footerBuilder == null
-                          : widget.headerBuilder == null) {
-                        return const SizedBox(height: 30);
+                      if (i == 0) {
+                        if (widget.reverse
+                            ? widget.footerBuilder == null
+                            : widget.headerBuilder == null) {
+                          return const SizedBox(height: 30);
+                        }
+                        return const SizedBox(height: 8);
                       }
-                      return const SizedBox(height: 8);
-                    }
 
-                    if (i == 1 || i == itemCount - 4) return const Offstage();
+                      if (i == 1 || i == itemCount - 4) return const Offstage();
 
-                    late final Message message, nextMessage;
-                    if (widget.reverse) {
-                      message = messages[i - 1];
-                      nextMessage = messages[i - 2];
-                    } else {
-                      message = messages[i - 2];
-                      nextMessage = messages[i - 1];
-                    }
-                    if (!Jiffy(message.createdAt.toLocal()).isSame(
-                      nextMessage.createdAt.toLocal(),
-                      Units.DAY,
-                    )) {
-                      final divider = widget.dateDividerBuilder != null
-                          ? widget.dateDividerBuilder!(
-                              nextMessage.createdAt.toLocal(),
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: DateDivider(
-                                dateTime: nextMessage.createdAt.toLocal(),
-                              ),
-                            );
-                      return divider;
-                    }
-                    final timeDiff =
-                        Jiffy(nextMessage.createdAt.toLocal()).diff(
-                      message.createdAt.toLocal(),
-                      Units.MINUTE,
-                    );
+                      late final Message message, nextMessage;
+                      if (widget.reverse) {
+                        message = messages[i - 1];
+                        nextMessage = messages[i - 2];
+                      } else {
+                        message = messages[i - 2];
+                        nextMessage = messages[i - 1];
+                      }
+                      if (!Jiffy(message.createdAt.toLocal()).isSame(
+                        nextMessage.createdAt.toLocal(),
+                        Units.DAY,
+                      )) {
+                        final divider = widget.dateDividerBuilder != null
+                            ? widget.dateDividerBuilder!(
+                                nextMessage.createdAt.toLocal(),
+                              )
+                            : Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                child: DateDivider(
+                                  dateTime: nextMessage.createdAt.toLocal(),
+                                ),
+                              );
+                        return divider;
+                      }
+                      final timeDiff =
+                          Jiffy(nextMessage.createdAt.toLocal()).diff(
+                        message.createdAt.toLocal(),
+                        Units.MINUTE,
+                      );
 
-                    final spacingRules = <SpacingType>[];
+                      final spacingRules = <SpacingType>[];
 
-                    final isNextUserSame =
-                        message.user!.id == nextMessage.user?.id;
-                    final isThread = message.replyCount! > 0;
-                    final isDeleted = message.isDeleted;
-                    final hasTimeDiff = timeDiff >= 1;
+                      final isNextUserSame =
+                          message.user!.id == nextMessage.user?.id;
+                      final isThread = message.replyCount! > 0;
+                      final isDeleted = message.isDeleted;
+                      final hasTimeDiff = timeDiff >= 1;
 
-                    if (hasTimeDiff) {
-                      spacingRules.add(SpacingType.timeDiff);
-                    }
+                      if (hasTimeDiff) {
+                        spacingRules.add(SpacingType.timeDiff);
+                      }
 
-                    if (!isNextUserSame) {
-                      spacingRules.add(SpacingType.otherUser);
-                    }
+                      if (!isNextUserSame) {
+                        spacingRules.add(SpacingType.otherUser);
+                      }
 
-                    if (isThread) {
-                      spacingRules.add(SpacingType.thread);
-                    }
+                      if (isThread) {
+                        spacingRules.add(SpacingType.thread);
+                      }
 
-                    if (isDeleted) {
-                      spacingRules.add(SpacingType.deleted);
-                    }
+                      if (isDeleted) {
+                        spacingRules.add(SpacingType.deleted);
+                      }
 
-                    if (spacingRules.isNotEmpty) {
+                      if (spacingRules.isNotEmpty) {
+                        return widget.spacingWidgetBuilder
+                                ?.call(context, spacingRules) ??
+                            const SizedBox(height: 8);
+                      }
                       return widget.spacingWidgetBuilder
-                              ?.call(context, spacingRules) ??
-                          const SizedBox(height: 8);
-                    }
-                    return widget.spacingWidgetBuilder
-                            ?.call(context, [SpacingType.defaultSpacing]) ??
-                        const SizedBox(height: 2);
-                  },
-                  itemBuilder: (context, i) {
-                    if (i == itemCount - 1) {
-                      if (widget.parentMessage == null) {
-                        return const Offstage();
+                              ?.call(context, [SpacingType.defaultSpacing]) ??
+                          const SizedBox(height: 2);
+                    },
+                    itemBuilder: (context, i) {
+                      if (i == itemCount - 1) {
+                        if (widget.parentMessage == null) {
+                          return const Offstage();
+                        }
+                        return buildParentMessage(widget.parentMessage!);
                       }
-                      return buildParentMessage(widget.parentMessage!);
-                    }
 
-                    if (i == itemCount - 2) {
-                      if (widget.reverse) {
-                        return widget.headerBuilder?.call(context) ??
-                            const Offstage();
+                      if (i == itemCount - 2) {
+                        if (widget.reverse) {
+                          return widget.headerBuilder?.call(context) ??
+                              const Offstage();
+                        } else {
+                          return widget.footerBuilder?.call(context) ??
+                              const Offstage();
+                        }
+                      }
+
+                      final indicatorBuilder =
+                          widget.paginationLoadingIndicatorBuilder;
+
+                      if (i == itemCount - 3) {
+                        return _loadingIndicator(
+                          streamChannel!,
+                          QueryDirection.top,
+                          indicatorBuilder: indicatorBuilder,
+                        );
+                      }
+
+                      if (i == 1) {
+                        return _loadingIndicator(
+                          streamChannel!,
+                          QueryDirection.bottom,
+                          indicatorBuilder: indicatorBuilder,
+                        );
+                      }
+
+                      if (i == 0) {
+                        if (widget.reverse) {
+                          return widget.footerBuilder?.call(context) ??
+                              const Offstage();
+                        } else {
+                          return widget.headerBuilder?.call(context) ??
+                              const Offstage();
+                        }
+                      }
+
+                      const bottomMessageIndex =
+                          2; // 1 -> loader // 0 -> footer
+
+                      final message = messages[i - 2];
+                      Widget messageWidget;
+
+                      if (i == bottomMessageIndex) {
+                        messageWidget = _buildBottomMessage(
+                          context,
+                          message,
+                          messages,
+                          streamChannel!,
+                          i - 2,
+                        );
                       } else {
-                        return widget.footerBuilder?.call(context) ??
-                            const Offstage();
+                        messageWidget = buildMessage(message, messages, i - 2);
                       }
-                    }
-
-                    final indicatorBuilder =
-                        widget.paginationLoadingIndicatorBuilder;
-
-                    if (i == itemCount - 3) {
-                      return _loadingIndicator(
-                        streamChannel!,
-                        QueryDirection.top,
-                        indicatorBuilder: indicatorBuilder,
+                      return KeyedSubtree(
+                        key: ValueKey(message.id),
+                        child: messageWidget,
                       );
-                    }
-
-                    if (i == 1) {
-                      return _loadingIndicator(
-                        streamChannel!,
-                        QueryDirection.bottom,
-                        indicatorBuilder: indicatorBuilder,
-                      );
-                    }
-
-                    if (i == 0) {
-                      if (widget.reverse) {
-                        return widget.footerBuilder?.call(context) ??
-                            const Offstage();
-                      } else {
-                        return widget.headerBuilder?.call(context) ??
-                            const Offstage();
-                      }
-                    }
-
-                    const bottomMessageIndex = 2; // 1 -> loader // 0 -> footer
-
-                    final message = messages[i - 2];
-                    Widget messageWidget;
-
-                    if (i == bottomMessageIndex) {
-                      messageWidget = _buildBottomMessage(
-                        context,
-                        message,
-                        messages,
-                        streamChannel!,
-                        i - 2,
-                      );
-                    } else {
-                      messageWidget = buildMessage(message, messages, i - 2);
-                    }
-                    return KeyedSubtree(
-                      key: ValueKey(message.id),
-                      child: messageWidget,
-                    );
-                  },
+                    },
+                  ),
                 ),
               ),
             );
@@ -893,8 +915,8 @@ class _MessageListViewState extends State<MessageListView> {
                       _showScrollToBottom.value = false;
                       _scrollController!.scrollTo(
                         index: 0,
-                        duration: const Duration(seconds: 1),
-                        curve: Curves.easeInOut,
+                        duration: widget.scrollToDuration,
+                        curve: widget.scrollToCurve,
                       );
                     }
                   },
@@ -1135,8 +1157,8 @@ class _MessageListViewState extends State<MessageListView> {
           final index = messages.indexWhere((m) => m.id == quotedMessageId);
           _scrollController?.scrollTo(
             index: index + 2, // +2 to account for loader and footer
-            duration: const Duration(seconds: 1),
-            curve: Curves.easeInOut,
+            duration: widget.scrollToDuration,
+            curve: widget.scrollToCurve,
             alignment: 0.1,
           );
         } else {
@@ -1324,7 +1346,8 @@ class _MessageListViewState extends State<MessageListView> {
           WidgetsBinding.instance!.addPostFrameCallback((_) {
             _scrollController?.scrollTo(
               index: 0,
-              duration: const Duration(seconds: 1),
+              duration: widget.scrollToDuration,
+              curve: widget.scrollToCurve,
             );
           });
         }
@@ -1448,4 +1471,93 @@ Stream<T> _valueListenableToStreamAdapter<T>(ValueListenable<T> listenable) {
   );
 
   return _controller.stream;
+}
+
+/// Describes how Scrollable widgets should behave.
+///
+/// Used by [ScrollConfiguration] to configure the [Scrollable] widgets in a
+/// subtree.
+///
+/// This is a custom Stream Chat class that provides custom scroll physics for
+/// iOS and macOS, using [BouncingScrollPhysicsWithClamp] instead of
+/// [BouncingScrollPhysics].
+class StreamChatScrollBehaviour extends ScrollBehavior {
+  /// Creates a description of how [Scrollable] widgets should behave.
+  const StreamChatScrollBehaviour({
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
+  }) : super(androidOverscrollIndicator: androidOverscrollIndicator);
+
+  static const ScrollPhysics _bouncingPhysicsWithClamp =
+      BouncingScrollPhysicsWithClamp();
+  static const ScrollPhysics _clampingPhysics =
+      ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    switch (getPlatform(context)) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return _bouncingPhysicsWithClamp;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return _clampingPhysics;
+    }
+  }
+}
+
+/// Scroll physics that replicates the behaviour of [BouncingScrollPhysics],
+/// however, it implements a clamp at the bottom of the list, when attempting to
+/// overscroll.
+///
+/// This is a custom scroll physics class used specifically for Stream Chat
+/// Flutter, to prevent unwanted behaviour when jumping to certain messages in
+/// a list view.
+class BouncingScrollPhysicsWithClamp extends BouncingScrollPhysics {
+  /// Creates scroll physics that bounce back from the edge. Similar to
+  /// [BouncingScrollPhysics], however this enforces a clamp to the bottom edge,
+  /// preventing initial overscroll.
+  const BouncingScrollPhysicsWithClamp({ScrollPhysics? parent})
+      : super(parent: parent);
+
+  @override
+  BouncingScrollPhysics applyTo(ScrollPhysics? ancestor) =>
+      BouncingScrollPhysicsWithClamp(parent: buildParent(ancestor));
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    assert(() {
+      if (value == position.pixels) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            '$runtimeType.applyBoundaryConditions() was called redundantly.',
+          ),
+          ErrorDescription(
+            'The proposed new position, $value, is exactly equal to the current position of the '
+            'given ${position.runtimeType}, ${position.pixels}.\n'
+            'The applyBoundaryConditions method should only be called when the value is '
+            'going to actually change the pixels, otherwise it is redundant.',
+          ),
+          DiagnosticsProperty<ScrollPhysics>(
+            'The physics object in question was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+          DiagnosticsProperty<ScrollMetrics>(
+            'The position object in question was',
+            position,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ]);
+      }
+      return true;
+    }(), '');
+    if (position.pixels < position.maxScrollExtent &&
+        position.maxScrollExtent < value) // hit bottom edge
+    {
+      return value - position.maxScrollExtent;
+    }
+    return 0;
+  }
 }

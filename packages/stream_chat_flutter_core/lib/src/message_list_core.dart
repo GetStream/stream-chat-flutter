@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/better_stream_builder.dart';
@@ -80,6 +79,7 @@ class MessageListCore extends StatefulWidget {
     this.messageListController,
     this.messageFilter,
     this.paginationLimit = 20,
+    this.artificialDelayBeforePaginate,
   }) : super(key: key);
 
   /// A [MessageListController] allows pagination.
@@ -97,6 +97,13 @@ class MessageListCore extends StatefulWidget {
 
   /// Limit used to paginate messages
   final int paginationLimit;
+
+  /// Forces a delay before loading/paginating more messages. This can be used
+  /// to ensure a loading indicator is displayed for a certain amount of time to
+  /// achieve the desired UI effect.
+  ///
+  /// If null, then no delay will be applied. Default is null.
+  final Duration? artificialDelayBeforePaginate;
 
   /// Callback triggered when an error occurs while performing the given
   /// request.
@@ -177,6 +184,7 @@ class MessageListCoreState extends State<MessageListCore> {
       return _streamChannel!.queryMessages(
         direction: direction,
         limit: widget.paginationLimit,
+        artificialDelayBeforeLoad: widget.artificialDelayBeforePaginate,
       );
     } else {
       return _streamChannel!.getReplies(

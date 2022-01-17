@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -86,6 +85,7 @@ class StreamChannelState extends State<StreamChannel> {
   Future<void> _queryTopMessages({
     int limit = 20,
     bool preferOffline = false,
+    Duration? artificialDelayBeforeLoad,
   }) async {
     if (_topPaginationEnded ||
         _queryTopMessagesController.value ||
@@ -101,6 +101,10 @@ class StreamChannelState extends State<StreamChannel> {
     final oldestMessage = channel.state!.messages.first;
 
     try {
+      if (artificialDelayBeforeLoad != null) {
+        await Future.delayed(artificialDelayBeforeLoad);
+      }
+
       final state = await queryBeforeMessage(
         oldestMessage.id,
         limit: limit,
@@ -118,6 +122,7 @@ class StreamChannelState extends State<StreamChannel> {
   Future<void> _queryBottomMessages({
     int limit = 20,
     bool preferOffline = false,
+    Duration? artificialDelayBeforeLoad,
   }) async {
     if (_bottomPaginationEnded ||
         _queryBottomMessagesController.value ||
@@ -132,6 +137,9 @@ class StreamChannelState extends State<StreamChannel> {
     final recentMessage = channel.state!.messages.last;
 
     try {
+      if (artificialDelayBeforeLoad != null) {
+        await Future.delayed(artificialDelayBeforeLoad);
+      }
       final state = await queryAfterMessage(
         recentMessage.id,
         limit: limit,
@@ -150,11 +158,18 @@ class StreamChannelState extends State<StreamChannel> {
   Future<void> queryMessages({
     QueryDirection? direction = QueryDirection.top,
     int limit = 20,
+    Duration? artificialDelayBeforeLoad,
   }) {
     if (direction == QueryDirection.top) {
-      return _queryTopMessages(limit: limit);
+      return _queryTopMessages(
+        limit: limit,
+        artificialDelayBeforeLoad: artificialDelayBeforeLoad,
+      );
     }
-    return _queryBottomMessages(limit: limit);
+    return _queryBottomMessages(
+      limit: limit,
+      artificialDelayBeforeLoad: artificialDelayBeforeLoad,
+    );
   }
 
   /// Calls [channel.getReplies] updating [queryMessage] stream
