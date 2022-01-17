@@ -377,4 +377,11 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get slowModeOnLabel => 'Mode lent activé';
+
+  @override
+  String get linkDisabledDetails =>
+      'L\'envoi de liens n\'est pas autorisé dans cette conversation.';
+
+  @override
+  String get linkDisabledError => 'Les liens sont désactivés';
 }

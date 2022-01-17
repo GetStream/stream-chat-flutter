@@ -374,4 +374,11 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get slowModeOnLabel => 'Slowmode attiva';
+
+  @override
+  String get linkDisabledDetails =>
+      'Non è permesso condividere link in questa convesazione.';
+
+  @override
+  String get linkDisabledError => 'I links sono disattivati';
 }

@@ -144,6 +144,12 @@ abstract class Translations {
   /// The label for "OK"
   String get okLabel;
 
+  /// The label for a link disabled error
+  String get linkDisabledError;
+
+  /// The additional info on a link disabled error
+  String get linkDisabledDetails;
+
   /// The label for "add more files"
   String get addMoreFilesLabel;
 
@@ -692,4 +698,11 @@ class DefaultTranslations implements Translations {
   @override
   String attachmentLimitExceedError(int limit) => """
 Attachment limit exceeded: it's not possible to add more than $limit attachments""";
+
+  @override
+  String get linkDisabledDetails =>
+      'Sending links is not allowed in this conversation.';
+
+  @override
+  String get linkDisabledError => 'Links are disabled';
 }

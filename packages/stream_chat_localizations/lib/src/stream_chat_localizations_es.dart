@@ -378,4 +378,11 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String get slowModeOnLabel => 'Modo lento activado';
+
+  @override
+  String get linkDisabledDetails =>
+      'No se permite enviar enlaces en esta conversación.';
+
+  @override
+  String get linkDisabledError => 'Los enlaces están deshabilitados';
 }

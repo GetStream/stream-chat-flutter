@@ -928,7 +928,9 @@ class MessageInputState extends State<MessageInput>
         _actionsShrunk = value.isNotEmpty && actionsLength > 1;
       });
 
-      _checkContainsUrl(value, context);
+      if (channel.ownCapabilities.contains(PermissionType.sendLinks)) {
+        _checkContainsUrl(value, context);
+      }
       _checkCommands(value, context);
       _checkMentions(value, context);
       _checkEmoji(value, context);
@@ -1646,9 +1648,25 @@ class MessageInputState extends State<MessageInput>
 
   /// Sends the current message
   Future<void> sendMessage() async {
-    final skipEnrichUrl = _effectiveController.ogAttachment == null;
-
+    final streamChannel = StreamChannel.of(context);
     var message = _effectiveController.value;
+    if (!streamChannel.channel.ownCapabilities
+            .contains(PermissionType.sendLinks) &&
+        _urlRegex.hasMatch(message.text ?? '')) {
+      showInfoDialog(
+        context,
+        icon: StreamSvgIcon.error(
+          color: StreamChatTheme.of(context).colorTheme.accentError,
+          size: 24,
+        ),
+        title: 'Links are disabled',
+        details: 'Sending links is not allowed in this conversation.',
+        okText: context.translations.okLabel,
+      );
+      return;
+    }
+
+    final skipEnrichUrl = _effectiveController.ogAttachment == null;
 
     var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
 
@@ -1660,7 +1678,6 @@ class MessageInputState extends State<MessageInput>
       message = await widget.preMessageSending!(message);
     }
 
-    final streamChannel = StreamChannel.of(context);
     final channel = streamChannel.channel;
     if (!channel.state!.isUpToDate) {
       await streamChannel.reloadChannel();
