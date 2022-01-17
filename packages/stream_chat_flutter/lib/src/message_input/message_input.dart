@@ -928,9 +928,7 @@ class MessageInputState extends State<MessageInput>
         _actionsShrunk = value.isNotEmpty && actionsLength > 1;
       });
 
-      if (channel.ownCapabilities.contains(PermissionType.sendLinks)) {
-        _checkContainsUrl(value, context);
-      }
+      _checkContainsUrl(value, context);
       _checkCommands(value, context);
       _checkMentions(value, context);
       _checkEmoji(value, context);
@@ -971,7 +969,11 @@ class MessageInputState extends State<MessageInput>
       ..removeWhere((it) => it.group(0)?.split('.').last.isValidTLD() == false);
 
     // Reset the og attachment if the text doesn't contain any url
-    if (matchedUrls.isEmpty) {
+    if (matchedUrls.isEmpty ||
+        !StreamChannel.of(context)
+            .channel
+            .ownCapabilities
+            .contains(PermissionType.sendLinks)) {
       _effectiveController
         ..text = value
         ..clearOGAttachment();
@@ -1652,7 +1654,8 @@ class MessageInputState extends State<MessageInput>
     var message = _effectiveController.value;
     if (!streamChannel.channel.ownCapabilities
             .contains(PermissionType.sendLinks) &&
-        _urlRegex.hasMatch(message.text ?? '')) {
+        _urlRegex.allMatches(message.text ?? '').any((element) =>
+            element.group(0)?.split('.').last.isValidTLD() == true)) {
       showInfoDialog(
         context,
         icon: StreamSvgIcon.error(
