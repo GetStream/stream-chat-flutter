@@ -1,5 +1,9 @@
 ## Upcoming
 
+🔄 Changed
+
+- `client.location` is now deprecated in favor of the new [edge server](https://getstream.io/blog/chat-edge-infrastructure) and will be removed in v4.0.0.
+
 ✅ Added
 
 - Added `client.enrichUrl` endpoint for enriching URLs with metadata.
