@@ -300,6 +300,18 @@ class Channel {
     return data;
   }
 
+  /// List of user permissions on this channel
+  List<String> get ownCapabilities =>
+      state?._channelState.channel?.ownCapabilities ?? [];
+
+  /// List of user permissions on this channel
+  Stream<List<String>> get ownCapabilitiesStream {
+    _checkInitialized();
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.ownCapabilities ?? [])
+        .distinct();
+  }
+
   /// Channel extra data as a stream.
   Stream<Map<String, Object?>> get extraDataStream {
     _checkInitialized();
@@ -1548,6 +1560,7 @@ class ChannelClientState {
         members: List.from(
           channelState.members..removeWhere((m) => m.userId == user!.id),
         ),
+        read: channelState.read..removeWhere((r) => r.user.id == user!.id),
       ));
     }));
   }

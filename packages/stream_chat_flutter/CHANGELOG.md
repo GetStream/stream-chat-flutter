@@ -2,10 +2,12 @@
 
 🛑️ Breaking Changes
 
+- `pinPermissions` is no longer needed in `MessageListView`.
 - `MessageInput` now works with a `MessageInputController` instead of a `TextEditingController`
 
 🐞 Fixed
 
+- SVG rendering fixes
 - Use file extension instead of mimeType for downloading files
 
 ✅ Added

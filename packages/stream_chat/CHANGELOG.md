@@ -3,6 +3,8 @@
 ✅ Added
 
 - Added `client.enrichUrl` endpoint for enriching URLs with metadata.
+- Fixed `unreadCount` after removing user from a channel.
+- `ChannelModel` now supplies individual user capabilities.
 
 ## 3.3.1
 

@@ -155,7 +155,9 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                   title: context.translations.viewInfoLabel,
                   onTap: widget.onViewInfoTap,
                 ),
-                if (!channel.isDistinct)
+                if (!channel.isDistinct &&
+                    channel.ownCapabilities
+                        .contains(PermissionType.leaveChannel))
                   OptionListTile(
                     leading: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -174,7 +176,9 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                       });
                     },
                   ),
-                if (isOwner)
+                if (isOwner &&
+                    channel.ownCapabilities
+                        .contains(PermissionType.deleteChannel))
                   OptionListTile(
                     leading: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),

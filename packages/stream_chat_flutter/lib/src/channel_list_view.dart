@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -560,14 +559,8 @@ class _ChannelListViewState extends State<ChannelListView> {
                         );
                       },
               ),
-              if ([
-                'admin',
-                'owner',
-              ].contains(channel.state!.members
-                  .firstWhereOrNull(
-                    (m) => m.userId == channel.client.state.currentUser?.id,
-                  )
-                  ?.role))
+              if (channel.ownCapabilities
+                  .contains(PermissionType.deleteChannel))
                 IconSlideAction(
                   color: backgroundColor,
                   iconWidget: StreamSvgIcon.delete(

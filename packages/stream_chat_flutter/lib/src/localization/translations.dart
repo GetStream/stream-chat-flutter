@@ -93,6 +93,9 @@ abstract class Translations {
   /// The label for search Gif
   String get searchGifLabel;
 
+  /// The label for the MessageInput hint when permission denied on sendMessage
+  String get sendMessagePermissionError;
+
   /// The label for add a comment or send in case of
   /// attachments inside [MessageInput]
   String get addACommentOrSendLabel;
@@ -140,6 +143,12 @@ abstract class Translations {
 
   /// The label for "OK"
   String get okLabel;
+
+  /// The label for a link disabled error
+  String get linkDisabledError;
+
+  /// The additional info on a link disabled error
+  String get linkDisabledDetails;
 
   /// The label for "add more files"
   String get addMoreFilesLabel;
@@ -376,6 +385,10 @@ class DefaultTranslations implements Translations {
     if (pinnedByCurrentUser) return 'Pinned by You';
     return 'Pinned by ${pinnedBy.name}';
   }
+
+  @override
+  String get sendMessagePermissionError =>
+      'You don\'t have permission to send messages';
 
   @override
   String get emptyMessagesText => 'There are no messages currently';
@@ -685,4 +698,11 @@ class DefaultTranslations implements Translations {
   @override
   String attachmentLimitExceedError(int limit) => """
 Attachment limit exceeded: it's not possible to add more than $limit attachments""";
+
+  @override
+  String get linkDisabledDetails =>
+      'Sending links is not allowed in this conversation.';
+
+  @override
+  String get linkDisabledError => 'Links are disabled';
 }

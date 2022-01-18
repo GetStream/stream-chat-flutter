@@ -61,6 +61,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get sendMessagePermissionError => 'आपको संदेश भेजने की अनुमति नहीं है';
+
+  @override
   String get emptyMessagesText => 'वर्तमान में कोई संदेश नहीं है';
 
   @override
@@ -368,4 +371,11 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get slowModeOnLabel => 'स्लो मोड चालू';
+
+  @override
+  String get linkDisabledDetails =>
+      'इस बातचीत में लिंक भेजने की अनुमति नहीं है.';
+
+  @override
+  String get linkDisabledError => 'लिंक भेजना प्रतिबंधित';
 }

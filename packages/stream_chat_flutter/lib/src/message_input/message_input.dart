@@ -471,120 +471,138 @@ class MessageInputState extends State<MessageInput>
   void _stopSlowMode() => _slowModeTimer?.cancel();
 
   @override
-  Widget build(BuildContext context) => MessageValueListenableBuilder(
-        valueListenable: _effectiveController,
-        builder: (context, value, _) {
-          Widget child = DecoratedBox(
-            decoration: BoxDecoration(
-              color: _messageInputTheme.inputBackgroundColor,
-            ),
-            child: SafeArea(
-              child: GestureDetector(
-                onPanUpdate: (details) {
-                  if (details.delta.dy > 0) {
-                    _focusNode.unfocus();
-                    if (_openFilePickerSection) {
-                      setState(() {
-                        _openFilePickerSection = false;
-                      });
-                    }
+  Widget build(BuildContext context) {
+    if (!StreamChannel.of(context)
+        .channel
+        .ownCapabilities
+        .contains(PermissionType.sendMessage)) {
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 15,
+          ),
+          child: Text(
+            context.translations.sendMessagePermissionError,
+            style: _messageInputTheme.inputTextStyle,
+          ),
+        ),
+      );
+    }
+    return MessageValueListenableBuilder(
+      valueListenable: _effectiveController,
+      builder: (context, value, _) {
+        Widget child = DecoratedBox(
+          decoration: BoxDecoration(
+            color: _messageInputTheme.inputBackgroundColor,
+          ),
+          child: SafeArea(
+            child: GestureDetector(
+              onPanUpdate: (details) {
+                if (details.delta.dy > 0) {
+                  _focusNode.unfocus();
+                  if (_openFilePickerSection) {
+                    setState(() {
+                      _openFilePickerSection = false;
+                    });
                   }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (_hasQuotedMessage)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: StreamSvgIcon.reply(
-                                color: _streamChatTheme.colorTheme.disabled,
-                              ),
-                            ),
-                            Text(
-                              context.translations.replyToMessageLabel,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            IconButton(
-                              visualDensity: VisualDensity.compact,
-                              icon: StreamSvgIcon.closeSmall(),
-                              onPressed: () {
-                                _effectiveController.clearQuotedMessage();
-                                _focusNode.unfocus();
-                              },
-                            ),
-                          ],
-                        ),
-                      )
-                    else if (_effectiveController.ogAttachment != null)
-                      OGAttachmentPreview(
-                        attachment: _effectiveController.ogAttachment!,
-                        onDismissPreviewPressed: () {
-                          _effectiveController.clearOGAttachment();
-                          _focusNode.unfocus();
-                        },
-                      ),
+                }
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_hasQuotedMessage)
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: _buildTextField(context),
-                    ),
-                    if (_effectiveController.value.parentId != null &&
-                        !widget.hideSendAsDm)
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          right: 12,
-                          left: 12,
-                          bottom: 12,
-                        ),
-                        child: _buildDmCheckbox(),
+                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: StreamSvgIcon.reply(
+                              color: _streamChatTheme.colorTheme.disabled,
+                            ),
+                          ),
+                          Text(
+                            context.translations.replyToMessageLabel,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            icon: StreamSvgIcon.closeSmall(),
+                            onPressed: () {
+                              _effectiveController.clearQuotedMessage();
+                              _focusNode.unfocus();
+                            },
+                          ),
+                        ],
                       ),
-                    _buildFilePickerSection(),
-                  ],
-                ),
+                    )
+                  else if (_effectiveController.ogAttachment != null)
+                    OGAttachmentPreview(
+                      attachment: _effectiveController.ogAttachment!,
+                      onDismissPreviewPressed: () {
+                        _effectiveController.clearOGAttachment();
+                        _focusNode.unfocus();
+                      },
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: _buildTextField(context),
+                  ),
+                  if (_effectiveController.value.parentId != null &&
+                      !widget.hideSendAsDm)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        right: 12,
+                        left: 12,
+                        bottom: 12,
+                      ),
+                      child: _buildDmCheckbox(),
+                    ),
+                  _buildFilePickerSection(),
+                ],
               ),
             ),
-          );
-          if (!_isEditing) {
-            child = Material(
-              elevation: 8,
-              child: child,
-            );
-          }
-          return MultiOverlay(
-            childAnchor: Alignment.topCenter,
-            overlayAnchor: Alignment.bottomCenter,
-            overlayOptions: [
-              OverlayOptions(
-                visible: _showCommandsOverlay,
-                widget: _buildCommandsOverlayEntry(),
-              ),
-              OverlayOptions(
-                visible: _focusNode.hasFocus &&
-                    _effectiveController.text.isNotEmpty &&
-                    _effectiveController.baseOffset > 0 &&
-                    _effectiveController.text
-                        .substring(
-                          0,
-                          _effectiveController.baseOffset,
-                        )
-                        .contains(':'),
-                widget: _buildEmojiOverlay(),
-              ),
-              OverlayOptions(
-                visible: _showMentionsOverlay,
-                widget: _buildMentionsOverlayEntry(),
-              ),
-              ...widget.customOverlays,
-            ],
+          ),
+        );
+        if (!_isEditing) {
+          child = Material(
+            elevation: 8,
             child: child,
           );
-        },
-      );
+        }
+        return MultiOverlay(
+          childAnchor: Alignment.topCenter,
+          overlayAnchor: Alignment.bottomCenter,
+          overlayOptions: [
+            OverlayOptions(
+              visible: _showCommandsOverlay,
+              widget: _buildCommandsOverlayEntry(),
+            ),
+            OverlayOptions(
+              visible: _focusNode.hasFocus &&
+                  _effectiveController.text.isNotEmpty &&
+                  _effectiveController.baseOffset > 0 &&
+                  _effectiveController.text
+                      .substring(
+                        0,
+                        _effectiveController.baseOffset,
+                      )
+                      .contains(':'),
+              widget: _buildEmojiOverlay(),
+            ),
+            OverlayOptions(
+              visible: _showMentionsOverlay,
+              widget: _buildMentionsOverlayEntry(),
+            ),
+            ...widget.customOverlays,
+          ],
+          child: child,
+        );
+      },
+    );
+  }
 
   Flex _buildTextField(BuildContext context) => Flex(
         direction: Axis.horizontal,
@@ -712,7 +730,9 @@ class MessageInputState extends State<MessageInput>
             ? const Offstage()
             : Wrap(
                 children: <Widget>[
-                  if (!widget.disableAttachments)
+                  if (!widget.disableAttachments &&
+                      channel.ownCapabilities
+                          .contains(PermissionType.uploadFile))
                     _buildAttachmentButton(context),
                   if (widget.showCommandsButton &&
                       !_isEditing &&
@@ -892,7 +912,8 @@ class MessageInputState extends State<MessageInput>
       value = value.trim();
 
       final channel = StreamChannel.of(context).channel;
-      if (value.isNotEmpty) {
+      if (channel.ownCapabilities.contains(PermissionType.sendTypingEvents) &&
+          value.isNotEmpty) {
         channel
             .keyStroke(_effectiveController.value.parentId)
             // ignore: no-empty-block
@@ -948,7 +969,11 @@ class MessageInputState extends State<MessageInput>
       ..removeWhere((it) => it.group(0)?.split('.').last.isValidTLD() == false);
 
     // Reset the og attachment if the text doesn't contain any url
-    if (matchedUrls.isEmpty) {
+    if (matchedUrls.isEmpty ||
+        !StreamChannel.of(context)
+            .channel
+            .ownCapabilities
+            .contains(PermissionType.sendLinks)) {
       _effectiveController
         ..text = value
         ..clearOGAttachment();
@@ -1625,9 +1650,26 @@ class MessageInputState extends State<MessageInput>
 
   /// Sends the current message
   Future<void> sendMessage() async {
-    final skipEnrichUrl = _effectiveController.ogAttachment == null;
-
+    final streamChannel = StreamChannel.of(context);
     var message = _effectiveController.value;
+    if (!streamChannel.channel.ownCapabilities
+            .contains(PermissionType.sendLinks) &&
+        _urlRegex.allMatches(message.text ?? '').any((element) =>
+            element.group(0)?.split('.').last.isValidTLD() == true)) {
+      showInfoDialog(
+        context,
+        icon: StreamSvgIcon.error(
+          color: StreamChatTheme.of(context).colorTheme.accentError,
+          size: 24,
+        ),
+        title: 'Links are disabled',
+        details: 'Sending links is not allowed in this conversation.',
+        okText: context.translations.okLabel,
+      );
+      return;
+    }
+
+    final skipEnrichUrl = _effectiveController.ogAttachment == null;
 
     var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
 
@@ -1639,7 +1681,6 @@ class MessageInputState extends State<MessageInput>
       message = await widget.preMessageSending!(message);
     }
 
-    final streamChannel = StreamChannel.of(context);
     final channel = streamChannel.channel;
     if (!channel.state!.isUpToDate) {
       await streamChannel.reloadChannel();

@@ -1095,7 +1095,8 @@ class _MessageWidgetState extends State<MessageWidget>
             showSendingIndicator: false,
             padding: const EdgeInsets.all(0),
             showReactionPickerIndicator: widget.showReactions &&
-                (widget.message.status == MessageSendingStatus.sent),
+                (widget.message.status == MessageSendingStatus.sent) &&
+                channel.ownCapabilities.contains(PermissionType.sendReaction),
             showPinHighlight: false,
             showUserAvatar:
                 widget.message.user!.id == channel.client.state.currentUser!.id
@@ -1106,7 +1107,6 @@ class _MessageWidgetState extends State<MessageWidget>
               Clipboard.setData(ClipboardData(text: message.text)),
           messageTheme: widget.messageTheme,
           reverse: widget.reverse,
-          showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
           message: widget.message,
           editMessageInputBuilder: widget.editMessageInputBuilder,
           onReplyTap: widget.onReplyTap,
@@ -1116,11 +1116,6 @@ class _MessageWidgetState extends State<MessageWidget>
           showCopyMessage: widget.showCopyMessage &&
               !isFailedState &&
               widget.message.text?.trim().isNotEmpty == true,
-          showEditMessage: widget.showEditMessage &&
-              !isDeleteFailed &&
-              !widget.message.attachments
-                  .any((element) => element.type == 'giphy'),
-          showReactions: widget.showReactions,
           showReplyMessage: widget.showReplyMessage &&
               !isFailedState &&
               widget.onReplyTap != null,
@@ -1128,7 +1123,6 @@ class _MessageWidgetState extends State<MessageWidget>
               !isFailedState &&
               widget.onThreadTap != null,
           showFlagButton: widget.showFlagButton,
-          showPinButton: widget.showPinButton,
           customActions: widget.customActions,
         ),
       ),
@@ -1158,7 +1152,8 @@ class _MessageWidgetState extends State<MessageWidget>
             showSendingIndicator: false,
             padding: const EdgeInsets.all(0),
             showReactionPickerIndicator: widget.showReactions &&
-                (widget.message.status == MessageSendingStatus.sent),
+                (widget.message.status == MessageSendingStatus.sent) &&
+                channel.ownCapabilities.contains(PermissionType.sendReaction),
             showPinHighlight: false,
             showUserAvatar:
                 widget.message.user!.id == channel.client.state.currentUser!.id
@@ -1169,7 +1164,8 @@ class _MessageWidgetState extends State<MessageWidget>
           messageTheme: widget.messageTheme,
           reverse: widget.reverse,
           message: widget.message,
-          showReactions: widget.showReactions,
+          showReactions: widget.showReactions &&
+              channel.ownCapabilities.contains(PermissionType.sendReaction),
         ),
       ),
     );
@@ -1256,6 +1252,13 @@ class _MessageWidgetState extends State<MessageWidget>
     }
 
     final channel = StreamChannel.of(context).channel;
+
+    if (!channel.ownCapabilities.contains(PermissionType.readEvents)) {
+      return SendingIndicator(
+        message: message,
+        size: style!.fontSize,
+      );
+    }
 
     return BetterStreamBuilder<List<Read>>(
       stream: channel.state?.readStream,
