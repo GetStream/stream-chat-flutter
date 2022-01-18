@@ -1,7 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/device.dart';
-import 'package:stream_chat/src/core/models/mute.dart';
-import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -89,9 +86,9 @@ class OwnUser extends User {
       OwnUser(
         id: id ?? this.id,
         role: role ?? this.role,
-        /* if null, it will be retrieved from extraData['name']*/
+        // if null, it will be retrieved from extraData['name']
         name: name,
-        /* if null, it will be retrieved from extraData['image']*/
+        // if null, it will be retrieved from extraData['image']
         image: image,
         banned: banned ?? this.banned,
         createdAt: createdAt ?? this.createdAt,
@@ -139,7 +136,7 @@ class OwnUser extends User {
   @JsonKey(includeIfNull: false)
   final List<Mute> mutes;
 
-  /// List of users muted by the user.
+  /// List of channels muted by the user.
   @JsonKey(includeIfNull: false)
   final List<Mute> channelMutes;
 
