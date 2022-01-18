@@ -123,7 +123,7 @@ abstract class PagedValue<Key, Value> with _$PagedValue<Key, Value> {
   /// Returns `true` if the [PagedValue] is [Success] and has an error.
   bool get hasError => asSuccess.error != null;
 
-  /// 
+  ///
   int get itemCount {
     final count = asSuccess.items.length;
     if (hasNextPage || hasError) return count + 1;
