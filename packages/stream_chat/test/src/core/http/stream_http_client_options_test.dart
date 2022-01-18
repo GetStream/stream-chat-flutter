@@ -1,5 +1,4 @@
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/location.dart';
 import 'package:test/test.dart';
 
 void main() {
