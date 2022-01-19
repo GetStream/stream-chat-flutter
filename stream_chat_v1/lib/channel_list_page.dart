@@ -40,7 +40,15 @@ class _ChannelListPageState extends State<ChannelListPage> {
             Positioned(
               top: -3,
               right: -16,
-              child: UnreadIndicator(),
+              child: StreamBuilder(
+                stream:
+                    StreamChat.of(context).client.state.unreadChannelsStream,
+                initialData: 0,
+                builder:
+                    (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                  return Text(snapshot.data.toString());
+                },
+              ),
             ),
           ],
         ),

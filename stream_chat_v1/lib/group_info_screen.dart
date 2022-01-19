@@ -534,9 +534,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         if (channel.state == null) {
                           await channel.watch();
                         }
-                        Navigator.pushNamed(
+                        Navigator.pushNamedAndRemoveUntil(
                           context,
                           Routes.CHANNEL_PAGE,
+                          ModalRoute.withName(Routes.CHANNEL_LIST_PAGE),
                           arguments: ChannelPageArgs(
                             channel: channel,
                             initialMessage: message,
