@@ -288,3 +288,8 @@ OGAttachmentResponse _$OGAttachmentResponseFromJson(
       ..title = json['title'] as String?
       ..titleLink = json['title_link'] as String?
       ..type = json['type'] as String?;
+
+AppSettingsResponse _$AppSettingsResponseFromJson(Map<String, dynamic> json) =>
+    AppSettingsResponse()
+      ..duration = json['duration'] as String?
+      ..app = AppSettings.fromJson(json['app'] as Map<String, dynamic>);

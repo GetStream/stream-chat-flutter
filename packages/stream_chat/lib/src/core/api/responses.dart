@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client/client.dart';
 import 'package:stream_chat/src/core/error/error.dart';
+import 'package:stream_chat/src/core/models/app_settings.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/device.dart';
@@ -481,4 +482,15 @@ class OGAttachmentResponse extends _BaseResponse {
   /// Create a new instance from a [json].
   static OGAttachmentResponse fromJson(Map<String, dynamic> json) =>
       _$OGAttachmentResponseFromJson(json);
+}
+
+/// Model response for [Client.getAppSettings] api call.
+@JsonSerializable(createToJson: false)
+class AppSettingsResponse extends _BaseResponse {
+  /// The settings of the app.
+  late AppSettings app;
+
+  /// Create a new instance from a [json].
+  static AppSettingsResponse fromJson(Map<String, dynamic> json) =>
+      _$AppSettingsResponseFromJson(json);
 }

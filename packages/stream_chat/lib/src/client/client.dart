@@ -16,6 +16,7 @@ import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
+import 'package:stream_chat/src/core/models/app_settings.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
@@ -1276,6 +1277,15 @@ class StreamChatClient {
         channelType,
       );
 
+  AppSettings? _appSettings;
+
+  /// Get application specific settings
+  Future<AppSettings> getAppSettings() async {
+    if (_appSettings != null) return _appSettings!;
+    final response = await _chatApi.general.getAppSettings();
+    return _appSettings = response.app;
+  }
+
   /// Pins provided message
   /// [timeoutOrExpirationDate] can either be a [DateTime] or a value in seconds
   /// to be added to [DateTime.now]
@@ -1331,6 +1341,7 @@ class StreamChatClient {
     // resetting state
     state.dispose();
     state = ClientState(this);
+    _appSettings = null;
     _lastSyncedAt = null;
 
     // resetting credentials

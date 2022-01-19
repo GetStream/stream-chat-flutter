@@ -108,4 +108,10 @@ class GeneralApi {
 
     return OGAttachmentResponse.fromJson(response.data);
   }
+
+  /// Get application specific settings.
+  Future<AppSettingsResponse> getAppSettings() async {
+    final response = await _client.get('/app');
+    return AppSettingsResponse.fromJson(response.data);
+  }
 }
