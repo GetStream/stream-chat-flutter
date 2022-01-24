@@ -9,6 +9,10 @@
 - Added `client.enrichUrl` endpoint for enriching URLs with metadata.
 - Fixed `unreadCount` after removing user from a channel.
 
+🐞 Fixed
+
+- [[#846]](https://github.com/GetStream/stream-chat-flutter/issues/846) Fixed `message.ownReactions` getting truncated when receiving a reaction event.
+
 ## 3.3.1
 
 🐞 Fixed
