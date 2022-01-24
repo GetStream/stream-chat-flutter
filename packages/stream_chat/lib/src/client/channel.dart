@@ -840,9 +840,15 @@ class Channel {
     );
 
     // Inserting at the 0th index as it's the latest reaction
-    latestReactions.insert(0, newReaction);
-    final ownReactions = [...latestReactions]
-      ..removeWhere((it) => it.userId != user!.id);
+    latestReactions
+      ..insert(0, newReaction)
+      ..take(10);
+    final ownReactions = enforceUnique
+        ? <Reaction>[newReaction]
+        : <Reaction>[
+            ...message.ownReactions ?? [],
+            newReaction,
+          ];
 
     final newMessage = message.copyWith(
       reactionCounts: {...message.reactionCounts ?? <String, int>{}}
@@ -882,7 +888,6 @@ class Channel {
     Reaction reaction,
   ) async {
     final type = reaction.type;
-    final user = _client.state.currentUser;
 
     final reactionCounts = {...message.reactionCounts ?? <String, int>{}};
     if (reactionCounts.containsKey(type)) {
@@ -899,8 +904,11 @@ class Channel {
           r.type == reaction.type &&
           r.messageId == reaction.messageId);
 
-    final ownReactions = [...latestReactions]
-      ..removeWhere((it) => it.userId != user!.id);
+    final ownReactions = message.ownReactions
+      ?..removeWhere((r) =>
+          r.userId == reaction.userId &&
+          r.type == reaction.type &&
+          r.messageId == reaction.messageId);
 
     final newMessage = message.copyWith(
       reactionCounts: reactionCounts..removeWhere((_, value) => value == 0),
@@ -1605,10 +1613,10 @@ class ChannelClientState {
 
   void _listenReactionDeleted() {
     _subscriptions.add(_channel.on(EventType.reactionDeleted).listen((event) {
-      final userId = _channel.client.state.currentUser!.id;
+      final oldMessage =
+          messages.firstWhereOrNull((it) => it.id == event.message?.id);
       final message = event.message!.copyWith(
-        ownReactions: [...event.message!.latestReactions!]
-          ..removeWhere((it) => it.userId != userId),
+        ownReactions: oldMessage?.ownReactions,
       );
       addMessage(message);
     }));
@@ -1616,10 +1624,10 @@ class ChannelClientState {
 
   void _listenReactions() {
     _subscriptions.add(_channel.on(EventType.reactionNew).listen((event) {
-      final userId = _channel.client.state.currentUser!.id;
+      final oldMessage =
+          messages.firstWhereOrNull((it) => it.id == event.message?.id);
       final message = event.message!.copyWith(
-        ownReactions: [...event.message!.latestReactions!]
-          ..removeWhere((it) => it.userId != userId),
+        ownReactions: oldMessage?.ownReactions,
       );
       addMessage(message);
     }));
@@ -1632,10 +1640,11 @@ class ChannelClientState {
       EventType.reactionUpdated,
     )
         .listen((event) {
-      final userId = _channel.client.state.currentUser!.id;
+      final oldMessage =
+          messages.firstWhereOrNull((it) => it.id == event.message?.id);
+
       final message = event.message!.copyWith(
-        ownReactions: [...event.message!.latestReactions!]
-          ..removeWhere((it) => it.userId != userId),
+        ownReactions: oldMessage?.ownReactions,
       );
       addMessage(message);
 
