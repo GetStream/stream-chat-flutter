@@ -1129,13 +1129,14 @@ class MessageInputState extends State<MessageInput> {
 
     if (file.size! > widget.maxAttachmentSize) {
       if (medium.type == AssetType.video && file.path != null) {
-        final mediaInfo = await (VideoService.compressVideo(
+        final mediaInfo = await VideoService.compressVideo(
           file.path!,
           frameRate: widget.compressedVideoFrameRate,
           quality: widget.compressedVideoQuality,
-        ) as FutureOr<MediaInfo>);
+        );
 
-        if (mediaInfo.filesize! > widget.maxAttachmentSize) {
+        if (mediaInfo == null ||
+            mediaInfo.filesize! > widget.maxAttachmentSize) {
           _showErrorAlert(
             context.translations.fileTooLargeAfterCompressionError(
               widget.maxAttachmentSize / (1024 * 1024),
