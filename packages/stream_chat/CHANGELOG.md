@@ -19,6 +19,10 @@
 - Fixed `unreadCount` after removing user from a channel.
 - Added `client.queryBannedUsers`, `channel.queryBannedUsers` endpoint for querying banned users.
 
+🐞 Fixed
+
+- [[#871]](https://github.com/GetStream/stream-chat-flutter/issues/871) Fixed thread message deletion.
+
 ## 3.3.1
 
 🐞 Fixed

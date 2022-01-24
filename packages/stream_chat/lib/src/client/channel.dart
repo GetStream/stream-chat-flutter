@@ -1827,7 +1827,13 @@ class ChannelClientState {
       if (replyCount == null || replyCount == 0) return;
 
       addMessage(parentMessage.copyWith(replyCount: replyCount - 1));
-      updateThreadInfo(parentId, threads[parentId]!..remove(message));
+      updateThreadInfo(
+        parentId,
+        threads[parentId]!
+          ..removeWhere(
+            (e) => e.id == message.id,
+          ),
+      );
     } else {
       // Remove regular message
       final allMessages = [...messages];
