@@ -45,7 +45,7 @@ class User extends Equatable {
     this.language,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now(),
-        /*For backwards compatibility, set 'name', 'image' in [extraData].*/
+        // For backwards compatibility, set 'name', 'image' in [extraData].
         extraData = {
           ...extraData,
           if (name != null) 'name': name,
@@ -164,9 +164,9 @@ class User extends Equatable {
       User(
         id: id ?? this.id,
         role: role ?? this.role,
-        /* if null, it will be retrieved from extraData['name']*/
+        // if null, it will be retrieved from extraData['name']
         name: name,
-        /* if null, it will be retrieved from extraData['image']*/
+        // if null, it will be retrieved from extraData['image']
         image: image,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,

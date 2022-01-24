@@ -66,8 +66,11 @@ class StreamChatClient {
     this.logLevel = Level.WARNING,
     LogHandlerFunction? logHandlerFunction,
     RetryPolicy? retryPolicy,
-    Location? location,
-    @Deprecated('Use location to change baseUrl instead') String? baseURL,
+    @Deprecated('''
+    Location is now deprecated in favor of the new edge server. Will be removed in v4.0.0.
+    Read more here: https://getstream.io/blog/chat-edge-infrastructure
+    ''') Location? location,
+    String? baseURL,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     StreamChatApi? chatApi,
@@ -79,7 +82,6 @@ class StreamChatClient {
 
     final options = StreamHttpClientOptions(
       baseUrl: baseURL,
-      location: location,
       connectTimeout: connectTimeout,
       receiveTimeout: receiveTimeout,
       headers: {'X-Stream-Client': defaultUserAgent},
