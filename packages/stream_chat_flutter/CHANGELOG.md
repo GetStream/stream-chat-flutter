@@ -7,8 +7,9 @@
 
 🐞 Fixed
 
-- SVG rendering fixes
-- Use file extension instead of mimeType for downloading files
+- SVG rendering fixes.
+- Use file extension instead of mimeType for downloading files.
+- [[#860]](https://github.com/GetStream/stream-chat-flutter/issues/860) CastError while compressing Videos.
 
 ✅ Added
 
@@ -32,7 +33,7 @@
 
 🐞 Fixed
 
-- [[#766]]`AttachmentActionsModal` now has customisation options for actions.
+- [[#766]](https://github.com/GetStream/stream-chat-flutter/issues/766) `AttachmentActionsModal` now has customisation options for actions.
 - Fixed `MessageWidget` null errors associated with `channel.memberCount`.
 - Fixed adding attachments on web.
 - [[#767]](https://github.com/GetStream/stream-chat-flutter/issues/767): Fix `MessageInput` focus behaviour when sending messages.
