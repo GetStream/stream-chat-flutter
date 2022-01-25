@@ -85,11 +85,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             );
           }
 
-          var userMember = snapshot.data!.firstWhereOrNull(
-            (e) => e.user!.id == StreamChat.of(context).currentUser!.id,
-          );
-          var isOwner = userMember?.role == 'owner';
-
           return Scaffold(
             backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
             appBar: AppBar(
@@ -150,10 +145,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               ),
               centerTitle: true,
               actions: [
-                if (!channel.channel.isDistinct &&
-                    isOwner &&
-                    channel.channel.ownCapabilities
-                        .contains(PermissionType.updateChannelMembers))
+                if (channel.channel.ownCapabilities
+                    .contains(PermissionType.updateChannelMembers))
                   StreamNeumorphicButton(
                     child: InkWell(
                       onTap: () {
@@ -177,7 +170,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   height: 8.0,
                   color: StreamChatTheme.of(context).colorTheme.disabled,
                 ),
-                if (isOwner) _buildNameTile(),
+                if (channel.channel.ownCapabilities
+                    .contains(PermissionType.updateChannel))
+                  _buildNameTile(),
                 _buildOptionListTiles(),
               ],
             ),
