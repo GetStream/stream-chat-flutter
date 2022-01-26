@@ -4,6 +4,7 @@
 
 - [[#857]](https://github.com/GetStream/stream-chat-flutter/issues/857) Channel now listens for member ban/unban and
   updates the channel state with the latest data.
+- [[#748]](https://github.com/GetStream/stream-chat-flutter/issues/748) `Message.user` are now also included while saving users in persistence.
 
 🔄 Changed
 
