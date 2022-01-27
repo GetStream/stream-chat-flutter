@@ -85,11 +85,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             );
           }
 
-          var userMember = snapshot.data!.firstWhereOrNull(
-            (e) => e.user!.id == StreamChat.of(context).currentUser!.id,
-          );
-          var isOwner = userMember?.role == 'owner';
-
           return Scaffold(
             backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
             appBar: AppBar(
@@ -150,7 +145,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               ),
               centerTitle: true,
               actions: [
-                if (!channel.channel.isDistinct && isOwner)
+                if (channel.channel.ownCapabilities
+                    .contains(PermissionType.updateChannelMembers))
                   StreamNeumorphicButton(
                     child: InkWell(
                       onTap: () {
@@ -174,7 +170,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   height: 8.0,
                   color: StreamChatTheme.of(context).colorTheme.disabled,
                 ),
-                if (isOwner) _buildNameTile(),
+                if (channel.channel.ownCapabilities
+                    .contains(PermissionType.updateChannel))
+                  _buildNameTile(),
                 _buildOptionListTiles(),
               ],
             ),
@@ -365,6 +363,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             ),
             Expanded(
               child: TextField(
+                enabled: channel.ownCapabilities
+                    .contains(PermissionType.updateChannel),
                 focusNode: _focusNode,
                 controller: _nameController,
                 cursorColor:
@@ -449,47 +449,50 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         //   ),
         //   onTap: () {},
         // ),
-        StreamBuilder<bool>(
-            stream: StreamChannel.of(context).channel.isMutedStream,
-            builder: (context, snapshot) {
-              mutedBool.value = snapshot.data;
+        if (channel.channel.ownCapabilities
+            .contains(PermissionType.muteChannel))
+          StreamBuilder<bool>(
+              stream: StreamChannel.of(context).channel.isMutedStream,
+              builder: (context, snapshot) {
+                mutedBool.value = snapshot.data;
 
-              return OptionListTile(
-                tileColor: StreamChatTheme.of(context).colorTheme.appBg,
-                separatorColor: StreamChatTheme.of(context).colorTheme.disabled,
-                title: AppLocalizations.of(context).muteGroup,
-                titleTextStyle: StreamChatTheme.of(context).textTheme.body,
-                leading: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: StreamSvgIcon.mute(
-                    size: 24.0,
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .textHighEmphasis
-                        .withOpacity(0.5),
+                return OptionListTile(
+                  tileColor: StreamChatTheme.of(context).colorTheme.appBg,
+                  separatorColor:
+                      StreamChatTheme.of(context).colorTheme.disabled,
+                  title: AppLocalizations.of(context).muteGroup,
+                  titleTextStyle: StreamChatTheme.of(context).textTheme.body,
+                  leading: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: StreamSvgIcon.mute(
+                      size: 24.0,
+                      color: StreamChatTheme.of(context)
+                          .colorTheme
+                          .textHighEmphasis
+                          .withOpacity(0.5),
+                    ),
                   ),
-                ),
-                trailing: snapshot.data == null
-                    ? CircularProgressIndicator()
-                    : ValueListenableBuilder<bool?>(
-                        valueListenable: mutedBool,
-                        builder: (context, value, _) {
-                          return CupertinoSwitch(
-                            value: value!,
-                            onChanged: (val) {
-                              mutedBool.value = val;
+                  trailing: snapshot.data == null
+                      ? CircularProgressIndicator()
+                      : ValueListenableBuilder<bool?>(
+                          valueListenable: mutedBool,
+                          builder: (context, value, _) {
+                            return CupertinoSwitch(
+                              value: value!,
+                              onChanged: (val) {
+                                mutedBool.value = val;
 
-                              if (snapshot.data!) {
-                                channel.channel.unmute();
-                              } else {
-                                channel.channel.mute();
-                              }
-                            },
-                          );
-                        }),
-                onTap: () {},
-              );
-            }),
+                                if (snapshot.data!) {
+                                  channel.channel.unmute();
+                                } else {
+                                  channel.channel.mute();
+                                }
+                              },
+                            );
+                          }),
+                  onTap: () {},
+                );
+              }),
         OptionListTile(
           title: AppLocalizations.of(context).pinnedMessages,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
@@ -654,7 +657,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             );
           },
         ),
-        if (!channel.channel.isDistinct)
+        if (!channel.channel.isDistinct &&
+            channel.channel.ownCapabilities
+                .contains(PermissionType.leaveChannel))
           OptionListTile(
             tileColor: StreamChatTheme.of(context).colorTheme.appBg,
             separatorColor: StreamChatTheme.of(context).colorTheme.disabled,
