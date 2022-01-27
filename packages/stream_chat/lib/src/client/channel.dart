@@ -825,7 +825,7 @@ class Channel {
     final now = DateTime.now();
     final user = _client.state.currentUser;
 
-    final latestReactions = [...message.latestReactions ?? <Reaction>[]];
+    var latestReactions = [...message.latestReactions ?? <Reaction>[]];
     if (enforceUnique) {
       latestReactions.removeWhere((it) => it.userId == user!.id);
     }
@@ -839,8 +839,8 @@ class Channel {
       extraData: extraData,
     );
 
-    // Inserting at the 0th index as it's the latest reaction
-    latestReactions
+    latestReactions = latestReactions
+      // Inserting at the 0th index as it's the latest reaction
       ..insert(0, newReaction)
       ..take(10);
     final ownReactions = enforceUnique
