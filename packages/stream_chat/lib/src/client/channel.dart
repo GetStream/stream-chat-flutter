@@ -1615,8 +1615,17 @@ class ChannelClientState {
     _subscriptions.add(_channel.on(EventType.reactionDeleted).listen((event) {
       final oldMessage =
           messages.firstWhereOrNull((it) => it.id == event.message?.id);
+      final reaction = event.reaction;
+      final ownReactions = oldMessage?.ownReactions
+          ?.whereNot((it) =>
+              it.type == reaction?.type &&
+              it.score == reaction?.score &&
+              it.messageId == reaction?.messageId &&
+              it.userId == reaction?.userId &&
+              it.extraData == reaction?.extraData)
+          .toList(growable: false);
       final message = event.message!.copyWith(
-        ownReactions: oldMessage?.ownReactions,
+        ownReactions: ownReactions,
       );
       addMessage(message);
     }));
