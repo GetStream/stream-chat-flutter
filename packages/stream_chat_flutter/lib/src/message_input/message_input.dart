@@ -13,6 +13,7 @@ import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
@@ -215,6 +216,9 @@ class MessageInput extends StatefulWidget {
     this.shouldKeepFocusAfterMessage,
     this.validator = _defaultValidator,
     this.restorationId,
+    this.enableSafeArea,
+    this.elevation,
+    this.shadow,
   }) : super(key: key);
 
   /// List of options for showing overlays.
@@ -330,6 +334,15 @@ class MessageInput extends StatefulWidget {
 
   /// Restoration ID to save and restore the state of the MessageInput.
   final String? restorationId;
+
+  /// Wrap [MessageInput] with a [SafeArea widget]
+  final bool? enableSafeArea;
+
+  /// Elevation of the [MessageInput]
+  final double? elevation;
+
+  /// Shadow for the [MessageInput] widget
+  final BoxShadow? shadow;
 
   static bool _defaultValidator(Message message) =>
       message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
@@ -495,8 +508,16 @@ class MessageInputState extends State<MessageInput>
         Widget child = DecoratedBox(
           decoration: BoxDecoration(
             color: _messageInputTheme.inputBackgroundColor,
+            boxShadow: widget.shadow == null
+                ? (_streamChatTheme.messageInputTheme.shadow == null
+                    ? []
+                    : [_streamChatTheme.messageInputTheme.shadow!])
+                : [widget.shadow!],
           ),
-          child: SafeArea(
+          child: SimpleSafeArea(
+            enabled: widget.enableSafeArea ??
+                _streamChatTheme.messageInputTheme.enableSafeArea ??
+                true,
             child: GestureDetector(
               onPanUpdate: (details) {
                 if (details.delta.dy > 0) {
@@ -568,7 +589,9 @@ class MessageInputState extends State<MessageInput>
         );
         if (!_isEditing) {
           child = Material(
-            elevation: 8,
+            elevation: widget.elevation ??
+                _streamChatTheme.messageInputTheme.elevation ??
+                8,
             child: child,
           );
         }
