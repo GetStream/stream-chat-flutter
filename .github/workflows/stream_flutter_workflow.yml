@@ -2,7 +2,7 @@ name: stream_flutter_workflow
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  flutter_version: "2.5.1"
+  flutter_version: "2.8.1"
   melos_version: "1.2.0"
 
 on:
