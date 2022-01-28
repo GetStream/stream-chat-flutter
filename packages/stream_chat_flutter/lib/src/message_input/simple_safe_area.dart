@@ -9,7 +9,10 @@ class SimpleSafeArea extends StatefulWidget {
     required this.child,
   }) : super(key: key);
 
+  /// Wrap [child] with [SafeArea]
   final bool enabled;
+
+  /// Child widget to wrap
   final Widget child;
 
   @override
