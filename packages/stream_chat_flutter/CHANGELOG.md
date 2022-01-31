@@ -14,6 +14,7 @@
 ✅ Added
 
 - Videos can now be auto-played in `FullScreenMedia`
+- Extra customisation options for `MessageInput`
 
 🔄 Changed
 
