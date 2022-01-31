@@ -687,6 +687,18 @@ class StreamChatClient {
     return response;
   }
 
+  /// Query banned users.
+  Future<QueryBannedUsersResponse> queryBannedUsers({
+    required Filter filter,
+    List<SortOption>? sort,
+    PaginationParams? pagination,
+  }) =>
+      _chatApi.moderation.queryBannedUsers(
+        filter: filter,
+        sort: sort,
+        pagination: pagination,
+      );
+
   /// A message search.
   Future<SearchMessagesResponse> search(
     Filter filter, {

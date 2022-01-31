@@ -62,6 +62,15 @@ QueryUsersResponse _$QueryUsersResponseFromJson(Map<String, dynamic> json) =>
               .toList() ??
           [];
 
+QueryBannedUsersResponse _$QueryBannedUsersResponseFromJson(
+        Map<String, dynamic> json) =>
+    QueryBannedUsersResponse()
+      ..duration = json['duration'] as String?
+      ..bans = (json['bans'] as List<dynamic>?)
+              ?.map((e) => BannedUser.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [];
+
 QueryReactionsResponse _$QueryReactionsResponseFromJson(
         Map<String, dynamic> json) =>
     QueryReactionsResponse()

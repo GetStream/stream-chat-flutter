@@ -1290,6 +1290,21 @@ class Channel {
         pagination: pagination,
       );
 
+  /// Query channel banned users.
+  Future<QueryBannedUsersResponse> queryBannedUsers({
+    Filter? filter,
+    List<SortOption>? sort,
+    PaginationParams? pagination,
+  }) {
+    _checkInitialized();
+    filter ??= Filter.equal('channel_cid', cid!);
+    return _client.queryBannedUsers(
+      filter: filter,
+      sort: sort,
+      pagination: pagination,
+    );
+  }
+
   /// Mutes the channel.
   Future<EmptyResponse> mute({Duration? expiration}) {
     _checkInitialized();
