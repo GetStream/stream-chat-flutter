@@ -1,13 +1,22 @@
 ## Upcoming
 
+🐞 Fixed
+
+- [[#857]](https://github.com/GetStream/stream-chat-flutter/issues/857) Channel now listens for member ban/unban and
+  updates the channel state with the latest data.
+
 🔄 Changed
 
-- `client.location` is now deprecated in favor of the new [edge server](https://getstream.io/blog/chat-edge-infrastructure) and will be removed in v4.0.0.
+- `client.location` is now deprecated in favor of the
+  new [edge server](https://getstream.io/blog/chat-edge-infrastructure) and will be removed in v4.0.0.
+- `channel.banUser`, `channel.unbanUser` is now deprecated in favor of the new `channel.banMember`
+  and `channel.unbanMember` and will be removed in v4.0.0.
 
 ✅ Added
 
 - Added `client.enrichUrl` endpoint for enriching URLs with metadata.
 - Fixed `unreadCount` after removing user from a channel.
+- Added `client.queryBannedUsers`, `channel.queryBannedUsers` endpoint for querying banned users.
 
 ## 3.3.1
 
