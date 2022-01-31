@@ -1296,7 +1296,15 @@ class Channel {
   }
 
   /// Bans the user with given [userID] from the channel.
+  @Deprecated("Use 'banMember' instead")
   Future<EmptyResponse> banUser(
+    String userID,
+    Map<String, dynamic> options,
+  ) =>
+      banMember(userID, options);
+
+  /// Bans the member with given [userID] from the channel.
+  Future<EmptyResponse> banMember(
     String userID,
     Map<String, dynamic> options,
   ) async {
@@ -1310,7 +1318,11 @@ class Channel {
   }
 
   /// Remove the ban for the user with given [userID] in the channel.
-  Future<EmptyResponse> unbanUser(String userID) async {
+  @Deprecated("Use 'unbanMember' instead")
+  Future<EmptyResponse> unbanUser(String userID) => unbanMember(userID);
+
+  /// Remove the ban for the member with given [userID] in the channel.
+  Future<EmptyResponse> unbanMember(String userID) async {
     _checkInitialized();
     return _client.unbanUser(userID, {
       'type': type,
