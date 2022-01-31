@@ -13,6 +13,10 @@
 - Added `client.enrichUrl` endpoint for enriching URLs with metadata.
 - Fixed `unreadCount` after removing user from a channel.
 
+🐞 Fixed
+
+- [[#871]](https://github.com/GetStream/stream-chat-flutter/issues/871) Fixed thread message deletion.
+
 ## 3.3.1
 
 🐞 Fixed
