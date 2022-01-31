@@ -1,8 +1,3 @@
-import 'package:stream_chat/src/core/models/channel_config.dart';
-import 'package:stream_chat/src/core/models/channel_state.dart';
-import 'package:stream_chat/src/core/models/command.dart';
-import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 

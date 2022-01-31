@@ -2,9 +2,6 @@ import 'dart:math';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/reaction_icon.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Creates reaction bubble widget for displaying over messages

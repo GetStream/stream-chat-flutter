@@ -1,15 +1,7 @@
 import 'dart:ui';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/message_action.dart';
-import 'package:stream_chat_flutter/src/reaction_picker.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/theme/themes.dart';
-import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Constructs a modal with actions for a message
 class MessageActionsModal extends StatefulWidget {

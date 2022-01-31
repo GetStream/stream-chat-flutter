@@ -1,5 +1,4 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -2066,7 +2065,7 @@ void main() {
             {'type': channelType, 'id': channelId, ...options},
           )).thenAnswer((_) async => EmptyResponse());
 
-      final res = await channel.banUser(userId, options);
+      final res = await channel.banMember(userId, options);
 
       expect(res, isNotNull);
 
@@ -2082,7 +2081,7 @@ void main() {
       when(() => client.unbanUser(userId, any()))
           .thenAnswer((_) async => EmptyResponse());
 
-      final res = await channel.unbanUser(userId);
+      final res = await channel.unbanMember(userId);
 
       expect(res, isNotNull);
 
