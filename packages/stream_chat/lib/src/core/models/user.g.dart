@@ -21,6 +21,9 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       online: json['online'] as bool? ?? false,
       banned: json['banned'] as bool? ?? false,
+      banExpires: json['ban_expires'] == null
+          ? null
+          : DateTime.parse(json['ban_expires'] as String),
       teams:
           (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??
               const [],
@@ -45,7 +48,8 @@ Map<String, dynamic> _$UserToJson(User instance) {
   writeNotNull('last_active', readonly(instance.lastActive));
   writeNotNull('online', readonly(instance.online));
   writeNotNull('banned', readonly(instance.banned));
-  val['extra_data'] = instance.extraData;
+  writeNotNull('ban_expires', readonly(instance.banExpires));
   writeNotNull('language', instance.language);
+  val['extra_data'] = instance.extraData;
   return val;
 }
