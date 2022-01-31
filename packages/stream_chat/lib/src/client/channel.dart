@@ -1515,6 +1515,10 @@ class ChannelClientState {
 
     _listenMemberRemoved();
 
+    _listenMemberBanned();
+
+    _listenMemberUnbanned();
+
     _startCleaning();
 
     _startCleaningPinnedMessages();
@@ -1613,6 +1617,54 @@ class ChannelClientState {
           ?.deleteMessageByCid(channel.cid);
       truncate();
     }));
+  }
+
+  void _listenMemberBanned() {
+    _subscriptions.add(_channel
+        .on(EventType.userBanned)
+        .where((it) => it.cid != null) // filters channel ban from app ban
+        .listen(
+      (event) async {
+        final user = event.user!;
+        final member = await _channel
+            .queryMembers(filter: Filter.equal('id', user.id))
+            .then((it) => it.members.first);
+
+        _updateMember(member);
+      },
+    ));
+  }
+
+  void _listenMemberUnbanned() {
+    _subscriptions.add(_channel
+        .on(EventType.userUnbanned)
+        .where((it) => it.cid != null) // filters channel ban from app ban
+        .listen(
+      (event) async {
+        final user = event.user!;
+        final member = await _channel
+            .queryMembers(filter: Filter.equal('id', user.id))
+            .then((it) => it.members.first);
+
+        _updateMember(member);
+      },
+    ));
+  }
+
+  void _updateMember(Member member) {
+    final currentMembers = [...members];
+    final memberIndex = currentMembers.indexWhere(
+      (m) => m.userId == member.userId,
+    );
+
+    if (memberIndex == -1) return;
+    currentMembers[memberIndex] = member;
+
+    updateChannelState(
+      channelState.copyWith(
+        members: currentMembers,
+      ),
+    );
   }
 
   /// Flag which indicates if [ChannelClientState] contain latest/recent messages or not.
