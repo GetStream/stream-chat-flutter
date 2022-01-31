@@ -4,15 +4,9 @@ import 'dart:math';
 import 'package:collection/collection.dart'
     show IterableExtension, ListEquality;
 import 'package:dio/dio.dart';
-import 'package:rate_limiter/rate_limiter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
-import 'package:stream_chat/src/core/error/error.dart';
-import 'package:stream_chat/src/core/models/attachment_file.dart';
-import 'package:stream_chat/src/core/models/channel_state.dart';
-import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
-import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 /// Class that manages a specific channel.

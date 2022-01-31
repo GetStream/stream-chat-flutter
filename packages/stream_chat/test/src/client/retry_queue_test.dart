@@ -4,7 +4,6 @@ import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/event_type.dart';
-import 'package:test/scaffolding.dart';
 import 'package:test/test.dart';
 
 import '../mocks.dart';
