@@ -1,5 +1,9 @@
 ## Upcoming
 
+🐞 Fixed
+
+- [[#748]](https://github.com/GetStream/stream-chat-flutter/issues/748) `Message.user` are now also included while saving users in persistence.
+
 🔄 Changed
 
 - `client.location` is now deprecated in favor of the new [edge server](https://getstream.io/blog/chat-edge-infrastructure) and will be removed in v4.0.0.
