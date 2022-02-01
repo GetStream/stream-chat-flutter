@@ -27,7 +27,7 @@
 
 🐞 Fixed
 
-- Avoid invalid url
+- Add check for invalid image URLs
 
 ## 3.3.1
 
