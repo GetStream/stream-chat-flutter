@@ -4,10 +4,14 @@
 <dict>
 	<key>CFBundleLocalizations</key>
 	<array>
-		<string>en</string>
-		<string>it</string>
-		<string>fr</string>
-		<string>hi</string>
+    <string>en</string>
+    <string>hi</string>
+    <string>fr</string>
+    <string>it</string>
+    <string>es</string>
+    <string>ja</string>
+    <string>ko</string>
+    <string>pt</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
