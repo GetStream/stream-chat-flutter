@@ -23,6 +23,8 @@
 
 - [[#871]](https://github.com/GetStream/stream-chat-flutter/issues/871) Fixed thread message deletion.
 
+- [[#846]](https://github.com/GetStream/stream-chat-flutter/issues/846) Fixed `message.ownReactions` getting truncated when receiving a reaction event.
+
 ## 3.3.1
 
 🐞 Fixed
