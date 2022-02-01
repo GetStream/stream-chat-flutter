@@ -44,6 +44,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The widget renders the ui based on the first ancestor of type
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
+
+@Deprecated(
+  "'ChannelName' is deprecated and shouldn't be used. "
+  "Please use 'StreamChannelName' instead.",
+)
 class ChannelAvatar extends StatelessWidget {
   /// Instantiate a new ChannelImage
   const ChannelAvatar({

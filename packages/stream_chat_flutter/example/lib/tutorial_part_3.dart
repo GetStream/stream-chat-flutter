@@ -130,7 +130,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
           ),
         );
       },
-      leading: ChannelAvatar(
+      leading: StreamChannelAvatar(
         channel: channel,
       ),
       title: StreamChannelName(

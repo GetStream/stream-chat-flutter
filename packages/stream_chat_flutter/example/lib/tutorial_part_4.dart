@@ -97,24 +97,21 @@ class ChannelPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const ChannelHeader(),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: MessageListView(
-              threadBuilder: (_, parentMessage) => ThreadPage(
-                parent: parentMessage,
+  Widget build(BuildContext context) => Scaffold(
+        appBar: const ChannelHeader(),
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: MessageListView(
+                threadBuilder: (_, parentMessage) => ThreadPage(
+                  parent: parentMessage,
+                ),
               ),
             ),
-          ),
-          const MessageInput(),
-        ],
-      ),
-    );
-  }
+            const MessageInput(),
+          ],
+        ),
+      );
 }
 
 class ThreadPage extends StatelessWidget {

@@ -52,6 +52,10 @@ typedef ViewInfoCallback = void Function(Channel);
 /// The widget components render the ui based on the first ancestor of
 /// type [StreamChatTheme].
 /// Modify it to change the widget appearance.
+@Deprecated(
+  "'ChannelListView' is deprecated and shouldn't be used. "
+  "Please use 'StreamChannelListView' instead.",
+)
 class ChannelListView extends StatefulWidget {
   /// Instantiate a new ChannelListView
   ChannelListView({
