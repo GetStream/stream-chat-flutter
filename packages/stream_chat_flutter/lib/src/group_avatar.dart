@@ -16,6 +16,7 @@ class GroupAvatar extends StatelessWidget {
     this.selectionThickness = 4,
   }) : super(key: key);
 
+  /// The channel of the avatar
   final Channel? channel;
 
   /// List of images to display

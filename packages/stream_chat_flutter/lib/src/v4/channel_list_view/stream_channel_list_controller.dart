@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter/src/paged_value_notifier.dart';
@@ -6,6 +7,8 @@ import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list
 
 /// The default channel page limit to load.
 const defaultChannelPagedLimit = 10;
+
+const _kDefaultBackendPaginationLimit = 30;
 
 /// A controller for a Channel list.
 ///
@@ -102,7 +105,10 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
 
   @override
   Future<void> doInitialLoad() async {
-    final limit = this.limit * defaultInitialPagedLimitMultiplier;
+    final limit = min(
+      this.limit * defaultInitialPagedLimitMultiplier,
+      _kDefaultBackendPaginationLimit,
+    );
     try {
       await for (final channels in client.queryChannels(
         filter: filter,

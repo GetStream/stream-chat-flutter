@@ -68,7 +68,8 @@ class StreamChannelListTile extends StatelessWidget {
   /// {@template flutter.material.ListTile.tileColor}
   /// Defines the background color of `ListTile`.
   ///
-  /// When the value is null, the `tileColor` is set to [ListTileTheme.tileColor]
+  /// When the value is null,
+  /// the `tileColor` is set to [ListTileTheme.tileColor]
   /// if it's not null and to [Colors.transparent] if it's null.
   /// {@endtemplate}
   final Color? tileColor;

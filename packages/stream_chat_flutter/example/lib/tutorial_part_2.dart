@@ -92,26 +92,23 @@ class _ChannelListPageState extends State<ChannelListPage> {
   );
 
   @override
-  // ignore: prefer_expression_function_bodies
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: _controller.refresh,
-        child: StreamChannelListView(
-          controller: _controller,
-          onChannelTap: (channel) => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => StreamChannel(
-                channel: channel,
-                child: const ChannelPage(),
+  Widget build(BuildContext context) => Scaffold(
+        body: RefreshIndicator(
+          onRefresh: _controller.refresh,
+          child: StreamChannelListView(
+            controller: _controller,
+            onChannelTap: (channel) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StreamChannel(
+                  channel: channel,
+                  child: const ChannelPage(),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class ChannelPage extends StatelessWidget {
@@ -120,18 +117,15 @@ class ChannelPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const ChannelHeader(),
-      body: Column(
-        children: const <Widget>[
-          Expanded(
-            child: MessageListView(),
-          ),
-          MessageInput(),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+        appBar: const ChannelHeader(),
+        body: Column(
+          children: const <Widget>[
+            Expanded(
+              child: MessageListView(),
+            ),
+            MessageInput(),
+          ],
+        ),
+      );
 }

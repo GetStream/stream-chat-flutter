@@ -229,8 +229,9 @@ const _kDefaultChannelInfoBottomSheetShape = RoundedRectangleBorder(
 /// The [transitionAnimationController] controls the bottom sheet's entrance and
 /// exit animations if provided.
 ///
-/// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
-/// sheet. This is particularly useful in the case that a user wants to observe
+/// The optional `routeSettings` parameter sets the [RouteSettings]
+/// of the modal bottom sheet sheet.
+/// This is particularly useful in the case that a user wants to observe
 /// [PopupRoute]s within a [NavigatorObserver].
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to

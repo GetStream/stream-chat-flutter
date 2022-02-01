@@ -57,6 +57,10 @@ export 'src/utils.dart';
 // v4
 export 'src/v4/channel_list_view/stream_channel_list_controller.dart';
 export 'src/v4/channel_list_view/stream_channel_list_event_handler.dart';
+export 'src/v4/channel_list_view/stream_channel_list_loading_tile.dart';
+export 'src/v4/channel_list_view/stream_channel_list_tile.dart';
 export 'src/v4/channel_list_view/stream_channel_list_view.dart';
+export 'src/v4/stream_channel_avatar.dart';
 export 'src/v4/stream_channel_info_bottom_sheet.dart';
+export 'src/v4/stream_channel_name.dart';
 export 'src/visible_footnote.dart';

@@ -143,9 +143,9 @@ class StreamChannelListView extends StatefulWidget {
   /// only scroll the view if it has sufficient content. See [physics].
   ///
   /// Also when true, the scroll view is used for default [ScrollAction]s. If a
-  /// ScrollAction is not handled by an otherwise focused part of the application,
-  /// the ScrollAction will be evaluated using this scroll view, for example,
-  /// when executing [Shortcuts] key events like page up and down.
+  /// ScrollAction is not handled by an otherwise focused part of the
+  /// application, the ScrollAction will be evaluated using this scroll view,
+  /// for example, when executing [Shortcuts] key events like page up and down.
   ///
   /// On iOS, this also identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.

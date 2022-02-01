@@ -146,8 +146,8 @@ class StreamChannelListEventHandler {
   /// Function which gets called for the event
   /// [EventType.notificationMessageNew].
   ///
-  /// This event is fired when a new message is created in a channel which we are
-  /// not currently watching.
+  /// This event is fired when a new message is created in a channel
+  /// which we are not currently watching.
   ///
   /// By default, this adds the channel and moves it to the top of list.
   void onNotificationMessageNew(

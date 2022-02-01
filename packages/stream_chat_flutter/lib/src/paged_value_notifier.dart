@@ -5,8 +5,10 @@ import 'package:stream_chat/stream_chat.dart' show StreamChatError;
 
 part 'paged_value_notifier.freezed.dart';
 
+/// Default initial page size multiplier.
 const defaultInitialPagedLimitMultiplier = 3;
 
+/// Value listenable for paged data.
 typedef PagedValueListenableBuilder<Key, Value>
     = ValueListenableBuilder<PagedValue<Key, Value>>;
 
@@ -57,6 +59,7 @@ abstract class PagedValueNotifier<Key, Value>
     final nextPageKey = lastValue.nextPageKey;
     // resetting the error
     value = lastValue.copyWith(error: null);
+    // ignore: null_check_on_nullable_type_parameter
     return loadMore(nextPageKey!);
   }
 
@@ -78,10 +81,9 @@ abstract class PagedValueNotifier<Key, Value>
   Future<void> loadMore(Key nextPageKey);
 }
 
+/// Paged value that can be used with [PagedValueNotifier].
 @freezed
 abstract class PagedValue<Key, Value> with _$PagedValue<Key, Value> {
-  const PagedValue._();
-
   /// Represents the success state of the [PagedValue]
   // @Assert(
   //   'nextPageKey != null',
@@ -97,6 +99,8 @@ abstract class PagedValue<Key, Value> with _$PagedValue<Key, Value> {
     /// The current error, if any.
     StreamChatError? error,
   }) = Success<Key, Value>;
+
+  const PagedValue._();
 
   /// Represents the loading state of the [PagedValue].
   const factory PagedValue.loading() = Loading;
