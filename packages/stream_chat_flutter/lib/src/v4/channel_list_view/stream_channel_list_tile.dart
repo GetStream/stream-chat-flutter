@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat/stream_chat.dart' show Channel;
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/sending_indicator.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';

@@ -60,7 +60,8 @@ class ChannelInfo extends StatelessWidget {
       var text = context.translations.membersCountText(memberCount);
       final onlineCount =
           members?.where((m) => m.user?.online == true).length ?? 0;
-      if (onlineCount > 0) {
+      if (channel.ownCapabilities.contains(PermissionType.connectEvents) &&
+          onlineCount > 0) {
         text += ', ${context.translations.watchersCountText(onlineCount)}';
       }
       alternativeWidget = Text(

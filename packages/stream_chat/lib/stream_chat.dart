@@ -7,6 +7,7 @@ export 'package:dio/src/options.dart';
 export 'package:dio/src/options.dart' show ProgressCallback;
 export 'package:logging/logging.dart' show Logger, Level;
 export 'package:rate_limiter/rate_limiter.dart';
+export 'package:uuid/uuid.dart';
 
 export './src/core/api/attachment_file_uploader.dart'
     show AttachmentFileUploader;
@@ -36,6 +37,7 @@ export './src/core/util/extension.dart';
 export './src/db/chat_persistence_client.dart';
 export './src/event_type.dart';
 export './src/location.dart';
+export './src/permission_type.dart';
 export './src/ws/connection_status.dart';
 export 'src/client/channel.dart';
 export 'src/client/client.dart';

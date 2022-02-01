@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added `MessageInputController` to hold `Message` related data.
+
 🐞 Fixed
 
 - Do not move a channel to top if the new message is from a thread.

@@ -13,6 +13,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
       final themeData = ThemeData();
 
       when(() => client.state).thenReturn(clientState);
@@ -33,13 +34,16 @@ void main() {
           home: StreamChat(
             client: client,
             streamChatThemeData: streamTheme,
-            child: MessageReactionsModal(
-              messageWidget: const Text(
-                'test',
-                key: Key('MessageWidget'),
+            child: StreamChannel(
+              channel: channel,
+              child: MessageReactionsModal(
+                messageWidget: const Text(
+                  'test',
+                  key: Key('MessageWidget'),
+                ),
+                message: message,
+                messageTheme: streamTheme.ownMessageTheme,
               ),
-              message: message,
-              messageTheme: streamTheme.ownMessageTheme,
             ),
           ),
         ),
@@ -58,6 +62,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
       final themeData = ThemeData();
 
       when(() => client.state).thenReturn(clientState);
@@ -89,16 +94,19 @@ void main() {
           home: StreamChat(
             client: client,
             streamChatThemeData: streamTheme,
-            child: MessageReactionsModal(
-              messageWidget: const Text(
-                'test',
-                key: Key('MessageWidget'),
+            child: StreamChannel(
+              channel: channel,
+              child: MessageReactionsModal(
+                messageWidget: const Text(
+                  'test',
+                  key: Key('MessageWidget'),
+                ),
+                message: message,
+                messageTheme: streamTheme.ownMessageTheme,
+                reverse: true,
+                showReactions: false,
+                onUserAvatarTap: onUserAvatarTap,
               ),
-              message: message,
-              messageTheme: streamTheme.ownMessageTheme,
-              reverse: true,
-              showReactions: false,
-              onUserAvatarTap: onUserAvatarTap,
             ),
           ),
         ),

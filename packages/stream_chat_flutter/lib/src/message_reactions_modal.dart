@@ -13,7 +13,7 @@ class MessageReactionsModal extends StatelessWidget {
     required this.message,
     required this.messageWidget,
     required this.messageTheme,
-    this.showReactions = true,
+    this.showReactions,
     this.reverse = false,
     this.onUserAvatarTap,
   }) : super(key: key);
@@ -31,7 +31,7 @@ class MessageReactionsModal extends StatelessWidget {
   final bool reverse;
 
   /// Flag to show reactions on message
-  final bool showReactions;
+  final bool? showReactions;
 
   /// Callback when user avatar is tapped
   final void Function(User)? onUserAvatarTap;
@@ -40,6 +40,10 @@ class MessageReactionsModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final user = StreamChat.of(context).currentUser;
+    final _userPermissions = StreamChannel.of(context).channel.ownCapabilities;
+
+    final hasReactionPermission =
+        _userPermissions.contains(PermissionType.sendReaction);
 
     final roughMaxSize = size.width * 2 / 3;
     var messageTextLength = message.text!.length;
@@ -71,7 +75,7 @@ class MessageReactionsModal extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              if (showReactions &&
+              if ((showReactions ?? hasReactionPermission) &&
                   (message.status == MessageSendingStatus.sent))
                 Align(
                   alignment: Alignment(

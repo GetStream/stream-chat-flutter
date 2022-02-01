@@ -294,6 +294,18 @@ class Channel {
     return data;
   }
 
+  /// List of user permissions on this channel
+  List<String> get ownCapabilities =>
+      state?._channelState.channel?.ownCapabilities ?? [];
+
+  /// List of user permissions on this channel
+  Stream<List<String>> get ownCapabilitiesStream {
+    _checkInitialized();
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.ownCapabilities ?? [])
+        .distinct();
+  }
+
   /// Channel extra data as a stream.
   Stream<Map<String, Object?>> get extraDataStream {
     _checkInitialized();
@@ -487,6 +499,7 @@ class Channel {
   Future<SendMessageResponse> sendMessage(
     Message message, {
     bool skipPush = false,
+    bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
     // Cancelling previous completer in case it's called again in the process
@@ -534,6 +547,7 @@ class Channel {
         id!,
         type,
         skipPush: skipPush,
+        skipEnrichUrl: skipEnrichUrl,
       );
       state!.addMessage(response.message);
       if (cooldown > 0) cooldownStartedAt = DateTime.now();
@@ -550,7 +564,10 @@ class Channel {
   ///
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually updating the message.
-  Future<UpdateMessageResponse> updateMessage(Message message) async {
+  Future<UpdateMessageResponse> updateMessage(
+    Message message, {
+    bool skipEnrichUrl = false,
+  }) async {
     final originalMessage = message;
 
     // Cancelling previous completer in case it's called again in the process
@@ -588,7 +605,10 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
       }
 
-      final response = await _client.updateMessage(message);
+      final response = await _client.updateMessage(
+        message,
+        skipEnrichUrl: skipEnrichUrl,
+      );
 
       final m = response.message.copyWith(
         ownReactions: message.ownReactions,
@@ -618,12 +638,14 @@ class Channel {
     Message message, {
     Map<String, Object?>? set,
     List<String>? unset,
+    bool skipEnrichUrl = false,
   }) async {
     try {
       final response = await _client.partialUpdateMessage(
         message.id,
         set: set,
         unset: unset,
+        skipEnrichUrl: skipEnrichUrl,
       );
 
       final updatedMessage = response.message.copyWith(
@@ -1572,7 +1594,9 @@ class ChannelClientState {
     _subscriptions.add(_channel.on(EventType.channelUpdated).listen((Event e) {
       final channel = e.channel!;
       updateChannelState(channelState.copyWith(
-        channel: channel,
+        channel: channel.copyWith(
+          ownCapabilities: channelState.channel?.ownCapabilities,
+        ),
         members: channel.members,
       ));
     }));

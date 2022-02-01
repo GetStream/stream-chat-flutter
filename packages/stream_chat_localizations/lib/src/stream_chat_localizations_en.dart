@@ -61,6 +61,10 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get sendMessagePermissionError =>
+      'You don\'t have permission to send messages';
+
+  @override
   String get emptyMessagesText => 'There are no messages currently';
 
   @override
@@ -368,4 +372,11 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get slowModeOnLabel => 'Slow mode ON';
+
+  @override
+  String get linkDisabledDetails =>
+      'Sending links is not allowed in this conversation.';
+
+  @override
+  String get linkDisabledError => 'Links are disabled';
 }

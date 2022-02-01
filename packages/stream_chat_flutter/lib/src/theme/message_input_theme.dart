@@ -65,6 +65,10 @@ class MessageInputThemeData with Diagnosticable {
     this.idleBorderGradient,
     this.borderRadius,
     this.expandButtonColor,
+    this.linkHighlightColor,
+    this.enableSafeArea,
+    this.elevation,
+    this.shadow,
   });
 
   /// Duration of the [MessageInput] send button animation
@@ -72,6 +76,9 @@ class MessageInputThemeData with Diagnosticable {
 
   /// Background color of [MessageInput] send button
   final Color? sendButtonColor;
+
+  /// Color of a link
+  final Color? linkHighlightColor;
 
   /// Background color of [MessageInput] action buttons
   final Color? actionButtonColor;
@@ -103,6 +110,15 @@ class MessageInputThemeData with Diagnosticable {
   /// Border radius of [MessageInput]
   final BorderRadius? borderRadius;
 
+  /// Wrap [MessageInput] with a [SafeArea widget]
+  final bool? enableSafeArea;
+
+  /// Elevation of the [MessageInput]
+  final double? elevation;
+
+  /// Shadow for the [MessageInput] widget
+  final BoxShadow? shadow;
+
   /// Returns a new [MessageInputThemeData] replacing some of its properties
   MessageInputThemeData copyWith({
     Duration? sendAnimationDuration,
@@ -110,6 +126,7 @@ class MessageInputThemeData with Diagnosticable {
     Color? actionButtonColor,
     Color? sendButtonColor,
     Color? actionButtonIdleColor,
+    Color? linkHighlightColor,
     Color? sendButtonIdleColor,
     Color? expandButtonColor,
     TextStyle? inputTextStyle,
@@ -117,6 +134,9 @@ class MessageInputThemeData with Diagnosticable {
     Gradient? activeBorderGradient,
     Gradient? idleBorderGradient,
     BorderRadius? borderRadius,
+    bool? enableSafeArea,
+    double? elevation,
+    BoxShadow? shadow,
   }) =>
       MessageInputThemeData(
         sendAnimationDuration:
@@ -133,6 +153,10 @@ class MessageInputThemeData with Diagnosticable {
         activeBorderGradient: activeBorderGradient ?? this.activeBorderGradient,
         idleBorderGradient: idleBorderGradient ?? this.idleBorderGradient,
         borderRadius: borderRadius ?? this.borderRadius,
+        linkHighlightColor: linkHighlightColor ?? this.linkHighlightColor,
+        enableSafeArea: enableSafeArea ?? this.enableSafeArea,
+        elevation: elevation ?? this.elevation,
+        shadow: shadow ?? this.shadow,
       );
 
   /// Linearly interpolate from one [MessageInputThemeData] to another.
@@ -161,6 +185,11 @@ class MessageInputThemeData with Diagnosticable {
             Color.lerp(a.sendButtonIdleColor, b.sendButtonIdleColor, t),
         sendAnimationDuration: a.sendAnimationDuration,
         inputDecoration: a.inputDecoration,
+        linkHighlightColor:
+            Color.lerp(a.linkHighlightColor, b.linkHighlightColor, t),
+        enableSafeArea: a.enableSafeArea,
+        elevation: Tween(begin: a.elevation, end: b.elevation).transform(t),
+        shadow: BoxShadow.lerp(a.shadow, b.shadow, t),
       );
 
   /// Merges [this] [MessageInputThemeData] with the [other]
@@ -181,6 +210,10 @@ class MessageInputThemeData with Diagnosticable {
       idleBorderGradient: other.idleBorderGradient,
       borderRadius: other.borderRadius,
       expandButtonColor: other.expandButtonColor,
+      linkHighlightColor: other.linkHighlightColor,
+      enableSafeArea: other.enableSafeArea,
+      elevation: other.elevation,
+      shadow: other.shadow,
     );
   }
 
@@ -200,7 +233,11 @@ class MessageInputThemeData with Diagnosticable {
           inputDecoration == other.inputDecoration &&
           idleBorderGradient == other.idleBorderGradient &&
           activeBorderGradient == other.activeBorderGradient &&
-          borderRadius == other.borderRadius;
+          borderRadius == other.borderRadius &&
+          linkHighlightColor == other.linkHighlightColor &&
+          enableSafeArea == other.enableSafeArea &&
+          elevation == other.elevation &&
+          shadow == other.shadow;
 
   @override
   int get hashCode =>
@@ -215,7 +252,11 @@ class MessageInputThemeData with Diagnosticable {
       inputDecoration.hashCode ^
       idleBorderGradient.hashCode ^
       activeBorderGradient.hashCode ^
-      borderRadius.hashCode;
+      borderRadius.hashCode ^
+      linkHighlightColor.hashCode ^
+      elevation.hashCode ^
+      shadow.hashCode ^
+      enableSafeArea.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -232,6 +273,10 @@ class MessageInputThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('activeBorderGradient', activeBorderGradient))
       ..add(DiagnosticsProperty('idleBorderGradient', idleBorderGradient))
       ..add(DiagnosticsProperty('borderRadius', borderRadius))
-      ..add(ColorProperty('expandButtonColor', expandButtonColor));
+      ..add(ColorProperty('expandButtonColor', expandButtonColor))
+      ..add(ColorProperty('linkHighlightColor', linkHighlightColor))
+      ..add(DiagnosticsProperty('elevation', elevation))
+      ..add(DiagnosticsProperty('shadow', shadow))
+      ..add(DiagnosticsProperty('enableSafeArea', enableSafeArea));
   }
 }

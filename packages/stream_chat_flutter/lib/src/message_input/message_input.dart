@@ -8,13 +8,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/media_list_view.dart';
+import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
+import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/user_mentions_overlay.dart';
@@ -24,6 +24,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_compress/video_compress.dart';
 
 export 'package:video_compress/video_compress.dart' show VideoQuality;
+
+/// A function that returns true if the message is valid and can be sent.
+typedef MessageValidator = bool Function(Message message);
 
 /// A callback that can be passed to [MessageInput.onError].
 ///
@@ -39,13 +42,14 @@ typedef ErrorListener = void Function(
 ///
 /// This callback should not throw.
 ///
-/// It exists merely for showing custom error, and should not be used otherwise.
+/// It exists merely for showing a custom error, and should not be used
+/// otherwise.
 typedef AttachmentLimitExceedListener = void Function(
   int limit,
   String error,
 );
 
-/// Builder for attachment thumbnails
+/// Builder for attachment thumbnails.
 typedef AttachmentThumbnailBuilder = Widget Function(
   BuildContext,
   Attachment,
@@ -74,7 +78,21 @@ typedef ActionButtonBuilder = Widget Function(
   IconButton defaultActionButton,
 );
 
-/// Location for actions on the [MessageInput]
+/// Widget builder for widgets that may require data from the
+/// [MessageInputController].
+typedef MessageRelatedBuilder = Widget Function(
+  BuildContext context,
+  MessageInputController messageInputController,
+);
+
+/// Widget builder for a custom attachment picker.
+typedef AttachmentsPickerBuilder = Widget Function(
+  BuildContext context,
+  MessageInputController messageInputController,
+  StreamAttachmentPicker defaultPicker,
+);
+
+/// Location for actions on the [MessageInput].
 enum ActionsLocation {
   /// Align to left
   left,
@@ -89,7 +107,7 @@ enum ActionsLocation {
   rightInside,
 }
 
-/// Default attachments for widget
+/// Default attachments for widget.
 enum DefaultAttachmentTypes {
   /// Image Attachment
   image,
@@ -101,7 +119,7 @@ enum DefaultAttachmentTypes {
   file,
 }
 
-/// Available locations for the sendMessage button relative to the textField
+/// Available locations for the `sendMessage` button relative to the textField.
 enum SendButtonLocation {
   /// inside the textField
   inside,
@@ -114,17 +132,17 @@ const _kMinMediaPickerSize = 360.0;
 
 const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 
-/// Inactive state
+/// Inactive state:
 ///
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input_paint.png)
 ///
-/// Focused state
+/// Focused state:
 ///
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input2.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input2_paint.png)
 ///
-/// Widget used to enter the message and add attachments
+/// Widget used to enter a message and add attachments:
 ///
 /// ```dart
 /// class ChannelPage extends StatelessWidget {
@@ -159,27 +177,21 @@ const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 /// as the bottom widget.
 ///
 /// The widget renders the ui based on the first ancestor of
-/// type [StreamChatTheme].
-/// Modify it to change the widget appearance.
+/// type [StreamChatTheme]. Modify it to change the widget appearance.
 class MessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
   const MessageInput({
     Key? key,
     this.onMessageSent,
     this.preMessageSending,
-    this.parentMessage,
-    this.editMessage,
     this.maxHeight = 150,
     this.keyboardType = TextInputType.multiline,
     this.disableAttachments = false,
-    this.initialMessage,
-    this.textEditingController,
+    this.messageInputController,
     this.actions = const [],
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
     this.focusNode,
-    this.quotedMessage,
-    this.onQuotedMessageCleared,
     this.sendButtonLocation = SendButtonLocation.outside,
     this.autofocus = false,
     this.hideSendAsDm = false,
@@ -199,78 +211,67 @@ class MessageInput extends StatefulWidget {
     this.commandButtonBuilder,
     this.customOverlays = const [],
     this.mentionAllAppUsers = false,
+    this.attachmentsPickerBuilder,
+    this.sendButtonBuilder,
     this.shouldKeepFocusAfterMessage,
-  })  : assert(
-          initialMessage == null || editMessage == null,
-          "Can't provide both `initialMessage` and `editMessage`",
-        ),
-        super(key: key);
+    this.validator = _defaultValidator,
+    this.restorationId,
+    this.enableSafeArea,
+    this.elevation,
+    this.shadow,
+  }) : super(key: key);
 
-  /// List of options for showing overlays
+  /// List of options for showing overlays.
   final List<OverlayOptions> customOverlays;
 
-  /// Message to edit
-  final Message? editMessage;
-
-  /// Video quality to use when compressing the videos
+  /// Video quality to use when compressing the videos.
   final VideoQuality compressedVideoQuality;
 
-  /// Frame rate to use when compressing the videos
+  /// Frame rate to use when compressing the videos.
   final int compressedVideoFrameRate;
 
-  /// Max attachment size in bytes
-  /// Defaults to 20 MB
-  /// do not set it if you're using our default CDN
+  /// Max attachment size in bytes:
+  /// - Defaults to 20 MB
+  /// - Do not set it if you're using our default CDN
   final int maxAttachmentSize;
 
-  /// Message to start with
-  final Message? initialMessage;
-
-  /// Function called after sending the message
+  /// Function called after sending the message.
   final void Function(Message)? onMessageSent;
 
-  /// Function called right before sending the message
-  /// Use this to transform the message
+  /// Function called right before sending the message.
+  ///
+  /// Use this to transform the message.
   final FutureOr<Message> Function(Message)? preMessageSending;
 
-  /// Parent message in case of a thread
-  final Message? parentMessage;
-
-  /// Maximum Height for the TextField to grow before it starts scrolling
+  /// Maximum Height for the TextField to grow before it starts scrolling.
   final double maxHeight;
 
-  /// The keyboard type assigned to the TextField
+  /// The keyboard type assigned to the TextField.
   final TextInputType keyboardType;
 
-  /// If true the attachments button will not be displayed
+  /// If true the attachments button will not be displayed.
   final bool disableAttachments;
 
-  /// Use this property to hide/show the commands button
+  /// Use this property to hide/show the commands button.
   final bool showCommandsButton;
 
-  /// Hide send as dm checkbox
+  /// Hide send as dm checkbox.
   final bool hideSendAsDm;
 
-  /// The text controller of the TextField
-  final TextEditingController? textEditingController;
+  /// The text controller of the TextField.
+  final MessageInputController? messageInputController;
 
-  /// List of action widgets
+  /// List of action widgets.
   final List<Widget> actions;
 
-  /// The location of the custom actions
+  /// The location of the custom actions.
   final ActionsLocation actionsLocation;
 
-  /// Map that defines a thumbnail builder for an attachment type
+  /// Map that defines a thumbnail builder for an attachment type.
   final Map<String, AttachmentThumbnailBuilder>? attachmentThumbnailBuilders;
 
-  /// The focus node associated to the TextField
+  /// The focus node associated to the TextField.
   final FocusNode? focusNode;
-
-  ///
-  final Message? quotedMessage;
-
-  ///
-  final VoidCallback? onQuotedMessageCleared;
 
   /// The location of the send button
   final SendButtonLocation sendButtonLocation;
@@ -318,63 +319,126 @@ class MessageInput extends StatefulWidget {
   /// Defaults to false.
   final bool mentionAllAppUsers;
 
+  /// Builds bottom sheet when attachment picker is opened.
+  final AttachmentsPickerBuilder? attachmentsPickerBuilder;
+
+  /// Builder for creating send button
+  final MessageRelatedBuilder? sendButtonBuilder;
+
   /// Defines if the [MessageInput] loses focuses after a message is sent.
   /// The default behaviour keeps focus until a command is enabled.
   final bool? shouldKeepFocusAfterMessage;
 
+  /// A callback function that validates the message.
+  final MessageValidator validator;
+
+  /// Restoration ID to save and restore the state of the MessageInput.
+  final String? restorationId;
+
+  /// Wrap [MessageInput] with a [SafeArea widget]
+  final bool? enableSafeArea;
+
+  /// Elevation of the [MessageInput]
+  final double? elevation;
+
+  /// Shadow for the [MessageInput] widget
+  final BoxShadow? shadow;
+
+  static bool _defaultValidator(Message message) =>
+      message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
+
   @override
   MessageInputState createState() => MessageInputState();
-
-  /// Use this method to get the current [StreamChatState] instance
-  static MessageInputState of(BuildContext context) {
-    MessageInputState? messageInputState;
-    messageInputState = context.findAncestorStateOfType<MessageInputState>();
-    assert(
-      messageInputState != null,
-      'You must have a MessageInput widget as ancestor of your widget tree',
-    );
-    return messageInputState!;
-  }
 }
 
 /// State of [MessageInput]
-class MessageInputState extends State<MessageInput> {
-  final _attachments = <String, Attachment>{};
-  final List<User> _mentionedUsers = [];
-
+class MessageInputState extends State<MessageInput>
+    with RestorationMixin<MessageInput> {
   final _imagePicker = ImagePicker();
-  late final _focusNode = widget.focusNode ?? FocusNode();
+  late FocusNode _focusNode = widget.focusNode ?? FocusNode();
   bool _inputEnabled = true;
-  bool _commandEnabled = false;
+
+  bool get _commandEnabled => _effectiveController.value.command != null;
   bool _showCommandsOverlay = false;
   bool _showMentionsOverlay = false;
 
-  Command? _chosenCommand;
   bool _actionsShrunk = false;
-  bool _sendAsDm = false;
   bool _openFilePickerSection = false;
-  int _filePickerIndex = 0;
-
-  /// The editing controller passed to the input TextField
-  late final TextEditingController textEditingController =
-      widget.textEditingController ?? TextEditingController();
 
   late StreamChatThemeData _streamChatTheme;
   late MessageInputThemeData _messageInputTheme;
 
-  bool get _hasQuotedMessage => widget.quotedMessage != null;
+  bool get _hasQuotedMessage =>
+      _effectiveController.value.quotedMessage != null;
 
-  bool get _messageIsPresent => textEditingController.text.trim().isNotEmpty;
+  bool get _isEditing =>
+      _effectiveController.value.status != MessageSendingStatus.sending;
+
+  RestorableMessageInputController? _controller;
+
+  MessageInputController get _effectiveController =>
+      widget.messageInputController ?? _controller!.value;
+
+  void _createLocalController([Message? message]) {
+    assert(_controller == null, '');
+    _controller = RestorableMessageInputController(message: message);
+  }
+
+  void _registerController() {
+    assert(_controller != null, '');
+
+    registerForRestoration(
+      _controller!,
+      widget.restorationId ?? 'messageInputController',
+    );
+    _effectiveController.textEditingController
+        .removeListener(_onChangedDebounced);
+    _effectiveController.textEditingController.addListener(_onChangedDebounced);
+    if (!_isEditing && _timeOut <= 0) _startSlowMode();
+  }
 
   @override
   void initState() {
     super.initState();
-    if (widget.editMessage != null || widget.initialMessage != null) {
-      _parseExistingMessage(widget.editMessage ?? widget.initialMessage!);
+    if (widget.messageInputController == null) {
+      _createLocalController();
+    } else {
+      _initialiseEffectiveController();
     }
-    textEditingController.addListener(_onChangedDebounced);
     _focusNode.addListener(_focusNodeListener);
   }
+
+  @override
+  void didUpdateWidget(covariant MessageInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.messageInputController == null &&
+        oldWidget.messageInputController != null) {
+      _createLocalController(oldWidget.messageInputController!.value);
+    } else if (widget.messageInputController != null &&
+        oldWidget.messageInputController == null) {
+      unregisterFromRestoration(_controller!);
+      _controller!.dispose();
+      _controller = null;
+      _initialiseEffectiveController();
+    }
+
+    // Update _focusNode
+    if (widget.focusNode != null && oldWidget.focusNode != widget.focusNode) {
+      _focusNode.removeListener(_focusNodeListener);
+      _focusNode = widget.focusNode!;
+      _focusNode.addListener(_focusNodeListener);
+    }
+  }
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    if (_controller != null) {
+      _registerController();
+    }
+  }
+
+  @override
+  String? get restorationId => widget.restorationId;
 
   void _focusNodeListener() {
     if (_focusNode.hasFocus) {
@@ -384,6 +448,13 @@ class MessageInputState extends State<MessageInput> {
 
   int _timeOut = 0;
   Timer? _slowModeTimer;
+
+  void _initialiseEffectiveController() {
+    _effectiveController.textEditingController
+        .removeListener(_onChangedDebounced);
+    _effectiveController.textEditingController.addListener(_onChangedDebounced);
+    if (!_isEditing && _timeOut <= 0) _startSlowMode();
+  }
 
   void _startSlowMode() {
     if (!mounted) {
@@ -414,102 +485,145 @@ class MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = DecoratedBox(
-      decoration: BoxDecoration(
-        color: _messageInputTheme.inputBackgroundColor,
-      ),
-      child: SafeArea(
-        child: GestureDetector(
-          onPanUpdate: (details) {
-            if (details.delta.dy > 0) {
-              _focusNode.unfocus();
-              if (_openFilePickerSection) {
-                setState(() {
-                  _openFilePickerSection = false;
-                });
-              }
-            }
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_hasQuotedMessage)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: StreamSvgIcon.reply(
-                          color: _streamChatTheme.colorTheme.disabled,
-                        ),
-                      ),
-                      Text(
-                        context.translations.replyToMessageLabel,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        icon: StreamSvgIcon.closeSmall(),
-                        onPressed: widget.onQuotedMessageCleared,
-                      ),
-                    ],
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: _buildTextField(context),
-              ),
-              if (widget.parentMessage != null && !widget.hideSendAsDm)
-                Padding(
-                  padding: const EdgeInsets.only(
-                    right: 12,
-                    left: 12,
-                    bottom: 12,
-                  ),
-                  child: _buildDmCheckbox(),
-                ),
-              _buildFilePickerSection(),
-            ],
+    if (!StreamChannel.of(context)
+        .channel
+        .ownCapabilities
+        .contains(PermissionType.sendMessage)) {
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 15,
+          ),
+          child: Text(
+            context.translations.sendMessagePermissionError,
+            style: _messageInputTheme.inputTextStyle,
           ),
         ),
-      ),
-    );
-    if (widget.editMessage == null) {
-      child = Material(
-        elevation: 8,
-        child: child,
       );
     }
-
-    return MultiOverlay(
-      childAnchor: Alignment.topCenter,
-      overlayAnchor: Alignment.bottomCenter,
-      overlayOptions: [
-        OverlayOptions(
-          visible: _showCommandsOverlay,
-          widget: _buildCommandsOverlayEntry(),
-        ),
-        OverlayOptions(
-          visible: _focusNode.hasFocus &&
-              textEditingController.text.isNotEmpty &&
-              textEditingController.selection.baseOffset > 0 &&
-              textEditingController.text
-                  .substring(
-                    0,
-                    textEditingController.selection.baseOffset,
-                  )
-                  .contains(':'),
-          widget: _buildEmojiOverlay(),
-        ),
-        OverlayOptions(
-          visible: _showMentionsOverlay,
-          widget: _buildMentionsOverlayEntry(),
-        ),
-        ...widget.customOverlays,
-      ],
-      child: child,
+    return MessageValueListenableBuilder(
+      valueListenable: _effectiveController,
+      builder: (context, value, _) {
+        Widget child = DecoratedBox(
+          decoration: BoxDecoration(
+            color: _messageInputTheme.inputBackgroundColor,
+            boxShadow: widget.shadow == null
+                ? (_streamChatTheme.messageInputTheme.shadow == null
+                    ? []
+                    : [_streamChatTheme.messageInputTheme.shadow!])
+                : [widget.shadow!],
+          ),
+          child: SimpleSafeArea(
+            enabled: widget.enableSafeArea ??
+                _streamChatTheme.messageInputTheme.enableSafeArea ??
+                true,
+            child: GestureDetector(
+              onPanUpdate: (details) {
+                if (details.delta.dy > 0) {
+                  _focusNode.unfocus();
+                  if (_openFilePickerSection) {
+                    setState(() {
+                      _openFilePickerSection = false;
+                    });
+                  }
+                }
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_hasQuotedMessage)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: StreamSvgIcon.reply(
+                              color: _streamChatTheme.colorTheme.disabled,
+                            ),
+                          ),
+                          Text(
+                            context.translations.replyToMessageLabel,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            icon: StreamSvgIcon.closeSmall(),
+                            onPressed: () {
+                              _effectiveController.clearQuotedMessage();
+                              _focusNode.unfocus();
+                            },
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (_effectiveController.ogAttachment != null)
+                    OGAttachmentPreview(
+                      attachment: _effectiveController.ogAttachment!,
+                      onDismissPreviewPressed: () {
+                        _effectiveController.clearOGAttachment();
+                        _focusNode.unfocus();
+                      },
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: _buildTextField(context),
+                  ),
+                  if (_effectiveController.value.parentId != null &&
+                      !widget.hideSendAsDm)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        right: 12,
+                        left: 12,
+                        bottom: 12,
+                      ),
+                      child: _buildDmCheckbox(),
+                    ),
+                  _buildFilePickerSection(),
+                ],
+              ),
+            ),
+          ),
+        );
+        if (!_isEditing) {
+          child = Material(
+            elevation: widget.elevation ??
+                _streamChatTheme.messageInputTheme.elevation ??
+                8,
+            child: child,
+          );
+        }
+        return MultiOverlay(
+          childAnchor: Alignment.topCenter,
+          overlayAnchor: Alignment.bottomCenter,
+          overlayOptions: [
+            OverlayOptions(
+              visible: _showCommandsOverlay,
+              widget: _buildCommandsOverlayEntry(),
+            ),
+            OverlayOptions(
+              visible: _focusNode.hasFocus &&
+                  _effectiveController.text.isNotEmpty &&
+                  _effectiveController.baseOffset > 0 &&
+                  _effectiveController.text
+                      .substring(
+                        0,
+                        _effectiveController.baseOffset,
+                      )
+                      .contains(':'),
+              widget: _buildEmojiOverlay(),
+            ),
+            OverlayOptions(
+              visible: _showMentionsOverlay,
+              widget: _buildMentionsOverlayEntry(),
+            ),
+            ...widget.customOverlays,
+          ],
+          child: child,
+        );
+      },
     );
   }
 
@@ -524,7 +638,7 @@ class MessageInputState extends State<MessageInput> {
               widget.actionsLocation == ActionsLocation.right)
             _buildExpandActionsButton(context),
           if (widget.sendButtonLocation == SendButtonLocation.outside)
-            _animateSendButton(context),
+            _buildSendButton(context),
         ],
       );
 
@@ -534,7 +648,7 @@ class MessageInputState extends State<MessageInput> {
             height: 16,
             width: 16,
             foregroundDecoration: BoxDecoration(
-              border: _sendAsDm
+              border: _effectiveController.showInChannel
                   ? null
                   : Border.all(
                       color: _streamChatTheme.colorTheme.textHighEmphasis
@@ -546,19 +660,18 @@ class MessageInputState extends State<MessageInput> {
             child: Center(
               child: Material(
                 borderRadius: BorderRadius.circular(3),
-                color: _sendAsDm
+                color: _effectiveController.showInChannel
                     ? _streamChatTheme.colorTheme.accentPrimary
                     : _streamChatTheme.colorTheme.barsBg,
                 child: InkWell(
                   onTap: () {
-                    setState(() {
-                      _sendAsDm = !_sendAsDm;
-                    });
+                    _effectiveController.showInChannel =
+                        !_effectiveController.showInChannel;
                   },
                   child: AnimatedCrossFade(
                     duration: const Duration(milliseconds: 300),
                     reverseDuration: const Duration(milliseconds: 300),
-                    crossFadeState: _sendAsDm
+                    crossFadeState: _effectiveController.showInChannel
                         ? CrossFadeState.showFirst
                         : CrossFadeState.showSecond,
                     firstChild: StreamSvgIcon.check(
@@ -587,24 +700,18 @@ class MessageInputState extends State<MessageInput> {
         ],
       );
 
-  Widget _animateSendButton(BuildContext context) {
-    late Widget sendButton;
-    if (_timeOut > 0) {
-      sendButton = _CountdownButton(count: _timeOut);
-    } else if (!_messageIsPresent && _attachments.isEmpty) {
-      sendButton = widget.idleSendButton ?? _buildIdleSendButton(context);
-    } else {
-      sendButton = widget.activeSendButton != null
-          ? InkWell(
-              onTap: sendMessage,
-              child: widget.activeSendButton,
-            )
-          : _buildSendButton(context);
+  Widget _buildSendButton(BuildContext context) {
+    if (widget.sendButtonBuilder != null) {
+      return widget.sendButtonBuilder!(context, _effectiveController);
     }
 
-    return AnimatedSwitcher(
-      duration: _streamChatTheme.messageInputTheme.sendAnimationDuration!,
-      child: sendButton,
+    return StreamMessageSendButton(
+      onSendMessage: sendMessage,
+      timeOut: _timeOut,
+      isIdle: !widget.validator(_effectiveController.message),
+      isEditEnabled: _isEditing,
+      idleSendButton: widget.idleSendButton,
+      activeSendButton: widget.activeSendButton,
     );
   }
 
@@ -646,10 +753,12 @@ class MessageInputState extends State<MessageInput> {
             ? const Offstage()
             : Wrap(
                 children: <Widget>[
-                  if (!widget.disableAttachments)
+                  if (!widget.disableAttachments &&
+                      channel.ownCapabilities
+                          .contains(PermissionType.uploadFile))
                     _buildAttachmentButton(context),
                   if (widget.showCommandsButton &&
-                      widget.editMessage == null &&
+                      !_isEditing &&
                       channel.state != null &&
                       channel.config?.commands.isNotEmpty == true)
                     _buildCommandButton(context),
@@ -694,13 +803,13 @@ class MessageInputState extends State<MessageInput> {
                 _buildAttachments(),
                 LimitedBox(
                   maxHeight: widget.maxHeight,
-                  child: TextField(
+                  child: StreamMessageTextField(
                     key: const Key('messageInputText'),
                     enabled: _inputEnabled,
                     maxLines: null,
                     onSubmitted: (_) => sendMessage(),
                     keyboardType: widget.keyboardType,
-                    controller: textEditingController,
+                    controller: _effectiveController,
                     focusNode: _focusNode,
                     style: _messageInputTheme.inputTextStyle,
                     autofocus: widget.autofocus,
@@ -772,7 +881,7 @@ class MessageInputState extends State<MessageInput> {
                           size: 16,
                         ),
                         Text(
-                          _chosenCommand?.name.toUpperCase() ?? '',
+                          _effectiveController.value.command!.toUpperCase(),
                           style:
                               _streamChatTheme.textTheme.footnoteBold.copyWith(
                             color: Colors.white,
@@ -806,16 +915,14 @@ class MessageInputState extends State<MessageInput> {
                   height: 24,
                   width: 24,
                 ),
-                onPressed: () {
-                  setState(() => _commandEnabled = false);
-                },
+                onPressed: _effectiveController.clear,
               ),
             ),
           if (!_commandEnabled &&
               widget.actionsLocation == ActionsLocation.rightInside)
             _buildExpandActionsButton(context),
           if (widget.sendButtonLocation == SendButtonLocation.inside)
-            _animateSendButton(context),
+            _buildSendButton(context),
         ],
       ),
     ).merge(passedDecoration);
@@ -823,14 +930,17 @@ class MessageInputState extends State<MessageInput> {
 
   late final _onChangedDebounced = debounce(
     () {
-      var value = textEditingController.text;
+      var value = _effectiveController.text;
       if (!mounted) return;
       value = value.trim();
 
       final channel = StreamChannel.of(context).channel;
-      if (value.isNotEmpty) {
-        // ignore: no-empty-block
-        channel.keyStroke(widget.parentMessage?.id).catchError((e) {});
+      if (channel.ownCapabilities.contains(PermissionType.sendTypingEvents) &&
+          value.isNotEmpty) {
+        channel
+            .keyStroke(_effectiveController.value.parentId)
+            // ignore: no-empty-block
+            .catchError((e) {});
       }
 
       var actionsLength = widget.actions.length;
@@ -841,6 +951,7 @@ class MessageInputState extends State<MessageInput> {
         _actionsShrunk = value.isNotEmpty && actionsLength > 1;
       });
 
+      _checkContainsUrl(value, context);
       _checkCommands(value, context);
       _checkMentions(value, context);
       _checkEmoji(value, context);
@@ -850,10 +961,10 @@ class MessageInputState extends State<MessageInput> {
   );
 
   String _getHint(BuildContext context) {
-    if (_commandEnabled && _chosenCommand!.name == 'giphy') {
+    if (_commandEnabled && _effectiveController.value.command == 'giphy') {
       return context.translations.searchGifLabel;
     }
-    if (_attachments.isNotEmpty) {
+    if (_effectiveController.attachments.isNotEmpty) {
       return context.translations.addACommentOrSendLabel;
     }
     if (_timeOut != 0) {
@@ -863,14 +974,84 @@ class MessageInputState extends State<MessageInput> {
     return context.translations.writeAMessageLabel;
   }
 
-  void _checkEmoji(String s, BuildContext context) {
-    if (s.isNotEmpty &&
-        textEditingController.selection.baseOffset > 0 &&
-        textEditingController.text
-            .substring(0, textEditingController.selection.baseOffset)
+  String? _lastSearchedContainsUrlText;
+  CancelableOperation? _enrichUrlOperation;
+  final _urlRegex = RegExp(
+    r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+',
+  );
+
+  void _checkContainsUrl(String value, BuildContext context) async {
+    // Cancel the previous operation if it's still running
+    _enrichUrlOperation?.cancel();
+
+    // If the text is same as the last time, don't do anything
+    if (_lastSearchedContainsUrlText == value) return;
+    _lastSearchedContainsUrlText = value;
+
+    final matchedUrls = _urlRegex.allMatches(value).toList()
+      ..removeWhere((it) => it.group(0)?.split('.').last.isValidTLD() == false);
+
+    // Reset the og attachment if the text doesn't contain any url
+    if (matchedUrls.isEmpty ||
+        !StreamChannel.of(context)
+            .channel
+            .ownCapabilities
+            .contains(PermissionType.sendLinks)) {
+      _effectiveController
+        ..text = value
+        ..clearOGAttachment();
+      return;
+    }
+
+    final firstMatchedUrl = matchedUrls.first.group(0)!;
+
+    // If the parsed url matches the ogAttachment url, don't do anything
+    if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
+      return;
+    }
+
+    final client = StreamChat.of(context).client;
+
+    _enrichUrlOperation = CancelableOperation.fromFuture(
+      _enrichUrl(firstMatchedUrl, client),
+    ).then(
+      (ogAttachment) {
+        final attachment = Attachment.fromOGAttachment(ogAttachment);
+        _effectiveController.setOGAttachment(attachment);
+      },
+      onError: (error, stackTrace) {
+        // Reset the ogAttachment if there was an error
+        _effectiveController.clearOGAttachment();
+        widget.onError?.call(error, stackTrace);
+      },
+    );
+  }
+
+  final _ogAttachmentCache = <String, OGAttachmentResponse>{};
+
+  Future<OGAttachmentResponse> _enrichUrl(
+    String url,
+    StreamChatClient client,
+  ) async {
+    var response = _ogAttachmentCache[url];
+    if (response == null) {
+      final client = StreamChat.of(context).client;
+      response = await client.enrichUrl(url);
+      _ogAttachmentCache[url] = response;
+    }
+    return response;
+  }
+
+  void _checkEmoji(String value, BuildContext context) {
+    if (value.isNotEmpty &&
+        _effectiveController.baseOffset > 0 &&
+        _effectiveController.text
+            .substring(0, _effectiveController.baseOffset)
             .contains(':')) {
-      final textToSelection = textEditingController.text
-          .substring(0, textEditingController.value.selection.start);
+      final textToSelection = _effectiveController.text.substring(
+        0,
+        _effectiveController.selectionStart,
+      );
       final splits = textToSelection.split(':');
       final query = splits[splits.length - 2].toLowerCase();
       final emoji = Emoji.byName(query);
@@ -881,11 +1062,11 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  void _checkMentions(String s, BuildContext context) {
-    if (s.isNotEmpty &&
-        textEditingController.selection.baseOffset > 0 &&
-        textEditingController.text
-            .substring(0, textEditingController.selection.baseOffset)
+  void _checkMentions(String value, BuildContext context) {
+    if (value.isNotEmpty &&
+        _effectiveController.baseOffset > 0 &&
+        _effectiveController.text
+            .substring(0, _effectiveController.baseOffset)
             .split(' ')
             .last
             .contains('@')) {
@@ -901,11 +1082,11 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  void _checkCommands(String s, BuildContext context) {
-    if (s.startsWith('/')) {
+  void _checkCommands(String value, BuildContext context) {
+    if (value.startsWith('/')) {
       final allCommands = StreamChannel.of(context).channel.config?.commands;
       final command =
-          allCommands?.firstWhereOrNull((it) => it.name == s.substring(1));
+          allCommands?.firstWhereOrNull((it) => it.name == value.substring(1));
       if (command != null) {
         return _setCommand(command);
       } else if (!_showCommandsOverlay) {
@@ -921,7 +1102,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildCommandsOverlayEntry() {
-    final text = textEditingController.text.trimLeft();
+    final text = _effectiveController.text.trimLeft();
 
     final renderObject = context.findRenderObject() as RenderBox?;
     if (renderObject == null) {
@@ -936,242 +1117,38 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildFilePickerSection() {
-    final _attachmentContainsFile =
-        _attachments.values.any((it) => it.type == 'file');
-
-    final attachmentLimitCrossed =
-        _attachments.length >= widget.attachmentLimit;
-
-    Color _getIconColor(int index) {
-      final streamChatThemeData = _streamChatTheme;
-      switch (index) {
-        case 0:
-          return _attachments.isEmpty
-              ? streamChatThemeData.colorTheme.accentPrimary
-              : (!_attachmentContainsFile
-                  ? streamChatThemeData.colorTheme.accentPrimary
-                  : streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.2));
-        case 1:
-          return _attachmentContainsFile
-              ? streamChatThemeData.colorTheme.accentPrimary
-              : (_attachments.isEmpty
-                  ? streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.5)
-                  : streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.2));
-        case 2:
-          return attachmentLimitCrossed
-              ? streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(0.2)
-              : _attachmentContainsFile && _attachments.isNotEmpty
-                  ? streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.2)
-                  : streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.5);
-        case 3:
-          return attachmentLimitCrossed
-              ? streamChatThemeData.colorTheme.textHighEmphasis.withOpacity(0.2)
-              : _attachmentContainsFile && _attachments.isNotEmpty
-                  ? streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.2)
-                  : streamChatThemeData.colorTheme.textHighEmphasis
-                      .withOpacity(0.5);
-        default:
-          return Colors.black;
-      }
-    }
-
-    return AnimatedContainer(
-      duration: _openFilePickerSection
-          ? const Duration(milliseconds: 300)
-          : const Duration(),
-      curve: Curves.easeOut,
-      height: _openFilePickerSection ? _kMinMediaPickerSize : 0,
-      child: SingleChildScrollView(
-        child: SizedBox(
-          height: _kMinMediaPickerSize,
-          child: Material(
-            color: _streamChatTheme.colorTheme.inputBg,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: StreamSvgIcon.pictures(
-                        color: _getIconColor(0),
-                      ),
-                      onPressed:
-                          _attachmentContainsFile && _attachments.isNotEmpty
-                              ? null
-                              : () {
-                                  setState(() {
-                                    _filePickerIndex = 0;
-                                  });
-                                },
-                    ),
-                    IconButton(
-                      iconSize: 32,
-                      icon: StreamSvgIcon.files(
-                        color: _getIconColor(1),
-                      ),
-                      onPressed:
-                          !_attachmentContainsFile && _attachments.isNotEmpty
-                              ? null
-                              : () {
-                                  pickFile(DefaultAttachmentTypes.file);
-                                },
-                    ),
-                    IconButton(
-                      icon: StreamSvgIcon.camera(
-                        color: _getIconColor(2),
-                      ),
-                      onPressed: attachmentLimitCrossed ||
-                              (_attachmentContainsFile &&
-                                  _attachments.isNotEmpty)
-                          ? null
-                          : () {
-                              pickFile(
-                                DefaultAttachmentTypes.image,
-                                camera: true,
-                              );
-                            },
-                    ),
-                    IconButton(
-                      padding: const EdgeInsets.all(0),
-                      icon: StreamSvgIcon.record(
-                        color: _getIconColor(3),
-                      ),
-                      onPressed: attachmentLimitCrossed ||
-                              (_attachmentContainsFile &&
-                                  _attachments.isNotEmpty)
-                          ? null
-                          : () {
-                              pickFile(
-                                DefaultAttachmentTypes.video,
-                                camera: true,
-                              );
-                            },
-                    ),
-                  ],
-                ),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: _streamChatTheme.colorTheme.barsBg,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: _streamChatTheme.colorTheme.inputBg,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                if (_openFilePickerSection)
-                  Expanded(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: _streamChatTheme.colorTheme.barsBg,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: _PickerWidget(
-                        filePickerIndex: _filePickerIndex,
-                        streamChatTheme: _streamChatTheme,
-                        containsFile: _attachmentContainsFile,
-                        selectedMedias: _attachments.keys.toList(),
-                        onAddMoreFilesClick: pickFile,
-                        onMediaSelected: (media) {
-                          if (_attachments.containsKey(media.id)) {
-                            setState(() => _attachments.remove(media.id));
-                          } else {
-                            _addAssetAttachment(media);
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _addAssetAttachment(AssetEntity medium) async {
-    final mediaFile = await medium.originFile.timeout(
-      const Duration(seconds: 5),
-      onTimeout: () => medium.originFile,
+    final picker = StreamAttachmentPicker(
+      messageInputController: _effectiveController,
+      onFilePicked: pickFile,
+      isOpen: _openFilePickerSection,
+      pickerSize: _openFilePickerSection ? _kMinMediaPickerSize : 0,
+      attachmentLimit: widget.attachmentLimit,
+      onAttachmentLimitExceeded: widget.onAttachmentLimitExceed,
+      maxAttachmentSize: widget.maxAttachmentSize,
+      compressedVideoQuality: widget.compressedVideoQuality,
+      compressedVideoFrameRate: widget.compressedVideoFrameRate,
+      onError: _showErrorAlert,
     );
 
-    if (mediaFile == null) return;
-
-    var file = AttachmentFile(
-      path: mediaFile.path,
-      size: await mediaFile.length(),
-      bytes: mediaFile.readAsBytesSync(),
-    );
-
-    if (file.size! > widget.maxAttachmentSize) {
-      if (medium.type == AssetType.video && file.path != null) {
-        final mediaInfo = await VideoService.compressVideo(
-          file.path!,
-          frameRate: widget.compressedVideoFrameRate,
-          quality: widget.compressedVideoQuality,
-        );
-
-        if (mediaInfo == null ||
-            mediaInfo.filesize! > widget.maxAttachmentSize) {
-          _showErrorAlert(
-            context.translations.fileTooLargeAfterCompressionError(
-              widget.maxAttachmentSize / (1024 * 1024),
-            ),
-          );
-          return;
-        }
-        file = AttachmentFile(
-          name: file.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file?.readAsBytes(),
-          path: mediaInfo.path,
-        );
-      } else {
-        _showErrorAlert(context.translations.fileTooLargeError(
-          widget.maxAttachmentSize / (1024 * 1024),
-        ));
-        return;
-      }
-    }
-
-    setState(() {
-      final attachment = Attachment(
-        id: medium.id,
-        file: file,
-        type: medium.type == AssetType.image ? 'image' : 'video',
+    if (_openFilePickerSection && widget.attachmentsPickerBuilder != null) {
+      return widget.attachmentsPickerBuilder!(
+        context,
+        _effectiveController,
+        picker,
       );
-      _addAttachments([attachment]);
-    });
+    }
+
+    return picker;
   }
 
   Widget _buildMentionsOverlayEntry() {
     final channel = StreamChannel.of(context).channel;
-    if (textEditingController.value.selection.start < 0 ||
-        channel.state == null) {
+    if (_effectiveController.selectionStart < 0 || channel.state == null) {
       return const Offstage();
     }
 
-    final splits = textEditingController.text
-        .substring(0, textEditingController.value.selection.start)
+    final splits = _effectiveController.text
+        .substring(0, _effectiveController.selectionStart)
         .split('@');
     final query = splits.last.toLowerCase();
 
@@ -1199,19 +1176,15 @@ class MessageInputState extends State<MessageInput> {
       size: Size(renderObject.size.width - 16, 400),
       mentionsTileBuilder: tileBuilder,
       onMentionUserTap: (user) {
-        _mentionedUsers.add(user);
+        _effectiveController.addMentionedUser(user);
         splits[splits.length - 1] = user.name;
         final rejoin = splits.join('@');
 
-        textEditingController.value = TextEditingValue(
-          text: rejoin +
-              textEditingController.text.substring(
-                textEditingController.selection.start,
-              ),
-          selection: TextSelection.collapsed(
-            offset: rejoin.length,
-          ),
-        );
+        _effectiveController.text = rejoin +
+            _effectiveController.text.substring(
+              _effectiveController.selectionStart,
+            );
+
         _onChangedDebounced.cancel();
         setState(() => _showMentionsOverlay = false);
       },
@@ -1219,12 +1192,12 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildEmojiOverlay() {
-    if (textEditingController.value.selection.baseOffset < 0) {
+    if (_effectiveController.baseOffset < 0) {
       return const Offstage();
     }
 
-    final splits = textEditingController.text
-        .substring(0, textEditingController.value.selection.baseOffset)
+    final splits = _effectiveController.text
+        .substring(0, _effectiveController.baseOffset)
         .split(':');
 
     final query = splits.last.toLowerCase();
@@ -1243,44 +1216,43 @@ class MessageInputState extends State<MessageInput> {
   void _chooseEmoji(List<String> splits, Emoji emoji) {
     final rejoin = splits.sublist(0, splits.length - 1).join(':') + emoji.char!;
 
-    textEditingController.value = TextEditingValue(
-      text: rejoin +
-          textEditingController.text
-              .substring(textEditingController.selection.start),
-      selection: TextSelection.collapsed(
-        offset: rejoin.length,
-      ),
-    );
+    _effectiveController.text = rejoin +
+        _effectiveController.text.substring(
+          _effectiveController.selectionStart,
+        );
   }
 
   void _setCommand(Command c) {
-    textEditingController.clear();
+    _effectiveController
+      ..clear()
+      ..command = c;
     setState(() {
-      _chosenCommand = c;
-      _commandEnabled = true;
       _showCommandsOverlay = false;
     });
   }
 
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return const Offstage();
-    final containsUrl = widget.quotedMessage!.attachments
+    final containsUrl = _effectiveController.value.quotedMessage!.attachments
         .any((element) => element.titleLink != null);
     return QuotedMessageWidget(
       reverse: true,
       showBorder: !containsUrl,
-      message: widget.quotedMessage!,
+      message: _effectiveController.value.quotedMessage!,
       messageTheme: _streamChatTheme.otherMessageTheme,
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
     );
   }
 
   Widget _buildAttachments() {
-    if (_attachments.isEmpty) return const Offstage();
-    final fileAttachments = _attachments.values
+    final nonOGAttachments = _effectiveController.attachments.where(
+      (it) => it.titleLink == null,
+    );
+    if (nonOGAttachments.isEmpty) return const Offstage();
+    final fileAttachments = nonOGAttachments
         .where((it) => it.type == 'file')
         .toList(growable: false);
-    final remainingAttachments = _attachments.values
+    final remainingAttachments = nonOGAttachments
         .where((it) => it.type != 'file')
         .toList(growable: false);
     return Column(
@@ -1298,9 +1270,7 @@ class MessageInputState extends State<MessageInput> {
                       (e) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: FileAttachment(
-                          message: Message(
-                            status: MessageSendingStatus.sending,
-                          ), // dummy message
+                          message: Message(), // dummy message
                           attachment: e,
                           size: Size(
                             MediaQuery.of(context).size.width * 0.65,
@@ -1367,7 +1337,7 @@ class MessageInputState extends State<MessageInput> {
           focusElevation: 0,
           hoverElevation: 0,
           onPressed: () {
-            setState(() => _attachments.remove(attachment.id));
+            _effectiveController.removeAttachmentById(attachment.id);
           },
           fillColor:
               _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
@@ -1446,7 +1416,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildCommandButton(BuildContext context) {
-    final s = textEditingController.text.trim();
+    final s = _effectiveController.text.trim();
     final defaultButton = IconButton(
       icon: StreamSvgIcon.lightning(
         color: s.isNotEmpty
@@ -1569,18 +1539,10 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  /// Add an attachment to the sending message
-  /// Use this to add custom type attachments
-  ///
-  /// Note: Only meant to be used from outside the state.
-  void addAttachment(Attachment attachment) {
-    setState(() => _addAttachments([attachment]));
-  }
-
-  /// Adds an attachment to the [_attachments] map
+  /// Adds an attachment to the [messageInputController.attachments] map
   void _addAttachments(Iterable<Attachment> attachments) {
     final limit = widget.attachmentLimit;
-    final length = _attachments.length + attachments.length;
+    final length = _effectiveController.attachments.length + attachments.length;
     if (length > limit) {
       final onAttachmentLimitExceed = widget.onAttachmentLimitExceed;
       if (onAttachmentLimitExceed != null) {
@@ -1594,7 +1556,7 @@ class MessageInputState extends State<MessageInput> {
       );
     }
     for (final attachment in attachments) {
-      _attachments[attachment.id] = attachment;
+      _effectiveController.addAttachment(attachment);
     }
   }
 
@@ -1700,130 +1662,65 @@ class MessageInputState extends State<MessageInput> {
       }
     }
 
-    setState(() {
-      _addAttachments([
-        attachment.copyWith(
-          file: file,
-          extraData: {...attachment.extraData}
-            ..update('file_size', ((_) => file!.size!)),
-        ),
-      ]);
-    });
-  }
-
-  Widget _buildIdleSendButton(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: StreamSvgIcon(
-          assetName: _getIdleSendIcon(),
-          color: _messageInputTheme.sendButtonIdleColor,
-        ),
-      );
-
-  Widget _buildSendButton(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: IconButton(
-          onPressed: sendMessage,
-          padding: const EdgeInsets.all(0),
-          splashRadius: 24,
-          constraints: const BoxConstraints.tightFor(
-            height: 24,
-            width: 24,
-          ),
-          icon: StreamSvgIcon(
-            assetName: _getSendIcon(),
-            color: _messageInputTheme.sendButtonColor,
-          ),
-        ),
-      );
-
-  String _getIdleSendIcon() {
-    if (_commandEnabled) {
-      return 'Icon_search.svg';
-    } else {
-      return 'Icon_circle_right.svg';
-    }
-  }
-
-  String _getSendIcon() {
-    if (widget.editMessage != null) {
-      return 'Icon_circle_up.svg';
-    } else if (_commandEnabled) {
-      return 'Icon_search.svg';
-    } else {
-      return 'Icon_circle_up.svg';
-    }
+    _addAttachments([
+      attachment.copyWith(
+        file: file,
+        extraData: {...attachment.extraData}
+          ..update('file_size', ((_) => file!.size!)),
+      ),
+    ]);
   }
 
   /// Sends the current message
   Future<void> sendMessage() async {
-    var text = textEditingController.text.trim();
-    if (text.isEmpty && _attachments.isEmpty) {
+    final streamChannel = StreamChannel.of(context);
+    var message = _effectiveController.value;
+    if (!streamChannel.channel.ownCapabilities
+            .contains(PermissionType.sendLinks) &&
+        _urlRegex.allMatches(message.text ?? '').any((element) =>
+            element.group(0)?.split('.').last.isValidTLD() == true)) {
+      showInfoDialog(
+        context,
+        icon: StreamSvgIcon.error(
+          color: StreamChatTheme.of(context).colorTheme.accentError,
+          size: 24,
+        ),
+        title: 'Links are disabled',
+        details: 'Sending links is not allowed in this conversation.',
+        okText: context.translations.okLabel,
+      );
       return;
     }
+
+    final skipEnrichUrl = _effectiveController.ogAttachment == null;
 
     var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
 
     shouldKeepFocus ??= !_commandEnabled;
 
-    if (_commandEnabled) {
-      text = '${'/${_chosenCommand!.name} '}$text';
-    }
-
-    final attachments = [..._attachments.values];
-
-    textEditingController.clear();
-    _attachments.clear();
-    widget.onQuotedMessageCleared?.call();
-
-    setState(() {
-      _commandEnabled = false;
-    });
-
-    Message message;
-    if (widget.editMessage != null) {
-      message = widget.editMessage!.copyWith(
-        text: text,
-        attachments: attachments,
-        mentionedUsers:
-            _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
-      );
-    } else {
-      message = (widget.initialMessage ?? Message()).copyWith(
-        parentId: widget.parentMessage?.id,
-        text: text,
-        attachments: attachments,
-        mentionedUsers:
-            _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
-        showInChannel: widget.parentMessage != null ? _sendAsDm : null,
-      );
-    }
-
-    if (widget.quotedMessage != null) {
-      message = message.copyWith(
-        quotedMessageId: widget.quotedMessage!.id,
-      );
-    }
+    _effectiveController.reset();
 
     if (widget.preMessageSending != null) {
       message = await widget.preMessageSending!(message);
     }
 
-    final streamChannel = StreamChannel.of(context);
     final channel = streamChannel.channel;
     if (!channel.state!.isUpToDate) {
       await streamChannel.reloadChannel();
     }
 
-    _mentionedUsers.clear();
-
     try {
       Future sendingFuture;
-      if (widget.editMessage == null ||
-          widget.editMessage!.status == MessageSendingStatus.failed ||
-          widget.editMessage!.status == MessageSendingStatus.sending) {
-        sendingFuture = channel.sendMessage(message);
+      if (_isEditing) {
+        sendingFuture = channel.updateMessage(
+          message,
+          skipEnrichUrl: skipEnrichUrl,
+        );
       } else {
-        sendingFuture = channel.updateMessage(message);
+        sendingFuture = channel.sendMessage(
+          message,
+          skipEnrichUrl: skipEnrichUrl,
+        );
       }
 
       if (shouldKeepFocus) {
@@ -1834,7 +1731,7 @@ class MessageInputState extends State<MessageInput> {
 
       final resp = await sendingFuture;
       if (resp.message?.type == 'error') {
-        _parseExistingMessage(message);
+        _effectiveController.value = message;
       }
       _startSlowMode();
       widget.onMessageSent?.call(resp.message);
@@ -1913,171 +1810,97 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  void _parseExistingMessage(Message message) {
-    final messageText = message.text;
-    if (messageText != null) textEditingController.text = messageText;
-    _addAttachments(message.attachments);
-  }
-
   @override
   void dispose() {
-    textEditingController.dispose();
+    _effectiveController.textEditingController
+        .removeListener(_onChangedDebounced);
+    _controller?.dispose();
     _focusNode.removeListener(_focusNodeListener);
     _stopSlowMode();
     _onChangedDebounced.cancel();
     super.dispose();
   }
 
-  bool _initialized = false;
-
   @override
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
     _messageInputTheme = MessageInputTheme.of(context);
-    if (widget.editMessage == null) _startSlowMode();
 
-    if ((widget.editMessage != null || widget.initialMessage != null) &&
-        !_initialized) {
-      FocusScope.of(context).requestFocus(_focusNode);
-      _initialized = true;
-    }
     super.didChangeDependencies();
   }
 }
 
-class _PickerWidget extends StatefulWidget {
-  const _PickerWidget({
+/// Preview of an Open Graph attachment.
+class OGAttachmentPreview extends StatelessWidget {
+  /// Returns a new instance of [OGAttachmentPreview]
+  const OGAttachmentPreview({
     Key? key,
-    required this.filePickerIndex,
-    required this.containsFile,
-    required this.selectedMedias,
-    required this.onAddMoreFilesClick,
-    required this.onMediaSelected,
-    required this.streamChatTheme,
+    required this.attachment,
+    this.onDismissPreviewPressed,
   }) : super(key: key);
 
-  final int filePickerIndex;
-  final bool containsFile;
-  final List<String> selectedMedias;
-  final void Function(DefaultAttachmentTypes) onAddMoreFilesClick;
-  final void Function(AssetEntity) onMediaSelected;
-  final StreamChatThemeData streamChatTheme;
+  /// The attachment to be rendered.
+  final Attachment attachment;
 
-  @override
-  _PickerWidgetState createState() => _PickerWidgetState();
-}
-
-class _PickerWidgetState extends State<_PickerWidget> {
-  Future<bool>? requestPermission;
-
-  @override
-  void initState() {
-    super.initState();
-    requestPermission = PhotoManager.requestPermission();
-  }
+  /// Called when the dismiss button is pressed.
+  final VoidCallback? onDismissPreviewPressed;
 
   @override
   Widget build(BuildContext context) {
-    if (widget.filePickerIndex != 0) {
-      return const Offstage();
-    }
-    return FutureBuilder<bool>(
-      future: requestPermission,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Offstage();
-        }
+    final chatTheme = StreamChatTheme.of(context);
+    final textTheme = chatTheme.textTheme;
+    final colorTheme = chatTheme.colorTheme;
 
-        if (snapshot.data!) {
-          if (widget.containsFile) {
-            return GestureDetector(
-              onTap: () {
-                widget.onAddMoreFilesClick(DefaultAttachmentTypes.file);
-              },
-              child: Container(
-                constraints: const BoxConstraints.expand(),
-                color: widget.streamChatTheme.colorTheme.inputBg,
-                alignment: Alignment.center,
-                child: Text(
-                  context.translations.addMoreFilesLabel,
-                  style: TextStyle(
-                    color: widget.streamChatTheme.colorTheme.accentPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
+    final attachmentTitle = attachment.title;
+    final attachmentText = attachment.text;
+
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            Icons.link,
+            color: colorTheme.accentPrimary,
+          ),
+        ),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(
+                  color: colorTheme.accentPrimary,
+                  width: 2,
                 ),
               ),
-            );
-          }
-          return MediaListView(
-            selectedIds: widget.selectedMedias,
-            onSelect: widget.onMediaSelected,
-          );
-        }
-
-        return InkWell(
-          onTap: () async {
-            PhotoManager.openSetting();
-          },
-          child: Container(
-            color: widget.streamChatTheme.colorTheme.inputBg,
+            ),
+            padding: const EdgeInsets.only(left: 6),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SvgPicture.asset(
-                  'svgs/icon_picture_empty_state.svg',
-                  package: 'stream_chat_flutter',
-                  height: 140,
-                  color: widget.streamChatTheme.colorTheme.disabled,
-                ),
-                Text(
-                  context.translations.enablePhotoAndVideoAccessMessage,
-                  style: widget.streamChatTheme.textTheme.body.copyWith(
-                    color: widget.streamChatTheme.colorTheme.textLowEmphasis,
+                if (attachmentTitle != null)
+                  Text(
+                    attachmentTitle.trim(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.body.copyWith(fontWeight: FontWeight.w700),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 6),
-                Center(
-                  child: Text(
-                    context.translations.allowGalleryAccessMessage,
-                    style: widget.streamChatTheme.textTheme.bodyBold.copyWith(
-                      color: widget.streamChatTheme.colorTheme.accentPrimary,
-                    ),
+                if (attachmentText != null)
+                  Text(
+                    attachmentText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.body.copyWith(fontWeight: FontWeight.w400),
                   ),
-                ),
               ],
             ),
           ),
-        );
-      },
+        ),
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          icon: StreamSvgIcon.closeSmall(),
+          onPressed: onDismissPreviewPressed,
+        ),
+      ],
     );
   }
-}
-
-class _CountdownButton extends StatelessWidget {
-  const _CountdownButton({
-    Key? key,
-    required this.count,
-  }) : super(key: key);
-
-  final int count;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: StreamChatTheme.of(context).colorTheme.disabled,
-            shape: BoxShape.circle,
-          ),
-          child: SizedBox(
-            height: 24,
-            width: 24,
-            child: Center(
-              child: Text('$count'),
-            ),
-          ),
-        ),
-      );
 }

@@ -1,5 +1,10 @@
 ## Upcoming
 
+🛑️ Breaking Changes
+
+- `pinPermissions` is no longer needed in `MessageListView`.
+- `MessageInput` now works with a `MessageInputController` instead of a `TextEditingController`
+
 🐞 Fixed
 
 - SVG rendering fixes.
@@ -9,6 +14,11 @@
 ✅ Added
 
 - Videos can now be auto-played in `FullScreenMedia`
+- Extra customisation options for `MessageInput`
+
+🔄 Changed
+
+- Add `didUpdateWidget` override in `MessageInput` widget to handle changes to `focusNode`.
 
 ## 3.3.2
 

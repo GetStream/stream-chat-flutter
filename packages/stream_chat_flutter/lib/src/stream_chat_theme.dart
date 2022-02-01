@@ -252,6 +252,7 @@ class StreamChatThemeData {
         sendButtonIdleColor: colorTheme.disabled,
         inputBackgroundColor: colorTheme.barsBg,
         inputTextStyle: textTheme.body,
+        linkHighlightColor: colorTheme.accentPrimary,
         idleBorderGradient: LinearGradient(
           colors: [
             colorTheme.disabled,
