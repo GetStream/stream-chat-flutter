@@ -841,7 +841,7 @@ class Channel {
     final now = DateTime.now();
     final user = _client.state.currentUser;
 
-    final latestReactions = [...message.latestReactions ?? <Reaction>[]];
+    var latestReactions = [...message.latestReactions ?? <Reaction>[]];
     if (enforceUnique) {
       latestReactions.removeWhere((it) => it.userId == user!.id);
     }
@@ -855,10 +855,17 @@ class Channel {
       extraData: extraData,
     );
 
-    // Inserting at the 0th index as it's the latest reaction
-    latestReactions.insert(0, newReaction);
-    final ownReactions = [...latestReactions]
-      ..removeWhere((it) => it.userId != user!.id);
+    latestReactions = (latestReactions
+          // Inserting at the 0th index as it's the latest reaction
+          ..insert(0, newReaction))
+        .take(10)
+        .toList();
+    final ownReactions = enforceUnique
+        ? <Reaction>[newReaction]
+        : <Reaction>[
+            ...message.ownReactions ?? [],
+            newReaction,
+          ];
 
     final newMessage = message.copyWith(
       reactionCounts: {...message.reactionCounts ?? <String, int>{}}
@@ -898,7 +905,6 @@ class Channel {
     Reaction reaction,
   ) async {
     final type = reaction.type;
-    final user = _client.state.currentUser;
 
     final reactionCounts = {...message.reactionCounts ?? <String, int>{}};
     if (reactionCounts.containsKey(type)) {
@@ -915,8 +921,11 @@ class Channel {
           r.type == reaction.type &&
           r.messageId == reaction.messageId);
 
-    final ownReactions = [...latestReactions]
-      ..removeWhere((it) => it.userId != user!.id);
+    final ownReactions = message.ownReactions
+      ?..removeWhere((r) =>
+          r.userId == reaction.userId &&
+          r.type == reaction.type &&
+          r.messageId == reaction.messageId);
 
     final newMessage = message.copyWith(
       reactionCounts: reactionCounts..removeWhere((_, value) => value == 0),
@@ -1545,16 +1554,21 @@ class ChannelClientState {
               if (url == null || !url.contains('')) {
                 return false;
               }
-              final uri = Uri.parse(url);
-              if (!uri.host.endsWith('stream-io-cdn.com') ||
-                  uri.queryParameters['Expires'] == null) {
+              try {
+                final uri = Uri.parse(url);
+                if (!uri.host.endsWith('stream-io-cdn.com') ||
+                    uri.queryParameters['Expires'] == null) {
+                  return false;
+                }
+                final secondsFromEpoch =
+                    int.parse(uri.queryParameters['Expires']!);
+                final expiration = DateTime.fromMillisecondsSinceEpoch(
+                  secondsFromEpoch * 1000,
+                );
+                return expiration.isBefore(DateTime.now());
+              } catch (_) {
                 return false;
               }
-              final secondsFromEpoch =
-                  int.parse(uri.queryParameters['Expires']!);
-              final expiration =
-                  DateTime.fromMillisecondsSinceEpoch(secondsFromEpoch * 1000);
-              return expiration.isBefore(DateTime.now());
             }))
         .map((e) => e.id)
         .toList();
@@ -1702,10 +1716,19 @@ class ChannelClientState {
 
   void _listenReactionDeleted() {
     _subscriptions.add(_channel.on(EventType.reactionDeleted).listen((event) {
-      final userId = _channel.client.state.currentUser!.id;
+      final oldMessage =
+          messages.firstWhereOrNull((it) => it.id == event.message?.id);
+      final reaction = event.reaction;
+      final ownReactions = oldMessage?.ownReactions
+          ?.whereNot((it) =>
+              it.type == reaction?.type &&
+              it.score == reaction?.score &&
+              it.messageId == reaction?.messageId &&
+              it.userId == reaction?.userId &&
+              it.extraData == reaction?.extraData)
+          .toList(growable: false);
       final message = event.message!.copyWith(
-        ownReactions: [...event.message!.latestReactions!]
-          ..removeWhere((it) => it.userId != userId),
+        ownReactions: ownReactions,
       );
       addMessage(message);
     }));
@@ -1713,10 +1736,10 @@ class ChannelClientState {
 
   void _listenReactions() {
     _subscriptions.add(_channel.on(EventType.reactionNew).listen((event) {
-      final userId = _channel.client.state.currentUser!.id;
+      final oldMessage =
+          messages.firstWhereOrNull((it) => it.id == event.message?.id);
       final message = event.message!.copyWith(
-        ownReactions: [...event.message!.latestReactions!]
-          ..removeWhere((it) => it.userId != userId),
+        ownReactions: oldMessage?.ownReactions,
       );
       addMessage(message);
     }));
@@ -1729,10 +1752,11 @@ class ChannelClientState {
       EventType.reactionUpdated,
     )
         .listen((event) {
-      final userId = _channel.client.state.currentUser!.id;
+      final oldMessage =
+          messages.firstWhereOrNull((it) => it.id == event.message?.id);
+
       final message = event.message!.copyWith(
-        ownReactions: [...event.message!.latestReactions!]
-          ..removeWhere((it) => it.userId != userId),
+        ownReactions: oldMessage?.ownReactions,
       );
       addMessage(message);
 
