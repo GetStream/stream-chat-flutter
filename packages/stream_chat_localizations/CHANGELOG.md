@@ -1,3 +1,9 @@
+## 2.1.0
+
+🔄 Changed
+
+* Some of the `Japanese` translations have been updated/changed for better understanding.
+
 ## 2.0.0
 
 - Updated `stream_chat_flutter` dependency to [`3.0.0`](https://pub.dev/packages/stream_chat_flutter/changelog).

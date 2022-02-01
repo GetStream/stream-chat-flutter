@@ -1,6 +1,7 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/device_api.dart';
 import 'package:stream_chat/src/core/http/token.dart';
+import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -980,6 +981,36 @@ void main() {
             pagination: any(named: 'pagination'),
           )).called(1);
       verifyNoMoreInteractions(api.user);
+    });
+
+    test('`.queryBannedUsers`', () async {
+      final bans = List.generate(
+        3,
+        (index) => BannedUser(
+          user: User(id: 'test-user-id-$index'),
+          bannedBy: User(id: 'test-user-id-${index + 1}'),
+        ),
+      );
+
+      const cid = 'message:nice-channel';
+      final filter = Filter.equal('channel_cid', cid);
+
+      when(() => api.moderation.queryBannedUsers(
+            filter: filter,
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          )).thenAnswer((_) async => QueryBannedUsersResponse()..bans = bans);
+
+      final res = await client.queryBannedUsers(filter: filter);
+      expect(res, isNotNull);
+      expect(res.bans.length, bans.length);
+
+      verify(() => api.moderation.queryBannedUsers(
+            filter: filter,
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
+      verifyNoMoreInteractions(api.moderation);
     });
 
     test('`.search`', () async {

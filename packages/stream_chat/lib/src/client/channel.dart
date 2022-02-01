@@ -4,15 +4,9 @@ import 'dart:math';
 import 'package:collection/collection.dart'
     show IterableExtension, ListEquality;
 import 'package:dio/dio.dart';
-import 'package:rate_limiter/rate_limiter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
-import 'package:stream_chat/src/core/error/error.dart';
-import 'package:stream_chat/src/core/models/attachment_file.dart';
-import 'package:stream_chat/src/core/models/channel_state.dart';
-import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
-import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 /// Class that manages a specific channel.
@@ -1276,6 +1270,21 @@ class Channel {
         pagination: pagination,
       );
 
+  /// Query channel banned users.
+  Future<QueryBannedUsersResponse> queryBannedUsers({
+    Filter? filter,
+    List<SortOption>? sort,
+    PaginationParams? pagination,
+  }) {
+    _checkInitialized();
+    filter ??= Filter.equal('channel_cid', cid!);
+    return _client.queryBannedUsers(
+      filter: filter,
+      sort: sort,
+      pagination: pagination,
+    );
+  }
+
   /// Mutes the channel.
   Future<EmptyResponse> mute({Duration? expiration}) {
     _checkInitialized();
@@ -1289,7 +1298,15 @@ class Channel {
   }
 
   /// Bans the user with given [userID] from the channel.
+  @Deprecated("Use 'banMember' instead")
   Future<EmptyResponse> banUser(
+    String userID,
+    Map<String, dynamic> options,
+  ) =>
+      banMember(userID, options);
+
+  /// Bans the member with given [userID] from the channel.
+  Future<EmptyResponse> banMember(
     String userID,
     Map<String, dynamic> options,
   ) async {
@@ -1303,7 +1320,11 @@ class Channel {
   }
 
   /// Remove the ban for the user with given [userID] in the channel.
-  Future<EmptyResponse> unbanUser(String userID) async {
+  @Deprecated("Use 'unbanMember' instead")
+  Future<EmptyResponse> unbanUser(String userID) => unbanMember(userID);
+
+  /// Remove the ban for the member with given [userID] in the channel.
+  Future<EmptyResponse> unbanMember(String userID) async {
     _checkInitialized();
     return _client.unbanUser(userID, {
       'type': type,
@@ -1474,6 +1495,10 @@ class ChannelClientState {
 
     _listenMemberRemoved();
 
+    _listenMemberBanned();
+
+    _listenMemberUnbanned();
+
     _startCleaning();
 
     _startCleaningPinnedMessages();
@@ -1570,6 +1595,54 @@ class ChannelClientState {
           ?.deleteMessageByCid(channel.cid);
       truncate();
     }));
+  }
+
+  void _listenMemberBanned() {
+    _subscriptions.add(_channel
+        .on(EventType.userBanned)
+        .where((it) => it.cid != null) // filters channel ban from app ban
+        .listen(
+      (event) async {
+        final user = event.user!;
+        final member = await _channel
+            .queryMembers(filter: Filter.equal('id', user.id))
+            .then((it) => it.members.first);
+
+        _updateMember(member);
+      },
+    ));
+  }
+
+  void _listenMemberUnbanned() {
+    _subscriptions.add(_channel
+        .on(EventType.userUnbanned)
+        .where((it) => it.cid != null) // filters channel ban from app ban
+        .listen(
+      (event) async {
+        final user = event.user!;
+        final member = await _channel
+            .queryMembers(filter: Filter.equal('id', user.id))
+            .then((it) => it.members.first);
+
+        _updateMember(member);
+      },
+    ));
+  }
+
+  void _updateMember(Member member) {
+    final currentMembers = [...members];
+    final memberIndex = currentMembers.indexWhere(
+      (m) => m.userId == member.userId,
+    );
+
+    if (memberIndex == -1) return;
+    currentMembers[memberIndex] = member;
+
+    updateChannelState(
+      channelState.copyWith(
+        members: currentMembers,
+      ),
+    );
   }
 
   /// Flag which indicates if [ChannelClientState] contain latest/recent messages or not.
@@ -1748,7 +1821,13 @@ class ChannelClientState {
       if (replyCount == null || replyCount == 0) return;
 
       addMessage(parentMessage.copyWith(replyCount: replyCount - 1));
-      updateThreadInfo(parentId, threads[parentId]!..remove(message));
+      updateThreadInfo(
+        parentId,
+        threads[parentId]!
+          ..removeWhere(
+            (e) => e.id == message.id,
+          ),
+      );
     } else {
       // Remove regular message
       final allMessages = [...messages];
