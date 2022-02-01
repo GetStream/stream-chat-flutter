@@ -5,6 +5,9 @@
 - [[#857]](https://github.com/GetStream/stream-chat-flutter/issues/857) Channel now listens for member ban/unban and
   updates the channel state with the latest data.
 - [[#748]](https://github.com/GetStream/stream-chat-flutter/issues/748) `Message.user` are now also included while saving users in persistence.
+- [[#871]](https://github.com/GetStream/stream-chat-flutter/issues/871) Fixed thread message deletion.
+- [[#846]](https://github.com/GetStream/stream-chat-flutter/issues/846) Fixed `message.ownReactions` getting truncated when receiving a reaction event.
+- Add check for invalid image URLs
 
 🔄 Changed
 
@@ -18,16 +21,6 @@
 - Added `client.enrichUrl` endpoint for enriching URLs with metadata.
 - Fixed `unreadCount` after removing user from a channel.
 - Added `client.queryBannedUsers`, `channel.queryBannedUsers` endpoint for querying banned users.
-
-🐞 Fixed
-
-- [[#871]](https://github.com/GetStream/stream-chat-flutter/issues/871) Fixed thread message deletion.
-
-- [[#846]](https://github.com/GetStream/stream-chat-flutter/issues/846) Fixed `message.ownReactions` getting truncated when receiving a reaction event.
-
-🐞 Fixed
-
-- Add check for invalid image URLs
 
 ## 3.3.1
 
