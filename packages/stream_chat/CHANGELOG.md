@@ -25,6 +25,10 @@
 
 - [[#846]](https://github.com/GetStream/stream-chat-flutter/issues/846) Fixed `message.ownReactions` getting truncated when receiving a reaction event.
 
+🐞 Fixed
+
+- Add check for invalid image URLs
+
 ## 3.3.1
 
 🐞 Fixed
