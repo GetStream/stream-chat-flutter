@@ -20,6 +20,7 @@ class Member extends Equatable {
     DateTime? createdAt,
     DateTime? updatedAt,
     this.banned = false,
+    this.banExpires,
     this.shadowBanned = false,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
@@ -56,6 +57,9 @@ class Member extends Equatable {
   /// True if the member is banned from the channel
   final bool banned;
 
+  /// The date at which the ban will expire.
+  final DateTime? banExpires;
+
   /// True if the member is shadow banned from the channel
   final bool shadowBanned;
 
@@ -77,6 +81,7 @@ class Member extends Equatable {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? banned,
+    DateTime? banExpires,
     bool? shadowBanned,
   }) =>
       Member(
@@ -85,6 +90,7 @@ class Member extends Equatable {
         inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
         invited: invited ?? this.invited,
         banned: banned ?? this.banned,
+        banExpires: banExpires ?? this.banExpires,
         shadowBanned: shadowBanned ?? this.shadowBanned,
         role: role ?? this.role,
         userId: userId ?? this.userId,
@@ -106,6 +112,7 @@ class Member extends Equatable {
         userId,
         isModerator,
         banned,
+        banExpires,
         shadowBanned,
         createdAt,
         updatedAt,
