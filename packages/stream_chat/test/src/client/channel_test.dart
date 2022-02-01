@@ -1,6 +1,6 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
+import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -1963,6 +1963,35 @@ void main() {
           )).called(1);
     });
 
+    test('`.queryBannedUsers`', () async {
+      final filter = Filter.equal('channel_cid', channelCid);
+
+      final bans = List.generate(
+        3,
+        (index) => BannedUser(
+          user: User(id: 'test-user-id-$index'),
+          bannedBy: User(id: 'test-user-id-${index + 1}'),
+        ),
+      );
+
+      when(() => client.queryBannedUsers(
+            filter: filter,
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          )).thenAnswer((_) async => QueryBannedUsersResponse()..bans = bans);
+
+      final res = await channel.queryBannedUsers();
+
+      expect(res, isNotNull);
+      expect(res.bans.length, bans.length);
+
+      verify(() => client.queryBannedUsers(
+            filter: filter,
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
+    });
+
     test('`.mute`', () async {
       when(() => client.muteChannel(
             channelCid,
@@ -2046,7 +2075,7 @@ void main() {
             {'type': channelType, 'id': channelId, ...options},
           )).thenAnswer((_) async => EmptyResponse());
 
-      final res = await channel.banUser(userId, options);
+      final res = await channel.banMember(userId, options);
 
       expect(res, isNotNull);
 
@@ -2062,7 +2091,7 @@ void main() {
       when(() => client.unbanUser(userId, any()))
           .thenAnswer((_) async => EmptyResponse());
 
-      final res = await channel.unbanUser(userId);
+      final res = await channel.unbanMember(userId);
 
       expect(res, isNotNull);
 

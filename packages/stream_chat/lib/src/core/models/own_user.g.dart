@@ -35,6 +35,9 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
       online: json['online'] as bool? ?? false,
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       banned: json['banned'] as bool? ?? false,
+      banExpires: json['ban_expires'] == null
+          ? null
+          : DateTime.parse(json['ban_expires'] as String),
       teams:
           (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??
               const [],

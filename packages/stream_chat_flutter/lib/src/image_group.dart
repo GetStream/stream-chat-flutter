@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/full_screen_media.dart';
-import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Widget for constructing a group of images in message
 class ImageGroup extends StatelessWidget {

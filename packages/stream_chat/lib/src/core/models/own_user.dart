@@ -26,6 +26,7 @@ class OwnUser extends User {
     bool online = false,
     Map<String, Object?> extraData = const {},
     bool banned = false,
+    DateTime? banExpires,
     List<String> teams = const [],
     String? language,
   }) : super(
@@ -39,6 +40,7 @@ class OwnUser extends User {
           online: online,
           extraData: extraData,
           banned: banned,
+          banExpires: banExpires,
           teams: teams,
           language: language,
         );
@@ -75,6 +77,7 @@ class OwnUser extends User {
     bool? online,
     Map<String, Object?>? extraData,
     bool? banned,
+    DateTime? banExpires,
     List<String>? teams,
     List<Mute>? channelMutes,
     List<Device>? devices,
@@ -91,6 +94,7 @@ class OwnUser extends User {
         // if null, it will be retrieved from extraData['image']
         image: image,
         banned: banned ?? this.banned,
+        banExpires: banExpires ?? this.banExpires,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         lastActive: lastActive ?? this.lastActive,
