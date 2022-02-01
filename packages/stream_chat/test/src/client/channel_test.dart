@@ -1,5 +1,6 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
+import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -1957,6 +1958,35 @@ void main() {
             channelId: channelId,
             filter: filter,
             members: any(named: 'members'),
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
+    });
+
+    test('`.queryBannedUsers`', () async {
+      final filter = Filter.equal('channel_cid', channelCid);
+
+      final bans = List.generate(
+        3,
+        (index) => BannedUser(
+          user: User(id: 'test-user-id-$index'),
+          bannedBy: User(id: 'test-user-id-${index + 1}'),
+        ),
+      );
+
+      when(() => client.queryBannedUsers(
+            filter: filter,
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          )).thenAnswer((_) async => QueryBannedUsersResponse()..bans = bans);
+
+      final res = await channel.queryBannedUsers();
+
+      expect(res, isNotNull);
+      expect(res.bans.length, bans.length);
+
+      verify(() => client.queryBannedUsers(
+            filter: filter,
             sort: any(named: 'sort'),
             pagination: any(named: 'pagination'),
           )).called(1);
