@@ -2,9 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
-import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 

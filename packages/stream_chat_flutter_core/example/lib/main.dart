@@ -88,7 +88,7 @@ class HomeScreen extends StatelessWidget {
                 [
                   StreamChatCore.of(context).currentUser!.id,
                 ],
-              )
+              ),
             ]),
             emptyBuilder: (BuildContext context) => const Center(
               child: Text('Looks like you are not in any channels'),
