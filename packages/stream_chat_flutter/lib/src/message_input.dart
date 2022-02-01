@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,16 +15,12 @@ import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
-import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:video_compress/video_compress.dart';
 
 export 'package:video_compress/video_compress.dart' show VideoQuality;
@@ -1129,13 +1124,14 @@ class MessageInputState extends State<MessageInput> {
 
     if (file.size! > widget.maxAttachmentSize) {
       if (medium.type == AssetType.video && file.path != null) {
-        final mediaInfo = await (VideoService.compressVideo(
+        final mediaInfo = await VideoService.compressVideo(
           file.path!,
           frameRate: widget.compressedVideoFrameRate,
           quality: widget.compressedVideoQuality,
-        ) as FutureOr<MediaInfo>);
+        );
 
-        if (mediaInfo.filesize! > widget.maxAttachmentSize) {
+        if (mediaInfo == null ||
+            mediaInfo.filesize! > widget.maxAttachmentSize) {
           _showErrorAlert(
             context.translations.fileTooLargeAfterCompressionError(
               widget.maxAttachmentSize / (1024 * 1024),

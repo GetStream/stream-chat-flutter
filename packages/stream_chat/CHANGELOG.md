@@ -2,6 +2,31 @@
 
 🐞 Fixed
 
+- [[#857]](https://github.com/GetStream/stream-chat-flutter/issues/857) Channel now listens for member ban/unban and
+  updates the channel state with the latest data.
+- [[#748]](https://github.com/GetStream/stream-chat-flutter/issues/748) `Message.user` are now also included while saving users in persistence.
+
+🔄 Changed
+
+- `client.location` is now deprecated in favor of the
+  new [edge server](https://getstream.io/blog/chat-edge-infrastructure) and will be removed in v4.0.0.
+- `channel.banUser`, `channel.unbanUser` is now deprecated in favor of the new `channel.banMember`
+  and `channel.unbanMember` and will be removed in v4.0.0.
+
+✅ Added
+
+- Added `client.enrichUrl` endpoint for enriching URLs with metadata.
+- Fixed `unreadCount` after removing user from a channel.
+- Added `client.queryBannedUsers`, `channel.queryBannedUsers` endpoint for querying banned users.
+
+🐞 Fixed
+
+- [[#871]](https://github.com/GetStream/stream-chat-flutter/issues/871) Fixed thread message deletion.
+
+## 3.3.1
+
+🐞 Fixed
+
 - [[#799]](https://github.com/GetStream/stream-chat-flutter/issues/799) Fixed `totalUnreadCount` is not updating when
   app is resumed from background mode.
 - Fix retry mechanism failing in some cases.

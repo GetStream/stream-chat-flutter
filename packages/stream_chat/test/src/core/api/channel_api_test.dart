@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 

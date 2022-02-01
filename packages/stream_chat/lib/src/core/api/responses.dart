@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client/client.dart';
 import 'package:stream_chat/src/core/error/error.dart';
+import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/device.dart';
@@ -104,6 +105,18 @@ class QueryUsersResponse extends _BaseResponse {
   /// Create a new instance from a json
   static QueryUsersResponse fromJson(Map<String, dynamic> json) =>
       _$QueryUsersResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.queryBannedUsers] api call
+@JsonSerializable(createToJson: false)
+class QueryBannedUsersResponse extends _BaseResponse {
+  /// List of users returned by the query
+  @JsonKey(defaultValue: [])
+  late List<BannedUser> bans;
+
+  /// Create a new instance from a json
+  static QueryBannedUsersResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryBannedUsersResponseFromJson(json);
 }
 
 /// Model response for [channel.getReactions] api call
@@ -441,4 +454,44 @@ class ChannelStateResponse extends _BaseResponse {
   /// Create a new instance from a json
   static ChannelStateResponse fromJson(Map<String, dynamic> json) =>
       _$ChannelStateResponseFromJson(json);
+}
+
+/// Model response for [Client.enrichUrl] api call.
+@JsonSerializable(createToJson: false)
+class OGAttachmentResponse extends _BaseResponse {
+  /// The URL of the page that was scraped.
+  late String ogScrapeUrl;
+
+  /// The URL of the asset.
+  String? assetUrl;
+
+  /// The URL of the author.
+  String? authorLink;
+
+  /// The name of the author.
+  String? authorName;
+
+  /// The URL of the image.
+  String? imageUrl;
+
+  /// The text of the attachment.
+  String? text;
+
+  /// The URL of the thumbnail.
+  String? thumbUrl;
+
+  /// The title of the attachment.
+  String? title;
+
+  /// The URL of the title.
+  String? titleLink;
+
+  /// The type of the attachment.
+  ///
+  /// 'video' | 'audio' | 'image'
+  String? type;
+
+  /// Create a new instance from a [json].
+  static OGAttachmentResponse fromJson(Map<String, dynamic> json) =>
+      _$OGAttachmentResponseFromJson(json);
 }

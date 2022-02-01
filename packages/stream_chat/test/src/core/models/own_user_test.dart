@@ -1,6 +1,4 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/core/models/own_user.dart';
-import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 

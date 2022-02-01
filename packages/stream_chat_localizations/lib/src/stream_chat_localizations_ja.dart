@@ -38,7 +38,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'スレッド返信';
 
   @override
-  String get onlyVisibleToYouText => '自分しか見れません';
+  String get onlyVisibleToYouText => '自分にのみ見えます';
 
   @override
   String threadReplyCountText(int count) => '$countつのスレッド返信';
@@ -48,7 +48,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
     required int remaining,
     required int total,
   }) =>
-      '$remaining/${total}mbのアップロード中 。。。';
+      '$remaining/${total}mbのアップロード中…';
 
   @override
   String pinnedByUserText({
@@ -82,7 +82,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get messageReactionsLabel => 'メッセージのリアクション';
 
   @override
-  String get emptyChatMessagesText => 'チャットがありませんが。。。';
+  String get emptyChatMessagesText => 'まだメッセージはありません…';
 
   @override
   String threadSeparatorText(int replyCount) => '$replyCount件の返信';
@@ -94,7 +94,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get disconnectedLabel => '接続切れ';
 
   @override
-  String get reconnectingLabel => '再接続中。。。';
+  String get reconnectingLabel => '再接続中…';
 
   @override
   String get alsoSendAsDirectMessageLabel => 'ダイレクトメッセージでも送信';
@@ -115,7 +115,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String fileTooLargeAfterCompressionError(double limitInMB) =>
       'ファイルのサイズが大きすぎてアップロードできません。'
       'ファイルサイズの制限は${limitInMB}MBです。'
-      '圧縮してみましたが、十分ではありませんでした。';
+      '圧縮を試しましたがサイズをオーバーしました';
 
   @override
   String fileTooLargeError(double limitInMB) =>
@@ -143,7 +143,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get videoFromCameraLabel => 'カメラからの動画';
 
   @override
-  String get okLabel => 'よし';
+  String get okLabel => 'OK';
 
   @override
   String get somethingWentWrongError => 'エラーが発生しました';
@@ -180,7 +180,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get deleteLabel => '削除';
 
   @override
-  String get deleteMessageLabel => 'メッセージを削除する ';
+  String get deleteMessageLabel => 'メッセージを削除する';
 
   @override
   String get deleteMessageQuestion => 'このメッセージ'
@@ -195,7 +195,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   @override
   String togglePinUnpinText({required bool pinned}) {
     if (pinned) return '会話のピンを外す';
-    return '会話にピンする';
+    return '会話をピンする';
   }
 
   @override
@@ -246,7 +246,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get yesterdayLabel => '昨日';
 
   @override
-  String get channelIsMutedText => 'チャンネルが無音されています';
+  String get channelIsMutedText => 'チャンネルがミュートされています';
 
   @override
   String get noTitleText => 'タイトル無し';
@@ -255,7 +255,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get letsStartChattingLabel => 'チャットを始めよう！';
 
   @override
-  String get sendingFirstMessageLabel => '友人に最初のメッセージを送りましょうか？';
+  String get sendingFirstMessageLabel => '最初のメッセージを送ってみましょう';
 
   @override
   String get startAChatLabel => 'チャットを開始する';
@@ -276,7 +276,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get searchingForNetworkText => 'ネットワークを検索中';
 
   @override
-  String get offlineLabel => 'オフライン。。。';
+  String get offlineLabel => 'オフライン…';
 
   @override
   String get tryAgainLabel => '再試行する';
@@ -291,16 +291,16 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get viewInfoLabel => '情報を見る';
 
   @override
-  String get leaveGroupLabel => 'グループを離れる';
+  String get leaveGroupLabel => 'グループから退出する';
 
   @override
-  String get leaveLabel => '離れる';
+  String get leaveLabel => '退出する';
 
   @override
-  String get leaveConversationLabel => '会話を離れる';
+  String get leaveConversationLabel => '会話から退出する';
 
   @override
-  String get leaveConversationQuestion => '本当に会話を離れますか？';
+  String get leaveConversationQuestion => '本当に会話から退出しますか？';
 
   @override
   String get showInChatLabel => 'チャットで表示';
@@ -315,7 +315,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get uploadErrorLabel => 'アップロードエラー';
 
   @override
-  String get giphyLabel => 'ギフィー';
+  String get giphyLabel => 'GIPHY';
 
   @override
   String get shuffleLabel => 'ミックス';
