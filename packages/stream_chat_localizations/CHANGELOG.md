@@ -1,11 +1,8 @@
-## 2.2.0
+## Upcoming
 
 ✅ Added
 
 * Added support for [Portuguese](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_pt.dart) locale.
-  
-
-## 2.1.0
 
 🔄 Changed
 
