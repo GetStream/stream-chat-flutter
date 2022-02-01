@@ -4,6 +4,10 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Bottom Sheet with options
+@Deprecated(
+  "'ChannelBottomSheet' is deprecated and shouldn't be used. "
+  "Please use 'StreamChannelBottomSheet' instead.",
+)
 class ChannelBottomSheet extends StatefulWidget {
   /// Constructor for creating bottom sheet
   const ChannelBottomSheet({Key? key, this.onViewInfoTap}) : super(key: key);
@@ -15,6 +19,7 @@ class ChannelBottomSheet extends StatefulWidget {
   _ChannelBottomSheetState createState() => _ChannelBottomSheetState();
 }
 
+// ignore: deprecated_member_use_from_same_package
 class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
   bool _showActions = true;
 
