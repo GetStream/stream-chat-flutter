@@ -8,6 +8,7 @@
 - [[#871]](https://github.com/GetStream/stream-chat-flutter/issues/871) Fixed thread message deletion.
 - [[#846]](https://github.com/GetStream/stream-chat-flutter/issues/846) Fixed `message.ownReactions` getting truncated when receiving a reaction event.
 - Add check for invalid image URLs
+- Fix `channelState.pinnedMessagesStream` getting reset to `0` after a channel update.
 
 🔄 Changed
 
