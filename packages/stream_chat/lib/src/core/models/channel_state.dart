@@ -7,6 +7,8 @@ import 'package:stream_chat/src/core/models/user.dart';
 
 part 'channel_state.g.dart';
 
+const _emptyPinnedMessages = <Message>[];
+
 /// The class that contains the information about a channel
 @JsonSerializable()
 class ChannelState {
@@ -15,7 +17,7 @@ class ChannelState {
     this.channel,
     this.messages = const [],
     this.members = const [],
-    this.pinnedMessages = const [],
+    this.pinnedMessages = _emptyPinnedMessages,
     this.watcherCount,
     this.watchers = const [],
     this.read = const [],
@@ -63,7 +65,11 @@ class ChannelState {
         channel: channel ?? this.channel,
         messages: messages ?? this.messages,
         members: members ?? this.members,
-        pinnedMessages: pinnedMessages ?? this.pinnedMessages,
+        // Hack to avoid using the default value in case nothing is provided.
+        // FIXME: Use non-nullable by default instead of empty list.
+        pinnedMessages: pinnedMessages == _emptyPinnedMessages
+            ? this.pinnedMessages
+            : pinnedMessages ?? _emptyPinnedMessages,
         watcherCount: watcherCount ?? this.watcherCount,
         watchers: watchers ?? this.watchers,
         read: read ?? this.read,
