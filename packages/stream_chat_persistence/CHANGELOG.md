@@ -1,4 +1,4 @@
-## Upcoming
+## 3.0.1
 
 - Bump `drift` to `1.3.0`.
 
