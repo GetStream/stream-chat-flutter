@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/visible_footnote.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Widget for showing a GIF attachment
 class GiphyAttachment extends AttachmentWidget {
@@ -246,7 +244,8 @@ class GiphyAttachment extends AttachmentWidget {
           return StreamChannel(
             channel: channel,
             child: FullScreenMedia(
-              mediaAttachments: [attachment],
+              mediaAttachments: message.attachments,
+              startIndex: message.attachments.indexOf(attachment),
               userName: message.user?.name,
               message: message,
               onShowMessage: onShowMessage,

@@ -1,7 +1,4 @@
-import 'dart:ui';
-
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
@@ -365,12 +362,13 @@ class AttachmentActionsModal extends StatelessWidget {
   }) async {
     String? filePath;
     final appDocDir = await getTemporaryDirectory();
+    final url =
+        attachment.assetUrl ?? attachment.imageUrl ?? attachment.thumbUrl!;
     await Dio().download(
-      attachment.assetUrl ?? attachment.imageUrl ?? attachment.thumbUrl!,
+      url,
       (Headers responseHeaders) {
-        final contentType = responseHeaders[Headers.contentTypeHeader]!;
-        final mimeType = contentType.first.split('/').last;
-        filePath ??= '${appDocDir.path}/${attachment.id}.$mimeType';
+        final ext = Uri.parse(url).pathSegments.last;
+        filePath ??= '${appDocDir.path}/${attachment.id}.$ext';
         return filePath!;
       },
       onReceiveProgress: progressCallback,

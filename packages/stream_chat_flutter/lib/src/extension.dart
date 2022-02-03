@@ -1,4 +1,3 @@
-import 'package:characters/characters.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -47,6 +46,7 @@ extension IterableX<T> on Iterable<T> {
 extension PlatformFileX on PlatformFile {
   /// Converts the [PlatformFile] into [AttachmentFile]
   AttachmentFile get toAttachmentFile => AttachmentFile(
+        //ignore: avoid_redundant_argument_values
         path: kIsWeb ? null : path,
         name: name,
         bytes: bytes,

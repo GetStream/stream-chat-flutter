@@ -11,7 +11,6 @@ import 'package:stream_chat/src/core/http/interceptor/connection_id_interceptor.
 import 'package:stream_chat/src/core/http/interceptor/logging_interceptor.dart';
 import 'package:stream_chat/src/core/http/stream_chat_dio_error.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
-import 'package:stream_chat/src/location.dart';
 
 part 'stream_http_client_options.dart';
 

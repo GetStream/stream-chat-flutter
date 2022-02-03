@@ -1,3 +1,29 @@
+## 3.4.0
+
+🐞 Fixed
+
+- [[#857]](https://github.com/GetStream/stream-chat-flutter/issues/857) Channel now listens for member ban/unban and
+  updates the channel state with the latest data.
+- [[#748]](https://github.com/GetStream/stream-chat-flutter/issues/748) `Message.user` is now also included while saving users in persistence.
+- [[#871]](https://github.com/GetStream/stream-chat-flutter/issues/871) Fixed thread message deletion.
+- [[#846]](https://github.com/GetStream/stream-chat-flutter/issues/846) Fixed `message.ownReactions` getting truncated when receiving a reaction event.
+- Add check for invalid image URLs
+- Fix `channelState.pinnedMessagesStream` getting reset to `0` after a channel update.
+- Fixed `unreadCount` after removing user from a channel.
+
+🔄 Changed
+
+- `client.location` is now deprecated in favor of the
+  new [edge server](https://getstream.io/blog/chat-edge-infrastructure) and will be removed in v4.0.0.
+- `channel.banUser`, `channel.unbanUser` is now deprecated in favor of the new `channel.banMember`
+  and `channel.unbanMember`. These deprecated methods will be removed in v4.0.0.
+- Added `banExpires` property of type `DateTime` on the `Member`, `OwnUser`, and `User` models.
+
+✅ Added
+
+- Added `client.enrichUrl` endpoint for enriching URLs with metadata.
+- Added `client.queryBannedUsers`, `channel.queryBannedUsers` endpoint for querying banned users.
+
 ## 3.3.1
 
 🐞 Fixed

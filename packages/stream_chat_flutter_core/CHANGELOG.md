@@ -1,3 +1,11 @@
+## 3.4.0
+- Updated `stream_chat` dependency to [`3.4.0`](https://pub.dev/packages/stream_chat/changelog).
+
+🐞 Fixed
+
+- Do not move a channel to top if the new message is from a thread.
+- [[#848]](https://github.com/GetStream/stream-chat-flutter/issues/848) Fixed "Bad state: Cannot add new events after calling close" by replacing all `.add` methods with a new `.safeAdd`.
+
 ## 3.3.1
 
 - Updated `stream_chat` dependency to [`3.3.1`](https://pub.dev/packages/stream_chat/changelog).

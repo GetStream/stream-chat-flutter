@@ -253,6 +253,7 @@ abstract class ChatPersistenceClient {
 
         users.addAll([
           channel.createdBy,
+          ...messages.map((it) => it.user),
           ...reads.map((it) => it.user),
           ...members.map((it) => it.user),
           ...reactions.map((it) => it.user),
