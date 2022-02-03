@@ -1,4 +1,5 @@
 ## 3.4.0
+- Updated `stream_chat_flutter_core` dependency to [`3.4.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 🐞 Fixed
 
@@ -8,7 +9,7 @@
 
 ✅ Added
 
-- Videos can now be auto-played in `FullScreenMedia`
+- Videos can now be auto-played in `FullScreenMedia`, by setting the `autoplayVideos` argument to true.
 
 ## 3.3.2
 
