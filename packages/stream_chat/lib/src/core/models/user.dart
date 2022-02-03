@@ -69,7 +69,6 @@ class User extends Equatable {
     'online',
     'banned',
     'ban_expires',
-    'dashboard_ban_channel_cid',
     'teams',
     'language',
   ];
