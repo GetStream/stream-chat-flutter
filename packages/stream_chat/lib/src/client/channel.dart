@@ -1321,7 +1321,8 @@ class Channel {
   }
 
   /// Remove the ban for the user with given [userID] in the channel.
-  @Deprecated("Use 'unbanMember' instead. This method will be removed in v4.0.0")
+  @Deprecated(
+      "Use 'unbanMember' instead. This method will be removed in v4.0.0")
   Future<EmptyResponse> unbanUser(String userID) => unbanMember(userID);
 
   /// Remove the ban for the member with given [userID] in the channel.
