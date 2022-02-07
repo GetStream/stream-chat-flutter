@@ -191,22 +191,20 @@ class _$Success<Key, Value> extends Success<Key, Value>
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is Success<Key, Value> &&
-            (identical(other.items, items) ||
-                const DeepCollectionEquality().equals(other.items, items)) &&
-            (identical(other.nextPageKey, nextPageKey) ||
-                const DeepCollectionEquality()
-                    .equals(other.nextPageKey, nextPageKey)) &&
-            (identical(other.error, error) ||
-                const DeepCollectionEquality().equals(other.error, error)));
+        (other.runtimeType == runtimeType &&
+            other is Success<Key, Value> &&
+            const DeepCollectionEquality().equals(other.items, items) &&
+            const DeepCollectionEquality()
+                .equals(other.nextPageKey, nextPageKey) &&
+            const DeepCollectionEquality().equals(other.error, error));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(items) ^
-      const DeepCollectionEquality().hash(nextPageKey) ^
-      const DeepCollectionEquality().hash(error);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(items),
+      const DeepCollectionEquality().hash(nextPageKey),
+      const DeepCollectionEquality().hash(error));
 
   @JsonKey(ignore: true)
   @override
@@ -296,13 +294,13 @@ abstract class Success<Key, Value> extends PagedValue<Key, Value> {
   const Success._() : super._();
 
   /// List with all items loaded so far.
-  List<Value> get items => throw _privateConstructorUsedError;
+  List<Value> get items;
 
   /// The key for the next page to be fetched.
-  Key? get nextPageKey => throw _privateConstructorUsedError;
+  Key? get nextPageKey;
 
   /// The current error, if any.
-  StreamChatError? get error => throw _privateConstructorUsedError;
+  StreamChatError? get error;
   @JsonKey(ignore: true)
   $SuccessCopyWith<Key, Value, Success<Key, Value>> get copyWith =>
       throw _privateConstructorUsedError;
@@ -347,7 +345,8 @@ class _$Loading<Key, Value> extends Loading<Key, Value>
 
   @override
   bool operator ==(dynamic other) {
-    return identical(this, other) || (other is Loading<Key, Value>);
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is Loading<Key, Value>);
   }
 
   @override
@@ -490,14 +489,14 @@ class _$Error<Key, Value> extends Error<Key, Value>
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is Error<Key, Value> &&
-            (identical(other.error, error) ||
-                const DeepCollectionEquality().equals(other.error, error)));
+        (other.runtimeType == runtimeType &&
+            other is Error<Key, Value> &&
+            const DeepCollectionEquality().equals(other.error, error));
   }
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^ const DeepCollectionEquality().hash(error);
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(error));
 
   @JsonKey(ignore: true)
   @override
@@ -583,7 +582,7 @@ abstract class Error<Key, Value> extends PagedValue<Key, Value> {
   const factory Error(StreamChatError error) = _$Error<Key, Value>;
   const Error._() : super._();
 
-  StreamChatError get error => throw _privateConstructorUsedError;
+  StreamChatError get error;
   @JsonKey(ignore: true)
   $ErrorCopyWith<Key, Value, Error<Key, Value>> get copyWith =>
       throw _privateConstructorUsedError;

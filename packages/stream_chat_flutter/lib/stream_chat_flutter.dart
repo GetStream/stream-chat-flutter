@@ -25,8 +25,6 @@ export 'src/mention_tile.dart';
 export 'src/message_action.dart';
 export 'src/message_input/countdown_button.dart';
 export 'src/message_input/message_input.dart';
-export 'src/message_input/message_input_controller.dart';
-export 'src/message_input/message_text_field_controller.dart';
 export 'src/message_input/stream_attachment_picker.dart';
 export 'src/message_input/stream_message_send_button.dart';
 export 'src/message_input/stream_message_text_field.dart';
@@ -55,8 +53,6 @@ export 'src/user_mention_tile.dart';
 export 'src/utils.dart';
 
 // v4
-export 'src/v4/channel_list_view/stream_channel_list_controller.dart';
-export 'src/v4/channel_list_view/stream_channel_list_event_handler.dart';
 export 'src/v4/channel_list_view/stream_channel_list_loading_tile.dart';
 export 'src/v4/channel_list_view/stream_channel_list_tile.dart';
 export 'src/v4/channel_list_view/stream_channel_list_view.dart';

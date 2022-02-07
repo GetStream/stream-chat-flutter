@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// A [SafeArea] with an enabled toggle
-class SimpleSafeArea extends StatefulWidget {
+class SimpleSafeArea extends StatelessWidget {
   /// Constructor for [SimpleSafeArea]
   const SimpleSafeArea({
     Key? key,
@@ -16,16 +16,11 @@ class SimpleSafeArea extends StatefulWidget {
   final Widget child;
 
   @override
-  _SimpleSafeAreaState createState() => _SimpleSafeAreaState();
-}
-
-class _SimpleSafeAreaState extends State<SimpleSafeArea> {
-  @override
   Widget build(BuildContext context) => SafeArea(
-        left: widget.enabled,
-        top: widget.enabled,
-        right: widget.enabled,
-        bottom: widget.enabled,
-        child: widget.child,
+        left: enabled,
+        top: enabled,
+        right: enabled,
+        bottom: enabled,
+        child: child,
       );
 }

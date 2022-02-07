@@ -1,11 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/paged_value_notifier.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list_controller.dart';
 import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list_loading_tile.dart';
 import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list_tile.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
