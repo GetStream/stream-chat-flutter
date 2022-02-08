@@ -1083,7 +1083,7 @@ class Channel {
     } else {
       // remove the passed message if response does
       // not contain message
-      state!.removeMessage(message);
+      state!.removeMessage(message, decreaseReplyCount: true);
       await _client.chatPersistenceClient?.deleteMessageById(messageId);
     }
     return res;
@@ -1758,6 +1758,7 @@ class ChannelClientState {
     _subscriptions.add(_channel.on(EventType.messageDeleted).listen((event) {
       final message = event.message!;
       if (event.hardDelete == true) {
+        //do not decrease reply count here - it is done in _listenMessageUpdated
         removeMessage(message, hardDelete: true);
       } else {
         addMessage(message);
@@ -1816,24 +1817,30 @@ class ChannelClientState {
   }
 
   /// Remove a [message] from this [channelState].
-  void removeMessage(Message message, {bool hardDelete = false}) {
+  void removeMessage(
+    Message message, {
+    bool hardDelete = false,
+    bool decreaseReplyCount = false,
+  }) {
     final parentId = message.parentId;
     // i.e. it's a thread message
     // 1. Remove the thread message
     // 2. Reduce total reply count of parent message
     if (parentId != null) {
-      final allMessages = [...messages];
-      final parentMessage = allMessages.firstWhereOrNull(
-        (it) => it.id == parentId,
-      );
+      if (decreaseReplyCount) {
+        final allMessages = [...messages];
+        final parentMessage = allMessages.firstWhereOrNull(
+          (it) => it.id == parentId,
+        );
 
-      // return if message not available in the memory
-      if (parentMessage == null) return;
-      final replyCount = parentMessage.replyCount;
-      // return if reply count is null or zero
-      if (replyCount == null || replyCount == 0) return;
+        // return if message not available in the memory
+        if (parentMessage == null) return;
+        final replyCount = parentMessage.replyCount;
+        // return if reply count is null or zero
+        if (replyCount == null || replyCount == 0) return;
 
-      addMessage(parentMessage.copyWith(replyCount: replyCount - 1));
+        addMessage(parentMessage.copyWith(replyCount: replyCount - 1));
+      }
       updateThreadInfo(
         parentId,
         threads[parentId]!
