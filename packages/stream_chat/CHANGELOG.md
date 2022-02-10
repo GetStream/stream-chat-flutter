@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed pinned message stream issue.
+
 ## 3.4.0
 
 🐞 Fixed
