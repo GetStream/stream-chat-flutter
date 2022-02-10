@@ -143,6 +143,7 @@ class MessageListView extends StatefulWidget {
     this.onAttachmentTap,
     this.textBuilder,
     this.onLinkTap,
+    this.showFloatingDateDivider = true,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -204,6 +205,9 @@ class MessageListView extends StatefulWidget {
   final ShowMessageCallback? onShowMessage;
 
   final bool showConnectionStateTile;
+
+  /// Flag for showing the floating date divider
+  final bool showFloatingDateDivider;
 
   /// Function called when messages are fetched
   final Widget Function(BuildContext, List<Message>)? messageListBuilder;
