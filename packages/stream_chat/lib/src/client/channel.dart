@@ -1736,15 +1736,6 @@ class ChannelClientState {
         ownReactions: oldMessage?.ownReactions,
       );
       addMessage(message);
-
-      if (message.pinned) {
-        _channelState = _channelState.copyWith(
-          pinnedMessages: [
-            ..._channelState.pinnedMessages,
-            message,
-          ],
-        );
-      }
     }));
   }
 
@@ -1796,11 +1787,20 @@ class ChannelClientState {
         newMessages.add(message);
       }
 
+      final _originalPinned = _channelState.pinnedMessages;
+
+      if (message.pinned) {
+        _originalPinned.add(message);
+      } else {
+        _originalPinned.removeWhere((e) => e.id == message.id);
+      }
+
       _channelState = _channelState.copyWith(
         messages: newMessages..sort(_sortByCreatedAt),
         channel: _channelState.channel?.copyWith(
           lastMessageAt: message.createdAt,
         ),
+        pinnedMessages: _originalPinned,
       );
     }
 
