@@ -1788,7 +1788,7 @@ class ChannelClientState {
         newMessages.add(message);
       }
 
-      final _originalPinned = _channelState.pinnedMessages;
+      final _originalPinned = [..._channelState.pinnedMessages];
 
       if (message.pinned) {
         _originalPinned.add(message);
