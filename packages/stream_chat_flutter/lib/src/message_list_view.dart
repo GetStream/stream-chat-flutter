@@ -143,6 +143,7 @@ class MessageListView extends StatefulWidget {
     this.onAttachmentTap,
     this.textBuilder,
     this.onLinkTap,
+    this.showFloatingDateDivider = true,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -204,6 +205,9 @@ class MessageListView extends StatefulWidget {
   final ShowMessageCallback? onShowMessage;
 
   final bool showConnectionStateTile;
+
+  /// Flag for showing the floating date divider
+  final bool showFloatingDateDivider;
 
   /// Function called when messages are fetched
   final Widget Function(BuildContext, List<Message>)? messageListBuilder;
@@ -553,39 +557,41 @@ class _MessageListViewState extends State<MessageListView> {
           },
         ),
         if (widget.showScrollToBottom) _buildScrollToBottom(),
-        Positioned(
-          top: 20.0,
-          child: ValueListenableBuilder<Iterable<ItemPosition>>(
-            valueListenable: _itemPositionListener.itemPositions,
-            builder: (context, values, _) {
-              final items = _itemPositionListener.itemPositions.value;
-              if (items.isEmpty || messages.isEmpty) {
-                return SizedBox();
-              }
-
-              var index = _getTopElement(values).index;
-
-              if (index > messages.length) {
-                return SizedBox();
-              }
-
-              if (index == messages.length) {
-                index = max(index - 1, 0);
-              }
-
-              return widget.dateDividerBuilder != null
-                  ? widget.dateDividerBuilder!(
-                      messages[index].createdAt.toLocal(),
-                    )
-                  : DateDivider(
-                      dateTime: messages[index].createdAt.toLocal(),
-                    );
-            },
-          ),
-        ),
+        if (widget.showFloatingDateDivider) _buildFloatingDateDivider(),
       ],
     );
   }
+
+  Positioned _buildFloatingDateDivider() => Positioned(
+        top: 20.0,
+        child: ValueListenableBuilder<Iterable<ItemPosition>>(
+          valueListenable: _itemPositionListener.itemPositions,
+          builder: (context, values, _) {
+            final items = _itemPositionListener.itemPositions.value;
+            if (items.isEmpty || messages.isEmpty) {
+              return SizedBox();
+            }
+
+            var index = _getTopElement(values).index;
+
+            if (index > messages.length) {
+              return SizedBox();
+            }
+
+            if (index == messages.length) {
+              index = max(index - 1, 0);
+            }
+
+            return widget.dateDividerBuilder != null
+                ? widget.dateDividerBuilder!(
+                    messages[index].createdAt.toLocal(),
+                  )
+                : DateDivider(
+                    dateTime: messages[index].createdAt.toLocal(),
+                  );
+          },
+        ),
+      );
 
   Future<void> _paginateData(
       StreamChannelState? channel, QueryDirection direction) {
