@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:native_context_menu/native_context_menu.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -150,34 +154,66 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                     final imageUrl = attachment.imageUrl ??
                         attachment.assetUrl ??
                         attachment.thumbUrl;
-                    return PhotoView(
-                      loadingBuilder: (context, image) => const Offstage(),
-                      imageProvider: (imageUrl == null &&
-                              attachment.localUri != null &&
-                              attachment.file?.bytes != null)
-                          ? Image.memory(attachment.file!.bytes!).image
-                          : CachedNetworkImageProvider(imageUrl!),
-                      maxScale: PhotoViewComputedScale.covered,
-                      minScale: PhotoViewComputedScale.contained,
-                      heroAttributes: PhotoViewHeroAttributes(
-                        tag: widget.mediaAttachments,
-                      ),
-                      backgroundDecoration: BoxDecoration(
-                        color: ColorTween(
-                          begin: ChannelHeaderTheme.of(context).color,
-                          end: Colors.black,
-                        ).lerp(_controller.value),
-                      ),
-                      onTapUp: (a, b, c) {
-                        setState(() {
-                          _optionsShown = !_optionsShown;
-                        });
-                        if (_controller.isCompleted) {
-                          _controller.reverse();
-                        } else {
-                          _controller.forward();
-                        }
+                    return ContextMenuRegion(
+                      onItemSelected: (item) {
+                        item.onSelected?.call();
                       },
+                      menuItems: [
+                        MenuItem(
+                          title: 'Download',
+                          onSelected: () async {
+                            final response =
+                                await http.get(Uri.parse(attachment.imageUrl!));
+                            final fileName =
+                                '${attachment.title}.${attachment.mimeType}';
+                            final path = await getSavePath(
+                              suggestedName: fileName,
+                            );
+
+                            if (path == null) {
+                              // Operation was canceled by the user.
+                              return;
+                            }
+
+                            final file = XFile.fromData(
+                              Uint8List.fromList(response.body.codeUnits),
+                              mimeType: attachment.mimeType,
+                              name: fileName,
+                              path: path,
+                            );
+                            await file.saveTo(path);
+                          },
+                        ),
+                      ],
+                      child: PhotoView(
+                        loadingBuilder: (context, image) => const Offstage(),
+                        imageProvider: (imageUrl == null &&
+                                attachment.localUri != null &&
+                                attachment.file?.bytes != null)
+                            ? Image.memory(attachment.file!.bytes!).image
+                            : CachedNetworkImageProvider(imageUrl!),
+                        maxScale: PhotoViewComputedScale.covered,
+                        minScale: PhotoViewComputedScale.contained,
+                        heroAttributes: PhotoViewHeroAttributes(
+                          tag: widget.mediaAttachments,
+                        ),
+                        backgroundDecoration: BoxDecoration(
+                          color: ColorTween(
+                            begin: ChannelHeaderTheme.of(context).color,
+                            end: Colors.black,
+                          ).lerp(_controller.value),
+                        ),
+                        onTapUp: (a, b, c) {
+                          setState(() {
+                            _optionsShown = !_optionsShown;
+                          });
+                          if (_controller.isCompleted) {
+                            _controller.reverse();
+                          } else {
+                            _controller.forward();
+                          }
+                        },
+                      ),
                     );
                   } else if (attachment.type == 'video') {
                     final controller = videoPackages[attachment.id]!;
