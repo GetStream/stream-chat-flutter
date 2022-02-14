@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// A button for adding attachments to a chat on mobile.
 class AttachmentButton extends StatelessWidget {
+  /// Builds an [AttachmentButton].
   const AttachmentButton({
     Key? key,
     required this.color,
     required this.onPressed,
   }) : super(key: key);
 
+  /// The color of the button.
   final Color color;
+
+  /// The callback to perform when the button is pressed.
   final VoidCallback onPressed;
 
   @override
