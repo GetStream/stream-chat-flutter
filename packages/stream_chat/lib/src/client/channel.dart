@@ -1789,11 +1789,16 @@ class ChannelClientState {
       }
 
       final _originalPinned = [..._channelState.pinnedMessages];
+      final _containsMessage = _originalPinned.any((e) => e.id == message.id);
 
       if (message.pinned) {
-        _originalPinned.add(message);
+        if (!_containsMessage) {
+          _originalPinned.add(message);
+        }
       } else {
-        _originalPinned.removeWhere((e) => e.id == message.id);
+        if(_containsMessage) {
+          _originalPinned.removeWhere((e) => e.id == message.id);
+        }
       }
 
       _channelState = _channelState.copyWith(
