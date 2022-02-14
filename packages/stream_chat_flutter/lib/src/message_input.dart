@@ -15,6 +15,7 @@ import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
+import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/user_mentions_overlay.dart';
@@ -647,7 +648,22 @@ class MessageInputState extends State<MessageInput> {
             : Wrap(
                 children: <Widget>[
                   if (!widget.disableAttachments)
-                    _buildAttachmentButton(context),
+                    //_buildAttachmentButton(context),
+                    AttachmentButton(
+                      color: _openFilePickerSection
+                          ? _messageInputTheme.actionButtonColor!
+                          : _messageInputTheme.actionButtonIdleColor!,
+                      onPressed: () async {
+                        _showCommandsOverlay = false;
+                        _showMentionsOverlay = false;
+
+                        if (_openFilePickerSection) {
+                          setState(() => _openFilePickerSection = false);
+                        } else {
+                          showAttachmentModal();
+                        }
+                      },
+                    ),
                   if (widget.showCommandsButton &&
                       widget.editMessage == null &&
                       channel.state != null &&
@@ -1474,35 +1490,6 @@ class MessageInputState extends State<MessageInput> {
     );
 
     return widget.commandButtonBuilder?.call(context, defaultButton) ??
-        defaultButton;
-  }
-
-  Widget _buildAttachmentButton(BuildContext context) {
-    final defaultButton = IconButton(
-      icon: StreamSvgIcon.attach(
-        color: _openFilePickerSection
-            ? _messageInputTheme.actionButtonColor
-            : _messageInputTheme.actionButtonIdleColor,
-      ),
-      padding: const EdgeInsets.all(0),
-      constraints: const BoxConstraints.tightFor(
-        height: 24,
-        width: 24,
-      ),
-      splashRadius: 24,
-      onPressed: () async {
-        _showCommandsOverlay = false;
-        _showMentionsOverlay = false;
-
-        if (_openFilePickerSection) {
-          setState(() => _openFilePickerSection = false);
-        } else {
-          showAttachmentModal();
-        }
-      },
-    );
-
-    return widget.attachmentButtonBuilder?.call(context, defaultButton) ??
         defaultButton;
   }
 
