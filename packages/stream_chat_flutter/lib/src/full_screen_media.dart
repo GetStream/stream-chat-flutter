@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:native_context_menu/native_context_menu.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/menu_items.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
@@ -159,30 +157,8 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                         item.onSelected?.call();
                       },
                       menuItems: [
-                        MenuItem(
-                          title: 'Download',
-                          onSelected: () async {
-                            final response =
-                                await http.get(Uri.parse(attachment.imageUrl!));
-                            final fileName =
-                                '${attachment.title}.${attachment.mimeType}';
-                            final path = await getSavePath(
-                              suggestedName: fileName,
-                            );
-
-                            if (path == null) {
-                              // Operation was canceled by the user.
-                              return;
-                            }
-
-                            final file = XFile.fromData(
-                              Uint8List.fromList(response.body.codeUnits),
-                              mimeType: attachment.mimeType,
-                              name: fileName,
-                              path: path,
-                            );
-                            await file.saveTo(path);
-                          },
+                        DownloadMenuItem(
+                          attachment: attachment,
                         ),
                       ],
                       child: PhotoView(
