@@ -84,9 +84,10 @@ class MessageText extends StatelessWidget {
   String _replaceMentions(String text) {
     var messageTextToRender = text;
     for (final user in message.mentionedUsers.toSet()) {
+      final userId = user.id;
       final userName = user.name;
       messageTextToRender = messageTextToRender.replaceAll(
-        '@$userName',
+        '@$userId',
         '[@$userName](@${userName.replaceAll(' ', '')})',
       );
     }
