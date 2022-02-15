@@ -332,19 +332,32 @@ StreamSvgIcon getFileTypeImage(String? type) {
 }
 
 /// Wraps attachment widget with custom shape
-Widget wrapAttachmentWidget(
-  BuildContext context,
-  Widget attachmentWidget,
-  ShapeBorder attachmentShape,
-  // ignore: avoid_positional_boolean_parameters
-  bool reverse,
-) =>
-    Material(
-      clipBehavior: Clip.hardEdge,
-      shape: attachmentShape,
-      type: MaterialType.transparency,
-      child: attachmentWidget,
-    );
+class WrapAttachmentWidget extends StatelessWidget {
+  /// Builds a [WrapAttachmentWidget].
+  const WrapAttachmentWidget({
+    Key? key,
+    required this.attachmentWidget,
+    required this.attachmentShape,
+    required this.reverse,
+  }) : super(key: key);
+
+  /// The widget to wrap
+  final Widget attachmentWidget;
+
+  /// The shape of the wrapper
+  final ShapeBorder attachmentShape;
+
+  /// Whether to reverse the wrapper shape
+  final bool reverse;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        clipBehavior: Clip.hardEdge,
+        shape: attachmentShape,
+        type: MaterialType.transparency,
+        child: attachmentWidget,
+      );
+}
 
 /// Represents a 2-tuple, or pair.
 class Tuple2<T1, T2> {

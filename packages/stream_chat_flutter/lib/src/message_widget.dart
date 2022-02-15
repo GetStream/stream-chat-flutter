@@ -117,9 +117,8 @@ class MessageWidget extends StatefulWidget {
             if (attachments.length > 1) {
               return Padding(
                 padding: attachmentPadding,
-                child: wrapAttachmentWidget(
-                  context,
-                  Material(
+                child: WrapAttachmentWidget(
+                  attachmentWidget: Material(
                     color: messageTheme.messageBackgroundColor,
                     child: ImageGroup(
                       size: Size(
@@ -134,15 +133,14 @@ class MessageWidget extends StatefulWidget {
                       onAttachmentTap: onAttachmentTap,
                     ),
                   ),
-                  border,
-                  reverse,
+                  attachmentShape: border,
+                  reverse: reverse,
                 ),
               );
             }
 
-            return wrapAttachmentWidget(
-              context,
-              ImageAttachment(
+            return WrapAttachmentWidget(
+              attachmentWidget: ImageAttachment(
                 attachment: attachments[0],
                 message: message,
                 messageTheme: messageTheme,
@@ -158,8 +156,8 @@ class MessageWidget extends StatefulWidget {
                       }
                     : null,
               ),
-              border,
-              reverse,
+              attachmentShape: border,
+              reverse: reverse,
             );
           },
           'video': (context, message, attachments) {
@@ -167,9 +165,8 @@ class MessageWidget extends StatefulWidget {
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
-            return wrapAttachmentWidget(
-              context,
-              Column(
+            return WrapAttachmentWidget(
+              attachmentWidget: Column(
                 children: attachments.map((attachment) {
                   final mediaQueryData = MediaQuery.of(context);
                   return VideoAttachment(
@@ -190,8 +187,8 @@ class MessageWidget extends StatefulWidget {
                   );
                 }).toList(),
               ),
-              border,
-              reverse,
+              attachmentShape: border,
+              reverse: reverse,
             );
           },
           'giphy': (context, message, attachments) {
@@ -199,9 +196,8 @@ class MessageWidget extends StatefulWidget {
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
-            return wrapAttachmentWidget(
-              context,
-              Column(
+            return WrapAttachmentWidget(
+              attachmentWidget: Column(
                 children: attachments.map((attachment) {
                   final mediaQueryData = MediaQuery.of(context);
                   return GiphyAttachment(
@@ -221,8 +217,8 @@ class MessageWidget extends StatefulWidget {
                   );
                 }).toList(),
               ),
-              border,
-              reverse,
+              attachmentShape: border,
+              reverse: reverse,
             );
           },
           'file': (context, message, attachments) {
@@ -238,9 +234,8 @@ class MessageWidget extends StatefulWidget {
               children: attachments
                   .map<Widget>((attachment) {
                     final mediaQueryData = MediaQuery.of(context);
-                    return wrapAttachmentWidget(
-                      context,
-                      FileAttachment(
+                    return WrapAttachmentWidget(
+                      attachmentWidget: FileAttachment(
                         message: message,
                         attachment: attachment,
                         size: Size(
@@ -253,8 +248,8 @@ class MessageWidget extends StatefulWidget {
                               }
                             : null,
                       ),
-                      border,
-                      reverse,
+                      attachmentShape: border,
+                      reverse: reverse,
                     );
                   })
                   .insertBetween(SizedBox(
