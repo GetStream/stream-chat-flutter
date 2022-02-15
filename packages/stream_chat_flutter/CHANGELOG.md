@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#888]](https://github.com/GetStream/stream-chat-flutter/issues/888) Fix `unban` command not working in `MessageInput`.
+
 ## 3.4.0
 - Updated `stream_chat_flutter_core` dependency to [`3.4.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
