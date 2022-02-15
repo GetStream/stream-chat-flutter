@@ -6,6 +6,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/src/attachment/AttachmentHandler.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
@@ -268,26 +269,11 @@ class FileAttachment extends AttachmentWidget {
             if (Platform.isAndroid || Platform.isIOS) {
               launchURL(context, assetUrl);
             } else {
-              /* TODO(Groovin): extract this to a utility */
-              final response = await http.get(Uri.parse(assetUrl));
-              final path = await getSavePath(
+              final attachmentHandler = DesktopAttachmentHandler();
+              await attachmentHandler.download(
+                attachment,
                 suggestedName: attachment.title,
               );
-
-              // Account for canceled operation.
-              if (path == null) {
-                return;
-              }
-
-              // Create an XFile for proper file saving
-              final file = XFile.fromData(
-                Uint8List.fromList(response.body.codeUnits),
-                mimeType: attachment.mimeType,
-                name: attachment.title,
-                path: path,
-              );
-              // Save the file to the user's selected path.
-              await file.saveTo(path);
             }
           }
         },
