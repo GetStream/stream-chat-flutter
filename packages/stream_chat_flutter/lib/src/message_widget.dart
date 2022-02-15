@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:native_context_menu/native_context_menu.dart';
 import 'package:stream_chat_flutter/src/attachment/url_attachment.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/menu_items.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/image_group.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
@@ -140,21 +142,31 @@ class MessageWidget extends StatefulWidget {
             }
 
             return WrapAttachmentWidget(
-              attachmentWidget: ImageAttachment(
-                attachment: attachments[0],
-                message: message,
-                messageTheme: messageTheme,
-                size: Size(
-                  mediaQueryData.size.width * 0.8,
-                  mediaQueryData.size.height * 0.3,
+              attachmentWidget: ContextMenuRegion(
+                onItemSelected: (item) {
+                  item.onSelected?.call();
+                },
+                menuItems: [
+                  DownloadMenuItem(
+                    attachment: attachments[0],
+                  ),
+                ],
+                child: ImageAttachment(
+                  attachment: attachments[0],
+                  message: message,
+                  messageTheme: messageTheme,
+                  size: Size(
+                    mediaQueryData.size.width * 0.8,
+                    mediaQueryData.size.height * 0.3,
+                  ),
+                  onShowMessage: onShowMessage,
+                  onReturnAction: onReturnAction,
+                  onAttachmentTap: onAttachmentTap != null
+                      ? () {
+                          onAttachmentTap.call(message, attachments[0]);
+                        }
+                      : null,
                 ),
-                onShowMessage: onShowMessage,
-                onReturnAction: onReturnAction,
-                onAttachmentTap: onAttachmentTap != null
-                    ? () {
-                        onAttachmentTap.call(message, attachments[0]);
-                      }
-                    : null,
               ),
               attachmentShape: border,
               reverse: reverse,
