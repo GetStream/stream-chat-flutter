@@ -33,8 +33,8 @@ class DownloadMenuItem extends MenuItem {
         /* ---IMAGES/GIFS--- */
         if (attachment.type == 'image') {
           response = await http.get(Uri.parse(attachment.imageUrl!));
-          /* TODO(Groovin): Create a title if attachment.title is null */
-          fileName = '${attachment.title}.${attachment.mimeType}';
+          fileName =
+              '${attachment.title ?? 'attachment'}.${attachment.mimeType}';
         }
 
         /* ---GIPHY's--- */
