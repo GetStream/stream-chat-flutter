@@ -1,4 +1,8 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
@@ -9,6 +13,7 @@ import 'package:stream_chat_flutter/src/upload_progress_indicator.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:http/http.dart' as http;
 
 /// Widget for displaying file attachments
 class FileAttachment extends AttachmentWidget {
@@ -257,9 +262,34 @@ class FileAttachment extends AttachmentWidget {
         ),
         visualDensity: VisualDensity.compact,
         splashRadius: 16,
-        onPressed: () {
+        onPressed: () async {
           final assetUrl = attachment.assetUrl;
-          if (assetUrl != null) launchURL(context, assetUrl);
+          if (assetUrl != null) {
+            if (Platform.isAndroid || Platform.isIOS) {
+              launchURL(context, assetUrl);
+            } else {
+              /* TODO(Groovin): extract this to a utility */
+              final response = await http.get(Uri.parse(assetUrl));
+              final path = await getSavePath(
+                suggestedName: attachment.title,
+              );
+
+              // Account for canceled operation.
+              if (path == null) {
+                return;
+              }
+
+              // Create an XFile for proper file saving
+              final file = XFile.fromData(
+                Uint8List.fromList(response.body.codeUnits),
+                mimeType: attachment.mimeType,
+                name: attachment.title,
+                path: path,
+              );
+              // Save the file to the user's selected path.
+              await file.saveTo(path);
+            }
+          }
         },
       );
     }

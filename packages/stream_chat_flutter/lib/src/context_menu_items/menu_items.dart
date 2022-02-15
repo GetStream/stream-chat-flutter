@@ -28,6 +28,8 @@ class DownloadMenuItem extends MenuItem {
         late http.Response response;
         String? fileName;
 
+        /* TODO(Groovin): extract this stuff to a utility */
+
         /* ---IMAGES/GIFS--- */
         if (attachment.type == 'image') {
           response = await http.get(Uri.parse(attachment.imageUrl!));
