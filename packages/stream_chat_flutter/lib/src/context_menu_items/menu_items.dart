@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -23,11 +24,24 @@ class DownloadMenuItem extends MenuItem {
   VoidCallback? get onSelected => () async {
         /* TODO(Groovin): Account for other file types and perform operations
             accordingly */
-        // Download the image
-        final response = await http.get(Uri.parse(attachment.imageUrl!));
-        // Create the file name
-        /* TODO(Groovin): Create a title if attachment.title is null */
-        final fileName = '${attachment.title}.${attachment.mimeType}';
+
+        late http.Response response;
+        String? fileName;
+
+        /* ---IMAGES/GIFS--- */
+        if (attachment.type == 'image') {
+          response = await http.get(Uri.parse(attachment.imageUrl!));
+          /* TODO(Groovin): Create a title if attachment.title is null */
+          fileName = '${attachment.title}.${attachment.mimeType}';
+        }
+
+        /* ---GIPHY's--- */
+        if (attachment.type == 'giphy') {
+          response = await http.get(Uri.parse((attachment.extraData.entries
+              .first.value! as Map<String, dynamic>)['original']['url']));
+          fileName = '${attachment.title}.gif';
+        }
+
         // Open the native file browser so the user can select the download
         // path
         final path = await getSavePath(
