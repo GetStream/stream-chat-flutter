@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/AttachmentHandler.dart';
@@ -263,7 +264,7 @@ class FileAttachment extends AttachmentWidget {
         onPressed: () async {
           final assetUrl = attachment.assetUrl;
           if (assetUrl != null) {
-            if (Platform.isAndroid || Platform.isIOS) {
+            if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
               launchURL(context, assetUrl);
             } else {
               final attachmentHandler = DesktopAttachmentHandler();
