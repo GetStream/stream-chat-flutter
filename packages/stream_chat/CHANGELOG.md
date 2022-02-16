@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#890]](https://github.com/GetStream/stream-chat-flutter/pull/890). Fixed Reactions not updating on thread messages. Thanks [bstolinski](https://github.com/bstolinski).
+- 
 ## 3.4.0
 
 🐞 Fixed
