@@ -1157,15 +1157,22 @@ class StreamChatClient {
   Future<SendReactionResponse> sendReaction(
     String messageId,
     String reactionType, {
+    int score = 1,
     Map<String, Object?> extraData = const {},
     bool enforceUnique = false,
-  }) =>
-      _chatApi.message.sendReaction(
-        messageId,
-        reactionType,
-        extraData: extraData,
-        enforceUnique: enforceUnique,
-      );
+  }) {
+    extraData.putIfAbsent(
+      'score',
+      () => score,
+    );
+
+    return _chatApi.message.sendReaction(
+      messageId,
+      reactionType,
+      extraData: extraData,
+      enforceUnique: enforceUnique,
+    );
+  }
 
   /// Delete a [reactionType] from this [messageId]
   Future<EmptyResponse> deleteReaction(
