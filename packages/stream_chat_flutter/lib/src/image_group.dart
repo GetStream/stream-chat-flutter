@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:native_context_menu/native_context_menu.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/menu_items.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget for constructing a group of images in message
@@ -142,11 +144,21 @@ class ImageGroup extends StatelessWidget {
     if (res != null) onReturnAction?.call(res);
   }
 
-  Widget _buildImage(BuildContext context, int index) => ImageAttachment(
-        attachment: images[index],
-        size: size,
-        message: message,
-        messageTheme: messageTheme,
-        onAttachmentTap: () => _onTap(context, index),
+  Widget _buildImage(BuildContext context, int index) => ContextMenuRegion(
+        onItemSelected: (item) {
+          item.onSelected?.call();
+        },
+        menuItems: [
+          DownloadMenuItem(
+            attachment: images[index],
+          ),
+        ],
+        child: ImageAttachment(
+          attachment: images[index],
+          size: size,
+          message: message,
+          messageTheme: messageTheme,
+          onAttachmentTap: () => _onTap(context, index),
+        ),
       );
 }
