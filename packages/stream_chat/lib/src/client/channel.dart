@@ -811,6 +811,7 @@ class Channel {
   Future<SendReactionResponse> sendReaction(
     Message message,
     String type, {
+    int? score,
     Map<String, Object?> extraData = const {},
     bool enforceUnique = false,
   }) async {
@@ -861,6 +862,13 @@ class Channel {
     );
 
     state?.addMessage(newMessage);
+
+    if (score != null) {
+      extraData.putIfAbsent(
+        'score',
+        () => score,
+      );
+    }
 
     try {
       final reactionResp = await _client.sendReaction(
