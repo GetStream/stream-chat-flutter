@@ -1,9 +1,5 @@
-import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:file_selector/file_selector.dart';
-import 'package:http/http.dart' as http;
 import 'package:native_context_menu/native_context_menu.dart';
 import 'package:stream_chat_flutter/src/attachment/AttachmentHandler.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';

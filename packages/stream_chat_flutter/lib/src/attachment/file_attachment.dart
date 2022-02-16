@@ -1,10 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/AttachmentHandler.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
