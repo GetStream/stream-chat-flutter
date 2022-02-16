@@ -1697,7 +1697,9 @@ class ChannelClientState {
   void _listenReactionDeleted() {
     _subscriptions.add(_channel.on(EventType.reactionDeleted).listen((event) {
       final oldMessage =
-          messages.firstWhereOrNull((it) => it.id == event.message?.id);
+          messages.firstWhereOrNull((it) => it.id == event.message?.id) ??
+              threads[event.message?.parentId]
+                  ?.firstWhereOrNull((e) => e.id == event.message?.id);
       final reaction = event.reaction;
       final ownReactions = oldMessage?.ownReactions
           ?.whereNot((it) =>
@@ -1717,7 +1719,9 @@ class ChannelClientState {
   void _listenReactions() {
     _subscriptions.add(_channel.on(EventType.reactionNew).listen((event) {
       final oldMessage =
-          messages.firstWhereOrNull((it) => it.id == event.message?.id);
+          messages.firstWhereOrNull((it) => it.id == event.message?.id) ??
+              threads[event.message?.parentId]
+                  ?.firstWhereOrNull((e) => e.id == event.message?.id);
       final message = event.message!.copyWith(
         ownReactions: oldMessage?.ownReactions,
       );
@@ -1733,8 +1737,9 @@ class ChannelClientState {
     )
         .listen((event) {
       final oldMessage =
-          messages.firstWhereOrNull((it) => it.id == event.message?.id);
-
+          messages.firstWhereOrNull((it) => it.id == event.message?.id) ??
+              threads[event.message?.parentId]
+                  ?.firstWhereOrNull((e) => e.id == event.message?.id);
       final message = event.message!.copyWith(
         ownReactions: oldMessage?.ownReactions,
       );
