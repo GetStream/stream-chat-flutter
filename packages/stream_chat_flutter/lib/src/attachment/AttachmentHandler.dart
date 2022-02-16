@@ -28,9 +28,6 @@ class DesktopAttachmentHandler extends AttachmentHandler {
     late http.Response response;
     String? fileName;
 
-    /* TODO(Groovin): Account for other file types and perform operations
-            accordingly */
-
     /* ---IMAGES/GIFS--- */
     if (attachment.type == 'image') {
       response = await http.get(Uri.parse(attachment.imageUrl!));
@@ -46,8 +43,8 @@ class DesktopAttachmentHandler extends AttachmentHandler {
       fileName = '${suggestedName ?? attachment.title}.gif';
     }
 
-    /* ---FILES--- */
-    if (attachment.type == 'file') {
+    /* ---FILES AND VIDEOS--- */
+    if (attachment.type == 'file' || attachment.type == 'video') {
       response = await http.get(Uri.parse(attachment.assetUrl!));
       fileName = attachment.title;
     }
