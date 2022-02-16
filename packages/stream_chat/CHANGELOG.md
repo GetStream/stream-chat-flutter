@@ -1,3 +1,7 @@
+## Upcoming
+
+- You can now pass `score` to `client.sendReaction` and `channel.sendReaction` functions
+
 ## 3.4.0
 
 🐞 Fixed
