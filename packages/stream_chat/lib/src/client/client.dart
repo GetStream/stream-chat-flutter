@@ -1161,15 +1161,15 @@ class StreamChatClient {
     Map<String, Object?> extraData = const {},
     bool enforceUnique = false,
   }) {
-    extraData.putIfAbsent(
-      'score',
-      () => score,
-    );
+    final _extraData = {
+      'score': score,
+      ...extraData,
+    };
 
     return _chatApi.message.sendReaction(
       messageId,
       reactionType,
-      extraData: extraData,
+      extraData: _extraData,
       enforceUnique: enforceUnique,
     );
   }

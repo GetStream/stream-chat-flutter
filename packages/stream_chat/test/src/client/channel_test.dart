@@ -1116,6 +1116,135 @@ void main() {
         verify(() => client.sendReaction(message.id, type)).called(1);
       });
 
+      test('should work fine with score passed explicitly', () async {
+        const type = 'test-reaction-type';
+        final message = Message(id: 'test-message-id');
+
+        const score = 5;
+        final reaction = Reaction(
+          type: type,
+          messageId: message.id,
+          score: score,
+        );
+
+        when(() => client.sendReaction(
+              message.id,
+              type,
+              score: score,
+            )).thenAnswer(
+          (_) async => SendReactionResponse()
+            ..message = message
+            ..reaction = reaction,
+        );
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  status: MessageSendingStatus.sent,
+                  reactionCounts: {type: 1},
+                  reactionScores: {type: score},
+                  latestReactions: [reaction],
+                  ownReactions: [reaction],
+                ),
+                matchReactions: true,
+                matchSendingStatus: true,
+              ),
+            ],
+          ]),
+        );
+
+        final res = await channel.sendReaction(
+          message,
+          type,
+          score: score,
+        );
+
+        expect(res, isNotNull);
+        expect(res.reaction.type, type);
+        expect(res.reaction.messageId, message.id);
+        expect(res.reaction.score, score);
+
+        verify(() => client.sendReaction(
+              message.id,
+              type,
+              score: score,
+            )).called(1);
+      });
+
+      test('should work fine with score passed explicitly and in extraData',
+          () async {
+        const type = 'test-reaction-type';
+        final message = Message(id: 'test-message-id');
+
+        const score = 5;
+        const extraDataScore = 3;
+        const extraData = {
+          'score': extraDataScore,
+        };
+        final reaction = Reaction(
+          type: type,
+          messageId: message.id,
+          score: extraDataScore,
+        );
+
+        when(() => client.sendReaction(
+              message.id,
+              type,
+              score: score,
+              extraData: extraData,
+            )).thenAnswer(
+          (_) async => SendReactionResponse()
+            ..message = message
+            ..reaction = reaction,
+        );
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  status: MessageSendingStatus.sent,
+                  reactionCounts: {type: 1},
+                  reactionScores: {type: extraDataScore},
+                  latestReactions: [reaction],
+                  ownReactions: [reaction],
+                ),
+                matchReactions: true,
+                matchSendingStatus: true,
+              ),
+            ],
+          ]),
+        );
+
+        final res = await channel.sendReaction(
+          message,
+          type,
+          score: score,
+          extraData: extraData,
+        );
+
+        expect(res, isNotNull);
+        expect(res.reaction.type, type);
+        expect(res.reaction.messageId, message.id);
+        expect(
+          res.reaction.score,
+          extraDataScore,
+        );
+
+        verify(() => client.sendReaction(
+              message.id,
+              type,
+              score: score,
+              extraData: extraData,
+            )).called(1);
+      });
+
       test(
         'should restore previous message if `client.sendReaction` throws',
         () async {

@@ -1956,23 +1956,109 @@ void main() {
       verifyNoMoreInteractions(api.channel);
     });
 
-    test('`.sendReaction`', () async {
-      const messageId = 'test-message-id';
-      const reactionType = 'like';
+    group('`.sendReaction`', () {
+      test('`.sendReaction with default params`', () async {
+        const messageId = 'test-message-id';
+        const reactionType = 'like';
+        const extraData = {'score': 1};
 
-      when(() => api.message.sendReaction(messageId, reactionType))
-          .thenAnswer((_) async => SendReactionResponse()
-            ..message = Message(id: messageId)
-            ..reaction = Reaction(type: reactionType, messageId: messageId));
+        when(() => api.message.sendReaction(
+              messageId,
+              reactionType,
+              extraData: extraData,
+            )).thenAnswer((_) async => SendReactionResponse()
+          ..message = Message(id: messageId)
+          ..reaction = Reaction(type: reactionType, messageId: messageId));
 
-      final res = await client.sendReaction(messageId, reactionType);
-      expect(res, isNotNull);
-      expect(res.message.id, messageId);
-      expect(res.reaction.type, reactionType);
-      expect(res.reaction.messageId, messageId);
+        final res = await client.sendReaction(messageId, reactionType);
+        expect(res, isNotNull);
+        expect(res.message.id, messageId);
+        expect(res.reaction.type, reactionType);
+        expect(res.reaction.messageId, messageId);
 
-      verify(() => api.message.sendReaction(messageId, reactionType)).called(1);
-      verifyNoMoreInteractions(api.message);
+        verify(() => api.message.sendReaction(
+              messageId,
+              reactionType,
+              extraData: extraData,
+            )).called(1);
+        verifyNoMoreInteractions(api.message);
+      });
+
+      test('`.sendReaction with score`', () async {
+        const messageId = 'test-message-id';
+        const reactionType = 'like';
+        const score = 3;
+        const extraData = {'score': score};
+
+        when(() => api.message.sendReaction(
+              messageId,
+              reactionType,
+              extraData: extraData,
+            )).thenAnswer((_) async => SendReactionResponse()
+          ..message = Message(id: messageId)
+          ..reaction = Reaction(
+            type: reactionType,
+            messageId: messageId,
+            score: score,
+          ));
+
+        final res = await client.sendReaction(
+          messageId,
+          reactionType,
+          score: score,
+        );
+        expect(res, isNotNull);
+        expect(res.message.id, messageId);
+        expect(res.reaction.type, reactionType);
+        expect(res.reaction.messageId, messageId);
+        expect(res.reaction.score, score);
+
+        verify(() => api.message.sendReaction(
+              messageId,
+              reactionType,
+              extraData: extraData,
+            )).called(1);
+        verifyNoMoreInteractions(api.message);
+      });
+
+      test('`.sendReaction with score passed in extradata also`', () async {
+        const messageId = 'test-message-id';
+        const reactionType = 'like';
+        const score = 3;
+        const extraDataScore = 5;
+        const extraData = {'score': extraDataScore};
+
+        when(() => api.message.sendReaction(
+              messageId,
+              reactionType,
+              extraData: extraData,
+            )).thenAnswer((_) async => SendReactionResponse()
+          ..message = Message(id: messageId)
+          ..reaction = Reaction(
+            type: reactionType,
+            messageId: messageId,
+            score: extraDataScore,
+          ));
+
+        final res = await client.sendReaction(
+          messageId,
+          reactionType,
+          score: score,
+          extraData: extraData,
+        );
+        expect(res, isNotNull);
+        expect(res.message.id, messageId);
+        expect(res.reaction.type, reactionType);
+        expect(res.reaction.messageId, messageId);
+        expect(res.reaction.score, extraDataScore);
+
+        verify(() => api.message.sendReaction(
+              messageId,
+              reactionType,
+              extraData: extraData,
+            )).called(1);
+        verifyNoMoreInteractions(api.message);
+      });
     });
 
     test('`.deleteReaction`', () async {
