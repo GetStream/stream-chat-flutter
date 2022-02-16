@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:native_context_menu/native_context_menu.dart';
-import 'package:stream_chat_flutter/src/attachment/AttachmentHandler.dart';
+import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A [MenuItem] that will allow a user to download an attachment from a chat.
