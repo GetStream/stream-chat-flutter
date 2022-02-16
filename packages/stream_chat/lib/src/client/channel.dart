@@ -811,6 +811,7 @@ class Channel {
   Future<SendReactionResponse> sendReaction(
     Message message,
     String type, {
+    int score = 1,
     Map<String, Object?> extraData = const {},
     bool enforceUnique = false,
   }) async {
@@ -829,7 +830,7 @@ class Channel {
       createdAt: now,
       type: type,
       user: user,
-      score: 1,
+      score: score,
       extraData: extraData,
     );
 
@@ -866,6 +867,7 @@ class Channel {
       final reactionResp = await _client.sendReaction(
         messageId,
         type,
+        score: score,
         extraData: extraData,
         enforceUnique: enforceUnique,
       );
@@ -1695,7 +1697,9 @@ class ChannelClientState {
   void _listenReactionDeleted() {
     _subscriptions.add(_channel.on(EventType.reactionDeleted).listen((event) {
       final oldMessage =
-          messages.firstWhereOrNull((it) => it.id == event.message?.id);
+          messages.firstWhereOrNull((it) => it.id == event.message?.id) ??
+              threads[event.message?.parentId]
+                  ?.firstWhereOrNull((e) => e.id == event.message?.id);
       final reaction = event.reaction;
       final ownReactions = oldMessage?.ownReactions
           ?.whereNot((it) =>
@@ -1715,7 +1719,9 @@ class ChannelClientState {
   void _listenReactions() {
     _subscriptions.add(_channel.on(EventType.reactionNew).listen((event) {
       final oldMessage =
-          messages.firstWhereOrNull((it) => it.id == event.message?.id);
+          messages.firstWhereOrNull((it) => it.id == event.message?.id) ??
+              threads[event.message?.parentId]
+                  ?.firstWhereOrNull((e) => e.id == event.message?.id);
       final message = event.message!.copyWith(
         ownReactions: oldMessage?.ownReactions,
       );
@@ -1731,8 +1737,9 @@ class ChannelClientState {
     )
         .listen((event) {
       final oldMessage =
-          messages.firstWhereOrNull((it) => it.id == event.message?.id);
-
+          messages.firstWhereOrNull((it) => it.id == event.message?.id) ??
+              threads[event.message?.parentId]
+                  ?.firstWhereOrNull((e) => e.id == event.message?.id);
       final message = event.message!.copyWith(
         ownReactions: oldMessage?.ownReactions,
       );
