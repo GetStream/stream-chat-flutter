@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';
 import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
@@ -17,6 +19,7 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
+import 'package:stream_chat_flutter/src/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/user_mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/video_service.dart';
@@ -471,7 +474,10 @@ class MessageInputState extends State<MessageInput> {
                   ),
                   child: _buildDmCheckbox(),
                 ),
-              _buildFilePickerSection(),
+              PlatformWidgetBuilder(
+                mobile: (context, child) => _buildFilePickerSection(),
+              ),
+              //_buildFilePickerSection(),
             ],
           ),
         ),
@@ -653,16 +659,7 @@ class MessageInputState extends State<MessageInput> {
                       color: _openFilePickerSection
                           ? _messageInputTheme.actionButtonColor!
                           : _messageInputTheme.actionButtonIdleColor!,
-                      onPressed: () async {
-                        _showCommandsOverlay = false;
-                        _showMentionsOverlay = false;
-
-                        if (_openFilePickerSection) {
-                          setState(() => _openFilePickerSection = false);
-                        } else {
-                          showAttachmentModal();
-                        }
-                      },
+                      onPressed: _handleFileSelect,
                     ),
                   if (widget.showCommandsButton &&
                       widget.editMessage == null &&
@@ -676,6 +673,65 @@ class MessageInputState extends State<MessageInput> {
         alignment: Alignment.center,
       ),
     );
+  }
+
+  /// Handle the platform-specific logic for selecting files.
+  ///
+  /// On mobile, this will open the file selection bottom sheet. On desktop,
+  /// this will open the native file system and allow the user to select one
+  /// or more files.
+  Future<void> _handleFileSelect() async {
+    if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+      final desktopAttachmentHandler = DesktopAttachmentHandler(
+        maxAttachmentSize: widget.maxAttachmentSize,
+        compressedVideoFrameRate: widget.compressedVideoFrameRate,
+        compressedVideoQuality: widget.compressedVideoQuality,
+      );
+      desktopAttachmentHandler.upload().then((attachments) {
+        // If attachments is empty, it means the user closed the file system
+        // without selecting any files.
+        if (attachments.isNotEmpty) {
+          setState(() => _addAttachments(attachments));
+        }
+      }).catchError((error) {
+        // TODO(Groovin): show the error in a desktop-appropriate manner
+        // Also consider a method for differentiating between errors, and
+        // displaying the corresponding error UI - it is possible that
+        // exceptions other than "file too large", such as "file too large
+        // after video compression", can occur, and there may even be others
+        // that we have not encountered yet - maybe something like the
+        // following:
+        // if (error.runtimeType == FileSystemException) {
+        //   switch (error.message) {
+        //     case 'Could not read bytes from file':
+        //     // Show an appropriate error
+        //       break;
+        //     case 'File size too large after compression and exceeds maximum '
+        //         'attachment size':
+        //     // Show an appropriate error
+        //       break;
+        //     case 'File size exceeds maximum attachment size':
+        //     // Show an appropriate error
+        //       break;
+        //     default:
+        //     // Show some standard error
+        //       break;
+        //   }
+        // }
+        _showErrorAlert(context.translations.fileTooLargeError(
+          widget.maxAttachmentSize / (1024 * 1024),
+        ));
+      });
+    } else {
+      _showCommandsOverlay = false;
+      _showMentionsOverlay = false;
+
+      if (_openFilePickerSection) {
+        setState(() => _openFilePickerSection = false);
+      } else {
+        showAttachmentModal();
+      }
+    }
   }
 
   Expanded _buildTextInput(BuildContext context) {
