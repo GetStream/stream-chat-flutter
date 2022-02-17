@@ -695,32 +695,29 @@ class MessageInputState extends State<MessageInput> {
         }
       }).catchError((error) {
         // TODO(Groovin): show the error in a desktop-appropriate manner
-        // Also consider a method for differentiating between errors, and
-        // displaying the corresponding error UI - it is possible that
-        // exceptions other than "file too large", such as "file too large
-        // after video compression", can occur, and there may even be others
-        // that we have not encountered yet - maybe something like the
-        // following:
-        // if (error.runtimeType == FileSystemException) {
-        //   switch (error.message) {
-        //     case 'Could not read bytes from file':
-        //     // Show an appropriate error
-        //       break;
-        //     case 'File size too large after compression and exceeds maximum '
-        //         'attachment size':
-        //     // Show an appropriate error
-        //       break;
-        //     case 'File size exceeds maximum attachment size':
-        //     // Show an appropriate error
-        //       break;
-        //     default:
-        //     // Show some standard error
-        //       break;
-        //   }
-        // }
-        _showErrorAlert(context.translations.fileTooLargeError(
-          widget.maxAttachmentSize / (1024 * 1024),
-        ));
+        if (error.runtimeType == FileSystemException) {
+          switch (error.message) {
+            case 'Could not read bytes from file':
+              // Show an appropriate error
+              break;
+            case 'File size too large after compression and exceeds maximum '
+                'attachment size':
+              _showErrorAlert(
+                context.translations.fileTooLargeAfterCompressionError(
+                  widget.maxAttachmentSize / (1024 * 1024),
+                ),
+              );
+              break;
+            case 'File size exceeds maximum attachment size':
+              _showErrorAlert(context.translations.fileTooLargeError(
+                widget.maxAttachmentSize / (1024 * 1024),
+              ));
+              break;
+            default:
+              // Show some standard error
+              break;
+          }
+        }
       });
     } else {
       _showCommandsOverlay = false;
