@@ -15,7 +15,7 @@ abstract class AttachmentHandler {
   Future<List<Attachment>> upload();
 
   /// Downloads an attachment.
-  void download(
+  Future<void> download(
     Attachment attachment, {
     String? suggestedName,
   });
