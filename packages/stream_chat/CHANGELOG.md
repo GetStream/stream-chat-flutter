@@ -6,16 +6,21 @@
 
 🐞 Fixed
 
-- [[#890]](https://github.com/GetStream/stream-chat-flutter/pull/890). Fixed Reactions not updating on thread messages. Thanks [bstolinski](https://github.com/bstolinski).
+- [[#890]](https://github.com/GetStream/stream-chat-flutter/pull/890) Fixed Reactions not updating on thread messages.
+  Thanks [bstolinski](https://github.com/bstolinski).
+- [[#897]](https://github.com/GetStream/stream-chat-flutter/issues/897) Fixed error type mis-match in `AuthInterceptor`.
+
 ## 3.4.0
 
 🐞 Fixed
 
 - [[#857]](https://github.com/GetStream/stream-chat-flutter/issues/857) Channel now listens for member ban/unban and
   updates the channel state with the latest data.
-- [[#748]](https://github.com/GetStream/stream-chat-flutter/issues/748) `Message.user` is now also included while saving users in persistence.
+- [[#748]](https://github.com/GetStream/stream-chat-flutter/issues/748) `Message.user` is now also included while saving
+  users in persistence.
 - [[#871]](https://github.com/GetStream/stream-chat-flutter/issues/871) Fixed thread message deletion.
-- [[#846]](https://github.com/GetStream/stream-chat-flutter/issues/846) Fixed `message.ownReactions` getting truncated when receiving a reaction event.
+- [[#846]](https://github.com/GetStream/stream-chat-flutter/issues/846) Fixed `message.ownReactions` getting truncated
+  when receiving a reaction event.
 - Add check for invalid image URLs
 - Fix `channelState.pinnedMessagesStream` getting reset to `0` after a channel update.
 - Fixed `unreadCount` after removing user from a channel.
