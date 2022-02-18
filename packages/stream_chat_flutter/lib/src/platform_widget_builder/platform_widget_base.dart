@@ -19,7 +19,7 @@ abstract class PlatformWidgetBase<M extends Widget, D extends Widget,
   @override
   Widget build(BuildContext context) {
     if (kIsWeb) {
-      return createMobileWidget(context);
+      return createWebWidget(context);
     } else if (Platform.isAndroid || Platform.isIOS) {
       return createMobileWidget(context);
     } else if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
