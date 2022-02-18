@@ -1772,6 +1772,46 @@ void main() {
       verifyNoMoreInteractions(api.user);
     });
 
+    test('`.partialUpdateUser`', () async {
+      const userId = 'test-user-id';
+
+      final set = {'color': 'yellow'};
+      final unset = <String>[];
+
+      final partialUpdateRequest = PartialUpdateUserRequest(
+        id: userId,
+        set: set,
+        unset: unset,
+      );
+
+      final updatedUser = User(
+        id: userId,
+        extraData: {'color': set['color']},
+      );
+
+      when(() => api.user.partialUpdateUsers([partialUpdateRequest]))
+          .thenAnswer(
+        (_) async => UpdateUsersResponse()
+          ..users = {
+            updatedUser.id: updatedUser,
+          },
+      );
+
+      final res = await client.partialUpdateUser(
+        userId,
+        set: set,
+        unset: unset,
+      );
+
+      expect(res, isNotNull);
+      expect(res.users, {updatedUser.id: updatedUser});
+
+      verify(
+        () => api.user.partialUpdateUsers([partialUpdateRequest]),
+      ).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
     test('`.banUser`', () async {
       const userId = 'test-user-id';
 

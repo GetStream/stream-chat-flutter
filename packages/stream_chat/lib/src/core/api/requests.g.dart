@@ -54,3 +54,14 @@ Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) {
   writeNotNull('id_lte', instance.lessThanOrEqual);
   return val;
 }
+
+Map<String, dynamic> _$PartialUpdateUserRequestToJson(
+        PartialUpdateUserRequest instance) =>
+    <String, dynamic>{
+      'stringify': instance.stringify,
+      'hash_code': instance.hashCode,
+      'id': instance.id,
+      'set': instance.set,
+      'unset': instance.unset,
+      'props': instance.props,
+    };
