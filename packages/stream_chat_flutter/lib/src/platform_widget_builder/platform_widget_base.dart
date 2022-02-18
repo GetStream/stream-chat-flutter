@@ -3,18 +3,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'package:stream_chat_flutter/src/platform_widget_builder/platform_target.dart';
-
 ///
 typedef PlatformBuilder<T> = T Function(
   BuildContext context,
   //PlatformTarget platform,
 );
-/*typedef T PlatformIndexBuilder<T>(
-  BuildContext context,
-  PlatformTarget platform,
-  int index,
-);*/
 
 ///
 abstract class PlatformWidgetBase<M extends Widget, D extends Widget,
