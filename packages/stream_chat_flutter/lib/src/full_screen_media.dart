@@ -313,7 +313,10 @@ class _FullScreenMediaState extends State<FullScreenMedia>
   }
 }
 
+/// A widget for desktop and web users to be able to navigate left and right
+/// through a gallery of images.
 class GalleryNavigationItem extends StatelessWidget {
+  /// Builds a [GalleryNavigationItem].
   const GalleryNavigationItem({
     Key? key,
     required this.icon,
@@ -323,10 +326,19 @@ class GalleryNavigationItem extends StatelessWidget {
     this.right,
   }) : super(key: key);
 
+  /// The icon to display.
   final IconData icon;
+
+  /// The callback to perform when the button is clicked.
   final VoidCallback onClick;
+
+  /// Whether to show or hide the button.
   final bool optionsShown;
+
+  /// The left-hand placement of the button.
   final double? left;
+
+  /// The right-hand placement of the button.
   final double? right;
 
   @override
