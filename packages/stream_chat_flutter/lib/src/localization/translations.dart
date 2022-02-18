@@ -106,7 +106,7 @@ abstract class Translations {
   /// The label for instant commands in [MessageInput]
   String get instantCommandsLabel;
 
-  /// The error shown in case the fi"le is too large even after compression
+  /// The error shown in case the file is too large even after compression
   /// while uploading via [MessageInput]
   String fileTooLargeAfterCompressionError(double limitInMB);
 
