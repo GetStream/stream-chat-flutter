@@ -8,6 +8,7 @@ import 'package:native_context_menu/native_context_menu.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/menu_items.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
@@ -271,6 +272,34 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                 ],
               ),
             ),
+            if (widget.mediaAttachments.length > 1) ...[
+              if (_currentPage != widget.mediaAttachments.length - 1) ...[
+                GalleryNavigationItem(
+                  icon: Icons.chevron_right,
+                  right: 0,
+                  optionsShown: _optionsShown,
+                  onClick: () {
+                    _pageController.nextPage(
+                      duration: const Duration(milliseconds: 350),
+                      curve: Curves.easeIn,
+                    );
+                  },
+                ),
+              ],
+              if (_currentPage != 0) ...[
+                GalleryNavigationItem(
+                  icon: Icons.chevron_left,
+                  left: 0,
+                  optionsShown: _optionsShown,
+                  onClick: () {
+                    _pageController.previousPage(
+                      duration: const Duration(milliseconds: 350),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                ),
+              ],
+            ],
           ],
         ),
       );
@@ -282,6 +311,45 @@ class _FullScreenMediaState extends State<FullScreenMedia>
     }
     super.dispose();
   }
+}
+
+class GalleryNavigationItem extends StatelessWidget {
+  const GalleryNavigationItem({
+    Key? key,
+    required this.icon,
+    required this.onClick,
+    required this.optionsShown,
+    this.left,
+    this.right,
+  }) : super(key: key);
+
+  final IconData icon;
+  final VoidCallback onClick;
+  final bool optionsShown;
+  final double? left;
+  final double? right;
+
+  @override
+  Widget build(BuildContext context) => PlatformWidgetBuilder(
+        desktop: (_, child) => child,
+        web: (_, child) => child,
+        child: Positioned(
+          left: left,
+          right: right,
+          top: MediaQuery.of(context).size.height / 2,
+          child: AnimatedOpacity(
+            opacity: optionsShown ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: GestureDetector(
+              onTap: onClick,
+              child: Icon(
+                icon,
+                size: 50,
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 /// Class for packaging up things required for videos
