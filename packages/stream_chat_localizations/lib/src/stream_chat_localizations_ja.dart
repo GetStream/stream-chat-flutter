@@ -122,6 +122,10 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
       'ファイルが大きすぎてアップロードできません。ファイルサイズの制限は${limitInMB}MBです。';
 
   @override
+  String get couldNotReadBytesFromFileError =>
+      'ファイルからバイトを読み取れませんでした';
+
+  @override
   String emojiMatchingQueryText(String query) => '「"$query"」とお揃いの絵文字';
 
   @override

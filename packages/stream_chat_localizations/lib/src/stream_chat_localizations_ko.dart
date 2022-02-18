@@ -122,6 +122,10 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
       '파일이 너무 커서 업로드할 수 없습니다. 파일 크기 제한은 ${limitInMB}MB입니다.';
 
   @override
+  String get couldNotReadBytesFromFileError =>
+      '파일에서 바이트를 읽을 수 없습니다.';
+
+  @override
   String emojiMatchingQueryText(String query) => '"$query"과 일치하는 이모티콘입니다';
 
   @override

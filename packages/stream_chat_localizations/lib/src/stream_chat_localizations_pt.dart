@@ -127,6 +127,10 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
       'O tamanho máximo dos arquivos é de $limitInMB MB.';
 
   @override
+  String get couldNotReadBytesFromFileError =>
+      'Não foi possível ler os bytes do arquivo.';
+
+  @override
   String emojiMatchingQueryText(String query) =>
       'Emoji correspondente a "$query"';
 
