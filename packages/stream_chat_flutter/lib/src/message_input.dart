@@ -698,7 +698,9 @@ class MessageInputState extends State<MessageInput> {
         if (error.runtimeType == FileSystemException) {
           switch (error.message) {
             case 'Could not read bytes from file':
-              // Show an appropriate error
+              _showErrorAlert(
+                context.translations.couldNotReadBytesFromFileError,
+              );
               break;
             case 'File size too large after compression and exceeds maximum '
                 'attachment size':
@@ -714,7 +716,9 @@ class MessageInputState extends State<MessageInput> {
               ));
               break;
             default:
-              // Show some standard error
+              _showErrorAlert(
+                context.translations.genericErrorText,
+              );
               break;
           }
         }
