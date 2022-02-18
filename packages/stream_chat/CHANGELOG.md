@@ -2,7 +2,8 @@
 
 ✅ Added
 
-- You can now pass `score` to `client.sendReaction` and `channel.sendReaction` functions
+- You can now pass `score` to `client.sendReaction` and `channel.sendReaction` functions.
+- Added new `client.partialUpdateUsers` function in order to partially update users.
 
 🐞 Fixed
 
