@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 ///
 typedef PlatformBuilder<T> = T Function(
   BuildContext context,
-  //PlatformTarget platform,
 );
 
 ///
