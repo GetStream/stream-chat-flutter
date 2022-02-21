@@ -264,9 +264,11 @@ class _FullScreenMediaState extends State<FullScreenMedia>
       );
 
   @override
-  void dispose() async {
+  void dispose() {
+    _controller.dispose();
+    _pageController.dispose();
     for (final package in videoPackages.values) {
-      await package.dispose();
+      package.dispose();
     }
     super.dispose();
   }
