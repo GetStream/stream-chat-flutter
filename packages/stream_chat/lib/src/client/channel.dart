@@ -1826,11 +1826,19 @@ class ChannelClientState {
     final parentId = message.parentId;
     // i.e. it's a thread message, Remove it
     if (parentId != null) {
-      final threadMessages = [...threads[parentId]!];
-      return updateThreadInfo(
-        parentId,
-        threadMessages..removeWhere((e) => e.id == message.id),
-      );
+      if (!threads.containsKey(parentId)) {
+        return;
+      }
+
+      final newThreads = Map<String, List<Message>>.from(threads);
+
+      newThreads[parentId] = [
+        ...newThreads[parentId]!
+          ..removeWhere((e) => e.id == message.id),
+      ];
+
+      _threads = newThreads;
+      return;
     }
 
     // Remove regular message
