@@ -109,23 +109,14 @@ class DesktopAttachmentHandler extends AttachmentHandler {
       return [];
     }
 
-    if (files.length == 1) {
-      final attachment = await _createAttachmentFromXFile(files.first);
+    final attachments = <Attachment>[];
+    for (final file in files) {
+      final attachment = await _createAttachmentFromXFile(file);
       if (attachment != null) {
-        return [attachment];
-      } else {
-        return [];
+        attachments.add(attachment);
       }
-    } else {
-      final attachments = <Attachment>[];
-      for (final file in files) {
-        final attachment = await _createAttachmentFromXFile(file);
-        if (attachment != null) {
-          attachments.add(attachment);
-        }
-      }
-      return attachments;
     }
+    return attachments;
   }
 
   /// Creates an [Attachment] from an [XFile] that is selected by a desktop
