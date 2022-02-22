@@ -1796,7 +1796,7 @@ class ChannelClientState {
           _originalPinned.add(message);
         }
       } else {
-        if(_containsMessage) {
+        if (_containsMessage) {
           _originalPinned.removeWhere((e) => e.id == message.id);
         }
       }
