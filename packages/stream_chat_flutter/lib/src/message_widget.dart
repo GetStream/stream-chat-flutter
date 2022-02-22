@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:native_context_menu/native_context_menu.dart';
 import 'package:stream_chat_flutter/src/attachment/url_attachment.dart';
-import 'package:stream_chat_flutter/src/context_menu_items/menu_items.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/image_group.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
