@@ -175,14 +175,14 @@ void main() {
 
   test('markAllRead', () async {
     const path = '/channels/read';
-    when(() => client.post(path)).thenAnswer(
+    when(() => client.post(path, data: {})).thenAnswer(
         (_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.markAllRead();
 
     expect(res, isNotNull);
 
-    verify(() => client.post(path)).called(1);
+    verify(() => client.post(path, data: {})).called(1);
     verifyNoMoreInteractions(client);
   });
 

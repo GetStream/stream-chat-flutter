@@ -811,6 +811,7 @@ class Channel {
   Future<SendReactionResponse> sendReaction(
     Message message,
     String type, {
+    int score = 1,
     Map<String, Object?> extraData = const {},
     bool enforceUnique = false,
   }) async {
@@ -829,7 +830,7 @@ class Channel {
       createdAt: now,
       type: type,
       user: user,
-      score: 1,
+      score: score,
       extraData: extraData,
     );
 
@@ -866,6 +867,7 @@ class Channel {
       final reactionResp = await _client.sendReaction(
         messageId,
         type,
+        score: score,
         extraData: extraData,
         enforceUnique: enforceUnique,
       );
@@ -1322,7 +1324,8 @@ class Channel {
 
   /// Remove the ban for the user with given [userID] in the channel.
   @Deprecated(
-      "Use 'unbanMember' instead. This method will be removed in v4.0.0")
+    "Use 'unbanMember' instead. This method will be removed in v4.0.0",
+  )
   Future<EmptyResponse> unbanUser(String userID) => unbanMember(userID);
 
   /// Remove the ban for the member with given [userID] in the channel.
