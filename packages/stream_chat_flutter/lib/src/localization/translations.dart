@@ -106,13 +106,16 @@ abstract class Translations {
   /// The label for instant commands in [MessageInput]
   String get instantCommandsLabel;
 
-  /// The error shown in case the fi"le is too large even after compression
+  /// The error shown in case the file is too large even after compression
   /// while uploading via [MessageInput]
   String fileTooLargeAfterCompressionError(double limitInMB);
 
   /// The error shown in case the file is too large
   /// while uploading via [MessageInput]
   String fileTooLargeError(double limitInMB);
+
+  /// The error shown when the file being read has no bytes
+  String get couldNotReadBytesFromFileError;
 
   /// The text for showing the query while searching for emojis
   String emojiMatchingQueryText(String query);
@@ -440,6 +443,10 @@ class DefaultTranslations implements Translations {
   @override
   String fileTooLargeError(double limitInMB) =>
       'The file is too large to upload. The file size limit is $limitInMB MB.';
+
+  @override
+  String get couldNotReadBytesFromFileError =>
+      'Could not read bytes from file.';
 
   @override
   String emojiMatchingQueryText(String query) => 'Emoji matching "$query"';

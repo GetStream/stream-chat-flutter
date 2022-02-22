@@ -125,6 +125,10 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
       'फ़ाइल अपलोड करने के लिए बहुत बड़ी है। फ़ाइल आकार सीमा $limitInMB MB है।';
 
   @override
+  String get couldNotReadBytesFromFileError =>
+      'फ़ाइल से बाइट नहीं पढ़ सका.';
+
+  @override
   String emojiMatchingQueryText(String query) => '"$query" से मिलते हुए इमोजी';
 
   @override

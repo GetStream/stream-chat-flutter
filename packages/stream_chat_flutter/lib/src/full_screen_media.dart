@@ -4,8 +4,11 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:native_context_menu/native_context_menu.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/menu_items.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
@@ -150,34 +153,44 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                     final imageUrl = attachment.imageUrl ??
                         attachment.assetUrl ??
                         attachment.thumbUrl;
-                    return PhotoView(
-                      loadingBuilder: (context, image) => const Offstage(),
-                      imageProvider: (imageUrl == null &&
-                              attachment.localUri != null &&
-                              attachment.file?.bytes != null)
-                          ? Image.memory(attachment.file!.bytes!).image
-                          : CachedNetworkImageProvider(imageUrl!),
-                      maxScale: PhotoViewComputedScale.covered,
-                      minScale: PhotoViewComputedScale.contained,
-                      heroAttributes: PhotoViewHeroAttributes(
-                        tag: widget.mediaAttachments,
-                      ),
-                      backgroundDecoration: BoxDecoration(
-                        color: ColorTween(
-                          begin: ChannelHeaderTheme.of(context).color,
-                          end: Colors.black,
-                        ).lerp(_controller.value),
-                      ),
-                      onTapUp: (a, b, c) {
-                        setState(() {
-                          _optionsShown = !_optionsShown;
-                        });
-                        if (_controller.isCompleted) {
-                          _controller.reverse();
-                        } else {
-                          _controller.forward();
-                        }
+                    return ContextMenuRegion(
+                      onItemSelected: (item) {
+                        item.onSelected?.call();
                       },
+                      menuItems: [
+                        DownloadMenuItem(
+                          attachment: attachment,
+                        ),
+                      ],
+                      child: PhotoView(
+                        loadingBuilder: (context, image) => const Offstage(),
+                        imageProvider: (imageUrl == null &&
+                                attachment.localUri != null &&
+                                attachment.file?.bytes != null)
+                            ? Image.memory(attachment.file!.bytes!).image
+                            : CachedNetworkImageProvider(imageUrl!),
+                        maxScale: PhotoViewComputedScale.covered,
+                        minScale: PhotoViewComputedScale.contained,
+                        heroAttributes: PhotoViewHeroAttributes(
+                          tag: widget.mediaAttachments,
+                        ),
+                        backgroundDecoration: BoxDecoration(
+                          color: ColorTween(
+                            begin: ChannelHeaderTheme.of(context).color,
+                            end: Colors.black,
+                          ).lerp(_controller.value),
+                        ),
+                        onTapUp: (a, b, c) {
+                          setState(() {
+                            _optionsShown = !_optionsShown;
+                          });
+                          if (_controller.isCompleted) {
+                            _controller.reverse();
+                          } else {
+                            _controller.forward();
+                          }
+                        },
+                      ),
                     );
                   } else if (attachment.type == 'video') {
                     final controller = videoPackages[attachment.id]!;
@@ -259,6 +272,34 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                 ],
               ),
             ),
+            if (widget.mediaAttachments.length > 1) ...[
+              if (_currentPage != widget.mediaAttachments.length - 1) ...[
+                GalleryNavigationItem(
+                  icon: Icons.chevron_right,
+                  right: 0,
+                  optionsShown: _optionsShown,
+                  onClick: () {
+                    _pageController.nextPage(
+                      duration: const Duration(milliseconds: 350),
+                      curve: Curves.easeIn,
+                    );
+                  },
+                ),
+              ],
+              if (_currentPage != 0) ...[
+                GalleryNavigationItem(
+                  icon: Icons.chevron_left,
+                  left: 0,
+                  optionsShown: _optionsShown,
+                  onClick: () {
+                    _pageController.previousPage(
+                      duration: const Duration(milliseconds: 350),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                ),
+              ],
+            ],
           ],
         ),
       );
@@ -270,6 +311,57 @@ class _FullScreenMediaState extends State<FullScreenMedia>
     }
     super.dispose();
   }
+}
+
+/// A widget for desktop and web users to be able to navigate left and right
+/// through a gallery of images.
+class GalleryNavigationItem extends StatelessWidget {
+  /// Builds a [GalleryNavigationItem].
+  const GalleryNavigationItem({
+    Key? key,
+    required this.icon,
+    required this.onClick,
+    required this.optionsShown,
+    this.left,
+    this.right,
+  }) : super(key: key);
+
+  /// The icon to display.
+  final IconData icon;
+
+  /// The callback to perform when the button is clicked.
+  final VoidCallback onClick;
+
+  /// Whether to show or hide the button.
+  final bool optionsShown;
+
+  /// The left-hand placement of the button.
+  final double? left;
+
+  /// The right-hand placement of the button.
+  final double? right;
+
+  @override
+  Widget build(BuildContext context) => PlatformWidgetBuilder(
+        desktop: (_, child) => child,
+        web: (_, child) => child,
+        child: Positioned(
+          left: left,
+          right: right,
+          top: MediaQuery.of(context).size.height / 2,
+          child: AnimatedOpacity(
+            opacity: optionsShown ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: GestureDetector(
+              onTap: onClick,
+              child: Icon(
+                icon,
+                size: 50,
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 /// Class for packaging up things required for videos

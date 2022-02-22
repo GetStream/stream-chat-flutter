@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:native_context_menu/native_context_menu.dart';
 import 'package:stream_chat_flutter/src/attachment/url_attachment.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/menu_items.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/image_group.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
@@ -117,9 +119,8 @@ class MessageWidget extends StatefulWidget {
             if (attachments.length > 1) {
               return Padding(
                 padding: attachmentPadding,
-                child: wrapAttachmentWidget(
-                  context,
-                  Material(
+                child: WrapAttachmentWidget(
+                  attachmentWidget: Material(
                     color: messageTheme.messageBackgroundColor,
                     child: ImageGroup(
                       size: Size(
@@ -134,32 +135,41 @@ class MessageWidget extends StatefulWidget {
                       onAttachmentTap: onAttachmentTap,
                     ),
                   ),
-                  border,
-                  reverse,
+                  attachmentShape: border,
+                  reverse: reverse,
                 ),
               );
             }
 
-            return wrapAttachmentWidget(
-              context,
-              ImageAttachment(
-                attachment: attachments[0],
-                message: message,
-                messageTheme: messageTheme,
-                size: Size(
-                  mediaQueryData.size.width * 0.8,
-                  mediaQueryData.size.height * 0.3,
+            return WrapAttachmentWidget(
+              attachmentWidget: ContextMenuRegion(
+                onItemSelected: (item) {
+                  item.onSelected?.call();
+                },
+                menuItems: [
+                  DownloadMenuItem(
+                    attachment: attachments[0],
+                  ),
+                ],
+                child: ImageAttachment(
+                  attachment: attachments[0],
+                  message: message,
+                  messageTheme: messageTheme,
+                  size: Size(
+                    mediaQueryData.size.width * 0.8,
+                    mediaQueryData.size.height * 0.3,
+                  ),
+                  onShowMessage: onShowMessage,
+                  onReturnAction: onReturnAction,
+                  onAttachmentTap: onAttachmentTap != null
+                      ? () {
+                          onAttachmentTap.call(message, attachments[0]);
+                        }
+                      : null,
                 ),
-                onShowMessage: onShowMessage,
-                onReturnAction: onReturnAction,
-                onAttachmentTap: onAttachmentTap != null
-                    ? () {
-                        onAttachmentTap.call(message, attachments[0]);
-                      }
-                    : null,
               ),
-              border,
-              reverse,
+              attachmentShape: border,
+              reverse: reverse,
             );
           },
           'video': (context, message, attachments) {
@@ -167,31 +177,40 @@ class MessageWidget extends StatefulWidget {
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
-            return wrapAttachmentWidget(
-              context,
-              Column(
-                children: attachments.map((attachment) {
-                  final mediaQueryData = MediaQuery.of(context);
-                  return VideoAttachment(
-                    attachment: attachment,
-                    messageTheme: messageTheme,
-                    size: Size(
-                      mediaQueryData.size.width * 0.8,
-                      mediaQueryData.size.height * 0.3,
-                    ),
-                    message: message,
-                    onShowMessage: onShowMessage,
-                    onReturnAction: onReturnAction,
-                    onAttachmentTap: onAttachmentTap != null
-                        ? () {
-                            onAttachmentTap(message, attachment);
-                          }
-                        : null,
-                  );
-                }).toList(),
+            return WrapAttachmentWidget(
+              attachmentWidget: ContextMenuRegion(
+                onItemSelected: (item) {
+                  item.onSelected?.call();
+                },
+                menuItems: [
+                  DownloadMenuItem(
+                    attachment: attachments[0],
+                  ),
+                ],
+                child: Column(
+                  children: attachments.map((attachment) {
+                    final mediaQueryData = MediaQuery.of(context);
+                    return VideoAttachment(
+                      attachment: attachment,
+                      messageTheme: messageTheme,
+                      size: Size(
+                        mediaQueryData.size.width * 0.8,
+                        mediaQueryData.size.height * 0.3,
+                      ),
+                      message: message,
+                      onShowMessage: onShowMessage,
+                      onReturnAction: onReturnAction,
+                      onAttachmentTap: onAttachmentTap != null
+                          ? () {
+                              onAttachmentTap(message, attachment);
+                            }
+                          : null,
+                    );
+                  }).toList(),
+                ),
               ),
-              border,
-              reverse,
+              attachmentShape: border,
+              reverse: reverse,
             );
           },
           'giphy': (context, message, attachments) {
@@ -199,30 +218,39 @@ class MessageWidget extends StatefulWidget {
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
-            return wrapAttachmentWidget(
-              context,
-              Column(
-                children: attachments.map((attachment) {
-                  final mediaQueryData = MediaQuery.of(context);
-                  return GiphyAttachment(
-                    attachment: attachment,
-                    message: message,
-                    size: Size(
-                      mediaQueryData.size.width * 0.8,
-                      mediaQueryData.size.height * 0.3,
-                    ),
-                    onShowMessage: onShowMessage,
-                    onReturnAction: onReturnAction,
-                    onAttachmentTap: onAttachmentTap != null
-                        ? () {
-                            onAttachmentTap(message, attachment);
-                          }
-                        : null,
-                  );
-                }).toList(),
+            return WrapAttachmentWidget(
+              attachmentWidget: ContextMenuRegion(
+                onItemSelected: (item) {
+                  item.onSelected?.call();
+                },
+                menuItems: [
+                  DownloadMenuItem(
+                    attachment: attachments[0],
+                  ),
+                ],
+                child: Column(
+                  children: attachments.map((attachment) {
+                    final mediaQueryData = MediaQuery.of(context);
+                    return GiphyAttachment(
+                      attachment: attachment,
+                      message: message,
+                      size: Size(
+                        mediaQueryData.size.width * 0.8,
+                        mediaQueryData.size.height * 0.3,
+                      ),
+                      onShowMessage: onShowMessage,
+                      onReturnAction: onReturnAction,
+                      onAttachmentTap: onAttachmentTap != null
+                          ? () {
+                              onAttachmentTap(message, attachment);
+                            }
+                          : null,
+                    );
+                  }).toList(),
+                ),
               ),
-              border,
-              reverse,
+              attachmentShape: border,
+              reverse: reverse,
             );
           },
           'file': (context, message, attachments) {
@@ -238,9 +266,8 @@ class MessageWidget extends StatefulWidget {
               children: attachments
                   .map<Widget>((attachment) {
                     final mediaQueryData = MediaQuery.of(context);
-                    return wrapAttachmentWidget(
-                      context,
-                      FileAttachment(
+                    return WrapAttachmentWidget(
+                      attachmentWidget: FileAttachment(
                         message: message,
                         attachment: attachment,
                         size: Size(
@@ -253,8 +280,8 @@ class MessageWidget extends StatefulWidget {
                               }
                             : null,
                       ),
-                      border,
-                      reverse,
+                      attachmentShape: border,
+                      reverse: reverse,
                     );
                   })
                   .insertBetween(SizedBox(
