@@ -1833,8 +1833,7 @@ class ChannelClientState {
       final newThreads = Map<String, List<Message>>.from(threads);
 
       newThreads[parentId] = [
-        ...newThreads[parentId]!
-          ..removeWhere((e) => e.id == message.id),
+        ...newThreads[parentId]!..removeWhere((e) => e.id == message.id),
       ];
 
       _threads = newThreads;
