@@ -1,3 +1,11 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#888]](https://github.com/GetStream/stream-chat-flutter/issues/888) Fix `unban` command not working in `MessageInput`.
+- [[#805]](https://github.com/GetStream/stream-chat-flutter/issues/805) Updated chewie dependency version to 1.3.0
+- Fix `showScrollToBottom` in `MessageListView` not respecting false value.
+
 ## 3.4.0
 - Updated `stream_chat_flutter_core` dependency to [`3.4.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
