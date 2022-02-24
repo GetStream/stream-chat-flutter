@@ -1,6 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:macos_ui/macos_ui.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/message/delete_message_button.dart';
+import 'package:stream_chat_flutter/src/platform_widgets/platform_dialog.dart';
+import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Constructs a modal with actions for a message
@@ -183,7 +187,23 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                         if (widget.showFlagButton) _buildFlagButton(context),
                         if (widget.showPinButton) _buildPinButton(context),
                         if (widget.showDeleteMessage)
-                          _buildDeleteButton(context),
+                          PlatformWidgetBuilder(
+                            mobile: (context, _) => DeleteMessageButton(
+                              isDeleteFailed: widget.message.status ==
+                                  MessageSendingStatus.failed_delete,
+                              onTap: _showDeleteBottomSheet,
+                            ),
+                            desktop: (context, child) => DeleteMessageButton(
+                              isDeleteFailed: widget.message.status ==
+                                  MessageSendingStatus.failed_delete,
+                              onTap: _showDeleteDialog,
+                            ),
+                            web: (context, child) => DeleteMessageButton(
+                              isDeleteFailed: widget.message.status ==
+                                  MessageSendingStatus.failed_delete,
+                              onTap: _showDeleteDialog,
+                            ),
+                          ),
                         ...widget.customActions
                             .map((action) => _buildCustomAction(
                                   context,
@@ -322,7 +342,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     }
   }
 
-  void _showDeleteDialog() async {
+  /// Shows a "delete message" bottom sheet on mobile platforms.
+  void _showDeleteBottomSheet() async {
     setState(() {
       _showActions = false;
     });
@@ -349,6 +370,43 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       setState(() {
         _showActions = true;
       });
+    }
+  }
+
+  /// Shows a "delete message" dialog on desktop platforms
+  ///
+  /// TODO(Groovin): consider web ⚠️
+  Future<void> _showDeleteDialog() async {
+    setState(() => _showActions = false);
+    final answer = await showDialog(
+      context: context,
+      builder: (_) => PlatformDialog(
+        title: Text(context.translations.deleteMessageLabel),
+        appIcon: const FlutterLogo(),
+        message: Text(context.translations.deleteMessageQuestion),
+        primaryButton: PushButton(
+          buttonSize: ButtonSize.large,
+          child: Text(context.translations.deleteLabel),
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+        secondaryButton: PushButton(
+          color: MacosColors.unemphasizedSelectedTextBackgroundColor,
+          buttonSize: ButtonSize.large,
+          child: Text(context.translations.cancelLabel),
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+
+      ),
+    );
+    if (answer == true) {
+      try {
+        Navigator.of(context).pop();
+        await StreamChannel.of(context).channel.deleteMessage(widget.message);
+      } catch (err) {
+        _showErrorAlert(); //!!!!
+      }
+    } else {
+      setState(() => _showActions = true);
     }
   }
 
