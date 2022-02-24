@@ -221,7 +221,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
   }
 
   Future<void> _showDeleteDialog() async {
-    final res = await showConfirmationDialog(
+    final res = await showConfirmationBottomSheet(
       context,
       title: context.translations.deleteConversationLabel,
       okText: context.translations.deleteLabel,
@@ -239,7 +239,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
   }
 
   Future<void> _showLeaveDialog() async {
-    final res = await showConfirmationDialog(
+    final res = await showConfirmationBottomSheet(
       context,
       title: context.translations.leaveConversationLabel,
       okText: context.translations.leaveLabel,

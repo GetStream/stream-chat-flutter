@@ -574,7 +574,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                           widget.onDeletePressed?.call(channel);
                         }
                       : () async {
-                          final res = await showConfirmationDialog(
+                          final res = await showConfirmationBottomSheet(
                             context,
                             title: context.translations.deleteConversationLabel,
                             question:

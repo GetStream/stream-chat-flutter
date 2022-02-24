@@ -18,7 +18,7 @@ Future<void> launchURL(BuildContext context, String url) async {
 }
 
 /// Shows confirmation dialog
-Future<bool?> showConfirmationDialog(
+Future<bool?> showConfirmationBottomSheet(
   BuildContext context, {
   required String title,
   required String okText,

@@ -282,7 +282,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final client = StreamChat.of(context).client;
 
     final streamChatThemeData = StreamChatTheme.of(context);
-    final answer = await showConfirmationDialog(
+    final answer = await showConfirmationBottomSheet(
       context,
       title: context.translations.flagMessageLabel,
       icon: StreamSvgIcon.flag(
@@ -348,7 +348,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     setState(() {
       _showActions = false;
     });
-    final answer = await showConfirmationDialog(
+    final answer = await showConfirmationBottomSheet(
       context,
       title: context.translations.deleteMessageLabel,
       icon: StreamSvgIcon.flag(
