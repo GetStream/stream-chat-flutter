@@ -386,6 +386,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         appIcon: const FlutterLogo(),
         message: Text(context.translations.deleteMessageQuestion),
         primaryButton: PushButton(
+          color: StreamChatTheme.of(context).colorTheme.accentPrimary,
           buttonSize: ButtonSize.large,
           child: Text(context.translations.deleteLabel),
           onPressed: () => Navigator.of(context).pop(true),
