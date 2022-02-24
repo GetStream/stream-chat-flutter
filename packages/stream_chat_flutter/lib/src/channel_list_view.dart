@@ -599,7 +599,9 @@ class _ChannelListViewState extends State<ChannelListView> {
               child: ChannelPreview(
                 onLongPress: widget.onChannelLongPress,
                 channel: channel,
-                onImageTap: () => widget.onImageTap?.call(channel),
+                onImageTap: widget.onImageTap != null
+                    ? () => widget.onImageTap!(channel)
+                    : null,
                 onTap: (channel) => onTap(channel, widget.channelWidget),
               ),
             ),
