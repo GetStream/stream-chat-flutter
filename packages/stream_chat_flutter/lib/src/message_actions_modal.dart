@@ -322,7 +322,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             okText: context.translations.okLabel,
           );
         } else {
-          _showErrorAlert();
+          _showErrorAlertBottomSheet();
         }
       }
     }
@@ -339,7 +339,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         await channel.unpinMessage(widget.message);
       }
     } catch (e) {
-      _showErrorAlert();
+      _showErrorAlertBottomSheet();
     }
   }
 
@@ -365,7 +365,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         Navigator.pop(context);
         await StreamChannel.of(context).channel.deleteMessage(widget.message);
       } catch (err) {
-        _showErrorAlert();
+        _showErrorAlertBottomSheet();
       }
     } else {
       setState(() {
@@ -419,14 +419,14 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         Navigator.of(context).pop();
         await StreamChannel.of(context).channel.deleteMessage(widget.message);
       } catch (err) {
-        _showErrorAlert(); //!!!!
+        _showErrorAlertBottomSheet(); //!!!!
       }
     } else {
       setState(() => _showActions = true);
     }
   }
 
-  void _showErrorAlert() {
+  void _showErrorAlertBottomSheet() {
     showInfoBottomSheet(
       context,
       icon: StreamSvgIcon.error(
