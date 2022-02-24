@@ -145,15 +145,17 @@ class PlatformDialog extends StatelessWidget {
           suppress: suppress,
         ),
       ),
-      // TODO(Groovin): check if a default style needs to be provided
-      windows: (context, child) => ContentDialog(
-        key: key,
-        title: title,
-        content: message,
-        actions: actions,
-        backgroundDismiss: backgroundDismiss!,
-        constraints: constraints!,
-        style: style,
+      windows: (context, child) => FluentTheme(
+        data: isDark ? ThemeData.dark() : ThemeData.light(),
+        child: ContentDialog(
+          key: key,
+          title: title,
+          content: message,
+          actions: actions,
+          backgroundDismiss: backgroundDismiss!,
+          constraints: constraints!,
+          style: style,
+        ),
       ),
     );
   }

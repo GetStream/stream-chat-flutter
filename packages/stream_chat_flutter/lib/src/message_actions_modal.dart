@@ -1,5 +1,6 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart' hide IconButton, showDialog, Colors;
+import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:macos_ui/macos_ui.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message/delete_message_button.dart';
@@ -395,7 +396,21 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           child: Text(context.translations.cancelLabel),
           onPressed: () => Navigator.of(context).pop(false),
         ),
-
+        actions: [
+          Button(
+            child: Text(context.translations.cancelLabel),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          Button(
+            style: ButtonStyle(
+              backgroundColor: ButtonState.all(
+                StreamChatTheme.of(context).colorTheme.accentPrimary,
+              ),
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(context.translations.deleteLabel),
+          ),
+        ],
       ),
     );
     if (answer == true) {
