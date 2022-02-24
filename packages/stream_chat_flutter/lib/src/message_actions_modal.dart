@@ -419,7 +419,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         Navigator.of(context).pop();
         await StreamChannel.of(context).channel.deleteMessage(widget.message);
       } catch (err) {
-        _showErrorAlertBottomSheet(); //!!!!
+        _showErrorDialog();
       }
     } else {
       setState(() => _showActions = true);
@@ -436,6 +436,34 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       details: context.translations.operationCouldNotBeCompletedText,
       title: context.translations.somethingWentWrongError,
       okText: context.translations.okLabel,
+    );
+  }
+
+  void _showErrorDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => PlatformDialog(
+        appIcon: const FlutterLogo(),
+        title: Text(context.translations.somethingWentWrongError),
+        message: Text(context.translations.operationCouldNotBeCompletedText),
+        primaryButton: PushButton(
+          buttonSize: ButtonSize.large,
+          color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+          child: Text(context.translations.okLabel),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          Button(
+            style: ButtonStyle(
+              backgroundColor: ButtonState.all(
+                StreamChatTheme.of(context).colorTheme.accentPrimary,
+              ),
+            ),
+            child: Text(context.translations.okLabel),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
     );
   }
 
