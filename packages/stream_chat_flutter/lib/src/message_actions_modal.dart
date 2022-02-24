@@ -439,34 +439,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     );
   }
 
-  Widget _buildDeleteButton(BuildContext context) {
-    final isDeleteFailed =
-        widget.message.status == MessageSendingStatus.failed_delete;
-    return InkWell(
-      onTap: _showDeleteDialog,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.delete(
-              color: Colors.red,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              context.translations.toggleDeleteRetryDeleteMessageText(
-                isDeleteFailed: isDeleteFailed,
-              ),
-              style: StreamChatTheme.of(context)
-                  .textTheme
-                  .body
-                  .copyWith(color: Colors.red),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildCopyButton(BuildContext context) {
     final streamChatThemeData = StreamChatTheme.of(context);
     return InkWell(
