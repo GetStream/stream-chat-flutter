@@ -298,7 +298,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     if (answer == true) {
       try {
         await client.flagMessage(widget.message.id);
-        await showInfoDialog(
+        await showInfoBottomSheet(
           context,
           icon: StreamSvgIcon.flag(
             color: theme.colorTheme.accentError,
@@ -311,7 +311,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       } catch (err) {
         if (err is StreamChatNetworkError &&
             err.errorCode == ChatErrorCode.inputError) {
-          await showInfoDialog(
+          await showInfoBottomSheet(
             context,
             icon: StreamSvgIcon.flag(
               color: theme.colorTheme.accentError,
@@ -427,7 +427,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   }
 
   void _showErrorAlert() {
-    showInfoDialog(
+    showInfoBottomSheet(
       context,
       icon: StreamSvgIcon.error(
         color: StreamChatTheme.of(context).colorTheme.accentError,

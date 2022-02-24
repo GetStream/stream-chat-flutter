@@ -107,7 +107,7 @@ Future<bool?> showConfirmationDialog(
 }
 
 /// Shows info dialog
-Future<bool?> showInfoDialog(
+Future<bool?> showInfoBottomSheet(
   BuildContext context, {
   required String title,
   required String okText,
