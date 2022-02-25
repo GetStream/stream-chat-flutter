@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart' hide Colors, showDialog;
+import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:native_context_menu/native_context_menu.dart';
+import 'package:macos_ui/macos_ui.dart';
 import 'package:stream_chat_flutter/src/attachment/url_attachment.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/copy_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/delete_message_menu_item.dart';
@@ -10,6 +11,7 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/image_group.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
+import 'package:stream_chat_flutter/src/platform_widgets/platform_dialog.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -636,19 +638,69 @@ class _MessageWidgetState extends State<MessageWidget>
     return ContextMenuRegion(
       onItemSelected: (item) => item.onSelected!.call(),
       menuItems: [
-        // Ensure "Copy Message" menu doesn't show if there is no text to copy
-        if (widget.message.attachments.isEmpty &&
+        // Ensure "Copy Message" menu doesn't show if:
+        // * Message is deleted
+        // * There is no text to copy (like in the case of a message
+        //   containing only an attachment)
+        if (!widget.message.isDeleted &&
+            widget.message.attachments.isEmpty &&
             widget.message.text!.isNotEmpty)
           CopyMessageMenuItem(
             message: widget.message,
           ),
-        DeleteMessageMenuItem(
-          onClick: () {
-            /* TODO(Groovin): 
+        // Ensure "Delete Message" menu doesn't show if the message is deleted.
+        if (!widget.message.isDeleted)
+          DeleteMessageMenuItem(
+            onClick: () async {
+              /* TODO(Groovin):
                 1. Show prompt to user
                 2. Perform deletion if user chooses to do so */
-          },
-        ),
+              final deleted = await showDialog(
+                context: context,
+                builder: (_) => PlatformDialog(
+                  title: Text(context.translations.deleteMessageLabel),
+                  appIcon: const FlutterLogo(),
+                  message: Text(context.translations.deleteMessageQuestion),
+                  primaryButton: PushButton(
+                    color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+                    buttonSize: ButtonSize.large,
+                    child: Text(context.translations.deleteLabel),
+                    onPressed: () => Navigator.of(context).pop(true),
+                  ),
+                  secondaryButton: PushButton(
+                    color: MacosColors.unemphasizedSelectedTextBackgroundColor,
+                    buttonSize: ButtonSize.large,
+                    child: Text(context.translations.cancelLabel),
+                    onPressed: () => Navigator.of(context).pop(false),
+                  ),
+                  actions: [
+                    Button(
+                      child: Text(context.translations.cancelLabel),
+                      onPressed: () => Navigator.of(context).pop(false),
+                    ),
+                    Button(
+                      style: ButtonStyle(
+                        backgroundColor: ButtonState.all(
+                          StreamChatTheme.of(context).colorTheme.accentPrimary,
+                        ),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: Text(context.translations.deleteLabel),
+                    ),
+                  ],
+                ),
+              );
+              if (deleted) {
+                try {
+                  await StreamChannel.of(context)
+                      .channel
+                      .deleteMessage(widget.message);
+                } catch (e) {
+                  // TODO(Groovin): show error dialog
+                }
+              }
+            },
+          ),
       ],
       child: Material(
         type: widget.message.pinned && widget.showPinHighlight
