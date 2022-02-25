@@ -639,7 +639,7 @@ class _MessageWidgetState extends State<MessageWidget>
     return ContextMenuRegion(
       onItemSelected: (item) => item.onSelected!.call(),
       menuItems: [
-        //
+        // Ensure "Pin Message" menu doesn't show if message is deleted.
         if (!widget.message.isDeleted)
           PinMessageMenuItem(
             context: context,
