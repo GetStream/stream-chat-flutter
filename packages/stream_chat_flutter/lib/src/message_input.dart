@@ -16,6 +16,7 @@ import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
@@ -767,19 +768,22 @@ class MessageInputState extends State<MessageInput> {
                 _buildAttachments(),
                 LimitedBox(
                   maxHeight: widget.maxHeight,
-                  child: TextField(
-                    key: const Key('messageInputText'),
-                    enabled: _inputEnabled,
-                    maxLines: null,
-                    onSubmitted: (_) => sendMessage(),
-                    keyboardType: widget.keyboardType,
-                    controller: textEditingController,
-                    focusNode: _focusNode,
-                    style: _messageInputTheme.inputTextStyle,
-                    autofocus: widget.autofocus,
-                    textAlignVertical: TextAlignVertical.center,
-                    decoration: _getInputDecoration(context),
-                    textCapitalization: TextCapitalization.sentences,
+                  child: KeyboardShortcutRunner(
+                    onEnterKeypress: sendMessage,
+                    child: TextField(
+                      key: const Key('messageInputText'),
+                      enabled: _inputEnabled,
+                      maxLines: null,
+                      onSubmitted: (_) => sendMessage(),
+                      keyboardType: widget.keyboardType,
+                      controller: textEditingController,
+                      focusNode: _focusNode,
+                      style: _messageInputTheme.inputTextStyle,
+                      autofocus: widget.autofocus,
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: _getInputDecoration(context),
+                      textCapitalization: TextCapitalization.sentences,
+                    ),
                   ),
                 ),
               ],

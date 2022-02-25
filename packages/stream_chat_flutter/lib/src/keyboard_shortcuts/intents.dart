@@ -1,0 +1,4 @@
+import 'package:flutter/widgets.dart';
+
+/// The intent for sending a message.
+class SendMessageIntent extends Intent {}
