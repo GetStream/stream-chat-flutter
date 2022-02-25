@@ -648,6 +648,17 @@ class _MessageWidgetState extends State<MessageWidget>
           CopyMessageMenuItem(
             message: widget.message,
           ),
+        // Ensure "Copy Message menu does show if:
+        // * Message is not deleted
+        // * There are attachments
+        // * There is text to copy
+        if (!widget.message.isDeleted &&
+            widget.message.attachments.isNotEmpty &&
+            widget.message.text!.isNotEmpty)
+          CopyMessageMenuItem(
+            message: widget.message,
+          ),
+
         // Ensure "Delete Message" menu doesn't show if the message is deleted.
         if (!widget.message.isDeleted)
           DeleteMessageMenuItem(
