@@ -3,7 +3,7 @@ import 'package:fluent_ui/fluent_ui.dart' hide IconButton, showDialog, Colors;
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:macos_ui/macos_ui.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/message/delete_message_button.dart';
+import 'package:stream_chat_flutter/src/message_actions_modal/delete_message_button.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_dialog.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
