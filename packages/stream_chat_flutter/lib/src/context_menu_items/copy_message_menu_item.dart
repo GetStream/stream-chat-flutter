@@ -17,6 +17,6 @@ class CopyMessageMenuItem extends MenuItem {
   final Message message;
 
   @override
-  VoidCallback? get onSelected =>
+  VoidCallback? get onPin =>
       () => Clipboard.setData(ClipboardData(text: message.text));
 }

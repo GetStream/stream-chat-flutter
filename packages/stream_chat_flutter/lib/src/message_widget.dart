@@ -6,6 +6,7 @@ import 'package:stream_chat_flutter/src/attachment/url_attachment.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/copy_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/delete_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/pin_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
 import 'package:stream_chat_flutter/src/dialogs/error_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
@@ -638,6 +639,14 @@ class _MessageWidgetState extends State<MessageWidget>
     return ContextMenuRegion(
       onItemSelected: (item) => item.onSelected!.call(),
       menuItems: [
+        //
+        if (!widget.message.isDeleted)
+          PinMessageMenuItem(
+            context: context,
+            message: widget.message,
+            pinned: widget.message.pinned,
+            title: widget.message.pinned ? 'Unpin Message' : 'Pin Message',
+          ),
         // Ensure "Copy Message" menu doesn't show if:
         // * Message is deleted
         // * There is no text to copy (like in the case of a message
@@ -658,7 +667,6 @@ class _MessageWidgetState extends State<MessageWidget>
           CopyMessageMenuItem(
             message: widget.message,
           ),
-
         // Ensure "Delete Message" menu doesn't show if the message is deleted.
         if (!widget.message.isDeleted)
           DeleteMessageMenuItem(
