@@ -4,9 +4,10 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-///
+/// A platform-aware dialog that asks the user to confirm that they want to
+/// delete the selected message.
 class DeleteMessageDialog extends StatelessWidget {
-  ///
+  /// Builds a [DeleteMessageDialog].
   const DeleteMessageDialog({
     Key? key,
   }) : super(key: key);
