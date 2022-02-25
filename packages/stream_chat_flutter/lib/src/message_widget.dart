@@ -733,9 +733,13 @@ class _MessageWidgetState extends State<MessageWidget>
                                             )
                                           : null,
                                       portalAnchor: Alignment(
-                                          widget.reverse ? 1 : -1, -1),
+                                        widget.reverse ? 1 : -1,
+                                        -1,
+                                      ),
                                       childAnchor: Alignment(
-                                          widget.reverse ? -1 : 1, -1),
+                                        widget.reverse ? -1 : 1,
+                                        -1,
+                                      ),
                                       child: Stack(
                                         clipBehavior: Clip.none,
                                         children: [
@@ -857,7 +861,8 @@ class _MessageWidgetState extends State<MessageWidget>
                               ),
                               if (showBottomRow)
                                 SizedBox(
-                                    height: context.textScaleFactor * 18.0),
+                                  height: context.textScaleFactor * 18.0,
+                                ),
                             ],
                           ),
                         ),
