@@ -8,11 +8,11 @@ import 'package:stream_chat_flutter/src/context_menu_items/copy_message_menu_ite
 import 'package:stream_chat_flutter/src/context_menu_items/delete_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
+import 'package:stream_chat_flutter/src/dialogs/error_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/image_group.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
-import 'package:stream_chat_flutter/src/platform_widgets/platform_dialog.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -663,7 +663,10 @@ class _MessageWidgetState extends State<MessageWidget>
                       .channel
                       .deleteMessage(widget.message);
                 } catch (e) {
-                  // TODO(Groovin): show error dialog
+                  showDialog(
+                    context: context,
+                    builder: (_) => const ErrorDialog(),
+                  );
                 }
               }
             },
