@@ -10,6 +10,8 @@ import 'package:video_compress/video_compress.dart';
 
 /// An abstract class for creating utility classes appropriate for various
 /// platforms.
+///
+/// TODO(Groovin): consider a "downloadMultiple()" function.
 abstract class AttachmentHandler {
   /// Uploads an attachment
   Future<List<Attachment>> upload();
