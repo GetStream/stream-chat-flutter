@@ -7,6 +7,7 @@ import 'package:stream_chat_flutter/src/attachment/url_attachment.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/copy_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/delete_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
+import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/image_group.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
@@ -652,43 +653,9 @@ class _MessageWidgetState extends State<MessageWidget>
         if (!widget.message.isDeleted)
           DeleteMessageMenuItem(
             onClick: () async {
-              /* TODO(Groovin):
-                1. Show prompt to user
-                2. Perform deletion if user chooses to do so */
               final deleted = await showDialog(
                 context: context,
-                builder: (_) => PlatformDialog(
-                  title: Text(context.translations.deleteMessageLabel),
-                  appIcon: const FlutterLogo(),
-                  message: Text(context.translations.deleteMessageQuestion),
-                  primaryButton: PushButton(
-                    color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-                    buttonSize: ButtonSize.large,
-                    child: Text(context.translations.deleteLabel),
-                    onPressed: () => Navigator.of(context).pop(true),
-                  ),
-                  secondaryButton: PushButton(
-                    color: MacosColors.unemphasizedSelectedTextBackgroundColor,
-                    buttonSize: ButtonSize.large,
-                    child: Text(context.translations.cancelLabel),
-                    onPressed: () => Navigator.of(context).pop(false),
-                  ),
-                  actions: [
-                    Button(
-                      child: Text(context.translations.cancelLabel),
-                      onPressed: () => Navigator.of(context).pop(false),
-                    ),
-                    Button(
-                      style: ButtonStyle(
-                        backgroundColor: ButtonState.all(
-                          StreamChatTheme.of(context).colorTheme.accentPrimary,
-                        ),
-                      ),
-                      onPressed: () => Navigator.of(context).pop(true),
-                      child: Text(context.translations.deleteLabel),
-                    ),
-                  ],
-                ),
+                builder: (_) => const DeleteMessageDialog(),
               );
               if (deleted) {
                 try {
