@@ -3,6 +3,7 @@ import 'package:fluent_ui/fluent_ui.dart' hide IconButton, showDialog, Colors;
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:macos_ui/macos_ui.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
+import 'package:stream_chat_flutter/src/dialogs/error_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/delete_message_button.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_dialog.dart';
@@ -389,7 +390,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         Navigator.of(context).pop();
         await StreamChannel.of(context).channel.deleteMessage(widget.message);
       } catch (err) {
-        _showErrorDialog();
+        showDialog(
+          context: context,
+          builder: (_) => const ErrorDialog(),
+        );
       }
     } else {
       setState(() => _showActions = true);
@@ -406,34 +410,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       details: context.translations.operationCouldNotBeCompletedText,
       title: context.translations.somethingWentWrongError,
       okText: context.translations.okLabel,
-    );
-  }
-
-  void _showErrorDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => PlatformDialog(
-        appIcon: const FlutterLogo(),
-        title: Text(context.translations.somethingWentWrongError),
-        message: Text(context.translations.operationCouldNotBeCompletedText),
-        primaryButton: PushButton(
-          buttonSize: ButtonSize.large,
-          color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-          child: Text(context.translations.okLabel),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        actions: [
-          Button(
-            style: ButtonStyle(
-              backgroundColor: ButtonState.all(
-                StreamChatTheme.of(context).colorTheme.accentPrimary,
-              ),
-            ),
-            child: Text(context.translations.okLabel),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
     );
   }
 
