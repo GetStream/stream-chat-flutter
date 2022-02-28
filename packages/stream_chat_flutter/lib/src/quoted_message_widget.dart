@@ -141,7 +141,7 @@ class QuotedMessageWidget extends StatelessWidget {
     final children = [
       if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux)
         ClearInputItemButton(
-          onTap: onQuotedMessageClear!,
+          onTap: onQuotedMessageClear,
         ),
       if (_hasAttachments) _parseAttachments(context),
       if (msg.text!.isNotEmpty)

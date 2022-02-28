@@ -11,7 +11,7 @@ class ClearInputItemButton extends StatelessWidget {
   }) : super(key: key);
 
   /// The callback to be performed when the button is tapped or clicked.
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
