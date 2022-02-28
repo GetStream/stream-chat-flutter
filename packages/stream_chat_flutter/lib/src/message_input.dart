@@ -438,7 +438,8 @@ class MessageInputState extends State<MessageInput> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (_hasQuotedMessage)
+              // Ensure this doesn't show on web & desktop
+              if (_hasQuotedMessage && Platform.isAndroid || Platform.isIOS)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                   child: Row(
