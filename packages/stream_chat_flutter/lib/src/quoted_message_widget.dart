@@ -72,6 +72,7 @@ class QuotedMessageWidget extends StatelessWidget {
     this.padding = const EdgeInsets.all(8),
     this.onTap,
     this.onQuotedMessageClear,
+    this.composing = true,
   }) : super(key: key);
 
   /// The message
@@ -101,6 +102,12 @@ class QuotedMessageWidget extends StatelessWidget {
 
   /// Callback for clearing quoted messages.
   final VoidCallback? onQuotedMessageClear;
+
+  /// Whether the user is currently composing a message in response to the
+  /// quoted message.
+  ///
+  /// Defaults to `true`.
+  final bool composing;
 
   bool get _hasAttachments => message.attachments.isNotEmpty;
 
@@ -139,7 +146,11 @@ class QuotedMessageWidget extends StatelessWidget {
     }
 
     final children = [
-      if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux)
+      if ((kIsWeb ||
+              Platform.isMacOS ||
+              Platform.isWindows ||
+              Platform.isLinux) &&
+          composing)
         ClearInputItemButton(
           onTap: onQuotedMessageClear,
         ),

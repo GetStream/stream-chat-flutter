@@ -969,6 +969,7 @@ class _MessageWidgetState extends State<MessageWidget>
         top: 8,
         bottom: hasNonUrlAttachments ? 8 : 0,
       ),
+      composing: false,
     );
   }
 
