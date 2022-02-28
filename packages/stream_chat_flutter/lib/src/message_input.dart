@@ -19,6 +19,7 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
+import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
@@ -1393,7 +1394,11 @@ class MessageInputState extends State<MessageInput> {
                           ),
                           trailing: Padding(
                             padding: const EdgeInsets.all(8),
-                            child: _buildRemoveButton(e),
+                            child: ClearInputItemButton(
+                              onTap: () {
+                                setState(() => _attachments.remove(e.id));
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -1426,7 +1431,13 @@ class MessageInputState extends State<MessageInput> {
                             Positioned(
                               top: 8,
                               right: 8,
-                              child: _buildRemoveButton(attachment),
+                              child: ClearInputItemButton(
+                                onTap: () {
+                                  setState(
+                                    () => _attachments.remove(attachment.id),
+                                  );
+                                },
+                              ),
                             ),
                           ],
                         ),
@@ -1439,31 +1450,6 @@ class MessageInputState extends State<MessageInput> {
       ],
     );
   }
-
-  Widget _buildRemoveButton(Attachment attachment) => SizedBox(
-        height: 24,
-        width: 24,
-        child: RawMaterialButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          elevation: 0,
-          highlightElevation: 0,
-          focusElevation: 0,
-          hoverElevation: 0,
-          onPressed: () {
-            setState(() => _attachments.remove(attachment.id));
-          },
-          fillColor:
-              _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
-          child: Center(
-            child: StreamSvgIcon.close(
-              size: 24,
-              color: _streamChatTheme.colorTheme.barsBg,
-            ),
-          ),
-        ),
-      );
 
   Widget _buildAttachment(Attachment attachment) {
     if (widget.attachmentThumbnailBuilders?.containsKey(attachment.type) ==
