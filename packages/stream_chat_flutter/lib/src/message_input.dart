@@ -1357,7 +1357,7 @@ class MessageInputState extends State<MessageInput> {
       message: widget.quotedMessage!,
       messageTheme: _streamChatTheme.otherMessageTheme,
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      onTap: widget.onQuotedMessageCleared,
+      onQuotedMessageClear: widget.onQuotedMessageCleared,
     );
   }
 
