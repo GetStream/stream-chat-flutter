@@ -7,6 +7,7 @@ import 'package:stream_chat_flutter/src/context_menu_items/copy_message_menu_ite
 import 'package:stream_chat_flutter/src/context_menu_items/delete_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/pin_message_menu_item.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/reply_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
 import 'package:stream_chat_flutter/src/dialogs/error_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
@@ -639,36 +640,36 @@ class _MessageWidgetState extends State<MessageWidget>
     return ContextMenuRegion(
       onItemSelected: (item) => item.onSelected!.call(),
       menuItems: [
-        // Ensure "Pin Message" menu doesn't show if message is deleted.
-        if (!widget.message.isDeleted)
+        // Ensure menu items don't show if message is deleted.
+        if (!widget.message.isDeleted) ...[
+          ReplyContextMenuItem(
+            onClick: () {
+              widget.onReplyTap!(widget.message);
+            },
+          ),
           PinMessageMenuItem(
             context: context,
             message: widget.message,
             pinned: widget.message.pinned,
             title: widget.message.pinned ? 'Unpin Message' : 'Pin Message',
           ),
-        // Ensure "Copy Message" menu doesn't show if:
-        // * Message is deleted
-        // * There is no text to copy (like in the case of a message
-        //   containing only an attachment)
-        if (!widget.message.isDeleted &&
-            widget.message.attachments.isEmpty &&
-            widget.message.text!.isNotEmpty)
-          CopyMessageMenuItem(
-            message: widget.message,
-          ),
-        // Ensure "Copy Message menu does show if:
-        // * Message is not deleted
-        // * There are attachments
-        // * There is text to copy
-        if (!widget.message.isDeleted &&
-            widget.message.attachments.isNotEmpty &&
-            widget.message.text!.isNotEmpty)
-          CopyMessageMenuItem(
-            message: widget.message,
-          ),
-        // Ensure "Delete Message" menu doesn't show if the message is deleted.
-        if (!widget.message.isDeleted)
+
+          // Ensure "Copy Message" menu doesn't show if:
+          // * There is no text to copy (like in the case of a message
+          //   containing only an attachment)
+          if (widget.message.attachments.isEmpty &&
+              widget.message.text!.isNotEmpty)
+            CopyMessageMenuItem(
+              message: widget.message,
+            ),
+          // Ensure "Copy Message menu does show if:
+          // * There are attachments
+          // * There is text to copy
+          if (widget.message.attachments.isNotEmpty &&
+              widget.message.text!.isNotEmpty)
+            CopyMessageMenuItem(
+              message: widget.message,
+            ),
           DeleteMessageMenuItem(
             onClick: () async {
               final deleted = await showDialog(
@@ -689,6 +690,7 @@ class _MessageWidgetState extends State<MessageWidget>
               }
             },
           ),
+        ],
       ],
       child: Material(
         type: widget.message.pinned && widget.showPinHighlight
