@@ -770,6 +770,12 @@ class MessageInputState extends State<MessageInput> {
                   maxHeight: widget.maxHeight,
                   child: KeyboardShortcutRunner(
                     onEnterKeypress: sendMessage,
+                    onEscapeKeypress: () {
+                      if (_hasQuotedMessage &&
+                          textEditingController.text.isEmpty) {
+                        widget.onQuotedMessageCleared?.call();
+                      }
+                    },
                     child: TextField(
                       key: const Key('messageInputText'),
                       enabled: _inputEnabled,

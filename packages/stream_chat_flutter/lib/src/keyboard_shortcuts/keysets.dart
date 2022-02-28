@@ -5,3 +5,8 @@ import 'package:flutter/widgets.dart';
 final sendMessageKeySet = LogicalKeySet(
   LogicalKeyboardKey.enter,
 );
+
+/// The keyset for removing a reply.
+final removeReplyKeySet = LogicalKeySet(
+  LogicalKeyboardKey.escape,
+);

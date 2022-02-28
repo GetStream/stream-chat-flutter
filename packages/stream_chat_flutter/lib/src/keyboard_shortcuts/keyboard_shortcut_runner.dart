@@ -10,6 +10,7 @@ class KeyboardShortcutRunner extends StatelessWidget {
     Key? key,
     required this.child,
     required this.onEnterKeypress,
+    required this.onEscapeKeypress,
   }) : super(key: key);
 
   /// This child of this widget.
@@ -18,15 +19,22 @@ class KeyboardShortcutRunner extends StatelessWidget {
   /// The function to execute when the "enter" key is pressed.
   final VoidCallback onEnterKeypress;
 
+  /// The function to execute when the "escape" key is pressed.
+  final VoidCallback onEscapeKeypress;
+
   @override
   Widget build(BuildContext context) => FocusableActionDetector(
         autofocus: true,
         shortcuts: {
           sendMessageKeySet: SendMessageIntent(),
+          removeReplyKeySet: RemoveReplyIntent(),
         },
         actions: {
           SendMessageIntent: CallbackAction(
             onInvoke: (e) => onEnterKeypress.call(),
+          ),
+          RemoveReplyIntent: CallbackAction(
+            onInvoke: (e) => onEscapeKeypress.call(),
           ),
         },
         child: child,
