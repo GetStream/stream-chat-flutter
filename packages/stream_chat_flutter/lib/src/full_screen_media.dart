@@ -275,29 +275,33 @@ class _FullScreenMediaState extends State<FullScreenMedia>
               ),
             ),
             if (widget.mediaAttachments.length > 1) ...[
-              if (_currentPage != widget.mediaAttachments.length - 1) ...[
+              if (_currentPage.value != widget.mediaAttachments.length - 1) ...[
                 GalleryNavigationItem(
                   icon: Icons.chevron_right,
                   right: 0,
-                  optionsShown: _optionsShown,
+                  opacityAnimation: _opacityAnimation,
+                  currentPage: _currentPage,
                   onClick: () {
                     _pageController.nextPage(
                       duration: const Duration(milliseconds: 350),
                       curve: Curves.easeIn,
                     );
+                    setState(() => _currentPage.value++);
                   },
                 ),
               ],
-              if (_currentPage != 0) ...[
+              if (_currentPage.value != 0) ...[
                 GalleryNavigationItem(
                   icon: Icons.chevron_left,
                   left: 0,
-                  optionsShown: _optionsShown,
+                  opacityAnimation: _opacityAnimation,
+                  currentPage: _currentPage,
                   onClick: () {
                     _pageController.previousPage(
                       duration: const Duration(milliseconds: 350),
                       curve: Curves.easeOut,
                     );
+                    setState(() => _currentPage.value--);
                   },
                 ),
               ],
@@ -325,7 +329,8 @@ class GalleryNavigationItem extends StatelessWidget {
     Key? key,
     required this.icon,
     required this.onClick,
-    required this.optionsShown,
+    required this.opacityAnimation,
+    required this.currentPage,
     this.left,
     this.right,
   }) : super(key: key);
@@ -336,8 +341,11 @@ class GalleryNavigationItem extends StatelessWidget {
   /// The callback to perform when the button is clicked.
   final VoidCallback onClick;
 
-  /// Whether to show or hide the button.
-  final bool optionsShown;
+  /// The animation for showing & hiding this widget.
+  final Animation<double> opacityAnimation;
+
+  /// The value to use for .
+  final ValueNotifier<int> currentPage;
 
   /// The left-hand placement of the button.
   final double? left;
@@ -353,14 +361,23 @@ class GalleryNavigationItem extends StatelessWidget {
           left: left,
           right: right,
           top: MediaQuery.of(context).size.height / 2,
-          child: AnimatedOpacity(
-            opacity: optionsShown ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 300),
-            child: GestureDetector(
-              onTap: onClick,
-              child: Icon(
-                icon,
-                size: 50,
+          child: FadeTransition(
+            opacity: opacityAnimation,
+            child: ValueListenableBuilder<int>(
+              valueListenable: currentPage,
+              builder: (context, value, child) => GestureDetector(
+                onTap: onClick,
+                child: Icon(
+                  icon,
+                  size: 50,
+                ),
+              ),
+              child: GestureDetector(
+                onTap: onClick,
+                child: Icon(
+                  icon,
+                  size: 50,
+                ),
               ),
             ),
           ),
