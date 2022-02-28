@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
@@ -67,6 +71,7 @@ class QuotedMessageWidget extends StatelessWidget {
     this.attachmentThumbnailBuilders,
     this.padding = const EdgeInsets.all(8),
     this.onTap,
+    this.onQuotedMessageClear,
   }) : super(key: key);
 
   /// The message
@@ -93,6 +98,9 @@ class QuotedMessageWidget extends StatelessWidget {
 
   /// Callback for tap on widget
   final GestureTapCallback? onTap;
+
+  /// Callback for clearing quoted messages.
+  final VoidCallback? onQuotedMessageClear;
 
   bool get _hasAttachments => message.attachments.isNotEmpty;
 
@@ -131,6 +139,10 @@ class QuotedMessageWidget extends StatelessWidget {
     }
 
     final children = [
+      if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux)
+        ClearInputItemButton(
+          onTap: onQuotedMessageClear!,
+        ),
       if (_hasAttachments) _parseAttachments(context),
       if (msg.text!.isNotEmpty)
         Flexible(
@@ -169,7 +181,6 @@ class QuotedMessageWidget extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment:
             reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: reverse ? children.reversed.toList() : children,
