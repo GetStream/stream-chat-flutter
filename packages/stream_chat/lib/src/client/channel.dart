@@ -1744,15 +1744,6 @@ class ChannelClientState {
         ownReactions: oldMessage?.ownReactions,
       );
       addMessage(message);
-
-      if (message.pinned) {
-        _channelState = _channelState.copyWith(
-          pinnedMessages: [
-            ..._channelState.pinnedMessages,
-            message,
-          ],
-        );
-      }
     }));
   }
 
@@ -1804,8 +1795,24 @@ class ChannelClientState {
         newMessages.add(message);
       }
 
+      final newPinnedMessages = [...pinnedMessages];
+      final oldPinnedIndex =
+          newPinnedMessages.indexWhere((m) => m.id == message.id);
+
+      // Handle pinned messages
+      if (message.pinned) {
+        if (oldPinnedIndex != -1) {
+          newPinnedMessages[oldPinnedIndex] = message;
+        } else {
+          newPinnedMessages.add(message);
+        }
+      } else {
+        newPinnedMessages.removeWhere((m) => m.id == message.id);
+      }
+
       _channelState = _channelState.copyWith(
         messages: newMessages..sort(_sortByCreatedAt),
+        pinnedMessages: newPinnedMessages,
         channel: _channelState.channel?.copyWith(
           lastMessageAt: message.createdAt,
         ),
@@ -1898,11 +1905,12 @@ class ChannelClientState {
       .distinct(const ListEquality().equals);
 
   /// Channel pinned message list.
-  List<Message> get pinnedMessages => _channelState.pinnedMessages.toList();
+  List<Message> get pinnedMessages => _channelState.pinnedMessages;
 
   /// Channel pinned message list as a stream.
-  Stream<List<Message>> get pinnedMessagesStream =>
-      channelStateStream.map((cs) => cs.pinnedMessages.toList());
+  Stream<List<Message>> get pinnedMessagesStream => channelStateStream
+      .map((cs) => cs.pinnedMessages)
+      .distinct(const ListEquality().equals);
 
   /// Get channel last message.
   Message? get lastMessage =>
@@ -2213,7 +2221,7 @@ class ChannelClientState {
             .toList();
 
         updateChannelState(_channelState.copyWith(
-          pinnedMessages: pinnedMessages.where(_pinIsValid()).toList(),
+          pinnedMessages: pinnedMessages.where(_pinIsValid).toList(),
           messages: expiredMessages,
         ));
       }
@@ -2250,7 +2258,7 @@ class ChannelClientState {
   }
 }
 
-bool Function(Message) _pinIsValid() {
+bool _pinIsValid(Message message) {
   final now = DateTime.now();
-  return (Message m) => m.pinExpires!.isAfter(now);
+  return message.pinExpires!.isAfter(now);
 }
