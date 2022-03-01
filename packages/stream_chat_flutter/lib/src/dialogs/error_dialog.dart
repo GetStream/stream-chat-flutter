@@ -1,4 +1,5 @@
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:fluent_ui/fluent_ui.dart' as fui;
+import 'package:flutter/material.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_dialog.dart';
@@ -38,9 +39,9 @@ class ErrorDialog extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         windowsActions: [
-          Button(
-            style: ButtonStyle(
-              backgroundColor: ButtonState.all(
+          fui.Button(
+            style: fui.ButtonStyle(
+              backgroundColor: fui.ButtonState.all(
                 StreamChatTheme.of(context).colorTheme.accentPrimary,
               ),
             ),
@@ -48,5 +49,15 @@ class ErrorDialog extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
+        title: titleText ?? context.translations.somethingWentWrongError,
+        linuxActions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(context.translations.okLabel),
+          ),
+        ],
+        child: Text(
+          messageText ?? context.translations.operationCouldNotBeCompletedText,
+        ),
       );
 }
