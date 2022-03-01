@@ -25,7 +25,7 @@ class ErrorDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) => PlatformDialog(
         appIcon: const FlutterLogo(),
-        title: Text(
+        titleWidget: Text(
           titleText ?? context.translations.somethingWentWrongError,
         ),
         message: Text(
@@ -37,7 +37,7 @@ class ErrorDialog extends StatelessWidget {
           child: Text(context.translations.okLabel),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: [
+        windowsActions: [
           Button(
             style: ButtonStyle(
               backgroundColor: ButtonState.all(

@@ -49,6 +49,7 @@ dependencies:
   video_player: ^2.1.0
   video_thumbnail: ^0.4.3
   visibility_detector: ^0.2.0
+  yaru_widgets: ^1.0.6
 
 flutter:
   assets:

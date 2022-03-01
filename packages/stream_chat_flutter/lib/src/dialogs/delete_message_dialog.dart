@@ -14,7 +14,7 @@ class DeleteMessageDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PlatformDialog(
-        title: Text(context.translations.deleteMessageLabel),
+        titleWidget: Text(context.translations.deleteMessageLabel),
         appIcon: const FlutterLogo(),
         message: Text(context.translations.deleteMessageQuestion),
         primaryButton: PushButton(
@@ -29,7 +29,7 @@ class DeleteMessageDialog extends StatelessWidget {
           child: Text(context.translations.cancelLabel),
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        actions: [
+        windowsActions: [
           Button(
             child: Text(context.translations.cancelLabel),
             onPressed: () => Navigator.of(context).pop(false),

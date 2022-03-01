@@ -1,56 +1,21 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/desktop_widget_builder.dart';
+import 'package:yaru_widgets/yaru_widgets.dart';
 
-/*class PlatformDialog extends StatefulWidget {
-  const PlatformDialog.macOS({
-    Key? key,
-    required Widget appIcon,
-    required Widget title,
-    required Widget message,
-    required Widget primaryButton,
-    Widget? secondaryButton,
-    bool horizontalActions = true,
-    Widget? suppress,
-  }) : super(key: key);
-
-  const PlatformDialog.windows({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  State<PlatformDialog> createState() => _PlatformDialogState();
-}
-
-class _PlatformDialogState extends State<PlatformDialog> {
-  @override
-  Widget build(BuildContext context) {
-    return DesktopWidgetBuilder(
-      macOS: (context, child) => MacosAlertDialog(
-        key: widget.key,
-        appIcon: appIcon,
-        title: title,
-        message: message,
-        primaryButton: primaryButton,
-      ),
-      windows: (context, child) => ContentDialog(
-        key: widget.key,
-        title: title,
-        content: content,
-        actions: [],
-        backgroundDismiss: backgroundDismiss,
-        constraints: constraints,
-        style: style,
-      ),
-    );
-  }
-}*/
-
+/// A Dialog that adapts itself to the visual style of whichever desktop
+/// platform an application is being executed on.
 ///
+/// This widget makes use of the [DesktopWidgetBuilder] to build widgets only
+/// for the specified platform.
+///
+/// On macOS, a [MacosAlertDialog] will be built. On Windows, a [ContentDialog]
+/// will be built. On Linux, a [YaruAlertDialog] will be built.
 class PlatformDialog extends StatelessWidget {
-  ///
+  /// Builds a [PlatformDialog].
   const PlatformDialog({
     Key? key,
+    this.titleWidget,
     this.title,
     this.appIcon,
     this.message,
@@ -58,16 +23,29 @@ class PlatformDialog extends StatelessWidget {
     this.secondaryButton,
     this.horizontalActions = true,
     this.suppress,
-    this.actions,
+    this.windowsActions,
     this.backgroundDismiss = true,
     this.constraints = const BoxConstraints(maxWidth: 368),
     this.style,
+    this.child,
+    this.linuxActions,
+    this.height,
+    this.width,
+    this.closeIconData,
+    this.alignment,
+    this.titleTextAlign,
+    this.scrollable,
   }) : super(key: key);
 
   /// The title of the message being shown.
   ///
-  /// Can be shared across dialogs for macOS, Windows, and Linux.
-  final Widget? title;
+  /// Can be shared across dialogs for macOS and Windows.
+  final Widget? titleWidget;
+
+  /// The title of the message bring shown in Linux-style dialogs.
+  ///
+  /// Used ONLY for Linux dialogs.
+  final String? title;
 
   /// The app icon to display in the dialog.
   ///
@@ -104,10 +82,10 @@ class PlatformDialog extends StatelessWidget {
   /// Should ONLY be used for macOS dialogs.
   final Widget? suppress;
 
-  /// The actions buttons in a Windows-style dialog.
+  /// The action buttons in a Windows-style dialog.
   ///
   /// Should ONLY be used for Windows dialogs.
-  final List<Widget>? actions;
+  final List<Widget>? windowsActions;
 
   /// Whether the dialog should be dismissible by clicking the background.
   ///
@@ -128,6 +106,59 @@ class PlatformDialog extends StatelessWidget {
   /// Should ONLY be used for Windows dialogs.
   final ContentDialogThemeData? style;
 
+  /// The content to display underneath the [title] in Linux dialogs.
+  ///
+  /// Use ONLY for Linux dialogs.
+  final Widget? child;
+
+  /// The action buttons in a Linux-style dialogs.
+  ///
+  /// Use ONLY for Linux dialogs
+  final List<Widget>? linuxActions;
+
+  /// The icon used in the dialogs 'close' button.
+  ///
+  /// Defaults to [Icons.close].
+  ///
+  /// Used ONLY for Linux dialogs.
+  final IconData? closeIconData;
+
+  /// How to align a Linux dialog on the screen.
+  ///
+  /// If null, then [DialogTheme.alignment] is used. If that is also null, the
+  /// default is [Alignment.center].
+  ///
+  /// Used ONLY for Linux dialogs.
+  final AlignmentGeometry? alignment;
+
+  /// The optional width of a Linux dialog.
+  ///
+  /// Constrains all children with the same width.
+  ///
+  /// Used ONLY for Linux dialogs.
+  final double? width;
+
+  /// The optional height of a Linux dialog.
+  ///
+  /// Can be used to limit the height of a [SingleChildScrollView] used as
+  /// the [child].
+  ///
+  /// Used ONLY for Linux dialogs.
+  final double? height;
+
+  /// The [TextAlign] used for the [YaruDialogTitle].
+  ///
+  /// [YaruAlertDialog]s use [YaruDialogTitle] as their title widgets.
+  /// This [TextAlign] is used there.
+  ///
+  /// Used ONLY for Linux dialogs.
+  final TextAlign? titleTextAlign;
+
+  /// Whether to make [YaruAlertDialog]'s underlying [AlertDialog] scrollable.
+  ///
+  /// Used ONLY for Linux dialogs.
+  final bool? scrollable;
+
   @override
   Widget build(BuildContext context) {
     final isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
@@ -137,7 +168,7 @@ class PlatformDialog extends StatelessWidget {
         child: MacosAlertDialog(
           key: key,
           appIcon: appIcon!,
-          title: title!,
+          title: titleWidget!,
           message: message!,
           primaryButton: primaryButton!,
           secondaryButton: secondaryButton,
@@ -149,13 +180,24 @@ class PlatformDialog extends StatelessWidget {
         data: isDark ? ThemeData.dark() : ThemeData.light(),
         child: ContentDialog(
           key: key,
-          title: title,
+          title: titleWidget,
           content: message,
-          actions: actions,
+          actions: windowsActions,
           backgroundDismiss: backgroundDismiss!,
           constraints: constraints!,
           style: style,
         ),
+      ),
+      linux: (context, _) => YaruAlertDialog(
+        title: title!,
+        actions: linuxActions,
+        height: height,
+        width: width,
+        alignment: alignment,
+        closeIconData: closeIconData,
+        titleTextAlign: titleTextAlign,
+        scrollable: scrollable,
+        child: child!,
       ),
     );
   }
