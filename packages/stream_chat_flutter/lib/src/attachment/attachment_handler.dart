@@ -121,6 +121,20 @@ class DesktopAttachmentHandler extends AttachmentHandler {
     return attachments;
   }
 
+  /// Uploads files received via drag 'n drop.
+  ///
+  /// No need to open the native file system in this instance.
+  Future<List<Attachment>> uploadViaDragNDrop(List<XFile> files) async {
+    final attachments = <Attachment>[];
+    for (final file in files) {
+      final attachment = await _createAttachmentFromXFile(file);
+      if (attachment != null) {
+        attachments.add(attachment);
+      }
+    }
+    return attachments;
+  }
+
   /// Creates an [Attachment] from an [XFile] that is selected by a desktop
   /// user in their native file system.
   Future<Attachment?> _createAttachmentFromXFile(XFile file) async {

@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -371,6 +372,8 @@ class MessageInputState extends State<MessageInput> {
   bool get _hasQuotedMessage => widget.quotedMessage != null;
 
   bool get _messageIsPresent => textEditingController.text.trim().isNotEmpty;
+
+  BoxBorder? _draggingBorder;
 
   @override
   void initState() {
@@ -745,56 +748,113 @@ class MessageInputState extends State<MessageInput> {
         (widget.actionsLocation != ActionsLocation.left || _commandEnabled
             ? const EdgeInsets.only(left: 8)
             : EdgeInsets.zero);
+    final _desktopAttachmentHandler = DesktopAttachmentHandler(
+      maxAttachmentSize: widget.maxAttachmentSize,
+      compressedVideoQuality: widget.compressedVideoQuality,
+      compressedVideoFrameRate: widget.compressedVideoFrameRate,
+    );
+
     return Expanded(
-      child: Container(
-        clipBehavior: Clip.hardEdge,
-        margin: margin,
-        decoration: BoxDecoration(
-          borderRadius: _messageInputTheme.borderRadius,
-          gradient: _focusNode.hasFocus
-              ? _messageInputTheme.activeBorderGradient
-              : _messageInputTheme.idleBorderGradient,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(1.5),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: _messageInputTheme.borderRadius,
-              color: _messageInputTheme.inputBackgroundColor,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildReplyToMessage(),
-                _buildAttachments(),
-                LimitedBox(
-                  maxHeight: widget.maxHeight,
-                  child: KeyboardShortcutRunner(
-                    onEnterKeypress: sendMessage,
-                    onEscapeKeypress: () {
-                      if (_hasQuotedMessage &&
-                          textEditingController.text.isEmpty) {
-                        widget.onQuotedMessageCleared?.call();
-                      }
-                    },
-                    child: TextField(
-                      key: const Key('messageInputText'),
-                      enabled: _inputEnabled,
-                      maxLines: null,
-                      onSubmitted: (_) => sendMessage(),
-                      keyboardType: widget.keyboardType,
-                      controller: textEditingController,
-                      focusNode: _focusNode,
-                      style: _messageInputTheme.inputTextStyle,
-                      autofocus: widget.autofocus,
-                      textAlignVertical: TextAlignVertical.center,
-                      decoration: _getInputDecoration(context),
-                      textCapitalization: TextCapitalization.sentences,
+      child: DropTarget(
+        onDragDone: (details) {
+          _desktopAttachmentHandler
+              .uploadViaDragNDrop(details.files)
+              .then((attachments) {
+            if (attachments.isNotEmpty) {
+              setState(() => _addAttachments(attachments));
+            }
+          }).catchError((error) {
+            // TODO(Groovin): show the error in a desktop-appropriate manner
+            if (error.runtimeType == FileSystemException) {
+              switch (error.message) {
+                case 'Could not read bytes from file':
+                  _showErrorAlert(
+                    context.translations.couldNotReadBytesFromFileError,
+                  );
+                  break;
+                case 'File size too large after compression and exceeds maximum '
+                    'attachment size':
+                  _showErrorAlert(
+                    context.translations.fileTooLargeAfterCompressionError(
+                      widget.maxAttachmentSize / (1024 * 1024),
+                    ),
+                  );
+                  break;
+                case 'File size exceeds maximum attachment size':
+                  _showErrorAlert(context.translations.fileTooLargeError(
+                    widget.maxAttachmentSize / (1024 * 1024),
+                  ));
+                  break;
+                default:
+                  _showErrorAlert(
+                    context.translations.genericErrorText,
+                  );
+                  break;
+              }
+            }
+          });
+        },
+        onDragEntered: (details) {
+          setState(() {
+            _draggingBorder = Border.all(
+              color: _streamChatTheme.colorTheme.accentPrimary,
+            );
+          });
+        },
+        onDragExited: (details) {
+          setState(() => _draggingBorder = null);
+        },
+        child: Container(
+          clipBehavior: Clip.hardEdge,
+          margin: margin,
+          decoration: BoxDecoration(
+            borderRadius: _messageInputTheme.borderRadius,
+            gradient: _focusNode.hasFocus
+                ? _messageInputTheme.activeBorderGradient
+                : _messageInputTheme.idleBorderGradient,
+            border: _draggingBorder,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(1.5),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: _messageInputTheme.borderRadius,
+                color: _messageInputTheme.inputBackgroundColor,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildReplyToMessage(),
+                  _buildAttachments(),
+                  LimitedBox(
+                    maxHeight: widget.maxHeight,
+                    child: KeyboardShortcutRunner(
+                      onEnterKeypress: sendMessage,
+                      onEscapeKeypress: () {
+                        if (_hasQuotedMessage &&
+                            textEditingController.text.isEmpty) {
+                          widget.onQuotedMessageCleared?.call();
+                        }
+                      },
+                      child: TextField(
+                        key: const Key('messageInputText'),
+                        enabled: _inputEnabled,
+                        maxLines: null,
+                        onSubmitted: (_) => sendMessage(),
+                        keyboardType: widget.keyboardType,
+                        controller: textEditingController,
+                        focusNode: _focusNode,
+                        style: _messageInputTheme.inputTextStyle,
+                        autofocus: widget.autofocus,
+                        textAlignVertical: TextAlignVertical.center,
+                        decoration: _getInputDecoration(context),
+                        textCapitalization: TextCapitalization.sentences,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
