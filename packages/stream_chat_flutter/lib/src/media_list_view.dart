@@ -43,100 +43,100 @@ class _MediaListViewState extends State<MediaListView> {
   int _currentPage = 0;
 
   @override
-  Widget build(BuildContext context) => LazyLoadScrollView(
-        onEndOfPage: () async => _getMedia(),
-        child: GridView.builder(
-          itemCount: _media.length,
-          controller: _scrollController,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-          ),
-          itemBuilder: (
-            context,
-            position,
-          ) {
-            final media = _media.elementAt(position);
-            final chatThemeData = StreamChatTheme.of(context);
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
-              child: InkWell(
-                onTap: () {
-                  if (widget.onSelect != null) {
-                    widget.onSelect!(media);
-                  }
-                },
-                child: Stack(
-                  children: [
-                    AspectRatio(
-                      aspectRatio: 1,
-                      child: FadeInImage(
-                        fadeInDuration: const Duration(milliseconds: 300),
-                        placeholder: const AssetImage(
-                          'images/placeholder.png',
-                          package: 'stream_chat_flutter',
-                        ),
-                        image: MediaThumbnailProvider(
-                          media: media,
-                        ),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: AnimatedOpacity(
-                          duration: const Duration(milliseconds: 300),
-                          opacity:
-                              widget.selectedIds.any((id) => id == media.id)
-                                  ? 1.0
-                                  : 0.0,
-                          child: Container(
-                            color: chatThemeData.colorTheme.textHighEmphasis
-                                .withOpacity(0.5),
-                            alignment: Alignment.topRight,
-                            padding: const EdgeInsets.only(
-                              top: 8,
-                              right: 8,
-                            ),
-                            child: CircleAvatar(
-                              radius: 12,
-                              backgroundColor: chatThemeData.colorTheme.barsBg,
-                              child: StreamSvgIcon.check(
-                                size: 24,
-                                color:
-                                    chatThemeData.colorTheme.textHighEmphasis,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (media.type == AssetType.video) ...[
-                      Positioned(
-                        left: 8,
-                        bottom: 10,
-                        child: SvgPicture.asset(
-                          'svgs/video_call_icon.svg',
-                          package: 'stream_chat_flutter',
-                        ),
-                      ),
-                      Positioned(
-                        right: 4,
-                        bottom: 10,
-                        child: Text(
-                          media.videoDuration.format(),
-                          style: TextStyle(
-                            color: chatThemeData.colorTheme.barsBg,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            );
-          },
+  Widget build(BuildContext context) {
+    return LazyLoadScrollView(
+      onEndOfPage: () async => _getMedia(),
+      child: GridView.builder(
+        itemCount: _media.length,
+        controller: _scrollController,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
         ),
-      );
+        itemBuilder: (
+          context,
+          position,
+        ) {
+          final media = _media.elementAt(position);
+          final chatThemeData = StreamChatTheme.of(context);
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
+            child: InkWell(
+              onTap: () {
+                if (widget.onSelect != null) {
+                  widget.onSelect!(media);
+                }
+              },
+              child: Stack(
+                children: [
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: FadeInImage(
+                      fadeInDuration: const Duration(milliseconds: 300),
+                      placeholder: const AssetImage(
+                        'images/placeholder.png',
+                        package: 'stream_chat_flutter',
+                      ),
+                      image: MediaThumbnailProvider(
+                        media: media,
+                      ),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 300),
+                        opacity: widget.selectedIds.any((id) => id == media.id)
+                            ? 1.0
+                            : 0.0,
+                        child: Container(
+                          color: chatThemeData.colorTheme.textHighEmphasis
+                              .withOpacity(0.5),
+                          alignment: Alignment.topRight,
+                          padding: const EdgeInsets.only(
+                            top: 8,
+                            right: 8,
+                          ),
+                          child: CircleAvatar(
+                            radius: 12,
+                            backgroundColor: chatThemeData.colorTheme.barsBg,
+                            child: StreamSvgIcon.check(
+                              size: 24,
+                              color: chatThemeData.colorTheme.textHighEmphasis,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (media.type == AssetType.video) ...[
+                    Positioned(
+                      left: 8,
+                      bottom: 10,
+                      child: SvgPicture.asset(
+                        'svgs/video_call_icon.svg',
+                        package: 'stream_chat_flutter',
+                      ),
+                    ),
+                    Positioned(
+                      right: 4,
+                      bottom: 10,
+                      child: Text(
+                        media.videoDuration.format(),
+                        style: TextStyle(
+                          color: chatThemeData.colorTheme.barsBg,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   @override
   void initState() {

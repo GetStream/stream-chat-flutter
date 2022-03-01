@@ -92,23 +92,25 @@ class _IconButton extends StatelessWidget {
   final Color? fillColor;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        height: iconSize,
-        width: iconSize,
-        child: RawMaterialButton(
-          elevation: 0,
-          highlightElevation: 0,
-          focusElevation: 0,
-          hoverElevation: 0,
-          onPressed: onPressed,
-          fillColor:
-              fillColor ?? StreamChatTheme.of(context).colorTheme.overlayDark,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: icon,
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: iconSize,
+      width: iconSize,
+      child: RawMaterialButton(
+        elevation: 0,
+        highlightElevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        onPressed: onPressed,
+        fillColor:
+            fillColor ?? StreamChatTheme.of(context).colorTheme.overlayDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-      );
+        child: icon,
+      ),
+    );
+  }
 }
 
 class _PreparingState extends StatelessWidget {
@@ -242,14 +244,16 @@ class _FailedState extends StatelessWidget {
 
 class _SuccessState extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Align(
-        alignment: Alignment.topRight,
-        child: CircleAvatar(
-          backgroundColor: StreamChatTheme.of(context).colorTheme.overlayDark,
-          maxRadius: 12,
-          child: StreamSvgIcon.check(
-            color: StreamChatTheme.of(context).colorTheme.barsBg,
-          ),
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: CircleAvatar(
+        backgroundColor: StreamChatTheme.of(context).colorTheme.overlayDark,
+        maxRadius: 12,
+        child: StreamSvgIcon.check(
+          color: StreamChatTheme.of(context).colorTheme.barsBg,
         ),
-      );
+      ),
+    );
+  }
 }

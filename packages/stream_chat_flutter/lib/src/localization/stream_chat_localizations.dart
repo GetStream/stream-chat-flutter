@@ -28,9 +28,10 @@ abstract class StreamChatLocalizations implements Translations {
   /// ```dart
   /// tooltip: StreamChatLocalizations.of(context).streamChatLabel,
   /// ```
-  static StreamChatLocalizations? of(BuildContext context) =>
-      Localizations.of<StreamChatLocalizations>(
-        context,
-        StreamChatLocalizations,
-      );
+  static StreamChatLocalizations? of(BuildContext context) {
+    return Localizations.of<StreamChatLocalizations>(
+      context,
+      StreamChatLocalizations,
+    );
+  }
 }

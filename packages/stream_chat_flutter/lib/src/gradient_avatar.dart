@@ -24,18 +24,20 @@ class GradientAvatar extends StatefulWidget {
 
 class _GradientAvatarState extends State<GradientAvatar> {
   @override
-  Widget build(BuildContext context) => Center(
-        child: RepaintBoundary(
-          child: CustomPaint(
-            painter: DemoPainter(
-              widget.userId,
-              getShortenedName(widget.name),
-              DefaultTextStyle.of(context).style.fontFamily ?? 'Roboto',
-            ),
-            child: const SizedBox.expand(),
+  Widget build(BuildContext context) {
+    return Center(
+      child: RepaintBoundary(
+        child: CustomPaint(
+          painter: DemoPainter(
+            widget.userId,
+            getShortenedName(widget.name),
+            DefaultTextStyle.of(context).style.fontFamily ?? 'Roboto',
           ),
+          child: const SizedBox.expand(),
         ),
-      );
+      ),
+    );
+  }
 
   String getShortenedName(String name) {
     var parts = name.split(' ')..removeWhere((e) => e == '');

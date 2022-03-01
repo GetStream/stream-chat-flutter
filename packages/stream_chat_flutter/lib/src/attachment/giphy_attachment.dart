@@ -257,78 +257,77 @@ class GiphyAttachment extends AttachmentWidget {
     if (res != null) onReturnAction?.call(res);
   }
 
-  Widget _buildSentAttachment(BuildContext context, String imageUrl) =>
-      SizedBox(
-        child: GestureDetector(
-          onTap: () {
-            if (onAttachmentTap != null) {
-              onAttachmentTap?.call();
-            } else {
-              _onImageTap(context);
-            }
-          },
-          child: Stack(
-            children: [
-              CachedNetworkImage(
-                height: size?.height,
-                width: size?.width,
-                placeholder: (_, __) {
-                  final image = Image.asset(
-                    'images/placeholder.png',
-                    fit: BoxFit.cover,
-                    package: 'stream_chat_flutter',
-                  );
+  Widget _buildSentAttachment(BuildContext context, String imageUrl) {
+    return SizedBox(
+      child: GestureDetector(
+        onTap: () {
+          if (onAttachmentTap != null) {
+            onAttachmentTap?.call();
+          } else {
+            _onImageTap(context);
+          }
+        },
+        child: Stack(
+          children: [
+            CachedNetworkImage(
+              height: size?.height,
+              width: size?.width,
+              placeholder: (_, __) {
+                final image = Image.asset(
+                  'images/placeholder.png',
+                  fit: BoxFit.cover,
+                  package: 'stream_chat_flutter',
+                );
 
-                  final colorTheme = StreamChatTheme.of(context).colorTheme;
-                  return Shimmer.fromColors(
-                    baseColor: colorTheme.disabled,
-                    highlightColor: colorTheme.inputBg,
-                    child: image,
-                  );
-                },
-                imageUrl: imageUrl,
-                errorWidget: (context, url, error) =>
-                    AttachmentError(size: size),
-                fit: BoxFit.cover,
-              ),
-              Positioned(
-                bottom: 8,
-                left: 8,
-                child: Material(
-                  color: StreamChatTheme.of(context)
-                      .colorTheme
-                      .textHighEmphasis
-                      .withOpacity(0.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                final colorTheme = StreamChatTheme.of(context).colorTheme;
+                return Shimmer.fromColors(
+                  baseColor: colorTheme.disabled,
+                  highlightColor: colorTheme.inputBg,
+                  child: image,
+                );
+              },
+              imageUrl: imageUrl,
+              errorWidget: (context, url, error) => AttachmentError(size: size),
+              fit: BoxFit.cover,
+            ),
+            Positioned(
+              bottom: 8,
+              left: 8,
+              child: Material(
+                color: StreamChatTheme.of(context)
+                    .colorTheme
+                    .textHighEmphasis
+                    .withOpacity(0.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    child: Row(
-                      children: [
-                        StreamSvgIcon.lightning(
+                  child: Row(
+                    children: [
+                      StreamSvgIcon.lightning(
+                        color: StreamChatTheme.of(context).colorTheme.barsBg,
+                        size: 16,
+                      ),
+                      Text(
+                        context.translations.giphyLabel.toUpperCase(),
+                        style: TextStyle(
                           color: StreamChatTheme.of(context).colorTheme.barsBg,
-                          size: 16,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
                         ),
-                        Text(
-                          context.translations.giphyLabel.toUpperCase(),
-                          style: TextStyle(
-                            color:
-                                StreamChatTheme.of(context).colorTheme.barsBg,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }

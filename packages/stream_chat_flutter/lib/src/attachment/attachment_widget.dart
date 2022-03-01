@@ -70,20 +70,20 @@ class AttachmentError extends StatelessWidget {
   final Size? size;
 
   @override
-  Widget build(BuildContext context) => Center(
-        child: Container(
-          width: size?.width,
-          height: size?.height,
-          color: StreamChatTheme.of(context)
-              .colorTheme
-              .accentError
-              .withOpacity(0.1),
-          child: Center(
-            child: Icon(
-              Icons.error_outline,
-              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-            ),
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: size?.width,
+        height: size?.height,
+        color:
+            StreamChatTheme.of(context).colorTheme.accentError.withOpacity(0.1),
+        child: Center(
+          child: Icon(
+            Icons.error_outline,
+            color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
           ),
         ),
-      );
+      ),
+    );
+  }
 }

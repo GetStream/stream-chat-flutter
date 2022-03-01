@@ -23,20 +23,22 @@ class KeyboardShortcutRunner extends StatelessWidget {
   final VoidCallback onEscapeKeypress;
 
   @override
-  Widget build(BuildContext context) => FocusableActionDetector(
-        autofocus: true,
-        shortcuts: {
-          sendMessageKeySet: SendMessageIntent(),
-          removeReplyKeySet: RemoveReplyIntent(),
-        },
-        actions: {
-          SendMessageIntent: CallbackAction(
-            onInvoke: (e) => onEnterKeypress.call(),
-          ),
-          RemoveReplyIntent: CallbackAction(
-            onInvoke: (e) => onEscapeKeypress.call(),
-          ),
-        },
-        child: child,
-      );
+  Widget build(BuildContext context) {
+    return FocusableActionDetector(
+      autofocus: true,
+      shortcuts: {
+        sendMessageKeySet: SendMessageIntent(),
+        removeReplyKeySet: RemoveReplyIntent(),
+      },
+      actions: {
+        SendMessageIntent: CallbackAction(
+          onInvoke: (e) => onEnterKeypress.call(),
+        ),
+        RemoveReplyIntent: CallbackAction(
+          onInvoke: (e) => onEscapeKeypress.call(),
+        ),
+      },
+      child: child,
+    );
+  }
 }

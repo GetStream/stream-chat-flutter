@@ -71,27 +71,30 @@ class AttachmentActionsModal extends StatelessWidget {
     bool? showSave,
     bool? showDelete,
     List<AttachmentAction>? customActions,
-  }) =>
-      AttachmentActionsModal(
-        key: key ?? this.key,
-        currentIndex: currentIndex ?? this.currentIndex,
-        message: message ?? this.message,
-        onShowMessage: onShowMessage ?? this.onShowMessage,
-        imageDownloader: imageDownloader ?? this.imageDownloader,
-        fileDownloader: fileDownloader ?? this.fileDownloader,
-        showReply: showReply ?? this.showReply,
-        showShowInChat: showShowInChat ?? this.showShowInChat,
-        showSave: showSave ?? this.showSave,
-        showDelete: showDelete ?? this.showDelete,
-        customActions: customActions ?? this.customActions,
-      );
+  }) {
+    return AttachmentActionsModal(
+      key: key ?? this.key,
+      currentIndex: currentIndex ?? this.currentIndex,
+      message: message ?? this.message,
+      onShowMessage: onShowMessage ?? this.onShowMessage,
+      imageDownloader: imageDownloader ?? this.imageDownloader,
+      fileDownloader: fileDownloader ?? this.fileDownloader,
+      showReply: showReply ?? this.showReply,
+      showShowInChat: showShowInChat ?? this.showShowInChat,
+      showSave: showSave ?? this.showSave,
+      showDelete: showDelete ?? this.showDelete,
+      customActions: customActions ?? this.customActions,
+    );
+  }
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () => Navigator.maybePop(context),
-        child: _buildPage(context),
-      );
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => Navigator.maybePop(context),
+      child: _buildPage(context),
+    );
+  }
 
   Widget _buildPage(BuildContext context) {
     final theme = StreamChatTheme.of(context);
@@ -256,30 +259,31 @@ class AttachmentActionsModal extends StatelessWidget {
     VoidCallback? onTap, {
     Color? color,
     Key? key,
-  }) =>
-      Material(
-        key: key,
-        color: StreamChatTheme.of(context).colorTheme.barsBg,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Row(
-              children: [
-                icon,
-                const SizedBox(width: 16),
-                Text(
-                  title,
-                  style: StreamChatTheme.of(context)
-                      .textTheme
-                      .body
-                      .copyWith(color: color),
-                ),
-              ],
-            ),
+  }) {
+    return Material(
+      key: key,
+      color: StreamChatTheme.of(context).colorTheme.barsBg,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: Row(
+            children: [
+              icon,
+              const SizedBox(width: 16),
+              Text(
+                title,
+                style: StreamChatTheme.of(context)
+                    .textTheme
+                    .body
+                    .copyWith(color: color),
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    );
+  }
 
   Widget _buildDownloadProgressDialog(
     BuildContext context,

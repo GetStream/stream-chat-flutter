@@ -22,27 +22,29 @@ class DeleteMessageButton extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-          child: Row(
-            children: [
-              StreamSvgIcon.delete(
-                color: Colors.red,
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+        child: Row(
+          children: [
+            StreamSvgIcon.delete(
+              color: Colors.red,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              context.translations.toggleDeleteRetryDeleteMessageText(
+                isDeleteFailed: isDeleteFailed,
               ),
-              const SizedBox(width: 16),
-              Text(
-                context.translations.toggleDeleteRetryDeleteMessageText(
-                  isDeleteFailed: isDeleteFailed,
-                ),
-                style: StreamChatTheme.of(context)
-                    .textTheme
-                    .body
-                    .copyWith(color: Colors.red),
-              ),
-            ],
-          ),
+              style: StreamChatTheme.of(context)
+                  .textTheme
+                  .body
+                  .copyWith(color: Colors.red),
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }

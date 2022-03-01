@@ -14,48 +14,50 @@ class DeleteMessageDialog extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => PlatformDialog(
-        titleWidget: Text(context.translations.deleteMessageLabel),
-        appIcon: const FlutterLogo(),
-        message: Text(context.translations.deleteMessageQuestion),
-        primaryButton: mui.PushButton(
-          color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-          buttonSize: mui.ButtonSize.large,
-          child: Text(context.translations.deleteLabel),
-          onPressed: () => Navigator.of(context).pop(true),
-        ),
-        secondaryButton: mui.PushButton(
-          color: mui.MacosColors.unemphasizedSelectedTextBackgroundColor,
-          buttonSize: mui.ButtonSize.large,
+  Widget build(BuildContext context) {
+    return PlatformDialog(
+      titleWidget: Text(context.translations.deleteMessageLabel),
+      appIcon: const FlutterLogo(),
+      message: Text(context.translations.deleteMessageQuestion),
+      primaryButton: mui.PushButton(
+        color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+        buttonSize: mui.ButtonSize.large,
+        child: Text(context.translations.deleteLabel),
+        onPressed: () => Navigator.of(context).pop(true),
+      ),
+      secondaryButton: mui.PushButton(
+        color: mui.MacosColors.unemphasizedSelectedTextBackgroundColor,
+        buttonSize: mui.ButtonSize.large,
+        child: Text(context.translations.cancelLabel),
+        onPressed: () => Navigator.of(context).pop(false),
+      ),
+      windowsActions: [
+        fui.Button(
           child: Text(context.translations.cancelLabel),
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        windowsActions: [
-          fui.Button(
-            child: Text(context.translations.cancelLabel),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          fui.Button(
-            style: fui.ButtonStyle(
-              backgroundColor: fui.ButtonState.all(
-                StreamChatTheme.of(context).colorTheme.accentPrimary,
-              ),
+        fui.Button(
+          style: fui.ButtonStyle(
+            backgroundColor: fui.ButtonState.all(
+              StreamChatTheme.of(context).colorTheme.accentPrimary,
             ),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(context.translations.deleteLabel),
           ),
-        ],
-        title: context.translations.deleteMessageLabel,
-        linuxActions: [
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(context.translations.cancelLabel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(context.translations.deleteLabel),
-          ),
-        ],
-        child: Text(context.translations.deleteMessageQuestion),
-      );
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(context.translations.deleteLabel),
+        ),
+      ],
+      title: context.translations.deleteMessageLabel,
+      linuxActions: [
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(context.translations.cancelLabel),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(context.translations.deleteLabel),
+        ),
+      ],
+      child: Text(context.translations.deleteMessageQuestion),
+    );
+  }
 }

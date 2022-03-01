@@ -131,41 +131,42 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onHorizontalDragStart: _handleDragStart,
-        onHorizontalDragUpdate: _handleDragUpdate,
-        onHorizontalDragEnd: _handleDragEnd,
-        behavior: HitTestBehavior.opaque,
-        child: Stack(
-          alignment: Alignment.center,
-          fit: StackFit.passthrough,
-          children: [
-            SlideTransition(
-              position: _iconTransitionAnimation,
-              child: Row(
-                children: [
-                  FadeTransition(
-                    opacity: _iconFadeAnimation,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color:
-                              StreamChatTheme.of(context).colorTheme.disabled,
-                        ),
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onHorizontalDragStart: _handleDragStart,
+      onHorizontalDragUpdate: _handleDragUpdate,
+      onHorizontalDragEnd: _handleDragEnd,
+      behavior: HitTestBehavior.opaque,
+      child: Stack(
+        alignment: Alignment.center,
+        fit: StackFit.passthrough,
+        children: [
+          SlideTransition(
+            position: _iconTransitionAnimation,
+            child: Row(
+              children: [
+                FadeTransition(
+                  opacity: _iconFadeAnimation,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: StreamChatTheme.of(context).colorTheme.disabled,
                       ),
-                      child: widget.backgroundIcon,
                     ),
+                    child: widget.backgroundIcon,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            SlideTransition(
-              position: _moveAnimation,
-              child: widget.child,
-            ),
-          ],
-        ),
-      );
+          ),
+          SlideTransition(
+            position: _moveAnimation,
+            child: widget.child,
+          ),
+        ],
+      ),
+    );
+  }
 }

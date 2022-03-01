@@ -17,16 +17,18 @@ class AttachmentButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) => IconButton(
-        icon: StreamSvgIcon.attach(
-          color: color,
-        ),
-        padding: const EdgeInsets.all(0),
-        constraints: const BoxConstraints.tightFor(
-          height: 24,
-          width: 24,
-        ),
-        splashRadius: 24,
-        onPressed: onPressed,
-      );
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: StreamSvgIcon.attach(
+        color: color,
+      ),
+      padding: const EdgeInsets.all(0),
+      constraints: const BoxConstraints.tightFor(
+        height: 24,
+        width: 24,
+      ),
+      splashRadius: 24,
+      onPressed: onPressed,
+    );
+  }
 }

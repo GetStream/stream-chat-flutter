@@ -101,54 +101,57 @@ class ChannelInfo extends StatelessWidget {
     );
   }
 
-  Widget _buildConnectingTitleState(BuildContext context) => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(
-            height: 16,
-            width: 16,
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
+  Widget _buildConnectingTitleState(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(
+          height: 16,
+          width: 16,
+          child: Center(
+            child: CircularProgressIndicator(),
           ),
-          const SizedBox(width: 10),
-          Text(
-            context.translations.searchingForNetworkText,
-            style: textStyle,
-          ),
-        ],
-      );
+        ),
+        const SizedBox(width: 10),
+        Text(
+          context.translations.searchingForNetworkText,
+          style: textStyle,
+        ),
+      ],
+    );
+  }
 
   Widget _buildDisconnectedTitleState(
     BuildContext context,
     StreamChatClient client,
-  ) =>
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            context.translations.offlineLabel,
-            style: textStyle,
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.all(0),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: const VisualDensity(
-                horizontal: VisualDensity.minimumDensity,
-                vertical: VisualDensity.minimumDensity,
-              ),
-            ),
-            onPressed: () => client
-              ..closeConnection()
-              ..openConnection(),
-            child: Text(
-              context.translations.tryAgainLabel,
-              style: textStyle?.copyWith(
-                color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-              ),
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          context.translations.offlineLabel,
+          style: textStyle,
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.all(0),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: const VisualDensity(
+              horizontal: VisualDensity.minimumDensity,
+              vertical: VisualDensity.minimumDensity,
             ),
           ),
-        ],
-      );
+          onPressed: () => client
+            ..closeConnection()
+            ..openConnection(),
+          child: Text(
+            context.translations.tryAgainLabel,
+            style: textStyle?.copyWith(
+              color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

@@ -351,12 +351,14 @@ class WrapAttachmentWidget extends StatelessWidget {
   final bool reverse;
 
   @override
-  Widget build(BuildContext context) => Material(
-        clipBehavior: Clip.hardEdge,
-        shape: attachmentShape,
-        type: MaterialType.transparency,
-        child: attachmentWidget,
-      );
+  Widget build(BuildContext context) {
+    return Material(
+      clipBehavior: Clip.hardEdge,
+      shape: attachmentShape,
+      type: MaterialType.transparency,
+      child: attachmentWidget,
+    );
+  }
 }
 
 /// Represents a 2-tuple, or pair.

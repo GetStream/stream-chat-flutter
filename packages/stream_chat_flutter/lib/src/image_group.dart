@@ -39,82 +39,84 @@ class ImageGroup extends StatelessWidget {
   final ShowMessageCallback? onShowMessage;
 
   @override
-  Widget build(BuildContext context) => ConstrainedBox(
-        constraints: BoxConstraints.loose(size),
-        child: Flex(
-          direction: Axis.vertical,
-          children: <Widget>[
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: BoxConstraints.loose(size),
+      child: Flex(
+        direction: Axis.vertical,
+        children: <Widget>[
+          Flexible(
+            fit: FlexFit.tight,
+            child: Flex(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              direction: Axis.horizontal,
+              children: [
+                Flexible(
+                  fit: FlexFit.tight,
+                  child: _buildImage(context, 0),
+                ),
+                Flexible(
+                  fit: FlexFit.tight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 2),
+                    child: _buildImage(context, 1),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (images.length >= 3)
             Flexible(
               fit: FlexFit.tight,
-              child: Flex(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                direction: Axis.horizontal,
-                children: [
-                  Flexible(
-                    fit: FlexFit.tight,
-                    child: _buildImage(context, 0),
-                  ),
-                  Flexible(
-                    fit: FlexFit.tight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 2),
-                      child: _buildImage(context, 1),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Flex(
+                  direction: Axis.horizontal,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Flexible(
+                      fit: FlexFit.tight,
+                      child: _buildImage(context, 2),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            if (images.length >= 3)
-              Flexible(
-                fit: FlexFit.tight,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Flex(
-                    direction: Axis.horizontal,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
+                    if (images.length >= 4)
                       Flexible(
                         fit: FlexFit.tight,
-                        child: _buildImage(context, 2),
-                      ),
-                      if (images.length >= 4)
-                        Flexible(
-                          fit: FlexFit.tight,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 2),
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: <Widget>[
-                                _buildImage(context, 3),
-                                if (images.length > 4)
-                                  Positioned.fill(
-                                    child: GestureDetector(
-                                      onTap: () => _onTap(context, 3),
-                                      child: Material(
-                                        color: Colors.black38,
-                                        child: Center(
-                                          child: Text(
-                                            '+ ${images.length - 4}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 26,
-                                            ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 2),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: <Widget>[
+                              _buildImage(context, 3),
+                              if (images.length > 4)
+                                Positioned.fill(
+                                  child: GestureDetector(
+                                    onTap: () => _onTap(context, 3),
+                                    child: Material(
+                                      color: Colors.black38,
+                                      child: Center(
+                                        child: Text(
+                                          '+ ${images.length - 4}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 26,
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-                              ],
-                            ),
+                                ),
+                            ],
                           ),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
               ),
-          ],
-        ),
-      );
+            ),
+        ],
+      ),
+    );
+  }
 
   void _onTap(
     BuildContext context,
@@ -144,21 +146,23 @@ class ImageGroup extends StatelessWidget {
     if (res != null) onReturnAction?.call(res);
   }
 
-  Widget _buildImage(BuildContext context, int index) => ContextMenuRegion(
-        onItemSelected: (item) {
-          item.onSelected?.call();
-        },
-        menuItems: [
-          DownloadMenuItem(
-            attachment: images[index],
-          ),
-        ],
-        child: ImageAttachment(
+  Widget _buildImage(BuildContext context, int index) {
+    return ContextMenuRegion(
+      onItemSelected: (item) {
+        item.onSelected?.call();
+      },
+      menuItems: [
+        DownloadMenuItem(
           attachment: images[index],
-          size: size,
-          message: message,
-          messageTheme: messageTheme,
-          onAttachmentTap: () => _onTap(context, index),
         ),
-      );
+      ],
+      child: ImageAttachment(
+        attachment: images[index],
+        size: size,
+        message: message,
+        messageTheme: messageTheme,
+        onAttachmentTap: () => _onTap(context, index),
+      ),
+    );
+  }
 }

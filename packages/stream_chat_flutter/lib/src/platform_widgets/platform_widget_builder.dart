@@ -40,9 +40,11 @@ class PlatformWidgetBuilder extends StatelessWidget {
   final PlatformTargetBuilder? web;
 
   @override
-  Widget build(BuildContext context) => PlatformWidget(
-        desktop: (context) => desktop?.call(context, child),
-        mobile: (context) => mobile?.call(context, child),
-        web: (context) => web?.call(context, child),
-      );
+  Widget build(BuildContext context) {
+    return PlatformWidget(
+      desktop: (context) => desktop?.call(context, child),
+      mobile: (context) => mobile?.call(context, child),
+      web: (context) => web?.call(context, child),
+    );
+  }
 }

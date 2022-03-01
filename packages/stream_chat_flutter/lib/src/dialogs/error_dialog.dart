@@ -24,40 +24,42 @@ class ErrorDialog extends StatelessWidget {
   final String? messageText;
 
   @override
-  Widget build(BuildContext context) => PlatformDialog(
-        appIcon: const FlutterLogo(),
-        titleWidget: Text(
-          titleText ?? context.translations.somethingWentWrongError,
-        ),
-        message: Text(
-          messageText ?? context.translations.operationCouldNotBeCompletedText,
-        ),
-        primaryButton: PushButton(
-          buttonSize: ButtonSize.large,
-          color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+  Widget build(BuildContext context) {
+    return PlatformDialog(
+      appIcon: const FlutterLogo(),
+      titleWidget: Text(
+        titleText ?? context.translations.somethingWentWrongError,
+      ),
+      message: Text(
+        messageText ?? context.translations.operationCouldNotBeCompletedText,
+      ),
+      primaryButton: PushButton(
+        buttonSize: ButtonSize.large,
+        color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+        child: Text(context.translations.okLabel),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      windowsActions: [
+        fui.Button(
+          style: fui.ButtonStyle(
+            backgroundColor: fui.ButtonState.all(
+              StreamChatTheme.of(context).colorTheme.accentPrimary,
+            ),
+          ),
           child: Text(context.translations.okLabel),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        windowsActions: [
-          fui.Button(
-            style: fui.ButtonStyle(
-              backgroundColor: fui.ButtonState.all(
-                StreamChatTheme.of(context).colorTheme.accentPrimary,
-              ),
-            ),
-            child: Text(context.translations.okLabel),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-        title: titleText ?? context.translations.somethingWentWrongError,
-        linuxActions: [
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.translations.okLabel),
-          ),
-        ],
-        child: Text(
-          messageText ?? context.translations.operationCouldNotBeCompletedText,
+      ],
+      title: titleText ?? context.translations.somethingWentWrongError,
+      linuxActions: [
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(context.translations.okLabel),
         ),
-      );
+      ],
+      child: Text(
+        messageText ?? context.translations.operationCouldNotBeCompletedText,
+      ),
+    );
+  }
 }

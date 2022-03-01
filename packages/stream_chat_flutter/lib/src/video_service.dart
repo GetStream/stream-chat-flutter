@@ -54,15 +54,16 @@ class _IVideoService {
     int maxWidth = 0,
     int timeMs = 0,
     int quality = 10,
-  }) =>
-      VideoThumbnail.thumbnailData(
-        video: video,
-        imageFormat: imageFormat,
-        maxHeight: maxHeight,
-        maxWidth: maxWidth,
-        timeMs: timeMs,
-        quality: quality,
-      );
+  }) {
+    return VideoThumbnail.thumbnailData(
+      video: video,
+      imageFormat: imageFormat,
+      maxHeight: maxHeight,
+      maxWidth: maxWidth,
+      timeMs: timeMs,
+      quality: quality,
+    );
+  }
 }
 
 /// Get instance of [_IVideoService]

@@ -41,9 +41,11 @@ class DesktopWidgetBuilder extends StatelessWidget {
   final DesktopTargetBuilder? linux;
 
   @override
-  Widget build(BuildContext context) => DesktopWidget(
-        macOS: (context) => macOS?.call(context, child),
-        windows: (context) => windows?.call(context, child),
-        linux: (context) => linux?.call(context, child),
-      );
+  Widget build(BuildContext context) {
+    return DesktopWidget(
+      macOS: (context) => macOS?.call(context, child),
+      windows: (context) => windows?.call(context, child),
+      linux: (context) => linux?.call(context, child),
+    );
+  }
 }

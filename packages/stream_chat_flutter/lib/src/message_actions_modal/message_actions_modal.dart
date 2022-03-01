@@ -261,22 +261,23 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   InkWell _buildCustomAction(
     BuildContext context,
     MessageAction messageAction,
-  ) =>
-      InkWell(
-        onTap: () {
-          messageAction.onTap?.call(widget.message);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-          child: Row(
-            children: [
-              messageAction.leading ?? const Offstage(),
-              const SizedBox(width: 16),
-              messageAction.title ?? const Offstage(),
-            ],
-          ),
+  ) {
+    return InkWell(
+      onTap: () {
+        messageAction.onTap?.call(widget.message);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+        child: Row(
+          children: [
+            messageAction.leading ?? const Offstage(),
+            const SizedBox(width: 16),
+            messageAction.title ?? const Offstage(),
+          ],
         ),
-      );
+      ),
+    );
+  }
 
   void _showFlagDialog() async {
     final client = StreamChat.of(context).client;
@@ -345,9 +346,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   /// Shows a "delete message" bottom sheet on mobile platforms.
   void _showDeleteBottomSheet() async {
-    setState(() {
-      _showActions = false;
-    });
+    setState(() => _showActions = false);
     final answer = await showConfirmationBottomSheet(
       context,
       title: context.translations.deleteMessageLabel,
@@ -368,9 +367,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         _showErrorAlertBottomSheet();
       }
     } else {
-      setState(() {
-        _showActions = true;
-      });
+      setState(() => _showActions = true);
     }
   }
 

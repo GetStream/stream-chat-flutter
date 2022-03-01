@@ -156,28 +156,29 @@ extension IconButtonX on IconButton {
     bool? enableFeedback,
     BoxConstraints? constraints,
     Widget? icon,
-  }) =>
-      IconButton(
-        iconSize: iconSize ?? this.iconSize,
-        visualDensity: visualDensity ?? this.visualDensity,
-        padding: padding ?? this.padding,
-        alignment: alignment ?? this.alignment,
-        splashRadius: splashRadius ?? this.splashRadius,
-        color: color ?? this.color,
-        focusColor: focusColor ?? this.focusColor,
-        hoverColor: hoverColor ?? this.hoverColor,
-        highlightColor: highlightColor ?? this.highlightColor,
-        splashColor: splashColor ?? this.splashColor,
-        disabledColor: disabledColor ?? this.disabledColor,
-        onPressed: onPressed ?? this.onPressed,
-        mouseCursor: mouseCursor ?? this.mouseCursor,
-        focusNode: focusNode ?? this.focusNode,
-        autofocus: autofocus ?? this.autofocus,
-        tooltip: tooltip ?? this.tooltip,
-        enableFeedback: enableFeedback ?? this.enableFeedback,
-        constraints: constraints ?? this.constraints,
-        icon: icon ?? this.icon,
-      );
+  }) {
+    return IconButton(
+      iconSize: iconSize ?? this.iconSize,
+      visualDensity: visualDensity ?? this.visualDensity,
+      padding: padding ?? this.padding,
+      alignment: alignment ?? this.alignment,
+      splashRadius: splashRadius ?? this.splashRadius,
+      color: color ?? this.color,
+      focusColor: focusColor ?? this.focusColor,
+      hoverColor: hoverColor ?? this.hoverColor,
+      highlightColor: highlightColor ?? this.highlightColor,
+      splashColor: splashColor ?? this.splashColor,
+      disabledColor: disabledColor ?? this.disabledColor,
+      onPressed: onPressed ?? this.onPressed,
+      mouseCursor: mouseCursor ?? this.mouseCursor,
+      focusNode: focusNode ?? this.focusNode,
+      autofocus: autofocus ?? this.autofocus,
+      tooltip: tooltip ?? this.tooltip,
+      enableFeedback: enableFeedback ?? this.enableFeedback,
+      constraints: constraints ?? this.constraints,
+      icon: icon ?? this.icon,
+    );
+  }
 }
 
 /// Extensions on List<User>
