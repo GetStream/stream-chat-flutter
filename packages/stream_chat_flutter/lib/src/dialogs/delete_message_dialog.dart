@@ -1,5 +1,6 @@
-import 'package:fluent_ui/fluent_ui.dart';
-import 'package:macos_ui/macos_ui.dart';
+import 'package:fluent_ui/fluent_ui.dart' as fui;
+import 'package:flutter/material.dart';
+import 'package:macos_ui/macos_ui.dart' as mui;
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -17,26 +18,26 @@ class DeleteMessageDialog extends StatelessWidget {
         titleWidget: Text(context.translations.deleteMessageLabel),
         appIcon: const FlutterLogo(),
         message: Text(context.translations.deleteMessageQuestion),
-        primaryButton: PushButton(
+        primaryButton: mui.PushButton(
           color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-          buttonSize: ButtonSize.large,
+          buttonSize: mui.ButtonSize.large,
           child: Text(context.translations.deleteLabel),
           onPressed: () => Navigator.of(context).pop(true),
         ),
-        secondaryButton: PushButton(
-          color: MacosColors.unemphasizedSelectedTextBackgroundColor,
-          buttonSize: ButtonSize.large,
+        secondaryButton: mui.PushButton(
+          color: mui.MacosColors.unemphasizedSelectedTextBackgroundColor,
+          buttonSize: mui.ButtonSize.large,
           child: Text(context.translations.cancelLabel),
           onPressed: () => Navigator.of(context).pop(false),
         ),
         windowsActions: [
-          Button(
+          fui.Button(
             child: Text(context.translations.cancelLabel),
             onPressed: () => Navigator.of(context).pop(false),
           ),
-          Button(
-            style: ButtonStyle(
-              backgroundColor: ButtonState.all(
+          fui.Button(
+            style: fui.ButtonStyle(
+              backgroundColor: fui.ButtonState.all(
                 StreamChatTheme.of(context).colorTheme.accentPrimary,
               ),
             ),
@@ -44,5 +45,13 @@ class DeleteMessageDialog extends StatelessWidget {
             child: Text(context.translations.deleteLabel),
           ),
         ],
+        title: context.translations.deleteMessageLabel,
+        linuxActions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(context.translations.deleteLabel),
+          ),
+        ],
+        child: Text(context.translations.deleteMessageQuestion),
       );
 }
