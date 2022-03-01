@@ -6,6 +6,11 @@
 - [[#805]](https://github.com/GetStream/stream-chat-flutter/issues/805) Updated chewie dependency version to 1.3.0
 - Fix `showScrollToBottom` in `MessageListView` not respecting false value.
 
+✅ Added
+
+- `centerTitle` and `elevation` properties to `ChannelHeader`.
+
+
 ## 3.4.0
 - Updated `stream_chat_flutter_core` dependency to [`3.4.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
