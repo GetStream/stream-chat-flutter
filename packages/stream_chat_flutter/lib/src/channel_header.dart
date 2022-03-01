@@ -61,9 +61,11 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
     this.showConnectionStateTile = false,
     this.title,
     this.subtitle,
+    this.centerTitle,
     this.leading,
     this.actions,
     this.backgroundColor,
+    this.elevation,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -92,6 +94,9 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Subtitle widget
   final Widget? subtitle;
 
+  // Whether the title should be centered
+  final bool? centerTitle;
+
   /// Leading widget
   final Widget? leading;
 
@@ -101,6 +106,9 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
 
   /// The background color for this [ChannelHeader].
   final Color? backgroundColor;
+
+  /// The elevation for this [ChannelHeader].
+  final double? elevation;
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +152,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             systemOverlayStyle: theme.brightness == Brightness.dark
                 ? SystemUiOverlayStyle.light
                 : SystemUiOverlayStyle.dark,
-            elevation: 1,
+            elevation: elevation ?? 1,
             leading: leadingWidget,
             backgroundColor: backgroundColor ?? channelHeaderTheme.color,
             actions: actions ??
@@ -162,7 +170,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ),
                 ],
-            centerTitle: true,
+            centerTitle: centerTitle ?? true,
             title: InkWell(
               onTap: onTitleTap,
               child: SizedBox(
