@@ -54,7 +54,7 @@ class PlatformDialog extends StatelessWidget {
 
   /// The message to be shown. Typically a [Text] widget.
   ///
-  /// Can be shared across dialogs for macOS, Windows, and Linux.
+  /// Can be shared across dialogs for macOS and Windows.
   final Widget? message;
 
   /// The primary action button in a macOS-style dialog.
