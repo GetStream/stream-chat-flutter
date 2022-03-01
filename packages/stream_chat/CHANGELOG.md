@@ -12,6 +12,7 @@
 - [[#897]](https://github.com/GetStream/stream-chat-flutter/issues/897) Fixed error type mis-match in `AuthInterceptor`.
 - [[#891]](https://github.com/GetStream/stream-chat-flutter/pull/891) Fixed reply counter for parent message not 
   updating correctly after deleting thread message.
+- Fix `channelState.copyWith` with respect to pinnedMessages.
 
 ## 3.4.0
 

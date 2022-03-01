@@ -65,24 +65,35 @@ class FullScreenMedia extends StatefulWidget {
 
 class _FullScreenMediaState extends State<FullScreenMedia>
     with SingleTickerProviderStateMixin {
-  bool _optionsShown = true;
-
-  late final AnimationController _controller;
+  late final AnimationController _animationController;
   late final PageController _pageController;
 
-  late int _currentPage;
+  late final _curvedAnimation = CurvedAnimation(
+    parent: _animationController,
+    curve: Curves.easeOut,
+    reverseCurve: Curves.easeIn,
+  );
+
+  final _opacityTween = Tween<double>(begin: 1, end: 0);
+  late final _opacityAnimation = _opacityTween.animate(
+    CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0, 0.6, curve: Curves.easeOut),
+    ),
+  );
+
+  late final ValueNotifier<int> _currentPage = ValueNotifier(widget.startIndex);
 
   final videoPackages = <String, VideoPackage>{};
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
     _pageController = PageController(initialPage: widget.startIndex);
-    _currentPage = widget.startIndex;
     for (var i = 0; i < widget.mediaAttachments.length; i++) {
       final attachment = widget.mediaAttachments[i];
       if (attachment.type != 'video') continue;
@@ -116,41 +127,38 @@ class _FullScreenMediaState extends State<FullScreenMedia>
         resizeToAvoidBottomInset: false,
         body: Stack(
           children: [
-            AnimatedBuilder(
-              animation: _controller,
-              builder: (context, snapshot) => PageView.builder(
-                controller: _pageController,
-                onPageChanged: (val) {
-                  setState(() {
-                    _currentPage = val;
-                  });
+            PageView.builder(
+              controller: _pageController,
+              onPageChanged: (val) {
+                _currentPage.value = val;
 
-                  if (videoPackages.isEmpty) {
-                    return;
+                if (videoPackages.isEmpty) {
+                  return;
+                }
+
+                final currentAttachment = widget.mediaAttachments[val];
+
+                for (final e in videoPackages.values) {
+                  if (e._attachment != currentAttachment) {
+                    e._chewieController?.pause();
                   }
+                }
 
-                  final currentAttachment = widget.mediaAttachments[val];
-
-                  for (final e in videoPackages.values) {
-                    if (e._attachment != currentAttachment) {
-                      e._chewieController?.pause();
-                    }
-                  }
-
-                  if (widget.autoplayVideos &&
-                      currentAttachment.type == 'video') {
-                    final controller = videoPackages[currentAttachment.id]!;
-                    controller._chewieController?.play();
-                  }
-                },
-                itemBuilder: (context, index) {
-                  final attachment = widget.mediaAttachments[index];
-                  if (attachment.type == 'image' ||
-                      attachment.type == 'giphy') {
-                    final imageUrl = attachment.imageUrl ??
-                        attachment.assetUrl ??
-                        attachment.thumbUrl;
-                    return PhotoView(
+                if (widget.autoplayVideos &&
+                    currentAttachment.type == 'video') {
+                  final controller = videoPackages[currentAttachment.id]!;
+                  controller._chewieController?.play();
+                }
+              },
+              itemBuilder: (context, index) {
+                final attachment = widget.mediaAttachments[index];
+                if (attachment.type == 'image' || attachment.type == 'giphy') {
+                  final imageUrl = attachment.imageUrl ??
+                      attachment.assetUrl ??
+                      attachment.thumbUrl;
+                  return AnimatedBuilder(
+                    animation: _curvedAnimation,
+                    builder: (context, child) => PhotoView(
                       loadingBuilder: (context, image) => const Offstage(),
                       imageProvider: (imageUrl == null &&
                               attachment.localUri != null &&
@@ -166,97 +174,91 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                         color: ColorTween(
                           begin: ChannelHeaderTheme.of(context).color,
                           end: Colors.black,
-                        ).lerp(_controller.value),
+                        ).lerp(_curvedAnimation.value),
                       ),
                       onTapUp: (a, b, c) {
-                        setState(() {
-                          _optionsShown = !_optionsShown;
-                        });
-                        if (_controller.isCompleted) {
-                          _controller.reverse();
+                        if (_animationController.isCompleted) {
+                          _animationController.reverse();
                         } else {
-                          _controller.forward();
+                          _animationController.forward();
                         }
                       },
-                    );
-                  } else if (attachment.type == 'video') {
-                    final controller = videoPackages[attachment.id]!;
-                    if (!controller.initialized) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    return InkWell(
-                      onTap: () {
-                        setState(() {
-                          _optionsShown = !_optionsShown;
-                        });
-                        if (_controller.isCompleted) {
-                          _controller.reverse();
-                        } else {
-                          _controller.forward();
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 50,
-                        ),
-                        child: Chewie(
-                          controller: controller.chewieController!,
-                        ),
-                      ),
+                    ),
+                  );
+                } else if (attachment.type == 'video') {
+                  final controller = videoPackages[attachment.id]!;
+                  if (!controller.initialized) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
                     );
                   }
-                  return Container();
-                },
-                itemCount: widget.mediaAttachments.length,
-              ),
-            ),
-            AnimatedOpacity(
-              opacity: _optionsShown ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GalleryHeader(
-                    userName: widget.userName,
-                    sentAt: context.translations.sentAtText(
-                      date: widget.message.createdAt,
-                      time: widget.message.createdAt,
+                  return InkWell(
+                    onTap: () {
+                      if (_animationController.isCompleted) {
+                        _animationController.reverse();
+                      } else {
+                        _animationController.forward();
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 50,
+                      ),
+                      child: Chewie(
+                        controller: controller.chewieController!,
+                      ),
                     ),
-                    onBackPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    message: widget.message,
-                    currentIndex: _currentPage,
-                    onShowMessage: () {
-                      widget.onShowMessage?.call(
-                        widget.message,
-                        StreamChannel.of(context).channel,
-                      );
-                    },
-                    attachmentActionsModalBuilder:
-                        widget.attachmentActionsModalBuilder,
-                  ),
-                  if (!widget.message.isEphemeral)
-                    GalleryFooter(
-                      currentPage: _currentPage,
-                      totalPages: widget.mediaAttachments.length,
-                      mediaAttachments: widget.mediaAttachments,
+                  );
+                }
+                return const SizedBox();
+              },
+              itemCount: widget.mediaAttachments.length,
+            ),
+            FadeTransition(
+              opacity: _opacityAnimation,
+              child: ValueListenableBuilder<int>(
+                valueListenable: _currentPage,
+                builder: (context, value, child) => Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GalleryHeader(
+                      userName: widget.userName,
+                      sentAt: context.translations.sentAtText(
+                        date: widget.message.createdAt,
+                        time: widget.message.createdAt,
+                      ),
+                      onBackPressed: () {
+                        Navigator.of(context).pop();
+                      },
                       message: widget.message,
-                      mediaSelectedCallBack: (val) {
-                        setState(() {
-                          _currentPage = val;
+                      currentIndex: value,
+                      onShowMessage: () {
+                        widget.onShowMessage?.call(
+                          widget.message,
+                          StreamChannel.of(context).channel,
+                        );
+                      },
+                      attachmentActionsModalBuilder:
+                          widget.attachmentActionsModalBuilder,
+                    ),
+                    if (!widget.message.isEphemeral)
+                      GalleryFooter(
+                        currentPage: value,
+                        totalPages: widget.mediaAttachments.length,
+                        mediaAttachments: widget.mediaAttachments,
+                        message: widget.message,
+                        mediaSelectedCallBack: (val) {
+                          _currentPage.value = val;
                           _pageController.animateToPage(
                             val,
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeInOut,
                           );
                           Navigator.pop(context);
-                        });
-                      },
-                    ),
-                ],
+                        },
+                      ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -264,9 +266,11 @@ class _FullScreenMediaState extends State<FullScreenMedia>
       );
 
   @override
-  void dispose() async {
+  void dispose() {
+    _animationController.dispose();
+    _pageController.dispose();
     for (final package in videoPackages.values) {
-      await package.dispose();
+      package.dispose();
     }
     super.dispose();
   }

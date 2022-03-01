@@ -56,7 +56,7 @@ class ChannelState {
     ChannelModel? channel,
     List<Message>? messages,
     List<Member>? members,
-    List<Message>? pinnedMessages,
+    List<Message> pinnedMessages = _emptyPinnedMessages,
     int? watcherCount,
     List<User>? watchers,
     List<Read>? read,
@@ -69,7 +69,7 @@ class ChannelState {
         // FIXME: Use non-nullable by default instead of empty list.
         pinnedMessages: pinnedMessages == _emptyPinnedMessages
             ? this.pinnedMessages
-            : pinnedMessages ?? _emptyPinnedMessages,
+            : pinnedMessages,
         watcherCount: watcherCount ?? this.watcherCount,
         watchers: watchers ?? this.watchers,
         read: read ?? this.read,
