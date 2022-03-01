@@ -14,6 +14,7 @@ dependencies:
   characters: ^1.1.0
   chewie: ^1.3.0
   collection: ^1.15.0
+  desktop_drop: ^0.3.2
   diacritic: ^0.1.3
   dio: ^4.0.0
   ezanimation: ^0.6.0
