@@ -48,6 +48,10 @@ class DeleteMessageDialog extends StatelessWidget {
         title: context.translations.deleteMessageLabel,
         linuxActions: [
           ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(context.translations.cancelLabel),
+          ),
+          ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(context.translations.deleteLabel),
           ),
