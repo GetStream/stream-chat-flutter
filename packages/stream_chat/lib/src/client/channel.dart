@@ -643,13 +643,18 @@ class Channel {
 
   /// Deletes the [message] from the channel.
   Future<EmptyResponse> deleteMessage(Message message, {bool? hard}) async {
+    final hardDelete = hard ?? false;
+
     // Directly deleting the local messages which are not yet sent to server
     if (message.status == MessageSendingStatus.sending ||
         message.status == MessageSendingStatus.failed) {
-      state!.updateMessage(message.copyWith(
-        type: 'deleted',
-        status: MessageSendingStatus.sent,
-      ));
+      state!.deleteMessage(
+        message.copyWith(
+          type: 'deleted',
+          status: MessageSendingStatus.sent,
+        ),
+        hardDelete: hardDelete,
+      );
 
       // Removing the attachments upload completer to stop the `sendMessage`
       // waiting for attachments to complete.
@@ -667,11 +672,14 @@ class Channel {
         deletedAt: message.deletedAt ?? DateTime.now(),
       );
 
-      state?.updateMessage(message);
+      state?.deleteMessage(message, hardDelete: hardDelete);
 
       final response = await _client.deleteMessage(message.id, hard: hard);
 
-      state?.updateMessage(message.copyWith(status: MessageSendingStatus.sent));
+      state?.deleteMessage(
+        message.copyWith(status: MessageSendingStatus.sent),
+        hardDelete: hardDelete,
+      );
 
       return response;
     } catch (e) {
@@ -1826,25 +1834,31 @@ class ChannelClientState {
     final parentId = message.parentId;
     // i.e. it's a thread message, Remove it
     if (parentId != null) {
-      if (!threads.containsKey(parentId)) {
-        return;
-      }
+      final newThreads = {...threads};
+      // Early return in case the thread is not available
+      if (!newThreads.containsKey(parentId)) return;
 
-      final newThreads = Map<String, List<Message>>.from(threads);
+      _threads = newThreads
+        ..update(
+          parentId,
+          (messages) => messages..removeWhere((e) => e.id == message.id),
+        );
 
-      newThreads[parentId] = [
-        ...newThreads[parentId]!..removeWhere((e) => e.id == message.id),
-      ];
-
-      _threads = newThreads;
-      return;
+      // Early return if the thread message is not shown in channel.
+      if (message.showInChannel == false) return;
     }
 
-    // Remove regular message
+    // Remove regular message, thread message shown in channel
     final allMessages = [...messages];
     _channelState = _channelState.copyWith(
       messages: allMessages..removeWhere((e) => e.id == message.id),
     );
+  }
+
+  /// Removes/Updates the [message] based on the [hardDelete] value.
+  void deleteMessage(Message message, {bool hardDelete = false}) {
+    if (hardDelete) return removeMessage(message);
+    return updateMessage(message);
   }
 
   void _listenReadEvents() {
