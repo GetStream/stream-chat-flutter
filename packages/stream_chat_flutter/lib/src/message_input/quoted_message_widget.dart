@@ -49,13 +49,15 @@ class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
   }
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        height: widget.size.height,
-        width: widget.size.width,
-        child: _controller.value.isInitialized
-            ? VideoPlayer(_controller)
-            : const CircularProgressIndicator(),
-      );
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: widget.size.height,
+      width: widget.size.width,
+      child: _controller.value.isInitialized
+          ? VideoPlayer(_controller)
+          : const CircularProgressIndicator(),
+    );
+  }
 }
 
 ///
@@ -248,60 +250,74 @@ class QuotedMessageWidget extends StatelessWidget {
     );
   }
 
-  ShapeBorder _getDefaultShape(BuildContext context) => RoundedRectangleBorder(
-        side: const BorderSide(width: 0, color: Colors.transparent),
-        borderRadius: BorderRadius.circular(8),
-      );
+  ShapeBorder _getDefaultShape(BuildContext context) {
+    return RoundedRectangleBorder(
+      side: const BorderSide(width: 0, color: Colors.transparent),
+      borderRadius: BorderRadius.circular(8),
+    );
+  }
 
-  Widget _buildUserAvatar() => UserAvatar(
-        user: message.user!,
-        constraints: const BoxConstraints.tightFor(
-          height: 24,
-          width: 24,
-        ),
-        showOnlineStatus: false,
-      );
+  Widget _buildUserAvatar() {
+    return UserAvatar(
+      user: message.user!,
+      constraints: const BoxConstraints.tightFor(
+        height: 24,
+        width: 24,
+      ),
+      showOnlineStatus: false,
+    );
+  }
 
   Map<String, QuotedMessageAttachmentThumbnailBuilder>
-      get _defaultAttachmentBuilder => {
-            'image': (_, attachment) => ImageAttachment(
-                  attachment: attachment,
-                  message: message,
-                  messageTheme: messageTheme,
-                  size: const Size(32, 32),
-                ),
-            'video': (_, attachment) => _VideoAttachmentThumbnail(
-                  key: ValueKey(attachment.assetUrl),
-                  attachment: attachment,
-                ),
-            'giphy': (_, attachment) {
-              const size = Size(32, 32);
-              return CachedNetworkImage(
-                height: size.height,
-                width: size.width,
-                placeholder: (_, __) => SizedBox(
-                  width: size.width,
-                  height: size.height,
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-                imageUrl: attachment.thumbUrl ??
-                    attachment.imageUrl ??
-                    attachment.assetUrl!,
-                errorWidget: (context, url, error) =>
-                    const AttachmentError(size: size),
-                fit: BoxFit.cover,
-              );
-            },
-            'file': (_, attachment) => SizedBox(
-                  height: 32,
-                  width: 32,
-                  child: getFileTypeImage(
-                    attachment.extraData['mime_type'] as String?,
-                  ),
-                ),
-          };
+      get _defaultAttachmentBuilder {
+    return {
+      'image': (_, attachment) {
+        return ImageAttachment(
+          attachment: attachment,
+          message: message,
+          messageTheme: messageTheme,
+          size: const Size(32, 32),
+        );
+      },
+      'video': (_, attachment) {
+        return _VideoAttachmentThumbnail(
+          key: ValueKey(attachment.assetUrl),
+          attachment: attachment,
+        );
+      },
+      'giphy': (_, attachment) {
+        const size = Size(32, 32);
+        return CachedNetworkImage(
+          height: size.height,
+          width: size.width,
+          placeholder: (_, __) {
+            return SizedBox(
+              width: size.width,
+              height: size.height,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          },
+          imageUrl: attachment.thumbUrl ??
+              attachment.imageUrl ??
+              attachment.assetUrl!,
+          errorWidget: (context, url, error) =>
+              const AttachmentError(size: size),
+          fit: BoxFit.cover,
+        );
+      },
+      'file': (_, attachment) {
+        return SizedBox(
+          height: 32,
+          width: 32,
+          child: getFileTypeImage(
+            attachment.extraData['mime_type'] as String?,
+          ),
+        );
+      },
+    };
+  }
 
   Color? _getBackgroundColor(BuildContext context) {
     if (_containsLinkAttachment) {
