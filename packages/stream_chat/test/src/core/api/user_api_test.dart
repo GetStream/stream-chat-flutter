@@ -82,4 +82,37 @@ void main() {
     verify(() => client.post(path, data: any(named: 'data'))).called(1);
     verifyNoMoreInteractions(client);
   });
+
+  test('partialUpdateUsers', () async {
+    const user = PartialUpdateUserRequest(
+      id: 'test-user-id',
+      set: {'color': 'yellow'},
+    );
+
+    const path = '/users';
+
+    final updatedUser = {user.id: User(id: user.id, extraData: user.set!)};
+
+    when(() => client.patch(path, data: {
+          'users': [user],
+        })).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'users':
+              updatedUser.map((key, value) => MapEntry(key, value.toJson()))
+        },
+      ),
+    );
+
+    final res = await userApi.partialUpdateUsers([user]);
+
+    expect(res, isNotNull);
+    expect(res.users.length, updatedUser.length);
+
+    verify(() => client.patch(path, data: {
+          'users': [user]
+        })).called(1);
+    verifyNoMoreInteractions(client);
+  });
 }
