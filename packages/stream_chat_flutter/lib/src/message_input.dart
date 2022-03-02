@@ -1507,9 +1507,7 @@ class MessageInputState extends State<MessageInput> {
     }
 
     if (!kIsWeb) {
-      setState(() {
-        _openFilePickerSection = true;
-      });
+      setState(() => _openFilePickerSection = true);
     } else {
       showModalBottomSheet(
         clipBehavior: Clip.hardEdge,
@@ -1537,7 +1535,7 @@ class MessageInputState extends State<MessageInput> {
               title: Text(context.translations.uploadAPhotoLabel),
               onTap: () {
                 pickFile(DefaultAttachmentTypes.image);
-                Navigator.pop(context);
+                Navigator.of(context).pop();
               },
             ),
             ListTile(
@@ -1545,7 +1543,7 @@ class MessageInputState extends State<MessageInput> {
               title: Text(context.translations.uploadAVideoLabel),
               onTap: () {
                 pickFile(DefaultAttachmentTypes.video);
-                Navigator.pop(context);
+                Navigator.of(context).pop();
               },
             ),
             ListTile(
@@ -1553,7 +1551,7 @@ class MessageInputState extends State<MessageInput> {
               title: Text(context.translations.uploadAFileLabel),
               onTap: () {
                 pickFile(DefaultAttachmentTypes.file);
-                Navigator.pop(context);
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -1593,6 +1591,8 @@ class MessageInputState extends State<MessageInput> {
 
   /// Pick a file from the device
   /// If [camera] is true then the camera will open
+  ///
+  /// Used only for mobile devices.
   void pickFile(
     DefaultAttachmentTypes fileType, {
     bool camera = false,
@@ -1772,9 +1772,7 @@ class MessageInputState extends State<MessageInput> {
     _attachments.clear();
     widget.onQuotedMessageCleared?.call();
 
-    setState(() {
-      _commandEnabled = false;
-    });
+    setState(() => _commandEnabled = false);
 
     Message message;
     if (widget.editMessage != null) {
@@ -1964,9 +1962,7 @@ class _PickerWidgetState extends State<_PickerWidget> {
         }
 
         return InkWell(
-          onTap: () async {
-            PhotoManager.openSetting();
-          },
+          onTap: () async => PhotoManager.openSetting(),
           child: Container(
             color: widget.streamChatTheme.colorTheme.inputBg,
             child: Column(
@@ -2013,22 +2009,24 @@ class _CountdownButton extends StatelessWidget {
   final int count;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: StreamChatTheme.of(context).colorTheme.disabled,
-            shape: BoxShape.circle,
-          ),
-          child: SizedBox(
-            height: 24,
-            width: 24,
-            child: Center(
-              child: Text('$count'),
-            ),
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: StreamChatTheme.of(context).colorTheme.disabled,
+          shape: BoxShape.circle,
+        ),
+        child: SizedBox(
+          height: 24,
+          width: 24,
+          child: Center(
+            child: Text('$count'),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 Message _replaceUserNameWithId(Message message) {
