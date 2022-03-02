@@ -21,6 +21,7 @@ import 'package:stream_chat_flutter/src/keyboard_shortcuts/keyboard_shortcut_run
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
+import 'package:stream_chat_flutter/src/message_input/file_upload_error_handler.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
@@ -700,34 +701,7 @@ class MessageInputState extends State<MessageInput> {
           setState(() => _addAttachments(attachments));
         }
       }).catchError((error) {
-        // TODO(Groovin): show the error in a desktop-appropriate manner
-        if (error.runtimeType == FileSystemException) {
-          switch (error.message) {
-            case 'Could not read bytes from file':
-              _showErrorAlert(
-                context.translations.couldNotReadBytesFromFileError,
-              );
-              break;
-            case 'File size too large after compression and exceeds maximum '
-                'attachment size':
-              _showErrorAlert(
-                context.translations.fileTooLargeAfterCompressionError(
-                  widget.maxAttachmentSize / (1024 * 1024),
-                ),
-              );
-              break;
-            case 'File size exceeds maximum attachment size':
-              _showErrorAlert(context.translations.fileTooLargeError(
-                widget.maxAttachmentSize / (1024 * 1024),
-              ));
-              break;
-            default:
-              _showErrorAlert(
-                context.translations.genericErrorText,
-              );
-              break;
-          }
-        }
+        handleFileUploadError(context, error, widget.maxAttachmentSize);
       });
     } else {
       _showCommandsOverlay = false;
@@ -764,34 +738,7 @@ class MessageInputState extends State<MessageInput> {
               setState(() => _addAttachments(attachments));
             }
           }).catchError((error) {
-            // TODO(Groovin): show the error in a desktop-appropriate manner
-            if (error.runtimeType == FileSystemException) {
-              switch (error.message) {
-                case 'Could not read bytes from file':
-                  _showErrorAlert(
-                    context.translations.couldNotReadBytesFromFileError,
-                  );
-                  break;
-                case 'File size too large after compression and exceeds maximum '
-                    'attachment size':
-                  _showErrorAlert(
-                    context.translations.fileTooLargeAfterCompressionError(
-                      widget.maxAttachmentSize / (1024 * 1024),
-                    ),
-                  );
-                  break;
-                case 'File size exceeds maximum attachment size':
-                  _showErrorAlert(context.translations.fileTooLargeError(
-                    widget.maxAttachmentSize / (1024 * 1024),
-                  ));
-                  break;
-                default:
-                  _showErrorAlert(
-                    context.translations.genericErrorText,
-                  );
-                  break;
-              }
-            }
+            handleFileUploadError(context, error, widget.maxAttachmentSize);
           });
         },
         onDragEntered: (details) {
