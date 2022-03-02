@@ -1,10 +1,8 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
+import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
@@ -111,19 +109,30 @@ class QuotedMessageWidget extends StatelessWidget {
   /// Defaults to `true`.
   final bool composing;
 
-  bool get _hasAttachments => message.attachments.isNotEmpty;
-
-  bool get _containsLinkAttachment =>
-      message.attachments.any((element) => element.titleLink != null);
-
-  bool get _containsText => message.text?.isNotEmpty == true;
-
   @override
   Widget build(BuildContext context) {
     final children = [
-      Flexible(child: _buildMessage(context)),
+      Flexible(
+        child: _QuotedMessage(
+          message: message,
+          textLimit: textLimit,
+          composing: composing,
+          onQuotedMessageClear: onQuotedMessageClear,
+          messageTheme: messageTheme,
+          showBorder: showBorder,
+          reverse: reverse,
+        ),
+      ),
       const SizedBox(width: 8),
-      if (message.user != null) _buildUserAvatar(),
+      if (message.user != null)
+        UserAvatar(
+          user: message.user!,
+          constraints: const BoxConstraints.tightFor(
+            height: 24,
+            width: 24,
+          ),
+          showOnlineStatus: false,
+        ),
     ];
     return Padding(
       padding: padding,
@@ -137,8 +146,42 @@ class QuotedMessageWidget extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildMessage(BuildContext context) {
+class _QuotedMessage extends StatelessWidget {
+  const _QuotedMessage({
+    Key? key,
+    required this.message,
+    required this.textLimit,
+    required this.composing,
+    required this.onQuotedMessageClear,
+    required this.messageTheme,
+    required this.showBorder,
+    required this.reverse,
+    this.attachmentThumbnailBuilders,
+  }) : super(key: key);
+
+  final Message message;
+  final int textLimit;
+  final bool composing;
+  final VoidCallback? onQuotedMessageClear;
+  final MessageThemeData messageTheme;
+  final bool showBorder;
+  final bool reverse;
+
+  /// Map that defines a thumbnail builder for an attachment type
+  final Map<String, QuotedMessageAttachmentThumbnailBuilder>?
+      attachmentThumbnailBuilders;
+
+  bool get _hasAttachments => message.attachments.isNotEmpty;
+
+  bool get _containsText => message.text?.isNotEmpty == true;
+
+  bool get _containsLinkAttachment =>
+      message.attachments.any((element) => element.titleLink != null);
+
+  @override
+  Widget build(BuildContext context) {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
     var msg = _hasAttachments && !_containsText
         ? message.copyWith(text: message.attachments.last.title ?? '')
@@ -148,15 +191,20 @@ class QuotedMessageWidget extends StatelessWidget {
     }
 
     final children = [
-      if ((kIsWeb ||
-              Platform.isMacOS ||
-              Platform.isWindows ||
-              Platform.isLinux) &&
-          composing)
-        ClearInputItemButton(
-          onTap: onQuotedMessageClear,
+      if (composing)
+        PlatformWidgetBuilder(
+          web: (context, child) => child,
+          desktop: (context, child) => child,
+          child: ClearInputItemButton(
+            onTap: onQuotedMessageClear,
+          ),
         ),
-      if (_hasAttachments) _parseAttachments(context),
+      if (_hasAttachments)
+        _ParseAttachments(
+          message: message,
+          messageTheme: messageTheme,
+          attachmentThumbnailBuilders: attachmentThumbnailBuilders,
+        ),
       if (msg.text!.isNotEmpty)
         Flexible(
           child: MessageText(
@@ -201,33 +249,39 @@ class QuotedMessageWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildUrlAttachment(Attachment attachment) {
-    const size = Size(32, 32);
-    if (attachment.thumbUrl != null) {
-      return Container(
-        height: size.height,
-        width: size.width,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            image: CachedNetworkImageProvider(
-              attachment.thumbUrl!,
-            ),
-          ),
-        ),
-      );
+  Color? _getBackgroundColor(BuildContext context) {
+    if (_containsLinkAttachment) {
+      return messageTheme.linkBackgroundColor;
     }
-    return const AttachmentError(size: size);
+    return messageTheme.messageBackgroundColor;
   }
+}
 
-  Widget _parseAttachments(BuildContext context) {
+class _ParseAttachments extends StatelessWidget {
+  const _ParseAttachments({
+    Key? key,
+    required this.message,
+    required this.messageTheme,
+    this.attachmentThumbnailBuilders,
+  }) : super(key: key);
+
+  final Message message;
+  final MessageThemeData messageTheme;
+  final Map<String, QuotedMessageAttachmentThumbnailBuilder>?
+      attachmentThumbnailBuilders;
+
+  bool get _containsLinkAttachment =>
+      message.attachments.any((element) => element.titleLink != null);
+
+  @override
+  Widget build(BuildContext context) {
     Widget child;
     Attachment attachment;
     if (_containsLinkAttachment) {
       attachment = message.attachments.firstWhere(
         (element) => element.titleLink != null,
       );
-      child = _buildUrlAttachment(attachment);
+      child = _UrlAttachment(attachment: attachment);
     } else {
       QuotedMessageAttachmentThumbnailBuilder? attachmentBuilder;
       attachment = message.attachments.last;
@@ -245,26 +299,13 @@ class QuotedMessageWidget extends StatelessWidget {
     return Material(
       clipBehavior: Clip.hardEdge,
       type: MaterialType.transparency,
-      shape: attachment.type == 'file' ? null : _getDefaultShape(context),
+      shape: attachment.type == 'file'
+          ? null
+          : RoundedRectangleBorder(
+              side: const BorderSide(width: 0, color: Colors.transparent),
+              borderRadius: BorderRadius.circular(8),
+            ),
       child: child,
-    );
-  }
-
-  ShapeBorder _getDefaultShape(BuildContext context) {
-    return RoundedRectangleBorder(
-      side: const BorderSide(width: 0, color: Colors.transparent),
-      borderRadius: BorderRadius.circular(8),
-    );
-  }
-
-  Widget _buildUserAvatar() {
-    return UserAvatar(
-      user: message.user!,
-      constraints: const BoxConstraints.tightFor(
-        height: 24,
-        width: 24,
-      ),
-      showOnlineStatus: false,
     );
   }
 
@@ -318,11 +359,33 @@ class QuotedMessageWidget extends StatelessWidget {
       },
     };
   }
+}
 
-  Color? _getBackgroundColor(BuildContext context) {
-    if (_containsLinkAttachment) {
-      return messageTheme.linkBackgroundColor;
+class _UrlAttachment extends StatelessWidget {
+  const _UrlAttachment({
+    Key? key,
+    required this.attachment,
+  }) : super(key: key);
+
+  final Attachment attachment;
+
+  @override
+  Widget build(BuildContext context) {
+    const size = Size(32, 32);
+    if (attachment.thumbUrl != null) {
+      return Container(
+        height: size.height,
+        width: size.width,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            fit: BoxFit.cover,
+            image: CachedNetworkImageProvider(
+              attachment.thumbUrl!,
+            ),
+          ),
+        ),
+      );
     }
-    return messageTheme.messageBackgroundColor;
+    return const AttachmentError(size: size);
   }
 }
