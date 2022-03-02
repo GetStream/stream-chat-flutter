@@ -5,13 +5,14 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// A platform-aware dialog that displays a generic error message to the user
-/// when something goes wrong.
+/// A platform-aware dialog that displays a message to a user. Falls back to a
+/// generic error message if no [titleText] and [messageText] are specified.
 ///
-/// Can be customized to show more specific error messages.
-class ErrorDialog extends StatelessWidget {
-  /// Builds an [ErrorDialog].
-  const ErrorDialog({
+/// If using this dialog to display the default generic error, be sure NOT to
+/// specify a [titleText] and [messageText] so the fallback strings can be used.
+class MessageDialog extends StatelessWidget {
+  /// Builds an [MessageDialog].
+  const MessageDialog({
     Key? key,
     this.titleText,
     this.messageText,

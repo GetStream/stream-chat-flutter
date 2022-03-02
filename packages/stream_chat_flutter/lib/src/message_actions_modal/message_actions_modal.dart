@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
-import 'package:stream_chat_flutter/src/dialogs/error_dialog.dart';
+import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/delete_message_button.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
@@ -387,7 +387,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       } catch (err) {
         showDialog(
           context: context,
-          builder: (_) => const ErrorDialog(),
+          builder: (_) => const MessageDialog(),
         );
       }
     } else {
