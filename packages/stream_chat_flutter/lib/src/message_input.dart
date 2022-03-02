@@ -435,9 +435,7 @@ class MessageInputState extends State<MessageInput> {
             if (details.delta.dy > 0) {
               _focusNode.unfocus();
               if (_openFilePickerSection) {
-                setState(() {
-                  _openFilePickerSection = false;
-                });
+                setState(() => _openFilePickerSection = false);
               }
             }
           },
@@ -509,79 +507,79 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Flex _buildTextField(BuildContext context) => Flex(
-        direction: Axis.horizontal,
-        children: <Widget>[
-          if (!_commandEnabled &&
-              widget.actionsLocation == ActionsLocation.left)
-            _buildExpandActionsButton(context),
-          _buildTextInput(context),
-          if (!_commandEnabled &&
-              widget.actionsLocation == ActionsLocation.right)
-            _buildExpandActionsButton(context),
-          if (widget.sendButtonLocation == SendButtonLocation.outside)
-            _animateSendButton(context),
-        ],
-      );
+  Flex _buildTextField(BuildContext context) {
+    return Flex(
+      direction: Axis.horizontal,
+      children: <Widget>[
+        if (!_commandEnabled && widget.actionsLocation == ActionsLocation.left)
+          _buildExpandActionsButton(context),
+        _buildTextInput(context),
+        if (!_commandEnabled && widget.actionsLocation == ActionsLocation.right)
+          _buildExpandActionsButton(context),
+        if (widget.sendButtonLocation == SendButtonLocation.outside)
+          _animateSendButton(context),
+      ],
+    );
+  }
 
-  Widget _buildDmCheckbox() => Row(
-        children: [
-          Container(
-            height: 16,
-            width: 16,
-            foregroundDecoration: BoxDecoration(
-              border: _sendAsDm
-                  ? null
-                  : Border.all(
-                      color: _streamChatTheme.colorTheme.textHighEmphasis
-                          .withOpacity(0.5),
-                      width: 2,
-                    ),
+  Widget _buildDmCheckbox() {
+    return Row(
+      children: [
+        Container(
+          height: 16,
+          width: 16,
+          foregroundDecoration: BoxDecoration(
+            border: _sendAsDm
+                ? null
+                : Border.all(
+                    color: _streamChatTheme.colorTheme.textHighEmphasis
+                        .withOpacity(0.5),
+                    width: 2,
+                  ),
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: Center(
+            child: Material(
               borderRadius: BorderRadius.circular(3),
-            ),
-            child: Center(
-              child: Material(
-                borderRadius: BorderRadius.circular(3),
-                color: _sendAsDm
-                    ? _streamChatTheme.colorTheme.accentPrimary
-                    : _streamChatTheme.colorTheme.barsBg,
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _sendAsDm = !_sendAsDm;
-                    });
-                  },
-                  child: AnimatedCrossFade(
-                    duration: const Duration(milliseconds: 300),
-                    reverseDuration: const Duration(milliseconds: 300),
-                    crossFadeState: _sendAsDm
-                        ? CrossFadeState.showFirst
-                        : CrossFadeState.showSecond,
-                    firstChild: StreamSvgIcon.check(
-                      size: 16,
-                      color: _streamChatTheme.colorTheme.barsBg,
-                    ),
-                    secondChild: const SizedBox(
-                      height: 16,
-                      width: 16,
-                    ),
+              color: _sendAsDm
+                  ? _streamChatTheme.colorTheme.accentPrimary
+                  : _streamChatTheme.colorTheme.barsBg,
+              child: InkWell(
+                onTap: () {
+                  setState(() => _sendAsDm = !_sendAsDm);
+                },
+                child: AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 300),
+                  reverseDuration: const Duration(milliseconds: 300),
+                  crossFadeState: _sendAsDm
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
+                  firstChild: StreamSvgIcon.check(
+                    size: 16,
+                    color: _streamChatTheme.colorTheme.barsBg,
+                  ),
+                  secondChild: const SizedBox(
+                    height: 16,
+                    width: 16,
                   ),
                 ),
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-              context.translations.alsoSendAsDirectMessageLabel,
-              style: _streamChatTheme.textTheme.footnote.copyWith(
-                color: _streamChatTheme.colorTheme.textHighEmphasis
-                    .withOpacity(0.5),
-              ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            context.translations.alsoSendAsDirectMessageLabel,
+            style: _streamChatTheme.textTheme.footnote.copyWith(
+              color:
+                  _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
           ),
-        ],
-      );
+        ),
+      ],
+    );
+  }
 
   Widget _animateSendButton(BuildContext context) {
     late Widget sendButton;
