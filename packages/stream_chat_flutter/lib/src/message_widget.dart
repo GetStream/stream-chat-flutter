@@ -9,7 +9,7 @@ import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.da
 import 'package:stream_chat_flutter/src/context_menu_items/pin_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/reply_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
-import 'package:stream_chat_flutter/src/dialogs/error_dialog.dart';
+import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/image_group.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
@@ -684,7 +684,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 } catch (e) {
                   showDialog(
                     context: context,
-                    builder: (_) => const ErrorDialog(),
+                    builder: (_) => const MessageDialog(),
                   );
                 }
               }
