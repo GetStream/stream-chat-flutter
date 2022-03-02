@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';
+import 'package:stream_chat_flutter/src/bottom_sheets/error_alert_sheet.dart';
 import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
@@ -1855,58 +1856,8 @@ class MessageInputState extends State<MessageInput> {
           topRight: Radius.circular(16),
         ),
       ),
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(
-            height: 26,
-          ),
-          StreamSvgIcon.error(
-            color: _streamChatTheme.colorTheme.accentError,
-            size: 24,
-          ),
-          const SizedBox(
-            height: 26,
-          ),
-          Text(
-            context.translations.somethingWentWrongError,
-            style: _streamChatTheme.textTheme.headlineBold,
-          ),
-          const SizedBox(
-            height: 7,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              description,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(
-            height: 36,
-          ),
-          Container(
-            color:
-                _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.08),
-            height: 1,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  context.translations.okLabel,
-                  style: _streamChatTheme.textTheme.bodyBold.copyWith(
-                    color: _streamChatTheme.colorTheme.accentPrimary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+      builder: (context) => ErrorAlertSheet(
+        errorDescription: context.translations.somethingWentWrongError,
       ),
     );
   }
