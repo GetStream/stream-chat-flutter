@@ -18,7 +18,7 @@ class DownloadMenuItem extends MenuItem {
   final Attachment attachment;
 
   @override
-  VoidCallback? get onPin => () async {
+  VoidCallback? get onSelected => () async {
         final attachmentHandler = DesktopAttachmentHandler();
         await attachmentHandler.download(attachment);
       };
