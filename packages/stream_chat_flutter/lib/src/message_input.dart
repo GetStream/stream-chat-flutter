@@ -22,6 +22,7 @@ import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
 import 'package:stream_chat_flutter/src/message_input/file_upload_error_handler.dart';
+import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
@@ -444,30 +445,12 @@ class MessageInputState extends State<MessageInput> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Ensure this doesn't show on web & desktop
-              if (_hasQuotedMessage && Platform.isAndroid || Platform.isIOS)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: StreamSvgIcon.reply(
-                          color: _streamChatTheme.colorTheme.disabled,
-                        ),
-                      ),
-                      Text(
-                        context.translations.replyToMessageLabel,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        icon: StreamSvgIcon.closeSmall(),
-                        onPressed: widget.onQuotedMessageCleared,
-                      ),
-                    ],
-                  ),
+              PlatformWidgetBuilder(
+                mobile: (context, child) => child,
+                child: QuotingMessageTopArea(
+                  onQuotedMessageCleared: widget.onQuotedMessageCleared,
                 ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: _buildTextField(context),
@@ -484,7 +467,6 @@ class MessageInputState extends State<MessageInput> {
               PlatformWidgetBuilder(
                 mobile: (context, child) => _buildFilePickerSection(),
               ),
-              //_buildFilePickerSection(),
             ],
           ),
         ),
