@@ -466,10 +466,11 @@ class MessageInputState extends State<MessageInput> {
                       border: _sendAsDm
                           ? null
                           : Border.all(
-                        color: _streamChatTheme.colorTheme.textHighEmphasis
-                            .withOpacity(0.5),
-                        width: 2,
-                      ),
+                              color: _streamChatTheme
+                                  .colorTheme.textHighEmphasis
+                                  .withOpacity(0.5),
+                              width: 2,
+                            ),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     color: _sendAsDm
@@ -1702,30 +1703,34 @@ class MessageInputState extends State<MessageInput> {
     });
   }
 
-  Widget _buildIdleSendButton(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: StreamSvgIcon(
-          assetName: _getIdleSendIcon(),
-          color: _messageInputTheme.sendButtonIdleColor,
-        ),
-      );
+  Widget _buildIdleSendButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: StreamSvgIcon(
+        assetName: _getIdleSendIcon(),
+        color: _messageInputTheme.sendButtonIdleColor,
+      ),
+    );
+  }
 
-  Widget _buildSendButton(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: IconButton(
-          onPressed: sendMessage,
-          padding: const EdgeInsets.all(0),
-          splashRadius: 24,
-          constraints: const BoxConstraints.tightFor(
-            height: 24,
-            width: 24,
-          ),
-          icon: StreamSvgIcon(
-            assetName: _getSendIcon(),
-            color: _messageInputTheme.sendButtonColor,
-          ),
+  Widget _buildSendButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: IconButton(
+        onPressed: sendMessage,
+        padding: const EdgeInsets.all(0),
+        splashRadius: 24,
+        constraints: const BoxConstraints.tightFor(
+          height: 24,
+          width: 24,
         ),
-      );
+        icon: StreamSvgIcon(
+          assetName: _getSendIcon(),
+          color: _messageInputTheme.sendButtonColor,
+        ),
+      ),
+    );
+  }
 
   String _getIdleSendIcon() {
     if (_commandEnabled) {
