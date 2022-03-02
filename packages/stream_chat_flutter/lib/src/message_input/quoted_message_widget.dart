@@ -8,7 +8,7 @@ import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.da
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
-/// Widget builder for quoted message attachment thumnail
+/// Widget builder for quoted message attachment thumbnail
 typedef QuotedMessageAttachmentThumbnailBuilder = Widget Function(
   BuildContext,
   Attachment,
