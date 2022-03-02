@@ -21,6 +21,7 @@ import 'package:stream_chat_flutter/src/keyboard_shortcuts/keyboard_shortcut_run
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
+import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/file_upload_error_handler.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
@@ -460,7 +461,27 @@ class MessageInputState extends State<MessageInput> {
                     left: 12,
                     bottom: 12,
                   ),
-                  child: _buildDmCheckbox(),
+                  child: DmCheckbox(
+                    foregroundDecoration: BoxDecoration(
+                      border: _sendAsDm
+                          ? null
+                          : Border.all(
+                        color: _streamChatTheme.colorTheme.textHighEmphasis
+                            .withOpacity(0.5),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    color: _sendAsDm
+                        ? _streamChatTheme.colorTheme.accentPrimary
+                        : _streamChatTheme.colorTheme.barsBg,
+                    onTap: () {
+                      setState(() => _sendAsDm = !_sendAsDm);
+                    },
+                    crossFadeState: _sendAsDm
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                  ),
                 ),
               PlatformWidgetBuilder(
                 mobile: (context, child) => _buildFilePickerSection(),
@@ -518,65 +539,6 @@ class MessageInputState extends State<MessageInput> {
           _buildExpandActionsButton(context),
         if (widget.sendButtonLocation == SendButtonLocation.outside)
           _animateSendButton(context),
-      ],
-    );
-  }
-
-  Widget _buildDmCheckbox() {
-    return Row(
-      children: [
-        Container(
-          height: 16,
-          width: 16,
-          foregroundDecoration: BoxDecoration(
-            border: _sendAsDm
-                ? null
-                : Border.all(
-                    color: _streamChatTheme.colorTheme.textHighEmphasis
-                        .withOpacity(0.5),
-                    width: 2,
-                  ),
-            borderRadius: BorderRadius.circular(3),
-          ),
-          child: Center(
-            child: Material(
-              borderRadius: BorderRadius.circular(3),
-              color: _sendAsDm
-                  ? _streamChatTheme.colorTheme.accentPrimary
-                  : _streamChatTheme.colorTheme.barsBg,
-              child: InkWell(
-                onTap: () {
-                  setState(() => _sendAsDm = !_sendAsDm);
-                },
-                child: AnimatedCrossFade(
-                  duration: const Duration(milliseconds: 300),
-                  reverseDuration: const Duration(milliseconds: 300),
-                  crossFadeState: _sendAsDm
-                      ? CrossFadeState.showFirst
-                      : CrossFadeState.showSecond,
-                  firstChild: StreamSvgIcon.check(
-                    size: 16,
-                    color: _streamChatTheme.colorTheme.barsBg,
-                  ),
-                  secondChild: const SizedBox(
-                    height: 16,
-                    width: 16,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text(
-            context.translations.alsoSendAsDirectMessageLabel,
-            style: _streamChatTheme.textTheme.footnote.copyWith(
-              color:
-                  _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
-            ),
-          ),
-        ),
       ],
     );
   }
