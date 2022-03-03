@@ -644,11 +644,12 @@ class _MessageWidgetState extends State<MessageWidget>
       menuItems: [
         // Ensure menu items don't show if message is deleted.
         if (!widget.message.isDeleted) ...[
-          ReplyContextMenuItem(
-            onClick: () {
-              widget.onReplyTap!(widget.message);
-            },
-          ),
+          if (widget.onReplyTap != null)
+            ReplyContextMenuItem(
+              onClick: () {
+                widget.onReplyTap!(widget.message);
+              },
+            ),
           PinMessageMenuItem(
             context: context,
             message: widget.message,
