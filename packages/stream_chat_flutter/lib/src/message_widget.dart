@@ -734,8 +734,8 @@ class _MessageWidgetState extends State<MessageWidget>
                 child: child,
               );
             },
-            desktop: (_, child) => child,
-            web: (_, child) => child,
+            desktop: (_, child) => MouseRegion(child: child),
+            web: (_, child) => MouseRegion(child: child),
             child: Padding(
               padding: widget.padding ?? const EdgeInsets.all(8),
               child: FractionallySizedBox(
