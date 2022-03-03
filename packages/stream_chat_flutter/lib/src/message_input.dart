@@ -1490,9 +1490,7 @@ class MessageInputState extends State<MessageInput> {
           await Future.delayed(const Duration(milliseconds: 300));
         }
 
-        setState(() {
-          _showCommandsOverlay = !_showCommandsOverlay;
-        });
+        setState(() => _showCommandsOverlay = !_showCommandsOverlay);
       },
     );
 
