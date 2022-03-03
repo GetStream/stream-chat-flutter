@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';
+import 'package:stream_chat_flutter/src/bottom_sheets/attachment_modal_sheet.dart';
 import 'package:stream_chat_flutter/src/bottom_sheets/error_alert_sheet.dart';
 import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
@@ -1519,42 +1520,10 @@ class MessageInputState extends State<MessageInput> {
         ),
         context: context,
         isScrollControlled: true,
-        builder: (_) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              title: Text(
-                context.translations.addAFileLabel,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.image),
-              title: Text(context.translations.uploadAPhotoLabel),
-              onTap: () {
-                pickFile(DefaultAttachmentTypes.image);
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.video_library),
-              title: Text(context.translations.uploadAVideoLabel),
-              onTap: () {
-                pickFile(DefaultAttachmentTypes.video);
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.insert_drive_file),
-              title: Text(context.translations.uploadAFileLabel),
-              onTap: () {
-                pickFile(DefaultAttachmentTypes.file);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+        builder: (_) => AttachmentModalSheet(
+          onFileTap: () => pickFile(DefaultAttachmentTypes.file),
+          onPhotoTap: () => pickFile(DefaultAttachmentTypes.image),
+          onVideoTap: () => pickFile(DefaultAttachmentTypes.video),
         ),
       );
     }
