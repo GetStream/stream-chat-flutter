@@ -21,6 +21,7 @@ import 'package:stream_chat_flutter/src/keyboard_shortcuts/keyboard_shortcut_run
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
+import 'package:stream_chat_flutter/src/message_input/countdown_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/file_upload_error_handler.dart';
 import 'package:stream_chat_flutter/src/message_input/input_attachments.dart';
@@ -547,7 +548,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _animateSendButton(BuildContext context) {
     late Widget sendButton;
     if (_timeOut > 0) {
-      sendButton = _CountdownButton(count: _timeOut);
+      sendButton = CountdownButton(count: _timeOut);
     } else if (!_messageIsPresent && _attachments.isEmpty) {
       sendButton = widget.idleSendButton ?? _buildIdleSendButton(context);
     } else {
@@ -1794,35 +1795,6 @@ class _PickerWidgetState extends State<_PickerWidget> {
           ),
         );
       },
-    );
-  }
-}
-
-class _CountdownButton extends StatelessWidget {
-  const _CountdownButton({
-    Key? key,
-    required this.count,
-  }) : super(key: key);
-
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: StreamChatTheme.of(context).colorTheme.disabled,
-          shape: BoxShape.circle,
-        ),
-        child: SizedBox(
-          height: 24,
-          width: 24,
-          child: Center(
-            child: Text('$count'),
-          ),
-        ),
-      ),
     );
   }
 }
