@@ -881,9 +881,7 @@ class MessageInputState extends State<MessageInput> {
       if (widget.showCommandsButton) actionsLength += 1;
       if (!widget.disableAttachments) actionsLength += 1;
 
-      setState(() {
-        _actionsShrunk = value.isNotEmpty && actionsLength > 1;
-      });
+      setState(() => _actionsShrunk = value.isNotEmpty && actionsLength > 1);
 
       _checkCommands(value, context);
       _checkMentions(value, context);
@@ -934,14 +932,10 @@ class MessageInputState extends State<MessageInput> {
             .last
             .contains('@')) {
       if (!_showMentionsOverlay) {
-        setState(() {
-          _showMentionsOverlay = true;
-        });
+        setState(() => _showMentionsOverlay = true);
       }
     } else if (_showMentionsOverlay) {
-      setState(() {
-        _showMentionsOverlay = false;
-      });
+      setState(() => _showMentionsOverlay = false);
     }
   }
 
@@ -953,14 +947,10 @@ class MessageInputState extends State<MessageInput> {
       if (command != null) {
         return _setCommand(command);
       } else if (!_showCommandsOverlay) {
-        setState(() {
-          _showCommandsOverlay = true;
-        });
+        setState(() => _showCommandsOverlay = true);
       }
     } else if (_showCommandsOverlay) {
-      setState(() {
-        _showCommandsOverlay = false;
-      });
+      setState(() => _showCommandsOverlay = false);
     }
   }
 
