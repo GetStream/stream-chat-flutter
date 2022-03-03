@@ -23,6 +23,7 @@ import 'package:stream_chat_flutter/src/keyboard_shortcuts/keyboard_shortcut_run
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
+import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/file_upload_error_handler.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
@@ -83,7 +84,7 @@ typedef UserMentionTileBuilder = Widget Function(
 /// use [defaultActionButton.copyWith] to easily customize it.
 typedef ActionButtonBuilder = Widget Function(
   BuildContext context,
-  IconButton defaultActionButton,
+  Widget defaultActionButton,
 );
 
 /// Location for actions on the [MessageInput]
@@ -1470,20 +1471,14 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildCommandButton(BuildContext context) {
     final s = textEditingController.text.trim();
-    final defaultButton = IconButton(
+    final defaultButton = CommandButton(
       icon: StreamSvgIcon.lightning(
         color: s.isNotEmpty
             ? _streamChatTheme.colorTheme.disabled
             : (_showCommandsOverlay
-                ? _messageInputTheme.actionButtonColor
-                : _messageInputTheme.actionButtonIdleColor),
+            ? _messageInputTheme.actionButtonColor
+            : _messageInputTheme.actionButtonIdleColor),
       ),
-      padding: const EdgeInsets.all(0),
-      constraints: const BoxConstraints.tightFor(
-        height: 24,
-        width: 24,
-      ),
-      splashRadius: 24,
       onPressed: () async {
         if (_openFilePickerSection) {
           setState(() => _openFilePickerSection = false);
