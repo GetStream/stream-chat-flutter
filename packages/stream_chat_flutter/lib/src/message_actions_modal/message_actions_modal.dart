@@ -5,7 +5,14 @@ import 'package:stream_chat_flutter/src/bottom_sheets/edit_message_sheet.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
 import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/message_actions_modal/ReplyButton.dart';
+import 'package:stream_chat_flutter/src/message_actions_modal/copy_message_button.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/delete_message_button.dart';
+import 'package:stream_chat_flutter/src/message_actions_modal/edit_message_button.dart';
+import 'package:stream_chat_flutter/src/message_actions_modal/flag_message_button.dart';
+import 'package:stream_chat_flutter/src/message_actions_modal/pin_message_button.dart';
+import 'package:stream_chat_flutter/src/message_actions_modal/resend_message_button.dart';
+import 'package:stream_chat_flutter/src/message_actions_modal/thread_reply_button.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -127,6 +134,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final numberOfReactions = streamChatThemeData.reactionIcons.length;
     final shiftFactor =
         numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
+    final channel = StreamChannel.of(context).channel;
 
     final child = Center(
       child: SingleChildScrollView(
@@ -176,18 +184,47 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                       children: [
                         if (widget.showReplyMessage &&
                             widget.message.status == MessageSendingStatus.sent)
-                          _buildReplyButton(context),
+                          ReplyButton(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              if (widget.onReplyTap != null) {
+                                widget.onReplyTap!(widget.message);
+                              }
+                            },
+                          ),
                         if (widget.showThreadReplyMessage &&
                             (widget.message.status ==
                                 MessageSendingStatus.sent) &&
                             widget.message.parentId == null)
-                          _buildThreadReplyButton(context),
+                          ThreadReplyButton(message: widget.message),
                         if (widget.showResendMessage)
-                          _buildResendMessage(context),
-                        if (widget.showEditMessage) _buildEditMessage(context),
-                        if (widget.showCopyMessage) _buildCopyButton(context),
-                        if (widget.showFlagButton) _buildFlagButton(context),
-                        if (widget.showPinButton) _buildPinButton(context),
+                          ResendMessageButton(
+                            message: widget.message,
+                            channel: channel,
+                          ),
+                        if (widget.showEditMessage)
+                          EditMessageButton(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              _showEditBottomSheet(context);
+                            },
+                          ),
+                        if (widget.showCopyMessage)
+                          CopyMessageButton(
+                            onTap: () {
+                              widget.onCopyTap?.call(widget.message);
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        if (widget.showFlagButton)
+                          FlagMessageButton(
+                            onTap: _showFlagDialog,
+                          ),
+                        if (widget.showPinButton)
+                          PinMessageButton(
+                            onTap: _togglePin,
+                            pinned: widget.message.pinned,
+                          ),
                         if (widget.showDeleteMessage)
                           PlatformWidgetBuilder(
                             mobile: (context, _) => DeleteMessageButton(
@@ -264,9 +301,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     MessageAction messageAction,
   ) {
     return InkWell(
-      onTap: () {
-        messageAction.onTap?.call(widget.message);
-      },
+      onTap: () => messageAction.onTap?.call(widget.message),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
@@ -333,7 +368,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   void _togglePin() async {
     final channel = StreamChannel.of(context).channel;
 
-    Navigator.pop(context);
+    Navigator.of(context).pop();
     try {
       if (!widget.message.pinned) {
         await channel.pinMessage(widget.message);
@@ -362,7 +397,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
     if (answer == true) {
       try {
-        Navigator.pop(context);
+        Navigator.of(context).pop();
         await StreamChannel.of(context).channel.deleteMessage(widget.message);
       } catch (err) {
         _showErrorAlertBottomSheet();
@@ -409,165 +444,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     );
   }
 
-  Widget _buildReplyButton(BuildContext context) {
-    final streamChatThemeData = StreamChatTheme.of(context);
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-        if (widget.onReplyTap != null) {
-          widget.onReplyTap!(widget.message);
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.reply(
-              color: streamChatThemeData.primaryIconTheme.color,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              context.translations.replyLabel,
-              style: streamChatThemeData.textTheme.body,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFlagButton(BuildContext context) {
-    final streamChatThemeData = StreamChatTheme.of(context);
-    return InkWell(
-      onTap: _showFlagDialog,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.iconFlag(
-              color: streamChatThemeData.primaryIconTheme.color,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              context.translations.flagMessageLabel,
-              style: streamChatThemeData.textTheme.body,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPinButton(BuildContext context) {
-    final streamChatThemeData = StreamChatTheme.of(context);
-    return InkWell(
-      onTap: _togglePin,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.pin(
-              color: streamChatThemeData.primaryIconTheme.color,
-              size: 24,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              context.translations.togglePinUnpinText(
-                pinned: widget.message.pinned,
-              ),
-              style: streamChatThemeData.textTheme.body,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCopyButton(BuildContext context) {
-    final streamChatThemeData = StreamChatTheme.of(context);
-    return InkWell(
-      onTap: () async {
-        widget.onCopyTap?.call(widget.message);
-        Navigator.pop(context);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.copy(
-              size: 24,
-              color: streamChatThemeData.primaryIconTheme.color,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              context.translations.copyMessageLabel,
-              style: streamChatThemeData.textTheme.body,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEditMessage(BuildContext context) {
-    final streamChatThemeData = StreamChatTheme.of(context);
-    return InkWell(
-      onTap: () async {
-        Navigator.pop(context);
-        _showEditBottomSheet(context);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.edit(
-              color: streamChatThemeData.primaryIconTheme.color,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              context.translations.editMessageLabel,
-              style: streamChatThemeData.textTheme.body,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResendMessage(BuildContext context) {
-    final isUpdateFailed =
-        widget.message.status == MessageSendingStatus.failed_update;
-    final streamChatThemeData = StreamChatTheme.of(context);
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-        final channel = StreamChannel.of(context).channel;
-        if (isUpdateFailed) {
-          channel.updateMessage(widget.message);
-        } else {
-          channel.sendMessage(widget.message);
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.circleUp(
-              color: streamChatThemeData.colorTheme.accentPrimary,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              context.translations.toggleResendOrResendEditedMessage(
-                isUpdateFailed: isUpdateFailed,
-              ),
-              style: streamChatThemeData.textTheme.body,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showEditBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     showModalBottomSheet(
@@ -585,33 +461,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       builder: (context) => EditMessageSheet(
         message: widget.message,
         channel: channel,
-      ),
-    );
-  }
-
-  Widget _buildThreadReplyButton(BuildContext context) {
-    final streamChatThemeData = StreamChatTheme.of(context);
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-        if (widget.onThreadReplyTap != null) {
-          widget.onThreadReplyTap!(widget.message);
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.thread(
-              color: streamChatThemeData.primaryIconTheme.color,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              context.translations.threadReplyLabel,
-              style: streamChatThemeData.textTheme.body,
-            ),
-          ],
-        ),
       ),
     );
   }
