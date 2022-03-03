@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart' hide ButtonStyle;
+import 'package:stream_chat_flutter/src/bottom_sheets/edit_message_sheet.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
 import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
@@ -569,7 +570,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   void _showEditBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-    final streamChatThemeData = StreamChatTheme.of(context);
     showModalBottomSheet(
       context: context,
       elevation: 2,
@@ -582,52 +582,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           topRight: Radius.circular(16),
         ),
       ),
-      builder: (context) => Padding(
-        padding: MediaQuery.of(context).viewInsets,
-        child: StreamChannel(
-          channel: channel,
-          child: Flex(
-            direction: Axis.vertical,
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: StreamSvgIcon.edit(
-                        color: streamChatThemeData.colorTheme.disabled,
-                      ),
-                    ),
-                    Text(
-                      context.translations.editMessageLabel,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      icon: StreamSvgIcon.closeSmall(),
-                      onPressed: Navigator.of(context).pop,
-                    ),
-                  ],
-                ),
-              ),
-              if (widget.editMessageInputBuilder != null)
-                widget.editMessageInputBuilder!(context, widget.message)
-              else
-                MessageInput(
-                  editMessage: widget.message,
-                  preMessageSending: (m) {
-                    FocusScope.of(context).unfocus();
-                    Navigator.pop(context);
-                    return m;
-                  },
-                ),
-            ],
-          ),
-        ),
+      builder: (context) => EditMessageSheet(
+        message: widget.message,
+        channel: channel,
       ),
     );
   }

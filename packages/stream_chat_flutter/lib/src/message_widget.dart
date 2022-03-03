@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:stream_chat_flutter/src/attachment/url_attachment.dart';
+import 'package:stream_chat_flutter/src/bottom_sheets/edit_message_sheet.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/copy_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/delete_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/edit_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/pin_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/reply_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
@@ -670,6 +672,26 @@ class _MessageWidgetState extends State<MessageWidget>
             CopyMessageMenuItem(
               message: widget.message,
             ),
+          EditMessageMenuItem(onClick: () {
+            showModalBottomSheet(
+              context: context,
+              elevation: 2,
+              clipBehavior: Clip.hardEdge,
+              isScrollControlled: true,
+              backgroundColor:
+                  MessageInputTheme.of(context).inputBackgroundColor,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+              ),
+              builder: (_) => EditMessageSheet(
+                message: widget.message,
+                channel: StreamChannel.of(context).channel,
+              ),
+            );
+          }),
           DeleteMessageMenuItem(
             onClick: () async {
               final deleted = await showDialog(
