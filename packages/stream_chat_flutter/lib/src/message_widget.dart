@@ -10,6 +10,8 @@ import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.da
 import 'package:stream_chat_flutter/src/context_menu_items/edit_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/pin_message_menu_item.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/reply_context_menu_item.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/resend_message_menu_item.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/thread_reply_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
 import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
@@ -651,6 +653,11 @@ class _MessageWidgetState extends State<MessageWidget>
                 widget.onReplyTap!(widget.message);
               },
             ),
+          if (widget.onThreadTap != null)
+            ThreadReplyMenuItem(
+              // NEEDS REVIEW ⚠️
+              onClick: () => widget.onThreadTap!(widget.message),
+            ),
           PinMessageMenuItem(
             context: context,
             message: widget.message,
@@ -694,6 +701,19 @@ class _MessageWidgetState extends State<MessageWidget>
               ),
             );
           }),
+          if (widget.showResendMessage && (isSendFailed || isUpdateFailed))
+            ResendMessageMenuItem(
+              onClick: () {
+                final isUpdateFailed =
+                    widget.message.status == MessageSendingStatus.failed_update;
+                final channel = StreamChannel.of(context).channel;
+                if (isUpdateFailed) {
+                  channel.updateMessage(widget.message);
+                } else {
+                  channel.sendMessage(widget.message);
+                }
+              },
+            ),
           DeleteMessageMenuItem(
             onClick: () async {
               final deleted = await showDialog(
