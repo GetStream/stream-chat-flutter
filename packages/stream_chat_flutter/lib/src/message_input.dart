@@ -7,7 +7,6 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';
@@ -18,13 +17,13 @@ import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
-import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 import 'package:stream_chat_flutter/src/message_input/countdown_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/file_upload_error_handler.dart';
 import 'package:stream_chat_flutter/src/message_input/input_attachments.dart';
+import 'package:stream_chat_flutter/src/message_input/picker_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/user_mentions_overlay.dart';
@@ -1114,7 +1113,7 @@ class MessageInputState extends State<MessageInput> {
                         color: _streamChatTheme.colorTheme.barsBg,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: _PickerWidget(
+                      child: PickerWidget(
                         filePickerIndex: _filePickerIndex,
                         streamChatTheme: _streamChatTheme,
                         containsFile: _attachmentContainsFile,
@@ -1688,114 +1687,6 @@ class MessageInputState extends State<MessageInput> {
       _initialized = true;
     }
     super.didChangeDependencies();
-  }
-}
-
-class _PickerWidget extends StatefulWidget {
-  const _PickerWidget({
-    Key? key,
-    required this.filePickerIndex,
-    required this.containsFile,
-    required this.selectedMedias,
-    required this.onAddMoreFilesClick,
-    required this.onMediaSelected,
-    required this.streamChatTheme,
-  }) : super(key: key);
-
-  final int filePickerIndex;
-  final bool containsFile;
-  final List<String> selectedMedias;
-  final void Function(DefaultAttachmentTypes) onAddMoreFilesClick;
-  final void Function(AssetEntity) onMediaSelected;
-  final StreamChatThemeData streamChatTheme;
-
-  @override
-  _PickerWidgetState createState() => _PickerWidgetState();
-}
-
-class _PickerWidgetState extends State<_PickerWidget> {
-  Future<bool>? requestPermission;
-
-  @override
-  void initState() {
-    super.initState();
-    requestPermission = PhotoManager.requestPermission();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.filePickerIndex != 0) {
-      return const Offstage();
-    }
-    return FutureBuilder<bool>(
-      future: requestPermission,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Offstage();
-        }
-
-        if (snapshot.data!) {
-          if (widget.containsFile) {
-            return GestureDetector(
-              onTap: () {
-                widget.onAddMoreFilesClick(DefaultAttachmentTypes.file);
-              },
-              child: Container(
-                constraints: const BoxConstraints.expand(),
-                color: widget.streamChatTheme.colorTheme.inputBg,
-                alignment: Alignment.center,
-                child: Text(
-                  context.translations.addMoreFilesLabel,
-                  style: TextStyle(
-                    color: widget.streamChatTheme.colorTheme.accentPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            );
-          }
-          return MediaListView(
-            selectedIds: widget.selectedMedias,
-            onSelect: widget.onMediaSelected,
-          );
-        }
-
-        return InkWell(
-          onTap: () async => PhotoManager.openSetting(),
-          child: Container(
-            color: widget.streamChatTheme.colorTheme.inputBg,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SvgPicture.asset(
-                  'svgs/icon_picture_empty_state.svg',
-                  package: 'stream_chat_flutter',
-                  height: 140,
-                  color: widget.streamChatTheme.colorTheme.disabled,
-                ),
-                Text(
-                  context.translations.enablePhotoAndVideoAccessMessage,
-                  style: widget.streamChatTheme.textTheme.body.copyWith(
-                    color: widget.streamChatTheme.colorTheme.textLowEmphasis,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 6),
-                Center(
-                  child: Text(
-                    context.translations.allowGalleryAccessMessage,
-                    style: widget.streamChatTheme.textTheme.bodyBold.copyWith(
-                      color: widget.streamChatTheme.colorTheme.accentPrimary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 }
 
