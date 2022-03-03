@@ -14,7 +14,10 @@ class InputAttachment extends StatelessWidget {
     required this.attachment,
   }) : super(key: key);
 
+  /// Map that defines a thumbnail builder for an attachment type.
   final Map<String, AttachmentThumbnailBuilder>? attachmentThumbnailBuilders;
+
+  /// The attachment to build.
   final Attachment attachment;
 
   @override

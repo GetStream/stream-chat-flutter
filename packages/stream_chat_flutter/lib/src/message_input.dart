@@ -26,6 +26,8 @@ import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.da
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/file_upload_error_handler.dart';
+import 'package:stream_chat_flutter/src/message_input/input_attachment.dart';
+import 'package:stream_chat_flutter/src/message_input/input_attachments.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
@@ -719,7 +721,11 @@ class MessageInputState extends State<MessageInput> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildReplyToMessage(),
-                  _buildAttachments(),
+                  InputAttachments(
+                    attachments: _attachments,
+                    attachmentThumbnailBuilders:
+                        widget.attachmentThumbnailBuilders,
+                  ),
                   LimitedBox(
                     maxHeight: widget.maxHeight,
                     child: KeyboardShortcutRunner(
@@ -1314,161 +1320,6 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Widget _buildAttachments() {
-    if (_attachments.isEmpty) return const Offstage();
-    final fileAttachments = _attachments.values
-        .where((it) => it.type == 'file')
-        .toList(growable: false);
-    final remainingAttachments = _attachments.values
-        .where((it) => it.type != 'file')
-        .toList(growable: false);
-    return Column(
-      children: [
-        if (fileAttachments.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-            child: LimitedBox(
-              maxHeight: 136,
-              child: ListView(
-                reverse: true,
-                shrinkWrap: true,
-                children: fileAttachments.reversed
-                    .map<Widget>(
-                      (e) => ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: FileAttachment(
-                          message: Message(
-                            status: MessageSendingStatus.sending,
-                          ), // dummy message
-                          attachment: e,
-                          size: Size(
-                            MediaQuery.of(context).size.width * 0.65,
-                            56,
-                          ),
-                          trailing: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: ClearInputItemButton(
-                              onTap: () {
-                                setState(() => _attachments.remove(e.id));
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .insertBetween(const SizedBox(height: 8)),
-              ),
-            ),
-          ),
-        if (remainingAttachments.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-            child: LimitedBox(
-              maxHeight: 104,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: remainingAttachments
-                    .map<Widget>(
-                      (attachment) => ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Stack(
-                          children: <Widget>[
-                            AspectRatio(
-                              aspectRatio: 1,
-                              child: SizedBox(
-                                height: 104,
-                                width: 104,
-                                child: _buildAttachment(attachment),
-                              ),
-                            ),
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: ClearInputItemButton(
-                                onTap: () {
-                                  setState(
-                                    () => _attachments.remove(attachment.id),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                    .insertBetween(const SizedBox(width: 8)),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildAttachment(Attachment attachment) {
-    if (widget.attachmentThumbnailBuilders?.containsKey(attachment.type) ==
-        true) {
-      return widget.attachmentThumbnailBuilders![attachment.type!]!(
-        context,
-        attachment,
-      );
-    }
-
-    switch (attachment.type) {
-      case 'image':
-      case 'giphy':
-        return attachment.file != null
-            ? Image.memory(
-                attachment.file!.bytes!,
-                fit: BoxFit.cover,
-                errorBuilder: (context, _, __) => Image.asset(
-                  'images/placeholder.png',
-                  package: 'stream_chat_flutter',
-                ),
-              )
-            : CachedNetworkImage(
-                imageUrl: attachment.imageUrl ??
-                    attachment.assetUrl ??
-                    attachment.thumbUrl!,
-                fit: BoxFit.cover,
-                errorWidget: (_, obj, trace) =>
-                    getFileTypeImage(attachment.extraData['other'] as String?),
-                placeholder: (context, _) => Shimmer.fromColors(
-                  baseColor: _streamChatTheme.colorTheme.disabled,
-                  highlightColor: _streamChatTheme.colorTheme.inputBg,
-                  child: Image.asset(
-                    'images/placeholder.png',
-                    fit: BoxFit.cover,
-                    package: 'stream_chat_flutter',
-                  ),
-                ),
-              );
-      case 'video':
-        return Stack(
-          children: [
-            VideoThumbnailImage(
-              height: 104,
-              width: 104,
-              video: (attachment.file?.path ?? attachment.assetUrl)!,
-              fit: BoxFit.cover,
-            ),
-            Positioned(
-              left: 8,
-              bottom: 10,
-              child: SvgPicture.asset(
-                'svgs/video_call_icon.svg',
-                package: 'stream_chat_flutter',
-              ),
-            ),
-          ],
-        );
-      default:
-        return Container(
-          color: Colors.black26,
-          child: const Icon(Icons.insert_drive_file),
-        );
-    }
-  }
-
   Widget _buildCommandButton(BuildContext context) {
     final s = textEditingController.text.trim();
     final defaultButton = CommandButton(
@@ -1476,8 +1327,8 @@ class MessageInputState extends State<MessageInput> {
         color: s.isNotEmpty
             ? _streamChatTheme.colorTheme.disabled
             : (_showCommandsOverlay
-            ? _messageInputTheme.actionButtonColor
-            : _messageInputTheme.actionButtonIdleColor),
+                ? _messageInputTheme.actionButtonColor
+                : _messageInputTheme.actionButtonIdleColor),
       ),
       onPressed: () async {
         if (_openFilePickerSection) {
