@@ -372,4 +372,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get slowModeOnLabel => 'Slow mode ON';
+
+  @override
+  String get downloadLabel => 'Download';
 }

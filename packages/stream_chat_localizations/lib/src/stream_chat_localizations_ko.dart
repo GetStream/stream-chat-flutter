@@ -358,4 +358,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   @override
   String attachmentLimitExceedError(int limit) =>
       '첨부 파일 제한 초과: $limit 이상의 첨부 파일을 추가할 수 없습니다';
+
+  @override
+  String get downloadLabel => '다운로드';
 }

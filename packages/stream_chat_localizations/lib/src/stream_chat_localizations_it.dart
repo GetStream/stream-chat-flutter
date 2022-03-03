@@ -374,4 +374,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get slowModeOnLabel => 'Slowmode attiva';
+
+  @override
+  String get downloadLabel => 'Scaricamento';
 }

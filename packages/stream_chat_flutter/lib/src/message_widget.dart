@@ -152,6 +152,7 @@ class MessageWidget extends StatefulWidget {
                 },
                 menuItems: [
                   DownloadMenuItem(
+                    title: context.translations.downloadLabel,
                     attachment: attachments[0],
                   ),
                 ],
@@ -188,6 +189,7 @@ class MessageWidget extends StatefulWidget {
                 },
                 menuItems: [
                   DownloadMenuItem(
+                    title: context.translations.downloadLabel,
                     attachment: attachments[0],
                   ),
                 ],
@@ -229,6 +231,7 @@ class MessageWidget extends StatefulWidget {
                 },
                 menuItems: [
                   DownloadMenuItem(
+                    title: context.translations.downloadLabel,
                     attachment: attachments[0],
                   ),
                 ],
@@ -642,12 +645,14 @@ class _MessageWidgetState extends State<MessageWidget>
         if (!widget.message.isDeleted) ...[
           if (widget.onReplyTap != null)
             ReplyContextMenuItem(
+              title: context.translations.replyLabel,
               onClick: () {
                 widget.onReplyTap!(widget.message);
               },
             ),
           if (widget.onThreadTap != null)
             ThreadReplyMenuItem(
+              title: context.translations.threadReplyLabel,
               // NEEDS REVIEW ⚠️
               onClick: () => widget.onThreadTap!(widget.message),
             ),
@@ -655,7 +660,9 @@ class _MessageWidgetState extends State<MessageWidget>
             context: context,
             message: widget.message,
             pinned: widget.message.pinned,
-            title: widget.message.pinned ? 'Unpin Message' : 'Pin Message',
+            title: context.translations.togglePinUnpinText(
+              pinned: widget.message.pinned,
+            ),
           ),
 
           // Ensure "Copy Message" menu doesn't show if:
@@ -664,6 +671,7 @@ class _MessageWidgetState extends State<MessageWidget>
           if (widget.message.attachments.isEmpty &&
               widget.message.text!.isNotEmpty)
             CopyMessageMenuItem(
+              title: context.translations.copyMessageLabel,
               message: widget.message,
             ),
           // Ensure "Copy Message menu does show if:
@@ -672,30 +680,38 @@ class _MessageWidgetState extends State<MessageWidget>
           if (widget.message.attachments.isNotEmpty &&
               widget.message.text!.isNotEmpty)
             CopyMessageMenuItem(
+              title: context.translations.copyMessageLabel,
               message: widget.message,
             ),
-          EditMessageMenuItem(onClick: () {
-            showModalBottomSheet(
-              context: context,
-              elevation: 2,
-              clipBehavior: Clip.hardEdge,
-              isScrollControlled: true,
-              backgroundColor:
-                  MessageInputTheme.of(context).inputBackgroundColor,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
+          EditMessageMenuItem(
+            title: context.translations.editMessageLabel,
+            onClick: () {
+              showModalBottomSheet(
+                context: context,
+                elevation: 2,
+                clipBehavior: Clip.hardEdge,
+                isScrollControlled: true,
+                backgroundColor:
+                    MessageInputTheme.of(context).inputBackgroundColor,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
                 ),
-              ),
-              builder: (_) => EditMessageSheet(
-                message: widget.message,
-                channel: StreamChannel.of(context).channel,
-              ),
-            );
-          }),
+                builder: (_) => EditMessageSheet(
+                  message: widget.message,
+                  channel: StreamChannel.of(context).channel,
+                ),
+              );
+            },
+          ),
           if (widget.showResendMessage && (isSendFailed || isUpdateFailed))
             ResendMessageMenuItem(
+              title: context.translations.toggleResendOrResendEditedMessage(
+                isUpdateFailed:
+                    widget.message.status == MessageSendingStatus.failed_update,
+              ),
               onClick: () {
                 final isUpdateFailed =
                     widget.message.status == MessageSendingStatus.failed_update;
@@ -708,6 +724,7 @@ class _MessageWidgetState extends State<MessageWidget>
               },
             ),
           DeleteMessageMenuItem(
+            title: context.translations.deleteMessageLabel,
             onClick: () async {
               final deleted = await showDialog(
                 context: context,

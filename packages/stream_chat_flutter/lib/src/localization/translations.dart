@@ -317,6 +317,9 @@ abstract class Translations {
   /// Label for "Attachment limit exceeded:
   /// it's not possible to add more than $limit attachments"
   String attachmentLimitExceedError(int limit);
+
+  /// The label for "Download"
+  String get downloadLabel;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -692,4 +695,7 @@ class DefaultTranslations implements Translations {
   @override
   String attachmentLimitExceedError(int limit) => """
 Attachment limit exceeded: it's not possible to add more than $limit attachments""";
+
+  @override
+  String get downloadLabel => 'Download';
 }
