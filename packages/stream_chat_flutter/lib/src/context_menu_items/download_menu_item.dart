@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:ui' show VoidCallback;
 
 import 'package:native_context_menu/native_context_menu.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';

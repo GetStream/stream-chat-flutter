@@ -1,4 +1,5 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:ui' show VoidCallback;
+
 import 'package:flutter/services.dart';
 import 'package:native_context_menu/native_context_menu.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
