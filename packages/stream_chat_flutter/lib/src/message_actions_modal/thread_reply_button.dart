@@ -24,7 +24,7 @@ class ThreadReplyButton extends StatelessWidget {
     final streamChatThemeData = StreamChatTheme.of(context);
     return InkWell(
       onTap: () {
-        Navigator.pop(context);
+        Navigator.of(context).pop();
         if (onThreadReplyTap != null) {
           onThreadReplyTap!(message);
         }
