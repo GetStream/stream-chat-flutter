@@ -17,9 +17,9 @@ import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
+import 'package:stream_chat_flutter/src/message_input/animated_send_button.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
-import 'package:stream_chat_flutter/src/message_input/countdown_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/file_upload_error_handler.dart';
 import 'package:stream_chat_flutter/src/message_input/input_attachments.dart';
@@ -539,29 +539,18 @@ class MessageInputState extends State<MessageInput> {
         if (!_commandEnabled && widget.actionsLocation == ActionsLocation.right)
           _buildExpandActionsButton(context),
         if (widget.sendButtonLocation == SendButtonLocation.outside)
-          _animateSendButton(context),
+          AnimatedSendButton(
+            cooldown: _timeOut,
+            messageIsPresent: _messageIsPresent,
+            attachmentsIsEmpty: _attachments.isEmpty,
+            messageInputTheme: _messageInputTheme,
+            onTap: sendMessage,
+            commandEnabled: _commandEnabled,
+            activeSendButton: widget.activeSendButton,
+            idleSendButton: widget.idleSendButton,
+            editMessage: widget.editMessage,
+          ),
       ],
-    );
-  }
-
-  Widget _animateSendButton(BuildContext context) {
-    late Widget sendButton;
-    if (_timeOut > 0) {
-      sendButton = CountdownButton(count: _timeOut);
-    } else if (!_messageIsPresent && _attachments.isEmpty) {
-      sendButton = widget.idleSendButton ?? _buildIdleSendButton(context);
-    } else {
-      sendButton = widget.activeSendButton != null
-          ? InkWell(
-              onTap: sendMessage,
-              child: widget.activeSendButton,
-            )
-          : _buildSendButton(context);
-    }
-
-    return AnimatedSwitcher(
-      duration: _streamChatTheme.messageInputTheme.sendAnimationDuration!,
-      child: sendButton,
     );
   }
 
@@ -854,7 +843,17 @@ class MessageInputState extends State<MessageInput> {
               widget.actionsLocation == ActionsLocation.rightInside)
             _buildExpandActionsButton(context),
           if (widget.sendButtonLocation == SendButtonLocation.inside)
-            _animateSendButton(context),
+            AnimatedSendButton(
+              cooldown: _timeOut,
+              messageIsPresent: _messageIsPresent,
+              attachmentsIsEmpty: _attachments.isEmpty,
+              messageInputTheme: _messageInputTheme,
+              onTap: sendMessage,
+              commandEnabled: _commandEnabled,
+              activeSendButton: widget.activeSendButton,
+              idleSendButton: widget.idleSendButton,
+              editMessage: widget.editMessage,
+            ),
         ],
       ),
     ).merge(passedDecoration);
@@ -1500,53 +1499,6 @@ class MessageInputState extends State<MessageInput> {
         ),
       ]);
     });
-  }
-
-  Widget _buildIdleSendButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: StreamSvgIcon(
-        assetName: _getIdleSendIcon(),
-        color: _messageInputTheme.sendButtonIdleColor,
-      ),
-    );
-  }
-
-  Widget _buildSendButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: IconButton(
-        onPressed: sendMessage,
-        padding: const EdgeInsets.all(0),
-        splashRadius: 24,
-        constraints: const BoxConstraints.tightFor(
-          height: 24,
-          width: 24,
-        ),
-        icon: StreamSvgIcon(
-          assetName: _getSendIcon(),
-          color: _messageInputTheme.sendButtonColor,
-        ),
-      ),
-    );
-  }
-
-  String _getIdleSendIcon() {
-    if (_commandEnabled) {
-      return 'Icon_search.svg';
-    } else {
-      return 'Icon_circle_right.svg';
-    }
-  }
-
-  String _getSendIcon() {
-    if (widget.editMessage != null) {
-      return 'Icon_circle_up.svg';
-    } else if (_commandEnabled) {
-      return 'Icon_search.svg';
-    } else {
-      return 'Icon_circle_up.svg';
-    }
   }
 
   /// Sends the current message
