@@ -727,9 +727,7 @@ class _MessageWidgetState extends State<MessageWidget>
           child: PlatformWidgetBuilder(
             mobile: (context, child) {
               return InkWell(
-                onTap: () {
-                  widget.onMessageTap!(widget.message);
-                },
+                onTap: () => widget.onMessageTap!(widget.message),
                 onLongPress: widget.message.isDeleted && !isFailedState
                     ? null
                     : () => onLongPress(context),
