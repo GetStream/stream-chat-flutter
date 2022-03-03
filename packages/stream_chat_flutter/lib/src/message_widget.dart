@@ -17,6 +17,7 @@ import 'package:stream_chat_flutter/src/image_group.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
+import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -723,13 +724,20 @@ class _MessageWidgetState extends State<MessageWidget>
             ? _streamChatTheme.colorTheme.highlight
             : null,
         child: Portal(
-          child: InkWell(
-            onTap: () {
-              widget.onMessageTap!(widget.message);
+          child: PlatformWidgetBuilder(
+            mobile: (context, child) {
+              return InkWell(
+                onTap: () {
+                  widget.onMessageTap!(widget.message);
+                },
+                onLongPress: widget.message.isDeleted && !isFailedState
+                    ? null
+                    : () => onLongPress(context),
+                child: child,
+              );
             },
-            onLongPress: widget.message.isDeleted && !isFailedState
-                ? null
-                : () => onLongPress(context),
+            desktop: (_, child) => child,
+            web: (_, child) => child,
             child: Padding(
               padding: widget.padding ?? const EdgeInsets.all(8),
               child: FractionallySizedBox(
