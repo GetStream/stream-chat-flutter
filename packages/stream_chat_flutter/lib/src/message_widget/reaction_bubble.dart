@@ -4,9 +4,11 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template reactionBubble}
 /// Creates reaction bubble widget for displaying over messages
+/// {@endtemplate}
 class ReactionBubble extends StatelessWidget {
-  /// Constructor for creating a [ReactionBubble]
+  /// {@macro reactionBubble}
   const ReactionBubble({
     Key? key,
     required this.reactions,

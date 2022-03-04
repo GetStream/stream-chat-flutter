@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template threadParticipants}
+/// Shows the users participating in a thread.
+///
+/// Used in [BottomRow].
+/// {@endtemplate}
 class ThreadParticipants extends StatelessWidget {
+  /// {@macro threadParticipants}
   const ThreadParticipants({
     Key? key,
     required StreamChatThemeData streamChatTheme,
@@ -9,7 +15,10 @@ class ThreadParticipants extends StatelessWidget {
   })  : _streamChatTheme = streamChatTheme,
         super(key: key);
 
+  /// {@macro streamChatThemeData}
   final StreamChatThemeData _streamChatTheme;
+
+  /// The users participating in the thread.
   final Iterable<User> threadParticipants;
 
   @override

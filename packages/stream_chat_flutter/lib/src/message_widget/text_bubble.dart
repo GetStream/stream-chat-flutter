@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/url_attachment.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/message_widget/message_widget_content_components.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template textBubble}
+/// The bubble around a [MessageText].
+///
+/// Used in [MessageCard]. Should not be used elsewhere.
+/// {@endtemplate}
 class TextBubble extends StatelessWidget {
+  /// {@macro textBubble}
   const TextBubble({
     Key? key,
     required this.message,
@@ -17,23 +24,31 @@ class TextBubble extends StatelessWidget {
     this.onMentionTap,
   }) : super(key: key);
 
+  /// {@macro message}
   final Message message;
+
+  /// {@macro isOnlyEmoji}
   final bool isOnlyEmoji;
+
+  /// {@macro textPadding}
   final EdgeInsets textPadding;
 
-  /// Widget builder for building text
+  /// {@macro textBuilder}
   final Widget Function(BuildContext, Message)? textBuilder;
 
-  /// The function called when tapping on a link
+  /// {@macro onLinkTap}
   final void Function(String)? onLinkTap;
 
-  /// Function called on mention tap
+  /// {@macro onMentionTap}
   final void Function(User)? onMentionTap;
 
-  /// The message theme
+  /// {@macro messageTheme}
   final MessageThemeData messageTheme;
 
+  /// {@macro hasUrlAttachments}
   final bool hasUrlAttachments;
+
+  /// {@macro hasQuotedMessage}
   final bool hasQuotedMessage;
 
   @override

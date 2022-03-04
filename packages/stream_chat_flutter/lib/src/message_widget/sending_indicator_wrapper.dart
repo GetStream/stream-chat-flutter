@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template sendingIndicatorWrapper}
+/// Helper widget for building a [SendingIndicator].
+///
+/// Used in [BottomRow]. Should not be used elsewhere.
+/// {@endtemplate}
 class SendingIndicatorWrapper extends StatelessWidget {
+  /// {@macro sendingIndicatorWrapper}
   const SendingIndicatorWrapper({
     Key? key,
     required this.messageTheme,
@@ -12,11 +18,19 @@ class SendingIndicatorWrapper extends StatelessWidget {
     required this.streamChatTheme,
   }) : super(key: key);
 
-  /// The message theme
+  /// {@macro messageTheme}
   final MessageThemeData messageTheme;
+
+  /// {@macro message}
   final Message message;
+
+  /// {@macro hasNonUrlAttachments}
   final bool hasNonUrlAttachments;
+
+  /// {@macro streamChat}
   final StreamChatState streamChat;
+
+  /// {@macro streamChatThemeData}
   final StreamChatThemeData streamChatTheme;
 
   @override

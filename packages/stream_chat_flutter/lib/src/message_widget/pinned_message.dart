@@ -2,14 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template pinnedMessage}
+/// A pinned message in a chat.
+///
+/// Used in [MessageWidgetContent]. Should not be used elsewhere.
+/// {@endtemplate}
 class PinnedMessage extends StatelessWidget {
+  /// {@macro pinnedMessage}
   const PinnedMessage({
     Key? key,
     required this.pinnedBy,
     required this.currentUser,
   }) : super(key: key);
 
+  /// The [User] who pinned this message.
   final User pinnedBy;
+
+  /// The current [User].
   final User currentUser;
 
   @override

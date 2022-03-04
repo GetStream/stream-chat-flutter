@@ -6,7 +6,13 @@ import 'package:stream_chat_flutter/src/message_widget/thread_participants.dart'
 import 'package:stream_chat_flutter/src/message_widget/username.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template bottomRow}
+/// The bottom row of a [MessageWidget].
+///
+/// Used in [MessageWidgetContent]. Should not be used elsewhere.
+/// {@endtemplate}
 class BottomRow extends StatelessWidget {
+  /// {@macro bottomRow}
   const BottomRow({
     Key? key,
     required this.isDeleted,
@@ -28,28 +34,55 @@ class BottomRow extends StatelessWidget {
     this.onThreadTap,
   }) : super(key: key);
 
+  /// {@macro messageIsDeleted}
   final bool isDeleted;
 
-  /// Widget builder for building a bottom row below a deleted message
+  /// {@macro deletedBottomRowBuilder}
   final Widget Function(BuildContext, Message)? deletedBottomRowBuilder;
+
+  /// {@macro message}
   final Message message;
+
+  /// {@macro showThreadReplyIndicator}
   final bool showThreadReplyIndicator;
+
+  /// {@macro showInChannelIndicator}
   final bool showInChannel;
+
+  /// {@macro showTimestamp}
   final bool showTimeStamp;
+
+  /// {@macro showUsername}
   final bool showUsername;
+
+  /// {@macro reverse}
   final bool reverse;
+
+  /// {@macro showSendingIndicator}
   final bool showSendingIndicator;
+
+  /// {@macro hasUrlAttachments}
   final bool hasUrlAttachments;
+
+  /// {@macro isGiphy}
   final bool isGiphy;
+
+  /// {@macro isOnlyEmoji}
   final bool isOnlyEmoji;
+
+  /// {@macro hasNonUrlAttachments}
   final bool hasNonUrlAttachments;
 
-  /// The message theme
+  /// {@macro messageTheme}
   final MessageThemeData messageTheme;
 
-  /// The function called when tapping on threads
+  /// {@macro onThreadTap}
   final void Function(Message)? onThreadTap;
+
+  /// {@macro streamChatThemeData}
   final StreamChatThemeData streamChatTheme;
+
+  /// {@macro streamChat}
   final StreamChatState streamChat;
 
   @override

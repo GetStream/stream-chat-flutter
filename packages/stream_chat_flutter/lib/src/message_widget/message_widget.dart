@@ -39,7 +39,8 @@ enum DisplayWidget {
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_widget.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_widget_paint.png)
 ///
-/// It shows a message with reactions, replies and user avatar.
+/// {@template messageWidget}
+/// Shows a message with reactions, replies and user avatar.
 ///
 /// Usually you don't use this widget as it's the default message widget used by
 /// [MessageListView].
@@ -47,8 +48,9 @@ enum DisplayWidget {
 /// The widget components render the ui based on the first ancestor of type
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
+/// {@endtemplate}
 class MessageWidget extends StatefulWidget {
-  ///
+  /// {@macro messageWidget}
   MessageWidget({
     Key? key,
     required this.message,
@@ -298,163 +300,267 @@ class MessageWidget extends StatefulWidget {
         }..addAll(customAttachmentBuilders ?? {}),
         super(key: key);
 
+  /// {@template onMentionTap}
   /// Function called on mention tap
+  /// {@endtemplate}
   final void Function(User)? onMentionTap;
 
+  /// {@template onThreadTap}
   /// The function called when tapping on threads
+  /// {@endtemplate}
   final void Function(Message)? onThreadTap;
 
+  /// {@template onReplyTap}
   /// The function called when tapping on replies
+  /// {@endtemplate}
   final void Function(Message)? onReplyTap;
 
+  /// {@template editMessageInputBuilder}
   /// Widget builder for edit message layout
+  /// {@endtemplate}
   final Widget Function(BuildContext, Message)? editMessageInputBuilder;
 
+  /// {@template textBuilder}
   /// Widget builder for building text
+  /// {@endtemplate}
   final Widget Function(BuildContext, Message)? textBuilder;
 
+  /// {@template usernameBuilder}
   /// Widget builder for building username
+  /// {@endtemplate}
   final Widget Function(BuildContext, Message)? usernameBuilder;
 
+  /// {@template onMessageActions}
   /// Function called on long press
+  /// {@endtemplate}
   final void Function(BuildContext, Message)? onMessageActions;
 
+  /// {@template bottomRowBuilder}
   /// Widget builder for building a bottom row below the message
+  /// {@endtemplate}
   final Widget Function(BuildContext, Message)? bottomRowBuilder;
 
+  /// {@template deletedBottomRowBuilder}
   /// Widget builder for building a bottom row below a deleted message
+  /// {@endtemplate}
   final Widget Function(BuildContext, Message)? deletedBottomRowBuilder;
 
+  /// {@template userAvatarBuilder}
   /// Widget builder for building user avatar
+  /// {@endtemplate}
   final Widget Function(BuildContext, User)? userAvatarBuilder;
 
-  /// The message
+  /// {@template message}
+  /// The message to display.
+  /// {@endtemplate}
   final Message message;
 
+  /// {@template messageTheme}
   /// The message theme
+  /// {@endtemplate}
   final MessageThemeData messageTheme;
 
+  /// {@template reverse}
   /// If true the widget will be mirrored
+  /// {@endtemplate}
   final bool reverse;
 
+  /// {@template shape}
   /// The shape of the message text
+  /// {@endtemplate}
   final ShapeBorder? shape;
 
+  /// {@template attachmentShape}
   /// The shape of an attachment
+  /// {@endtemplate}
   final ShapeBorder? attachmentShape;
 
-  /// The borderside of the message text
+  /// {@template borderSide}
+  /// The borderSide of the message text
+  /// {@endtemplate}
   final BorderSide? borderSide;
 
-  /// The borderside of an attachment
+  /// {@template attachmentBorderSide}
+  /// The borderSide of an attachment
+  /// {@endtemplate}
   final BorderSide? attachmentBorderSide;
 
+  /// {@template borderRadiusGeometry}
   /// The border radius of the message text
+  /// {@endtemplate}
   final BorderRadiusGeometry? borderRadiusGeometry;
 
+  /// {@template attachmentBorderRadiusGeometry}
   /// The border radius of an attachment
+  /// {@endtemplate}
   final BorderRadiusGeometry? attachmentBorderRadiusGeometry;
 
+  /// {@template padding}
   /// The padding of the widget
+  /// {@endtemplate}
   final EdgeInsetsGeometry? padding;
 
+  /// {@template textPadding}
   /// The internal padding of the message text
+  /// {@endtemplate}
   final EdgeInsets textPadding;
 
+  /// {@template attachmentPadding}
   /// The internal padding of an attachment
+  /// {@endtemplate}
   final EdgeInsetsGeometry attachmentPadding;
 
+  /// {@template showUserAvatar}
   /// It controls the display behaviour of the user avatar
+  /// {@endtemplate}
   final DisplayWidget showUserAvatar;
 
+  /// {@template showSendingIndicator}
   /// It controls the display behaviour of the sending indicator
+  /// {@endtemplate}
   final bool showSendingIndicator;
 
-  /// If true the widget will show the reactions
+  /// {@template showReactions}
+  /// If `true` the message's reactions will be shown.
+  /// {@endtemplate}
   final bool showReactions;
 
   ///
   final bool allRead;
 
+  /// {@template showThreadReplyIndicator}
   /// If true the widget will show the thread reply indicator
+  /// {@endtemplate}
   final bool showThreadReplyIndicator;
 
+  /// {@template showInChannelIndicator}
   /// If true the widget will show the show in channel indicator
+  /// {@endtemplate}
   final bool showInChannelIndicator;
 
+  /// {@template onUserAvatarTap}
   /// The function called when tapping on UserAvatar
+  /// {@endtemplate}
   final void Function(User)? onUserAvatarTap;
 
+  /// {@template onLinkTap}
   /// The function called when tapping on a link
+  /// {@endtemplate}
   final void Function(String)? onLinkTap;
 
+  /// {@template showReactionPickerIndicator}
   /// Used in [MessageReactionsModal] and [MessageActionsModal]
+  /// {@endtemplate}
   final bool showReactionPickerIndicator;
 
-  /// List of users who read
+  /// {@template readList}
+  /// List of users who have read the [message].
+  /// {@endtemplate}
   final List<Read>? readList;
 
+  /// {@template onShowMessage}
   /// Callback when show message is tapped
+  /// {@endtemplate}
   final ShowMessageCallback? onShowMessage;
 
+  /// {@template onReturnAction}
   /// Handle return actions like reply message
+  /// {@endtemplate}
   final ValueChanged<ReturnActionType>? onReturnAction;
 
+  /// {@template showUsername}
   /// If true show the users username next to the timestamp of the message
+  /// {@endtemplate}
   final bool showUsername;
 
+  /// {@template showTimestamp}
   /// Show message timestamp
+  /// {@endtemplate}
   final bool showTimestamp;
 
+  /// {@template showReplyMessage}
   /// Show reply action
+  /// {@endtemplate}
   final bool showReplyMessage;
 
+  /// {@template showThreadReplyMessage}
   /// Show thread reply action
+  /// {@endtemplate}
   final bool showThreadReplyMessage;
 
+  /// {@template showEditMessage}
   /// Show edit action
+  /// {@endtemplate}
   final bool showEditMessage;
 
+  /// {@template showCopyMessage}
   /// Show copy action
+  /// {@endtemplate}
   final bool showCopyMessage;
 
+  /// {@template showDeleteMessage}
   /// Show delete action
+  /// {@endtemplate}
   final bool showDeleteMessage;
 
+  /// {@template showResendMessage}
   /// Show resend action
+  /// {@endtemplate}
   final bool showResendMessage;
 
+  /// {@template showFlagButton}
   /// Show flag action
+  /// {@endtemplate}
   final bool showFlagButton;
 
-  /// Show flag action
+  /// {@template showPinButton}
+  /// Show pin action
+  /// {@endtemplate}
   final bool showPinButton;
 
+  /// {@template showPinHighlight}
   /// Display Pin Highlight
+  /// {@endtemplate}
   final bool showPinHighlight;
 
+  /// {@template attachmentBuilders}
   /// Builder for respective attachment types
+  /// {@endtemplate}
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
+  /// {@template customAttachmentBuilders}
   /// Builder for respective attachment types (user facing builder)
+  /// {@endtemplate}
   final Map<String, AttachmentBuilder>? customAttachmentBuilders;
 
+  /// {@template translateUserAvatar}
   /// Center user avatar with bottom of the message
+  /// {@endtemplate}
   final bool translateUserAvatar;
 
+  /// {@template onQuotedMessageTap}
   /// Function called when quotedMessage is tapped
+  /// {@endtemplate}
   final OnQuotedMessageTap? onQuotedMessageTap;
 
+  /// {@template onMessageTap}
   /// Function called when message is tapped
+  /// {@endtemplate}
   final void Function(Message)? onMessageTap;
 
+  /// {@template customActions}
   /// List of custom actions shown on message long tap
+  /// {@endtemplate}
   final List<MessageAction> customActions;
 
+  /// {@template onAttachmentTap}
   /// Customize onTap on attachment
+  /// {@endtemplate}
   final void Function(Message message, Attachment attachment)? onAttachmentTap;
 
+  /// {@template copyWith}
   /// Creates a copy of [MessageWidget] with specified attributes overridden.
+  /// {@endtemplate}
   MessageWidget copyWith({
     Key? key,
     void Function(User)? onMentionTap,
@@ -588,6 +694,9 @@ class _MessageWidgetState extends State<MessageWidget>
 
   bool get showInChannel => widget.showInChannelIndicator;
 
+  /// {@template hasQuotedMessage}
+  /// `true` if [MessageWidget.quotedMessage] is not null.
+  /// {@endtemplate}
   bool get hasQuotedMessage => widget.message.quotedMessage != null;
 
   bool get isSendFailed => widget.message.status == MessageSendingStatus.failed;
@@ -598,20 +707,46 @@ class _MessageWidgetState extends State<MessageWidget>
   bool get isDeleteFailed =>
       widget.message.status == MessageSendingStatus.failed_delete;
 
+  /// {@template isFailedState}
+  /// Whether the message has failed to be sent, updated, or deleted.
+  /// {@endtemplate}
   bool get isFailedState => isSendFailed || isUpdateFailed || isDeleteFailed;
 
+  /// {@template isGiphy}
+  /// `true` if any of the [message]'s attachments are a giphy.
+  /// {@endtemplate}
   bool get isGiphy =>
       widget.message.attachments.any((element) => element.type == 'giphy');
 
+  /// {@template isOnlyEmoji}
+  /// `true` if [message.text] contains only emoji.
+  /// {@endtemplate}
   bool get isOnlyEmoji => widget.message.text?.isOnlyEmoji == true;
 
+  /// {@template hasNonUrlAttachments}
+  /// `true` if any of the [message]'s attachments are a giphy and do not
+  /// have a [Attachment.titleLink].
+  /// {@endtemplate}
   bool get hasNonUrlAttachments => widget.message.attachments
       .where((it) => it.titleLink == null || it.type == 'giphy')
       .isNotEmpty;
 
+  /// {@template hasUrlAttachments}
+  /// `true` if any of the [message]'s attachments are a giphy with a
+  /// [Attachment.titleLink].
+  /// {@endtemplate}
   bool get hasUrlAttachments => widget.message.attachments
       .any((it) => it.titleLink != null && it.type != 'giphy');
 
+  /// {@template showBottomRow}
+  /// Show the [BottomRow] widget if any of the following are `true`:
+  /// * [MessageWidget.showThreadReplyIndicator]
+  /// * [MessageWidget.showUsername]
+  /// * [MessageWidget.showTimestamp]
+  /// * [MessageWidget.showInChannelIndicator]
+  /// * [MessageWidget.showSendingIndicator]
+  /// * [MessageWidget.message.isDeleted]
+  /// {@endtemplate}
   bool get showBottomRow =>
       showThreadReplyIndicator ||
       showUsername ||
@@ -620,9 +755,16 @@ class _MessageWidgetState extends State<MessageWidget>
       showSendingIndicator ||
       isDeleted;
 
+  /// {@template isPinned}
+  /// Whether [MessageWidget.message] is pinned or not.
+  /// {@endtemplate}
   bool get isPinned => widget.message.pinned;
 
-  bool get _shouldShowReactions =>
+  /// {@template shouldShowReactions}
+  /// Should show message reactions if [MessageWidget.showReactions] is
+  /// `true`, if there are reactions to show, and if the message is not deleted.
+  /// {@endtemplate}
+  bool get shouldShowReactions =>
       widget.showReactions &&
       (widget.message.reactionCounts?.isNotEmpty == true) &&
       !widget.message.isDeleted;
@@ -648,7 +790,7 @@ class _MessageWidgetState extends State<MessageWidget>
     final bottomRowPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
-    final showReactions = _shouldShowReactions;
+    final showReactions = shouldShowReactions;
 
     return ContextMenuRegion(
       onItemSelected: (item) => item.onSelected!.call(),
@@ -799,7 +941,7 @@ class _MessageWidgetState extends State<MessageWidget>
                   reverse: widget.reverse,
                   message: widget.message,
                   hasNonUrlAttachments: hasNonUrlAttachments,
-                  shouldShowReactions: _shouldShowReactions,
+                  shouldShowReactions: shouldShowReactions,
                   hasQuotedMessage: hasQuotedMessage,
                   textPadding: widget.textPadding,
                   attachmentBuilders: widget.attachmentBuilders,

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template username}
+/// Displays the username of a particular message's sender.
+/// {@endtemplate}
 class Username extends StatelessWidget {
+  /// {@macro username}
   const Username({
     Key? key,
     required this.message,
@@ -9,11 +13,13 @@ class Username extends StatelessWidget {
     this.usernameBuilder,
   }) : super(key: key);
 
-  /// Widget builder for building username
+  /// {@macro usernameBuilder}
   final Widget Function(BuildContext, Message)? usernameBuilder;
+
+  /// {@macro message}
   final Message message;
 
-  /// The message theme
+  /// {@macro messageTheme}
   final MessageThemeData messageTheme;
 
   @override

@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template userAvatarTransform}
+/// Transforms a [UserAvatar] according to the specified translation.
+///
+/// Used in [MessageWidgetContent].
+/// {@endtemplate}
 class UserAvatarTransform extends StatelessWidget {
+  /// {@macro userAvatarTransform}
   const UserAvatarTransform({
     Key? key,
     required this.translateUserAvatar,
@@ -11,17 +17,19 @@ class UserAvatarTransform extends StatelessWidget {
     this.onUserAvatarTap,
   }) : super(key: key);
 
-  /// Center user avatar with bottom of the message
+  /// {@macro translateUserAvatar}
   final bool translateUserAvatar;
 
-  /// The message theme
+  /// {@macro messageTheme}
   final MessageThemeData messageTheme;
 
-  /// Widget builder for building user avatar
+  /// {@macro userAvatarBuilder}
   final Widget Function(BuildContext, User)? userAvatarBuilder;
+
+  /// {@macro message}
   final Message message;
 
-  /// The function called when tapping on UserAvatar
+  /// {@macro onUserAvatarTap}
   final void Function(User)? onUserAvatarTap;
 
   @override

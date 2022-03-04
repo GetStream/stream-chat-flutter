@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template quotedMessage}
+/// A quoted message in a chat.
+///
+/// Used in [QuotedMessageCard]. Should not be used elsewhere.
+/// {@endtemplate}
 class QuotedMessage extends StatefulWidget {
+  /// {@macro quotedMessage}
   const QuotedMessage({
     Key? key,
     required this.message,
@@ -11,11 +17,16 @@ class QuotedMessage extends StatefulWidget {
     this.onQuotedMessageTap,
   }) : super(key: key);
 
+  /// {@macro message}
   final Message message;
 
-  /// Function called when quotedMessage is tapped
+  /// {@macro onQuotedMessageTap}
   final OnQuotedMessageTap? onQuotedMessageTap;
+
+  /// {@macro reverse}
   final bool reverse;
+
+  /// {@macro hasNonUrlAttachments}
   final bool hasNonUrlAttachments;
 
   @override

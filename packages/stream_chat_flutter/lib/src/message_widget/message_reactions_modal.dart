@@ -5,9 +5,11 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_widget/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template messageReactionsModal}
 /// Modal widget for displaying message reactions
+/// {@endtemplate}
 class MessageReactionsModal extends StatelessWidget {
-  /// Constructor for creating a [MessageReactionsModal] reactions
+  /// {@macro messageReactionsModal}
   const MessageReactionsModal({
     Key? key,
     required this.message,
@@ -27,13 +29,13 @@ class MessageReactionsModal extends StatelessWidget {
   /// [MessageThemeData] to apply to [message]
   final MessageThemeData messageTheme;
 
-  /// Flag to reverse message
+  /// {@macro reverse}
   final bool reverse;
 
-  /// Flag to show reactions on message
+  /// {@macro showReactions}
   final bool showReactions;
 
-  /// Callback when user avatar is tapped
+  /// {@macro onUserAvatarTap}
   final void Function(User)? onUserAvatarTap;
 
   @override

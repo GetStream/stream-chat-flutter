@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template threadReplyPainter}
+/// A custom painter used to render thread replies.
+///
+/// Used in [BottomRow].
+/// {@endtemplate}
 class ThreadReplyPainter extends CustomPainter {
+  /// {@macro threadReplyPainter}
   const ThreadReplyPainter({
     this.context,
     required this.color,
     this.reverse = false,
   });
 
+  /// The color to paint the thread reply with.
   final Color? color;
+
+  /// The [BuildContext] to use to retrieve the [StreamChatTheme].
   final BuildContext? context;
+
+  /// {@macro reverse}
   final bool reverse;
 
   @override

@@ -33,7 +33,9 @@ class StreamChatTheme extends InheritedWidget {
   }
 }
 
-/// Theme data
+/// {@template streamChatThemeData}
+/// Theme data for Stream Chat
+/// {@endtemplate}
 class StreamChatThemeData {
   /// Create a theme from scratch
   factory StreamChatThemeData({

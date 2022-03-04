@@ -4,8 +4,14 @@ import 'package:stream_chat_flutter/src/message_widget/quoted_message.dart';
 import 'package:stream_chat_flutter/src/message_widget/text_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-class QuotedMessageCard extends StatelessWidget {
-  const QuotedMessageCard({
+/// {@template messageCard}
+/// The widget containing a quoted message.
+///
+/// Used in [MessageWidgetContent]. Should not be used elsewhere.
+/// {@endtemplate}
+class MessageCard extends StatelessWidget {
+  /// {@macro messageCard}
+  const MessageCard({
     Key? key,
     required this.message,
     required this.isFailedState,
@@ -29,50 +35,64 @@ class QuotedMessageCard extends StatelessWidget {
     this.onQuotedMessageTap,
   }) : super(key: key);
 
+  /// {@macro isFailedState}
   final bool isFailedState;
 
-  /// It controls the display behaviour of the user avatar
+  /// {@macro showUserAvatar}
   final DisplayWidget showUserAvatar;
 
-  /// The shape of the message text
+  /// {@macro shape}
   final ShapeBorder? shape;
 
-  /// The borderside of the message text
+  /// {@macro borderSide}
   final BorderSide? borderSide;
 
-  /// The message theme
+  /// {@macro messageTheme}
   final MessageThemeData messageTheme;
 
-  /// The border radius of the message text
+  /// {@macro borderRadiusGeometry}
   final BorderRadiusGeometry? borderRadiusGeometry;
 
+  /// {@macro hasQuotedMessage}
   final bool hasQuotedMessage;
+
+  /// {@macro hasUrlAttachments}
   final bool hasUrlAttachments;
+
+  /// {@macro hasNonUrlAttachments}
   final bool hasNonUrlAttachments;
+
+  /// {@macro isOnlyEmoji}
   final bool isOnlyEmoji;
+
+  /// {@macro isGiphy}
   final bool isGiphy;
+
+  /// {@macro message}
   final Message message;
 
-  /// Builder for respective attachment types
+  /// {@macro attachmentBuilders}
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
-  /// The internal padding of an attachment
+  /// {@macro attachmentPadding}
   final EdgeInsetsGeometry attachmentPadding;
 
-  /// The internal padding of the message text
+  /// {@macro textPadding}
   final EdgeInsets textPadding;
 
-  /// Widget builder for building text
+  /// {@macro textBuilder}
   final Widget Function(BuildContext, Message)? textBuilder;
 
-  /// The function called when tapping on a link
+  /// {@macro onLinkTap}
   final void Function(String)? onLinkTap;
 
-  /// Function called on mention tap
+  /// {@macro onMentionTap}
   final void Function(User)? onMentionTap;
 
-  /// Function called when quotedMessage is tapped
+  /// {@macro onQuotedMessageTap}
   final OnQuotedMessageTap? onQuotedMessageTap;
+
+  /// {@macro reverse}
   final bool reverse;
 
   @override

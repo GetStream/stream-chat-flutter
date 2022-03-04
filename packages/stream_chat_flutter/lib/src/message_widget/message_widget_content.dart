@@ -4,7 +4,13 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content_components.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template messageWidgetContent}
+/// The main content of a [MessageWidget].
+///
+/// Should not be used outside of [MessageWidget.
+/// {@endtemplate}
 class MessageWidgetContent extends StatelessWidget {
+  /// {@macro messageWidgetContent}
   const MessageWidgetContent({
     Key? key,
     required this.reverse,
@@ -50,80 +56,127 @@ class MessageWidgetContent extends StatelessWidget {
     this.deletedBottomRowBuilder,
   }) : super(key: key);
 
+  /// {@macro reverse}
   final bool reverse;
+
+  /// {@macro isPinned}
   final bool isPinned;
+
+  /// {@macro showPinHighlight}
   final bool showPinHighlight;
+
+  /// {@macro showBottomRow}
   final bool showBottomRow;
+
+  /// {@macro message}
   final Message message;
 
-  /// It controls the display behaviour of the user avatar
+  /// {@macro showUserAvatar}
   final DisplayWidget showUserAvatar;
+
+  /// The width of the avatar.
   final double avatarWidth;
+
+  /// {@macro showReactions}
   final bool showReactions;
 
-  /// The message theme
+  /// {@macro messageTheme}
   final MessageThemeData messageTheme;
 
+  /// {@macro shouldShowReactions}
   final bool shouldShowReactions;
 
-  /// The function called when tapping on UserAvatar
+  /// {@macro onUserAvatarTap}
   final void Function(User)? onUserAvatarTap;
+
+  /// {@macro streamChatThemeData}
   final StreamChatThemeData streamChatTheme;
+
+  /// {@macro isFailedState}
   final bool isFailedState;
 
-  /// The border radius of the message text
+  /// {@macro borderRadiusGeometry}
   final BorderRadiusGeometry? borderRadiusGeometry;
 
-  /// The borderside of the message text
+  /// {@macro borderSide}
   final BorderSide? borderSide;
 
-  /// The shape of the message text
+  /// {@macro shape}
   final ShapeBorder? shape;
+
+  /// {@macro hasQuotedMessage}
   final bool hasQuotedMessage;
+
+  /// {@macro hasUrlAttachments}
   final bool hasUrlAttachments;
+
+  /// {@macro hasNonUrlAttachments}
   final bool hasNonUrlAttachments;
+
+  /// {@macro isOnlyEmoji}
   final bool isOnlyEmoji;
+
+  /// {@macro isGiphy}
   final bool isGiphy;
 
-  /// Builder for respective attachment types
+  /// {@macro attachmentBuilders}
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
-  /// The internal padding of an attachment
+  /// {@macro attachmentPadding}
   final EdgeInsetsGeometry attachmentPadding;
 
-  /// The internal padding of the message text
+  /// {@macro textPadding}
   final EdgeInsets textPadding;
 
-  /// Function called when quotedMessage is tapped
+  /// {@macro onQuotedMessageTap}
   final OnQuotedMessageTap? onQuotedMessageTap;
 
-  /// Function called on mention tap
+  /// {@macro onMentionTap}
   final void Function(User)? onMentionTap;
 
-  /// The function called when tapping on a link
+  /// {@macro onLinkTap}
   final void Function(String)? onLinkTap;
 
-  /// Widget builder for building text
+  /// {@macro textBuilder}
   final Widget Function(BuildContext, Message)? textBuilder;
+
+  /// {@macro showReactionPickerIndicator}
   final bool showReactionPickerIndicator;
+
+  /// {@macro translateUserAvatar}
   final bool translateUserAvatar;
+
+  /// The padding to use for this widget.
   final double bottomRowPadding;
 
-  /// Widget builder for building a bottom row below the message
+  /// {@macro bottomRowBuilder}
   final Widget Function(BuildContext, Message)? bottomRowBuilder;
+
+  /// {@macro showInChannelIndicator}
   final bool showInChannel;
+
+  /// {@macro streamChat}
   final StreamChatState streamChat;
+
+  /// {@macro showSendingIndicator}
   final bool showSendingIndicator;
+
+  /// {@macro showThreadReplyIndicator}
   final bool showThreadReplyIndicator;
+
+  /// {@macro showTimestamp}
   final bool showTimeStamp;
+
+  /// {@macro showUsername}
   final bool showUsername;
 
-  /// The function called when tapping on threads
+  /// {@macro onThreadTap}
   final void Function(Message)? onThreadTap;
 
-  /// Widget builder for building a bottom row below a deleted message
+  /// {@macro deletedBottomRowBuilder}
   final Widget Function(BuildContext, Message)? deletedBottomRowBuilder;
 
+  /// {@macro messageWidget}
   final MessageWidget messageWidget;
 
   @override
@@ -228,7 +281,7 @@ class MessageWidgetContent extends StatelessWidget {
                                           messageTheme: messageTheme,
                                         ),
                                       )
-                                    : QuotedMessageCard(
+                                    : MessageCard(
                                         message: message,
                                         isFailedState: isFailedState,
                                         showUserAvatar: showUserAvatar,

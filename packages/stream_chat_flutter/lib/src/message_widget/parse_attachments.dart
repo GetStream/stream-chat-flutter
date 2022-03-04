@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/message_widget/message_widget_content_components.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template quotedMessageCard}
+/// Parses the attachments of a [MessageWidget].
+///
+/// Used in [MessageCard]. Should not be used elsewhere.
+/// {@endtemplate}
 class ParseAttachments extends StatelessWidget {
+  /// {@macro quotedMessageCard}
   const ParseAttachments({
     Key? key,
     required this.message,
@@ -10,12 +17,13 @@ class ParseAttachments extends StatelessWidget {
     required this.attachmentPadding,
   }) : super(key: key);
 
+  /// {@macro message}
   final Message message;
 
-  /// Builder for respective attachment types
+  /// {@macro attachmentBuilders}
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
-  /// The internal padding of an attachment
+  /// {@macro attachmentPadding}
   final EdgeInsetsGeometry attachmentPadding;
 
   @override

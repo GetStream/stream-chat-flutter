@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template streamChat}
 /// Widget used to provide information about the chat to the widget tree
 ///
 /// class MyApp extends StatelessWidget {
@@ -25,6 +26,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// }
 ///
 /// Use [StreamChat.of] to get the current [StreamChatState] instance.
+/// {@endtemplate}
 class StreamChat extends StatefulWidget {
   /// Constructor for creating a [StreamChat] widget
   const StreamChat({

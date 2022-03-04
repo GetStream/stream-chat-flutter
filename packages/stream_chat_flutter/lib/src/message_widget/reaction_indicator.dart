@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_widget/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template reactionIndicator}
+/// Indicates the reaction a [MessageWidget] has.
+///
+/// Used in [MessageWidgetContent].
+/// {@endtemplate}
 class ReactionIndicator extends StatelessWidget {
+  /// {@macro reactionIndicator}
   const ReactionIndicator({
     Key? key,
     required this.ownId,
@@ -13,13 +19,22 @@ class ReactionIndicator extends StatelessWidget {
     required this.messageTheme,
   }) : super(key: key);
 
+  /// The id of the current user.
   final String ownId;
+
+  /// {@macro message}
   final Message message;
+
+  /// {@macro shouldShowReactions}
   final bool shouldShowReactions;
+
+  /// The callback to perform when the widget is tapped or clicked.
   final VoidCallback onTap;
+
+  /// {@macro reverse}
   final bool reverse;
 
-  /// The message theme
+  /// {@macro messageTheme}
   final MessageThemeData messageTheme;
 
   @override
