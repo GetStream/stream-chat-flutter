@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/message_widget/bottom_row.dart';
-import 'package:stream_chat_flutter/src/message_widget/message_reactions_modal.dart';
-import 'package:stream_chat_flutter/src/message_widget/pinned_message.dart';
-import 'package:stream_chat_flutter/src/message_widget/quoted_message_card.dart';
-import 'package:stream_chat_flutter/src/message_widget/reaction_indicator.dart';
-import 'package:stream_chat_flutter/src/message_widget/user_avatar_transform.dart';
-import 'package:stream_chat_flutter/src/reaction_bubble.dart';
+import 'package:stream_chat_flutter/src/message_widget/message_widget_content_components.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class MessageWidgetContent extends StatelessWidget {
