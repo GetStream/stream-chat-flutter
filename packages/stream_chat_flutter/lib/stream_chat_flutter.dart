@@ -28,7 +28,7 @@ export 'src/message_list_view.dart';
 export 'src/message_search_item.dart';
 export 'src/message_search_list_view.dart';
 export 'src/message_text.dart';
-export 'src/message_widget.dart';
+export 'src/message_widget/message_widget.dart';
 export 'src/option_list_tile.dart';
 export 'src/reaction_icon.dart';
 export 'src/reaction_picker.dart';

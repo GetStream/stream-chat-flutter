@@ -1,0 +1,184 @@
+import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/message_widget/sending_indicator_wrapper.dart';
+import 'package:stream_chat_flutter/src/message_widget/thread_painter.dart';
+import 'package:stream_chat_flutter/src/message_widget/thread_participants.dart';
+import 'package:stream_chat_flutter/src/message_widget/username.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+class BottomRow extends StatelessWidget {
+  const BottomRow({
+    Key? key,
+    required this.isDeleted,
+    required this.message,
+    required this.showThreadReplyIndicator,
+    required this.showInChannel,
+    required this.showTimeStamp,
+    required this.showUsername,
+    required this.reverse,
+    required this.showSendingIndicator,
+    required this.hasUrlAttachments,
+    required this.isGiphy,
+    required this.isOnlyEmoji,
+    required this.messageTheme,
+    required this.streamChatTheme,
+    required this.hasNonUrlAttachments,
+    required this.streamChat,
+    this.deletedBottomRowBuilder,
+    this.onThreadTap,
+  }) : super(key: key);
+
+  final bool isDeleted;
+
+  /// Widget builder for building a bottom row below a deleted message
+  final Widget Function(BuildContext, Message)? deletedBottomRowBuilder;
+  final Message message;
+  final bool showThreadReplyIndicator;
+  final bool showInChannel;
+  final bool showTimeStamp;
+  final bool showUsername;
+  final bool reverse;
+  final bool showSendingIndicator;
+  final bool hasUrlAttachments;
+  final bool isGiphy;
+  final bool isOnlyEmoji;
+  final bool hasNonUrlAttachments;
+
+  /// The message theme
+  final MessageThemeData messageTheme;
+
+  /// The function called when tapping on threads
+  final void Function(Message)? onThreadTap;
+  final StreamChatThemeData streamChatTheme;
+  final StreamChatState streamChat;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isDeleted) {
+      return deletedBottomRowBuilder?.call(
+            context,
+            message,
+          ) ??
+          const Offstage();
+    }
+
+    final children = <Widget>[];
+
+    final threadParticipants = message.threadParticipants?.take(2);
+    final showThreadParticipants = threadParticipants?.isNotEmpty == true;
+    final replyCount = message.replyCount;
+
+    var msg = context.translations.threadReplyLabel;
+    if (showThreadReplyIndicator && replyCount! > 1) {
+      msg = context.translations.threadReplyCountText(replyCount);
+    }
+
+    // ignore: prefer_function_declarations_over_variables
+    final _onThreadTap = () async {
+      try {
+        var _message = message;
+        if (showInChannel) {
+          final channel = StreamChannel.of(context);
+          _message = await channel.getMessage(message.parentId!);
+        }
+        return onThreadTap!(_message);
+      } catch (e, stk) {
+        print(e);
+        print(stk);
+        // ignore: avoid_returning_null_for_void
+        return null;
+      }
+    };
+
+    const usernameKey = Key('username');
+
+    children.addAll([
+      if (showInChannel || showThreadReplyIndicator) ...[
+        if (showThreadParticipants)
+          SizedBox.fromSize(
+            size: Size((threadParticipants!.length * 8.0) + 8, 16),
+            child: ThreadParticipants(
+              streamChatTheme: streamChatTheme,
+              threadParticipants: threadParticipants,
+            ),
+          ),
+        InkWell(
+          onTap: onThreadTap != null ? _onThreadTap : null,
+          child: Text(msg, style: messageTheme.repliesStyle),
+        ),
+      ],
+      if (showUsername)
+        Username(
+          key: usernameKey,
+          message: message,
+          messageTheme: messageTheme,
+        ),
+      if (showTimeStamp)
+        Text(
+          Jiffy(message.createdAt.toLocal()).jm,
+          style: messageTheme.createdAtStyle,
+        ),
+      if (showSendingIndicator)
+        SendingIndicatorWrapper(
+          messageTheme: messageTheme,
+          message: message,
+          hasNonUrlAttachments: hasNonUrlAttachments,
+          streamChat: streamChat,
+          streamChatTheme: streamChatTheme,
+        ),
+    ]);
+
+    final showThreadTail = !(hasUrlAttachments || isGiphy || isOnlyEmoji) &&
+        (showThreadReplyIndicator || showInChannel);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment:
+          reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: [
+        if (showThreadTail && !reverse)
+          Container(
+            margin: EdgeInsets.only(
+              bottom: context.textScaleFactor *
+                  ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
+            ),
+            child: CustomPaint(
+              size: const Size(16, 32) * context.textScaleFactor,
+              painter: ThreadReplyPainter(
+                context: context,
+                color: messageTheme.messageBorderColor,
+                reverse: reverse,
+              ),
+            ),
+          ),
+        ...children.map(
+          (child) {
+            Widget mappedChild = SizedBox(
+              height: context.textScaleFactor * 14,
+              child: child,
+            );
+            if (child.key == usernameKey) {
+              mappedChild = Flexible(child: mappedChild);
+            }
+            return mappedChild;
+          },
+        ),
+        if (showThreadTail && reverse)
+          Container(
+            margin: EdgeInsets.only(
+              bottom: context.textScaleFactor *
+                  ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
+            ),
+            child: CustomPaint(
+              size: const Size(16, 32) * context.textScaleFactor,
+              painter: ThreadReplyPainter(
+                context: context,
+                color: messageTheme.messageBorderColor,
+                reverse: reverse,
+              ),
+            ),
+          ),
+      ].insertBetween(const SizedBox(width: 8)),
+    );
+  }
+}

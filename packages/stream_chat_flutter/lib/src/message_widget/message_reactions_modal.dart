@@ -186,10 +186,9 @@ class MessageReactionsModal extends StatelessWidget {
     final isCurrentUser = reaction.user?.id == currentUser.id;
     final chatThemeData = StreamChatTheme.of(context);
     return ConstrainedBox(
-      constraints: BoxConstraints.loose(const Size(
-        64,
-        98,
-      )),
+      constraints: BoxConstraints.loose(
+        const Size(64, 98), //TODO(Groovin): fix on desktop
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
