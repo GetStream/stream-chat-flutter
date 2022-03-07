@@ -60,9 +60,11 @@ class ParseAttachments extends StatelessWidget {
       padding: attachmentPadding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: attachmentList.insertBetween(SizedBox(
-          height: attachmentPadding.vertical / 2,
-        )),
+        children: attachmentList.insertBetween(
+          SizedBox(
+            height: attachmentPadding.vertical / 2,
+          ),
+        ),
       ),
     );
   }
