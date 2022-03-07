@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Mentions overlay now doesn't overflow when not enough height available
+
 ## 3.5.0
 
 🐞 Fixed
