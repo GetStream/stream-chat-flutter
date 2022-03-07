@@ -1,4 +1,4 @@
-## Upcoming
+## 2.1.0
 
 ✅ Added
 
@@ -10,7 +10,7 @@
 
 ## 2.0.0
 
-- Updated `stream_chat_flutter` dependency to [`3.0.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+* Updated `stream_chat_flutter` dependency to [`3.0.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 🐞 Fixed
 

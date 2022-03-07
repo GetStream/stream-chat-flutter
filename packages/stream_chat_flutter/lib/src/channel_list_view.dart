@@ -592,7 +592,9 @@ class _ChannelListViewState extends State<ChannelListView> {
               child: ChannelPreview(
                 onLongPress: widget.onChannelLongPress,
                 channel: channel,
-                onImageTap: () => widget.onImageTap?.call(channel),
+                onImageTap: widget.onImageTap != null
+                    ? () => widget.onImageTap!(channel)
+                    : null,
                 onTap: (channel) => onTap(channel, widget.channelWidget),
               ),
             ),
@@ -605,7 +607,7 @@ class _ChannelListViewState extends State<ChannelListView> {
     if (widget.onChannelTap != null) {
       onTap = widget.onChannelTap!;
     } else {
-      onTap = (client, _) {
+      onTap = (channel, _) {
         if (widget.channelWidget == null) {
           return;
         }
@@ -613,7 +615,7 @@ class _ChannelListViewState extends State<ChannelListView> {
           context,
           MaterialPageRoute(
             builder: (context) => StreamChannel(
-              channel: client,
+              channel: channel,
               child: widget.channelWidget!,
             ),
           ),

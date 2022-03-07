@@ -159,7 +159,7 @@ class RetryQueue {
         : message.status == MessageSendingStatus.updating
             ? MessageSendingStatus.failed_update
             : MessageSendingStatus.failed_delete;
-    channel.state?.addMessage(message.copyWith(status: newStatus));
+    channel.state?.updateMessage(message.copyWith(status: newStatus));
   }
 
   Future<void> _retryMessage(Message message) async {

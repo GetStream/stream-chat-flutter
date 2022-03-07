@@ -84,7 +84,10 @@ class ChannelApi {
 
   /// Mark all channels for this user as read
   Future<EmptyResponse> markAllRead() async {
-    final response = await _client.post('/channels/read');
+    final response = await _client.post(
+      '/channels/read',
+      data: {},
+    );
     return EmptyResponse.fromJson(response.data);
   }
 

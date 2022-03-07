@@ -46,4 +46,17 @@ class UserApi {
     );
     return UpdateUsersResponse.fromJson(response.data);
   }
+
+  /// Batch partial update of [users].
+  Future<UpdateUsersResponse> partialUpdateUsers(
+    List<PartialUpdateUserRequest> users,
+  ) async {
+    final response = await _client.patch(
+      '/users',
+      data: {
+        'users': users,
+      },
+    );
+    return UpdateUsersResponse.fromJson(response.data);
+  }
 }
