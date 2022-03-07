@@ -378,7 +378,12 @@ class DesktopVideoPackage {
           ),
         );
 
+  /// The video attachment to play.
   final Attachment attachment;
+
+  /// The VLC player to use.
   final Player player;
+
+  /// Whether to show the player controls or not.
   final bool showControls;
 }
