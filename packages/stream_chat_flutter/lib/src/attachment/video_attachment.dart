@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_title.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
+import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_desktop.dart'
+    hide ShowMessageCallback, ReturnActionType;
+import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -86,12 +89,24 @@ class VideoAttachment extends AttachmentWidget {
                       MaterialPageRoute(
                         builder: (_) => StreamChannel(
                           channel: channel,
-                          child: FullScreenMedia(
-                            mediaAttachments: message.attachments,
-                            startIndex: message.attachments.indexOf(attachment),
-                            userName: message.user?.name,
-                            message: message,
-                            onShowMessage: onShowMessage,
+                          child: PlatformWidgetBuilder(
+                            mobile: (context, child) => FullScreenMediaMobile(
+                              mediaAttachments: message.attachments,
+                              startIndex:
+                                  message.attachments.indexOf(attachment),
+                              userName: message.user?.name,
+                              message: message,
+                              onShowMessage: onShowMessage,
+                            ),
+                            desktop: (context, child) => FullScreenMediaDesktop(
+                              mediaAttachments: message.attachments,
+                              startIndex:
+                                  message.attachments.indexOf(attachment),
+                              userName: message.user?.name,
+                              message: message,
+                              onShowMessage: onShowMessage,
+                              autoplayVideos: true,
+                            ),
                           ),
                         ),
                       ),

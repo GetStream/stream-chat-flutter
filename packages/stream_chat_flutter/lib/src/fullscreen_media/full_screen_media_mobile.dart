@@ -25,9 +25,9 @@ enum ReturnActionType {
 typedef ShowMessageCallback = void Function(Message message, Channel channel);
 
 /// A full screen image widget
-class FullScreenMedia extends StatefulWidget {
+class FullScreenMediaMobile extends StatefulWidget {
   /// Instantiate a new FullScreenImage
-  const FullScreenMedia({
+  const FullScreenMediaMobile({
     Key? key,
     required this.mediaAttachments,
     required this.message,
@@ -63,10 +63,10 @@ class FullScreenMedia extends StatefulWidget {
   final bool autoplayVideos;
 
   @override
-  _FullScreenMediaState createState() => _FullScreenMediaState();
+  _FullScreenMediaMobileState createState() => _FullScreenMediaMobileState();
 }
 
-class _FullScreenMediaState extends State<FullScreenMedia>
+class _FullScreenMediaMobileState extends State<FullScreenMediaMobile>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
   late final PageController _pageController;

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -85,6 +86,12 @@ class StreamChat extends StatefulWidget {
 class StreamChatState extends State<StreamChat> {
   /// Gets client from widget
   StreamChatClient get client => widget.client;
+
+  @override
+  void initState() {
+    super.initState();
+    DartVLC.initialize();
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:native_context_menu/native_context_menu.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
+import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_desktop.dart'
+    hide ShowMessageCallback, ReturnActionType;
+import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget for constructing a group of images in message
@@ -32,7 +35,7 @@ class ImageGroup extends StatelessWidget {
   /// [MessageThemeData] to apply to message
   final MessageThemeData messageTheme;
 
-  /// Size of iamges
+  /// Size of images
   final Size size;
 
   /// Callback for when show message is tapped
@@ -133,12 +136,22 @@ class ImageGroup extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => StreamChannel(
           channel: channel,
-          child: FullScreenMedia(
-            mediaAttachments: images,
-            startIndex: index,
-            userName: message.user?.name,
-            message: message,
-            onShowMessage: onShowMessage,
+          child: PlatformWidgetBuilder(
+            mobile: (context, child) => FullScreenMediaMobile(
+              mediaAttachments: images,
+              startIndex: index,
+              userName: message.user?.name,
+              message: message,
+              onShowMessage: onShowMessage,
+            ),
+            desktop: (context, child) => FullScreenMediaDesktop(
+              mediaAttachments: images,
+              startIndex: index,
+              userName: message.user?.name,
+              message: message,
+              onShowMessage: onShowMessage,
+              autoplayVideos: true,
+            ),
           ),
         ),
       ),

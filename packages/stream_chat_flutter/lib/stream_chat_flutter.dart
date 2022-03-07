@@ -14,7 +14,7 @@ export 'src/connection_status_builder.dart';
 export 'src/date_divider.dart';
 export 'src/deleted_message.dart';
 export 'src/extension.dart' show IconButtonX;
-export 'src/full_screen_media.dart';
+export 'src/fullscreen_media/full_screen_media_mobile.dart';
 export 'src/gallery_footer.dart';
 export 'src/gallery_header.dart';
 export 'src/gradient_avatar.dart';
