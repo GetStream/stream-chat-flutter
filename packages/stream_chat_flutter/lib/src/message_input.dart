@@ -448,6 +448,7 @@ class MessageInputState extends State<MessageInput> {
               PlatformWidgetBuilder(
                 mobile: (context, child) => child,
                 child: QuotingMessageTopArea(
+                  hasQuotedMessage: _hasQuotedMessage,
                   onQuotedMessageCleared: widget.onQuotedMessageCleared,
                 ),
               ),
