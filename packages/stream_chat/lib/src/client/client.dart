@@ -1073,6 +1073,28 @@ class StreamChatClient {
   Future<UpdateUsersResponse> updateUsers(List<User> users) =>
       _chatApi.user.updateUsers(users);
 
+  /// Partially update the given user with [id].
+  /// Use [set] to define values to be set.
+  /// Use [unset] to define values to be unset.
+  Future<UpdateUsersResponse> partialUpdateUser(
+    String id, {
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) {
+    final user = PartialUpdateUserRequest(
+      id: id,
+      set: set,
+      unset: unset,
+    );
+    return partialUpdateUsers([user]);
+  }
+
+  /// Batch partial updates the [users].
+  Future<UpdateUsersResponse> partialUpdateUsers(
+    List<PartialUpdateUserRequest> users,
+  ) =>
+      _chatApi.user.partialUpdateUsers(users);
+
   /// Bans a user from all channels
   Future<EmptyResponse> banUser(
     String targetUserId, [
@@ -1157,15 +1179,22 @@ class StreamChatClient {
   Future<SendReactionResponse> sendReaction(
     String messageId,
     String reactionType, {
+    int score = 1,
     Map<String, Object?> extraData = const {},
     bool enforceUnique = false,
-  }) =>
-      _chatApi.message.sendReaction(
-        messageId,
-        reactionType,
-        extraData: extraData,
-        enforceUnique: enforceUnique,
-      );
+  }) {
+    final _extraData = {
+      'score': score,
+      ...extraData,
+    };
+
+    return _chatApi.message.sendReaction(
+      messageId,
+      reactionType,
+      extraData: _extraData,
+      enforceUnique: enforceUnique,
+    );
+  }
 
   /// Delete a [reactionType] from this [messageId]
   Future<EmptyResponse> deleteReaction(

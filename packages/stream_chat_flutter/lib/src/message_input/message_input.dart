@@ -356,6 +356,7 @@ class MessageInputState extends State<MessageInput>
     with RestorationMixin<MessageInput> {
   final _imagePicker = ImagePicker();
   late FocusNode _focusNode = widget.focusNode ?? FocusNode();
+  late final _isInternalFocusNode = widget.focusNode == null;
   bool _inputEnabled = true;
 
   bool get _commandEnabled => _effectiveController.value.command != null;
@@ -1168,26 +1169,31 @@ class MessageInputState extends State<MessageInput>
       };
     }
 
-    return UserMentionsOverlay(
-      query: query,
-      mentionAllAppUsers: widget.mentionAllAppUsers,
-      client: StreamChat.of(context).client,
-      channel: channel,
-      size: Size(renderObject.size.width - 16, 400),
-      mentionsTileBuilder: tileBuilder,
-      onMentionUserTap: (user) {
-        _effectiveController.addMentionedUser(user);
-        splits[splits.length - 1] = user.name;
-        final rejoin = splits.join('@');
+    return LayoutBuilder(
+      builder: (context, snapshot) => UserMentionsOverlay(
+        query: query,
+        mentionAllAppUsers: widget.mentionAllAppUsers,
+        client: StreamChat.of(context).client,
+        channel: channel,
+        size: Size(
+          renderObject.size.width - 16,
+          min(400, (snapshot.maxHeight - renderObject.size.height - 16).abs()),
+        ),
+        mentionsTileBuilder: tileBuilder,
+        onMentionUserTap: (user) {
+          _effectiveController.addMentionedUser(user);
+          splits[splits.length - 1] = user.name;
+          final rejoin = splits.join('@');
 
-        _effectiveController.text = rejoin +
-            _effectiveController.text.substring(
-              _effectiveController.selectionStart,
-            );
+          _effectiveController.text = rejoin +
+              _effectiveController.text.substring(
+                _effectiveController.selectionStart,
+              );
 
-        _onChangedDebounced.cancel();
-        setState(() => _showMentionsOverlay = false);
-      },
+          _onChangedDebounced.cancel();
+          setState(() => _showMentionsOverlay = false);
+        },
+      ),
     );
   }
 
@@ -1816,6 +1822,7 @@ class MessageInputState extends State<MessageInput>
         .removeListener(_onChangedDebounced);
     _controller?.dispose();
     _focusNode.removeListener(_focusNodeListener);
+    if (_isInternalFocusNode) _focusNode.dispose();
     _stopSlowMode();
     _onChangedDebounced.cancel();
     super.dispose();
