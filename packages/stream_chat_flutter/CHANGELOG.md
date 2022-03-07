@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- `centerTitle` and `elevation` properties to `ChannelHeader`.
+
 ## 3.5.0
 
 🐞 Fixed
@@ -6,11 +12,6 @@
 - [[#805]](https://github.com/GetStream/stream-chat-flutter/issues/805) Updated chewie dependency version to 1.3.0
 - Fix `showScrollToBottom` in `MessageListView` not respecting false value.
 - Fix default `Channel` route not opening from `ChannelListView` when `ChannelAvatar` is tapped
-
-✅ Added
-
-- `centerTitle` and `elevation` properties to `ChannelHeader`.
-
 
 ## 3.4.0
 - Updated `stream_chat_flutter_core` dependency to [`3.4.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
