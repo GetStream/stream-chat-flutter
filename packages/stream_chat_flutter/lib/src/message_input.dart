@@ -200,6 +200,7 @@ class MessageInput extends StatefulWidget {
     this.customOverlays = const [],
     this.mentionAllAppUsers = false,
     this.shouldKeepFocusAfterMessage,
+    this.autocorrectEnabled,
   })  : assert(
           initialMessage == null || editMessage == null,
           "Can't provide both `initialMessage` and `editMessage`",
@@ -321,6 +322,8 @@ class MessageInput extends StatefulWidget {
   /// Defines if the [MessageInput] loses focuses after a message is sent.
   /// The default behaviour keeps focus until a command is enabled.
   final bool? shouldKeepFocusAfterMessage;
+
+  final bool? autocorrectEnabled;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -707,6 +710,7 @@ class MessageInputState extends State<MessageInput> {
                     textAlignVertical: TextAlignVertical.center,
                     decoration: _getInputDecoration(context),
                     textCapitalization: TextCapitalization.sentences,
+                    autocorrect: widget.autocorrectEnabled ?? true,
                   ),
                 ),
               ],
