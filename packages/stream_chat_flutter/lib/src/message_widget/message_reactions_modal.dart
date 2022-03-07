@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_widget/reaction_bubble.dart';
@@ -189,7 +191,7 @@ class MessageReactionsModal extends StatelessWidget {
     final chatThemeData = StreamChatTheme.of(context);
     return ConstrainedBox(
       constraints: BoxConstraints.loose(
-        const Size(64, 98), //TODO(Groovin): fix on desktop
+        _computeSizeFromPlatform(),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -241,5 +243,13 @@ class MessageReactionsModal extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Size _computeSizeFromPlatform() {
+    if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+      return const Size(64, 100);
+    } else {
+      return const Size(64, 98);
+    }
   }
 }
