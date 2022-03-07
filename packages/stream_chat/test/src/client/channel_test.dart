@@ -1132,7 +1132,10 @@ void main() {
 
       test('should work fine with score passed explicitly', () async {
         const type = 'test-reaction-type';
-        final message = Message(id: 'test-message-id');
+        final message = Message(
+          id: 'test-message-id',
+          status: MessageSendingStatus.sent,
+        );
 
         const score = 5;
         final reaction = Reaction(
@@ -1192,7 +1195,10 @@ void main() {
       test('should work fine with score passed explicitly and in extraData',
           () async {
         const type = 'test-reaction-type';
-        final message = Message(id: 'test-message-id');
+        final message = Message(
+          id: 'test-message-id',
+          status: MessageSendingStatus.sent,
+        );
 
         const score = 5;
         const extraDataScore = 3;
@@ -1392,6 +1398,7 @@ void main() {
         final message = Message(
           id: 'test-message-id',
           parentId: 'test-parent-id', // is thread message
+          status: MessageSendingStatus.sent,
         );
 
         final reaction = Reaction(type: type, messageId: message.id);
@@ -1441,6 +1448,7 @@ void main() {
           final message = Message(
             id: 'test-message-id',
             parentId: 'test-parent-id', // is thread message
+            status: MessageSendingStatus.sent,
           );
 
           final reaction = Reaction(type: type, messageId: message.id);
@@ -1508,6 +1516,7 @@ void main() {
             latestReactions: [prevReaction],
             reactionScores: const {prevType: 1},
             reactionCounts: const {prevType: 1},
+            status: MessageSendingStatus.sent,
           );
 
           const type = 'test-reaction-type-2';
@@ -1688,11 +1697,13 @@ void main() {
         );
         final message = Message(
           id: messageId,
-          parentId: parentId, // is thread
+          parentId: parentId,
+          // is thread
           ownReactions: [reaction],
           latestReactions: [reaction],
           reactionScores: const {type: 1},
           reactionCounts: const {type: 1},
+          status: MessageSendingStatus.sent,
         );
 
         when(() => client.deleteReaction(messageId, type))
@@ -1745,6 +1756,7 @@ void main() {
             latestReactions: [reaction],
             reactionScores: const {type: 1},
             reactionCounts: const {type: 1},
+            status: MessageSendingStatus.sent,
           );
 
           when(() => client.deleteReaction(messageId, type))
