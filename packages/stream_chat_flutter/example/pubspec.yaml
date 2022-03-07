@@ -27,9 +27,12 @@ dependencies:
   cupertino_icons: ^1.0.3
   flutter:
     sdk: flutter
-  stream_chat_flutter: ^3.4.0
-  stream_chat_localizations: ^2.1.0
-  stream_chat_persistence: ^3.1.0
+  stream_chat_flutter: 
+    path: ../
+  stream_chat_localizations: 
+    path: ../../stream_chat_localizations
+  stream_chat_persistence: 
+    path: ../../stream_chat_persistence
 
 dev_dependencies:
   flutter_test:
