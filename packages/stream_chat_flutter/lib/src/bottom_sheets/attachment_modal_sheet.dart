@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template attachmentModalSheet}
+/// The modalBottomSheet that appears when a mobile user attempts to add
+/// attachments to a chat.
+///
+/// Should not be used on desktop or web.
+/// {@endtemplate}
 class AttachmentModalSheet extends StatelessWidget {
+  /// {@macro attachmentModalSheet}
   const AttachmentModalSheet({
     Key? key,
     required this.onFileTap,
@@ -10,8 +16,13 @@ class AttachmentModalSheet extends StatelessWidget {
     required this.onVideoTap,
   }) : super(key: key);
 
+  /// The action to perform when the "file" button is tapped.
   final VoidCallback onFileTap;
+
+  /// The action to perform when the "photo" button is tapped.
   final VoidCallback onPhotoTap;
+
+  /// The action to perform when the "video" button is tapped.
   final VoidCallback onVideoTap;
 
   @override

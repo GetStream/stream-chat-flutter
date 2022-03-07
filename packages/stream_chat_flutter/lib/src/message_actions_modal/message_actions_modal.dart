@@ -5,14 +5,7 @@ import 'package:stream_chat_flutter/src/bottom_sheets/edit_message_sheet.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
 import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/message_actions_modal/ReplyButton.dart';
-import 'package:stream_chat_flutter/src/message_actions_modal/copy_message_button.dart';
-import 'package:stream_chat_flutter/src/message_actions_modal/delete_message_button.dart';
-import 'package:stream_chat_flutter/src/message_actions_modal/edit_message_button.dart';
-import 'package:stream_chat_flutter/src/message_actions_modal/flag_message_button.dart';
-import 'package:stream_chat_flutter/src/message_actions_modal/pin_message_button.dart';
-import 'package:stream_chat_flutter/src/message_actions_modal/resend_message_button.dart';
-import 'package:stream_chat_flutter/src/message_actions_modal/thread_reply_button.dart';
+import 'package:stream_chat_flutter/src/message_actions_modal/mam_widgets.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template dmCheckbox}
+/// Prompts the user to send a reply to a message thread as a DM.
+/// {@endtemplate}
 class DmCheckbox extends StatelessWidget {
+  /// {@macro dmCheckbox}
   const DmCheckbox({
     Key? key,
     required this.foregroundDecoration,
@@ -11,9 +15,16 @@ class DmCheckbox extends StatelessWidget {
     required this.crossFadeState,
   }) : super(key: key);
 
+  /// The decoration to use for the button's foreground.
   final BoxDecoration foregroundDecoration;
+
+  /// The color to use for the button.
   final Color color;
+
+  /// The action to perform when the button is tapped or clicked.
   final VoidCallback onTap;
+
+  /// The [CrossFadeState] of the animation.
   final CrossFadeState crossFadeState;
 
   @override

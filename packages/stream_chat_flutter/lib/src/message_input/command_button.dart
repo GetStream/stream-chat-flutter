@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 
+/// {@template commandButton}
+/// The button that allows a user to use commands in a chat.
+/// {@endtemplate}
 class CommandButton extends StatelessWidget {
+  /// {@macro commandButton}
   const CommandButton({
     Key? key,
     required this.icon,
     required this.onPressed,
   }) : super(key: key);
 
+  /// The icon to use.
   final Widget icon;
+
+  /// The action to perform when the button is pressed or clicked.
   final VoidCallback onPressed;
 
   @override
