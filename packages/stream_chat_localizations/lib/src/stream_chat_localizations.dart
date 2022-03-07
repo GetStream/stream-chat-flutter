@@ -74,6 +74,8 @@ GlobalStreamChatLocalizations? getStreamChatTranslation(Locale locale) {
       return const StreamChatLocalizationsKo();
     case 'pt':
       return const StreamChatLocalizationsPt();
+    default:
+      return null;
   }
 }
 

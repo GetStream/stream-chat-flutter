@@ -94,7 +94,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Subtitle widget
   final Widget? subtitle;
 
-  // Whether the title should be centered
+  /// Whether the title should be centered
   final bool? centerTitle;
 
   /// Leading widget

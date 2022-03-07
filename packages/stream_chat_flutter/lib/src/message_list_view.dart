@@ -529,6 +529,7 @@ class _MessageListViewState extends State<MessageListView> {
                         return ((index + 2) * 2) - 1;
                       }
                     }
+                    return null;
                   },
 
                   // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
