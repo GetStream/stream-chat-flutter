@@ -63,19 +63,23 @@ void main() {
                     Event(type: EventType.typingStart),
               }));
 
+      const typingKey = Key('typing');
+
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
           client: client,
           child: StreamChannel(
             channel: channel,
             child: const Scaffold(
-              body: TypingIndicator(),
+              body: TypingIndicator(
+                key: typingKey,
+              ),
             ),
           ),
         ),
       ));
 
-      expect(find.byKey(const Key('typings')), findsOneWidget);
+      expect(find.byKey(typingKey), findsOneWidget);
     },
   );
 }

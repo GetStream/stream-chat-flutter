@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
@@ -188,7 +190,7 @@ class MessageInputThemeData with Diagnosticable {
         linkHighlightColor:
             Color.lerp(a.linkHighlightColor, b.linkHighlightColor, t),
         enableSafeArea: a.enableSafeArea,
-        elevation: Tween(begin: a.elevation, end: b.elevation).transform(t),
+        elevation: lerpDouble(a.elevation, b.elevation, t),
         shadow: BoxShadow.lerp(a.shadow, b.shadow, t),
       );
 
