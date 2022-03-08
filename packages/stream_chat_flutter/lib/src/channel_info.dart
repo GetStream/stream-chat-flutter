@@ -94,11 +94,12 @@ class ChannelInfo extends StatelessWidget {
       return alternativeWidget ?? const Offstage();
     }
 
-    return TypingIndicator(
-      parentId: parentId,
-      alignment: Alignment.center,
-      alternativeWidget: alternativeWidget,
-      style: textStyle,
+    return Align(
+      child: TypingIndicator(
+        parentId: parentId,
+        style: textStyle,
+        alternativeWidget: alternativeWidget,
+      ),
     );
   }
 

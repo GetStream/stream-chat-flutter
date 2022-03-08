@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// It shows the current [Channel] name using a [Text] widget.
 ///
 /// The widget uses a [StreamBuilder] to render the channel information
 /// image as soon as it updates.
-@Deprecated(
-  "'ChannelName' is deprecated and shouldn't be used. "
-  "Please use 'StreamChannelName' instead.",
-)
-class ChannelName extends StatelessWidget {
+class StreamChannelName extends StatelessWidget {
   /// Instantiate a new ChannelName
-  const ChannelName({
+  StreamChannelName({
     Key? key,
+    required this.channel,
     this.textStyle,
     this.textOverflow = TextOverflow.ellipsis,
-  }) : super(key: key);
+  })  : assert(
+          channel.state != null,
+          'Channel ${channel.id} is not initialized',
+        ),
+        super(key: key);
+
+  /// The [Channel] to show the name for.
+  final Channel channel;
 
   /// The style of the text displayed
   final TextStyle? textStyle;
@@ -25,26 +30,19 @@ class ChannelName extends StatelessWidget {
   final TextOverflow textOverflow;
 
   @override
-  Widget build(BuildContext context) {
-    final client = StreamChat.of(context);
-    final channel = StreamChannel.of(context).channel;
-
-    assert(channel.state != null, 'Channel ${channel.id} is not initialized');
-
-    return BetterStreamBuilder<String>(
-      stream: channel.nameStream,
-      initialData: channel.name,
-      builder: (context, channelName) => Text(
-        channelName,
-        style: textStyle,
-        overflow: textOverflow,
-      ),
-      noDataBuilder: (context) => _generateName(
-        client.currentUser!,
-        channel.state!.members,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => BetterStreamBuilder<String>(
+        stream: channel.nameStream,
+        initialData: channel.name,
+        builder: (context, channelName) => Text(
+          channelName,
+          style: textStyle,
+          overflow: textOverflow,
+        ),
+        noDataBuilder: (context) => _generateName(
+          channel.client.state.currentUser!,
+          channel.state!.members,
+        ),
+      );
 
   Widget _generateName(
     User currentUser,

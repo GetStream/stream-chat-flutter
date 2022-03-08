@@ -44,29 +44,28 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The widget renders the ui based on the first ancestor of type
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
-
-@Deprecated(
-  "'ChannelAvatar' is deprecated and shouldn't be used. "
-  "Please use 'StreamChannelAvatar' instead.",
-)
-class ChannelAvatar extends StatelessWidget {
+class StreamChannelAvatar extends StatelessWidget {
   /// Instantiate a new ChannelImage
-  const ChannelAvatar({
+  StreamChannelAvatar({
     Key? key,
-    this.channel,
+    required this.channel,
     this.constraints,
     this.onTap,
     this.borderRadius,
     this.selected = false,
     this.selectionColor,
     this.selectionThickness = 4,
-  }) : super(key: key);
+  })  : assert(
+          channel.state != null,
+          'Channel ${channel.id} is not initialized',
+        ),
+        super(key: key);
 
   /// [BorderRadius] to display the widget
   final BorderRadius? borderRadius;
 
   /// The channel to show the image of
-  final Channel? channel;
+  final Channel channel;
 
   /// The diameter of the image
   final BoxConstraints? constraints;
@@ -85,10 +84,7 @@ class ChannelAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final streamChat = StreamChat.of(context);
-    final channel = this.channel ?? StreamChannel.of(context).channel;
-
-    assert(channel.state != null, 'Channel ${channel.id} is not initialized');
+    final client = channel.client.state;
 
     final chatThemeData = StreamChatTheme.of(context);
     final colorTheme = chatThemeData.colorTheme;
@@ -142,7 +138,7 @@ class ChannelAvatar extends StatelessWidget {
         return child;
       },
       noDataBuilder: (context) {
-        final currentUser = streamChat.currentUser!;
+        final currentUser = client.currentUser!;
         final otherMembers = channel.state!.members
             .where((it) => it.userId != currentUser.id)
             .toList(growable: false);
@@ -150,7 +146,7 @@ class ChannelAvatar extends StatelessWidget {
         // our own space, no other members
         if (otherMembers.isEmpty) {
           return BetterStreamBuilder<User>(
-            stream: streamChat.client.state.currentUserStream.map((it) => it!),
+            stream: client.currentUserStream.map((it) => it!),
             initialData: currentUser,
             builder: (context, user) => UserAvatar(
               borderRadius: borderRadius ?? previewTheme?.borderRadius,
@@ -189,6 +185,7 @@ class ChannelAvatar extends StatelessWidget {
 
         // Group conversation
         return GroupAvatar(
+          channel: channel,
           members: otherMembers,
           borderRadius: borderRadius ?? previewTheme?.borderRadius,
           constraints: constraints ?? previewTheme?.constraints,

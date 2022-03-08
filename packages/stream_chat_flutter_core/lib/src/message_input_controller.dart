@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat/stream_chat.dart';
+
+import 'package:stream_chat_flutter_core/src/message_text_field_controller.dart';
 
 /// A value listenable builder related to a [Message].
 ///

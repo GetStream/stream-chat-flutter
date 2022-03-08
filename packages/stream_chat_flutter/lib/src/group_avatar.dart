@@ -6,6 +6,7 @@ class GroupAvatar extends StatelessWidget {
   /// Constructor for creating a [GroupAvatar]
   const GroupAvatar({
     Key? key,
+    this.channel,
     required this.members,
     this.constraints,
     this.onTap,
@@ -14,6 +15,9 @@ class GroupAvatar extends StatelessWidget {
     this.selectionColor,
     this.selectionThickness = 4,
   }) : super(key: key);
+
+  /// The channel of the avatar
+  final Channel? channel;
 
   /// List of images to display
   final List<Member> members;
@@ -38,7 +42,7 @@ class GroupAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
+    final channel = this.channel ?? StreamChannel.of(context).channel;
 
     assert(channel.state != null, 'Channel ${channel.id} is not initialized');
 

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_input/tld.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A function that takes a [BuildContext] and returns a [TextStyle].
 typedef TextStyleBuilder = TextStyle? Function(
@@ -33,17 +31,8 @@ class MessageTextFieldController extends TextEditingController {
     TextStyle? style,
     required bool withComposing,
   }) {
-    final pattern = textPatternStyle ??
-        {
-          RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+'):
-              (context, text) {
-            if (!text.split('.').last.isValidTLD()) return null;
-            return TextStyle(
-              color: MessageInputTheme.of(context).linkHighlightColor,
-            );
-          },
-        };
-    if (pattern.isEmpty) {
+    final pattern = textPatternStyle;
+    if (pattern == null || pattern.isEmpty) {
       return super.buildTextSpan(
         context: context,
         style: style,
