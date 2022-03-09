@@ -65,11 +65,13 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
     this.onBackPressed,
     this.title,
     this.subtitle,
+    this.centerTitle,
     this.leading,
     this.actions,
     this.onTitleTap,
     this.showTypingIndicator = true,
     this.backgroundColor,
+    this.elevation,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -92,6 +94,9 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Subtitle widget
   final Widget? subtitle;
 
+  /// Whether the title should be centered
+  final bool? centerTitle;
+
   /// Leading widget
   final Widget? leading;
 
@@ -104,6 +109,9 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
 
   /// The background color of this [ThreadHeader].
   final Color? backgroundColor;
+
+  /// The elevation for this [ThreadHeader].
+  final double? elevation;
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +142,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
       systemOverlayStyle: theme.brightness == Brightness.dark
           ? SystemUiOverlayStyle.light
           : SystemUiOverlayStyle.dark,
-      elevation: 1,
+      elevation: elevation ?? 1,
       leading: leading ??
           (showBackButton
               ? StreamBackButton(
@@ -144,7 +152,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                 )
               : const SizedBox()),
       backgroundColor: backgroundColor ?? channelHeaderTheme.color,
-      centerTitle: true,
+      centerTitle: centerTitle,
       actions: actions,
       title: InkWell(
         onTap: onTitleTap,
