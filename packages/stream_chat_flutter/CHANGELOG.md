@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- `centerTitle` and `elevation` properties to `ChannelHeader`.
+- `centerTitle` and `elevation` properties to `ChannelHeader`, `ThreadHeader` and `ChannelListHeader`.
 
 ## 3.5.0
 
