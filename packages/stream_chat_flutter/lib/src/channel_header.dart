@@ -170,7 +170,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ),
                 ],
-            centerTitle: centerTitle ?? true,
+            centerTitle: _getEffectiveCenterTitle(theme),
             title: InkWell(
               onTap: onTitleTap,
               child: SizedBox(
@@ -202,4 +202,24 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   final Size preferredSize;
+
+  /// Returns the effective center title for the current theme and platform.
+  ///
+  /// This code is aligned with the [AppBar]'s [AppBar.centerTitle].
+  bool _getEffectiveCenterTitle(ThemeData theme) {
+    if (centerTitle != null) return centerTitle!;
+    if (theme.appBarTheme.centerTitle != null) {
+      return theme.appBarTheme.centerTitle!;
+    }
+    switch (theme.platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return false;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return actions == null || actions!.length < 2;
+    }
+  }
 }
