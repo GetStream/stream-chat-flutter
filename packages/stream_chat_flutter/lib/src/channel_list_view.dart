@@ -1,14 +1,10 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/channel_bottom_sheet.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Callback called when tapping on a channel
 typedef ChannelTapCallback = void Function(Channel, Widget?);
@@ -603,7 +599,9 @@ class _ChannelListViewState extends State<ChannelListView> {
               child: ChannelPreview(
                 onLongPress: widget.onChannelLongPress,
                 channel: channel,
-                onImageTap: () => widget.onImageTap?.call(channel),
+                onImageTap: widget.onImageTap != null
+                    ? () => widget.onImageTap!(channel)
+                    : null,
                 onTap: (channel) => onTap(channel, widget.channelWidget),
               ),
             ),
@@ -616,7 +614,7 @@ class _ChannelListViewState extends State<ChannelListView> {
     if (widget.onChannelTap != null) {
       onTap = widget.onChannelTap!;
     } else {
-      onTap = (client, _) {
+      onTap = (channel, _) {
         if (widget.channelWidget == null) {
           return;
         }
@@ -624,7 +622,7 @@ class _ChannelListViewState extends State<ChannelListView> {
           context,
           MaterialPageRoute(
             builder: (context) => StreamChannel(
-              channel: client,
+              channel: channel,
               child: widget.channelWidget!,
             ),
           ),

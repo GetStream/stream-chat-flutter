@@ -66,8 +66,11 @@ class StreamChatClient {
     this.logLevel = Level.WARNING,
     LogHandlerFunction? logHandlerFunction,
     RetryPolicy? retryPolicy,
-    Location? location,
-    @Deprecated('Use location to change baseUrl instead') String? baseURL,
+    @Deprecated('''
+    Location is now deprecated in favor of the new edge server. Will be removed in v4.0.0.
+    Read more here: https://getstream.io/blog/chat-edge-infrastructure
+    ''') Location? location,
+    String? baseURL,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     StreamChatApi? chatApi,
@@ -79,7 +82,6 @@ class StreamChatClient {
 
     final options = StreamHttpClientOptions(
       baseUrl: baseURL,
-      location: location,
       connectTimeout: connectTimeout,
       receiveTimeout: receiveTimeout,
       headers: {'X-Stream-Client': defaultUserAgent},
@@ -685,6 +687,18 @@ class StreamChatClient {
     return response;
   }
 
+  /// Query banned users.
+  Future<QueryBannedUsersResponse> queryBannedUsers({
+    required Filter filter,
+    List<SortOption>? sort,
+    PaginationParams? pagination,
+  }) =>
+      _chatApi.moderation.queryBannedUsers(
+        filter: filter,
+        sort: sort,
+        pagination: pagination,
+      );
+
   /// A message search.
   Future<SearchMessagesResponse> search(
     Filter filter, {
@@ -1059,6 +1073,28 @@ class StreamChatClient {
   Future<UpdateUsersResponse> updateUsers(List<User> users) =>
       _chatApi.user.updateUsers(users);
 
+  /// Partially update the given user with [id].
+  /// Use [set] to define values to be set.
+  /// Use [unset] to define values to be unset.
+  Future<UpdateUsersResponse> partialUpdateUser(
+    String id, {
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) {
+    final user = PartialUpdateUserRequest(
+      id: id,
+      set: set,
+      unset: unset,
+    );
+    return partialUpdateUsers([user]);
+  }
+
+  /// Batch partial updates the [users].
+  Future<UpdateUsersResponse> partialUpdateUsers(
+    List<PartialUpdateUserRequest> users,
+  ) =>
+      _chatApi.user.partialUpdateUsers(users);
+
   /// Bans a user from all channels
   Future<EmptyResponse> banUser(
     String targetUserId, [
@@ -1143,15 +1179,22 @@ class StreamChatClient {
   Future<SendReactionResponse> sendReaction(
     String messageId,
     String reactionType, {
+    int score = 1,
     Map<String, Object?> extraData = const {},
     bool enforceUnique = false,
-  }) =>
-      _chatApi.message.sendReaction(
-        messageId,
-        reactionType,
-        extraData: extraData,
-        enforceUnique: enforceUnique,
-      );
+  }) {
+    final _extraData = {
+      'score': score,
+      ...extraData,
+    };
+
+    return _chatApi.message.sendReaction(
+      messageId,
+      reactionType,
+      extraData: _extraData,
+      enforceUnique: enforceUnique,
+    );
+  }
 
   /// Delete a [reactionType] from this [messageId]
   Future<EmptyResponse> deleteReaction(

@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/stream_controller_extension.dart';
 
 /// Specifies query direction for pagination
 enum QueryDirection {
@@ -92,10 +93,10 @@ class StreamChannelState extends State<StreamChannel> {
         channel.state == null) {
       return;
     }
-    _queryTopMessagesController.add(true);
+    _queryTopMessagesController.safeAdd(true);
 
     if (channel.state!.messages.isEmpty) {
-      return _queryTopMessagesController.add(false);
+      return _queryTopMessagesController.safeAdd(false);
     }
 
     final oldestMessage = channel.state!.messages.first;
@@ -113,9 +114,9 @@ class StreamChannelState extends State<StreamChannel> {
       if (state.messages.isEmpty || state.messages.length < limit) {
         _topPaginationEnded = true;
       }
-      _queryTopMessagesController.add(false);
+      _queryTopMessagesController.safeAdd(false);
     } catch (e, stk) {
-      _queryTopMessagesController.addError(e, stk);
+      _queryTopMessagesController.safeAddError(e, stk);
     }
   }
 
@@ -128,10 +129,10 @@ class StreamChannelState extends State<StreamChannel> {
         _queryBottomMessagesController.value ||
         channel.state == null ||
         channel.state!.isUpToDate) return;
-    _queryBottomMessagesController.add(true);
+    _queryBottomMessagesController.safeAdd(true);
 
     if (channel.state!.messages.isEmpty) {
-      return _queryBottomMessagesController.add(false);
+      return _queryBottomMessagesController.safeAdd(false);
     }
 
     final recentMessage = channel.state!.messages.last;
@@ -148,9 +149,9 @@ class StreamChannelState extends State<StreamChannel> {
       if (state.messages.isEmpty || state.messages.length < limit) {
         _bottomPaginationEnded = true;
       }
-      _queryBottomMessagesController.add(false);
+      _queryBottomMessagesController.safeAdd(false);
     } catch (e, stk) {
-      _queryBottomMessagesController.addError(e, stk);
+      _queryBottomMessagesController.safeAddError(e, stk);
     }
   }
 
@@ -181,7 +182,7 @@ class StreamChannelState extends State<StreamChannel> {
     if (_topPaginationEnded ||
         _queryTopMessagesController.value ||
         channel.state == null) return;
-    _queryTopMessagesController.add(true);
+    _queryTopMessagesController.safeAdd(true);
 
     Message? message;
     if (channel.state!.threads.containsKey(parentId)) {
@@ -203,9 +204,9 @@ class StreamChannelState extends State<StreamChannel> {
       if (response.messages.isEmpty || response.messages.length < limit) {
         _topPaginationEnded = true;
       }
-      _queryTopMessagesController.add(false);
+      _queryTopMessagesController.safeAdd(false);
     } catch (e, stk) {
-      _queryTopMessagesController.addError(e, stk);
+      _queryTopMessagesController.safeAddError(e, stk);
     }
   }
 

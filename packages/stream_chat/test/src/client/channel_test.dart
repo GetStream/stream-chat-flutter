@@ -1,6 +1,6 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
+import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -1116,6 +1116,135 @@ void main() {
         verify(() => client.sendReaction(message.id, type)).called(1);
       });
 
+      test('should work fine with score passed explicitly', () async {
+        const type = 'test-reaction-type';
+        final message = Message(id: 'test-message-id');
+
+        const score = 5;
+        final reaction = Reaction(
+          type: type,
+          messageId: message.id,
+          score: score,
+        );
+
+        when(() => client.sendReaction(
+              message.id,
+              type,
+              score: score,
+            )).thenAnswer(
+          (_) async => SendReactionResponse()
+            ..message = message
+            ..reaction = reaction,
+        );
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  status: MessageSendingStatus.sent,
+                  reactionCounts: {type: 1},
+                  reactionScores: {type: score},
+                  latestReactions: [reaction],
+                  ownReactions: [reaction],
+                ),
+                matchReactions: true,
+                matchSendingStatus: true,
+              ),
+            ],
+          ]),
+        );
+
+        final res = await channel.sendReaction(
+          message,
+          type,
+          score: score,
+        );
+
+        expect(res, isNotNull);
+        expect(res.reaction.type, type);
+        expect(res.reaction.messageId, message.id);
+        expect(res.reaction.score, score);
+
+        verify(() => client.sendReaction(
+              message.id,
+              type,
+              score: score,
+            )).called(1);
+      });
+
+      test('should work fine with score passed explicitly and in extraData',
+          () async {
+        const type = 'test-reaction-type';
+        final message = Message(id: 'test-message-id');
+
+        const score = 5;
+        const extraDataScore = 3;
+        const extraData = {
+          'score': extraDataScore,
+        };
+        final reaction = Reaction(
+          type: type,
+          messageId: message.id,
+          score: extraDataScore,
+        );
+
+        when(() => client.sendReaction(
+              message.id,
+              type,
+              score: score,
+              extraData: extraData,
+            )).thenAnswer(
+          (_) async => SendReactionResponse()
+            ..message = message
+            ..reaction = reaction,
+        );
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  status: MessageSendingStatus.sent,
+                  reactionCounts: {type: 1},
+                  reactionScores: {type: extraDataScore},
+                  latestReactions: [reaction],
+                  ownReactions: [reaction],
+                ),
+                matchReactions: true,
+                matchSendingStatus: true,
+              ),
+            ],
+          ]),
+        );
+
+        final res = await channel.sendReaction(
+          message,
+          type,
+          score: score,
+          extraData: extraData,
+        );
+
+        expect(res, isNotNull);
+        expect(res.reaction.type, type);
+        expect(res.reaction.messageId, message.id);
+        expect(
+          res.reaction.score,
+          extraDataScore,
+        );
+
+        verify(() => client.sendReaction(
+              message.id,
+              type,
+              score: score,
+              extraData: extraData,
+            )).called(1);
+      });
+
       test(
         'should restore previous message if `client.sendReaction` throws',
         () async {
@@ -1239,6 +1368,189 @@ void main() {
       );
     });
 
+    group('`.sendReaction in thread`', () {
+      test('should work fine', () async {
+        const type = 'test-reaction-type';
+        final message = Message(
+          id: 'test-message-id',
+          parentId: 'test-parent-id', // is thread message
+        );
+
+        final reaction = Reaction(type: type, messageId: message.id);
+
+        when(() => client.sendReaction(message.id, type)).thenAnswer(
+          (_) async => SendReactionResponse()
+            ..message = message
+            ..reaction = reaction,
+        );
+
+        expectLater(
+          channel.state?.threadsStream
+              // skipping first seed message list -> [] messages
+              .skip(1)
+              .map((event) => event['test-parent-id']),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  status: MessageSendingStatus.sent,
+                  reactionCounts: {type: 1},
+                  reactionScores: {type: 1},
+                  latestReactions: [reaction],
+                  ownReactions: [reaction],
+                ),
+                matchReactions: true,
+                matchSendingStatus: true,
+                matchParentId: true,
+              ),
+            ],
+          ]),
+        );
+
+        final res = await channel.sendReaction(message, type);
+
+        expect(res, isNotNull);
+        expect(res.reaction.type, type);
+        expect(res.reaction.messageId, message.id);
+
+        verify(() => client.sendReaction(message.id, type)).called(1);
+      });
+
+      test(
+        '''should restore previous thread message if `client.sendReaction` throws''',
+        () async {
+          const type = 'test-reaction-type';
+          final message = Message(
+            id: 'test-message-id',
+            parentId: 'test-parent-id', // is thread message
+          );
+
+          final reaction = Reaction(type: type, messageId: message.id);
+
+          when(() => client.sendReaction(message.id, type))
+              .thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+
+          expectLater(
+            // skipping first seed message list -> [] messages
+            channel.state?.threadsStream
+                .skip(1)
+                .map((event) => event['test-parent-id']),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    status: MessageSendingStatus.sent,
+                    reactionCounts: {type: 1},
+                    reactionScores: {type: 1},
+                    latestReactions: [reaction],
+                    ownReactions: [reaction],
+                  ),
+                  matchReactions: true,
+                  matchSendingStatus: true,
+                  matchParentId: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message,
+                  matchReactions: true,
+                  matchSendingStatus: true,
+                  matchParentId: true,
+                ),
+              ],
+            ]),
+          );
+
+          try {
+            await channel.sendReaction(message, type);
+          } catch (e) {
+            expect(e, isA<StreamChatNetworkError>());
+          }
+
+          verify(() => client.sendReaction(message.id, type)).called(1);
+        },
+      );
+
+      test(
+        '''should override previous thread reaction if present and `enforceUnique` is true''',
+        () async {
+          const userId = 'test-user-id';
+          const messageId = 'test-message-id';
+          const parentId = 'test-parent-id';
+          const prevType = 'test-reaction-type';
+          final prevReaction = Reaction(
+            type: prevType,
+            messageId: messageId,
+            userId: userId,
+          );
+          final message = Message(
+            id: messageId,
+            parentId: parentId,
+            ownReactions: [prevReaction],
+            latestReactions: [prevReaction],
+            reactionScores: const {prevType: 1},
+            reactionCounts: const {prevType: 1},
+          );
+
+          const type = 'test-reaction-type-2';
+          final newReaction = Reaction(
+            type: type,
+            messageId: messageId,
+            userId: userId,
+          );
+          final newMessage = message.copyWith(
+            ownReactions: [newReaction],
+            latestReactions: [newReaction],
+          );
+
+          const enforceUnique = true;
+
+          when(() => client.sendReaction(
+                messageId,
+                type,
+                enforceUnique: enforceUnique,
+              )).thenAnswer(
+            (_) async => SendReactionResponse()
+              ..message = newMessage
+              ..reaction = newReaction,
+          );
+
+          expectLater(
+            // skipping first seed message list -> [] messages
+            channel.state?.threadsStream
+                .skip(1)
+                .map((event) => event['test-parent-id']),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  newMessage.copyWith(status: MessageSendingStatus.sent),
+                  matchReactions: true,
+                  matchSendingStatus: true,
+                  matchParentId: true,
+                ),
+              ],
+            ]),
+          );
+
+          final res = await channel.sendReaction(
+            message,
+            type,
+            enforceUnique: enforceUnique,
+          );
+
+          expect(res, isNotNull);
+          expect(res.reaction.type, type);
+          expect(res.reaction.messageId, messageId);
+
+          verify(() => client.sendReaction(
+                messageId,
+                type,
+                enforceUnique: enforceUnique,
+              )).called(1);
+        },
+      );
+    });
+
     group('`.deleteReaction`', () {
       test('should work fine', () async {
         const userId = 'test-user-id';
@@ -1327,6 +1639,121 @@ void main() {
                   message,
                   matchReactions: true,
                   matchSendingStatus: true,
+                ),
+              ],
+            ]),
+          );
+
+          try {
+            await channel.deleteReaction(message, reaction);
+          } catch (e) {
+            expect(e, isA<StreamChatNetworkError>());
+          }
+
+          verify(() => client.deleteReaction(messageId, type)).called(1);
+        },
+      );
+    });
+
+    group('`.deleteReaction in thread`', () {
+      test('should work fine', () async {
+        const userId = 'test-user-id';
+        const messageId = 'test-message-id';
+        const parentId = 'test-parent-id';
+        const type = 'test-reaction-type';
+        final reaction = Reaction(
+          type: type,
+          messageId: messageId,
+          userId: userId,
+        );
+        final message = Message(
+          id: messageId,
+          parentId: parentId, // is thread
+          ownReactions: [reaction],
+          latestReactions: [reaction],
+          reactionScores: const {type: 1},
+          reactionCounts: const {type: 1},
+        );
+
+        when(() => client.deleteReaction(messageId, type))
+            .thenAnswer((_) async => EmptyResponse());
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.threadsStream
+              .skip(1)
+              .map((event) => event['test-parent-id']),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  status: MessageSendingStatus.sent,
+                  latestReactions: [],
+                  ownReactions: [],
+                ),
+                matchReactions: true,
+                matchSendingStatus: true,
+                matchParentId: true,
+              ),
+            ],
+          ]),
+        );
+
+        final res = await channel.deleteReaction(message, reaction);
+
+        expect(res, isNotNull);
+
+        verify(() => client.deleteReaction(messageId, type)).called(1);
+      });
+
+      test(
+        'should restore prev message state if `client.deleteReaction` throws',
+        () async {
+          const userId = 'test-user-id';
+          const messageId = 'test-message-id';
+          const parentId = 'test-parent-id';
+          const type = 'test-reaction-type';
+          final reaction = Reaction(
+            type: type,
+            messageId: messageId,
+            userId: userId,
+          );
+          final message = Message(
+            id: messageId,
+            parentId: parentId,
+            ownReactions: [reaction],
+            latestReactions: [reaction],
+            reactionScores: const {type: 1},
+            reactionCounts: const {type: 1},
+          );
+
+          when(() => client.deleteReaction(messageId, type))
+              .thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+
+          expectLater(
+            // skipping first seed message list -> [] messages
+            channel.state?.threadsStream
+                .skip(1)
+                .map((event) => event['test-parent-id']),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    status: MessageSendingStatus.sent,
+                    latestReactions: [],
+                    ownReactions: [],
+                  ),
+                  matchReactions: true,
+                  matchSendingStatus: true,
+                  matchParentId: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message,
+                  matchReactions: true,
+                  matchSendingStatus: true,
+                  matchParentId: true,
                 ),
               ],
             ]),
@@ -1963,6 +2390,35 @@ void main() {
           )).called(1);
     });
 
+    test('`.queryBannedUsers`', () async {
+      final filter = Filter.equal('channel_cid', channelCid);
+
+      final bans = List.generate(
+        3,
+        (index) => BannedUser(
+          user: User(id: 'test-user-id-$index'),
+          bannedBy: User(id: 'test-user-id-${index + 1}'),
+        ),
+      );
+
+      when(() => client.queryBannedUsers(
+            filter: filter,
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          )).thenAnswer((_) async => QueryBannedUsersResponse()..bans = bans);
+
+      final res = await channel.queryBannedUsers();
+
+      expect(res, isNotNull);
+      expect(res.bans.length, bans.length);
+
+      verify(() => client.queryBannedUsers(
+            filter: filter,
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
+    });
+
     test('`.mute`', () async {
       when(() => client.muteChannel(
             channelCid,
@@ -2046,7 +2502,7 @@ void main() {
             {'type': channelType, 'id': channelId, ...options},
           )).thenAnswer((_) async => EmptyResponse());
 
-      final res = await channel.banUser(userId, options);
+      final res = await channel.banMember(userId, options);
 
       expect(res, isNotNull);
 
@@ -2062,7 +2518,7 @@ void main() {
       when(() => client.unbanUser(userId, any()))
           .thenAnswer((_) async => EmptyResponse());
 
-      final res = await channel.unbanUser(userId);
+      final res = await channel.unbanMember(userId);
 
       expect(res, isNotNull);
 

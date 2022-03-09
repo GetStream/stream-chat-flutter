@@ -41,11 +41,12 @@ class User extends Equatable {
     Map<String, Object?> extraData = const {},
     this.online = false,
     this.banned = false,
+    this.banExpires,
     this.teams = const [],
     this.language,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now(),
-        /*For backwards compatibility, set 'name', 'image' in [extraData].*/
+        // For backwards compatibility, set 'name', 'image' in [extraData].
         extraData = {
           ...extraData,
           if (name != null) 'name': name,
@@ -67,6 +68,7 @@ class User extends Equatable {
     'last_active',
     'online',
     'banned',
+    'ban_expires',
     'teams',
     'language',
   ];
@@ -129,13 +131,17 @@ class User extends Equatable {
   )
   final bool banned;
 
-  /// Map of custom user extraData.
-  @JsonKey(includeIfNull: false)
-  final Map<String, Object?> extraData;
+  /// The date at which the ban will expire.
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  final DateTime? banExpires;
 
   /// The language this user prefers.
   @JsonKey(includeIfNull: false)
   final String? language;
+
+  /// Map of custom user extraData.
+  @JsonKey(includeIfNull: false)
+  final Map<String, Object?> extraData;
 
   /// List of users to list of userIds.
   static List<String>? toIds(List<User>? users) =>
@@ -158,15 +164,16 @@ class User extends Equatable {
     bool? online,
     Map<String, Object?>? extraData,
     bool? banned,
+    DateTime? banExpires,
     List<String>? teams,
     String? language,
   }) =>
       User(
         id: id ?? this.id,
         role: role ?? this.role,
-        /* if null, it will be retrieved from extraData['name']*/
+        // if null, it will be retrieved from extraData['name']
         name: name,
-        /* if null, it will be retrieved from extraData['image']*/
+        // if null, it will be retrieved from extraData['image']
         image: image,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -174,6 +181,7 @@ class User extends Equatable {
         online: online ?? this.online,
         extraData: extraData ?? this.extraData,
         banned: banned ?? this.banned,
+        banExpires: banExpires ?? this.banExpires,
         teams: teams ?? this.teams,
         language: language ?? this.language,
       );
@@ -186,6 +194,7 @@ class User extends Equatable {
         online,
         extraData,
         banned,
+        banExpires,
         teams,
         language,
       ];

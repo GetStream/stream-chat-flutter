@@ -49,10 +49,13 @@ class AuthInterceptor extends Interceptor {
     DioError err,
     ErrorInterceptorHandler handler,
   ) async {
-    ErrorResponse? error;
     final data = err.response?.data;
-    if (data != null) error = ErrorResponse.fromJson(data);
-    if (error?.code == ChatErrorCode.tokenExpired.code) {
+    if (data == null || data is! Map<String, dynamic>) {
+      return handler.next(err);
+    }
+
+    final error = ErrorResponse.fromJson(data);
+    if (error.code == ChatErrorCode.tokenExpired.code) {
       if (_tokenManager.isStatic) return handler.next(err);
       _client.lock();
       await _tokenManager.loadToken(refresh: true);

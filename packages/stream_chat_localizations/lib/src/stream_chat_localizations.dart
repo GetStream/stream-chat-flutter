@@ -17,6 +17,8 @@ part 'stream_chat_localizations_ko.dart';
 
 part 'stream_chat_localizations_hi.dart';
 
+part 'stream_chat_localizations_pt.dart';
+
 /// The set of supported languages, as language code strings.
 ///
 /// The [GlobalStreamChatLocalizations.delegate] can generate localizations for
@@ -33,6 +35,7 @@ const kStreamChatSupportedLanguages = {
   'es',
   'ja',
   'ko',
+  'pt',
 };
 
 /// Creates a [GlobalStreamChatLocalizations] instance for the given `locale`.
@@ -69,6 +72,8 @@ GlobalStreamChatLocalizations? getStreamChatTranslation(Locale locale) {
       return const StreamChatLocalizationsJa();
     case 'ko':
       return const StreamChatLocalizationsKo();
+    case 'pt':
+      return const StreamChatLocalizationsPt();
   }
 }
 

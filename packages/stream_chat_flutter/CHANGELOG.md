@@ -2,12 +2,29 @@
 
 🐞 Fixed
 
-- SVG rendering fixes
-- Use file extension instead of mimeType for downloading files
+- Mentions overlay now doesn't overflow when not enough height available
+
+## 3.5.0
+
+🐞 Fixed
+
+- [[#888]](https://github.com/GetStream/stream-chat-flutter/issues/888) Fix `unban` command not working in `MessageInput`.
+- [[#805]](https://github.com/GetStream/stream-chat-flutter/issues/805) Updated chewie dependency version to 1.3.0
+- Fix `showScrollToBottom` in `MessageListView` not respecting false value.
+- Fix default `Channel` route not opening from `ChannelListView` when `ChannelAvatar` is tapped
+
+## 3.4.0
+- Updated `stream_chat_flutter_core` dependency to [`3.4.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
+🐞 Fixed
+
+- SVG rendering fixes.
+- Use file extension instead of mimeType for downloading files.
+- [[#860]](https://github.com/GetStream/stream-chat-flutter/issues/860) CastError while compressing Videos.
 
 ✅ Added
 
-- Videos can now be auto-played in `FullScreenMedia`
+- Videos can now be auto-played in `FullScreenMedia`, by setting the `autoplayVideos` argument to true.
 
 ## 3.3.2
 
@@ -23,7 +40,7 @@
 
 🐞 Fixed
 
-- [[#766]]`AttachmentActionsModal` now has customisation options for actions.
+- [[#766]](https://github.com/GetStream/stream-chat-flutter/issues/766) `AttachmentActionsModal` now has customisation options for actions.
 - Fixed `MessageWidget` null errors associated with `channel.memberCount`.
 - Fixed adding attachments on web.
 - [[#767]](https://github.com/GetStream/stream-chat-flutter/issues/767): Fix `MessageInput` focus behaviour when sending messages.

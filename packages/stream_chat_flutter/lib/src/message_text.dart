@@ -1,9 +1,7 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Text widget to display in message
 class MessageText extends StatelessWidget {
@@ -86,9 +84,10 @@ class MessageText extends StatelessWidget {
   String _replaceMentions(String text) {
     var messageTextToRender = text;
     for (final user in message.mentionedUsers.toSet()) {
+      final userId = user.id;
       final userName = user.name;
       messageTextToRender = messageTextToRender.replaceAll(
-        '@$userName',
+        '@$userId',
         '[@$userName](@${userName.replaceAll(' ', '')})',
       );
     }

@@ -49,6 +49,7 @@ Matcher isSameMessageAs(
   bool matchSendingStatus = false,
   bool matchAttachments = false,
   bool matchAttachmentsUploadState = false,
+  bool matchParentId = false,
 }) =>
     _IsSameMessageAs(
       targetMessage: targetMessage,
@@ -57,6 +58,7 @@ Matcher isSameMessageAs(
       matchSendingStatus: matchSendingStatus,
       matchAttachments: matchAttachments,
       matchAttachmentsUploadState: matchAttachmentsUploadState,
+      matchParentId: matchParentId,
     );
 
 class _IsSameMessageAs extends Matcher {
@@ -67,6 +69,7 @@ class _IsSameMessageAs extends Matcher {
     this.matchSendingStatus = false,
     this.matchAttachments = false,
     this.matchAttachmentsUploadState = false,
+    this.matchParentId = false,
   });
 
   final Message targetMessage;
@@ -75,6 +78,7 @@ class _IsSameMessageAs extends Matcher {
   final bool matchSendingStatus;
   final bool matchAttachments;
   final bool matchAttachmentsUploadState;
+  final bool matchParentId;
 
   @override
   Description describe(Description description) =>
@@ -122,6 +126,9 @@ class _IsSameMessageAs extends Matcher {
       }
 
       matches &= matchAttachments();
+    }
+    if (matchParentId) {
+      matches &= message.parentId == targetMessage.parentId;
     }
     return matches;
   }
