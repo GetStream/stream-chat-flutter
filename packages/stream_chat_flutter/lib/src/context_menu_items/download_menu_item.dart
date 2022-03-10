@@ -12,14 +12,24 @@ class DownloadMenuItem extends MenuItem {
   DownloadMenuItem({
     String title = 'Download',
     required this.attachment,
+    this.onDownloadSuccess,
   }) : super(title: title);
 
   /// The [Attachment] to download.
   final Attachment attachment;
 
+  /// An action that can be performed after a successful download, such as
+  /// showing a message to the user.
+  final VoidCallback? onDownloadSuccess;
+
   @override
-  VoidCallback? get onSelected => () async {
-        final attachmentHandler = DesktopAttachmentHandler();
-        await attachmentHandler.download(attachment);
-      };
+  VoidCallback? get onSelected {
+    return () async {
+      final attachmentHandler = DesktopAttachmentHandler();
+      final success = await attachmentHandler.download(attachment);
+      if (success && onDownloadSuccess != null) {
+        onDownloadSuccess!.call();
+      }
+    };
+  }
 }
