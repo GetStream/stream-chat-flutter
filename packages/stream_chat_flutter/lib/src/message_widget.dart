@@ -1013,6 +1013,7 @@ class _MessageWidgetState extends State<MessageWidget>
       hostDisplayName: hostDisplayName,
       textPadding: widget.textPadding,
       messageTheme: widget.messageTheme,
+      onLinkTap: widget.onLinkTap,
     );
   }
 
