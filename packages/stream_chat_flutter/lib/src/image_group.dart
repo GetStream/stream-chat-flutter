@@ -160,22 +160,12 @@ class ImageGroup extends StatelessWidget {
   }
 
   Widget _buildImage(BuildContext context, int index) {
-    return ContextMenuRegion(
-      onItemSelected: (item) {
-        item.onSelected?.call();
-      },
-      menuItems: [
-        DownloadMenuItem(
-          attachment: images[index],
-        ),
-      ],
-      child: ImageAttachment(
-        attachment: images[index],
-        size: size,
-        message: message,
-        messageTheme: messageTheme,
-        onAttachmentTap: () => _onTap(context, index),
-      ),
+    return ImageAttachment(
+      attachment: images[index],
+      size: size,
+      message: message,
+      messageTheme: messageTheme,
+      onAttachmentTap: () => _onTap(context, index),
     );
   }
 }
