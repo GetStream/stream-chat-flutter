@@ -339,6 +339,7 @@ class MessageInput extends StatefulWidget {
 }
 
 /// State of [MessageInput]
+@Deprecated("Use 'StreamMessageInput' instead")
 class MessageInputState extends State<MessageInput> {
   final _attachments = <String, Attachment>{};
   final List<User> _mentionedUsers = [];
