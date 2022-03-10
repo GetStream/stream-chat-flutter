@@ -4,6 +4,12 @@
 
 - Mentions overlay now doesn't overflow when not enough height available
 
+
+✅ Added
+
+- `onLinkTap` for `MessageWidget` can now be passed down to `UrlAttachment`.
+
+
 ## 3.5.0
 
 🐞 Fixed
