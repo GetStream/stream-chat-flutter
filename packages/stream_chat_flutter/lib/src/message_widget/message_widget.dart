@@ -146,32 +146,21 @@ class MessageWidget extends StatefulWidget {
             }
 
             return WrapAttachmentWidget(
-              attachmentWidget: ContextMenuRegion(
-                onItemSelected: (item) {
-                  item.onSelected?.call();
-                },
-                menuItems: [
-                  DownloadMenuItem(
-                    title: context.translations.downloadLabel,
-                    attachment: attachments[0],
-                  ),
-                ],
-                child: ImageAttachment(
-                  attachment: attachments[0],
-                  message: message,
-                  messageTheme: messageTheme,
-                  size: Size(
-                    mediaQueryData.size.width * 0.8,
-                    mediaQueryData.size.height * 0.3,
-                  ),
-                  onShowMessage: onShowMessage,
-                  onReturnAction: onReturnAction,
-                  onAttachmentTap: onAttachmentTap != null
-                      ? () {
-                          onAttachmentTap.call(message, attachments[0]);
-                        }
-                      : null,
+              attachmentWidget: ImageAttachment(
+                attachment: attachments[0],
+                message: message,
+                messageTheme: messageTheme,
+                size: Size(
+                  mediaQueryData.size.width * 0.8,
+                  mediaQueryData.size.height * 0.3,
                 ),
+                onShowMessage: onShowMessage,
+                onReturnAction: onReturnAction,
+                onAttachmentTap: onAttachmentTap != null
+                    ? () {
+                        onAttachmentTap.call(message, attachments[0]);
+                      }
+                    : null,
               ),
               attachmentShape: border,
               reverse: reverse,
@@ -183,37 +172,26 @@ class MessageWidget extends StatefulWidget {
             );
 
             return WrapAttachmentWidget(
-              attachmentWidget: ContextMenuRegion(
-                onItemSelected: (item) {
-                  item.onSelected?.call();
-                },
-                menuItems: [
-                  DownloadMenuItem(
-                    title: context.translations.downloadLabel,
-                    attachment: attachments[0],
-                  ),
-                ],
-                child: Column(
-                  children: attachments.map((attachment) {
-                    final mediaQueryData = MediaQuery.of(context);
-                    return VideoAttachment(
-                      attachment: attachment,
-                      messageTheme: messageTheme,
-                      size: Size(
-                        mediaQueryData.size.width * 0.8,
-                        mediaQueryData.size.height * 0.3,
-                      ),
-                      message: message,
-                      onShowMessage: onShowMessage,
-                      onReturnAction: onReturnAction,
-                      onAttachmentTap: onAttachmentTap != null
-                          ? () {
-                              onAttachmentTap(message, attachment);
-                            }
-                          : null,
-                    );
-                  }).toList(),
-                ),
+              attachmentWidget: Column(
+                children: attachments.map((attachment) {
+                  final mediaQueryData = MediaQuery.of(context);
+                  return VideoAttachment(
+                    attachment: attachment,
+                    messageTheme: messageTheme,
+                    size: Size(
+                      mediaQueryData.size.width * 0.8,
+                      mediaQueryData.size.height * 0.3,
+                    ),
+                    message: message,
+                    onShowMessage: onShowMessage,
+                    onReturnAction: onReturnAction,
+                    onAttachmentTap: onAttachmentTap != null
+                        ? () {
+                            onAttachmentTap(message, attachment);
+                          }
+                        : null,
+                  );
+                }).toList(),
               ),
               attachmentShape: border,
               reverse: reverse,
@@ -225,36 +203,25 @@ class MessageWidget extends StatefulWidget {
             );
 
             return WrapAttachmentWidget(
-              attachmentWidget: ContextMenuRegion(
-                onItemSelected: (item) {
-                  item.onSelected?.call();
-                },
-                menuItems: [
-                  DownloadMenuItem(
-                    title: context.translations.downloadLabel,
-                    attachment: attachments[0],
-                  ),
-                ],
-                child: Column(
-                  children: attachments.map((attachment) {
-                    final mediaQueryData = MediaQuery.of(context);
-                    return GiphyAttachment(
-                      attachment: attachment,
-                      message: message,
-                      size: Size(
-                        mediaQueryData.size.width * 0.8,
-                        mediaQueryData.size.height * 0.3,
-                      ),
-                      onShowMessage: onShowMessage,
-                      onReturnAction: onReturnAction,
-                      onAttachmentTap: onAttachmentTap != null
-                          ? () {
-                              onAttachmentTap(message, attachment);
-                            }
-                          : null,
-                    );
-                  }).toList(),
-                ),
+              attachmentWidget: Column(
+                children: attachments.map((attachment) {
+                  final mediaQueryData = MediaQuery.of(context);
+                  return GiphyAttachment(
+                    attachment: attachment,
+                    message: message,
+                    size: Size(
+                      mediaQueryData.size.width * 0.8,
+                      mediaQueryData.size.height * 0.3,
+                    ),
+                    onShowMessage: onShowMessage,
+                    onReturnAction: onReturnAction,
+                    onAttachmentTap: onAttachmentTap != null
+                        ? () {
+                            onAttachmentTap(message, attachment);
+                          }
+                        : null,
+                  );
+                }).toList(),
               ),
               attachmentShape: border,
               reverse: reverse,
