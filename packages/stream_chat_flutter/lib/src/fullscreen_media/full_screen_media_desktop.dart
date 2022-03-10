@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:native_context_menu/native_context_menu.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
+import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -101,6 +102,16 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
     }
   }
 
+  void onDownloadSuccess() {
+    showDialog(
+      context: context,
+      builder: (_) => const MessageDialog(
+        titleText: 'Download Successful!',
+        showMessage: false,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,12 +149,11 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
                 return AnimatedBuilder(
                   animation: _curvedAnimation,
                   builder: (context, child) => ContextMenuRegion(
-                    onItemSelected: (item) {
-                      item.onSelected?.call();
-                    },
+                    onItemSelected: (item) => item.onSelected?.call(),
                     menuItems: [
                       DownloadMenuItem(
                         attachment: attachment,
+                        onDownloadSuccess: onDownloadSuccess,
                       ),
                     ],
                     child: PhotoView(
@@ -197,8 +207,17 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
                     padding: const EdgeInsets.symmetric(
                       vertical: 50,
                     ),
-                    child: Video(
-                      player: package.player,
+                    child: ContextMenuRegion(
+                      onItemSelected: (item) => item.onSelected?.call(),
+                      menuItems: [
+                        DownloadMenuItem(
+                          attachment: attachment,
+                          onDownloadSuccess: onDownloadSuccess,
+                        ),
+                      ],
+                      child: Video(
+                        player: package.player,
+                      ),
                     ),
                   ),
                 );
@@ -332,35 +351,37 @@ class GalleryNavigationItem extends StatelessWidget {
   final double? right;
 
   @override
-  Widget build(BuildContext context) => PlatformWidgetBuilder(
-        desktop: (_, child) => child,
-        web: (_, child) => child,
-        child: Positioned(
-          left: left,
-          right: right,
-          top: MediaQuery.of(context).size.height / 2,
-          child: FadeTransition(
-            opacity: opacityAnimation,
-            child: ValueListenableBuilder<int>(
-              valueListenable: currentPage,
-              builder: (context, value, child) => GestureDetector(
-                onTap: onClick,
-                child: Icon(
-                  icon,
-                  size: 50,
-                ),
+  Widget build(BuildContext context) {
+    return PlatformWidgetBuilder(
+      desktop: (_, child) => child,
+      web: (_, child) => child,
+      child: Positioned(
+        left: left,
+        right: right,
+        top: MediaQuery.of(context).size.height / 2,
+        child: FadeTransition(
+          opacity: opacityAnimation,
+          child: ValueListenableBuilder<int>(
+            valueListenable: currentPage,
+            builder: (context, value, child) => GestureDetector(
+              onTap: onClick,
+              child: Icon(
+                icon,
+                size: 50,
               ),
-              child: GestureDetector(
-                onTap: onClick,
-                child: Icon(
-                  icon,
-                  size: 50,
-                ),
+            ),
+            child: GestureDetector(
+              onTap: onClick,
+              child: Icon(
+                icon,
+                size: 50,
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 /// Class for packaging up things required for videos

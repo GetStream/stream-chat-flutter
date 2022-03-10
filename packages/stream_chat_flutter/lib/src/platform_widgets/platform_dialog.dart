@@ -169,7 +169,7 @@ class PlatformDialog extends StatelessWidget {
           key: key,
           appIcon: appIcon!,
           title: titleWidget!,
-          message: message!,
+          message: message ?? const SizedBox.shrink(),
           primaryButton: primaryButton!,
           secondaryButton: secondaryButton,
           horizontalActions: horizontalActions,

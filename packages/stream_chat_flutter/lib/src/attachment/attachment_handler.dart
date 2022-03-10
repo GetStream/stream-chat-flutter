@@ -17,7 +17,7 @@ abstract class AttachmentHandler {
   Future<List<Attachment>> upload();
 
   /// Downloads an attachment.
-  Future<void> download(
+  Future<bool> download(
     Attachment attachment, {
     String? suggestedName,
   });
@@ -52,7 +52,7 @@ class DesktopAttachmentHandler extends AttachmentHandler {
   final VideoQuality? compressedVideoQuality;
 
   @override
-  Future<void> download(
+  Future<bool> download(
     Attachment attachment, {
     String? suggestedName,
   }) async {
@@ -88,7 +88,7 @@ class DesktopAttachmentHandler extends AttachmentHandler {
 
     // Account for canceled operation.
     if (path == null) {
-      return;
+      return false;
     }
 
     // Create an XFile for proper file saving
@@ -98,8 +98,14 @@ class DesktopAttachmentHandler extends AttachmentHandler {
       name: fileName,
       path: path,
     );
-    // Save the file to the user's selected path.
-    await file.saveTo(path);
+    try {
+      // Save the file to the user's selected path.
+      await file.saveTo(path);
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 
   @override

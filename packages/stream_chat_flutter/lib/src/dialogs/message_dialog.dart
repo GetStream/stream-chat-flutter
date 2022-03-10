@@ -16,6 +16,7 @@ class MessageDialog extends StatelessWidget {
     Key? key,
     this.titleText,
     this.messageText,
+    this.showMessage = true,
   }) : super(key: key);
 
   /// The optional error message title to use.
@@ -24,6 +25,8 @@ class MessageDialog extends StatelessWidget {
   /// The optional error message to use.
   final String? messageText;
 
+  final bool? showMessage;
+
   @override
   Widget build(BuildContext context) {
     return PlatformDialog(
@@ -31,9 +34,12 @@ class MessageDialog extends StatelessWidget {
       titleWidget: Text(
         titleText ?? context.translations.somethingWentWrongError,
       ),
-      message: Text(
-        messageText ?? context.translations.operationCouldNotBeCompletedText,
-      ),
+      message: showMessage!
+          ? Text(
+              messageText ??
+                  context.translations.operationCouldNotBeCompletedText,
+            )
+          : null,
       primaryButton: PushButton(
         buttonSize: ButtonSize.large,
         color: StreamChatTheme.of(context).colorTheme.accentPrimary,
