@@ -882,6 +882,7 @@ class _MessageWidgetState extends State<MessageWidget>
             onClick: () async {
               final deleted = await showDialog(
                 context: context,
+                barrierDismissible: false,
                 builder: (_) => const DeleteMessageDialog(),
               );
               if (deleted) {
