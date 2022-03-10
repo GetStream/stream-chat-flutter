@@ -23,7 +23,7 @@ export 'src/localization/stream_chat_localizations.dart';
 export 'src/localization/translations.dart' show DefaultTranslations;
 export 'src/mention_tile.dart';
 export 'src/message_actions_modal/message_action.dart';
-export 'src/message_input.dart';
+export 'src/message_input/message_input.dart';
 export 'src/message_list_view.dart';
 export 'src/message_search_item.dart';
 export 'src/message_search_list_view.dart';
