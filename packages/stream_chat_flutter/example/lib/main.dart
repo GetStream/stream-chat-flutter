@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   /// Create a new instance of [StreamChatClient] passing the apikey obtained
   /// from your project dashboard.
   final client = StreamChatClient(
     's2dxdhpxd94g',
-    logLevel: Level.INFO,
+    logLevel: Level.OFF,
   );
 
   /// Set the current user and connect the websocket. In a production
@@ -63,26 +64,114 @@ class MyApp extends StatelessWidget {
   final Channel channel;
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        theme: ThemeData.light(),
-        darkTheme: ThemeData.dark(),
-        supportedLocales: const [
-          Locale('en'),
-          Locale('hi'),
-          Locale('fr'),
-          Locale('it'),
-          Locale('es'),
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      supportedLocales: const [
+        Locale('en'),
+        Locale('hi'),
+        Locale('fr'),
+        Locale('it'),
+        Locale('es'),
+      ],
+      localizationsDelegates: GlobalStreamChatLocalizations.delegates,
+      builder: (context, widget) => StreamChat(
+        client: client,
+        child: widget,
+      ),
+      home: StreamChannel(
+        channel: channel,
+        child: const ResponsiveChat(),
+      ),
+    );
+  }
+}
+
+class ResponsiveChat extends StatelessWidget {
+  const ResponsiveChat({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final initialChannel = StreamChannel.of(context).channel;
+    return ScreenTypeLayout(
+      breakpoints: const ScreenBreakpoints(
+        desktop: 600,
+        tablet: 600,
+        watch: 300,
+      ),
+      desktop: DesktopLayout(
+        initialChannel: initialChannel,
+      ),
+      mobile: ChannelPage(
+        channel: initialChannel,
+      ),
+    );
+  }
+}
+
+class DesktopLayout extends StatefulWidget {
+  const DesktopLayout({
+    Key? key,
+    required this.initialChannel,
+  }) : super(key: key);
+
+  final Channel initialChannel;
+
+  @override
+  State<DesktopLayout> createState() => _DesktopLayoutState();
+}
+
+class _DesktopLayoutState extends State<DesktopLayout> {
+  late Widget _page;
+
+  @override
+  void initState() {
+    super.initState();
+    _page = ChannelPage(
+      channel: widget.initialChannel,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          SizedBox(
+            width: 250,
+            child: Column(
+              children: [
+                Expanded(
+                  child: ChannelsBloc(
+                    child: ChannelListView(
+                      filter: Filter.in_(
+                        'members',
+                        [
+                          StreamChat.of(context).currentUser!.id,
+                        ],
+                      ),
+                      sort: const [SortOption('last_message_at')],
+                      limit: 20,
+                      onChannelTap: (channel, _) {
+                        setState(() => _page = ChannelPage(channel: channel));
+                      },
+                      channelWidget: _page,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _page,
+          ),
         ],
-        localizationsDelegates: GlobalStreamChatLocalizations.delegates,
-        builder: (context, widget) => StreamChat(
-          client: client,
-          child: widget,
-        ),
-        home: StreamChannel(
-          channel: channel,
-          child: const ChannelPage(),
-        ),
-      );
+      ),
+    );
+  }
 }
 
 /// A list of messages sent in the current channel.
@@ -90,22 +179,74 @@ class MyApp extends StatelessWidget {
 /// This is implemented using [MessageListView], a widget that provides query
 /// functionalities fetching the messages from the api and showing them in a
 /// listView.
-class ChannelPage extends StatelessWidget {
+class ChannelPage extends StatefulWidget {
   /// Creates the page that shows the list of messages
   const ChannelPage({
     Key? key,
+    required this.channel,
   }) : super(key: key);
 
+  final Channel channel;
+
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: const ChannelHeader(),
+  State<ChannelPage> createState() => _ChannelPageState();
+}
+
+class _ChannelPageState extends State<ChannelPage> {
+  Message? _quotedMessage;
+  late FocusNode? _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _focusNode!.dispose();
+    super.dispose();
+  }
+
+  void _reply(Message message) {
+    setState(() => _quotedMessage = message);
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      _focusNode!.requestFocus();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamChannel(
+      channel: widget.channel,
+      child: Scaffold(
+        appBar: ChannelHeader(
+          title: ChannelName(
+            textStyle:
+                StreamChatTheme.of(context).channelHeaderTheme.titleStyle,
+          ),
+        ),
         body: Column(
-          children: const <Widget>[
+          children: [
             Expanded(
-              child: MessageListView(),
+              child: MessageListView(
+                messageBuilder: (p0, p1, p2, defaultMessageWidget) =>
+                    defaultMessageWidget.copyWith(
+                  onReplyTap: _reply,
+                ),
+              ),
             ),
-            MessageInput(attachmentLimit: 3),
+            MessageInput(
+              attachmentLimit: 3,
+              quotedMessage: _quotedMessage,
+              onQuotedMessageCleared: () {
+                setState(() => _quotedMessage = null);
+                _focusNode!.unfocus();
+              },
+            ),
           ],
         ),
-      );
+      ),
+    );
+  }
 }
