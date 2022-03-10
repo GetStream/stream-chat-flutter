@@ -59,7 +59,7 @@ abstract class Translations {
   /// The error shown when loading messages fails
   String get loadingMessagesError;
 
-  /// The text for showing the result count in [MessageSearchListView]
+  /// The text for showing the result count in [StreamMessageSearchListView]
   String resultCountText(int count);
 
   /// The text for showing the message is deleted
@@ -74,20 +74,20 @@ abstract class Translations {
   /// The text for showing there are no chats
   String get emptyChatMessagesText;
 
-  /// The text for showing the thread separator in case [MessageListView]
+  /// The text for showing the thread separator in case [StreamMessageListView]
   /// contains a parent message
   String threadSeparatorText(int replyCount);
 
-  /// The label for "connected" in [ConnectionStatusBuilder]
+  /// The label for "connected" in [StreamConnectionStatusBuilder]
   String get connectedLabel;
 
-  /// The label for "disconnected" in [ConnectionStatusBuilder]
+  /// The label for "disconnected" in [StreamConnectionStatusBuilder]
   String get disconnectedLabel;
 
-  /// The label for "reconnecting" in [ConnectionStatusBuilder]
+  /// The label for "reconnecting" in [StreamConnectionStatusBuilder]
   String get reconnectingLabel;
 
-  /// The label for also send as direct message "checkbox"" in [MessageInput]
+  /// The label for also send as direct message "checkbox"" in [StreamMessageInput]
   String get alsoSendAsDirectMessageLabel;
 
   /// The label for search Gif
@@ -97,24 +97,24 @@ abstract class Translations {
   String get sendMessagePermissionError;
 
   /// The label for add a comment or send in case of
-  /// attachments inside [MessageInput]
+  /// attachments inside [StreamMessageInput]
   String get addACommentOrSendLabel;
 
-  /// The label for write a message in [MessageInput]
+  /// The label for write a message in [StreamMessageInput]
   String get writeAMessageLabel;
 
-  /// The label for slow mode enabled in [MessageInput]
+  /// The label for slow mode enabled in [StreamMessageInput]
   String get slowModeOnLabel;
 
-  /// The label for instant commands in [MessageInput]
+  /// The label for instant commands in [StreamMessageInput]
   String get instantCommandsLabel;
 
   /// The error shown in case the fi"le is too large even after compression
-  /// while uploading via [MessageInput]
+  /// while uploading via [StreamMessageInput]
   String fileTooLargeAfterCompressionError(double limitInMB);
 
   /// The error shown in case the file is too large
-  /// while uploading via [MessageInput]
+  /// while uploading via [StreamMessageInput]
   String fileTooLargeError(double limitInMB);
 
   /// The text for showing the query while searching for emojis

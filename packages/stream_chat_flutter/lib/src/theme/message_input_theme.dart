@@ -5,27 +5,33 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// {@macro message_input_theme}
+@Deprecated("Use 'StreamMessageInputTheme' instead")
+typedef MessageInputTheme = StreamMessageInputTheme;
+
+/// {@template message_input_theme}
 /// Overrides the default style of [MessageInput] descendants.
 ///
 /// See also:
 ///
-///  * [MessageInputThemeData], which is used to configure this theme.
-class MessageInputTheme extends InheritedTheme {
-  /// Creates a [MessageInputTheme].
+///  * [StreamMessageInputThemeData], which is used to configure this theme.
+/// {@endtemplate}
+class StreamMessageInputTheme extends InheritedTheme {
+  /// Creates a [StreamMessageInputTheme].
   ///
   /// The [data] parameter must not be null.
-  const MessageInputTheme({
+  const StreamMessageInputTheme({
     Key? key,
     required this.data,
     required Widget child,
   }) : super(key: key, child: child);
 
   /// The configuration of this theme.
-  final MessageInputThemeData data;
+  final StreamMessageInputThemeData data;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [MessageInputTheme] widget, then
+  /// If there is no enclosing [StreamMessageInputTheme] widget, then
   /// [StreamChatThemeData.messageInputTheme] is used.
   ///
   /// Typical usage is as follows:
@@ -33,28 +39,34 @@ class MessageInputTheme extends InheritedTheme {
   /// ```dart
   /// final theme = MessageInputTheme.of(context);
   /// ```
-  static MessageInputThemeData of(BuildContext context) {
+  static StreamMessageInputThemeData of(BuildContext context) {
     final messageInputTheme =
-        context.dependOnInheritedWidgetOfExactType<MessageInputTheme>();
+        context.dependOnInheritedWidgetOfExactType<StreamMessageInputTheme>();
     return messageInputTheme?.data ??
         StreamChatTheme.of(context).messageInputTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) =>
-      MessageInputTheme(data: data, child: child);
+      StreamMessageInputTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(MessageInputTheme oldWidget) =>
+  bool updateShouldNotify(StreamMessageInputTheme oldWidget) =>
       data != oldWidget.data;
 }
 
+/// {@macro message_input_theme_data}
+@Deprecated("Use 'StreamMessageInputThemeData' instead")
+typedef MessageInputThemeData = StreamMessageInputThemeData;
+
+/// {@template message_input_theme_data}
 /// A style that overrides the default appearance of [MessageInput] widgets
-/// when used with [MessageInputTheme] or with the overall [StreamChatTheme]'s
+/// when used with [StreamMessageInputTheme] or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.messageInputTheme].
-class MessageInputThemeData with Diagnosticable {
-  /// Creates a [MessageInputThemeData].
-  const MessageInputThemeData({
+/// {@endtemplate}
+class StreamMessageInputThemeData with Diagnosticable {
+  /// Creates a [StreamMessageInputThemeData].
+  const StreamMessageInputThemeData({
     this.sendAnimationDuration,
     this.actionButtonColor,
     this.sendButtonColor,
@@ -121,8 +133,8 @@ class MessageInputThemeData with Diagnosticable {
   /// Shadow for the [MessageInput] widget
   final BoxShadow? shadow;
 
-  /// Returns a new [MessageInputThemeData] replacing some of its properties
-  MessageInputThemeData copyWith({
+  /// Returns a new [StreamMessageInputThemeData] replacing some of its properties
+  StreamMessageInputThemeData copyWith({
     Duration? sendAnimationDuration,
     Color? inputBackgroundColor,
     Color? actionButtonColor,
@@ -140,7 +152,7 @@ class MessageInputThemeData with Diagnosticable {
     double? elevation,
     BoxShadow? shadow,
   }) =>
-      MessageInputThemeData(
+      StreamMessageInputThemeData(
         sendAnimationDuration:
             sendAnimationDuration ?? this.sendAnimationDuration,
         inputBackgroundColor: inputBackgroundColor ?? this.inputBackgroundColor,
@@ -161,13 +173,13 @@ class MessageInputThemeData with Diagnosticable {
         shadow: shadow ?? this.shadow,
       );
 
-  /// Linearly interpolate from one [MessageInputThemeData] to another.
-  MessageInputThemeData lerp(
-    MessageInputThemeData a,
-    MessageInputThemeData b,
+  /// Linearly interpolate from one [StreamMessageInputThemeData] to another.
+  StreamMessageInputThemeData lerp(
+    StreamMessageInputThemeData a,
+    StreamMessageInputThemeData b,
     double t,
   ) =>
-      MessageInputThemeData(
+      StreamMessageInputThemeData(
         actionButtonColor:
             Color.lerp(a.actionButtonColor, b.actionButtonColor, t),
         actionButtonIdleColor:
@@ -194,8 +206,8 @@ class MessageInputThemeData with Diagnosticable {
         shadow: BoxShadow.lerp(a.shadow, b.shadow, t),
       );
 
-  /// Merges [this] [MessageInputThemeData] with the [other]
-  MessageInputThemeData merge(MessageInputThemeData? other) {
+  /// Merges [this] [StreamMessageInputThemeData] with the [other]
+  StreamMessageInputThemeData merge(StreamMessageInputThemeData? other) {
     if (other == null) return this;
     return copyWith(
       sendAnimationDuration: other.sendAnimationDuration,
@@ -222,7 +234,7 @@ class MessageInputThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MessageInputThemeData &&
+      other is StreamMessageInputThemeData &&
           runtimeType == other.runtimeType &&
           sendAnimationDuration == other.sendAnimationDuration &&
           sendButtonColor == other.sendButtonColor &&

@@ -40,7 +40,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: Scaffold(
-              body: SystemMessage(
+              body: StreamSystemMessage(
                 onMessageTap: (m) => tapped = true,
                 message: Message(
                   text: 'demo message',
@@ -51,7 +51,7 @@ void main() {
         ),
       ));
 
-      await tester.tap(find.byType(SystemMessage));
+      await tester.tap(find.byType(StreamSystemMessage));
 
       expect(find.text('demo message'), findsOneWidget);
       expect(tapped, true);
@@ -94,7 +94,7 @@ void main() {
               showLoading: false,
               channel: channel,
               child: Center(
-                child: SystemMessage(
+                child: StreamSystemMessage(
                   message: Message(
                     text: 'demo message',
                   ),
@@ -146,7 +146,7 @@ void main() {
               showLoading: false,
               channel: channel,
               child: Center(
-                child: SystemMessage(
+                child: StreamSystemMessage(
                   message: Message(
                     text: 'demo message',
                   ),

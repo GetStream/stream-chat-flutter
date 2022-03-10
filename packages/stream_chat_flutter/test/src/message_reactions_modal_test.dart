@@ -36,7 +36,7 @@ void main() {
             streamChatThemeData: streamTheme,
             child: StreamChannel(
               channel: channel,
-              child: MessageReactionsModal(
+              child: StreamMessageReactionsModal(
                 messageWidget: const Text(
                   'test',
                   key: Key('MessageWidget'),
@@ -51,9 +51,9 @@ void main() {
 
       await tester.pump(const Duration(milliseconds: 1000));
 
-      expect(find.byType(ReactionBubble), findsNothing);
+      expect(find.byType(StreamReactionBubble), findsNothing);
 
-      expect(find.byType(UserAvatar), findsNothing);
+      expect(find.byType(StreamUserAvatar), findsNothing);
     },
   );
 
@@ -96,7 +96,7 @@ void main() {
             streamChatThemeData: streamTheme,
             child: StreamChannel(
               channel: channel,
-              child: MessageReactionsModal(
+              child: StreamMessageReactionsModal(
                 messageWidget: const Text(
                   'test',
                   key: Key('MessageWidget'),
@@ -116,8 +116,8 @@ void main() {
 
       expect(find.byKey(const Key('MessageWidget')), findsOneWidget);
 
-      expect(find.byType(ReactionBubble), findsOneWidget);
-      expect(find.byType(UserAvatar), findsOneWidget);
+      expect(find.byType(StreamReactionBubble), findsOneWidget);
+      expect(find.byType(StreamUserAvatar), findsOneWidget);
     },
   );
 }

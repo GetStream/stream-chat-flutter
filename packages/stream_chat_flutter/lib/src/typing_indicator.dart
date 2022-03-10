@@ -3,10 +3,16 @@ import 'package:lottie/lottie.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// {@macro typing_indicator}
+@Deprecated("Use 'StreamTypingIndicator' instead")
+typedef TypingIndicator = StreamTypingIndicator;
+
+/// {@template typing_indicator}
 /// Widget to show the current list of typing users
-class TypingIndicator extends StatelessWidget {
+/// {@endtemplate}
+class StreamTypingIndicator extends StatelessWidget {
   /// Instantiate a new TypingIndicator
-  const TypingIndicator({
+  const StreamTypingIndicator({
     Key? key,
     this.channel,
     this.alternativeWidget,

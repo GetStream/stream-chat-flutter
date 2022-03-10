@@ -6,16 +6,18 @@ import '../mocks.dart';
 
 void main() {
   test('ChannelListViewThemeData copyWith, ==, hashCode basics', () {
-    expect(const ChannelListViewThemeData(),
-        const ChannelListViewThemeData().copyWith());
+    expect(const StreamChannelListViewThemeData(),
+        const StreamChannelListViewThemeData().copyWith());
   });
 
   test(
       '''Light ChannelListViewThemeData lerps completely to dark ChannelListViewThemeData''',
       () {
     expect(
-        const ChannelListViewThemeData().lerp(_channelListViewThemeDataControl,
-            _channelListViewThemeDataControlDark, 1),
+        const StreamChannelListViewThemeData().lerp(
+            _channelListViewThemeDataControl,
+            _channelListViewThemeDataControlDark,
+            1),
         _channelListViewThemeDataControlDark);
   });
 
@@ -23,8 +25,10 @@ void main() {
       '''Light ChannelListViewThemeData lerps halfway to dark ChannelListViewThemeData''',
       () {
     expect(
-        const ChannelListViewThemeData().lerp(_channelListViewThemeDataControl,
-            _channelListViewThemeDataControlDark, 0.5),
+        const StreamChannelListViewThemeData().lerp(
+            _channelListViewThemeDataControl,
+            _channelListViewThemeDataControlDark,
+            0.5),
         _channelListViewThemeDataControlHalfLerp);
   });
 
@@ -32,7 +36,7 @@ void main() {
       '''Dark ChannelListViewThemeData lerps completely to light ChannelListViewThemeData''',
       () {
     expect(
-        const ChannelListViewThemeData().lerp(
+        const StreamChannelListViewThemeData().lerp(
             _channelListViewThemeDataControlDark,
             _channelListViewThemeDataControl,
             1),
@@ -70,7 +74,7 @@ void main() {
       ),
     );
 
-    final channelListViewTheme = ChannelListViewTheme.of(_context);
+    final channelListViewTheme = StreamChannelListViewTheme.of(_context);
     expect(channelListViewTheme.backgroundColor,
         _channelListViewThemeDataControl.backgroundColor);
   });
@@ -92,7 +96,7 @@ void main() {
             return Scaffold(
               body: StreamChannel(
                 channel: MockChannel(),
-                child: const MessageListView(),
+                child: const StreamMessageListView(),
               ),
             );
           },
@@ -100,20 +104,20 @@ void main() {
       ),
     );
 
-    final channelListViewTheme = ChannelListViewTheme.of(_context);
+    final channelListViewTheme = StreamChannelListViewTheme.of(_context);
     expect(channelListViewTheme.backgroundColor,
         _channelListViewThemeDataControlDark.backgroundColor);
   });
 }
 
-final _channelListViewThemeDataControl = ChannelListViewThemeData(
-  backgroundColor: ColorTheme.light().appBg,
+final _channelListViewThemeDataControl = StreamChannelListViewThemeData(
+  backgroundColor: StreamColorTheme.light().appBg,
 );
 
-const _channelListViewThemeDataControlHalfLerp = ChannelListViewThemeData(
+const _channelListViewThemeDataControlHalfLerp = StreamChannelListViewThemeData(
   backgroundColor: Color(0xff818384),
 );
 
-final _channelListViewThemeDataControlDark = ChannelListViewThemeData(
-  backgroundColor: ColorTheme.dark().appBg,
+final _channelListViewThemeDataControlDark = StreamChannelListViewThemeData(
+  backgroundColor: StreamColorTheme.dark().appBg,
 );

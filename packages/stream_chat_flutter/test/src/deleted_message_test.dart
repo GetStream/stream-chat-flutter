@@ -20,8 +20,8 @@ void main() {
         home: StreamChat(
           client: client,
           child: const Scaffold(
-            body: DeletedMessage(
-              messageTheme: MessageThemeData(
+            body: StreamDeletedMessage(
+              messageTheme: StreamMessageThemeData(
                 createdAtStyle: TextStyle(
                   color: Colors.black,
                 ),
@@ -75,7 +75,7 @@ void main() {
               showLoading: false,
               channel: channel,
               child: Center(
-                child: DeletedMessage(
+                child: StreamDeletedMessage(
                   messageTheme: theme.ownMessageTheme,
                 ),
               ),
@@ -128,7 +128,7 @@ void main() {
               showLoading: false,
               channel: channel,
               child: Center(
-                child: DeletedMessage(
+                child: StreamDeletedMessage(
                   messageTheme: theme.ownMessageTheme,
                 ),
               ),
@@ -181,7 +181,7 @@ void main() {
               showLoading: false,
               channel: channel,
               child: Center(
-                child: DeletedMessage(
+                child: StreamDeletedMessage(
                   messageTheme: theme.ownMessageTheme,
                   reverse: true,
                   shape: RoundedRectangleBorder(

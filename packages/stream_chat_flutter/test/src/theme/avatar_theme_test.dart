@@ -4,22 +4,23 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
   test('AvatarThemeData copyWith, ==, hashCode basics', () {
-    expect(const AvatarThemeData(), const AvatarThemeData().copyWith());
-    expect(const AvatarThemeData().hashCode,
-        const AvatarThemeData().copyWith().hashCode);
+    expect(const StreamAvatarThemeData(),
+        const StreamAvatarThemeData().copyWith());
+    expect(const StreamAvatarThemeData().hashCode,
+        const StreamAvatarThemeData().copyWith().hashCode);
   });
 
   group('AvatarThemeData lerps correctly', () {
     test('Lerp completely', () {
       expect(
-          const AvatarThemeData()
+          const StreamAvatarThemeData()
               .lerp(_avatarThemeDataControl1, _avatarThemeDataControl2, 1),
           _avatarThemeDataControl2);
     });
 
     test('Lerp halfway', () {
       expect(
-          const AvatarThemeData()
+          const StreamAvatarThemeData()
               .lerp(_avatarThemeDataControl1, _avatarThemeDataControl2, 0.5),
           _avatarThemeDataControlMidLerp);
     });
@@ -31,9 +32,9 @@ void main() {
   });
 }
 
-const _avatarThemeDataControl1 = AvatarThemeData();
+const _avatarThemeDataControl1 = StreamAvatarThemeData();
 
-final _avatarThemeDataControlMidLerp = AvatarThemeData(
+final _avatarThemeDataControlMidLerp = StreamAvatarThemeData(
   borderRadius: BorderRadius.circular(16),
   constraints: const BoxConstraints.tightFor(
     height: 33,
@@ -41,7 +42,7 @@ final _avatarThemeDataControlMidLerp = AvatarThemeData(
   ),
 );
 
-final _avatarThemeDataControl2 = AvatarThemeData(
+final _avatarThemeDataControl2 = StreamAvatarThemeData(
   borderRadius: BorderRadius.circular(12),
   constraints: const BoxConstraints.tightFor(
     height: 34,

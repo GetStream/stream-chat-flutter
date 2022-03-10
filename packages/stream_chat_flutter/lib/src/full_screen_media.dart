@@ -21,10 +21,16 @@ enum ReturnActionType {
 /// Callback when show message is tapped
 typedef ShowMessageCallback = void Function(Message message, Channel channel);
 
+/// {@macro full_screen_media}
+@Deprecated("Use 'StreamFullScreenMedia' instead")
+typedef FullScreenMedia = StreamFullScreenMedia;
+
+/// {@template full_screen_media}
 /// A full screen image widget
-class FullScreenMedia extends StatefulWidget {
+/// {@endtemplate}
+class StreamFullScreenMedia extends StatefulWidget {
   /// Instantiate a new FullScreenImage
-  const FullScreenMedia({
+  const StreamFullScreenMedia({
     Key? key,
     required this.mediaAttachments,
     required this.message,
@@ -60,10 +66,10 @@ class FullScreenMedia extends StatefulWidget {
   final bool autoplayVideos;
 
   @override
-  _FullScreenMediaState createState() => _FullScreenMediaState();
+  _StreamFullScreenMediaState createState() => _StreamFullScreenMediaState();
 }
 
-class _FullScreenMediaState extends State<FullScreenMedia>
+class _StreamFullScreenMediaState extends State<StreamFullScreenMedia>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
   late final PageController _pageController;
@@ -172,7 +178,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                       ),
                       backgroundDecoration: BoxDecoration(
                         color: ColorTween(
-                          begin: ChannelHeaderTheme.of(context).color,
+                          begin: StreamChannelHeaderTheme.of(context).color,
                           end: Colors.black,
                         ).lerp(_curvedAnimation.value),
                       ),
@@ -221,7 +227,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                 builder: (context, value, child) => Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    GalleryHeader(
+                    StreamGalleryHeader(
                       userName: widget.userName,
                       sentAt: context.translations.sentAtText(
                         date: widget.message.createdAt,
@@ -242,7 +248,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                           widget.attachmentActionsModalBuilder,
                     ),
                     if (!widget.message.isEphemeral)
-                      GalleryFooter(
+                      StreamGalleryFooter(
                         currentPage: value,
                         totalPages: widget.mediaAttachments.length,
                         mediaAttachments: widget.mediaAttachments,

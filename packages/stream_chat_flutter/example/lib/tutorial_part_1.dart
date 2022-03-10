@@ -27,7 +27,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// - We make [StreamChat] the root Widget of our application
 ///
 /// - We create a single [ChannelPage] widget under [StreamChat] with three
-/// widgets: [ChannelHeader], [MessageListView] and [MessageInput]
+/// widgets: [StreamChannelHeader], [StreamMessageListView] and [StreamMessageInput]
 ///
 /// If you now run the simulator you will see a single channel UI.
 void main() async {
@@ -91,13 +91,13 @@ class ChannelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: const ChannelHeader(),
+        appBar: const StreamChannelHeader(),
         body: Column(
           children: const <Widget>[
             Expanded(
-              child: MessageListView(),
+              child: StreamMessageListView(),
             ),
-            MessageInput(),
+            StreamMessageInput(),
           ],
         ),
       );

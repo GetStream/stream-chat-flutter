@@ -8,7 +8,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// the SDK supports easily.
 ///
 /// Replacing the built-in message component with your own is done by passing
-/// it as a builder function to the [MessageListView] widget.
+/// it as a builder function to the [StreamMessageListView] widget.
 ///
 /// The message builder function will get the usual [BuildContext] argument
 /// as well as the [Message] object and its position inside the list.
@@ -106,15 +106,15 @@ class ChannelPage extends StatelessWidget {
   // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const ChannelHeader(),
+      appBar: const StreamChannelHeader(),
       body: Column(
         children: <Widget>[
           Expanded(
-            child: MessageListView(
+            child: StreamMessageListView(
               messageBuilder: _messageBuilder,
             ),
           ),
-          const MessageInput(),
+          const StreamMessageInput(),
         ],
       ),
     );
@@ -124,7 +124,7 @@ class ChannelPage extends StatelessWidget {
     BuildContext context,
     MessageDetails details,
     List<Message> messages,
-    MessageWidget _,
+    StreamMessageWidget _,
   ) {
     final message = details.message;
     final isCurrentUser =

@@ -52,7 +52,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeData = StreamChatTheme.of(context);
     final colorTheme = themeData.colorTheme;
-    final channelPreviewTheme = ChannelPreviewTheme.of(context);
+    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
 
     final currentUser = channel.client.state.currentUser;
     final isOneToOneChannel = channel.isDistinct && channel.memberCount == 2;
@@ -84,7 +84,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
         const SizedBox(height: 5),
         Center(
           // TODO: Refactor ChannelInfo
-          child: ChannelInfo(
+          child: StreamChannelInfo(
             showTypingIndicator: false,
             channel: channel,
             textStyle: channelPreviewTheme.subtitleStyle,
@@ -105,7 +105,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
               final user = member.user!;
               return Column(
                 children: [
-                  UserAvatar(
+                  StreamUserAvatar(
                     user: user,
                     constraints: const BoxConstraints(
                       maxHeight: 64,
@@ -132,7 +132,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        OptionListTile(
+        StreamOptionListTile(
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: StreamSvgIcon.user(
@@ -143,7 +143,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
           onTap: onViewInfoTap,
         ),
         if (!isOneToOneChannel)
-          OptionListTile(
+          StreamOptionListTile(
             title: context.translations.leaveGroupLabel,
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -154,7 +154,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
             onTap: onLeaveChannelTap,
           ),
         if (isOwner)
-          OptionListTile(
+          StreamOptionListTile(
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: StreamSvgIcon.delete(
@@ -165,7 +165,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
             titleColor: colorTheme.accentError,
             onTap: onDeleteConversationTap,
           ),
-        OptionListTile(
+        StreamOptionListTile(
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: StreamSvgIcon.closeSmall(

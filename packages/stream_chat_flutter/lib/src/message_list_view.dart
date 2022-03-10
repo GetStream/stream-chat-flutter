@@ -11,22 +11,22 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 /// Widget builder for message
-/// [defaultMessageWidget] is the default [MessageWidget] configuration
+/// [defaultMessageWidget] is the default [StreamMessageWidget] configuration
 /// Use [defaultMessageWidget.copyWith] to easily customize it
 typedef MessageBuilder = Widget Function(
   BuildContext,
   MessageDetails,
   List<Message>,
-  MessageWidget defaultMessageWidget,
+  StreamMessageWidget defaultMessageWidget,
 );
 
 /// Widget builder for parent message
-/// [defaultMessageWidget] is the default [MessageWidget] configuration
+/// [defaultMessageWidget] is the default [StreamMessageWidget] configuration
 /// Use [defaultMessageWidget.copyWith] to easily customize it
 typedef ParentMessageBuilder = Widget Function(
   BuildContext,
   Message?,
-  MessageWidget defaultMessageWidget,
+  StreamMessageWidget defaultMessageWidget,
 );
 
 /// Widget builder for system message
@@ -123,6 +123,11 @@ class MessageDetails {
   final int index;
 }
 
+/// {@macro message_list_view}
+@Deprecated("Use 'StreamMessageListView' instead")
+typedef MessageListView = StreamMessageListView;
+
+/// {@template message_list_view}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_listview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_listview_paint.png)
 ///
@@ -165,9 +170,10 @@ class MessageDetails {
 /// The widget components render the ui based on the first
 /// ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class MessageListView extends StatefulWidget {
+/// {@endtemplate}
+class StreamMessageListView extends StatefulWidget {
   /// Instantiate a new MessageListView
-  const MessageListView({
+  const StreamMessageListView({
     Key? key,
     this.showScrollToBottom = true,
     this.messageBuilder,
@@ -330,10 +336,10 @@ class MessageListView extends StatefulWidget {
   final SpacingWidgetBuilder? spacingWidgetBuilder;
 
   @override
-  _MessageListViewState createState() => _MessageListViewState();
+  _StreamMessageListViewState createState() => _StreamMessageListViewState();
 }
 
-class _MessageListViewState extends State<MessageListView> {
+class _StreamMessageListViewState extends State<StreamMessageListView> {
   ItemScrollController? _scrollController;
   void Function(Message)? _onThreadTap;
   final ValueNotifier<bool> _showScrollToBottom = ValueNotifier(false);
@@ -461,7 +467,7 @@ class _MessageListViewState extends State<MessageListView> {
     final child = Stack(
       alignment: Alignment.center,
       children: [
-        ConnectionStatusBuilder(
+        StreamConnectionStatusBuilder(
           statusBuilder: (context, status) {
             var statusString = '';
             var showStatus = true;
@@ -478,7 +484,7 @@ class _MessageListViewState extends State<MessageListView> {
                 break;
             }
 
-            return InfoTile(
+            return StreamInfoTile(
               showMessage: widget.showConnectionStateTile && showStatus,
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
@@ -592,7 +598,7 @@ class _MessageListViewState extends State<MessageListView> {
                             )
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: DateDivider(
+                              child: StreamDateDivider(
                                 dateTime: nextMessage.createdAt.toLocal(),
                               ),
                             );
@@ -730,8 +736,10 @@ class _MessageListViewState extends State<MessageListView> {
       ],
     );
 
-    final backgroundColor = MessageListViewTheme.of(context).backgroundColor;
-    final backgroundImage = MessageListViewTheme.of(context).backgroundImage;
+    final backgroundColor =
+        StreamMessageListViewTheme.of(context).backgroundColor;
+    final backgroundImage =
+        StreamMessageListViewTheme.of(context).backgroundImage;
 
     if (backgroundColor != null || backgroundImage != null) {
       return Container(
@@ -761,7 +769,7 @@ class _MessageListViewState extends State<MessageListView> {
         child: Text(
           context.translations.threadSeparatorText(replyCount),
           textAlign: TextAlign.center,
-          style: ChannelHeaderTheme.of(context).subtitleStyle,
+          style: StreamChannelHeaderTheme.of(context).subtitleStyle,
         ),
       ),
     );
@@ -815,7 +823,7 @@ class _MessageListViewState extends State<MessageListView> {
             final message = messages[index - 2];
             return widget.dateDividerBuilder != null
                 ? widget.dateDividerBuilder!(message.createdAt.toLocal())
-                : DateDivider(dateTime: message.createdAt.toLocal());
+                : StreamDateDivider(dateTime: message.createdAt.toLocal());
           },
         ),
       );
@@ -976,7 +984,7 @@ class _MessageListViewState extends State<MessageListView> {
     final currentUserMember =
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
-    final defaultMessageWidget = MessageWidget(
+    final defaultMessageWidget = StreamMessageWidget(
       showReplyMessage: false,
       showResendMessage: false,
       showThreadReplyMessage: false,
@@ -1040,7 +1048,7 @@ class _MessageListViewState extends State<MessageListView> {
     if ((message.type == 'system' || message.type == 'error') &&
         message.text?.isNotEmpty == true) {
       return widget.systemMessageBuilder?.call(context, message) ??
-          SystemMessage(
+          StreamSystemMessage(
             message: message,
             onMessageTap: (message) {
               if (widget.onSystemMessageTap != null) {
@@ -1110,7 +1118,7 @@ class _MessageListViewState extends State<MessageListView> {
     final currentUserMember =
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
-    Widget messageWidget = MessageWidget(
+    Widget messageWidget = StreamMessageWidget(
       message: message,
       reverse: isMyMessage,
       showReactions: !message.isDeleted,
@@ -1226,7 +1234,7 @@ class _MessageListViewState extends State<MessageListView> {
           index,
         ),
         messages,
-        messageWidget as MessageWidget,
+        messageWidget as StreamMessageWidget,
       );
     }
 

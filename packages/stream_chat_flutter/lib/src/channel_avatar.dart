@@ -152,7 +152,7 @@ class ChannelAvatar extends StatelessWidget {
           return BetterStreamBuilder<User>(
             stream: streamChat.client.state.currentUserStream.map((it) => it!),
             initialData: currentUser,
-            builder: (context, user) => UserAvatar(
+            builder: (context, user) => StreamUserAvatar(
               borderRadius: borderRadius ?? previewTheme?.borderRadius,
               user: user,
               constraints: constraints ?? previewTheme?.constraints,
@@ -175,7 +175,7 @@ class ChannelAvatar extends StatelessWidget {
               ),
             ),
             initialData: member,
-            builder: (context, member) => UserAvatar(
+            builder: (context, member) => StreamUserAvatar(
               borderRadius: borderRadius ?? previewTheme?.borderRadius,
               user: member.user!,
               constraints: constraints ?? previewTheme?.constraints,
@@ -188,7 +188,7 @@ class ChannelAvatar extends StatelessWidget {
         }
 
         // Group conversation
-        return GroupAvatar(
+        return StreamGroupAvatar(
           members: otherMembers,
           borderRadius: borderRadius ?? previewTheme?.borderRadius,
           constraints: constraints ?? previewTheme?.constraints,

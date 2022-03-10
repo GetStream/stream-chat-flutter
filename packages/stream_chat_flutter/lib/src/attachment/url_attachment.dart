@@ -2,10 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro url_attachment}
+@Deprecated("Use 'StreamUrlAttachment' instead")
+typedef UrlAttachment = StreamUrlAttachment;
+
+/// {@template url_attachment}
 /// Widget to display URL attachment
-class UrlAttachment extends StatelessWidget {
-  /// Constructor for creating a [UrlAttachment]
-  const UrlAttachment({
+/// {@endtemplate}
+class StreamUrlAttachment extends StatelessWidget {
+  /// Constructor for creating a [StreamUrlAttachment]
+  const StreamUrlAttachment({
     Key? key,
     required this.urlAttachment,
     required this.hostDisplayName,
@@ -25,8 +31,8 @@ class UrlAttachment extends StatelessWidget {
   /// Padding for text
   final EdgeInsets textPadding;
 
-  /// [MessageThemeData] for showing image title
-  final MessageThemeData messageTheme;
+  /// [StreamMessageThemeData] for showing image title
+  final StreamMessageThemeData messageTheme;
 
   @override
   Widget build(BuildContext context) {

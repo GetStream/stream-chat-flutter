@@ -11,13 +11,17 @@ typedef MessageSearchItemBuilder = Widget Function(
   GetMessageResponse,
 );
 
-/// Builder used when [MessageSearchListView] is empty
+/// Builder used when [StreamMessageSearchListView] is empty
 typedef EmptyMessageSearchBuilder = Widget Function(
   BuildContext context,
   String searchQuery,
 );
 
-///
+/// {@macro message_search_list_view}
+@Deprecated("Use 'StreamMessageSearchListView' instead")
+typedef MessageSearchListView = StreamMessageSearchListView;
+
+/// {@template message_search_list_view}
 /// It shows the list of searched messages.
 ///
 /// ```dart
@@ -47,9 +51,10 @@ typedef EmptyMessageSearchBuilder = Widget Function(
 /// The widget components render the ui based on the first ancestor of type
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class MessageSearchListView extends StatefulWidget {
+/// {@endtemplate}
+class StreamMessageSearchListView extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
-  const MessageSearchListView({
+  const StreamMessageSearchListView({
     Key? key,
     required this.filters,
     this.messageQuery,
@@ -96,7 +101,7 @@ class MessageSearchListView extends StatefulWidget {
   /// Builder used to create a custom item preview
   final MessageSearchItemBuilder? itemBuilder;
 
-  /// Function called when tapping on a [MessageSearchItem]
+  /// Function called when tapping on a [StreamMessageSearchItem]
   final MessageSearchItemTapCallback? onItemTap;
 
   /// Builder used to create a custom item separator
@@ -130,10 +135,12 @@ class MessageSearchListView extends StatefulWidget {
   final MessageSearchListController? messageSearchListController;
 
   @override
-  _MessageSearchListViewState createState() => _MessageSearchListViewState();
+  _StreamMessageSearchListViewState createState() =>
+      _StreamMessageSearchListViewState();
 }
 
-class _MessageSearchListViewState extends State<MessageSearchListView> {
+class _StreamMessageSearchListViewState
+    extends State<StreamMessageSearchListView> {
   late final _defaultController = MessageSearchListController();
 
   MessageSearchListController get _messageSearchListController =>
@@ -168,7 +175,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
             if (error is Error) {
               print(error.stackTrace);
             }
-            return InfoTile(
+            return StreamInfoTile(
               showMessage: widget.showErrorTile,
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
@@ -195,7 +202,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     );
 
     final backgroundColor =
-        MessageSearchListViewTheme.of(context).backgroundColor;
+        StreamMessageSearchListViewTheme.of(context).backgroundColor;
 
     if (backgroundColor != null) {
       return ColoredBox(
@@ -219,7 +226,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     if (widget.itemBuilder != null) {
       return widget.itemBuilder!(context, getMessageResponse);
     }
-    return MessageSearchItem(
+    return StreamMessageSearchItem(
       getMessageResponse: getMessageResponse,
       onTap: () => widget.onItemTap!(getMessageResponse),
     );

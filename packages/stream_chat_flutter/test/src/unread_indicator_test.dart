@@ -37,7 +37,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: const Scaffold(
-              body: UnreadIndicator(),
+              body: StreamUnreadIndicator(),
             ),
           ),
         ),
@@ -75,7 +75,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: Scaffold(
-              body: UnreadIndicator(
+              body: StreamUnreadIndicator(
                 cid: channel.cid,
               ),
             ),
@@ -115,7 +115,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: Scaffold(
-              body: UnreadIndicator(
+              body: StreamUnreadIndicator(
                 cid: channel.cid,
               ),
             ),

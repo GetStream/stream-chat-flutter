@@ -66,5 +66,10 @@ class _IVideoService {
 }
 
 /// Get instance of [_IVideoService]
+@Deprecated("Use 'StreamVideoService' instead")
 // ignore: non_constant_identifier_names
 _IVideoService get VideoService => _IVideoService.instance;
+
+/// Get instance of [_IVideoService]
+// ignore: non_constant_identifier_names
+_IVideoService get StreamVideoService => _IVideoService.instance;

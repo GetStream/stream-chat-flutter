@@ -376,7 +376,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
 
     if (file.size! > widget.maxAttachmentSize) {
       if (medium.type == AssetType.video && file.path != null) {
-        final mediaInfo = await (VideoService.compressVideo(
+        final mediaInfo = await (StreamVideoService.compressVideo(
           file.path!,
           frameRate: widget.compressedVideoFrameRate,
           quality: widget.compressedVideoQuality,
@@ -507,7 +507,7 @@ class _PickerWidgetState extends State<_PickerWidget> {
               ),
             );
           }
-          return MediaListView(
+          return StreamMediaListView(
             selectedIds: widget.selectedMedias,
             onSelect: widget.onMediaSelected,
           );

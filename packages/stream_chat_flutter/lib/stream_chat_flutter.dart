@@ -21,7 +21,6 @@ export 'src/gradient_avatar.dart';
 export 'src/info_tile.dart';
 export 'src/localization/stream_chat_localizations.dart';
 export 'src/localization/translations.dart' show DefaultTranslations;
-export 'src/mention_tile.dart';
 export 'src/message_action.dart';
 export 'src/message_input/countdown_button.dart';
 export 'src/message_input/message_input.dart';

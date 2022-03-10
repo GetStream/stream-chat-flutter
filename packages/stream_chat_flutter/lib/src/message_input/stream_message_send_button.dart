@@ -44,7 +44,7 @@ class StreamMessageSendButton extends StatelessWidget {
 
     late Widget sendButton;
     if (timeOut > 0) {
-      sendButton = CountdownButton(count: timeOut);
+      sendButton = StreamCountdownButton(count: timeOut);
     } else if (isIdle) {
       sendButton = idleSendButton ?? _buildIdleSendButton(context);
     } else {
@@ -63,7 +63,7 @@ class StreamMessageSendButton extends StatelessWidget {
   }
 
   Widget _buildIdleSendButton(BuildContext context) {
-    final _messageInputTheme = MessageInputTheme.of(context);
+    final _messageInputTheme = StreamMessageInputTheme.of(context);
 
     return Padding(
       padding: const EdgeInsets.all(8),
@@ -75,7 +75,7 @@ class StreamMessageSendButton extends StatelessWidget {
   }
 
   Widget _buildSendButton(BuildContext context) {
-    final _messageInputTheme = MessageInputTheme.of(context);
+    final _messageInputTheme = StreamMessageInputTheme.of(context);
 
     return Padding(
       padding: const EdgeInsets.all(8),

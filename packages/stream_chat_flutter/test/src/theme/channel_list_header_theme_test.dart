@@ -4,10 +4,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
   test('ChannelListHeaderThemeData copyWith, ==, hashCode basics', () {
-    expect(const ChannelListHeaderThemeData(),
-        const ChannelListHeaderThemeData().copyWith());
-    expect(const ChannelListHeaderThemeData().hashCode,
-        const ChannelListHeaderThemeData().copyWith().hashCode);
+    expect(const StreamChannelListHeaderThemeData(),
+        const StreamChannelListHeaderThemeData().copyWith());
+    expect(const StreamChannelListHeaderThemeData().hashCode,
+        const StreamChannelListHeaderThemeData().copyWith().hashCode);
   });
 
   group('ChannelListHeaderThemeData lerps', () {
@@ -15,7 +15,7 @@ void main() {
         '''Light ChannelListHeaderThemeData lerps completely to dark ChannelListHeaderThemeData''',
         () {
       expect(
-          const ChannelListHeaderThemeData().lerp(
+          const StreamChannelListHeaderThemeData().lerp(
               _channelListHeaderThemeControl,
               _channelListHeaderThemeControlDark,
               1),
@@ -26,7 +26,7 @@ void main() {
         '''Light ChannelListHeaderThemeData lerps halfway to dark ChannelListHeaderThemeData''',
         () {
       expect(
-          const ChannelListHeaderThemeData().lerp(
+          const StreamChannelListHeaderThemeData().lerp(
               _channelListHeaderThemeControl,
               _channelListHeaderThemeControlDark,
               0.5),
@@ -37,7 +37,7 @@ void main() {
         '''Dark ChannelListHeaderThemeData lerps completely to light ChannelListHeaderThemeData''',
         () {
       expect(
-          const ChannelListHeaderThemeData().lerp(
+          const StreamChannelListHeaderThemeData().lerp(
               _channelListHeaderThemeControlDark,
               _channelListHeaderThemeControl,
               1),
@@ -53,20 +53,20 @@ void main() {
   });
 }
 
-final _channelListHeaderThemeControl = ChannelListHeaderThemeData(
-  avatarTheme: AvatarThemeData(
+final _channelListHeaderThemeControl = StreamChannelListHeaderThemeData(
+  avatarTheme: StreamAvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
       height: 40,
       width: 40,
     ),
   ),
-  color: ColorTheme.light().barsBg,
-  titleStyle: TextTheme.light().headlineBold,
+  color: StreamColorTheme.light().barsBg,
+  titleStyle: StreamTextTheme.light().headlineBold,
 );
 
-final _channelListHeaderThemeControlMidLerp = ChannelListHeaderThemeData(
-  avatarTheme: AvatarThemeData(
+final _channelListHeaderThemeControlMidLerp = StreamChannelListHeaderThemeData(
+  avatarTheme: StreamAvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
       height: 40,
@@ -81,14 +81,14 @@ final _channelListHeaderThemeControlMidLerp = ChannelListHeaderThemeData(
   ),
 );
 
-final _channelListHeaderThemeControlDark = ChannelListHeaderThemeData(
-  avatarTheme: AvatarThemeData(
+final _channelListHeaderThemeControlDark = StreamChannelListHeaderThemeData(
+  avatarTheme: StreamAvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
       height: 40,
       width: 40,
     ),
   ),
-  color: ColorTheme.dark().barsBg,
-  titleStyle: TextTheme.dark().headlineBold,
+  color: StreamColorTheme.dark().barsBg,
+  titleStyle: StreamTextTheme.dark().headlineBold,
 );

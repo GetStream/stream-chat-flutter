@@ -2,27 +2,33 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// {@macro message_list_view_theme}
+@Deprecated("Use 'StreamMessageListViewTheme' instead")
+typedef MessageListViewTheme = StreamMessageListViewTheme;
+
+/// {@template message_list_view_theme}
 /// Overrides the default style of [MessageListView] descendants.
 ///
 /// See also:
 ///
-///  * [MessageListViewThemeData], which is used to configure this theme.
-class MessageListViewTheme extends InheritedTheme {
-  /// Creates a [MessageListViewTheme].
+///  * [StreamMessageListViewThemeData], which is used to configure this theme.
+/// {@endtemplate}
+class StreamMessageListViewTheme extends InheritedTheme {
+  /// Creates a [StreamMessageListViewTheme].
   ///
   /// The [data] parameter must not be null.
-  const MessageListViewTheme({
+  const StreamMessageListViewTheme({
     Key? key,
     required this.data,
     required Widget child,
   }) : super(key: key, child: child);
 
   /// The configuration of this theme.
-  final MessageListViewThemeData data;
+  final StreamMessageListViewThemeData data;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [MessageListViewTheme] widget, then
+  /// If there is no enclosing [StreamMessageListViewTheme] widget, then
   /// [StreamChatThemeData.messageListViewTheme] is used.
   ///
   /// Typical usage is as follows:
@@ -30,35 +36,41 @@ class MessageListViewTheme extends InheritedTheme {
   /// ```dart
   /// MessageListViewTheme theme = MessageListViewTheme.of(context);
   /// ```
-  static MessageListViewThemeData of(BuildContext context) {
-    final messageListViewTheme =
-        context.dependOnInheritedWidgetOfExactType<MessageListViewTheme>();
+  static StreamMessageListViewThemeData of(BuildContext context) {
+    final messageListViewTheme = context
+        .dependOnInheritedWidgetOfExactType<StreamMessageListViewTheme>();
     return messageListViewTheme?.data ??
         StreamChatTheme.of(context).messageListViewTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) =>
-      MessageListViewTheme(data: data, child: child);
+      StreamMessageListViewTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(MessageListViewTheme oldWidget) =>
+  bool updateShouldNotify(StreamMessageListViewTheme oldWidget) =>
       data != oldWidget.data;
 }
 
+/// {@macro message_list_view_theme_data}
+@Deprecated("Use 'StreamMessageListViewThemeData' instead")
+typedef MessageListViewThemeData = StreamMessageListViewThemeData;
+
+/// {@template message_list_view_theme_data}
 /// A style that overrides the default appearance of [MessageListView]s when
-/// used with [MessageListViewTheme] or with the overall [StreamChatTheme]'s
+/// used with [StreamMessageListViewTheme] or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.messageListViewTheme].
 ///
 /// See also:
 ///
-/// * [MessageListViewTheme], the theme which is configured with this class.
+/// * [StreamMessageListViewTheme], the theme which is configured with this class.
 /// * [StreamChatThemeData.messageListViewTheme], which can be used to override
 /// the default style for [MessageListView]s below the overall
 /// [StreamChatTheme].
-class MessageListViewThemeData with Diagnosticable {
-  /// Creates a [MessageListViewThemeData].
-  const MessageListViewThemeData({
+/// {@endtemplate}
+class StreamMessageListViewThemeData with Diagnosticable {
+  /// Creates a [StreamMessageListViewThemeData].
+  const StreamMessageListViewThemeData({
     this.backgroundColor,
     this.backgroundImage,
   });
@@ -69,12 +81,12 @@ class MessageListViewThemeData with Diagnosticable {
   /// The image of the [MessageListView] background.
   final DecorationImage? backgroundImage;
 
-  /// Copies this [MessageListViewThemeData] to another.
-  MessageListViewThemeData copyWith({
+  /// Copies this [StreamMessageListViewThemeData] to another.
+  StreamMessageListViewThemeData copyWith({
     Color? backgroundColor,
     DecorationImage? backgroundImage,
   }) =>
-      MessageListViewThemeData(
+      StreamMessageListViewThemeData(
         backgroundColor: backgroundColor ?? this.backgroundColor,
         backgroundImage: backgroundImage ?? this.backgroundImage,
       );
@@ -82,18 +94,18 @@ class MessageListViewThemeData with Diagnosticable {
   /// Linearly interpolate between two [MessageListView] themes.
   ///
   /// All the properties must be non-null.
-  MessageListViewThemeData lerp(
-    MessageListViewThemeData a,
-    MessageListViewThemeData b,
+  StreamMessageListViewThemeData lerp(
+    StreamMessageListViewThemeData a,
+    StreamMessageListViewThemeData b,
     double t,
   ) =>
-      MessageListViewThemeData(
+      StreamMessageListViewThemeData(
         backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
         backgroundImage: t < 0.5 ? a.backgroundImage : b.backgroundImage,
       );
 
-  /// Merges one [MessageListViewThemeData] with another.
-  MessageListViewThemeData merge(MessageListViewThemeData? other) {
+  /// Merges one [StreamMessageListViewThemeData] with another.
+  StreamMessageListViewThemeData merge(StreamMessageListViewThemeData? other) {
     if (other == null) return this;
     return copyWith(
       backgroundColor: other.backgroundColor,
@@ -104,7 +116,7 @@ class MessageListViewThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MessageListViewThemeData &&
+      other is StreamMessageListViewThemeData &&
           runtimeType == other.runtimeType &&
           backgroundColor == other.backgroundColor &&
           backgroundImage == other.backgroundImage;

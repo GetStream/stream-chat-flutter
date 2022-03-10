@@ -131,7 +131,7 @@ class StreamChannelListTile extends StatelessWidget {
     final channelState = channel.state!;
     final currentUser = channel.client.state.currentUser!;
 
-    final channelPreviewTheme = ChannelPreviewTheme.of(context);
+    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
 
     final leading = this.leading ??
         StreamChannelAvatar(
@@ -182,7 +182,7 @@ class StreamChannelListTile extends StatelessWidget {
                     return const Offstage();
                   }
                   return unreadIndicatorBuilder?.call(context) ??
-                      UnreadIndicator(cid: channel.cid);
+                      StreamUnreadIndicator(cid: channel.cid);
                 },
               ),
             ],
@@ -213,7 +213,7 @@ class StreamChannelListTile extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 4),
                     child:
                         sendingIndicatorBuilder?.call(context, lastMessage) ??
-                            SendingIndicator(
+                            StreamSendingIndicator(
                               message: lastMessage,
                               size: channelPreviewTheme.indicatorIconSize,
                               isMessageRead: channelState
@@ -318,7 +318,7 @@ class ChannelListTileSubtitle extends StatelessWidget {
         ],
       );
     }
-    return TypingIndicator(
+    return StreamTypingIndicator(
       channel: channel,
       style: textStyle,
       alternativeWidget: ChannelLastMessageText(
