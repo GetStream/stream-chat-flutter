@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:macos_ui/macos_ui.dart';
+import 'package:native_context_menu/native_context_menu.dart';
 import 'package:stream_chat_flutter/src/bottom_sheets/edit_message_sheet.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/context_menu_items.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
