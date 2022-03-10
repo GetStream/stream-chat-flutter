@@ -116,197 +116,226 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          PageView.builder(
-            controller: _pageController,
-            onPageChanged: (val) {
-              _currentPage.value = val;
+      body: widget.mediaAttachments.length != videoPackages.length
+          ? Stack(
+              children: [
+                PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: (val) {
+                    _currentPage.value = val;
 
-              if (videoPackages.isEmpty) {
-                return;
-              }
+                    if (videoPackages.isEmpty) {
+                      return;
+                    }
 
-              final currentAttachment = widget.mediaAttachments[val];
+                    final currentAttachment = widget.mediaAttachments[val];
 
-              for (final e in videoPackages.values) {
-                if (e.attachment != currentAttachment) {
-                  e.player.pause();
-                }
-              }
+                    for (final p in videoPackages.values) {
+                      if (p.attachment != currentAttachment) {
+                        p.player.pause();
+                      }
+                    }
 
-              if (widget.autoplayVideos && currentAttachment.type == 'video') {
-                final package = videoPackages[currentAttachment.id]!;
-                package.player.play();
-              }
-            },
-            itemBuilder: (context, index) {
-              final attachment = widget.mediaAttachments[index];
-              if (attachment.type == 'image' || attachment.type == 'giphy') {
-                final imageUrl = attachment.imageUrl ??
-                    attachment.assetUrl ??
-                    attachment.thumbUrl;
-                return AnimatedBuilder(
-                  animation: _curvedAnimation,
-                  builder: (context, child) => ContextMenuRegion(
-                    onItemSelected: (item) => item.onSelected?.call(),
-                    menuItems: [
-                      DownloadMenuItem(
-                        attachment: attachment,
-                        onDownloadSuccess: onDownloadSuccess,
-                      ),
-                    ],
-                    child: PhotoView(
-                      loadingBuilder: (context, image) => const Offstage(),
-                      imageProvider: (imageUrl == null &&
-                              attachment.localUri != null &&
-                              attachment.file?.bytes != null)
-                          ? Image.memory(attachment.file!.bytes!).image
-                          : CachedNetworkImageProvider(imageUrl!),
-                      maxScale: PhotoViewComputedScale.covered,
-                      minScale: PhotoViewComputedScale.contained,
-                      heroAttributes: PhotoViewHeroAttributes(
-                        tag: widget.mediaAttachments,
-                      ),
-                      backgroundDecoration: BoxDecoration(
-                        color: ColorTween(
-                          begin: ChannelHeaderTheme.of(context).color,
-                          end: Colors.black,
-                        ).lerp(_curvedAnimation.value),
-                      ),
-                      onTapUp: (a, b, c) {
-                        if (_animationController.isCompleted) {
-                          _animationController.reverse();
-                        } else {
-                          _animationController.forward();
-                        }
-                      },
-                    ),
-                  ),
-                );
-              } else if (attachment.type == 'video') {
-                final package = videoPackages[attachment.id]!;
-                package.player.open(
-                  Playlist(
-                    medias: [
-                      Media.network(package.attachment.assetUrl),
-                    ],
-                  ),
-                  autoStart: widget.autoplayVideos,
-                );
-                return InkWell(
-                  splashFactory: NoSplash.splashFactory,
-                  onTap: () {
-                    if (_animationController.isCompleted) {
-                      _animationController.reverse();
-                    } else {
-                      _animationController.forward();
+                    if (widget.autoplayVideos &&
+                        currentAttachment.type == 'video') {
+                      final package = videoPackages[currentAttachment.id]!;
+                      package.player.play();
                     }
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 50,
-                    ),
-                    child: ContextMenuRegion(
-                      onItemSelected: (item) => item.onSelected?.call(),
-                      menuItems: [
-                        DownloadMenuItem(
-                          attachment: attachment,
-                          onDownloadSuccess: onDownloadSuccess,
+                  itemBuilder: (context, index) {
+                    final attachment = widget.mediaAttachments[index];
+                    if (attachment.type == 'image' ||
+                        attachment.type == 'giphy') {
+                      final imageUrl = attachment.imageUrl ??
+                          attachment.assetUrl ??
+                          attachment.thumbUrl;
+                      return AnimatedBuilder(
+                        animation: _curvedAnimation,
+                        builder: (context, child) => ContextMenuRegion(
+                          onItemSelected: (item) => item.onSelected?.call(),
+                          menuItems: [
+                            DownloadMenuItem(
+                              attachment: attachment,
+                              onDownloadSuccess: onDownloadSuccess,
+                            ),
+                          ],
+                          child: PhotoView(
+                            loadingBuilder: (context, image) =>
+                                const Offstage(),
+                            imageProvider: (imageUrl == null &&
+                                    attachment.localUri != null &&
+                                    attachment.file?.bytes != null)
+                                ? Image.memory(attachment.file!.bytes!).image
+                                : CachedNetworkImageProvider(imageUrl!),
+                            maxScale: PhotoViewComputedScale.covered,
+                            minScale: PhotoViewComputedScale.contained,
+                            heroAttributes: PhotoViewHeroAttributes(
+                              tag: widget.mediaAttachments,
+                            ),
+                            backgroundDecoration: BoxDecoration(
+                              color: ColorTween(
+                                begin: ChannelHeaderTheme.of(context).color,
+                                end: Colors.black,
+                              ).lerp(_curvedAnimation.value),
+                            ),
+                            onTapUp: (a, b, c) {
+                              if (_animationController.isCompleted) {
+                                _animationController.reverse();
+                              } else {
+                                _animationController.forward();
+                              }
+                            },
+                          ),
                         ),
+                      );
+                    } else if (attachment.type == 'video') {
+                      final package = videoPackages[attachment.id]!;
+                      package.player.open(
+                        Playlist(
+                          medias: [
+                            Media.network(package.attachment.assetUrl),
+                          ],
+                        ),
+                        autoStart: widget.autoplayVideos,
+                      );
+                      return InkWell(
+                        splashFactory: NoSplash.splashFactory,
+                        onTap: () {
+                          if (_animationController.isCompleted) {
+                            _animationController.reverse();
+                          } else {
+                            _animationController.forward();
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 50,
+                          ),
+                          child: ContextMenuRegion(
+                            onItemSelected: (item) => item.onSelected?.call(),
+                            menuItems: [
+                              DownloadMenuItem(
+                                attachment: attachment,
+                                onDownloadSuccess: onDownloadSuccess,
+                              ),
+                            ],
+                            child: Video(
+                              player: package.player,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox();
+                  },
+                  itemCount: widget.mediaAttachments.length,
+                ),
+                FadeTransition(
+                  opacity: _opacityAnimation,
+                  child: ValueListenableBuilder<int>(
+                    valueListenable: _currentPage,
+                    builder: (context, value, child) => Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GalleryHeader(
+                          userName: widget.userName,
+                          sentAt: context.translations.sentAtText(
+                            date: widget.message.createdAt,
+                            time: widget.message.createdAt,
+                          ),
+                          onBackPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          message: widget.message,
+                          currentIndex: value,
+                          onShowMessage: () {
+                            widget.onShowMessage?.call(
+                              widget.message,
+                              StreamChannel.of(context).channel,
+                            );
+                          },
+                          attachmentActionsModalBuilder:
+                              widget.attachmentActionsModalBuilder,
+                        ),
+                        if (!widget.message.isEphemeral)
+                          GalleryFooter(
+                            currentPage: value,
+                            totalPages: widget.mediaAttachments.length,
+                            mediaAttachments: widget.mediaAttachments,
+                            message: widget.message,
+                            mediaSelectedCallBack: (val) {
+                              _currentPage.value = val;
+                              _pageController.animateToPage(
+                                val,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                              Navigator.pop(context);
+                            },
+                          ),
                       ],
-                      child: Video(
-                        player: package.player,
+                    ),
+                  ),
+                ),
+                if (widget.mediaAttachments.length > 1) ...[
+                  if (_currentPage.value !=
+                      widget.mediaAttachments.length - 1) ...[
+                    GalleryNavigationItem(
+                      icon: Icons.chevron_right,
+                      right: 0,
+                      opacityAnimation: _opacityAnimation,
+                      currentPage: _currentPage,
+                      onClick: () {
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 350),
+                          curve: Curves.easeIn,
+                        );
+                        setState(() => _currentPage.value++);
+                      },
+                    ),
+                  ],
+                  if (_currentPage.value != 0) ...[
+                    GalleryNavigationItem(
+                      icon: Icons.chevron_left,
+                      left: 0,
+                      opacityAnimation: _opacityAnimation,
+                      currentPage: _currentPage,
+                      onClick: () {
+                        _pageController.previousPage(
+                          duration: const Duration(milliseconds: 350),
+                          curve: Curves.easeOut,
+                        );
+                        setState(() => _currentPage.value--);
+                      },
+                    ),
+                  ],
+                ],
+              ],
+            )
+          : Stack(
+              children: [
+                _PlaylistPlayer(
+                  packages: videoPackages.values.toList(),
+                  autoStart: widget.autoplayVideos,
+                ),
+                Positioned(
+                  left: 8,
+                  top: 8,
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        videoPackages.values.first.player.stop();
+                        Navigator.of(context).pop();
+                      },
+                      child: StreamSvgIcon.close(
+                        size: 30,
                       ),
                     ),
                   ),
-                );
-              }
-              return const SizedBox();
-            },
-            itemCount: widget.mediaAttachments.length,
-          ),
-          FadeTransition(
-            opacity: _opacityAnimation,
-            child: ValueListenableBuilder<int>(
-              valueListenable: _currentPage,
-              builder: (context, value, child) => Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GalleryHeader(
-                    userName: widget.userName,
-                    sentAt: context.translations.sentAtText(
-                      date: widget.message.createdAt,
-                      time: widget.message.createdAt,
-                    ),
-                    onBackPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    message: widget.message,
-                    currentIndex: value,
-                    onShowMessage: () {
-                      widget.onShowMessage?.call(
-                        widget.message,
-                        StreamChannel.of(context).channel,
-                      );
-                    },
-                    attachmentActionsModalBuilder:
-                        widget.attachmentActionsModalBuilder,
-                  ),
-                  if (!widget.message.isEphemeral)
-                    GalleryFooter(
-                      currentPage: value,
-                      totalPages: widget.mediaAttachments.length,
-                      mediaAttachments: widget.mediaAttachments,
-                      message: widget.message,
-                      mediaSelectedCallBack: (val) {
-                        _currentPage.value = val;
-                        _pageController.animateToPage(
-                          val,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                        Navigator.pop(context);
-                      },
-                    ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-          if (widget.mediaAttachments.length > 1) ...[
-            if (_currentPage.value != widget.mediaAttachments.length - 1) ...[
-              GalleryNavigationItem(
-                icon: Icons.chevron_right,
-                right: 0,
-                opacityAnimation: _opacityAnimation,
-                currentPage: _currentPage,
-                onClick: () {
-                  _pageController.nextPage(
-                    duration: const Duration(milliseconds: 350),
-                    curve: Curves.easeIn,
-                  );
-                  setState(() => _currentPage.value++);
-                },
-              ),
-            ],
-            if (_currentPage.value != 0) ...[
-              GalleryNavigationItem(
-                icon: Icons.chevron_left,
-                left: 0,
-                opacityAnimation: _opacityAnimation,
-                currentPage: _currentPage,
-                onClick: () {
-                  _pageController.previousPage(
-                    duration: const Duration(milliseconds: 350),
-                    curve: Curves.easeOut,
-                  );
-                  setState(() => _currentPage.value--);
-                },
-              ),
-            ],
-          ],
-        ],
-      ),
     );
   }
 
@@ -407,4 +436,33 @@ class DesktopVideoPackage {
 
   /// Whether to show the player controls or not.
   final bool showControls;
+}
+
+class _PlaylistPlayer extends StatelessWidget {
+  const _PlaylistPlayer({
+    Key? key,
+    required this.packages,
+    required this.autoStart,
+  }) : super(key: key);
+
+  final List<DesktopVideoPackage> packages;
+  final bool autoStart;
+
+  @override
+  Widget build(BuildContext context) {
+    final _media = <Media>[];
+    for (final package in packages) {
+      _media.add(Media.network(package.attachment.assetUrl));
+    }
+    packages.first.player.open(
+      Playlist(
+        medias: _media,
+      ),
+      autoStart: autoStart,
+    );
+    return Video(
+      player: packages.first.player,
+      fit: BoxFit.fill,
+    );
+  }
 }
