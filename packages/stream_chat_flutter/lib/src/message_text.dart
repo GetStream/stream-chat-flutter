@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@macro message_text}
@@ -40,13 +41,14 @@ class StreamMessageText extends StatelessWidget {
       stream: streamChat.currentUserStream.map((it) => it!.language ?? 'en'),
       initialData: streamChat.currentUser!.language ?? 'en',
       builder: (context, language) {
-        final translatedText =
-            message.i18n?['${language}_text'] ?? message.text;
-        final messageText =
-            _replaceMentions(translatedText ?? '').replaceAll('\n', '\n\n');
+        final messageText = message
+            .translate(language)
+            .replaceMentions()
+            .text
+            ?.replaceAll('\n', '\n\n');
         final themeData = Theme.of(context);
         return MarkdownBody(
-          data: messageText,
+          data: messageText ?? '',
           onTapLink: (
             String link,
             String? href,
@@ -85,18 +87,5 @@ class StreamMessageText extends StatelessWidget {
         );
       },
     );
-  }
-
-  String _replaceMentions(String text) {
-    var messageTextToRender = text;
-    for (final user in message.mentionedUsers.toSet()) {
-      final userId = user.id;
-      final userName = user.name;
-      messageTextToRender = messageTextToRender.replaceAll(
-        '@$userId',
-        '[@$userName](@${userName.replaceAll(' ', '')})',
-      );
-    }
-    return messageTextToRender;
   }
 }

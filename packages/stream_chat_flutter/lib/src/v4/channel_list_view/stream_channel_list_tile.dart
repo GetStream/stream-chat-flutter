@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/src/typing_indicator.dart';
 import 'package:stream_chat_flutter/src/unread_indicator.dart';
 import 'package:stream_chat_flutter/src/v4/stream_channel_avatar.dart';
 import 'package:stream_chat_flutter/src/v4/stream_channel_name.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// A widget that displays a channel preview.
@@ -359,7 +360,10 @@ class ChannelLastMessageText extends StatelessWidget {
 
           if (lastMessage == null) return const Offstage();
 
-          final lastMessageText = lastMessage.text;
+          final lastMessageText = lastMessage
+              .translate(channel.client.state.currentUser?.language ?? 'en')
+              .replaceMentions(linkify: false)
+              .text;
           final lastMessageAttachments = lastMessage.attachments;
           final lastMessageMentionedUsers = lastMessage.mentionedUsers;
 

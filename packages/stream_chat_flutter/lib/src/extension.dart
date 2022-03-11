@@ -225,3 +225,50 @@ extension UserListX on List<User> {
     return entries.map((e) => e.key).toList(growable: false);
   }
 }
+
+/// Extensions on Message
+extension MessageX on Message {
+  /// It replaces the user mentions with the actual user names.
+  Message replaceMentions({bool linkify = true}) {
+    var messageTextToRender = text;
+    for (final user in mentionedUsers.toSet()) {
+      final userId = user.id;
+      final userName = user.name;
+      if (linkify) {
+        messageTextToRender = messageTextToRender?.replaceAll(
+          '@$userId',
+          '[@$userName](@${userName.replaceAll(' ', '')})',
+        );
+      } else {
+        messageTextToRender = messageTextToRender?.replaceAll(
+          '@$userId',
+          '@$userName',
+        );
+      }
+    }
+    return copyWith(text: messageTextToRender);
+  }
+
+  /// It returns the message with the translated text if available locally
+  Message translate(String language) =>
+      copyWith(text: i18n?['${language}_text'] ?? text);
+
+  /// It returns the message replacing the mentioned user names with
+  ///  the respective user ids
+  Message replaceMentionsWithId() {
+    if (mentionedUsers.isEmpty) return this;
+
+    var messageTextToSend = text;
+    if (messageTextToSend == null) return this;
+
+    for (final user in mentionedUsers.toSet()) {
+      final userName = user.name;
+      messageTextToSend = messageTextToSend!.replaceAll(
+        '@$userName',
+        '@${user.id}',
+      );
+    }
+
+    return copyWith(text: messageTextToSend);
+  }
+}
