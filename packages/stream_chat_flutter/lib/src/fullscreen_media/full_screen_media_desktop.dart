@@ -462,7 +462,7 @@ class _PlaylistPlayer extends StatelessWidget {
     );
     return Video(
       player: packages.first.player,
-      fit: BoxFit.fill,
+      fit: BoxFit.cover,
     );
   }
 }
