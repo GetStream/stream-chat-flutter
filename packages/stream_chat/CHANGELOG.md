@@ -1,3 +1,8 @@
+## Upcoming
+
+🐞 Fixed
+- Unread count specific to channel setting global unread count on a specific case.
+
 ## 3.5.0
 
 ✅ Added
