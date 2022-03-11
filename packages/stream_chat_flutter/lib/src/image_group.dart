@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:native_context_menu/native_context_menu.dart';
-import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_desktop.dart'
     hide ShowMessageCallback, ReturnActionType;
 import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
