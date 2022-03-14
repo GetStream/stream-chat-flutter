@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' hide ThemeData;
 import 'package:macos_ui/macos_ui.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:yaru_widgets/yaru_widgets.dart';
@@ -161,7 +162,8 @@ class PlatformDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    print(isDark);
     return DesktopWidgetBuilder(
       macOS: (context, child) => MacosTheme(
         data: isDark ? MacosThemeData.dark() : MacosThemeData.light(),
