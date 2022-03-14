@@ -581,67 +581,68 @@ class MessageWidget extends StatefulWidget {
     List<MessageAction>? customActions,
     void Function(Message message, Attachment attachment)? onAttachmentTap,
     Widget Function(BuildContext, User)? userAvatarBuilder,
-  }) =>
-      MessageWidget(
-        key: key ?? this.key,
-        onMentionTap: onMentionTap ?? this.onMentionTap,
-        onThreadTap: onThreadTap ?? this.onThreadTap,
-        onReplyTap: onReplyTap ?? this.onReplyTap,
-        editMessageInputBuilder:
-            editMessageInputBuilder ?? this.editMessageInputBuilder,
-        textBuilder: textBuilder ?? this.textBuilder,
-        usernameBuilder: usernameBuilder ?? this.usernameBuilder,
-        bottomRowBuilder: bottomRowBuilder ?? this.bottomRowBuilder,
-        deletedBottomRowBuilder:
-            deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
-        onMessageActions: onMessageActions ?? this.onMessageActions,
-        message: message ?? this.message,
-        messageTheme: messageTheme ?? this.messageTheme,
-        reverse: reverse ?? this.reverse,
-        shape: shape ?? this.shape,
-        attachmentShape: attachmentShape ?? this.attachmentShape,
-        borderSide: borderSide ?? this.borderSide,
-        attachmentBorderSide: attachmentBorderSide ?? this.attachmentBorderSide,
-        borderRadiusGeometry: borderRadiusGeometry ?? this.borderRadiusGeometry,
-        attachmentBorderRadiusGeometry: attachmentBorderRadiusGeometry ??
-            this.attachmentBorderRadiusGeometry,
-        padding: padding ?? this.padding,
-        textPadding: textPadding ?? this.textPadding,
-        attachmentPadding: attachmentPadding ?? this.attachmentPadding,
-        showUserAvatar: showUserAvatar ?? this.showUserAvatar,
-        showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
-        showReactions: showReactions ?? this.showReactions,
-        showThreadReplyIndicator:
-            showThreadReplyIndicator ?? this.showThreadReplyIndicator,
-        showInChannelIndicator:
-            showInChannelIndicator ?? this.showInChannelIndicator,
-        onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
-        onLinkTap: onLinkTap ?? this.onLinkTap,
-        showReactionPickerIndicator:
-            showReactionPickerIndicator ?? this.showReactionPickerIndicator,
-        onShowMessage: onShowMessage ?? this.onShowMessage,
-        onReturnAction: onReturnAction ?? this.onReturnAction,
-        showUsername: showUsername ?? this.showUsername,
-        showTimestamp: showTimestamp ?? this.showTimestamp,
-        showReplyMessage: showReplyMessage ?? this.showReplyMessage,
-        showThreadReplyMessage:
-            showThreadReplyMessage ?? this.showThreadReplyMessage,
-        showEditMessage: showEditMessage ?? this.showEditMessage,
-        showCopyMessage: showCopyMessage ?? this.showCopyMessage,
-        showDeleteMessage: showDeleteMessage ?? this.showDeleteMessage,
-        showResendMessage: showResendMessage ?? this.showResendMessage,
-        showFlagButton: showFlagButton ?? this.showFlagButton,
-        showPinButton: showPinButton ?? this.showPinButton,
-        showPinHighlight: showPinHighlight ?? this.showPinHighlight,
-        customAttachmentBuilders:
-            customAttachmentBuilders ?? this.customAttachmentBuilders,
-        translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
-        onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
-        onMessageTap: onMessageTap ?? this.onMessageTap,
-        customActions: customActions ?? this.customActions,
-        onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
-        userAvatarBuilder: userAvatarBuilder ?? this.userAvatarBuilder,
-      );
+  }) {
+    return MessageWidget(
+      key: key ?? this.key,
+      onMentionTap: onMentionTap ?? this.onMentionTap,
+      onThreadTap: onThreadTap ?? this.onThreadTap,
+      onReplyTap: onReplyTap ?? this.onReplyTap,
+      editMessageInputBuilder:
+          editMessageInputBuilder ?? this.editMessageInputBuilder,
+      textBuilder: textBuilder ?? this.textBuilder,
+      usernameBuilder: usernameBuilder ?? this.usernameBuilder,
+      bottomRowBuilder: bottomRowBuilder ?? this.bottomRowBuilder,
+      deletedBottomRowBuilder:
+          deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
+      onMessageActions: onMessageActions ?? this.onMessageActions,
+      message: message ?? this.message,
+      messageTheme: messageTheme ?? this.messageTheme,
+      reverse: reverse ?? this.reverse,
+      shape: shape ?? this.shape,
+      attachmentShape: attachmentShape ?? this.attachmentShape,
+      borderSide: borderSide ?? this.borderSide,
+      attachmentBorderSide: attachmentBorderSide ?? this.attachmentBorderSide,
+      borderRadiusGeometry: borderRadiusGeometry ?? this.borderRadiusGeometry,
+      attachmentBorderRadiusGeometry:
+          attachmentBorderRadiusGeometry ?? this.attachmentBorderRadiusGeometry,
+      padding: padding ?? this.padding,
+      textPadding: textPadding ?? this.textPadding,
+      attachmentPadding: attachmentPadding ?? this.attachmentPadding,
+      showUserAvatar: showUserAvatar ?? this.showUserAvatar,
+      showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
+      showReactions: showReactions ?? this.showReactions,
+      showThreadReplyIndicator:
+          showThreadReplyIndicator ?? this.showThreadReplyIndicator,
+      showInChannelIndicator:
+          showInChannelIndicator ?? this.showInChannelIndicator,
+      onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
+      onLinkTap: onLinkTap ?? this.onLinkTap,
+      showReactionPickerIndicator:
+          showReactionPickerIndicator ?? this.showReactionPickerIndicator,
+      onShowMessage: onShowMessage ?? this.onShowMessage,
+      onReturnAction: onReturnAction ?? this.onReturnAction,
+      showUsername: showUsername ?? this.showUsername,
+      showTimestamp: showTimestamp ?? this.showTimestamp,
+      showReplyMessage: showReplyMessage ?? this.showReplyMessage,
+      showThreadReplyMessage:
+          showThreadReplyMessage ?? this.showThreadReplyMessage,
+      showEditMessage: showEditMessage ?? this.showEditMessage,
+      showCopyMessage: showCopyMessage ?? this.showCopyMessage,
+      showDeleteMessage: showDeleteMessage ?? this.showDeleteMessage,
+      showResendMessage: showResendMessage ?? this.showResendMessage,
+      showFlagButton: showFlagButton ?? this.showFlagButton,
+      showPinButton: showPinButton ?? this.showPinButton,
+      showPinHighlight: showPinHighlight ?? this.showPinHighlight,
+      customAttachmentBuilders:
+          customAttachmentBuilders ?? this.customAttachmentBuilders,
+      translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
+      onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
+      onMessageTap: onMessageTap ?? this.onMessageTap,
+      customActions: customActions ?? this.customActions,
+      onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
+      userAvatarBuilder: userAvatarBuilder ?? this.userAvatarBuilder,
+    );
+  }
 
   @override
   _MessageWidgetState createState() => _MessageWidgetState();

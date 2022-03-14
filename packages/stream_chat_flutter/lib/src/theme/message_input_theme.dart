@@ -117,51 +117,53 @@ class MessageInputThemeData with Diagnosticable {
     Gradient? activeBorderGradient,
     Gradient? idleBorderGradient,
     BorderRadius? borderRadius,
-  }) =>
-      MessageInputThemeData(
-        sendAnimationDuration:
-            sendAnimationDuration ?? this.sendAnimationDuration,
-        inputBackgroundColor: inputBackgroundColor ?? this.inputBackgroundColor,
-        actionButtonColor: actionButtonColor ?? this.actionButtonColor,
-        sendButtonColor: sendButtonColor ?? this.sendButtonColor,
-        actionButtonIdleColor:
-            actionButtonIdleColor ?? this.actionButtonIdleColor,
-        expandButtonColor: expandButtonColor ?? this.expandButtonColor,
-        inputTextStyle: inputTextStyle ?? this.inputTextStyle,
-        sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
-        inputDecoration: inputDecoration ?? this.inputDecoration,
-        activeBorderGradient: activeBorderGradient ?? this.activeBorderGradient,
-        idleBorderGradient: idleBorderGradient ?? this.idleBorderGradient,
-        borderRadius: borderRadius ?? this.borderRadius,
-      );
+  }) {
+    return MessageInputThemeData(
+      sendAnimationDuration:
+          sendAnimationDuration ?? this.sendAnimationDuration,
+      inputBackgroundColor: inputBackgroundColor ?? this.inputBackgroundColor,
+      actionButtonColor: actionButtonColor ?? this.actionButtonColor,
+      sendButtonColor: sendButtonColor ?? this.sendButtonColor,
+      actionButtonIdleColor:
+          actionButtonIdleColor ?? this.actionButtonIdleColor,
+      expandButtonColor: expandButtonColor ?? this.expandButtonColor,
+      inputTextStyle: inputTextStyle ?? this.inputTextStyle,
+      sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
+      inputDecoration: inputDecoration ?? this.inputDecoration,
+      activeBorderGradient: activeBorderGradient ?? this.activeBorderGradient,
+      idleBorderGradient: idleBorderGradient ?? this.idleBorderGradient,
+      borderRadius: borderRadius ?? this.borderRadius,
+    );
+  }
 
   /// Linearly interpolate from one [MessageInputThemeData] to another.
   MessageInputThemeData lerp(
     MessageInputThemeData a,
     MessageInputThemeData b,
     double t,
-  ) =>
-      MessageInputThemeData(
-        actionButtonColor:
-            Color.lerp(a.actionButtonColor, b.actionButtonColor, t),
-        actionButtonIdleColor:
-            Color.lerp(a.actionButtonIdleColor, b.actionButtonIdleColor, t),
-        activeBorderGradient:
-            Gradient.lerp(a.activeBorderGradient, b.activeBorderGradient, t),
-        borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
-        expandButtonColor:
-            Color.lerp(a.expandButtonColor, b.expandButtonColor, t),
-        idleBorderGradient:
-            Gradient.lerp(a.idleBorderGradient, b.idleBorderGradient, t),
-        inputBackgroundColor:
-            Color.lerp(a.inputBackgroundColor, b.inputBackgroundColor, t),
-        inputTextStyle: TextStyle.lerp(a.inputTextStyle, b.inputTextStyle, t),
-        sendButtonColor: Color.lerp(a.sendButtonColor, b.sendButtonColor, t),
-        sendButtonIdleColor:
-            Color.lerp(a.sendButtonIdleColor, b.sendButtonIdleColor, t),
-        sendAnimationDuration: a.sendAnimationDuration,
-        inputDecoration: a.inputDecoration,
-      );
+  ) {
+    return MessageInputThemeData(
+      actionButtonColor:
+          Color.lerp(a.actionButtonColor, b.actionButtonColor, t),
+      actionButtonIdleColor:
+          Color.lerp(a.actionButtonIdleColor, b.actionButtonIdleColor, t),
+      activeBorderGradient:
+          Gradient.lerp(a.activeBorderGradient, b.activeBorderGradient, t),
+      borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
+      expandButtonColor:
+          Color.lerp(a.expandButtonColor, b.expandButtonColor, t),
+      idleBorderGradient:
+          Gradient.lerp(a.idleBorderGradient, b.idleBorderGradient, t),
+      inputBackgroundColor:
+          Color.lerp(a.inputBackgroundColor, b.inputBackgroundColor, t),
+      inputTextStyle: TextStyle.lerp(a.inputTextStyle, b.inputTextStyle, t),
+      sendButtonColor: Color.lerp(a.sendButtonColor, b.sendButtonColor, t),
+      sendButtonIdleColor:
+          Color.lerp(a.sendButtonIdleColor, b.sendButtonIdleColor, t),
+      sendAnimationDuration: a.sendAnimationDuration,
+      inputDecoration: a.inputDecoration,
+    );
+  }
 
   /// Merges [this] [MessageInputThemeData] with the [other]
   MessageInputThemeData merge(MessageInputThemeData? other) {

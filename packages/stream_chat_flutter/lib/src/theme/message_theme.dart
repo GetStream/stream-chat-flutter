@@ -71,53 +71,55 @@ class MessageThemeData with Diagnosticable {
     Color? reactionsBorderColor,
     Color? reactionsMaskColor,
     Color? linkBackgroundColor,
-  }) =>
-      MessageThemeData(
-        messageTextStyle: messageTextStyle ?? this.messageTextStyle,
-        messageAuthorStyle: messageAuthorStyle ?? this.messageAuthorStyle,
-        messageLinksStyle: messageLinksStyle ?? this.messageLinksStyle,
-        createdAtStyle: createdAtStyle ?? this.createdAtStyle,
-        messageBackgroundColor:
-            messageBackgroundColor ?? this.messageBackgroundColor,
-        messageBorderColor: messageBorderColor ?? this.messageBorderColor,
-        avatarTheme: avatarTheme ?? this.avatarTheme,
-        repliesStyle: repliesStyle ?? this.repliesStyle,
-        reactionsBackgroundColor:
-            reactionsBackgroundColor ?? this.reactionsBackgroundColor,
-        reactionsBorderColor: reactionsBorderColor ?? this.reactionsBorderColor,
-        reactionsMaskColor: reactionsMaskColor ?? this.reactionsMaskColor,
-        linkBackgroundColor: linkBackgroundColor ?? this.linkBackgroundColor,
-      );
+  }) {
+    return MessageThemeData(
+      messageTextStyle: messageTextStyle ?? this.messageTextStyle,
+      messageAuthorStyle: messageAuthorStyle ?? this.messageAuthorStyle,
+      messageLinksStyle: messageLinksStyle ?? this.messageLinksStyle,
+      createdAtStyle: createdAtStyle ?? this.createdAtStyle,
+      messageBackgroundColor:
+          messageBackgroundColor ?? this.messageBackgroundColor,
+      messageBorderColor: messageBorderColor ?? this.messageBorderColor,
+      avatarTheme: avatarTheme ?? this.avatarTheme,
+      repliesStyle: repliesStyle ?? this.repliesStyle,
+      reactionsBackgroundColor:
+          reactionsBackgroundColor ?? this.reactionsBackgroundColor,
+      reactionsBorderColor: reactionsBorderColor ?? this.reactionsBorderColor,
+      reactionsMaskColor: reactionsMaskColor ?? this.reactionsMaskColor,
+      linkBackgroundColor: linkBackgroundColor ?? this.linkBackgroundColor,
+    );
+  }
 
   /// Linearly interpolate from one [MessageThemeData] to another.
-  MessageThemeData lerp(MessageThemeData a, MessageThemeData b, double t) =>
-      MessageThemeData(
-        avatarTheme:
-            const AvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
-        createdAtStyle: TextStyle.lerp(a.createdAtStyle, b.createdAtStyle, t),
-        messageAuthorStyle:
-            TextStyle.lerp(a.messageAuthorStyle, b.messageAuthorStyle, t),
-        messageBackgroundColor:
-            Color.lerp(a.messageBackgroundColor, b.messageBackgroundColor, t),
-        messageBorderColor:
-            Color.lerp(a.messageBorderColor, b.messageBorderColor, t),
-        messageLinksStyle:
-            TextStyle.lerp(a.messageLinksStyle, b.messageLinksStyle, t),
-        messageTextStyle:
-            TextStyle.lerp(a.messageTextStyle, b.messageTextStyle, t),
-        reactionsBackgroundColor: Color.lerp(
-          a.reactionsBackgroundColor,
-          b.reactionsBackgroundColor,
-          t,
-        ),
-        reactionsBorderColor:
-            Color.lerp(a.messageBorderColor, b.reactionsBorderColor, t),
-        reactionsMaskColor:
-            Color.lerp(a.reactionsMaskColor, b.reactionsMaskColor, t),
-        repliesStyle: TextStyle.lerp(a.repliesStyle, b.repliesStyle, t),
-        linkBackgroundColor:
-            Color.lerp(a.linkBackgroundColor, b.linkBackgroundColor, t),
-      );
+  MessageThemeData lerp(MessageThemeData a, MessageThemeData b, double t) {
+    return MessageThemeData(
+      avatarTheme:
+          const AvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+      createdAtStyle: TextStyle.lerp(a.createdAtStyle, b.createdAtStyle, t),
+      messageAuthorStyle:
+          TextStyle.lerp(a.messageAuthorStyle, b.messageAuthorStyle, t),
+      messageBackgroundColor:
+          Color.lerp(a.messageBackgroundColor, b.messageBackgroundColor, t),
+      messageBorderColor:
+          Color.lerp(a.messageBorderColor, b.messageBorderColor, t),
+      messageLinksStyle:
+          TextStyle.lerp(a.messageLinksStyle, b.messageLinksStyle, t),
+      messageTextStyle:
+          TextStyle.lerp(a.messageTextStyle, b.messageTextStyle, t),
+      reactionsBackgroundColor: Color.lerp(
+        a.reactionsBackgroundColor,
+        b.reactionsBackgroundColor,
+        t,
+      ),
+      reactionsBorderColor:
+          Color.lerp(a.messageBorderColor, b.reactionsBorderColor, t),
+      reactionsMaskColor:
+          Color.lerp(a.reactionsMaskColor, b.reactionsMaskColor, t),
+      repliesStyle: TextStyle.lerp(a.repliesStyle, b.repliesStyle, t),
+      linkBackgroundColor:
+          Color.lerp(a.linkBackgroundColor, b.linkBackgroundColor, t),
+    );
+  }
 
   /// Merge with a theme
   MessageThemeData merge(MessageThemeData? other) {

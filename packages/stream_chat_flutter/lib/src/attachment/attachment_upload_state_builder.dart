@@ -50,18 +50,22 @@ class AttachmentUploadStateBuilder extends StatelessWidget {
     final attachmentId = attachment.id;
 
     final inProgress = inProgressBuilder ??
-        (context, int sent, int total) => _InProgressState(
-              sent: sent,
-              total: total,
-              attachmentId: attachmentId,
-            );
+        (context, int sent, int total) {
+          return _InProgressState(
+            sent: sent,
+            total: total,
+            attachmentId: attachmentId,
+          );
+        };
 
     final failed = failedBuilder ??
-        (context, error) => _FailedState(
-              error: error,
-              messageId: messageId,
-              attachmentId: attachmentId,
-            );
+        (context, error) {
+          return _FailedState(
+            error: error,
+            messageId: messageId,
+            attachmentId: attachmentId,
+          );
+        };
 
     final success = successBuilder ?? (context) => _SuccessState();
 

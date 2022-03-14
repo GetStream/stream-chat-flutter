@@ -138,9 +138,12 @@ class GiphyAttachment extends AttachmentWidget {
                       height: 50,
                       child: TextButton(
                         onPressed: () {
-                          streamChannel.channel.sendAction(message, {
-                            'image_action': 'cancel',
-                          });
+                          streamChannel.channel.sendAction(
+                            message,
+                            {
+                              'image_action': 'cancel',
+                            },
+                          );
                         },
                         child: Text(
                           context.translations.cancelLabel
@@ -172,9 +175,12 @@ class GiphyAttachment extends AttachmentWidget {
                       height: 50,
                       child: TextButton(
                         onPressed: () {
-                          streamChannel.channel.sendAction(message, {
-                            'image_action': 'shuffle',
-                          });
+                          streamChannel.channel.sendAction(
+                            message,
+                            {
+                              'image_action': 'shuffle',
+                            },
+                          );
                         },
                         child: Text(
                           context.translations.shuffleLabel,
@@ -205,9 +211,12 @@ class GiphyAttachment extends AttachmentWidget {
                       height: 50,
                       child: TextButton(
                         onPressed: () {
-                          streamChannel.channel.sendAction(message, {
-                            'image_action': 'send',
-                          });
+                          streamChannel.channel.sendAction(
+                            message,
+                            {
+                              'image_action': 'send',
+                            },
+                          );
                         },
                         child: Text(
                           context.translations.sendLabel,

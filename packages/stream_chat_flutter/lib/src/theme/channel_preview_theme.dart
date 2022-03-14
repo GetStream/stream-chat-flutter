@@ -93,33 +93,35 @@ class ChannelPreviewThemeData with Diagnosticable {
     AvatarThemeData? avatarTheme,
     Color? unreadCounterColor,
     double? indicatorIconSize,
-  }) =>
-      ChannelPreviewThemeData(
-        titleStyle: titleStyle ?? this.titleStyle,
-        subtitleStyle: subtitleStyle ?? this.subtitleStyle,
-        lastMessageAtStyle: lastMessageAtStyle ?? this.lastMessageAtStyle,
-        avatarTheme: avatarTheme ?? this.avatarTheme,
-        unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
-        indicatorIconSize: indicatorIconSize ?? this.indicatorIconSize,
-      );
+  }) {
+    return ChannelPreviewThemeData(
+      titleStyle: titleStyle ?? this.titleStyle,
+      subtitleStyle: subtitleStyle ?? this.subtitleStyle,
+      lastMessageAtStyle: lastMessageAtStyle ?? this.lastMessageAtStyle,
+      avatarTheme: avatarTheme ?? this.avatarTheme,
+      unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
+      indicatorIconSize: indicatorIconSize ?? this.indicatorIconSize,
+    );
+  }
 
   /// Linearly interpolate one [ChannelPreviewThemeData] to another.
   ChannelPreviewThemeData lerp(
     ChannelPreviewThemeData a,
     ChannelPreviewThemeData b,
     double t,
-  ) =>
-      ChannelPreviewThemeData(
-        avatarTheme:
-            const AvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
-        indicatorIconSize: a.indicatorIconSize,
-        lastMessageAtStyle:
-            TextStyle.lerp(a.lastMessageAtStyle, b.lastMessageAtStyle, t),
-        subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
-        titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
-        unreadCounterColor:
-            Color.lerp(a.unreadCounterColor, b.unreadCounterColor, t),
-      );
+  ) {
+    return ChannelPreviewThemeData(
+      avatarTheme:
+          const AvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+      indicatorIconSize: a.indicatorIconSize,
+      lastMessageAtStyle:
+          TextStyle.lerp(a.lastMessageAtStyle, b.lastMessageAtStyle, t),
+      subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
+      titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
+      unreadCounterColor:
+          Color.lerp(a.unreadCounterColor, b.unreadCounterColor, t),
+    );
+  }
 
   /// Merge with theme
   ChannelPreviewThemeData merge(ChannelPreviewThemeData? other) {

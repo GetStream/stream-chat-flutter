@@ -84,13 +84,14 @@ class ChannelHeaderThemeData with Diagnosticable {
     TextStyle? subtitleStyle,
     AvatarThemeData? avatarTheme,
     Color? color,
-  }) =>
-      ChannelHeaderThemeData(
-        titleStyle: titleStyle ?? this.titleStyle,
-        subtitleStyle: subtitleStyle ?? this.subtitleStyle,
-        avatarTheme: avatarTheme ?? this.avatarTheme,
-        color: color ?? this.color,
-      );
+  }) {
+    return ChannelHeaderThemeData(
+      titleStyle: titleStyle ?? this.titleStyle,
+      subtitleStyle: subtitleStyle ?? this.subtitleStyle,
+      avatarTheme: avatarTheme ?? this.avatarTheme,
+      color: color ?? this.color,
+    );
+  }
 
   /// Linearly interpolate between two [ChannelHeaderThemeData].
   ///
@@ -99,14 +100,15 @@ class ChannelHeaderThemeData with Diagnosticable {
     ChannelHeaderThemeData a,
     ChannelHeaderThemeData b,
     double t,
-  ) =>
-      ChannelHeaderThemeData(
-        titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
-        subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
-        avatarTheme:
-            const AvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
-        color: Color.lerp(a.color, b.color, t),
-      );
+  ) {
+    return ChannelHeaderThemeData(
+      titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
+      subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
+      avatarTheme:
+          const AvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+      color: Color.lerp(a.color, b.color, t),
+    );
+  }
 
   /// Merge with other [ChannelHeaderThemeData]
   ChannelHeaderThemeData merge(ChannelHeaderThemeData? other) {

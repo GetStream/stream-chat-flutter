@@ -69,10 +69,11 @@ class MessageSearchListViewThemeData with Diagnosticable {
   /// Copies this [MessageSearchListViewThemeData] to another.
   MessageSearchListViewThemeData copyWith({
     Color? backgroundColor,
-  }) =>
-      MessageSearchListViewThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-      );
+  }) {
+    return MessageSearchListViewThemeData(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+    );
+  }
 
   /// Linearly interpolate between two [UserListViewThemeData] themes.
   ///
@@ -81,10 +82,11 @@ class MessageSearchListViewThemeData with Diagnosticable {
     MessageSearchListViewThemeData a,
     MessageSearchListViewThemeData b,
     double t,
-  ) =>
-      MessageSearchListViewThemeData(
-        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      );
+  ) {
+    return MessageSearchListViewThemeData(
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+    );
+  }
 
   /// Merges one [MessageSearchListViewThemeData] with another.
   MessageSearchListViewThemeData merge(MessageSearchListViewThemeData? other) {

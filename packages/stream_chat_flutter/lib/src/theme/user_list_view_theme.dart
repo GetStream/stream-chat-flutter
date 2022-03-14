@@ -68,10 +68,11 @@ class UserListViewThemeData with Diagnosticable {
   /// Copies this [ChannelListViewThemeData] to another.
   UserListViewThemeData copyWith({
     Color? backgroundColor,
-  }) =>
-      UserListViewThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-      );
+  }) {
+    return UserListViewThemeData(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+    );
+  }
 
   /// Linearly interpolate between two [UserListViewThemeData] themes.
   ///
@@ -80,10 +81,11 @@ class UserListViewThemeData with Diagnosticable {
     UserListViewThemeData a,
     UserListViewThemeData b,
     double t,
-  ) =>
-      UserListViewThemeData(
-        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      );
+  ) {
+    return UserListViewThemeData(
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+    );
+  }
 
   /// Merges one [UserListViewThemeData] with another.
   UserListViewThemeData merge(UserListViewThemeData? other) {

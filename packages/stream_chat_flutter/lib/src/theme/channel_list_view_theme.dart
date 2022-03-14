@@ -68,10 +68,11 @@ class ChannelListViewThemeData with Diagnosticable {
   /// Copies this [ChannelListViewThemeData] to another.
   ChannelListViewThemeData copyWith({
     Color? backgroundColor,
-  }) =>
-      ChannelListViewThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-      );
+  }) {
+    return ChannelListViewThemeData(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+    );
+  }
 
   /// Linearly interpolate between two [ChannelListViewThemeData] themes.
   ///
@@ -80,10 +81,11 @@ class ChannelListViewThemeData with Diagnosticable {
     ChannelListViewThemeData a,
     ChannelListViewThemeData b,
     double t,
-  ) =>
-      ChannelListViewThemeData(
-        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      );
+  ) {
+    return ChannelListViewThemeData(
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+    );
+  }
 
   /// Merges one [ChannelListViewThemeData] with another.
   ChannelListViewThemeData merge(ChannelListViewThemeData? other) {

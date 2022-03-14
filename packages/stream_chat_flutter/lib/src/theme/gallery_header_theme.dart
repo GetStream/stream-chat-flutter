@@ -100,16 +100,17 @@ class GalleryHeaderThemeData with Diagnosticable {
     TextStyle? titleTextStyle,
     TextStyle? subtitleTextStyle,
     Color? bottomSheetBarrierColor,
-  }) =>
-      GalleryHeaderThemeData(
-        closeButtonColor: closeButtonColor ?? this.closeButtonColor,
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-        iconMenuPointColor: iconMenuPointColor ?? this.iconMenuPointColor,
-        titleTextStyle: titleTextStyle ?? this.titleTextStyle,
-        subtitleTextStyle: subtitleTextStyle ?? this.subtitleTextStyle,
-        bottomSheetBarrierColor:
-            bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
-      );
+  }) {
+    return GalleryHeaderThemeData(
+      closeButtonColor: closeButtonColor ?? this.closeButtonColor,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      iconMenuPointColor: iconMenuPointColor ?? this.iconMenuPointColor,
+      titleTextStyle: titleTextStyle ?? this.titleTextStyle,
+      subtitleTextStyle: subtitleTextStyle ?? this.subtitleTextStyle,
+      bottomSheetBarrierColor:
+          bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
+    );
+  }
 
   /// Linearly interpolate between two [GalleryHeader] themes.
   ///
@@ -118,18 +119,19 @@ class GalleryHeaderThemeData with Diagnosticable {
     GalleryHeaderThemeData a,
     GalleryHeaderThemeData b,
     double t,
-  ) =>
-      GalleryHeaderThemeData(
-        closeButtonColor: Color.lerp(a.closeButtonColor, b.closeButtonColor, t),
-        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-        iconMenuPointColor:
-            Color.lerp(a.iconMenuPointColor, b.iconMenuPointColor, t),
-        titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
-        subtitleTextStyle:
-            TextStyle.lerp(a.subtitleTextStyle, b.subtitleTextStyle, t),
-        bottomSheetBarrierColor:
-            Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
-      );
+  ) {
+    return GalleryHeaderThemeData(
+      closeButtonColor: Color.lerp(a.closeButtonColor, b.closeButtonColor, t),
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+      iconMenuPointColor:
+          Color.lerp(a.iconMenuPointColor, b.iconMenuPointColor, t),
+      titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
+      subtitleTextStyle:
+          TextStyle.lerp(a.subtitleTextStyle, b.subtitleTextStyle, t),
+      bottomSheetBarrierColor:
+          Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
+    );
+  }
 
   /// Merges one [GalleryHeaderThemeData] with the another
   GalleryHeaderThemeData merge(GalleryHeaderThemeData? other) {

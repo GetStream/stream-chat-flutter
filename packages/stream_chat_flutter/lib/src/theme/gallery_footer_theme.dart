@@ -118,21 +118,22 @@ class GalleryFooterThemeData with Diagnosticable {
     Color? bottomSheetBackgroundColor,
     TextStyle? bottomSheetPhotosTextStyle,
     Color? bottomSheetCloseIconColor,
-  }) =>
-      GalleryFooterThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-        shareIconColor: shareIconColor ?? this.shareIconColor,
-        titleTextStyle: titleTextStyle ?? this.titleTextStyle,
-        gridIconButtonColor: gridIconButtonColor ?? this.gridIconButtonColor,
-        bottomSheetBarrierColor:
-            bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
-        bottomSheetBackgroundColor:
-            bottomSheetBackgroundColor ?? this.bottomSheetBackgroundColor,
-        bottomSheetPhotosTextStyle:
-            bottomSheetPhotosTextStyle ?? this.bottomSheetPhotosTextStyle,
-        bottomSheetCloseIconColor:
-            bottomSheetCloseIconColor ?? this.bottomSheetCloseIconColor,
-      );
+  }) {
+    return GalleryFooterThemeData(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      shareIconColor: shareIconColor ?? this.shareIconColor,
+      titleTextStyle: titleTextStyle ?? this.titleTextStyle,
+      gridIconButtonColor: gridIconButtonColor ?? this.gridIconButtonColor,
+      bottomSheetBarrierColor:
+          bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
+      bottomSheetBackgroundColor:
+          bottomSheetBackgroundColor ?? this.bottomSheetBackgroundColor,
+      bottomSheetPhotosTextStyle:
+          bottomSheetPhotosTextStyle ?? this.bottomSheetPhotosTextStyle,
+      bottomSheetCloseIconColor:
+          bottomSheetCloseIconColor ?? this.bottomSheetCloseIconColor,
+    );
+  }
 
   /// Linearly interpolate between two [GalleryFooter] themes.
   ///
@@ -141,31 +142,32 @@ class GalleryFooterThemeData with Diagnosticable {
     GalleryFooterThemeData a,
     GalleryFooterThemeData b,
     double t,
-  ) =>
-      GalleryFooterThemeData(
-        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-        shareIconColor: Color.lerp(a.shareIconColor, b.shareIconColor, t),
-        titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
-        gridIconButtonColor:
-            Color.lerp(a.gridIconButtonColor, b.gridIconButtonColor, t),
-        bottomSheetBarrierColor:
-            Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
-        bottomSheetBackgroundColor: Color.lerp(
-          a.bottomSheetBackgroundColor,
-          b.bottomSheetBackgroundColor,
-          t,
-        ),
-        bottomSheetPhotosTextStyle: TextStyle.lerp(
-          a.bottomSheetPhotosTextStyle,
-          b.bottomSheetPhotosTextStyle,
-          t,
-        ),
-        bottomSheetCloseIconColor: Color.lerp(
-          a.bottomSheetCloseIconColor,
-          b.bottomSheetCloseIconColor,
-          t,
-        ),
-      );
+  ) {
+    return GalleryFooterThemeData(
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+      shareIconColor: Color.lerp(a.shareIconColor, b.shareIconColor, t),
+      titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
+      gridIconButtonColor:
+          Color.lerp(a.gridIconButtonColor, b.gridIconButtonColor, t),
+      bottomSheetBarrierColor:
+          Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
+      bottomSheetBackgroundColor: Color.lerp(
+        a.bottomSheetBackgroundColor,
+        b.bottomSheetBackgroundColor,
+        t,
+      ),
+      bottomSheetPhotosTextStyle: TextStyle.lerp(
+        a.bottomSheetPhotosTextStyle,
+        b.bottomSheetPhotosTextStyle,
+        t,
+      ),
+      bottomSheetCloseIconColor: Color.lerp(
+        a.bottomSheetCloseIconColor,
+        b.bottomSheetCloseIconColor,
+        t,
+      ),
+    );
+  }
 
   /// Merges one [GalleryFooterThemeData] with another.
   GalleryFooterThemeData merge(GalleryFooterThemeData? other) {

@@ -73,11 +73,12 @@ class MessageListViewThemeData with Diagnosticable {
   MessageListViewThemeData copyWith({
     Color? backgroundColor,
     DecorationImage? backgroundImage,
-  }) =>
-      MessageListViewThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-        backgroundImage: backgroundImage ?? this.backgroundImage,
-      );
+  }) {
+    return MessageListViewThemeData(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      backgroundImage: backgroundImage ?? this.backgroundImage,
+    );
+  }
 
   /// Linearly interpolate between two [MessageListView] themes.
   ///
@@ -86,11 +87,12 @@ class MessageListViewThemeData with Diagnosticable {
     MessageListViewThemeData a,
     MessageListViewThemeData b,
     double t,
-  ) =>
-      MessageListViewThemeData(
-        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-        backgroundImage: t < 0.5 ? a.backgroundImage : b.backgroundImage,
-      );
+  ) {
+    return MessageListViewThemeData(
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+      backgroundImage: t < 0.5 ? a.backgroundImage : b.backgroundImage,
+    );
+  }
 
   /// Merges one [MessageListViewThemeData] with another.
   MessageListViewThemeData merge(MessageListViewThemeData? other) {

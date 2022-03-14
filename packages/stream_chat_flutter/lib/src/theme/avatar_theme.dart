@@ -15,12 +15,13 @@ class AvatarThemeData with Diagnosticable {
   final BorderRadius? _borderRadius;
 
   /// Get constraints for avatar
-  BoxConstraints get constraints =>
-      _constraints ??
-      const BoxConstraints.tightFor(
-        height: 32,
-        width: 32,
-      );
+  BoxConstraints get constraints {
+    return _constraints ??
+        const BoxConstraints.tightFor(
+          height: 32,
+          width: 32,
+        );
+  }
 
   /// Get border radius
   BorderRadius get borderRadius => _borderRadius ?? BorderRadius.circular(20);
@@ -29,11 +30,12 @@ class AvatarThemeData with Diagnosticable {
   AvatarThemeData copyWith({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
-  }) =>
-      AvatarThemeData(
-        constraints: constraints ?? _constraints,
-        borderRadius: borderRadius ?? _borderRadius,
-      );
+  }) {
+    return AvatarThemeData(
+      constraints: constraints ?? _constraints,
+      borderRadius: borderRadius ?? _borderRadius,
+    );
+  }
 
   /// Linearly interpolate between two [UserAvatar] themes.
   ///
@@ -42,11 +44,12 @@ class AvatarThemeData with Diagnosticable {
     AvatarThemeData a,
     AvatarThemeData b,
     double t,
-  ) =>
-      AvatarThemeData(
-        borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
-        constraints: BoxConstraints.lerp(a.constraints, b.constraints, t),
-      );
+  ) {
+    return AvatarThemeData(
+      borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
+      constraints: BoxConstraints.lerp(a.constraints, b.constraints, t),
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
