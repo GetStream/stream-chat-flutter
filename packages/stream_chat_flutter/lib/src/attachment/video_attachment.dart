@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_title.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_desktop.dart'
     hide ShowMessageCallback, ReturnActionType;
-import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

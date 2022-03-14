@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/platform_widgets/desktop_widget_base.dart';
+import 'package:stream_chat_flutter/platform_widget_builder/src/desktop_widget_base.dart';
 
 /// A widget that will only be built for the specified desktop Platforms.
 ///

@@ -6,9 +6,9 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:native_context_menu/native_context_menu.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 

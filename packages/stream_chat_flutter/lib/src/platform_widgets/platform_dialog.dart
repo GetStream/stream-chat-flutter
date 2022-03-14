@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:macos_ui/macos_ui.dart';
-import 'package:stream_chat_flutter/src/platform_widgets/desktop_widget_builder.dart';
+import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:yaru_widgets/yaru_widgets.dart';
 
 /// A Dialog that adapts itself to the visual style of whichever desktop

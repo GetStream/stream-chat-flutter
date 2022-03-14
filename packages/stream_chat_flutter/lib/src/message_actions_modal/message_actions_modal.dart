@@ -1,12 +1,12 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart' hide ButtonStyle;
+import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/bottom_sheets/edit_message_sheet.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
 import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/mam_widgets.dart';
-import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Constructs a modal with actions for a message

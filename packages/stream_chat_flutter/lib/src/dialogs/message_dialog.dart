@@ -25,6 +25,7 @@ class MessageDialog extends StatelessWidget {
   /// The optional error message to use.
   final String? messageText;
 
+  /// TODO(Groovin): document me
   final bool? showMessage;
 
   @override

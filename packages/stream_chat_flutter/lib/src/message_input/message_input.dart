@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';
 import 'package:stream_chat_flutter/src/bottom_sheets/attachment_modal_sheet.dart';
 import 'package:stream_chat_flutter/src/bottom_sheets/error_alert_sheet.dart';
@@ -28,7 +29,6 @@ import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/user_mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
-import 'package:stream_chat_flutter/src/platform_widgets/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_compress/video_compress.dart';
