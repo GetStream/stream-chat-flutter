@@ -88,7 +88,9 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// ignore: public_member_api_docs
 class ResponsiveChat extends StatelessWidget {
+  // ignore: public_member_api_docs
   const ResponsiveChat({
     Key? key,
   }) : super(key: key);
@@ -98,8 +100,8 @@ class ResponsiveChat extends StatelessWidget {
     final initialChannel = StreamChannel.of(context).channel;
     return ScreenTypeLayout(
       breakpoints: const ScreenBreakpoints(
-        desktop: 600,
-        tablet: 600,
+        desktop: 550,
+        tablet: 550,
         watch: 300,
       ),
       desktop: DesktopLayout(
@@ -112,12 +114,15 @@ class ResponsiveChat extends StatelessWidget {
   }
 }
 
+// ignore: public_member_api_docs
 class DesktopLayout extends StatefulWidget {
+  // ignore: public_member_api_docs
   const DesktopLayout({
     Key? key,
     required this.initialChannel,
   }) : super(key: key);
 
+  // ignore: public_member_api_docs
   final Channel initialChannel;
 
   @override
@@ -186,6 +191,7 @@ class ChannelPage extends StatefulWidget {
     required this.channel,
   }) : super(key: key);
 
+  // ignore: public_member_api_docs
   final Channel channel;
 
   @override
