@@ -374,6 +374,7 @@ class StreamChatClient {
       final event = await _ws.connect(user);
       return user.merge(event.me);
     } catch (e, stk) {
+      _wsConnectionStatus = ConnectionStatus.disconnected;
       logger.severe('error connecting ws', e, stk);
       rethrow;
     }
