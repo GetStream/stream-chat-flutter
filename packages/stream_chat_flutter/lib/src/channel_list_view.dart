@@ -591,7 +591,7 @@ class _ChannelListViewState extends State<ChannelListView> {
               decoration: BoxDecoration(
                 color: chatThemeData.channelListViewTheme.backgroundColor,
               ),
-              child: StreamChannelPreview(
+              child: ChannelPreview(
                 onLongPress: widget.onChannelLongPress,
                 channel: channel,
                 onImageTap: widget.onImageTap != null

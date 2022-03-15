@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro channel_preview}
-@Deprecated("Use 'StreamChannelPreview' instead")
-typedef ChannelPreview = StreamChannelPreview;
-
 /// {@template channel_preview}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_preview_paint.png)
@@ -24,9 +20,10 @@ typedef ChannelPreview = StreamChannelPreview;
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
 /// {@endtemplate}
-class StreamChannelPreview extends StatelessWidget {
-  /// Constructor for creating [StreamChannelPreview]
-  const StreamChannelPreview({
+@Deprecated("Use 'StreamChannelListTile' instead")
+class ChannelPreview extends StatelessWidget {
+  /// Constructor for creating [ChannelPreview]
+  const ChannelPreview({
     required this.channel,
     Key? key,
     this.onTap,
@@ -71,7 +68,7 @@ class StreamChannelPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
+    final channelPreviewTheme = ChannelPreviewTheme.of(context);
     final streamChatState = StreamChat.of(context);
     return BetterStreamBuilder<bool>(
       stream: channel.isMutedStream,
@@ -194,13 +191,13 @@ class StreamChannelPreview extends StatelessWidget {
 
           return Text(
             stringDate,
-            style: StreamChannelPreviewTheme.of(context).lastMessageAtStyle,
+            style: ChannelPreviewTheme.of(context).lastMessageAtStyle,
           );
         },
       );
 
   Widget _buildSubtitle(BuildContext context) {
-    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
+    final channelPreviewTheme = ChannelPreviewTheme.of(context);
     if (channel.isMuted) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -253,7 +250,7 @@ class StreamChannelPreview extends StatelessWidget {
 
             text = parts.join(' ');
 
-            final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
+            final channelPreviewTheme = ChannelPreviewTheme.of(context);
             return Text.rich(
               _getDisplayText(
                 text,

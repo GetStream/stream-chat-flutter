@@ -1171,10 +1171,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
           splits[splits.length - 1] = user.name;
           final rejoin = splits.join('@');
 
-          _effectiveController.text = rejoin +
-              _effectiveController.text.substring(
-                _effectiveController.selectionStart,
-              );
+          _effectiveController.text =
+              '$rejoin${_effectiveController.text.substring(
+            _effectiveController.selectionStart,
+          )}';
 
           _onChangedDebounced.cancel();
           setState(() => _showMentionsOverlay = false);
@@ -1678,6 +1678,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
     if (!channel.state!.isUpToDate) {
       await streamChannel.reloadChannel();
     }
+
+    message = message.replaceMentionsWithId();
 
     try {
       Future sendingFuture;
