@@ -36,7 +36,7 @@ class StreamChatContextMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return Ink(
       color: StreamChatTheme.of(context).messageListViewTheme.backgroundColor ??
           Theme.of(context).scaffoldBackgroundColor,
       child: child ??
