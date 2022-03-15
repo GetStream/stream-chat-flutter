@@ -112,6 +112,7 @@ class WebSocket with TimerHelper {
     if (_webSocketChannel != null) {
       _closeWebSocketChannel();
     }
+    // throw Error();
     _webSocketChannel =
         webSocketChannelProvider?.call(uri) ?? WebSocketChannel.connect(uri);
     _subscribeToWebSocketChannel();
@@ -220,7 +221,11 @@ class WebSocket with TimerHelper {
       Duration(milliseconds: delay),
       () async {
         final uri = await _buildUri(refreshToken: refreshToken);
-        _initWebSocketChannel(uri);
+        try {
+          _initWebSocketChannel(uri);
+        } catch (e, stk) {
+          _onConnectionError(e, stk);
+        }
       },
     );
   }
