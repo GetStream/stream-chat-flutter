@@ -2,7 +2,7 @@
 
 🐞 Fixed
 - Unread count specific to channel setting global unread count on a specific case.
-- The reconnection logic for the ws is now more robust.
+- The reconnection logic for the WebSocket connection is now more robust.
 
 ## 3.5.0
 
