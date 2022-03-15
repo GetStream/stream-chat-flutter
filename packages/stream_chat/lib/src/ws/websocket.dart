@@ -112,7 +112,6 @@ class WebSocket with TimerHelper {
     if (_webSocketChannel != null) {
       _closeWebSocketChannel();
     }
-    // throw Error();
     _webSocketChannel =
         webSocketChannelProvider?.call(uri) ?? WebSocketChannel.connect(uri);
     _subscribeToWebSocketChannel();
