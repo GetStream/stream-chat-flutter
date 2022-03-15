@@ -1,7 +1,7 @@
 ## 3.5.1
 
 🐞 Fixed
-- Unread count specific to channel setting global unread count on a specific case.
+- `channel.unreadCount` was being set as using global unread count on a very specific case.
 - The reconnection logic for the WebSocket connection is now more robust.
 
 ## 3.5.0
