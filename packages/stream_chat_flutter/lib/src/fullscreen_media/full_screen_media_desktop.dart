@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:contextmenu/contextmenu.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
-import 'package:native_context_menu/native_context_menu.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
@@ -151,12 +151,11 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
                           attachment.thumbUrl;
                       return AnimatedBuilder(
                         animation: _curvedAnimation,
-                        builder: (context, child) => ContextMenuRegion(
-                          onItemSelected: (item) => item.onSelected?.call(),
-                          menuItems: [
+                        builder: (context, child) => ContextMenuArea(
+                          verticalPadding: 0,
+                          builder: (_) => [
                             DownloadMenuItem(
                               attachment: attachment,
-                              onDownloadSuccess: onDownloadSuccess,
                             ),
                           ],
                           child: PhotoView(
@@ -211,12 +210,11 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
                           padding: const EdgeInsets.symmetric(
                             vertical: 50,
                           ),
-                          child: ContextMenuRegion(
-                            onItemSelected: (item) => item.onSelected?.call(),
-                            menuItems: [
+                          child: ContextMenuArea(
+                            verticalPadding: 0,
+                            builder: (_) => [
                               DownloadMenuItem(
                                 attachment: attachment,
-                                onDownloadSuccess: onDownloadSuccess,
                               ),
                             ],
                             child: Video(
@@ -314,9 +312,19 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
             )
           : Stack(
               children: [
-                _PlaylistPlayer(
-                  packages: videoPackages.values.toList(),
-                  autoStart: widget.autoplayVideos,
+                ContextMenuArea(
+                  verticalPadding: 0,
+                  builder: (_) => [
+                    DownloadMenuItem(
+                      attachment: videoPackages.values
+                          .toList()[_currentPage.value]
+                          .attachment,
+                    ),
+                  ],
+                  child: _PlaylistPlayer(
+                    packages: videoPackages.values.toList(),
+                    autoStart: widget.autoplayVideos,
+                  ),
                 ),
                 Positioned(
                   left: 8,

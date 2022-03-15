@@ -113,9 +113,11 @@ class _ReactionPickerState extends State<ReactionPicker>
                   ),
                 );
               })
-              .insertBetween(const SizedBox(
-                width: 16,
-              ))
+              .insertBetween(
+                const SizedBox(
+                  width: 16,
+                ),
+              )
               .toList(),
         ),
       ),
@@ -133,14 +135,14 @@ class _ReactionPickerState extends State<ReactionPicker>
     );
   }
 
-  void triggerAnimations() async {
+  Future<void> triggerAnimations() async {
     for (final a in animations) {
       a.start();
       await Future.delayed(const Duration(milliseconds: 100));
     }
   }
 
-  void pop() async {
+  Future<void> pop() async {
     for (final a in animations) {
       a.stop();
     }

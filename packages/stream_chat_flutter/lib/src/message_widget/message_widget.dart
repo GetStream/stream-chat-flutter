@@ -1,15 +1,17 @@
+import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:native_context_menu/native_context_menu.dart';
+import 'package:stream_chat_flutter/conditional_parent_builder/conditional_parent_builder.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/bottom_sheets/edit_message_sheet.dart';
-import 'package:stream_chat_flutter/src/context_menu_items/context_menu_items.dart';
-import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
-import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
+import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/image_group.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
+import 'package:stream_chat_flutter/src/message_widget/desktop_reaction_picker.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -760,115 +762,18 @@ class _MessageWidgetState extends State<MessageWidget>
 
     final showReactions = shouldShowReactions;
 
-    return ContextMenuRegion(
-      onItemSelected: (item) => item.onSelected!.call(),
-      menuItems: [
-        // Ensure menu items don't show if message is deleted.
-        if (!widget.message.isDeleted) ...[
-          if (widget.onReplyTap != null)
-            ReplyContextMenuItem(
-              title: context.translations.replyLabel,
-              onClick: () {
-                widget.onReplyTap!(widget.message);
-              },
-            ),
-          if (widget.onThreadTap != null)
-            ThreadReplyMenuItem(
-              title: context.translations.threadReplyLabel,
-              // NEEDS REVIEW ⚠️
-              onClick: () => widget.onThreadTap!(widget.message),
-            ),
-          PinMessageMenuItem(
-            context: context,
-            message: widget.message,
-            pinned: widget.message.pinned,
-            title: context.translations.togglePinUnpinText(
-              pinned: widget.message.pinned,
-            ),
-          ),
-
-          // Ensure "Copy Message" menu doesn't show if:
-          // * There is no text to copy (like in the case of a message
-          //   containing only an attachment)
-          if (widget.message.attachments.isEmpty &&
-              widget.message.text!.isNotEmpty)
-            CopyMessageMenuItem(
-              title: context.translations.copyMessageLabel,
-              message: widget.message,
-            ),
-          // Ensure "Copy Message menu does show if:
-          // * There are attachments
-          // * There is text to copy
-          if (widget.message.attachments.isNotEmpty &&
-              widget.message.text!.isNotEmpty)
-            CopyMessageMenuItem(
-              title: context.translations.copyMessageLabel,
-              message: widget.message,
-            ),
-          EditMessageMenuItem(
-            title: context.translations.editMessageLabel,
-            onClick: () {
-              showModalBottomSheet(
-                context: context,
-                elevation: 2,
-                clipBehavior: Clip.hardEdge,
-                isScrollControlled: true,
-                backgroundColor:
-                    MessageInputTheme.of(context).inputBackgroundColor,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
-                builder: (_) => EditMessageSheet(
-                  message: widget.message,
-                  channel: StreamChannel.of(context).channel,
-                ),
-              );
-            },
-          ),
-          if (widget.showResendMessage && (isSendFailed || isUpdateFailed))
-            ResendMessageMenuItem(
-              title: context.translations.toggleResendOrResendEditedMessage(
-                isUpdateFailed:
-                    widget.message.status == MessageSendingStatus.failed_update,
-              ),
-              onClick: () {
-                final isUpdateFailed =
-                    widget.message.status == MessageSendingStatus.failed_update;
-                final channel = StreamChannel.of(context).channel;
-                if (isUpdateFailed) {
-                  channel.updateMessage(widget.message);
-                } else {
-                  channel.sendMessage(widget.message);
-                }
-              },
-            ),
-          DeleteMessageMenuItem(
-            title: context.translations.deleteMessageLabel,
-            onClick: () async {
-              final deleted = await showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (_) => const DeleteMessageDialog(),
-              );
-              if (deleted) {
-                try {
-                  await StreamChannel.of(context)
-                      .channel
-                      .deleteMessage(widget.message);
-                } catch (e) {
-                  showDialog(
-                    context: context,
-                    builder: (_) => const MessageDialog(),
-                  );
-                }
-              }
-            },
-          ),
-        ],
-      ],
+    return ConditionalParentBuilder(
+      builder: (context, child) {
+        if (!widget.message.isDeleted) {
+          return ContextMenuArea(
+            verticalPadding: 0,
+            builder: (context) => _buildContextMenu(),
+            child: child,
+          );
+        } else {
+          return child;
+        }
+      },
       child: Material(
         type: widget.message.pinned && widget.showPinHighlight
             ? MaterialType.card
@@ -946,6 +851,142 @@ class _MessageWidgetState extends State<MessageWidget>
         ),
       ),
     );
+  }
+
+  List<Widget> _buildContextMenu() {
+    final channel = StreamChannel.of(context).channel;
+
+    return [
+      StreamChatContextMenuItem(
+        child: StreamChannel(
+          channel: channel,
+          child: DesktopReactionPicker(
+            message: widget.message,
+          ),
+        ),
+      ),
+      StreamChatContextMenuItem(
+        leading: StreamSvgIcon.reply(),
+        title: Text(context.translations.replyLabel),
+        onClick: () {
+          Navigator.of(context).pop();
+          widget.onReplyTap!(widget.message);
+        },
+      ),
+      if (widget.onThreadTap != null)
+        StreamChatContextMenuItem(
+          leading: StreamSvgIcon.thread(),
+          title: Text(context.translations.threadReplyLabel),
+          onClick: () {
+            Navigator.of(context).pop();
+            widget.onThreadTap!(widget.message);
+          },
+        ),
+      if (widget.message.text != null && widget.message.text!.isNotEmpty)
+        StreamChatContextMenuItem(
+          leading: StreamSvgIcon.copy(),
+          title: Text(context.translations.copyMessageLabel),
+          onClick: () {
+            Navigator.of(context).pop();
+            Clipboard.setData(ClipboardData(text: widget.message.text));
+          },
+        ),
+      StreamChatContextMenuItem(
+        leading: StreamSvgIcon.edit(color: Colors.grey),
+        title: Text(context.translations.editMessageLabel),
+        onClick: () {
+          Navigator.of(context).pop();
+          showModalBottomSheet(
+            context: context,
+            elevation: 2,
+            clipBehavior: Clip.hardEdge,
+            isScrollControlled: true,
+            backgroundColor: MessageInputTheme.of(context).inputBackgroundColor,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
+            builder: (_) => EditMessageSheet(
+              message: widget.message,
+              channel: StreamChannel.of(context).channel,
+            ),
+          );
+        },
+      ),
+      StreamChatContextMenuItem(
+        leading: StreamSvgIcon.pin(
+          color: Colors.grey,
+          size: 24,
+        ),
+        title: Text(
+          context.translations.togglePinUnpinText(
+            pinned: widget.message.pinned,
+          ),
+        ),
+        onClick: () async {
+          Navigator.of(context).pop();
+          try {
+            if (!widget.message.pinned) {
+              await channel.pinMessage(widget.message);
+            } else {
+              await channel.unpinMessage(widget.message);
+            }
+          } catch (e) {
+            throw Exception(e);
+          }
+        },
+      ),
+      if (widget.showResendMessage && (isSendFailed || isUpdateFailed))
+        StreamChatContextMenuItem(
+          leading: StreamSvgIcon.iconSendMessage(),
+          title: Text(
+            context.translations.toggleResendOrResendEditedMessage(
+              isUpdateFailed:
+                  widget.message.status == MessageSendingStatus.failed,
+            ),
+          ),
+          onClick: () {
+            Navigator.of(context).pop();
+            final isUpdateFailed =
+                widget.message.status == MessageSendingStatus.failed_update;
+            final channel = StreamChannel.of(context).channel;
+            if (isUpdateFailed) {
+              channel.updateMessage(widget.message);
+            } else {
+              channel.sendMessage(widget.message);
+            }
+          },
+        ),
+      StreamChatContextMenuItem(
+        leading: StreamSvgIcon.delete(color: Colors.red),
+        title: Text(
+          context.translations.deleteMessageLabel,
+          style: const TextStyle(color: Colors.red),
+        ),
+        onClick: () async {
+          Navigator.of(context).pop();
+          final deleted = await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => const DeleteMessageDialog(),
+          );
+          if (deleted) {
+            try {
+              await StreamChannel.of(context)
+                  .channel
+                  .deleteMessage(widget.message);
+            } catch (e) {
+              showDialog(
+                context: context,
+                builder: (_) => const MessageDialog(),
+              );
+            }
+          }
+        },
+      ),
+    ];
   }
 
   void onLongPress(BuildContext context) {

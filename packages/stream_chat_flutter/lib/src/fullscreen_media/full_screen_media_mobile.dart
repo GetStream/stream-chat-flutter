@@ -4,10 +4,8 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:native_context_menu/native_context_menu.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
@@ -161,41 +159,31 @@ class _FullScreenMediaMobileState extends State<FullScreenMediaMobile>
                       attachment.thumbUrl;
                   return AnimatedBuilder(
                     animation: _curvedAnimation,
-                    builder: (context, child) => ContextMenuRegion(
-                      onItemSelected: (item) {
-                        item.onSelected?.call();
-                      },
-                      menuItems: [
-                        DownloadMenuItem(
-                          attachment: attachment,
-                        ),
-                      ],
-                      child: PhotoView(
-                        loadingBuilder: (context, image) => const Offstage(),
-                        imageProvider: (imageUrl == null &&
-                                attachment.localUri != null &&
-                                attachment.file?.bytes != null)
-                            ? Image.memory(attachment.file!.bytes!).image
-                            : CachedNetworkImageProvider(imageUrl!),
-                        maxScale: PhotoViewComputedScale.covered,
-                        minScale: PhotoViewComputedScale.contained,
-                        heroAttributes: PhotoViewHeroAttributes(
-                          tag: widget.mediaAttachments,
-                        ),
-                        backgroundDecoration: BoxDecoration(
-                          color: ColorTween(
-                            begin: ChannelHeaderTheme.of(context).color,
-                            end: Colors.black,
-                          ).lerp(_curvedAnimation.value),
-                        ),
-                        onTapUp: (a, b, c) {
-                          if (_animationController.isCompleted) {
-                            _animationController.reverse();
-                          } else {
-                            _animationController.forward();
-                          }
-                        },
+                    builder: (context, child) => PhotoView(
+                      loadingBuilder: (context, image) => const Offstage(),
+                      imageProvider: (imageUrl == null &&
+                              attachment.localUri != null &&
+                              attachment.file?.bytes != null)
+                          ? Image.memory(attachment.file!.bytes!).image
+                          : CachedNetworkImageProvider(imageUrl!),
+                      maxScale: PhotoViewComputedScale.covered,
+                      minScale: PhotoViewComputedScale.contained,
+                      heroAttributes: PhotoViewHeroAttributes(
+                        tag: widget.mediaAttachments,
                       ),
+                      backgroundDecoration: BoxDecoration(
+                        color: ColorTween(
+                          begin: ChannelHeaderTheme.of(context).color,
+                          end: Colors.black,
+                        ).lerp(_curvedAnimation.value),
+                      ),
+                      onTapUp: (a, b, c) {
+                        if (_animationController.isCompleted) {
+                          _animationController.reverse();
+                        } else {
+                          _animationController.forward();
+                        }
+                      },
                     ),
                   );
                 } else if (attachment.type == 'video') {

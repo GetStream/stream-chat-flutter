@@ -7,7 +7,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   dart_vlc
   desktop_drop
   file_selector_windows
-  native_context_menu
   url_launcher_windows
 )
 
