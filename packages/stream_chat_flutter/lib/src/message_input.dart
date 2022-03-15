@@ -18,12 +18,8 @@ import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/user_mentions_overlay.dart';
-import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:video_compress/video_compress.dart';
-
-export 'package:video_compress/video_compress.dart' show VideoQuality;
 
 /// A callback that can be passed to [MessageInput.onError].
 ///
@@ -191,8 +187,6 @@ class MessageInput extends StatefulWidget {
         this.mentionsTileBuilder,
     this.userMentionsTileBuilder,
     this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
-    this.compressedVideoQuality = VideoQuality.DefaultQuality,
-    this.compressedVideoFrameRate = 30,
     this.onError,
     this.attachmentLimit = 10,
     this.onAttachmentLimitExceed,
@@ -212,12 +206,6 @@ class MessageInput extends StatefulWidget {
 
   /// Message to edit
   final Message? editMessage;
-
-  /// Video quality to use when compressing the videos
-  final VideoQuality compressedVideoQuality;
-
-  /// Frame rate to use when compressing the videos
-  final int compressedVideoFrameRate;
 
   /// Max attachment size in bytes
   /// Defaults to 20 MB
@@ -1119,41 +1107,18 @@ class MessageInputState extends State<MessageInput> {
 
     if (mediaFile == null) return;
 
-    var file = AttachmentFile(
+    final file = AttachmentFile(
       path: mediaFile.path,
       size: await mediaFile.length(),
       bytes: mediaFile.readAsBytesSync(),
     );
 
     if (file.size! > widget.maxAttachmentSize) {
-      if (medium.type == AssetType.video && file.path != null) {
-        final mediaInfo = await StreamVideoService.compressVideo(
-          file.path!,
-          frameRate: widget.compressedVideoFrameRate,
-          quality: widget.compressedVideoQuality,
-        );
-
-        if (mediaInfo == null ||
-            mediaInfo.filesize! > widget.maxAttachmentSize) {
-          _showErrorAlert(
-            context.translations.fileTooLargeAfterCompressionError(
-              widget.maxAttachmentSize / (1024 * 1024),
-            ),
-          );
-          return;
-        }
-        file = AttachmentFile(
-          name: file.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file?.readAsBytes(),
-          path: mediaInfo.path,
-        );
-      } else {
-        _showErrorAlert(context.translations.fileTooLargeError(
+      return _showErrorAlert(
+        context.translations.fileTooLargeError(
           widget.maxAttachmentSize / (1024 * 1024),
-        ));
-        return;
-      }
+        ),
+      );
     }
 
     setState(() {
@@ -1678,33 +1643,11 @@ class MessageInputState extends State<MessageInput> {
     );
 
     if (file.size! > widget.maxAttachmentSize) {
-      if (attachmentType == 'video' && file.path != null) {
-        final mediaInfo = await (StreamVideoService.compressVideo(
-          file.path!,
-          frameRate: widget.compressedVideoFrameRate,
-          quality: widget.compressedVideoQuality,
-        ) as FutureOr<MediaInfo>);
-
-        if (mediaInfo.filesize! > widget.maxAttachmentSize) {
-          _showErrorAlert(
-            context.translations.fileTooLargeAfterCompressionError(
-              widget.maxAttachmentSize / (1024 * 1024),
-            ),
-          );
-          return;
-        }
-        file = AttachmentFile(
-          name: file.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file!.readAsBytes(),
-          path: mediaInfo.path,
-        );
-      } else {
-        _showErrorAlert(context.translations.fileTooLargeError(
+      return _showErrorAlert(
+        context.translations.fileTooLargeError(
           widget.maxAttachmentSize / (1024 * 1024),
-        ));
-        return;
-      }
+        ),
+      );
     }
 
     setState(() {

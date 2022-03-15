@@ -5,9 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
-import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:video_compress/video_compress.dart';
 
 /// Callback for when a file has to be picked.
 typedef FilePickerCallback = void Function(
@@ -34,8 +32,6 @@ class StreamAttachmentPicker extends StatefulWidget {
     this.attachmentLimit = 10,
     this.onAttachmentLimitExceeded,
     this.maxAttachmentSize = 20971520,
-    this.compressedVideoQuality = VideoQuality.DefaultQuality,
-    this.compressedVideoFrameRate = 30,
     this.onError,
     this.allowedAttachmentTypes = const [
       DefaultAttachmentTypes.image,
@@ -66,12 +62,6 @@ class StreamAttachmentPicker extends StatefulWidget {
   /// Callback for when file is picked.
   final FilePickerCallback onFilePicked;
 
-  /// Video quality to use when compressing the videos.
-  final VideoQuality compressedVideoQuality;
-
-  /// Frame rate to use when compressing the videos.
-  final int compressedVideoFrameRate;
-
   /// Max attachment size in bytes:
   /// - Defaults to 20 MB
   /// - Do not set it if you're using our default CDN
@@ -94,8 +84,6 @@ class StreamAttachmentPicker extends StatefulWidget {
     int? attachmentLimit,
     AttachmentLimitExceedListener? onAttachmentLimitExceeded,
     int? maxAttachmentSize,
-    VideoQuality? compressedVideoQuality,
-    int? compressedVideoFrameRate,
     ValueChanged<bool>? onChangeInputState,
     ValueChanged<String>? onError,
     List<DefaultAttachmentTypes>? allowedAttachmentTypes,
@@ -112,10 +100,6 @@ class StreamAttachmentPicker extends StatefulWidget {
         onAttachmentLimitExceeded:
             onAttachmentLimitExceeded ?? this.onAttachmentLimitExceeded,
         maxAttachmentSize: maxAttachmentSize ?? this.maxAttachmentSize,
-        compressedVideoQuality:
-            compressedVideoQuality ?? this.compressedVideoQuality,
-        compressedVideoFrameRate:
-            compressedVideoFrameRate ?? this.compressedVideoFrameRate,
         onError: onError ?? this.onError,
         allowedAttachmentTypes:
             allowedAttachmentTypes ?? this.allowedAttachmentTypes,
@@ -375,33 +359,11 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
     );
 
     if (file.size! > widget.maxAttachmentSize) {
-      if (medium.type == AssetType.video && file.path != null) {
-        final mediaInfo = await (StreamVideoService.compressVideo(
-          file.path!,
-          frameRate: widget.compressedVideoFrameRate,
-          quality: widget.compressedVideoQuality,
-        ) as FutureOr<MediaInfo>);
-
-        if (mediaInfo.filesize! > widget.maxAttachmentSize) {
-          widget.onError?.call(
-            context.translations.fileTooLargeAfterCompressionError(
-              widget.maxAttachmentSize / (1024 * 1024),
-            ),
-          );
-          return;
-        }
-        file = AttachmentFile(
-          name: file.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file?.readAsBytes(),
-          path: mediaInfo.path,
-        );
-      } else {
-        widget.onError?.call(context.translations.fileTooLargeError(
+      return widget.onError?.call(
+        context.translations.fileTooLargeError(
           widget.maxAttachmentSize / (1024 * 1024),
-        ));
-        return;
-      }
+        ),
+      );
     }
 
     setState(() {
