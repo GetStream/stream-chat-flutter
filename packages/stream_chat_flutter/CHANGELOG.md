@@ -1,8 +1,9 @@
-## Upcoming
+## 3.5.1
 
 🐞 Fixed
 
-- Mentions overlay now doesn't overflow when not enough height available
+- Mentions overlay now doesn't overflow when there is not enough height available
+- Updated `stream_chat_flutter_core` dependency to [`3.5.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 3.5.0
 
