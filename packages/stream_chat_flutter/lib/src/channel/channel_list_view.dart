@@ -18,10 +18,11 @@ typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 /// Callback for when 'View Info' is tapped
 typedef ViewInfoCallback = void Function(Channel);
 
+/// {@template channelListView}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_list_view.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_list_view_paint.png)
 ///
-/// It shows the list of current channels.
+/// Shows the list of active channels.
 ///
 /// ```dart
 /// class ChannelListPage extends StatelessWidget {
@@ -45,22 +46,22 @@ typedef ViewInfoCallback = void Function(Channel);
 /// }
 /// ```
 ///
+/// A [StreamChat] ancestor is required in order to provide the information
+/// about the channels.
 ///
-/// Make sure to have a [StreamChat] ancestor in order to provide the
-/// information about the channels.
-/// The widget uses a [ListView.custom] to render the list of channels.
+/// A [ListView.custom] is used to render the list of channels.
 ///
-/// The widget components render the ui based on the first ancestor of
-/// type [StreamChatTheme].
-/// Modify it to change the widget appearance.
+/// The UI is rendered based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget's appearance.
+/// {@endtemplate}
 class ChannelListView extends StatefulWidget {
-  /// Instantiate a new ChannelListView
+  /// {@macro channelListView}
   ChannelListView({
     Key? key,
     this.filter,
     this.sort,
-    this.state = true,
-    this.watch = true,
+    this.showChannelState = true,
+    this.watchChannel = true,
     this.presence = false,
     this.memberLimit,
     this.messageLimit,
@@ -94,38 +95,49 @@ class ChannelListView extends StatefulWidget {
   })  : limit = limit ?? pagination?.limit ?? 25,
         super(key: key);
 
-  /// If true a default swipe to action behaviour will be added to this widget
+  /// Whether to add a default swipe action behavior to this widget.
+  ///
+  /// Defaults to `false`.
   final bool swipeToAction;
 
-  /// The query filters to use.
+  /// The query filters to use for filtering the list of channels.
+  ///
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
   final Filter? filter;
 
   /// The sorting used for the channels matching the filters.
-  /// Sorting is based on field and direction, multiple sorting options
+  ///
+  /// Sorting is based on field and direction. Multiple sorting options
   /// can be provided.
-  /// You can sort based on last_updated, last_message_at, updated_at,
-  /// created_at or member_count.
+  ///
+  /// You can sort based on `last_updated`, `last_message_at`, `updated_at`,
+  /// `created_at` or `member_count`.
+  ///
   /// Direction can be ascending or descending.
   final List<SortOption<ChannelModel>>? sort;
 
-  /// If true returns the Channel state
-  final bool state;
+  /// Whether to return the [Channel] state.
+  ///
+  /// Defaults to `true`.
+  final bool showChannelState;
 
-  /// If true listen to changes to this Channel in real time.
-  final bool watch;
+  /// Whether to listen to changes to this [Channel] in real time.
+  ///
+  /// Defaults to `true`.
+  final bool watchChannel;
 
-  /// If true you’ll receive user presence updates via the websocket events
+  /// Whether to receive user presence updates via the websocket events
   final bool presence;
 
-  /// Number of members to fetch in each channel
+  /// The maximum number of members to fetch in each channel
   final int? memberLimit;
 
-  /// Number of messages to fetch in each channel
+  /// The maximum number of messages to fetch in each channel
   final int? messageLimit;
 
   /// Pagination parameters
+  ///
   /// limit: the number of channels to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
@@ -135,18 +147,19 @@ class ChannelListView extends StatefulWidget {
   )
   final PaginationParams? pagination;
 
-  /// The amount of channels requested per API call.
+  /// The maximum amount of channels to request per API call.
   final int limit;
 
-  /// Function called when tapping on a channel
-  /// By default it calls [Navigator.push] building a [MaterialPageRoute]
-  /// with the widget [channelWidget] as child.
+  /// The action to perform when tapping on a channel.
+  ///
+  /// By default it calls [Navigator.push] building a [MaterialPageRoute],
+  /// with the [channelWidget] as its child.
   final ChannelTapCallback? onChannelTap;
 
-  /// Function called when long pressing on a channel
+  /// The action to perform when long pressing on a channel
   final Function(Channel)? onChannelLongPress;
 
-  /// Widget used when opening a channel
+  /// The widget used when opening a channel
   final Widget? channelWidget;
 
   /// Builder used to create a custom channel preview
@@ -155,10 +168,12 @@ class ChannelListView extends StatefulWidget {
   /// Builder used to create a custom item separator
   final Function(BuildContext, int)? separatorBuilder;
 
-  /// The function called when the image is tapped
+  /// The action to perform when the image is tapped
   final Function(Channel)? onImageTap;
 
-  /// Set it to false to disable the pull-to-refresh widget
+  /// Whether to disable the pull-to-refresh widget.
+  ///
+  /// Defaults to `true`.
   final bool pullToRefresh;
 
   /// Callback used in the default empty list widget
@@ -171,9 +186,10 @@ class ChannelListView extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
 
   /// List of selected channels which are displayed differently
+  /// FIXME: What the heck does this mean???
   final List<Channel> selectedChannels;
 
-  /// Callback for when 'View Info' is tapped
+  /// The action to perform when 'View Info' is tapped
   final ViewInfoCallback? onViewInfoTap;
 
   /// The builder that will be used in case of error
@@ -182,22 +198,23 @@ class ChannelListView extends StatefulWidget {
   /// The builder that will be used in case of loading
   final WidgetBuilder? loadingBuilder;
 
-  /// The builder which is used when list of channels loads
+  /// The builder for creating custom channel widgets
   final Function(BuildContext, List<Channel>)? listBuilder;
 
   /// The builder used when the channel list is empty.
   final WidgetBuilder? emptyBuilder;
 
-  /// Callback used when the more details slidable option is pressed
+  /// The action to perform when the 'more details' slidable option is pressed
   final ChannelInfoCallback? onMoreDetailsPressed;
 
-  /// Callback used when the delete slidable option is pressed
+  /// The action to perform when the 'delete' slidable option is pressed
   final ChannelInfoCallback? onDeletePressed;
 
-  /// List of actions for slidable
+  /// List of actions that can be selected for slidable channel widgets
   final List<SwipeAction>? swipeActions;
 
-  /// A [ChannelListController] allows reloading and pagination.
+  /// Enables channel list reloading and pagination.
+  ///
   /// Use [ChannelListController.loadData] and
   /// [ChannelListController.paginateData] respectively for reloading and
   /// pagination.
@@ -220,8 +237,8 @@ class _ChannelListViewState extends State<ChannelListView> {
     Widget child = ChannelListCore(
       filter: widget.filter,
       sort: widget.sort,
-      state: widget.state,
-      watch: widget.watch,
+      state: widget.showChannelState,
+      watch: widget.watchChannel,
       presence: widget.presence,
       memberLimit: widget.memberLimit,
       messageLimit: widget.messageLimit,

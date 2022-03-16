@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/avatars/group_avatar.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template channelAvatar}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_image.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_image_paint.png)
 ///
-/// It shows the current [Channel] image.
+/// The image that represents the current [Channel].
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
@@ -35,17 +36,17 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// }
 /// ```
 ///
-/// The widget uses a [StreamBuilder] to render the channel information
-/// image as soon as it updates.
+/// Uses a [StreamBuilder] to render the channel information image as soon as
+/// it updates.
 ///
-/// By default the widget radius size is 40x40 pixels.
-/// Set the property [constraints] to set a custom dimension.
+/// By default, the widget radius size is 40x40 pixels. Set the [constraints]
+/// property to set a custom dimension.
 ///
-/// The widget renders the ui based on the first ancestor of type
-/// [StreamChatTheme].
-/// Modify it to change the widget appearance.
+/// The UI is rendered based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget's appearance.
+/// {@endtemplate}
 class ChannelAvatar extends StatelessWidget {
-  /// Instantiate a new ChannelImage
+  /// {@macro channelAvatar}
   const ChannelAvatar({
     Key? key,
     this.channel,
@@ -57,25 +58,26 @@ class ChannelAvatar extends StatelessWidget {
     this.selectionThickness = 4,
   }) : super(key: key);
 
-  /// [BorderRadius] to display the widget
+  /// The [BorderRadius] for this [ChannelAvatar]
   final BorderRadius? borderRadius;
 
   /// The channel to show the image of
   final Channel? channel;
 
-  /// The diameter of the image
+  /// The sizing constraints of the image
   final BoxConstraints? constraints;
 
-  /// The function called when the image is tapped
+  /// The action to perform when the image is tapped
   final VoidCallback? onTap;
 
-  /// If image is selected
+  /// Whether the image is currently selected or not
   final bool selected;
 
-  /// Selection color for image
+  /// The color to use when the image is selected
   final Color? selectionColor;
 
-  /// Thickness of selection image
+  /// The value to use for the border thickness and padding of the
+  /// selected image
   final double selectionThickness;
 
   @override

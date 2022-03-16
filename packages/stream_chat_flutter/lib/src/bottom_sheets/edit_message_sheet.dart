@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template editMessageSheet}
 /// Allows a user to edit the selected message.
+/// {@endtemplate}
 class EditMessageSheet extends StatelessWidget {
-  /// Builds an [EditMessageSheet].
+  /// {@macro editMessageSheet}
   const EditMessageSheet({
     Key? key,
     required this.message,

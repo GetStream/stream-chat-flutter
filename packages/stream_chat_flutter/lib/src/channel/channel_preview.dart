@@ -4,22 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template channelPreview}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_preview_paint.png)
 ///
-/// It shows the current [Channel] preview.
+/// Shows a preview for the current [Channel].
 ///
-/// The widget uses a [StreamBuilder] to render the channel information
-/// image as soon as it updates.
+/// Uses a [StreamBuilder] to render the channel information image as soon as
+/// it updates.
 ///
-/// Usually you don't use this widget as it's the default channel preview
-/// used by [ChannelListView].
+/// It is not recommended to use this widget directly as it is the
+/// default channel preview widget used by [ChannelListView].
 ///
-/// The widget renders the ui based on the first ancestor of type
-/// [StreamChatTheme].
-/// Modify it to change the widget appearance.
+/// The UI is rendered based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget's appearance.
+/// {@endtemplate}
 class ChannelPreview extends StatelessWidget {
-  /// Constructor for creating [ChannelPreview]
+  /// {@macro channelPreview}
   const ChannelPreview({
     required this.channel,
     Key? key,
@@ -33,16 +34,16 @@ class ChannelPreview extends StatelessWidget {
     this.trailing,
   }) : super(key: key);
 
-  /// Function called when tapping this widget
+  /// The action to perform when tapping this widget
   final void Function(Channel)? onTap;
 
-  /// Function called when long pressing this widget
+  /// The action to perform when long pressing this widget
   final void Function(Channel)? onLongPress;
 
-  /// Channel displayed
+  /// The [Channel] being previewed.
   final Channel channel;
 
-  /// The function called when the image is tapped
+  /// The action to perform when the image is tapped
   final VoidCallback? onImageTap;
 
   /// Widget rendering the title
@@ -51,16 +52,16 @@ class ChannelPreview extends StatelessWidget {
   /// Widget rendering the subtitle
   final Widget? subtitle;
 
-  /// Widget rendering the leading element, by default
-  /// it shows the [ChannelAvatar]
+  /// Widget rendering the leading element. By default it shows the
+  /// [ChannelAvatar].
   final Widget? leading;
 
-  /// Widget rendering the trailing element,
-  /// by default it shows the last message date
+  /// Widget rendering the trailing element. By default it shows the date of
+  /// the last message.
   final Widget? trailing;
 
-  /// Widget rendering the sending indicator,
-  /// by default it uses the [SendingIndicator] widget
+  /// Widget rendering the sending indicator. By default it uses the
+  /// [SendingIndicator] widget.
   final Widget? sendingIndicator;
 
   @override

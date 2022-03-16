@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template groupAvatar}
 /// Widget for constructing a group of images
+/// {@endtemplate}
 class GroupAvatar extends StatelessWidget {
-  /// Constructor for creating a [GroupAvatar]
+  /// {@macro groupAvatar}
   const GroupAvatar({
     Key? key,
     required this.members,
@@ -15,25 +17,28 @@ class GroupAvatar extends StatelessWidget {
     this.selectionThickness = 4,
   }) : super(key: key);
 
-  /// List of images to display
+  /// The list of members in the group whose avatars should be displayed.
   final List<Member> members;
 
   /// Constraints on the widget
   final BoxConstraints? constraints;
 
-  /// Callback when widget is tapped
+  /// The action to perform when the widget is tapped
   final VoidCallback? onTap;
 
-  /// Highlights if selected
+  /// If `true`, this widget should be highlighted.
+  ///
+  /// Defaults to `false`.
   final bool selected;
 
   /// [BorderRadius] to pass to the widget
   final BorderRadius? borderRadius;
 
-  /// Color of selection if selected
+  /// The color to highlight the widget with if [selected] is `true`
   final Color? selectionColor;
 
-  /// Thickness with which color of selection is shown
+  /// The value to use for the border thickness and padding of the
+  /// selected image
   final double selectionThickness;
 
   @override

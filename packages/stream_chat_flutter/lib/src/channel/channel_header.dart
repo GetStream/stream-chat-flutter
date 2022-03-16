@@ -4,10 +4,11 @@ import 'package:stream_chat_flutter/src/channel/channel_info.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template channelHeader}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header_paint.png)
 ///
-/// It shows the current [Channel] information.
+/// Shows information about the current [Channel].
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
@@ -34,23 +35,25 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// ```
 ///
 /// Usually you would use this widget as an [AppBar] inside a [Scaffold].
-/// However you can also use it as a normal widget.
+/// However, you can also use it as a normal widget.
 ///
 /// Make sure to have a [StreamChannel] ancestor in order to provide the
 /// information about the channel.
+///
 /// Every part of the widget uses a [StreamBuilder] to render the channel
 /// information as soon as it updates.
 ///
 /// By default the widget shows a backButton that calls [Navigator.pop].
-/// You can disable this button using the [showBackButton] property of just
-/// override the behaviour
-/// with [onBackPressed].
+/// You can disable this button using the [showBackButton] property.
+/// Alternatively, you can override this behaviour via the [onBackPressed]
+/// callback.
 ///
-/// The widget components render the ui based on the first ancestor of type
-/// [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
-/// Modify it to change the widget appearance.
+/// The UI is rendered based on the first ancestor of type [StreamChatTheme]
+/// and the [ChannelTheme.channelHeaderTheme] property. Modify it to change
+/// the widget's appearance.
+/// {@endtemplate}
 class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
-  /// Creates a channel header
+  /// {@macro channelHeader}
   const ChannelHeader({
     Key? key,
     this.showBackButton = true,
@@ -67,23 +70,28 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
-  /// True if this header shows the leading back button
+  /// Whether to show the leading back button
+  ///
+  /// Defaults to `true`
   final bool showBackButton;
 
-  /// Callback to call when pressing the back button.
+  /// The action to perform when the back button is pressed.
+  ///
   /// By default it calls [Navigator.pop]
   final VoidCallback? onBackPressed;
 
-  /// Callback to call when the header is tapped.
+  /// The action to perform when the header is tapped.
   final VoidCallback? onTitleTap;
 
-  /// Callback to call when the image is tapped.
+  /// The action to perform when the image is tapped.
   final VoidCallback? onImageTap;
 
-  /// If true the typing indicator will be rendered if a user is typing
+  /// Whether to show the typing indicator
+  ///
+  /// Defaults to `true`
   final bool showTypingIndicator;
 
-  /// Show connection tile on header
+  /// Whether to show the connection state tile
   final bool showConnectionStateTile;
 
   /// Title widget
@@ -95,8 +103,9 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Leading widget
   final Widget? leading;
 
-  /// AppBar actions
-  /// By default it shows the [ChannelAvatar]
+  /// {@macro flutter.material.appbar.actions}
+  ///
+  /// The [ChannelAvatar] is shown by default
   final List<Widget>? actions;
 
   /// The background color for this [ChannelHeader].

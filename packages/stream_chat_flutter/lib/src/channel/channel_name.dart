@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// It shows the current [Channel] name using a [Text] widget.
+/// {@template channelName}
+/// Displays the current [Channel] name using a [Text] widget.
 ///
 /// The widget uses a [StreamBuilder] to render the channel information
 /// image as soon as it updates.
+/// {@endtemplate}
 class ChannelName extends StatelessWidget {
-  /// Instantiate a new ChannelName
+  /// {@macro channelName}
   const ChannelName({
     Key? key,
     this.textStyle,

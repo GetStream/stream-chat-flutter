@@ -26,7 +26,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// change the color attribute
 ///
 /// - We loop over the list of channel messages to search for the first not
-/// deleted message ([Channel.state.messages])
+/// deleted message ([Channel.showChannelState.messages])
 ///
 /// - We retrieve the count of unread messages from [Channel.state]
 Future<void> main() async {

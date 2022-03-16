@@ -11,8 +11,8 @@ typedef TitleBuilder = Widget Function(
   StreamChatClient client,
 );
 
-///
-/// It shows the current [StreamChatClient] status.
+/// {@template channelListHeader}
+/// Shows the current [StreamChatClient] status.
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
@@ -35,18 +35,18 @@ typedef TitleBuilder = Widget Function(
 /// ```
 ///
 /// Usually you would use this widget as an [AppBar] inside a [Scaffold].
-/// However you can also use it as a normal widget.
+/// However, you can also use it as a normal widget.
 ///
-/// The widget by default uses the inherited [StreamChatClient]
-/// to fetch information about the status.
-/// However you can also pass your own [StreamChatClient]
-/// if you don't have it in the widget tree.
+/// Uses the inherited [StreamChatClient], by default, to fetch information
+/// about the status of the [client]. You can also pass your own
+/// [StreamChatClient] if you don't have it in the widget tree.
 ///
-/// The widget components render the ui based on the first ancestor of type
-/// [StreamChatTheme] and on its [ChannelListHeaderThemeData] property.
-/// Modify it to change the widget appearance.
+/// Renders the UI based on the first ancestor of type [StreamChatTheme] and
+/// the [ChannelListHeaderThemeData] property. Modify it to change the widget's
+/// appearance.
+/// {@endtemplate}
 class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
-  /// Instantiates a ChannelListHeader
+  /// {@macro channelListHeader}
   const ChannelListHeader({
     Key? key,
     this.client,
@@ -61,34 +61,40 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor,
   }) : super(key: key);
 
-  /// Pass this if you don't have a [StreamChatClient] in your widget tree.
+  /// Use this if you don't have a [StreamChatClient] in your widget tree.
   final StreamChatClient? client;
 
-  /// Use this to build your own title as per different [ConnectionStatus]
+  /// Custom title widget builder.
+  ///
+  /// Use this to build your own title widget based on the current
+  /// [ConnectionStatus].
   final TitleBuilder? titleBuilder;
 
-  /// Callback to call when pressing the user avatar button.
-  /// By default it calls Scaffold.of(context).openDrawer()
+  /// The action to perform when pressing the user avatar button.
+  ///
+  /// By default it calls `Scaffold.of(context).openDrawer()`.
   final Function(User)? onUserAvatarTap;
 
-  /// Callback to call when pressing the new chat button.
+  /// The action to perform when pressing the "new chat" button.
   final VoidCallback? onNewChatButtonTap;
 
-  /// Show connection state tile
+  /// Whether to show the connection state tile
   final bool showConnectionStateTile;
 
-  /// Callback before navigation is performed
+  /// The function to execute before navigation is performed
   final VoidCallback? preNavigationCallback;
 
   /// Subtitle widget
   final Widget? subtitle;
 
   /// Leading widget
-  /// By default it shows the logged in user avatar
+  ///
+  /// By default it shows the logged in user's avatar
   final Widget? leading;
 
-  /// AppBar actions
-  /// By default it shows the new chat button
+  /// {@macro flutter.material.appbar.actions}
+  ///
+  /// The "new chat" button is shown by default.
   final List<Widget>? actions;
 
   /// The background color for this [ChannelListHeader].

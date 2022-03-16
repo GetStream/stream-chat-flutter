@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template errorAlertSheet}
 /// A bottom sheet that displays when an error occurs.
 ///
 /// Should only be used on mobile platforms.
+/// {@endtemplate}
 class ErrorAlertSheet extends StatelessWidget {
-  /// Builds an [ErrorAlertSheet].
+  /// {@macro errorAlertSheet}
   const ErrorAlertSheet({
     Key? key,
     required this.errorDescription,

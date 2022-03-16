@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Widget which shows channel info
+/// {@template channelInfo}
+/// Displays information about the current [Channel].
+/// {@endtemplate}
 class ChannelInfo extends StatelessWidget {
-  /// Constructor which creates a [ChannelInfo] widget
+  /// {@macro channelInfo}
   const ChannelInfo({
     Key? key,
     required this.channel,
@@ -14,16 +16,18 @@ class ChannelInfo extends StatelessWidget {
     this.parentId,
   }) : super(key: key);
 
-  /// The channel about which the info is to be displayed
+  /// The channel to display information about
   final Channel channel;
 
   /// The style of the text displayed
   final TextStyle? textStyle;
 
-  /// If true the typing indicator will be rendered if a user is typing
+  /// Whether to show the typing indicator
+  ///
+  /// Defaults to `true`
   final bool showTypingIndicator;
 
-  /// Id of the parent message in case of a thread
+  /// The ID of the parent message (in the case of a thread)
   final String? parentId;
 
   @override

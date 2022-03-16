@@ -2,9 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template userAvatar}
 /// Widget that displays a user avatar
+/// {@endtemplate}
 class UserAvatar extends StatelessWidget {
-  /// Constructor to create a [UserAvatar]
+  /// {@macro userAvatar}
   const UserAvatar({
     Key? key,
     required this.user,
@@ -21,37 +23,45 @@ class UserAvatar extends StatelessWidget {
     this.placeholder,
   }) : super(key: key);
 
-  /// User whose avatar is to displayed
+  /// User whose avatar is to be displayed
   final User user;
 
   /// Alignment of the online indicator
+  ///
+  /// Defaults to `Alignment.topRight`
   final Alignment onlineIndicatorAlignment;
 
-  /// Size of the avatar
+  /// Sizing constraints of the avatar
   final BoxConstraints? constraints;
 
   /// [BorderRadius] of the image
   final BorderRadius? borderRadius;
 
-  /// Size of the online indicator
+  /// Sizing constraints of the online indicator
   final BoxConstraints? onlineIndicatorConstraints;
 
-  /// Callback when avatar is tapped
+  /// The action to perform when the avatar is tapped
   final void Function(User)? onTap;
 
-  /// Callback when avatar is long pressed
+  /// The action to perform when the avatar is long pressed
   final void Function(User)? onLongPress;
 
   /// Flag for showing online status
+  ///
+  /// Defaults to `true`
   final bool showOnlineStatus;
 
   /// Flag for if avatar is selected
+  ///
+  /// Defaults to `false`
   final bool selected;
 
   /// Color of selection
   final Color? selectionColor;
 
   /// Selection thickness around the avatar
+  ///
+  /// Defaults to `4`
   final double selectionThickness;
 
   /// The widget that will be built when the user image is loading
