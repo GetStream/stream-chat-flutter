@@ -110,7 +110,7 @@ class ChannelPreview extends StatelessWidget {
           subtitle: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Flexible(child: subtitle ?? _buildSubtitle(context)),
+              Flexible(child: subtitle ?? _Subtitle(channel: channel)),
               sendingIndicator ??
                   Builder(
                     builder: (context) {
@@ -148,47 +148,69 @@ class ChannelPreview extends StatelessWidget {
                       return const SizedBox();
                     },
                   ),
-              trailing ?? _buildDate(context),
+              trailing ?? _Date(channel: channel),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildDate(BuildContext context) => BetterStreamBuilder<DateTime>(
-        stream: channel.lastMessageAtStream,
-        initialData: channel.lastMessageAt,
-        builder: (context, data) {
-          final lastMessageAt = data.toLocal();
+class _Date extends StatelessWidget {
+  const _Date({
+    Key? key,
+    required this.channel,
+  }) : super(key: key);
 
-          String stringDate;
-          final now = DateTime.now();
+  final Channel channel;
 
-          final startOfDay = DateTime(now.year, now.month, now.day);
+  @override
+  Widget build(BuildContext context) {
+    return BetterStreamBuilder<DateTime>(
+      stream: channel.lastMessageAtStream,
+      initialData: channel.lastMessageAt,
+      builder: (context, data) {
+        final lastMessageAt = data.toLocal();
 
-          if (lastMessageAt.millisecondsSinceEpoch >=
-              startOfDay.millisecondsSinceEpoch) {
-            stringDate = Jiffy(lastMessageAt.toLocal()).jm;
-          } else if (lastMessageAt.millisecondsSinceEpoch >=
-              startOfDay
-                  .subtract(const Duration(days: 1))
-                  .millisecondsSinceEpoch) {
-            stringDate = context.translations.yesterdayLabel;
-          } else if (startOfDay.difference(lastMessageAt).inDays < 7) {
-            stringDate = Jiffy(lastMessageAt.toLocal()).EEEE;
-          } else {
-            stringDate = Jiffy(lastMessageAt.toLocal()).yMd;
-          }
+        String stringDate;
+        final now = DateTime.now();
 
-          return Text(
-            stringDate,
-            style: ChannelPreviewTheme.of(context).lastMessageAtStyle,
-          );
-        },
-      );
+        final startOfDay = DateTime(now.year, now.month, now.day);
 
-  Widget _buildSubtitle(BuildContext context) {
+        if (lastMessageAt.millisecondsSinceEpoch >=
+            startOfDay.millisecondsSinceEpoch) {
+          stringDate = Jiffy(lastMessageAt.toLocal()).jm;
+        } else if (lastMessageAt.millisecondsSinceEpoch >=
+            startOfDay
+                .subtract(const Duration(days: 1))
+                .millisecondsSinceEpoch) {
+          stringDate = context.translations.yesterdayLabel;
+        } else if (startOfDay.difference(lastMessageAt).inDays < 7) {
+          stringDate = Jiffy(lastMessageAt.toLocal()).EEEE;
+        } else {
+          stringDate = Jiffy(lastMessageAt.toLocal()).yMd;
+        }
+
+        return Text(
+          stringDate,
+          style: ChannelPreviewTheme.of(context).lastMessageAtStyle,
+        );
+      },
+    );
+  }
+}
+
+class _Subtitle extends StatelessWidget {
+  const _Subtitle({
+    Key? key,
+    required this.channel,
+  }) : super(key: key);
+
+  final Channel channel;
+
+  @override
+  Widget build(BuildContext context) {
     final channelPreviewTheme = ChannelPreviewTheme.of(context);
     if (channel.isMuted) {
       return Row(
@@ -206,69 +228,83 @@ class ChannelPreview extends StatelessWidget {
     }
     return TypingIndicator(
       channel: channel,
-      alternativeWidget: _buildLastMessage(context),
+      alternativeWidget: _LastMessage(
+        channel: channel,
+      ),
       style: channelPreviewTheme.subtitleStyle,
     );
   }
+}
 
-  Widget _buildLastMessage(BuildContext context) => Align(
-        alignment: Alignment.centerLeft,
-        child: BetterStreamBuilder<List<Message>>(
-          stream: channel.state!.messagesStream,
-          initialData: channel.state!.messages,
-          builder: (context, data) {
-            final lastMessage =
-                data.lastWhereOrNull((m) => !m.shadowed && !m.isDeleted);
-            if (lastMessage == null) {
-              return const SizedBox();
-            }
+class _LastMessage extends StatelessWidget {
+  const _LastMessage({
+    Key? key,
+    required this.channel,
+  }) : super(key: key);
 
-            var text = lastMessage.text;
-            final parts = <String>[
-              ...lastMessage.attachments.map((e) {
-                if (e.type == 'image') {
-                  return '📷';
-                } else if (e.type == 'video') {
-                  return '🎬';
-                } else if (e.type == 'giphy') {
-                  return '[GIF]';
-                }
-                return e == lastMessage.attachments.last
-                    ? (e.title ?? 'File')
-                    : '${e.title ?? 'File'} , ';
-              }),
-              lastMessage.text ?? '',
-            ];
+  final Channel channel;
 
-            text = parts.join(' ');
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: BetterStreamBuilder<List<Message>>(
+        stream: channel.state!.messagesStream,
+        initialData: channel.state!.messages,
+        builder: (context, data) {
+          final lastMessage =
+              data.lastWhereOrNull((m) => !m.shadowed && !m.isDeleted);
+          if (lastMessage == null) {
+            return const SizedBox();
+          }
 
-            final channelPreviewTheme = ChannelPreviewTheme.of(context);
-            return Text.rich(
-              _getDisplayText(
-                text,
-                lastMessage.mentionedUsers,
-                lastMessage.attachments,
-                channelPreviewTheme.subtitleStyle?.copyWith(
-                  color: channelPreviewTheme.subtitleStyle?.color,
-                  fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
-                      ? FontStyle.italic
-                      : FontStyle.normal,
-                ),
-                channelPreviewTheme.subtitleStyle?.copyWith(
-                  color: channelPreviewTheme.subtitleStyle?.color,
-                  fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
-                      ? FontStyle.italic
-                      : FontStyle.normal,
-                  fontWeight: FontWeight.bold,
-                ),
+          var text = lastMessage.text;
+          final parts = <String>[
+            ...lastMessage.attachments.map((e) {
+              if (e.type == 'image') {
+                return '📷';
+              } else if (e.type == 'video') {
+                return '🎬';
+              } else if (e.type == 'giphy') {
+                return '[GIF]';
+              }
+              return e == lastMessage.attachments.last
+                  ? (e.title ?? 'File')
+                  : '${e.title ?? 'File'} , ';
+            }),
+            lastMessage.text ?? '',
+          ];
+
+          text = parts.join(' ');
+
+          final channelPreviewTheme = ChannelPreviewTheme.of(context);
+          return Text.rich(
+            _getDisplayText(
+              text,
+              lastMessage.mentionedUsers,
+              lastMessage.attachments,
+              channelPreviewTheme.subtitleStyle?.copyWith(
+                color: channelPreviewTheme.subtitleStyle?.color,
+                fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                    ? FontStyle.italic
+                    : FontStyle.normal,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.start,
-            );
-          },
-        ),
-      );
+              channelPreviewTheme.subtitleStyle?.copyWith(
+                color: channelPreviewTheme.subtitleStyle?.color,
+                fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                    ? FontStyle.italic
+                    : FontStyle.normal,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.start,
+          );
+        },
+      ),
+    );
+  }
 
   TextSpan _getDisplayText(
     String text,

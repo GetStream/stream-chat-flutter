@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:stream_chat_flutter/src/channel_info.dart';
+import 'package:stream_chat_flutter/src/channel/channel_info.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -103,6 +103,9 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   final Color? backgroundColor;
 
   @override
+  final Size preferredSize;
+
+  @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     final channelHeaderTheme = ChannelHeaderTheme.of(context);
@@ -191,7 +194,4 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
       },
     );
   }
-
-  @override
-  final Size preferredSize;
 }

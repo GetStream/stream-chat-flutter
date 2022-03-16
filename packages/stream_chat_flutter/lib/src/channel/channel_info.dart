@@ -36,11 +36,20 @@ class ChannelInfo extends StatelessWidget {
         statusBuilder: (context, status) {
           switch (status) {
             case ConnectionStatus.connected:
-              return _buildConnectedTitleState(context, data);
+              return _ConnectedTitleState(
+                channel: channel,
+                showTypingIndicator: showTypingIndicator,
+                textStyle: textStyle,
+                members: data,
+                parentId: parentId,
+              );
             case ConnectionStatus.connecting:
-              return _buildConnectingTitleState(context);
+              return _ConnectingTitleState(textStyle: textStyle);
             case ConnectionStatus.disconnected:
-              return _buildDisconnectedTitleState(context, client);
+              return _DisconnectedTitleState(
+                client: client,
+                textStyle: textStyle,
+              );
             default:
               return const Offstage();
           }
@@ -48,11 +57,26 @@ class ChannelInfo extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildConnectedTitleState(
-    BuildContext context,
-    List<Member>? members,
-  ) {
+class _ConnectedTitleState extends StatelessWidget {
+  const _ConnectedTitleState({
+    Key? key,
+    required this.channel,
+    required this.showTypingIndicator,
+    this.members,
+    this.textStyle,
+    this.parentId,
+  }) : super(key: key);
+
+  final Channel channel;
+  final List<Member>? members;
+  final TextStyle? textStyle;
+  final bool showTypingIndicator;
+  final String? parentId;
+
+  @override
+  Widget build(BuildContext context) {
     Widget? alternativeWidget;
 
     final memberCount = channel.memberCount;
@@ -100,8 +124,18 @@ class ChannelInfo extends StatelessWidget {
       style: textStyle,
     );
   }
+}
 
-  Widget _buildConnectingTitleState(BuildContext context) {
+class _ConnectingTitleState extends StatelessWidget {
+  const _ConnectingTitleState({
+    Key? key,
+    this.textStyle,
+  }) : super(key: key);
+
+  final TextStyle? textStyle;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -120,11 +154,20 @@ class ChannelInfo extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildDisconnectedTitleState(
-    BuildContext context,
-    StreamChatClient client,
-  ) {
+class _DisconnectedTitleState extends StatelessWidget {
+  const _DisconnectedTitleState({
+    Key? key,
+    required this.client,
+    this.textStyle,
+  }) : super(key: key);
+
+  final StreamChatClient client;
+  final TextStyle? textStyle;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

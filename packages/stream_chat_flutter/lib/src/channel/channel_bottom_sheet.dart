@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/channel_info.dart';
+import 'package:stream_chat_flutter/src/channel/channel_info.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -22,6 +22,15 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
   late ChannelPreviewThemeData _channelPreviewThemeData;
   late StreamChatThemeData _streamChatThemeData;
   late StreamChatState _streamChatState;
+
+  @override
+  void didChangeDependencies() {
+    _streamChannelState = StreamChannel.of(context);
+    _streamChatThemeData = StreamChatTheme.of(context);
+    _channelPreviewThemeData = ChannelPreviewTheme.of(context);
+    _streamChatState = StreamChat.of(context);
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,13 +174,9 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                     ),
                     title: context.translations.leaveGroupLabel,
                     onTap: () async {
-                      setState(() {
-                        _showActions = false;
-                      });
+                      setState(() => _showActions = false);
                       await _showLeaveDialog();
-                      setState(() {
-                        _showActions = true;
-                      });
+                      setState(() => _showActions = true);
                     },
                   ),
                 if (isOwner)
@@ -185,13 +190,9 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                     title: context.translations.deleteConversationLabel,
                     titleColor: _streamChatThemeData.colorTheme.accentError,
                     onTap: () async {
-                      setState(() {
-                        _showActions = false;
-                      });
+                      setState(() => _showActions = false);
                       await _showDeleteDialog();
-                      setState(() {
-                        _showActions = true;
-                      });
+                      setState(() => _showActions = true);
                     },
                   ),
                 OptionListTile(
@@ -202,22 +203,11 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                     ),
                   ),
                   title: context.translations.cancelLabel,
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
+                  onTap: () => Navigator.of(context).pop(),
                 ),
               ],
             ),
     );
-  }
-
-  @override
-  void didChangeDependencies() {
-    _streamChannelState = StreamChannel.of(context);
-    _streamChatThemeData = StreamChatTheme.of(context);
-    _channelPreviewThemeData = ChannelPreviewTheme.of(context);
-    _streamChatState = StreamChat.of(context);
-    super.didChangeDependencies();
   }
 
   Future<void> _showDeleteDialog() async {
@@ -234,7 +224,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
     final channel = _streamChannelState.channel;
     if (res == true) {
       await channel.delete();
-      Navigator.pop(context);
+      Navigator.of(context).pop();
     }
   }
 
@@ -255,7 +245,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
       if (user != null) {
         await channel.removeMembers([user.id]);
       }
-      Navigator.pop(context);
+      Navigator.of(context).pop();
     }
   }
 }

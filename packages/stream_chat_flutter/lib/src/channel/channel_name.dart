@@ -35,17 +35,32 @@ class ChannelName extends StatelessWidget {
         style: textStyle,
         overflow: textOverflow,
       ),
-      noDataBuilder: (context) => _generateName(
-        client.currentUser!,
-        channel.state!.members,
+      noDataBuilder: (context) => _NameGenerator(
+        currentUser: client.currentUser!,
+        members: channel.state!.members,
+        textStyle: textStyle,
+        textOverflow: textOverflow,
       ),
     );
   }
+}
 
-  Widget _generateName(
-    User currentUser,
-    List<Member> members,
-  ) {
+class _NameGenerator extends StatelessWidget {
+  const _NameGenerator({
+    Key? key,
+    required this.currentUser,
+    required this.members,
+    this.textStyle,
+    this.textOverflow,
+  }) : super(key: key);
+
+  final User currentUser;
+  final List<Member> members;
+  final TextStyle? textStyle;
+  final TextOverflow? textOverflow;
+
+  @override
+  Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         var channelName = context.translations.noTitleText;

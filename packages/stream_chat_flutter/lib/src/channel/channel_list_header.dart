@@ -95,6 +95,9 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   final Color? backgroundColor;
 
   @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
   Widget build(BuildContext context) {
     final _client = client ?? StreamChat.of(context).client;
     final user = _client.state.currentUser;
@@ -192,11 +195,11 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
                     }
                     switch (status) {
                       case ConnectionStatus.connected:
-                        return _buildConnectedTitleState(context);
+                        return const _ConnectedTitleState();
                       case ConnectionStatus.connecting:
-                        return _buildConnectingTitleState(context);
+                        return const _ConnectingTitleState();
                       case ConnectionStatus.disconnected:
-                        return _buildDisconnectedTitleState(context, _client);
+                        return _DisconnectedTitleState(client: _client);
                       default:
                         return const Offstage();
                     }
@@ -210,8 +213,13 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
       },
     );
   }
+}
 
-  Widget _buildConnectedTitleState(BuildContext context) {
+class _ConnectedTitleState extends StatelessWidget {
+  const _ConnectedTitleState({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
     return Text(
       context.translations.streamChatLabel,
@@ -220,32 +228,46 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
+}
 
-  Widget _buildConnectingTitleState(BuildContext context) => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(
-            height: 16,
-            width: 16,
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            context.translations.searchingForNetworkText,
-            style: ChannelListHeaderTheme.of(context).titleStyle?.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ],
-      );
+class _ConnectingTitleState extends StatelessWidget {
+  const _ConnectingTitleState({Key? key}) : super(key: key);
 
-  Widget _buildDisconnectedTitleState(
-    BuildContext context,
-    StreamChatClient client,
-  ) {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(
+          height: 16,
+          width: 16,
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          context.translations.searchingForNetworkText,
+          style: ChannelListHeaderTheme.of(context).titleStyle?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DisconnectedTitleState extends StatelessWidget {
+  const _DisconnectedTitleState({
+    Key? key,
+    required this.client,
+  }) : super(key: key);
+
+  final StreamChatClient client;
+
+  @override
+  Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
     final channelListHeaderTheme = ChannelListHeaderTheme.of(context);
     return Row(
@@ -274,7 +296,4 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
       ],
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
