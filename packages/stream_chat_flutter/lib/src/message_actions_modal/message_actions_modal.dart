@@ -397,7 +397,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     );
   }
 
-  void _showFlagDialog() async {
+  Future<void> _showFlagDialog() async {
     final client = StreamChat.of(context).client;
 
     final streamChatThemeData = StreamChatTheme.of(context);
@@ -447,7 +447,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     }
   }
 
-  void _togglePin() async {
+  Future<void> _togglePin() async {
     final channel = StreamChannel.of(context).channel;
 
     Navigator.of(context).pop();
@@ -463,7 +463,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   }
 
   /// Shows a "delete message" bottom sheet on mobile platforms.
-  void _showDeleteBottomSheet() async {
+  Future<void> _showDeleteBottomSheet() async {
     setState(() => _showActions = false);
     final answer = await showConfirmationBottomSheet(
       context,

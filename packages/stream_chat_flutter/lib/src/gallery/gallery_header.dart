@@ -133,7 +133,7 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   final Size preferredSize;
 
-  void _showMessageActionModalBottomSheet(BuildContext context) async {
+  Future<void> _showMessageActionModalBottomSheet(BuildContext context) async {
     final channel = StreamChannel.of(context).channel;
     final galleryHeaderThemeData =
         StreamChatTheme.of(context).galleryHeaderTheme;

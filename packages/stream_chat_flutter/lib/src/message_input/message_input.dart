@@ -1138,7 +1138,7 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  void _addAssetAttachment(AssetEntity medium) async {
+  Future<void> _addAssetAttachment(AssetEntity medium) async {
     final mediaFile = await medium.originFile.timeout(
       const Duration(seconds: 5),
       onTimeout: () => medium.originFile,
@@ -1398,7 +1398,7 @@ class MessageInputState extends State<MessageInput> {
   /// If [camera] is true then the camera will open
   ///
   /// Used only for mobile devices.
-  void pickFile(
+  Future<void> pickFile(
     DefaultAttachmentTypes fileType, {
     bool camera = false,
   }) async {
