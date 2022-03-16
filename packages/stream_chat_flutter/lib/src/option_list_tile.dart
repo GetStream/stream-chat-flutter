@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// {@template optionListTile}
 /// List tile for [ChannelBottomSheet]
+/// {@endtemplate}
 class OptionListTile extends StatelessWidget {
-  /// Constructor for creating [OptionListTile]
+  /// {@macro optionListTile}
   const OptionListTile({
     Key? key,
     this.title,
@@ -25,7 +27,7 @@ class OptionListTile extends StatelessWidget {
   /// Trailing widget (end)
   final Widget? trailing;
 
-  /// Callback when tile is tapped
+  /// The action to perform when the tile is tapped
   final VoidCallback? onTap;
 
   /// Title color

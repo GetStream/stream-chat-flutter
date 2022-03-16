@@ -3,9 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Widget to make a swipeable tile
+/// {@template swipeable}
+/// A swipeable tile in a list. Swiping on the tile will reveal actions that
+/// can be taken.
+/// {@endtemplate}
 class Swipeable extends StatefulWidget {
-  /// Constructor for creating a [Swipeable] widget
+  /// {@macro swipeable}
   const Swipeable({
     Key? key,
     required this.child,
@@ -22,13 +25,13 @@ class Swipeable extends StatefulWidget {
   /// Background icon after swipe
   final Widget backgroundIcon;
 
-  /// Callback when swipe starts
+  /// The action to perform when the swipe starts
   final VoidCallback? onSwipeStart;
 
-  /// Callback when swipe is cancelled
+  /// The action to perform when the swipe is cancelled
   final VoidCallback? onSwipeCancel;
 
-  /// Callback when swipe ends
+  /// The action to perform when the swipe ends
   final VoidCallback? onSwipeEnd;
 
   /// Threshold for swipe

@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template pickerWidget}
 /// Allows user to select files to upload to a chat.
 ///
 /// Should only be used on mobile - breaks on desktop & web due to the
 /// permissions plugin not being supported.
+/// {@endtemplate}
 class PickerWidget extends StatefulWidget {
-  /// Builds a [PickerWidget].
+  /// {@macro pickerWidget}
   const PickerWidget({
     Key? key,
     required this.filePickerIndex,
@@ -30,10 +32,10 @@ class PickerWidget extends StatefulWidget {
   /// The selected media to upload.
   final List<String> selectedMedias;
 
-  /// The callback to perform when adding more files.
+  /// The action to perform when adding more files.
   final void Function(DefaultAttachmentTypes) onAddMoreFilesClick;
 
-  /// The callback to perform when a media is selected.
+  /// The action to perform when a media is selected.
   final void Function(AssetEntity) onMediaSelected;
 
   /// The theme to use for this widget.

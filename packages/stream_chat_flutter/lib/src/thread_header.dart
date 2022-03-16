@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template threadHeader}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header_paint.png)
 ///
-/// It shows the current thread information.
+/// Shows information about the current message thread.
 ///
 /// ```dart
 /// class ThreadPage extends StatelessWidget {
@@ -43,21 +44,22 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// Usually you would use this widget as an [AppBar] inside a [Scaffold].
 /// However you can also use it as a normal widget.
 ///
-/// Make sure to have a [StreamChannel] ancestor in order to provide the
+/// A [StreamChannel] ancestor is required in order to provide the
 /// information about the channel.
+///
 /// Every part of the widget uses a [StreamBuilder] to render the channel
 /// information as soon as it updates.
 ///
 /// By default the widget shows a backButton that calls [Navigator.pop].
-/// You can disable this button using the [showBackButton] property of just
-/// override the behaviour
-/// with [onBackPressed].
+/// You can disable this button using the [showBackButton] property.
+/// Alternatively, you can override the behavior with [onBackPressed].
 ///
-/// The widget components render the ui based on the first ancestor of type
-/// [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
-/// Modify it to change the widget appearance.
+/// The UI is rendered based on the first ancestor of type [StreamChatTheme]
+/// and the [ChannelTheme.channelHeaderTheme] property. Modify it to change
+/// the widget's appearance.
+/// {@endtemplate}
 class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
-  /// Instantiate a new ThreadHeader
+  /// {@macro threadHeader}
   const ThreadHeader({
     Key? key,
     required this.parent,
@@ -73,14 +75,17 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
-  /// True if this header shows the leading back button
+  /// Whether to show the leading back button.
+  ///
+  /// Defaults to `true`.
   final bool showBackButton;
 
-  /// Callback to call when pressing the back button.
+  /// The action to perform when pressing the back button.
+  ///
   /// By default it calls [Navigator.pop]
   final VoidCallback? onBackPressed;
 
-  /// Callback to call when the title is tapped.
+  /// The action to perform when the title is tapped.
   final VoidCallback? onTitleTap;
 
   /// The message parent of this thread
@@ -95,11 +100,12 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Leading widget
   final Widget? leading;
 
-  /// AppBar actions
+  /// {@macro flutter.material.appbar.actions}
   final List<Widget>? actions;
 
-  /// If true the typing indicator will be rendered
-  /// if a user is typing in this thread
+  /// Whether to show the typing indicator if users are currently typing.
+  ///
+  /// Defaults to `true`.
   final bool showTypingIndicator;
 
   /// The background color of this [ThreadHeader].
@@ -138,9 +144,9 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
       leading: leading ??
           (showBackButton
               ? StreamBackButton(
-                  cid: StreamChannel.of(context).channel.cid,
+                  channelId: StreamChannel.of(context).channel.cid,
                   onPressed: onBackPressed,
-                  showUnreads: true,
+                  showUnreadCount: true,
                 )
               : const SizedBox()),
       backgroundColor: backgroundColor ?? channelHeaderTheme.color,

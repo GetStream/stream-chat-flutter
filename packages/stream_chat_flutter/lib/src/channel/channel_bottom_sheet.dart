@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/channel/channel_info.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template channelBottomSheet}
@@ -10,7 +10,7 @@ class ChannelBottomSheet extends StatefulWidget {
   /// {@macro channelBottomSheet}
   const ChannelBottomSheet({Key? key, this.onViewInfoTap}) : super(key: key);
 
-  /// The action to perform when 'View Info' is tapped
+  /// The action to perform when 'View Info' is tapped or clicked.
   final VoidCallback? onViewInfoTap;
 
   @override

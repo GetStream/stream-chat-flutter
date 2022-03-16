@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
-/// Widget to display deleted message
+/// {@template deletedMessage}
+/// Displays that a message was deleted at this position in the message list.
+/// {@endtemplate}
 class DeletedMessage extends StatelessWidget {
-  /// Constructor to create [DeletedMessage]
+  /// {@macro deletedMessage}
   const DeletedMessage({
     Key? key,
     required this.messageTheme,
@@ -24,7 +26,7 @@ class DeletedMessage extends StatelessWidget {
   /// The shape of the message text
   final ShapeBorder? shape;
 
-  /// The borderside of the message text
+  /// The [BorderSide] of the message text
   final BorderSide? borderSide;
 
   /// If true the widget will be mirrored

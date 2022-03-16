@@ -14,7 +14,6 @@ import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';
 import 'package:stream_chat_flutter/src/bottom_sheets/attachment_modal_sheet.dart';
 import 'package:stream_chat_flutter/src/bottom_sheets/error_alert_sheet.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
 import 'package:stream_chat_flutter/src/message_input/animated_send_button.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
@@ -29,60 +28,12 @@ import 'package:stream_chat_flutter/src/message_input/user_mentions_overlay.dart
 import 'package:stream_chat_flutter/src/overlays/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/multi_overlay.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_compress/video_compress.dart';
 
 export 'package:video_compress/video_compress.dart' show VideoQuality;
-
-/// A callback that can be passed to [MessageInput.onError].
-///
-/// This callback should not throw.
-///
-/// It exists merely for error reporting, and should not be used otherwise.
-typedef ErrorListener = void Function(
-  Object error,
-  StackTrace? stackTrace,
-);
-
-/// A callback that can be passed to [MessageInput.onAttachmentLimitExceed].
-///
-/// This callback should not throw.
-///
-/// It exists merely for showing custom error, and should not be used otherwise.
-typedef AttachmentLimitExceedListener = void Function(
-  int limit,
-  String error,
-);
-
-/// Builder for attachment thumbnails
-typedef AttachmentThumbnailBuilder = Widget Function(
-  BuildContext,
-  Attachment,
-);
-
-/// Builder function for building a mention tile.
-typedef MentionTileBuilder = Widget Function(
-  BuildContext context,
-  Member member,
-);
-
-/// Builder function for building a user mention tile.
-///
-/// Use [UserMentionTile] for the default implementation.
-typedef UserMentionTileBuilder = Widget Function(
-  BuildContext context,
-  User user,
-);
-
-/// Widget builder for action button.
-///
-/// [defaultActionButton] is the default [IconButton] configuration,
-/// use [defaultActionButton.copyWith] to easily customize it.
-typedef ActionButtonBuilder = Widget Function(
-  BuildContext context,
-  Widget defaultActionButton,
-);
 
 /// Location for actions on the [MessageInput]
 enum ActionsLocation {
@@ -294,24 +245,24 @@ class MessageInput extends StatefulWidget {
   /// Send button widget in an active state
   final Widget? activeSendButton;
 
-  /// Customize the tile for the mentions overlay.
+  /// {@macro mentionTileBuilder}
   final MentionTileBuilder? mentionsTileBuilder;
 
-  /// Customize the tile for the mentions overlay.
+  /// {@macro userMentionTileBuilder}
   final UserMentionTileBuilder? userMentionsTileBuilder;
 
-  /// A callback for error reporting
+  /// {@macro errorListener}
   final ErrorListener? onError;
 
   /// A limit for the no. of attachments that can be sent with a single message.
   final int attachmentLimit;
 
-  /// A callback for when the [attachmentLimit] is exceeded.
+  /// {@macro attachmentLimitExceededListener}
   ///
   /// This will override the default error alert behaviour.
   final AttachmentLimitExceedListener? onAttachmentLimitExceed;
 
-  /// Builder for customizing the attachment button.
+  /// {@macro actionButtonBuilder}
   ///
   /// The builder contains the default [IconButton] that can be customized by
   /// calling `.copyWith`.

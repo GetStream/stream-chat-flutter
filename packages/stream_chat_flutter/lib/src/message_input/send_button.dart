@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template sendButton}
 /// The button for sending a message.
 ///
 /// Used in [AnimatedSendButton]. Should not be directly used anywhere else.
+/// {@endtemplate}
 class SendButton extends StatelessWidget {
-  /// Builds a [SendButton].
+  /// {@macro sendButton}
   const SendButton({
     Key? key,
     required this.assetName,

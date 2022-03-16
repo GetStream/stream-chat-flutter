@@ -18,9 +18,11 @@ extension on Duration {
   }
 }
 
+/// {@template mediaListView}
 /// Constructs a list of media
+/// {@endtemplate}
 class MediaListView extends StatefulWidget {
-  /// Constructor for creating a [MediaListView] widget
+  /// {@macro mediaListView}
   const MediaListView({
     Key? key,
     this.selectedIds = const [],
@@ -30,7 +32,7 @@ class MediaListView extends StatefulWidget {
   /// Stores the media selected
   final List<String> selectedIds;
 
-  /// Callback for on media selected
+  /// The action to perform when a media is selected
   final void Function(AssetEntity media)? onSelect;
 
   @override
@@ -172,9 +174,11 @@ class _MediaListViewState extends State<MediaListView> {
   }
 }
 
-/// ImageProvider implementation
+/// {@template mediaThumbnailProvider}
+/// Builds a thumbnail using [ImageProvider].
+/// {@endtemplate}
 class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
-  /// Constructor for creating a [MediaThumbnailProvider]
+  /// {@macro mediaThumbnailProvider}
   const MediaThumbnailProvider({
     required this.media,
   });
@@ -186,14 +190,15 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   ImageStreamCompleter load(
     MediaThumbnailProvider key,
     DecoderCallback decode,
-  ) =>
-      MultiFrameImageStreamCompleter(
-        codec: _loadAsync(key, decode),
-        scale: 1,
-        informationCollector: () sync* {
-          yield ErrorDescription('Id: ${media.id}');
-        },
-      );
+  ) {
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key, decode),
+      scale: 1,
+      informationCollector: () sync* {
+        yield ErrorDescription('Id: ${media.id}');
+      },
+    );
+  }
 
   Future<ui.Codec> _loadAsync(
     MediaThumbnailProvider key,

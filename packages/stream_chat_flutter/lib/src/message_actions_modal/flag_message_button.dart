@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template flagMessageButton}
 /// Allows a user to flag a message.
 ///
 /// Used by [MessageActionsModal]. Should not be used by itself.
+/// {@endtemplate}
 class FlagMessageButton extends StatelessWidget {
-  /// Builds a [FlagMessageButton].
+  /// {@macro flagMessageButton}
   const FlagMessageButton({
     Key? key,
     required this.onTap,

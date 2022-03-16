@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 
+/// {@template emojiOverlay}
 /// Overlay for displaying emoji that can be used
+/// {@endtemplate}
 class EmojiOverlay extends StatelessWidget {
-  /// Constructor for creating a [EmojiOverlay]
+  /// {@macro emojiOverlay}
   const EmojiOverlay({
     required this.query,
     required this.onEmojiResult,
@@ -20,7 +22,7 @@ class EmojiOverlay extends StatelessWidget {
   /// Query for searching emoji
   final String query;
 
-  /// Callback called when an emoji is selected
+  /// The action to perform when an emoji is selected
   final ValueChanged<Emoji> onEmojiResult;
 
   @override

@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart'
     show IterableExtension, ListEquality;
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template channelPreview}
@@ -34,10 +34,10 @@ class ChannelPreview extends StatelessWidget {
     this.trailing,
   }) : super(key: key);
 
-  /// The action to perform when tapping this widget
+  /// The action to perform when this widget is tapped or clicked.
   final void Function(Channel)? onTap;
 
-  /// The action to perform when long pressing this widget
+  /// The action to perform when this widget is long pressed.
   final void Function(Channel)? onLongPress;
 
   /// The [Channel] being previewed.

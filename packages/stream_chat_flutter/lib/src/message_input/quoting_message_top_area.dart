@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template quotingMessageTopArea}
 /// The area that appears above [MessageInput] when the user is quoting a
 /// message.
 ///
 /// Should only be used on mobile platforms.
+/// {@endtemplate}
 class QuotingMessageTopArea extends StatelessWidget {
-  /// Builds a [QuotingMessageTopArea].
+  /// {@macro quotingMessageTopArea}
   const QuotingMessageTopArea({
     Key? key,
     required this.hasQuotedMessage,

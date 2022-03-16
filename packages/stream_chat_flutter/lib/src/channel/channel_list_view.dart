@@ -3,20 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/channel/channel_bottom_sheet.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-/// Callback called when tapping on a channel
-typedef ChannelTapCallback = void Function(Channel, Widget?);
-
-/// Callback called when tapping on a channel
-typedef ChannelInfoCallback = void Function(Channel);
-
-/// Builder used to create a custom [ChannelPreview] from a [Channel]
-typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
-
-/// Callback for when 'View Info' is tapped
-typedef ViewInfoCallback = void Function(Channel);
 
 /// {@template channelListView}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_list_view.png)
@@ -162,7 +150,7 @@ class ChannelListView extends StatefulWidget {
   /// The widget used when opening a channel
   final Widget? channelWidget;
 
-  /// Builder used to create a custom channel preview
+  /// {@macro channelPreviewBuilder}
   final ChannelPreviewBuilder? channelPreviewBuilder;
 
   /// Builder used to create a custom item separator
@@ -189,7 +177,7 @@ class ChannelListView extends StatefulWidget {
   /// FIXME: What the heck does this mean???
   final List<Channel> selectedChannels;
 
-  /// The action to perform when 'View Info' is tapped
+  /// {@macro viewInfoCallback}
   final ViewInfoCallback? onViewInfoTap;
 
   /// The builder that will be used in case of error
@@ -204,10 +192,12 @@ class ChannelListView extends StatefulWidget {
   /// The builder used when the channel list is empty.
   final WidgetBuilder? emptyBuilder;
 
-  /// The action to perform when the 'more details' slidable option is pressed
+  /// This function is executed when the 'more details' slidable option is
+  /// tapped or clicked.
   final ChannelInfoCallback? onMoreDetailsPressed;
 
-  /// The action to perform when the 'delete' slidable option is pressed
+  /// This function is executed when the 'delete' slidable option is tapped
+  /// or clicked.
   final ChannelInfoCallback? onDeletePressed;
 
   /// List of actions that can be selected for slidable channel widgets

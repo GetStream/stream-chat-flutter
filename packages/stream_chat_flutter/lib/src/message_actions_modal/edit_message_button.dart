@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template editMessageButton}
 /// Allows a user to edit a message.
 ///
 /// Used by [MessageActionsModal]. Should not be used by itself.
+/// {@endtemplate}
 class EditMessageButton extends StatelessWidget {
-  /// Builds an [EditMessageButton].
+  /// {@macro editMessageButton}
   const EditMessageButton({
     Key? key,
     required this.onTap,

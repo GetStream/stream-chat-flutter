@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template replyButton}
 /// Allows a user to reply to a message.
 ///
 /// Used by [MessageActionsModal]. Should not be used by itself.
+/// {@endtemplate}
 class ReplyButton extends StatelessWidget {
-  /// Builds a [ReplyButton].
+  /// {@macro replyButton}
   const ReplyButton({
     Key? key,
     required this.onTap,

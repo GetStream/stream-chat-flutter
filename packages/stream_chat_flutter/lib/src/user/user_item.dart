@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template userItem}
+/// Shows a preview of the current [User].
 ///
-/// It shows the current [User] preview.
-///
-/// The widget uses a [StreamBuilder] to render the user information
+/// This widget uses a [StreamBuilder] to render the user information
 /// image as soon as it updates.
 ///
-/// Usually you don't use this widget as it's the default user preview used
-/// by [UserListView].
+/// It is not recommended to use this widget as it's the default user preview
+/// used by [UserListView].
 ///
 /// The widget renders the ui based on the first ancestor of type
 /// [StreamChatTheme].
-/// Modify it to change the widget appearance.
+/// Modify it to change the widget's appearance.
+/// {@endtemplate}
 class UserItem extends StatelessWidget {
-  /// Instantiate a new UserItem
+  /// {@macro userItem}
   const UserItem({
     Key? key,
     required this.user,
@@ -26,16 +27,16 @@ class UserItem extends StatelessWidget {
     this.showLastOnline = true,
   }) : super(key: key);
 
-  /// Function called when tapping this widget
+  /// Function called when tapping or clicking on this widget
   final void Function(User)? onTap;
 
   /// Function called when long pressing this widget
   final void Function(User)? onLongPress;
 
-  /// User displayed
+  /// The user to display
   final User user;
 
-  /// The function called when the image is tapped
+  /// The function called when the image is tapped or clicked
   final void Function(User)? onImageTap;
 
   /// If true the [UserItem] will show a trailing checkmark

@@ -67,7 +67,7 @@ class ChannelAvatar extends StatelessWidget {
   /// The sizing constraints of the image
   final BoxConstraints? constraints;
 
-  /// The action to perform when the image is tapped
+  /// The action to perform when the image is tapped or clicked
   final VoidCallback? onTap;
 
   /// Whether the image is currently selected or not

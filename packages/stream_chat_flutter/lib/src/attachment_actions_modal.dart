@@ -2,14 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-/// Callback to download an attachment asset
-typedef AttachmentDownloader = Future<String> Function(
-  Attachment attachment, {
-  ProgressCallback? progressCallback,
-});
 
 /// Widget that shows the options in the gallery view
 class AttachmentActionsModal extends StatelessWidget {
@@ -394,9 +388,11 @@ class _DownloadProgress {
   int get toPercentage => (received * 100) ~/ total;
 }
 
-/// Class for custom attachment action
+/// {@template attachmentAction}
+/// Defines a custom attachment action.
+/// {@endtemplate}
 class AttachmentAction {
-  /// Constructor for custom attachment action
+  /// {@macro attachmentAction}
   AttachmentAction({
     required this.actionTitle,
     required this.icon,

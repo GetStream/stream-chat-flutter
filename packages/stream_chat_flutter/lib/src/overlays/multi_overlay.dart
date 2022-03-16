@@ -2,14 +2,13 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
-/// Widget that renders a single overlay widget from a list of [overlayOptions]
-/// It shows the first one that is visible
+/// {@template multiOverlay}
+/// Renders a single overlay widget from a list of [overlayOptions].
+///
+/// It shows the first one that is visible.
+/// {@endtemplate}
 class MultiOverlay extends StatelessWidget {
-  /// Constructs a new MultiOverlay widget
-  /// [overlayOptions] - the list of overlay options
-  /// [overlayAnchor] - the anchor relative to the overlay
-  /// [childAnchor] - the anchor relative to the child
-  /// [child] - the child widget
+  /// {@macro multiOverlay}
   const MultiOverlay({
     Key? key,
     required this.overlayOptions,
@@ -45,19 +44,19 @@ class MultiOverlay extends StatelessWidget {
   }
 }
 
-/// Class that contains the parameters for building an overlay entry
+/// {@template overlayOptions}
+/// Defines the parameters for building an overlay entry.
+/// {@endtemplate}
 class OverlayOptions {
-  /// Constructs a new overlay options object
-  /// [visible] - the visibility of the overlay
-  /// [widget] - the widget to be displayed
+  /// {@macro overlayOptions}
   OverlayOptions({
     required this.visible,
     required this.widget,
   });
 
-  /// the visibility of the overlay
+  /// The visibility of the overlay
   final bool visible;
 
-  /// the widget to be displayed
+  /// The widget to be displayed
   final Widget widget;
 }

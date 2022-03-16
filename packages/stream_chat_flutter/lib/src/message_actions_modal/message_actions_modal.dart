@@ -5,13 +5,15 @@ import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_buil
 import 'package:stream_chat_flutter/src/bottom_sheets/edit_message_sheet.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
 import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/mam_widgets.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template messageActionsModal}
 /// Constructs a modal with actions for a message
+/// {@endtemplate}
 class MessageActionsModal extends StatefulWidget {
-  /// Constructor for creating a [MessageActionsModal] widget
+  /// {@macro messageActionsModal}
   const MessageActionsModal({
     Key? key,
     required this.message,
@@ -38,12 +40,12 @@ class MessageActionsModal extends StatefulWidget {
   final Widget messageWidget;
 
   /// Builder for edit message
-  final Widget Function(BuildContext, Message)? editMessageInputBuilder;
+  final EditMessageInputBuilder? editMessageInputBuilder;
 
-  /// Callback for when thread reply is tapped
+  /// The action to perform when "thread reply" is tapped
   final OnMessageTap? onThreadReplyTap;
 
-  /// Callback for when reply is tapped
+  /// The action to perform when "reply" is tapped
   final OnMessageTap? onReplyTap;
 
   /// Message in focus for actions

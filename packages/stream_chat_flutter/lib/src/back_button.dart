@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Back button implementation
+/// {@template streamBackButton}
+/// A custom back button implementation
+/// {@endtemplate}
 // ignore: prefer-match-file-name
 class StreamBackButton extends StatelessWidget {
-  /// Constructor for creating back button
+  /// {@macro streamBackButton}
   const StreamBackButton({
     Key? key,
     this.onPressed,
-    this.showUnreads = false,
-    this.cid,
+    this.showUnreadCount = false,
+    this.channelId,
   }) : super(key: key);
 
   /// Callback for when button is pressed
   final VoidCallback? onPressed;
 
   /// Show unread count
-  final bool showUnreads;
+  final bool showUnreadCount;
 
-  /// Channel cid used to retrieve unread count
-  final String? cid;
+  /// Channel ID used to retrieve unread count
+  final String? channelId;
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +49,12 @@ class StreamBackButton extends StatelessWidget {
             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
           ),
         ),
-        if (showUnreads)
+        if (showUnreadCount)
           Positioned(
             top: 7,
             right: 7,
             child: UnreadIndicator(
-              cid: cid,
+              cid: channelId,
             ),
           ),
       ],

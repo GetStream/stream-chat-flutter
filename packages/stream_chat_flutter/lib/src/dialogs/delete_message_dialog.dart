@@ -1,8 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart' as fui;
 import 'package:flutter/material.dart';
 import 'package:macos_ui/macos_ui.dart' as mui;
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/platform_widgets/platform_dialog.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A platform-aware dialog that asks the user to confirm that they want to

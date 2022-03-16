@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Used to show the sending status of the message
+/// {@template sendingIndicator}
+/// Shows the sending status of a message.
+/// {@endtemplate}
 class SendingIndicator extends StatelessWidget {
-  /// Constructor for creating a [SendingIndicator] widget
+  /// {@macro sendingIndicator}
   const SendingIndicator({
     Key? key,
     required this.message,

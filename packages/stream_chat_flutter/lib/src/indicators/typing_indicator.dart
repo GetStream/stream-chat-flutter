@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-/// Widget to show the current list of typing users
+/// {@template typingIndicator}
+/// Shows the list of user who are actively typing.
+/// {@endtemplate}
 class TypingIndicator extends StatelessWidget {
-  /// Instantiate a new TypingIndicator
+  /// {@macro typingIndicator}
   const TypingIndicator({
     Key? key,
     this.channel,
@@ -22,7 +24,7 @@ class TypingIndicator extends StatelessWidget {
   /// List of typing users
   final Channel? channel;
 
-  /// Widget built when no typings is happening
+  /// The widget to build when no typing is happening
   final Widget? alternativeWidget;
 
   /// The padding of this widget

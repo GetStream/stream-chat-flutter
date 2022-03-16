@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template reactionBubble}
-/// Creates reaction bubble widget for displaying over messages
+/// Creates a reaction bubble that displays over messages.
 /// {@endtemplate}
 class ReactionBubble extends StatelessWidget {
   /// {@macro reactionBubble}

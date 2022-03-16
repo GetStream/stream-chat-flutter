@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
-/// It shows a date divider depending on the date difference
+/// {@template dateDivider}
+/// Shows a date divider depending on the date difference
+/// FIXME: write better description!
+/// {@endtemplate}
 class DateDivider extends StatelessWidget {
-  /// Constructor for creating a [DateDivider]
+  /// {@macro dateDivider}
   const DateDivider({
     Key? key,
     required this.dateTime,

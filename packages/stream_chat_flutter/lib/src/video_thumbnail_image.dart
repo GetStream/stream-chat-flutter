@@ -6,9 +6,11 @@ import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-/// Widget for creating video thumbnail image
+/// {@template videoThumbnailImage}
+/// Displays a video thumbnail for video attachments in a message.
+/// {@endtemplate}
 class VideoThumbnailImage extends StatefulWidget {
-  /// Constructor for creating [VideoThumbnailImage]
+  /// {@macro videoThumbnailImage}
   const VideoThumbnailImage({
     Key? key,
     required this.video,
@@ -29,16 +31,17 @@ class VideoThumbnailImage extends StatefulWidget {
   /// Height of widget
   final double? height;
 
-  /// Fit of iamge
+  /// Fit of image
   final BoxFit? fit;
 
   /// Image format
   final ImageFormat format;
 
-  /// Builds widget on error
+  /// A builder for building a custom error widget when the thumbnail
+  /// creation fails
   final Widget Function(BuildContext, Object?)? errorBuilder;
 
-  /// Builds placeholder
+  /// A builder for building custom thumbnail loading UI
   final WidgetBuilder? placeholderBuilder;
 
   @override

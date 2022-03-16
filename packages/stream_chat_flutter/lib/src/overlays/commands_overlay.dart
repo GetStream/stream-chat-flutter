@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template commandsOverlay}
 /// Overlay for displaying commands that can be used
+/// {@endtemplate}
 class CommandsOverlay extends StatelessWidget {
-  /// Constructor for creating a [CommandsOverlay]
+  /// {@macro commandsOverlay}
   const CommandsOverlay({
     required this.text,
     required this.onCommandResult,

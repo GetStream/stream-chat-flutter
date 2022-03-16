@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+/// {@template streamSvgIcon}
 /// Icon set of stream chat
+/// {@endtemplate}
 class StreamSvgIcon extends StatelessWidget {
-  /// Constructor for creating a [StreamSvgIcon]
+  /// {@macro streamSvgIcon}
   const StreamSvgIcon({
     Key? key,
     this.assetName,

@@ -5,50 +5,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/swipeable.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-
-/// Widget builder for message
-/// [defaultMessageWidget] is the default [MessageWidget] configuration
-/// Use [defaultMessageWidget.copyWith] to easily customize it
-typedef MessageBuilder = Widget Function(
-  BuildContext,
-  MessageDetails,
-  List<Message>,
-  MessageWidget defaultMessageWidget,
-);
-
-/// Widget builder for parent message
-/// [defaultMessageWidget] is the default [MessageWidget] configuration
-/// Use [defaultMessageWidget.copyWith] to easily customize it
-typedef ParentMessageBuilder = Widget Function(
-  BuildContext,
-  Message?,
-  MessageWidget defaultMessageWidget,
-);
-
-/// Widget builder for system message
-typedef SystemMessageBuilder = Widget Function(
-  BuildContext,
-  Message,
-);
-
-/// Widget builder for thread
-typedef ThreadBuilder = Widget Function(BuildContext context, Message? parent);
-
-/// Callback for thread taps
-typedef ThreadTapCallback = void Function(Message, Widget?);
-
-/// Callback on message swiped
-typedef OnMessageSwiped = void Function(Message);
-
-/// Callback on message tapped
-typedef OnMessageTap = void Function(Message);
-
-/// Callback on reply tapped
-typedef ReplyTapCallback = void Function(Message);
 
 /// Spacing Types (These are properties of a message to help inform the decision
 /// of how much space / which widget to build after it)
@@ -69,26 +29,6 @@ enum SpacingType {
   /// only rule in the list provided)
   defaultSpacing,
 }
-
-/// Builder for building certain spacing after widgets.
-/// This spacing can be in form of any widgets you like.
-/// A List of [SpacingType] is provided to help inform the decision of
-/// what to build after the message.
-///
-/// As an example:
-///               MessageListView(
-///                 spacingWidgetBuilder: (context, list) {
-///                   if(list.contains(SpacingType.defaultSpacing)) {
-///                     return SizedBox(height: 2.0,);
-///                   } else {
-///                     return SizedBox(height: 8.0,);
-///                   }
-///                 },
-///               ),
-typedef SpacingWidgetBuilder = Widget Function(
-  BuildContext context,
-  List<SpacingType> spacingTypes,
-);
 
 /// Class for message details
 // ignore: prefer-match-file-name
@@ -211,7 +151,7 @@ class MessageListView extends StatefulWidget {
   /// dismiss the keyboard automatically.
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
-  /// Function used to build a custom message widget
+  /// {@macro messageBuilder}
   final MessageBuilder? messageBuilder;
 
   /// Whether the view scrolls in the reading direction.
@@ -224,16 +164,17 @@ class MessageListView extends StatefulWidget {
   /// Limit used during pagination
   final int paginationLimit;
 
-  /// Function used to build a custom system message widget
+  /// {@macro systemMessageBuilder}
   final SystemMessageBuilder? systemMessageBuilder;
 
-  /// Function used to build a custom parent message widget
+  /// {@macro parentMessageBuilder}
   final ParentMessageBuilder? parentMessageBuilder;
 
-  /// Function used to build a custom thread widget
+  /// {@macro threadBuilder}
   final ThreadBuilder? threadBuilder;
 
-  /// Function called when tapping on a thread
+  /// {@macro threadTapCallback}
+  ///
   /// By default it calls [Navigator.push] using the widget
   /// built using [threadBuilder]
   final ThreadTapCallback? onThreadTap;
@@ -265,7 +206,7 @@ class MessageListView extends StatefulWidget {
   /// The ScrollPhysics used by the ListView
   final ScrollPhysics? scrollPhysics;
 
-  /// Called when message item gets swiped
+  /// {@macro onMessageSwiped}
   final OnMessageSwiped? onMessageSwiped;
 
   /// If true the list will highlight the initialMessage if there is any.
@@ -327,10 +268,7 @@ class MessageListView extends StatefulWidget {
   /// Builder used to build the loading indicator shown while paginating.
   final WidgetBuilder? paginationLoadingIndicatorBuilder;
 
-  /// This allows a user to customise the space after a message
-  /// A List of [SpacingType] is provided to provide more data about the
-  /// type of message (thread, difference in time between current and last
-  /// message, default spacing, etc)
+  /// {@macro spacingWidgetBuilder}
   final SpacingWidgetBuilder? spacingWidgetBuilder;
 
   @override

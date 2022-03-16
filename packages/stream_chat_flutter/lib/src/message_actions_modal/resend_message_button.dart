@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template resendMessageButton}
 /// Allows a user to resend a message that has failed to be sent.
 ///
 /// Used by [MessageActionsModal]. Should not be used by itself.
+/// {@endtemplate}
 class ResendMessageButton extends StatelessWidget {
-  /// Builds a [ResendMessageButton].
+  /// {@macro resendMessageButton}
   const ResendMessageButton({
     Key? key,
     required this.message,

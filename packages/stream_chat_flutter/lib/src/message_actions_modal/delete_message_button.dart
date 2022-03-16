@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template deleteMessageButton}
 /// A button that allows a user to delete the selected message.
 ///
-/// As of Feb 24, 2022, this button appears on all platforms. It really should
-/// only be shown on mobile platforms, with a different UI paradigm being
-/// preferred for desktop and web.
+/// Used by [MessageActionsModal]. Should not be used by itself.
+/// {@endtemplate}
 class DeleteMessageButton extends StatelessWidget {
-  /// Builds a [DeleteMessageButton].
+  /// {@macro deleteMessageButton}
   const DeleteMessageButton({
     Key? key,
     required this.isDeleteFailed,

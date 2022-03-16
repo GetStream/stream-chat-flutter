@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_widget/sending_indicator_wrapper.dart';
 import 'package:stream_chat_flutter/src/message_widget/thread_painter.dart';
 import 'package:stream_chat_flutter/src/message_widget/thread_participants.dart';
 import 'package:stream_chat_flutter/src/message_widget/username.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template bottomRow}

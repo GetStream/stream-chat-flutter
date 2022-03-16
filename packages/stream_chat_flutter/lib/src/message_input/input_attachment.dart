@@ -2,12 +2,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template inputAttachment}
 /// Represents one attachment that is being uploaded to a chat.
+/// {@endtemplate}
 class InputAttachment extends StatelessWidget {
-  /// Builds an [InputAttachment].
+  /// {@macro inputAttachment}
   const InputAttachment({
     Key? key,
     this.attachmentThumbnailBuilders,

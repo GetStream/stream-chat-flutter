@@ -6,7 +6,7 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
@@ -18,11 +18,6 @@ enum ReturnActionType {
   /// Go to reply message action
   reply,
 }
-
-/// {@template showMessageCallback}
-/// The action to perform when "show message" is tapped
-/// {@endtemplate}
-typedef ShowMessageCallback = void Function(Message message, Channel channel);
 
 /// A full screen image widget
 class FullScreenMediaMobile extends StatefulWidget {
@@ -54,9 +49,7 @@ class FullScreenMediaMobile extends StatefulWidget {
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
 
-  /// Widget builder for attachment actions modal
-  /// [defaultActionsModal] is the default [AttachmentActionsModal] config
-  /// Use [defaultActionsModal.copyWith] to easily customize it
+  /// {@macro attachmentActionsBuilder}
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   /// Auto-play videos when page is opened

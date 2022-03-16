@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template countdownButton}
 /// Shows the countdown to when the user can send another message.
+/// {@endtemplate}
 class CountdownButton extends StatelessWidget {
-  /// Builds a [CountdownButton].
+  /// {@macro countdownButton}
   const CountdownButton({
     Key? key,
     required this.count,

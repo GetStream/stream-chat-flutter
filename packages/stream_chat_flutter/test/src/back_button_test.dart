@@ -128,7 +128,7 @@ void main() {
               child: StreamChat(
                 client: client,
                 child: const StreamBackButton(
-                  showUnreads: true,
+                  showUnreadCount: true,
                 ),
               ),
             ),

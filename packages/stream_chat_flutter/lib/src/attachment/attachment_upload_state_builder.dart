@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/indicators/upload_progress_indicator.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-/// Widget to build in progress
-typedef InProgressBuilder = Widget Function(BuildContext, int, int);
-
-/// Widget to build on failure
-typedef FailedBuilder = Widget Function(BuildContext, String);
 
 /// {@template attachmentUploadStateBuilder}
 /// Widget to display attachment upload state
@@ -18,10 +12,10 @@ class AttachmentUploadStateBuilder extends StatelessWidget {
     Key? key,
     required this.message,
     required this.attachment,
-    this.failedBuilder,
-    this.successBuilder,
-    this.inProgressBuilder,
     this.preparingBuilder,
+    this.inProgressBuilder,
+    this.successBuilder,
+    this.failedBuilder,
   }) : super(key: key);
 
   /// The message that [attachment] is associated with
@@ -30,17 +24,17 @@ class AttachmentUploadStateBuilder extends StatelessWidget {
   /// The attachment currently being handled
   final Attachment attachment;
 
-  /// Widget to display when the [attachment] has failed to upload
-  final FailedBuilder? failedBuilder;
+  /// Widget to display when preparing to upload the [attachment]
+  final PreparingBuilder? preparingBuilder;
 
-  /// Widget to display when the [attachment] has been uploaded successfully
-  final WidgetBuilder? successBuilder;
-
-  /// Widget to display when in the [attachment] upload is in progress
+  /// {@macro inProgressBuilder}
   final InProgressBuilder? inProgressBuilder;
 
-  /// Widget to display when preparing to upload the [attachment]
-  final WidgetBuilder? preparingBuilder;
+  /// {@macro successBuilder}
+  final SuccessBuilder? successBuilder;
+
+  /// {@macro failedBuilder}
+  final FailedBuilder? failedBuilder;
 
   @override
   Widget build(BuildContext context) {

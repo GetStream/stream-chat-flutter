@@ -1,9 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template userAvatar}
-/// Widget that displays a user avatar
+/// Displays a user's avatar.
 /// {@endtemplate}
 class UserAvatar extends StatelessWidget {
   /// {@macro userAvatar}
@@ -40,11 +41,11 @@ class UserAvatar extends StatelessWidget {
   /// Sizing constraints of the online indicator
   final BoxConstraints? onlineIndicatorConstraints;
 
-  /// The action to perform when the avatar is tapped
-  final void Function(User)? onTap;
+  /// {@macro onUserAvatarTap}
+  final OnUserAvatarPress? onTap;
 
-  /// The action to perform when the avatar is long pressed
-  final void Function(User)? onLongPress;
+  /// {@macro onUserAvatarTap}
+  final OnUserAvatarPress? onLongPress;
 
   /// Flag for showing online status
   ///
@@ -64,8 +65,8 @@ class UserAvatar extends StatelessWidget {
   /// Defaults to `4`
   final double selectionThickness;
 
-  /// The widget that will be built when the user image is loading
-  final Widget Function(BuildContext, User)? placeholder;
+  /// {@macro placeholderUserImage}
+  final PlaceholderUserImage? placeholder;
 
   @override
   Widget build(BuildContext context) {

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
 import 'package:stream_chat_flutter/src/message_input/input_attachment.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template inputAttachments}
 /// Represents multiple [InputAttachment]s that are being uploaded to a chat.
+/// {@endtemplate}
 class InputAttachments extends StatefulWidget {
-  /// Builds an [InputAttachments].
+  /// {@macro inputAttachments}
   const InputAttachments({
     Key? key,
     required this.attachments,

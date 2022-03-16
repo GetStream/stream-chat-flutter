@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template copyMessageButton}
 /// Allows a user to copy the text of a message.
 ///
 /// Used by [MessageActionsModal]. Should not be used by itself.
+/// {@endtemplate}
 class CopyMessageButton extends StatelessWidget {
-  /// Builds a [CopyMessageButton].
+  /// {@macro copyMessageButton}
   const CopyMessageButton({
     Key? key,
     required this.onTap,

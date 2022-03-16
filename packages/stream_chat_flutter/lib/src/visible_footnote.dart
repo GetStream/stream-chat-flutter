@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Widget for displaying a footnote
+/// {@template visibleFootnote}
+/// Informs the user about a [MessageWidget]'s visibility to the current user.
+///
+/// Used in [GiphyAttachment].
+/// {@endtemplate}
 class VisibleFootnote extends StatelessWidget {
-  /// Constructor for creating a [VisibleFootnote]
+  /// {@macro visibleFootnote}
   const VisibleFootnote({Key? key}) : super(key: key);
 
   @override

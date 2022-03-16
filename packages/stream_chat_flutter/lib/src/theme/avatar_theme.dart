@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// {@template avatarThemeData}
 /// A style that overrides the default appearance of various avatar widgets.
+/// {@endtemplate}
 // ignore: prefer-match-file-name
 class AvatarThemeData with Diagnosticable {
-  /// Creates an [AvatarThemeData].
+  /// {@macro avatarThemeData}
   const AvatarThemeData({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,

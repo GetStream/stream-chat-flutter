@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-/// Widget builder for title
-typedef TitleBuilder = Widget Function(
-  BuildContext context,
-  ConnectionStatus status,
-  StreamChatClient client,
-);
 
 /// {@template channelListHeader}
 /// Shows the current [StreamChatClient] status.
@@ -64,11 +57,8 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Use this if you don't have a [StreamChatClient] in your widget tree.
   final StreamChatClient? client;
 
-  /// Custom title widget builder.
-  ///
-  /// Use this to build your own title widget based on the current
-  /// [ConnectionStatus].
-  final TitleBuilder? titleBuilder;
+  /// {@macro channelListHeaderTitleBuilder}
+  final ChannelListHeaderTitleBuilder? titleBuilder;
 
   /// The action to perform when pressing the user avatar button.
   ///

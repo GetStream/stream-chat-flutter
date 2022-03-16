@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
 /// Handles errors related to file upload errors on desktop platforms.
 void handleFileUploadError(

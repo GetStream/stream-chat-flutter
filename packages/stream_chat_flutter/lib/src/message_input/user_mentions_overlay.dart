@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user/user_mention_tile.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-/// Builder function for building a mention tile.
-///
-/// Use [UserMentionTile] for the default implementation.
-typedef MentionTileBuilder = Widget Function(
-  BuildContext context,
-  User user,
-);
+
 
 /// Overlay for displaying users that can be mentioned.
 class UserMentionsOverlay extends StatefulWidget {
@@ -55,8 +49,10 @@ class UserMentionsOverlay extends StatefulWidget {
   /// Defaults to false.
   final bool mentionAllAppUsers;
 
-  /// Customize the tile for the mentions overlay.
-  final MentionTileBuilder? mentionsTileBuilder;
+  /// {@macro mentionTileOverlayBuilder}
+  ///
+  /// Use [UserMentionTile] for the default implementation.
+  final MentionTileOverlayBuilder? mentionsTileBuilder;
 
   /// Callback called when a user is selected.
   final void Function(User user)? onMentionUserTap;

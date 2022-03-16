@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_desktop.dart'
-    hide ShowMessageCallback, ReturnActionType;
+    hide ReturnActionType;
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template giphyAttachment}
-/// Widget for showing a GIF attachment
+/// Shows a GIF attachment in a [MessageWidget].
 /// {@endtemplate}
 class GiphyAttachment extends AttachmentWidget {
   /// {@macro giphyAttachment}
@@ -31,12 +31,11 @@ class GiphyAttachment extends AttachmentWidget {
   /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
 
-  /// The function to execute when the attachment is returned to from other
-  /// screens
-  final ValueChanged<ReturnActionType>? onReturnAction;
+  /// {@macro onReturnAction}
+  final OnReturnAction? onReturnAction;
 
-  /// The action to perform when the attachment is tapped
-  final VoidCallback? onAttachmentTap;
+  /// {@macro onAttachmentTap}
+  final OnAttachmentTap? onAttachmentTap;
 
   @override
   Widget build(BuildContext context) {

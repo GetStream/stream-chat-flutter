@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// This widget is used for showing user tiles for mentions
+/// {@template userMentionTile}
+/// Shows user tiles for mentions.
+///
 /// Use [title], [subtitle], [leading], [trailing] for
 /// substituting widgets in respective positions
+/// {@endtemplate}
 class UserMentionTile extends StatelessWidget {
-  /// Constructor for creating a [UserMentionTile] widget
+  /// {@macro userMentionTile}
   const UserMentionTile(
     this.user, {
     Key? key,

@@ -1,6 +1,6 @@
 import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template desktopReactionPicker}
@@ -10,6 +10,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// spec.
 ///
 /// Used by the `_buildContextMenu()` function found in `message_widget.dart`.
+/// It is not recommended to use this widget directly.
 /// {@endtemplate}
 class DesktopReactionPicker extends StatefulWidget {
   /// {@macro desktopReactionPicker}

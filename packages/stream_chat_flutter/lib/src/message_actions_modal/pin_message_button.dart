@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template pinMessageButton}
 /// Allows a user to pin or unpin a message.
 ///
 /// Used by [MessageActionsModal]. Should not be used by itself.
+/// {@endtemplate}
 class PinMessageButton extends StatelessWidget {
-  /// Builds a [PinMessageButton].
+  /// {@macro pinMessageButton}
   const PinMessageButton({
     Key? key,
     required this.onTap,

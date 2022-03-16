@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template editMessageSheet}
@@ -14,8 +14,8 @@ class EditMessageSheet extends StatelessWidget {
     this.editMessageInputBuilder,
   }) : super(key: key);
 
-  /// Builder for edit message.
-  final Widget Function(BuildContext, Message)? editMessageInputBuilder;
+  /// {@macro editMessageInputBuilder}
+  final EditMessageInputBuilder? editMessageInputBuilder;
 
   /// The message to edit.
   final Message message;

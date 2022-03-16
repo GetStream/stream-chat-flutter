@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template urlAttachment}
-/// Widget to display URL attachment
+/// Displays a URL attachment in a [MessageWidget].
 /// {@endtemplate}
 class UrlAttachment extends StatelessWidget {
   /// {@macro urlAttachment}

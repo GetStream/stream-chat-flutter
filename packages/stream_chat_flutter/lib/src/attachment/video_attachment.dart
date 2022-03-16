@@ -3,12 +3,13 @@ import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_buil
 import 'package:stream_chat_flutter/src/attachment/attachment_title.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_desktop.dart'
-    hide ShowMessageCallback, ReturnActionType;
+    hide ReturnActionType;
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template videoAttachment}
-/// Widget for showing a video attachment
+/// Shows a video attachment in a [MessageWidget].
 /// {@endtemplate}
 class VideoAttachment extends AttachmentWidget {
   /// {@macro videoAttachment}
@@ -34,12 +35,11 @@ class VideoAttachment extends AttachmentWidget {
   /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
 
-  /// The function to execute when the attachment is returned to from other
-  /// screens
-  final ValueChanged<ReturnActionType>? onReturnAction;
+  /// {@macro onReturnAction}
+  final OnReturnAction? onReturnAction;
 
-  /// The action to perform when the attachment is tapped
-  final VoidCallback? onAttachmentTap;
+  /// {@macro onAttachmentTap}
+  final OnAttachmentTap? onAttachmentTap;
 
   @override
   Widget build(BuildContext context) {

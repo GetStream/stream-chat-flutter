@@ -29,7 +29,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// Use [StreamChat.of] to get the current [StreamChatState] instance.
 /// {@endtemplate}
 class StreamChat extends StatefulWidget {
-  /// Constructor for creating a [StreamChat] widget
+  /// {@macro streamChat}
   const StreamChat({
     Key? key,
     required this.client,
@@ -40,7 +40,7 @@ class StreamChat extends StatefulWidget {
     this.connectivityStream,
   }) : super(key: key);
 
-  /// Client to do chat ops with
+  /// Client to do chat operations with
   final StreamChatClient client;
 
   /// Child which inherits details

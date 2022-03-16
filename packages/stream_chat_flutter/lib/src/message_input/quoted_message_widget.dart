@@ -1,16 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
-
-/// Widget builder for quoted message attachment thumbnail
-typedef QuotedMessageAttachmentThumbnailBuilder = Widget Function(
-  BuildContext,
-  Attachment,
-);
 
 class _VideoAttachmentThumbnail extends StatefulWidget {
   const _VideoAttachmentThumbnail({

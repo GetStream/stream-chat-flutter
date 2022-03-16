@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// It shows a date divider depending on the date difference
+/// {@template systemMessage}
+/// Shows a date divider depending on the date difference
+/// FIXME: This is NOT a good description!
+/// {@endtemplate}
 class SystemMessage extends StatelessWidget {
-  /// Constructor for creating a [SystemMessage]
+  /// {@macro systemMessage}
   const SystemMessage({
     Key? key,
     required this.message,
@@ -11,10 +14,10 @@ class SystemMessage extends StatelessWidget {
   }) : super(key: key);
 
   /// This message
+  /// FIXME: This is NOT a good description!
   final Message message;
 
-  /// The function called when tapping on the message
-  /// when the message is not failed
+  /// The action to perform when tapping on the message.
   final void Function(Message)? onMessageTap;
 
   @override

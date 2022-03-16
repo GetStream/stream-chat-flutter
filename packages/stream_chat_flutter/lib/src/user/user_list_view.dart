@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Callback called when tapping on a user
-typedef UserTapCallback = void Function(User, Widget?);
-
-/// Builder used to create a custom [ListUserItem] from a [User]
-typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
-
-///
-/// It shows the list of current users.
+/// {@template userListView}
+/// Shows the list of current users.
 ///
 /// ```dart
 /// class UsersListPage extends StatelessWidget {
@@ -34,16 +28,17 @@ typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 /// ```
 ///
 ///
-/// Make sure to have a [UsersBloc] ancestor in order to provide the
+/// A [UsersBloc] ancestor widget is required in order to provide the
 /// information about the users.
-/// The widget uses a [ListView.separated], [GridView.builder] to render the
-/// list, grid of channels.
+///
+/// This widget uses [ListView.separated] or [GridView.builder] to render the
+/// list, or grid, of channels.
 ///
 /// The widget components render the ui based on the first ancestor of
-/// type [StreamChatTheme].
-/// Modify it to change the widget appearance.
+/// type [StreamChatTheme]. Modify it to change the widget's appearance.
+/// {@endtemplate}
 class UserListView extends StatefulWidget {
-  /// Instantiate a new UserListView
+  /// {@macro userListView}
   UserListView({
     Key? key,
     this.filter = const Filter.empty(),
@@ -106,7 +101,8 @@ class UserListView extends StatefulWidget {
   /// The amount of users requested per API call.
   final int limit;
 
-  /// Function called when tapping on a channel
+  /// {@macro userTapCallback}
+  ///
   /// By default it calls [Navigator.push] building a [MaterialPageRoute]
   /// with the widget [userWidget] as child.
   final UserTapCallback? onUserTap;
@@ -117,7 +113,7 @@ class UserListView extends StatefulWidget {
   /// Widget used when opening a channel
   final Widget? userWidget;
 
-  /// Builder used to create a custom user preview
+  /// {@macro userItemBuilder}
   final UserItemBuilder? userItemBuilder;
 
   /// Builder used to create a custom item separator

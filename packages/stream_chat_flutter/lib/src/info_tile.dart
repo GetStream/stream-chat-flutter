@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
-/// Tile to display a message, used in stream chat to display connection status
+/// {@template infoTile}
+/// Displays a message. Often used to display connection status.
+/// {@endtemplate}
 class InfoTile extends StatelessWidget {
-  /// Constructor for creating an [InfoTile] widget
+  /// {@macro infoTile}
   const InfoTile({
     Key? key,
     required this.message,

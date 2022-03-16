@@ -1,9 +1,11 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 
+/// {@template messageAction}
 /// Class describing a message action
+/// {@endtemplate}
 class MessageAction {
-  /// returns a new instance of a [MessageAction]
+  /// {@macro messageAction}
   MessageAction({
     this.leading,
     this.title,
@@ -16,6 +18,6 @@ class MessageAction {
   /// title widget
   final Widget? title;
 
-  /// callback called on tap
+  /// {@macro onMessageTap}
   final OnMessageTap? onTap;
 }

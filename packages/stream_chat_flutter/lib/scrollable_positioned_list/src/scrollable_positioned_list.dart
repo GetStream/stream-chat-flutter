@@ -9,7 +9,6 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/item_positions_listener.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/item_positions_notifier.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/positioned_list.dart';

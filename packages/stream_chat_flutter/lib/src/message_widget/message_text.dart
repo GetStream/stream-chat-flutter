@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Text widget to display in message
+/// {@template messageText}
+/// The text content of a message.
+/// {@endtemplate}
 class MessageText extends StatelessWidget {
-  /// Constructor for creating a [MessageText] widget
+  /// {@macro messageText}
   const MessageText({
     Key? key,
     required this.message,
@@ -20,10 +22,10 @@ class MessageText extends StatelessWidget {
   /// Message whose text is to be displayed
   final Message message;
 
-  /// Callback for when mention is tapped
+  /// The action to perform when a mention is tapped
   final void Function(User)? onMentionTap;
 
-  /// Callback for when link is tapped
+  /// The action to perform when a link is tapped
   final void Function(String)? onLinkTap;
 
   /// [MessageThemeData] whose text theme is to be applied

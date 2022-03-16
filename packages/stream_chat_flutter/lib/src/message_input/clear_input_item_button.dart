@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template clearInputItemButton}
 /// Used to clear items from the [MessageInput] field, such as attachments
 /// or message quotes.
+/// {@endtemplate}
 class ClearInputItemButton extends StatelessWidget {
-  /// Builds a [ClearInputItemButton].
+  /// {@macro clearInputItemButton}
   const ClearInputItemButton({
     Key? key,
     required this.onTap,

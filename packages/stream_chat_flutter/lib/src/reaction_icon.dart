@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+/// {@template reactionIcon}
 /// Reaction icon data
+/// {@endtemplate}
 class ReactionIcon {
-  /// Constructor for creating [ReactionIcon]
+  /// {@macro reactionIcon}
   ReactionIcon({
     required this.type,
     required this.builder,

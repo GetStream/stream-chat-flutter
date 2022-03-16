@@ -8,22 +8,12 @@ import 'package:stream_chat_flutter/src/attachment/image_group.dart';
 import 'package:stream_chat_flutter/src/bottom_sheets/edit_message_sheet.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_widget/desktop_reaction_picker.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-/// Widget builder for building attachments
-typedef AttachmentBuilder = Widget Function(
-  BuildContext,
-  Message,
-  List<Attachment>,
-);
-
-/// Callback for when quoted message is tapped
-typedef OnQuotedMessageTap = void Function(String?);
 
 /// The display behaviour of a widget
 enum DisplayWidget {
@@ -37,10 +27,10 @@ enum DisplayWidget {
   show,
 }
 
+/// {@template messageWidget}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_widget.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_widget_paint.png)
 ///
-/// {@template messageWidget}
 /// Shows a message with reactions, replies and user avatar.
 ///
 /// Usually you don't use this widget as it's the default message widget used by
@@ -431,10 +421,8 @@ class MessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final ShowMessageCallback? onShowMessage;
 
-  /// {@template onReturnAction}
-  /// Handle return actions like reply message
-  /// {@endtemplate}
-  final ValueChanged<ReturnActionType>? onReturnAction;
+  /// {@macro onReturnAction}
+  final OnReturnAction? onReturnAction;
 
   /// {@template showUsername}
   /// If true show the users username next to the timestamp of the message
@@ -506,14 +494,10 @@ class MessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final bool translateUserAvatar;
 
-  /// {@template onQuotedMessageTap}
-  /// Function called when quotedMessage is tapped
-  /// {@endtemplate}
+  /// {@macro onQuotedMessageTap}
   final OnQuotedMessageTap? onQuotedMessageTap;
 
-  /// {@template onMessageTap}
-  /// Function called when message is tapped
-  /// {@endtemplate}
+  /// {@macro onMessageTap}
   final void Function(Message)? onMessageTap;
 
   /// {@template customActions}
@@ -521,10 +505,8 @@ class MessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final List<MessageAction> customActions;
 
-  /// {@template onAttachmentTap}
-  /// Customize onTap on attachment
-  /// {@endtemplate}
-  final void Function(Message message, Attachment attachment)? onAttachmentTap;
+  /// {@macro onMessageWidgetAttachmentTap}
+  final OnMessageWidgetAttachmentTap? onAttachmentTap;
 
   /// {@template copyWith}
   /// Creates a copy of [MessageWidget] with specified attributes overridden.

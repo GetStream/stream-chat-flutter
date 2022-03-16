@@ -1,24 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Callback called when tapping on a user
-typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
-
-/// Builder used to create a custom [ListUserItem] from a [User]
-typedef MessageSearchItemBuilder = Widget Function(
-  BuildContext,
-  GetMessageResponse,
-);
-
-/// Builder used when [MessageSearchListView] is empty
-typedef EmptyMessageSearchBuilder = Widget Function(
-  BuildContext context,
-  String searchQuery,
-);
-
-///
-/// It shows the list of searched messages.
+/// {@template messageSearchListView}
+/// Shows the list of searched messages.
 ///
 /// ```dart
 /// class MessageSearchPage extends StatelessWidget {
@@ -40,15 +25,16 @@ typedef EmptyMessageSearchBuilder = Widget Function(
 /// ```
 ///
 ///
-/// Make sure to have a [MessageSearchBloc] ancestor in order to provide the
+/// A [MessageSearchBloc] ancestor widget is required in order to provide the
 /// information about the messages.
-/// The widget uses a [ListView.separated] to render the list of messages.
 ///
-/// The widget components render the ui based on the first ancestor of type
-/// [StreamChatTheme].
-/// Modify it to change the widget appearance.
+/// This widget uses a [ListView.separated] to render the list of messages.
+///
+/// The UI is rendered based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget's appearance.
+/// {@endtemplate}
 class MessageSearchListView extends StatefulWidget {
-  /// Instantiate a new MessageSearchListView
+  /// {@macro messageSearchListView}
   const MessageSearchListView({
     Key? key,
     required this.filters,
@@ -93,10 +79,10 @@ class MessageSearchListView extends StatefulWidget {
   /// You can also filter other built-in channel fields.
   final Filter? messageFilters;
 
-  /// Builder used to create a custom item preview
+  /// {@macro messageSearchItemBuilder}
   final MessageSearchItemBuilder? itemBuilder;
 
-  /// Function called when tapping on a [MessageSearchItem]
+  /// {@macro messageSearchItemTapCallback}
   final MessageSearchItemTapCallback? onItemTap;
 
   /// Builder used to create a custom item separator

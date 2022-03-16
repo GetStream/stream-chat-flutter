@@ -1,17 +1,19 @@
 import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template reactionPicker}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/reaction_picker.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/reaction_picker_paint.png)
 ///
-/// It shows a reaction picker
+/// Allows the user to select reactions to a message on mobile.
 ///
-/// Usually you don't use this widget as it's one of the default widgets used
-/// by [MessageWidget.onMessageActions].
+/// It is not recommended to use this widget directly as it's one of the
+/// default widgets used by [MessageWidget.onMessageActions].
+/// {@endtemplate}
 class ReactionPicker extends StatefulWidget {
-  /// Constructor for creating a [ReactionPicker] widget
+  /// {@macro reactionPicker}
   const ReactionPicker({
     Key? key,
     required this.message,

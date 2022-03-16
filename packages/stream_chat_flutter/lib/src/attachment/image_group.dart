@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_desktop.dart'
-    hide ShowMessageCallback, ReturnActionType;
+    hide ReturnActionType;
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template imageGroup}
-/// Widget for constructing a group of images in message
+/// Constructs a group of image attachments in a [MessageWidget].
 /// {@endtemplate}
 class ImageGroup extends StatelessWidget {
   /// {@macro imageGroup}
@@ -23,12 +24,11 @@ class ImageGroup extends StatelessWidget {
   /// List of attachments to show
   final List<Attachment> images;
 
-  /// The function to execute when the attachment is returned to from other
-  /// screens
-  final ValueChanged<ReturnActionType>? onReturnAction;
+  /// {@macro onReturnAction}
+  final OnReturnAction? onReturnAction;
 
-  /// The action to perform when the attachment is tapped
-  final void Function(Message message, Attachment attachment)? onAttachmentTap;
+  /// {@macro onImageGroupAttachmentTap}
+  final OnImageGroupAttachmentTap? onAttachmentTap;
 
   /// The [Message] that the images are attached to
   final Message message;

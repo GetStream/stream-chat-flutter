@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Widget for showing an unread indicator
+/// {@template unreadIndicator}
+/// Shows an unread indicator for a message.
+/// {@endtemplate}
 class UnreadIndicator extends StatelessWidget {
-  /// Constructor for creating an [UnreadIndicator]
+  /// {@macro unreadIndicator}
   const UnreadIndicator({
     Key? key,
     this.cid,

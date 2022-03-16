@@ -6,7 +6,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Return action for coming back from pages
@@ -17,9 +17,6 @@ enum ReturnActionType {
   /// Go to reply message action
   reply,
 }
-
-/// Callback when show message is tapped
-typedef ShowMessageCallback = void Function(Message message, Channel channel);
 
 /// A full screen image widget
 class FullScreenMediaDesktop extends StatefulWidget {
@@ -51,9 +48,7 @@ class FullScreenMediaDesktop extends StatefulWidget {
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
 
-  /// Widget builder for attachment actions modal
-  /// [defaultActionsModal] is the default [AttachmentActionsModal] config
-  /// Use [defaultActionsModal.copyWith] to easily customize it
+  /// {@macro attachmentActionsBuilder}
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   /// Auto-play videos when page is opened

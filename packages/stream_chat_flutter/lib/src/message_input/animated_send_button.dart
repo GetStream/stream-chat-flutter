@@ -3,6 +3,7 @@ import 'package:stream_chat_flutter/src/message_input/countdown_button.dart';
 import 'package:stream_chat_flutter/src/message_input/send_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template animatedSendButton}
 /// The button for sending a message. It animates between several states
 /// depending on:
 /// * If there is a cooldown enabled or not
@@ -10,8 +11,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// are any attachments ready to upload
 ///
 /// Used in [MessageInput].
+/// {@endtemplate}
 class AnimatedSendButton extends StatelessWidget {
-  /// Builds an [AnimatedSendButton].
+  /// {@macro animatedSendButton}
   const AnimatedSendButton({
     Key? key,
     required this.cooldown,
@@ -37,7 +39,7 @@ class AnimatedSendButton extends StatelessWidget {
   /// The theme currently used for [MessageInput].
   final MessageInputThemeData messageInputTheme;
 
-  /// The callback to perform when the button is pressed or clicked.
+  /// The callback to perform when the button is tapped or clicked.
   final VoidCallback onTap;
 
   /// If commands are enabled.

@@ -4,6 +4,7 @@ import 'package:macos_ui/macos_ui.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:yaru_widgets/yaru_widgets.dart';
 
+/// {@template platformDialog}
 /// A Dialog that adapts itself to the visual style of whichever desktop
 /// platform an application is being executed on.
 ///
@@ -12,8 +13,9 @@ import 'package:yaru_widgets/yaru_widgets.dart';
 ///
 /// On macOS, a [MacosAlertDialog] will be built. On Windows, a [ContentDialog]
 /// will be built. On Linux, a [YaruAlertDialog] will be built.
+/// {@endtemplate}
 class PlatformDialog extends StatelessWidget {
-  /// Builds a [PlatformDialog].
+  /// {@macro platformDialog}
   const PlatformDialog({
     Key? key,
     this.titleWidget,

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template threadReplyButton}
 /// Allows a user to start a thread reply to a message.
 ///
 /// Used by [MessageActionsModal]. Should not be used by itself.
+/// {@endtemplate}
 class ThreadReplyButton extends StatelessWidget {
-  /// Builds a [ThreadReplyButton].
+  /// {@macro threadReplyButton}
   const ThreadReplyButton({
     Key? key,
     required this.message,
@@ -16,7 +18,7 @@ class ThreadReplyButton extends StatelessWidget {
   /// The message to start a thread reply to.
   final Message message;
 
-  /// Callback for when thread reply is tapped
+  /// The action to perform when "thread reply" is tapped
   final OnMessageTap? onThreadReplyTap;
 
   @override

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Widget for showing upload progress
+/// {@template uploadProgressIndicator}
+/// Shows the upload progress of an attachment.
+/// {@endtemplate}
 class UploadProgressIndicator extends StatelessWidget {
-  /// Constructor for creating an [UploadProgressIndicator]
+  /// {@macro uploadProgressIndicator}
   const UploadProgressIndicator({
     Key? key,
     required this.uploaded,

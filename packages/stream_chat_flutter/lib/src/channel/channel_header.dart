@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/channel/channel_info.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template channelHeader}
@@ -123,7 +123,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
         (showBackButton
             ? StreamBackButton(
                 onPressed: onBackPressed,
-                showUnreads: true,
+                showUnreadCount: true,
               )
             : const SizedBox());
 
@@ -156,7 +156,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             systemOverlayStyle: theme.brightness == Brightness.dark
                 ? SystemUiOverlayStyle.light
                 : SystemUiOverlayStyle.dark,
-            elevation: 1,
+            elevation: 1, //TODO(Groovin): no elevation on desktop & web
             leading: leadingWidget,
             backgroundColor: backgroundColor ?? channelHeaderTheme.color,
             actions: actions ??

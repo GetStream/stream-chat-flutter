@@ -6,16 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/indicators/upload_progress_indicator.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/utils.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template fileAttachment}
-/// Widget for displaying file attachments
+/// Displays file attachments that have been sent in a chat.
+///
+/// Used in [MessageWidget].
 /// {@endtemplate}
 class FileAttachment extends AttachmentWidget {
   /// {@macro fileAttachment}
@@ -41,8 +42,8 @@ class FileAttachment extends AttachmentWidget {
   /// (such as a download button)
   final Widget? trailing;
 
-  /// The action to perform when the attachment widget is tapped
-  final VoidCallback? onAttachmentTap;
+  /// {@macro onAttachmentTap}
+  final OnAttachmentTap? onAttachmentTap;
 
   /// Checks if the attachment is a video
   bool get isVideoAttachment => attachment.title?.mimeType?.type == 'video';

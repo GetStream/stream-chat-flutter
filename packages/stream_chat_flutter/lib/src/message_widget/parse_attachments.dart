@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content_components.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template quotedMessageCard}
+/// {@template parseAttachments}
 /// Parses the attachments of a [MessageWidget].
 ///
 /// Used in [MessageCard]. Should not be used elsewhere.
 /// {@endtemplate}
 class ParseAttachments extends StatelessWidget {
-  /// {@macro quotedMessageCard}
+  /// {@macro parseAttachments}
   const ParseAttachments({
     Key? key,
     required this.message,

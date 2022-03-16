@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// It shows the current [Message] preview.
+/// {@template messageSearchItem}
+/// Shows a preview of a message search result.
 ///
-/// Usually you don't use this widget as it's the default item used by
-/// [MessageSearchListView].
+/// It is not recommended to use this widget directly as it's the default item
+/// used by [MessageSearchListView].
 ///
-/// The widget renders the ui based on the first ancestor of type
-/// [StreamChatTheme].
-/// Modify it to change the widget appearance.
+/// The UI based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget's appearance.
+/// {@endtemplate}
 class MessageSearchItem extends StatelessWidget {
-  /// Instantiate a new MessageSearchItem
+  /// {@macro messageSearchItem}
   const MessageSearchItem({
     Key? key,
     required this.getMessageResponse,
