@@ -344,6 +344,7 @@ class MessageInputState extends State<MessageInput> {
 
   final _imagePicker = ImagePicker();
   late final _focusNode = widget.focusNode ?? FocusNode();
+  late final _isInternalFocusNode = widget.focusNode == null;
   bool _inputEnabled = true;
   bool _commandEnabled = false;
   bool _showCommandsOverlay = false;
@@ -1191,30 +1192,36 @@ class MessageInputState extends State<MessageInput> {
       };
     }
 
-    return UserMentionsOverlay(
-      query: query,
-      mentionAllAppUsers: widget.mentionAllAppUsers,
-      client: StreamChat.of(context).client,
-      channel: channel,
-      size: Size(renderObject.size.width - 16, 400),
-      mentionsTileBuilder: tileBuilder,
-      onMentionUserTap: (user) {
-        _mentionedUsers.add(user);
-        splits[splits.length - 1] = user.name;
-        final rejoin = splits.join('@');
+    return LayoutBuilder(
+      builder: (context, snapshot) => UserMentionsOverlay(
+        query: query,
+        mentionAllAppUsers: widget.mentionAllAppUsers,
+        client: StreamChat.of(context).client,
+        channel: channel,
+        size: Size(
+          renderObject.size.width - 16,
+          min(400, (snapshot.maxHeight - renderObject.size.height - 16).abs()),
+        ),
+        mentionsTileBuilder: tileBuilder,
+        onMentionUserTap: (user) {
+          _mentionedUsers.add(user);
+          splits[splits.length - 1] = user.name;
+          final rejoin = splits.join('@');
 
-        textEditingController.value = TextEditingValue(
-          text: rejoin +
-              textEditingController.text.substring(
-                textEditingController.selection.start,
-              ),
-          selection: TextSelection.collapsed(
-            offset: rejoin.length,
-          ),
-        );
-        _onChangedDebounced.cancel();
-        setState(() => _showMentionsOverlay = false);
-      },
+          textEditingController.value = TextEditingValue(
+            text: rejoin +
+                textEditingController.text.substring(
+                  textEditingController.selection.start,
+                ),
+            selection: TextSelection.collapsed(
+              offset: rejoin.length,
+            ),
+          );
+          _onChangedDebounced.cancel();
+
+          setState(() => _showMentionsOverlay = false);
+        },
+      ),
     );
   }
 
@@ -1925,6 +1932,7 @@ class MessageInputState extends State<MessageInput> {
   void dispose() {
     textEditingController.dispose();
     _focusNode.removeListener(_focusNodeListener);
+    if (_isInternalFocusNode) _focusNode.dispose();
     _stopSlowMode();
     _onChangedDebounced.cancel();
     super.dispose();
@@ -1970,12 +1978,12 @@ class _PickerWidget extends StatefulWidget {
 }
 
 class _PickerWidgetState extends State<_PickerWidget> {
-  Future<bool>? requestPermission;
+  Future<PermissionState>? requestPermission;
 
   @override
   void initState() {
     super.initState();
-    requestPermission = PhotoManager.requestPermission();
+    requestPermission = PhotoManager.requestPermissionExtend();
   }
 
   @override
@@ -1983,14 +1991,15 @@ class _PickerWidgetState extends State<_PickerWidget> {
     if (widget.filePickerIndex != 0) {
       return const Offstage();
     }
-    return FutureBuilder<bool>(
+    return FutureBuilder<PermissionState>(
       future: requestPermission,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Offstage();
         }
 
-        if (snapshot.data!) {
+        if ([PermissionState.authorized, PermissionState.limited]
+            .contains(snapshot.data)) {
           if (widget.containsFile) {
             return GestureDetector(
               onTap: () {
