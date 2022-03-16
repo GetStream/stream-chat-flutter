@@ -196,7 +196,7 @@ class _GalleryFooterState extends State<GalleryFooter> {
                           color:
                               galleryFooterThemeData.bottomSheetCloseIconColor,
                         ),
-                        onPressed: () => Navigator.maybePop(context),
+                        onPressed: () => Navigator.of(context).maybePop(),
                       ),
                     ),
                   ],

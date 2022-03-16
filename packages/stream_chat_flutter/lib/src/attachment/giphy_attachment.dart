@@ -247,9 +247,8 @@ class GiphyAttachment extends AttachmentWidget {
     );
   }
 
-  void _onImageTap(BuildContext context) async {
-    final res = await Navigator.push(
-      context,
+  Future<void> _onImageTap(BuildContext context) async {
+    final res = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) {
           final channel = StreamChannel.of(context).channel;

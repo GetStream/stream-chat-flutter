@@ -84,8 +84,7 @@ class VideoAttachment extends AttachmentWidget {
               onTap: onAttachmentTap ??
                   () async {
                     final channel = StreamChannel.of(context).channel;
-                    final res = await Navigator.push(
-                      context,
+                    final res = await Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => StreamChannel(
                           channel: channel,

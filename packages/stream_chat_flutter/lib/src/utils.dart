@@ -85,9 +85,7 @@ Future<bool?> showConfirmationBottomSheet(
                   child: Container(
                     alignment: Alignment.center,
                     child: TextButton(
-                      onPressed: () {
-                        Navigator.pop(context, true);
-                      },
+                      onPressed: () => Navigator.of(context).pop(true),
                       child: Text(
                         okText,
                         style: chatThemeData.textTheme.bodyBold.copyWith(

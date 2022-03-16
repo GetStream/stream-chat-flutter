@@ -228,9 +228,7 @@ class _FullScreenMediaMobileState extends State<FullScreenMediaMobile>
                         date: widget.message.createdAt,
                         time: widget.message.createdAt,
                       ),
-                      onBackPressed: () {
-                        Navigator.of(context).pop();
-                      },
+                      onBackPressed: () => Navigator.of(context).pop(),
                       message: widget.message,
                       currentIndex: value,
                       onShowMessage: () {
@@ -255,7 +253,7 @@ class _FullScreenMediaMobileState extends State<FullScreenMediaMobile>
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeInOut,
                           );
-                          Navigator.pop(context);
+                          Navigator.of(context).pop();
                         },
                       ),
                   ],

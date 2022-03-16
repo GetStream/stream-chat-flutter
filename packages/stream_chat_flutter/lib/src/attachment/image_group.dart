@@ -119,7 +119,7 @@ class ImageGroup extends StatelessWidget {
     );
   }
 
-  void _onTap(
+  Future<void> _onTap(
     BuildContext context,
     int index,
   ) async {
@@ -129,8 +129,7 @@ class ImageGroup extends StatelessWidget {
 
     final channel = StreamChannel.of(context).channel;
 
-    final res = await Navigator.push(
-      context,
+    final res = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => StreamChannel(
           channel: channel,

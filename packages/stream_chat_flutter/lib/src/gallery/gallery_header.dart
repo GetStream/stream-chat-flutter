@@ -162,7 +162,7 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
     );
 
     if (result != null) {
-      Navigator.pop(context, result);
+      Navigator.of(context).pop(result);
     }
   }
 }

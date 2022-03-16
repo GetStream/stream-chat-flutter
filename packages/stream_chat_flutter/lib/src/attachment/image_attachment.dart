@@ -134,8 +134,7 @@ class ImageAttachment extends AttachmentWidget {
                 GestureDetector(
                   onTap: onAttachmentTap ??
                       () async {
-                        final result = await Navigator.push(
-                          context,
+                        final result = await Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) {
                               final channel = StreamChannel.of(context).channel;

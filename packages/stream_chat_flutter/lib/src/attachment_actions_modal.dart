@@ -91,7 +91,7 @@ class AttachmentActionsModal extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () => Navigator.maybePop(context),
+      onTap: () => Navigator.of(context).maybePop(),
       child: _buildPage(context),
     );
   }
@@ -123,9 +123,7 @@ class AttachmentActionsModal extends StatelessWidget {
                         size: 24,
                         color: theme.colorTheme.textLowEmphasis,
                       ),
-                      () {
-                        Navigator.pop(context, ReturnActionType.reply);
-                      },
+                      () => Navigator.of(context).pop(ReturnActionType.reply),
                     ),
                   if (showShowInChat)
                     _buildButton(
@@ -179,7 +177,7 @@ class AttachmentActionsModal extends StatelessWidget {
 
                         // Closing attachment actions modal before opening
                         // attachment download dialog
-                        Navigator.pop(context);
+                        Navigator.of(context).pop();
 
                         showDialog(
                           barrierDismissible: false,

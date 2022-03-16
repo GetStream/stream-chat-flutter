@@ -262,7 +262,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () => Navigator.maybePop(context),
+      onTap: () => Navigator.of(context).maybePop(),
       child: Stack(
         children: [
           Positioned.fill(

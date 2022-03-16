@@ -63,7 +63,7 @@ class EditMessageSheet extends StatelessWidget {
                 editMessage: message,
                 preMessageSending: (m) {
                   FocusScope.of(context).unfocus();
-                  Navigator.pop(context);
+                  Navigator.of(context).pop();
                   return m;
                 },
               ),

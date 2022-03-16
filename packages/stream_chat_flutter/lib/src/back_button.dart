@@ -38,7 +38,7 @@ class StreamBackButton extends StatelessWidget {
             if (onPressed != null) {
               onPressed!();
             } else {
-              Navigator.maybePop(context);
+              Navigator.of(context).maybePop();
             }
           },
           padding: const EdgeInsets.all(14),

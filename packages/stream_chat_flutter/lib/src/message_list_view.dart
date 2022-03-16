@@ -1344,8 +1344,7 @@ class _MessageListViewState extends State<MessageListView> {
       };
     } else if (widget.threadBuilder != null) {
       _onThreadTap = (Message message) {
-        Navigator.push(
-          context,
+        Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => BetterStreamBuilder<Message>(
               stream: streamChannel!.channel.state!.messagesStream.map(
