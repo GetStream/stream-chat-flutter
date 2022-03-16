@@ -8,7 +8,7 @@ import 'package:stream_chat_flutter/src/bottom_sheets/edit_message_sheet.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/image_group.dart';
+import 'package:stream_chat_flutter/src/attachment/image_group.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_widget/desktop_reaction_picker.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_reactions_modal.dart';
