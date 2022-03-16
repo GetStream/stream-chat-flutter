@@ -13,9 +13,7 @@ import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_buil
 import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';
 import 'package:stream_chat_flutter/src/bottom_sheets/attachment_modal_sheet.dart';
 import 'package:stream_chat_flutter/src/bottom_sheets/error_alert_sheet.dart';
-import 'package:stream_chat_flutter/src/overlays/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
-import 'package:stream_chat_flutter/src/overlays/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
 import 'package:stream_chat_flutter/src/message_input/animated_send_button.dart';
@@ -28,6 +26,8 @@ import 'package:stream_chat_flutter/src/message_input/picker_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/user_mentions_overlay.dart';
+import 'package:stream_chat_flutter/src/overlays/commands_overlay.dart';
+import 'package:stream_chat_flutter/src/overlays/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
