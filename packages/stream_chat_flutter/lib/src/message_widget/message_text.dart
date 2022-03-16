@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -41,6 +44,10 @@ class MessageText extends StatelessWidget {
         final themeData = Theme.of(context);
         return MarkdownBody(
           data: messageText,
+          selectable: kIsWeb ||
+              Platform.isMacOS ||
+              Platform.isWindows ||
+              Platform.isLinux,
           onTapLink: (
             String link,
             String? href,
