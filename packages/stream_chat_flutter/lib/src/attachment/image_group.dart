@@ -4,9 +4,11 @@ import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_deskt
     hide ShowMessageCallback, ReturnActionType;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template imageGroup}
 /// Widget for constructing a group of images in message
+/// {@endtemplate}
 class ImageGroup extends StatelessWidget {
-  /// Constructor for creating [ImageGroup] widget
+  /// {@macro imageGroup}
   const ImageGroup({
     Key? key,
     required this.images,
@@ -21,22 +23,23 @@ class ImageGroup extends StatelessWidget {
   /// List of attachments to show
   final List<Attachment> images;
 
-  /// Callback when attachment is returned to from other screens
+  /// The function to execute when the attachment is returned to from other
+  /// screens
   final ValueChanged<ReturnActionType>? onReturnAction;
 
-  /// Callback when attachment is tapped
+  /// The action to perform when the attachment is tapped
   final void Function(Message message, Attachment attachment)? onAttachmentTap;
 
-  /// Message which images are attached to
+  /// The [Message] that the images are attached to
   final Message message;
 
-  /// [MessageThemeData] to apply to message
+  /// The [MessageThemeData] to apply to this [message]
   final MessageThemeData messageTheme;
 
-  /// Size of images
+  /// The total size of the [images]
   final Size size;
 
-  /// Callback for when show message is tapped
+  /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
 
   @override

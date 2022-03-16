@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template attachmentTitle}
 /// Title for attachments
+/// {@endtemplate}
 class AttachmentTitle extends StatelessWidget {
-  /// Supply attachment and theme for constructing title
+  /// {@macro attachmentTitle}
   const AttachmentTitle({
     Key? key,
     required this.attachment,

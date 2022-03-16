@@ -7,9 +7,11 @@ import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_deskt
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template videoAttachment}
 /// Widget for showing a video attachment
+/// {@endtemplate}
 class VideoAttachment extends AttachmentWidget {
-  /// Constructor for creating a [VideoAttachment] widget
+  /// {@macro videoAttachment}
   const VideoAttachment({
     Key? key,
     required Message message,
@@ -26,16 +28,17 @@ class VideoAttachment extends AttachmentWidget {
           size: size,
         );
 
-  /// [MessageThemeData] for showing title
+  /// The [MessageThemeData] to use for the title
   final MessageThemeData messageTheme;
 
-  /// Callback when show message is tapped
+  /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
 
-  /// Callback when attachment is returned to from other screens
+  /// The function to execute when the attachment is returned to from other
+  /// screens
   final ValueChanged<ReturnActionType>? onReturnAction;
 
-  /// Callback when attachment is tapped
+  /// The action to perform when the attachment is tapped
   final VoidCallback? onAttachmentTap;
 
   @override

@@ -2,9 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template urlAttachment}
 /// Widget to display URL attachment
+/// {@endtemplate}
 class UrlAttachment extends StatelessWidget {
-  /// Constructor for creating a [UrlAttachment]
+  /// {@macro urlAttachment}
   const UrlAttachment({
     Key? key,
     required this.urlAttachment,
@@ -25,7 +27,7 @@ class UrlAttachment extends StatelessWidget {
   /// Padding for text
   final EdgeInsets textPadding;
 
-  /// [MessageThemeData] for showing image title
+  /// The [MessageThemeData] to use for the image title
   final MessageThemeData messageTheme;
 
   @override

@@ -28,9 +28,11 @@ extension AttachmentSourceX on AttachmentSource {
   }
 }
 
+/// {@template attachmentWidget}
 /// Abstract class for deriving attachment types
+/// {@endtemplate}
 abstract class AttachmentWidget extends StatelessWidget {
-  /// Constructor for creating attachment widget
+  /// {@macro attachmentWidget}
   const AttachmentWidget({
     Key? key,
     required this.message,
@@ -44,10 +46,10 @@ abstract class AttachmentWidget extends StatelessWidget {
   final Size? size;
   final AttachmentSource? _source;
 
-  /// Message which attachment is attached to
+  /// The message that [attachment] is associated with
   final Message message;
 
-  /// Attachment to display
+  /// The [Attachment] to display
   final Attachment attachment;
 
   /// Getter for source of attachment
@@ -58,9 +60,11 @@ abstract class AttachmentWidget extends StatelessWidget {
           : AttachmentSource.network);
 }
 
+/// {@template attachmentError}
 /// Widget for building in case of error
+/// {@endtemplate}
 class AttachmentError extends StatelessWidget {
-  /// Constructor for creating AttachmentError
+  /// {@macro attachmentError}
   const AttachmentError({
     Key? key,
     this.size,

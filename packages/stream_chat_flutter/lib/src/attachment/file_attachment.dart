@@ -14,9 +14,11 @@ import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// {@template fileAttachment}
 /// Widget for displaying file attachments
+/// {@endtemplate}
 class FileAttachment extends AttachmentWidget {
-  /// Constructor for creating a widget when attachment is of type 'file'
+  /// {@macro fileAttachment}
   const FileAttachment({
     Key? key,
     required Message message,
@@ -32,19 +34,20 @@ class FileAttachment extends AttachmentWidget {
           size: size,
         );
 
-  /// Title for attachment
+  /// Title for the attachment
   final Widget? title;
 
-  /// Widget for displaying at the end of attachment (such as a download button)
+  /// Widget for displaying at the end of the attachment
+  /// (such as a download button)
   final Widget? trailing;
 
-  /// Callback called when attachment widget is tapped
+  /// The action to perform when the attachment widget is tapped
   final VoidCallback? onAttachmentTap;
 
-  /// Check if attachment is a video
+  /// Checks if the attachment is a video
   bool get isVideoAttachment => attachment.title?.mimeType?.type == 'video';
 
-  /// Check if attachment is an image
+  /// Checks if the attachment is an image
   bool get isImageAttachment => attachment.title?.mimeType?.type == 'image';
 
   @override

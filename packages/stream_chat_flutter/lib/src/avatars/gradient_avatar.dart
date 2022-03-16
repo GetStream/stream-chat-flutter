@@ -3,9 +3,11 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-/// Fallback user avatar with a polygon gradient overlayed with text
+/// {@template gradientAvatar}
+/// Fallback user avatar with a polygon gradient overlaid with text
+/// {@endtemplate}
 class GradientAvatar extends StatefulWidget {
-  /// Constructor for [GradientAvatar]
+  /// {@macro gradientAvatar}
   const GradientAvatar({
     Key? key,
     required this.name,
@@ -28,7 +30,7 @@ class _GradientAvatarState extends State<GradientAvatar> {
     return Center(
       child: RepaintBoundary(
         child: CustomPaint(
-          painter: DemoPainter(
+          painter: PolygonGradientPainter(
             widget.userId,
             getShortenedName(widget.name),
             DefaultTextStyle.of(context).style.fontFamily ?? 'Roboto',
@@ -56,19 +58,21 @@ class _GradientAvatarState extends State<GradientAvatar> {
   }
 }
 
+/// {@template polygonGradientPainter}
 /// Painter for bg polygon gradient
-class DemoPainter extends CustomPainter {
-  /// Constructor for [DemoPainter]
-  DemoPainter(
+/// {@endtemplate}
+class PolygonGradientPainter extends CustomPainter {
+  /// {@macro polygonGradientPainter}
+  PolygonGradientPainter(
     this.userId,
     this.username,
     this.fontFamily,
   );
 
-  /// Init grid row count
+  /// Initial grid row count
   static const int rowCount = 5;
 
-  /// Init grid column count
+  /// Initial grid column count
   static const int columnCount = 5;
 
   /// User ID used for key
@@ -150,7 +154,7 @@ class DemoPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 
-  /// Transforms initial grid into a polygon grid
+  /// Transforms initial grid into a polygon grid.
   List<Offset> transformPoints(Set<Offset> points, Size size) {
     final transformedList = <Offset>[];
     final orgList = points.toList();
@@ -181,9 +185,11 @@ class DemoPainter extends CustomPainter {
   }
 }
 
-/// Class for storing and drawing four points of a polygon
+/// {@template offset4}
+/// Class for storing and drawing four points of a polygon.
+/// {@endtemplate}
 class Offset4 {
-  /// Constructor for [Offset4]
+  /// {@macro offset4}
   Offset4(
     this.p1,
     this.p2,

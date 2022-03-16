@@ -8,9 +8,11 @@ import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_deskt
     hide ShowMessageCallback, ReturnActionType;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template giphyAttachment}
 /// Widget for showing a GIF attachment
+/// {@endtemplate}
 class GiphyAttachment extends AttachmentWidget {
-  /// Constructor for creating a [GiphyAttachment] widget
+  /// {@macro giphyAttachment}
   const GiphyAttachment({
     Key? key,
     required Message message,
@@ -26,13 +28,14 @@ class GiphyAttachment extends AttachmentWidget {
           size: size,
         );
 
-  /// Callback when show message is tapped
+  /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
 
-  /// Callback when attachment is returned to from other screens
+  /// The function to execute when the attachment is returned to from other
+  /// screens
   final ValueChanged<ReturnActionType>? onReturnAction;
 
-  /// Callback when attachment is tapped
+  /// The action to perform when the attachment is tapped
   final VoidCallback? onAttachmentTap;
 
   @override

@@ -9,9 +9,11 @@ typedef InProgressBuilder = Widget Function(BuildContext, int, int);
 /// Widget to build on failure
 typedef FailedBuilder = Widget Function(BuildContext, String);
 
+/// {@template attachmentUploadStateBuilder}
 /// Widget to display attachment upload state
+/// {@endtemplate}
 class AttachmentUploadStateBuilder extends StatelessWidget {
-  /// Constructor for creating an [AttachmentUploadStateBuilder] widget
+  /// {@macro attachmentUploadStateBuilder}
   const AttachmentUploadStateBuilder({
     Key? key,
     required this.message,
@@ -22,22 +24,22 @@ class AttachmentUploadStateBuilder extends StatelessWidget {
     this.preparingBuilder,
   }) : super(key: key);
 
-  /// Message which attachment is added to
+  /// The message that [attachment] is associated with
   final Message message;
 
-  /// Attachment in concern
+  /// The attachment currently being handled
   final Attachment attachment;
 
-  /// Widget to display when failed
+  /// Widget to display when the [attachment] has failed to upload
   final FailedBuilder? failedBuilder;
 
-  /// Widget to display when succeeded
+  /// Widget to display when the [attachment] has been uploaded successfully
   final WidgetBuilder? successBuilder;
 
-  /// Widget to display when in progress
+  /// Widget to display when in the [attachment] upload is in progress
   final InProgressBuilder? inProgressBuilder;
 
-  /// Widget to display when in prep
+  /// Widget to display when preparing to upload the [attachment]
   final WidgetBuilder? preparingBuilder;
 
   @override

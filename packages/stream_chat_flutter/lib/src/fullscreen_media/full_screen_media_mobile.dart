@@ -19,7 +19,9 @@ enum ReturnActionType {
   reply,
 }
 
-/// Callback when show message is tapped
+/// {@template showMessageCallback}
+/// The action to perform when "show message" is tapped
+/// {@endtemplate}
 typedef ShowMessageCallback = void Function(Message message, Channel channel);
 
 /// A full screen image widget

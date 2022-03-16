@@ -8,9 +8,11 @@ import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_deskt
     hide ShowMessageCallback, ReturnActionType;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template imageAttachment}
 /// Widget for showing an image attachment
+/// {@endtemplate}
 class ImageAttachment extends AttachmentWidget {
-  /// Constructor for creating a [ImageAttachment] widget
+  /// {@macro imageAttachment}
   const ImageAttachment({
     Key? key,
     required Message message,
@@ -28,19 +30,20 @@ class ImageAttachment extends AttachmentWidget {
           size: size,
         );
 
-  /// [MessageThemeData] for showing image title
+  /// The [MessageThemeData] to use for the image title
   final MessageThemeData messageTheme;
 
-  /// Flag for showing title
+  /// Flag for whether the title should be shown or not
   final bool showTitle;
 
-  /// Callback when show message is tapped
+  /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
 
-  /// Callback when attachment is returned to from other screens
+  /// The function to execute when the attachment is returned to from other
+  /// screens
   final ValueChanged<ReturnActionType>? onReturnAction;
 
-  /// Callback when attachment is tapped
+  /// The action to perform when the attachment is tapped
   final VoidCallback? onAttachmentTap;
 
   @override
