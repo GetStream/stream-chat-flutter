@@ -595,7 +595,6 @@ class MessageInputState extends State<MessageInput> {
             : Wrap(
                 children: <Widget>[
                   if (!widget.disableAttachments)
-                    //_buildAttachmentButton(context),
                     AttachmentButton(
                       color: _openFilePickerSection
                           ? _messageInputTheme.actionButtonColor!

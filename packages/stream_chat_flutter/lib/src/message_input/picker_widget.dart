@@ -44,12 +44,12 @@ class PickerWidget extends StatefulWidget {
 }
 
 class _PickerWidgetState extends State<PickerWidget> {
-  Future<bool>? requestPermission;
+  Future<PermissionState>? requestPermission;
 
   @override
   void initState() {
     super.initState();
-    requestPermission = PhotoManager.requestPermission();
+    requestPermission = PhotoManager.requestPermissionExtend();
   }
 
   @override
@@ -57,14 +57,15 @@ class _PickerWidgetState extends State<PickerWidget> {
     if (widget.filePickerIndex != 0) {
       return const Offstage();
     }
-    return FutureBuilder<bool>(
+    return FutureBuilder<PermissionState>(
       future: requestPermission,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Offstage();
         }
 
-        if (snapshot.data!) {
+        if ([PermissionState.authorized, PermissionState.limited]
+            .contains(snapshot.data)) {
           if (widget.containsFile) {
             return GestureDetector(
               onTap: () {
