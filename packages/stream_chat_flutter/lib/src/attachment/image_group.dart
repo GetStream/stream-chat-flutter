@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_desktop.dart'
-    hide ReturnActionType;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template imageGroup}
@@ -135,22 +132,12 @@ class ImageGroup extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => StreamChannel(
           channel: channel,
-          child: PlatformWidgetBuilder(
-            mobile: (context, child) => FullScreenMediaMobile(
-              mediaAttachments: images,
-              startIndex: index,
-              userName: message.user?.name,
-              message: message,
-              onShowMessage: onShowMessage,
-            ),
-            desktop: (context, child) => FullScreenMediaDesktop(
-              mediaAttachments: images,
-              startIndex: index,
-              userName: message.user?.name,
-              message: message,
-              onShowMessage: onShowMessage,
-              autoplayVideos: true,
-            ),
+          child: FullScreenMediaBuilder(
+            mediaAttachments: images,
+            startIndex: index,
+            userName: message.user!.name,
+            message: message,
+            onShowMessage: onShowMessage,
           ),
         ),
       ),

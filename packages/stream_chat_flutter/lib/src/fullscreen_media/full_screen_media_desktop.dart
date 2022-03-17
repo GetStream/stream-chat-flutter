@@ -6,20 +6,37 @@ import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
+import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Return action for coming back from pages
-enum ReturnActionType {
-  /// No return action
-  none,
-
-  /// Go to reply message action
-  reply,
+/// Returns an instance of [FullScreenMediaDesktop].
+///
+/// This should ONLY be used in [FullScreenMediaBuilder].
+FullScreenMediaWidget getFsm({
+  Key? key,
+  required Message message,
+  required List<Attachment> mediaAttachments,
+  required int startIndex,
+  required String userName,
+  ShowMessageCallback? onShowMessage,
+  AttachmentActionsBuilder? attachmentActionsModalBuilder,
+  required bool autoplayVideos,
+}) {
+  return FullScreenMediaDesktop(
+    key: key,
+    mediaAttachments: mediaAttachments,
+    message: message,
+    autoplayVideos: autoplayVideos,
+    startIndex: startIndex,
+    attachmentActionsModalBuilder: attachmentActionsModalBuilder,
+    onShowMessage: onShowMessage,
+    userName: userName,
+  );
 }
 
 /// A full screen image widget
-class FullScreenMediaDesktop extends StatefulWidget {
+class FullScreenMediaDesktop extends FullScreenMediaWidget {
   /// Instantiate a new FullScreenImage
   const FullScreenMediaDesktop({
     Key? key,

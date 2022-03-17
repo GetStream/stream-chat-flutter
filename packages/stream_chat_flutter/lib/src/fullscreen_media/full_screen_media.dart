@@ -6,23 +6,40 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
+import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
-/// Return action for coming back from pages
-enum ReturnActionType {
-  /// No return action
-  none,
-
-  /// Go to reply message action
-  reply,
+/// Returns an instance of [FullScreenMedia].
+///
+/// This should ONLY be used in [FullScreenMediaBuilder].
+FullScreenMediaWidget getFsm({
+  Key? key,
+  required Message message,
+  required List<Attachment> mediaAttachments,
+  required int startIndex,
+  required String userName,
+  ShowMessageCallback? onShowMessage,
+  AttachmentActionsBuilder? attachmentActionsModalBuilder,
+  required bool autoplayVideos,
+}) {
+  return FullScreenMedia(
+    key: key,
+    mediaAttachments: mediaAttachments,
+    message: message,
+    autoplayVideos: autoplayVideos,
+    startIndex: startIndex,
+    attachmentActionsModalBuilder: attachmentActionsModalBuilder,
+    onShowMessage: onShowMessage,
+    userName: userName,
+  );
 }
 
 /// A full screen image widget
-class FullScreenMediaMobile extends StatefulWidget {
+class FullScreenMedia extends FullScreenMediaWidget {
   /// Instantiate a new FullScreenImage
-  const FullScreenMediaMobile({
+  const FullScreenMedia({
     Key? key,
     required this.mediaAttachments,
     required this.message,
@@ -56,10 +73,10 @@ class FullScreenMediaMobile extends StatefulWidget {
   final bool autoplayVideos;
 
   @override
-  _FullScreenMediaMobileState createState() => _FullScreenMediaMobileState();
+  _FullScreenMediaState createState() => _FullScreenMediaState();
 }
 
-class _FullScreenMediaMobileState extends State<FullScreenMediaMobile>
+class _FullScreenMediaState extends State<FullScreenMedia>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
   late final PageController _pageController;

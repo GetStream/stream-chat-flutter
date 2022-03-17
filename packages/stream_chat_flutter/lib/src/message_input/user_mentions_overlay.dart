@@ -4,8 +4,6 @@ import 'package:stream_chat_flutter/src/user/user_mention_tile.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-
-
 /// Overlay for displaying users that can be mentioned.
 class UserMentionsOverlay extends StatefulWidget {
   /// Constructor for creating a [UserMentionsOverlay].

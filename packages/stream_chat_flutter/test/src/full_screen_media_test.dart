@@ -68,7 +68,7 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: FullScreenMediaMobile(
+            child: FullScreenMedia(
               mediaAttachments: [
                 Attachment(
                   type: 'image',

@@ -1,10 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
-import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_desktop.dart'
-    hide ReturnActionType;
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -256,22 +253,12 @@ class GiphyAttachment extends AttachmentWidget {
           final channel = StreamChannel.of(context).channel;
           return StreamChannel(
             channel: channel,
-            child: PlatformWidgetBuilder(
-              mobile: (context, child) => FullScreenMediaMobile(
-                mediaAttachments: message.attachments,
-                startIndex: message.attachments.indexOf(attachment),
-                userName: message.user?.name,
-                message: message,
-                onShowMessage: onShowMessage,
-              ),
-              desktop: (context, child) => FullScreenMediaDesktop(
-                mediaAttachments: message.attachments,
-                startIndex: message.attachments.indexOf(attachment),
-                message: message,
-                userName: message.user?.name,
-                onShowMessage: onShowMessage,
-                autoplayVideos: true,
-              ),
+            child: FullScreenMediaBuilder(
+              mediaAttachments: message.attachments,
+              startIndex: message.attachments.indexOf(attachment),
+              userName: message.user!.name,
+              message: message,
+              onShowMessage: onShowMessage,
             ),
           );
         },
