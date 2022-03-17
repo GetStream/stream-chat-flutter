@@ -153,7 +153,10 @@ class _StreamMediaListViewState extends State<StreamMediaListView> {
     ))
         .firstOrNull;
 
-    final media = await assetList?.getAssetListPaged(_currentPage, 50);
+    final media = await assetList?.getAssetListPaged(
+      page: _currentPage,
+      size: 50,
+    );
 
     if (media?.isNotEmpty == true) {
       setState(() {
@@ -192,7 +195,7 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
     DecoderCallback decode,
   ) async {
     assert(key == this, 'Checks MediaThumbnailProvider');
-    final bytes = await media.thumbData;
+    final bytes = await media.thumbnailData;
 
     return decode(bytes!);
   }

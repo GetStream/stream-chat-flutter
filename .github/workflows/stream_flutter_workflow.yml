@@ -15,6 +15,7 @@ on:
 jobs:
   analyze:
     timeout-minutes: 15
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: "Git Checkout"
@@ -45,6 +46,7 @@ jobs:
 
   format:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
     timeout-minutes: 15
     steps:
       - name: "Git Checkout"
@@ -73,6 +75,7 @@ jobs:
 
   test:
     runs-on: macos-latest
+    if: github.event.pull_request.draft == false
     timeout-minutes: 20
     steps:
       - name: "Git Checkout"
@@ -123,3 +126,12 @@ jobs:
         with:
           path: packages/stream_chat_flutter/coverage/lcov.info
           min_coverage: 67
+
+  draft-build:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == true
+    timeout-minutes: 1
+
+    steps:
+      - name: Run a one-line script
+        run: echo Draft PR, you are good.
