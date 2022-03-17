@@ -2,27 +2,33 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// {@macro gallery_footer_theme}
+@Deprecated("Use 'StreamGalleryFooterTheme' instead")
+typedef GalleryFooterTheme = StreamGalleryFooterTheme;
+
+/// {@template gallery_footer_theme}
 /// Overrides the default style of [GalleryFooter] descendants.
 ///
 /// See also:
 ///
-///  * [GalleryFooterThemeData], which is used to configure this theme.
-class GalleryFooterTheme extends InheritedTheme {
-  /// Creates an [GalleryFooterTheme].
+///  * [StreamGalleryFooterThemeData], which is used to configure this theme.
+/// {@endtemplate}
+class StreamGalleryFooterTheme extends InheritedTheme {
+  /// Creates an [StreamGalleryFooterTheme].
   ///
   /// The [data] parameter must not be null.
-  const GalleryFooterTheme({
+  const StreamGalleryFooterTheme({
     Key? key,
     required this.data,
     required Widget child,
   }) : super(key: key, child: child);
 
   /// The configuration of this theme.
-  final GalleryFooterThemeData data;
+  final StreamGalleryFooterThemeData data;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [GalleryFooterTheme] widget, then
+  /// If there is no enclosing [StreamGalleryFooterTheme] widget, then
   /// [StreamChatThemeData.galleryFooterTheme] is used.
   ///
   /// Typical usage is as follows:
@@ -30,34 +36,40 @@ class GalleryFooterTheme extends InheritedTheme {
   /// ```dart
   /// ImageFooterTheme theme = ImageFooterTheme.of(context);
   /// ```
-  static GalleryFooterThemeData of(BuildContext context) {
+  static StreamGalleryFooterThemeData of(BuildContext context) {
     final imageFooterTheme =
-        context.dependOnInheritedWidgetOfExactType<GalleryFooterTheme>();
+        context.dependOnInheritedWidgetOfExactType<StreamGalleryFooterTheme>();
     return imageFooterTheme?.data ??
         StreamChatTheme.of(context).galleryFooterTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) =>
-      GalleryFooterTheme(data: data, child: child);
+      StreamGalleryFooterTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(GalleryFooterTheme oldWidget) =>
+  bool updateShouldNotify(StreamGalleryFooterTheme oldWidget) =>
       data != oldWidget.data;
 }
 
+/// {@macro gallery_footer_theme_data}
+@Deprecated("Use 'StreamGalleryFooterThemeData' instead")
+typedef GalleryFooterThemeData = StreamGalleryFooterThemeData;
+
+/// {@template gallery_footer_theme_data}
 /// A style that overrides the default appearance of [GalleryFooter]s when used
-/// with [GalleryFooterTheme] or with the overall [StreamChatTheme]'s
+/// with [StreamGalleryFooterTheme] or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.galleryFooterTheme].
 ///
 /// See also:
 ///
-/// * [GalleryFooterTheme], the theme which is configured with this class.
+/// * [StreamGalleryFooterTheme], the theme which is configured with this class.
 /// * [StreamChatThemeData.galleryFooterTheme], which can be used to override
 /// the default style for [GalleryFooter]s below the overall [StreamChatTheme].
-class GalleryFooterThemeData with Diagnosticable {
-  /// Creates an [GalleryFooterThemeData].
-  const GalleryFooterThemeData({
+/// {@endtemplate}
+class StreamGalleryFooterThemeData with Diagnosticable {
+  /// Creates an [StreamGalleryFooterThemeData].
+  const StreamGalleryFooterThemeData({
     this.backgroundColor,
     this.shareIconColor,
     this.titleTextStyle,
@@ -108,8 +120,8 @@ class GalleryFooterThemeData with Diagnosticable {
   /// Defaults to [ColorTheme.textHighEmphasis].
   final Color? bottomSheetCloseIconColor;
 
-  /// Copies this [GalleryFooterThemeData] to another.
-  GalleryFooterThemeData copyWith({
+  /// Copies this [StreamGalleryFooterThemeData] to another.
+  StreamGalleryFooterThemeData copyWith({
     Color? backgroundColor,
     Color? shareIconColor,
     TextStyle? titleTextStyle,
@@ -119,7 +131,7 @@ class GalleryFooterThemeData with Diagnosticable {
     TextStyle? bottomSheetPhotosTextStyle,
     Color? bottomSheetCloseIconColor,
   }) =>
-      GalleryFooterThemeData(
+      StreamGalleryFooterThemeData(
         backgroundColor: backgroundColor ?? this.backgroundColor,
         shareIconColor: shareIconColor ?? this.shareIconColor,
         titleTextStyle: titleTextStyle ?? this.titleTextStyle,
@@ -137,12 +149,12 @@ class GalleryFooterThemeData with Diagnosticable {
   /// Linearly interpolate between two [GalleryFooter] themes.
   ///
   /// All the properties must be non-null.
-  GalleryFooterThemeData lerp(
-    GalleryFooterThemeData a,
-    GalleryFooterThemeData b,
+  StreamGalleryFooterThemeData lerp(
+    StreamGalleryFooterThemeData a,
+    StreamGalleryFooterThemeData b,
     double t,
   ) =>
-      GalleryFooterThemeData(
+      StreamGalleryFooterThemeData(
         backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
         shareIconColor: Color.lerp(a.shareIconColor, b.shareIconColor, t),
         titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
@@ -167,8 +179,8 @@ class GalleryFooterThemeData with Diagnosticable {
         ),
       );
 
-  /// Merges one [GalleryFooterThemeData] with another.
-  GalleryFooterThemeData merge(GalleryFooterThemeData? other) {
+  /// Merges one [StreamGalleryFooterThemeData] with another.
+  StreamGalleryFooterThemeData merge(StreamGalleryFooterThemeData? other) {
     if (other == null) return this;
     return copyWith(
       backgroundColor: other.backgroundColor,
@@ -185,7 +197,7 @@ class GalleryFooterThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is GalleryFooterThemeData &&
+      other is StreamGalleryFooterThemeData &&
           runtimeType == other.runtimeType &&
           backgroundColor == other.backgroundColor &&
           shareIconColor == other.shareIconColor &&

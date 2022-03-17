@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro image_group}
+@Deprecated("Use 'StreamImageGroup' instead")
+typedef ImageGroup = StreamImageGroup;
+
+/// {@template image_group}
 /// Widget for constructing a group of images in message
-class ImageGroup extends StatelessWidget {
-  /// Constructor for creating [ImageGroup] widget
-  const ImageGroup({
+/// {@endtemplate}
+class StreamImageGroup extends StatelessWidget {
+  /// Constructor for creating [StreamImageGroup] widget
+  const StreamImageGroup({
     Key? key,
     required this.images,
     required this.message,
@@ -27,8 +33,8 @@ class ImageGroup extends StatelessWidget {
   /// Message which images are attached to
   final Message message;
 
-  /// [MessageThemeData] to apply to message
-  final MessageThemeData messageTheme;
+  /// [StreamMessageThemeData] to apply to message
+  final StreamMessageThemeData messageTheme;
 
   /// Size of iamges
   final Size size;
@@ -129,7 +135,7 @@ class ImageGroup extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => StreamChannel(
           channel: channel,
-          child: FullScreenMedia(
+          child: StreamFullScreenMedia(
             mediaAttachments: images,
             startIndex: index,
             userName: message.user?.name,
@@ -142,7 +148,7 @@ class ImageGroup extends StatelessWidget {
     if (res != null) onReturnAction?.call(res);
   }
 
-  Widget _buildImage(BuildContext context, int index) => ImageAttachment(
+  Widget _buildImage(BuildContext context, int index) => StreamImageAttachment(
         attachment: images[index],
         size: size,
         message: message,

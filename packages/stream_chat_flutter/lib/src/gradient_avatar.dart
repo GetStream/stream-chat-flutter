@@ -3,10 +3,16 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+/// {@macro gradient_avatar}
+@Deprecated("Use 'StreamGradientAvatar' instead")
+typedef GradientAvatar = StreamGradientAvatar;
+
+/// {@template gradient_avatar}
 /// Fallback user avatar with a polygon gradient overlayed with text
-class GradientAvatar extends StatefulWidget {
-  /// Constructor for [GradientAvatar]
-  const GradientAvatar({
+/// {@endtemplate}
+class StreamGradientAvatar extends StatefulWidget {
+  /// Constructor for [StreamGradientAvatar]
+  const StreamGradientAvatar({
     Key? key,
     required this.name,
     required this.userId,
@@ -19,10 +25,10 @@ class GradientAvatar extends StatefulWidget {
   final String userId;
 
   @override
-  _GradientAvatarState createState() => _GradientAvatarState();
+  _StreamGradientAvatarState createState() => _StreamGradientAvatarState();
 }
 
-class _GradientAvatarState extends State<GradientAvatar> {
+class _StreamGradientAvatarState extends State<StreamGradientAvatar> {
   @override
   Widget build(BuildContext context) => Center(
         child: RepaintBoundary(

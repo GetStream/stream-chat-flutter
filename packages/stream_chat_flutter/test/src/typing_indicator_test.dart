@@ -71,7 +71,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: const Scaffold(
-              body: TypingIndicator(
+              body: StreamTypingIndicator(
                 key: typingKey,
               ),
             ),

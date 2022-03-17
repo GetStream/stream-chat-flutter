@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/src/typing_indicator.dart';
 import 'package:stream_chat_flutter/src/unread_indicator.dart';
 import 'package:stream_chat_flutter/src/v4/stream_channel_avatar.dart';
 import 'package:stream_chat_flutter/src/v4/stream_channel_name.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// A widget that displays a channel preview.
@@ -131,7 +132,7 @@ class StreamChannelListTile extends StatelessWidget {
     final channelState = channel.state!;
     final currentUser = channel.client.state.currentUser!;
 
-    final channelPreviewTheme = ChannelPreviewTheme.of(context);
+    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
 
     final leading = this.leading ??
         StreamChannelAvatar(
@@ -182,7 +183,7 @@ class StreamChannelListTile extends StatelessWidget {
                     return const Offstage();
                   }
                   return unreadIndicatorBuilder?.call(context) ??
-                      UnreadIndicator(cid: channel.cid);
+                      StreamUnreadIndicator(cid: channel.cid);
                 },
               ),
             ],
@@ -213,7 +214,7 @@ class StreamChannelListTile extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 4),
                     child:
                         sendingIndicatorBuilder?.call(context, lastMessage) ??
-                            SendingIndicator(
+                            StreamSendingIndicator(
                               message: lastMessage,
                               size: channelPreviewTheme.indicatorIconSize,
                               isMessageRead: channelState
@@ -318,7 +319,7 @@ class ChannelListTileSubtitle extends StatelessWidget {
         ],
       );
     }
-    return TypingIndicator(
+    return StreamTypingIndicator(
       channel: channel,
       style: textStyle,
       alternativeWidget: ChannelLastMessageText(
@@ -359,9 +360,17 @@ class ChannelLastMessageText extends StatelessWidget {
 
           if (lastMessage == null) return const Offstage();
 
-          final lastMessageText = lastMessage.text;
+          final lastMessageText = lastMessage
+              .translate(channel.client.state.currentUser?.language ?? 'en')
+              .replaceMentions(linkify: false)
+              .text;
           final lastMessageAttachments = lastMessage.attachments;
           final lastMessageMentionedUsers = lastMessage.mentionedUsers;
+
+          final mentionedUsersRegex = RegExp(
+            lastMessageMentionedUsers.map((it) => '@${it.name}').join('|'),
+            caseSensitive: false,
+          );
 
           final messageTextParts = [
             ...lastMessageAttachments.map((it) {
@@ -376,7 +385,11 @@ class ChannelLastMessageText extends StatelessWidget {
                   ? (it.title ?? 'File')
                   : '${it.title ?? 'File'} , ';
             }),
-            if (lastMessageText != null) lastMessageText,
+            if (lastMessageText != null)
+              if (lastMessageMentionedUsers.isNotEmpty)
+                ...mentionedUsersRegex.allMatchesWithSep(lastMessageText)
+              else
+                lastMessageText,
           ];
 
           final fontStyle = (lastMessage.isSystem || lastMessage.isDeleted)
@@ -395,7 +408,7 @@ class ChannelLastMessageText extends StatelessWidget {
               if (lastMessageMentionedUsers.isNotEmpty &&
                   lastMessageMentionedUsers.any((it) => '@${it.name}' == part))
                 TextSpan(
-                  text: '$part ',
+                  text: part,
                   style: mentionsTextStyle,
                 )
               else if (lastMessageAttachments.isNotEmpty &&
@@ -403,12 +416,14 @@ class ChannelLastMessageText extends StatelessWidget {
                       .where((it) => it.title != null)
                       .any((it) => it.title == part))
                 TextSpan(
-                  text: '$part ',
-                  style: regularTextStyle,
+                  text: part,
+                  style: regularTextStyle?.copyWith(
+                    fontStyle: FontStyle.italic,
+                  ),
                 )
               else
                 TextSpan(
-                  text: part == messageTextParts.last ? part : '$part ',
+                  text: part,
                   style: regularTextStyle,
                 ),
           ];
@@ -421,4 +436,19 @@ class ChannelLastMessageText extends StatelessWidget {
           );
         },
       );
+}
+
+extension _RegExpX on RegExp {
+  List<String> allMatchesWithSep(String input, [int start = 0]) {
+    final result = <String>[];
+    for (final match in allMatches(input, start)) {
+      result.add(input.substring(start, match.start));
+      // ignore: cascade_invocations
+      result.add(match[0]!);
+      // ignore: parameter_assignments
+      start = match.end;
+    }
+    result.add(input.substring(start));
+    return result;
+  }
 }

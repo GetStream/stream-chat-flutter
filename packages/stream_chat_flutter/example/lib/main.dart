@@ -87,7 +87,7 @@ class MyApp extends StatelessWidget {
 
 /// A list of messages sent in the current channel.
 ///
-/// This is implemented using [MessageListView], a widget that provides query
+/// This is implemented using [StreamMessageListView], a widget that provides query
 /// functionalities fetching the messages from the api and showing them in a
 /// listView.
 class ChannelPage extends StatelessWidget {
@@ -98,13 +98,13 @@ class ChannelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: const ChannelHeader(),
+        appBar: const StreamChannelHeader(),
         body: Column(
           children: const <Widget>[
             Expanded(
-              child: MessageListView(),
+              child: StreamMessageListView(),
             ),
-            MessageInput(attachmentLimit: 3),
+            StreamMessageInput(attachmentLimit: 3),
           ],
         ),
       );

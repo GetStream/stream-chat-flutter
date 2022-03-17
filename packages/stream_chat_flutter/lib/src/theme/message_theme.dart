@@ -2,11 +2,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
 
+/// {@macro message_theme_data}
+@Deprecated("Use 'StreamMessageThemeData' instead")
+typedef MessageThemeData = StreamMessageThemeData;
+
+/// {@template message_theme_data}
 /// Class for getting message theme
+/// {@endtemplate}
 // ignore: prefer-match-file-name
-class MessageThemeData with Diagnosticable {
-  /// Creates a [MessageThemeData].
-  const MessageThemeData({
+class StreamMessageThemeData with Diagnosticable {
+  /// Creates a [StreamMessageThemeData].
+  const StreamMessageThemeData({
     this.repliesStyle,
     this.messageTextStyle,
     this.messageAuthorStyle,
@@ -52,13 +58,13 @@ class MessageThemeData with Diagnosticable {
   final Color? reactionsMaskColor;
 
   /// Theme of the avatar
-  final AvatarThemeData? avatarTheme;
+  final StreamAvatarThemeData? avatarTheme;
 
   /// Background color for messages with url attachments.
   final Color? linkBackgroundColor;
 
   /// Copy with a theme
-  MessageThemeData copyWith({
+  StreamMessageThemeData copyWith({
     TextStyle? messageTextStyle,
     TextStyle? messageAuthorStyle,
     TextStyle? messageLinksStyle,
@@ -66,13 +72,13 @@ class MessageThemeData with Diagnosticable {
     TextStyle? repliesStyle,
     Color? messageBackgroundColor,
     Color? messageBorderColor,
-    AvatarThemeData? avatarTheme,
+    StreamAvatarThemeData? avatarTheme,
     Color? reactionsBackgroundColor,
     Color? reactionsBorderColor,
     Color? reactionsMaskColor,
     Color? linkBackgroundColor,
   }) =>
-      MessageThemeData(
+      StreamMessageThemeData(
         messageTextStyle: messageTextStyle ?? this.messageTextStyle,
         messageAuthorStyle: messageAuthorStyle ?? this.messageAuthorStyle,
         messageLinksStyle: messageLinksStyle ?? this.messageLinksStyle,
@@ -89,11 +95,15 @@ class MessageThemeData with Diagnosticable {
         linkBackgroundColor: linkBackgroundColor ?? this.linkBackgroundColor,
       );
 
-  /// Linearly interpolate from one [MessageThemeData] to another.
-  MessageThemeData lerp(MessageThemeData a, MessageThemeData b, double t) =>
-      MessageThemeData(
-        avatarTheme:
-            const AvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+  /// Linearly interpolate from one [StreamMessageThemeData] to another.
+  StreamMessageThemeData lerp(
+    StreamMessageThemeData a,
+    StreamMessageThemeData b,
+    double t,
+  ) =>
+      StreamMessageThemeData(
+        avatarTheme: const StreamAvatarThemeData()
+            .lerp(a.avatarTheme!, b.avatarTheme!, t),
         createdAtStyle: TextStyle.lerp(a.createdAtStyle, b.createdAtStyle, t),
         messageAuthorStyle:
             TextStyle.lerp(a.messageAuthorStyle, b.messageAuthorStyle, t),
@@ -120,7 +130,7 @@ class MessageThemeData with Diagnosticable {
       );
 
   /// Merge with a theme
-  MessageThemeData merge(MessageThemeData? other) {
+  StreamMessageThemeData merge(StreamMessageThemeData? other) {
     if (other == null) return this;
     return copyWith(
       messageTextStyle: messageTextStyle?.merge(other.messageTextStyle) ??
@@ -146,7 +156,7 @@ class MessageThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MessageThemeData &&
+      other is StreamMessageThemeData &&
           runtimeType == other.runtimeType &&
           messageTextStyle == other.messageTextStyle &&
           messageAuthorStyle == other.messageAuthorStyle &&

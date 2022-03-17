@@ -58,24 +58,24 @@ class MyApp extends StatelessWidget {
     final defaultTheme = StreamChatThemeData.fromTheme(themeData);
     final colorTheme = defaultTheme.colorTheme;
     final customTheme = defaultTheme.merge(StreamChatThemeData(
-      channelPreviewTheme: ChannelPreviewThemeData(
-        avatarTheme: AvatarThemeData(
+      channelPreviewTheme: StreamChannelPreviewThemeData(
+        avatarTheme: StreamAvatarThemeData(
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-      messageListViewTheme: const MessageListViewThemeData(
+      messageListViewTheme: const StreamMessageListViewThemeData(
         backgroundColor: Colors.grey,
         backgroundImage: DecorationImage(
           image: AssetImage('assets/background_doodle.png'),
           fit: BoxFit.cover,
         ),
       ),
-      otherMessageTheme: MessageThemeData(
+      otherMessageTheme: StreamMessageThemeData(
         messageBackgroundColor: colorTheme.textHighEmphasis,
         messageTextStyle: TextStyle(
           color: colorTheme.barsBg,
         ),
-        avatarTheme: AvatarThemeData(
+        avatarTheme: StreamAvatarThemeData(
           borderRadius: BorderRadius.circular(8),
         ),
       ),
@@ -137,17 +137,17 @@ class ChannelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: const ChannelHeader(),
+        appBar: const StreamChannelHeader(),
         body: Column(
           children: <Widget>[
             Expanded(
-              child: MessageListView(
+              child: StreamMessageListView(
                 threadBuilder: (_, parentMessage) => ThreadPage(
                   parent: parentMessage,
                 ),
               ),
             ),
-            const MessageInput(),
+            const StreamMessageInput(),
           ],
         ),
       );
@@ -165,17 +165,17 @@ class ThreadPage extends StatelessWidget {
   // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ThreadHeader(
+      appBar: StreamThreadHeader(
         parent: parent!,
       ),
       body: Column(
         children: <Widget>[
           Expanded(
-            child: MessageListView(
+            child: StreamMessageListView(
               parentMessage: parent,
             ),
           ),
-          MessageInput(
+          StreamMessageInput(
             messageInputController: MessageInputController(
               message: Message(parentId: parent!.id),
             ),

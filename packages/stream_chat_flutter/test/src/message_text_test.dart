@@ -65,7 +65,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: Scaffold(
-              body: MessageText(
+              body: StreamMessageText(
                   message: Message(
                     text: 'demo',
                   ),
@@ -84,7 +84,7 @@ void main() {
     final clientState = MockClientState();
     final channel = MockChannel();
     final channelState = MockChannelState();
-    const messageTheme = MessageThemeData();
+    const messageTheme = StreamMessageThemeData();
 
     final currentUser = OwnUser(
       id: 'sahil',
@@ -122,7 +122,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  body: MessageText(
+                  body: StreamMessageText(
                     message: message,
                     messageTheme: messageTheme,
                   ),
@@ -158,7 +158,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  body: MessageText(
+                  body: StreamMessageText(
                     message: message,
                     messageTheme: messageTheme,
                   ),
@@ -221,7 +221,7 @@ cool.''';
             child: StreamChannel(
               channel: channel,
               child: Scaffold(
-                body: MessageText(
+                body: StreamMessageText(
                   message: Message(
                     text: messageText,
                   ),

@@ -9,18 +9,20 @@ class MockStreamChatClient extends Mock implements StreamChatClient {}
 
 void main() {
   test('MessageListViewThemeData copyWith, ==, hashCode basics', () {
-    expect(const MessageListViewThemeData(),
-        const MessageListViewThemeData().copyWith());
-    expect(const MessageListViewThemeData().hashCode,
-        const MessageListViewThemeData().copyWith().hashCode);
+    expect(const StreamMessageListViewThemeData(),
+        const StreamMessageListViewThemeData().copyWith());
+    expect(const StreamMessageListViewThemeData().hashCode,
+        const StreamMessageListViewThemeData().copyWith().hashCode);
   });
 
   test(
       '''Light MessageListViewThemeData lerps completely to dark MessageListViewThemeData''',
       () {
     expect(
-        const MessageListViewThemeData().lerp(_messageListViewThemeDataControl,
-            _messageListViewThemeDataControlDark, 1),
+        const StreamMessageListViewThemeData().lerp(
+            _messageListViewThemeDataControl,
+            _messageListViewThemeDataControlDark,
+            1),
         _messageListViewThemeDataControlDark);
   });
 
@@ -28,8 +30,10 @@ void main() {
       '''Light MessageListViewThemeData lerps halfway to dark MessageListViewThemeData''',
       () {
     expect(
-        const MessageListViewThemeData().lerp(_messageListViewThemeDataControl,
-            _messageListViewThemeDataControlDark, 0.5),
+        const StreamMessageListViewThemeData().lerp(
+            _messageListViewThemeDataControl,
+            _messageListViewThemeDataControlDark,
+            0.5),
         _messageListViewThemeDataControlHalfLerp);
   });
 
@@ -37,7 +41,7 @@ void main() {
       '''Dark MessageListViewThemeData lerps completely to light MessageListViewThemeData''',
       () {
     expect(
-        const MessageListViewThemeData().lerp(
+        const StreamMessageListViewThemeData().lerp(
             _messageListViewThemeDataControlDark,
             _messageListViewThemeDataControl,
             1),
@@ -67,7 +71,7 @@ void main() {
             return Scaffold(
               body: StreamChannel(
                 channel: MockChannel(),
-                child: const MessageListView(),
+                child: const StreamMessageListView(),
               ),
             );
           },
@@ -75,7 +79,7 @@ void main() {
       ),
     );
 
-    final messageListViewTheme = MessageListViewTheme.of(_context);
+    final messageListViewTheme = StreamMessageListViewTheme.of(_context);
     expect(messageListViewTheme.backgroundColor,
         _messageListViewThemeDataControl.backgroundColor);
   });
@@ -97,7 +101,7 @@ void main() {
             return Scaffold(
               body: StreamChannel(
                 channel: MockChannel(),
-                child: const MessageListView(),
+                child: const StreamMessageListView(),
               ),
             );
           },
@@ -105,7 +109,7 @@ void main() {
       ),
     );
 
-    final messageListViewTheme = MessageListViewTheme.of(_context);
+    final messageListViewTheme = StreamMessageListViewTheme.of(_context);
     expect(messageListViewTheme.backgroundColor,
         _messageListViewThemeDataControlDark.backgroundColor);
   });
@@ -128,7 +132,7 @@ void main() {
             return Scaffold(
               body: StreamChannel(
                 channel: MockChannel(),
-                child: const MessageListView(),
+                child: const StreamMessageListView(),
               ),
             );
           },
@@ -136,25 +140,25 @@ void main() {
       ),
     );
 
-    final messageListViewTheme = MessageListViewTheme.of(_context);
+    final messageListViewTheme = StreamMessageListViewTheme.of(_context);
     expect(messageListViewTheme.backgroundImage,
         _messageListViewThemeDataImage.backgroundImage);
   });
 }
 
-final _messageListViewThemeDataControl = MessageListViewThemeData(
-  backgroundColor: ColorTheme.light().barsBg,
+final _messageListViewThemeDataControl = StreamMessageListViewThemeData(
+  backgroundColor: StreamColorTheme.light().barsBg,
 );
 
-const _messageListViewThemeDataControlHalfLerp = MessageListViewThemeData(
+const _messageListViewThemeDataControlHalfLerp = StreamMessageListViewThemeData(
   backgroundColor: Color(0xff87898b),
 );
 
-final _messageListViewThemeDataControlDark = MessageListViewThemeData(
-  backgroundColor: ColorTheme.dark().barsBg,
+final _messageListViewThemeDataControlDark = StreamMessageListViewThemeData(
+  backgroundColor: StreamColorTheme.dark().barsBg,
 );
 
-const _messageListViewThemeDataImage = MessageListViewThemeData(
+const _messageListViewThemeDataImage = StreamMessageListViewThemeData(
   backgroundImage: DecorationImage(
     image: AssetImage('example/assets/background_doodle.png'),
     fit: BoxFit.cover,

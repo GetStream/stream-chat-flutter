@@ -10,10 +10,16 @@ import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// {@macro file_attachment}
+@Deprecated("Use 'StreamFileAttachment' instead")
+typedef FileAttachment = StreamFileAttachment;
+
+/// {@template file_attachment}
 /// Widget for displaying file attachments
-class FileAttachment extends AttachmentWidget {
+/// {@endtemplate}
+class StreamFileAttachment extends StreamAttachmentWidget {
   /// Constructor for creating a widget when attachment is of type 'file'
-  const FileAttachment({
+  const StreamFileAttachment({
     Key? key,
     required Message message,
     required Attachment attachment,
@@ -157,7 +163,7 @@ class FileAttachment extends AttachmentWidget {
         type: MaterialType.transparency,
         shape: _getDefaultShape(context),
         child: source.when(
-          local: () => VideoThumbnailImage(
+          local: () => StreamVideoThumbnailImage(
             fit: BoxFit.cover,
             video: attachment.file!.path!,
             placeholderBuilder: (_) => const Center(
@@ -168,7 +174,7 @@ class FileAttachment extends AttachmentWidget {
               ),
             ),
           ),
-          network: () => VideoThumbnailImage(
+          network: () => StreamVideoThumbnailImage(
             fit: BoxFit.cover,
             video: attachment.assetUrl!,
             placeholderBuilder: (_) => const Center(
@@ -278,7 +284,7 @@ class FileAttachment extends AttachmentWidget {
     );
     return attachment.uploadState.when(
       preparing: () => Text(fileSize(size), style: textStyle),
-      inProgress: (sent, total) => UploadProgressIndicator(
+      inProgress: (sent, total) => StreamUploadProgressIndicator(
         uploaded: sent,
         total: total,
         showBackground: false,

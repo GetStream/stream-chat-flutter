@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Button for showing visual component of slow mode.
-class CountdownButton extends StatelessWidget {
-  /// Constructor for creating [CountdownButton].
-  const CountdownButton({
+class StreamCountdownButton extends StatelessWidget {
+  /// Constructor for creating [StreamCountdownButton].
+  const StreamCountdownButton({
     Key? key,
     required this.count,
   }) : super(key: key);

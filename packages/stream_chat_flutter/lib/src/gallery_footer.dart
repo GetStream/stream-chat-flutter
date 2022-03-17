@@ -9,10 +9,17 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro gallery_footer}
+@Deprecated("Use 'StreamGalleryFooter' instead")
+typedef GalleryFooter = StreamGalleryFooter;
+
+/// {@template gallery_footer}
 /// Footer widget for media display
-class GalleryFooter extends StatefulWidget implements PreferredSizeWidget {
+/// {@endtemplate}
+class StreamGalleryFooter extends StatefulWidget
+    implements PreferredSizeWidget {
   /// Creates a channel header
-  const GalleryFooter({
+  const StreamGalleryFooter({
     Key? key,
     required this.message,
     this.onBackPressed,
@@ -51,22 +58,22 @@ class GalleryFooter extends StatefulWidget implements PreferredSizeWidget {
   /// Callback when media is selected
   final ValueChanged<int>? mediaSelectedCallBack;
 
-  /// The background color of this [GalleryFooter].
+  /// The background color of this [StreamGalleryFooter].
   final Color? backgroundColor;
 
   @override
-  _GalleryFooterState createState() => _GalleryFooterState();
+  _StreamGalleryFooterState createState() => _StreamGalleryFooterState();
 
   @override
   final Size preferredSize;
 }
 
-class _GalleryFooterState extends State<GalleryFooter> {
+class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
   @override
   Widget build(BuildContext context) {
     const showShareButton = !kIsWeb;
     final mediaQueryData = MediaQuery.of(context);
-    final galleryFooterThemeData = GalleryFooterTheme.of(context);
+    final galleryFooterThemeData = StreamGalleryFooterTheme.of(context);
     return SizedBox.fromSize(
       size: Size(
         mediaQueryData.size.width,
@@ -149,7 +156,7 @@ class _GalleryFooterState extends State<GalleryFooter> {
 
   void _showPhotosModal(context) {
     final chatThemeData = StreamChatTheme.of(context);
-    final galleryFooterThemeData = GalleryFooterTheme.of(context);
+    final galleryFooterThemeData = StreamGalleryFooterTheme.of(context);
     showModalBottomSheet(
       context: context,
       barrierColor: galleryFooterThemeData.bottomSheetBarrierColor,
@@ -222,7 +229,7 @@ class _GalleryFooterState extends State<GalleryFooter> {
                           onTap: () => widget.mediaSelectedCallBack!(index),
                           child: FittedBox(
                             fit: BoxFit.cover,
-                            child: VideoThumbnailImage(
+                            child: StreamVideoThumbnailImage(
                               video: (attachment.file?.path ??
                                   attachment.assetUrl)!,
                             ),
@@ -264,7 +271,7 @@ class _GalleryFooterState extends State<GalleryFooter> {
                                     ),
                                   ],
                                 ),
-                                child: UserAvatar(
+                                child: StreamUserAvatar(
                                   user: widget.message.user!,
                                   constraints:
                                       BoxConstraints.tight(const Size(24, 24)),

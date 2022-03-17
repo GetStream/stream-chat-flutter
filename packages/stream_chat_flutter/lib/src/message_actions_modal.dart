@@ -3,10 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro message_actions_modal}
+@Deprecated("Use 'StreamMessageActionsModal' instead")
+typedef MessageActionsModal = StreamMessageActionsModal;
+
+/// {@template message_actions_modal}
 /// Constructs a modal with actions for a message
-class MessageActionsModal extends StatefulWidget {
-  /// Constructor for creating a [MessageActionsModal] widget
-  const MessageActionsModal({
+/// {@endtemplate}
+class StreamMessageActionsModal extends StatefulWidget {
+  /// Constructor for creating a [StreamMessageActionsModal] widget
+  const StreamMessageActionsModal({
     Key? key,
     required this.message,
     required this.messageWidget,
@@ -43,8 +49,8 @@ class MessageActionsModal extends StatefulWidget {
   /// Message in focus for actions
   final Message message;
 
-  /// [MessageThemeData] for message
-  final MessageThemeData messageTheme;
+  /// [StreamMessageThemeData] for message
+  final StreamMessageThemeData messageTheme;
 
   /// Flag for showing reactions
   final bool? showReactions;
@@ -80,13 +86,14 @@ class MessageActionsModal extends StatefulWidget {
   final bool reverse;
 
   /// List of custom actions
-  final List<MessageAction> customActions;
+  final List<StreamMessageAction> customActions;
 
   @override
-  _MessageActionsModalState createState() => _MessageActionsModalState();
+  _StreamMessageActionsModalState createState() =>
+      _StreamMessageActionsModalState();
 }
 
-class _MessageActionsModalState extends State<MessageActionsModal> {
+class _StreamMessageActionsModalState extends State<StreamMessageActionsModal> {
   bool _showActions = true;
   late List<String> _userPermissions;
   late bool _isMyMessage;
@@ -159,7 +166,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             : -(1.2 - divFactor)),
                     0,
                   ),
-                  child: ReactionPicker(
+                  child: StreamReactionPicker(
                     message: widget.message,
                   ),
                 ),
@@ -268,7 +275,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   InkWell _buildCustomAction(
     BuildContext context,
-    MessageAction messageAction,
+    StreamMessageAction messageAction,
   ) =>
       InkWell(
         onTap: () {
@@ -589,7 +596,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       elevation: 2,
       clipBehavior: Clip.hardEdge,
       isScrollControlled: true,
-      backgroundColor: MessageInputTheme.of(context).inputBackgroundColor,
+      backgroundColor: StreamMessageInputTheme.of(context).inputBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16),
@@ -631,7 +638,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
               if (widget.editMessageInputBuilder != null)
                 widget.editMessageInputBuilder!(context, widget.message)
               else
-                MessageInput(
+                StreamMessageInput(
                   messageInputController: MessageInputController(
                     message: widget.message,
                   ),

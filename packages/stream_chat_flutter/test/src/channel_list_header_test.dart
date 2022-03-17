@@ -22,14 +22,15 @@ void main() {
           home: StreamChat(
             client: client,
             child: const Scaffold(
-              body: ChannelListHeader(),
+              body: StreamChannelListHeader(),
             ),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      final userAvatar = tester.widget<UserAvatar>(find.byType(UserAvatar));
+      final userAvatar =
+          tester.widget<StreamUserAvatar>(find.byType(StreamUserAvatar));
       expect(userAvatar.user, clientState.currentUser);
       expect(find.byType(StreamNeumorphicButton), findsOneWidget);
       expect(find.text('Stream Chat'), findsOneWidget);
@@ -52,7 +53,7 @@ void main() {
           home: StreamChat(
             client: client,
             child: const Scaffold(
-              body: ChannelListHeader(
+              body: StreamChannelListHeader(
                 showConnectionStateTile: true,
               ),
             ),
@@ -81,7 +82,7 @@ void main() {
           home: StreamChat(
             client: client,
             child: const Scaffold(
-              body: ChannelListHeader(
+              body: StreamChannelListHeader(
                 showConnectionStateTile: true,
               ),
             ),
@@ -110,7 +111,7 @@ void main() {
           home: StreamChat(
             client: client,
             child: Scaffold(
-              body: ChannelListHeader(
+              body: StreamChannelListHeader(
                 titleBuilder: (context, status, client) => const Text('TITLE'),
                 subtitle: const Text('SUBTITLE'),
                 leading: const Text('LEADING'),
@@ -150,7 +151,7 @@ void main() {
           home: StreamChat(
             client: client,
             child: Scaffold(
-              body: ChannelListHeader(
+              body: StreamChannelListHeader(
                 preNavigationCallback: () {
                   tapped = true;
                 },
@@ -161,7 +162,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.byType(UserAvatar));
+      await tester.tap(find.byType(StreamUserAvatar));
       expect(tapped, true);
     },
   );
@@ -183,7 +184,7 @@ void main() {
           home: StreamChat(
             client: client,
             child: Scaffold(
-              body: ChannelListHeader(
+              body: StreamChannelListHeader(
                 onUserAvatarTap: (u) {
                   tapped++;
                 },
@@ -197,7 +198,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.byType(UserAvatar));
+      await tester.tap(find.byType(StreamUserAvatar));
       await tester.tap(find.byType(StreamNeumorphicButton));
       expect(tapped, 2);
     },

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/src/channel_bottom_sheet.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -11,7 +10,7 @@ typedef ChannelTapCallback = void Function(Channel, Widget?);
 /// Callback called when tapping on a channel
 typedef ChannelInfoCallback = void Function(Channel);
 
-/// Builder used to create a custom [ChannelPreview] from a [Channel]
+/// Builder used to create a custom [StreamChannelPreview] from a [Channel]
 typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 
 /// Callback for when 'View Info' is tapped
@@ -52,10 +51,7 @@ typedef ViewInfoCallback = void Function(Channel);
 /// The widget components render the ui based on the first ancestor of
 /// type [StreamChatTheme].
 /// Modify it to change the widget appearance.
-@Deprecated(
-  "'ChannelListView' is deprecated and shouldn't be used. "
-  "Please use 'StreamChannelListView' instead.",
-)
+@Deprecated("Use 'StreamChannelListView' instead")
 class ChannelListView extends StatefulWidget {
   /// Instantiate a new ChannelListView
   ChannelListView({
@@ -248,7 +244,8 @@ class _ChannelListViewState extends State<ChannelListView> {
       child: child,
     );
 
-    final backgroundColor = ChannelListViewTheme.of(context).backgroundColor;
+    final backgroundColor =
+        StreamChannelListViewTheme.of(context).backgroundColor;
 
     if (backgroundColor != null) {
       return ColoredBox(
@@ -550,7 +547,8 @@ class _ChannelListViewState extends State<ChannelListView> {
                           context: context,
                           builder: (context) => StreamChannel(
                             channel: channel,
-                            child: ChannelBottomSheet(
+                            child: StreamChannelInfoBottomSheet(
+                              channel: channel,
                               onViewInfoTap: () {
                                 widget.onViewInfoTap?.call(channel);
                               },
@@ -639,7 +637,7 @@ class _ChannelListViewState extends State<ChannelListView> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ChannelAvatar(
+          StreamChannelAvatar(
             channel: channel,
             borderRadius: BorderRadius.circular(32),
             selected: selected,
@@ -654,8 +652,9 @@ class _ChannelListViewState extends State<ChannelListView> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: StreamChannel(
               channel: channel,
-              child: const ChannelName(
-                textStyle: TextStyle(
+              child: StreamChannelName(
+                channel: channel,
+                textStyle: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),

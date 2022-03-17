@@ -34,7 +34,7 @@ void main() {
             child: SizedBox(
               child: StreamChannel(
                 channel: channel,
-                child: MessageActionsModal(
+                child: StreamMessageActionsModal(
                   message: Message(
                     text: 'test',
                     user: User(
@@ -88,7 +88,7 @@ void main() {
             child: SizedBox(
               child: StreamChannel(
                 channel: channel,
-                child: MessageActionsModal(
+                child: StreamMessageActionsModal(
                   showCopyMessage: false,
                   showReplyMessage: false,
                   showThreadReplyMessage: false,
@@ -143,7 +143,7 @@ void main() {
             child: SizedBox(
               child: StreamChannel(
                 channel: channel,
-                child: MessageActionsModal(
+                child: StreamMessageActionsModal(
                   messageWidget: const Text('test'),
                   message: Message(
                     text: 'test',
@@ -153,7 +153,7 @@ void main() {
                   ),
                   messageTheme: streamTheme.ownMessageTheme,
                   customActions: [
-                    MessageAction(
+                    StreamMessageAction(
                       leading: const Icon(Icons.check),
                       title: const Text('title'),
                       onTap: (m) {
@@ -203,7 +203,7 @@ void main() {
             child: SizedBox(
               child: StreamChannel(
                 channel: channel,
-                child: MessageActionsModal(
+                child: StreamMessageActionsModal(
                   messageWidget: const Text('test'),
                   onReplyTap: (m) {
                     tapped = true;
@@ -254,7 +254,7 @@ void main() {
             child: SizedBox(
               child: StreamChannel(
                 channel: channel,
-                child: MessageActionsModal(
+                child: StreamMessageActionsModal(
                   messageWidget: const Text('test'),
                   onThreadReplyTap: (m) {
                     tapped = true;
@@ -309,7 +309,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   text: 'test',
@@ -330,7 +330,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.byType(MessageInput), findsOneWidget);
+      expect(find.byType(StreamMessageInput), findsOneWidget);
     },
   );
 
@@ -359,7 +359,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 editMessageInputBuilder: (context, m) => const Text('test'),
                 message: Message(
@@ -412,7 +412,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 onCopyTap: (m) => tapped = true,
                 message: Message(
@@ -462,7 +462,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   status: MessageSendingStatus.failed,
@@ -512,7 +512,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   status: MessageSendingStatus.failed_update,
@@ -560,7 +560,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
@@ -617,7 +617,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
@@ -674,7 +674,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
@@ -729,7 +729,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
@@ -786,7 +786,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',

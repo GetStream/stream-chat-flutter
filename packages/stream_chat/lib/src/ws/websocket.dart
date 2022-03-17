@@ -190,8 +190,12 @@ class WebSocket with TimerHelper {
     _connectionStatus = ConnectionStatus.connecting;
     connectionCompleter = Completer<Event>();
 
-    final uri = await _buildUri();
-    _initWebSocketChannel(uri);
+    try {
+      final uri = await _buildUri();
+      _initWebSocketChannel(uri);
+    } catch (e, stk) {
+      _onConnectionError(e, stk);
+    }
 
     return connectionCompleter!.future;
   }
@@ -216,7 +220,11 @@ class WebSocket with TimerHelper {
       Duration(milliseconds: delay),
       () async {
         final uri = await _buildUri(refreshToken: refreshToken);
-        _initWebSocketChannel(uri);
+        try {
+          _initWebSocketChannel(uri);
+        } catch (e, stk) {
+          _onConnectionError(e, stk);
+        }
       },
     );
   }

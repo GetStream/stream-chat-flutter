@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro group_avatar}
+@Deprecated("Use 'StreamGroupAvatar' instead")
+typedef GroupAvatar = StreamGroupAvatar;
+
+/// {@template group_avatar}
 /// Widget for constructing a group of images
-class GroupAvatar extends StatelessWidget {
-  /// Constructor for creating a [GroupAvatar]
-  const GroupAvatar({
+/// {@endtemplate}
+class StreamGroupAvatar extends StatelessWidget {
+  /// Constructor for creating a [StreamGroupAvatar]
+  const StreamGroupAvatar({
     Key? key,
     this.channel,
     required this.members,
@@ -84,7 +90,7 @@ class GroupAvatar extends StatelessWidget {
                                   ),
                                 ),
                                 initialData: member,
-                                builder: (context, member) => UserAvatar(
+                                builder: (context, member) => StreamUserAvatar(
                                   showOnlineStatus: false,
                                   user: member.user!,
                                   borderRadius: BorderRadius.zero,
@@ -122,7 +128,8 @@ class GroupAvatar extends StatelessWidget {
                                     ),
                                   ),
                                   initialData: member,
-                                  builder: (context, member) => UserAvatar(
+                                  builder: (context, member) =>
+                                      StreamUserAvatar(
                                     showOnlineStatus: false,
                                     user: member.user!,
                                     borderRadius: BorderRadius.zero,

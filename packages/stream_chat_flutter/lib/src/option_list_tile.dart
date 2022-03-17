@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// {@macro option_list_tile}
+@Deprecated("Use 'StreamOptionListTile' instead")
+typedef OptionListTile = StreamOptionListTile;
+
+/// {@template option_list_tile}
 /// List tile for [ChannelBottomSheet]
-class OptionListTile extends StatelessWidget {
-  /// Constructor for creating [OptionListTile]
-  const OptionListTile({
+/// {@endtemplate}
+class StreamOptionListTile extends StatelessWidget {
+  /// Constructor for creating [StreamOptionListTile]
+  const StreamOptionListTile({
     Key? key,
     required this.title,
     this.leading,

@@ -8,7 +8,11 @@ typedef UserTapCallback = void Function(User, Widget?);
 /// Builder used to create a custom [ListUserItem] from a [User]
 typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 
-///
+/// {@macro user_list_view}
+@Deprecated("Use 'StreamUserListView' instead")
+typedef UserListView = StreamUserListView;
+
+/// {@template user_list_view}
 /// It shows the list of current users.
 ///
 /// ```dart
@@ -42,9 +46,10 @@ typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 /// The widget components render the ui based on the first ancestor of
 /// type [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class UserListView extends StatefulWidget {
+/// {@endtemplate}
+class StreamUserListView extends StatefulWidget {
   /// Instantiate a new UserListView
-  UserListView({
+  StreamUserListView({
     Key? key,
     this.filter = const Filter.empty(),
     this.sort,
@@ -160,10 +165,10 @@ class UserListView extends StatefulWidget {
   final UserListController? userListController;
 
   @override
-  _UserListViewState createState() => _UserListViewState();
+  _StreamUserListViewState createState() => _StreamUserListViewState();
 }
 
-class _UserListViewState extends State<UserListView>
+class _StreamUserListViewState extends State<StreamUserListView>
     with WidgetsBindingObserver {
   bool get _isListView => widget.crossAxisCount == 1;
 
@@ -203,7 +208,7 @@ class _UserListViewState extends State<UserListView>
       userListController: _userListController,
     );
 
-    final backgroundColor = UserListViewTheme.of(context).backgroundColor;
+    final backgroundColor = StreamUserListViewTheme.of(context).backgroundColor;
 
     Widget child;
 
@@ -332,7 +337,7 @@ class _UserListViewState extends State<UserListView>
             key: ValueKey<String>('USER-${user.id}'),
             child: widget.userItemBuilder != null
                 ? widget.userItemBuilder!(context, user, selected)
-                : UserItem(
+                : StreamUserItem(
                     user: user,
                     onTap: (user) => widget.onUserTap!(user, widget.userWidget),
                     onLongPress: widget.onUserLongPress,
@@ -362,7 +367,7 @@ class _UserListViewState extends State<UserListView>
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      UserAvatar(
+                      StreamUserAvatar(
                         user: user,
                         borderRadius: BorderRadius.circular(32),
                         selected: selected,

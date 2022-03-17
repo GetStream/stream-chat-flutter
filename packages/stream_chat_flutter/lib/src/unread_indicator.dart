@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro unread_indicator}
+@Deprecated("Use 'StreamUnreadIndicator' instead")
+typedef UnreadIndicator = StreamUnreadIndicator;
+
+/// {@template unread_indicator}
 /// Widget for showing an unread indicator
-class UnreadIndicator extends StatelessWidget {
-  /// Constructor for creating an [UnreadIndicator]
-  const UnreadIndicator({
+/// {@endtemplate}
+class StreamUnreadIndicator extends StatelessWidget {
+  /// Constructor for creating an [StreamUnreadIndicator]
+  const StreamUnreadIndicator({
     Key? key,
     this.cid,
   }) : super(key: key);

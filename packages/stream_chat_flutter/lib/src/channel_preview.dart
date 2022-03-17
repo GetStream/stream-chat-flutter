@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template channel_preview}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_preview_paint.png)
 ///
@@ -13,11 +14,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// image as soon as it updates.
 ///
 /// Usually you don't use this widget as it's the default channel preview
-/// used by [ChannelListView].
+/// used by [StreamChannelListView].
 ///
 /// The widget renders the ui based on the first ancestor of type
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
+/// {@endtemplate}
+@Deprecated("Use 'StreamChannelListTile' instead")
 class ChannelPreview extends StatelessWidget {
   /// Constructor for creating [ChannelPreview]
   const ChannelPreview({
@@ -52,7 +55,7 @@ class ChannelPreview extends StatelessWidget {
   final Widget? subtitle;
 
   /// Widget rendering the leading element, by default
-  /// it shows the [ChannelAvatar]
+  /// it shows the [StreamChannelAvatar]
   final Widget? leading;
 
   /// Widget rendering the trailing element,
@@ -60,7 +63,7 @@ class ChannelPreview extends StatelessWidget {
   final Widget? trailing;
 
   /// Widget rendering the sending indicator,
-  /// by default it uses the [SendingIndicator] widget
+  /// by default it uses the [StreamSendingIndicator] widget
   final Widget? sendingIndicator;
 
   @override
@@ -80,13 +83,18 @@ class ChannelPreview extends StatelessWidget {
           ),
           onTap: () => onTap?.call(channel),
           onLongPress: () => onLongPress?.call(channel),
-          leading: leading ?? ChannelAvatar(onTap: onImageTap),
+          leading: leading ??
+              StreamChannelAvatar(
+                channel: channel,
+                onTap: onImageTap,
+              ),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Flexible(
                 child: title ??
-                    ChannelName(
+                    StreamChannelName(
+                      channel: channel,
                       textStyle: channelPreviewTheme.titleStyle,
                     ),
               ),
@@ -100,7 +108,7 @@ class ChannelPreview extends StatelessWidget {
                           e.user!.id == channel.client.state.currentUser?.id)) {
                     return const SizedBox();
                   }
-                  return UnreadIndicator(
+                  return StreamUnreadIndicator(
                     cid: channel.cid,
                   );
                 },
@@ -136,7 +144,7 @@ class ChannelPreview extends StatelessWidget {
                                       )));
                               final isMessageRead = readList.length >=
                                   (channel.memberCount ?? 0) - 1;
-                              return SendingIndicator(
+                              return StreamSendingIndicator(
                                 message: lastMessage!,
                                 size: channelPreviewTheme.indicatorIconSize,
                                 isMessageRead: isMessageRead,
@@ -204,7 +212,7 @@ class ChannelPreview extends StatelessWidget {
         ],
       );
     }
-    return TypingIndicator(
+    return StreamTypingIndicator(
       channel: channel,
       alternativeWidget: _buildLastMessage(context),
       style: channelPreviewTheme.subtitleStyle,

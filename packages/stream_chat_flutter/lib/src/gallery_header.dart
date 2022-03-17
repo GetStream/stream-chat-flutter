@@ -15,10 +15,17 @@ typedef AttachmentActionsBuilder = Widget Function(
   AttachmentActionsModal defaultActionsModal,
 );
 
+/// {@macro gallery_header}
+@Deprecated("Use 'StreamGalleryHeader' instead")
+typedef GalleryHeader = StreamGalleryHeader;
+
+/// {@template gallery_header}
 /// Header/AppBar widget for media display screen
-class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
+/// {@endtemplate}
+class StreamGalleryHeader extends StatelessWidget
+    implements PreferredSizeWidget {
   /// Creates a channel header
-  const GalleryHeader({
+  const StreamGalleryHeader({
     Key? key,
     required this.message,
     this.currentIndex = 0,
@@ -62,7 +69,7 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Stores the current index of media shown
   final int currentIndex;
 
-  /// The background color of this [GalleryHeader].
+  /// The background color of this [StreamGalleryHeader].
   final Color? backgroundColor;
 
   /// Widget builder for attachment actions modal
@@ -72,7 +79,7 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final galleryHeaderThemeData = GalleryHeaderTheme.of(context);
+    final galleryHeaderThemeData = StreamGalleryHeaderTheme.of(context);
     final theme = Theme.of(context);
     return AppBar(
       toolbarTextStyle: theme.textTheme.bodyText2,

@@ -5,10 +5,16 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro message_reactions_modal}
+@Deprecated("Use 'StreamMessageReactionsModal' instead")
+typedef MessageReactionsModal = StreamMessageReactionsModal;
+
+/// {@template message_reactions_modal}
 /// Modal widget for displaying message reactions
-class MessageReactionsModal extends StatelessWidget {
-  /// Constructor for creating a [MessageReactionsModal] reactions
-  const MessageReactionsModal({
+/// {@endtemplate}
+class StreamMessageReactionsModal extends StatelessWidget {
+  /// Constructor for creating a [StreamMessageReactionsModal] reactions
+  const StreamMessageReactionsModal({
     Key? key,
     required this.message,
     required this.messageWidget,
@@ -24,8 +30,8 @@ class MessageReactionsModal extends StatelessWidget {
   /// Message to display reactions of
   final Message message;
 
-  /// [MessageThemeData] to apply to [message]
-  final MessageThemeData messageTheme;
+  /// [StreamMessageThemeData] to apply to [message]
+  final StreamMessageThemeData messageTheme;
 
   /// Flag to reverse message
   final bool reverse;
@@ -88,7 +94,7 @@ class MessageReactionsModal extends StatelessWidget {
                             : -(1.2 - divFactor)),
                     0,
                   ),
-                  child: ReactionPicker(
+                  child: StreamReactionPicker(
                     message: message,
                   ),
                 ),
@@ -200,7 +206,7 @@ class MessageReactionsModal extends StatelessWidget {
           Stack(
             clipBehavior: Clip.none,
             children: [
-              UserAvatar(
+              StreamUserAvatar(
                 onTap: onUserAvatarTap,
                 user: reaction.user!,
                 constraints: const BoxConstraints.tightFor(
@@ -220,7 +226,7 @@ class MessageReactionsModal extends StatelessWidget {
                 child: Align(
                   alignment:
                       reverse ? Alignment.centerRight : Alignment.centerLeft,
-                  child: ReactionBubble(
+                  child: StreamReactionBubble(
                     reactions: [reaction],
                     flipTail: !reverse,
                     borderColor:

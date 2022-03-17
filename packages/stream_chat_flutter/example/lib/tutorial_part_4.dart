@@ -8,8 +8,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// to create sub-conversations inside the same channel.
 ///
 /// Using threaded conversations is very simple and mostly a matter of
-/// plugging the [MessageListView] to another widget that renders the widget.
-/// To make this simple, such a widget only needs to build [MessageListView]
+/// plugging the [StreamMessageListView] to another widget that renders the widget.
+/// To make this simple, such a widget only needs to build [StreamMessageListView]
 /// with the parent attribute set to the thread’s root message.
 ///
 /// Now we can open threads and create new ones as well. If you long-press a
@@ -98,17 +98,17 @@ class ChannelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: const ChannelHeader(),
+        appBar: const StreamChannelHeader(),
         body: Column(
           children: <Widget>[
             Expanded(
-              child: MessageListView(
+              child: StreamMessageListView(
                 threadBuilder: (_, parentMessage) => ThreadPage(
                   parent: parentMessage,
                 ),
               ),
             ),
-            const MessageInput(),
+            const StreamMessageInput(),
           ],
         ),
       );
@@ -126,17 +126,17 @@ class ThreadPage extends StatelessWidget {
   // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ThreadHeader(
+      appBar: StreamThreadHeader(
         parent: parent!,
       ),
       body: Column(
         children: <Widget>[
           Expanded(
-            child: MessageListView(
+            child: StreamMessageListView(
               parentMessage: parent,
             ),
           ),
-          MessageInput(
+          StreamMessageInput(
             messageInputController: MessageInputController(
               message: Message(parentId: parent!.id),
             ),
