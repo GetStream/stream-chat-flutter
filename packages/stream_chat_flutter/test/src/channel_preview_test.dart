@@ -71,7 +71,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: Scaffold(
-              body: StreamChannelPreview(
+              body: ChannelPreview(
                 channel: channel,
               ),
             ),

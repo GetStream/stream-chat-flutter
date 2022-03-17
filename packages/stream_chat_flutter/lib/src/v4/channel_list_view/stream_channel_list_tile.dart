@@ -367,6 +367,11 @@ class ChannelLastMessageText extends StatelessWidget {
           final lastMessageAttachments = lastMessage.attachments;
           final lastMessageMentionedUsers = lastMessage.mentionedUsers;
 
+          final mentionedUsersRegex = RegExp(
+            lastMessageMentionedUsers.map((it) => '@${it.name}').join('|'),
+            caseSensitive: false,
+          );
+
           final messageTextParts = [
             ...lastMessageAttachments.map((it) {
               if (it.type == 'image') {
@@ -380,7 +385,11 @@ class ChannelLastMessageText extends StatelessWidget {
                   ? (it.title ?? 'File')
                   : '${it.title ?? 'File'} , ';
             }),
-            if (lastMessageText != null) lastMessageText,
+            if (lastMessageText != null)
+              if (lastMessageMentionedUsers.isNotEmpty)
+                ...mentionedUsersRegex.allMatchesWithSep(lastMessageText)
+              else
+                lastMessageText,
           ];
 
           final fontStyle = (lastMessage.isSystem || lastMessage.isDeleted)
@@ -399,7 +408,7 @@ class ChannelLastMessageText extends StatelessWidget {
               if (lastMessageMentionedUsers.isNotEmpty &&
                   lastMessageMentionedUsers.any((it) => '@${it.name}' == part))
                 TextSpan(
-                  text: '$part ',
+                  text: part,
                   style: mentionsTextStyle,
                 )
               else if (lastMessageAttachments.isNotEmpty &&
@@ -407,12 +416,14 @@ class ChannelLastMessageText extends StatelessWidget {
                       .where((it) => it.title != null)
                       .any((it) => it.title == part))
                 TextSpan(
-                  text: '$part ',
-                  style: regularTextStyle,
+                  text: part,
+                  style: regularTextStyle?.copyWith(
+                    fontStyle: FontStyle.italic,
+                  ),
                 )
               else
                 TextSpan(
-                  text: part == messageTextParts.last ? part : '$part ',
+                  text: part,
                   style: regularTextStyle,
                 ),
           ];
@@ -425,4 +436,19 @@ class ChannelLastMessageText extends StatelessWidget {
           );
         },
       );
+}
+
+extension _RegExpX on RegExp {
+  List<String> allMatchesWithSep(String input, [int start = 0]) {
+    final result = <String>[];
+    for (final match in allMatches(input, start)) {
+      result.add(input.substring(start, match.start));
+      // ignore: cascade_invocations
+      result.add(match[0]!);
+      // ignore: parameter_assignments
+      start = match.end;
+    }
+    result.add(input.substring(start));
+    return result;
+  }
 }
