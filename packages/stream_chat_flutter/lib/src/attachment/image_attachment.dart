@@ -6,7 +6,6 @@ import 'package:stream_chat_flutter/src/attachment/attachment_title.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_desktop.dart'
     hide ReturnActionType;
-import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template imageAttachment}

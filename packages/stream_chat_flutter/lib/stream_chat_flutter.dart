@@ -47,4 +47,5 @@ export 'src/user/user_list_view.dart';
 export 'src/user/user_mention_tile.dart';
 export 'src/utils/extensions.dart' show IconButtonX;
 export 'src/utils/helpers.dart';
+export 'src/utils/typedefs.dart';
 export 'src/visible_footnote.dart';

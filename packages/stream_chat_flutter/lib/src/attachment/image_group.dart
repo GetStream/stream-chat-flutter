@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_desktop.dart'
     hide ReturnActionType;
-import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template imageGroup}
