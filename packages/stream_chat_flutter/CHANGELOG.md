@@ -5,6 +5,12 @@
 - Mentions overlay now doesn't overflow when there is not enough height available
 - Updated `stream_chat_flutter_core` dependency to [`3.5.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
+
+✅ Added
+
+- `onLinkTap` for `MessageWidget` can now be passed down to `UrlAttachment`.
+
+
 ## 3.5.0
 
 🐞 Fixed
