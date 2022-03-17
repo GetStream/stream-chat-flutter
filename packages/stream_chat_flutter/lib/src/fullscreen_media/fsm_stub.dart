@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_desktop.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
