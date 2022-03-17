@@ -165,7 +165,6 @@ class PlatformDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    print(isDark);
     return DesktopWidgetBuilder(
       macOS: (context, child) => MacosTheme(
         data: isDark ? MacosThemeData.dark() : MacosThemeData.light(),

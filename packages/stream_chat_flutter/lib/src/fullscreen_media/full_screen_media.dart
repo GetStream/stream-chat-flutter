@@ -3,9 +3,11 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
+import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -136,42 +138,49 @@ class _FullScreenMediaState extends State<FullScreenMedia>
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Stack(
-          children: [
-            PageView.builder(
-              controller: _pageController,
-              onPageChanged: (val) {
-                _currentPage.value = val;
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _pageController,
+            onPageChanged: (val) {
+              _currentPage.value = val;
 
-                if (videoPackages.isEmpty) {
-                  return;
+              if (videoPackages.isEmpty) {
+                return;
+              }
+
+              final currentAttachment = widget.mediaAttachments[val];
+
+              for (final e in videoPackages.values) {
+                if (e._attachment != currentAttachment) {
+                  e._chewieController?.pause();
                 }
+              }
 
-                final currentAttachment = widget.mediaAttachments[val];
-
-                for (final e in videoPackages.values) {
-                  if (e._attachment != currentAttachment) {
-                    e._chewieController?.pause();
-                  }
-                }
-
-                if (widget.autoplayVideos &&
-                    currentAttachment.type == 'video') {
-                  final controller = videoPackages[currentAttachment.id]!;
-                  controller._chewieController?.play();
-                }
-              },
-              itemBuilder: (context, index) {
-                final attachment = widget.mediaAttachments[index];
-                if (attachment.type == 'image' || attachment.type == 'giphy') {
-                  final imageUrl = attachment.imageUrl ??
-                      attachment.assetUrl ??
-                      attachment.thumbUrl;
-                  return AnimatedBuilder(
-                    animation: _curvedAnimation,
-                    builder: (context, child) => PhotoView(
+              if (widget.autoplayVideos && currentAttachment.type == 'video') {
+                final controller = videoPackages[currentAttachment.id]!;
+                controller._chewieController?.play();
+              }
+            },
+            itemBuilder: (context, index) {
+              final attachment = widget.mediaAttachments[index];
+              if (attachment.type == 'image' || attachment.type == 'giphy') {
+                final imageUrl = attachment.imageUrl ??
+                    attachment.assetUrl ??
+                    attachment.thumbUrl;
+                return AnimatedBuilder(
+                  animation: _curvedAnimation,
+                  builder: (context, child) => ContextMenuArea(
+                    verticalPadding: 0,
+                    builder: (_) => [
+                      DownloadMenuItem(
+                        attachment: attachment,
+                      ),
+                    ],
+                    child: PhotoView(
                       loadingBuilder: (context, image) => const Offstage(),
                       imageProvider: (imageUrl == null &&
                               attachment.localUri != null &&
@@ -197,116 +206,126 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                         }
                       },
                     ),
+                  ),
+                );
+              } else if (attachment.type == 'video') {
+                final controller = videoPackages[attachment.id]!;
+                if (!controller.initialized) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
                   );
-                } else if (attachment.type == 'video') {
-                  final controller = videoPackages[attachment.id]!;
-                  if (!controller.initialized) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  return InkWell(
-                    onTap: () {
-                      if (_animationController.isCompleted) {
-                        _animationController.reverse();
-                      } else {
-                        _animationController.forward();
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 50,
-                      ),
+                }
+                return InkWell(
+                  onTap: () {
+                    if (_animationController.isCompleted) {
+                      _animationController.reverse();
+                    } else {
+                      _animationController.forward();
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 50,
+                    ),
+                    child: ContextMenuArea(
+                      verticalPadding: 0,
+                      builder: (_) => [
+                        DownloadMenuItem(
+                          attachment: attachment,
+                        ),
+                      ],
                       child: Chewie(
                         controller: controller.chewieController!,
                       ),
                     ),
-                  );
-                }
-                return const SizedBox();
-              },
-              itemCount: widget.mediaAttachments.length,
-            ),
-            FadeTransition(
-              opacity: _opacityAnimation,
-              child: ValueListenableBuilder<int>(
-                valueListenable: _currentPage,
-                builder: (context, value, child) => Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GalleryHeader(
-                      userName: widget.userName,
-                      sentAt: context.translations.sentAtText(
-                        date: widget.message.createdAt,
-                        time: widget.message.createdAt,
-                      ),
-                      onBackPressed: () => Navigator.of(context).pop(),
-                      message: widget.message,
-                      currentIndex: value,
-                      onShowMessage: () {
-                        widget.onShowMessage?.call(
-                          widget.message,
-                          StreamChannel.of(context).channel,
-                        );
-                      },
-                      attachmentActionsModalBuilder:
-                          widget.attachmentActionsModalBuilder,
+                  ),
+                );
+              }
+              return const SizedBox();
+            },
+            itemCount: widget.mediaAttachments.length,
+          ),
+          FadeTransition(
+            opacity: _opacityAnimation,
+            child: ValueListenableBuilder<int>(
+              valueListenable: _currentPage,
+              builder: (context, value, child) => Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GalleryHeader(
+                    userName: widget.userName,
+                    sentAt: context.translations.sentAtText(
+                      date: widget.message.createdAt,
+                      time: widget.message.createdAt,
                     ),
-                    if (!widget.message.isEphemeral)
-                      GalleryFooter(
-                        currentPage: value,
-                        totalPages: widget.mediaAttachments.length,
-                        mediaAttachments: widget.mediaAttachments,
-                        message: widget.message,
-                        mediaSelectedCallBack: (val) {
-                          _currentPage.value = val;
-                          _pageController.animateToPage(
-                            val,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                  ],
-                ),
+                    onBackPressed: () => Navigator.of(context).pop(),
+                    message: widget.message,
+                    currentIndex: value,
+                    onShowMessage: () {
+                      widget.onShowMessage?.call(
+                        widget.message,
+                        StreamChannel.of(context).channel,
+                      );
+                    },
+                    attachmentActionsModalBuilder:
+                        widget.attachmentActionsModalBuilder,
+                  ),
+                  if (!widget.message.isEphemeral)
+                    GalleryFooter(
+                      currentPage: value,
+                      totalPages: widget.mediaAttachments.length,
+                      mediaAttachments: widget.mediaAttachments,
+                      message: widget.message,
+                      mediaSelectedCallBack: (val) {
+                        _currentPage.value = val;
+                        _pageController.animateToPage(
+                          val,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                ],
               ),
             ),
-            if (widget.mediaAttachments.length > 1) ...[
-              if (_currentPage.value != widget.mediaAttachments.length - 1) ...[
-                GalleryNavigationItem(
-                  icon: Icons.chevron_right,
-                  right: 0,
-                  opacityAnimation: _opacityAnimation,
-                  currentPage: _currentPage,
-                  onClick: () {
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 350),
-                      curve: Curves.easeIn,
-                    );
-                    setState(() => _currentPage.value++);
-                  },
-                ),
-              ],
-              if (_currentPage.value != 0) ...[
-                GalleryNavigationItem(
-                  icon: Icons.chevron_left,
-                  left: 0,
-                  opacityAnimation: _opacityAnimation,
-                  currentPage: _currentPage,
-                  onClick: () {
-                    _pageController.previousPage(
-                      duration: const Duration(milliseconds: 350),
-                      curve: Curves.easeOut,
-                    );
-                    setState(() => _currentPage.value--);
-                  },
-                ),
-              ],
+          ),
+          if (widget.mediaAttachments.length > 1) ...[
+            if (_currentPage.value != widget.mediaAttachments.length - 1) ...[
+              GalleryNavigationItem(
+                icon: Icons.chevron_right,
+                right: 0,
+                opacityAnimation: _opacityAnimation,
+                currentPage: _currentPage,
+                onClick: () {
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 350),
+                    curve: Curves.easeIn,
+                  );
+                  setState(() => _currentPage.value++);
+                },
+              ),
+            ],
+            if (_currentPage.value != 0) ...[
+              GalleryNavigationItem(
+                icon: Icons.chevron_left,
+                left: 0,
+                opacityAnimation: _opacityAnimation,
+                currentPage: _currentPage,
+                onClick: () {
+                  _pageController.previousPage(
+                    duration: const Duration(milliseconds: 350),
+                    curve: Curves.easeOut,
+                  );
+                  setState(() => _currentPage.value--);
+                },
+              ),
             ],
           ],
-        ),
-      );
+        ],
+      ),
+    );
+  }
 
   @override
   void dispose() {
