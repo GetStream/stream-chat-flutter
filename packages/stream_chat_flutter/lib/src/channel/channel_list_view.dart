@@ -620,6 +620,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                     ? () => widget.onImageTap!(channel)
                     : null,
                 onTap: (channel) => onTap(channel, widget.channelWidget),
+                onViewInfoTap: widget.onViewInfoTap,
               ),
             ),
       ),
