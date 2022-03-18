@@ -1,10 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart' hide ButtonStyle;
-import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/bottom_sheets/edit_message_sheet.dart';
-import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
-import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/mam_widgets.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -224,22 +221,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             pinned: widget.message.pinned,
                           ),
                         if (widget.showDeleteMessage)
-                          PlatformWidgetBuilder(
-                            mobile: (context, _) => DeleteMessageButton(
-                              isDeleteFailed: widget.message.status ==
-                                  MessageSendingStatus.failed_delete,
-                              onTap: _showDeleteBottomSheet,
-                            ),
-                            desktop: (context, child) => DeleteMessageButton(
-                              isDeleteFailed: widget.message.status ==
-                                  MessageSendingStatus.failed_delete,
-                              onTap: _showDeleteDialog,
-                            ),
-                            web: (context, child) => DeleteMessageButton(
-                              isDeleteFailed: widget.message.status ==
-                                  MessageSendingStatus.failed_delete,
-                              onTap: _showDeleteDialog,
-                            ),
+                          DeleteMessageButton(
+                            isDeleteFailed: widget.message.status ==
+                                MessageSendingStatus.failed_delete,
+                            onTap: _showDeleteBottomSheet,
                           ),
                         ...widget.customActions
                             .map((action) => _buildCustomAction(
@@ -294,7 +279,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     );
   }
 
-  // FIXME: This function is a mediocre fix and needs to be addressed.
+  /// TODO(Groovin): document me!
   double _calculateReactionsHorizontalAlignmentValue(
     User? user,
     num divFactor,
@@ -485,30 +470,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         await StreamChannel.of(context).channel.deleteMessage(widget.message);
       } catch (err) {
         _showErrorAlertBottomSheet();
-      }
-    } else {
-      setState(() => _showActions = true);
-    }
-  }
-
-  /// Shows a "delete message" dialog on desktop platforms
-  ///
-  /// TODO(Groovin): consider web ⚠️
-  Future<void> _showDeleteDialog() async {
-    setState(() => _showActions = false);
-    final answer = await showDialog(
-      context: context,
-      builder: (_) => const DeleteMessageDialog(),
-    );
-    if (answer == true) {
-      try {
-        Navigator.of(context).pop();
-        await StreamChannel.of(context).channel.deleteMessage(widget.message);
-      } catch (err) {
-        showDialog(
-          context: context,
-          builder: (_) => const MessageDialog(),
-        );
       }
     } else {
       setState(() => _showActions = true);

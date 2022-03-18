@@ -2,14 +2,20 @@ import 'package:stream_chat_flutter/src/vlc/vlc_stub.dart'
     if (dart.library.io) 'vlc_manager_desktop.dart'
     if (dar.library.html) 'vlc_manager_web.dart';
 
+/// {@template vlcManager}
+/// An abstract class for the purpose of ensuring Flutter applications that
+/// target both desktop & web do not crash when building for web targets.
+/// {@endtemplate}
 abstract class VlcManager {
   static VlcManager? _instance;
 
+  /// The current instance of [VlcManager].
   static VlcManager get instance {
     _instance = getVlc();
 
     return _instance!;
   }
 
+  /// Initializes VLC.
   void initialize();
 }

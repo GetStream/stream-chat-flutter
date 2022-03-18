@@ -3,6 +3,8 @@ import 'package:collection/collection.dart'
 import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
+import 'package:stream_chat_flutter/src/dialogs/confimation_dialog.dart';
+import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -93,6 +95,135 @@ class ChannelPreview extends StatelessWidget {
                 onViewInfoTap?.call(channel);
               },
             ),
+            StreamChatContextMenuItem(
+              leading: StreamSvgIcon.mute(
+                color: Colors.grey,
+              ),
+              title: channel.isGroup
+                  ? Text(
+                      channel.isMuted ? 'Unmute Group' : 'Mute Group',
+                    )
+                  : Text(
+                      channel.isMuted
+                          ? 'Unmute conversation'
+                          : 'Mute conversation',
+                    ),
+              onClick: () async {
+                Navigator.of(context, rootNavigator: true).pop();
+                showDialog(
+                  context: context,
+                  builder: (_) => ConfirmationDialog(
+                    //TODO(Groovin): translations!
+                    titleText: channel.isGroup
+                        ? (channel.isMuted ? 'Unmute User' : 'Mute User')
+                        : (channel.isMuted
+                            ? 'Unmute Conversation'
+                            : 'Mute Conversation'),
+                    promptText: channel.isGroup
+                        ? (channel.isMuted
+                            ? 'Are you sure you want to unmute this user?'
+                            : 'Are you sure you want to mute this user?')
+                        : (channel.isMuted
+                            ? 'Are you sure you want to unmute this conversation?'
+                            : 'Are you sure you want to mute this conversation?'),
+                    affirmativeText: channel.isMuted ? 'UNMUTE' : 'MUTE',
+                    onConfirmation: () async {
+                      try {
+                        if (channel.isMuted) {
+                          await channel.unmute();
+                        } else {
+                          await channel.mute();
+                        }
+                      } catch (e) {
+                        showDialog(
+                          context: context,
+                          builder: (_) => MessageDialog(
+                            messageText: e.toString(),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
+            if (channel.isGroup)
+              StreamChatContextMenuItem(
+                leading: StreamSvgIcon.userRemove(
+                  color: Colors.red,
+                ),
+                title: Text(
+                  context.translations.leaveGroupLabel,
+                  style: const TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
+                onClick: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                  showDialog(
+                    context: context,
+                    builder: (_) => ConfirmationDialog(
+                      titleText: context.translations.leaveGroupLabel,
+                      promptText:
+                          context.translations.leaveConversationQuestion,
+                      affirmativeText: context.translations.leaveLabel,
+                      onConfirmation: () async {
+                        final userAsMember = channel.state?.members.firstWhere(
+                          (e) =>
+                              e.user?.id ==
+                              StreamChat.of(context).currentUser?.id,
+                        );
+                        try {
+                          await channel.removeMembers([userAsMember!.user!.id]);
+                        } catch (e) {
+                          showDialog(
+                            context: context,
+                            builder: (_) => MessageDialog(
+                              messageText: e.toString(),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
+            if (!channel.isGroup)
+              StreamChatContextMenuItem(
+                leading: StreamSvgIcon.delete(
+                  color: Colors.red,
+                ),
+                title: Text(
+                  context.translations.deleteConversationLabel,
+                  style: const TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
+                onClick: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                  showDialog(
+                    context: context,
+                    builder: (_) => ConfirmationDialog(
+                      titleText: context.translations.deleteConversationLabel,
+                      promptText:
+                          context.translations.deleteConversationQuestion,
+                      affirmativeText: context.translations.deleteLabel,
+                      onConfirmation: () async {
+                        try {
+                          await channel.delete();
+                        } catch (e) {
+                          showDialog(
+                            context: context,
+                            builder: (_) => MessageDialog(
+                              messageText: e.toString(),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
           ],
           child: ListTile(
             visualDensity: VisualDensity.compact,
@@ -118,7 +249,8 @@ class ChannelPreview extends StatelessWidget {
                   builder: (context, members) {
                     if (members.isEmpty ||
                         !members.any((Member e) =>
-                            e.user!.id == channel.client.state.currentUser?.id)) {
+                            e.user!.id ==
+                            channel.client.state.currentUser?.id)) {
                       return const SizedBox();
                     }
                     return UnreadIndicator(
