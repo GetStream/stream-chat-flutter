@@ -720,6 +720,8 @@ class _MessageWidgetState extends State<MessageWidget>
       (widget.message.reactionCounts?.isNotEmpty == true) &&
       !widget.message.isDeleted;
 
+  late bool? _isOwnMessage;
+
   @override
   bool get wantKeepAlive => widget.message.attachments.isNotEmpty;
 
@@ -730,6 +732,12 @@ class _MessageWidgetState extends State<MessageWidget>
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
     _streamChat = StreamChat.of(context);
+    if (widget.message.user == _streamChat.currentUser) {
+      _isOwnMessage = true;
+    } else {
+      _isOwnMessage = false;
+    }
+    print(_isOwnMessage);
     super.didChangeDependencies();
   }
 
@@ -850,7 +858,7 @@ class _MessageWidgetState extends State<MessageWidget>
         leading: StreamSvgIcon.reply(),
         title: Text(context.translations.replyLabel),
         onClick: () {
-          Navigator.of(context).pop();
+          Navigator.of(context, rootNavigator: true).pop();
           widget.onReplyTap!(widget.message);
         },
       ),
@@ -859,7 +867,7 @@ class _MessageWidgetState extends State<MessageWidget>
           leading: StreamSvgIcon.thread(),
           title: Text(context.translations.threadReplyLabel),
           onClick: () {
-            Navigator.of(context).pop();
+            Navigator.of(context, rootNavigator: true).pop();
             widget.onThreadTap!(widget.message);
           },
         ),
@@ -868,7 +876,7 @@ class _MessageWidgetState extends State<MessageWidget>
           leading: StreamSvgIcon.copy(),
           title: Text(context.translations.copyMessageLabel),
           onClick: () {
-            Navigator.of(context).pop();
+            Navigator.of(context, rootNavigator: true).pop();
             Clipboard.setData(ClipboardData(text: widget.message.text));
           },
         ),
@@ -876,7 +884,7 @@ class _MessageWidgetState extends State<MessageWidget>
         leading: StreamSvgIcon.edit(color: Colors.grey),
         title: Text(context.translations.editMessageLabel),
         onClick: () {
-          Navigator.of(context).pop();
+          Navigator.of(context, rootNavigator: true).pop();
           showModalBottomSheet(
             context: context,
             elevation: 2,
@@ -907,7 +915,7 @@ class _MessageWidgetState extends State<MessageWidget>
           ),
         ),
         onClick: () async {
-          Navigator.of(context).pop();
+          Navigator.of(context, rootNavigator: true).pop();
           try {
             if (!widget.message.pinned) {
               await channel.pinMessage(widget.message);
@@ -929,7 +937,7 @@ class _MessageWidgetState extends State<MessageWidget>
             ),
           ),
           onClick: () {
-            Navigator.of(context).pop();
+            Navigator.of(context, rootNavigator: true).pop();
             final isUpdateFailed =
                 widget.message.status == MessageSendingStatus.failed_update;
             final channel = StreamChannel.of(context).channel;
@@ -940,33 +948,34 @@ class _MessageWidgetState extends State<MessageWidget>
             }
           },
         ),
-      StreamChatContextMenuItem(
-        leading: StreamSvgIcon.delete(color: Colors.red),
-        title: Text(
-          context.translations.deleteMessageLabel,
-          style: const TextStyle(color: Colors.red),
-        ),
-        onClick: () async {
-          Navigator.of(context).pop();
-          final deleted = await showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) => const DeleteMessageDialog(),
-          );
-          if (deleted) {
-            try {
-              await StreamChannel.of(context)
-                  .channel
-                  .deleteMessage(widget.message);
-            } catch (e) {
-              showDialog(
-                context: context,
-                builder: (_) => const MessageDialog(),
-              );
+      if (widget.showDeleteMessage || isDeleteFailed)
+        StreamChatContextMenuItem(
+          leading: StreamSvgIcon.delete(color: Colors.red),
+          title: Text(
+            context.translations.deleteMessageLabel,
+            style: const TextStyle(color: Colors.red),
+          ),
+          onClick: () async {
+            Navigator.of(context, rootNavigator: true).pop();
+            final deleted = await showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => const DeleteMessageDialog(),
+            );
+            if (deleted) {
+              try {
+                await StreamChannel.of(context)
+                    .channel
+                    .deleteMessage(widget.message);
+              } catch (e) {
+                showDialog(
+                  context: context,
+                  builder: (_) => const MessageDialog(),
+                );
+              }
             }
-          }
-        },
-      ),
+          },
+        ),
     ];
   }
 
