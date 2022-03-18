@@ -1,17 +1,16 @@
-import 'package:fluent_ui/fluent_ui.dart' as fui;
 import 'package:flutter/material.dart';
-import 'package:macos_ui/macos_ui.dart';
-import 'package:stream_chat_flutter/src/platform_widgets/platform_dialog.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// A platform-aware dialog that displays a message to a user. Falls back to a
+/// {@template messageDialog}
+/// A dialog that displays a message to a user. Falls back to a
 /// generic error message if no [titleText] and [messageText] are specified.
 ///
 /// If using this dialog to display the default generic error, be sure NOT to
 /// specify a [titleText] and [messageText] so the fallback strings can be used.
+/// {@endtemplate}
 class MessageDialog extends StatelessWidget {
-  /// Builds an [MessageDialog].
+  /// {@macro messageDialog}
   const MessageDialog({
     Key? key,
     this.titleText,
@@ -30,44 +29,28 @@ class MessageDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformDialog(
-      appIcon: const FlutterLogo(),
-      titleWidget: Text(
-        titleText ?? context.translations.somethingWentWrongError,
+    final streamTheme = StreamChatTheme.of(context);
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
-      message: showMessage!
+      backgroundColor: streamTheme.colorTheme.appBg,
+      title: Text(titleText ?? context.translations.somethingWentWrongError),
+      content: showMessage!
           ? Text(
               messageText ??
                   context.translations.operationCouldNotBeCompletedText,
             )
           : null,
-      primaryButton: PushButton(
-        buttonSize: ButtonSize.large,
-        color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-        child: Text(context.translations.okLabel),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      windowsActions: [
-        fui.Button(
-          style: fui.ButtonStyle(
-            backgroundColor: fui.ButtonState.all(
-              StreamChatTheme.of(context).colorTheme.accentPrimary,
-            ),
+      actions: [
+        TextButton(
+          style: TextButton.styleFrom(
+            primary: streamTheme.colorTheme.accentPrimary,
           ),
           child: Text(context.translations.okLabel),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],
-      title: titleText ?? context.translations.somethingWentWrongError,
-      linuxActions: [
-        ElevatedButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(context.translations.okLabel),
-        ),
-      ],
-      child: Text(
-        messageText ?? context.translations.operationCouldNotBeCompletedText,
-      ),
     );
   }
 }
