@@ -98,6 +98,7 @@ class DesktopAttachmentHandler extends AttachmentHandler {
       name: fileName,
       path: path,
     );
+
     try {
       // Save the file to the user's selected path.
       await file.saveTo(path);
