@@ -177,7 +177,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                     title: context.translations.leaveGroupLabel,
                     onTap: () async {
                       setState(() => _showActions = false);
-                      await _showLeaveDialog();
+                      await _showLeaveBottomSheet();
                       setState(() => _showActions = true);
                     },
                   ),
@@ -193,7 +193,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                     titleColor: _streamChatThemeData.colorTheme.accentError,
                     onTap: () async {
                       setState(() => _showActions = false);
-                      await _showDeleteDialog();
+                      await _showDeleteBottomSheet();
                       setState(() => _showActions = true);
                     },
                   ),
@@ -212,7 +212,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
     );
   }
 
-  Future<void> _showDeleteDialog() async {
+  Future<void> _showDeleteBottomSheet() async {
     final res = await showConfirmationBottomSheet(
       context,
       title: context.translations.deleteConversationLabel,
@@ -230,7 +230,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
     }
   }
 
-  Future<void> _showLeaveDialog() async {
+  Future<void> _showLeaveBottomSheet() async {
     final res = await showConfirmationBottomSheet(
       context,
       title: context.translations.leaveConversationLabel,
