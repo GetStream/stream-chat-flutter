@@ -1,4 +1,4 @@
-import 'package:stream_chat_flutter/src/vlc/vlc_stub.dart'
+import 'package:stream_chat_flutter/src/video/vlc/vlc_stub.dart'
     if (dart.library.io) 'vlc_manager_desktop.dart'
     if (dar.library.html) 'vlc_manager_web.dart';
 

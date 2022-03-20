@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
+import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template inputAttachment}

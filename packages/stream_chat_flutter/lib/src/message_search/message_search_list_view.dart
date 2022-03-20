@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/message_search/query_progress_indicator.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -135,20 +136,21 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       messageFilters: widget.messageFilters,
       messageSearchListController: _messageSearchListController,
       emptyBuilder: widget.emptyBuilder ??
-          (context) => LayoutBuilder(
-                builder: (context, viewportConstraints) =>
-                    SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: viewportConstraints.maxHeight,
-                    ),
-                    child: Center(
-                      child: Text(context.translations.emptyMessagesText),
-                    ),
+          (context) {
+            return LayoutBuilder(
+              builder: (context, viewportConstraints) => SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: viewportConstraints.maxHeight,
+                  ),
+                  child: Center(
+                    child: Text(context.translations.emptyMessagesText),
                   ),
                 ),
               ),
+            );
+          },
       errorBuilder: widget.errorBuilder ??
           (BuildContext context, dynamic error) {
             if (error is Error) {
@@ -159,24 +161,25 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
               message: context.translations.genericErrorText,
-              child: Container(),
+              child: const SizedBox.shrink(),
             );
           },
       loadingBuilder: widget.loadingBuilder ??
-          (context) => LayoutBuilder(
-                builder: (context, viewportConstraints) =>
-                    SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: viewportConstraints.maxHeight,
-                    ),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+          (context) {
+            return LayoutBuilder(
+              builder: (context, viewportConstraints) => SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: viewportConstraints.maxHeight,
+                  ),
+                  child: const Center(
+                    child: CircularProgressIndicator(),
                   ),
                 ),
               ),
+            );
+          },
       childBuilder: widget.childBuilder ?? _buildListView,
     );
 
@@ -193,58 +196,6 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     return messageSearchListCore;
   }
 
-  Widget _separatorBuilder(BuildContext context, int index) => Container(
-        height: 1,
-        color: StreamChatTheme.of(context).colorTheme.borders,
-      );
-
-  Widget _listItemBuilder(
-    BuildContext context,
-    GetMessageResponse getMessageResponse,
-  ) {
-    if (widget.itemBuilder != null) {
-      return widget.itemBuilder!(context, getMessageResponse);
-    }
-    return MessageSearchItem(
-      getMessageResponse: getMessageResponse,
-      onTap: () => widget.onItemTap!(getMessageResponse),
-    );
-  }
-
-  Widget _buildQueryProgressIndicator(context) {
-    final messageSearchBloc = MessageSearchBloc.of(context);
-
-    return StreamBuilder<bool>(
-      stream: messageSearchBloc.queryMessagesLoading,
-      initialData: false,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Container(
-            color: StreamChatTheme.of(context)
-                .colorTheme
-                .accentError
-                .withOpacity(0.2),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Center(
-                child: Text(context.translations.loadingMessagesError),
-              ),
-            ),
-          );
-        }
-        return Container(
-          height: 100,
-          padding: const EdgeInsets.all(32),
-          child: Center(
-            child: snapshot.data!
-                ? const CircularProgressIndicator()
-                : Container(),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildListView(List<GetMessageResponse> data) {
     final items = data;
 
@@ -255,13 +206,22 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
         if (widget.separatorBuilder != null) {
           return widget.separatorBuilder!(context, index);
         }
-        return _separatorBuilder(context, index);
+        return Container(
+          height: 1,
+          color: StreamChatTheme.of(context).colorTheme.borders,
+        );
       },
       itemBuilder: (context, index) {
         if (index < items.length) {
-          return _listItemBuilder(context, items[index]);
+          if (widget.itemBuilder != null) {
+            return widget.itemBuilder!(context, items[index]);
+          }
+          return MessageSearchItem(
+            getMessageResponse: items[index],
+            onTap: () => widget.onItemTap!(items[index]),
+          );
         }
-        return _buildQueryProgressIndicator(context);
+        return const QueryProgressIndicator();
       },
     );
     if (widget.pullToRefresh) {

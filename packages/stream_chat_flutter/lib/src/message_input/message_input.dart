@@ -29,7 +29,7 @@ import 'package:stream_chat_flutter/src/overlays/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
-import 'package:stream_chat_flutter/src/video_service.dart';
+import 'package:stream_chat_flutter/src/video/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_compress/video_compress.dart';
 

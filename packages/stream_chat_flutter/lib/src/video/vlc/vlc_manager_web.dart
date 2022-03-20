@@ -1,5 +1,5 @@
 import 'package:flutter/rendering.dart';
-import 'package:stream_chat_flutter/src/vlc/vlc_manager.dart';
+import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 
 /// The web implementation of [VlcManager]. Naturally, it does nothing. It
 /// exists simply to satisfy the requirements of conditional imports.

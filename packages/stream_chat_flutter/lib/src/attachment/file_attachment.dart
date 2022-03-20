@@ -7,10 +7,10 @@ import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/indicators/upload_progress_indicator.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
-import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
+import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template fileAttachment}

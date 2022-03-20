@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:http/http.dart' as http;
-import 'package:stream_chat_flutter/src/video_service.dart';
+import 'package:stream_chat_flutter/src/video/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_compress/video_compress.dart';
 

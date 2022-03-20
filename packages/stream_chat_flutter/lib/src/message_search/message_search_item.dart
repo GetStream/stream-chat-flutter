@@ -70,15 +70,25 @@ class MessageSearchItem extends StatelessWidget {
       ),
       subtitle: Row(
         children: [
-          Expanded(child: _buildSubtitle(context, message)),
+          Expanded(child: _SearchItemSubtitle(message: message)),
           const SizedBox(width: 16),
-          _buildDate(context, message),
+          _Date(message: message),
         ],
       ),
     );
   }
+}
 
-  Widget _buildDate(BuildContext context, Message message) {
+class _Date extends StatelessWidget {
+  const _Date({
+    Key? key,
+    required this.message,
+  }) : super(key: key);
+
+  final Message message;
+
+  @override
+  Widget build(BuildContext context) {
     final createdAt = message.createdAt;
     String stringDate;
     final now = DateTime.now();
@@ -96,8 +106,18 @@ class MessageSearchItem extends StatelessWidget {
       style: StreamChatTheme.of(context).channelPreviewTheme.lastMessageAtStyle,
     );
   }
+}
 
-  Widget _buildSubtitle(BuildContext context, Message message) {
+class _SearchItemSubtitle extends StatelessWidget {
+  const _SearchItemSubtitle({
+    Key? key,
+    required this.message,
+  }) : super(key: key);
+
+  final Message message;
+
+  @override
+  Widget build(BuildContext context) {
     var text = message.text;
     if (message.isDeleted) {
       text = context.translations.messageDeletedText;

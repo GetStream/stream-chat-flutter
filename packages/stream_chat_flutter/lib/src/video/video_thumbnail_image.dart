@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/src/video_service.dart';
+import 'package:stream_chat_flutter/src/video/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// Overrides the default style of [ChannelListView] descendants.
 ///

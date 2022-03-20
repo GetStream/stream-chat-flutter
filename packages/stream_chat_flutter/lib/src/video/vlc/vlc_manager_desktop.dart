@@ -1,5 +1,5 @@
 import 'package:dart_vlc/dart_vlc.dart';
-import 'package:stream_chat_flutter/src/vlc/vlc_manager.dart';
+import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 
 /// The desktop implementation of [VlcManager]. It simply initializes VLC.
 class VlcManagerDesktop extends VlcManager {

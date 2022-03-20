@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/vlc/vlc_manager.dart';
+import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChat}
