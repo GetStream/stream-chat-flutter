@@ -3,7 +3,6 @@ import 'package:collection/collection.dart'
 import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
-import 'package:stream_chat_flutter/src/dialogs/confimation_dialog.dart';
 import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -92,7 +91,16 @@ class ChannelPreview extends StatelessWidget {
               title: Text(context.translations.viewInfoLabel),
               onClick: () {
                 Navigator.of(context, rootNavigator: true).pop();
-                onViewInfoTap?.call(channel);
+                if (onViewInfoTap != null) {
+                  onViewInfoTap?.call(channel);
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (_) => ChannelInfoDialog(
+                      channel: channel,
+                    ),
+                  );
+                }
               },
             ),
             StreamChatContextMenuItem(

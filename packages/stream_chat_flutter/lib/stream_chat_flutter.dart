@@ -8,6 +8,7 @@ export 'src/avatars/user_avatar.dart';
 export 'src/back_button.dart';
 export 'src/channel/channel_avatar.dart';
 export 'src/channel/channel_header.dart';
+export 'src/channel/channel_info.dart';
 export 'src/channel/channel_list_header.dart';
 export 'src/channel/channel_list_view.dart';
 export 'src/channel/channel_name.dart';
