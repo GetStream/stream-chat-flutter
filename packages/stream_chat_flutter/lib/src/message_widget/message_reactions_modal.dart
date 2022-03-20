@@ -191,7 +191,7 @@ class MessageReactionsModal extends StatelessWidget {
     final chatThemeData = StreamChatTheme.of(context);
     return ConstrainedBox(
       constraints: BoxConstraints.loose(
-        _computeSizeFromPlatform(),
+        const Size(64, 100),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -243,13 +243,5 @@ class MessageReactionsModal extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Size _computeSizeFromPlatform() {
-    if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
-      return const Size(64, 100);
-    } else {
-      return const Size(64, 98);
-    }
   }
 }
