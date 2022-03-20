@@ -45,7 +45,8 @@ class TypingIndicator extends StatelessWidget {
 
     return BetterStreamBuilder<Iterable<User>>(
       initialData: channelState.typingEvents.keys,
-      stream: channelState.typingEventsStream.map((typings) => typings.entries
+      stream: channelState.typingEventsStream.map((typingEvents) => typingEvents
+          .entries
           .where((element) => element.value.parentId == parentId)
           .map((e) => e.key)),
       builder: (context, data) => AnimatedSwitcher(
