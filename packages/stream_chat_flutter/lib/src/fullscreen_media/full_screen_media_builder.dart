@@ -4,10 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/fsm_stub.dart'
     if (dart.library.io) 'full_screen_media_desktop.dart' as desktop_fsm;
-import 'package:stream_chat_flutter/src/fullscreen_media/fsm_stub.dart'
-    if (dart.library.html) 'full_screen_media.dart' as fsm
-    if (dart.library.io) 'full_screen_media.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide getFsm;
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template fsmBuilder}
 /// A wrapper widget for conditionally providing the proper FullScreenMedia
@@ -73,7 +70,7 @@ class FullScreenMediaBuilder extends StatelessWidget {
           autoplayVideos: autoplayVideos,
         );
       } else {
-        return fsm.getFsm(
+        return FullScreenMedia(
           mediaAttachments: mediaAttachments,
           message: message,
           startIndex: startIndex,
@@ -84,7 +81,7 @@ class FullScreenMediaBuilder extends StatelessWidget {
         );
       }
     } else {
-      return fsm.getFsm(
+      return FullScreenMedia(
         mediaAttachments: mediaAttachments,
         message: message,
         startIndex: startIndex,

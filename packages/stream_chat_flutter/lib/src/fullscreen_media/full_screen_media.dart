@@ -13,31 +13,6 @@ import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
-/// Returns an instance of [FullScreenMedia].
-///
-/// This should ONLY be used in [FullScreenMediaBuilder].
-FullScreenMediaWidget getFsm({
-  Key? key,
-  required Message message,
-  required List<Attachment> mediaAttachments,
-  required int startIndex,
-  required String userName,
-  ShowMessageCallback? onShowMessage,
-  AttachmentActionsBuilder? attachmentActionsModalBuilder,
-  required bool autoplayVideos,
-}) {
-  return FullScreenMedia(
-    key: key,
-    mediaAttachments: mediaAttachments,
-    message: message,
-    autoplayVideos: autoplayVideos,
-    startIndex: startIndex,
-    attachmentActionsModalBuilder: attachmentActionsModalBuilder,
-    onShowMessage: onShowMessage,
-    userName: userName,
-  );
-}
-
 /// A full screen image widget
 class FullScreenMedia extends FullScreenMediaWidget {
   /// Instantiate a new FullScreenImage
