@@ -62,6 +62,7 @@ class GalleryFooter extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _GalleryFooterState extends State<GalleryFooter> {
+  final shareButtonKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     const showShareButton = !kIsWeb;
@@ -82,11 +83,10 @@ class _GalleryFooterState extends State<GalleryFooter> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (!showShareButton)
-                Container(
-                  width: 48,
-                )
+                const SizedBox(width: 48)
               else
                 IconButton(
+                  key: shareButtonKey,
                   icon: StreamSvgIcon.iconShare(
                     size: 24,
                     color: galleryFooterThemeData.shareIconColor,
@@ -108,8 +108,15 @@ class _GalleryFooterState extends State<GalleryFooter> {
                     final filePath = '${tmpPath.path}/${attachment.id}.$type';
                     final file = File(filePath);
                     await file.writeAsBytes(bytes);
+                    final box =
+                        shareButtonKey.currentContext?.findRenderObject();
+                    final position =
+                        (box! as RenderBox).localToGlobal(Offset.zero);
+                    print(position);
                     await Share.shareFiles(
                       [filePath],
+                      sharePositionOrigin:
+                          Rect.fromLTWH(position.dx, position.dy, 0, 0),
                       mimeTypes: [
                         'image/$type',
                       ],
