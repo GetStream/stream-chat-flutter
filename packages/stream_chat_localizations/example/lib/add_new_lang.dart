@@ -399,6 +399,51 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get downloadLabel => 'Download';
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Unmute User';
+    } else {
+      return 'Mute User';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Are you sure you want to unmute this group?';
+    } else {
+      return 'Are you sure you want to mute this group?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Are you sure you want to unmute this user?';
+    } else {
+      return 'Are you sure you want to mute this user?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return 'UNMUTE';
+    } else {
+      return 'MUTE';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Unmute Group';
+    } else {
+      return 'Mute Group';
+    }
+  }
 }
 
 void main() async {
@@ -462,36 +507,38 @@ class MyApp extends StatelessWidget {
   final Channel channel;
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        theme: ThemeData.light(),
-        darkTheme: ThemeData.dark(),
-        // Add all the supported locales
-        supportedLocales: const [
-          Locale('en'),
-          Locale('hi'),
-          Locale('fr'),
-          Locale('it'),
-          Locale('es'),
-          Locale('ja'),
-          Locale('ko'),
-          // Add support for additional 'nn' locale
-          Locale('nn'),
-        ],
-        // Add overridden "NnStreamChatLocalizations.delegate" along with
-        // "GlobalStreamChatLocalizations.delegates"
-        localizationsDelegates: const [
-          NnStreamChatLocalizations.delegate,
-          ...GlobalStreamChatLocalizations.delegates,
-        ],
-        builder: (context, widget) => StreamChat(
-          client: client,
-          child: widget,
-        ),
-        home: StreamChannel(
-          channel: channel,
-          child: const ChannelPage(),
-        ),
-      );
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      // Add all the supported locales
+      supportedLocales: const [
+        Locale('en'),
+        Locale('hi'),
+        Locale('fr'),
+        Locale('it'),
+        Locale('es'),
+        Locale('ja'),
+        Locale('ko'),
+        // Add support for additional 'nn' locale
+        Locale('nn'),
+      ],
+      // Add overridden "NnStreamChatLocalizations.delegate" along with
+      // "GlobalStreamChatLocalizations.delegates"
+      localizationsDelegates: const [
+        NnStreamChatLocalizations.delegate,
+        ...GlobalStreamChatLocalizations.delegates,
+      ],
+      builder: (context, widget) => StreamChat(
+        client: client,
+        child: widget,
+      ),
+      home: StreamChannel(
+        channel: channel,
+        child: const ChannelPage(),
+      ),
+    );
+  }
 }
 
 /// A list of messages sent in the current channel.
@@ -506,15 +553,17 @@ class ChannelPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: const ChannelHeader(),
-        body: Column(
-          children: const <Widget>[
-            Expanded(
-              child: MessageListView(),
-            ),
-            MessageInput(),
-          ],
-        ),
-      );
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const ChannelHeader(),
+      body: Column(
+        children: const <Widget>[
+          Expanded(
+            child: MessageListView(),
+          ),
+          MessageInput(),
+        ],
+      ),
+    );
+  }
 }

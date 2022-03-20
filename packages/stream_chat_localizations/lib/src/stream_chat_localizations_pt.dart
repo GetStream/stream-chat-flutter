@@ -378,4 +378,49 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get downloadLabel => 'Download';
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Ativar o som do usuário';
+    } else {
+      return 'Silenciar usuário';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Tem certeza de que deseja ativar o som deste grupo?';
+    } else {
+      return 'Tem certeza de que deseja silenciar este grupo?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Tem certeza de que deseja ativar o som deste usuário?';
+    } else {
+      return 'Tem certeza de que deseja silenciar este usuário?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return 'ATIVAR MUDO';
+    } else {
+      return 'MUDO';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Reativar o som do grupo';
+    } else {
+      return 'Silenciar Grupo';
+    }
+  }
 }

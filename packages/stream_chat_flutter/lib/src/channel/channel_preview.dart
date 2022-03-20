@@ -101,32 +101,32 @@ class ChannelPreview extends StatelessWidget {
               ),
               title: channel.isGroup
                   ? Text(
-                      channel.isMuted ? 'Unmute Group' : 'Mute Group',
+                      context.translations
+                          .toggleMuteUnmuteGroupText(isMuted: channel.isMuted),
                     )
                   : Text(
-                      channel.isMuted
-                          ? 'Unmute conversation'
-                          : 'Mute conversation',
+                      context.translations
+                          .toggleMuteUnmuteUserText(isMuted: channel.isMuted),
                     ),
               onClick: () async {
                 Navigator.of(context, rootNavigator: true).pop();
                 showDialog(
                   context: context,
                   builder: (_) => ConfirmationDialog(
-                    //TODO(Groovin): translations!
                     titleText: channel.isGroup
-                        ? (channel.isMuted ? 'Unmute User' : 'Mute User')
-                        : (channel.isMuted
-                            ? 'Unmute Conversation'
-                            : 'Mute Conversation'),
+                        ? context.translations
+                            .toggleMuteUnmuteGroupText(isMuted: channel.isMuted)
+                        : context.translations
+                            .toggleMuteUnmuteUserText(isMuted: channel.isMuted),
                     promptText: channel.isGroup
-                        ? (channel.isMuted
-                            ? 'Are you sure you want to unmute this user?'
-                            : 'Are you sure you want to mute this user?')
-                        : (channel.isMuted
-                            ? 'Are you sure you want to unmute this conversation?'
-                            : 'Are you sure you want to mute this conversation?'),
-                    affirmativeText: channel.isMuted ? 'UNMUTE' : 'MUTE',
+                        ? context.translations.toggleMuteUnmuteGroupQuestion(
+                            isMuted: channel.isMuted,
+                          )
+                        : context.translations.toggleMuteUnmuteUserQuestion(
+                            isMuted: channel.isMuted,
+                          ),
+                    affirmativeText: context.translations
+                        .toggleMuteUnmuteAction(isMuted: channel.isMuted),
                     onConfirmation: () async {
                       try {
                         if (channel.isMuted) {

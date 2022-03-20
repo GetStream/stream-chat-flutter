@@ -320,6 +320,23 @@ abstract class Translations {
 
   /// The label for "Download"
   String get downloadLabel;
+
+  /// The text for "Mute Group"/"Unmute Group" based on the value of [isMuted].
+  String toggleMuteUnmuteGroupText({required bool isMuted});
+
+  /// The text for "Mute User"/"Unmute User" based on the value of [isMuted].
+  String toggleMuteUnmuteUserText({required bool isMuted});
+
+  /// The text for "Are you sure you want to mute this group?"/"Are you sure you want to unmute this group?"
+  /// based on the value of [isMuted].
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted});
+
+  /// The text for "Are you sure you want to mute this user?"/"Are you sure you want to unmute this user?"
+  /// based on the value of [isMuted].
+  String toggleMuteUnmuteUserQuestion({required bool isMuted});
+
+  /// The text for "MUTE"/"UNMUTE" based on the value of [isMuted].
+  String toggleMuteUnmuteAction({required bool isMuted});
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -698,4 +715,49 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get downloadLabel => 'Download';
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Unmute User';
+    } else {
+      return 'Mute User';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Are you sure you want to unmute this group?';
+    } else {
+      return 'Are you sure you want to mute this group?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Are you sure you want to unmute this user?';
+    } else {
+      return 'Are you sure you want to mute this user?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return 'UNMUTE';
+    } else {
+      return 'MUTE';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Unmute Group';
+    } else {
+      return 'Mute Group';
+    }
+  }
 }

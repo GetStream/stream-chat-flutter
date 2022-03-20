@@ -377,4 +377,49 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get downloadLabel => 'Scaricamento';
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Attiva l\'audio dell\'utente';
+    } else {
+      return 'Utente muto';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Sei sicuro di voler riattivare questo gruppo?';
+    } else {
+      return 'Sei sicuro di voler disattivare questo gruppo?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Sei sicuro di voler riattivare questo utente?';
+    } else {
+      return 'Sei sicuro di voler silenziare questo utente?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return 'RIATTIVATO';
+    } else {
+      return 'MUTO';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Riattiva gruppo';
+    } else {
+      return 'Gruppo muto';
+    }
+  }
 }
