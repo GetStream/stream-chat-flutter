@@ -720,8 +720,6 @@ class _MessageWidgetState extends State<MessageWidget>
       (widget.message.reactionCounts?.isNotEmpty == true) &&
       !widget.message.isDeleted;
 
-  late bool? _isOwnMessage;
-
   @override
   bool get wantKeepAlive => widget.message.attachments.isNotEmpty;
 
@@ -733,11 +731,6 @@ class _MessageWidgetState extends State<MessageWidget>
     super.didChangeDependencies();
     _streamChatTheme = StreamChatTheme.of(context);
     _streamChat = StreamChat.of(context);
-    if (widget.message.user == _streamChat.currentUser) {
-      _isOwnMessage = true;
-    } else {
-      _isOwnMessage = false;
-    }
   }
 
   @override
