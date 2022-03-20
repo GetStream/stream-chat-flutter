@@ -292,7 +292,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       if (divFactor >= 1.0) {
         // This calculation is hacky and does not cover all bases!!!
         // A better option is needed!
-        print(constraints.maxWidth);
 
         // Landscape calculations
         if (constraints.maxWidth == 1350) {
@@ -353,7 +352,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         result = -(1.2 - divFactor);
       }
     }
-    print(result);
 
     // Ensure reactions don't get pushed past the edge of the screen.
     //

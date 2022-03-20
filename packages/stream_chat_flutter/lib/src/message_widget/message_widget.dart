@@ -730,6 +730,7 @@ class _MessageWidgetState extends State<MessageWidget>
 
   @override
   void didChangeDependencies() {
+    super.didChangeDependencies();
     _streamChatTheme = StreamChatTheme.of(context);
     _streamChat = StreamChat.of(context);
     if (widget.message.user == _streamChat.currentUser) {
@@ -737,8 +738,6 @@ class _MessageWidgetState extends State<MessageWidget>
     } else {
       _isOwnMessage = false;
     }
-    print(_isOwnMessage);
-    super.didChangeDependencies();
   }
 
   @override
