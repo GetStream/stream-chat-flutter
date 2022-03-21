@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   stream_chat_flutter:
-    path: ../stream_chat_flutter
+    path: ../../stream_chat_flutter
   stream_chat_localizations: 
     path: ../
 
