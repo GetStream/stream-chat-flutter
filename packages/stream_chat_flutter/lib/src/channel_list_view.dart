@@ -207,8 +207,6 @@ class ChannelListView extends StatefulWidget {
 }
 
 class _ChannelListViewState extends State<ChannelListView> {
-  final _slideController = SlidableController();
-
   late final _defaultController = ChannelListController();
 
   ChannelListController get _channelListController =>
@@ -270,19 +268,21 @@ class _ChannelListViewState extends State<ChannelListView> {
             _gridItemBuilder(context, index, channels),
       );
     }
-    return ListView.separated(
-      padding: widget.padding,
-      physics: const AlwaysScrollableScrollPhysics(),
-      // all channels + progress loader
-      itemCount: channels.length + 1,
-      separatorBuilder: (_, index) {
-        if (widget.separatorBuilder != null) {
-          return widget.separatorBuilder!(context, index);
-        }
-        return _separatorBuilder(context, index);
-      },
-      itemBuilder: (context, index) =>
-          _listItemBuilder(context, index, channels),
+    return SlidableAutoCloseBehavior(
+      child: ListView.separated(
+        padding: widget.padding,
+        physics: const AlwaysScrollableScrollPhysics(),
+        // all channels + progress loader
+        itemCount: channels.length + 1,
+        separatorBuilder: (_, index) {
+          if (widget.separatorBuilder != null) {
+            return widget.separatorBuilder!(context, index);
+          }
+          return _separatorBuilder(context, index);
+        },
+        itemBuilder: (context, index) =>
+            _listItemBuilder(context, index, channels),
+      ),
     );
   }
 
@@ -510,82 +510,86 @@ class _ChannelListViewState extends State<ChannelListView> {
     final backgroundColor = chatThemeData.colorTheme.inputBg;
     final channel = channels[i];
 
+    final canDeleteChannel =
+        channel.ownCapabilities.contains(PermissionType.deleteChannel);
+
     return StreamChannel(
       key: ValueKey<String>('CHANNEL-${channel.cid}'),
       channel: channel,
       child: Slidable(
-        controller: _slideController,
         enabled: widget.swipeToAction,
-        actionPane: const SlidableBehindActionPane(),
-        actionExtentRatio: 0.12,
-        secondaryActions: widget.swipeActions
-                ?.map((e) => IconSlideAction(
-                      color: e.color,
-                      iconWidget: e.iconWidget,
-                      onTap: () {
-                        e.onTap?.call(channel);
-                      },
-                    ))
-                .toList() ??
-            <Widget>[
-              IconSlideAction(
-                color: backgroundColor,
-                icon: Icons.more_horiz,
-                onTap: widget.onMoreDetailsPressed != null
-                    ? () {
-                        widget.onMoreDetailsPressed!(channel);
-                      }
-                    : () {
-                        showModalBottomSheet(
-                          clipBehavior: Clip.hardEdge,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(32),
-                              topRight: Radius.circular(32),
-                            ),
-                          ),
-                          context: context,
-                          builder: (context) => StreamChannel(
-                            channel: channel,
-                            child: StreamChannelInfoBottomSheet(
-                              channel: channel,
-                              onViewInfoTap: () {
-                                widget.onViewInfoTap?.call(channel);
-                              },
-                            ),
-                          ),
-                        );
-                      },
-              ),
-              if (channel.ownCapabilities
-                  .contains(PermissionType.deleteChannel))
-                IconSlideAction(
-                  color: backgroundColor,
-                  iconWidget: StreamSvgIcon.delete(
-                    color: chatThemeData.colorTheme.accentError,
-                  ),
-                  onTap: widget.onDeletePressed != null
-                      ? () {
-                          widget.onDeletePressed?.call(channel);
+        endActionPane: ActionPane(
+          extentRatio: canDeleteChannel ? 0.4 : 0.2,
+          motion: const BehindMotion(),
+          children: widget.swipeActions
+                  ?.map((e) => CustomSlidableAction(
+                        backgroundColor: e.color ?? Colors.white,
+                        child: e.iconWidget,
+                        onPressed: (_) {
+                          e.onTap?.call(channel);
+                        },
+                      ))
+                  .toList() ??
+              <Widget>[
+                CustomSlidableAction(
+                  backgroundColor: backgroundColor,
+                  onPressed: widget.onMoreDetailsPressed != null
+                      ? (_) {
+                          widget.onMoreDetailsPressed!(channel);
                         }
-                      : () async {
-                          final res = await showConfirmationDialog(
-                            context,
-                            title: context.translations.deleteConversationLabel,
-                            question:
-                                context.translations.deleteConversationQuestion,
-                            okText: context.translations.deleteLabel,
-                            cancelText: context.translations.cancelLabel,
-                            icon: StreamSvgIcon.delete(
-                              color: chatThemeData.colorTheme.accentError,
+                      : (_) {
+                          showModalBottomSheet(
+                            clipBehavior: Clip.hardEdge,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(32),
+                                topRight: Radius.circular(32),
+                              ),
+                            ),
+                            context: context,
+                            builder: (context) => StreamChannel(
+                              channel: channel,
+                              child: StreamChannelInfoBottomSheet(
+                                channel: channel,
+                                onViewInfoTap: () {
+                                  widget.onViewInfoTap?.call(channel);
+                                },
+                              ),
                             ),
                           );
-                          if (res == true) {
-                            await channel.delete();
-                          }
                         },
+                  child: const Icon(Icons.more_horiz),
                 ),
-            ],
+                if (canDeleteChannel)
+                  CustomSlidableAction(
+                    backgroundColor: backgroundColor,
+                    onPressed: widget.onDeletePressed != null
+                        ? (_) {
+                            widget.onDeletePressed?.call(channel);
+                          }
+                        : (_) async {
+                            final res = await showConfirmationDialog(
+                              context,
+                              title:
+                                  context.translations.deleteConversationLabel,
+                              question: context
+                                  .translations.deleteConversationQuestion,
+                              okText: context.translations.deleteLabel,
+                              cancelText: context.translations.cancelLabel,
+                              icon: StreamSvgIcon.delete(
+                                color: chatThemeData.colorTheme.accentError,
+                              ),
+                            );
+                            if (res == true) {
+                              await channel.delete();
+                            }
+                          },
+                    child: StreamSvgIcon.delete(
+                      color: chatThemeData.colorTheme.accentError,
+                    ),
+                  ),
+              ],
+        ),
         child: widget.channelPreviewBuilder?.call(context, channel) ??
             DecoratedBox(
               decoration: BoxDecoration(
