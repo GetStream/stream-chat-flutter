@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:lottie/lottie.dart';
 
 mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T>

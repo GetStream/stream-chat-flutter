@@ -44,13 +44,13 @@ class _ThreadPageState extends State<ThreadPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-      appBar: ThreadHeader(
+      appBar: StreamThreadHeader(
         parent: widget.parent,
       ),
       body: Column(
         children: <Widget>[
           Expanded(
-            child: MessageListView(
+            child: StreamMessageListView(
               parentMessage: widget.parent,
               initialScrollIndex: widget.initialScrollIndex,
               initialAlignment: widget.initialAlignment,
@@ -62,14 +62,14 @@ class _ThreadPageState extends State<ThreadPage> {
                 return defaultMessage.copyWith(
                   onReplyTap: _reply,
                   deletedBottomRowBuilder: (context, message) {
-                    return const VisibleFootnote();
+                    return const StreamVisibleFootnote();
                   },
                 );
               },
             ),
           ),
           if (widget.parent.type != 'deleted')
-            MessageInput(
+            StreamMessageInput(
               focusNode: _focusNode,
               messageInputController: _messageInputController,
             ),

@@ -88,7 +88,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
             )
         ],
       ),
-      body: ConnectionStatusBuilder(
+      body: StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
           String statusString = '';
           bool showStatus = true;
@@ -105,7 +105,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
               statusString = AppLocalizations.of(context).disconnected;
               break;
           }
-          return InfoTile(
+          return StreamInfoTile(
             showMessage: showStatus,
             tileAnchor: Alignment.topCenter,
             childAnchor: Alignment.topCenter,
@@ -136,7 +136,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                               children: [
                                 Stack(
                                   children: [
-                                    UserAvatar(
+                                    StreamUserAvatar(
                                       onlineIndicatorAlignment:
                                           Alignment(0.9, 0.9),
                                       user: user,
@@ -229,7 +229,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                 behavior: HitTestBehavior.opaque,
                 onPanDown: (_) => FocusScope.of(context).unfocus(),
                 child: UsersBloc(
-                  child: UserListView(
+                  child: StreamUserListView(
                     selectedUsers: _selectedUsers,
                     pullToRefresh: false,
                     groupAlphabetically: _isSearchActive ? false : true,

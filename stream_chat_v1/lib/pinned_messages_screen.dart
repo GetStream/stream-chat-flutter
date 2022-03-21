@@ -21,7 +21,7 @@ class PinnedMessagesScreen extends StatefulWidget {
 
   final ShowMessageCallback? onShowMessage;
 
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   const PinnedMessagesScreen({
     required this.messageTheme,
@@ -166,7 +166,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
               var text = data[position].message.text ?? '';
 
               return ListTile(
-                leading: UserAvatar(
+                leading: StreamUserAvatar(
                   user: user,
                   constraints: BoxConstraints.tightFor(
                     width: 40.0,

@@ -130,7 +130,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
         ),
         centerTitle: true,
       ),
-      body: ConnectionStatusBuilder(
+      body: StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
           String statusString = '';
           bool showStatus = true;
@@ -147,7 +147,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
               statusString = AppLocalizations.of(context).disconnected;
               break;
           }
-          return InfoTile(
+          return StreamInfoTile(
             showMessage: showStatus,
             tileAnchor: Alignment.topCenter,
             childAnchor: Alignment.topCenter,
@@ -200,7 +200,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                     .overlay,
                                 shape: BoxShape.circle,
                               ),
-                              child: UserAvatar(
+                              child: StreamUserAvatar(
                                 showOnlineStatus: false,
                                 user: user,
                                 constraints: BoxConstraints.tightFor(
@@ -288,7 +288,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             behavior: HitTestBehavior.opaque,
                             onPanDown: (_) => FocusScope.of(context).unfocus(),
                             child: UsersBloc(
-                              child: UserListView(
+                              child: StreamUserListView(
                                 selectedUsers: _selectedUsers,
                                 groupAlphabetically:
                                     _isSearchActive ? false : true,
@@ -366,7 +366,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             future: channel!.initialized,
                             builder: (context, snapshot) {
                               if (snapshot.data == true) {
-                                return MessageListView();
+                                return StreamMessageListView();
                               }
 
                               return Center(
@@ -384,7 +384,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             },
                           ),
                   ),
-                  MessageInput(
+                  StreamMessageInput(
                     focusNode: _messageInputFocusNode,
                     preMessageSending: (message) async {
                       await channel!.watch();

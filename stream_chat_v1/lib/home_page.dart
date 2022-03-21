@@ -4,7 +4,6 @@ import 'package:example/channel_page.dart';
 import 'package:example/notifications_service.dart';
 import 'package:example/routes/app_routes.dart';
 import 'package:example/routes/routes.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

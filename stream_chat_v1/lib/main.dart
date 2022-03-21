@@ -4,7 +4,6 @@ import 'package:example/choose_user_page.dart';
 import 'package:example/home_page.dart';
 import 'package:example/localizations.dart';
 import 'package:example/splash_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';

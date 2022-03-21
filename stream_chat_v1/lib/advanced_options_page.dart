@@ -3,7 +3,6 @@ import 'package:example/localizations.dart';
 import 'package:example/routes/routes.dart';
 import 'package:example/stream_version.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

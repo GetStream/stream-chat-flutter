@@ -1,8 +1,6 @@
-import 'package:collection/collection.dart' show IterableExtension;
 import 'package:example/localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'channel_file_display_screen.dart';
@@ -16,7 +14,7 @@ class ChatInfoScreen extends StatefulWidget {
   /// User in consideration
   final User? user;
 
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   const ChatInfoScreen({
     Key? key,
@@ -54,13 +52,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             height: 8.0,
             color: StreamChatTheme.of(context).colorTheme.disabled,
           ),
-          if ([
-            'admin',
-            'owner',
-          ].contains(channel.state!.members
-              .firstWhereOrNull(
-                  (m) => m.userId == channel.client.state.currentUser!.id)
-              ?.role))
+          if (channel.ownCapabilities.contains(PermissionType.deleteChannel))
             _buildDeleteListTile(),
         ],
       ),
@@ -78,7 +70,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: UserAvatar(
+                  child: StreamUserAvatar(
                     user: widget.user!,
                     constraints: BoxConstraints.tightFor(
                       width: 72.0,
@@ -95,7 +87,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 SizedBox(height: 7.0),
                 _buildConnectedTitleState(),
                 SizedBox(height: 15.0),
-                OptionListTile(
+                StreamOptionListTile(
                   title: '@${widget.user!.id}',
                   tileColor: StreamChatTheme.of(context).colorTheme.appBg,
                   trailing: Padding(
@@ -148,7 +140,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             builder: (context, snapshot) {
               mutedBool.value = snapshot.data;
 
-              return OptionListTile(
+              return StreamOptionListTile(
                 tileColor: StreamChatTheme.of(context).colorTheme.appBg,
                 title: AppLocalizations.of(context).muteUser,
                 titleTextStyle: StreamChatTheme.of(context).textTheme.body,
@@ -201,7 +193,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         //   ),
         //   onTap: () {},
         // ),
-        OptionListTile(
+        StreamOptionListTile(
           title: AppLocalizations.of(context).pinnedMessages,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
@@ -261,7 +253,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             );
           },
         ),
-        OptionListTile(
+        StreamOptionListTile(
           title: AppLocalizations.of(context).photosAndVideos,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
@@ -321,7 +313,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             );
           },
         ),
-        OptionListTile(
+        StreamOptionListTile(
           title: AppLocalizations.of(context).files,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
@@ -361,7 +353,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             );
           },
         ),
-        OptionListTile(
+        StreamOptionListTile(
           title: AppLocalizations.of(context).sharedGroups,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
@@ -391,7 +383,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   }
 
   Widget _buildDeleteListTile() {
-    return OptionListTile(
+    return StreamOptionListTile(
       title: 'Delete Conversation',
       tileColor: StreamChatTheme.of(context).colorTheme.appBg,
       titleTextStyle: StreamChatTheme.of(context).textTheme.body.copyWith(
@@ -632,7 +624,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: ChannelAvatar(
+                    child: StreamChannelAvatar(
                       channel: channel,
                       constraints:
                           BoxConstraints(maxWidth: 40.0, maxHeight: 40.0),
