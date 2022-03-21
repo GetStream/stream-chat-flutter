@@ -214,6 +214,7 @@ class StreamMessageInput extends StatefulWidget {
     this.elevation,
     this.shadow,
     this.autoCorrect,
+    this.disableEmojiSuggestionsOverlay,
   }) : super(key: key);
 
   /// List of options for showing overlays.
@@ -337,6 +338,10 @@ class StreamMessageInput extends StatefulWidget {
   /// autoCorrect is enabled by default
   final bool? autoCorrect;
 
+  /// Disable the default emoji suggestions
+  /// Enabled by default
+  final bool? disableEmojiSuggestionsOverlay;
+
   static bool _defaultValidator(Message message) =>
       message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
 
@@ -369,6 +374,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
       _effectiveController.value.status != MessageSendingStatus.sending;
 
   bool get _autoCorrect => widget.autoCorrect ?? true;
+
+  bool get _disableEmojiSuggestionsOverlay =>
+      widget.disableEmojiSuggestionsOverlay ?? false;
 
   RestorableMessageInputController? _controller;
 
@@ -599,18 +607,19 @@ class StreamMessageInputState extends State<StreamMessageInput>
               visible: _showCommandsOverlay,
               widget: _buildCommandsOverlayEntry(),
             ),
-            OverlayOptions(
-              visible: _focusNode.hasFocus &&
-                  _effectiveController.text.isNotEmpty &&
-                  _effectiveController.baseOffset > 0 &&
-                  _effectiveController.text
-                      .substring(
-                        0,
-                        _effectiveController.baseOffset,
-                      )
-                      .contains(':'),
-              widget: _buildEmojiOverlay(),
-            ),
+            if (!_disableEmojiSuggestionsOverlay)
+              OverlayOptions(
+                visible: _focusNode.hasFocus &&
+                    _effectiveController.text.isNotEmpty &&
+                    _effectiveController.baseOffset > 0 &&
+                    _effectiveController.text
+                        .substring(
+                          0,
+                          _effectiveController.baseOffset,
+                        )
+                        .contains(':'),
+                widget: _buildEmojiOverlay(),
+              ),
             OverlayOptions(
               visible: _showMentionsOverlay,
               widget: _buildMentionsOverlayEntry(),
