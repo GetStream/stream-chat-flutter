@@ -19,8 +19,8 @@ dependencies:
 
 dependency_overrides: 
   stream_chat_flutter: 
-    path: ../
-    
+    path: ../../stream_chat_flutter
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
