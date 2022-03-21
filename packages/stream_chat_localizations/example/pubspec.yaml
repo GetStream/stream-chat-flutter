@@ -16,6 +16,11 @@ dependencies:
   stream_chat_localizations: 
     path: ../
 
+
+dependency_overrides: 
+  stream_chat_flutter: 
+    path: ../
+    
 dev_dependencies:
   flutter_test:
     sdk: flutter
