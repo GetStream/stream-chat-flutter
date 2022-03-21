@@ -1,7 +1,10 @@
 export 'package:jiffy/jiffy.dart';
+export 'package:stream_chat_flutter/src/message_widget/parse_attachments.dart';
+export 'package:stream_chat_flutter/src/message_widget/quoted_message.dart';
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 export 'src/attachment/attachment.dart';
+export 'src/attachment/url_attachment.dart';
 export 'src/attachment_actions_modal/attachment_actions_modal.dart';
 export 'src/avatars/gradient_avatar.dart';
 export 'src/avatars/user_avatar.dart';
@@ -32,6 +35,7 @@ export 'src/message_widget/deleted_message.dart';
 export 'src/message_widget/message_text.dart';
 export 'src/message_widget/message_widget.dart';
 export 'src/message_widget/reaction_picker.dart';
+export 'src/message_widget/text_bubble.dart';
 export 'src/misc/back_button.dart';
 export 'src/misc/connection_status_builder.dart';
 export 'src/misc/date_divider.dart';

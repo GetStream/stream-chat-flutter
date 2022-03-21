@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/parse_attachments.dart';
-import 'package:stream_chat_flutter/src/message_widget/quoted_message.dart';
-import 'package:stream_chat_flutter/src/message_widget/text_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template messageCard}
