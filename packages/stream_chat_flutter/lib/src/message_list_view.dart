@@ -248,6 +248,20 @@ class StreamMessageListView extends StatefulWidget {
   /// messages and the scroll offset is not zero
   final bool showScrollToBottom;
 
+  /// Function used to build a custom scroll to bottom widget
+  ///
+  /// Provides the current unread messages count and a reference
+  /// to the function that is executed on tap of this widget by default
+  ///
+  /// As an example:
+  ///           MessageListView(
+  ///             scrollToBottomBuilder: (unreadCount, defaultTapAction) {
+  ///               return InkWell(
+  ///                 onTap: () => defaultTapAction(unreadCount),
+  ///                 child: Text('Scroll To Bottom'),
+  ///               );
+  ///             },
+  ///           ),
   final Widget Function(
     int unreadCount,
     Future<void> Function(int) scrollToBottomDefaultTapAction,

@@ -213,6 +213,7 @@ class StreamMessageInput extends StatefulWidget {
     this.enableSafeArea,
     this.elevation,
     this.shadow,
+    this.autoCorrect,
   }) : super(key: key);
 
   /// List of options for showing overlays.
@@ -332,6 +333,10 @@ class StreamMessageInput extends StatefulWidget {
   /// Shadow for the [StreamMessageInput] widget
   final BoxShadow? shadow;
 
+  /// Disable autoCorrect by passing false
+  /// autoCorrect is enabled by default
+  final bool? autoCorrect;
+
   static bool _defaultValidator(Message message) =>
       message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
 
@@ -362,6 +367,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   bool get _isEditing =>
       _effectiveController.value.status != MessageSendingStatus.sending;
+
+  bool get _autoCorrect => widget.autoCorrect ?? true;
 
   RestorableMessageInputController? _controller;
 
@@ -805,6 +812,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     textAlignVertical: TextAlignVertical.center,
                     decoration: _getInputDecoration(context),
                     textCapitalization: TextCapitalization.sentences,
+                    autocorrect: _autoCorrect,
                   ),
                 ),
               ],
