@@ -1019,6 +1019,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       hostDisplayName: hostDisplayName,
       textPadding: widget.textPadding,
       messageTheme: widget.messageTheme,
+      onLinkTap: widget.onLinkTap,
     );
   }
 
