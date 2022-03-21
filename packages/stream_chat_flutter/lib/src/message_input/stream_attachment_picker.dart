@@ -426,12 +426,12 @@ class _PickerWidget extends StatefulWidget {
 }
 
 class _PickerWidgetState extends State<_PickerWidget> {
-  Future<bool>? requestPermission;
+  Future<PermissionState>? requestPermission;
 
   @override
   void initState() {
     super.initState();
-    requestPermission = PhotoManager.requestPermission();
+    requestPermission = PhotoManager.requestPermissionExtend();
   }
 
   @override
@@ -440,14 +440,15 @@ class _PickerWidgetState extends State<_PickerWidget> {
       return widget.customAttachmentTypes[widget.filePickerIndex - 1]
           .pickerBuilder(context);
     }
-    return FutureBuilder<bool>(
+    return FutureBuilder<PermissionState>(
       future: requestPermission,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Offstage();
         }
 
-        if (snapshot.data!) {
+        if ([PermissionState.authorized, PermissionState.limited]
+            .contains(snapshot.data)) {
           if (widget.containsFile ||
               !widget.allowedAttachmentTypes
                   .contains(DefaultAttachmentTypes.image)) {
