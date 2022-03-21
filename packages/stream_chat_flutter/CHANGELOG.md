@@ -1,5 +1,10 @@
 ## 3.5.1
 
+🛑️ Breaking Changes
+
+- `pinPermissions` is no longer needed in `MessageListView`.
+- `MessageInput` now works with a `MessageInputController` instead of a `TextEditingController`
+
 🐞 Fixed
 
 - Mentions overlay now doesn't overflow when there is not enough height available
@@ -31,7 +36,12 @@
 
 ✅ Added
 
-- Videos can now be auto-played in `FullScreenMedia`, by setting the `autoplayVideos` argument to true.
+- Videos can now be auto-played in `FullScreenMedia`
+- Extra customisation options for `MessageInput`
+
+🔄 Changed
+
+- Add `didUpdateWidget` override in `MessageInput` widget to handle changes to `focusNode`.
 
 ## 3.3.2
 

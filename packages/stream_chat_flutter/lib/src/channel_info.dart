@@ -3,10 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro channel_info}
+@Deprecated("Use 'StreamChannelInfo' instead")
+typedef ChannelInfo = StreamChannelInfo;
+
+/// {@template channel_info}
 /// Widget which shows channel info
-class ChannelInfo extends StatelessWidget {
-  /// Constructor which creates a [ChannelInfo] widget
-  const ChannelInfo({
+/// {@endtemplate}
+class StreamChannelInfo extends StatelessWidget {
+  /// Constructor which creates a [StreamChannelInfo] widget
+  const StreamChannelInfo({
     Key? key,
     required this.channel,
     this.textStyle,
@@ -32,7 +38,7 @@ class ChannelInfo extends StatelessWidget {
     return BetterStreamBuilder<List<Member>>(
       stream: channel.state!.membersStream,
       initialData: channel.state!.members,
-      builder: (context, data) => ConnectionStatusBuilder(
+      builder: (context, data) => StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
           switch (status) {
             case ConnectionStatus.connected:
@@ -60,12 +66,13 @@ class ChannelInfo extends StatelessWidget {
       var text = context.translations.membersCountText(memberCount);
       final onlineCount =
           members?.where((m) => m.user?.online == true).length ?? 0;
-      if (onlineCount > 0) {
+      if (channel.ownCapabilities.contains(PermissionType.connectEvents) &&
+          onlineCount > 0) {
         text += ', ${context.translations.watchersCountText(onlineCount)}';
       }
       alternativeWidget = Text(
         text,
-        style: ChannelHeaderTheme.of(context).subtitleStyle,
+        style: StreamChannelHeaderTheme.of(context).subtitleStyle,
       );
     } else {
       final userId = StreamChat.of(context).currentUser?.id;
@@ -93,11 +100,12 @@ class ChannelInfo extends StatelessWidget {
       return alternativeWidget ?? const Offstage();
     }
 
-    return TypingIndicator(
-      parentId: parentId,
-      alignment: Alignment.center,
-      alternativeWidget: alternativeWidget,
-      style: textStyle,
+    return Align(
+      child: StreamTypingIndicator(
+        parentId: parentId,
+        style: textStyle,
+        alternativeWidget: alternativeWidget,
+      ),
     );
   }
 

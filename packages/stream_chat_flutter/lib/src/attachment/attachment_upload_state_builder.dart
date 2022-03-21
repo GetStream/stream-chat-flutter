@@ -9,10 +9,16 @@ typedef InProgressBuilder = Widget Function(BuildContext, int, int);
 /// Widget to build on failure
 typedef FailedBuilder = Widget Function(BuildContext, String);
 
+/// {@macro attachment_upload_state_builder}
+@Deprecated("Use 'StreamAttachmentsUploadStateBuilder' instead")
+typedef AttachmentUploadStateBuilder = StreamAttachmentUploadStateBuilder;
+
+/// {@template attachment_upload_state_builder}
 /// Widget to display attachment upload state
-class AttachmentUploadStateBuilder extends StatelessWidget {
-  /// Constructor for creating an [AttachmentUploadStateBuilder] widget
-  const AttachmentUploadStateBuilder({
+/// {@endtemplate}
+class StreamAttachmentUploadStateBuilder extends StatelessWidget {
+  /// Constructor for creating an [StreamAttachmentUploadStateBuilder] widget
+  const StreamAttachmentUploadStateBuilder({
     Key? key,
     required this.message,
     required this.attachment,
@@ -137,7 +143,7 @@ class _PreparingState extends StatelessWidget {
         ),
         Align(
           alignment: Alignment.topRight,
-          child: UploadProgressIndicator(
+          child: StreamUploadProgressIndicator(
             uploaded: 0,
             total: double.maxFinite.toInt(),
           ),
@@ -177,7 +183,7 @@ class _InProgressState extends StatelessWidget {
         ),
         Align(
           alignment: Alignment.topRight,
-          child: UploadProgressIndicator(
+          child: StreamUploadProgressIndicator(
             uploaded: sent,
             total: total,
           ),

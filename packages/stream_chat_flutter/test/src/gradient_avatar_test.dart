@@ -25,7 +25,8 @@ void main() {
                 child: SizedBox(
                   width: 100,
                   height: 100,
-                  child: GradientAvatar(name: 'demo user', userId: 'demo123'),
+                  child: StreamGradientAvatar(
+                      name: 'demo user', userId: 'demo123'),
                 ),
               ),
             ),
@@ -33,7 +34,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(GradientAvatar), findsOneWidget);
+      expect(find.byType(StreamGradientAvatar), findsOneWidget);
     },
   );
 
@@ -47,7 +48,8 @@ void main() {
               child: SizedBox(
                 width: 100,
                 height: 100,
-                child: GradientAvatar(name: 'demo user', userId: 'demo123'),
+                child:
+                    StreamGradientAvatar(name: 'demo user', userId: 'demo123'),
               ),
             ),
           ),
@@ -68,7 +70,7 @@ void main() {
               child: SizedBox(
                 width: 100,
                 height: 100,
-                child: GradientAvatar(name: 'demo', userId: 'demo1'),
+                child: StreamGradientAvatar(name: 'demo', userId: 'demo1'),
               ),
             ),
           ),
@@ -89,7 +91,7 @@ void main() {
               child: SizedBox(
                 width: 100,
                 height: 100,
-                child: GradientAvatar(
+                child: StreamGradientAvatar(
                   name: 'd123@/d de:\$as',
                   userId: 'demo123',
                 ),
@@ -113,7 +115,8 @@ void main() {
               child: SizedBox(
                 width: 100,
                 height: 100,
-                child: GradientAvatar(name: '123@/d \$as', userId: 'demo123'),
+                child: StreamGradientAvatar(
+                    name: '123@/d \$as', userId: 'demo123'),
               ),
             ),
           ),

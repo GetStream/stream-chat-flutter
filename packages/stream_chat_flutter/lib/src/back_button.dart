@@ -50,7 +50,7 @@ class StreamBackButton extends StatelessWidget {
             Positioned(
               top: 7,
               right: 7,
-              child: UnreadIndicator(
+              child: StreamUnreadIndicator(
                 cid: cid,
               ),
             ),

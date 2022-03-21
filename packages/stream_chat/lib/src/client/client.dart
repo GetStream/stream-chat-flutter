@@ -1212,12 +1212,14 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     bool skipPush = false,
+    bool skipEnrichUrl = false,
   }) =>
       _chatApi.message.sendMessage(
         channelId,
         channelType,
         message,
         skipPush: skipPush,
+        skipEnrichUrl: skipEnrichUrl,
       );
 
   /// Lists all the message replies for the [parentId]
@@ -1241,8 +1243,14 @@ class StreamChatClient {
       );
 
   /// Update the given message
-  Future<UpdateMessageResponse> updateMessage(Message message) =>
-      _chatApi.message.updateMessage(message);
+  Future<UpdateMessageResponse> updateMessage(
+    Message message, {
+    bool skipEnrichUrl = false,
+  }) =>
+      _chatApi.message.updateMessage(
+        message,
+        skipEnrichUrl: skipEnrichUrl,
+      );
 
   /// Partially update the given [messageId]
   /// Use [set] to define values to be set
@@ -1251,11 +1259,13 @@ class StreamChatClient {
     String messageId, {
     Map<String, Object?>? set,
     List<String>? unset,
+    bool skipEnrichUrl = false,
   }) =>
       _chatApi.message.partialUpdateMessage(
         messageId,
         set: set,
         unset: unset,
+        skipEnrichUrl: skipEnrichUrl,
       );
 
   /// Deletes the given message

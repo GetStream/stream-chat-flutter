@@ -5,10 +5,16 @@ import 'package:stream_chat_flutter/src/attachment/attachment_title.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro image_attachment}
+@Deprecated("use 'StreamImageAttachment' instead")
+typedef ImageAttachment = StreamImageAttachment;
+
+/// {@template image_attachment}
 /// Widget for showing an image attachment
-class ImageAttachment extends AttachmentWidget {
-  /// Constructor for creating a [ImageAttachment] widget
-  const ImageAttachment({
+/// {@endtemplate}
+class StreamImageAttachment extends StreamAttachmentWidget {
+  /// Constructor for creating a [StreamImageAttachment] widget
+  const StreamImageAttachment({
     Key? key,
     required Message message,
     required Attachment attachment,
@@ -25,8 +31,8 @@ class ImageAttachment extends AttachmentWidget {
           size: size,
         );
 
-  /// [MessageThemeData] for showing image title
-  final MessageThemeData messageTheme;
+  /// [StreamMessageThemeData] for showing image title
+  final StreamMessageThemeData messageTheme;
 
   /// Flag for showing title
   final bool showTitle;
@@ -137,7 +143,7 @@ class ImageAttachment extends AttachmentWidget {
                                     StreamChannel.of(context).channel;
                                 return StreamChannel(
                                   channel: channel,
-                                  child: FullScreenMedia(
+                                  child: StreamFullScreenMedia(
                                     mediaAttachments: message.attachments,
                                     startIndex:
                                         message.attachments.indexOf(attachment),
@@ -155,7 +161,7 @@ class ImageAttachment extends AttachmentWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8),
-                    child: AttachmentUploadStateBuilder(
+                    child: StreamAttachmentUploadStateBuilder(
                       message: message,
                       attachment: attachment,
                     ),
@@ -166,7 +172,7 @@ class ImageAttachment extends AttachmentWidget {
             if (showTitle && attachment.title != null)
               Material(
                 color: messageTheme.messageBackgroundColor,
-                child: AttachmentTitle(
+                child: StreamAttachmentTitle(
                   messageTheme: messageTheme,
                   attachment: attachment,
                 ),

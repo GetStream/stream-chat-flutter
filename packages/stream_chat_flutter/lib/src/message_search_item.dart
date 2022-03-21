@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro message_search_item}
+@Deprecated("Use 'StreamMessageSearchItem' instead")
+typedef MessageSearchItem = StreamMessageSearchItem;
+
+/// {@template message_search_item}
 /// It shows the current [Message] preview.
 ///
 /// Usually you don't use this widget as it's the default item used by
-/// [MessageSearchListView].
+/// [StreamMessageSearchListView].
 ///
 /// The widget renders the ui based on the first ancestor of type
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class MessageSearchItem extends StatelessWidget {
+/// {@endtemplate}
+class StreamMessageSearchItem extends StatelessWidget {
   /// Instantiate a new MessageSearchItem
-  const MessageSearchItem({
+  const StreamMessageSearchItem({
     Key? key,
     required this.getMessageResponse,
     this.onTap,
@@ -25,7 +31,7 @@ class MessageSearchItem extends StatelessWidget {
   /// Function called when tapping this widget
   final VoidCallback? onTap;
 
-  /// If true the [MessageSearchItem] will show the current online Status
+  /// If true the [StreamMessageSearchItem] will show the current online Status
   final bool showOnlineStatus;
 
   @override
@@ -34,10 +40,10 @@ class MessageSearchItem extends StatelessWidget {
     final channel = getMessageResponse.channel;
     final channelName = channel?.extraData['name'];
     final user = message.user!;
-    final channelPreviewTheme = ChannelPreviewTheme.of(context);
+    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
     return ListTile(
       onTap: onTap,
-      leading: UserAvatar(
+      leading: StreamUserAvatar(
         user: user,
         showOnlineStatus: showOnlineStatus,
         constraints: const BoxConstraints.tightFor(
@@ -120,7 +126,7 @@ class MessageSearchItem extends StatelessWidget {
       text = parts.join(' ');
     }
 
-    final channelPreviewTheme = ChannelPreviewTheme.of(context);
+    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
     return Text.rich(
       _getDisplayText(
         text!,

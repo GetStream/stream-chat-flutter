@@ -4,6 +4,11 @@ import 'package:stream_chat_flutter/src/channel_info.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+///{@macro template_name}
+@Deprecated("Use 'StreamChannelHeader' instead")
+typedef ChannelHeader = StreamChannelHeader;
+
+/// {@template channel_header}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header_paint.png)
 ///
@@ -49,9 +54,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The widget components render the ui based on the first ancestor of type
 /// [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
 /// Modify it to change the widget appearance.
-class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
+/// {@endtemplate}
+class StreamChannelHeader extends StatelessWidget
+    implements PreferredSizeWidget {
   /// Creates a channel header
-  const ChannelHeader({
+  const StreamChannelHeader({
     Key? key,
     this.showBackButton = true,
     this.onBackPressed,
@@ -96,16 +103,16 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
 
   /// AppBar actions
-  /// By default it shows the [ChannelAvatar]
+  /// By default it shows the [StreamChannelAvatar]
   final List<Widget>? actions;
 
-  /// The background color for this [ChannelHeader].
+  /// The background color for this [StreamChannelHeader].
   final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-    final channelHeaderTheme = ChannelHeaderTheme.of(context);
+    final channelHeaderTheme = StreamChannelHeaderTheme.of(context);
 
     final leadingWidget = leading ??
         (showBackButton
@@ -115,7 +122,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
               )
             : const SizedBox());
 
-    return ConnectionStatusBuilder(
+    return StreamConnectionStatusBuilder(
       statusBuilder: (context, status) {
         var statusString = '';
         var showStatus = true;
@@ -135,7 +142,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
 
         final theme = Theme.of(context);
 
-        return InfoTile(
+        return StreamInfoTile(
           showMessage: showConnectionStateTile && showStatus,
           message: statusString,
           child: AppBar(
@@ -152,7 +159,8 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: Center(
-                      child: ChannelAvatar(
+                      child: StreamChannelAvatar(
+                        channel: channel,
                         borderRadius:
                             channelHeaderTheme.avatarTheme?.borderRadius,
                         constraints:
@@ -172,12 +180,13 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     title ??
-                        ChannelName(
+                        StreamChannelName(
+                          channel: channel,
                           textStyle: channelHeaderTheme.titleStyle,
                         ),
                     const SizedBox(height: 2),
                     subtitle ??
-                        ChannelInfo(
+                        StreamChannelInfo(
                           showTypingIndicator: showTypingIndicator,
                           channel: channel,
                           textStyle: channelHeaderTheme.subtitleStyle,

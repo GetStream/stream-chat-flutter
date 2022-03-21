@@ -169,7 +169,8 @@ void main() {
         ),
       ));
 
-      final image = tester.widget<GroupAvatar>(find.byType(GroupAvatar));
+      final image =
+          tester.widget<StreamGroupAvatar>(find.byType(StreamGroupAvatar));
       final otherMembers = members.where((it) => it.userId != currentUser.id);
       expect(
         image.members.map((it) => it.user?.id),

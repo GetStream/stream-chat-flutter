@@ -9,6 +9,10 @@
 ## 3.4.0
 - Updated `stream_chat` dependency to [`3.4.0`](https://pub.dev/packages/stream_chat/changelog).
 
+✅ Added
+
+- Added `MessageInputController` to hold `Message` related data.
+
 🐞 Fixed
 
 - Do not move a channel to top if the new message is from a thread.

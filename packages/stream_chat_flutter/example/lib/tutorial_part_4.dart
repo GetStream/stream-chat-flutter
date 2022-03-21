@@ -8,8 +8,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// to create sub-conversations inside the same channel.
 ///
 /// Using threaded conversations is very simple and mostly a matter of
-/// plugging the [MessageListView] to another widget that renders the widget.
-/// To make this simple, such a widget only needs to build [MessageListView]
+/// plugging the [StreamMessageListView] to another widget that renders the widget.
+/// To make this simple, such a widget only needs to build [StreamMessageListView]
 /// with the parent attribute set to the thread’s root message.
 ///
 /// Now we can open threads and create new ones as well. If you long-press a
@@ -53,28 +53,42 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class ChannelListPage extends StatelessWidget {
+class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
     Key? key,
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ChannelsBloc(
-        child: ChannelListView(
-          filter: Filter.in_(
-            'members',
-            [StreamChat.of(context).currentUser!.id],
-          ),
-          sort: const [SortOption('last_message_at')],
-          limit: 20,
-          channelWidget: const ChannelPage(),
+  State<ChannelListPage> createState() => _ChannelListPageState();
+}
+
+class _ChannelListPageState extends State<ChannelListPage> {
+  late final _listController = StreamChannelListController(
+    client: StreamChat.of(context).client,
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).currentUser!.id],
+    ),
+    sort: const [SortOption('last_message_at')],
+    limit: 20,
+  );
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: StreamChannelListView(
+          controller: _listController,
+          onChannelTap: (channel) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => StreamChannel(
+                  channel: channel,
+                  child: const ChannelPage(),
+                ),
+              ),
+            );
+          },
         ),
-      ),
-    );
-  }
+      );
 }
 
 class ChannelPage extends StatelessWidget {
@@ -83,24 +97,21 @@ class ChannelPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const ChannelHeader(),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: MessageListView(
-              threadBuilder: (_, parentMessage) => ThreadPage(
-                parent: parentMessage,
+  Widget build(BuildContext context) => Scaffold(
+        appBar: const StreamChannelHeader(),
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: StreamMessageListView(
+                threadBuilder: (_, parentMessage) => ThreadPage(
+                  parent: parentMessage,
+                ),
               ),
             ),
-          ),
-          const MessageInput(),
-        ],
-      ),
-    );
-  }
+            const StreamMessageInput(),
+          ],
+        ),
+      );
 }
 
 class ThreadPage extends StatelessWidget {
@@ -115,18 +126,20 @@ class ThreadPage extends StatelessWidget {
   // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ThreadHeader(
+      appBar: StreamThreadHeader(
         parent: parent!,
       ),
       body: Column(
         children: <Widget>[
           Expanded(
-            child: MessageListView(
+            child: StreamMessageListView(
               parentMessage: parent,
             ),
           ),
-          MessageInput(
-            parentMessage: parent,
+          StreamMessageInput(
+            messageInputController: MessageInputController(
+              message: Message(parentId: parent!.id),
+            ),
           ),
         ],
       ),

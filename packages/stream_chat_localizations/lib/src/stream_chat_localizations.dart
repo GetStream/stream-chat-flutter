@@ -75,6 +75,7 @@ GlobalStreamChatLocalizations? getStreamChatTranslation(Locale locale) {
     case 'pt':
       return const StreamChatLocalizationsPt();
   }
+  return null;
 }
 
 /// Implementation of localized strings for the stream chat widgets

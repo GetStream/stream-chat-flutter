@@ -136,7 +136,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(UnreadIndicator), findsOneWidget);
+      expect(find.byType(StreamUnreadIndicator), findsOneWidget);
     },
   );
 }

@@ -54,7 +54,7 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: MessageListView(
+            child: StreamMessageListView(
               emptyBuilder: (_) => Container(key: emptyWidgetKey),
             ),
           ),
@@ -63,7 +63,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(MessageListView), findsOneWidget);
+    expect(find.byType(StreamMessageListView), findsOneWidget);
     expect(find.byKey(emptyWidgetKey), findsOneWidget);
   });
 
@@ -92,7 +92,7 @@ void main() {
             child: StreamChat(
               client: client,
               streamChatThemeData: StreamChatThemeData.light().copyWith(
-                messageListViewTheme: const MessageListViewThemeData(
+                messageListViewTheme: const StreamMessageListViewThemeData(
                   backgroundColor: Colors.grey,
                   backgroundImage: DecorationImage(
                     image: AssetImage('images/placeholder.png'),
@@ -102,7 +102,7 @@ void main() {
               ),
               child: StreamChannel(
                 channel: channel,
-                child: const MessageListView(
+                child: const StreamMessageListView(
                   key: nonEmptyWidgetKey,
                 ),
               ),
@@ -118,7 +118,7 @@ void main() {
         widget.decoration is BoxDecoration &&
         (widget.decoration! as BoxDecoration).image != null;
 
-    expect(find.byType(MessageListView), findsOneWidget);
+    expect(find.byType(StreamMessageListView), findsOneWidget);
     expect(find.byKey(nonEmptyWidgetKey), findsOneWidget);
     expect(
         find.byWidgetPredicate(

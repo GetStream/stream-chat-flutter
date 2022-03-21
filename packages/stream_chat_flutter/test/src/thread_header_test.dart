@@ -51,7 +51,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: Scaffold(
-              body: ThreadHeader(
+              body: StreamThreadHeader(
                 parent: Message(),
               ),
             ),
@@ -112,7 +112,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: Scaffold(
-              body: ThreadHeader(
+              body: StreamThreadHeader(
                 parent: Message(),
                 subtitle: const Text('subtitle'),
                 leading: const Text('leading'),

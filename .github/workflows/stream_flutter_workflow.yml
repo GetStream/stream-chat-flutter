@@ -35,7 +35,7 @@ jobs:
         run: |
           flutter pub global activate melos ${{ env.melos_version }}
       - name: "Bootstrap Workspace"
-        run: melos bootstrap
+        run: melos bootstrap --verbose
       - name: "Dart Analyze"
         run: |
           melos run analyze

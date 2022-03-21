@@ -4,27 +4,33 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 
+/// {@macro channel_header_theme}
+@Deprecated("Use 'StreamChannelHeaderTheme' instead")
+typedef ChannelHeaderTheme = StreamChannelHeaderTheme;
+
+/// {@template channel_header_theme}
 /// Overrides the default style of [ChannelHeader] descendants.
 ///
 /// See also:
 ///
-///  * [ChannelHeaderThemeData], which is used to configure this theme.
-class ChannelHeaderTheme extends InheritedTheme {
-  /// Creates a [ChannelHeaderTheme].
+///  * [StreamChannelHeaderThemeData], which is used to configure this theme.
+/// {@endtemplate}
+class StreamChannelHeaderTheme extends InheritedTheme {
+  /// Creates a [StreamChannelHeaderTheme].
   ///
   /// The [data] parameter must not be null.
-  const ChannelHeaderTheme({
+  const StreamChannelHeaderTheme({
     Key? key,
     required this.data,
     required Widget child,
   }) : super(key: key, child: child);
 
   /// The configuration of this theme.
-  final ChannelHeaderThemeData data;
+  final StreamChannelHeaderThemeData data;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [ChannelHeaderTheme] widget, then
+  /// If there is no enclosing [StreamChannelHeaderTheme] widget, then
   /// [StreamChatThemeData.channelTheme.channelHeaderTheme] is used.
   ///
   /// Typical usage is as follows:
@@ -32,34 +38,40 @@ class ChannelHeaderTheme extends InheritedTheme {
   /// ```dart
   /// final theme = ChannelHeaderTheme.of(context);
   /// ```
-  static ChannelHeaderThemeData of(BuildContext context) {
+  static StreamChannelHeaderThemeData of(BuildContext context) {
     final channelHeaderTheme =
-        context.dependOnInheritedWidgetOfExactType<ChannelHeaderTheme>();
+        context.dependOnInheritedWidgetOfExactType<StreamChannelHeaderTheme>();
     return channelHeaderTheme?.data ??
         StreamChatTheme.of(context).channelHeaderTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) =>
-      ChannelHeaderTheme(data: data, child: child);
+      StreamChannelHeaderTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(ChannelHeaderTheme oldWidget) =>
+  bool updateShouldNotify(StreamChannelHeaderTheme oldWidget) =>
       data != oldWidget.data;
 }
 
+/// {@macro channel_header_theme_data}
+@Deprecated("Use 'StreamChannelHeaderThemeData' instead")
+typedef ChannelHeaderThemeData = StreamChannelHeaderThemeData;
+
+/// {@template channel_header_theme_data}
 /// A style that overrides the default appearance of [ChannelHeader]s when used
-/// with [ChannelHeaderTheme] or with the overall [StreamChatTheme]'s
+/// with [StreamChannelHeaderTheme] or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.channelHeaderTheme].
 ///
 /// See also:
 ///
-/// * [ChannelHeaderTheme], the theme which is configured with this class.
+/// * [StreamChannelHeaderTheme], the theme which is configured with this class.
 /// * [StreamChatThemeData.channelHeaderTheme], which can be used to override
 /// the default style for [ChannelHeader]s below the overall [StreamChatTheme].
-class ChannelHeaderThemeData with Diagnosticable {
-  /// Creates a [ChannelHeaderThemeData]
-  const ChannelHeaderThemeData({
+/// {@endtemplate}
+class StreamChannelHeaderThemeData with Diagnosticable {
+  /// Creates a [StreamChannelHeaderThemeData]
+  const StreamChannelHeaderThemeData({
     this.titleStyle,
     this.subtitleStyle,
     this.avatarTheme,
@@ -73,43 +85,43 @@ class ChannelHeaderThemeData with Diagnosticable {
   final TextStyle? subtitleStyle;
 
   /// Theme for avatar
-  final AvatarThemeData? avatarTheme;
+  final StreamAvatarThemeData? avatarTheme;
 
-  /// Color for [ChannelHeaderThemeData]
+  /// Color for [StreamChannelHeaderThemeData]
   final Color? color;
 
   /// Copy with theme
-  ChannelHeaderThemeData copyWith({
+  StreamChannelHeaderThemeData copyWith({
     TextStyle? titleStyle,
     TextStyle? subtitleStyle,
-    AvatarThemeData? avatarTheme,
+    StreamAvatarThemeData? avatarTheme,
     Color? color,
   }) =>
-      ChannelHeaderThemeData(
+      StreamChannelHeaderThemeData(
         titleStyle: titleStyle ?? this.titleStyle,
         subtitleStyle: subtitleStyle ?? this.subtitleStyle,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         color: color ?? this.color,
       );
 
-  /// Linearly interpolate between two [ChannelHeaderThemeData].
+  /// Linearly interpolate between two [StreamChannelHeaderThemeData].
   ///
   /// All the properties must be non-null.
-  ChannelHeaderThemeData lerp(
-    ChannelHeaderThemeData a,
-    ChannelHeaderThemeData b,
+  StreamChannelHeaderThemeData lerp(
+    StreamChannelHeaderThemeData a,
+    StreamChannelHeaderThemeData b,
     double t,
   ) =>
-      ChannelHeaderThemeData(
+      StreamChannelHeaderThemeData(
         titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
         subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
-        avatarTheme:
-            const AvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+        avatarTheme: const StreamAvatarThemeData()
+            .lerp(a.avatarTheme!, b.avatarTheme!, t),
         color: Color.lerp(a.color, b.color, t),
       );
 
-  /// Merge with other [ChannelHeaderThemeData]
-  ChannelHeaderThemeData merge(ChannelHeaderThemeData? other) {
+  /// Merge with other [StreamChannelHeaderThemeData]
+  StreamChannelHeaderThemeData merge(StreamChannelHeaderThemeData? other) {
     if (other == null) return this;
     return copyWith(
       titleStyle: titleStyle?.merge(other.titleStyle) ?? other.titleStyle,
@@ -123,7 +135,7 @@ class ChannelHeaderThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ChannelHeaderThemeData &&
+      other is StreamChannelHeaderThemeData &&
           runtimeType == other.runtimeType &&
           titleStyle == other.titleStyle &&
           subtitleStyle == other.subtitleStyle &&

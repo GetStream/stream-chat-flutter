@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// It shows a date divider depending on the date difference
-class SystemMessage extends StatelessWidget {
-  /// Constructor for creating a [SystemMessage]
-  const SystemMessage({
+/// {@macro system_message}
+@Deprecated("Use 'StreamSystemMessage' instead")
+typedef SystemMessage = StreamSystemMessage;
+
+/// {@template system_message}
+/// It shows a widget for the message with a system message type.
+/// {@endtemplate}
+class StreamSystemMessage extends StatelessWidget {
+  /// Constructor for creating a [StreamSystemMessage]
+  const StreamSystemMessage({
     Key? key,
     required this.message,
     this.onMessageTap,

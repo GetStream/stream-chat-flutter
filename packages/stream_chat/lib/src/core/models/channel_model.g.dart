@@ -10,6 +10,10 @@ ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) => ChannelModel(
       id: json['id'] as String?,
       type: json['type'] as String?,
       cid: json['cid'] as String?,
+      ownCapabilities: (json['own_capabilities'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       config: json['config'] == null
           ? null
           : ChannelConfig.fromJson(json['config'] as Map<String, dynamic>),
@@ -48,6 +52,7 @@ Map<String, dynamic> _$ChannelModelToJson(ChannelModel instance) {
   }
 
   writeNotNull('cid', readonly(instance.cid));
+  writeNotNull('own_capabilities', readonly(instance.ownCapabilities));
   writeNotNull('config', readonly(instance.config));
   writeNotNull('created_by', readonly(instance.createdBy));
   val['frozen'] = instance.frozen;

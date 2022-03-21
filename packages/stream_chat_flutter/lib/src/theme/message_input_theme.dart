@@ -1,29 +1,37 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// {@macro message_input_theme}
+@Deprecated("Use 'StreamMessageInputTheme' instead")
+typedef MessageInputTheme = StreamMessageInputTheme;
+
+/// {@template message_input_theme}
 /// Overrides the default style of [MessageInput] descendants.
 ///
 /// See also:
 ///
-///  * [MessageInputThemeData], which is used to configure this theme.
-class MessageInputTheme extends InheritedTheme {
-  /// Creates a [MessageInputTheme].
+///  * [StreamMessageInputThemeData], which is used to configure this theme.
+/// {@endtemplate}
+class StreamMessageInputTheme extends InheritedTheme {
+  /// Creates a [StreamMessageInputTheme].
   ///
   /// The [data] parameter must not be null.
-  const MessageInputTheme({
+  const StreamMessageInputTheme({
     Key? key,
     required this.data,
     required Widget child,
   }) : super(key: key, child: child);
 
   /// The configuration of this theme.
-  final MessageInputThemeData data;
+  final StreamMessageInputThemeData data;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [MessageInputTheme] widget, then
+  /// If there is no enclosing [StreamMessageInputTheme] widget, then
   /// [StreamChatThemeData.messageInputTheme] is used.
   ///
   /// Typical usage is as follows:
@@ -31,28 +39,34 @@ class MessageInputTheme extends InheritedTheme {
   /// ```dart
   /// final theme = MessageInputTheme.of(context);
   /// ```
-  static MessageInputThemeData of(BuildContext context) {
+  static StreamMessageInputThemeData of(BuildContext context) {
     final messageInputTheme =
-        context.dependOnInheritedWidgetOfExactType<MessageInputTheme>();
+        context.dependOnInheritedWidgetOfExactType<StreamMessageInputTheme>();
     return messageInputTheme?.data ??
         StreamChatTheme.of(context).messageInputTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) =>
-      MessageInputTheme(data: data, child: child);
+      StreamMessageInputTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(MessageInputTheme oldWidget) =>
+  bool updateShouldNotify(StreamMessageInputTheme oldWidget) =>
       data != oldWidget.data;
 }
 
+/// {@macro message_input_theme_data}
+@Deprecated("Use 'StreamMessageInputThemeData' instead")
+typedef MessageInputThemeData = StreamMessageInputThemeData;
+
+/// {@template message_input_theme_data}
 /// A style that overrides the default appearance of [MessageInput] widgets
-/// when used with [MessageInputTheme] or with the overall [StreamChatTheme]'s
+/// when used with [StreamMessageInputTheme] or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.messageInputTheme].
-class MessageInputThemeData with Diagnosticable {
-  /// Creates a [MessageInputThemeData].
-  const MessageInputThemeData({
+/// {@endtemplate}
+class StreamMessageInputThemeData with Diagnosticable {
+  /// Creates a [StreamMessageInputThemeData].
+  const StreamMessageInputThemeData({
     this.sendAnimationDuration,
     this.actionButtonColor,
     this.sendButtonColor,
@@ -65,6 +79,10 @@ class MessageInputThemeData with Diagnosticable {
     this.idleBorderGradient,
     this.borderRadius,
     this.expandButtonColor,
+    this.linkHighlightColor,
+    this.enableSafeArea,
+    this.elevation,
+    this.shadow,
   });
 
   /// Duration of the [MessageInput] send button animation
@@ -72,6 +90,9 @@ class MessageInputThemeData with Diagnosticable {
 
   /// Background color of [MessageInput] send button
   final Color? sendButtonColor;
+
+  /// Color of a link
+  final Color? linkHighlightColor;
 
   /// Background color of [MessageInput] action buttons
   final Color? actionButtonColor;
@@ -103,13 +124,23 @@ class MessageInputThemeData with Diagnosticable {
   /// Border radius of [MessageInput]
   final BorderRadius? borderRadius;
 
-  /// Returns a new [MessageInputThemeData] replacing some of its properties
-  MessageInputThemeData copyWith({
+  /// Wrap [MessageInput] with a [SafeArea widget]
+  final bool? enableSafeArea;
+
+  /// Elevation of the [MessageInput]
+  final double? elevation;
+
+  /// Shadow for the [MessageInput] widget
+  final BoxShadow? shadow;
+
+  /// Returns a new [StreamMessageInputThemeData] replacing some of its properties
+  StreamMessageInputThemeData copyWith({
     Duration? sendAnimationDuration,
     Color? inputBackgroundColor,
     Color? actionButtonColor,
     Color? sendButtonColor,
     Color? actionButtonIdleColor,
+    Color? linkHighlightColor,
     Color? sendButtonIdleColor,
     Color? expandButtonColor,
     TextStyle? inputTextStyle,
@@ -117,8 +148,11 @@ class MessageInputThemeData with Diagnosticable {
     Gradient? activeBorderGradient,
     Gradient? idleBorderGradient,
     BorderRadius? borderRadius,
+    bool? enableSafeArea,
+    double? elevation,
+    BoxShadow? shadow,
   }) =>
-      MessageInputThemeData(
+      StreamMessageInputThemeData(
         sendAnimationDuration:
             sendAnimationDuration ?? this.sendAnimationDuration,
         inputBackgroundColor: inputBackgroundColor ?? this.inputBackgroundColor,
@@ -133,15 +167,19 @@ class MessageInputThemeData with Diagnosticable {
         activeBorderGradient: activeBorderGradient ?? this.activeBorderGradient,
         idleBorderGradient: idleBorderGradient ?? this.idleBorderGradient,
         borderRadius: borderRadius ?? this.borderRadius,
+        linkHighlightColor: linkHighlightColor ?? this.linkHighlightColor,
+        enableSafeArea: enableSafeArea ?? this.enableSafeArea,
+        elevation: elevation ?? this.elevation,
+        shadow: shadow ?? this.shadow,
       );
 
-  /// Linearly interpolate from one [MessageInputThemeData] to another.
-  MessageInputThemeData lerp(
-    MessageInputThemeData a,
-    MessageInputThemeData b,
+  /// Linearly interpolate from one [StreamMessageInputThemeData] to another.
+  StreamMessageInputThemeData lerp(
+    StreamMessageInputThemeData a,
+    StreamMessageInputThemeData b,
     double t,
   ) =>
-      MessageInputThemeData(
+      StreamMessageInputThemeData(
         actionButtonColor:
             Color.lerp(a.actionButtonColor, b.actionButtonColor, t),
         actionButtonIdleColor:
@@ -161,10 +199,15 @@ class MessageInputThemeData with Diagnosticable {
             Color.lerp(a.sendButtonIdleColor, b.sendButtonIdleColor, t),
         sendAnimationDuration: a.sendAnimationDuration,
         inputDecoration: a.inputDecoration,
+        linkHighlightColor:
+            Color.lerp(a.linkHighlightColor, b.linkHighlightColor, t),
+        enableSafeArea: a.enableSafeArea,
+        elevation: lerpDouble(a.elevation, b.elevation, t),
+        shadow: BoxShadow.lerp(a.shadow, b.shadow, t),
       );
 
-  /// Merges [this] [MessageInputThemeData] with the [other]
-  MessageInputThemeData merge(MessageInputThemeData? other) {
+  /// Merges [this] [StreamMessageInputThemeData] with the [other]
+  StreamMessageInputThemeData merge(StreamMessageInputThemeData? other) {
     if (other == null) return this;
     return copyWith(
       sendAnimationDuration: other.sendAnimationDuration,
@@ -181,13 +224,17 @@ class MessageInputThemeData with Diagnosticable {
       idleBorderGradient: other.idleBorderGradient,
       borderRadius: other.borderRadius,
       expandButtonColor: other.expandButtonColor,
+      linkHighlightColor: other.linkHighlightColor,
+      enableSafeArea: other.enableSafeArea,
+      elevation: other.elevation,
+      shadow: other.shadow,
     );
   }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MessageInputThemeData &&
+      other is StreamMessageInputThemeData &&
           runtimeType == other.runtimeType &&
           sendAnimationDuration == other.sendAnimationDuration &&
           sendButtonColor == other.sendButtonColor &&
@@ -200,7 +247,11 @@ class MessageInputThemeData with Diagnosticable {
           inputDecoration == other.inputDecoration &&
           idleBorderGradient == other.idleBorderGradient &&
           activeBorderGradient == other.activeBorderGradient &&
-          borderRadius == other.borderRadius;
+          borderRadius == other.borderRadius &&
+          linkHighlightColor == other.linkHighlightColor &&
+          enableSafeArea == other.enableSafeArea &&
+          elevation == other.elevation &&
+          shadow == other.shadow;
 
   @override
   int get hashCode =>
@@ -215,7 +266,11 @@ class MessageInputThemeData with Diagnosticable {
       inputDecoration.hashCode ^
       idleBorderGradient.hashCode ^
       activeBorderGradient.hashCode ^
-      borderRadius.hashCode;
+      borderRadius.hashCode ^
+      linkHighlightColor.hashCode ^
+      elevation.hashCode ^
+      shadow.hashCode ^
+      enableSafeArea.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -232,6 +287,10 @@ class MessageInputThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('activeBorderGradient', activeBorderGradient))
       ..add(DiagnosticsProperty('idleBorderGradient', idleBorderGradient))
       ..add(DiagnosticsProperty('borderRadius', borderRadius))
-      ..add(ColorProperty('expandButtonColor', expandButtonColor));
+      ..add(ColorProperty('expandButtonColor', expandButtonColor))
+      ..add(ColorProperty('linkHighlightColor', linkHighlightColor))
+      ..add(DiagnosticsProperty('elevation', elevation))
+      ..add(DiagnosticsProperty('shadow', shadow))
+      ..add(DiagnosticsProperty('enableSafeArea', enableSafeArea));
   }
 }
