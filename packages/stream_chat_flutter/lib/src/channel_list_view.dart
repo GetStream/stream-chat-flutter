@@ -513,13 +513,19 @@ class _ChannelListViewState extends State<ChannelListView> {
     final canDeleteChannel =
         channel.ownCapabilities.contains(PermissionType.deleteChannel);
 
+    final actionPaneChildren =
+        widget.swipeActions?.length ?? (canDeleteChannel ? 2 : 1);
+    final actionPaneExtentRatio = actionPaneChildren > 5
+        ? 1 / actionPaneChildren
+        : actionPaneChildren * 0.2;
+
     return StreamChannel(
       key: ValueKey<String>('CHANNEL-${channel.cid}'),
       channel: channel,
       child: Slidable(
         enabled: widget.swipeToAction,
         endActionPane: ActionPane(
-          extentRatio: canDeleteChannel ? 0.4 : 0.2,
+          extentRatio: actionPaneExtentRatio,
           motion: const BehindMotion(),
           children: widget.swipeActions
                   ?.map((e) => CustomSlidableAction(
