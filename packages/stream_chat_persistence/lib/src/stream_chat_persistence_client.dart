@@ -33,10 +33,10 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     /// Whether to use an experimental storage implementation on the web
     /// that uses IndexedDB if the current browser supports it.
     /// Otherwise, falls back to the local storage based implementation.
-    bool webUseExperimentalIndexedDB = false,
+    bool webUseExperimentalIndexedDb = false,
     LogHandlerFunction? logHandlerFunction,
   })  : _connectionMode = connectionMode,
-        _webUseIndexedDbIfSupported = webUseExperimentalIndexedDB,
+        _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb,
         _logger = Logger.detached('💽')..level = logLevel {
     _logger.onRecord.listen(logHandlerFunction ?? _defaultLogHandler);
   }

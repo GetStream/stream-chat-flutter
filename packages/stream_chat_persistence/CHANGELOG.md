@@ -1,3 +1,8 @@
+## Upcoming
+
+- Allowed experimental use of indexedDb on web with `webUseExperimentalIndexedDb` parameter on `StreamChatPersistenceClient`
+
+
 ## 3.1.0
 
 - Bump `drift` to `1.3.0`.
