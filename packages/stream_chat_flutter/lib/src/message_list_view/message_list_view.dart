@@ -827,82 +827,82 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Widget _buildScrollToBottom() => StreamBuilder<int>(
-    stream: streamChannel!.channel.state!.unreadCountStream,
-    builder: (_, snapshot) {
-      if (snapshot.hasError) {
-        return const Offstage();
-      } else if (!snapshot.hasData) {
-        return const Offstage();
-      }
-      final unreadCount = snapshot.data!;
-      final showUnreadCount = unreadCount > 0 &&
-          streamChannel!.channel.state!.members.any((e) =>
-          e.userId ==
-              streamChannel!.channel.client.state.currentUser!.id);
-      return Positioned(
-        bottom: 8,
-        right: 8,
-        width: 40,
-        height: 40,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            FloatingActionButton(
-              backgroundColor: _streamTheme.colorTheme.barsBg,
-              onPressed: () async {
-                if (unreadCount > 0) {
-                  streamChannel!.channel.markRead();
-                }
-                if (!_upToDate) {
-                  _bottomPaginationActive = false;
-                  initialAlignment = 0;
-                  initialIndex = 0;
-                  await streamChannel!.reloadChannel();
+        stream: streamChannel!.channel.state!.unreadCountStream,
+        builder: (_, snapshot) {
+          if (snapshot.hasError) {
+            return const Offstage();
+          } else if (!snapshot.hasData) {
+            return const Offstage();
+          }
+          final unreadCount = snapshot.data!;
+          final showUnreadCount = unreadCount > 0 &&
+              streamChannel!.channel.state!.members.any((e) =>
+                  e.userId ==
+                  streamChannel!.channel.client.state.currentUser!.id);
+          return Positioned(
+            bottom: 8,
+            right: 8,
+            width: 40,
+            height: 40,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                FloatingActionButton(
+                  backgroundColor: _streamTheme.colorTheme.barsBg,
+                  onPressed: () async {
+                    if (unreadCount > 0) {
+                      streamChannel!.channel.markRead();
+                    }
+                    if (!_upToDate) {
+                      _bottomPaginationActive = false;
+                      initialAlignment = 0;
+                      initialIndex = 0;
+                      await streamChannel!.reloadChannel();
 
-                  WidgetsBinding.instance?.addPostFrameCallback((_) {
-                    _scrollController!.jumpTo(index: 0);
-                  });
-                } else {
-                  _showScrollToBottom.value = false;
-                  _scrollController!.scrollTo(
-                    index: 0,
-                    duration: const Duration(seconds: 1),
-                    curve: Curves.easeInOut,
-                  );
-                }
-              },
-              child: widget.reverse
-                  ? StreamSvgIcon.down(
-                color: _streamTheme.colorTheme.textHighEmphasis,
-              )
-                  : StreamSvgIcon.up(
-                color: _streamTheme.colorTheme.textHighEmphasis,
-              ),
-            ),
-            if (showUnreadCount)
-              Positioned(
-                width: 20,
-                height: 20,
-                left: 10,
-                top: -10,
-                child: CircleAvatar(
-                  child: Padding(
-                    padding: const EdgeInsets.all(3),
-                    child: Text(
-                      '$unreadCount',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+                      WidgetsBinding.instance?.addPostFrameCallback((_) {
+                        _scrollController!.jumpTo(index: 0);
+                      });
+                    } else {
+                      _showScrollToBottom.value = false;
+                      _scrollController!.scrollTo(
+                        index: 0,
+                        duration: const Duration(seconds: 1),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  },
+                  child: widget.reverse
+                      ? StreamSvgIcon.down(
+                          color: _streamTheme.colorTheme.textHighEmphasis,
+                        )
+                      : StreamSvgIcon.up(
+                          color: _streamTheme.colorTheme.textHighEmphasis,
+                        ),
+                ),
+                if (showUnreadCount)
+                  Positioned(
+                    width: 20,
+                    height: 20,
+                    left: 10,
+                    top: -10,
+                    child: CircleAvatar(
+                      child: Padding(
+                        padding: const EdgeInsets.all(3),
+                        child: Text(
+                          '$unreadCount',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-          ],
-        ),
+              ],
+            ),
+          );
+        },
       );
-    },
-  );
 
   Widget buildMessage(Message message, List<Message> messages, int index) {
     if ((message.type == 'system' || message.type == 'error') &&
