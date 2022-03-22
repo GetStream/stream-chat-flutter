@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -572,7 +571,7 @@ class MessageInputState extends State<MessageInput> {
   /// this will open the native file system and allow the user to select one
   /// or more files.
   Future<void> _handleFileSelect() async {
-    if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+    if (isDesktopDeviceOrWeb) {
       final desktopAttachmentHandler = DesktopAttachmentHandler(
         maxAttachmentSize: widget.maxAttachmentSize,
         compressedVideoFrameRate: widget.compressedVideoFrameRate,

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/fsm_stub.dart'
@@ -61,7 +59,7 @@ class FullScreenMediaBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb) {
-      if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+      if (isDesktopDevice) {
         return desktop_fsm.getFsm(
           message: message,
           mediaAttachments: mediaAttachments,

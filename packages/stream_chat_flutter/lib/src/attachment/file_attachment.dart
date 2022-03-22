@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';
@@ -287,7 +284,7 @@ class _Trailing extends StatelessWidget {
         onPressed: () async {
           final assetUrl = attachment.assetUrl;
           if (assetUrl != null) {
-            if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
+            if (isMobileDeviceOrWeb) {
               launchURL(context, assetUrl);
             } else {
               final attachmentHandler = DesktopAttachmentHandler();

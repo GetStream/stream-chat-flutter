@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
@@ -92,10 +90,8 @@ class StreamChatState extends State<StreamChat> {
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
-      if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
-        VlcManager.instance.initialize();
-      }
+    if (isDesktopDevice) {
+      VlcManager.instance.initialize();
     }
   }
 
