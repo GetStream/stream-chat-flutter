@@ -30,7 +30,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// widgets: [ChannelHeader], [MessageListView] and [MessageInput]
 ///
 /// If you now run the simulator you will see a single channel UI.
-void main() async {
+Future<void> main() async {
   final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
@@ -66,10 +66,8 @@ class MyApp extends StatelessWidget {
   final Channel channel;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return MaterialApp(
-      // ignore: prefer_expression_function_bodies
       builder: (context, widget) {
         return StreamChat(
           client: client,
@@ -90,7 +88,6 @@ class ChannelPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const ChannelHeader(),

@@ -57,29 +57,31 @@ class MyApp extends StatelessWidget {
     final themeData = ThemeData(primarySwatch: Colors.green);
     final defaultTheme = StreamChatThemeData.fromTheme(themeData);
     final colorTheme = defaultTheme.colorTheme;
-    final customTheme = defaultTheme.merge(StreamChatThemeData(
-      channelPreviewTheme: ChannelPreviewThemeData(
-        avatarTheme: AvatarThemeData(
-          borderRadius: BorderRadius.circular(8),
+    final customTheme = defaultTheme.merge(
+      StreamChatThemeData(
+        channelPreviewTheme: ChannelPreviewThemeData(
+          avatarTheme: AvatarThemeData(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        messageListViewTheme: const MessageListViewThemeData(
+          backgroundColor: Colors.grey,
+          backgroundImage: DecorationImage(
+            image: AssetImage('assets/background_doodle.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        otherMessageTheme: MessageThemeData(
+          messageBackgroundColor: colorTheme.textHighEmphasis,
+          messageTextStyle: TextStyle(
+            color: colorTheme.barsBg,
+          ),
+          avatarTheme: AvatarThemeData(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
       ),
-      messageListViewTheme: const MessageListViewThemeData(
-        backgroundColor: Colors.grey,
-        backgroundImage: DecorationImage(
-          image: AssetImage('assets/background_doodle.png'),
-          fit: BoxFit.cover,
-        ),
-      ),
-      otherMessageTheme: MessageThemeData(
-        messageBackgroundColor: colorTheme.textHighEmphasis,
-        messageTextStyle: TextStyle(
-          color: colorTheme.barsBg,
-        ),
-        avatarTheme: AvatarThemeData(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    ));
+    );
 
     return MaterialApp(
       theme: themeData,
@@ -99,7 +101,6 @@ class ChannelListPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
       body: ChannelsBloc(
@@ -123,7 +124,6 @@ class ChannelPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const ChannelHeader(),
@@ -152,7 +152,6 @@ class ThreadPage extends StatelessWidget {
   final Message? parent;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ThreadHeader(

@@ -41,7 +41,6 @@ class MyApp extends StatelessWidget {
   final StreamChatClient client;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, child) => StreamChat(
@@ -59,7 +58,6 @@ class ChannelListPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
       body: ChannelsBloc(
@@ -83,7 +81,6 @@ class ChannelPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const ChannelHeader(),
@@ -112,7 +109,6 @@ class ThreadPage extends StatelessWidget {
   final Message? parent;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ThreadHeader(

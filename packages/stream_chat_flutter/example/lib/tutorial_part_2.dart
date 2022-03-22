@@ -28,7 +28,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// on the time they had a new message. [ChannelListView] handles pagination
 /// and updates automatically when new channels are created or when a new
 /// message is added to a channel.
-void main() async {
+Future<void> main() async {
   final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
@@ -55,7 +55,6 @@ class MyApp extends StatelessWidget {
   final StreamChatClient client;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, child) => StreamChat(
@@ -73,7 +72,6 @@ class ChannelListPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
       body: ChannelsBloc(
@@ -97,7 +95,6 @@ class ChannelPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const ChannelHeader(),
