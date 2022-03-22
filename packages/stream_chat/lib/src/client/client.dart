@@ -417,6 +417,7 @@ class StreamChatClient {
   }
 
   void _connectionStatusHandler(ConnectionStatus status) async {
+    final previousState = wsConnectionStatus;
     final currentState = _wsConnectionStatus = status;
 
     handleEvent(Event(
@@ -436,10 +437,12 @@ class StreamChatClient {
           await sync(cids: cids, lastSyncAt: _lastSyncedAt);
         }
       }
-      handleEvent(Event(
-        type: EventType.connectionRecovered,
-        online: true,
-      ));
+      if (previousState != ConnectionStatus.connected) {
+        handleEvent(Event(
+          type: EventType.connectionRecovered,
+          online: true,
+        ));
+      }
     }
   }
 
