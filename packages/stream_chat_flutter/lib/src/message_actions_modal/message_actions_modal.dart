@@ -191,7 +191,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             (widget.message.status ==
                                 MessageSendingStatus.sent) &&
                             widget.message.parentId == null)
-                          ThreadReplyButton(message: widget.message),
+                          ThreadReplyButton(
+                            message: widget.message,
+                            onThreadReplyTap: widget.onThreadReplyTap,
+                          ),
                         if (widget.showResendMessage)
                           ResendMessageButton(
                             message: widget.message,
