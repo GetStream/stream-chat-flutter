@@ -12,6 +12,7 @@
 - Separated `MessageInput` widget in smaller components. (For example `CountDownButton`, `StreamAttachmentPicker`...)
 - Updated `stream_chat_flutter_core` dependency to [`4.0.0-beta.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 - Added OpenGraph preview support for links in `StreamMessageInput`.
+- Removed video compression.
 
 🐞 Fixed
 
