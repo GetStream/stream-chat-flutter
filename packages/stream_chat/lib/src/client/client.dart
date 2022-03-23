@@ -425,7 +425,8 @@ class StreamChatClient {
       online: status == ConnectionStatus.connected,
     ));
 
-    if (currentState == ConnectionStatus.connected) {
+    if (currentState == ConnectionStatus.connected &&
+        previousState != ConnectionStatus.connected) {
       // connection recovered
       final cids = state.channels.keys.toList(growable: false);
       if (cids.isNotEmpty) {
@@ -437,12 +438,10 @@ class StreamChatClient {
           await sync(cids: cids, lastSyncAt: _lastSyncedAt);
         }
       }
-      if (previousState != ConnectionStatus.connected) {
-        handleEvent(Event(
-          type: EventType.connectionRecovered,
-          online: true,
-        ));
-      }
+      handleEvent(Event(
+        type: EventType.connectionRecovered,
+        online: true,
+      ));
     }
   }
 
