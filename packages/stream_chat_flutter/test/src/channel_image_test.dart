@@ -26,17 +26,19 @@ void main() {
           .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
       when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: ChannelAvatar(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: ChannelAvatar(),
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       final image =
           tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
@@ -60,19 +62,21 @@ void main() {
       when(() => channel.name).thenReturn('test');
       when(() => channel.imageStream).thenAnswer((i) => Stream.value(null));
       when(() => channel.image).thenReturn(null);
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(id: 'user-id'),
+      when(() => channelState.membersStream).thenAnswer(
+        (i) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          ),
+          Member(
+            userId: 'user-id2',
+            user: User(
+              id: 'user-id2',
+              image: 'testimage',
             ),
-            Member(
-              userId: 'user-id2',
-              user: User(
-                id: 'user-id2',
-                image: 'testimage',
-              ),
-            )
-          ]));
+          )
+        ]),
+      );
       when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id2',
@@ -86,27 +90,31 @@ void main() {
           user: User(id: 'user-id'),
         )
       ]);
-      when(() => clientState.usersStream).thenAnswer((i) => Stream.value({
-            'user-id2': User(
-              id: 'user-id2',
-              image: 'testimage',
-            ),
-          }));
+      when(() => clientState.usersStream).thenAnswer(
+        (i) => Stream.value({
+          'user-id2': User(
+            id: 'user-id2',
+            image: 'testimage',
+          ),
+        }),
+      );
       when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: ChannelAvatar(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: ChannelAvatar(),
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       final image =
           tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
@@ -157,17 +165,19 @@ void main() {
       when(() => channelState.membersStream)
           .thenAnswer((_) => Stream.value(members));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: ChannelAvatar(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: ChannelAvatar(),
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       final image = tester.widget<GroupAvatar>(find.byType(GroupAvatar));
       final otherMembers = members.where((it) => it.userId != currentUser.id);
@@ -196,19 +206,21 @@ void main() {
           .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
       when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: ChannelAvatar(
-                selected: true,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: ChannelAvatar(
+                  selected: true,
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.byKey(const Key('selectedImage')), findsOneWidget);
     },

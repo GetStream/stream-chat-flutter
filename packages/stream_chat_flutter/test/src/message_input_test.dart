@@ -22,18 +22,22 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
+      when(() => channel.extraDataStream).thenAnswer(
+        (i) => Stream.value({
+          'name': 'test',
+        }),
+      );
       when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(id: 'user-id'),
-            )
-          ]));
+      when(() => channelState.membersStream).thenAnswer(
+        (i) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          )
+        ]),
+      );
       when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
@@ -46,24 +50,28 @@ void main() {
           user: User(id: 'other-user'),
         )
       ]);
-      when(() => channelState.messagesStream).thenAnswer((i) => Stream.value([
-            Message(
-              text: 'hello',
-              user: User(id: 'other-user'),
-            )
-          ]));
+      when(() => channelState.messagesStream).thenAnswer(
+        (i) => Stream.value([
+          Message(
+            text: 'hello',
+            user: User(id: 'other-user'),
+          )
+        ]),
+      );
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: MessageInput(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: MessageInput(),
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.byType(TextField), findsOneWidget);
       expect(find.byKey(const Key('messageInputText')), findsOneWidget);
@@ -88,18 +96,22 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
+      when(() => channel.extraDataStream).thenAnswer(
+        (i) => Stream.value({
+          'name': 'test',
+        }),
+      );
       when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(id: 'user-id'),
-            )
-          ]));
+      when(() => channelState.membersStream).thenAnswer(
+        (i) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          )
+        ]),
+      );
       when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
@@ -112,24 +124,28 @@ void main() {
           user: User(id: 'other-user'),
         )
       ]);
-      when(() => channelState.messagesStream).thenAnswer((i) => Stream.value([
-            Message(
-              text: 'hello',
-              user: User(id: 'other-user'),
-            )
-          ]));
+      when(() => channelState.messagesStream).thenAnswer(
+        (i) => Stream.value([
+          Message(
+            text: 'hello',
+            user: User(id: 'other-user'),
+          )
+        ]),
+      );
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: MessageInput(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: MessageInput(),
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.text('Slow mode ON'), findsOneWidget);
     },

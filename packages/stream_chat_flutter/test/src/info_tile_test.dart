@@ -16,22 +16,24 @@ void main() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: const Scaffold(
-            body: Portal(
-              child: SizedBox(
-                child: InfoTile(
-                  showMessage: true,
-                  message: 'message',
-                  child: Text('test'),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: const Scaffold(
+              body: Portal(
+                child: SizedBox(
+                  child: InfoTile(
+                    showMessage: true,
+                    message: 'message',
+                    child: Text('test'),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.text('message'), findsOneWidget);
     },
@@ -46,22 +48,24 @@ void main() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: const Scaffold(
-            body: Portal(
-              child: SizedBox(
-                child: InfoTile(
-                  showMessage: false,
-                  message: 'message',
-                  child: Text('test'),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: const Scaffold(
+              body: Portal(
+                child: SizedBox(
+                  child: InfoTile(
+                    showMessage: false,
+                    message: 'message',
+                    child: Text('test'),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.text('message'), findsNothing);
     },

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 class MockClient extends Mock implements StreamChatClient {
@@ -35,3 +36,5 @@ class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 class MockVoidCallback extends Mock {
   void call();
 }
+
+class MockVlcManager extends Mock implements VlcManager {}

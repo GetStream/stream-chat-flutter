@@ -16,21 +16,23 @@ void main() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: const Scaffold(
-            body: DeletedMessage(
-              messageTheme: MessageThemeData(
-                createdAtStyle: TextStyle(
-                  color: Colors.black,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: const Scaffold(
+              body: DeletedMessage(
+                messageTheme: MessageThemeData(
+                  createdAtStyle: TextStyle(
+                    color: Colors.black,
+                  ),
+                  messageTextStyle: TextStyle(),
                 ),
-                messageTextStyle: TextStyle(),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.text('Message deleted'), findsOneWidget);
     },
@@ -50,9 +52,11 @@ void main() {
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
+      when(() => channel.extraDataStream).thenAnswer(
+        (i) => Stream.value({
+          'name': 'test',
+        }),
+      );
       when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
@@ -103,9 +107,11 @@ void main() {
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
+      when(() => channel.extraDataStream).thenAnswer(
+        (i) => Stream.value({
+          'name': 'test',
+        }),
+      );
       when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
@@ -156,9 +162,11 @@ void main() {
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
+      when(() => channel.extraDataStream).thenAnswer(
+        (i) => Stream.value({
+          'name': 'test',
+        }),
+      );
       when(() => channel.extraData).thenReturn({
         'name': 'test',
       });

@@ -40,12 +40,14 @@ void main() {
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(id: 'user-id'),
-            )
-          ]));
+      when(() => channelState.membersStream).thenAnswer(
+        (i) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          )
+        ]),
+      );
       when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
@@ -58,26 +60,30 @@ void main() {
           user: User(id: 'other-user'),
         )
       ]);
-      when(() => channelState.messagesStream).thenAnswer((i) => Stream.value([
-            Message(
-              text: 'hello',
-              user: User(id: 'other-user'),
-            )
-          ]));
+      when(() => channelState.messagesStream).thenAnswer(
+        (i) => Stream.value([
+          Message(
+            text: 'hello',
+            user: User(id: 'other-user'),
+          )
+        ]),
+      );
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: Scaffold(
-              body: ChannelPreview(
-                channel: channel,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: ChannelPreview(
+                  channel: channel,
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.text('6/22/2020'), findsOneWidget);
       expect(find.text('test name'), findsOneWidget);

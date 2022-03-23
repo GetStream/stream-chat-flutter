@@ -51,17 +51,19 @@ void main() {
         ),
       ]);
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: ChannelHeader(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: ChannelHeader(),
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.text('test'), findsOneWidget);
       expect(find.byType(ChannelAvatar), findsOneWidget);
@@ -97,12 +99,14 @@ void main() {
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(id: 'user-id'),
-            )
-          ]));
+      when(() => channelState.membersStream).thenAnswer(
+        (i) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          )
+        ]),
+      );
       when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
@@ -117,19 +121,21 @@ void main() {
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(1));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: ChannelHeader(
-                showConnectionStateTile: true,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: ChannelHeader(
+                  showConnectionStateTile: true,
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(tester.widget<InfoTile>(find.byType(InfoTile)).showMessage, true);
       expect(tester.widget<InfoTile>(find.byType(InfoTile)).message,
@@ -164,12 +170,14 @@ void main() {
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(id: 'user-id'),
-            )
-          ]));
+      when(() => channelState.membersStream).thenAnswer(
+        (i) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          )
+        ]),
+      );
       when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
@@ -182,20 +190,22 @@ void main() {
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(1));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            showLoading: false,
-            child: const Scaffold(
-              body: ChannelHeader(
-                showConnectionStateTile: true,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              showLoading: false,
+              child: const Scaffold(
+                body: ChannelHeader(
+                  showConnectionStateTile: true,
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       await tester.pump();
 
@@ -233,12 +243,14 @@ void main() {
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(id: 'user-id'),
-            )
-          ]));
+      when(() => channelState.membersStream).thenAnswer(
+        (i) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          )
+        ]),
+      );
       when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
@@ -250,24 +262,26 @@ void main() {
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(1));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: ChannelHeader(
-                leading: Text('leading'),
-                subtitle: Text('subtitle'),
-                actions: [
-                  Text('action'),
-                ],
-                title: Text('title'),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: ChannelHeader(
+                  leading: Text('leading'),
+                  subtitle: Text('subtitle'),
+                  actions: [
+                    Text('action'),
+                  ],
+                  title: Text('title'),
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.text('test'), findsNothing);
       expect(find.byType(StreamBackButton), findsNothing);
@@ -309,12 +323,14 @@ void main() {
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(id: 'user-id'),
-            )
-          ]));
+      when(() => channelState.membersStream).thenAnswer(
+        (i) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          )
+        ]),
+      );
       when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
@@ -324,27 +340,30 @@ void main() {
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: ChannelHeader(
-                showTypingIndicator: false,
-                showBackButton: false,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: ChannelHeader(
+                  showTypingIndicator: false,
+                  showBackButton: false,
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.byType(StreamBackButton), findsNothing);
       expect(
-          tester
-              .widget<ChannelInfo>(find.byType(ChannelInfo))
-              .showTypingIndicator,
-          false);
+        tester
+            .widget<ChannelInfo>(find.byType(ChannelInfo))
+            .showTypingIndicator,
+        false,
+      );
       expect(tester.widget<InfoTile>(find.byType(InfoTile)).showMessage, false);
     },
   );
@@ -376,12 +395,14 @@ void main() {
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(id: 'user-id'),
-            )
-          ]));
+      when(() => channelState.membersStream).thenAnswer(
+        (i) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          )
+        ]),
+      );
       when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
@@ -398,21 +419,23 @@ void main() {
       var imageTapped = false;
       var titleTapped = false;
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: Scaffold(
-              body: ChannelHeader(
-                onBackPressed: () => backPressed = true,
-                onImageTap: () => imageTapped = true,
-                onTitleTap: () => titleTapped = true,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: ChannelHeader(
+                  onBackPressed: () => backPressed = true,
+                  onImageTap: () => imageTapped = true,
+                  onTitleTap: () => titleTapped = true,
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       await tester.tap(find.byType(StreamBackButton));
       await tester.tap(find.byType(ChannelAvatar));

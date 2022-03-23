@@ -27,12 +27,14 @@ void main() {
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(id: 'user-id'),
-            )
-          ]));
+      when(() => channelState.membersStream).thenAnswer(
+        (i) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          )
+        ]),
+      );
       when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
@@ -45,19 +47,21 @@ void main() {
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(1));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: Scaffold(
-              body: ThreadHeader(
-                parent: Message(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: ThreadHeader(
+                  parent: Message(),
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('with '), findsOneWidget);
@@ -83,21 +87,25 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
+      when(() => channel.extraDataStream).thenAnswer(
+        (i) => Stream.value({
+          'name': 'test',
+        }),
+      );
       when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
-      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(id: 'user-id'),
-            )
-          ]));
+      when(() => channelState.membersStream).thenAnswer(
+        (i) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          )
+        ]),
+      );
       when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
@@ -106,28 +114,30 @@ void main() {
       ]);
 
       var tapped = false;
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: Scaffold(
-              body: ThreadHeader(
-                parent: Message(),
-                subtitle: const Text('subtitle'),
-                leading: const Text('leading'),
-                title: const Text('title'),
-                onTitleTap: () {
-                  tapped = true;
-                },
-                actions: const [
-                  Text('action'),
-                ],
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: ThreadHeader(
+                  parent: Message(),
+                  subtitle: const Text('subtitle'),
+                  leading: const Text('leading'),
+                  title: const Text('title'),
+                  onTitleTap: () {
+                    tapped = true;
+                  },
+                  actions: const [
+                    Text('action'),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('title'), findsOneWidget);

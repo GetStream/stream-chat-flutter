@@ -121,10 +121,11 @@ void main() {
     expect(find.byType(MessageListView), findsOneWidget);
     expect(find.byKey(nonEmptyWidgetKey), findsOneWidget);
     expect(
-        find.byWidgetPredicate(
-          findBackground,
-          description: 'findBackground',
-        ),
-        findsOneWidget);
+      find.byWidgetPredicate(
+        findBackground,
+        description: 'findBackground',
+      ),
+      findsOneWidget,
+    );
   });
 }

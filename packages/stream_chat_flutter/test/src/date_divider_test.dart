@@ -15,16 +15,18 @@ void main() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: Scaffold(
-            body: DateDivider(
-              dateTime: DateTime.now(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: Scaffold(
+              body: DateDivider(
+                dateTime: DateTime.now(),
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.text('Today'), findsOneWidget);
     },

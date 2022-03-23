@@ -18,6 +18,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
@@ -31,18 +32,21 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: SizedBox(
-              child: MessageActionsModal(
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
+              child: StreamChannel(
+                channel: channel,
+                child: MessageActionsModal(
+                  message: Message(
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
                   ),
+                  messageWidget: const Text(
+                    'test',
+                    key: Key('MessageWidget'),
+                  ),
+                  messageTheme: streamTheme.ownMessageTheme,
                 ),
-                messageWidget: const Text(
-                  'test',
-                  key: Key('MessageWidget'),
-                ),
-                messageTheme: streamTheme.ownMessageTheme,
               ),
             ),
           ),
@@ -64,6 +68,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
@@ -77,22 +82,25 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: SizedBox(
-              child: MessageActionsModal(
-                showEditMessage: false,
-                showCopyMessage: false,
-                showDeleteMessage: false,
-                showReplyMessage: false,
-                showThreadReplyMessage: false,
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
+              child: StreamChannel(
+                channel: channel,
+                child: MessageActionsModal(
+                  showEditMessage: false,
+                  showCopyMessage: false,
+                  showDeleteMessage: false,
+                  showReplyMessage: false,
+                  showThreadReplyMessage: false,
+                  message: Message(
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
                   ),
-                ),
-                messageTheme: streamTheme.ownMessageTheme,
-                messageWidget: const Text(
-                  'test',
-                  key: Key('MessageWidget'),
+                  messageTheme: streamTheme.ownMessageTheme,
+                  messageWidget: const Text(
+                    'test',
+                    key: Key('MessageWidget'),
+                  ),
                 ),
               ),
             ),
@@ -115,6 +123,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
@@ -130,24 +139,27 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: SizedBox(
-              child: MessageActionsModal(
-                messageWidget: const Text('test'),
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
+              child: StreamChannel(
+                channel: channel,
+                child: MessageActionsModal(
+                  messageWidget: const Text('test'),
+                  message: Message(
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
                   ),
+                  messageTheme: streamTheme.ownMessageTheme,
+                  customActions: [
+                    MessageAction(
+                      leading: const Icon(Icons.check),
+                      title: const Text('title'),
+                      onTap: (m) {
+                        tapped = true;
+                      },
+                    ),
+                  ],
                 ),
-                messageTheme: streamTheme.ownMessageTheme,
-                customActions: [
-                  MessageAction(
-                    leading: const Icon(Icons.check),
-                    title: const Text('title'),
-                    onTap: (m) {
-                      tapped = true;
-                    },
-                  ),
-                ],
               ),
             ),
           ),
@@ -170,6 +182,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
@@ -186,18 +199,21 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: SizedBox(
-              child: MessageActionsModal(
-                messageWidget: const Text('test'),
-                onReplyTap: (m) {
-                  tapped = true;
-                },
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
+              child: StreamChannel(
+                channel: channel,
+                child: MessageActionsModal(
+                  messageWidget: const Text('test'),
+                  onReplyTap: (m) {
+                    tapped = true;
+                  },
+                  message: Message(
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
                   ),
+                  messageTheme: streamTheme.ownMessageTheme,
                 ),
-                messageTheme: streamTheme.ownMessageTheme,
               ),
             ),
           ),
@@ -216,6 +232,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
@@ -232,18 +249,21 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: SizedBox(
-              child: MessageActionsModal(
-                messageWidget: const Text('test'),
-                onThreadReplyTap: (m) {
-                  tapped = true;
-                },
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
+              child: StreamChannel(
+                channel: channel,
+                child: MessageActionsModal(
+                  messageWidget: const Text('test'),
+                  onThreadReplyTap: (m) {
+                    tapped = true;
+                  },
+                  message: Message(
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
                   ),
+                  messageTheme: streamTheme.ownMessageTheme,
                 ),
-                messageTheme: streamTheme.ownMessageTheme,
               ),
             ),
           ),

@@ -22,29 +22,33 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
+      when(() => channel.extraDataStream).thenAnswer(
+        (i) => Stream.value({
+          'name': 'test',
+        }),
+      );
       when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: WillPopScope(
-              onWillPop: () async => false,
-              child: Scaffold(
-                body: GalleryFooter(
-                  message: Message(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: WillPopScope(
+                onWillPop: () async => false,
+                child: Scaffold(
+                  body: GalleryFooter(
+                    message: Message(),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.byType(StreamSvgIcon), findsNWidgets(2));
     },

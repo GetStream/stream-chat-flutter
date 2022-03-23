@@ -222,16 +222,17 @@ void main() {
               child: AttachmentActionsModal(
                 onShowMessage: onShowMessage,
                 message: Message(
-                    text: 'test',
-                    user: User(
-                      id: 'user-id',
+                  text: 'test',
+                  user: User(
+                    id: 'user-id',
+                  ),
+                  attachments: [
+                    Attachment(
+                      type: 'image',
+                      title: 'image.jpg',
                     ),
-                    attachments: [
-                      Attachment(
-                        type: 'image',
-                        title: 'image.jpg',
-                      ),
-                    ]),
+                  ],
+                ),
                 currentIndex: 0,
               ),
             ),
@@ -289,11 +290,15 @@ void main() {
         ),
       );
       await tester.tap(find.text('Delete'));
-      verify(() => mockChannel.updateMessage(message.copyWith(
+      verify(
+        () => mockChannel.updateMessage(
+          message.copyWith(
             attachments: [
               message.attachments[1],
             ],
-          ))).called(1);
+          ),
+        ),
+      ).called(1);
     },
   );
 
@@ -339,9 +344,13 @@ void main() {
         ),
       );
       await tester.tap(find.text('Delete'));
-      verify(() => mockChannel.updateMessage(message.copyWith(
+      verify(
+        () => mockChannel.updateMessage(
+          message.copyWith(
             attachments: [],
-          ))).called(1);
+          ),
+        ),
+      ).called(1);
     },
   );
 
@@ -412,16 +421,17 @@ void main() {
             child: AttachmentActionsModal(
               imageDownloader: imageDownloader,
               message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
+                text: 'test',
+                user: User(
+                  id: 'user-id',
+                ),
+                attachments: [
+                  Attachment(
+                    type: 'image',
+                    title: 'image.jpg',
                   ),
-                  attachments: [
-                    Attachment(
-                      type: 'image',
-                      title: 'image.jpg',
-                    ),
-                  ]),
+                ],
+              ),
               currentIndex: 0,
             ),
           ),
@@ -467,16 +477,17 @@ void main() {
             child: AttachmentActionsModal(
               fileDownloader: fileDownloader,
               message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
+                text: 'test',
+                user: User(
+                  id: 'user-id',
+                ),
+                attachments: [
+                  Attachment(
+                    type: 'video',
+                    title: 'video.mp4',
                   ),
-                  attachments: [
-                    Attachment(
-                      type: 'video',
-                      title: 'video.mp4',
-                    ),
-                  ]),
+                ],
+              ),
               currentIndex: 0,
             ),
           ),

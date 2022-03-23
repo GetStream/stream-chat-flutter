@@ -27,12 +27,14 @@ void main() {
       when(() => channelState.unreadCount).thenReturn(1);
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(1));
-      when(() => channelState.membersStream).thenAnswer((_) => Stream.value([
-            Member(
-              userId: 'user-id',
-              user: User(id: 'user-id'),
-            )
-          ]));
+      when(() => channelState.membersStream).thenAnswer(
+        (_) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          )
+        ]),
+      );
       when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
@@ -45,24 +47,28 @@ void main() {
           user: User(id: 'other-user'),
         )
       ]);
-      when(() => channelState.messagesStream).thenAnswer((i) => Stream.value([
-            Message(
-              text: 'hello',
-              user: User(id: 'other-user'),
-            )
-          ]));
+      when(() => channelState.messagesStream).thenAnswer(
+        (i) => Stream.value([
+          Message(
+            text: 'hello',
+            user: User(id: 'other-user'),
+          )
+        ]),
+      );
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: ChannelName(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: ChannelName(),
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       expect(find.text('test'), findsOneWidget);
     },

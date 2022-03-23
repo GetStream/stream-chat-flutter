@@ -14,14 +14,16 @@ void main() {
         MaterialApp(
           home: const Material(child: Text('Home')),
           routes: <String, WidgetBuilder>{
-            '/next': (BuildContext context) => Material(
-                  child: Center(
-                    child: StreamChatTheme(
-                      data: StreamChatThemeData.fromTheme(theme),
-                      child: const StreamBackButton(),
-                    ),
+            '/next': (BuildContext context) {
+              return Material(
+                child: Center(
+                  child: StreamChatTheme(
+                    data: StreamChatThemeData.fromTheme(theme),
+                    child: const StreamBackButton(),
                   ),
                 ),
+              );
+            },
           },
         ),
       );
@@ -75,16 +77,18 @@ void main() {
         MaterialApp(
           home: const Material(child: Text('Home')),
           routes: <String, WidgetBuilder>{
-            '/next': (BuildContext context) => Material(
-                  child: Center(
-                    child: StreamChatTheme(
-                      data: StreamChatThemeData.fromTheme(theme),
-                      child: StreamBackButton(
-                        onPressed: () => customCallbackWasCalled = true,
-                      ),
+            '/next': (BuildContext context) {
+              return Material(
+                child: Center(
+                  child: StreamChatTheme(
+                    data: StreamChatThemeData.fromTheme(theme),
+                    child: StreamBackButton(
+                      onPressed: () => customCallbackWasCalled = true,
                     ),
                   ),
                 ),
+              );
+            },
           },
         ),
       );
