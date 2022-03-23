@@ -63,8 +63,8 @@ typedef MessageSearchListViewThemeData = StreamMessageSearchListViewThemeData;
 ///
 /// See also:
 ///
-/// * [StreamMessageSearchListViewTheme], the theme which is configured with this
-/// class.
+/// * [StreamMessageSearchListViewTheme], the theme
+/// which is configured with this class.
 /// * [StreamChatThemeData.messageSearchListViewTheme], which can be used to
 /// override the default style for [UserListView]s below the overall
 /// [StreamChatTheme].

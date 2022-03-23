@@ -87,7 +87,8 @@ class MyApp extends StatelessWidget {
 
 /// A list of messages sent in the current channel.
 ///
-/// This is implemented using [StreamMessageListView], a widget that provides query
+/// This is implemented using [StreamMessageListView],
+/// a widget that provides query
 /// functionalities fetching the messages from the api and showing them in a
 /// listView.
 class ChannelPage extends StatelessWidget {

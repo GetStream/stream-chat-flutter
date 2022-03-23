@@ -23,11 +23,6 @@ export 'src/localization/stream_chat_localizations.dart';
 export 'src/localization/translations.dart' show DefaultTranslations;
 export 'src/message_action.dart';
 export 'src/message_input.dart' show MessageInput, MessageInputState;
-export 'src/message_input/countdown_button.dart';
-export 'src/message_input/message_input.dart';
-export 'src/message_input/stream_attachment_picker.dart';
-export 'src/message_input/stream_message_send_button.dart';
-export 'src/message_input/stream_message_text_field.dart';
 export 'src/message_list_view.dart';
 export 'src/message_search_item.dart';
 export 'src/message_search_list_view.dart';
@@ -51,11 +46,15 @@ export 'src/user_item.dart';
 export 'src/user_list_view.dart';
 export 'src/user_mention_tile.dart';
 export 'src/utils.dart';
-
 // v4
 export 'src/v4/channel_list_view/stream_channel_list_loading_tile.dart';
 export 'src/v4/channel_list_view/stream_channel_list_tile.dart';
 export 'src/v4/channel_list_view/stream_channel_list_view.dart';
+export 'src/v4/message_input/countdown_button.dart';
+export 'src/v4/message_input/stream_attachment_picker.dart';
+export 'src/v4/message_input/stream_message_input.dart';
+export 'src/v4/message_input/stream_message_send_button.dart';
+export 'src/v4/message_input/stream_message_text_field.dart';
 export 'src/v4/stream_channel_avatar.dart';
 export 'src/v4/stream_channel_info_bottom_sheet.dart';
 export 'src/v4/stream_channel_name.dart';

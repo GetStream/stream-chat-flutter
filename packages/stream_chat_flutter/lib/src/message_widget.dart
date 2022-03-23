@@ -428,7 +428,8 @@ class StreamMessageWidget extends StatefulWidget {
   /// Customize onTap on attachment
   final void Function(Message message, Attachment attachment)? onAttachmentTap;
 
-  /// Creates a copy of [StreamMessageWidget] with specified attributes overridden.
+  /// Creates a copy of [StreamMessageWidget] with
+  /// specified attributes overridden.
   StreamMessageWidget copyWith({
     Key? key,
     void Function(User)? onMentionTap,

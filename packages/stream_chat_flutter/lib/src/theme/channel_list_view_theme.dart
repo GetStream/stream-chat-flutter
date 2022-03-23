@@ -58,12 +58,14 @@ typedef ChannelListViewThemeData = StreamChannelListViewThemeData;
 
 /// {@template channel_list_view_theme_data}
 /// A style that overrides the default appearance of [ChannelListView]s when
-/// used with [StreamChannelListViewTheme] or with the overall [StreamChatTheme]'s
+/// used with [StreamChannelListViewTheme]
+/// or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.channelListViewTheme].
 ///
 /// See also:
 ///
-/// * [StreamChannelListViewTheme], the theme which is configured with this class.
+/// * [StreamChannelListViewTheme], the theme
+/// which is configured with this class.
 /// * [StreamChatThemeData.channelListViewTheme], which can be used to override
 /// the default style for [ChannelListView]s below the overall
 /// [StreamChatTheme].

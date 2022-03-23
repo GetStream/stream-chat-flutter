@@ -352,7 +352,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
 
     if (mediaFile == null) return;
 
-    var file = AttachmentFile(
+    final file = AttachmentFile(
       path: mediaFile.path,
       size: await mediaFile.length(),
       bytes: mediaFile.readAsBytesSync(),

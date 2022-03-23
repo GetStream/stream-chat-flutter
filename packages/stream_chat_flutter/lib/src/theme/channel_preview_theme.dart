@@ -64,7 +64,8 @@ typedef ChannelPreviewThemeData = StreamChannelPreviewThemeData;
 ///
 /// See also:
 ///
-/// * [StreamChannelPreviewTheme], the theme which is configured with this class.
+/// * [StreamChannelPreviewTheme], the theme
+/// which is configured with this class.
 /// * [StreamChatThemeData.channelPreviewTheme], which can be used to override
 /// the default style for [ChannelHeader]s below the overall [StreamChatTheme].
 /// {@endtemplate}

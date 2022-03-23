@@ -1,3 +1,23 @@
+## 4.0.0-beta.1
+
+✅ Added
+
+- Deprecated old widgets in favor of Stream-prefixed ones.
+- Use channel capabilities to show/hide actions.
+- Deprecated `ChannelListView` in favor of `StreamChannelListView`.
+- Deprecated `ChannelPreview` in favor of `StreamChannelListTile`.
+- Deprecated `ChannelAvatar` in favor of `StreamChannelAvatar`.
+- Deprecated `ChannelName` in favor of `StreamChannelName`.
+- Deprecated `MessageInput` in favor of `StreamMessageInput`.
+- Separated `MessageInput` widget in smaller components. (For example `CountDownButton`, `StreamAttachmentPicker`...)
+- Updated `stream_chat_flutter_core` dependency to [`4.0.0-beta.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Added OpenGraph preview support for links in `StreamMessageInput`.
+- Removed video compression.
+
+🐞 Fixed
+
+- Minor fixes and improvements
+
 ## 3.5.1
 
 🛑️ Breaking Changes

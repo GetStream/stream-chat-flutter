@@ -25,7 +25,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The [ChannelListPage] widget retrieves the list of channels based on a
 /// custom query and ordering. In this case we are showing the list of
 /// channels in which the current user is a member and we order them based
-/// on the time they had a new message. [StreamChannelListView] handles pagination
+/// on the time they had a new message.
+/// [StreamChannelListView] handles pagination
 /// and updates automatically when new channels are created or when a new
 /// message is added to a channel.
 void main() async {

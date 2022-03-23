@@ -12,7 +12,8 @@ typedef ChannelListHeaderTheme = StreamChannelListHeaderTheme;
 ///
 /// See also:
 ///
-///  * [StreamChannelListHeaderThemeData], which is used to configure this theme.
+///  * [StreamChannelListHeaderThemeData], which is used
+/// to configure this theme.
 /// {@endtemplate}
 class StreamChannelListHeaderTheme extends InheritedTheme {
   /// Creates a [StreamChannelListHeaderTheme].
@@ -90,7 +91,8 @@ class StreamChannelListHeaderThemeData with Diagnosticable {
         color: color ?? this.color,
       );
 
-  /// Linearly interpolate from one [StreamChannelListHeaderThemeData] to another.
+  /// Linearly interpolate from one [StreamChannelListHeaderThemeData]
+  /// to another.
   StreamChannelListHeaderThemeData lerp(
     StreamChannelListHeaderThemeData a,
     StreamChannelListHeaderThemeData b,
