@@ -58,12 +58,14 @@ typedef MessageListViewThemeData = StreamMessageListViewThemeData;
 
 /// {@template message_list_view_theme_data}
 /// A style that overrides the default appearance of [MessageListView]s when
-/// used with [StreamMessageListViewTheme] or with the overall [StreamChatTheme]'s
+/// used with [StreamMessageListViewTheme] or with
+/// the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.messageListViewTheme].
 ///
 /// See also:
 ///
-/// * [StreamMessageListViewTheme], the theme which is configured with this class.
+/// * [StreamMessageListViewTheme], the theme
+/// which is configured with this class.
 /// * [StreamChatThemeData.messageListViewTheme], which can be used to override
 /// the default style for [MessageListView]s below the overall
 /// [StreamChatTheme].

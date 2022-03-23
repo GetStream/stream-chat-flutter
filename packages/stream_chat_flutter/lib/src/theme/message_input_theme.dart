@@ -61,7 +61,8 @@ typedef MessageInputThemeData = StreamMessageInputThemeData;
 
 /// {@template message_input_theme_data}
 /// A style that overrides the default appearance of [MessageInput] widgets
-/// when used with [StreamMessageInputTheme] or with the overall [StreamChatTheme]'s
+/// when used with [StreamMessageInputTheme]
+/// or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.messageInputTheme].
 /// {@endtemplate}
 class StreamMessageInputThemeData with Diagnosticable {
@@ -133,7 +134,8 @@ class StreamMessageInputThemeData with Diagnosticable {
   /// Shadow for the [MessageInput] widget
   final BoxShadow? shadow;
 
-  /// Returns a new [StreamMessageInputThemeData] replacing some of its properties
+  /// Returns a new [StreamMessageInputThemeData]
+  /// replacing some of its properties
   StreamMessageInputThemeData copyWith({
     Duration? sendAnimationDuration,
     Color? inputBackgroundColor,

@@ -1,8 +1,8 @@
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/connection_status_builder.dart';
-import 'package:stream_chat_flutter/src/message_input/message_input.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/message_search_list_view.dart';
+import 'package:stream_chat_flutter/src/v4/message_input/stream_message_input.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart'
     show User;
 
@@ -87,7 +87,8 @@ abstract class Translations {
   /// The label for "reconnecting" in [StreamConnectionStatusBuilder]
   String get reconnectingLabel;
 
-  /// The label for also send as direct message "checkbox"" in [StreamMessageInput]
+  /// The label for also send
+  /// as direct message "checkbox"" in [StreamMessageInput]
   String get alsoSendAsDirectMessageLabel;
 
   /// The label for search Gif

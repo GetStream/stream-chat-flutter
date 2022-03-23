@@ -1,16 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/sending_indicator.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/theme/channel_preview_theme.dart';
-import 'package:stream_chat_flutter/src/typing_indicator.dart';
-import 'package:stream_chat_flutter/src/unread_indicator.dart';
-import 'package:stream_chat_flutter/src/v4/stream_channel_avatar.dart';
-import 'package:stream_chat_flutter/src/v4/stream_channel_name.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// A widget that displays a channel preview.
 ///
