@@ -221,7 +221,6 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     }
 
     _channelEventSubscription = client.on().listen((event) {
-      print('event.type: ${event.type}');
       // Returns early if the event is already handled by the listener.
       if (eventListener?.call(event) ?? false) return;
 
