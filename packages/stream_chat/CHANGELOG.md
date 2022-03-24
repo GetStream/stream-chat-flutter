@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Handle `event.message` in `channel.truncate` events
+
 ## 3.5.1
 
 🐞 Fixed
