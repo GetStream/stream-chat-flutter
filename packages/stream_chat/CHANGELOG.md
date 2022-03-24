@@ -1,5 +1,9 @@
 ## Upcoming
 
+🐞 Fixed
+
+- Fixed reactions not working for threads in offline mode.
+
 ✅ Added
 
 - Handle `event.message` in `channel.truncate` events
@@ -7,6 +11,7 @@
 ## 3.5.1
 
 🐞 Fixed
+
 - `channel.unreadCount` was being set as using global unread count on a very specific case.
 - The reconnection logic for the WebSocket connection is now more robust.
 
@@ -22,7 +27,7 @@
 - [[#890]](https://github.com/GetStream/stream-chat-flutter/pull/890) Fixed Reactions not updating on thread messages.
   Thanks [bstolinski](https://github.com/bstolinski).
 - [[#897]](https://github.com/GetStream/stream-chat-flutter/issues/897) Fixed error type mis-match in `AuthInterceptor`.
-- [[#891]](https://github.com/GetStream/stream-chat-flutter/pull/891) Fixed reply counter for parent message not 
+- [[#891]](https://github.com/GetStream/stream-chat-flutter/pull/891) Fixed reply counter for parent message not
   updating correctly after deleting thread message.
 - Fix `channelState.copyWith` with respect to pinnedMessages.
 
