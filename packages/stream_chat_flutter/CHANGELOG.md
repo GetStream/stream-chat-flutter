@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+-[[#892]](https://github.com/GetStream/stream-chat-flutter/issues/892): Fix default `initialAlignment` in `MessageListView`.
+
 ## 3.5.1
 
 🐞 Fixed
