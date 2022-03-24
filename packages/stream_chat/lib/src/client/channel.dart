@@ -1612,6 +1612,9 @@ class ChannelClientState {
       await _channel._client.chatPersistenceClient
           ?.deleteMessageByCid(channel.cid);
       truncate();
+      if (event.message != null) {
+        updateMessage(event.message!);
+      }
     }));
   }
 
