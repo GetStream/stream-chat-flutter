@@ -259,7 +259,7 @@ class _MessageListViewState extends State<MessageListView> {
   double get _initialAlignment {
     final initialAlignment = widget.initialAlignment;
     if (initialAlignment != null) return initialAlignment;
-    return 0.1;
+    return streamChannel!.initialMessageId == null ? 0 : 0.1;
   }
 
   bool get _upToDate => streamChannel!.channel.state!.isUpToDate;

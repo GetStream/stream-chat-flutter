@@ -197,6 +197,28 @@ abstract class ChatPersistenceClient {
   /// Deletes all the members by channel [cids]
   Future<void> deleteMembersByCids(List<String> cids);
 
+  /// Updates the channel [cid] threads data along with reactions and users.
+  Future<void> updateChannelThreads(
+    String cid,
+    Map<String, List<Message>> threads,
+  ) async {
+    final messages = threads.values.expand((it) => it).toList();
+
+    // Removing old reactions before saving the new
+    final oldReactions = messages.map((it) => it.id).toList();
+    await deleteReactionsByMessageId(oldReactions);
+
+    // Adding new reactions and users data
+    final reactions = messages.expand(_expandReactions).toList();
+    final users = messages.map((it) => it.user).withNullifyer.toList();
+
+    await Future.wait([
+      updateMessages(cid, messages),
+      updateReactions(reactions),
+      updateUsers(users),
+    ]);
+  }
+
   /// Update the channel state data using [channelState]
   Future<void> updateChannelState(ChannelState channelState) =>
       updateChannelStates([channelState]);
@@ -239,17 +261,8 @@ abstract class ChatPersistenceClient {
         channelWithMessages[cid] = messages;
         channelWithPinnedMessages[cid] = pinnedMessages;
 
-        List<Reaction> expandReactions(Message message) {
-          final own = message.ownReactions;
-          final latest = message.latestReactions;
-          return [
-            if (own != null) ...own.where((r) => r.userId != null),
-            if (latest != null) ...latest.where((r) => r.userId != null),
-          ];
-        }
-
-        reactions.addAll(messages.expand(expandReactions));
-        pinnedReactions.addAll(pinnedMessages.expand(expandReactions));
+        reactions.addAll(messages.expand(_expandReactions));
+        pinnedReactions.addAll(pinnedMessages.expand(_expandReactions));
 
         users.addAll([
           channel.createdBy,
@@ -291,5 +304,14 @@ abstract class ChatPersistenceClient {
         pinnedReactions.toList(growable: false),
       ),
     ]);
+  }
+
+  List<Reaction> _expandReactions(Message message) {
+    final own = message.ownReactions;
+    final latest = message.latestReactions;
+    return [
+      if (own != null) ...own.where((r) => r.userId != null),
+      if (latest != null) ...latest.where((r) => r.userId != null),
+    ];
   }
 }

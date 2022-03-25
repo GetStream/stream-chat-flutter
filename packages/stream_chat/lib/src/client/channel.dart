@@ -1612,6 +1612,9 @@ class ChannelClientState {
       await _channel._client.chatPersistenceClient
           ?.deleteMessageByCid(channel.cid);
       truncate();
+      if (event.message != null) {
+        updateMessage(event.message!);
+      }
     }));
   }
 
@@ -2119,12 +2122,12 @@ class ChannelClientState {
   final BehaviorSubject<Map<String, List<Message>>> _threadsController =
       BehaviorSubject.seeded({});
 
-  set _threads(Map<String, List<Message>> v) {
-    _channel.client.chatPersistenceClient?.updateMessages(
+  set _threads(Map<String, List<Message>> threads) {
+    _threadsController.add(threads);
+    _channel.client.chatPersistenceClient?.updateChannelThreads(
       _channel.cid!,
-      v.values.expand((v) => v).toList(),
+      threads,
     );
-    _threadsController.add(v);
   }
 
   /// Channel related typing users last value.
