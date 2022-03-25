@@ -203,6 +203,12 @@ abstract class ChatPersistenceClient {
     Map<String, List<Message>> threads,
   ) async {
     final messages = threads.values.expand((it) => it).toList();
+
+    // Removing old reactions before saving the new
+    final oldReactions = messages.map((it) => it.id).toList();
+    await deleteReactionsByMessageId(oldReactions);
+
+    // Adding new reactions and users data
     final reactions = messages.expand(_expandReactions).toList();
     final users = messages.map((it) => it.user).withNullifyer.toList();
 
