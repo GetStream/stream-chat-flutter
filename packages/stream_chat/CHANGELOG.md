@@ -3,6 +3,8 @@
 🐞 Fixed
 
 - Fixed reactions not working for threads in offline mode.
+- [[#1046]](https://github.com/GetStream/stream-chat-flutter/issues/1046) After `/mute` command on reload cannot access
+  any channel.
 
 ✅ Added
 
