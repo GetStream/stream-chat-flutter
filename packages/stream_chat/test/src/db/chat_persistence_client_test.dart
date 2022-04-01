@@ -162,6 +162,23 @@ void main() {
       expect(channelState, isNotNull);
     });
 
+    test('updateChannelThreads', () async {
+      const cid = 'test:cid';
+      final user = User(id: 'test-user-id');
+      final threads = {
+        'parent-test-message': [
+          Message(
+            id: 'test-message',
+            text: 'test-message',
+            user: user,
+            ownReactions: [Reaction(type: 'test', user: user)],
+            latestReactions: [Reaction(type: 'test', user: user)],
+          )
+        ]
+      };
+      persistenceClient.updateChannelThreads(cid, threads);
+    });
+
     test('updateChannelState', () async {
       final channelState = ChannelState();
       persistenceClient.updateChannelState(channelState);
