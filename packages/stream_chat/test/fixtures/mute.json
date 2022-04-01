@@ -1,0 +1,32 @@
+{
+  "user": {
+    "id": "super-band-9",
+    "role": "user",
+    "created_at": "2020-03-03T16:48:28.853674Z",
+    "updated_at": "2021-05-26T03:22:20.296181Z",
+    "last_active": "2021-06-16T11:42:29.466165498Z",
+    "banned": false,
+    "online": true,
+    "username": "Rioland",
+    "image": "https://placehold.jp/150x150.png",
+    "invisible": false,
+    "name": "Proud darkness",
+    "unread_count": 0
+  },
+  "target": {
+    "id": "super-band-10",
+    "role": "user",
+    "created_at": "2020-03-03T16:48:28.853674Z",
+    "updated_at": "2021-05-26T03:22:20.296181Z",
+    "last_active": "2021-06-16T11:42:29.466165498Z",
+    "banned": false,
+    "online": true,
+    "username": "Holland",
+    "image": "https://placehold.jp/150x150.png",
+    "invisible": false,
+    "name": "Proud brightness",
+    "unread_count": 0
+  },
+  "created_at": "2020-12-04T10:39:06.512021Z",
+  "updated_at": "2020-12-04T10:39:06.512021Z"
+}
