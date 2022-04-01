@@ -26,7 +26,7 @@ class ChannelMute {
   /// The target channel
   final ChannelModel channel;
 
-  /// The date in which the use was muted
+  /// The date in which the channel was muted
   final DateTime createdAt;
 
   /// The date of the last update
