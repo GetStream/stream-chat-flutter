@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/channel_mute.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -79,7 +80,7 @@ class OwnUser extends User {
     bool? banned,
     DateTime? banExpires,
     List<String>? teams,
-    List<Mute>? channelMutes,
+    List<ChannelMute>? channelMutes,
     List<Device>? devices,
     List<Mute>? mutes,
     int? totalUnreadCount,
@@ -142,7 +143,7 @@ class OwnUser extends User {
 
   /// List of channels muted by the user.
   @JsonKey(includeIfNull: false)
-  final List<Mute> channelMutes;
+  final List<ChannelMute> channelMutes;
 
   /// Total unread messages by the user.
   @JsonKey(includeIfNull: false)

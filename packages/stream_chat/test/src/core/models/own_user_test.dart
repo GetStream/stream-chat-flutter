@@ -1,4 +1,5 @@
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat/src/core/models/channel_mute.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -6,12 +7,14 @@ import '../../utils.dart';
 
 class MockMute extends Mock implements Mute {}
 
+class ChannelMockMute extends Mock implements ChannelMute {}
+
 class MockDevice extends Mock implements Device {}
 
 void main() {
   final devices = [MockDevice(), MockDevice()];
   final mutes = [MockMute(), MockMute()];
-  final channelMutes = [MockMute()];
+  final channelMutes = [ChannelMockMute()];
   final createdAt = DateTime.parse('2021-05-03 12:39:21.817646');
   final updatedAt = DateTime.parse('2021-04-03 12:39:21.817646');
   final lastActive = DateTime.parse('2021-03-03 12:39:21.817646');
