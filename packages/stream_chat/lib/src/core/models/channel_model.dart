@@ -172,7 +172,7 @@ class ChannelModel {
       updatedAt: other.updatedAt,
       deletedAt: other.deletedAt,
       memberCount: other.memberCount,
-      extraData: other.extraData,
+      extraData: {...extraData, ...other.extraData},
       team: other.team,
       cooldown: other.cooldown,
     );

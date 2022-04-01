@@ -3,6 +3,8 @@
 🐞 Fixed
 
 - Fixed reactions not working for threads in offline mode.
+- [[#1047]](https://github.com/GetStream/stream-chat-flutter/issues/1047) `own_capabilities` extraData missing after
+  channel update.
 
 ✅ Added
 
