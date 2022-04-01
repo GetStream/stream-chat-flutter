@@ -1598,7 +1598,7 @@ class ChannelClientState {
     _subscriptions.add(_channel.on(EventType.channelUpdated).listen((Event e) {
       final channel = e.channel!;
       updateChannelState(channelState.copyWith(
-        channel: channel,
+        channel: channelState.channel?.merge(channel),
         members: channel.members,
       ));
     }));
