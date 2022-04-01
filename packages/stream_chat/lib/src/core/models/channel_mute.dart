@@ -4,7 +4,7 @@ import 'package:stream_chat/src/core/models/user.dart';
 
 part 'channel_mute.g.dart';
 
-/// The class that contains the information about a muted user
+/// The class that contains the information about a muted channel
 @JsonSerializable(createToJson: false)
 class ChannelMute {
   /// Constructor used for json serialization
@@ -23,7 +23,7 @@ class ChannelMute {
   /// The user that performed the muting action
   final User user;
 
-  /// The target user
+  /// The target channel
   final ChannelModel channel;
 
   /// The date in which the use was muted
