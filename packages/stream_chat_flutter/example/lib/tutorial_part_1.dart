@@ -27,7 +27,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// - We make [StreamChat] the root Widget of our application
 ///
 /// - We create a single [ChannelPage] widget under [StreamChat] with three
-/// widgets: [StreamChannelHeader], [StreamMessageListView] and [StreamMessageInput]
+/// widgets: [StreamChannelHeader], [StreamMessageListView]
+/// and [StreamMessageInput]
 ///
 /// If you now run the simulator you will see a single channel UI.
 void main() async {

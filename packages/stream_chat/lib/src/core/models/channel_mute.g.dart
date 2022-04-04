@@ -1,14 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'mute.dart';
+part of 'channel_mute.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Mute _$MuteFromJson(Map<String, dynamic> json) => Mute(
+ChannelMute _$ChannelMuteFromJson(Map<String, dynamic> json) => ChannelMute(
       user: User.fromJson(json['user'] as Map<String, dynamic>),
-      target: User.fromJson(json['target'] as Map<String, dynamic>),
+      channel: ChannelModel.fromJson(json['channel'] as Map<String, dynamic>),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       expires: json['expires'] == null

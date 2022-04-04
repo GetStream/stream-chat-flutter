@@ -8,8 +8,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// to create sub-conversations inside the same channel.
 ///
 /// Using threaded conversations is very simple and mostly a matter of
-/// plugging the [StreamMessageListView] to another widget that renders the widget.
-/// To make this simple, such a widget only needs to build [StreamMessageListView]
+/// plugging the [StreamMessageListView]
+/// to another widget that renders the widget.
+/// To make this simple, such a widget only needs
+/// to build [StreamMessageListView]
 /// with the parent attribute set to the thread’s root message.
 ///
 /// Now we can open threads and create new ones as well. If you long-press a

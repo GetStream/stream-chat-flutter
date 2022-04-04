@@ -645,8 +645,8 @@ void main() {
 
           when(() => persistence.getChannelThreads(any()))
               .thenAnswer((_) async => {});
-          when(() => persistence.updateMessages(any(), any()))
-              .thenAnswer((_) => Future.value());
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async => {});
           when(() => persistence.getChannelStateByCid(any(),
               messagePagination: any(named: 'messagePagination'),
               pinnedMessagePagination:
@@ -692,7 +692,7 @@ void main() {
 
           verify(() => persistence.getChannelThreads(any()))
               .called((persistentChannelStates + channelStates).length);
-          verify(() => persistence.updateMessages(any(), any()))
+          verify(() => persistence.updateChannelThreads(any(), any()))
               .called((persistentChannelStates + channelStates).length);
           verify(
             () => persistence.getChannelStateByCid(any(),
@@ -733,8 +733,8 @@ void main() {
 
           when(() => persistence.getChannelThreads(any()))
               .thenAnswer((_) async => {});
-          when(() => persistence.updateMessages(any(), any()))
-              .thenAnswer((_) => Future.value());
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async => {});
           when(() => persistence.getChannelStateByCid(any(),
               messagePagination: any(named: 'messagePagination'),
               pinnedMessagePagination:
@@ -775,7 +775,7 @@ void main() {
 
           verify(() => persistence.getChannelThreads(any()))
               .called(persistentChannelStates.length);
-          verify(() => persistence.updateMessages(any(), any()))
+          verify(() => persistence.updateChannelThreads(any(), any()))
               .called(persistentChannelStates.length);
           verify(
             () => persistence.getChannelStateByCid(any(),

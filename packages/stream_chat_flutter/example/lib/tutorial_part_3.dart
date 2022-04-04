@@ -15,9 +15,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// We start by changing how channel previews are shown in the channel list
 /// and include the number of unread messages for each.
 ///
-/// We're passing a custom widget to [StreamChannelListView.channelPreviewBuilder];
-/// this will override the default [StreamChannelPreview] and allows you to create
-/// one yourself.
+/// We're passing a custom widget
+/// to [StreamChannelListView.channelPreviewBuilder];
+/// this will override the default [StreamChannelPreview] and allows you
+/// to create one yourself.
 ///
 /// There are a couple interesting things we do in this widget:
 ///
