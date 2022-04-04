@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs
+// ignore_for_file: prefer_expression_function_bodies
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -47,7 +48,6 @@ class MyApp extends StatelessWidget {
   final StreamChatClient client;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, child) => StreamChat(
@@ -80,6 +80,12 @@ class _ChannelListPageState extends State<ChannelListPage> {
   );
 
   @override
+  void dispose() {
+    _listController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => Scaffold(
         body: StreamChannelListView(
           controller: _listController,
@@ -103,7 +109,6 @@ class ChannelPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const StreamChannelHeader(),
