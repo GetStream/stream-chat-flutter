@@ -1094,7 +1094,6 @@ class Channel {
       // remove the passed message if response does
       // not contain message
       state!.removeMessage(message);
-      await _client.chatPersistenceClient?.deleteMessageById(messageId);
     }
     return res;
   }
@@ -1851,7 +1850,9 @@ class ChannelClientState {
   }
 
   /// Remove a [message] from this [channelState].
-  void removeMessage(Message message) {
+  void removeMessage(Message message) async {
+    await _channel._client.chatPersistenceClient?.deleteMessageById(message.id);
+
     final parentId = message.parentId;
     // i.e. it's a thread message, Remove it
     if (parentId != null) {
