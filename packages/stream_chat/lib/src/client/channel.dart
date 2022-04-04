@@ -1587,10 +1587,10 @@ class ChannelClientState {
       final user = e.user;
       updateChannelState(channelState.copyWith(
         members: channelState.members
-            .whereNot((m) => m.userId == user!.id)
+            .where((m) => m.userId != user!.id)
             .toList(growable: false),
         read: channelState.read
-            .whereNot((r) => r.user.id == user!.id)
+            .where((r) => r.user.id != user!.id)
             .toList(growable: false),
       ));
     }));
