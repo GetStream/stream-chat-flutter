@@ -1586,10 +1586,12 @@ class ChannelClientState {
     _subscriptions.add(_channel.on(EventType.memberRemoved).listen((Event e) {
       final user = e.user;
       updateChannelState(channelState.copyWith(
-        members: List.from(
-          channelState.members..removeWhere((m) => m.userId == user!.id),
-        ),
-        read: channelState.read..removeWhere((r) => r.user.id == user!.id),
+        members: channelState.members
+            .where((m) => m.userId != user!.id)
+            .toList(growable: false),
+        read: channelState.read
+            .where((r) => r.user.id != user!.id)
+            .toList(growable: false),
       ));
     }));
   }
