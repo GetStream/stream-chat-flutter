@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// A function that takes a [BuildContext] and returns a [TextStyle].
-typedef TextStyleBuilder = TextStyle? Function(
+/// A function that takes a [BuildContext] and returns an [InlineSpan].
+typedef InlineSpanBuilder = InlineSpan Function(
   BuildContext context,
   String text,
 );
@@ -11,17 +11,17 @@ class MessageTextFieldController extends TextEditingController {
   /// Returns a new MessageTextFieldController
   MessageTextFieldController({
     String? text,
-    this.textPatternStyle,
+    this.textPatternSpan,
   }) : super(text: text);
 
   /// Returns a new MessageTextFieldController with the given text [value].
   MessageTextFieldController.fromValue(
     TextEditingValue? value, {
-    this.textPatternStyle,
+    this.textPatternSpan,
   }) : super.fromValue(value);
 
   /// A map of style to apply to the text matching the RegExp patterns.
-  final Map<RegExp, TextStyleBuilder>? textPatternStyle;
+  final Map<RegExp, InlineSpanBuilder>? textPatternSpan;
 
   /// Builds a [TextSpan] from the current text,
   /// highlighting the matches for [textPatternStyle].
@@ -31,7 +31,7 @@ class MessageTextFieldController extends TextEditingController {
     TextStyle? style,
     required bool withComposing,
   }) {
-    final pattern = textPatternStyle;
+    final pattern = textPatternSpan;
     if (pattern == null || pattern.isEmpty) {
       return super.buildTextSpan(
         context: context,
@@ -45,13 +45,10 @@ class MessageTextFieldController extends TextEditingController {
       onMatch: (match) {
         final text = match[0]!;
         final key = pattern.keys.firstWhere((it) => it.hasMatch(text));
-        return TextSpan(
-          text: text,
-          style: pattern[key]?.call(
-            context,
-            text,
-          ),
-        );
+        return pattern[key]?.call(context, text) ??
+            TextSpan(
+              text: text,
+            );
       },
     );
   }
@@ -60,10 +57,10 @@ class MessageTextFieldController extends TextEditingController {
 extension _TextSpanX on TextSpan {
   TextSpan splitMapJoin(
     Pattern pattern, {
-    TextSpan Function(Match)? onMatch,
-    TextSpan Function(TextSpan)? onNonMatch,
+    InlineSpan Function(Match)? onMatch,
+    InlineSpan Function(InlineSpan)? onNonMatch,
   }) {
-    final children = <TextSpan>[];
+    final children = <InlineSpan>[];
 
     toPlainText().splitMapJoin(
       pattern,
