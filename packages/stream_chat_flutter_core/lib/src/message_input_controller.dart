@@ -19,37 +19,37 @@ class MessageInputController extends ValueNotifier<Message> {
   /// message.
   factory MessageInputController({
     Message? message,
-    Map<RegExp, InlineSpanBuilder>? textPatternSpan,
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
   }) =>
       MessageInputController._(
         initialMessage: message ?? Message(),
-        textPatternSpan: textPatternSpan,
+        textPatternStyle: textPatternStyle,
       );
 
   /// Creates a controller for an editable text field from an initial [text].
   factory MessageInputController.fromText(
     String? text, {
-    Map<RegExp, InlineSpanBuilder>? textPatternSpan,
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
   }) =>
       MessageInputController._(
         initialMessage: Message(text: text),
-        textPatternSpan: textPatternSpan,
+        textPatternStyle: textPatternStyle,
       );
 
   /// Creates a controller for an editable text field from initial
   /// [attachments].
   factory MessageInputController.fromAttachments(
     List<Attachment> attachments, {
-    Map<RegExp, InlineSpanBuilder>? textPatternSpan,
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
   }) =>
       MessageInputController._(
         initialMessage: Message(attachments: attachments),
-        textPatternSpan: textPatternSpan,
+        textPatternStyle: textPatternStyle,
       );
 
   MessageInputController._({
     required Message initialMessage,
-    Map<RegExp, InlineSpanBuilder>? textPatternSpan,
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
   })  : _textEditingController = MessageTextFieldController.fromValue(
           initialMessage.text == null
               ? const TextEditingValue()
@@ -57,7 +57,7 @@ class MessageInputController extends ValueNotifier<Message> {
                   text: initialMessage.text!,
                   composing: TextRange.collapsed(initialMessage.text!.length),
                 ),
-          textPatternSpan: textPatternSpan,
+          textPatternStyle: textPatternStyle,
         ),
         _initialMessage = initialMessage,
         super(initialMessage) {
