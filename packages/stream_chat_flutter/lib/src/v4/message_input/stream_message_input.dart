@@ -987,9 +987,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             .channel
             .ownCapabilities
             .contains(PermissionType.sendLinks)) {
-      _effectiveController
-        ..text = value
-        ..clearOGAttachment();
+      _effectiveController.clearOGAttachment();
       return;
     }
 
