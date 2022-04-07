@@ -172,6 +172,7 @@ class StreamMessageListView extends StatefulWidget {
   const StreamMessageListView({
     Key? key,
     this.showScrollToBottom = true,
+    this.scrollToBottomBuilder,
     this.messageBuilder,
     this.parentMessageBuilder,
     this.parentMessage,
@@ -242,6 +243,25 @@ class StreamMessageListView extends StatefulWidget {
   /// If true will show a scroll to bottom message when there are new
   /// messages and the scroll offset is not zero
   final bool showScrollToBottom;
+
+  /// Function used to build a custom scroll to bottom widget
+  ///
+  /// Provides the current unread messages count and a reference
+  /// to the function that is executed on tap of this widget by default
+  ///
+  /// As an example:
+  ///           MessageListView(
+  ///             scrollToBottomBuilder: (unreadCount, defaultTapAction) {
+  ///               return InkWell(
+  ///                 onTap: () => defaultTapAction(unreadCount),
+  ///                 child: Text('Scroll To Bottom'),
+  ///               );
+  ///             },
+  ///           ),
+  final Widget Function(
+    int unreadCount,
+    Future<void> Function(int) scrollToBottomDefaultTapAction,
+  )? scrollToBottomBuilder;
 
   /// Parent message in case of a thread
   final Message? parentMessage;
@@ -848,6 +868,29 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         .index;
   }
 
+  Future<void> scrollToBottomDefaultTapAction(int unreadCount) async {
+    if (unreadCount > 0) {
+      streamChannel!.channel.markRead();
+    }
+    if (!_upToDate) {
+      _bottomPaginationActive = false;
+      initialAlignment = 0;
+      initialIndex = 0;
+      await streamChannel!.reloadChannel();
+
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
+        _scrollController!.jumpTo(index: 0);
+      });
+    } else {
+      _showScrollToBottom.value = false;
+      _scrollController!.scrollTo(
+        index: 0,
+        duration: const Duration(seconds: 1),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   Widget _buildScrollToBottom() => StreamBuilder<int>(
         stream: streamChannel!.channel.state!.unreadCountStream,
         builder: (_, snapshot) {
@@ -857,6 +900,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             return const Offstage();
           }
           final unreadCount = snapshot.data!;
+          if (widget.scrollToBottomBuilder != null) {
+            return widget.scrollToBottomBuilder!(
+              unreadCount,
+              scrollToBottomDefaultTapAction,
+            );
+          }
           final showUnreadCount = unreadCount > 0 &&
               streamChannel!.channel.state!.members.any((e) =>
                   e.userId ==
@@ -871,28 +920,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               children: [
                 FloatingActionButton(
                   backgroundColor: _streamTheme.colorTheme.barsBg,
-                  onPressed: () async {
-                    if (unreadCount > 0) {
-                      streamChannel!.channel.markRead();
-                    }
-                    if (!_upToDate) {
-                      _bottomPaginationActive = false;
-                      initialAlignment = 0;
-                      initialIndex = 0;
-                      await streamChannel!.reloadChannel();
-
-                      WidgetsBinding.instance?.addPostFrameCallback((_) {
-                        _scrollController!.jumpTo(index: 0);
-                      });
-                    } else {
-                      _showScrollToBottom.value = false;
-                      _scrollController!.scrollTo(
-                        index: 0,
-                        duration: const Duration(seconds: 1),
-                        curve: Curves.easeInOut,
-                      );
-                    }
-                  },
+                  onPressed: () => scrollToBottomDefaultTapAction(unreadCount),
                   child: widget.reverse
                       ? StreamSvgIcon.down(
                           color: _streamTheme.colorTheme.textHighEmphasis,
