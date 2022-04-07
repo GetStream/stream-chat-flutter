@@ -24,7 +24,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///         child: StreamChannel(
 ///           channel: channel,
 ///           child: Center(
-///             child: ChannelImage(
+///             child: ChannelAvatar(
 ///               channel: channel,
 ///             ),
 ///           ),

@@ -144,29 +144,25 @@ const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 /// ```dart
 /// class ChannelPage extends StatelessWidget {
 ///   const ChannelPage({
-///     Key key,
+///     Key? key,
 ///   }) : super(key: key);
 ///
 ///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: ChannelHeader(),
-///       body: Column(
-///         children: <Widget>[
-///           Expanded(
-///             child: MessageListView(
-///               threadBuilder: (_, parentMessage) {
-///                 return ThreadPage(
+///   Widget build(BuildContext context) => Scaffold(
+///         appBar: const StreamChannelHeader(),
+///         body: Column(
+///           children: <Widget>[
+///             Expanded(
+///               child: StreamMessageListView(
+///                 threadBuilder: (_, parentMessage) => ThreadPage(
 ///                   parent: parentMessage,
-///                 );
-///               },
+///                 ),
+///               ),
 ///             ),
-///           ),
-///           MessageInput(),
-///         ],
-///       ),
-///     );
-///   }
+///             const StreamMessageInput(),
+///           ],
+///         ),
+///       );
 /// }
 /// ```
 ///

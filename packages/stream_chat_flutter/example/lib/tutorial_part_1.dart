@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs
+// ignore_for_file: prefer_expression_function_bodies
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -67,10 +68,8 @@ class MyApp extends StatelessWidget {
   final Channel channel;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return MaterialApp(
-      // ignore: prefer_expression_function_bodies
       builder: (context, widget) {
         return StreamChat(
           client: client,

@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs
+// ignore_for_file: prefer_expression_function_bodies
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -14,7 +16,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// > Note: the SDK uses Flutter’s [Navigator] to move from one route to
 /// another. This allows us to avoid any boiler-plate code.
 /// > Of course, you can take total control of how navigation works by
-/// customizing widgets like [Channel] and [ChannelList].
+/// customizing widgets like [StreamChannel] and [StreamChannelListView].
 ///
 /// If you run the application, you will see that the first screen shows a
 /// list of conversations, you can open each by tapping and go back to the list.
@@ -56,7 +58,6 @@ class MyApp extends StatelessWidget {
   final StreamChatClient client;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, child) => StreamChat(
@@ -91,6 +92,12 @@ class _ChannelListPageState extends State<ChannelListPage> {
     ),
     sort: const [SortOption('last_message_at')],
   );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(

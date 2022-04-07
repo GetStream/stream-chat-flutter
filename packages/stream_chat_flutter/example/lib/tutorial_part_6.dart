@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs
+// ignore_for_file: prefer_expression_function_bodies
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -112,6 +114,13 @@ class _ChannelListPageState extends State<ChannelListPage> {
     sort: const [SortOption('last_message_at')],
     limit: 20,
   );
+
+  @override
+  void dispose() {
+    _listController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
         body: StreamChannelListView(
@@ -162,7 +171,6 @@ class ThreadPage extends StatelessWidget {
   final Message? parent;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: StreamThreadHeader(
