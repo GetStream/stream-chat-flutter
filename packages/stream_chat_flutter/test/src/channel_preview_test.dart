@@ -83,7 +83,7 @@ void main() {
       expect(find.text('test name'), findsOneWidget);
       expect(find.text('1'), findsOneWidget);
       expect(find.text('hello'), findsOneWidget);
-      expect(find.byType(ChannelAvatar), findsOneWidget);
+      expect(find.byType(StreamChannelAvatar), findsOneWidget);
     },
   );
 }
