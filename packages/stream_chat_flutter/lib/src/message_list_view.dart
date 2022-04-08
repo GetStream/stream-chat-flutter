@@ -8,7 +8,6 @@ import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positi
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/swipeable.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 /// Widget builder for message
 /// [defaultMessageWidget] is the default [MessageWidget] configuration
