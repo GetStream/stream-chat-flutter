@@ -7,6 +7,7 @@ import 'package:stream_chat_flutter/src/video/vlc/vlc_stub.dart'
 /// target both desktop & web do not crash when building for web targets.
 /// {@endtemplate}
 abstract class VlcManager {
+  // ignore: use_late_for_private_fields_and_variables
   static VlcManager? _instance;
 
   /// The current instance of [VlcManager].
