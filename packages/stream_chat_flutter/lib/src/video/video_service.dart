@@ -41,9 +41,9 @@ class _IVideoService {
 
   /// Generates a thumbnail image data in memory as UInt8List,
   /// it can be easily used by Image.memory(...).
-  /// The video can be a local video file, or an URL repreents iOS or
+  /// The video can be a local video file, or an URL represents iOS or
   /// Android native supported video format.
-  /// Speicify the maximum height or width for the thumbnail or 0 for
+  /// Specify the maximum height or width for the thumbnail or 0 for
   /// same resolution as the original video.
   /// The lower quality value creates lower quality of the thumbnail image,
   /// but it gets ignored for PNG format.
