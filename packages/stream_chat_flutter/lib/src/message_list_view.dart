@@ -882,7 +882,6 @@ class _MessageListViewState extends State<MessageListView> {
                         _scrollController!.jumpTo(index: 0);
                       });
                     } else {
-                      _showScrollToBottom.value = false;
                       _scrollController!.scrollTo(
                         index: 0,
                         duration: const Duration(seconds: 1),
