@@ -284,3 +284,10 @@ void main() {
     },
   );
 }
+
+class MockStreamChannelState extends Mock implements StreamChannelState {
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return super.toString();
+  }
+}
