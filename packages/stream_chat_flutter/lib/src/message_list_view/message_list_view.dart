@@ -11,7 +11,6 @@ import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart'
 import 'package:stream_chat_flutter/src/misc/swipeable.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 /// Spacing Types (These are properties of a message to help inform the decision
 /// of how much space / which widget to build after it)
@@ -733,26 +732,7 @@ class _MessageListViewState extends State<MessageListView> {
     int index,
   ) {
     final messageWidget = buildMessage(message, messages, index);
-    return VisibilityDetector(
-      key: ValueKey('visibility: ${message.id}'),
-      onVisibilityChanged: (visibility) {
-        final isVisible = visibility.visibleBounds != Rect.zero;
-        if (isVisible) {
-          final channel = streamChannel.channel;
-          if (_upToDate &&
-              channel.config?.readEvents == true &&
-              channel.state!.unreadCount > 0) {
-            streamChannel.channel.markRead();
-          }
-        }
-        if (mounted) {
-          if (_showScrollToBottom.value == isVisible) {
-            _showScrollToBottom.value = !isVisible;
-          }
-        }
-      },
-      child: messageWidget,
-    );
+    return messageWidget;
   }
 
   Widget buildParentMessage(

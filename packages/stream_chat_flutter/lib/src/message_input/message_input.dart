@@ -441,6 +441,7 @@ class MessageInputState extends State<MessageInput> {
     if (widget.editMessage == null) {
       child = Material(
         elevation: 8,
+        color: _messageInputTheme.inputBackgroundColor,
         child: child,
       );
     }

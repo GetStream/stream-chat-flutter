@@ -3,6 +3,12 @@
 🐞 Fixed
 
 - Fixed reactions not working for threads in offline mode.
+- [[#1046]](https://github.com/GetStream/stream-chat-flutter/issues/1046) After `/mute` command on reload cannot access
+  any channel.
+- [[#1047]](https://github.com/GetStream/stream-chat-flutter/issues/1047) `own_capabilities` extraData missing after
+  channel update.
+- [[#1054]](https://github.com/GetStream/stream-chat-flutter/issues/1054) Fix `Unsupported operation: Cannot remove from an unmodifiable list`.
+- [[#1033]](https://github.com/GetStream/stream-chat-flutter/issues/1033) Hard delete from dashboard does not delete message from client.
 
 ✅ Added
 
