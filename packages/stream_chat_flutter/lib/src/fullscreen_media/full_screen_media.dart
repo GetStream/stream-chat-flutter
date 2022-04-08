@@ -113,6 +113,16 @@ class _FullScreenMediaState extends State<FullScreenMedia>
   }
 
   @override
+  void dispose() {
+    _animationController.dispose();
+    _pageController.dispose();
+    for (final package in videoPackages.values) {
+      package.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -301,16 +311,6 @@ class _FullScreenMediaState extends State<FullScreenMedia>
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    _pageController.dispose();
-    for (final package in videoPackages.values) {
-      package.dispose();
-    }
-    super.dispose();
-  }
 }
 
 /// A widget for desktop and web users to be able to navigate left and right
@@ -346,35 +346,37 @@ class GalleryNavigationItem extends StatelessWidget {
   final double? right;
 
   @override
-  Widget build(BuildContext context) => PlatformWidgetBuilder(
-        desktop: (_, child) => child,
-        web: (_, child) => child,
-        child: Positioned(
-          left: left,
-          right: right,
-          top: MediaQuery.of(context).size.height / 2,
-          child: FadeTransition(
-            opacity: opacityAnimation,
-            child: ValueListenableBuilder<int>(
-              valueListenable: currentPage,
-              builder: (context, value, child) => GestureDetector(
-                onTap: onClick,
-                child: Icon(
-                  icon,
-                  size: 50,
-                ),
+  Widget build(BuildContext context) {
+    return PlatformWidgetBuilder(
+      desktop: (_, child) => child,
+      web: (_, child) => child,
+      child: Positioned(
+        left: left,
+        right: right,
+        top: MediaQuery.of(context).size.height / 2,
+        child: FadeTransition(
+          opacity: opacityAnimation,
+          child: ValueListenableBuilder<int>(
+            valueListenable: currentPage,
+            builder: (context, value, child) => GestureDetector(
+              onTap: onClick,
+              child: Icon(
+                icon,
+                size: 50,
               ),
-              child: GestureDetector(
-                onTap: onClick,
-                child: Icon(
-                  icon,
-                  size: 50,
-                ),
+            ),
+            child: GestureDetector(
+              onTap: onClick,
+              child: Icon(
+                icon,
+                size: 50,
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 /// Class for packaging up things required for videos
@@ -406,14 +408,16 @@ class VideoPackage {
   bool get initialized => _videoPlayerController.value.isInitialized;
 
   /// Initialize all things required for [VideoPackage]
-  Future<void> initialize() => _videoPlayerController.initialize().then((_) {
-        _chewieController = ChewieController(
-          videoPlayerController: _videoPlayerController,
-          autoInitialize: _autoInitialize,
-          showControls: _showControls,
-          aspectRatio: _videoPlayerController.value.aspectRatio,
-        );
-      });
+  Future<void> initialize() {
+    return _videoPlayerController.initialize().then((_) {
+      _chewieController = ChewieController(
+        videoPlayerController: _videoPlayerController,
+        autoInitialize: _autoInitialize,
+        showControls: _showControls,
+        aspectRatio: _videoPlayerController.value.aspectRatio,
+      );
+    });
+  }
 
   /// Add a listener to video player controller
   void addListener(VoidCallback listener) =>

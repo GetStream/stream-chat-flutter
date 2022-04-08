@@ -1,7 +1,4 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -142,14 +139,17 @@ class AttachmentActionsModal extends StatelessWidget {
                       () {
                         final attachment = message.attachments[currentIndex];
                         final isImage = attachment.type == 'image';
+                        final attachmentHandler = MobileAttachmentHandler();
                         final Future<String?> Function(
                           Attachment, {
                           void Function(int, int) progressCallback,
-                        }) saveFile = fileDownloader ?? _downloadAttachment;
+                        }) saveFile =
+                            fileDownloader ?? attachmentHandler.download;
                         final Future<String?> Function(
                           Attachment, {
                           void Function(int, int) progressCallback,
-                        }) saveImage = imageDownloader ?? _downloadAttachment;
+                        }) saveImage =
+                            imageDownloader ?? attachmentHandler.download;
                         final downloader = isImage ? saveImage : saveFile;
 
                         final progressNotifier =
@@ -350,27 +350,6 @@ class AttachmentActionsModal extends StatelessWidget {
         );
       },
     );
-  }
-
-  Future<String?> _downloadAttachment(
-    Attachment attachment, {
-    ProgressCallback? progressCallback,
-  }) async {
-    String? filePath;
-    final appDocDir = await getTemporaryDirectory();
-    final url =
-        attachment.assetUrl ?? attachment.imageUrl ?? attachment.thumbUrl!;
-    await Dio().download(
-      url,
-      (Headers responseHeaders) {
-        final ext = Uri.parse(url).pathSegments.last;
-        filePath ??= '${appDocDir.path}/${attachment.id}.$ext';
-        return filePath!;
-      },
-      onReceiveProgress: progressCallback,
-    );
-    final result = await ImageGallerySaver.saveFile(filePath!);
-    return (result as Map)['filePath'];
   }
 }
 

@@ -1,6 +1,4 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/widgets.dart';
 
 /// A generic widget builder function.
@@ -32,17 +30,16 @@ abstract class PlatformWidgetBase<M extends Widget, D extends Widget,
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb) {
-      return createWebWidget(context);
-    } else if (Platform.isAndroid || Platform.isIOS) {
+    final platform = Theme.of(context).platform;
+    if (platform == TargetPlatform.android || platform == TargetPlatform.iOS) {
       return createMobileWidget(context);
-    } else if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+    } else if (platform == TargetPlatform.macOS ||
+        platform == TargetPlatform.windows ||
+        platform == TargetPlatform.linux) {
       return createDesktopWidget(context);
+    } else {
+      return createWebWidget(context);
     }
-
-    return throw UnsupportedError(
-      'This platform is not supported: $defaultTargetPlatform',
-    );
   }
 
   /// Builds a `M` mobile widget.

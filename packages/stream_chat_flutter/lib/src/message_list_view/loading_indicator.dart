@@ -13,7 +13,7 @@ class LoadingIndicator extends StatelessWidget {
     required this.streamTheme,
     required this.isThreadConversation,
     required this.direction,
-    required this.streamChannel,
+    required this.streamChannelState,
     this.indicatorBuilder,
   }) : super(key: key);
 
@@ -27,7 +27,7 @@ class LoadingIndicator extends StatelessWidget {
   final QueryDirection direction;
 
   // ignore: public_member_api_docs
-  final StreamChannelState streamChannel;
+  final StreamChannelState streamChannelState;
 
   // ignore: public_member_api_docs
   final WidgetBuilder? indicatorBuilder;
@@ -35,8 +35,8 @@ class LoadingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final stream = direction == QueryDirection.top
-        ? streamChannel.queryTopMessages
-        : streamChannel.queryBottomMessages;
+        ? streamChannelState.queryTopMessages
+        : streamChannelState.queryBottomMessages;
     return BetterStreamBuilder<bool>(
       key: Key('LOADING-INDICATOR $direction'),
       stream: stream,

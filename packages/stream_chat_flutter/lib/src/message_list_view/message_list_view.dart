@@ -625,7 +625,7 @@ class _MessageListViewState extends State<MessageListView> {
                       return LoadingIndicator(
                         direction: QueryDirection.top,
                         streamTheme: _streamTheme,
-                        streamChannel: streamChannel!,
+                        streamChannelState: streamChannel!,
                         isThreadConversation: _isThreadConversation,
                         indicatorBuilder: indicatorBuilder,
                       );
@@ -635,7 +635,7 @@ class _MessageListViewState extends State<MessageListView> {
                       return LoadingIndicator(
                         direction: QueryDirection.bottom,
                         streamTheme: _streamTheme,
-                        streamChannel: streamChannel!,
+                        streamChannelState: streamChannel!,
                         isThreadConversation: _isThreadConversation,
                         indicatorBuilder: indicatorBuilder,
                       );

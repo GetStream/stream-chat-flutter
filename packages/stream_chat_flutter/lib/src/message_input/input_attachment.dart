@@ -12,15 +12,15 @@ class InputAttachment extends StatelessWidget {
   /// {@macro inputAttachment}
   const InputAttachment({
     Key? key,
-    this.attachmentThumbnailBuilders,
     required this.attachment,
+    this.attachmentThumbnailBuilders,
   }) : super(key: key);
-
-  /// Map that defines a thumbnail builder for an attachment type.
-  final Map<String, AttachmentThumbnailBuilder>? attachmentThumbnailBuilders;
 
   /// The attachment to build.
   final Attachment attachment;
+
+  /// Map that defines a thumbnail builder for an attachment type.
+  final Map<String, AttachmentThumbnailBuilder>? attachmentThumbnailBuilders;
 
   @override
   Widget build(BuildContext context) {

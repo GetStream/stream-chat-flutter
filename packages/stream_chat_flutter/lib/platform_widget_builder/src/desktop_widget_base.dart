@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/widgets.dart';
 
 /// A generic widget builder function.
@@ -29,11 +28,12 @@ abstract class DesktopWidgetBase<M extends Widget, W extends Widget,
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isMacOS) {
+    final platform = Theme.of(context).platform;
+    if (platform == TargetPlatform.macOS) {
       return createMacosWidget(context);
-    } else if (Platform.isWindows) {
+    } else if (platform == TargetPlatform.windows) {
       return createWindowsWidget(context);
-    } else if (Platform.isLinux) {
+    } else if (platform == TargetPlatform.linux) {
       return createLinuxWidget(context);
     }
 

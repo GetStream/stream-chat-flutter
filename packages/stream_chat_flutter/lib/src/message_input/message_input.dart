@@ -1,19 +1,15 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/attachment/attachment_handler.dart';
-import 'package:stream_chat_flutter/src/bottom_sheets/attachment_modal_sheet.dart';
-import 'package:stream_chat_flutter/src/bottom_sheets/error_alert_sheet.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
-import 'package:stream_chat_flutter/src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
 import 'package:stream_chat_flutter/src/message_input/animated_send_button.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
@@ -31,8 +27,6 @@ import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/src/video/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_compress/video_compress.dart';
-
-export 'package:video_compress/video_compress.dart' show VideoQuality;
 
 /// Location for actions on the [MessageInput]
 enum ActionsLocation {
@@ -1087,6 +1081,7 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
+  // TODO(Groovin): streamline this
   Future<void> _addAssetAttachment(AssetEntity medium) async {
     final mediaFile = await medium.originFile.timeout(
       const Duration(seconds: 5),
@@ -1292,6 +1287,7 @@ class MessageInputState extends State<MessageInput> {
       _focusNode.unfocus();
     }
 
+    // TODO(Groovin): review this to make sure it is correct
     if (!kIsWeb) {
       setState(() => _openFilePickerSection = true);
     } else {
@@ -1352,109 +1348,44 @@ class MessageInputState extends State<MessageInput> {
     bool camera = false,
   }) async {
     setState(() => _inputEnabled = false);
-
-    AttachmentFile? file;
-    String? attachmentType;
-
-    if (fileType == DefaultAttachmentTypes.image) {
-      attachmentType = 'image';
-    } else if (fileType == DefaultAttachmentTypes.video) {
-      attachmentType = 'video';
-    } else if (fileType == DefaultAttachmentTypes.file) {
-      attachmentType = 'file';
-    }
-
-    if (camera) {
-      XFile? pickedFile;
-      if (fileType == DefaultAttachmentTypes.image) {
-        pickedFile = await _imagePicker.pickImage(source: ImageSource.camera);
-      } else if (fileType == DefaultAttachmentTypes.video) {
-        pickedFile = await _imagePicker.pickVideo(source: ImageSource.camera);
-      }
-      if (pickedFile != null) {
-        final bytes = await pickedFile.readAsBytes();
-        file = AttachmentFile(
-          size: bytes.length,
-          path: pickedFile.path,
-          bytes: bytes,
-        );
-      }
-    } else {
-      late FileType type;
-      if (fileType == DefaultAttachmentTypes.image) {
-        type = FileType.image;
-      } else if (fileType == DefaultAttachmentTypes.video) {
-        type = FileType.video;
-      } else if (fileType == DefaultAttachmentTypes.file) {
-        type = FileType.any;
-      }
-      final res = await FilePicker.platform.pickFiles(
-        type: type,
-      );
-      if (res?.files.isNotEmpty == true) {
-        file = res!.files.single.toAttachmentFile;
-      }
-    }
-
-    setState(() => _inputEnabled = true);
-
-    if (file == null) return;
-
-    final mimeType = file.name?.mimeType ?? file.path!.split('/').last.mimeType;
-
-    final extraDataMap = <String, Object>{};
-
-    if (mimeType?.subtype != null) {
-      extraDataMap['mime_type'] = mimeType!.subtype.toLowerCase();
-    }
-
-    extraDataMap['file_size'] = file.size!;
-
-    final attachment = Attachment(
-      file: file,
-      type: attachmentType,
-      uploadState: const UploadState.preparing(),
-      extraData: extraDataMap,
+    final attachmentHandler = MobileAttachmentHandler(
+      compressedVideoFrameRate: widget.compressedVideoFrameRate,
+      compressedVideoQuality: widget.compressedVideoQuality,
+      maxAttachmentSize: widget.maxAttachmentSize,
+      imagePicker: _imagePicker,
     );
 
-    if (file.size! > widget.maxAttachmentSize) {
-      if (attachmentType == 'video' && file.path != null) {
-        final mediaInfo = await (VideoService.compressVideo(
-          file.path!,
-          frameRate: widget.compressedVideoFrameRate,
-          quality: widget.compressedVideoQuality,
-        ) as FutureOr<MediaInfo>);
+    attachmentHandler
+        .upload(fileType: fileType, camera: camera)
+        .then((attachments) {
+      setState(() => _inputEnabled = true);
 
-        if (mediaInfo.filesize! > widget.maxAttachmentSize) {
-          _showErrorAlert(
-            context.translations.fileTooLargeAfterCompressionError(
-              widget.maxAttachmentSize / (1024 * 1024),
-            ),
-          );
-          return;
-        }
-        file = AttachmentFile(
-          name: file.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file!.readAsBytes(),
-          path: mediaInfo.path,
-        );
-      } else {
-        _showErrorAlert(context.translations.fileTooLargeError(
-          widget.maxAttachmentSize / (1024 * 1024),
-        ));
-        return;
+      if (attachments.isNotEmpty) {
+        setState(() => _addAttachments(attachments));
       }
-    }
-
-    setState(() {
-      _addAttachments([
-        attachment.copyWith(
-          file: file,
-          extraData: {...attachment.extraData}
-            ..update('file_size', ((_) => file!.size!)),
-        ),
-      ]);
+    }).catchError((error) {
+      if (error.runtimeType == FileSystemException) {
+        switch (error.message) {
+          case 'File size too large after compression and exceeds maximum '
+              'attachment size':
+            _showErrorAlert(
+              context.translations.fileTooLargeAfterCompressionError(
+                widget.maxAttachmentSize / (1024 * 1024),
+              ),
+            );
+            break;
+          case 'File size exceeds maximum attachment size':
+            _showErrorAlert(
+              context.translations.fileTooLargeError(
+                widget.maxAttachmentSize / (1024 * 1024),
+              ),
+            );
+            break;
+          default:
+            _showErrorAlert(context.translations.somethingWentWrongError);
+            break;
+        }
+      }
     });
   }
 
