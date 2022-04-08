@@ -73,13 +73,12 @@ void main() {
               child: child,
             ),
             home: Scaffold(
-              body: Center(
-                child: EditMessageSheet(
-                  channel: MockChannel(),
-                  message: Message(id: 'msg123', text: 'Hello World!'),
-                ),
-              )
-            ),
+                body: Center(
+              child: EditMessageSheet(
+                channel: MockChannel(),
+                message: Message(id: 'msg123', text: 'Hello World!'),
+              ),
+            )),
           ),
         );
 

@@ -9,7 +9,7 @@ import '../mocks.dart';
 void main() {
   testWidgets(
     'Shows 2 images',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final channel = MockChannel();
       final channelState = MockChannelState();
 
@@ -37,7 +37,7 @@ void main() {
                       type: 'image',
                       title: 'example.png',
                       imageUrl:
-                      'https://logowik.com/content/uploads/images/flutter5786.jpg',
+                          'https://logowik.com/content/uploads/images/flutter5786.jpg',
                       extraData: const {
                         'mime_type': 'png',
                       },
@@ -46,7 +46,7 @@ void main() {
                       type: 'image',
                       title: 'example.png',
                       imageUrl:
-                      'https://logowik.com/content/uploads/images/flutter5786.jpg',
+                          'https://logowik.com/content/uploads/images/flutter5786.jpg',
                       extraData: const {
                         'mime_type': 'png',
                       },

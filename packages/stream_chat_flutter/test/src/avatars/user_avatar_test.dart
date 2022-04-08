@@ -73,7 +73,7 @@ void main() {
 
   testGoldens(
     'golden test for offline user "user123"',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       when(() => user.online).thenReturn(false);
       await tester.pumpWidget(
         MaterialApp(
