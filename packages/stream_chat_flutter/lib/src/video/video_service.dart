@@ -43,14 +43,19 @@ class _IVideoService {
         ),
       );
 
-  /// Generates a thumbnail image data in memory as UInt8List,
-  /// it can be easily used by Image.memory(...).
-  /// The video can be a local video file, or an URL represents iOS or
-  /// Android native supported video format.
-  /// Specify the maximum height or width for the thumbnail or 0 for
-  /// same resolution as the original video.
-  /// The lower quality value creates lower quality of the thumbnail image,
-  /// but it gets ignored for PNG format.
+  /// Generates a thumbnail image data in memory as UInt8List.
+  ///
+  /// The video source can be a local video file or a URL.
+  ///
+  /// Thumbnails are not supported on Web at this time.
+  ///
+  /// For desktop, you can specify the position of the video to generate
+  /// the thumbnail.
+  ///
+  /// For mobile, you can specify the maximum height or width for the thumbnail
+  /// or 0 for same resolution as the original video. The lower quality value
+  /// creates lower quality of the thumbnail image, but it gets ignored for
+  /// PNG format.
   Future<Uint8List?> generateVideoThumbnail({
     required String video,
     ImageFormat imageFormat = ImageFormat.PNG,
