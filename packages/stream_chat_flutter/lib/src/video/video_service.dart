@@ -77,8 +77,6 @@ class _IVideoService {
       } catch (e) {
         print(e);
         // If the thumbnail generation fails, return a placeholder image.
-        // As of thumblr 0.0.2+1, thumbnails can only be generated from local
-        // video files; urls are not supported yet.
         final placeholder = await generatePlaceholderThumbnail();
         return placeholder;
       }
