@@ -3,9 +3,9 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  dart_vlc
   desktop_drop
   file_selector_linux
-  native_context_menu
   url_launcher_linux
 )
 
