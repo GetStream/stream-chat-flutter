@@ -945,26 +945,7 @@ class _MessageListViewState extends State<MessageListView> {
     int index,
   ) {
     final messageWidget = buildMessage(message, messages, index);
-    return VisibilityDetector(
-      key: ValueKey('visibility: ${message.id}'),
-      onVisibilityChanged: (visibility) {
-        final isVisible = visibility.visibleBounds != Rect.zero;
-        if (isVisible) {
-          final channel = streamChannel.channel;
-          if (_upToDate &&
-              channel.config?.readEvents == true &&
-              channel.state!.unreadCount > 0) {
-            streamChannel.channel.markRead();
-          }
-        }
-        if (mounted) {
-          if (_showScrollToBottom.value == isVisible) {
-            _showScrollToBottom.value = !isVisible;
-          }
-        }
-      },
-      child: messageWidget,
-    );
+    return messageWidget;
   }
 
   Widget buildParentMessage(
@@ -1283,6 +1264,8 @@ class _MessageListViewState extends State<MessageListView> {
     _scrollController = widget.scrollController ?? ItemScrollController();
     _itemPositionListener =
         widget.itemPositionListener ?? ItemPositionsListener.create();
+    _itemPositionListener.itemPositions
+        .addListener(_handleItemPositionsChanged);
 
     _getOnThreadTap();
     super.initState();
@@ -1331,6 +1314,34 @@ class _MessageListViewState extends State<MessageListView> {
     super.didChangeDependencies();
   }
 
+  void _handleItemPositionsChanged() {
+    final _itemPositions = _itemPositionListener.itemPositions.value.toList();
+    final _firstItemIndex =
+        _itemPositions.indexWhere((element) => element.index == 1);
+    var _isFirstItemVisible = false;
+    if (_firstItemIndex != -1) {
+      final _firstItem = _itemPositions[_firstItemIndex];
+      _isFirstItemVisible =
+          _firstItem.itemLeadingEdge > 0 && _firstItem.itemTrailingEdge < 1;
+    }
+    if (_isFirstItemVisible) {
+      // most recent message is visible
+      final channel = streamChannel?.channel;
+      if (channel != null) {
+        if (_upToDate &&
+            channel.config?.readEvents == true &&
+            channel.state!.unreadCount > 0) {
+          streamChannel!.channel.markRead();
+        }
+      }
+    }
+    if (mounted) {
+      if (_showScrollToBottom.value == _isFirstItemVisible) {
+        _showScrollToBottom.value = !_isFirstItemVisible;
+      }
+    }
+  }
+
   void _getOnThreadTap() {
     if (widget.onThreadTap != null) {
       _onThreadTap = (Message message) {
@@ -1368,6 +1379,8 @@ class _MessageListViewState extends State<MessageListView> {
       streamChannel!.reloadChannel();
     }
     _messageNewListener?.cancel();
+    _itemPositionListener.itemPositions
+        .removeListener(_handleItemPositionsChanged);
     super.dispose();
   }
 }
