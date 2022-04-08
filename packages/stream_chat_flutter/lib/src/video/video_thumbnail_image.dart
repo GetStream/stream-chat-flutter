@@ -54,17 +54,17 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
 
   @override
   void initState() {
+    super.initState();
     thumbnailFuture = VideoService.generateVideoThumbnail(
       video: widget.video,
       imageFormat: widget.format,
     );
-    super.initState();
   }
 
   @override
   void didChangeDependencies() {
-    _streamChatTheme = StreamChatTheme.of(context);
     super.didChangeDependencies();
+    _streamChatTheme = StreamChatTheme.of(context);
   }
 
   @override
