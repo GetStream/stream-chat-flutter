@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template threadSeparator}
 /// A widget that separates messages in a thread. Not intended for use outside
-/// of [MessageWidget].
+/// of [StreamMessageWidget].
 /// {@endtemplate}
 class ThreadSeparator extends StatelessWidget {
   ///{@macro threadSeparator}
@@ -36,7 +36,7 @@ class ThreadSeparator extends StatelessWidget {
         child: Text(
           context.translations.threadSeparatorText(replyCount),
           textAlign: TextAlign.center,
-          style: ChannelHeaderTheme.of(context).subtitleStyle,
+          style: StreamChannelHeaderTheme.of(context).subtitleStyle,
         ),
       ),
     );

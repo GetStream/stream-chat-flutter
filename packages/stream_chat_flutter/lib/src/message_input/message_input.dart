@@ -24,45 +24,7 @@ import 'package:stream_chat_flutter/src/overlays/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
-import 'package:stream_chat_flutter/src/video/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:video_compress/video_compress.dart';
-
-/// Location for actions on the [MessageInput]
-enum ActionsLocation {
-  /// Align to left
-  left,
-
-  /// Align to right
-  right,
-
-  /// Align to left but inside the [TextField]
-  leftInside,
-
-  /// Align to right but inside the [TextField]
-  rightInside,
-}
-
-/// Default attachments for widget
-enum DefaultAttachmentTypes {
-  /// Image Attachment
-  image,
-
-  /// Video Attachment
-  video,
-
-  /// File Attachment
-  file,
-}
-
-/// Available locations for the sendMessage button relative to the textField
-enum SendButtonLocation {
-  /// inside the textField
-  inside,
-
-  /// outside the textField
-  outside,
-}
 
 const _kMinMediaPickerSize = 360.0;
 
@@ -109,12 +71,13 @@ const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 /// }
 /// ```
 ///
-/// You usually put this widget in the same page of a [MessageListView]
+/// You usually put this widget in the same page of a [StreamMessageListView]
 /// as the bottom widget.
 ///
 /// The widget renders the ui based on the first ancestor of
 /// type [StreamChatTheme].
 /// Modify it to change the widget appearance.
+@Deprecated("Use 'StreamMessageInput' instead")
 class MessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
   const MessageInput({
@@ -144,8 +107,6 @@ class MessageInput extends StatefulWidget {
         this.mentionsTileBuilder,
     this.userMentionsTileBuilder,
     this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
-    this.compressedVideoQuality = VideoQuality.DefaultQuality,
-    this.compressedVideoFrameRate = 30,
     this.onError,
     this.attachmentLimit = 10,
     this.onAttachmentLimitExceed,
@@ -165,12 +126,6 @@ class MessageInput extends StatefulWidget {
 
   /// Message to edit
   final Message? editMessage;
-
-  /// Video quality to use when compressing the videos
-  final VideoQuality compressedVideoQuality;
-
-  /// Frame rate to use when compressing the videos
-  final int compressedVideoFrameRate;
 
   /// Max attachment size in bytes
   /// Defaults to 20 MB
@@ -220,10 +175,10 @@ class MessageInput extends StatefulWidget {
   /// The focus node associated to the TextField
   final FocusNode? focusNode;
 
-  ///
+  /// TODO: document me!
   final Message? quotedMessage;
 
-  ///
+  /// TODO: document me!
   final VoidCallback? onQuotedMessageCleared;
 
   /// The location of the send button
@@ -292,6 +247,7 @@ class MessageInput extends StatefulWidget {
 }
 
 /// State of [MessageInput]
+@Deprecated("Use 'StreamMessageInput' instead")
 class MessageInputState extends State<MessageInput> {
   final _attachments = <String, Attachment>{};
   final List<User> _mentionedUsers = [];
@@ -315,7 +271,7 @@ class MessageInputState extends State<MessageInput> {
       widget.textEditingController ?? TextEditingController();
 
   late StreamChatThemeData _streamChatTheme;
-  late MessageInputThemeData _messageInputTheme;
+  late StreamMessageInputThemeData _messageInputTheme;
 
   bool get _hasQuotedMessage => widget.quotedMessage != null;
 
@@ -446,7 +402,7 @@ class MessageInputState extends State<MessageInput> {
       );
     }
 
-    return MultiOverlay(
+    return StreamMultiOverlay(
       childAnchor: Alignment.topCenter,
       overlayAnchor: Alignment.bottomCenter,
       overlayOptions: [
@@ -569,8 +525,6 @@ class MessageInputState extends State<MessageInput> {
     if (isDesktopDeviceOrWeb) {
       final desktopAttachmentHandler = DesktopAttachmentHandler(
         maxAttachmentSize: widget.maxAttachmentSize,
-        compressedVideoFrameRate: widget.compressedVideoFrameRate,
-        compressedVideoQuality: widget.compressedVideoQuality,
       );
       desktopAttachmentHandler.upload().then((attachments) {
         // If attachments is empty, it means the user closed the file system
@@ -602,8 +556,6 @@ class MessageInputState extends State<MessageInput> {
             : EdgeInsets.zero);
     final _desktopAttachmentHandler = DesktopAttachmentHandler(
       maxAttachmentSize: widget.maxAttachmentSize,
-      compressedVideoQuality: widget.compressedVideoQuality,
-      compressedVideoFrameRate: widget.compressedVideoFrameRate,
     );
 
     return Expanded(
@@ -901,7 +853,7 @@ class MessageInputState extends State<MessageInput> {
     if (renderObject == null) {
       return const Offstage();
     }
-    return CommandsOverlay(
+    return StreamCommandsOverlay(
       channel: StreamChannel.of(context).channel,
       size: Size(renderObject.size.width - 16, 400),
       text: text,
@@ -1082,7 +1034,6 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  // TODO(Groovin): streamline this
   Future<void> _addAssetAttachment(AssetEntity medium) async {
     final mediaFile = await medium.originFile.timeout(
       const Duration(seconds: 5),
@@ -1091,41 +1042,18 @@ class MessageInputState extends State<MessageInput> {
 
     if (mediaFile == null) return;
 
-    var file = AttachmentFile(
+    final file = AttachmentFile(
       path: mediaFile.path,
       size: await mediaFile.length(),
       bytes: mediaFile.readAsBytesSync(),
     );
 
     if (file.size! > widget.maxAttachmentSize) {
-      if (medium.type == AssetType.video && file.path != null) {
-        final mediaInfo = await VideoService.compressVideo(
-          file.path!,
-          frameRate: widget.compressedVideoFrameRate,
-          quality: widget.compressedVideoQuality,
-        );
-
-        if (mediaInfo == null ||
-            mediaInfo.filesize! > widget.maxAttachmentSize) {
-          _showErrorAlert(
-            context.translations.fileTooLargeAfterCompressionError(
-              widget.maxAttachmentSize / (1024 * 1024),
-            ),
-          );
-          return;
-        }
-        file = AttachmentFile(
-          name: file.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file?.readAsBytes(),
-          path: mediaInfo.path,
-        );
-      } else {
-        _showErrorAlert(context.translations.fileTooLargeError(
+      return _showErrorAlert(
+        context.translations.fileTooLargeError(
           widget.maxAttachmentSize / (1024 * 1024),
-        ));
-        return;
-      }
+        ),
+      );
     }
 
     setState(() {
@@ -1167,7 +1095,7 @@ class MessageInputState extends State<MessageInput> {
     }
 
     return LayoutBuilder(
-      builder: (context, snapshot) => UserMentionsOverlay(
+      builder: (context, snapshot) => StreamUserMentionsOverlay(
         query: query,
         mentionAllAppUsers: widget.mentionAllAppUsers,
         client: StreamChat.of(context).client,
@@ -1212,7 +1140,7 @@ class MessageInputState extends State<MessageInput> {
     // ignore: cast_nullable_to_non_nullable
     final renderObject = context.findRenderObject() as RenderBox;
 
-    return EmojiOverlay(
+    return StreamEmojiOverlay(
       size: Size(renderObject.size.width - 16, 200),
       query: query,
       onEmojiResult: (emoji) {
@@ -1247,7 +1175,7 @@ class MessageInputState extends State<MessageInput> {
     if (!_hasQuotedMessage) return const Offstage();
     final containsUrl = widget.quotedMessage!.attachments
         .any((element) => element.titleLink != null);
-    return QuotedMessageWidget(
+    return StreamQuotedMessageWidget(
       reverse: true,
       showBorder: !containsUrl,
       message: widget.quotedMessage!,
@@ -1350,8 +1278,6 @@ class MessageInputState extends State<MessageInput> {
   }) async {
     setState(() => _inputEnabled = false);
     final attachmentHandler = MobileAttachmentHandler(
-      compressedVideoFrameRate: widget.compressedVideoFrameRate,
-      compressedVideoQuality: widget.compressedVideoQuality,
       maxAttachmentSize: widget.maxAttachmentSize,
       imagePicker: _imagePicker,
     );
@@ -1520,7 +1446,7 @@ class MessageInputState extends State<MessageInput> {
   @override
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
-    _messageInputTheme = MessageInputTheme.of(context);
+    _messageInputTheme = StreamMessageInputTheme.of(context);
     if (widget.editMessage == null) _startSlowMode();
 
     if ((widget.editMessage != null || widget.initialMessage != null) &&

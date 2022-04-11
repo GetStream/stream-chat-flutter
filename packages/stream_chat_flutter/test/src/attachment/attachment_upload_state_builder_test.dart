@@ -14,7 +14,7 @@ void main() {
           body: Center(
             child: StreamChannel(
               channel: MockChannel(),
-              child: AttachmentUploadStateBuilder(
+              child: StreamAttachmentUploadStateBuilder(
                 attachment: Attachment(
                   id: 'test',
                 ),

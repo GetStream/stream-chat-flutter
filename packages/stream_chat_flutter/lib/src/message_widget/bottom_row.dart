@@ -7,7 +7,7 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template bottomRow}
-/// The bottom row of a [MessageWidget].
+/// The bottom row of a [StreamMessageWidget].
 ///
 /// Used in [MessageWidgetContent]. Should not be used elsewhere.
 /// {@endtemplate}
@@ -74,7 +74,7 @@ class BottomRow extends StatelessWidget {
   final bool hasNonUrlAttachments;
 
   /// {@macro messageTheme}
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   /// {@macro onThreadTap}
   final void Function(Message)? onThreadTap;

@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template commandsOverlay}
+/// {@macro commands_overlay}
+@Deprecated("Use 'StreamCommandsOverlay' instead")
+typedef CommandsOverlay = StreamCommandsOverlay;
+
+/// {@template streamCommandsOverlay}
 /// Overlay for displaying commands that can be used
 /// {@endtemplate}
-class CommandsOverlay extends StatelessWidget {
-  /// {@macro commandsOverlay}
-  const CommandsOverlay({
+class StreamCommandsOverlay extends StatelessWidget {
+  /// {@macro streamCommandsOverlay}
+  const StreamCommandsOverlay({
     required this.text,
     required this.onCommandResult,
     required this.size,

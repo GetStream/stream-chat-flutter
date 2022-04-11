@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template imageGroup}
-/// Constructs a group of image attachments in a [MessageWidget].
+/// Constructs a group of image attachments in a [StreamMessageWidget].
 /// {@endtemplate}
 class ImageGroup extends StatelessWidget {
   /// {@macro imageGroup}
@@ -29,8 +29,8 @@ class ImageGroup extends StatelessWidget {
   /// The [Message] that the images are attached to
   final Message message;
 
-  /// The [MessageThemeData] to apply to this [message]
-  final MessageThemeData messageTheme;
+  /// The [StreamMessageThemeData] to apply to this [message]
+  final StreamMessageThemeData messageTheme;
 
   /// The total size of the [images]
   final Size size;
@@ -146,7 +146,7 @@ class ImageGroup extends StatelessWidget {
   }
 
   Widget _buildImage(BuildContext context, int index) {
-    return ImageAttachment(
+    return StreamImageAttachment(
       attachment: images[index],
       size: size,
       message: message,

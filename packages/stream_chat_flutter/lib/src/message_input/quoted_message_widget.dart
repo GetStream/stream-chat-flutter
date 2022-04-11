@@ -6,56 +6,16 @@ import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
-class _VideoAttachmentThumbnail extends StatefulWidget {
-  const _VideoAttachmentThumbnail({
-    Key? key,
-    required this.attachment,
-    this.size = const Size(32, 32),
-  }) : super(key: key);
+/// {@macro streamQuotedMessage}
+@Deprecated("Use 'StreamQuotedMessageWidget' instead")
+typedef QuotedMessageWidget = StreamQuotedMessageWidget;
 
-  final Size size;
-  final Attachment attachment;
-
-  @override
-  _VideoAttachmentThumbnailState createState() =>
-      _VideoAttachmentThumbnailState();
-}
-
-class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
-  late VideoPlayerController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = VideoPlayerController.network(widget.attachment.assetUrl!)
-      ..initialize().then((_) {
-        // ignore: no-empty-block
-        setState(() {}); //when your thumbnail will show.
-      });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _controller.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: widget.size.height,
-      width: widget.size.width,
-      child: _controller.value.isInitialized
-          ? VideoPlayer(_controller)
-          : const CircularProgressIndicator(),
-    );
-  }
-}
-
-///
-class QuotedMessageWidget extends StatelessWidget {
-  ///
-  const QuotedMessageWidget({
+/// {@template streamQuotedMessage}
+/// Widget for the quoted message.
+/// {@endtemplate}
+class StreamQuotedMessageWidget extends StatelessWidget {
+  /// {@macro streamQuotedMessage}
+  const StreamQuotedMessageWidget({
     Key? key,
     required this.message,
     required this.messageTheme,
@@ -73,7 +33,7 @@ class QuotedMessageWidget extends StatelessWidget {
   final Message message;
 
   /// The message theme
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   /// If true the widget will be mirrored
   final bool reverse;
@@ -119,7 +79,7 @@ class QuotedMessageWidget extends StatelessWidget {
       ),
       const SizedBox(width: 8),
       if (message.user != null)
-        UserAvatar(
+        StreamUserAvatar(
           user: message.user!,
           constraints: const BoxConstraints.tightFor(
             height: 24,
@@ -159,7 +119,7 @@ class _QuotedMessage extends StatelessWidget {
   final int textLimit;
   final bool composing;
   final VoidCallback? onQuotedMessageClear;
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
   final bool showBorder;
   final bool reverse;
 
@@ -201,7 +161,7 @@ class _QuotedMessage extends StatelessWidget {
         ),
       if (msg.text!.isNotEmpty)
         Flexible(
-          child: MessageText(
+          child: StreamMessageText(
             message: msg,
             messageTheme: isOnlyEmoji && _containsText
                 ? messageTheme.copyWith(
@@ -260,7 +220,7 @@ class _ParseAttachments extends StatelessWidget {
   }) : super(key: key);
 
   final Message message;
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
   final Map<String, QuotedMessageAttachmentThumbnailBuilder>?
       attachmentThumbnailBuilders;
 
@@ -307,7 +267,7 @@ class _ParseAttachments extends StatelessWidget {
       get _defaultAttachmentBuilder {
     return {
       'image': (_, attachment) {
-        return ImageAttachment(
+        return StreamImageAttachment(
           attachment: attachment,
           message: message,
           messageTheme: messageTheme,
@@ -381,5 +341,51 @@ class _UrlAttachment extends StatelessWidget {
       );
     }
     return const AttachmentError(size: size);
+  }
+}
+
+class _VideoAttachmentThumbnail extends StatefulWidget {
+  const _VideoAttachmentThumbnail({
+    Key? key,
+    required this.attachment,
+    this.size = const Size(32, 32),
+  }) : super(key: key);
+
+  final Size size;
+  final Attachment attachment;
+
+  @override
+  _VideoAttachmentThumbnailState createState() =>
+      _VideoAttachmentThumbnailState();
+}
+
+class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.network(widget.attachment.assetUrl!)
+      ..initialize().then((_) {
+        // ignore: no-empty-block
+        setState(() {}); //when your thumbnail will show.
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: widget.size.height,
+      width: widget.size.width,
+      child: _controller.value.isInitialized
+          ? VideoPlayer(_controller)
+          : const CircularProgressIndicator(),
+    );
   }
 }

@@ -40,6 +40,7 @@ void main() {
                     user: User(
                       id: 'user-id',
                     ),
+                    status: MessageSendingStatus.sent,
                   ),
                   messageWidget: const Text(
                     'test',
@@ -85,9 +86,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: MessageActionsModal(
-                  showEditMessage: false,
                   showCopyMessage: false,
-                  showDeleteMessage: false,
                   showReplyMessage: false,
                   showThreadReplyMessage: false,
                   message: Message(
@@ -132,13 +131,14 @@ void main() {
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       var tapped = false;
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: themeData,
-          home: StreamChat(
-            streamChatThemeData: streamTheme,
-            client: client,
-            child: SizedBox(
+      await tester.pumpWidget(MaterialApp(
+        theme: themeData,
+        home: StreamChat(
+          streamChatThemeData: streamTheme,
+          client: client,
+          child: SizedBox(
+            child: StreamChannel(
+              channel: channel,
               child: StreamChannel(
                 channel: channel,
                 child: MessageActionsModal(
@@ -151,7 +151,7 @@ void main() {
                   ),
                   messageTheme: streamTheme.ownMessageTheme,
                   customActions: [
-                    MessageAction(
+                    StreamMessageAction(
                       leading: const Icon(Icons.check),
                       title: const Text('title'),
                       onTap: (m) {
@@ -164,7 +164,7 @@ void main() {
             ),
           ),
         ),
-      );
+      ));
 
       await tester.pumpAndSettle();
 
@@ -211,6 +211,7 @@ void main() {
                     user: User(
                       id: 'user-id',
                     ),
+                    status: MessageSendingStatus.sent,
                   ),
                   messageTheme: streamTheme.ownMessageTheme,
                 ),
@@ -261,6 +262,7 @@ void main() {
                     user: User(
                       id: 'user-id',
                     ),
+                    status: MessageSendingStatus.sent,
                   ),
                   messageTheme: streamTheme.ownMessageTheme,
                 ),
@@ -324,7 +326,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.byType(MessageInput), findsOneWidget);
+      expect(find.byType(StreamMessageInput), findsOneWidget);
     },
   );
 

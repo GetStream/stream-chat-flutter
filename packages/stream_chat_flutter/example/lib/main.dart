@@ -181,7 +181,8 @@ class _DesktopLayoutState extends State<DesktopLayout> {
 
 /// A list of messages sent in the current channel.
 ///
-/// This is implemented using [MessageListView], a widget that provides query
+/// This is implemented using [StreamMessageListView],
+/// a widget that provides query
 /// functionalities fetching the messages from the api and showing them in a
 /// listView.
 class ChannelPage extends StatefulWidget {
@@ -226,7 +227,7 @@ class _ChannelPageState extends State<ChannelPage> {
     return StreamChannel(
       channel: widget.channel,
       child: Scaffold(
-        appBar: ChannelHeader(
+        appBar: StreamChannelHeader(
           title: ChannelName(
             textStyle:
                 StreamChatTheme.of(context).channelHeaderTheme.titleStyle,
@@ -235,14 +236,14 @@ class _ChannelPageState extends State<ChannelPage> {
         body: Column(
           children: [
             Expanded(
-              child: MessageListView(
+              child: StreamMessageListView(
                 messageBuilder: (p0, p1, p2, defaultMessageWidget) =>
                     defaultMessageWidget.copyWith(
                   onReplyTap: _reply,
                 ),
               ),
             ),
-            MessageInput(
+            StreamMessageInput(
               attachmentLimit: 3,
               quotedMessage: _quotedMessage,
               onQuotedMessageCleared: () {

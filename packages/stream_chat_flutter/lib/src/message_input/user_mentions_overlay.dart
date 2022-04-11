@@ -4,10 +4,16 @@ import 'package:stream_chat_flutter/src/user/user_mention_tile.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// {@macro streamUserMentionsOverlay}
+@Deprecated("Use 'StreamUserMentionsOverlay' instead")
+typedef UserMentionsOverlay = StreamUserMentionsOverlay;
+
+/// {@template streamUserMentionsOverlay}
 /// Overlay for displaying users that can be mentioned.
-class UserMentionsOverlay extends StatefulWidget {
-  /// Constructor for creating a [UserMentionsOverlay].
-  UserMentionsOverlay({
+/// {@endtemplate}
+class StreamUserMentionsOverlay extends StatefulWidget {
+  /// {@macro streamUserMentionsOverlay}
+  StreamUserMentionsOverlay({
     Key? key,
     required this.query,
     required this.channel,
@@ -49,17 +55,18 @@ class UserMentionsOverlay extends StatefulWidget {
 
   /// {@macro mentionTileOverlayBuilder}
   ///
-  /// Use [UserMentionTile] for the default implementation.
+  /// Use [StreamUserMentionTile] for the default implementation.
   final MentionTileOverlayBuilder? mentionsTileBuilder;
 
   /// Callback called when a user is selected.
   final void Function(User user)? onMentionUserTap;
 
   @override
-  _UserMentionsOverlayState createState() => _UserMentionsOverlayState();
+  _StreamUserMentionsOverlayState createState() =>
+      _StreamUserMentionsOverlayState();
 }
 
-class _UserMentionsOverlayState extends State<UserMentionsOverlay> {
+class _StreamUserMentionsOverlayState extends State<StreamUserMentionsOverlay> {
   late Future<List<User>> userMentionsFuture;
 
   @override
@@ -69,7 +76,7 @@ class _UserMentionsOverlayState extends State<UserMentionsOverlay> {
   }
 
   @override
-  void didUpdateWidget(covariant UserMentionsOverlay oldWidget) {
+  void didUpdateWidget(covariant StreamUserMentionsOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.channel != oldWidget.channel ||
         widget.query != oldWidget.query ||
@@ -110,7 +117,7 @@ class _UserMentionsOverlayState extends State<UserMentionsOverlay> {
                   child: InkWell(
                     onTap: () => widget.onMentionUserTap?.call(user),
                     child: widget.mentionsTileBuilder?.call(context, user) ??
-                        UserMentionTile(user),
+                        StreamUserMentionTile(user),
                   ),
                 );
               },

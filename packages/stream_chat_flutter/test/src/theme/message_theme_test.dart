@@ -4,16 +4,17 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
   test('MessageThemeData copyWith, ==, hashCode basics', () {
-    expect(const MessageThemeData(), const MessageThemeData().copyWith());
-    expect(const MessageThemeData().hashCode,
-        const MessageThemeData().copyWith().hashCode);
+    expect(const StreamMessageThemeData(),
+        const StreamMessageThemeData().copyWith());
+    expect(const StreamMessageThemeData().hashCode,
+        const StreamMessageThemeData().copyWith().hashCode);
   });
 
   group('MessageThemeData lerps', () {
     test('''Light MessageThemeData lerps completely to dark MessageThemeData''',
         () {
       expect(
-          const MessageThemeData()
+          const StreamMessageThemeData()
               .lerp(_messageThemeControl, _messageThemeControlDark, 1),
           _messageThemeControlDark);
     });
@@ -21,7 +22,7 @@ void main() {
     test('''Dark MessageThemeData lerps completely to light MessageThemeData''',
         () {
       expect(
-          const MessageThemeData()
+          const StreamMessageThemeData()
               .lerp(_messageThemeControlDark, _messageThemeControl, 1),
           _messageThemeControl);
     });
@@ -33,23 +34,23 @@ void main() {
   });
 }
 
-final _messageThemeControl = MessageThemeData(
-  messageAuthorStyle: TextTheme.light().footnote.copyWith(
-        color: ColorTheme.light().textLowEmphasis,
+final _messageThemeControl = StreamMessageThemeData(
+  messageAuthorStyle: StreamTextTheme.light().footnote.copyWith(
+        color: StreamColorTheme.light().textLowEmphasis,
       ),
-  messageTextStyle: TextTheme.light().body,
-  createdAtStyle: TextTheme.light().footnote.copyWith(
-        color: ColorTheme.light().textLowEmphasis,
+  messageTextStyle: StreamTextTheme.light().body,
+  createdAtStyle: StreamTextTheme.light().footnote.copyWith(
+        color: StreamColorTheme.light().textLowEmphasis,
       ),
-  repliesStyle: TextTheme.light().footnoteBold.copyWith(
-        color: ColorTheme.light().accentPrimary,
+  repliesStyle: StreamTextTheme.light().footnoteBold.copyWith(
+        color: StreamColorTheme.light().accentPrimary,
       ),
-  messageBackgroundColor: ColorTheme.light().disabled,
-  reactionsBackgroundColor: ColorTheme.light().barsBg,
-  reactionsBorderColor: ColorTheme.light().borders,
-  reactionsMaskColor: ColorTheme.light().appBg,
-  messageBorderColor: ColorTheme.light().disabled,
-  avatarTheme: AvatarThemeData(
+  messageBackgroundColor: StreamColorTheme.light().disabled,
+  reactionsBackgroundColor: StreamColorTheme.light().barsBg,
+  reactionsBorderColor: StreamColorTheme.light().borders,
+  reactionsMaskColor: StreamColorTheme.light().appBg,
+  messageBorderColor: StreamColorTheme.light().disabled,
+  avatarTheme: StreamAvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
       height: 32,
@@ -57,28 +58,28 @@ final _messageThemeControl = MessageThemeData(
     ),
   ),
   messageLinksStyle: TextStyle(
-    color: ColorTheme.light().accentPrimary,
+    color: StreamColorTheme.light().accentPrimary,
   ),
-  linkBackgroundColor: ColorTheme.light().linkBg,
+  linkBackgroundColor: StreamColorTheme.light().linkBg,
 );
 
-final _messageThemeControlDark = MessageThemeData(
-  messageAuthorStyle: TextTheme.dark().footnote.copyWith(
-        color: ColorTheme.dark().textLowEmphasis,
+final _messageThemeControlDark = StreamMessageThemeData(
+  messageAuthorStyle: StreamTextTheme.dark().footnote.copyWith(
+        color: StreamColorTheme.dark().textLowEmphasis,
       ),
-  messageTextStyle: TextTheme.dark().body,
-  createdAtStyle: TextTheme.dark().footnote.copyWith(
-        color: ColorTheme.dark().textLowEmphasis,
+  messageTextStyle: StreamTextTheme.dark().body,
+  createdAtStyle: StreamTextTheme.dark().footnote.copyWith(
+        color: StreamColorTheme.dark().textLowEmphasis,
       ),
-  repliesStyle: TextTheme.dark().footnoteBold.copyWith(
-        color: ColorTheme.dark().accentPrimary,
+  repliesStyle: StreamTextTheme.dark().footnoteBold.copyWith(
+        color: StreamColorTheme.dark().accentPrimary,
       ),
-  messageBackgroundColor: ColorTheme.dark().disabled,
-  reactionsBackgroundColor: ColorTheme.dark().barsBg,
-  reactionsBorderColor: ColorTheme.dark().borders,
-  reactionsMaskColor: ColorTheme.dark().appBg,
-  messageBorderColor: ColorTheme.dark().disabled,
-  avatarTheme: AvatarThemeData(
+  messageBackgroundColor: StreamColorTheme.dark().disabled,
+  reactionsBackgroundColor: StreamColorTheme.dark().barsBg,
+  reactionsBorderColor: StreamColorTheme.dark().borders,
+  reactionsMaskColor: StreamColorTheme.dark().appBg,
+  messageBorderColor: StreamColorTheme.dark().disabled,
+  avatarTheme: StreamAvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
       height: 32,
@@ -86,7 +87,7 @@ final _messageThemeControlDark = MessageThemeData(
     ),
   ),
   messageLinksStyle: TextStyle(
-    color: ColorTheme.dark().accentPrimary,
+    color: StreamColorTheme.dark().accentPrimary,
   ),
-  linkBackgroundColor: ColorTheme.dark().linkBg,
+  linkBackgroundColor: StreamColorTheme.dark().linkBg,
 );

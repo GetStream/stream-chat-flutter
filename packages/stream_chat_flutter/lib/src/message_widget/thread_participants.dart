@@ -37,7 +37,7 @@ class ThreadParticipants extends StatelessWidget {
               color: _streamChatTheme.colorTheme.barsBg,
             ),
             padding: const EdgeInsets.all(1),
-            child: UserAvatar(
+            child: StreamUserAvatar(
               user: user,
               constraints: BoxConstraints.loose(const Size.fromRadius(7)),
               showOnlineStatus: false,

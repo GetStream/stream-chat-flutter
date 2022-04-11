@@ -38,9 +38,9 @@ enum DisplayWidget {
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
 /// {@endtemplate}
-class MessageWidget extends StatefulWidget {
+class StreamMessageWidget extends StatefulWidget {
   /// {@macro messageWidget}
-  MessageWidget({
+  StreamMessageWidget({
     Key? key,
     required this.message,
     required this.messageTheme,
@@ -135,7 +135,7 @@ class MessageWidget extends StatefulWidget {
             }
 
             return WrapAttachmentWidget(
-              attachmentWidget: ImageAttachment(
+              attachmentWidget: StreamImageAttachment(
                 attachment: attachments[0],
                 message: message,
                 messageTheme: messageTheme,
@@ -164,7 +164,7 @@ class MessageWidget extends StatefulWidget {
               attachmentWidget: Column(
                 children: attachments.map((attachment) {
                   final mediaQueryData = MediaQuery.of(context);
-                  return VideoAttachment(
+                  return StreamVideoAttachment(
                     attachment: attachment,
                     messageTheme: messageTheme,
                     size: Size(
@@ -195,7 +195,7 @@ class MessageWidget extends StatefulWidget {
               attachmentWidget: Column(
                 children: attachments.map((attachment) {
                   final mediaQueryData = MediaQuery.of(context);
-                  return GiphyAttachment(
+                  return StreamGiphyAttachment(
                     attachment: attachment,
                     message: message,
                     size: Size(
@@ -230,7 +230,7 @@ class MessageWidget extends StatefulWidget {
                   .map<Widget>((attachment) {
                     final mediaQueryData = MediaQuery.of(context);
                     return WrapAttachmentWidget(
-                      attachmentWidget: FileAttachment(
+                      attachmentWidget: StreamFileAttachment(
                         message: message,
                         attachment: attachment,
                         size: Size(
@@ -314,7 +314,7 @@ class MessageWidget extends StatefulWidget {
   /// {@template messageTheme}
   /// The message theme
   /// {@endtemplate}
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   /// {@template reverse}
   /// If true the widget will be mirrored
@@ -405,7 +405,7 @@ class MessageWidget extends StatefulWidget {
   final void Function(String)? onLinkTap;
 
   /// {@template showReactionPickerIndicator}
-  /// Used in [MessageReactionsModal] and [MessageActionsModal]
+  /// Used in [StreamMessageReactionsModal] and [MessageActionsModal]
   /// {@endtemplate}
   final bool showReactionPickerIndicator;
 
@@ -501,15 +501,16 @@ class MessageWidget extends StatefulWidget {
   /// {@template customActions}
   /// List of custom actions shown on message long tap
   /// {@endtemplate}
-  final List<MessageAction> customActions;
+  final List<StreamMessageAction> customActions;
 
   /// {@macro onMessageWidgetAttachmentTap}
   final OnMessageWidgetAttachmentTap? onAttachmentTap;
 
   /// {@template copyWith}
-  /// Creates a copy of [MessageWidget] with specified attributes overridden.
+  /// Creates a copy of [StreamMessageWidget] with specified attributes
+  /// overridden.
   /// {@endtemplate}
-  MessageWidget copyWith({
+  StreamMessageWidget copyWith({
     Key? key,
     void Function(User)? onMentionTap,
     void Function(Message)? onThreadTap,
@@ -521,7 +522,7 @@ class MessageWidget extends StatefulWidget {
     Widget Function(BuildContext, Message)? deletedBottomRowBuilder,
     void Function(BuildContext, Message)? onMessageActions,
     Message? message,
-    MessageThemeData? messageTheme,
+    StreamMessageThemeData? messageTheme,
     bool? reverse,
     ShapeBorder? shape,
     ShapeBorder? attachmentShape,
@@ -559,11 +560,11 @@ class MessageWidget extends StatefulWidget {
     bool? translateUserAvatar,
     OnQuotedMessageTap? onQuotedMessageTap,
     void Function(Message)? onMessageTap,
-    List<MessageAction>? customActions,
+    List<StreamMessageAction>? customActions,
     void Function(Message message, Attachment attachment)? onAttachmentTap,
     Widget Function(BuildContext, User)? userAvatarBuilder,
   }) {
-    return MessageWidget(
+    return StreamMessageWidget(
       key: key ?? this.key,
       onMentionTap: onMentionTap ?? this.onMentionTap,
       onThreadTap: onThreadTap ?? this.onThreadTap,
@@ -626,11 +627,11 @@ class MessageWidget extends StatefulWidget {
   }
 
   @override
-  _MessageWidgetState createState() => _MessageWidgetState();
+  _StreamMessageWidgetState createState() => _StreamMessageWidgetState();
 }
 
-class _MessageWidgetState extends State<MessageWidget>
-    with AutomaticKeepAliveClientMixin<MessageWidget> {
+class _StreamMessageWidgetState extends State<StreamMessageWidget>
+    with AutomaticKeepAliveClientMixin<StreamMessageWidget> {
   bool get showThreadReplyIndicator => widget.showThreadReplyIndicator;
 
   bool get showSendingIndicator => widget.showSendingIndicator;
@@ -644,7 +645,7 @@ class _MessageWidgetState extends State<MessageWidget>
   bool get showInChannel => widget.showInChannelIndicator;
 
   /// {@template hasQuotedMessage}
-  /// `true` if [MessageWidget.quotedMessage] is not null.
+  /// `true` if [StreamMessageWidget.quotedMessage] is not null.
   /// {@endtemplate}
   bool get hasQuotedMessage => widget.message.quotedMessage != null;
 
@@ -689,12 +690,12 @@ class _MessageWidgetState extends State<MessageWidget>
 
   /// {@template showBottomRow}
   /// Show the [BottomRow] widget if any of the following are `true`:
-  /// * [MessageWidget.showThreadReplyIndicator]
-  /// * [MessageWidget.showUsername]
-  /// * [MessageWidget.showTimestamp]
-  /// * [MessageWidget.showInChannelIndicator]
-  /// * [MessageWidget.showSendingIndicator]
-  /// * [MessageWidget.message.isDeleted]
+  /// * [StreamMessageWidget.showThreadReplyIndicator]
+  /// * [StreamMessageWidget.showUsername]
+  /// * [StreamMessageWidget.showTimestamp]
+  /// * [StreamMessageWidget.showInChannelIndicator]
+  /// * [StreamMessageWidget.showSendingIndicator]
+  /// * [StreamMessageWidget.message.isDeleted]
   /// {@endtemplate}
   bool get showBottomRow =>
       showThreadReplyIndicator ||
@@ -705,12 +706,12 @@ class _MessageWidgetState extends State<MessageWidget>
       isDeleted;
 
   /// {@template isPinned}
-  /// Whether [MessageWidget.message] is pinned or not.
+  /// Whether [StreamMessageWidget.message] is pinned or not.
   /// {@endtemplate}
   bool get isPinned => widget.message.pinned;
 
   /// {@template shouldShowReactions}
-  /// Should show message reactions if [MessageWidget.showReactions] is
+  /// Should show message reactions if [StreamMessageWidget.showReactions] is
   /// `true`, if there are reactions to show, and if the message is not deleted.
   /// {@endtemplate}
   bool get shouldShowReactions =>
@@ -880,7 +881,8 @@ class _MessageWidgetState extends State<MessageWidget>
             elevation: 2,
             clipBehavior: Clip.hardEdge,
             isScrollControlled: true,
-            backgroundColor: MessageInputTheme.of(context).inputBackgroundColor,
+            backgroundColor:
+                StreamMessageInputTheme.of(context).inputBackgroundColor,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(16),

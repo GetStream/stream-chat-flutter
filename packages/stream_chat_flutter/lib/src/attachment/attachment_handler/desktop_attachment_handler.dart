@@ -4,9 +4,7 @@ import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:http/http.dart' as http;
-import 'package:stream_chat_flutter/src/video/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:video_compress/video_compress.dart';
 
 /// A utility class for handling the uploading and downloading of attachments
 /// on desktop platforms.
@@ -15,7 +13,6 @@ class DesktopAttachmentHandler extends AttachmentHandler {
   DesktopAttachmentHandler({
     this.maxAttachmentSize,
     this.compressedVideoFrameRate = 30,
-    this.compressedVideoQuality = VideoQuality.DefaultQuality,
   });
 
   /// Max attachment size in bytes.
@@ -29,12 +26,6 @@ class DesktopAttachmentHandler extends AttachmentHandler {
   /// Include this in your instance of [DesktopAttachmentHandler] when dealing
   /// with uploads, or use the default value of `30`.
   final int? compressedVideoFrameRate;
-
-  /// The video quality to use when compressing the videos.
-  ///
-  /// Include this in your instance of [DesktopAttachmentHandler] when dealing
-  /// with uploads, or use the default value of [VideoQuality.DefaultQuality].
-  final VideoQuality? compressedVideoQuality;
 
   @override
   Future<bool> download(
@@ -143,7 +134,7 @@ class DesktopAttachmentHandler extends AttachmentHandler {
     }
 
     // Create the AttachmentFile to include in the Attachment
-    var attachmentFile = AttachmentFile(
+    final attachmentFile = AttachmentFile(
       size: bytes.length,
       path: file.path,
       bytes: bytes,
@@ -169,30 +160,9 @@ class DesktopAttachmentHandler extends AttachmentHandler {
     // Check file size against maxAttachmentSize and stop uploading if
     // required
     if (attachmentFile.size! > maxAttachmentSize!) {
-      // Compress video
-      if (attachment.type == 'video' && attachmentFile.path != null) {
-        final mediaInfo = await (VideoService.compressVideo(
-          attachmentFile.path!,
-          frameRate: compressedVideoFrameRate!,
-          quality: compressedVideoQuality!,
-        ) as FutureOr<MediaInfo>);
-        if (mediaInfo.filesize! > maxAttachmentSize!) {
-          throw const FileSystemException(
-            'File size too large after compression and '
-            'exceeds maximum attachment size',
-          );
-        }
-        attachmentFile = AttachmentFile(
-          name: attachmentFile.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file?.readAsBytes(),
-          path: mediaInfo.path,
-        );
-      } else {
-        throw const FileSystemException(
-          'File size exceeds maximum attachment size',
-        );
-      }
+      throw const FileSystemException(
+        'File size exceeds maximum attachment size',
+      );
     }
 
     return attachment.copyWith(

@@ -32,6 +32,7 @@ void main() {
           data: {
             'message': message,
             'skip_push': false,
+            'skip_enrich_url': false,
           },
         )).thenAnswer((_) async => successResponse(path, data: {
           'message': message.toJson(),
@@ -58,6 +59,7 @@ void main() {
           data: {
             'message': message,
             'skip_push': true,
+            'skip_enrich_url': false,
           },
         )).thenAnswer((_) async => successResponse(path, data: {
           'message': message.toJson(),
@@ -137,7 +139,10 @@ void main() {
 
     when(() => client.post(
           path,
-          data: {'message': message},
+          data: {
+            'message': message,
+            'skip_enrich_url': false,
+          },
         )).thenAnswer(
       (_) async => successResponse(path, data: {'message': message.toJson()}),
     );
@@ -162,7 +167,11 @@ void main() {
 
     when(() => client.put(
           path,
-          data: {'set': set, 'unset': unset},
+          data: {
+            'set': set,
+            'unset': unset,
+            'skip_enrich_url': false,
+          },
         )).thenAnswer(
       (_) async => successResponse(path, data: {'message': message.toJson()}),
     );
@@ -180,7 +189,11 @@ void main() {
 
     verify(() => client.put(
           path,
-          data: {'set': set, 'unset': unset},
+          data: {
+            'set': set,
+            'unset': unset,
+            'skip_enrich_url': false,
+          },
         )).called(1);
     verifyNoMoreInteractions(client);
   });

@@ -37,7 +37,7 @@ class ChannelInfoDialog extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ChannelInfo(
+              StreamChannelInfo(
                 channel: channel,
                 textStyle: StreamChatTheme.of(context)
                     .channelPreviewTheme
@@ -49,7 +49,7 @@ class ChannelInfoDialog extends StatelessWidget {
           if (channel.isDistinct && channel.memberCount == 2)
             Column(
               children: [
-                UserAvatar(
+                StreamUserAvatar(
                   user: members
                       .firstWhere(
                         (e) => e.user?.id != userAsMember.user?.id,

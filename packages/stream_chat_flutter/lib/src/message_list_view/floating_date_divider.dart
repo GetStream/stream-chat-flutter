@@ -84,7 +84,7 @@ class FloatingDateDivider extends StatelessWidget {
           final message = messages[index - 2];
           return dateDividerBuilder != null
               ? dateDividerBuilder!(message.createdAt.toLocal())
-              : DateDivider(dateTime: message.createdAt.toLocal());
+              : StreamDateDivider(dateTime: message.createdAt.toLocal());
         },
       ),
     );

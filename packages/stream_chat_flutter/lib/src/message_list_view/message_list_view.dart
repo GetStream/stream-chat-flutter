@@ -32,7 +32,7 @@ enum SpacingType {
   defaultSpacing,
 }
 
-/// {@template messageListView}
+/// {@template streamMessageListView}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_listview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_listview_paint.png)
 ///
@@ -41,17 +41,17 @@ enum SpacingType {
 /// ```dart
 /// class ChannelPage extends StatelessWidget {
 ///   const ChannelPage({
-///     Key key,
+///     Key? key,
 ///   }) : super(key: key);
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
-///       appBar: ChannelHeader(),
+///       appBar: StreamChannelHeader(),
 ///       body: Column(
 ///         children: <Widget>[
 ///           Expanded(
-///             child: MessageListView(
+///             child: StreamMessageListView(
 ///               threadBuilder: (_, parentMessage) {
 ///                 return ThreadPage(
 ///                   parent: parentMessage,
@@ -59,7 +59,7 @@ enum SpacingType {
 ///               },
 ///             ),
 ///           ),
-///           MessageInput(),
+///           StreamMessageInput(),
 ///         ],
 ///       ),
 ///     );
@@ -75,11 +75,12 @@ enum SpacingType {
 /// The UI is rendered based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget's appearance.
 /// {@endtemplate}
-class MessageListView extends StatefulWidget {
-  /// {@macro messageListView}
-  const MessageListView({
+class StreamMessageListView extends StatefulWidget {
+  /// {@macro streamMessageListView}
+  const StreamMessageListView({
     Key? key,
     this.showScrollToBottom = true,
+    this.scrollToBottomBuilder,
     this.messageBuilder,
     this.parentMessageBuilder,
     this.parentMessage,
@@ -106,7 +107,6 @@ class MessageListView extends StatefulWidget {
     this.messageFilter,
     this.onMessageTap,
     this.onSystemMessageTap,
-    this.pinPermissions = const [],
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
     this.messageListController,
@@ -152,6 +152,27 @@ class MessageListView extends StatefulWidget {
   /// If true will show a scroll to bottom message when there are new
   /// messages and the scroll offset is not zero
   final bool showScrollToBottom;
+
+  /// Function used to build a custom scroll to bottom widget
+  ///
+  /// Provides the current unread messages count and a reference
+  /// to the function that is executed on tap of this widget by default
+  ///
+  /// As an example:
+  /// ```
+  /// MessageListView(
+  ///   scrollToBottomBuilder: (unreadCount, defaultTapAction) {
+  ///     return InkWell(
+  ///       onTap: () => defaultTapAction(unreadCount),
+  ///       child: Text('Scroll To Bottom'),
+  ///     );
+  ///   },
+  /// ),
+  /// ```
+  final Widget Function(
+    int unreadCount,
+    Future<void> Function(int) scrollToBottomDefaultTapAction,
+  )? scrollToBottomBuilder;
 
   /// Parent message in case of a thread
   final Message? parentMessage;
@@ -225,9 +246,6 @@ class MessageListView extends StatefulWidget {
   /// Called when system message is tapped
   final OnMessageTap? onSystemMessageTap;
 
-  /// A List of user types that have permission to pin messages
-  final List<String> pinPermissions;
-
   /// Builder used to build the thread separator in case it's a thread view
   final WidgetBuilder? threadSeparatorBuilder;
 
@@ -243,10 +261,10 @@ class MessageListView extends StatefulWidget {
   final SpacingWidgetBuilder? spacingWidgetBuilder;
 
   @override
-  _MessageListViewState createState() => _MessageListViewState();
+  _StreamMessageListViewState createState() => _StreamMessageListViewState();
 }
 
-class _MessageListViewState extends State<MessageListView> {
+class _StreamMessageListViewState extends State<StreamMessageListView> {
   ItemScrollController? _scrollController;
   void Function(Message)? _onThreadTap;
   final ValueNotifier<bool> _showScrollToBottom = ValueNotifier(false);
@@ -254,6 +272,7 @@ class _MessageListViewState extends State<MessageListView> {
   int? _messageListLength;
   StreamChannelState? streamChannel;
   late StreamChatThemeData _streamTheme;
+  late List<String> _userPermissions;
 
   double get _initialAlignment {
     final initialAlignment = widget.initialAlignment;
@@ -420,7 +439,7 @@ class _MessageListViewState extends State<MessageListView> {
     final child = Stack(
       alignment: Alignment.center,
       children: [
-        ConnectionStatusBuilder(
+        StreamConnectionStatusBuilder(
           statusBuilder: (context, status) {
             var statusString = '';
             var showStatus = true;
@@ -437,7 +456,7 @@ class _MessageListViewState extends State<MessageListView> {
                 break;
             }
 
-            return InfoTile(
+            return StreamInfoTile(
               showMessage: widget.showConnectionStateTile && showStatus,
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
@@ -554,7 +573,7 @@ class _MessageListViewState extends State<MessageListView> {
                             )
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: DateDivider(
+                              child: StreamDateDivider(
                                 dateTime: nextMessage.createdAt.toLocal(),
                               ),
                             );
@@ -702,8 +721,10 @@ class _MessageListViewState extends State<MessageListView> {
       ],
     );
 
-    final backgroundColor = MessageListViewTheme.of(context).backgroundColor;
-    final backgroundImage = MessageListViewTheme.of(context).backgroundImage;
+    final backgroundColor =
+        StreamMessageListViewTheme.of(context).backgroundColor;
+    final backgroundImage =
+        StreamMessageListViewTheme.of(context).backgroundImage;
 
     if (backgroundColor != null || backgroundImage != null) {
       return Container(
@@ -746,7 +767,7 @@ class _MessageListViewState extends State<MessageListView> {
     final currentUserMember =
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
-    final defaultMessageWidget = MessageWidget(
+    final defaultMessageWidget = StreamMessageWidget(
       showReplyMessage: false,
       showResendMessage: false,
       showThreadReplyMessage: false,
@@ -792,7 +813,7 @@ class _MessageListViewState extends State<MessageListView> {
         FocusScope.of(context).unfocus();
       },
       showPinButton: currentUserMember != null &&
-          widget.pinPermissions.contains(currentUserMember.role),
+          _userPermissions.contains(PermissionType.pinMessage),
     );
 
     if (widget.parentMessageBuilder != null) {
@@ -806,89 +827,91 @@ class _MessageListViewState extends State<MessageListView> {
     return defaultMessageWidget;
   }
 
-  Widget _buildScrollToBottom() => StreamBuilder<int>(
-        stream: streamChannel!.channel.state!.unreadCountStream,
-        builder: (_, snapshot) {
-          if (snapshot.hasError) {
-            return const Offstage();
-          } else if (!snapshot.hasData) {
-            return const Offstage();
-          }
-          final unreadCount = snapshot.data!;
-          final showUnreadCount = unreadCount > 0 &&
-              streamChannel!.channel.state!.members.any((e) =>
-                  e.userId ==
-                  streamChannel!.channel.client.state.currentUser!.id);
-          return Positioned(
-            bottom: 8,
-            right: 8,
-            width: 40,
-            height: 40,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                FloatingActionButton(
-                  backgroundColor: _streamTheme.colorTheme.barsBg,
-                  onPressed: () async {
-                    if (unreadCount > 0) {
-                      streamChannel!.channel.markRead();
-                    }
-                    if (!_upToDate) {
-                      _bottomPaginationActive = false;
-                      initialAlignment = 0;
-                      initialIndex = 0;
-                      await streamChannel!.reloadChannel();
+  Widget _buildScrollToBottom() {
+    return StreamBuilder<int>(
+      stream: streamChannel!.channel.state!.unreadCountStream,
+      builder: (_, snapshot) {
+        if (snapshot.hasError) {
+          return const Offstage();
+        } else if (!snapshot.hasData) {
+          return const Offstage();
+        }
+        final unreadCount = snapshot.data!;
+        final showUnreadCount = unreadCount > 0 &&
+            streamChannel!.channel.state!.members.any((e) =>
+                e.userId ==
+                streamChannel!.channel.client.state.currentUser!.id);
+        return Positioned(
+          bottom: 8,
+          right: 8,
+          width: 40,
+          height: 40,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              FloatingActionButton(
+                backgroundColor: _streamTheme.colorTheme.barsBg,
+                onPressed: () async {
+                  if (unreadCount > 0) {
+                    streamChannel!.channel.markRead();
+                  }
+                  if (!_upToDate) {
+                    _bottomPaginationActive = false;
+                    initialAlignment = 0;
+                    initialIndex = 0;
+                    await streamChannel!.reloadChannel();
 
-                      WidgetsBinding.instance?.addPostFrameCallback((_) {
-                        _scrollController!.jumpTo(index: 0);
-                      });
-                    } else {
-                      _showScrollToBottom.value = false;
-                      _scrollController!.scrollTo(
-                        index: 0,
-                        duration: const Duration(seconds: 1),
-                        curve: Curves.easeInOut,
-                      );
-                    }
-                  },
-                  child: widget.reverse
-                      ? StreamSvgIcon.down(
-                          color: _streamTheme.colorTheme.textHighEmphasis,
-                        )
-                      : StreamSvgIcon.up(
-                          color: _streamTheme.colorTheme.textHighEmphasis,
-                        ),
-                ),
-                if (showUnreadCount)
-                  Positioned(
-                    width: 20,
-                    height: 20,
-                    left: 10,
-                    top: -10,
-                    child: CircleAvatar(
-                      child: Padding(
-                        padding: const EdgeInsets.all(3),
-                        child: Text(
-                          '$unreadCount',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    WidgetsBinding.instance?.addPostFrameCallback((_) {
+                      _scrollController!.jumpTo(index: 0);
+                    });
+                  } else {
+                    _showScrollToBottom.value = false;
+                    _scrollController!.scrollTo(
+                      index: 0,
+                      duration: const Duration(seconds: 1),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+                child: widget.reverse
+                    ? StreamSvgIcon.down(
+                        color: _streamTheme.colorTheme.textHighEmphasis,
+                      )
+                    : StreamSvgIcon.up(
+                        color: _streamTheme.colorTheme.textHighEmphasis,
+                      ),
+              ),
+              if (showUnreadCount)
+                Positioned(
+                  width: 20,
+                  height: 20,
+                  left: 10,
+                  top: -10,
+                  child: CircleAvatar(
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Text(
+                        '$unreadCount',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
-              ],
-            ),
-          );
-        },
-      );
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Widget buildMessage(Message message, List<Message> messages, int index) {
     if ((message.type == 'system' || message.type == 'error') &&
         message.text?.isNotEmpty == true) {
       return widget.systemMessageBuilder?.call(context, message) ??
-          SystemMessage(
+          StreamSystemMessage(
             message: message,
             onMessageTap: (message) {
               if (widget.onSystemMessageTap != null) {
@@ -958,7 +981,7 @@ class _MessageListViewState extends State<MessageListView> {
     final currentUserMember =
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
-    Widget messageWidget = MessageWidget(
+    Widget messageWidget = StreamMessageWidget(
       message: message,
       reverse: isMyMessage,
       showReactions: !message.isDeleted,
@@ -989,7 +1012,10 @@ class _MessageListViewState extends State<MessageListView> {
       },
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
-      showThreadReplyMessage: !isThreadMessage,
+      showThreadReplyMessage: !isThreadMessage &&
+          streamChannel?.channel.ownCapabilities
+                  .contains(PermissionType.sendReply) ==
+              true,
       showFlagButton: !isMyMessage,
       borderSide: borderSide,
       onThreadTap: _onThreadTap,
@@ -1058,7 +1084,7 @@ class _MessageListViewState extends State<MessageListView> {
         FocusScope.of(context).unfocus();
       },
       showPinButton: currentUserMember != null &&
-          widget.pinPermissions.contains(currentUserMember.role),
+          _userPermissions.contains(PermissionType.pinMessage),
     );
 
     if (widget.messageBuilder != null) {
@@ -1071,7 +1097,7 @@ class _MessageListViewState extends State<MessageListView> {
           index,
         ),
         messages,
-        messageWidget as MessageWidget,
+        messageWidget as StreamMessageWidget,
       );
     }
 

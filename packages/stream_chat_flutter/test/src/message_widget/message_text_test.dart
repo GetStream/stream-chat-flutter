@@ -59,23 +59,21 @@ void main() {
         'name': 'test',
       });
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChat(
-            client: client,
-            child: StreamChannel(
-              channel: channel,
-              child: Scaffold(
-                body: MessageText(
-                    message: Message(
-                      text: 'demo',
-                    ),
-                    messageTheme: streamTheme.otherMessageTheme),
-              ),
+      await tester.pumpWidget(MaterialApp(
+        home: StreamChat(
+          client: client,
+          child: StreamChannel(
+            channel: channel,
+            child: Scaffold(
+              body: StreamMessageText(
+                  message: Message(
+                    text: 'demo',
+                  ),
+                  messageTheme: streamTheme.otherMessageTheme),
             ),
           ),
         ),
-      );
+      ));
 
       expect(find.byType(MarkdownBody), findsOneWidget);
     },
@@ -86,7 +84,7 @@ void main() {
     final clientState = MockClientState();
     final channel = MockChannel();
     final channelState = MockChannelState();
-    const messageTheme = MessageThemeData();
+    const messageTheme = StreamMessageThemeData();
 
     final currentUser = OwnUser(
       id: 'sahil',
@@ -124,7 +122,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  body: MessageText(
+                  body: StreamMessageText(
                     message: message,
                     messageTheme: messageTheme,
                   ),
@@ -160,7 +158,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  body: MessageText(
+                  body: StreamMessageText(
                     message: message,
                     messageTheme: messageTheme,
                   ),
@@ -218,25 +216,23 @@ and a list:
 cool.''';
 
       await tester.pumpWidgetBuilder(
-        materialAppWrapper()(
-          SimpleFrame(
-            child: StreamChat(
-              client: client,
-              connectivityStream: Stream.value(ConnectivityResult.wifi),
-              child: StreamChannel(
-                channel: channel,
-                child: Scaffold(
-                  body: MessageText(
-                    message: Message(
-                      text: messageText,
-                    ),
-                    messageTheme: streamTheme.otherMessageTheme,
+        materialAppWrapper()(SimpleFrame(
+          child: StreamChat(
+            client: client,
+            connectivityStream: Stream.value(ConnectivityResult.wifi),
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: StreamMessageText(
+                  message: Message(
+                    text: messageText,
                   ),
+                  messageTheme: streamTheme.otherMessageTheme,
                 ),
               ),
             ),
           ),
-        ),
+        )),
         surfaceSize: const Size(500, 500),
       );
       await screenMatchesGolden(tester, 'message_text');

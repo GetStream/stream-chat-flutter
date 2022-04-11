@@ -2,12 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template urlAttachment}
-/// Displays a URL attachment in a [MessageWidget].
+/// {@macro streamUrlAttachment}
+@Deprecated("Use 'StreamUrlAttachment' instead")
+typedef UrlAttachment = StreamUrlAttachment;
+
+/// {@template streamUrlAttachment}
+/// Displays a URL attachment in a [StreamMessageWidget].
 /// {@endtemplate}
-class UrlAttachment extends StatelessWidget {
-  /// {@macro urlAttachment}
-  const UrlAttachment({
+class StreamUrlAttachment extends StatelessWidget {
+  /// {@macro streamUrlAttachment}
+  const StreamUrlAttachment({
     Key? key,
     required this.urlAttachment,
     required this.hostDisplayName,
@@ -28,8 +32,8 @@ class UrlAttachment extends StatelessWidget {
   /// Padding for text
   final EdgeInsets textPadding;
 
-  /// The [MessageThemeData] to use for the image title
-  final MessageThemeData messageTheme;
+  /// The [StreamMessageThemeData] to use for the image title
+  final StreamMessageThemeData messageTheme;
 
   /// The function called when tapping on a link
   final void Function(String)? onLinkTap;

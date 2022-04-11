@@ -45,7 +45,7 @@ class MessageCard extends StatelessWidget {
   final BorderSide? borderSide;
 
   /// {@macro messageTheme}
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   /// {@macro borderRadiusGeometry}
   final BorderRadiusGeometry? borderRadiusGeometry;

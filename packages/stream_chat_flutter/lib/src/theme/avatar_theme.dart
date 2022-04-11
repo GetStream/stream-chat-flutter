@@ -1,13 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// {@macro avatarThemeData}
+@Deprecated("Use 'StreamAvatarThemeData' instead")
+typedef AvatarThemeData = StreamAvatarThemeData;
+
 /// {@template avatarThemeData}
 /// A style that overrides the default appearance of various avatar widgets.
 /// {@endtemplate}
 // ignore: prefer-match-file-name
-class AvatarThemeData with Diagnosticable {
+class StreamAvatarThemeData with Diagnosticable {
   /// {@macro avatarThemeData}
-  const AvatarThemeData({
+  const StreamAvatarThemeData({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
   })  : _constraints = constraints,
@@ -17,23 +21,22 @@ class AvatarThemeData with Diagnosticable {
   final BorderRadius? _borderRadius;
 
   /// Get constraints for avatar
-  BoxConstraints get constraints {
-    return _constraints ??
-        const BoxConstraints.tightFor(
-          height: 32,
-          width: 32,
-        );
-  }
+  BoxConstraints get constraints =>
+      _constraints ??
+      const BoxConstraints.tightFor(
+        height: 32,
+        width: 32,
+      );
 
   /// Get border radius
   BorderRadius get borderRadius => _borderRadius ?? BorderRadius.circular(20);
 
-  /// Copy this [AvatarThemeData] to another.
-  AvatarThemeData copyWith({
+  /// Copy this [StreamAvatarThemeData] to another.
+  StreamAvatarThemeData copyWith({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
   }) {
-    return AvatarThemeData(
+    return StreamAvatarThemeData(
       constraints: constraints ?? _constraints,
       borderRadius: borderRadius ?? _borderRadius,
     );
@@ -42,12 +45,12 @@ class AvatarThemeData with Diagnosticable {
   /// Linearly interpolate between two [UserAvatar] themes.
   ///
   /// All the properties must be non-null.
-  AvatarThemeData lerp(
-    AvatarThemeData a,
-    AvatarThemeData b,
+  StreamAvatarThemeData lerp(
+    StreamAvatarThemeData a,
+    StreamAvatarThemeData b,
     double t,
   ) {
-    return AvatarThemeData(
+    return StreamAvatarThemeData(
       borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
       constraints: BoxConstraints.lerp(a.constraints, b.constraints, t),
     );
@@ -56,7 +59,7 @@ class AvatarThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AvatarThemeData &&
+      other is StreamAvatarThemeData &&
           runtimeType == other.runtimeType &&
           _constraints == other._constraints &&
           _borderRadius == other._borderRadius;
@@ -64,8 +67,8 @@ class AvatarThemeData with Diagnosticable {
   @override
   int get hashCode => _constraints.hashCode ^ _borderRadius.hashCode;
 
-  /// Merges one [AvatarThemeData] with the another
-  AvatarThemeData merge(AvatarThemeData? other) {
+  /// Merges one [StreamAvatarThemeData] with the another
+  StreamAvatarThemeData merge(StreamAvatarThemeData? other) {
     if (other == null) return this;
     return copyWith(
       constraints: other._constraints,

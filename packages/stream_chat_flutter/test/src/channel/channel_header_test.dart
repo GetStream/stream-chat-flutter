@@ -60,7 +60,7 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: const Scaffold(
-                body: ChannelHeader(),
+                body: StreamChannelHeader(),
               ),
             ),
           ),
@@ -68,9 +68,9 @@ void main() {
       );
 
       expect(find.text('test'), findsOneWidget);
-      expect(find.byType(ChannelAvatar), findsOneWidget);
+      expect(find.byType(StreamChannelAvatar), findsOneWidget);
       expect(find.byType(StreamBackButton), findsOneWidget);
-      expect(find.byType(ChannelInfo), findsOneWidget);
+      expect(find.byType(StreamChannelInfo), findsOneWidget);
     },
   );
 
@@ -130,7 +130,7 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: const Scaffold(
-                body: ChannelHeader(
+                body: StreamChannelHeader(
                   showConnectionStateTile: true,
                 ),
               ),
@@ -139,8 +139,12 @@ void main() {
         ),
       );
 
-      expect(tester.widget<InfoTile>(find.byType(InfoTile)).showMessage, true);
-      expect(tester.widget<InfoTile>(find.byType(InfoTile)).message,
+      expect(
+          tester
+              .widget<StreamInfoTile>(find.byType(StreamInfoTile))
+              .showMessage,
+          true);
+      expect(tester.widget<StreamInfoTile>(find.byType(StreamInfoTile)).message,
           'Disconnected');
     },
   );
@@ -200,7 +204,7 @@ void main() {
               channel: channel,
               showLoading: false,
               child: const Scaffold(
-                body: ChannelHeader(
+                body: StreamChannelHeader(
                   showConnectionStateTile: true,
                 ),
               ),
@@ -211,8 +215,12 @@ void main() {
 
       await tester.pump();
 
-      expect(tester.widget<InfoTile>(find.byType(InfoTile)).showMessage, true);
-      expect(tester.widget<InfoTile>(find.byType(InfoTile)).message,
+      expect(
+          tester
+              .widget<StreamInfoTile>(find.byType(StreamInfoTile))
+              .showMessage,
+          true);
+      expect(tester.widget<StreamInfoTile>(find.byType(StreamInfoTile)).message,
           'Reconnecting...');
     },
   );
@@ -271,7 +279,7 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: const Scaffold(
-                body: ChannelHeader(
+                body: StreamChannelHeader(
                   leading: Text('leading'),
                   subtitle: Text('subtitle'),
                   actions: [
@@ -287,8 +295,8 @@ void main() {
 
       expect(find.text('test'), findsNothing);
       expect(find.byType(StreamBackButton), findsNothing);
-      expect(find.byType(ChannelAvatar), findsNothing);
-      expect(find.byType(ChannelInfo), findsNothing);
+      expect(find.byType(StreamChannelAvatar), findsNothing);
+      expect(find.byType(StreamChannelInfo), findsNothing);
       expect(find.text('leading'), findsOneWidget);
       expect(find.text('title'), findsOneWidget);
       expect(find.text('subtitle'), findsOneWidget);
@@ -349,7 +357,7 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: const Scaffold(
-                body: ChannelHeader(
+                body: StreamChannelHeader(
                   showTypingIndicator: false,
                   showBackButton: false,
                 ),
@@ -362,11 +370,15 @@ void main() {
       expect(find.byType(StreamBackButton), findsNothing);
       expect(
         tester
-            .widget<ChannelInfo>(find.byType(ChannelInfo))
+            .widget<StreamChannelInfo>(find.byType(StreamChannelInfo))
             .showTypingIndicator,
         false,
       );
-      expect(tester.widget<InfoTile>(find.byType(InfoTile)).showMessage, false);
+      expect(
+          tester
+              .widget<StreamInfoTile>(find.byType(StreamInfoTile))
+              .showMessage,
+          false);
     },
   );
 
@@ -428,7 +440,7 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: Scaffold(
-                body: ChannelHeader(
+                body: StreamChannelHeader(
                   onBackPressed: () => backPressed = true,
                   onImageTap: () => imageTapped = true,
                   onTitleTap: () => titleTapped = true,
@@ -440,8 +452,8 @@ void main() {
       );
 
       await tester.tap(find.byType(StreamBackButton));
-      await tester.tap(find.byType(ChannelAvatar));
-      await tester.tap(find.byType(ChannelName));
+      await tester.tap(find.byType(StreamChannelAvatar));
+      await tester.tap(find.byType(StreamChannelName));
 
       expect(backPressed, true);
       expect(imageTapped, true);

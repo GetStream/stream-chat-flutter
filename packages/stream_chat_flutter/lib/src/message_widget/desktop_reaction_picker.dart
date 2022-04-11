@@ -6,8 +6,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@template desktopReactionPicker}
 /// Allows the user to select reactions to a message on desktop & web.
 ///
-/// This differs slightly from [ReactionPicker] in order to match our design
-/// spec.
+/// This differs slightly from [StreamReactionPicker] in order to match our
+/// design spec.
 ///
 /// Used by the `_buildContextMenu()` function found in `message_widget.dart`.
 /// It is not recommended to use this widget directly.

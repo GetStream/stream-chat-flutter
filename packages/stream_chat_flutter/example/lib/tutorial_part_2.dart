@@ -14,7 +14,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// > Note: the SDK uses Flutter’s [Navigator] to move from one route to
 /// another. This allows us to avoid any boiler-plate code.
 /// > Of course, you can take total control of how navigation works by
-/// customizing widgets like [Channel] and [ChannelList].
+/// customizing widgets like [StreamChannel] and [StreamChannelListView].
 ///
 /// If you run the application, you will see that the first screen shows a
 /// list of conversations, you can open each by tapping and go back to the list.
@@ -25,7 +25,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The [ChannelListPage] widget retrieves the list of channels based on a
 /// custom query and ordering. In this case we are showing the list of
 /// channels in which the current user is a member and we order them based
-/// on the time they had a new message. [ChannelListView] handles pagination
+/// on the time they had a new message.
+/// [StreamChannelListView] handles pagination
 /// and updates automatically when new channels are created or when a new
 /// message is added to a channel.
 Future<void> main() async {
@@ -61,28 +62,57 @@ class MyApp extends StatelessWidget {
         client: client,
         child: child,
       ),
-      home: const ChannelListPage(),
+      home: ChannelListPage(
+        client: client,
+      ),
     );
   }
 }
 
-class ChannelListPage extends StatelessWidget {
+class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
     Key? key,
+    required this.client,
   }) : super(key: key);
+
+  final StreamChatClient client;
+
+  @override
+  State<ChannelListPage> createState() => _ChannelListPageState();
+}
+
+class _ChannelListPageState extends State<ChannelListPage> {
+  late final _controller = StreamChannelListController(
+    client: widget.client,
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).currentUser!.id],
+    ),
+    sort: const [SortOption('last_message_at')],
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ChannelsBloc(
-        child: ChannelListView(
-          filter: Filter.in_(
-            'members',
-            [StreamChat.of(context).currentUser!.id],
+      body: RefreshIndicator(
+        onRefresh: _controller.refresh,
+        child: StreamChannelListView(
+          controller: _controller,
+          onChannelTap: (channel) => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => StreamChannel(
+                channel: channel,
+                child: const ChannelPage(),
+              ),
+            ),
           ),
-          sort: const [SortOption('last_message_at')],
-          limit: 20,
-          channelWidget: const ChannelPage(),
         ),
       ),
     );
@@ -97,13 +127,13 @@ class ChannelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const ChannelHeader(),
+      appBar: const StreamChannelHeader(),
       body: Column(
         children: const <Widget>[
           Expanded(
-            child: MessageListView(),
+            child: StreamMessageListView(),
           ),
-          MessageInput(),
+          StreamMessageInput(),
         ],
       ),
     );

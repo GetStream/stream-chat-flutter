@@ -68,7 +68,7 @@ void main() {
               child: WillPopScope(
                 onWillPop: () async => false,
                 child: Scaffold(
-                  body: GalleryFooter(
+                  body: StreamGalleryFooter(
                     message: Message(),
                   ),
                 ),
@@ -92,7 +92,7 @@ void main() {
             child: WillPopScope(
               onWillPop: () async => false,
               child: Scaffold(
-                body: GalleryFooter(
+                body: StreamGalleryFooter(
                   message: Message(),
                 ),
               ),

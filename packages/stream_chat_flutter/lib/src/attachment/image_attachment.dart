@@ -4,12 +4,16 @@ import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template imageAttachment}
-/// Shows an image attachment in a [MessageWidget].
+/// {@macro streamImageAttachment}
+@Deprecated("use 'StreamImageAttachment' instead")
+typedef ImageAttachment = StreamImageAttachment;
+
+/// {@template streamImageAttachment}
+/// Shows an image attachment in a [StreamMessageWidget].
 /// {@endtemplate}
-class ImageAttachment extends AttachmentWidget {
-  /// {@macro imageAttachment}
-  const ImageAttachment({
+class StreamImageAttachment extends StreamAttachmentWidget {
+  /// {@macro streamImageAttachment}
+  const StreamImageAttachment({
     Key? key,
     required Message message,
     required Attachment attachment,
@@ -26,8 +30,8 @@ class ImageAttachment extends AttachmentWidget {
           size: size,
         );
 
-  /// The [MessageThemeData] to use for the image title
-  final MessageThemeData messageTheme;
+  /// The [StreamMessageThemeData] to use for the image title
+  final StreamMessageThemeData messageTheme;
 
   /// Flag for whether the title should be shown or not
   final bool showTitle;
@@ -156,7 +160,7 @@ class ImageAttachment extends AttachmentWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8),
-                  child: AttachmentUploadStateBuilder(
+                  child: StreamAttachmentUploadStateBuilder(
                     message: message,
                     attachment: attachment,
                   ),
@@ -167,7 +171,7 @@ class ImageAttachment extends AttachmentWidget {
           if (showTitle && attachment.title != null)
             Material(
               color: messageTheme.messageBackgroundColor,
-              child: AttachmentTitle(
+              child: StreamAttachmentTitle(
                 messageTheme: messageTheme,
                 attachment: attachment,
               ),

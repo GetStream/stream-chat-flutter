@@ -2,22 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template userItem}
+/// {@macro streamUserItem}
+@Deprecated("Use 'StreamUserItem' instead")
+typedef UserItem = StreamUserItem;
+
+/// {@template streamUserItem}
 /// Shows a preview of the current [User].
 ///
 /// This widget uses a [StreamBuilder] to render the user information
 /// image as soon as it updates.
 ///
 /// It is not recommended to use this widget as it's the default user preview
-/// used by [UserListView].
+/// used by [StreamUserListView].
 ///
 /// The widget renders the ui based on the first ancestor of type
 /// [StreamChatTheme].
 /// Modify it to change the widget's appearance.
 /// {@endtemplate}
-class UserItem extends StatelessWidget {
-  /// {@macro userItem}
-  const UserItem({
+class StreamUserItem extends StatelessWidget {
+  /// {@macro streamUserItem}
+  const StreamUserItem({
     Key? key,
     required this.user,
     this.onTap,
@@ -39,10 +43,10 @@ class UserItem extends StatelessWidget {
   /// The function called when the image is tapped or clicked
   final void Function(User)? onImageTap;
 
-  /// If true the [UserItem] will show a trailing checkmark
+  /// If true the [StreamUserItem] will show a trailing checkmark
   final bool selected;
 
-  /// If true the [UserItem] will show the last seen
+  /// If true the [StreamUserItem] will show the last seen
   final bool showLastOnline;
 
   @override
@@ -59,7 +63,7 @@ class UserItem extends StatelessWidget {
           onLongPress!(user);
         }
       },
-      leading: UserAvatar(
+      leading: StreamUserAvatar(
         user: user,
         onTap: (user) {
           if (onImageTap != null) {

@@ -23,7 +23,7 @@ void main() {
             child: const Scaffold(
               body: Portal(
                 child: SizedBox(
-                  child: InfoTile(
+                  child: StreamInfoTile(
                     showMessage: true,
                     message: 'message',
                     child: Text('test'),
@@ -55,7 +55,7 @@ void main() {
             child: const Scaffold(
               body: Portal(
                 child: SizedBox(
-                  child: InfoTile(
+                  child: StreamInfoTile(
                     showMessage: false,
                     message: 'message',
                     child: Text('test'),

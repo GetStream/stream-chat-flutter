@@ -59,19 +59,17 @@ void main() {
         ]),
       );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChat(
-            client: client,
-            child: StreamChannel(
-              channel: channel,
-              child: const Scaffold(
-                body: MessageInput(),
-              ),
+      await tester.pumpWidget(MaterialApp(
+        home: StreamChat(
+          client: client,
+          child: StreamChannel(
+            channel: channel,
+            child: const Scaffold(
+              body: StreamMessageInput(),
             ),
           ),
         ),
-      );
+      ));
 
       expect(find.byType(TextField), findsOneWidget);
       expect(find.byKey(const Key('messageInputText')), findsOneWidget);
@@ -133,19 +131,17 @@ void main() {
         ]),
       );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChat(
-            client: client,
-            child: StreamChannel(
-              channel: channel,
-              child: const Scaffold(
-                body: MessageInput(),
-              ),
+      await tester.pumpWidget(MaterialApp(
+        home: StreamChat(
+          client: client,
+          child: StreamChannel(
+            channel: channel,
+            child: const Scaffold(
+              body: StreamMessageInput(),
             ),
           ),
         ),
-      );
+      ));
 
       expect(find.text('Slow mode ON'), findsOneWidget);
     },

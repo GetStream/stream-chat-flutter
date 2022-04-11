@@ -47,21 +47,19 @@ void main() {
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(1));
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChat(
-            client: client,
-            child: StreamChannel(
-              channel: channel,
-              child: Scaffold(
-                body: ThreadHeader(
-                  parent: Message(),
-                ),
+      await tester.pumpWidget(MaterialApp(
+        home: StreamChat(
+          client: client,
+          child: StreamChannel(
+            channel: channel,
+            child: Scaffold(
+              body: StreamThreadHeader(
+                parent: Message(),
               ),
             ),
           ),
         ),
-      );
+      ));
       await tester.pumpAndSettle();
 
       expect(find.text('with '), findsOneWidget);
@@ -114,30 +112,28 @@ void main() {
       ]);
 
       var tapped = false;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChat(
-            client: client,
-            child: StreamChannel(
-              channel: channel,
-              child: Scaffold(
-                body: ThreadHeader(
-                  parent: Message(),
-                  subtitle: const Text('subtitle'),
-                  leading: const Text('leading'),
-                  title: const Text('title'),
-                  onTitleTap: () {
-                    tapped = true;
-                  },
-                  actions: const [
-                    Text('action'),
-                  ],
-                ),
+      await tester.pumpWidget(MaterialApp(
+        home: StreamChat(
+          client: client,
+          child: StreamChannel(
+            channel: channel,
+            child: Scaffold(
+              body: StreamThreadHeader(
+                parent: Message(),
+                subtitle: const Text('subtitle'),
+                leading: const Text('leading'),
+                title: const Text('title'),
+                onTitleTap: () {
+                  tapped = true;
+                },
+                actions: const [
+                  Text('action'),
+                ],
               ),
             ),
           ),
         ),
-      );
+      ));
       await tester.pumpAndSettle();
 
       expect(find.text('title'), findsOneWidget);

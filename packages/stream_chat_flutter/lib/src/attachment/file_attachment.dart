@@ -10,14 +10,18 @@ import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-/// {@template fileAttachment}
+/// {@macro streamFileAttachment}
+@Deprecated("Use 'StreamFileAttachment' instead")
+typedef FileAttachment = StreamFileAttachment;
+
+/// {@template streamFileAttachment}
 /// Displays file attachments that have been sent in a chat.
 ///
 /// Used in [MessageWidget].
 /// {@endtemplate}
-class FileAttachment extends AttachmentWidget {
-  /// {@macro fileAttachment}
-  const FileAttachment({
+class StreamFileAttachment extends StreamAttachmentWidget {
+  /// {@macro streamFileAttachment}
+  const StreamFileAttachment({
     Key? key,
     required Message message,
     required Attachment attachment,
@@ -188,7 +192,7 @@ class _FileTypeImage extends StatelessWidget {
         type: MaterialType.transparency,
         shape: _getDefaultShape(context),
         child: source.when(
-          local: () => VideoThumbnailImage(
+          local: () => StreamVideoThumbnailImage(
             fit: BoxFit.cover,
             video: attachment.file!.path!,
             placeholderBuilder: (_) => const Center(
@@ -199,7 +203,7 @@ class _FileTypeImage extends StatelessWidget {
               ),
             ),
           ),
-          network: () => VideoThumbnailImage(
+          network: () => StreamVideoThumbnailImage(
             fit: BoxFit.cover,
             video: attachment.assetUrl!,
             placeholderBuilder: (_) => const Center(
@@ -355,7 +359,7 @@ class _FileAttachmentSubtitle extends StatelessWidget {
     );
     return attachment.uploadState.when(
       preparing: () => Text(fileSize(size), style: textStyle),
-      inProgress: (sent, total) => UploadProgressIndicator(
+      inProgress: (sent, total) => StreamUploadProgressIndicator(
         uploaded: sent,
         total: total,
         showBackground: false,

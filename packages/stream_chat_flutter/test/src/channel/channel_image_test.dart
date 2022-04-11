@@ -31,8 +31,8 @@ void main() {
             client: client,
             child: StreamChannel(
               channel: channel,
-              child: const Scaffold(
-                body: ChannelAvatar(),
+              child: Scaffold(
+                body: StreamChannelAvatar(channel: channel),
               ),
             ),
           ),
@@ -107,8 +107,8 @@ void main() {
             client: client,
             child: StreamChannel(
               channel: channel,
-              child: const Scaffold(
-                body: ChannelAvatar(),
+              child: Scaffold(
+                body: StreamChannelAvatar(channel: channel),
               ),
             ),
           ),
@@ -170,15 +170,16 @@ void main() {
             client: client,
             child: StreamChannel(
               channel: channel,
-              child: const Scaffold(
-                body: ChannelAvatar(),
+              child: Scaffold(
+                body: StreamChannelAvatar(channel: channel),
               ),
             ),
           ),
         ),
       );
 
-      final image = tester.widget<GroupAvatar>(find.byType(GroupAvatar));
+      final image =
+          tester.widget<StreamGroupAvatar>(find.byType(StreamGroupAvatar));
       final otherMembers = members.where((it) => it.userId != currentUser.id);
       expect(
         image.members.map((it) => it.user?.id),
@@ -211,8 +212,9 @@ void main() {
             client: client,
             child: StreamChannel(
               channel: channel,
-              child: const Scaffold(
-                body: ChannelAvatar(
+              child: Scaffold(
+                body: StreamChannelAvatar(
+                  channel: channel,
                   selected: true,
                 ),
               ),

@@ -3,7 +3,11 @@ import 'package:stream_chat_flutter/src/message_search/query_progress_indicator.
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template messageSearchListView}
+/// {@macro streamMessageSearchListView}
+@Deprecated("Use 'StreamMessageSearchListView' instead")
+typedef MessageSearchListView = StreamMessageSearchListView;
+
+/// {@template streamMessageSearchListView}
 /// Shows the list of searched messages.
 ///
 /// ```dart
@@ -34,9 +38,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The UI is rendered based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget's appearance.
 /// {@endtemplate}
-class MessageSearchListView extends StatefulWidget {
-  /// {@macro messageSearchListView}
-  const MessageSearchListView({
+class StreamMessageSearchListView extends StatefulWidget {
+  /// {@macro streamMessageSearchListView}
+  const StreamMessageSearchListView({
     Key? key,
     required this.filters,
     this.messageQuery,
@@ -117,10 +121,12 @@ class MessageSearchListView extends StatefulWidget {
   final MessageSearchListController? messageSearchListController;
 
   @override
-  _MessageSearchListViewState createState() => _MessageSearchListViewState();
+  _StreamMessageSearchListViewState createState() =>
+      _StreamMessageSearchListViewState();
 }
 
-class _MessageSearchListViewState extends State<MessageSearchListView> {
+class _StreamMessageSearchListViewState
+    extends State<StreamMessageSearchListView> {
   late final _defaultController = MessageSearchListController();
 
   MessageSearchListController get _messageSearchListController =>
@@ -156,7 +162,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
             if (error is Error) {
               print(error.stackTrace);
             }
-            return InfoTile(
+            return StreamInfoTile(
               showMessage: widget.showErrorTile,
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
@@ -184,7 +190,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     );
 
     final backgroundColor =
-        MessageSearchListViewTheme.of(context).backgroundColor;
+        StreamMessageSearchListViewTheme.of(context).backgroundColor;
 
     if (backgroundColor != null) {
       return ColoredBox(
@@ -216,7 +222,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
           if (widget.itemBuilder != null) {
             return widget.itemBuilder!(context, items[index]);
           }
-          return MessageSearchItem(
+          return StreamMessageSearchItem(
             getMessageResponse: items[index],
             onTap: () => widget.onItemTap!(items[index]),
           );

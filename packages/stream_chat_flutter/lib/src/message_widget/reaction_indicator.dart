@@ -3,7 +3,7 @@ import 'package:stream_chat_flutter/src/message_widget/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template reactionIndicator}
-/// Indicates the reaction a [MessageWidget] has.
+/// Indicates the reaction a [StreamMessageWidget] has.
 ///
 /// Used in [MessageWidgetContent].
 /// {@endtemplate}
@@ -35,7 +35,7 @@ class ReactionIndicator extends StatelessWidget {
   final bool reverse;
 
   /// {@macro messageTheme}
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class ReactionIndicator extends StatelessWidget {
           child: shouldShowReactions
               ? GestureDetector(
                   onTap: onTap,
-                  child: ReactionBubble(
+                  child: StreamReactionBubble(
                     key: ValueKey('${message.id}.reactions'),
                     reverse: reverse,
                     flipTail: reverse,

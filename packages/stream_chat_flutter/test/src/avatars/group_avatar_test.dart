@@ -67,7 +67,7 @@ void main() {
               channel: channel,
               child: Scaffold(
                 body: Center(
-                  child: GroupAvatar(
+                  child: StreamGroupAvatar(
                     members: [
                       member,
                       member2,
@@ -80,7 +80,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(UserAvatar), findsNWidgets(2));
+      expect(find.byType(StreamUserAvatar), findsNWidgets(2));
     },
   );
 
@@ -99,7 +99,7 @@ void main() {
                   child: SizedBox(
                     width: 100,
                     height: 100,
-                    child: GroupAvatar(
+                    child: StreamGroupAvatar(
                       members: [
                         member,
                         member2,

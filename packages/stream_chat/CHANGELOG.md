@@ -1,3 +1,13 @@
+## 4.0.0-beta.0
+
+✅ Added
+
+- Added support for ownCapabilities.
+
+🐞 Fixed
+
+- Minor fixes and improvements.
+
 ## Upcoming
 
 🐞 Fixed

@@ -13,6 +13,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
       final themeData = ThemeData();
 
       when(() => client.state).thenReturn(clientState);
@@ -33,13 +34,16 @@ void main() {
           home: StreamChat(
             client: client,
             streamChatThemeData: streamTheme,
-            child: MessageReactionsModal(
-              messageWidget: const Text(
-                'test',
-                key: Key('MessageWidget'),
+            child: StreamChannel(
+              channel: channel,
+              child: StreamMessageReactionsModal(
+                messageWidget: const Text(
+                  'test',
+                  key: Key('MessageWidget'),
+                ),
+                message: message,
+                messageTheme: streamTheme.ownMessageTheme,
               ),
-              message: message,
-              messageTheme: streamTheme.ownMessageTheme,
             ),
           ),
         ),
@@ -47,9 +51,9 @@ void main() {
 
       await tester.pump(const Duration(milliseconds: 1000));
 
-      expect(find.byType(ReactionBubble), findsNothing);
+      expect(find.byType(StreamReactionBubble), findsNothing);
 
-      expect(find.byType(UserAvatar), findsNothing);
+      expect(find.byType(StreamUserAvatar), findsNothing);
     },
   );
 
@@ -58,6 +62,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
       final themeData = ThemeData();
 
       when(() => client.state).thenReturn(clientState);
@@ -89,16 +94,19 @@ void main() {
           home: StreamChat(
             client: client,
             streamChatThemeData: streamTheme,
-            child: MessageReactionsModal(
-              messageWidget: const Text(
-                'test',
-                key: Key('MessageWidget'),
+            child: StreamChannel(
+              channel: channel,
+              child: StreamMessageReactionsModal(
+                messageWidget: const Text(
+                  'test',
+                  key: Key('MessageWidget'),
+                ),
+                message: message,
+                messageTheme: streamTheme.ownMessageTheme,
+                reverse: true,
+                showReactions: false,
+                onUserAvatarTap: onUserAvatarTap,
               ),
-              message: message,
-              messageTheme: streamTheme.ownMessageTheme,
-              reverse: true,
-              showReactions: false,
-              onUserAvatarTap: onUserAvatarTap,
             ),
           ),
         ),
@@ -108,8 +116,8 @@ void main() {
 
       expect(find.byKey(const Key('MessageWidget')), findsOneWidget);
 
-      expect(find.byType(ReactionBubble), findsOneWidget);
-      expect(find.byType(UserAvatar), findsOneWidget);
+      expect(find.byType(StreamReactionBubble), findsOneWidget);
+      expect(find.byType(StreamUserAvatar), findsOneWidget);
     },
   );
 }

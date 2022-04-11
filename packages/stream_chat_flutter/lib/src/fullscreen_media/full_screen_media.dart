@@ -179,7 +179,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                       ),
                       backgroundDecoration: BoxDecoration(
                         color: ColorTween(
-                          begin: ChannelHeaderTheme.of(context).color,
+                          begin: StreamChannelHeaderTheme.of(context).color,
                           end: Colors.black,
                         ).lerp(_curvedAnimation.value),
                       ),
@@ -237,7 +237,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
               builder: (context, value, child) => Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GalleryHeader(
+                  StreamGalleryHeader(
                     userName: widget.userName,
                     sentAt: context.translations.sentAtText(
                       date: widget.message.createdAt,
@@ -256,7 +256,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                         widget.attachmentActionsModalBuilder,
                   ),
                   if (!widget.message.isEphemeral)
-                    GalleryFooter(
+                    StreamGalleryFooter(
                       currentPage: value,
                       totalPages: widget.mediaAttachments.length,
                       mediaAttachments: widget.mediaAttachments,

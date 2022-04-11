@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template messageWidgetContent}
-/// The main content of a [MessageWidget].
+/// The main content of a [StreamMessageWidget].
 ///
 /// Should not be used outside of [MessageWidget.
 /// {@endtemplate}
@@ -81,7 +81,7 @@ class MessageWidgetContent extends StatelessWidget {
   final bool showReactions;
 
   /// {@macro messageTheme}
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   /// {@macro shouldShowReactions}
   final bool shouldShowReactions;
@@ -177,7 +177,7 @@ class MessageWidgetContent extends StatelessWidget {
   final Widget Function(BuildContext, Message)? deletedBottomRowBuilder;
 
   /// {@macro messageWidget}
-  final MessageWidget messageWidget;
+  final StreamMessageWidget messageWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -273,7 +273,7 @@ class MessageWidgetContent extends StatelessWidget {
                                                   ? 0
                                                   : 4.0,
                                         ),
-                                        child: DeletedMessage(
+                                        child: StreamDeletedMessage(
                                           borderRadiusGeometry:
                                               borderRadiusGeometry,
                                           borderSide: borderSide,
@@ -395,7 +395,7 @@ class MessageWidgetContent extends StatelessWidget {
       barrierColor: streamChatTheme.colorTheme.overlay,
       builder: (context) => StreamChannel(
         channel: channel,
-        child: MessageReactionsModal(
+        child: StreamMessageReactionsModal(
           messageWidget: messageWidget.copyWith(
             key: const Key('MessageWidget'),
             message: message.copyWith(

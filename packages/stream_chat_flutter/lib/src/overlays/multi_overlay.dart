@@ -2,14 +2,18 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
-/// {@template multiOverlay}
+/// {@macro streamMultiOverlay}
+@Deprecated("Use 'StreamMultiOverlay' instead")
+typedef MultiOverlay = StreamMultiOverlay;
+
+/// {@template streamMultiOverlay}
 /// Renders a single overlay widget from a list of [overlayOptions].
 ///
 /// It shows the first one that is visible.
 /// {@endtemplate}
-class MultiOverlay extends StatelessWidget {
-  /// {@macro multiOverlay}
-  const MultiOverlay({
+class StreamMultiOverlay extends StatelessWidget {
+  /// {@macro streamMultiOverlay}
+  const StreamMultiOverlay({
     Key? key,
     required this.overlayOptions,
     required this.child,

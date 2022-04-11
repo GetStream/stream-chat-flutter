@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro attachmentTitle}
+@Deprecated("Use 'StreamAttachmentTitle' instead")
+typedef AttachmentTitle = StreamAttachmentTitle;
+
 /// {@template attachmentTitle}
 /// Title for attachments
 /// {@endtemplate}
-class AttachmentTitle extends StatelessWidget {
+class StreamAttachmentTitle extends StatelessWidget {
   /// {@macro attachmentTitle}
-  const AttachmentTitle({
+  const StreamAttachmentTitle({
     Key? key,
     required this.attachment,
     required this.messageTheme,
   }) : super(key: key);
 
   /// Theme to apply to text
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   /// Attachment data to display
   final Attachment attachment;

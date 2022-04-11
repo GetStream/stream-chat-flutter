@@ -73,7 +73,7 @@ void main() {
     );
 
     expect(find.byType(SimpleDialog), findsOneWidget);
-    expect(find.byType(ChannelInfo), findsOneWidget);
-    expect(find.byType(UserAvatar), findsOneWidget);
+    expect(find.byType(StreamChannelInfo), findsOneWidget);
+    expect(find.byType(StreamUserAvatar), findsOneWidget);
   });
 }

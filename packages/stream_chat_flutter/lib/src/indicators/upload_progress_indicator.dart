@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template uploadProgressIndicator}
+/// {@macro streamUploadProgressIndicator}
+@Deprecated("Use 'StreamUploadProgressIndicator' instead")
+typedef UploadProgressIndicator = StreamUploadProgressIndicator;
+
+/// {@template streamUploadProgressIndicator}
 /// Shows the upload progress of an attachment.
 /// {@endtemplate}
-class UploadProgressIndicator extends StatelessWidget {
-  /// {@macro uploadProgressIndicator}
-  const UploadProgressIndicator({
+class StreamUploadProgressIndicator extends StatelessWidget {
+  /// {@macro streamUploadProgressIndicator}
+  const StreamUploadProgressIndicator({
     Key? key,
     required this.uploaded,
     required this.total,

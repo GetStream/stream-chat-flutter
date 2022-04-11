@@ -37,7 +37,7 @@ class AnimatedSendButton extends StatelessWidget {
   final bool attachmentsIsEmpty;
 
   /// The theme currently used for [MessageInput].
-  final MessageInputThemeData messageInputTheme;
+  final StreamMessageInputThemeData messageInputTheme;
 
   /// The callback to perform when the button is tapped or clicked.
   final VoidCallback onTap;

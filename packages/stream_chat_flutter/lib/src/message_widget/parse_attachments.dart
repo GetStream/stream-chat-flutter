@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template parseAttachments}
-/// Parses the attachments of a [MessageWidget].
+/// Parses the attachments of a [StreamMessageWidget].
 ///
 /// Used in [MessageCard]. Should not be used elsewhere.
 /// {@endtemplate}

@@ -18,12 +18,12 @@ extension on Duration {
   }
 }
 
-/// {@template mediaListView}
+/// {@template streamMediaListView}
 /// Constructs a list of media
 /// {@endtemplate}
-class MediaListView extends StatefulWidget {
-  /// {@macro mediaListView}
-  const MediaListView({
+class StreamMediaListView extends StatefulWidget {
+  /// {@macro streamMediaListView}
+  const StreamMediaListView({
     Key? key,
     this.selectedIds = const [],
     this.onSelect,
@@ -36,10 +36,10 @@ class MediaListView extends StatefulWidget {
   final void Function(AssetEntity media)? onSelect;
 
   @override
-  _MediaListViewState createState() => _MediaListViewState();
+  _StreamMediaListViewState createState() => _StreamMediaListViewState();
 }
 
-class _MediaListViewState extends State<MediaListView> {
+class _StreamMediaListViewState extends State<StreamMediaListView> {
   final _media = <AssetEntity>[];
   final ScrollController _scrollController = ScrollController();
   int _currentPage = 0;

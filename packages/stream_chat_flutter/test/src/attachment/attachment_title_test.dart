@@ -18,7 +18,7 @@ void main() {
           body: Builder(
             builder: (context) {
               return Center(
-                child: AttachmentTitle(
+                child: StreamAttachmentTitle(
                   attachment: Attachment(
                     title: 'Test Attachment',
                     type: 'video',
@@ -33,7 +33,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(AttachmentTitle), findsOneWidget);
+    expect(find.byType(StreamAttachmentTitle), findsOneWidget);
     expect(find.text('Test Attachment'), findsOneWidget);
     expect(find.text('youtube.com/watch?v=lytQi-slT5Y'), findsOneWidget);
   });

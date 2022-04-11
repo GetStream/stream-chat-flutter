@@ -5,12 +5,16 @@ import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template giphyAttachment}
-/// Shows a GIF attachment in a [MessageWidget].
+/// {@macro streamGiphyAttachment}
+@Deprecated("Use 'StreamGiphyAttachment' instead")
+typedef GiphyAttachment = StreamGiphyAttachment;
+
+/// {@template streamGiphyAttachment}
+/// Shows a GIF attachment in a [StreamMessageWidget].
 /// {@endtemplate}
-class GiphyAttachment extends AttachmentWidget {
-  /// {@macro giphyAttachment}
-  const GiphyAttachment({
+class StreamGiphyAttachment extends StreamAttachmentWidget {
+  /// {@macro streamGiphyAttachment}
+  const StreamGiphyAttachment({
     Key? key,
     required Message message,
     required Attachment attachment,
@@ -239,7 +243,7 @@ class GiphyAttachment extends AttachmentWidget {
           alignment: Alignment.centerRight,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: VisibleFootnote(),
+            child: StreamVisibleFootnote(),
           ),
         ),
       ],

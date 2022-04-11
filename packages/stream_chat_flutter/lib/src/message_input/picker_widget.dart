@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/media_list_view/media_list_view.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -87,7 +86,7 @@ class _PickerWidgetState extends State<PickerWidget> {
               ),
             );
           }
-          return MediaListView(
+          return StreamMediaListView(
             selectedIds: widget.selectedMedias,
             onSelect: widget.onMediaSelected,
           );

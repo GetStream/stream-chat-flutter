@@ -4,14 +4,14 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
-  testWidgets('SendingIndicator shows a StreamSvgIcon', (tester) async {
+  testWidgets('StreamSendingIndicator shows a StreamSvgIcon', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: StreamChatTheme(
           data: StreamChatThemeData.light(),
           child: Scaffold(
             body: Center(
-              child: SendingIndicator(
+              child: StreamSendingIndicator(
                 message: Message(),
               ),
             ),
@@ -23,17 +23,15 @@ void main() {
     expect(find.byType(StreamSvgIcon), findsOneWidget);
   });
 
-  testWidgets('SendingIndicator shows an Icon', (tester) async {
+  testWidgets('StreamSendingIndicator shows an Icon', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: StreamChatTheme(
           data: StreamChatThemeData.light(),
           child: Scaffold(
             body: Center(
-              child: SendingIndicator(
-                message: Message(
-                  status: MessageSendingStatus.sending,
-                ),
+              child: StreamSendingIndicator(
+                message: Message(),
               ),
             ),
           ),
@@ -44,7 +42,8 @@ void main() {
     expect(find.byType(Icon), findsOneWidget);
   });
 
-  testGoldens('golden test for SendingIndicator with StreamSvgIcon.checkAll',
+  testGoldens(
+      'golden test for StreamSendingIndicator with StreamSvgIcon.checkAll',
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -52,7 +51,7 @@ void main() {
           data: StreamChatThemeData.light(),
           child: Scaffold(
             body: Center(
-              child: SendingIndicator(
+              child: StreamSendingIndicator(
                 isMessageRead: true,
                 message: Message(),
               ),
@@ -65,7 +64,7 @@ void main() {
     await screenMatchesGolden(tester, 'sending_indicator_0');
   });
 
-  testGoldens('golden test for SendingIndicator with StreamSvgIcon.check',
+  testGoldens('golden test for StreamSendingIndicator with StreamSvgIcon.check',
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -73,7 +72,7 @@ void main() {
           data: StreamChatThemeData.light(),
           child: Scaffold(
             body: Center(
-              child: SendingIndicator(
+              child: StreamSendingIndicator(
                 message: Message(),
               ),
             ),
@@ -85,7 +84,8 @@ void main() {
     await screenMatchesGolden(tester, 'sending_indicator_1');
   });
 
-  testGoldens('golden test for SendingIndicator with Icon(Icons.access_time)',
+  testGoldens(
+      'golden test for StreamSendingIndicator with Icon(Icons.access_time)',
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -93,10 +93,8 @@ void main() {
           data: StreamChatThemeData.light(),
           child: Scaffold(
             body: Center(
-              child: SendingIndicator(
-                message: Message(
-                  status: MessageSendingStatus.sending,
-                ),
+              child: StreamSendingIndicator(
+                message: Message(),
               ),
             ),
           ),

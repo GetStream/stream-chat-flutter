@@ -3,7 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template threadHeader}
+/// {@macro streamThreadHeader}
+@Deprecated("Use 'StreamThreadHeader' instead")
+typedef ThreadHeader = StreamThreadHeader;
+
+/// {@template streamThreadHeader}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header_paint.png)
 ///
@@ -58,9 +62,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// and the [ChannelTheme.channelHeaderTheme] property. Modify it to change
 /// the widget's appearance.
 /// {@endtemplate}
-class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
-  /// {@macro threadHeader}
-  const ThreadHeader({
+class StreamThreadHeader extends StatelessWidget
+    implements PreferredSizeWidget {
+  /// {@macro streamThreadHeader}
+  const StreamThreadHeader({
     Key? key,
     required this.parent,
     this.showBackButton = true,
@@ -108,12 +113,12 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Defaults to `true`.
   final bool showTypingIndicator;
 
-  /// The background color of this [ThreadHeader].
+  /// The background color of this [StreamThreadHeader].
   final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
-    final channelHeaderTheme = ChannelHeaderTheme.of(context);
+    final channelHeaderTheme = StreamChannelHeaderTheme.of(context);
 
     final defaultSubtitle = subtitle ??
         Row(
@@ -167,12 +172,13 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                   ),
               const SizedBox(height: 2),
               if (showTypingIndicator)
-                TypingIndicator(
-                  alignment: Alignment.center,
-                  channel: StreamChannel.of(context).channel,
-                  style: channelHeaderTheme.subtitleStyle,
-                  parentId: parent.id,
-                  alternativeWidget: defaultSubtitle,
+                Align(
+                  child: StreamTypingIndicator(
+                    channel: StreamChannel.of(context).channel,
+                    style: channelHeaderTheme.subtitleStyle,
+                    parentId: parent.id,
+                    alternativeWidget: defaultSubtitle,
+                  ),
                 )
               else
                 defaultSubtitle,

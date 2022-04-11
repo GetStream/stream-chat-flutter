@@ -68,7 +68,7 @@ void main() {
               child: WillPopScope(
                 onWillPop: () async => false,
                 child: Scaffold(
-                  appBar: GalleryHeader(
+                  appBar: StreamGalleryHeader(
                     message: Message(),
                   ),
                 ),
@@ -92,7 +92,7 @@ void main() {
             child: WillPopScope(
               onWillPop: () async => false,
               child: Scaffold(
-                appBar: GalleryHeader(
+                appBar: StreamGalleryHeader(
                   userName: 'User',
                   sentAt: DateTime.now().toIso8601String(),
                   message: Message(),

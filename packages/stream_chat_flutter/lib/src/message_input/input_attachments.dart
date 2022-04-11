@@ -49,10 +49,8 @@ class _InputAttachmentsState extends State<InputAttachments> {
                     .map<Widget>(
                       (e) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: FileAttachment(
-                          message: Message(
-                            status: MessageSendingStatus.sending,
-                          ), // dummy message
+                        child: StreamFileAttachment(
+                          message: Message(), // dummy message
                           attachment: e,
                           size: Size(
                             MediaQuery.of(context).size.width * 0.65,

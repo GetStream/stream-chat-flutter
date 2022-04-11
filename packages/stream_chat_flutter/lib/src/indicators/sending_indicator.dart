@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template sendingIndicator}
+/// {@macro streamSendingIndicator}
+@Deprecated("Use 'StreamSendingIndicator' instead")
+typedef SendingIndicator = StreamSendingIndicator;
+
+/// {@template streamSendingIndicator}
 /// Shows the sending status of a message.
 /// {@endtemplate}
-class SendingIndicator extends StatelessWidget {
-  /// {@macro sendingIndicator}
-  const SendingIndicator({
+class StreamSendingIndicator extends StatelessWidget {
+  /// {@macro streamSendingIndicator}
+  const StreamSendingIndicator({
     Key? key,
     required this.message,
     this.isMessageRead = false,

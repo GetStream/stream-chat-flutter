@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template userMentionTile}
+/// {@macro streamUserMentionTile}
+@Deprecated("Use 'StreamUserMentionTile' instead")
+typedef UserMentionTile = StreamUserMentionTile;
+
+/// {@template streamUserMentionTile}
 /// Shows user tiles for mentions.
 ///
 /// Use [title], [subtitle], [leading], [trailing] for
 /// substituting widgets in respective positions
 /// {@endtemplate}
-class UserMentionTile extends StatelessWidget {
-  /// {@macro userMentionTile}
-  const UserMentionTile(
+class StreamUserMentionTile extends StatelessWidget {
+  /// {@macro streamUserMentionTile}
+  const StreamUserMentionTile(
     this.user, {
     Key? key,
     this.title,
@@ -44,7 +48,7 @@ class UserMentionTile extends StatelessWidget {
             width: 16,
           ),
           leading ??
-              UserAvatar(
+              StreamUserAvatar(
                 user: user,
                 constraints: BoxConstraints.tight(const Size(40, 40)),
               ),

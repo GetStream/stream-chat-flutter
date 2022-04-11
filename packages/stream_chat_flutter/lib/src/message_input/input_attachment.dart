@@ -63,7 +63,7 @@ class InputAttachment extends StatelessWidget {
       case 'video':
         return Stack(
           children: [
-            VideoThumbnailImage(
+            StreamVideoThumbnailImage(
               height: 104,
               width: 104,
               video: (attachment.file?.path ?? attachment.assetUrl)!,

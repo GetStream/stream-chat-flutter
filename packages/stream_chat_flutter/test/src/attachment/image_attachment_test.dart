@@ -25,7 +25,7 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: SizedBox(
-                child: ImageAttachment(
+                child: StreamImageAttachment(
                   messageTheme: streamTheme.ownMessageTheme,
                   size: const Size(
                     300,

@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template connectionStatusBuilder}
+/// {@macro streamConnectionStatusBuilder}
+@Deprecated("Use 'StreamConnectionStatusBuilder' instead")
+typedef ConnectionStatusBuilder = StreamConnectionStatusBuilder;
+
+/// {@template streamConnectionStatusBuilder}
 /// A widget that builds itself based on the latest snapshot of interaction with
 /// a [Stream] of type [ConnectionStatus].
 ///
 /// The widget will use the closest [StreamChatClient.wsConnectionStatusStream]
 /// in case no stream is provided.
 /// {@endtemplate}
-class ConnectionStatusBuilder extends StatelessWidget {
-  /// {@macro connectionStatusBuilder}
-  const ConnectionStatusBuilder({
+class StreamConnectionStatusBuilder extends StatelessWidget {
+  /// {@macro streamConnectionStatusBuilder}
+  const StreamConnectionStatusBuilder({
     Key? key,
     required this.statusBuilder,
     this.connectionStatusStream,

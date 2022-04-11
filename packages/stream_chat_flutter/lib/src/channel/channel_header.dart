@@ -3,7 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template channelHeader}
+///{@macro streamChannelHeader}
+@Deprecated("Use 'StreamChannelHeader' instead")
+typedef ChannelHeader = StreamChannelHeader;
+
+/// {@template streamChannelHeader}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header_paint.png)
 ///
@@ -51,9 +55,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// and the [ChannelTheme.channelHeaderTheme] property. Modify it to change
 /// the widget's appearance.
 /// {@endtemplate}
-class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
-  /// {@macro channelHeader}
-  const ChannelHeader({
+class StreamChannelHeader extends StatelessWidget
+    implements PreferredSizeWidget {
+  /// {@macro streamChannelHeader}
+  const StreamChannelHeader({
     Key? key,
     this.showBackButton = true,
     this.onBackPressed,
@@ -104,10 +109,10 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
 
   /// {@macro flutter.material.appbar.actions}
   ///
-  /// The [ChannelAvatar] is shown by default
+  /// The [StreamChannelAvatar] is shown by default
   final List<Widget>? actions;
 
-  /// The background color for this [ChannelHeader].
+  /// The background color for this [StreamChannelHeader].
   final Color? backgroundColor;
 
   @override
@@ -116,7 +121,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-    final channelHeaderTheme = ChannelHeaderTheme.of(context);
+    final channelHeaderTheme = StreamChannelHeaderTheme.of(context);
 
     final leadingWidget = leading ??
         (showBackButton
@@ -126,7 +131,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
               )
             : const SizedBox());
 
-    return ConnectionStatusBuilder(
+    return StreamConnectionStatusBuilder(
       statusBuilder: (context, status) {
         var statusString = '';
         var showStatus = true;
@@ -146,7 +151,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
 
         final theme = Theme.of(context);
 
-        return InfoTile(
+        return StreamInfoTile(
           showMessage: showConnectionStateTile && showStatus,
           message: statusString,
           child: AppBar(
@@ -163,7 +168,8 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: Center(
-                      child: ChannelAvatar(
+                      child: StreamChannelAvatar(
+                        channel: channel,
                         borderRadius:
                             channelHeaderTheme.avatarTheme?.borderRadius,
                         constraints:
@@ -183,12 +189,13 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     title ??
-                        ChannelName(
+                        StreamChannelName(
+                          channel: channel,
                           textStyle: channelHeaderTheme.titleStyle,
                         ),
                     const SizedBox(height: 2),
                     subtitle ??
-                        ChannelInfo(
+                        StreamChannelInfo(
                           showTypingIndicator: showTypingIndicator,
                           channel: channel,
                           textStyle: channelHeaderTheme.subtitleStyle,

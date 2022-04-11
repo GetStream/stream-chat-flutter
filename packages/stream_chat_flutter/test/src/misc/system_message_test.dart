@@ -36,26 +36,24 @@ void main() {
 
       var tapped = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChat(
-            client: client,
-            child: StreamChannel(
-              channel: channel,
-              child: Scaffold(
-                body: SystemMessage(
-                  onMessageTap: (m) => tapped = true,
-                  message: Message(
-                    text: 'demo message',
-                  ),
+      await tester.pumpWidget(MaterialApp(
+        home: StreamChat(
+          client: client,
+          child: StreamChannel(
+            channel: channel,
+            child: Scaffold(
+              body: StreamSystemMessage(
+                onMessageTap: (m) => tapped = true,
+                message: Message(
+                  text: 'demo message',
                 ),
               ),
             ),
           ),
         ),
-      );
+      ));
 
-      await tester.tap(find.byType(SystemMessage));
+      await tester.tap(find.byType(StreamSystemMessage));
 
       expect(find.text('demo message'), findsOneWidget);
       expect(tapped, true);
@@ -100,7 +98,7 @@ void main() {
               showLoading: false,
               channel: channel,
               child: Center(
-                child: SystemMessage(
+                child: StreamSystemMessage(
                   message: Message(
                     text: 'demo message',
                   ),
@@ -154,7 +152,7 @@ void main() {
               showLoading: false,
               channel: channel,
               child: Center(
-                child: SystemMessage(
+                child: StreamSystemMessage(
                   message: Message(
                     text: 'demo message',
                   ),

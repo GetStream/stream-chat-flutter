@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template attachmentUploadStateBuilder}
+/// {@macro streamAttachmentUploadStateBuilder}
+@Deprecated("Use 'StreamAttachmentsUploadStateBuilder' instead")
+typedef AttachmentUploadStateBuilder = StreamAttachmentUploadStateBuilder;
+
+/// {@template streamAttachmentUploadStateBuilder}
 /// Widget to display attachment upload state
 /// {@endtemplate}
-class AttachmentUploadStateBuilder extends StatelessWidget {
-  /// {@macro attachmentUploadStateBuilder}
-  const AttachmentUploadStateBuilder({
+class StreamAttachmentUploadStateBuilder extends StatelessWidget {
+  /// {@macro streamAttachmentUploadStateBuilder}
+  const StreamAttachmentUploadStateBuilder({
     Key? key,
     required this.message,
     required this.attachment,
@@ -138,7 +142,7 @@ class _PreparingState extends StatelessWidget {
         ),
         Align(
           alignment: Alignment.topRight,
-          child: UploadProgressIndicator(
+          child: StreamUploadProgressIndicator(
             uploaded: 0,
             total: double.maxFinite.toInt(),
           ),
@@ -178,7 +182,7 @@ class _InProgressState extends StatelessWidget {
         ),
         Align(
           alignment: Alignment.topRight,
-          child: UploadProgressIndicator(
+          child: StreamUploadProgressIndicator(
             uploaded: sent,
             total: total,
           ),

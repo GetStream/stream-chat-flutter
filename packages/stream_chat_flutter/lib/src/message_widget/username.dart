@@ -20,7 +20,7 @@ class Username extends StatelessWidget {
   final Message message;
 
   /// {@macro messageTheme}
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   @override
   Widget build(BuildContext context) {

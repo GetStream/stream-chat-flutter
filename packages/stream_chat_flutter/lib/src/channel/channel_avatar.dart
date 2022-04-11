@@ -24,7 +24,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///         child: StreamChannel(
 ///           channel: channel,
 ///           child: Center(
-///             child: ChannelImage(
+///             child: ChannelAvatar(
 ///               channel: channel,
 ///             ),
 ///           ),
@@ -44,6 +44,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The UI is rendered based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget's appearance.
 /// {@endtemplate}
+
+@Deprecated(
+  "'ChannelAvatar' is deprecated and shouldn't be used. "
+      "Please use 'StreamChannelAvatar' instead.",
+)
 class ChannelAvatar extends StatelessWidget {
   /// {@macro channelAvatar}
   const ChannelAvatar({
@@ -148,7 +153,7 @@ class ChannelAvatar extends StatelessWidget {
           return BetterStreamBuilder<User>(
             stream: streamChat.client.state.currentUserStream.map((it) => it!),
             initialData: currentUser,
-            builder: (context, user) => UserAvatar(
+            builder: (context, user) => StreamUserAvatar(
               borderRadius: borderRadius ?? previewTheme?.borderRadius,
               user: user,
               constraints: constraints ?? previewTheme?.constraints,
@@ -171,7 +176,7 @@ class ChannelAvatar extends StatelessWidget {
               ),
             ),
             initialData: member,
-            builder: (context, member) => UserAvatar(
+            builder: (context, member) => StreamUserAvatar(
               borderRadius: borderRadius ?? previewTheme?.borderRadius,
               user: member.user!,
               constraints: constraints ?? previewTheme?.constraints,
@@ -184,7 +189,7 @@ class ChannelAvatar extends StatelessWidget {
         }
 
         // Group conversation
-        return GroupAvatar(
+        return StreamGroupAvatar(
           members: otherMembers,
           borderRadius: borderRadius ?? previewTheme?.borderRadius,
           constraints: constraints ?? previewTheme?.constraints,

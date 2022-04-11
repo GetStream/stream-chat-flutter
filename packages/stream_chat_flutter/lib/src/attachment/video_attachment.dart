@@ -3,12 +3,16 @@ import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template videoAttachment}
-/// Shows a video attachment in a [MessageWidget].
+/// {@macro streamVideoAttachment}
+@Deprecated("Use 'StreamVideoAttachment' instead")
+typedef VideoAttachment = StreamVideoAttachment;
+
+/// {@template streamVideoAttachment}
+/// Shows a video attachment in a [StreamMessageWidget].
 /// {@endtemplate}
-class VideoAttachment extends AttachmentWidget {
-  /// {@macro videoAttachment}
-  const VideoAttachment({
+class StreamVideoAttachment extends StreamAttachmentWidget {
+  /// {@macro streamVideoAttachment}
+  const StreamVideoAttachment({
     Key? key,
     required Message message,
     required Attachment attachment,
@@ -24,8 +28,8 @@ class VideoAttachment extends AttachmentWidget {
           size: size,
         );
 
-  /// The [MessageThemeData] to use for the title
-  final MessageThemeData messageTheme;
+  /// The [StreamMessageThemeData] to use for the title
+  final StreamMessageThemeData messageTheme;
 
   /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
@@ -45,7 +49,7 @@ class VideoAttachment extends AttachmentWidget {
         }
         return _buildVideoAttachment(
           context,
-          VideoThumbnailImage(
+          StreamVideoThumbnailImage(
             video: attachment.file!.path!,
             height: size?.height,
             width: size?.width,
@@ -60,7 +64,7 @@ class VideoAttachment extends AttachmentWidget {
         }
         return _buildVideoAttachment(
           context,
-          VideoThumbnailImage(
+          StreamVideoThumbnailImage(
             video: attachment.assetUrl!,
             height: size?.height,
             width: size?.width,
@@ -112,7 +116,7 @@ class VideoAttachment extends AttachmentWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8),
-                    child: AttachmentUploadStateBuilder(
+                    child: StreamAttachmentUploadStateBuilder(
                       message: message,
                       attachment: attachment,
                     ),
@@ -124,7 +128,7 @@ class VideoAttachment extends AttachmentWidget {
           if (attachment.title != null)
             Material(
               color: messageTheme.messageBackgroundColor,
-              child: AttachmentTitle(
+              child: StreamAttachmentTitle(
                 messageTheme: messageTheme,
                 attachment: attachment,
               ),

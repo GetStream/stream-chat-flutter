@@ -24,7 +24,7 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: SizedBox(
-                child: VideoAttachment(
+                child: StreamVideoAttachment(
                   messageTheme: streamTheme.ownMessageTheme,
                   size: const Size(
                     300,
@@ -47,7 +47,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(AttachmentTitle), findsOneWidget);
+      expect(find.byType(StreamAttachmentTitle), findsOneWidget);
     },
   );
 }

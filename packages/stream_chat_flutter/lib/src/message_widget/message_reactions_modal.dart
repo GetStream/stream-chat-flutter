@@ -5,17 +5,21 @@ import 'package:stream_chat_flutter/src/message_widget/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template messageReactionsModal}
+/// {@macro streamMessageReactionsModal}
+@Deprecated("Use 'StreamMessageReactionsModal' instead")
+typedef MessageReactionsModal = StreamMessageReactionsModal;
+
+/// {@template streamMessageReactionsModal}
 /// Modal widget for displaying message reactions
 /// {@endtemplate}
-class MessageReactionsModal extends StatelessWidget {
-  /// {@macro messageReactionsModal}
-  const MessageReactionsModal({
+class StreamMessageReactionsModal extends StatelessWidget {
+  /// {@macro streamMessageReactionsModal}
+  const StreamMessageReactionsModal({
     Key? key,
     required this.message,
     required this.messageWidget,
     required this.messageTheme,
-    this.showReactions = true,
+    this.showReactions,
     this.reverse = false,
     this.onUserAvatarTap,
   }) : super(key: key);
@@ -26,14 +30,14 @@ class MessageReactionsModal extends StatelessWidget {
   /// Message to display reactions of
   final Message message;
 
-  /// [MessageThemeData] to apply to [message]
-  final MessageThemeData messageTheme;
+  /// [StreamMessageThemeData] to apply to [message]
+  final StreamMessageThemeData messageTheme;
 
   /// {@macro reverse}
   final bool reverse;
 
   /// {@macro showReactions}
-  final bool showReactions;
+  final bool? showReactions;
 
   /// {@macro onUserAvatarTap}
   final void Function(User)? onUserAvatarTap;
@@ -42,6 +46,10 @@ class MessageReactionsModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final user = StreamChat.of(context).currentUser;
+    final _userPermissions = StreamChannel.of(context).channel.ownCapabilities;
+
+    final hasReactionPermission =
+        _userPermissions.contains(PermissionType.sendReaction);
 
     final roughMaxSize = size.width * 2 / 3;
     var messageTextLength = message.text!.length;
@@ -73,7 +81,7 @@ class MessageReactionsModal extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              if (showReactions &&
+              if ((showReactions ?? hasReactionPermission) &&
                   (message.status == MessageSendingStatus.sent))
                 Align(
                   alignment: Alignment(
@@ -86,7 +94,7 @@ class MessageReactionsModal extends StatelessWidget {
                             : -(1.2 - divFactor)),
                     0,
                   ),
-                  child: ReactionPicker(
+                  child: StreamReactionPicker(
                     message: message,
                   ),
                 ),
@@ -197,7 +205,7 @@ class MessageReactionsModal extends StatelessWidget {
           Stack(
             clipBehavior: Clip.none,
             children: [
-              UserAvatar(
+              StreamUserAvatar(
                 onTap: onUserAvatarTap,
                 user: reaction.user!,
                 constraints: const BoxConstraints.tightFor(
@@ -217,7 +225,7 @@ class MessageReactionsModal extends StatelessWidget {
                 child: Align(
                   alignment:
                       reverse ? Alignment.centerRight : Alignment.centerLeft,
-                  child: ReactionBubble(
+                  child: StreamReactionBubble(
                     reactions: [reaction],
                     flipTail: !reverse,
                     borderColor:

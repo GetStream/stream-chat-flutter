@@ -20,7 +20,7 @@ void main() {
           home: StreamChat(
             client: client,
             child: Scaffold(
-              body: DateDivider(
+              body: StreamDateDivider(
                 dateTime: DateTime.now(),
               ),
             ),

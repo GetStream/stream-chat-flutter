@@ -1,12 +1,16 @@
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 
-/// {@template messageAction}
+/// {@macro message_action}
+@Deprecated("Use 'streamMessageAction' instead")
+typedef MessageAction = StreamMessageAction;
+
+/// {@template streamMessageAction}
 /// Class describing a message action
 /// {@endtemplate}
-class MessageAction {
-  /// {@macro messageAction}
-  MessageAction({
+class StreamMessageAction {
+  /// {@macro streamMessageAction}
+  StreamMessageAction({
     this.leading,
     this.title,
     this.onTap,

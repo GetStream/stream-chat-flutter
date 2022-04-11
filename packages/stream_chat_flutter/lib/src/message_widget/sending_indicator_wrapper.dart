@@ -3,7 +3,7 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template sendingIndicatorWrapper}
-/// Helper widget for building a [SendingIndicator].
+/// Helper widget for building a [StreamSendingIndicator].
 ///
 /// Used in [BottomRow]. Should not be used elsewhere.
 /// {@endtemplate}
@@ -19,7 +19,7 @@ class SendingIndicatorWrapper extends StatelessWidget {
   }) : super(key: key);
 
   /// {@macro messageTheme}
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   /// {@macro message}
   final Message message;
@@ -70,7 +70,7 @@ class SendingIndicatorWrapper extends StatelessWidget {
             (it.lastRead.isAfter(message.createdAt) ||
                 it.lastRead.isAtSameMomentAs(message.createdAt)));
         final isMessageRead = readList.length >= (channel.memberCount ?? 0) - 1;
-        Widget child = SendingIndicator(
+        Widget child = StreamSendingIndicator(
           message: message,
           isMessageRead: isMessageRead,
           size: style!.fontSize,

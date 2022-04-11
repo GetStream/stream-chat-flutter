@@ -28,12 +28,16 @@ extension AttachmentSourceX on AttachmentSource {
   }
 }
 
-/// {@template attachmentWidget}
+/// {@macro streamAttachmentWidget}
+@Deprecated("Use 'StreamAttachmentWidget' instead")
+typedef AttachmentWidget = StreamAttachmentWidget;
+
+/// {@template streamAttachmentWidget}
 /// Abstract class for deriving attachment types
 /// {@endtemplate}
-abstract class AttachmentWidget extends StatelessWidget {
-  /// {@macro attachmentWidget}
-  const AttachmentWidget({
+abstract class StreamAttachmentWidget extends StatelessWidget {
+  /// {@macro streamAttachmentWidget}
+  const StreamAttachmentWidget({
     Key? key,
     required this.message,
     required this.attachment,

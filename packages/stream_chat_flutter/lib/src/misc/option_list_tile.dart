@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@template optionListTile}
+/// {@macro streamOptionListTile}
+@Deprecated("Use 'StreamOptionListTile' instead")
+typedef OptionListTile = StreamOptionListTile;
+
+/// {@template streamOptionListTile}
 /// List tile for [ChannelBottomSheet]
 /// {@endtemplate}
-class OptionListTile extends StatelessWidget {
-  /// {@macro optionListTile}
-  const OptionListTile({
+class StreamOptionListTile extends StatelessWidget {
+  /// {@macro streamOptionListTile}
+  const StreamOptionListTile({
     Key? key,
-    this.title,
+    required this.title,
     this.leading,
     this.trailing,
     this.onTap,
@@ -19,7 +23,7 @@ class OptionListTile extends StatelessWidget {
   }) : super(key: key);
 
   /// Title for tile
-  final String? title;
+  final String title;
 
   /// Leading widget (start)
   final Widget? leading;
@@ -48,8 +52,8 @@ class OptionListTile extends StatelessWidget {
     return Column(
       children: [
         Container(
-          color: separatorColor ?? chatThemeData.colorTheme.disabled,
           height: 1,
+          color: separatorColor ?? chatThemeData.colorTheme.disabled,
         ),
         Material(
           color: tileColor ?? chatThemeData.colorTheme.barsBg,
@@ -59,15 +63,14 @@ class OptionListTile extends StatelessWidget {
               onTap: onTap,
               child: Row(
                 children: [
-                  if (leading != null) Center(child: leading),
-                  if (leading == null)
-                    const SizedBox(
-                      width: 16,
-                    ),
+                  if (leading != null)
+                    Center(child: leading)
+                  else
+                    const SizedBox(width: 16),
                   Expanded(
                     flex: 4,
                     child: Text(
-                      title!,
+                      title,
                       style: titleTextStyle ??
                           (titleColor == null
                               ? chatThemeData.textTheme.bodyBold

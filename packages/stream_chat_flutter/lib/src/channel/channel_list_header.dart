@@ -4,7 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template channelListHeader}
+/// {@macro streamChannelListHeader}
+@Deprecated("Use 'StreamChannelListHeader' instead")
+typedef ChannelListHeader = StreamChannelListHeader;
+
+/// {@template streamChannelListHeader}
 /// Shows the current [StreamChatClient] status.
 ///
 /// ```dart
@@ -35,12 +39,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// [StreamChatClient] if you don't have it in the widget tree.
 ///
 /// Renders the UI based on the first ancestor of type [StreamChatTheme] and
-/// the [ChannelListHeaderThemeData] property. Modify it to change the widget's
-/// appearance.
+/// the [StreamChannelListHeaderThemeData] property. Modify it to change the
+/// widget's appearance.
 /// {@endtemplate}
-class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
-  /// {@macro channelListHeader}
-  const ChannelListHeader({
+class StreamChannelListHeader extends StatelessWidget
+    implements PreferredSizeWidget {
+  /// {@macro streamChannelListHeader}
+  const StreamChannelListHeader({
     Key? key,
     this.client,
     this.titleBuilder,
@@ -87,7 +92,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   /// The "new chat" button is shown by default.
   final List<Widget>? actions;
 
-  /// The background color for this [ChannelListHeader].
+  /// The background color for this [StreamChannelListHeader].
   final Color? backgroundColor;
 
   @override
@@ -97,7 +102,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final _client = client ?? StreamChat.of(context).client;
     final user = _client.state.currentUser;
-    return ConnectionStatusBuilder(
+    return StreamConnectionStatusBuilder(
       statusBuilder: (context, status) {
         var statusString = '';
         var showStatus = true;
@@ -116,9 +121,10 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
         }
 
         final chatThemeData = StreamChatTheme.of(context);
-        final channelListHeaderThemeData = ChannelListHeaderTheme.of(context);
+        final channelListHeaderThemeData =
+            StreamChannelListHeaderTheme.of(context);
         final theme = Theme.of(context);
-        return InfoTile(
+        return StreamInfoTile(
           showMessage: showConnectionStateTile && showStatus,
           message: statusString,
           child: AppBar(
@@ -134,7 +140,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             leading: leading ??
                 Center(
                   child: user != null
-                      ? UserAvatar(
+                      ? StreamUserAvatar(
                           user: user,
                           showOnlineStatus: false,
                           onTap: onUserAvatarTap ??
@@ -155,7 +161,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
                 [
                   StreamNeumorphicButton(
                     child: IconButton(
-                      icon: ConnectionStatusBuilder(
+                      icon: StreamConnectionStatusBuilder(
                         statusBuilder: (context, status) {
                           Color? color;
                           switch (status) {
@@ -244,7 +250,7 @@ class _ConnectingTitleState extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           context.translations.searchingForNetworkText,
-          style: ChannelListHeaderTheme.of(context).titleStyle?.copyWith(
+          style: StreamChannelListHeaderTheme.of(context).titleStyle?.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -265,7 +271,7 @@ class _DisconnectedTitleState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
-    final channelListHeaderTheme = ChannelListHeaderTheme.of(context);
+    final channelListHeaderTheme = StreamChannelListHeaderTheme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

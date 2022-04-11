@@ -70,21 +70,23 @@ void main() {
         }),
       );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChat(
-            client: client,
-            child: StreamChannel(
-              channel: channel,
-              child: const Scaffold(
-                body: TypingIndicator(),
+      const typingKey = Key('typing');
+
+      await tester.pumpWidget(MaterialApp(
+        home: StreamChat(
+          client: client,
+          child: StreamChannel(
+            channel: channel,
+            child: const Scaffold(
+              body: StreamTypingIndicator(
+                key: typingKey,
               ),
             ),
           ),
         ),
-      );
+      ));
 
-      expect(find.byKey(const Key('typings')), findsOneWidget);
+      expect(find.byKey(typingKey), findsOneWidget);
     },
   );
 }

@@ -52,7 +52,7 @@ class _QuotedMessageState extends State<QuotedMessage> {
         ? () => widget.onQuotedMessageTap!(widget.message.quotedMessageId)
         : null;
     final chatThemeData = _streamChatTheme;
-    return QuotedMessageWidget(
+    return StreamQuotedMessageWidget(
       onTap: onTap,
       message: widget.message.quotedMessage!,
       messageTheme: isMyMessage

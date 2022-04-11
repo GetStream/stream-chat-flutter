@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template groupAvatar}
+/// {@macro streamGroupAvatar}
+@Deprecated("Use 'StreamGroupAvatar' instead")
+typedef GroupAvatar = StreamGroupAvatar;
+
+/// {@template streamGroupAvatar}
 /// Widget for constructing a group of images
 /// {@endtemplate}
-class GroupAvatar extends StatelessWidget {
-  /// {@macro groupAvatar}
-  const GroupAvatar({
+class StreamGroupAvatar extends StatelessWidget {
+  /// {@macro streamGroupAvatar}
+  const StreamGroupAvatar({
     Key? key,
+    this.channel,
     required this.members,
     this.constraints,
     this.onTap,
@@ -16,6 +21,9 @@ class GroupAvatar extends StatelessWidget {
     this.selectionColor,
     this.selectionThickness = 4,
   }) : super(key: key);
+
+  /// The channel of the avatar
+  final Channel? channel;
 
   /// The list of members in the group whose avatars should be displayed.
   final List<Member> members;
@@ -43,7 +51,7 @@ class GroupAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
+    final channel = this.channel ?? StreamChannel.of(context).channel;
 
     assert(channel.state != null, 'Channel ${channel.id} is not initialized');
 
@@ -85,7 +93,7 @@ class GroupAvatar extends StatelessWidget {
                                   ),
                                 ),
                                 initialData: member,
-                                builder: (context, member) => UserAvatar(
+                                builder: (context, member) => StreamUserAvatar(
                                   showOnlineStatus: false,
                                   user: member.user!,
                                   borderRadius: BorderRadius.zero,
@@ -123,7 +131,8 @@ class GroupAvatar extends StatelessWidget {
                                     ),
                                   ),
                                   initialData: member,
-                                  builder: (context, member) => UserAvatar(
+                                  builder: (context, member) =>
+                                      StreamUserAvatar(
                                     showOnlineStatus: false,
                                     user: member.user!,
                                     borderRadius: BorderRadius.zero,

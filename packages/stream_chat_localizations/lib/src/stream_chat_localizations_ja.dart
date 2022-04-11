@@ -61,6 +61,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get sendMessagePermissionError => 'メッセージを送信する権限がありません';
+
+  @override
   String get emptyMessagesText => '現在、メッセージはありません。';
 
   @override
@@ -405,4 +408,10 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
       return 'ミュートグループ';
     }
   }
+
+  @override
+  String get linkDisabledDetails => 'この会話では、リンクの送信は許可されていません。';
+
+  @override
+  String get linkDisabledError => 'リンクが無効になっています';
 }

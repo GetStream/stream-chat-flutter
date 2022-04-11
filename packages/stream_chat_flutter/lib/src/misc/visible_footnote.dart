@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template visibleFootnote}
-/// Informs the user about a [MessageWidget]'s visibility to the current user.
+/// {@macro streamVisibleFootnote}
+@Deprecated("Use 'StreamVisibleFootnote' instead")
+typedef VisibleFootnote = StreamVisibleFootnote;
+
+/// {@template streamVisibleFootnote}
+/// Informs the user about a [StreamMessageWidget]'s visibility to the current
+/// user.
 ///
-/// Used in [GiphyAttachment].
+/// Used in [StreamGiphyAttachment].
 /// {@endtemplate}
-class VisibleFootnote extends StatelessWidget {
-  /// {@macro visibleFootnote}
-  const VisibleFootnote({Key? key}) : super(key: key);
+class StreamVisibleFootnote extends StatelessWidget {
+  /// {@macro streamVisibleFootnote}
+  const StreamVisibleFootnote({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

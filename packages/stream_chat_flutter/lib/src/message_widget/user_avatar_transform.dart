@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template userAvatarTransform}
-/// Transforms a [UserAvatar] according to the specified translation.
+/// Transforms a [StreamUserAvatar] according to the specified translation.
 ///
 /// Used in [MessageWidgetContent].
 /// {@endtemplate}
@@ -21,7 +21,7 @@ class UserAvatarTransform extends StatelessWidget {
   final bool translateUserAvatar;
 
   /// {@macro messageTheme}
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   /// {@macro userAvatarBuilder}
   final Widget Function(BuildContext, User)? userAvatarBuilder;
@@ -42,7 +42,7 @@ class UserAvatarTransform extends StatelessWidget {
             : 0,
       ),
       child: userAvatarBuilder?.call(context, message.user!) ??
-          UserAvatar(
+          StreamUserAvatar(
             user: message.user!,
             onTap: onUserAvatarTap,
             constraints: messageTheme.avatarTheme!.constraints,

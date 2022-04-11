@@ -2,6 +2,7 @@
 
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/models/action.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
@@ -65,6 +66,21 @@ class Attachment extends Equatable {
         json,
         topLevelFields + dbSpecificTopLevelFields,
       ));
+
+  factory Attachment.fromOGAttachment(OGAttachmentResponse ogAttachment) =>
+      Attachment(
+        type: ogAttachment.type,
+        title: ogAttachment.title,
+        titleLink: ogAttachment.titleLink,
+        text: ogAttachment.text,
+        imageUrl: ogAttachment.imageUrl,
+        thumbUrl: ogAttachment.thumbUrl,
+        authorName: ogAttachment.authorName,
+        authorLink: ogAttachment.authorLink,
+        assetUrl: ogAttachment.assetUrl,
+        ogScrapeUrl: ogAttachment.ogScrapeUrl,
+        uploadState: const UploadState.success(),
+      );
 
   ///The attachment type based on the URL resource. This can be: audio,
   ///image or video
@@ -228,6 +244,33 @@ class Attachment extends Equatable {
         uploadState: uploadState ?? this.uploadState,
         extraData: extraData ?? this.extraData,
       );
+
+  Attachment merge(Attachment? other) {
+    if (other == null) return this;
+    return copyWith(
+      type: other.type,
+      titleLink: other.titleLink,
+      title: other.title,
+      thumbUrl: other.thumbUrl,
+      text: other.text,
+      pretext: other.pretext,
+      ogScrapeUrl: other.ogScrapeUrl,
+      imageUrl: other.imageUrl,
+      footerIcon: other.footerIcon,
+      footer: other.footer,
+      fields: other.fields,
+      fallback: other.fallback,
+      color: other.color,
+      authorName: other.authorName,
+      authorLink: other.authorLink,
+      authorIcon: other.authorIcon,
+      assetUrl: other.assetUrl,
+      actions: other.actions,
+      file: other.file,
+      uploadState: other.uploadState,
+      extraData: other.extraData,
+    );
+  }
 
   @override
   List<Object?> get props => [

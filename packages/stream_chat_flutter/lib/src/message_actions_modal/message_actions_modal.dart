@@ -47,8 +47,8 @@ class MessageActionsModal extends StatefulWidget {
   /// Message in focus for actions
   final Message message;
 
-  /// [MessageThemeData] for message
-  final MessageThemeData messageTheme;
+  /// [StreamMessageThemeData] for message
+  final StreamMessageThemeData messageTheme;
 
   /// Flag for showing reactions
   final bool showReactions;
@@ -84,7 +84,7 @@ class MessageActionsModal extends StatefulWidget {
   final bool reverse;
 
   /// List of custom actions
-  final List<MessageAction> customActions;
+  final List<StreamMessageAction> customActions;
 
   @override
   _MessageActionsModalState createState() => _MessageActionsModalState();
@@ -150,7 +150,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                         ),
                         0,
                       ),
-                      child: ReactionPicker(
+                      child: StreamReactionPicker(
                         message: widget.message,
                       ),
                     );
@@ -367,7 +367,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   InkWell _buildCustomAction(
     BuildContext context,
-    MessageAction messageAction,
+    StreamMessageAction messageAction,
   ) {
     return InkWell(
       onTap: () => messageAction.onTap?.call(widget.message),
@@ -496,7 +496,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       elevation: 2,
       clipBehavior: Clip.hardEdge,
       isScrollControlled: true,
-      backgroundColor: MessageInputTheme.of(context).inputBackgroundColor,
+      backgroundColor: StreamMessageInputTheme.of(context).inputBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16),

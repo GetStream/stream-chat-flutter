@@ -6,12 +6,16 @@ import 'package:stream_chat_flutter/src/video/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-/// {@template videoThumbnailImage}
+/// {@macro streamVideoThumbnailImage}
+@Deprecated("Use 'StreamVideoThumbnailImage' instead")
+typedef VideoThumbnailImage = StreamVideoThumbnailImage;
+
+/// {@template streamVideoThumbnailImage}
 /// Displays a video thumbnail for video attachments in a message.
 /// {@endtemplate}
-class VideoThumbnailImage extends StatefulWidget {
-  /// {@macro videoThumbnailImage}
-  const VideoThumbnailImage({
+class StreamVideoThumbnailImage extends StatefulWidget {
+  /// {@macro streamVideoThumbnailImage}
+  const StreamVideoThumbnailImage({
     Key? key,
     required this.video,
     this.width,
@@ -45,17 +49,18 @@ class VideoThumbnailImage extends StatefulWidget {
   final WidgetBuilder? placeholderBuilder;
 
   @override
-  _VideoThumbnailImageState createState() => _VideoThumbnailImageState();
+  _StreamVideoThumbnailImageState createState() =>
+      _StreamVideoThumbnailImageState();
 }
 
-class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
+class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
   late Future<Uint8List?> thumbnailFuture;
   late StreamChatThemeData _streamChatTheme;
 
   @override
   void initState() {
     super.initState();
-    thumbnailFuture = VideoService.generateVideoThumbnail(
+    thumbnailFuture = StreamVideoService.generateVideoThumbnail(
       video: widget.video,
       imageFormat: widget.format,
     );
@@ -68,9 +73,9 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
   }
 
   @override
-  void didUpdateWidget(covariant VideoThumbnailImage oldWidget) {
+  void didUpdateWidget(covariant StreamVideoThumbnailImage oldWidget) {
     if (oldWidget.video != widget.video || oldWidget.format != widget.format) {
-      thumbnailFuture = VideoService.generateVideoThumbnail(
+      thumbnailFuture = StreamVideoService.generateVideoThumbnail(
         video: widget.video,
         imageFormat: widget.format,
       );

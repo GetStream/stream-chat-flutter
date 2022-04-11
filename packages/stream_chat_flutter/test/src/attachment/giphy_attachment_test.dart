@@ -24,7 +24,7 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: SizedBox(
-                child: GiphyAttachment(
+                child: StreamGiphyAttachment(
                   size: const Size(
                     300,
                     300,

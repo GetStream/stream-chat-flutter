@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template channelInfo}
+/// {@template streamChannelInfo}
 /// Displays information about the current [Channel].
 /// {@endtemplate}
-class ChannelInfo extends StatelessWidget {
-  /// {@macro channelInfo}
-  const ChannelInfo({
+class StreamChannelInfo extends StatelessWidget {
+  /// {@macro streamChannelInfo}
+  const StreamChannelInfo({
     Key? key,
     required this.channel,
     this.textStyle,
@@ -36,7 +36,7 @@ class ChannelInfo extends StatelessWidget {
     return BetterStreamBuilder<List<Member>>(
       stream: channel.state!.membersStream,
       initialData: channel.state!.members,
-      builder: (context, data) => ConnectionStatusBuilder(
+      builder: (context, data) => StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
           switch (status) {
             case ConnectionStatus.connected:
@@ -93,7 +93,7 @@ class _ConnectedTitleState extends StatelessWidget {
       }
       alternativeWidget = Text(
         text,
-        style: ChannelHeaderTheme.of(context).subtitleStyle,
+        style: StreamChannelHeaderTheme.of(context).subtitleStyle,
       );
     } else {
       final userId = StreamChat.of(context).currentUser?.id;
@@ -121,9 +121,8 @@ class _ConnectedTitleState extends StatelessWidget {
       return alternativeWidget ?? const Offstage();
     }
 
-    return TypingIndicator(
+    return StreamTypingIndicator(
       parentId: parentId,
-      alignment: Alignment.center,
       alternativeWidget: alternativeWidget,
       style: textStyle,
     );

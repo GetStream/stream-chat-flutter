@@ -60,7 +60,7 @@ class ChannelPreview extends StatelessWidget {
   final Widget? subtitle;
 
   /// Widget rendering the leading element. By default it shows the
-  /// [ChannelAvatar].
+  /// [StreamChannelAvatar].
   final Widget? leading;
 
   /// Widget rendering the trailing element. By default it shows the date of
@@ -68,12 +68,12 @@ class ChannelPreview extends StatelessWidget {
   final Widget? trailing;
 
   /// Widget rendering the sending indicator. By default it uses the
-  /// [SendingIndicator] widget.
+  /// [StreamSendingIndicator] widget.
   final Widget? sendingIndicator;
 
   @override
   Widget build(BuildContext context) {
-    final channelPreviewTheme = ChannelPreviewTheme.of(context);
+    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
     final streamChatState = StreamChat.of(context);
     return BetterStreamBuilder<bool>(
       stream: channel.isMutedStream,
@@ -240,7 +240,11 @@ class ChannelPreview extends StatelessWidget {
             ),
             onTap: () => onTap?.call(channel),
             onLongPress: () => onLongPress?.call(channel),
-            leading: leading ?? ChannelAvatar(onTap: onImageTap),
+            leading: leading ??
+                StreamChannelAvatar(
+                  onTap: onImageTap,
+                  channel: channel,
+                ),
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -261,7 +265,7 @@ class ChannelPreview extends StatelessWidget {
                             channel.client.state.currentUser?.id)) {
                       return const SizedBox();
                     }
-                    return UnreadIndicator(
+                    return StreamUnreadIndicator(
                       cid: channel.cid,
                     );
                   },
@@ -297,7 +301,7 @@ class ChannelPreview extends StatelessWidget {
                                         )));
                                 final isMessageRead = readList.length >=
                                     (channel.memberCount ?? 0) - 1;
-                                return SendingIndicator(
+                                return StreamSendingIndicator(
                                   message: lastMessage!,
                                   size: channelPreviewTheme.indicatorIconSize,
                                   isMessageRead: isMessageRead,
@@ -356,7 +360,7 @@ class _Date extends StatelessWidget {
 
         return Text(
           stringDate,
-          style: ChannelPreviewTheme.of(context).lastMessageAtStyle,
+          style: StreamChannelPreviewTheme.of(context).lastMessageAtStyle,
         );
       },
     );
@@ -373,7 +377,7 @@ class _Subtitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final channelPreviewTheme = ChannelPreviewTheme.of(context);
+    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
     if (channel.isMuted) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -388,7 +392,7 @@ class _Subtitle extends StatelessWidget {
         ],
       );
     }
-    return TypingIndicator(
+    return StreamTypingIndicator(
       channel: channel,
       alternativeWidget: _LastMessage(
         channel: channel,
@@ -439,7 +443,7 @@ class _LastMessage extends StatelessWidget {
 
           text = parts.join(' ');
 
-          final channelPreviewTheme = ChannelPreviewTheme.of(context);
+          final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
           return Text.rich(
             _getDisplayText(
               text,

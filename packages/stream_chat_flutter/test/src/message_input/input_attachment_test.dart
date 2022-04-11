@@ -48,7 +48,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(VideoThumbnailImage), findsOneWidget);
+    expect(find.byType(StreamVideoThumbnailImage), findsOneWidget);
     expect(find.byType(SvgPicture), findsOneWidget);
   });
 

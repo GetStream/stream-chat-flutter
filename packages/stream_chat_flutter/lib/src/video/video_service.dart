@@ -4,9 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
-import 'package:synchronized/synchronized.dart';
 import 'package:thumblr/thumblr.dart' as thumblr;
-import 'package:video_compress/video_compress.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 ///
@@ -16,32 +14,6 @@ class _IVideoService {
 
   /// Singleton instance of [_IVideoService]
   static final _IVideoService instance = _IVideoService._();
-  final _lock = Lock();
-
-  /// compress video from [path]
-  /// compress video from [path] return [Future<MediaInfo>]
-  ///
-  /// you can choose its [quality] and [frameRate]
-  ///
-  /// ## example
-  /// ```dart
-  /// final info = await _flutterVideoCompress.compressVideo(
-  ///   file.path,
-  /// );
-  /// debugPrint(info.toJson());
-  /// ```
-  Future<MediaInfo?> compressVideo(
-    String path, {
-    int frameRate = 30,
-    VideoQuality quality = VideoQuality.DefaultQuality,
-  }) async =>
-      _lock.synchronized(
-        () => VideoCompress.compressVideo(
-          path,
-          frameRate: frameRate,
-          quality: quality,
-        ),
-      );
 
   /// Generates a thumbnail image data in memory as UInt8List.
   ///
@@ -101,5 +73,10 @@ class _IVideoService {
 }
 
 /// Get instance of [_IVideoService]
+@Deprecated("Use 'StreamVideoService' instead")
 // ignore: non_constant_identifier_names
 _IVideoService get VideoService => _IVideoService.instance;
+
+/// Get instance of [_IVideoService]
+// ignore: non_constant_identifier_names
+_IVideoService get StreamVideoService => _IVideoService.instance;

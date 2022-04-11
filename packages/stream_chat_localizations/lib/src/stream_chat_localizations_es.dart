@@ -62,6 +62,10 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get sendMessagePermissionError =>
+      'No tienes permiso para enviar mensajes';
+
+  @override
   String get emptyMessagesText => 'Actualmente no hay mensajes';
 
   @override
@@ -426,4 +430,11 @@ No es posible añadir más de $limit archivos adjuntos
       return 'Silenciar grupo';
     }
   }
+
+  @override
+  String get linkDisabledDetails =>
+      'No se permite enviar enlaces en esta conversación.';
+
+  @override
+  String get linkDisabledError => 'Los enlaces están deshabilitados';
 }

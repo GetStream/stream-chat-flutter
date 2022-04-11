@@ -186,7 +186,7 @@ typedef QuotedMessageAttachmentThumbnailBuilder = Widget Function(
 );
 
 /// {@template onMessageWidgetAttachmentTap}
-/// The action to perform when an attachment in an [MessageWidget]
+/// The action to perform when an attachment in an [StreamMessageWidget]
 /// is tapped or clicked.
 /// {@endtemplate}
 typedef OnMessageWidgetAttachmentTap = void Function(
@@ -230,26 +230,26 @@ typedef MessageSearchItemBuilder = Widget Function(
 /// {@template messageBuilder}
 /// A widget builder for creating custom message UI.
 ///
-/// [defaultMessageWidget] is the default [MessageWidget] configuration.
+/// [defaultMessageWidget] is the default [StreamMessageWidget] configuration.
 /// Use [defaultMessageWidget.copyWith] to customize it.
 /// {@endtemplate}
 typedef MessageBuilder = Widget Function(
   BuildContext,
   MessageDetails,
   List<Message>,
-  MessageWidget defaultMessageWidget,
+  StreamMessageWidget defaultMessageWidget,
 );
 
 /// {@template parentMessageBuilder}
 /// A widget builder for creating custom parent message UI.
 ///
-/// [defaultMessageWidget] is the default [MessageWidget] configuration.
+/// [defaultMessageWidget] is the default [StreamMessageWidget] configuration.
 /// Use [defaultMessageWidget.copyWith] to customize it.
 /// {@endtemplate}
 typedef ParentMessageBuilder = Widget Function(
   BuildContext,
   Message?,
-  MessageWidget defaultMessageWidget,
+  StreamMessageWidget defaultMessageWidget,
 );
 
 /// {@template systemMessageBuilder}
@@ -323,3 +323,20 @@ typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 /// The action to perform when the "scroll to bottom" button is pressed
 /// within a [MessageListView].
 typedef OnScrollToBottom = Function(int unreadCount);
+
+/// Widget builder for a custom attachment picker.
+typedef AttachmentsPickerBuilder = Widget Function(
+  BuildContext context,
+  MessageInputController messageInputController,
+  StreamAttachmentPicker defaultPicker,
+);
+
+/// Widget builder for widgets that may require data from the
+/// [MessageInputController].
+typedef MessageRelatedBuilder = Widget Function(
+  BuildContext context,
+  MessageInputController messageInputController,
+);
+
+/// A function that returns true if the message is valid and can be sent.
+typedef MessageValidator = bool Function(Message message);

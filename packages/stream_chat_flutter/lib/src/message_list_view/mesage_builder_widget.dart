@@ -94,7 +94,7 @@ class MessageBuilderWidget extends StatelessWidget {
     if ((message.type == 'system' || message.type == 'error') &&
         message.text?.isNotEmpty == true) {
       return systemMessageBuilder?.call(context, message) ??
-          SystemMessage(
+          StreamSystemMessage(
             message: message,
             onMessageTap: (message) {
               if (onSystemMessageTap != null) {
@@ -166,7 +166,7 @@ class MessageBuilderWidget extends StatelessWidget {
 
     final _streamTheme = StreamChatTheme.of(context);
 
-    Widget messageWidget = MessageWidget(
+    Widget messageWidget = StreamMessageWidget(
       message: message,
       reverse: isMyMessage,
       showReactions: !message.isDeleted,
@@ -262,7 +262,7 @@ class MessageBuilderWidget extends StatelessWidget {
           index,
         ),
         messages,
-        messageWidget as MessageWidget,
+        messageWidget as StreamMessageWidget,
       );
     }
 

@@ -41,7 +41,7 @@ class ParentMessageWidget extends StatelessWidget {
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
     final _streamTheme = StreamChatTheme.of(context);
 
-    final defaultMessageWidget = MessageWidget(
+    final defaultMessageWidget = StreamMessageWidget(
       showReplyMessage: false,
       showResendMessage: false,
       showThreadReplyMessage: false,

@@ -3,18 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template reactionPicker}
+/// {@macro streamReactionPicker}
+@Deprecated("Use 'StreamReactionPicker' instead")
+typedef ReactionPicker = StreamReactionPicker;
+
+/// {@template streamReactionPicker}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/reaction_picker.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/reaction_picker_paint.png)
 ///
 /// Allows the user to select reactions to a message on mobile.
 ///
 /// It is not recommended to use this widget directly as it's one of the
-/// default widgets used by [MessageWidget.onMessageActions].
+/// default widgets used by [StreamMessageWidget.onMessageActions].
 /// {@endtemplate}
-class ReactionPicker extends StatefulWidget {
-  /// {@macro reactionPicker}
-  const ReactionPicker({
+class StreamReactionPicker extends StatefulWidget {
+  /// {@macro streamReactionPicker}
+  const StreamReactionPicker({
     Key? key,
     required this.message,
   }) : super(key: key);
@@ -23,10 +27,10 @@ class ReactionPicker extends StatefulWidget {
   final Message message;
 
   @override
-  _ReactionPickerState createState() => _ReactionPickerState();
+  _StreamReactionPickerState createState() => _StreamReactionPickerState();
 }
 
-class _ReactionPickerState extends State<ReactionPicker>
+class _StreamReactionPickerState extends State<StreamReactionPicker>
     with TickerProviderStateMixin {
   List<EzAnimation> animations = [];
 

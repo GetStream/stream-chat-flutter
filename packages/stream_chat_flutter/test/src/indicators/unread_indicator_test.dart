@@ -33,19 +33,17 @@ void main() {
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(10));
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChat(
-            client: client,
-            child: StreamChannel(
-              channel: channel,
-              child: const Scaffold(
-                body: UnreadIndicator(),
-              ),
+      await tester.pumpWidget(MaterialApp(
+        home: StreamChat(
+          client: client,
+          child: StreamChannel(
+            channel: channel,
+            child: const Scaffold(
+              body: StreamUnreadIndicator(),
             ),
           ),
         ),
-      );
+      ));
 
       expect(find.text('10'), findsOneWidget);
     },
@@ -73,21 +71,19 @@ void main() {
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(0));
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChat(
-            client: client,
-            child: StreamChannel(
-              channel: channel,
-              child: Scaffold(
-                body: UnreadIndicator(
-                  cid: channel.cid,
-                ),
+      await tester.pumpWidget(MaterialApp(
+        home: StreamChat(
+          client: client,
+          child: StreamChannel(
+            channel: channel,
+            child: Scaffold(
+              body: StreamUnreadIndicator(
+                cid: channel.cid,
               ),
             ),
           ),
         ),
-      );
+      ));
 
       expect(find.text('0'), findsNothing);
     },
@@ -115,21 +111,19 @@ void main() {
       when(() => channelState.unreadCountStream)
           .thenAnswer((i) => Stream.value(100));
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChat(
-            client: client,
-            child: StreamChannel(
-              channel: channel,
-              child: Scaffold(
-                body: UnreadIndicator(
-                  cid: channel.cid,
-                ),
+      await tester.pumpWidget(MaterialApp(
+        home: StreamChat(
+          client: client,
+          child: StreamChannel(
+            channel: channel,
+            child: Scaffold(
+              body: StreamUnreadIndicator(
+                cid: channel.cid,
               ),
             ),
           ),
         ),
-      );
+      ));
 
       expect(find.text('99+'), findsOneWidget);
     },

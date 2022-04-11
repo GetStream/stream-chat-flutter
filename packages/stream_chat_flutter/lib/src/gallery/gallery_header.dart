@@ -7,10 +7,17 @@ import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// {@macro streamGalleryHeader}
+@Deprecated("Use 'StreamGalleryHeader' instead")
+typedef GalleryHeader = StreamGalleryHeader;
+
+/// {@macro streamGalleryHeader}
 /// Header/AppBar widget for media display screen
-class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
-  /// Creates a channel header
-  const GalleryHeader({
+/// {@endtemplate}
+class StreamGalleryHeader extends StatelessWidget
+    implements PreferredSizeWidget {
+  /// {@macro streamGalleryHeader}
+  const StreamGalleryHeader({
     Key? key,
     required this.message,
     this.currentIndex = 0,
@@ -54,7 +61,7 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Stores the current index of media shown
   final int currentIndex;
 
-  /// The background color of this [GalleryHeader].
+  /// The background color of this [StreamGalleryHeader].
   final Color? backgroundColor;
 
   /// {@macro attachmentActionsBuilder}
@@ -62,7 +69,7 @@ class GalleryHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final galleryHeaderThemeData = GalleryHeaderTheme.of(context);
+    final galleryHeaderThemeData = StreamGalleryHeaderTheme.of(context);
     final theme = Theme.of(context);
     return AppBar(
       toolbarTextStyle: theme.textTheme.bodyText2,

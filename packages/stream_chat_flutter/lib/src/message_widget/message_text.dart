@@ -1,14 +1,19 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template messageText}
+/// {@macro streamMessageText}
+@Deprecated("Use 'StreamMessageText' instead")
+typedef MessageText = StreamMessageText;
+
+/// {@template streamMessageText}
 /// The text content of a message.
 /// {@endtemplate}
-class MessageText extends StatelessWidget {
-  /// {@macro messageText}
-  const MessageText({
+class StreamMessageText extends StatelessWidget {
+  /// {@macro streamMessageText}
+  const StreamMessageText({
     Key? key,
     required this.message,
     required this.messageTheme,
@@ -25,8 +30,8 @@ class MessageText extends StatelessWidget {
   /// The action to perform when a link is tapped
   final void Function(String)? onLinkTap;
 
-  /// [MessageThemeData] whose text theme is to be applied
-  final MessageThemeData messageTheme;
+  /// [StreamMessageThemeData] whose text theme is to be applied
+  final StreamMessageThemeData messageTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -36,13 +41,14 @@ class MessageText extends StatelessWidget {
       stream: streamChat.currentUserStream.map((it) => it!.language ?? 'en'),
       initialData: streamChat.currentUser!.language ?? 'en',
       builder: (context, language) {
-        final translatedText =
-            message.i18n?['${language}_text'] ?? message.text;
-        final messageText =
-            _replaceMentions(translatedText ?? '').replaceAll('\n', '\n\n');
+        final messageText = message
+            .translate(language)
+            .replaceMentions()
+            .text
+            ?.replaceAll('\n', '\n\n');
         final themeData = Theme.of(context);
         return MarkdownBody(
-          data: messageText,
+          data: messageText ?? '',
           selectable: isDesktopDeviceOrWeb,
           onTapLink: (
             String link,
@@ -82,18 +88,5 @@ class MessageText extends StatelessWidget {
         );
       },
     );
-  }
-
-  String _replaceMentions(String text) {
-    var messageTextToRender = text;
-    for (final user in message.mentionedUsers.toSet()) {
-      final userId = user.id;
-      final userName = user.name;
-      messageTextToRender = messageTextToRender.replaceAll(
-        '@$userId',
-        '[@$userName](@${userName.replaceAll(' ', '')})',
-      );
-    }
-    return messageTextToRender;
   }
 }

@@ -30,7 +30,7 @@ void main() {
             child: Builder(builder: (context) {
               return Scaffold(
                 body: Center(
-                  child: UserAvatar(
+                  child: StreamUserAvatar(
                     user: user,
                   ),
                 ),
@@ -40,7 +40,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(UserAvatar), findsOneWidget);
+      expect(find.byType(StreamUserAvatar), findsOneWidget);
     },
   );
 
@@ -56,7 +56,7 @@ void main() {
               builder: (context) {
                 return Scaffold(
                   body: Center(
-                    child: UserAvatar(
+                    child: StreamUserAvatar(
                       user: user,
                     ),
                   ),
@@ -83,7 +83,7 @@ void main() {
               builder: (context) {
                 return Scaffold(
                   body: Center(
-                    child: UserAvatar(
+                    child: StreamUserAvatar(
                       user: user,
                     ),
                   ),

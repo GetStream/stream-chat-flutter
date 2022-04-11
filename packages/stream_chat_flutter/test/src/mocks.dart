@@ -22,6 +22,9 @@ class MockChannel extends Mock implements Channel {
   Future<void> keyStroke([String? parentId]) async {
     return;
   }
+
+  @override
+  List<String> get ownCapabilities => ['send-message'];
 }
 
 class MockChannelState extends Mock implements ChannelClientState {

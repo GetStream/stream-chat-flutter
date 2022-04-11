@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template textBubble}
-/// The bubble around a [MessageText].
+/// The bubble around a [StreamMessageText].
 ///
 /// Used in [MessageCard]. Should not be used elsewhere.
 /// {@endtemplate}
@@ -42,7 +42,7 @@ class TextBubble extends StatelessWidget {
   final void Function(User)? onMentionTap;
 
   /// {@macro messageTheme}
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   /// {@macro hasUrlAttachments}
   final bool hasUrlAttachments;
@@ -60,7 +60,7 @@ class TextBubble extends StatelessWidget {
           padding: isOnlyEmoji ? EdgeInsets.zero : textPadding,
           child: textBuilder != null
               ? textBuilder!(context, message)
-              : MessageText(
+              : StreamMessageText(
                   onLinkTap: onLinkTap,
                   message: message,
                   onMentionTap: onMentionTap,
@@ -90,7 +90,7 @@ class TextBubble extends StatelessWidget {
         getWebsiteName(hostName.toLowerCase()) ??
         hostName.capitalize();
 
-    return UrlAttachment(
+    return StreamUrlAttachment(
       urlAttachment: urlAttachment,
       hostDisplayName: hostDisplayName,
       textPadding: textPadding,

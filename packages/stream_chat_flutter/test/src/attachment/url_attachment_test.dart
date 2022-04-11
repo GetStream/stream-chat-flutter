@@ -24,7 +24,7 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: SizedBox(
-                child: UrlAttachment(
+                child: StreamUrlAttachment(
                   messageTheme: streamTheme.ownMessageTheme,
                   hostDisplayName: 'Test',
                   urlAttachment: Attachment(
