@@ -147,12 +147,15 @@ class WebSocket with TimerHelper {
     }
   }
 
-  Future<Uri> _buildUri({bool refreshToken = false}) async {
+  Future<Uri> _buildUri({
+    bool refreshToken = false,
+    bool includeUserDetails = true,
+  }) async {
     final user = _user!;
     final token = await tokenManager.loadToken(refresh: refreshToken);
     final params = {
       'user_id': user.id,
-      'user_details': user,
+      if (includeUserDetails) 'user_details': user,
       'user_token': token.rawValue,
       'server_determines_connection_id': true,
     };
@@ -219,7 +222,10 @@ class WebSocket with TimerHelper {
     setTimer(
       Duration(milliseconds: delay),
       () async {
-        final uri = await _buildUri(refreshToken: refreshToken);
+        final uri = await _buildUri(
+          refreshToken: refreshToken,
+          includeUserDetails: false,
+        );
         try {
           _initWebSocketChannel(uri);
         } catch (e, stk) {
