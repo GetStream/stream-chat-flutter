@@ -4,25 +4,6 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
-  testWidgets('StreamSendingIndicator shows a StreamSvgIcon', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: StreamChatTheme(
-          data: StreamChatThemeData.light(),
-          child: Scaffold(
-            body: Center(
-              child: StreamSendingIndicator(
-                message: Message(),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(find.byType(StreamSvgIcon), findsOneWidget);
-  });
-
   testWidgets('StreamSendingIndicator shows an Icon', (tester) async {
     await tester.pumpWidget(
       MaterialApp(

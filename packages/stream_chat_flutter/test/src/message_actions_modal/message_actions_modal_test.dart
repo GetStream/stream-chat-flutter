@@ -326,7 +326,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.byType(StreamMessageInput), findsOneWidget);
+      expect(find.byType(MessageInput), findsOneWidget);
     },
   );
 
