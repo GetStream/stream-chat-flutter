@@ -343,6 +343,8 @@ class StreamChatClient {
   }
 
   /// Creates a new WebSocket connection with the current user.
+  /// If [includeUserDetailsInConnectCall] is true it will include the current
+  /// user details in the connect call.
   Future<OwnUser> openConnection({
     bool includeUserDetailsInConnectCall = false,
   }) async {
