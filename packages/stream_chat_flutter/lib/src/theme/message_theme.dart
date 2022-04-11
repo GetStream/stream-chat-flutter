@@ -103,8 +103,8 @@ class StreamMessageThemeData with Diagnosticable {
     double t,
   ) {
     return StreamMessageThemeData(
-      avatarTheme: const StreamAvatarThemeData()
-          .lerp(a.avatarTheme!, b.avatarTheme!, t),
+      avatarTheme:
+          const StreamAvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
       createdAtStyle: TextStyle.lerp(a.createdAtStyle, b.createdAtStyle, t),
       messageAuthorStyle:
           TextStyle.lerp(a.messageAuthorStyle, b.messageAuthorStyle, t),

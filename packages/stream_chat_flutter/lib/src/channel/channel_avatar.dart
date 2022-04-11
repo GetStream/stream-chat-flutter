@@ -47,7 +47,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 @Deprecated(
   "'ChannelAvatar' is deprecated and shouldn't be used. "
-      "Please use 'StreamChannelAvatar' instead.",
+  "Please use 'StreamChannelAvatar' instead.",
 )
 class ChannelAvatar extends StatelessWidget {
   /// {@macro channelAvatar}
