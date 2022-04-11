@@ -341,7 +341,9 @@ class StreamChatClient {
   }
 
   /// Creates a new WebSocket connection with the current user.
-  Future<OwnUser> openConnection() async {
+  Future<OwnUser> openConnection({
+    bool includeUserDetailsInConnectCall = true,
+  }) async {
     assert(
       state.currentUser != null,
       'User is not set on client, '
@@ -371,7 +373,11 @@ class StreamChatClient {
         _ws.connectionStatusStream.skip(1).listen(_connectionStatusHandler);
 
     try {
-      final event = await _ws.connect(user);
+      final event = await _ws.connect(includeUserDetailsInConnectCall
+          ? user
+          : User(
+              id: user.id,
+            ));
       return user.merge(event.me);
     } catch (e, stk) {
       logger.severe('error connecting ws', e, stk);
