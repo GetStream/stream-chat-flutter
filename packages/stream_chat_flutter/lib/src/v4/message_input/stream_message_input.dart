@@ -115,7 +115,6 @@ class StreamMessageInput extends StatefulWidget {
     this.shadow,
     this.autoCorrect,
     this.disableEmojiSuggestionsOverlay,
-    this.quotedMessage,
     this.onQuotedMessageCleared,
   }) : super(key: key);
 
@@ -243,9 +242,6 @@ class StreamMessageInput extends StatefulWidget {
   /// Disable the default emoji suggestions
   /// Enabled by default
   final bool? disableEmojiSuggestionsOverlay;
-
-  /// TODO: document me!
-  final Message? quotedMessage;
 
   /// TODO: document me!
   final VoidCallback? onQuotedMessageCleared;

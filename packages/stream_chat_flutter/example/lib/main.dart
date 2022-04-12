@@ -200,8 +200,8 @@ class ChannelPage extends StatefulWidget {
 }
 
 class _ChannelPageState extends State<ChannelPage> {
-  Message? _quotedMessage;
   late FocusNode? _focusNode;
+  final _messageInputController = MessageInputController();
 
   @override
   void initState() {
@@ -216,7 +216,7 @@ class _ChannelPageState extends State<ChannelPage> {
   }
 
   void _reply(Message message) {
-    setState(() => _quotedMessage = message);
+    _messageInputController.quotedMessage = message;
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
       _focusNode!.requestFocus();
     });
@@ -244,10 +244,10 @@ class _ChannelPageState extends State<ChannelPage> {
               ),
             ),
             StreamMessageInput(
+              messageInputController: _messageInputController,
               attachmentLimit: 3,
-              quotedMessage: _quotedMessage,
               onQuotedMessageCleared: () {
-                setState(() => _quotedMessage = null);
+                _messageInputController.clearQuotedMessage();
                 _focusNode!.unfocus();
               },
             ),
