@@ -17,6 +17,7 @@ import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/file_upload_error_handler.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
+import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/user_mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/emoji_overlay.dart';
@@ -452,32 +453,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (_hasQuotedMessage)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: StreamSvgIcon.reply(
-                              color: _streamChatTheme.colorTheme.disabled,
-                            ),
-                          ),
-                          Text(
-                            context.translations.replyToMessageLabel,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          IconButton(
-                            visualDensity: VisualDensity.compact,
-                            icon: StreamSvgIcon.closeSmall(),
-                            onPressed: () {
-                              _effectiveController.clearQuotedMessage();
-                              _focusNode.unfocus();
-                            },
-                          ),
-                        ],
+                    // Ensure this doesn't show on web & desktop
+                    PlatformWidgetBuilder(
+                      mobile: (context, child) => child,
+                      child: QuotingMessageTopArea(
+                        hasQuotedMessage: _hasQuotedMessage,
+                        onQuotedMessageCleared: widget.onQuotedMessageCleared,
                       ),
                     )
                   else if (_effectiveController.ogAttachment != null)
@@ -1195,6 +1176,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       message: _effectiveController.value.quotedMessage!,
       messageTheme: _streamChatTheme.otherMessageTheme,
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      onQuotedMessageClear: widget.onQuotedMessageCleared,
     );
   }
 
@@ -1523,6 +1505,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
 
     shouldKeepFocus ??= !_commandEnabled;
+    widget.onQuotedMessageCleared?.call();
 
     _effectiveController.reset();
 
