@@ -179,7 +179,10 @@ class WebSocket with TimerHelper {
   bool _connectRequestInProgress = false;
 
   /// Connect the WS using the parameters passed in the constructor
-  Future<Event> connect(User user) async {
+  Future<Event> connect(
+    User user, {
+    bool includeUserDetails = false,
+  }) async {
     if (_connectRequestInProgress) {
       throw const StreamWebSocketError('''
         You've called connect twice,
@@ -194,7 +197,9 @@ class WebSocket with TimerHelper {
     connectionCompleter = Completer<Event>();
 
     try {
-      final uri = await _buildUri();
+      final uri = await _buildUri(
+        includeUserDetails: includeUserDetails,
+      );
       _initWebSocketChannel(uri);
     } catch (e, stk) {
       _onConnectionError(e, stk);

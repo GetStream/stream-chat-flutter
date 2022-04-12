@@ -377,11 +377,10 @@ class StreamChatClient {
         _ws.connectionStatusStream.skip(1).listen(_connectionStatusHandler);
 
     try {
-      final event = await _ws.connect(includeUserDetailsInConnectCall
-          ? user
-          : User(
-              id: user.id,
-            ));
+      final event = await _ws.connect(
+        user,
+        includeUserDetails: includeUserDetailsInConnectCall,
+      );
       return user.merge(event.me);
     } catch (e, stk) {
       logger.severe('error connecting ws', e, stk);
