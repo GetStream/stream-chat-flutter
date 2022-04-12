@@ -13,6 +13,7 @@
 ✅ Added
 
 - Handle `event.message` in `channel.truncate` events
+- Added additional parameters to `channel.truncate`
 
 ## 3.5.1
 
