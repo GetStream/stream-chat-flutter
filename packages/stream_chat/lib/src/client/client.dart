@@ -938,14 +938,23 @@ class StreamChatClient {
         channelType,
       );
 
-  /// Removes all messages from the channel
+  /// Removes all messages from the channel up to [truncatedAt] or now if
+  /// [truncatedAt] is not provided.
+  /// If [skipPush] is true, no push notification will be sent.
+  /// [Message] is the system message that will be sent to the channel.
   Future<EmptyResponse> truncateChannel(
     String channelId,
-    String channelType,
-  ) =>
+    String channelType, {
+    Message? message,
+    bool? skipPush,
+    DateTime? truncatedAt,
+  }) =>
       _chatApi.channel.truncateChannel(
         channelId,
         channelType,
+        message: message,
+        skipPush: skipPush,
+        truncatedAt: truncatedAt,
       );
 
   /// Mutes the channel

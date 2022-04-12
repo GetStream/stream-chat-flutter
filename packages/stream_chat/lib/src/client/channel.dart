@@ -1033,10 +1033,23 @@ class Channel {
     return _client.deleteChannel(id!, type);
   }
 
-  /// Removes all messages from the channel.
-  Future<EmptyResponse> truncate() async {
+  /// Removes all messages from the channel up to [truncatedAt] or now if
+  /// [truncatedAt] is not provided.
+  /// If [skipPush] is true, no push notification will be sent.
+  /// [Message] is the system message that will be sent to the channel.
+  Future<EmptyResponse> truncate({
+    Message? message,
+    bool? skipPush,
+    DateTime? truncatedAt,
+  }) async {
     _checkInitialized();
-    return _client.truncateChannel(id!, type);
+    return _client.truncateChannel(
+      id!,
+      type,
+      message: message,
+      skipPush: skipPush,
+      truncatedAt: truncatedAt,
+    );
   }
 
   /// Accept invitation to the channel.
