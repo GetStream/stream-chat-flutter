@@ -174,10 +174,6 @@ class AttachmentActionsModal extends StatelessWidget {
                         downloader(
                           attachment,
                           progressCallback: (received, total) {
-                            print('>>>>>>>>>>>>>>>');
-                            print('>>r : $received');
-                            print('>>t : $total');
-                            print('>>>>>>>>>>>>>>>');
                             progressNotifier.value = _DownloadProgress(
                               total,
                               received,
