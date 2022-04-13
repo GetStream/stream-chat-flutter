@@ -1,3 +1,7 @@
+## 3.6.0
+
+- Updated `stream_chat` dependency to [`3.6.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 3.5.1
 
 - Updated `stream_chat` dependency to [`3.5.1`](https://pub.dev/packages/stream_chat/changelog).
