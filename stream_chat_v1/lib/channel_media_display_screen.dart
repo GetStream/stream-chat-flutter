@@ -181,10 +181,15 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                         builder: (context) => StreamChannel(
                           channel: channel,
                           child: StreamFullScreenMedia(
-                            mediaAttachments:
-                                media.map((e) => e.attachment).toList(),
+                            mediaAttachmentPackages: media
+                                .map(
+                                  (e) => StreamAttachmentPackage(
+                                    attachment: e.attachment,
+                                    message: e.message,
+                                  ),
+                                )
+                                .toList(),
                             startIndex: position,
-                            message: media[position].message,
                             userName: media[position].message.user!.name,
                             onShowMessage: widget.onShowMessage,
                           ),
