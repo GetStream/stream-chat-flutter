@@ -8,7 +8,7 @@
 
 - Minor fixes and improvements.
 
-## Upcoming
+## 3.6.0
 
 🐞 Fixed
 
@@ -19,10 +19,12 @@
   channel update.
 - [[#1054]](https://github.com/GetStream/stream-chat-flutter/issues/1054) Fix `Unsupported operation: Cannot remove from an unmodifiable list`.
 - [[#1033]](https://github.com/GetStream/stream-chat-flutter/issues/1033) Hard delete from dashboard does not delete message from client.
+- Send only `user_id` while reconnecting.
 
 ✅ Added
 
 - Handle `event.message` in `channel.truncate` events
+- Added additional parameters to `channel.truncate`
 
 ## 3.5.1
 

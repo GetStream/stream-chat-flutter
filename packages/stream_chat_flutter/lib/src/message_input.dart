@@ -470,6 +470,7 @@ class MessageInputState extends State<MessageInput> {
     if (widget.editMessage == null) {
       child = Material(
         elevation: 8,
+        color: _messageInputTheme.inputBackgroundColor,
         child: child,
       );
     }
@@ -669,6 +670,7 @@ class MessageInputState extends State<MessageInput> {
           gradient: _focusNode.hasFocus
               ? _messageInputTheme.activeBorderGradient
               : _messageInputTheme.idleBorderGradient,
+          color: _messageInputTheme.inputBackgroundColor,
         ),
         child: Padding(
           padding: const EdgeInsets.all(1.5),

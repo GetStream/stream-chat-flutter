@@ -14,10 +14,14 @@
 - Added OpenGraph preview support for links in `StreamMessageInput`.
 - Removed video compression.
 
+## 3.6.0
+
 🐞 Fixed
 
 - Minor fixes and improvements
 -[[#892]](https://github.com/GetStream/stream-chat-flutter/issues/892): Fix default `initialAlignment` in `MessageListView`.
+- Fix `MessageInputTheme.inputBackgroundColor` color not being used in some widgets of `MessageInput`
+- Removed dependency on `visibility_detector`
 
 ## 3.5.1
 
