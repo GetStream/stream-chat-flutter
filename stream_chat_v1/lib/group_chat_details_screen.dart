@@ -1,7 +1,6 @@
 import 'package:example/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:uuid/uuid.dart';
 
 import 'channel_page.dart';
 import 'routes/routes.dart';
@@ -155,7 +154,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
             ),
           ],
         ),
-        body: ConnectionStatusBuilder(
+        body: StreamConnectionStatusBuilder(
           statusBuilder: (context, status) {
             String statusString = '';
             bool showStatus = true;
@@ -172,7 +171,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                 statusString = AppLocalizations.of(context).disconnected;
                 break;
             }
-            return InfoTile(
+            return StreamInfoTile(
               showMessage: showStatus,
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
@@ -222,7 +221,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                           final user = _selectedUsers[index];
                           return ListTile(
                             key: ObjectKey(user),
-                            leading: UserAvatar(
+                            leading: StreamUserAvatar(
                               user: user,
                               constraints: BoxConstraints.tightFor(
                                 width: 40,

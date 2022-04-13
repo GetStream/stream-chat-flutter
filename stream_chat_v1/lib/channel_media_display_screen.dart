@@ -21,7 +21,7 @@ class ChannelMediaDisplayScreen extends StatefulWidget {
 
   final ShowMessageCallback? onShowMessage;
 
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   const ChannelMediaDisplayScreen({
     required this.messageTheme,
@@ -180,11 +180,16 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                       MaterialPageRoute(
                         builder: (context) => StreamChannel(
                           channel: channel,
-                          child: FullScreenMedia(
-                            mediaAttachments:
-                                media.map((e) => e.attachment).toList(),
+                          child: StreamFullScreenMedia(
+                            mediaAttachmentPackages: media
+                                .map(
+                                  (e) => StreamAttachmentPackage(
+                                    attachment: e.attachment,
+                                    message: e.message,
+                                  ),
+                                )
+                                .toList(),
                             startIndex: position,
-                            message: media[position].message,
                             userName: media[position].message.user!.name,
                             onShowMessage: widget.onShowMessage,
                           ),
@@ -194,7 +199,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                   },
                   child: media[position].attachment.type == 'image'
                       ? IgnorePointer(
-                          child: ImageAttachment(
+                          child: StreamImageAttachment(
                             attachment: media[position].attachment,
                             message: media[position].message,
                             showTitle: false,

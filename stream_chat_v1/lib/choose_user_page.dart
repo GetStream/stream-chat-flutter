@@ -124,7 +124,7 @@ class ChooseUserPage extends StatelessWidget {
                               arguments: HomePageArgs(client),
                             );
                           },
-                          leading: UserAvatar(
+                          leading: StreamUserAvatar(
                             user: user,
                             constraints: BoxConstraints.tight(
                               Size.fromRadius(20),

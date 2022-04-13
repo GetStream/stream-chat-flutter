@@ -26,7 +26,7 @@ dependencies:
       ref: feat/capabilities
       path: packages/stream_chat_localizations
   flutter_local_notifications: ^9.0.0
-  flutter_svg: ^0.23.0
+  flutter_svg:
   flutter_secure_storage: ^4.2.1
   yaml: ^3.1.0
   uuid: ^3.0.5
@@ -42,17 +42,17 @@ dependency_overrides:
   stream_chat:
     git:
       url: https://github.com/GetStream/stream-chat-flutter.git
-      ref: feat/capabilities
+      ref: 5587622587e1fb31e1935d4209189db0434ef09b
       path: packages/stream_chat
   stream_chat_flutter_core:
     git:
       url: https://github.com/GetStream/stream-chat-flutter.git
-      ref: feat/capabilities
+      ref: 5587622587e1fb31e1935d4209189db0434ef09b
       path: packages/stream_chat_flutter_core
   stream_chat_flutter:
     git:
       url: https://github.com/GetStream/stream-chat-flutter.git
-      ref: feat/capabilities
+      ref: 5587622587e1fb31e1935d4209189db0434ef09b
       path: packages/stream_chat_flutter
 
 flutter:

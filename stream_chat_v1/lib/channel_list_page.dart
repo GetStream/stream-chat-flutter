@@ -40,7 +40,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
             Positioned(
               top: -3,
               right: -16,
-              child: UnreadIndicator(),
+              child: StreamUnreadIndicator(),
             ),
           ],
         ),
@@ -70,7 +70,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
     }
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-      appBar: ChannelListHeader(
+      appBar: StreamChannelListHeader(
         onNewChatButtonTap: () {
           Navigator.pushNamed(context, Routes.NEW_CHAT);
         },
@@ -165,7 +165,7 @@ class LeftDrawer extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      UserAvatar(
+                      StreamUserAvatar(
                         user: user,
                         showOnlineStatus: false,
                         constraints: BoxConstraints.tight(Size.fromRadius(20)),

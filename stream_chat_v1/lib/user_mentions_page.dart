@@ -10,7 +10,7 @@ class UserMentionsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = StreamChat.of(context).currentUser!;
     return MessageSearchBloc(
-      child: MessageSearchListView(
+      child: StreamMessageSearchListView(
         filters: Filter.in_('members', [user.id]),
         messageFilters: Filter.custom(
           operator: r'$contains',

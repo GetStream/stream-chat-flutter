@@ -4,7 +4,6 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:example/localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'channel_file_display_screen.dart';
@@ -15,7 +14,7 @@ import 'pinned_messages_screen.dart';
 import 'routes/routes.dart';
 
 class GroupInfoScreen extends StatefulWidget {
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   const GroupInfoScreen({
     Key? key,
@@ -222,7 +221,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                               horizontal: 8.0,
                               vertical: 12.0,
                             ),
-                            child: UserAvatar(
+                            child: StreamUserAvatar(
                               user: member.user!,
                               constraints: BoxConstraints.tightFor(
                                 height: 40.0,
@@ -456,7 +455,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               builder: (context, snapshot) {
                 mutedBool.value = snapshot.data;
 
-                return OptionListTile(
+                return StreamOptionListTile(
                   tileColor: StreamChatTheme.of(context).colorTheme.appBg,
                   separatorColor:
                       StreamChatTheme.of(context).colorTheme.disabled,
@@ -493,7 +492,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   onTap: () {},
                 );
               }),
-        OptionListTile(
+        StreamOptionListTile(
           title: AppLocalizations.of(context).pinnedMessages,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
@@ -553,7 +552,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             );
           },
         ),
-        OptionListTile(
+        StreamOptionListTile(
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           separatorColor: StreamChatTheme.of(context).colorTheme.disabled,
           title: AppLocalizations.of(context).photosAndVideos,
@@ -615,7 +614,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             );
           },
         ),
-        OptionListTile(
+        StreamOptionListTile(
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           separatorColor: StreamChatTheme.of(context).colorTheme.disabled,
           title: AppLocalizations.of(context).files,
@@ -660,7 +659,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         if (!channel.channel.isDistinct &&
             channel.channel.ownCapabilities
                 .contains(PermissionType.leaveChannel))
-          OptionListTile(
+          StreamOptionListTile(
             tileColor: StreamChatTheme.of(context).colorTheme.appBg,
             separatorColor: StreamChatTheme.of(context).colorTheme.disabled,
             title: AppLocalizations.of(context).leaveGroup,
@@ -730,7 +729,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         child: _buildTextInputSection(modalSetState),
                       ),
                       Expanded(
-                        child: UserListView(
+                        child: StreamUserListView(
                           selectedUsers: {},
                           onUserTap: (user, _) async {
                             _searchController!.clear();
@@ -900,7 +899,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: UserAvatar(
+                      child: StreamUserAvatar(
                         user: user,
                         constraints: BoxConstraints.tightFor(
                           height: 64.0,

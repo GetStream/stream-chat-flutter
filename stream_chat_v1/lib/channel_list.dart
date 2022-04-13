@@ -86,7 +86,7 @@ class _ChannelList extends State<ChannelList> {
             ),
           ],
           body: _isSearchActive
-              ? MessageSearchListView(
+              ? StreamMessageSearchListView(
                   showErrorTile: true,
                   messageQuery: _channelQuery,
                   filters: Filter.in_('members', [user!.id]),
