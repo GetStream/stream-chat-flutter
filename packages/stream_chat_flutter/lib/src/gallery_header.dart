@@ -28,7 +28,7 @@ class StreamGalleryHeader extends StatelessWidget
   const StreamGalleryHeader({
     Key? key,
     required this.message,
-    this.currentIndex = 0,
+    required this.attachment,
     this.showBackButton = true,
     this.onBackPressed,
     this.onShowMessage,
@@ -60,14 +60,14 @@ class StreamGalleryHeader extends StatelessWidget
   /// Message which attachments are attached to
   final Message message;
 
+  /// The attachment that's currently in focus
+  final Attachment attachment;
+
   /// Username of sender
   final String userName;
 
   /// Text which connotes the time the message was sent
   final String sentAt;
-
-  /// Stores the current index of media shown
-  final int currentIndex;
 
   /// The background color of this [StreamGalleryHeader].
   final Color? backgroundColor;
@@ -146,14 +146,14 @@ class StreamGalleryHeader extends StatelessWidget
         StreamChatTheme.of(context).galleryHeaderTheme;
 
     final defaultModal = AttachmentActionsModal(
+      attachment: attachment,
       message: message,
-      currentIndex: currentIndex,
       onShowMessage: onShowMessage,
     );
 
     final effectiveModal = attachmentActionsModalBuilder?.call(
           context,
-          message.attachments[currentIndex],
+          attachment,
           defaultModal,
         ) ??
         defaultModal;

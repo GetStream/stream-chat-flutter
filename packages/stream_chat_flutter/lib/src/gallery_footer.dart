@@ -18,16 +18,15 @@ typedef GalleryFooter = StreamGalleryFooter;
 /// {@endtemplate}
 class StreamGalleryFooter extends StatefulWidget
     implements PreferredSizeWidget {
-  /// Creates a channel header
+  /// Creates a StreamGalleryFooter
   const StreamGalleryFooter({
     Key? key,
-    required this.message,
     this.onBackPressed,
     this.onTitleTap,
     this.onImageTap,
     this.currentPage = 0,
     this.totalPages = 0,
-    this.mediaAttachments = const [],
+    required this.mediaAttachmentPackages,
     this.mediaSelectedCallBack,
     this.backgroundColor,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
@@ -50,10 +49,7 @@ class StreamGalleryFooter extends StatefulWidget
   final int totalPages;
 
   /// All attachments to show
-  final List<Attachment> mediaAttachments;
-
-  /// Message which attachments are attached to
-  final Message message;
+  final List<StreamAttachmentPackage> mediaAttachmentPackages;
 
   /// Callback when media is selected
   final ValueChanged<int>? mediaSelectedCallBack;
@@ -99,8 +95,8 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                     color: galleryFooterThemeData.shareIconColor,
                   ),
                   onPressed: () async {
-                    final attachment =
-                        widget.mediaAttachments[widget.currentPage];
+                    final attachment = widget
+                        .mediaAttachmentPackages[widget.currentPage].attachment;
                     final url = attachment.imageUrl ??
                         attachment.assetUrl ??
                         attachment.thumbUrl!;
@@ -171,7 +167,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
       builder: (context) {
         const crossAxisCount = 3;
         final noOfRowToShowInitially =
-            widget.mediaAttachments.length > crossAxisCount ? 2 : 1;
+            widget.mediaAttachmentPackages.length > crossAxisCount ? 2 : 1;
         final size = MediaQuery.of(context).size;
         final initialChildSize =
             48 + (size.width * noOfRowToShowInitially) / crossAxisCount;
@@ -212,7 +208,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                   child: GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: widget.mediaAttachments.length,
+                    itemCount: widget.mediaAttachmentPackages.length,
                     padding: const EdgeInsets.all(1),
                     // ignore: lines_longer_than_80_chars
                     gridDelegate:
@@ -223,7 +219,10 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                     ),
                     itemBuilder: (context, index) {
                       Widget media;
-                      final attachment = widget.mediaAttachments[index];
+                      final attachmentPackage =
+                          widget.mediaAttachmentPackages[index];
+                      final attachment = attachmentPackage.attachment;
+                      final message = attachmentPackage.message;
                       if (attachment.type == 'video') {
                         media = InkWell(
                           onTap: () => widget.mediaSelectedCallBack!(index),
@@ -253,7 +252,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                       return Stack(
                         children: [
                           media,
-                          if (widget.message.user != null)
+                          if (message.user != null)
                             Padding(
                               padding: const EdgeInsets.all(8),
                               child: Container(
@@ -272,7 +271,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                                   ],
                                 ),
                                 child: StreamUserAvatar(
-                                  user: widget.message.user!,
+                                  user: message.user!,
                                   constraints:
                                       BoxConstraints.tight(const Size(24, 24)),
                                   showOnlineStatus: false,
