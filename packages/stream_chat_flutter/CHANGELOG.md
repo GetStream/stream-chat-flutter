@@ -1,10 +1,17 @@
-## Upcoming
+## 4.0.0-beta.2
 
 ✅ Added
 
 - Added support to pass `autoCorrect` to `StreamMessageInput` for the text input field
 - Added support to control the visibility of the default emoji suggestions overlay
 - Added support to build custom widget for scrollToBottom in `StreamMessageListView`
+
+🐞 Fixed
+
+- Minor fixes and improvements
+-[[#892]](https://github.com/GetStream/stream-chat-flutter/issues/892): Fix default `initialAlignment` in `MessageListView`.
+- Fix `MessageInputTheme.inputBackgroundColor` color not being used in some widgets of `MessageInput`
+- Removed dependency on `visibility_detector`
 
 ## 4.0.0-beta.1
 
