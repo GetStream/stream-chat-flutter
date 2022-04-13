@@ -6,6 +6,7 @@ import 'package:example/search_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import 'channel_page.dart';
 import 'chat_info_screen.dart';
@@ -38,6 +39,16 @@ class _ChannelList extends State<ChannelList> {
       }
     });
   }
+
+  late final _channelListController = StreamChannelListController(
+    client: StreamChat.of(context).client,
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).currentUser!.id],
+    ),
+    presence: true,
+    limit: 30,
+  );
 
   @override
   void initState() {
@@ -149,59 +160,141 @@ class _ChannelList extends State<ChannelList> {
                     );
                   },
                 )
-              : ChannelListView(
-                  onChannelTap: (channel, _) {
-                    Navigator.pushNamed(
-                      context,
-                      Routes.CHANNEL_PAGE,
-                      arguments: ChannelPageArgs(
-                        channel: channel,
-                      ),
-                    );
-                  },
-                  onStartChatPressed: () {
-                    Navigator.pushNamed(context, Routes.NEW_CHAT);
-                  },
-                  swipeToAction: true,
-                  filter: Filter.in_('members', [user!.id]),
-                  presence: true,
-                  limit: 30,
-                  onViewInfoTap: (channel) {
-                    Navigator.pop(context);
-                    if (channel.memberCount == 2 && channel.isDistinct) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StreamChannel(
+              : SlidableAutoCloseBehavior(
+                  closeWhenOpened: true,
+                  child: RefreshIndicator(
+                    onRefresh: _channelListController.refresh,
+                    child: StreamChannelListView(
+                      controller: _channelListController,
+                      itemBuilder: (context, channel, tile) {
+                        final chatTheme = StreamChatTheme.of(context);
+                        final backgroundColor = chatTheme.colorTheme.inputBg;
+                        final canDeleteChannel = channel.ownCapabilities
+                            .contains(PermissionType.deleteChannel);
+                        return Slidable(
+                          groupTag: 'channels-actions',
+                          endActionPane: ActionPane(
+                            extentRatio: canDeleteChannel ? 0.40 : 0.20,
+                            motion: const BehindMotion(),
+                            children: [
+                              CustomSlidableAction(
+                                child: Icon(Icons.more_horiz),
+                                backgroundColor: backgroundColor,
+                                onPressed: (_) {
+                                  showChannelInfoModalBottomSheet(
+                                    context: context,
+                                    channel: channel,
+                                    onViewInfoTap: () {
+                                      Navigator.pop(context);
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            final isOneToOne =
+                                                channel.memberCount == 2 &&
+                                                    channel.isDistinct;
+                                            return StreamChannel(
+                                              channel: channel,
+                                              child: isOneToOne
+                                                  ? ChatInfoScreen(
+                                                      messageTheme: chatTheme
+                                                          .ownMessageTheme,
+                                                      user: channel
+                                                          .state!.members
+                                                          .where((m) =>
+                                                              m.userId !=
+                                                              channel
+                                                                  .client
+                                                                  .state
+                                                                  .currentUser!
+                                                                  .id)
+                                                          .first
+                                                          .user,
+                                                    )
+                                                  : GroupInfoScreen(
+                                                      messageTheme: chatTheme
+                                                          .ownMessageTheme,
+                                                    ),
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                              if (canDeleteChannel)
+                                CustomSlidableAction(
+                                  backgroundColor: backgroundColor,
+                                  child: StreamSvgIcon.delete(
+                                    color: chatTheme.colorTheme.accentError,
+                                  ),
+                                  onPressed: (_) async {
+                                    final res = await showConfirmationDialog(
+                                      context,
+                                      title: 'Delete Conversation',
+                                      question:
+                                          'Are you sure you want to delete this conversation?',
+                                      okText: 'Delete',
+                                      cancelText: 'Cancel',
+                                      icon: StreamSvgIcon.delete(
+                                        color: chatTheme.colorTheme.accentError,
+                                      ),
+                                    );
+                                    if (res == true) {
+                                      await _channelListController
+                                          .deleteChannel(channel);
+                                    }
+                                  },
+                                ),
+                            ],
+                          ),
+                          child: tile,
+                        );
+                      },
+                      onChannelTap: (channel) {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.CHANNEL_PAGE,
+                          arguments: ChannelPageArgs(
                             channel: channel,
-                            child: ChatInfoScreen(
-                              messageTheme:
-                                  StreamChatTheme.of(context).ownMessageTheme,
-                              user: channel.state!.members
-                                  .where((m) =>
-                                      m.userId !=
-                                      channel.client.state.currentUser!.id)
-                                  .first
-                                  .user,
+                          ),
+                        );
+                      },
+                      emptyBuilder: (_) {
+                        return Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Expanded(child: StreamChannelListEmptyWidget()),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      Routes.NEW_CHAT,
+                                    );
+                                  },
+                                  child: Text(
+                                    'Start a chat',
+                                    style: StreamChatTheme.of(context)
+                                        .textTheme
+                                        .bodyBold
+                                        .copyWith(
+                                          color: StreamChatTheme.of(context)
+                                              .colorTheme
+                                              .accentPrimary,
+                                        ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      );
-                    } else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StreamChannel(
-                            channel: channel,
-                            child: GroupInfoScreen(
-                              messageTheme:
-                                  StreamChatTheme.of(context).ownMessageTheme,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                  },
+                        );
+                      },
+                    ),
+                  ),
                 ),
         ),
       ),

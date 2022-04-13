@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart' show IterableExtension;
 import 'package:example/localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -53,13 +52,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             height: 8.0,
             color: StreamChatTheme.of(context).colorTheme.disabled,
           ),
-          if ([
-            'admin',
-            'owner',
-          ].contains(channel.state!.members
-              .firstWhereOrNull(
-                  (m) => m.userId == channel.client.state.currentUser!.id)
-              ?.role))
+          if (channel.ownCapabilities.contains(PermissionType.deleteChannel))
             _buildDeleteListTile(),
         ],
       ),

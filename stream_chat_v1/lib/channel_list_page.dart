@@ -100,10 +100,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          ChannelsBloc(
-            child: MessageSearchBloc(
-              child: ChannelList(),
-            ),
+          MessageSearchBloc(
+            child: ChannelList(),
           ),
           UserMentionsPage(),
         ],
