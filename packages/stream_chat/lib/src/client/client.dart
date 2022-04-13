@@ -328,7 +328,9 @@ class StreamChatClient {
         _chatPersistenceClient = _originalChatPersistenceClient;
         await _chatPersistenceClient!.connect(ownUser.id);
       }
-      final connectedUser = await openConnection();
+      final connectedUser = await openConnection(
+        includeUserDetailsInConnectCall: true,
+      );
       return state.currentUser = connectedUser;
     } catch (e, stk) {
       if (e is StreamWebSocketError && e.isRetriable) {
@@ -341,7 +343,11 @@ class StreamChatClient {
   }
 
   /// Creates a new WebSocket connection with the current user.
-  Future<OwnUser> openConnection() async {
+  /// If [includeUserDetailsInConnectCall] is true it will include the current
+  /// user details in the connect call.
+  Future<OwnUser> openConnection({
+    bool includeUserDetailsInConnectCall = false,
+  }) async {
     assert(
       state.currentUser != null,
       'User is not set on client, '
@@ -371,7 +377,10 @@ class StreamChatClient {
         _ws.connectionStatusStream.skip(1).listen(_connectionStatusHandler);
 
     try {
-      final event = await _ws.connect(user);
+      final event = await _ws.connect(
+        user,
+        includeUserDetails: includeUserDetailsInConnectCall,
+      );
       return user.merge(event.me);
     } catch (e, stk) {
       logger.severe('error connecting ws', e, stk);
