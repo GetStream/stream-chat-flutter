@@ -12,6 +12,7 @@
 -[[#892]](https://github.com/GetStream/stream-chat-flutter/issues/892): Fix default `initialAlignment` in `MessageListView`.
 - Fix `MessageInputTheme.inputBackgroundColor` color not being used in some widgets of `MessageInput`
 - Removed dependency on `visibility_detector`
+- [[#1071]](https://github.com/GetStream/stream-chat-flutter/issues/1071): Fixed the way attachment actions were handled in full screen
 
 ## 4.0.0-beta.1
 
