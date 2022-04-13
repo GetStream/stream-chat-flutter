@@ -38,7 +38,7 @@ void main() {
               onWillPop: () async => false,
               child: Scaffold(
                 body: StreamGalleryFooter(
-                  message: Message(),
+                  mediaAttachmentPackages: Message().getAttachmentPackageList(),
                 ),
               ),
             ),

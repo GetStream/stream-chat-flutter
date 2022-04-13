@@ -66,9 +66,11 @@ void main() {
         home: Builder(
           builder: (context) {
             _context = context;
+            final _message = Message();
             return Scaffold(
               appBar: StreamGalleryHeader(
-                message: Message(),
+                message: _message,
+                attachment: _message.attachments[0],
               ),
             );
           },
@@ -105,9 +107,11 @@ void main() {
         home: Builder(
           builder: (context) {
             _context = context;
+            final _message = Message();
             return Scaffold(
               appBar: StreamGalleryHeader(
-                message: Message(),
+                message: _message,
+                attachment: _message.attachments[0],
               ),
             );
           },

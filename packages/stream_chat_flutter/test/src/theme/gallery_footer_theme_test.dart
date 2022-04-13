@@ -75,7 +75,7 @@ void main() {
             _context = context;
             return Scaffold(
               appBar: StreamGalleryFooter(
-                message: Message(),
+                mediaAttachmentPackages: Message().getAttachmentPackageList(),
               ),
             );
           },
@@ -118,7 +118,7 @@ void main() {
             _context = context;
             return Scaffold(
               appBar: StreamGalleryFooter(
-                message: Message(),
+                mediaAttachmentPackages: Message().getAttachmentPackageList(),
               ),
             );
           },

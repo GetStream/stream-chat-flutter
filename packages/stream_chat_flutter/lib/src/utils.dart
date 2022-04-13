@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/stream_attachment_package.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -428,4 +429,20 @@ int levenshtein(String s, String t, {bool caseSensitive = true}) {
   }
 
   return v1[t.length];
+}
+
+/// An easy way to handle attachment related operations on a message
+extension AttachmentPackagesX on Message {
+  /// This extension will return a List of type [StreamAttachmentPackage] from the
+  /// existing attachments of the message
+  List<StreamAttachmentPackage> getAttachmentPackageList() {
+    final _attachmentPackages = List<StreamAttachmentPackage>.generate(
+      attachments.length,
+      (index) => StreamAttachmentPackage(
+        attachment: attachments[index],
+        message: this,
+      ),
+    );
+    return _attachmentPackages;
+  }
 }

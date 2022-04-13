@@ -63,22 +63,29 @@ void main() {
                     Event(type: EventType.typingStart),
               }));
 
+      final attachment = Attachment(
+        type: 'image',
+        title: 'demo image',
+        imageUrl: '',
+      );
+      final message = Message(
+        createdAt: DateTime.now(),
+        attachments: [
+          attachment,
+        ],
+      );
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
           client: client,
           child: StreamChannel(
             channel: channel,
             child: StreamFullScreenMedia(
-              mediaAttachments: [
-                Attachment(
-                  type: 'image',
-                  title: 'demo image',
-                  imageUrl: '',
+              mediaAttachmentPackages: [
+                StreamAttachmentPackage(
+                  attachment: attachment,
+                  message: message,
                 ),
               ],
-              message: Message(
-                createdAt: DateTime.now(),
-              ),
             ),
           ),
         ),
