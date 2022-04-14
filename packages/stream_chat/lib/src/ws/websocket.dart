@@ -155,7 +155,7 @@ class WebSocket with TimerHelper {
     final token = await tokenManager.loadToken(refresh: refreshToken);
     final params = {
       'user_id': user.id,
-      if (includeUserDetails) 'user_details': user,
+      'user_details': includeUserDetails ? user : {'id': user.id},
       'user_token': token.rawValue,
       'server_determines_connection_id': true,
     };
