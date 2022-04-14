@@ -593,6 +593,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             elevation: widget.elevation ??
                 _streamChatTheme.messageInputTheme.elevation ??
                 8,
+            color: _messageInputTheme.inputBackgroundColor,
             child: child,
           );
         }
@@ -789,6 +790,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
           gradient: _focusNode.hasFocus
               ? _messageInputTheme.activeBorderGradient
               : _messageInputTheme.idleBorderGradient,
+          color: _messageInputTheme.inputBackgroundColor,
         ),
         child: Padding(
           padding: const EdgeInsets.all(1.5),

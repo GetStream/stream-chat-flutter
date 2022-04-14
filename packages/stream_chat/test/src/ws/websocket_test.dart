@@ -59,7 +59,10 @@ void main() {
   });
 
   test('`connect` successfully with the provided user', () async {
-    final user = OwnUser(id: 'test-user');
+    final user = OwnUser(
+      id: 'test-user',
+      name: 'test',
+    );
     const connectionId = 'test-connection-id';
     // Sends connect event to web-socket stream
     final timer = Timer(const Duration(milliseconds: 300), () {
@@ -81,6 +84,44 @@ void main() {
     );
 
     final event = await webSocket.connect(user);
+
+    expect(event.type, EventType.healthCheck);
+    expect(event.connectionId, connectionId);
+    expect(event.me, isNotNull);
+    expect(event.me!.id, user.id);
+
+    addTearDown(timer.cancel);
+  });
+
+  test('`connect` successfully without user details', () async {
+    final user = OwnUser(
+      id: 'test-user',
+      name: 'test',
+    );
+    const connectionId = 'test-connection-id';
+    // Sends connect event to web-socket stream
+    final timer = Timer(const Duration(milliseconds: 300), () {
+      final event = Event(
+        type: EventType.healthCheck,
+        connectionId: connectionId,
+        me: user,
+      );
+      webSocketSink.add(json.encode(event));
+    });
+
+    expectLater(
+      webSocket.connectionStatusStream,
+      emitsInOrder([
+        ConnectionStatus.disconnected,
+        ConnectionStatus.connecting,
+        ConnectionStatus.connected,
+      ]),
+    );
+
+    final event = await webSocket.connect(
+      user,
+      includeUserDetails: true,
+    );
 
     expect(event.type, EventType.healthCheck);
     expect(event.connectionId, connectionId);
