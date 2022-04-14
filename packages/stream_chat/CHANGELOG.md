@@ -1,3 +1,8 @@
+## Upcoming
+
+🐞 Fixed
+- [[#1081]](https://github.com/GetStream/stream-chat-flutter/issues/1081) Fixed a bug with user reconnection.
+
 ## 3.6.0
 
 🐞 Fixed
