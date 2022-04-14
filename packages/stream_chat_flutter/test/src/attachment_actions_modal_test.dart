@@ -452,15 +452,16 @@ void main() {
 
       await tester.tap(find.text('Save Image'));
 
-      imageDownloader.progressCallback!(0, 100);
+      imageDownloader.progressCallback!(0, 100000);
       await tester.pump();
-      expect(find.text('0%'), findsOneWidget);
+      expect(find.text('0.00 MB'), findsOneWidget);
 
-      imageDownloader.progressCallback!(50, 100);
+      imageDownloader.progressCallback!(50000, 100000);
       await tester.pump();
-      expect(find.text('50%'), findsOneWidget);
+      expect(find.text('0.05 MB'), findsOneWidget);
 
-      imageDownloader.progressCallback!(100, 100);
+      imageDownloader.progressCallback!(100000, 100000);
+      imageDownloader.downloadedPathCallback!('path');
       imageDownloader.completer.complete('path');
       await tester.pump();
       expect(find.byKey(const Key('completedIcon')), findsOneWidget);
@@ -510,15 +511,16 @@ void main() {
 
       await tester.tap(find.text('Save Video'));
 
-      fileDownloader.progressCallback!(0, 100);
+      fileDownloader.progressCallback!(0, 100000);
       await tester.pump();
-      expect(find.text('0%'), findsOneWidget);
+      expect(find.text('0.00 MB'), findsOneWidget);
 
-      fileDownloader.progressCallback!(50, 100);
+      fileDownloader.progressCallback!(50000, 100000);
       await tester.pump();
-      expect(find.text('50%'), findsOneWidget);
+      expect(find.text('0.05 MB'), findsOneWidget);
 
-      fileDownloader.progressCallback!(100, 100);
+      fileDownloader.progressCallback!(100000, 100000);
+      fileDownloader.downloadedPathCallback!('path');
       fileDownloader.completer.complete('path');
       await tester.pump();
       expect(find.byKey(const Key('completedIcon')), findsOneWidget);
