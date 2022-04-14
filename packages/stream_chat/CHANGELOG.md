@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## 4.0.0-beta.0
 
 ✅ Added
@@ -7,6 +8,13 @@
 🐞 Fixed
 
 - Minor fixes and improvements.
+=======
+## 3.6.1
+
+🐞 Fixed
+
+- [[#1081]](https://github.com/GetStream/stream-chat-flutter/issues/1081) Fixed a bug with user reconnection.
+>>>>>>> develop
 
 ## 3.6.0
 

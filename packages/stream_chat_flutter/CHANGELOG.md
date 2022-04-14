@@ -22,6 +22,10 @@
 - Added OpenGraph preview support for links in `StreamMessageInput`.
 - Removed video compression.
 
+## 3.6.1
+
+- Updated `stream_chat_flutter_core` dependency to [`3.6.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 3.6.0
 
 🐞 Fixed
@@ -59,6 +63,7 @@
 - Fix default `Channel` route not opening from `ChannelListView` when `ChannelAvatar` is tapped
 
 ## 3.4.0
+
 - Updated `stream_chat_flutter_core` dependency to [`3.4.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 🐞 Fixed
