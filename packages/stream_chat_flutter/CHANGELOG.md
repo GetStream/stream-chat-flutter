@@ -3,7 +3,7 @@
 ✅ Added
 
 - Added support to pass `autoCorrect` to `StreamMessageInput` for the text input field
-- Added support to control the visibility of the default emoji suggestions overlay
+- Added support to control the visibility of the default emoji suggestions overlay in `StreamMessageInput`
 - Added support to build custom widget for scrollToBottom in `StreamMessageListView`
 
 🐞 Fixed
