@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+- [[#842]](https://github.com/GetStream/stream-chat-flutter/issues/842): show date divider for first message.
+
+
 ## 3.6.1
 
 - Updated `stream_chat_flutter_core` dependency to [`3.6.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
