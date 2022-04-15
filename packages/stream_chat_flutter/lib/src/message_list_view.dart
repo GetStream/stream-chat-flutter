@@ -559,6 +559,9 @@ class _MessageListViewState extends State<MessageListView> {
                       if (widget.reverse
                           ? widget.headerBuilder == null
                           : widget.footerBuilder == null) {
+                        if (messages.isNotEmpty) {
+                          return _buildDateDivider(messages.last);
+                        }
                         if (_isThreadConversation) return const Offstage();
                         return const SizedBox(height: 52);
                       }
@@ -583,21 +586,12 @@ class _MessageListViewState extends State<MessageListView> {
                       message = messages[i - 2];
                       nextMessage = messages[i - 1];
                     }
+
                     if (!Jiffy(message.createdAt.toLocal()).isSame(
                       nextMessage.createdAt.toLocal(),
                       Units.DAY,
                     )) {
-                      final divider = widget.dateDividerBuilder != null
-                          ? widget.dateDividerBuilder!(
-                              nextMessage.createdAt.toLocal(),
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: DateDivider(
-                                dateTime: nextMessage.createdAt.toLocal(),
-                              ),
-                            );
-                      return divider;
+                      return _buildDateDivider(nextMessage);
                     }
                     final timeDiff =
                         Jiffy(nextMessage.createdAt.toLocal()).diff(
@@ -747,6 +741,20 @@ class _MessageListViewState extends State<MessageListView> {
     return child;
   }
 
+  Widget _buildDateDivider(Message message) {
+    final divider = widget.dateDividerBuilder != null
+        ? widget.dateDividerBuilder!(
+            message.createdAt.toLocal(),
+          )
+        : Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: DateDivider(
+              dateTime: message.createdAt.toLocal(),
+            ),
+          );
+    return divider;
+  }
+
   Widget _buildThreadSeparator() {
     if (widget.threadSeparatorBuilder != null) {
       return widget.threadSeparatorBuilder!.call(context);
@@ -803,7 +811,11 @@ class _MessageListViewState extends State<MessageListView> {
               index = _getBottomElementIndex(values);
             }
 
-            if (index == null) return const Offstage();
+            if ((index == null) ||
+                (!_isThreadConversation && index == itemCount - 2) ||
+                (_isThreadConversation && index == itemCount - 1)) {
+              return const Offstage();
+            }
 
             if (index <= 2 || index >= itemCount - 3) {
               if (widget.reverse) {
