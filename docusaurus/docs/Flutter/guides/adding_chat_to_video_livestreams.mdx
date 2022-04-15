@@ -61,75 +61,37 @@ The second type looks like this:
 
 ![](../assets/live_stream_2.jpg)
 
-We can use a `Stack` for achieving this, here's a complete working implementation:
+We can use a `Stack` for achieving this:
 
 ```dart
-class MyApp extends StatelessWidget {
-  const MyApp({
-    Key? key,
-    required this.client,
-    required this.channel,
-  }) : super(key: key);
-
-  final StreamChatClient client;
-
-  final Channel channel;
-
-  @override
-  Widget build(BuildContext context) => MaterialApp(
-        theme: ThemeData.light(),
-        darkTheme: ThemeData.dark(),
-        builder: (context, widget) => StreamChat(
-          client: client,
-          child: widget,
-          streamChatThemeData: StreamChatThemeData().copyWith(
-            messageListViewTheme: const MessageListViewThemeData(
-              backgroundColor: Colors.transparent,
+Stack(
+  children: <Widget>[
+    // Add your video implementation here
+    ShaderMask(
+      shaderCallback: (rect) {
+        return const LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [Colors.black, Colors.transparent],
+            stops: [0.4, 0.8]).createShader(
+          Rect.fromLTRB(0, 0, rect.width, rect.height),
+        );
+      },
+      blendMode: BlendMode.dstIn,
+      child: Column(
+        children: const [
+          Expanded(
+            child: MessageListViewTheme(
+              data: MessageListViewThemeData(
+                backgroundColor: Colors.transparent,
+              ),
+              child: MessageListView(),
             ),
           ),
-        ),
-        home: StreamChannel(
-          channel: channel,
-          child: const ChannelPage(),
-        ),
-      );
-}
-
-class ChannelPage extends StatelessWidget {
-  const ChannelPage({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
-        children: <Widget>[
-          // Add your video implementation here
-          ShaderMask(
-            shaderCallback: (rect) {
-              return const LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [Colors.black, Colors.transparent],
-                  stops: [0.4, 0.8]).createShader(
-                Rect.fromLTRB(0, 0, rect.width, rect.height),
-              );
-            },
-            blendMode: BlendMode.dstIn,
-            child: Column(
-              children: const [
-                Expanded(
-                  child: MessageListView(),
-                ),
-                MessageInput(),
-              ],
-            ),
-          ),
+          MessageInput(),
         ],
       ),
-    );
-  }
-}
+    ),
+  ],
+),
 ```
