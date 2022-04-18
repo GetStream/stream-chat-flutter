@@ -1,3 +1,7 @@
+## Upcoming
+
+* Added translations for viewLibrary.
+
 ## 2.1.0
 
 ✅ Added
