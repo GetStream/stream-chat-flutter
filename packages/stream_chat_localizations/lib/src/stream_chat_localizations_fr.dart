@@ -372,5 +372,8 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   ''';
 
   @override
+  String get viewLibrary => 'Voir la bibliothèque';
+
+  @override
   String get slowModeOnLabel => 'Mode lent activé';
 }
