@@ -370,5 +370,8 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   ''';
 
   @override
+  String get viewLibrary => 'Ver biblioteca';
+
+  @override
   String get slowModeOnLabel => 'Modo lento ativado';
 }

@@ -392,6 +392,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get slowModeOnLabel => 'Slow mode ON';
+
+  @override
+  String get viewLibrary => 'View library';
 }
 
 void main() async {

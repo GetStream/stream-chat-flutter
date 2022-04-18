@@ -351,6 +351,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'スローモードオン';
 
   @override
+  String get viewLibrary => 'ライブラリを表示';
+
+  @override
   String attachmentLimitExceedError(int limit) => '''
 添付ファイルの制限を超えました：$limit個のファイル以上を添付することはできません
   ''';

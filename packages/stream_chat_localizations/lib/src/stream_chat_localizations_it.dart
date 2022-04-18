@@ -369,5 +369,8 @@ Attenzione: il limite massimo di $limit file è stato superato.
   ''';
 
   @override
+  String get viewLibrary => 'Vedi la biblioteca';
+
+  @override
   String get slowModeOnLabel => 'Slowmode attiva';
 }
