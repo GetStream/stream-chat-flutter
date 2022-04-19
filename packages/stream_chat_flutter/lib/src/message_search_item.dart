@@ -2,23 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro message_search_item}
-@Deprecated("Use 'StreamMessageSearchItem' instead")
-typedef MessageSearchItem = StreamMessageSearchItem;
-
 /// {@template message_search_item}
 /// It shows the current [Message] preview.
 ///
 /// Usually you don't use this widget as it's the default item used by
-/// [StreamMessageSearchListView].
+/// [MessageSearchListView].
 ///
 /// The widget renders the ui based on the first ancestor of type
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
 /// {@endtemplate}
-class StreamMessageSearchItem extends StatelessWidget {
+@Deprecated("Use 'StreamMessageSearchItem' instead")
+class MessageSearchItem extends StatelessWidget {
   /// Instantiate a new MessageSearchItem
-  const StreamMessageSearchItem({
+  const MessageSearchItem({
     Key? key,
     required this.getMessageResponse,
     this.onTap,
@@ -31,7 +28,7 @@ class StreamMessageSearchItem extends StatelessWidget {
   /// Function called when tapping this widget
   final VoidCallback? onTap;
 
-  /// If true the [StreamMessageSearchItem] will show the current online Status
+  /// If true the [MessageSearchItem] will show the current online Status
   final bool showOnlineStatus;
 
   @override

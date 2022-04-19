@@ -8,10 +8,6 @@ typedef UserTapCallback = void Function(User, Widget?);
 /// Builder used to create a custom [ListUserItem] from a [User]
 typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 
-/// {@macro user_list_view}
-@Deprecated("Use 'StreamUserListView' instead")
-typedef UserListView = StreamUserListView;
-
 /// {@template user_list_view}
 /// It shows the list of current users.
 ///
@@ -47,9 +43,10 @@ typedef UserListView = StreamUserListView;
 /// type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 /// {@endtemplate}
-class StreamUserListView extends StatefulWidget {
+@Deprecated("Use 'StreamUserListView' instead")
+class UserListView extends StatefulWidget {
   /// Instantiate a new UserListView
-  StreamUserListView({
+  UserListView({
     Key? key,
     this.filter = const Filter.empty(),
     this.sort,
@@ -165,10 +162,10 @@ class StreamUserListView extends StatefulWidget {
   final UserListController? userListController;
 
   @override
-  _StreamUserListViewState createState() => _StreamUserListViewState();
+  _UserListViewState createState() => _UserListViewState();
 }
 
-class _StreamUserListViewState extends State<StreamUserListView>
+class _UserListViewState extends State<UserListView>
     with WidgetsBindingObserver {
   bool get _isListView => widget.crossAxisCount == 1;
 

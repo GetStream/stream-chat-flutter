@@ -11,15 +11,11 @@ typedef MessageSearchItemBuilder = Widget Function(
   GetMessageResponse,
 );
 
-/// Builder used when [StreamMessageSearchListView] is empty
+/// Builder used when [MessageSearchListView] is empty
 typedef EmptyMessageSearchBuilder = Widget Function(
   BuildContext context,
   String searchQuery,
 );
-
-/// {@macro message_search_list_view}
-@Deprecated("Use 'StreamMessageSearchListView' instead")
-typedef MessageSearchListView = StreamMessageSearchListView;
 
 /// {@template message_search_list_view}
 /// It shows the list of searched messages.
@@ -52,9 +48,10 @@ typedef MessageSearchListView = StreamMessageSearchListView;
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
 /// {@endtemplate}
-class StreamMessageSearchListView extends StatefulWidget {
+@Deprecated("Use 'StreamMessageSearchListView' instead")
+class MessageSearchListView extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
-  const StreamMessageSearchListView({
+  const MessageSearchListView({
     Key? key,
     required this.filters,
     this.messageQuery,
@@ -101,7 +98,7 @@ class StreamMessageSearchListView extends StatefulWidget {
   /// Builder used to create a custom item preview
   final MessageSearchItemBuilder? itemBuilder;
 
-  /// Function called when tapping on a [StreamMessageSearchItem]
+  /// Function called when tapping on a [MessageSearchItem]
   final MessageSearchItemTapCallback? onItemTap;
 
   /// Builder used to create a custom item separator
@@ -135,12 +132,10 @@ class StreamMessageSearchListView extends StatefulWidget {
   final MessageSearchListController? messageSearchListController;
 
   @override
-  _StreamMessageSearchListViewState createState() =>
-      _StreamMessageSearchListViewState();
+  _MessageSearchListViewState createState() => _MessageSearchListViewState();
 }
 
-class _StreamMessageSearchListViewState
-    extends State<StreamMessageSearchListView> {
+class _MessageSearchListViewState extends State<MessageSearchListView> {
   late final _defaultController = MessageSearchListController();
 
   MessageSearchListController get _messageSearchListController =>
@@ -226,7 +221,7 @@ class _StreamMessageSearchListViewState
     if (widget.itemBuilder != null) {
       return widget.itemBuilder!(context, getMessageResponse);
     }
-    return StreamMessageSearchItem(
+    return MessageSearchItem(
       getMessageResponse: getMessageResponse,
       onTap: () => widget.onItemTap!(getMessageResponse),
     );

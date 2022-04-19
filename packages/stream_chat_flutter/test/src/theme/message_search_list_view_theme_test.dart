@@ -67,7 +67,7 @@ void main() {
             _context = context;
             return Scaffold(
               body: MessageSearchBloc(
-                child: StreamMessageSearchListView(
+                child: MessageSearchListView(
                   filters: Filter.in_('members', const ['test_id']),
                   messageQuery: 'test query',
                 ),
@@ -100,7 +100,7 @@ void main() {
             _context = context;
             return Scaffold(
               body: MessageSearchBloc(
-                child: StreamMessageSearchListView(
+                child: MessageSearchListView(
                   filters: Filter.in_('members', const ['test_id']),
                   messageQuery: 'test query',
                 ),

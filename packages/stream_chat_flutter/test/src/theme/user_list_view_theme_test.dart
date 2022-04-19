@@ -60,7 +60,7 @@ void main() {
             _context = context;
             return Scaffold(
               body: UsersBloc(
-                child: StreamUserListView(),
+                child: UserListView(),
               ),
             );
           },
@@ -89,7 +89,7 @@ void main() {
             _context = context;
             return Scaffold(
               body: UsersBloc(
-                child: StreamUserListView(),
+                child: UserListView(),
               ),
             );
           },
