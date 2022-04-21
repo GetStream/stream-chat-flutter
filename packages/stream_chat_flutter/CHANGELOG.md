@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#1067]](https://github.com/GetStream/stream-chat-flutter/issues/1067): Fix name text overflow in reaction card.
+
 ## 3.6.1
 
 - Updated `stream_chat_flutter_core` dependency to [`3.6.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
