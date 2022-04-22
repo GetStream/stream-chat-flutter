@@ -33,6 +33,7 @@ dependencies:
   streaming_shared_preferences: ^2.0.0
   lottie: ^1.2.1
   collection: ^1.15.0
+  sentry_flutter: ^6.5.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.9.2

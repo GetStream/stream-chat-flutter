@@ -294,10 +294,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           ),
                         );
 
-                        final client = StreamChatClient(
-                          apiKey,
-                          logLevel: Level.INFO,
-                        )..chatPersistenceClient = chatPersistentClient;
+                        final client = buildStreamChatClient(apiKey);
 
                         try {
                           await client.connectUser(
