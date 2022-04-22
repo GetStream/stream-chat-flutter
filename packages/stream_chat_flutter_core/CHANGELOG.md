@@ -1,3 +1,8 @@
+## Upcoming
+
+- Deprecated `UsersBloc` in favor of `StreamUserListController` to control the user list.
+- Deprecated `MessageSearchBloc` in favor of `StreamMessageSearchListController` to control the user list.
+
 ## 4.0.0-beta.2
 
 - Updated `stream_chat` dependency to [`4.0.0-beta.2`](https://pub.dev/packages/stream_chat/changelog).

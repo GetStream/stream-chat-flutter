@@ -486,10 +486,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   @override
   Widget build(BuildContext context) {
-    if (!StreamChannel.of(context)
-        .channel
-        .ownCapabilities
-        .contains(PermissionType.sendMessage)) {
+    final channel = StreamChannel.of(context).channel;
+    if (channel.state != null &&
+        !channel.ownCapabilities.contains(PermissionType.sendMessage)) {
       return SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
