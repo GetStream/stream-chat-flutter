@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - [[#1067]](https://github.com/GetStream/stream-chat-flutter/issues/1067): Fix name text overflow in reaction card.
+- [[#842]](https://github.com/GetStream/stream-chat-flutter/issues/842): show date divider for first message.
 
 ## 3.6.1
 
