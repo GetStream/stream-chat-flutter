@@ -64,7 +64,7 @@ class StreamChatClient {
   StreamChatClient(
     String apiKey, {
     this.logLevel = Level.WARNING,
-    LogHandlerFunction? logHandlerFunction,
+    this.logHandlerFunction = StreamChatClient.defaultLogHandler,
     RetryPolicy? retryPolicy,
     @Deprecated('''
     Location is now deprecated in favor of the new edge server. Will be removed in v4.0.0.
@@ -77,7 +77,6 @@ class StreamChatClient {
     WebSocket? ws,
     AttachmentFileUploader? attachmentFileUploader,
   }) {
-    this.logHandlerFunction = logHandlerFunction ?? _defaultLogHandler;
     logger.info('Initiating new StreamChatClient');
 
     final options = StreamHttpClientOptions(
@@ -134,7 +133,7 @@ class StreamChatClient {
       '${CurrentPlatform.name}-'
       '${PACKAGE_VERSION.split('+')[0]}';
 
-  /// Additionals headers for all requests
+  /// Additional headers for all requests
   static Map<String, Object?> additionalHeaders = {};
 
   ChatPersistenceClient? _originalChatPersistenceClient;
@@ -189,7 +188,7 @@ class StreamChatClient {
   /// final client = StreamChatClient("stream-chat-api-key",
   /// logHandlerFunction: myLogHandlerFunction);
   ///```
-  late LogHandlerFunction logHandlerFunction;
+  final LogHandlerFunction logHandlerFunction;
 
   StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
 
@@ -214,17 +213,18 @@ class StreamChatClient {
   Stream<ConnectionStatus> get wsConnectionStatusStream =>
       _wsConnectionStatusController.stream.distinct();
 
-  LogHandlerFunction get _defaultLogHandler => (LogRecord record) {
-        print(
-          '${record.time} '
-          '${_levelEmojiMapper[record.level] ?? record.level.name} '
-          '${record.loggerName} ${record.message} ',
-        );
-        if (record.error != null) print(record.error);
-        if (record.stackTrace != null) print(record.stackTrace);
-      };
+  /// Default log handler function for the [StreamChatClient] logger.
+  static void defaultLogHandler(LogRecord record) {
+    print(
+      '${record.time} '
+      '${_levelEmojiMapper[record.level] ?? record.level.name} '
+      '${record.loggerName} ${record.message} ',
+    );
+    if (record.error != null) print(record.error);
+    if (record.stackTrace != null) print(record.stackTrace);
+  }
 
-  ///
+  /// Default logger for the [StreamChatClient].
   Logger detachedLogger(String name) => Logger.detached(name)
     ..level = logLevel
     ..onRecord.listen(logHandlerFunction);
