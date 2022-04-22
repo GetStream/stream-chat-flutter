@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// using Flutter's [BuildContext].
 ///
 /// API docs: https://getstream.io/chat/docs/flutter-dart/init_and_users/
+@Deprecated("Use 'StreamUserListController' instead")
 class UsersBloc extends StatefulWidget {
   /// Instantiate a new [UsersBloc]. The parameter [child] must be supplied and
   /// not null.

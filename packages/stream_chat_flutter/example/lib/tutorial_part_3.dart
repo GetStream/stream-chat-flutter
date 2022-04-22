@@ -115,9 +115,11 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   Widget _channelPreviewBuilder(
     BuildContext context,
-    Channel channel,
+    List<Channel> channels,
+    int index,
     StreamChannelListTile defaultTile,
   ) {
+    final channel = channels[index];
     final lastMessage = channel.state?.messages.reversed.firstWhereOrNull(
       (message) => !message.isDeleted,
     );

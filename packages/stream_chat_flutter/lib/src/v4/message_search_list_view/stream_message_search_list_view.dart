@@ -1,61 +1,58 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list_loading_tile.dart';
-import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list_tile.dart';
 import 'package:stream_chat_flutter/src/v4/stream_list_view_indexed_widget_builder.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Default separator builder for [StreamChannelListView].
-Widget defaultChannelListViewSeparatorBuilder(
+/// Default separator builder for [StreamMessageSearchListView].
+Widget defaultMessageSearchListViewSeparatorBuilder(
   BuildContext context,
-  List<Channel> items,
+  List<GetMessageResponse> responses,
   int index,
 ) =>
-    const StreamChannelListSeparator();
+    const StreamMessageSearchListSeparator();
 
 /// Signature for the item builder that creates the children of the
-/// [StreamChannelListView].
-typedef StreamChannelListViewIndexedWidgetBuilder
-    = StreamListViewIndexedWidgetBuilder<Channel, StreamChannelListTile>;
+/// [StreamMessageSearchListView].
+typedef StreamMessageSearchListViewIndexedWidgetBuilder
+    = StreamListViewIndexedWidgetBuilder<GetMessageResponse,
+        StreamMessageSearchListTile>;
 
-/// A [ListView] that shows a list of [Channel]s,
-/// it uses [StreamChannelListTile] as a default item.
+/// A [ListView] that shows a list of [GetMessageResponse]s,
+/// it uses [StreamMessageSearchListTile] as a default item.
 ///
-/// This is the new version of [ChannelListView] that uses
-/// [StreamChannelListController].
+/// This is the new version of [MessageSearchListView] that uses
+/// [StreamMessageSearchListController].
 ///
 /// Example:
 ///
 /// ```dart
-/// StreamChannelListView(
+/// StreamMessageSearchListView(
 ///   controller: controller,
-///   onChannelTap: (channel) {
-///     // Handle channel tap event
+///   onMessageTap: (user) {
+///     // Handle user tap event
 ///   },
-///   onChannelLongPress: (channel) {
-///     // Handle channel long press event
+///   onMessageLongPress: (user) {
+///     // Handle user long press event
 ///   },
 /// )
 /// ```
 ///
 /// See also:
-/// * [StreamChannelListTile]
-/// * [StreamChannelListController]
-class StreamChannelListView extends StatelessWidget {
-  /// Creates a new instance of [StreamChannelListView].
-  const StreamChannelListView({
+/// * [StreamMessageSearchListTile]
+/// * [StreamMessageSearchListController]
+class StreamMessageSearchListView extends StatelessWidget {
+  /// Creates a new instance of [StreamMessageSearchListView].
+  const StreamMessageSearchListView({
     Key? key,
     required this.controller,
     this.itemBuilder,
-    this.separatorBuilder = defaultChannelListViewSeparatorBuilder,
+    this.separatorBuilder = defaultMessageSearchListViewSeparatorBuilder,
     this.emptyBuilder,
     this.loadingBuilder,
     this.errorBuilder,
-    this.onChannelTap,
-    this.onChannelLongPress,
+    this.onMessageTap,
+    this.onMessageLongPress,
     this.loadMoreTriggerIndex = 3,
     this.padding,
     this.physics,
@@ -70,39 +67,41 @@ class StreamChannelListView extends StatelessWidget {
     this.restorationId,
   }) : super(key: key);
 
-  /// The [StreamChannelListController] used to control the list of channels.
-  final StreamChannelListController controller;
+  /// The [StreamUserListController] used to control the list of
+  /// searched messages.
+  final StreamMessageSearchListController controller;
 
   /// A builder that is called to build items in the [ListView].
   ///
-  /// The `channel` parameter is the [Channel] at this position in the list
-  /// and the `defaultWidget` is the default widget used
-  /// i.e: [StreamChannelListTile].
-  final StreamChannelListViewIndexedWidgetBuilder? itemBuilder;
+  /// The `messageResponse` parameter is the [GetMessageResponse] at this
+  /// position in the list and the `defaultWidget` is the default widget used
+  /// i.e: [StreamMessageSearchListTile].
+  final StreamMessageSearchListViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.
-  final PagedValueListViewIndexedWidgetBuilder<Channel> separatorBuilder;
+  final PagedValueListViewIndexedWidgetBuilder<GetMessageResponse>
+      separatorBuilder;
 
   /// A builder that is called to build the empty state of the list.
   ///
-  /// If not provided, [StreamChannelListEmptyWidget] will be used.
+  /// If not provided, [StreamMessageSearchListEmptyWidget] will be used.
   final WidgetBuilder? emptyBuilder;
 
   /// A builder that is called to build the loading state of the list.
   ///
-  /// If not provided, [StreamChannelListLoadingTile] will be used.
+  /// If not provided, [StreamMessageSearchListLoadingTile] will be used.
   final WidgetBuilder? loadingBuilder;
 
   /// A builder that is called to build the error state of the list.
   ///
-  /// If not provided, [StreamChannelListErrorWidget] will be used.
+  /// If not provided, [StreamMessageSearchListErrorWidget] will be used.
   final Widget Function(BuildContext, StreamChatError)? errorBuilder;
 
   /// Called when the user taps this list tile.
-  final void Function(Channel)? onChannelTap;
+  final void Function(GetMessageResponse)? onMessageTap;
 
   /// Called when the user long-presses on this list tile.
-  final void Function(Channel)? onChannelLongPress;
+  final void Function(GetMessageResponse)? onMessageLongPress;
 
   /// The index to take into account when triggering [controller.loadMore].
   final int loadMoreTriggerIndex;
@@ -241,7 +240,8 @@ class StreamChannelListView extends StatelessWidget {
   final String? restorationId;
 
   @override
-  Widget build(BuildContext context) => PagedValueListView<int, Channel>(
+  Widget build(BuildContext context) =>
+      PagedValueListView<String, GetMessageResponse>(
         padding: padding,
         physics: physics,
         reverse: reverse,
@@ -254,40 +254,40 @@ class StreamChannelListView extends StatelessWidget {
         cacheExtent: cacheExtent,
         loadMoreTriggerIndex: loadMoreTriggerIndex,
         separatorBuilder: separatorBuilder,
-        itemBuilder: (context, channels, index) {
-          final channel = channels[index];
-          final onTap = onChannelTap;
-          final onLongPress = onChannelLongPress;
+        itemBuilder: (context, messageResponses, index) {
+          final messageResponse = messageResponses[index];
+          final onTap = onMessageTap;
+          final onLongPress = onMessageLongPress;
 
-          final streamChannelListTile = StreamChannelListTile(
-            channel: channel,
-            onTap: onTap == null ? null : () => onTap(channel),
+          final streamUserListTile = StreamMessageSearchListTile(
+            messageResponse: messageResponse,
+            onTap: onTap == null ? null : () => onTap(messageResponse),
             onLongPress:
-                onLongPress == null ? null : () => onLongPress(channel),
+                onLongPress == null ? null : () => onLongPress(messageResponse),
           );
 
           return itemBuilder?.call(
                 context,
-                channels,
+                messageResponses,
                 index,
-                streamChannelListTile,
+                streamUserListTile,
               ) ??
-              streamChannelListTile;
+              streamUserListTile;
         },
         emptyBuilder: (context) =>
             emptyBuilder?.call(context) ??
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(8),
-                child: StreamChannelListEmptyWidget(),
+                child: StreamMessageSearchListEmptyWidget(),
               ),
             ),
         loadMoreErrorBuilder: (context, error) =>
-            StreamChannelListLoadMoreError(onTap: controller.retry),
+            StreamMessageSearchListLoadMoreError(onTap: controller.retry),
         loadMoreIndicatorBuilder: (context) => const Center(
           child: Padding(
             padding: EdgeInsets.all(16),
-            child: StreamChannelListLoadMoreIndicator(),
+            child: StreamMessageSearchListLoadMoreIndicator(),
           ),
         ),
         loadingBuilder: (context) =>
@@ -297,25 +297,26 @@ class StreamChannelListView extends StatelessWidget {
               physics: physics,
               reverse: reverse,
               itemCount: 25,
-              separatorBuilder: (_, __) => const StreamChannelListSeparator(),
+              separatorBuilder: (_, __) =>
+                  const StreamMessageSearchListSeparator(),
               itemBuilder: (_, __) => const StreamChannelListLoadingTile(),
             ),
         errorBuilder: (context, error) =>
             errorBuilder?.call(context, error) ??
             Center(
-              child: StreamChannelListErrorWidget(
+              child: StreamMessageSearchListErrorWidget(
                 onPressed: controller.refresh,
               ),
             ),
       );
 }
 
-/// A [StreamChannelListTile] that can be used in a [ListView] to show a
-/// loading tile while waiting for the [StreamChannelListController] to load
-/// more channels.
-class StreamChannelListLoadMoreIndicator extends StatelessWidget {
-  /// Creates a new instance of [StreamChannelListLoadMoreIndicator].
-  const StreamChannelListLoadMoreIndicator({Key? key}) : super(key: key);
+/// A [StreamMessageSearchListTile] that can be used in a [ListView] to show a
+/// loading tile while waiting for the [StreamMessageSearchListController] to
+/// load more messages.
+class StreamMessageSearchListLoadMoreIndicator extends StatelessWidget {
+  /// Creates a new instance of [StreamMessageSearchListLoadMoreIndicator].
+  const StreamMessageSearchListLoadMoreIndicator({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => const SizedBox(
@@ -325,11 +326,11 @@ class StreamChannelListLoadMoreIndicator extends StatelessWidget {
       );
 }
 
-/// A [StreamChannelListTile] that is used to display the error indicator when
-/// loading more channels fails.
-class StreamChannelListLoadMoreError extends StatelessWidget {
-  /// Creates a new instance of [StreamChannelListLoadMoreError].
-  const StreamChannelListLoadMoreError({
+/// A [StreamMessageSearchListTile] that is used to display the error indicator
+/// when loading more messages fails.
+class StreamMessageSearchListLoadMoreError extends StatelessWidget {
+  /// Creates a new instance of [StreamMessageSearchListLoadMoreError].
+  const StreamMessageSearchListLoadMoreError({
     Key? key,
     this.onTap,
   }) : super(key: key);
@@ -365,10 +366,10 @@ class StreamChannelListLoadMoreError extends StatelessWidget {
 }
 
 /// A widget that is used to display a separator between
-/// [StreamChannelListTile] items.
-class StreamChannelListSeparator extends StatelessWidget {
-  /// Creates a new instance of [StreamChannelListSeparator].
-  const StreamChannelListSeparator({Key? key}) : super(key: key);
+/// [StreamMessageSearchListTile] items.
+class StreamMessageSearchListSeparator extends StatelessWidget {
+  /// Creates a new instance of [StreamMessageSearchListSeparator].
+  const StreamMessageSearchListSeparator({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -381,10 +382,10 @@ class StreamChannelListSeparator extends StatelessWidget {
 }
 
 /// A widget that is used to display an error screen
-/// when [StreamChannelListController] fails to load initial channels.
-class StreamChannelListErrorWidget extends StatelessWidget {
-  /// Creates a new instance of [StreamChannelListErrorWidget] widget.
-  const StreamChannelListErrorWidget({
+/// when [StreamMessageSearchListController] fails to load initial messages.
+class StreamMessageSearchListErrorWidget extends StatelessWidget {
+  /// Creates a new instance of [StreamMessageSearchListErrorWidget] widget.
+  const StreamMessageSearchListErrorWidget({
     Key? key,
     this.onPressed,
   }) : super(key: key);
@@ -419,10 +420,10 @@ class StreamChannelListErrorWidget extends StatelessWidget {
 }
 
 /// A widget that is used to display an empty state when
-/// [StreamChannelListController] loads zero channels.
-class StreamChannelListEmptyWidget extends StatelessWidget {
-  /// Creates a new instance of [StreamChannelListEmptyWidget] widget.
-  const StreamChannelListEmptyWidget({Key? key}) : super(key: key);
+/// [StreamMessageSearchListController] loads zero messages.
+class StreamMessageSearchListEmptyWidget extends StatelessWidget {
+  /// Creates a new instance of [StreamMessageSearchListEmptyWidget] widget.
+  const StreamMessageSearchListEmptyWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

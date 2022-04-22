@@ -11,6 +11,7 @@ import 'package:stream_chat_flutter_core/src/stream_controller_extension.dart';
 /// using Flutter's [BuildContext].
 ///
 /// API docs: https://getstream.io/chat/docs/flutter-dart/send_message/
+@Deprecated("Use 'StreamMessageSearchListController' instead")
 class MessageSearchBloc extends StatefulWidget {
   /// Instantiate a new MessageSearchBloc
   const MessageSearchBloc({

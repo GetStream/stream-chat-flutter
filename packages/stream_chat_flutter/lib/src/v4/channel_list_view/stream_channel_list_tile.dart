@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/v4/stream_message_preview_text.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that displays a channel preview.
@@ -351,95 +352,11 @@ class ChannelLastMessageText extends StatelessWidget {
 
           if (lastMessage == null) return const Offstage();
 
-          final lastMessageText = lastMessage
-              .translate(channel.client.state.currentUser?.language ?? 'en')
-              .replaceMentions(linkify: false)
-              .text;
-          final lastMessageAttachments = lastMessage.attachments;
-          final lastMessageMentionedUsers = lastMessage.mentionedUsers;
-
-          final mentionedUsersRegex = RegExp(
-            lastMessageMentionedUsers.map((it) => '@${it.name}').join('|'),
-            caseSensitive: false,
-          );
-
-          final messageTextParts = [
-            ...lastMessageAttachments.map((it) {
-              if (it.type == 'image') {
-                return '📷';
-              } else if (it.type == 'video') {
-                return '🎬';
-              } else if (it.type == 'giphy') {
-                return '[GIF]';
-              }
-              return it == lastMessage.attachments.last
-                  ? (it.title ?? 'File')
-                  : '${it.title ?? 'File'} , ';
-            }),
-            if (lastMessageText != null)
-              if (lastMessageMentionedUsers.isNotEmpty)
-                ...mentionedUsersRegex.allMatchesWithSep(lastMessageText)
-              else
-                lastMessageText,
-          ];
-
-          final fontStyle = (lastMessage.isSystem || lastMessage.isDeleted)
-              ? FontStyle.italic
-              : FontStyle.normal;
-
-          final regularTextStyle = textStyle?.copyWith(fontStyle: fontStyle);
-
-          final mentionsTextStyle = textStyle?.copyWith(
-            fontStyle: fontStyle,
-            fontWeight: FontWeight.bold,
-          );
-
-          final spans = [
-            for (final part in messageTextParts)
-              if (lastMessageMentionedUsers.isNotEmpty &&
-                  lastMessageMentionedUsers.any((it) => '@${it.name}' == part))
-                TextSpan(
-                  text: part,
-                  style: mentionsTextStyle,
-                )
-              else if (lastMessageAttachments.isNotEmpty &&
-                  lastMessageAttachments
-                      .where((it) => it.title != null)
-                      .any((it) => it.title == part))
-                TextSpan(
-                  text: part,
-                  style: regularTextStyle?.copyWith(
-                    fontStyle: FontStyle.italic,
-                  ),
-                )
-              else
-                TextSpan(
-                  text: part,
-                  style: regularTextStyle,
-                ),
-          ];
-
-          return Text.rich(
-            TextSpan(children: spans),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.start,
+          return StreamMessagePreviewText(
+            message: lastMessage,
+            textStyle: textStyle,
+            language: channel.client.state.currentUser?.language,
           );
         },
       );
-}
-
-extension _RegExpX on RegExp {
-  List<String> allMatchesWithSep(String input, [int start = 0]) {
-    final result = <String>[];
-    for (final match in allMatches(input, start)) {
-      result.add(input.substring(start, match.start));
-      // ignore: cascade_invocations
-      result.add(match[0]!);
-      // ignore: parameter_assignments
-      start = match.end;
-    }
-    result.add(input.substring(start));
-    return result;
-  }
 }
