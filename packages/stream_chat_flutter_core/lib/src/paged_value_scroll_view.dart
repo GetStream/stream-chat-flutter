@@ -695,9 +695,6 @@ class _PagedValueGridViewState<K, V> extends State<PagedValueGridView<K, V>> {
 
                 return widget.itemBuilder(context, items, index);
               },
-              // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              //   crossAxisCount: widget.crossAxisCount,
-              // ),
             );
           },
           loading: () => widget.loadingBuilder(context),
