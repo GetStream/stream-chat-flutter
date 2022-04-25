@@ -259,6 +259,7 @@ class FileAttachment extends AttachmentWidget {
         splashRadius: 16,
         onPressed: () {
           final assetUrl = attachment.assetUrl;
+          print('assetUrl: $assetUrl');
           if (assetUrl != null) launchURL(context, assetUrl);
         },
       );
