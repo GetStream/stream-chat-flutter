@@ -66,9 +66,20 @@ void main() {
         home: Builder(
           builder: (context) {
             _context = context;
+            final attachment = Attachment(
+              type: 'video',
+              title: 'video.mp4',
+            );
+            final _message = Message(
+              createdAt: DateTime.now(),
+              attachments: [
+                attachment,
+              ],
+            );
             return Scaffold(
               appBar: StreamGalleryHeader(
-                message: Message(),
+                message: _message,
+                attachment: _message.attachments[0],
               ),
             );
           },
@@ -105,9 +116,20 @@ void main() {
         home: Builder(
           builder: (context) {
             _context = context;
+            final attachment = Attachment(
+              type: 'video',
+              title: 'video.mp4',
+            );
+            final _message = Message(
+              createdAt: DateTime.now(),
+              attachments: [
+                attachment,
+              ],
+            );
             return Scaffold(
               appBar: StreamGalleryHeader(
-                message: Message(),
+                message: _message,
+                attachment: _message.attachments[0],
               ),
             );
           },

@@ -70,28 +70,33 @@ void main() {
         }),
       );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChat(
-            client: client,
-            child: StreamChannel(
-              channel: channel,
-              child: FullScreenMedia(
-                mediaAttachments: [
-                  Attachment(
-                    type: 'image',
-                    title: 'demo image',
-                    imageUrl: '',
-                  ),
-                ],
-                message: Message(
-                  createdAt: DateTime.now(),
+      final attachment = Attachment(
+        type: 'image',
+        title: 'demo image',
+        imageUrl: '',
+      );
+      final message = Message(
+        createdAt: DateTime.now(),
+        attachments: [
+          attachment,
+        ],
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: StreamChat(
+          client: client,
+          child: StreamChannel(
+            channel: channel,
+            child: FullScreenMedia(
+              mediaAttachmentPackages: [
+                StreamAttachmentPackage(
+                  attachment: attachment,
+                  message: message,
                 ),
-              ),
+              ],
             ),
           ),
         ),
-      );
+      ));
 
       expect(find.byType(PhotoView), findsOneWidget);
       expect(find.byType(StreamSvgIcon), findsNWidgets(4));

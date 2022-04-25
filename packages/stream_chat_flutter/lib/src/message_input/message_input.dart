@@ -22,7 +22,6 @@ import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.d
 import 'package:stream_chat_flutter/src/message_input/user_mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/emoji_overlay.dart';
-import 'package:stream_chat_flutter/src/overlays/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

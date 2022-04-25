@@ -9,13 +9,16 @@ import '../mocks.dart';
 
 class MockAttachmentDownloader extends Mock {
   ProgressCallback? progressCallback;
+  DownloadedPathCallback? downloadedPathCallback;
   Completer<String> completer = Completer();
 
   Future<String> call(
     Attachment attachment, {
     ProgressCallback? progressCallback,
+    DownloadedPathCallback? downloadedPathCallback,
   }) {
     this.progressCallback = progressCallback;
+    this.downloadedPathCallback = downloadedPathCallback;
     return completer.future;
   }
 }
@@ -38,6 +41,19 @@ void main() {
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
+      final attachment = Attachment(
+        type: 'image',
+        title: 'text.jpg',
+      );
+      final message = Message(
+        text: 'test',
+        user: User(
+          id: 'user-id',
+        ),
+        attachments: [
+          attachment,
+        ],
+      );
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -45,19 +61,8 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: AttachmentActionsModal(
-              message: Message(
-                text: 'test',
-                user: User(
-                  id: 'user-id',
-                ),
-                attachments: [
-                  Attachment(
-                    type: 'image',
-                    title: 'text.jpg',
-                  ),
-                ],
-              ),
-              currentIndex: 0,
+              message: message,
+              attachment: attachment,
             ),
           ),
         ),
@@ -80,6 +85,19 @@ void main() {
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
+      final attachment = Attachment(
+        type: 'image',
+        title: 'text.jpg',
+      );
+      final message = Message(
+        text: 'test',
+        user: User(
+          id: 'user-id',
+        ),
+        attachments: [
+          attachment,
+        ],
+      );
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -87,19 +105,8 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: AttachmentActionsModal(
-              message: Message(
-                text: 'test',
-                user: User(
-                  id: 'user-id',
-                ),
-                attachments: [
-                  Attachment(
-                    type: 'image',
-                    title: 'text.jpg',
-                  ),
-                ],
-              ),
-              currentIndex: 0,
+              message: message,
+              attachment: attachment,
             ),
           ),
         ),
@@ -122,6 +129,19 @@ void main() {
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
+      final attachment = Attachment(
+        type: 'video',
+        title: 'video.mp4',
+      );
+      final message = Message(
+        text: 'test',
+        user: User(
+          id: 'user-id',
+        ),
+        attachments: [
+          attachment,
+        ],
+      );
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -130,19 +150,8 @@ void main() {
             client: client,
             child: SizedBox(
               child: AttachmentActionsModal(
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
-                  ),
-                  attachments: [
-                    Attachment(
-                      type: 'video',
-                      title: 'video.mp4',
-                    ),
-                  ],
-                ),
-                currentIndex: 0,
+                message: message,
+                attachment: attachment,
               ),
             ),
           ),
@@ -166,16 +175,17 @@ void main() {
 
       final mockObserver = MockNavigatorObserver();
 
+      final attachment = Attachment(
+        type: 'image',
+        title: 'image.jpg',
+      );
       final message = Message(
         text: 'test',
         user: User(
           id: 'user-id',
         ),
         attachments: [
-          Attachment(
-            type: 'image',
-            title: 'image.jpg',
-          ),
+          attachment,
         ],
       );
       await tester.pumpWidget(
@@ -188,7 +198,7 @@ void main() {
             child: SizedBox(
               child: AttachmentActionsModal(
                 message: message,
-                currentIndex: 0,
+                attachment: attachment,
               ),
             ),
           ),
@@ -212,6 +222,20 @@ void main() {
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
       final onShowMessage = MockVoidCallback();
 
+      final attachment = Attachment(
+        type: 'image',
+        title: 'image.jpg',
+      );
+      final message = Message(
+        text: 'test',
+        user: User(
+          id: 'user-id',
+        ),
+        attachments: [
+          attachment,
+        ],
+      );
+
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -221,19 +245,8 @@ void main() {
             child: SizedBox(
               child: AttachmentActionsModal(
                 onShowMessage: onShowMessage,
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
-                  ),
-                  attachments: [
-                    Attachment(
-                      type: 'image',
-                      title: 'image.jpg',
-                    ),
-                  ],
-                ),
-                currentIndex: 0,
+                message: message,
+                attachment: attachment,
               ),
             ),
           ),
@@ -256,20 +269,22 @@ void main() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
+      final targetAttachment = Attachment(
+        type: 'image',
+        title: 'image.jpg',
+      );
+      final remainingAttachment = Attachment(
+        type: 'image',
+        title: 'image.jpg',
+      );
       final message = Message(
         text: 'test',
         user: User(
           id: 'user-id',
         ),
         attachments: [
-          Attachment(
-            type: 'image',
-            title: 'image.jpg',
-          ),
-          Attachment(
-            type: 'image',
-            title: 'image.jpg',
-          ),
+          targetAttachment,
+          remainingAttachment,
         ],
       );
 
@@ -284,21 +299,17 @@ void main() {
             channel: mockChannel,
             child: AttachmentActionsModal(
               message: message,
-              currentIndex: 0,
+              attachment: targetAttachment,
             ),
           ),
         ),
       );
       await tester.tap(find.text('Delete'));
-      verify(
-        () => mockChannel.updateMessage(
-          message.copyWith(
+      verify(() => mockChannel.updateMessage(message.copyWith(
             attachments: [
               message.attachments[1],
             ],
-          ),
-        ),
-      ).called(1);
+          ))).called(1);
     },
   );
 
@@ -314,16 +325,17 @@ void main() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
+      final attachment = Attachment(
+        type: 'image',
+        title: 'image.jpg',
+      );
       final message = Message(
         text: 'test',
         user: User(
           id: 'user-id',
         ),
         attachments: [
-          Attachment(
-            type: 'image',
-            title: 'image.jpg',
-          ),
+          attachment,
         ],
       );
 
@@ -338,19 +350,15 @@ void main() {
             channel: mockChannel,
             child: AttachmentActionsModal(
               message: message,
-              currentIndex: 0,
+              attachment: attachment,
             ),
           ),
         ),
       );
       await tester.tap(find.text('Delete'));
-      verify(
-        () => mockChannel.updateMessage(
-          message.copyWith(
+      verify(() => mockChannel.updateMessage(message.copyWith(
             attachments: [],
-          ),
-        ),
-      ).called(1);
+          ))).called(1);
     },
   );
 
@@ -367,15 +375,16 @@ void main() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
+      final attachment = Attachment(
+        type: 'image',
+        title: 'image.jpg',
+      );
       final message = Message(
         user: User(
           id: 'user-id',
         ),
         attachments: [
-          Attachment(
-            type: 'image',
-            title: 'image.jpg',
-          ),
+          attachment,
         ],
       );
 
@@ -390,7 +399,7 @@ void main() {
             channel: mockChannel,
             child: AttachmentActionsModal(
               message: message,
-              currentIndex: 0,
+              attachment: attachment,
             ),
           ),
         ),
@@ -411,6 +420,20 @@ void main() {
 
       final imageDownloader = MockAttachmentDownloader();
 
+      final attachment = Attachment(
+        type: 'image',
+        title: 'image.jpg',
+      );
+      final message = Message(
+        text: 'test',
+        user: User(
+          id: 'user-id',
+        ),
+        attachments: [
+          attachment,
+        ],
+      );
+
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
@@ -420,19 +443,8 @@ void main() {
           home: SizedBox(
             child: AttachmentActionsModal(
               imageDownloader: imageDownloader,
-              message: Message(
-                text: 'test',
-                user: User(
-                  id: 'user-id',
-                ),
-                attachments: [
-                  Attachment(
-                    type: 'image',
-                    title: 'image.jpg',
-                  ),
-                ],
-              ),
-              currentIndex: 0,
+              message: message,
+              attachment: attachment,
             ),
           ),
         ),
@@ -440,15 +452,16 @@ void main() {
 
       await tester.tap(find.text('Save Image'));
 
-      imageDownloader.progressCallback!(0, 100);
+      imageDownloader.progressCallback!(0, 100000);
       await tester.pump();
-      expect(find.text('0%'), findsOneWidget);
+      expect(find.text('0.00 MB'), findsOneWidget);
 
-      imageDownloader.progressCallback!(50, 100);
+      imageDownloader.progressCallback!(50000, 100000);
       await tester.pump();
-      expect(find.text('50%'), findsOneWidget);
+      expect(find.text('0.05 MB'), findsOneWidget);
 
-      imageDownloader.progressCallback!(100, 100);
+      imageDownloader.progressCallback!(100000, 100000);
+      imageDownloader.downloadedPathCallback!('path');
       imageDownloader.completer.complete('path');
       await tester.pump();
       expect(find.byKey(const Key('completedIcon')), findsOneWidget);
@@ -467,6 +480,19 @@ void main() {
 
       final fileDownloader = MockAttachmentDownloader();
 
+      final attachment = Attachment(
+        type: 'video',
+        title: 'video.mp4',
+      );
+      final message = Message(
+          text: 'test',
+          user: User(
+            id: 'user-id',
+          ),
+          attachments: [
+            attachment,
+          ]);
+
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
@@ -476,19 +502,8 @@ void main() {
           home: SizedBox(
             child: AttachmentActionsModal(
               fileDownloader: fileDownloader,
-              message: Message(
-                text: 'test',
-                user: User(
-                  id: 'user-id',
-                ),
-                attachments: [
-                  Attachment(
-                    type: 'video',
-                    title: 'video.mp4',
-                  ),
-                ],
-              ),
-              currentIndex: 0,
+              message: message,
+              attachment: attachment,
             ),
           ),
         ),
@@ -496,15 +511,16 @@ void main() {
 
       await tester.tap(find.text('Save Video'));
 
-      fileDownloader.progressCallback!(0, 100);
+      fileDownloader.progressCallback!(0, 100000);
       await tester.pump();
-      expect(find.text('0%'), findsOneWidget);
+      expect(find.text('0.00 MB'), findsOneWidget);
 
-      fileDownloader.progressCallback!(50, 100);
+      fileDownloader.progressCallback!(50000, 100000);
       await tester.pump();
-      expect(find.text('50%'), findsOneWidget);
+      expect(find.text('0.05 MB'), findsOneWidget);
 
-      fileDownloader.progressCallback!(100, 100);
+      fileDownloader.progressCallback!(100000, 100000);
+      fileDownloader.downloadedPathCallback!('path');
       fileDownloader.completer.complete('path');
       await tester.pump();
       expect(find.byKey(const Key('completedIcon')), findsOneWidget);

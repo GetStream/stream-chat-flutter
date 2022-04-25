@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@template editMessageSheet}
 /// Allows a user to edit the selected message.
 /// {@endtemplate}
-class EditMessageSheet extends StatelessWidget {
+class EditMessageSheet extends StatefulWidget {
   /// {@macro editMessageSheet}
   const EditMessageSheet({
     Key? key,
@@ -24,12 +24,27 @@ class EditMessageSheet extends StatelessWidget {
   final Channel channel;
 
   @override
+  State<EditMessageSheet> createState() => _EditMessageSheetState();
+}
+
+class _EditMessageSheetState extends State<EditMessageSheet> {
+  late final controller = MessageInputController(
+    message: widget.message,
+  );
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final streamChatThemeData = StreamChatTheme.of(context);
     return Padding(
       padding: MediaQuery.of(context).viewInsets,
       child: StreamChannel(
-        channel: channel,
+        channel: widget.channel,
         child: Flex(
           direction: Axis.vertical,
           mainAxisAlignment: MainAxisAlignment.end,
@@ -58,11 +73,12 @@ class EditMessageSheet extends StatelessWidget {
                 ],
               ),
             ),
-            if (editMessageInputBuilder != null)
-              editMessageInputBuilder!(context, message)
+            if (widget.editMessageInputBuilder != null)
+              widget.editMessageInputBuilder!(context, widget.message)
             else
-              MessageInput(
-                editMessage: message,
+              // TODO(Groovin): Esc key should close the sheet
+              StreamMessageInput(
+                messageInputController: controller,
                 preMessageSending: (m) {
                   FocusScope.of(context).unfocus();
                   Navigator.of(context).pop();

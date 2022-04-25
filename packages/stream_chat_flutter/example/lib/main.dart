@@ -131,6 +131,7 @@ class DesktopLayout extends StatefulWidget {
 
 class _DesktopLayoutState extends State<DesktopLayout> {
   late Widget _page;
+  late StreamChannelListController controller;
 
   @override
   void initState() {
@@ -138,6 +139,29 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     _page = ChannelPage(
       channel: widget.initialChannel,
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final client = StreamChat.of(context).client;
+    controller = StreamChannelListController(
+      client: client,
+      filter: Filter.in_(
+        'members',
+        [
+          StreamChat.of(context).currentUser!.id,
+        ],
+      ),
+      sort: const [SortOption('last_message_at')],
+      limit: 20,
+    );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -150,21 +174,11 @@ class _DesktopLayoutState extends State<DesktopLayout> {
             child: Column(
               children: [
                 Expanded(
-                  child: ChannelsBloc(
-                    child: ChannelListView(
-                      filter: Filter.in_(
-                        'members',
-                        [
-                          StreamChat.of(context).currentUser!.id,
-                        ],
-                      ),
-                      sort: const [SortOption('last_message_at')],
-                      limit: 20,
-                      onChannelTap: (channel, _) {
-                        setState(() => _page = ChannelPage(channel: channel));
-                      },
-                      channelWidget: _page,
-                    ),
+                  child: StreamChannelListView(
+                    controller: controller,
+                    onChannelTap: (channel) {
+                      setState(() => _page = ChannelPage(channel: channel));
+                    },
                   ),
                 ),
               ],

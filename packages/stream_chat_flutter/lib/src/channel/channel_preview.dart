@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:collection/collection.dart'
     show IterableExtension, ListEquality;
 import 'package:contextmenu/contextmenu.dart';

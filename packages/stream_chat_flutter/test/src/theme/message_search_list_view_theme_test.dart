@@ -66,10 +66,11 @@ void main() {
           builder: (BuildContext context) {
             _context = context;
             return Scaffold(
-              body: MessageSearchBloc(
-                child: StreamMessageSearchListView(
-                  filters: Filter.in_('members', const ['test_id']),
-                  messageQuery: 'test query',
+              body: StreamMessageSearchListView(
+                controller: StreamMessageSearchListController(
+                  client: MockClient(),
+                  filter: Filter.in_('members', const ['test_id']),
+                  searchQuery: 'test query',
                 ),
               ),
             );
@@ -99,10 +100,11 @@ void main() {
           builder: (BuildContext context) {
             _context = context;
             return Scaffold(
-              body: MessageSearchBloc(
-                child: StreamMessageSearchListView(
-                  filters: Filter.in_('members', const ['test_id']),
-                  messageQuery: 'test query',
+              body: StreamMessageSearchListView(
+                controller: StreamMessageSearchListController(
+                  client: MockClient(),
+                  filter: Filter.in_('members', const ['test_id']),
+                  searchQuery: 'test query',
                 ),
               ),
             );

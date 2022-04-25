@@ -59,8 +59,10 @@ void main() {
           builder: (BuildContext context) {
             _context = context;
             return Scaffold(
-              body: UsersBloc(
-                child: StreamUserListView(),
+              body: StreamUserListView(
+                controller: StreamUserListController(
+                  client: MockClient(),
+                ),
               ),
             );
           },
@@ -88,8 +90,10 @@ void main() {
           builder: (BuildContext context) {
             _context = context;
             return Scaffold(
-              body: UsersBloc(
-                child: StreamUserListView(),
+              body: StreamUserListView(
+                controller: StreamUserListController(
+                  client: MockClient(),
+                ),
               ),
             );
           },

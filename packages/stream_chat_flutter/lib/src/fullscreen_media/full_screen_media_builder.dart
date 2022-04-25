@@ -26,8 +26,7 @@ class FullScreenMediaBuilder extends StatelessWidget {
   /// {@macro fsmBuilder}
   const FullScreenMediaBuilder({
     Key? key,
-    required this.mediaAttachments,
-    required this.message,
+    required this.mediaAttachmentPackages,
     required this.startIndex,
     required this.userName,
     this.onShowMessage,
@@ -36,10 +35,7 @@ class FullScreenMediaBuilder extends StatelessWidget {
   }) : super(key: key);
 
   /// The url of the image
-  final List<Attachment> mediaAttachments;
-
-  /// Message where attachments are attached
-  final Message message;
+  final List<StreamAttachmentPackage> mediaAttachmentPackages;
 
   /// First index of media shown
   final int startIndex;
@@ -50,7 +46,9 @@ class FullScreenMediaBuilder extends StatelessWidget {
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
 
-  /// {@macro attachmentActionsBuilder}
+  /// Widget builder for attachment actions modal
+  /// [defaultActionsModal] is the default [AttachmentActionsModal] config
+  /// Use [defaultActionsModal.copyWith] to easily customize it
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   /// Auto-play videos when page is opened
@@ -61,16 +59,14 @@ class FullScreenMediaBuilder extends StatelessWidget {
     if (!kIsWeb) {
       if (isDesktopDevice) {
         return desktop_fsm.getFsm(
-          message: message,
-          mediaAttachments: mediaAttachments,
+          mediaAttachmentPackages: mediaAttachmentPackages,
           startIndex: startIndex,
           userName: userName,
           autoplayVideos: autoplayVideos,
         );
       } else {
         return FullScreenMedia(
-          mediaAttachments: mediaAttachments,
-          message: message,
+          mediaAttachmentPackages: mediaAttachmentPackages,
           startIndex: startIndex,
           userName: userName,
           onShowMessage: onShowMessage,
@@ -80,8 +76,7 @@ class FullScreenMediaBuilder extends StatelessWidget {
       }
     } else {
       return FullScreenMedia(
-        mediaAttachments: mediaAttachments,
-        message: message,
+        mediaAttachmentPackages: mediaAttachmentPackages,
         startIndex: startIndex,
         userName: userName,
         onShowMessage: onShowMessage,

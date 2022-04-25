@@ -8,8 +8,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// This should ONLY be used in [FullScreenMediaBuilder].
 FullScreenMediaWidget getFsm({
   Key? key,
-  required Message message,
-  required List<Attachment> mediaAttachments,
+  required List<StreamAttachmentPackage> mediaAttachmentPackages,
   required int startIndex,
   required String userName,
   ShowMessageCallback? onShowMessage,

@@ -21,7 +21,6 @@ import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.d
 import 'package:stream_chat_flutter/src/message_input/user_mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/emoji_overlay.dart';
-import 'package:stream_chat_flutter/src/overlays/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/src/v4/message_input/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/v4/message_input/tld.dart';
@@ -403,10 +402,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   @override
   Widget build(BuildContext context) {
-    if (!StreamChannel.of(context)
-        .channel
-        .ownCapabilities
-        .contains(PermissionType.sendMessage)) {
+    final channel = StreamChannel.of(context).channel;
+    if (channel.state != null &&
+        !channel.ownCapabilities.contains(PermissionType.sendMessage)) {
       return SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -514,6 +512,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             elevation: widget.elevation ??
                 _streamChatTheme.messageInputTheme.elevation ??
                 8,
+            color: _messageInputTheme.inputBackgroundColor,
             child: child,
           );
         }

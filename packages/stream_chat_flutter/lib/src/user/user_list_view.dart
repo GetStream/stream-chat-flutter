@@ -1,12 +1,11 @@
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: deprecated_member_use_from_same_package, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamUserListView}
-@Deprecated("Use 'StreamUserListView' instead")
-typedef UserListView = StreamUserListView;
-
-/// {@template streamUserListView}
+/// {@template userListView}
 /// Shows the list of current users.
 ///
 /// ```dart
@@ -41,9 +40,10 @@ typedef UserListView = StreamUserListView;
 /// The widget components render the ui based on the first ancestor of
 /// type [StreamChatTheme]. Modify it to change the widget's appearance.
 /// {@endtemplate}
-class StreamUserListView extends StatefulWidget {
-  /// {@macro streamUserListView}
-  StreamUserListView({
+@Deprecated('User StreamUserListView instead')
+class UserListView extends StatefulWidget {
+  /// {@macro userListView}
+  UserListView({
     Key? key,
     this.filter = const Filter.empty(),
     this.sort,
@@ -160,10 +160,10 @@ class StreamUserListView extends StatefulWidget {
   final UserListController? userListController;
 
   @override
-  _StreamUserListViewState createState() => _StreamUserListViewState();
+  _UserListViewState createState() => _UserListViewState();
 }
 
-class _StreamUserListViewState extends State<StreamUserListView>
+class _UserListViewState extends State<UserListView>
     with WidgetsBindingObserver {
   bool get _isListView => widget.crossAxisCount == 1;
 

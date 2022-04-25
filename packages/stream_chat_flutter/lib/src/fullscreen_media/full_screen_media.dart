@@ -18,8 +18,7 @@ class FullScreenMedia extends FullScreenMediaWidget {
   /// Instantiate a new FullScreenImage
   const FullScreenMedia({
     Key? key,
-    required this.mediaAttachments,
-    required this.message,
+    required this.mediaAttachmentPackages,
     this.startIndex = 0,
     String? userName,
     this.onShowMessage,
@@ -29,10 +28,7 @@ class FullScreenMedia extends FullScreenMediaWidget {
         super(key: key);
 
   /// The url of the image
-  final List<Attachment> mediaAttachments;
-
-  /// Message where attachments are attached
-  final Message message;
+  final List<StreamAttachmentPackage> mediaAttachmentPackages;
 
   /// First index of media shown
   final int startIndex;
@@ -43,7 +39,9 @@ class FullScreenMedia extends FullScreenMediaWidget {
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
 
-  /// {@macro attachmentActionsBuilder}
+  /// Widget builder for attachment actions modal
+  /// [defaultActionsModal] is the default [AttachmentActionsModal] config
+  /// Use [defaultActionsModal.copyWith] to easily customize it
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   /// Auto-play videos when page is opened
@@ -84,8 +82,8 @@ class _FullScreenMediaState extends State<FullScreenMedia>
       duration: const Duration(milliseconds: 300),
     );
     _pageController = PageController(initialPage: widget.startIndex);
-    for (var i = 0; i < widget.mediaAttachments.length; i++) {
-      final attachment = widget.mediaAttachments[i];
+    for (var i = 0; i < widget.mediaAttachmentPackages.length; i++) {
+      final attachment = widget.mediaAttachmentPackages[i].attachment;
       if (attachment.type != 'video') continue;
       final package = VideoPackage(attachment, showControls: true);
       videoPackages[attachment.id] = package;
@@ -98,7 +96,8 @@ class _FullScreenMediaState extends State<FullScreenMedia>
       return;
     }
 
-    final currentAttachment = widget.mediaAttachments[widget.startIndex];
+    final currentAttachment =
+        widget.mediaAttachmentPackages[widget.startIndex].attachment;
 
     await Future.wait(videoPackages.values.map(
       (it) => it.initialize(),
@@ -137,7 +136,8 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                 return;
               }
 
-              final currentAttachment = widget.mediaAttachments[val];
+              final currentAttachment =
+                  widget.mediaAttachmentPackages[val].attachment;
 
               for (final e in videoPackages.values) {
                 if (e._attachment != currentAttachment) {
@@ -151,7 +151,8 @@ class _FullScreenMediaState extends State<FullScreenMedia>
               }
             },
             itemBuilder: (context, index) {
-              final attachment = widget.mediaAttachments[index];
+              final attachment =
+                  widget.mediaAttachmentPackages[index].attachment;
               if (attachment.type == 'image' || attachment.type == 'giphy') {
                 final imageUrl = attachment.imageUrl ??
                     attachment.assetUrl ??
@@ -175,7 +176,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                       maxScale: PhotoViewComputedScale.covered,
                       minScale: PhotoViewComputedScale.contained,
                       heroAttributes: PhotoViewHeroAttributes(
-                        tag: widget.mediaAttachments,
+                        tag: widget.mediaAttachmentPackages,
                       ),
                       backgroundDecoration: BoxDecoration(
                         color: ColorTween(
@@ -228,55 +229,65 @@ class _FullScreenMediaState extends State<FullScreenMedia>
               }
               return const SizedBox();
             },
-            itemCount: widget.mediaAttachments.length,
+            itemCount: widget.mediaAttachmentPackages.length,
           ),
           FadeTransition(
             opacity: _opacityAnimation,
             child: ValueListenableBuilder<int>(
               valueListenable: _currentPage,
-              builder: (context, value, child) => Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  StreamGalleryHeader(
-                    userName: widget.userName,
-                    sentAt: context.translations.sentAtText(
-                      date: widget.message.createdAt,
-                      time: widget.message.createdAt,
-                    ),
-                    onBackPressed: () => Navigator.of(context).pop(),
-                    message: widget.message,
-                    currentIndex: value,
-                    onShowMessage: () {
-                      widget.onShowMessage?.call(
-                        widget.message,
-                        StreamChannel.of(context).channel,
-                      );
-                    },
-                    attachmentActionsModalBuilder:
-                        widget.attachmentActionsModalBuilder,
-                  ),
-                  if (!widget.message.isEphemeral)
-                    StreamGalleryFooter(
-                      currentPage: value,
-                      totalPages: widget.mediaAttachments.length,
-                      mediaAttachments: widget.mediaAttachments,
-                      message: widget.message,
-                      mediaSelectedCallBack: (val) {
-                        _currentPage.value = val;
-                        _pageController.animateToPage(
-                          val,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
+              builder: (context, value, child) {
+                final _currentAttachmentPackage =
+                    widget.mediaAttachmentPackages[value];
+                final _currentMessage = _currentAttachmentPackage.message;
+                final _currentAttachment = _currentAttachmentPackage.attachment;
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    StreamGalleryHeader(
+                      userName: widget.userName,
+                      sentAt: context.translations.sentAtText(
+                        date: widget.mediaAttachmentPackages[_currentPage.value]
+                            .message.createdAt,
+                        time: widget.mediaAttachmentPackages[_currentPage.value]
+                            .message.createdAt,
+                      ),
+                      onBackPressed: () {
                         Navigator.of(context).pop();
                       },
+                      message: _currentMessage,
+                      attachment: _currentAttachment,
+                      onShowMessage: () {
+                        widget.onShowMessage?.call(
+                          _currentMessage,
+                          StreamChannel.of(context).channel,
+                        );
+                      },
+                      attachmentActionsModalBuilder:
+                          widget.attachmentActionsModalBuilder,
                     ),
-                ],
-              ),
+                    if (!_currentMessage.isEphemeral)
+                      StreamGalleryFooter(
+                        currentPage: value,
+                        totalPages: widget.mediaAttachmentPackages.length,
+                        mediaAttachmentPackages: widget.mediaAttachmentPackages,
+                        mediaSelectedCallBack: (val) {
+                          _currentPage.value = val;
+                          _pageController.animateToPage(
+                            val,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                          Navigator.pop(context);
+                        },
+                      ),
+                  ],
+                );
+              },
             ),
           ),
-          if (widget.mediaAttachments.length > 1) ...[
-            if (_currentPage.value != widget.mediaAttachments.length - 1) ...[
+          if (widget.mediaAttachmentPackages.length > 1) ...[
+            if (_currentPage.value !=
+                widget.mediaAttachmentPackages.length - 1) ...[
               GalleryNavigationItem(
                 icon: Icons.chevron_right,
                 right: 0,

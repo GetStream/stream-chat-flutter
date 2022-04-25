@@ -436,8 +436,7 @@ class StreamMessageTextField extends StatefulWidget {
   ///
   /// This setting is only honored on iOS devices.
   ///
-  /// If unset, defaults to the brightness of
-  /// [ThemeData.primaryColorBrightness].
+  /// If unset, defaults to the brightness of [ThemeData.brightness].
   final Brightness? keyboardAppearance;
 
   /// {@macro flutter.widgets.editableText.scrollPadding}

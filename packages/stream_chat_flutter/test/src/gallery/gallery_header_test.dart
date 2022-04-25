@@ -69,6 +69,7 @@ void main() {
                 onWillPop: () async => false,
                 child: Scaffold(
                   appBar: StreamGalleryHeader(
+                    attachment: MockAttachment(),
                     message: Message(),
                   ),
                 ),
@@ -96,6 +97,7 @@ void main() {
                   userName: 'User',
                   sentAt: DateTime.now().toIso8601String(),
                   message: Message(),
+                  attachment: MockAttachment(),
                 ),
               ),
             ),

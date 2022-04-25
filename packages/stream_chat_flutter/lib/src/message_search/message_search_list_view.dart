@@ -1,13 +1,11 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_search/query_progress_indicator.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamMessageSearchListView}
-@Deprecated("Use 'StreamMessageSearchListView' instead")
-typedef MessageSearchListView = StreamMessageSearchListView;
-
-/// {@template streamMessageSearchListView}
+/// {@template messageSearchListView}
 /// Shows the list of searched messages.
 ///
 /// ```dart
@@ -38,9 +36,10 @@ typedef MessageSearchListView = StreamMessageSearchListView;
 /// The UI is rendered based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget's appearance.
 /// {@endtemplate}
-class StreamMessageSearchListView extends StatefulWidget {
-  /// {@macro streamMessageSearchListView}
-  const StreamMessageSearchListView({
+@Deprecated('Use StreamMessageSearchListView instead')
+class MessageSearchListView extends StatefulWidget {
+  /// {@macro messageSearchListView}
+  const MessageSearchListView({
     Key? key,
     required this.filters,
     this.messageQuery,
@@ -121,12 +120,10 @@ class StreamMessageSearchListView extends StatefulWidget {
   final MessageSearchListController? messageSearchListController;
 
   @override
-  _StreamMessageSearchListViewState createState() =>
-      _StreamMessageSearchListViewState();
+  _MessageSearchListViewState createState() => _MessageSearchListViewState();
 }
 
-class _StreamMessageSearchListViewState
-    extends State<StreamMessageSearchListView> {
+class _MessageSearchListViewState extends State<MessageSearchListView> {
   late final _defaultController = MessageSearchListController();
 
   MessageSearchListController get _messageSearchListController =>

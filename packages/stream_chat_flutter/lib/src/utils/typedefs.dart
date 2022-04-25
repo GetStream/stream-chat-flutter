@@ -59,12 +59,14 @@ typedef OnUserAvatarPress = void Function(User);
 typedef PlaceholderUserImage = Widget Function(BuildContext, User);
 
 /// {@template editMessageInputBuilder}
+// ignore: deprecated_member_use_from_same_package
 /// A widget builder for building a pre-populated [MessageInput] for use in
 /// editing messages.
 /// {@endtemplate}
 typedef EditMessageInputBuilder = Widget Function(BuildContext, Message);
 
 /// {@template channelListHeaderTitleBuilder}
+// ignore: deprecated_member_use_from_same_package
 /// A widget builder for custom [ChannelListHeader] title widgets.
 /// {@endtemplate}
 typedef ChannelListHeaderTitleBuilder = Widget Function(
@@ -108,7 +110,7 @@ typedef AttachmentActionsBuilder = Widget Function(
 );
 
 /// {@template errorListener}
-/// A callback that can be passed to [MessageInput.onError].
+/// A callback that can be passed to [StreamMessageInput.onError].
 ///
 /// This callback should not throw.
 ///
@@ -120,7 +122,8 @@ typedef ErrorListener = void Function(
 );
 
 /// {@template attachmentLimitExceededListener}
-/// A callback that can be passed to [MessageInput.onAttachmentLimitExceed].
+/// A callback that can be passed to
+/// [StreamMessageInput.onAttachmentLimitExceed].
 ///
 /// This callback should not throw.
 ///
@@ -159,6 +162,7 @@ typedef MentionTileOverlayBuilder = Widget Function(
 /// {@template userMentionTileBuilder}
 /// A builder function for representing a custom user mention tile.
 ///
+// ignore: deprecated_member_use_from_same_package
 /// Use [UserMentionTile] for the default implementation.
 /// {@endtemplate}
 typedef UserMentionTileBuilder = Widget Function(
@@ -215,6 +219,7 @@ typedef OnMessageTap = void Function(Message);
 
 /// {@template messageSearchItemTapCallback}
 /// The action to perform when tapping or clicking on a user in a
+// ignore: deprecated_member_use_from_same_package
 /// [MessageSearchListView].
 /// {@endtemplate}
 typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
@@ -305,10 +310,15 @@ typedef SpacingWidgetBuilder = Widget Function(
 /// {@template attachmentDownloader}
 /// A callback for downloading an attachment asset.
 /// {@endtemplate}
+/// Callback to download an attachment asset
 typedef AttachmentDownloader = Future<String> Function(
   Attachment attachment, {
   ProgressCallback? progressCallback,
+  DownloadedPathCallback? downloadedPathCallback,
 });
+
+/// Callback to receive the path once the attachment asset is downloaded
+typedef DownloadedPathCallback = void Function(String? path);
 
 /// {@template userTapCallback}
 /// Callback called when tapping on a user

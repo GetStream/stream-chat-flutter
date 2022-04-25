@@ -30,7 +30,7 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 ///         ),
 ///         errorBuilder: (context, err) {
 ///           return Center(
-///             child: Text('An error has occured'),
+///             child: Text('An error has occurred'),
 ///           );
 ///         },
 ///         emptyBuilder: (context) {
@@ -185,7 +185,7 @@ class ChannelListCoreState extends State<ChannelListCore> {
 
   @override
   void didChangeDependencies() {
-    _channelsBloc = ChannelsBloc.of(context);
+    super.didChangeDependencies();
     final newStreamChatCoreState = StreamChatCore.of(context);
 
     if (newStreamChatCoreState != _streamChatCoreState) {
@@ -202,8 +202,6 @@ class ChannelListCoreState extends State<ChannelListCore> {
           )
           .listen((event) => loadData());
     }
-
-    super.didChangeDependencies();
   }
 
   @override

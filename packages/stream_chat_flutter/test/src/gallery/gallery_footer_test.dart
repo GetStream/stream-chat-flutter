@@ -67,9 +67,9 @@ void main() {
               channel: channel,
               child: WillPopScope(
                 onWillPop: () async => false,
-                child: Scaffold(
+                child: const Scaffold(
                   body: StreamGalleryFooter(
-                    message: Message(),
+                    mediaAttachmentPackages: [],
                   ),
                 ),
               ),
@@ -91,9 +91,9 @@ void main() {
             channel: channel,
             child: WillPopScope(
               onWillPop: () async => false,
-              child: Scaffold(
+              child: const Scaffold(
                 body: StreamGalleryFooter(
-                  message: Message(),
+                  mediaAttachmentPackages: [],
                 ),
               ),
             ),

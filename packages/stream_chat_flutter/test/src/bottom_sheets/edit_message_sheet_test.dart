@@ -60,7 +60,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(EditMessageSheet), findsOneWidget);
       expect(find.text('Edit Message'), findsOneWidget);
-      expect(find.byType(MessageInput), findsOneWidget);
+      expect(find.byType(StreamMessageInput), findsOneWidget);
     });
 
     testGoldens(

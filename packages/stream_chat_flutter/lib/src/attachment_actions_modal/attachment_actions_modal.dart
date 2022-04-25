@@ -1,4 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -7,7 +10,7 @@ class AttachmentActionsModal extends StatelessWidget {
   /// Returns a new [AttachmentActionsModal]
   const AttachmentActionsModal({
     Key? key,
-    required this.currentIndex,
+    required this.attachment,
     required this.message,
     this.onShowMessage,
     this.imageDownloader,
@@ -19,11 +22,11 @@ class AttachmentActionsModal extends StatelessWidget {
     this.customActions = const [],
   }) : super(key: key);
 
+  /// The attachment object for which the actions are to be performed
+  final Attachment attachment;
+
   /// The message containing the attachments
   final Message message;
-
-  /// Current page index
-  final int currentIndex;
 
   /// Callback to show the message
   final VoidCallback? onShowMessage;
@@ -53,7 +56,7 @@ class AttachmentActionsModal extends StatelessWidget {
   /// specified attributes overridden.
   AttachmentActionsModal copyWith({
     Key? key,
-    int? currentIndex,
+    Attachment? attachment,
     Message? message,
     VoidCallback? onShowMessage,
     AttachmentDownloader? imageDownloader,
@@ -66,7 +69,7 @@ class AttachmentActionsModal extends StatelessWidget {
   }) {
     return AttachmentActionsModal(
       key: key ?? this.key,
-      currentIndex: currentIndex ?? this.currentIndex,
+      attachment: attachment ?? this.attachment,
       message: message ?? this.message,
       onShowMessage: onShowMessage ?? this.onShowMessage,
       imageDownloader: imageDownloader ?? this.imageDownloader,
@@ -130,7 +133,7 @@ class AttachmentActionsModal extends StatelessWidget {
                   if (showSave)
                     _buildButton(
                       context,
-                      message.attachments[currentIndex].type == 'video'
+                      attachment.type == 'video'
                           ? context.translations.saveVideoLabel
                           : context.translations.saveImageLabel,
                       StreamSvgIcon.iconSave(
@@ -138,24 +141,25 @@ class AttachmentActionsModal extends StatelessWidget {
                         color: theme.colorTheme.textLowEmphasis,
                       ),
                       () {
-                        final attachment = message.attachments[currentIndex];
                         final isImage = attachment.type == 'image';
-                        final attachmentHandler = MobileAttachmentHandler();
                         final Future<String?> Function(
                           Attachment, {
                           void Function(int, int) progressCallback,
-                        }) saveFile =
-                            fileDownloader ?? attachmentHandler.download;
+                          DownloadedPathCallback downloadedPathCallback,
+                        }) saveFile = fileDownloader ?? _downloadAttachment;
                         final Future<String?> Function(
                           Attachment, {
                           void Function(int, int) progressCallback,
-                        }) saveImage =
-                            imageDownloader ?? attachmentHandler.download;
+                          DownloadedPathCallback downloadedPathCallback,
+                        }) saveImage = imageDownloader ?? _downloadAttachment;
                         final downloader = isImage ? saveImage : saveFile;
 
                         final progressNotifier =
                             ValueNotifier<_DownloadProgress?>(
                           _DownloadProgress.initial(),
+                        );
+                        final downloadedPathNotifier = ValueNotifier<String?>(
+                          null,
                         );
 
                         downloader(
@@ -165,6 +169,9 @@ class AttachmentActionsModal extends StatelessWidget {
                               total,
                               received,
                             );
+                          },
+                          downloadedPathCallback: (String? path) {
+                            downloadedPathNotifier.value = path;
                           },
                         ).catchError((e, stk) {
                           progressNotifier.value = null;
@@ -181,6 +188,7 @@ class AttachmentActionsModal extends StatelessWidget {
                           builder: (context) => _buildDownloadProgressDialog(
                             context,
                             progressNotifier,
+                            downloadedPathNotifier,
                           ),
                         );
                       },
@@ -199,8 +207,12 @@ class AttachmentActionsModal extends StatelessWidget {
                         final channel = StreamChannel.of(context).channel;
                         if (message.attachments.length > 1 ||
                             message.text?.isNotEmpty == true) {
+                          final currentAttachmentIndex =
+                              message.attachments.indexWhere(
+                            (element) => element.id == attachment.id,
+                          );
                           final remainingAttachments = [...message.attachments]
-                            ..removeAt(currentIndex);
+                            ..removeAt(currentAttachmentIndex);
                           channel.updateMessage(message.copyWith(
                             attachments: remainingAttachments,
                           ));
@@ -281,76 +293,112 @@ class AttachmentActionsModal extends StatelessWidget {
   Widget _buildDownloadProgressDialog(
     BuildContext context,
     ValueNotifier<_DownloadProgress?> progressNotifier,
+    ValueNotifier<String?> downloadedFilePathNotifier,
   ) {
     final theme = StreamChatTheme.of(context);
     return ValueListenableBuilder(
-      valueListenable: progressNotifier,
-      builder: (_, _DownloadProgress? progress, __) {
-        // Pop the dialog in case the progress is null or it's completed.
-        if (progress == null || progress.toProgressIndicatorValue == 1.0) {
+      valueListenable: downloadedFilePathNotifier,
+      builder: (_, String? path, __) {
+        final _downloadComplete = path != null && path.isNotEmpty;
+        // Pop the dialog in case the download has completed
+        if (_downloadComplete) {
           Future.delayed(
             const Duration(milliseconds: 500),
             () => Navigator.of(context).maybePop(),
           );
         }
-        return Material(
-          type: MaterialType.transparency,
-          child: Center(
-            child: Container(
-              height: 182,
-              width: 182,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: theme.colorTheme.barsBg,
-              ),
+        return ValueListenableBuilder(
+          valueListenable: progressNotifier,
+          builder: (_, _DownloadProgress? progress, __) {
+            // Pop the dialog in case the progress is null.
+            if (progress == null) {
+              Future.delayed(
+                const Duration(milliseconds: 500),
+                () => Navigator.of(context).maybePop(),
+              );
+            }
+            return Material(
+              type: MaterialType.transparency,
               child: Center(
-                child: progress == null
-                    ? SizedBox(
-                        height: 100,
-                        width: 100,
-                        child: StreamSvgIcon.error(
-                          color: theme.colorTheme.disabled,
-                        ),
-                      )
-                    : progress.toProgressIndicatorValue == 1.0
+                child: Container(
+                  height: 182,
+                  width: 182,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: theme.colorTheme.barsBg,
+                  ),
+                  child: Center(
+                    child: progress == null
                         ? SizedBox(
-                            key: const Key('completedIcon'),
-                            height: 160,
-                            width: 160,
-                            child: StreamSvgIcon.check(
+                            height: 100,
+                            width: 100,
+                            child: StreamSvgIcon.error(
                               color: theme.colorTheme.disabled,
                             ),
                           )
-                        : SizedBox(
-                            height: 100,
-                            width: 100,
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                CircularProgressIndicator(
-                                  value: progress.toProgressIndicatorValue,
-                                  strokeWidth: 8,
-                                  valueColor: AlwaysStoppedAnimation(
-                                    theme.colorTheme.accentPrimary,
-                                  ),
+                        : _downloadComplete
+                            ? SizedBox(
+                                key: const Key('completedIcon'),
+                                height: 160,
+                                width: 160,
+                                child: StreamSvgIcon.check(
+                                  color: theme.colorTheme.disabled,
                                 ),
-                                Center(
-                                  child: Text(
-                                    '${progress.toPercentage}%',
-                                    style: theme.textTheme.headline.copyWith(
-                                      color: theme.colorTheme.textLowEmphasis,
+                              )
+                            : SizedBox(
+                                height: 100,
+                                width: 100,
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    CircularProgressIndicator(
+                                      strokeWidth: 8,
+                                      color: theme.colorTheme.accentPrimary,
                                     ),
-                                  ),
+                                    Center(
+                                      child: Text(
+                                        '${progress.receivedValueInMB} MB',
+                                        style:
+                                            theme.textTheme.headline.copyWith(
+                                          color:
+                                              theme.colorTheme.textLowEmphasis,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
+                              ),
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
+  }
+
+  Future<String?> _downloadAttachment(
+    Attachment attachment, {
+    ProgressCallback? progressCallback,
+    DownloadedPathCallback? downloadedPathCallback,
+  }) async {
+    String? filePath;
+    final appDocDir = await getTemporaryDirectory();
+    final url =
+        attachment.assetUrl ?? attachment.imageUrl ?? attachment.thumbUrl!;
+    await Dio().download(
+      url,
+      (Headers responseHeaders) {
+        final ext = Uri.parse(url).pathSegments.last;
+        filePath ??= '${appDocDir.path}/${attachment.id}.$ext';
+        return filePath!;
+      },
+      onReceiveProgress: progressCallback,
+    );
+    final result = await ImageGallerySaver.saveFile(filePath!);
+    downloadedPathCallback?.call((result as Map)['filePath']);
+    return (result as Map)['filePath'];
   }
 }
 
@@ -362,6 +410,8 @@ class _DownloadProgress {
 
   final int total;
   final int received;
+
+  String get receivedValueInMB => ((received / 1024) / 1024).toStringAsFixed(2);
 
   double get toProgressIndicatorValue => received / total;
 

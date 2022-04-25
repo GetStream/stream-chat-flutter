@@ -4,17 +4,17 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default separator builder for [StreamChannelListView].
-Widget defaultSeparatorBuilder(BuildContext context, int index) {
-  return const StreamChannelListSeparator();
-}
+Widget defaultChannelListViewSeparatorBuilder(
+  BuildContext context,
+  List<Channel> items,
+  int index,
+) =>
+    const StreamChannelListSeparator();
 
 /// Signature for the item builder that creates the children of the
 /// [StreamChannelListView].
-typedef StreamChannelListViewItemBuilder = Widget Function(
-  BuildContext context,
-  Channel channel,
-  StreamChannelListTile defaultWidget,
-);
+typedef StreamChannelListViewIndexedWidgetBuilder
+    = StreamListViewIndexedWidgetBuilder<Channel, StreamChannelListTile>;
 
 /// A [ListView] that shows a list of [Channel]s,
 /// it uses [StreamChannelListTile] as a default item.
@@ -39,18 +39,19 @@ typedef StreamChannelListViewItemBuilder = Widget Function(
 /// See also:
 /// * [StreamChannelListTile]
 /// * [StreamChannelListController]
-class StreamChannelListView extends StatefulWidget {
+class StreamChannelListView extends StatelessWidget {
   /// Creates a new instance of [StreamChannelListView].
   const StreamChannelListView({
     Key? key,
     required this.controller,
     this.itemBuilder,
-    this.separatorBuilder = defaultSeparatorBuilder,
+    this.separatorBuilder = defaultChannelListViewSeparatorBuilder,
     this.emptyBuilder,
     this.loadingBuilder,
     this.errorBuilder,
     this.onChannelTap,
     this.onChannelLongPress,
+    this.loadMoreTriggerIndex = 3,
     this.padding,
     this.physics,
     this.reverse = false,
@@ -72,14 +73,14 @@ class StreamChannelListView extends StatefulWidget {
   /// The `channel` parameter is the [Channel] at this position in the list
   /// and the `defaultWidget` is the default widget used
   /// i.e: [StreamChannelListTile].
-  final StreamChannelListViewItemBuilder? itemBuilder;
+  final StreamChannelListViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.
-  final IndexedWidgetBuilder separatorBuilder;
+  final PagedValueListViewIndexedWidgetBuilder<Channel> separatorBuilder;
 
   /// A builder that is called to build the empty state of the list.
   ///
-  /// If not provider, [StreamChannelListEmptyWidget] will be used.
+  /// If not provided, [StreamChannelListEmptyWidget] will be used.
   final WidgetBuilder? emptyBuilder;
 
   /// A builder that is called to build the loading state of the list.
@@ -97,6 +98,9 @@ class StreamChannelListView extends StatefulWidget {
 
   /// Called when the user long-presses on this list tile.
   final void Function(Channel)? onChannelLongPress;
+
+  /// The index to take into account when triggering [controller.loadMore].
+  final int loadMoreTriggerIndex;
 
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry? padding;
@@ -232,136 +236,74 @@ class StreamChannelListView extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _StreamChannelListViewState createState() => _StreamChannelListViewState();
-}
+  Widget build(BuildContext context) {
+    return PagedValueListView<int, Channel>(
+      padding: padding,
+      physics: physics,
+      reverse: reverse,
+      controller: controller,
+      primary: primary,
+      shrinkWrap: shrinkWrap,
+      keyboardDismissBehavior: keyboardDismissBehavior,
+      restorationId: restorationId,
+      dragStartBehavior: dragStartBehavior,
+      cacheExtent: cacheExtent,
+      loadMoreTriggerIndex: loadMoreTriggerIndex,
+      separatorBuilder: separatorBuilder,
+      itemBuilder: (context, channels, index) {
+        final channel = channels[index];
+        final onTap = onChannelTap;
+        final onLongPress = onChannelLongPress;
 
-class _StreamChannelListViewState extends State<StreamChannelListView> {
-  StreamChannelListController get _controller => widget.controller;
+        final streamChannelListTile = StreamChannelListTile(
+          channel: channel,
+          onTap: onTap == null ? null : () => onTap(channel),
+          onLongPress: onLongPress == null ? null : () => onLongPress(channel),
+        );
 
-  // Avoids duplicate requests on rebuilds.
-  bool _hasRequestedNextPage = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.doInitialLoad();
-  }
-
-  @override
-  void didUpdateWidget(covariant StreamChannelListView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_controller != oldWidget.controller) {
-      // reset duplicate requests flag
-      _hasRequestedNextPage = false;
-      _controller.doInitialLoad();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) =>
-      PagedValueListenableBuilder<int, Channel>(
-        valueListenable: widget.controller,
-        builder: (context, value, _) => value.when(
-          (channels, nextPageKey, error) {
-            if (channels.isEmpty) {
-              return widget.emptyBuilder?.call(context) ??
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(8),
-                      child: StreamChannelListEmptyWidget(),
-                    ),
-                  );
-            }
-
-            return ListView.separated(
-              padding: widget.padding,
-              physics: widget.physics,
-              reverse: widget.reverse,
-              controller: widget.scrollController,
-              primary: widget.primary,
-              shrinkWrap: widget.shrinkWrap,
-              keyboardDismissBehavior: widget.keyboardDismissBehavior,
-              restorationId: widget.restorationId,
-              dragStartBehavior: widget.dragStartBehavior,
-              cacheExtent: widget.cacheExtent,
-              itemCount: value.itemCount,
-              separatorBuilder: widget.separatorBuilder,
-              itemBuilder: (context, index) {
-                if (!_hasRequestedNextPage) {
-                  final newPageRequestTriggerIndex = channels.length - 3;
-                  final isBuildingTriggerIndexItem =
-                      index == newPageRequestTriggerIndex;
-                  if (nextPageKey != null && isBuildingTriggerIndexItem) {
-                    // Schedules the request for the end of this frame.
-                    WidgetsBinding.instance?.addPostFrameCallback((_) async {
-                      if (error == null) {
-                        await _controller.loadMore(nextPageKey);
-                      }
-                      _hasRequestedNextPage = false;
-                    });
-                    _hasRequestedNextPage = true;
-                  }
-                }
-
-                if (index == channels.length) {
-                  if (error != null) {
-                    return StreamChannelListLoadMoreError(
-                      onTap: _controller.retry,
-                    );
-                  }
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: StreamChannelListLoadMoreIndicator(),
-                    ),
-                  );
-                }
-
-                final channel = channels[index];
-
-                final onTap = widget.onChannelTap;
-                final onLongPress = widget.onChannelLongPress;
-
-                final streamChannelListTile = StreamChannelListTile(
-                  channel: channel,
-                  onTap: onTap == null ? null : () => onTap(channel),
-                  onLongPress:
-                      onLongPress == null ? null : () => onLongPress(channel),
-                );
-
-                final itemBuilder = widget.itemBuilder;
-
-                if (itemBuilder != null) {
-                  return itemBuilder(
-                    context,
-                    channel,
-                    streamChannelListTile,
-                  );
-                }
-
-                return streamChannelListTile;
-              },
-            );
-          },
-          loading: () =>
-              widget.loadingBuilder?.call(context) ??
-              ListView.separated(
-                padding: widget.padding,
-                physics: widget.physics,
-                reverse: widget.reverse,
-                itemCount: 25,
-                separatorBuilder: widget.separatorBuilder,
-                itemBuilder: (_, __) => const StreamChannelListLoadingTile(),
-              ),
-          error: (error) =>
-              widget.errorBuilder?.call(context, error) ??
-              Center(
-                child: StreamChannelListErrorWidget(
-                  onPressed: _controller.refresh,
-                ),
-              ),
+        return itemBuilder?.call(
+              context,
+              channels,
+              index,
+              streamChannelListTile,
+            ) ??
+            streamChannelListTile;
+      },
+      emptyBuilder: (context) =>
+          emptyBuilder?.call(context) ??
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(8),
+              child: StreamChannelListEmptyWidget(),
+            ),
+          ),
+      loadMoreErrorBuilder: (context, error) =>
+          StreamChannelListLoadMoreError(onTap: controller.retry),
+      loadMoreIndicatorBuilder: (context) => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: StreamChannelListLoadMoreIndicator(),
         ),
-      );
+      ),
+      loadingBuilder: (context) =>
+          loadingBuilder?.call(context) ??
+          ListView.separated(
+            padding: padding,
+            physics: physics,
+            reverse: reverse,
+            itemCount: 25,
+            separatorBuilder: (_, __) => const StreamChannelListSeparator(),
+            itemBuilder: (_, __) => const StreamChannelListLoadingTile(),
+          ),
+      errorBuilder: (context, error) =>
+          errorBuilder?.call(context, error) ??
+          Center(
+            child: StreamChannelListErrorWidget(
+              onPressed: controller.refresh,
+            ),
+          ),
+    );
+  }
 }
 
 /// A [StreamChannelListTile] that can be used in a [ListView] to show a

@@ -1,3 +1,19 @@
+## 4.0.0-beta.2
+
+✅ Added
+
+- Added support to pass `autoCorrect` to `StreamMessageInput` for the text input field
+- Added support to control the visibility of the default emoji suggestions overlay in `StreamMessageInput`
+- Added support to build custom widget for scrollToBottom in `StreamMessageListView`
+
+🐞 Fixed
+
+- Minor fixes and improvements
+-[[#892]](https://github.com/GetStream/stream-chat-flutter/issues/892): Fix default `initialAlignment` in `MessageListView`.
+- Fix `MessageInputTheme.inputBackgroundColor` color not being used in some widgets of `MessageInput`
+- Removed dependency on `visibility_detector`
+- [[#1071]](https://github.com/GetStream/stream-chat-flutter/issues/1071): Fixed the way attachment actions were handled in full screen
+
 ## 4.0.0-beta.1
 
 ✅ Added
@@ -13,6 +29,12 @@
 - Updated `stream_chat_flutter_core` dependency to [`4.0.0-beta.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 - Added OpenGraph preview support for links in `StreamMessageInput`.
 - Removed video compression.
+
+## 3.6.1
+
+- Updated `stream_chat_flutter_core` dependency to [`3.6.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
+## 3.6.0
 
 🐞 Fixed
 
@@ -49,6 +71,7 @@
 - Fix default `Channel` route not opening from `ChannelListView` when `ChannelAvatar` is tapped
 
 ## 3.4.0
+
 - Updated `stream_chat_flutter_core` dependency to [`3.4.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 🐞 Fixed
