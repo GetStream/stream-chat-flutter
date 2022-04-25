@@ -1,8 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/v4/stream_list_view_indexed_widget_builder.dart';
-import 'package:stream_chat_flutter/src/v4/user_list_view/stream_user_list_tile.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default separator builder for [StreamUserListView].
@@ -54,17 +52,21 @@ class StreamUserListView extends StatelessWidget {
     this.onUserTap,
     this.onUserLongPress,
     this.loadMoreTriggerIndex = 3,
-    this.padding,
-    this.physics,
+    this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.scrollController,
     this.primary,
-    this.scrollBehavior,
+    this.physics,
     this.shrinkWrap = false,
+    this.padding,
+    this.addAutomaticKeepAlives = true,
+    this.addRepaintBoundaries = true,
+    this.addSemanticIndexes = true,
     this.cacheExtent,
     this.dragStartBehavior = DragStartBehavior.start,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
   }) : super(key: key);
 
   /// The [StreamUserListController] used to control the list of users.
@@ -78,7 +80,7 @@ class StreamUserListView extends StatelessWidget {
   final StreamUserListViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.
-  final PagedValueListViewIndexedWidgetBuilder<User> separatorBuilder;
+  final PagedValueScrollViewIndexedWidgetBuilder<User> separatorBuilder;
 
   /// A builder that is called to build the empty state of the list.
   ///
@@ -104,8 +106,55 @@ class StreamUserListView extends StatelessWidget {
   /// The index to take into account when triggering [controller.loadMore].
   final int loadMoreTriggerIndex;
 
+  /// {@template flutter.widgets.scroll_view.scrollDirection}
+  /// The axis along which the scroll view scrolls.
+  ///
+  /// Defaults to [Axis.vertical].
+  /// {@endtemplate}
+  final Axis scrollDirection;
+
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry? padding;
+
+  /// Whether to wrap each child in an [AutomaticKeepAlive].
+  ///
+  /// Typically, children in lazy list are wrapped in [AutomaticKeepAlive]
+  /// widgets so that children can use [KeepAliveNotification]s to preserve
+  /// their state when they would otherwise be garbage collected off-screen.
+  ///
+  /// This feature (and [addRepaintBoundaries]) must be disabled if the children
+  /// are going to manually maintain their [KeepAlive] state. It may also be
+  /// more efficient to disable this feature if it is known ahead of time that
+  /// none of the children will ever try to keep themselves alive.
+  ///
+  /// Defaults to true.
+  final bool addAutomaticKeepAlives;
+
+  /// Whether to wrap each child in a [RepaintBoundary].
+  ///
+  /// Typically, children in a scrolling container are wrapped in repaint
+  /// boundaries so that they do not need to be repainted as the list scrolls.
+  /// If the children are easy to repaint (e.g., solid color blocks or a short
+  /// snippet of text), it might be more efficient to not add a repaint boundary
+  /// and simply repaint the children during scrolling.
+  ///
+  /// Defaults to true.
+  final bool addRepaintBoundaries;
+
+  /// Whether to wrap each child in an [IndexedSemantics].
+  ///
+  /// Typically, children in a scrolling container must be annotated with a
+  /// semantic index in order to generate the correct accessibility
+  /// announcements. This should only be set to false if the indexes have
+  /// already been provided by an [IndexedSemantics] widget.
+  ///
+  /// Defaults to true.
+  ///
+  /// See also:
+  ///
+  ///  * [IndexedSemantics], for an explanation of how to manually
+  ///    provide semantic indexes.
+  final bool addSemanticIndexes;
 
   /// {@template flutter.widgets.scroll_view.reverse}
   /// Whether the scroll view scrolls in the reading direction.
@@ -153,14 +202,6 @@ class StreamUserListView extends StatelessWidget {
   ///
   /// Defaults to true when [scrollController] is null.
   final bool? primary;
-
-  /// {@macro flutter.widgets.shadow.scrollBehavior}
-  ///
-  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
-  /// [ScrollPhysics] is provided in [physics], it will take precedence,
-  /// followed by [scrollBehavior], and then the inherited ancestor
-  /// [ScrollBehavior].
-  final ScrollBehavior? scrollBehavior;
 
   /// {@template flutter.widgets.scroll_view.shrinkWrap}
   /// Whether the extent of the scroll view in the [scrollDirection] should be
@@ -237,18 +278,29 @@ class StreamUserListView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
   @override
   Widget build(BuildContext context) => PagedValueListView<int, User>(
+        scrollDirection: scrollDirection,
         padding: padding,
         physics: physics,
         reverse: reverse,
         controller: controller,
+        scrollController: scrollController,
         primary: primary,
         shrinkWrap: shrinkWrap,
+        addAutomaticKeepAlives: addAutomaticKeepAlives,
+        addRepaintBoundaries: addRepaintBoundaries,
+        addSemanticIndexes: addSemanticIndexes,
         keyboardDismissBehavior: keyboardDismissBehavior,
         restorationId: restorationId,
         dragStartBehavior: dragStartBehavior,
         cacheExtent: cacheExtent,
+        clipBehavior: clipBehavior,
         loadMoreTriggerIndex: loadMoreTriggerIndex,
         separatorBuilder: separatorBuilder,
         itemBuilder: (context, users, index) {
