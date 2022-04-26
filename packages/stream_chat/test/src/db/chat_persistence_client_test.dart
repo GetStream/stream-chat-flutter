@@ -117,19 +117,20 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> updateUsers(List<User> users) => Future.value();
 
   @override
-  Future<void> bulkUpdateMembers(Map<String, List<Member>> members) =>
+  Future<void> bulkUpdateMembers(Map<String, List<Member>?> members) =>
       Future.value();
 
   @override
-  Future<void> bulkUpdateMessages(Map<String, List<Message>> messages) =>
+  Future<void> bulkUpdateMessages(Map<String, List<Message>?> messages) =>
       Future.value();
 
   @override
-  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>> messages) =>
+  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>?> messages) =>
       Future.value();
 
   @override
-  Future<void> bulkUpdateReads(Map<String, List<Read>> reads) => Future.value();
+  Future<void> bulkUpdateReads(Map<String, List<Read>?> reads) =>
+      Future.value();
 }
 
 void main() {
