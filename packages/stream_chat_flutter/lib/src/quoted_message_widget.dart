@@ -97,7 +97,7 @@ class QuotedMessageWidget extends StatelessWidget {
   bool get _hasAttachments => message.attachments.isNotEmpty;
 
   bool get _containsLinkAttachment =>
-      message.attachments.any((element) => element.titleLink != null);
+      message.attachments.any((element) => element.ogScrapeUrl != null);
 
   bool get _containsText => message.text?.isNotEmpty == true;
 
@@ -201,7 +201,7 @@ class QuotedMessageWidget extends StatelessWidget {
     Attachment attachment;
     if (_containsLinkAttachment) {
       attachment = message.attachments.firstWhere(
-        (element) => element.titleLink != null,
+        (element) => element.ogScrapeUrl != null,
       );
       child = _buildUrlAttachment(attachment);
     } else {

@@ -1274,7 +1274,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return const Offstage();
     final containsUrl = widget.quotedMessage!.attachments
-        .any((element) => element.titleLink != null);
+        .any((element) => element.ogScrapeUrl != null);
     return QuotedMessageWidget(
       reverse: true,
       showBorder: !containsUrl,
