@@ -9,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// Launch URL
 Future<void> launchURL(BuildContext context, String url) async {
   try {
-    await launch(url);
+    await launch(Uri.parse(url).withScheme.toString());
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(context.translations.launchUrlError)),
