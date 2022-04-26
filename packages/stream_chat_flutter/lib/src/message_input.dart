@@ -480,6 +480,7 @@ class MessageInputState extends State<MessageInput> {
     if (widget.editMessage == null) {
       child = Material(
         elevation: 8,
+        color: _messageInputTheme.inputBackgroundColor,
         child: child,
       );
     }
@@ -679,6 +680,7 @@ class MessageInputState extends State<MessageInput> {
           gradient: _focusNode.hasFocus
               ? _messageInputTheme.activeBorderGradient
               : _messageInputTheme.idleBorderGradient,
+          color: _messageInputTheme.inputBackgroundColor,
         ),
         child: Padding(
           padding: const EdgeInsets.all(1.5),
@@ -1272,7 +1274,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return const Offstage();
     final containsUrl = widget.quotedMessage!.attachments
-        .any((element) => element.titleLink != null);
+        .any((element) => element.ogScrapeUrl != null);
     return QuotedMessageWidget(
       reverse: true,
       showBorder: !containsUrl,

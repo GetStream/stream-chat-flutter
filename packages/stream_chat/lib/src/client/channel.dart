@@ -1033,10 +1033,23 @@ class Channel {
     return _client.deleteChannel(id!, type);
   }
 
-  /// Removes all messages from the channel.
-  Future<EmptyResponse> truncate() async {
+  /// Removes all messages from the channel up to [truncatedAt] or now if
+  /// [truncatedAt] is not provided.
+  /// If [skipPush] is true, no push notification will be sent.
+  /// [Message] is the system message that will be sent to the channel.
+  Future<EmptyResponse> truncate({
+    Message? message,
+    bool? skipPush,
+    DateTime? truncatedAt,
+  }) async {
     _checkInitialized();
-    return _client.truncateChannel(id!, type);
+    return _client.truncateChannel(
+      id!,
+      type,
+      message: message,
+      skipPush: skipPush,
+      truncatedAt: truncatedAt,
+    );
   }
 
   /// Accept invitation to the channel.
@@ -1094,7 +1107,6 @@ class Channel {
       // remove the passed message if response does
       // not contain message
       state!.removeMessage(message);
-      await _client.chatPersistenceClient?.deleteMessageById(messageId);
     }
     return res;
   }
@@ -1586,10 +1598,12 @@ class ChannelClientState {
     _subscriptions.add(_channel.on(EventType.memberRemoved).listen((Event e) {
       final user = e.user;
       updateChannelState(channelState.copyWith(
-        members: List.from(
-          channelState.members..removeWhere((m) => m.userId == user!.id),
-        ),
-        read: channelState.read..removeWhere((r) => r.user.id == user!.id),
+        members: channelState.members
+            .where((m) => m.userId != user!.id)
+            .toList(growable: false),
+        read: channelState.read
+            .where((r) => r.user.id != user!.id)
+            .toList(growable: false),
       ));
     }));
   }
@@ -1598,7 +1612,7 @@ class ChannelClientState {
     _subscriptions.add(_channel.on(EventType.channelUpdated).listen((Event e) {
       final channel = e.channel!;
       updateChannelState(channelState.copyWith(
-        channel: channel,
+        channel: channelState.channel?.merge(channel),
         members: channel.members,
       ));
     }));
@@ -1612,6 +1626,9 @@ class ChannelClientState {
       await _channel._client.chatPersistenceClient
           ?.deleteMessageByCid(channel.cid);
       truncate();
+      if (event.message != null) {
+        updateMessage(event.message!);
+      }
     }));
   }
 
@@ -1846,7 +1863,9 @@ class ChannelClientState {
   }
 
   /// Remove a [message] from this [channelState].
-  void removeMessage(Message message) {
+  void removeMessage(Message message) async {
+    await _channel._client.chatPersistenceClient?.deleteMessageById(message.id);
+
     final parentId = message.parentId;
     // i.e. it's a thread message, Remove it
     if (parentId != null) {
@@ -2119,12 +2138,12 @@ class ChannelClientState {
   final BehaviorSubject<Map<String, List<Message>>> _threadsController =
       BehaviorSubject.seeded({});
 
-  set _threads(Map<String, List<Message>> v) {
-    _channel.client.chatPersistenceClient?.updateMessages(
+  set _threads(Map<String, List<Message>> threads) {
+    _threadsController.add(threads);
+    _channel.client.chatPersistenceClient?.updateChannelThreads(
       _channel.cid!,
-      v.values.expand((v) => v).toList(),
+      threads,
     );
-    _threadsController.add(v);
   }
 
   /// Channel related typing users last value.

@@ -64,7 +64,7 @@ class StreamChatClient {
   StreamChatClient(
     String apiKey, {
     this.logLevel = Level.WARNING,
-    LogHandlerFunction? logHandlerFunction,
+    this.logHandlerFunction = StreamChatClient.defaultLogHandler,
     RetryPolicy? retryPolicy,
     @Deprecated('''
     Location is now deprecated in favor of the new edge server. Will be removed in v4.0.0.
@@ -77,7 +77,6 @@ class StreamChatClient {
     WebSocket? ws,
     AttachmentFileUploader? attachmentFileUploader,
   }) {
-    this.logHandlerFunction = logHandlerFunction ?? _defaultLogHandler;
     logger.info('Initiating new StreamChatClient');
 
     final options = StreamHttpClientOptions(
@@ -134,7 +133,7 @@ class StreamChatClient {
       '${CurrentPlatform.name}-'
       '${PACKAGE_VERSION.split('+')[0]}';
 
-  /// Additionals headers for all requests
+  /// Additional headers for all requests
   static Map<String, Object?> additionalHeaders = {};
 
   ChatPersistenceClient? _originalChatPersistenceClient;
@@ -189,7 +188,7 @@ class StreamChatClient {
   /// final client = StreamChatClient("stream-chat-api-key",
   /// logHandlerFunction: myLogHandlerFunction);
   ///```
-  late LogHandlerFunction logHandlerFunction;
+  final LogHandlerFunction logHandlerFunction;
 
   StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
 
@@ -214,17 +213,18 @@ class StreamChatClient {
   Stream<ConnectionStatus> get wsConnectionStatusStream =>
       _wsConnectionStatusController.stream.distinct();
 
-  LogHandlerFunction get _defaultLogHandler => (LogRecord record) {
-        print(
-          '${record.time} '
-          '${_levelEmojiMapper[record.level] ?? record.level.name} '
-          '${record.loggerName} ${record.message} ',
-        );
-        if (record.error != null) print(record.error);
-        if (record.stackTrace != null) print(record.stackTrace);
-      };
+  /// Default log handler function for the [StreamChatClient] logger.
+  static void defaultLogHandler(LogRecord record) {
+    print(
+      '${record.time} '
+      '${_levelEmojiMapper[record.level] ?? record.level.name} '
+      '${record.loggerName} ${record.message} ',
+    );
+    if (record.error != null) print(record.error);
+    if (record.stackTrace != null) print(record.stackTrace);
+  }
 
-  ///
+  /// Default logger for the [StreamChatClient].
   Logger detachedLogger(String name) => Logger.detached(name)
     ..level = logLevel
     ..onRecord.listen(logHandlerFunction);
@@ -328,7 +328,9 @@ class StreamChatClient {
         _chatPersistenceClient = _originalChatPersistenceClient;
         await _chatPersistenceClient!.connect(ownUser.id);
       }
-      final connectedUser = await openConnection();
+      final connectedUser = await openConnection(
+        includeUserDetailsInConnectCall: true,
+      );
       return state.currentUser = connectedUser;
     } catch (e, stk) {
       if (e is StreamWebSocketError && e.isRetriable) {
@@ -341,7 +343,11 @@ class StreamChatClient {
   }
 
   /// Creates a new WebSocket connection with the current user.
-  Future<OwnUser> openConnection() async {
+  /// If [includeUserDetailsInConnectCall] is true it will include the current
+  /// user details in the connect call.
+  Future<OwnUser> openConnection({
+    bool includeUserDetailsInConnectCall = false,
+  }) async {
     assert(
       state.currentUser != null,
       'User is not set on client, '
@@ -371,7 +377,10 @@ class StreamChatClient {
         _ws.connectionStatusStream.skip(1).listen(_connectionStatusHandler);
 
     try {
-      final event = await _ws.connect(user);
+      final event = await _ws.connect(
+        user,
+        includeUserDetails: includeUserDetailsInConnectCall,
+      );
       return user.merge(event.me);
     } catch (e, stk) {
       logger.severe('error connecting ws', e, stk);
@@ -938,14 +947,23 @@ class StreamChatClient {
         channelType,
       );
 
-  /// Removes all messages from the channel
+  /// Removes all messages from the channel up to [truncatedAt] or now if
+  /// [truncatedAt] is not provided.
+  /// If [skipPush] is true, no push notification will be sent.
+  /// [Message] is the system message that will be sent to the channel.
   Future<EmptyResponse> truncateChannel(
     String channelId,
-    String channelType,
-  ) =>
+    String channelType, {
+    Message? message,
+    bool? skipPush,
+    DateTime? truncatedAt,
+  }) =>
       _chatApi.channel.truncateChannel(
         channelId,
         channelType,
+        message: message,
+        skipPush: skipPush,
+        truncatedAt: truncatedAt,
       );
 
   /// Mutes the channel
