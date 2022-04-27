@@ -86,7 +86,7 @@ firebaseMessaging.onTokenRefresh.listen((token) {
 }); 
 ```
 
-Push Notifications v2 also supports specifying a name to the push tokens you register. By setting the optional `pushProviderName` param in the `addDevice` call you can support different configurations between and the device and the `PushProvider`.
+Push Notifications v2 also supports specifying a name to the push device tokens you register. By setting the optional `pushProviderName` param in the `addDevice` call you can support different configurations between the device and the `PushProvider`.
 
 ```dart
 firebaseMessaging.onTokenRefresh.listen((token) { 
