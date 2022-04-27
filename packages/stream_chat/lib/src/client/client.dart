@@ -623,7 +623,7 @@ class StreamChatClient {
     final channels = res.channels;
 
     final users = channels
-        .expand((it) => it.members)
+        .expand((it) => it.members ?? <Member>[])
         .map((it) => it.user)
         .toList(growable: false);
 

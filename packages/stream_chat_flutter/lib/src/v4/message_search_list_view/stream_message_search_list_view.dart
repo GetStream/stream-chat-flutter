@@ -286,7 +286,6 @@ class StreamMessageSearchListView extends StatelessWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-
   @override
   Widget build(BuildContext context) =>
       PagedValueListView<String, GetMessageResponse>(

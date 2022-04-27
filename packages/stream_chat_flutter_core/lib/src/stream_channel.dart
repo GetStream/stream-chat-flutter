@@ -106,7 +106,9 @@ class StreamChannelState extends State<StreamChannel> {
         limit: limit,
         preferOffline: preferOffline,
       );
-      if (state.messages.isEmpty || state.messages.length < limit) {
+      if (state.messages == null ||
+          state.messages!.isEmpty ||
+          state.messages!.length < limit) {
         _topPaginationEnded = true;
       }
       _queryTopMessagesController.safeAdd(false);
@@ -137,7 +139,9 @@ class StreamChannelState extends State<StreamChannel> {
         limit: limit,
         preferOffline: preferOffline,
       );
-      if (state.messages.isEmpty || state.messages.length < limit) {
+      if (state.messages == null ||
+          state.messages!.isEmpty ||
+          state.messages!.length < limit) {
         _bottomPaginationEnded = true;
       }
       _queryBottomMessagesController.safeAdd(false);
@@ -299,7 +303,9 @@ class StreamChannelState extends State<StreamChannel> {
       ),
       preferOffline: preferOffline,
     );
-    if (state.messages.isEmpty || state.messages.length < limit) {
+    if (state.messages == null ||
+        state.messages!.isEmpty ||
+        state.messages!.length < limit) {
       channel.state?.isUpToDate = true;
     }
     return state;

@@ -45,7 +45,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
     if (imageUrl == null) {
       return const AttachmentError();
     }
-    if (attachment.actions.isNotEmpty) {
+    if (attachment.actions != null && attachment.actions!.isNotEmpty) {
       return _buildSendingAttachment(context, imageUrl);
     }
     return _buildSentAttachment(context, imageUrl);

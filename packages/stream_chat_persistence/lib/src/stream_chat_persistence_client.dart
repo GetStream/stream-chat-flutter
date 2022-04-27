@@ -295,21 +295,21 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
-  Future<void> bulkUpdateMembers(Map<String, List<Member>> members) {
+  Future<void> bulkUpdateMembers(Map<String, List<Member>?> members) {
     assert(_debugIsConnected, '');
     _logger.info('bulkUpdateMembers');
     return _readProtected(() => db!.memberDao.bulkUpdateMembers(members));
   }
 
   @override
-  Future<void> bulkUpdateMessages(Map<String, List<Message>> messages) {
+  Future<void> bulkUpdateMessages(Map<String, List<Message>?> messages) {
     assert(_debugIsConnected, '');
     _logger.info('bulkUpdateMessages');
     return _readProtected(() => db!.messageDao.bulkUpdateMessages(messages));
   }
 
   @override
-  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>> messages) {
+  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>?> messages) {
     assert(_debugIsConnected, '');
     _logger.info('bulkUpdatePinnedMessages');
     return _readProtected(
@@ -334,7 +334,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
-  Future<void> bulkUpdateReads(Map<String, List<Read>> reads) {
+  Future<void> bulkUpdateReads(Map<String, List<Read>?> reads) {
     assert(_debugIsConnected, '');
     _logger.info('bulkUpdateReads');
     return _readProtected(() => db!.readDao.bulkUpdateReads(reads));
