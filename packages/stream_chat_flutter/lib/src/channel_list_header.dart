@@ -60,7 +60,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.actions,
     this.backgroundColor,
-    this.elevation,
+    this.elevation = 1,
   }) : super(key: key);
 
   /// Pass this if you don't have a [StreamChatClient] in your widget tree.
@@ -100,7 +100,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   final Color? backgroundColor;
 
   /// The elevation for this [ChannelListHeader].
-  final double? elevation;
+  final double elevation;
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +136,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             systemOverlayStyle: theme.brightness == Brightness.dark
                 ? SystemUiOverlayStyle.light
                 : SystemUiOverlayStyle.dark,
-            elevation: elevation ?? 1,
+            elevation: elevation,
             backgroundColor:
                 backgroundColor ?? channelListHeaderThemeData.color,
             centerTitle: centerTitle,

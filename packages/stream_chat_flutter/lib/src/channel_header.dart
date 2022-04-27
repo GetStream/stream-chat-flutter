@@ -65,7 +65,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.actions,
     this.backgroundColor,
-    this.elevation,
+    this.elevation = 1,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -108,7 +108,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   final Color? backgroundColor;
 
   /// The elevation for this [ChannelHeader].
-  final double? elevation;
+  final double elevation;
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +153,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             systemOverlayStyle: theme.brightness == Brightness.dark
                 ? SystemUiOverlayStyle.light
                 : SystemUiOverlayStyle.dark,
-            elevation: elevation ?? 1,
+            elevation: elevation,
             leading: leadingWidget,
             backgroundColor: backgroundColor ?? channelHeaderTheme.color,
             actions: actions ??

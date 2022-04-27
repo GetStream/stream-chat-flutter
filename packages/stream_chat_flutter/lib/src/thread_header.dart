@@ -71,7 +71,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
     this.onTitleTap,
     this.showTypingIndicator = true,
     this.backgroundColor,
-    this.elevation,
+    this.elevation = 1,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -111,7 +111,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   final Color? backgroundColor;
 
   /// The elevation for this [ThreadHeader].
-  final double? elevation;
+  final double elevation;
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +143,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
       systemOverlayStyle: theme.brightness == Brightness.dark
           ? SystemUiOverlayStyle.light
           : SystemUiOverlayStyle.dark,
-      elevation: elevation ?? 1,
+      elevation: elevation,
       leading: leading ??
           (showBackButton
               ? StreamBackButton(
