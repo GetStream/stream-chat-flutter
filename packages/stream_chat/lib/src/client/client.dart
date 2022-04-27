@@ -818,8 +818,16 @@ class StreamChatClient {
       );
 
   /// Add a device for Push Notifications.
-  Future<EmptyResponse> addDevice(String id, PushProvider pushProvider) =>
-      _chatApi.device.addDevice(id, pushProvider);
+  Future<EmptyResponse> addDevice(
+    String id,
+    PushProvider pushProvider, {
+    String? pushProviderName,
+  }) =>
+      _chatApi.device.addDevice(
+        id,
+        pushProvider,
+        pushProviderName: pushProviderName,
+      );
 
   /// Gets a list of user devices.
   Future<ListDevicesResponse> getDevices() => _chatApi.device.getDevices();

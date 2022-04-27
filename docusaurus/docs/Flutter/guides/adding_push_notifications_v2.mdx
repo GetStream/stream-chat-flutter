@@ -86,6 +86,14 @@ firebaseMessaging.onTokenRefresh.listen((token) {
 }); 
 ```
 
+Push Notifications v2 also supports specifying a name to the push tokens you register. By setting the optional `pushProviderName` param in the `addDevice` call you can support different configurations between and the device and the `PushProvider`.
+
+```dart
+firebaseMessaging.onTokenRefresh.listen((token) { 
+      client.addDevice(token, PushProvider.firebase, pushProviderName: 'my-custom-config'); 
+}); 
+```
+
 ### Receiving Notifications
 
 Push notifications behave a bit differently depending on whether you are using iOS or Android.
