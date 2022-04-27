@@ -112,7 +112,11 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveCenterTitle = _getEffectiveCenterTitle(Theme.of(context));
+    final effectiveCenterTitle = getEffectiveCenterTitle(
+      Theme.of(context),
+      actions: actions,
+      centerTitle: centerTitle,
+    );
     final channel = StreamChannel.of(context).channel;
     final channelHeaderTheme = ChannelHeaderTheme.of(context);
 
@@ -205,21 +209,4 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   final Size preferredSize;
-
-  bool _getEffectiveCenterTitle(ThemeData theme) {
-    if (centerTitle != null) return centerTitle!;
-    if (theme.appBarTheme.centerTitle != null) {
-      return theme.appBarTheme.centerTitle!;
-    }
-    switch (theme.platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return false;
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        return actions == null || actions!.length < 2;
-    }
-  }
 }
