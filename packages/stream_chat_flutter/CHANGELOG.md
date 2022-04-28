@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- [[#1087]](https://github.com/GetStream/stream-chat-flutter/issues/1087): Handle limited access to camera on iOS.
 - `centerTitle` and `elevation` properties to `ChannelHeader`, `ThreadHeader` and `ChannelListHeader`.
 
 🐞 Fixed
