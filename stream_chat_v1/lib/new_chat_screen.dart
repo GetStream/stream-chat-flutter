@@ -308,77 +308,74 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         ? GestureDetector(
                             behavior: HitTestBehavior.opaque,
                             onPanDown: (_) => FocusScope.of(context).unfocus(),
-                            child: UsersBloc(
-                              child: StreamUserListView(
-                                controller: userListController,
-                                // groupAlphabetically:
-                                //     _isSearchActive ? false : true,
-                                onUserTap: (user) {
-                                  _controller.clear();
-                                  if (!_selectedUsers.contains(user)) {
-                                    _chipInputTextFieldState
-                                      ?..addItem(user)
-                                      ..pauseItemAddition();
-                                  } else {
-                                    _chipInputTextFieldState!.removeItem(user);
-                                  }
-                                },
-                                itemBuilder: (
-                                  context,
-                                  users,
-                                  index,
-                                  defaultWidget,
-                                ) {
-                                  return defaultWidget.copyWith(
-                                    selected:
-                                        _selectedUsers.contains(users[index]),
-                                  );
-                                },
-                                emptyBuilder: (_) {
-                                  return LayoutBuilder(
-                                    builder: (context, viewportConstraints) {
-                                      return SingleChildScrollView(
-                                        physics:
-                                            AlwaysScrollableScrollPhysics(),
-                                        child: ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            minHeight:
-                                                viewportConstraints.maxHeight,
-                                          ),
-                                          child: Center(
-                                            child: Column(
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(24),
-                                                  child: StreamSvgIcon.search(
-                                                    size: 96,
-                                                    color: Colors.grey,
-                                                  ),
+                            child: StreamUserListView(
+                              controller: userListController,
+                              // groupAlphabetically:
+                              //     _isSearchActive ? false : true,
+                              onUserTap: (user) {
+                                _controller.clear();
+                                if (!_selectedUsers.contains(user)) {
+                                  _chipInputTextFieldState
+                                    ?..addItem(user)
+                                    ..pauseItemAddition();
+                                } else {
+                                  _chipInputTextFieldState!.removeItem(user);
+                                }
+                              },
+                              itemBuilder: (
+                                context,
+                                users,
+                                index,
+                                defaultWidget,
+                              ) {
+                                return defaultWidget.copyWith(
+                                  selected:
+                                      _selectedUsers.contains(users[index]),
+                                );
+                              },
+                              emptyBuilder: (_) {
+                                return LayoutBuilder(
+                                  builder: (context, viewportConstraints) {
+                                    return SingleChildScrollView(
+                                      physics: AlwaysScrollableScrollPhysics(),
+                                      child: ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          minHeight:
+                                              viewportConstraints.maxHeight,
+                                        ),
+                                        child: Center(
+                                          child: Column(
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(24),
+                                                child: StreamSvgIcon.search(
+                                                  size: 96,
+                                                  color: Colors.grey,
                                                 ),
-                                                Text(
-                                                  AppLocalizations.of(context)
-                                                      .noUserMatchesTheseKeywords,
-                                                  style: StreamChatTheme.of(
-                                                          context)
-                                                      .textTheme
-                                                      .footnote
-                                                      .copyWith(
-                                                          color: StreamChatTheme
-                                                                  .of(context)
-                                                              .colorTheme
-                                                              .textHighEmphasis
-                                                              .withOpacity(.5)),
-                                                ),
-                                              ],
-                                            ),
+                                              ),
+                                              Text(
+                                                AppLocalizations.of(context)
+                                                    .noUserMatchesTheseKeywords,
+                                                style: StreamChatTheme.of(
+                                                        context)
+                                                    .textTheme
+                                                    .footnote
+                                                    .copyWith(
+                                                        color: StreamChatTheme
+                                                                .of(context)
+                                                            .colorTheme
+                                                            .textHighEmphasis
+                                                            .withOpacity(.5)),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
                             ),
                           )
                         : FutureBuilder<bool>(
