@@ -20,7 +20,7 @@ void main() {
     deviceApi = DeviceApi(client);
   });
 
-  test('addDevice', () async {
+  test('addDevice should work', () async {
     const deviceId = 'test-device-id';
     const pushProvider = PushProvider.firebase;
 
@@ -37,6 +37,36 @@ void main() {
             (_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await deviceApi.addDevice(deviceId, pushProvider);
+
+    expect(res, isNotNull);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('addDevice should work with pushProviderName', () async {
+    const deviceId = 'test-device-id';
+    const pushProvider = PushProvider.firebase;
+    const pushProviderName = 'my-custom-config';
+
+    const path = '/devices';
+
+    when(() => client.post(
+              path,
+              data: {
+                'id': deviceId,
+                'push_provider': pushProvider.name,
+                'push_provider_name': pushProviderName,
+              },
+            ))
+        .thenAnswer(
+            (_) async => successResponse(path, data: <String, dynamic>{}));
+
+    final res = await deviceApi.addDevice(
+      deviceId,
+      pushProvider,
+      pushProviderName: pushProviderName,
+    );
 
     expect(res, isNotNull);
 

@@ -47,6 +47,12 @@ class TypingIndicator extends StatelessWidget {
           .where((element) => element.value.parentId == parentId)
           .map((e) => e.key)),
       builder: (context, data) => AnimatedSwitcher(
+        layoutBuilder: (currentChild, previousChildren) => Stack(
+          children: <Widget>[
+            ...previousChildren,
+            if (currentChild != null) currentChild,
+          ],
+        ),
         duration: const Duration(milliseconds: 300),
         child: data.isNotEmpty
             ? Padding(

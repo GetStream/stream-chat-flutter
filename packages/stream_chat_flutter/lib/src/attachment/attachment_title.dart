@@ -18,14 +18,11 @@ class AttachmentTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final normalizedTitleLink = attachment.titleLink?.replaceFirst(
-      RegExp(r'https?://(www\.)?'),
-      '',
-    );
+    final ogScrapeUrl = attachment.ogScrapeUrl;
     return GestureDetector(
       onTap: () {
-        final titleLink = attachment.titleLink;
-        if (titleLink != null) launchURL(context, titleLink);
+        final ogScrapeUrl = attachment.ogScrapeUrl;
+        if (ogScrapeUrl != null) launchURL(context, ogScrapeUrl);
       },
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -42,8 +39,8 @@ class AttachmentTitle extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            if (normalizedTitleLink != null)
-              Text(normalizedTitleLink, style: messageTheme.messageTextStyle),
+            if (ogScrapeUrl != null)
+              Text(ogScrapeUrl, style: messageTheme.messageTextStyle),
           ],
         ),
       ),

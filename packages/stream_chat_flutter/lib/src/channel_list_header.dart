@@ -56,9 +56,11 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     this.showConnectionStateTile = false,
     this.preNavigationCallback,
     this.subtitle,
+    this.centerTitle,
     this.leading,
     this.actions,
     this.backgroundColor,
+    this.elevation = 1,
   }) : super(key: key);
 
   /// Pass this if you don't have a [StreamChatClient] in your widget tree.
@@ -83,6 +85,9 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Subtitle widget
   final Widget? subtitle;
 
+  /// Whether the title should be centered
+  final bool? centerTitle;
+
   /// Leading widget
   /// By default it shows the logged in user avatar
   final Widget? leading;
@@ -93,6 +98,9 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
 
   /// The background color for this [ChannelListHeader].
   final Color? backgroundColor;
+
+  /// The elevation for this [ChannelListHeader].
+  final double elevation;
 
   @override
   Widget build(BuildContext context) {
@@ -128,10 +136,10 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             systemOverlayStyle: theme.brightness == Brightness.dark
                 ? SystemUiOverlayStyle.light
                 : SystemUiOverlayStyle.dark,
-            elevation: 1,
+            elevation: elevation,
             backgroundColor:
                 backgroundColor ?? channelListHeaderThemeData.color,
-            centerTitle: true,
+            centerTitle: centerTitle,
             leading: leading ??
                 Center(
                   child: user != null
