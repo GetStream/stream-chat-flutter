@@ -184,10 +184,10 @@ To do this, we will:
 First, we add the attachment when the location button is clicked:
 
 ```dart
- GlobalKey<StreamMessageInputState> _messageInputKey = GlobalKey();
+ StreamMessageInputController _messageInputController = StreamMessageInputController();
 
  StreamMessageInput(
-   key: _messageInputKey,
+   messageInputController: _messageInputController,
    actions: [
      InkWell(
        child: Icon(
@@ -197,7 +197,7 @@ First, we add the attachment when the location button is clicked:
         ),
       onTap: () {
         _determinePosition().then((value) {
-           _messageInputKey.currentState.addAttachment(
+           _messageInputController.addAttachment(
               Attachment(
                 uploadState: UploadState.success(),
                 type: 'location',
@@ -220,7 +220,7 @@ After this, we can build the thumbnail:
 
 ```dart
 StreamMessageInput(
-  key: _messageInputKey,
+  messageInputController: _messageInputController,
   actions: [
     InkWell(
       child: Icon(
@@ -230,7 +230,7 @@ StreamMessageInput(
       ),
      onTap: () {
        _determinePosition().then((value) {
-         _messageInputKey.currentState.addAttachment(
+         _messageInputController.addAttachment(
            Attachment(
              uploadState: UploadState.success(),
              type: 'location',
