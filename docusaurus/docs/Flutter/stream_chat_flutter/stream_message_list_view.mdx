@@ -1,0 +1,92 @@
+---
+id: stream_message_list_view
+sidebar_position: 5
+title: StreamMessageListView
+---
+
+A Widget For Displaying A List Of Messages
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamMessageListView-class.html)
+
+![](../assets/message_list_view.png)
+
+### Background
+
+Every channel can contain a list of messages sent by users inside it. The `StreamMessageListView` widget
+displays the list of messages inside a particular channel along with possible attachments and
+other message attributes (if the message is pinned for example). This sets it apart from the `StreamMessageSearchListView`
+which may not contain messages only from a single channel and is used to search for messages across
+many.
+
+### Basic Example
+
+The `StreamMessageListView` shows the list of messages of the current channel. It has inbuilt support for
+common messaging functionality: displaying and editing messages, adding / modifying reactions, support
+for quoting messages, pinning messages, and more.
+
+An example of how you can use the `StreamMessageListView` is:
+
+```dart
+class ChannelPage extends StatelessWidget {
+  const ChannelPage({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: StreamChannelHeader(),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: StreamMessageListView(),
+          ),
+          StreamMessageInput(),
+        ],
+      ),
+    );
+  }
+}
+```
+
+### Enable Threads
+
+Threads are made of a parent message and replies linked to it. To enable threading, the SDK requires you
+to supply a `threadBuilder` which will supply the page when the thread is clicked.
+
+```dart
+StreamMessageListView(
+    threadBuilder: (_, parentMessage) {
+        return ThreadPage(
+            parent: parentMessage,
+        );
+    },
+),
+```
+
+![](../assets/message_list_view_threads.png)
+
+The `StreamMessageListView` itself can render the thread by supplying the `parentMessage` parameter.
+
+```dart
+StreamMessageListView(
+    parentMessage: parent,
+),
+```
+
+### Building Custom Messages
+
+You can also supply your own implementation for displaying messages using the `messageBuilder` parameter.
+
+:::note
+To customize the existing implementation, look at the `StreamMessageWidget` documentation instead.
+:::
+
+```dart
+StreamMessageListView(
+    messageBuilder: (context, details, messageList, defaultImpl) {
+        // Your implementation of the message here
+        // E.g: return Text(details.message.text ?? '');
+    },
+),
+```
