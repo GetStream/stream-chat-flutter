@@ -190,7 +190,7 @@ await client.connectUser(
 
 Now you will use the `encryptMessage()` function created in the previous steps to encrypt the message.
 
-To do that, you need to make some minor changes to the **MessageInput** widget.
+To do that, you need to make some minor changes to the **StreamMessageInput** widget.
 
 ```dart
 final receiverJwk = receiver.extraData['publicKey'];
@@ -200,7 +200,7 @@ final derivedKey = await deriveKey(keyPair.privateKey, receiverJwk);
 ```
 
 ```dart
-MessageInput(
+StreamMessageInput(
   
   ...
   
@@ -223,10 +223,10 @@ Here, you have used it to encrypt the message before sending it to Stream’s ba
 
 Now, it’s time to decrypt the message and present it in a human-readable format to the receiver.
 
-You can customize the **MessageListView** widget to have a custom `messagebuilder`, that can decrypt the message.
+You can customize the **StreamMessageListView** widget to have a custom `messagebuilder`, that can decrypt the message.
 
 ```dart
-MessageListView(
+StreamMessageListView(
   ...
   messageBuilder: (context, messageDetails, currentMessages, defaultWidget) {
     // Retrieving the message from details
