@@ -20,9 +20,21 @@ class ChannelList extends StatefulWidget {
 class _ChannelList extends State<ChannelList> {
   ScrollController _scrollController = ScrollController();
 
-  TextEditingController? _controller;
+  late StreamMessageSearchListController _messageSearchListController =
+      StreamMessageSearchListController(
+    client: StreamChat.of(context).client,
+    filter: Filter.in_('members', [StreamChat.of(context).currentUser!.id]),
+    limit: 5,
+    searchQuery: '',
+    sort: [
+      SortOption(
+        'created_at',
+        direction: SortOption.ASC,
+      ),
+    ],
+  );
 
-  String _channelQuery = '';
+  TextEditingController? _controller;
 
   bool _isSearchActive = false;
 
@@ -32,10 +44,11 @@ class _ChannelList extends State<ChannelList> {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted) {
+        _messageSearchListController.searchQuery = _controller!.text;
         setState(() {
-          _channelQuery = _controller!.text;
-          _isSearchActive = _channelQuery.isNotEmpty;
+          _isSearchActive = _controller!.text.isNotEmpty;
         });
+        if (_isSearchActive) _messageSearchListController.doInitialLoad();
       }
     });
   }
@@ -61,12 +74,12 @@ class _ChannelList extends State<ChannelList> {
     _controller?.removeListener(_channelQueryListener);
     _controller?.dispose();
     _scrollController.dispose();
+    _channelListController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = StreamChat.of(context).currentUser;
     return WillPopScope(
       onWillPop: () async {
         if (_isSearchActive) {
@@ -98,17 +111,7 @@ class _ChannelList extends State<ChannelList> {
           ],
           body: _isSearchActive
               ? StreamMessageSearchListView(
-                  showErrorTile: true,
-                  messageQuery: _channelQuery,
-                  filters: Filter.in_('members', [user!.id]),
-                  sortOptions: [
-                    SortOption(
-                      'created_at',
-                      direction: SortOption.ASC,
-                    ),
-                  ],
-                  pullToRefresh: false,
-                  limit: 30,
+                  controller: _messageSearchListController,
                   emptyBuilder: (_) {
                     return LayoutBuilder(
                       builder: (context, viewportConstraints) {
@@ -139,24 +142,34 @@ class _ChannelList extends State<ChannelList> {
                       },
                     );
                   },
-                  onItemTap: (messageResponse) async {
-                    FocusScope.of(context).requestFocus(FocusNode());
-                    final client = StreamChat.of(context).client;
-                    final message = messageResponse.message;
-                    final channel = client.channel(
-                      messageResponse.channel!.type,
-                      id: messageResponse.channel!.id,
-                    );
-                    if (channel.state == null) {
-                      await channel.watch();
-                    }
-                    Navigator.pushNamed(
-                      context,
-                      Routes.CHANNEL_PAGE,
-                      arguments: ChannelPageArgs(
-                        channel: channel,
-                        initialMessage: message,
-                      ),
+                  itemBuilder: (
+                    context,
+                    messageResponses,
+                    index,
+                    defaultWidget,
+                  ) {
+                    return defaultWidget.copyWith(
+                      onTap: () async {
+                        final messageResponse = messageResponses[index];
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        final client = StreamChat.of(context).client;
+                        final message = messageResponse.message;
+                        final channel = client.channel(
+                          messageResponse.channel!.type,
+                          id: messageResponse.channel!.id,
+                        );
+                        if (channel.state == null) {
+                          await channel.watch();
+                        }
+                        Navigator.pushNamed(
+                          context,
+                          Routes.CHANNEL_PAGE,
+                          arguments: ChannelPageArgs(
+                            channel: channel,
+                            initialMessage: message,
+                          ),
+                        );
+                      },
                     );
                   },
                 )
@@ -166,9 +179,10 @@ class _ChannelList extends State<ChannelList> {
                     onRefresh: _channelListController.refresh,
                     child: StreamChannelListView(
                       controller: _channelListController,
-                      itemBuilder: (context, channel, tile) {
+                      itemBuilder: (context, channels, index, defaultWidget) {
                         final chatTheme = StreamChatTheme.of(context);
                         final backgroundColor = chatTheme.colorTheme.inputBg;
+                        final channel = channels[index];
                         final canDeleteChannel = channel.ownCapabilities
                             .contains(PermissionType.deleteChannel);
                         return Slidable(
@@ -249,7 +263,7 @@ class _ChannelList extends State<ChannelList> {
                                 ),
                             ],
                           ),
-                          child: tile,
+                          child: defaultWidget,
                         );
                       },
                       onChannelTap: (channel) {

@@ -704,6 +704,28 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
   void _buildAddUserModal(context) {
     var channel = StreamChannel.of(context).channel;
+    final userListController = StreamUserListController(
+      client: channel.client,
+      limit: 25,
+      filter: Filter.and(
+        [
+          if (_searchController!.text.isNotEmpty)
+            Filter.autoComplete('name', _userNameQuery),
+          Filter.notIn('id', [
+            StreamChat.of(context).currentUser!.id,
+            ...channel.state!.members
+                .map<String?>(((e) => e.userId))
+                .whereType<String>(),
+          ]),
+        ],
+      ),
+      sort: [
+        SortOption(
+          'name',
+          direction: 1,
+        ),
+      ],
+    );
 
     showDialog(
       useRootNavigator: false,
@@ -721,85 +743,63 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               ),
               clipBehavior: Clip.antiAlias,
               child: Scaffold(
-                body: UsersBloc(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: _buildTextInputSection(modalSetState),
-                      ),
-                      Expanded(
-                        child: StreamUserListView(
-                          selectedUsers: {},
-                          onUserTap: (user, _) async {
-                            _searchController!.clear();
+                body: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: _buildTextInputSection(modalSetState),
+                    ),
+                    Expanded(
+                      child: StreamUserListView(
+                        controller: userListController,
+                        onUserTap: (user) async {
+                          _searchController!.clear();
 
-                            await channel.addMembers([user.id]);
-                            Navigator.pop(context);
-                            setState(() {});
-                          },
-                          crossAxisCount: 4,
-                          limit: 25,
-                          filter: Filter.and(
-                            [
-                              if (_searchController!.text.isNotEmpty)
-                                Filter.autoComplete('name', _userNameQuery),
-                              Filter.notIn('id', [
-                                StreamChat.of(context).currentUser!.id,
-                                ...channel.state!.members
-                                    .map<String?>(((e) => e.userId))
-                                    .whereType<String>(),
-                              ]),
-                            ],
-                          ),
-                          sort: [
-                            SortOption(
-                              'name',
-                              direction: 1,
-                            ),
-                          ],
-                          emptyBuilder: (_) {
-                            return LayoutBuilder(
-                              builder: (context, viewportConstraints) {
-                                return SingleChildScrollView(
-                                  physics: AlwaysScrollableScrollPhysics(),
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      minHeight: viewportConstraints.maxHeight,
-                                    ),
-                                    child: Center(
-                                      child: Column(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(24),
-                                            child: StreamSvgIcon.search(
-                                              size: 96,
-                                              color: StreamChatTheme.of(context)
-                                                  .colorTheme
-                                                  .textLowEmphasis,
-                                            ),
+                          await channel.addMembers([user.id]);
+                          Navigator.pop(context);
+                          setState(() {});
+                        },
+                        emptyBuilder: (_) {
+                          return LayoutBuilder(
+                            builder: (context, viewportConstraints) {
+                              return SingleChildScrollView(
+                                physics: AlwaysScrollableScrollPhysics(),
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minHeight: viewportConstraints.maxHeight,
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(24),
+                                          child: StreamSvgIcon.search(
+                                            size: 96,
+                                            color: StreamChatTheme.of(context)
+                                                .colorTheme
+                                                .textLowEmphasis,
                                           ),
-                                          Text(AppLocalizations.of(context)
-                                              .noUserMatchesTheseKeywords),
-                                        ],
-                                      ),
+                                        ),
+                                        Text(AppLocalizations.of(context)
+                                            .noUserMatchesTheseKeywords),
+                                      ],
                                     ),
                                   ),
-                                );
-                              },
-                            );
-                          },
-                        ),
+                                ),
+                              );
+                            },
+                          );
+                        },
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
           );
         });
       },
-    );
+    ).then((_) => userListController.dispose());
   }
 
   Widget _buildTextInputSection(modalSetState) {

@@ -19,6 +19,20 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   late TextEditingController _controller;
 
+  late final userListController = StreamUserListController(
+    client: StreamChat.of(context).client,
+    limit: 25,
+    filter: Filter.and([
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+    ]),
+    sort: [
+      SortOption(
+        'name',
+        direction: 1,
+      ),
+    ],
+  );
+
   ChipInputTextFieldState? get _chipInputTextFieldState =>
       _chipInputTextFieldStateKey.currentState;
 
@@ -45,6 +59,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
           _userNameQuery = _controller.text;
           _isSearchActive = _userNameQuery.isNotEmpty;
         });
+      userListController.filter = Filter.and([
+        if (_userNameQuery.isNotEmpty)
+          Filter.autoComplete('name', _userNameQuery),
+        Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+      ]);
+      userListController.doInitialLoad();
     });
   }
 
@@ -112,6 +132,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
     _controller.clear();
     _controller.removeListener(_userNameListener);
     _controller.dispose();
+    userListController.dispose();
     super.dispose();
   }
 
@@ -289,10 +310,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             onPanDown: (_) => FocusScope.of(context).unfocus(),
                             child: UsersBloc(
                               child: StreamUserListView(
-                                selectedUsers: _selectedUsers,
-                                groupAlphabetically:
-                                    _isSearchActive ? false : true,
-                                onUserTap: (user, _) {
+                                controller: userListController,
+                                // groupAlphabetically:
+                                //     _isSearchActive ? false : true,
+                                onUserTap: (user) {
                                   _controller.clear();
                                   if (!_selectedUsers.contains(user)) {
                                     _chipInputTextFieldState
@@ -302,19 +323,17 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                     _chipInputTextFieldState!.removeItem(user);
                                   }
                                 },
-                                limit: 25,
-                                filter: Filter.and([
-                                  if (_userNameQuery.isNotEmpty)
-                                    Filter.autoComplete('name', _userNameQuery),
-                                  Filter.notEqual('id',
-                                      StreamChat.of(context).currentUser!.id),
-                                ]),
-                                sort: [
-                                  SortOption(
-                                    'name',
-                                    direction: 1,
-                                  ),
-                                ],
+                                itemBuilder: (
+                                  context,
+                                  users,
+                                  index,
+                                  defaultWidget,
+                                ) {
+                                  return defaultWidget.copyWith(
+                                    selected:
+                                        _selectedUsers.contains(users[index]),
+                                  );
+                                },
                                 emptyBuilder: (_) {
                                   return LayoutBuilder(
                                     builder: (context, viewportConstraints) {
