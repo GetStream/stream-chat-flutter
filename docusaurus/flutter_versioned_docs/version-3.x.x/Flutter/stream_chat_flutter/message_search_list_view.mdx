@@ -1,0 +1,62 @@
+---
+id: message_search_list_view
+sidebar_position: 8
+title: MessageSearchListView
+---
+
+A Widget To Search For Messages Across Channels
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/MessageSearchListView-class.html)
+
+![](../assets/message_search_list_view.png)
+
+### Background
+
+Users in Stream Chat can have several channels and it can get hard to remember which channel has the
+message they are searching for. As such, there needs to be a way to search for a message across multiple
+channels. This is where `MessageSearchListView` comes in.
+
+### Basic Example
+
+While the MessageListView is tied to a certain `StreamChannel`, a `MessageSearchListView` is not.
+
+```dart
+class MessageSearchPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: MessageSearchBloc(
+        child: MessageSearchListView(
+          filters: Filter.in_('members', [StreamChat.of(context).user!.id],),
+          messageQuery: 'your query here',
+          limit: 20,
+        ),
+      ),
+    );
+  }
+}
+```
+
+### Customize The Result Tiles
+
+You can use your own widget for the result items using the `itemBuilder` parameter.
+
+```dart
+MessageSearchListView(
+  // ...
+  itemBuilder: (context, response) {
+    return Text(response.message.text);
+  },
+),
+```
+
+### Show Result Count
+
+You show the number of results via the `showResultCount` parameter.
+
+```dart
+MessageSearchListView(
+  // ...
+  showResultCount: true,
+),
+```

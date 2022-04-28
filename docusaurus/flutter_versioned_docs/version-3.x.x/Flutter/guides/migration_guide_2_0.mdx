@@ -1,0 +1,298 @@
+---
+id: mig_guide_2_0
+sidebar_position: 4
+title: Migrating to 2.0 (Null-safety)
+---
+
+A Migration Guide For Switching To v2.0 Of The Flutter SDK
+
+### Overview
+
+v2.0 of the Stream Chat Flutter SDK brings along several changes - primarily making the SDK null-safe.
+Null safety allows your apps to run faster, with fewer errors, and with less code.
+
+Check [this link](https://flutter.dev/docs/null-safety) for more about Null Safety in Flutter.
+
+This guide is intended to enumerate and better explain the changes in the SDK.
+
+The changes will be listed by package and a concise changelog will follow with more info.
+
+### Changelog of `stream_chat_flutter`
+
+#### 🛑️ Breaking Changes from 1.5.4
+
+* Migrate this package to null safety
+
+* Renamed `ChannelImage` to `ChannelAvatar`
+
+* Updated `StreamChatThemeData.reactionIcons` to accept custom builder
+
+* Renamed `ColorTheme` properties to reflect the purpose of the colors
+
+    * `ColorTheme.black` -> `ColorTheme.textHighEmphasis`
+    * `ColorTheme.grey` -> `ColorTheme.textLowEmphasis`
+    * `ColorTheme.greyGainsboro` -> `ColorTheme.disabled`
+    * `ColorTheme.greyWhisper` -> `ColorTheme.borders`
+    * `ColorTheme.whiteSmoke` -> `ColorTheme.inputBg`
+    * `ColorTheme.whiteSnow` -> `ColorTheme.appBg`
+    * `ColorTheme.white` -> `ColorTheme.barsBg`
+    * `ColorTheme.blueAlice` -> `ColorTheme.linkBg`
+    * `ColorTheme.accentBlue` -> `ColorTheme.accentPrimary`
+    * `ColorTheme.accentRed` -> `ColorTheme.accentError`
+    * `ColorTheme.accentGreen` -> `ColorTheme.accentInfo`
+
+* `ChannelListCore` options property is removed in favor of individual properties
+
+     * `options.state` -> `bool state`
+     * `options.watch` -> `bool watch`
+     * `options.presence` -> `bool presence`
+
+* `UserListView` options property is removed in favor of individual properties
+
+     * `options.presence` -> `bool presence`
+
+* Renamed `ImageHeader` to `GalleryHeader`
+
+* Renamed `ImageFooter` to `GalleryFooter`
+
+* `MessageBuilder` and `ParentMessageBuilder` signature is now
+
+```dart
+typedef MessageBuilder = Widget Function(
+    BuildContext,
+    MessageDetails,
+    List<Message>,
+    MessageWidget defaultMessageWidget,
+    );
+```
+
+The last parameter is the default `MessageWidget`
+You can call `.copyWith` to customize just a subset of properties
+
+#### ✅ Added
+
+Added video compress options (frame and quality) to MessageInput
+`TypingIndicator` now has a property called `parentId` to show typing indicator specific to threads
+#493: add support for `MessageListView` header/footer
+`MessageWidget` accepts a `userAvatarBuilder`
+Added `pinMessage` ui support
+Added `MessageListView.threadSeparatorBuilder` property
+Added `MessageInput.onError` property to allow error handling
+Added `GalleryHeader`/`GalleryFooter` theme classes
+
+#### 🐞 Fixed
+
+#483: Keyboard covers input text box when editing message
+`Modals` are shown using the nearest `Navigator` to make using the SDK easier in a nested navigator use case
+#484: messages don't update without a reload
+`MessageListView` not rendering if the user is not a member of the channel
+Fix `MessageInput` overflow when there are no actions
+Minor fixes and improvements
+
+### Migrating to 2.0 for `stream_chat_flutter`
+
+:::note
+If you are migrating your full Flutter project to null-safety, first make sure you follow the
+instructions from the [official Null Safety migration guide](https://dart.dev/null-safety/migration-guide).
+:::
+
+To migrate to v2.0 for `stream_chat_flutter`, first change the version of the package to the latest
+null-safe version.
+
+```yaml
+dependencies:
+  stream_chat_flutter: ^2.0.0
+```
+
+Upon doing this, all breaking changes from the package will take immediate effect. Here are steps to
+remedy the issues:
+
+1) Replace the offending class names with the revised class names
+
+    * `ChannelImage` -> `ChannelAvatar`
+    * `ImageHeader` -> `GalleryHeader`
+    * `ImageFooter` -> `GalleryFooter`
+
+2) The new version comes with revised color names since the previous names do not suit light/dark mode
+nomenclature. Make sure any old colors used from theme are changed over to the new theme color names:
+
+    * `ColorTheme.black` -> `ColorTheme.textHighEmphasis`
+    * `ColorTheme.grey` -> `ColorTheme.textLowEmphasis`
+    * `ColorTheme.greyGainsboro` -> `ColorTheme.disabled`
+    * `ColorTheme.greyWhisper` -> `ColorTheme.borders`
+    * `ColorTheme.whiteSmoke` -> `ColorTheme.inputBg`
+    * `ColorTheme.whiteSnow` -> `ColorTheme.appBg`
+    * `ColorTheme.white` -> `ColorTheme.barsBg`
+    * `ColorTheme.blueAlice` -> `ColorTheme.linkBg`
+    * `ColorTheme.accentBlue` -> `ColorTheme.accentPrimary`
+    * `ColorTheme.accentRed` -> `ColorTheme.accentError`
+    * `ColorTheme.accentGreen` -> `ColorTheme.accentInfo`
+
+3) We decided to make messages easier to customize and now supply the default implementation of the
+messages in the builder - so you can now customize a single parameter without having to redo the
+entire implementation. Please reform your builders to take into account the new format:
+
+```
+typedef MessageBuilder = Widget Function(
+    BuildContext,
+    MessageDetails,
+    List<Message>,
+    MessageWidget defaultMessageWidget,
+    );
+```
+
+To tweak any of the default properties individually, you can use `defaultMessageWidget.copyWith()`.
+
+### Changelog of `stream_chat_flutter_core`
+
+#### 🛑️ Breaking Changes from 1.5.3
+
+* Migrate this package to null safety
+* `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of individual params/properties
+    * `options.state` -> `bool state`
+    * `options.watch` -> `bool watch`
+    * `options.presence` -> `bool presence`
+* `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual params/properties
+    * `options.presence` -> `bool presence`
+
+#### ✅ Added
+
+* Monitor connection using `connectivity_plus` package
+
+#### 🐞 Fixed
+
+* Minor fixes
+* Performance improvements
+
+### Migrating to 2.0 for `stream_chat_flutter_core`
+
+:::note
+If you are migrating your full Flutter project to null-safety, first make sure you follow the
+instructions from the [official Null Safety migration guide](https://dart.dev/null-safety/migration-guide).
+:::
+
+To migrate to v2.0 for `stream_chat_flutter_core`, first change the version of the package to the latest
+null-safe version.
+
+```yaml
+dependencies:
+  stream_chat_flutter_core: ^2.0.0
+```
+
+Upon doing this, all breaking changes from the package will take immediate effect. Here are steps to
+remedy the issue:
+
+:::note
+The major changes in `stream_chat_flutter_core` consist of changing over from a map full of options
+to a more type safe and sound approach by changing over to explicit parameters.
+:::
+
+1) Change over Core widget implementations by using the explicit parameters instead of the options map.
+Use these explicit parameters in the widget constructor instead of the option keys:
+
+    * `options.state` -> `bool state`
+    * `options.watch` -> `bool watch`
+    * `options.presence` -> `bool presence`
+
+2) Change over query calls in the BLoCs in the same way (change from options map to explicit parameters
+in the constructor)
+
+### Changelog of `stream_chat`
+
+#### 🛑️ Breaking Changes from 1.5.3
+
+* Migrate this package to null safety
+* `ConnectUserWithProvider` now requires `tokenProvider` as a required param. (Removed from the constructor)
+* `client.disconnect()` is now divided into two different functions
+    * `client.closeConnection()` -> for closing user websocket connection.
+    * `client.disconnectUser()` -> for disconnecting user and resetting client state.
+* `client.devToken()` now returns a Token model instead of String.
+* `ApiError` is removed in favor of `StreamChatError`
+    * `StreamChatError` -> parent type for all the stream errors.
+    * `StreamWebSocketError` -> for user websocket related errors.
+    * `StreamChatNetworkError` -> for network related errors.
+* `client.queryChannels()`, `channel.query()` options param is removed in favor of individual params
+    * `option.state` -> `bool state`
+    * `option.watch` -> `bool watch`
+    * `option.presence` -> `bool presence`
+* `client.queryUsers()` options param is removed in favor of individual params
+    * `option.presence` -> `bool presence`
+* Added typed filters
+
+#### 🐞 Fixed
+
+* #369: Client does not return without internet connection
+* Several minor fixes
+* Performance improvements
+
+#### ✅ Added
+
+* New Location enum is introduced for easily changing the client location/baseUrl.
+* New `client.openConnection()` and `client.closeConnection()` is introduced to connect/disconnect user ws connection.
+* New `client.partialUpdateMessage` and `channel.partialUpdateMessage` methods
+* `connectWebSocket` parameter in connect user calls to use the client in "connection-less" mode.
+
+#### 🔄 Changed
+
+* `baseURL` is now deprecated in favor of using Location to change data location.
+
+### Migrating to 2.0 for `stream_chat`
+
+If you are migrating your full Flutter project to null-safety, first make sure you follow the
+instructions from the [official Null Safety migration guide](https://dart.dev/null-safety/migration-guide).
+:::
+
+To migrate to v2.0 for `stream_chat`, first change the version of the package to the latest
+null-safe version.
+
+```yaml
+dependencies:
+  stream_chat: ^2.0.0
+```
+
+Upon doing this, all breaking changes from the package will take immediate effect. Here are steps to
+remedy the issues:
+
+1) Change over the constructor of `connectUserWithProvider()` to the new format which has `tokenProvider` as a required param.
+
+2) We added more nuance to `disconnectUser()` by adding two new methods - one to close the connection
+and the other to disconnect the user. This allows more fine-grained control of disconnection.
+
+    * `client.closeConnection()` -> for closing user websocket connection.
+    * `client.disconnectUser()` -> for disconnecting user and resetting client state.
+
+3) We refactored how we handle errors - new error types are now introduced that replace ApiError.
+
+    * `StreamChatError` -> parent type for all the stream errors.
+    * `StreamWebSocketError` -> for user websocket related errors.
+    * `StreamChatNetworkError` -> for network related errors.
+
+4) We changed over from a map full of options to a more type-safe and sound approach by changing over to explicit parameters.
+
+Use these explicit parameters in the query parameters instead of the option keys:
+
+* `client.queryChannels()`, `channel.query()` options param is removed in favor of individual params
+    * `option.state` -> `bool state`
+    * `option.watch` -> `bool watch`
+    * `option.presence` -> `bool presence`
+* `client.queryUsers()` options param is removed in favor of individual params
+    * `option.presence` -> `bool presence`
+
+5) We added type-safe filters to make filtering in the app easier. Change over the filters to the
+new implementation.
+
+As an example, in the old app this filter:
+
+```dart
+    filter: {
+      'members': {
+        '\$in': [StreamChat.of(context).user.id],
+      }
+    },
+```
+
+Would turn into:
+
+```dart
+    filter: Filter.in_('members', [StreamChat.of(context).user.id])
+```

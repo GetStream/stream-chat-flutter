@@ -1,0 +1,40 @@
+---
+id: message_search_list_block
+sidebar_position: 8
+title: MessageSearchListBloc
+---
+
+A Widget Used To Manage A List Of Messages With Pagination.
+
+### Background
+
+Most widgets in the Core SDK are focused on fetching a particular type of object from Stream Chat - channels,
+messages, users etc. The BLoC widgets bundle up the base functions used to fetch data as well as the current
+data fetched by the respective functions. Furthermore, the Core widgets use this BLoC to fetch new or
+existing data and build UI based on it.
+
+All Core and UI widgets which focus on fetching a list of objects need to have their respective functions
+above them in the widget tree. The MessageSearchListCore and MessageSearchListView require the
+MessageSearchListCore above them in the widget hierarchy without which they will fail.
+
+### Understanding The Widget
+
+This class can be used to load messages, perform queries, etc.
+
+`MessageSearchBloc` can be accessed at anytime by using the static `.of` method
+using Flutter's BuildContext.
+
+```dart
+var _searchBloc = MessageSearchBloc.of(context);
+```
+
+The `MessageSearchBloc` widget encapsulates common functionality related to searching for messages
+across channels and also supplies them down the widget tree.
+
+Here is a basic implementation of `ChannelsBloc`:
+
+```dart
+MessageSearchBloc(
+    child: // Further Widget Tree
+),
+```
