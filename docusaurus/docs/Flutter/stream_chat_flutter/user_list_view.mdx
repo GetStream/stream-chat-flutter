@@ -1,7 +1,7 @@
 ---
-id: user_list_view
+id: stream_user_list_view
 sidebar_position: 7
-title: UserListView
+title: StreamUserListView
 ---
 
 A Widget For Displaying And Selecting Users
@@ -13,76 +13,81 @@ Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_
 ### Background
 
 A list of users is required for many different purposes: showing a list of users in a Channel,
-selecting users to add in a channel, etc. The `UserListView` displays and allows selection of a list
-of users along with multiple display configurations like a list and grid.
+selecting users to add in a channel, etc. The `StreamUserListView` displays a list
+of users.
+
+:::note
+Make sure to check the [StreamUserListController](./stream_user_list_controller.mdx) documentation for more information on how to use the controller to manipulate the `StreamUserListView`.
+:::
 
 ### Basic Example
 
 Let's take a look at an example where we use the widget to autocomplete user names:
 
 ```dart
-class UsersListPage extends StatelessWidget {
+class UserListPage extends StatefulWidget {
+  const UserListPage({
+    Key? key,
+    required this.client,
+  }) : super(key: key);
+
+  final StreamChatClient client;
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: UsersBloc(
-        child: UsersListView(
-          filter: Filter.notEqual('id', StreamChat.of(context).user!.id),
-          sort: [
-            SortOption(
-              'name',
-              direction: 1,
+  State<UserListPage> createState() => _UserListPageState();
+}
+
+class _UserListPageState extends State<UserListPage> {
+  late final _controller = StreamUserListController(
+    client: widget.client,
+    limit: 25,
+    filter: Filter.and([
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+    ]),
+    sort: [
+      SortOption(
+        'name',
+        direction: 1,
+      ),
+    ],
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: RefreshIndicator(
+          onRefresh: _controller.refresh,
+          child: StreamChannelListView(
+            controller: _controller,
+            onChannelTap: (channel) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StreamChannel(
+                  channel: channel,
+                  child: const ChannelPage(),
+                ),
+              ),
             ),
-          ],
-          pagination: PaginationParams(
-            limit: 25,
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 ```
 
 ### Customize The User Items
 
-You can use your own widget for the user items using the `userItemBuilder` parameter.
+You can use your own widget for the user items using the `itemBuilder` parameter.
 
 ```dart
-UsersListView(
+StreamUsersListView(
   // ...
-  userItemBuilder: (context, user, isSelected) {
-    return Text(user.name);
+  itemBuilder: (context, users, index, defaultWidget) {
+    return Text(user[index].name);
   },
-),
-```
-
-### Group Alphabetically
-
-You can group alphabetically using the `groupAlphabetically` parameter:
-
-```dart
-UsersListView(
-    //...
-    groupAlphabetically: true,
-),
-```
-
-### Selecting Users
-
-The `UserListView` widget allows selecting users in a list by supplying a selected users list and callbacks
-for when user items are tapped.
-
-```dart
-Set<User>? selectedUsers = {};
-
-UsersListView(
-    //...
-    selectedUsers: selectedUsers,
-    onUserTap: (user, _) {
-        setState(() {
-            selectedUsers.add(user);
-        });
-    },
 ),
 ```
