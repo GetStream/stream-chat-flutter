@@ -57,7 +57,6 @@ export 'src/v4/scroll_view/channel_scroll_view/stream_channel_grid_tile.dart';
 export 'src/v4/scroll_view/channel_scroll_view/stream_channel_grid_view.dart';
 
 // v4
-export 'src/v4/scroll_view/channel_scroll_view/stream_channel_list_loading_tile.dart';
 export 'src/v4/scroll_view/channel_scroll_view/stream_channel_list_tile.dart';
 export 'src/v4/scroll_view/channel_scroll_view/stream_channel_list_view.dart';
 
