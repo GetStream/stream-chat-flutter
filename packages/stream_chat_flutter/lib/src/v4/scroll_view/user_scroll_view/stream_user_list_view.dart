@@ -1,57 +1,61 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_empty_widget.dart';
+import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_error_widget.dart';
+import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_error.dart';
+import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_indicator.dart';
+import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Default separator builder for [StreamMessageSearchListView].
-Widget defaultMessageSearchListViewSeparatorBuilder(
+/// Default separator builder for [StreamUserListView].
+Widget defaultUserListViewSeparatorBuilder(
   BuildContext context,
-  List<GetMessageResponse> responses,
+  List<User> users,
   int index,
 ) =>
-    const StreamMessageSearchListSeparator();
+    const StreamUserListSeparator();
 
 /// Signature for the item builder that creates the children of the
-/// [StreamMessageSearchListView].
-typedef StreamMessageSearchListViewIndexedWidgetBuilder
-    = StreamListViewIndexedWidgetBuilder<GetMessageResponse,
-        StreamMessageSearchListTile>;
+/// [StreamUserListView].
+typedef StreamUserListViewIndexedWidgetBuilder
+    = StreamScrollViewIndexedWidgetBuilder<User, StreamUserListTile>;
 
-/// A [ListView] that shows a list of [GetMessageResponse]s,
-/// it uses [StreamMessageSearchListTile] as a default item.
+/// A [ListView] that shows a list of [User]s,
+/// it uses [StreamUserListTile] as a default item.
 ///
-/// This is the new version of [MessageSearchListView] that uses
-/// [StreamMessageSearchListController].
+/// This is the new version of [UserListView] that uses
+/// [StreamUserListController].
 ///
 /// Example:
 ///
 /// ```dart
-/// StreamMessageSearchListView(
+/// StreamUserListView(
 ///   controller: controller,
-///   onMessageTap: (user) {
+///   onUserTap: (user) {
 ///     // Handle user tap event
 ///   },
-///   onMessageLongPress: (user) {
+///   onUserLongPress: (user) {
 ///     // Handle user long press event
 ///   },
 /// )
 /// ```
 ///
 /// See also:
-/// * [StreamMessageSearchListTile]
-/// * [StreamMessageSearchListController]
-class StreamMessageSearchListView extends StatelessWidget {
-  /// Creates a new instance of [StreamMessageSearchListView].
-  const StreamMessageSearchListView({
+/// * [StreamUserListTile]
+/// * [StreamUserListController]
+class StreamUserListView extends StatelessWidget {
+  /// Creates a new instance of [StreamUserListView].
+  const StreamUserListView({
     Key? key,
     required this.controller,
     this.itemBuilder,
-    this.separatorBuilder = defaultMessageSearchListViewSeparatorBuilder,
+    this.separatorBuilder = defaultUserListViewSeparatorBuilder,
     this.emptyBuilder,
     this.loadingBuilder,
     this.errorBuilder,
-    this.onMessageTap,
-    this.onMessageLongPress,
+    this.onUserTap,
+    this.onUserLongPress,
     this.loadMoreTriggerIndex = 3,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
@@ -70,41 +74,35 @@ class StreamMessageSearchListView extends StatelessWidget {
     this.clipBehavior = Clip.hardEdge,
   }) : super(key: key);
 
-  /// The [StreamUserListController] used to control the list of
-  /// searched messages.
-  final StreamMessageSearchListController controller;
+  /// The [StreamUserListController] used to control the list of users.
+  final StreamUserListController controller;
 
   /// A builder that is called to build items in the [ListView].
-  ///
-  /// The `messageResponse` parameter is the [GetMessageResponse] at this
-  /// position in the list and the `defaultWidget` is the default widget used
-  /// i.e: [StreamMessageSearchListTile].
-  final StreamMessageSearchListViewIndexedWidgetBuilder? itemBuilder;
+  final StreamUserListViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.
-  final PagedValueScrollViewIndexedWidgetBuilder<GetMessageResponse>
-      separatorBuilder;
+  final PagedValueScrollViewIndexedWidgetBuilder<User> separatorBuilder;
 
   /// A builder that is called to build the empty state of the list.
   ///
-  /// If not provided, [StreamMessageSearchListEmptyWidget] will be used.
+  /// If not provided, [StreamUserListEmptyWidget] will be used.
   final WidgetBuilder? emptyBuilder;
 
   /// A builder that is called to build the loading state of the list.
   ///
-  /// If not provided, [StreamMessageSearchListLoadingTile] will be used.
+  /// If not provided, [StreamUserListLoadingTile] will be used.
   final WidgetBuilder? loadingBuilder;
 
   /// A builder that is called to build the error state of the list.
   ///
-  /// If not provided, [StreamMessageSearchListErrorWidget] will be used.
+  /// If not provided, [StreamUserListErrorWidget] will be used.
   final Widget Function(BuildContext, StreamChatError)? errorBuilder;
 
   /// Called when the user taps this list tile.
-  final void Function(GetMessageResponse)? onMessageTap;
+  final void Function(User)? onUserTap;
 
   /// Called when the user long-presses on this list tile.
-  final void Function(GetMessageResponse)? onMessageLongPress;
+  final void Function(User)? onUserLongPress;
 
   /// The index to take into account when triggering [controller.loadMore].
   final int loadMoreTriggerIndex;
@@ -287,8 +285,7 @@ class StreamMessageSearchListView extends StatelessWidget {
   final Clip clipBehavior;
 
   @override
-  Widget build(BuildContext context) =>
-      PagedValueListView<String, GetMessageResponse>(
+  Widget build(BuildContext context) => PagedValueListView<int, User>(
         scrollDirection: scrollDirection,
         padding: padding,
         physics: physics,
@@ -307,122 +304,76 @@ class StreamMessageSearchListView extends StatelessWidget {
         clipBehavior: clipBehavior,
         loadMoreTriggerIndex: loadMoreTriggerIndex,
         separatorBuilder: separatorBuilder,
-        itemBuilder: (context, messageResponses, index) {
-          final messageResponse = messageResponses[index];
-          final onTap = onMessageTap;
-          final onLongPress = onMessageLongPress;
+        itemBuilder: (context, users, index) {
+          final user = users[index];
+          final onTap = onUserTap;
+          final onLongPress = onUserLongPress;
 
-          final streamUserListTile = StreamMessageSearchListTile(
-            messageResponse: messageResponse,
-            onTap: onTap == null ? null : () => onTap(messageResponse),
-            onLongPress:
-                onLongPress == null ? null : () => onLongPress(messageResponse),
+          final streamUserListTile = StreamUserListTile(
+            user: user,
+            onTap: onTap == null ? null : () => onTap(user),
+            onLongPress: onLongPress == null ? null : () => onLongPress(user),
           );
 
           return itemBuilder?.call(
                 context,
-                messageResponses,
+                users,
                 index,
                 streamUserListTile,
               ) ??
               streamUserListTile;
         },
-        emptyBuilder: (context) =>
-            emptyBuilder?.call(context) ??
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(8),
-                child: StreamMessageSearchListEmptyWidget(),
-              ),
-            ),
+        emptyBuilder: (context) {
+          final chatThemeData = StreamChatTheme.of(context);
+          return emptyBuilder?.call(context) ??
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: StreamScrollViewEmptyWidget(
+                    emptyIcon: StreamSvgIcon.user(
+                      size: 148,
+                      color: chatThemeData.colorTheme.disabled,
+                    ),
+                    emptyTitle: Text(
+                      context.translations.noUsersLabel,
+                      style: chatThemeData.textTheme.headline,
+                    ),
+                  ),
+                ),
+              );
+        },
         loadMoreErrorBuilder: (context, error) =>
-            StreamMessageSearchListLoadMoreError(onTap: controller.retry),
+            StreamScrollViewLoadMoreError.list(
+          onTap: controller.retry,
+          error: Text(context.translations.loadingUsersError),
+        ),
         loadMoreIndicatorBuilder: (context) => const Center(
           child: Padding(
             padding: EdgeInsets.all(16),
-            child: StreamMessageSearchListLoadMoreIndicator(),
+            child: StreamScrollViewLoadMoreIndicator(),
           ),
         ),
         loadingBuilder: (context) =>
             loadingBuilder?.call(context) ??
-            ListView.separated(
-              padding: padding,
-              physics: physics,
-              reverse: reverse,
-              itemCount: 25,
-              separatorBuilder: (_, __) =>
-                  const StreamMessageSearchListSeparator(),
-              itemBuilder: (_, __) => const StreamChannelListLoadingTile(),
+            const Center(
+              child: StreamScrollViewLoadingWidget(),
             ),
         errorBuilder: (context, error) =>
             errorBuilder?.call(context, error) ??
             Center(
-              child: StreamMessageSearchListErrorWidget(
-                onPressed: controller.refresh,
+              child: StreamScrollViewErrorWidget(
+                errorTitle: Text(context.translations.loadingUsersError),
+                onRetryPressed: controller.refresh,
               ),
             ),
       );
 }
 
-/// A [StreamMessageSearchListTile] that can be used in a [ListView] to show a
-/// loading tile while waiting for the [StreamMessageSearchListController] to
-/// load more messages.
-class StreamMessageSearchListLoadMoreIndicator extends StatelessWidget {
-  /// Creates a new instance of [StreamMessageSearchListLoadMoreIndicator].
-  const StreamMessageSearchListLoadMoreIndicator({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => const SizedBox(
-        height: 16,
-        width: 16,
-        child: CircularProgressIndicator.adaptive(),
-      );
-}
-
-/// A [StreamMessageSearchListTile] that is used to display the error indicator
-/// when loading more messages fails.
-class StreamMessageSearchListLoadMoreError extends StatelessWidget {
-  /// Creates a new instance of [StreamMessageSearchListLoadMoreError].
-  const StreamMessageSearchListLoadMoreError({
-    Key? key,
-    this.onTap,
-  }) : super(key: key);
-
-  /// The callback to invoke when the user taps on the error indicator.
-  final GestureTapCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        color: theme.colorTheme.textLowEmphasis.withOpacity(0.9),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                context.translations.loadingChannelsError,
-                style: theme.textTheme.body.copyWith(
-                  color: Colors.white,
-                ),
-              ),
-              StreamSvgIcon.retry(color: Colors.white),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// A widget that is used to display a separator between
-/// [StreamMessageSearchListTile] items.
-class StreamMessageSearchListSeparator extends StatelessWidget {
-  /// Creates a new instance of [StreamMessageSearchListSeparator].
-  const StreamMessageSearchListSeparator({Key? key}) : super(key: key);
+/// [StreamUserListTile] items.
+class StreamUserListSeparator extends StatelessWidget {
+  /// Creates a new instance of [StreamUserListSeparator].
+  const StreamUserListSeparator({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -430,70 +381,6 @@ class StreamMessageSearchListSeparator extends StatelessWidget {
     return Container(
       height: 1,
       color: effect.color!.withOpacity(effect.alpha ?? 1.0),
-    );
-  }
-}
-
-/// A widget that is used to display an error screen
-/// when [StreamMessageSearchListController] fails to load initial messages.
-class StreamMessageSearchListErrorWidget extends StatelessWidget {
-  /// Creates a new instance of [StreamMessageSearchListErrorWidget] widget.
-  const StreamMessageSearchListErrorWidget({
-    Key? key,
-    this.onPressed,
-  }) : super(key: key);
-
-  /// The callback to invoke when the user taps on the retry button.
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) => Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text.rich(
-            TextSpan(
-              children: [
-                const WidgetSpan(
-                  child: Padding(
-                    padding: EdgeInsets.only(right: 2),
-                    child: Icon(Icons.error_outline),
-                  ),
-                ),
-                TextSpan(text: context.translations.loadingChannelsError),
-              ],
-            ),
-            style: Theme.of(context).textTheme.headline6,
-          ),
-          TextButton(
-            onPressed: onPressed,
-            child: Text(context.translations.retryLabel),
-          ),
-        ],
-      );
-}
-
-/// A widget that is used to display an empty state when
-/// [StreamMessageSearchListController] loads zero messages.
-class StreamMessageSearchListEmptyWidget extends StatelessWidget {
-  /// Creates a new instance of [StreamMessageSearchListEmptyWidget] widget.
-  const StreamMessageSearchListEmptyWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        StreamSvgIcon.message(
-          size: 148,
-          color: chatThemeData.colorTheme.disabled,
-        ),
-        const SizedBox(height: 28),
-        Text(
-          context.translations.letsStartChattingLabel,
-          style: chatThemeData.textTheme.headline,
-        ),
-      ],
     );
   }
 }

@@ -8,46 +8,46 @@ import 'package:stream_chat_flutter_core/src/message_text_field_controller.dart'
 
 /// A value listenable builder related to a [Message].
 ///
-/// Pass in a [MessageInputController] as the `valueListenable`.
-typedef MessageValueListenableBuilder = ValueListenableBuilder<Message>;
+/// Pass in a [StreamMessageInputController] as the `valueListenable`.
+typedef StreamMessageValueListenableBuilder = ValueListenableBuilder<Message>;
 
 /// Controller for storing and mutating a [Message] value.
-class MessageInputController extends ValueNotifier<Message> {
+class StreamMessageInputController extends ValueNotifier<Message> {
   /// Creates a controller for an editable text field.
   ///
   /// This constructor treats a null [message] argument as if it were the empty
   /// message.
-  factory MessageInputController({
+  factory StreamMessageInputController({
     Message? message,
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
   }) =>
-      MessageInputController._(
+      StreamMessageInputController._(
         initialMessage: message ?? Message(),
         textPatternStyle: textPatternStyle,
       );
 
   /// Creates a controller for an editable text field from an initial [text].
-  factory MessageInputController.fromText(
+  factory StreamMessageInputController.fromText(
     String? text, {
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
   }) =>
-      MessageInputController._(
+      StreamMessageInputController._(
         initialMessage: Message(text: text),
         textPatternStyle: textPatternStyle,
       );
 
   /// Creates a controller for an editable text field from initial
   /// [attachments].
-  factory MessageInputController.fromAttachments(
+  factory StreamMessageInputController.fromAttachments(
     List<Attachment> attachments, {
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
   }) =>
-      MessageInputController._(
+      StreamMessageInputController._(
         initialMessage: Message(attachments: attachments),
         textPatternStyle: textPatternStyle,
       );
 
-  MessageInputController._({
+  StreamMessageInputController._({
     required Message initialMessage,
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
   })  : _textEditingController = MessageTextFieldController.fromValue(
@@ -245,7 +245,7 @@ class MessageInputController extends ValueNotifier<Message> {
   /// will all be empty.
   ///
   /// Calling this will notify all the listeners of this
-  /// [MessageInputController] that they need to update
+  /// [StreamMessageInputController] that they need to update
   /// (calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
@@ -272,36 +272,36 @@ class MessageInputController extends ValueNotifier<Message> {
 }
 
 /// A [RestorableProperty] that knows how to store and restore a
-/// [MessageInputController].
+/// [StreamMessageInputController].
 ///
-/// The [MessageInputController] is accessible via the [value] getter. During
-/// state restoration, the property will restore [MessageInputController.value]
+/// The [StreamMessageInputController] is accessible via the [value] getter. During
+/// state restoration, the property will restore [StreamMessageInputController.value]
 /// to the value it had when the restoration data it is getting restored from
 /// was collected.
-class RestorableMessageInputController
-    extends RestorableChangeNotifier<MessageInputController> {
-  /// Creates a [RestorableMessageInputController].
+class StreamRestorableMessageInputController
+    extends RestorableChangeNotifier<StreamMessageInputController> {
+  /// Creates a [StreamRestorableMessageInputController].
   ///
   /// This constructor creates a default [Message] when no `message` argument
   /// is supplied.
-  RestorableMessageInputController({Message? message})
+  StreamRestorableMessageInputController({Message? message})
       : _initialValue = message ?? Message();
 
-  /// Creates a [RestorableMessageInputController] from an initial
+  /// Creates a [StreamRestorableMessageInputController] from an initial
   /// [text] value.
-  factory RestorableMessageInputController.fromText(String? text) =>
-      RestorableMessageInputController(message: Message(text: text));
+  factory StreamRestorableMessageInputController.fromText(String? text) =>
+      StreamRestorableMessageInputController(message: Message(text: text));
 
   final Message _initialValue;
 
   @override
-  MessageInputController createDefaultValue() =>
-      MessageInputController(message: _initialValue);
+  StreamMessageInputController createDefaultValue() =>
+      StreamMessageInputController(message: _initialValue);
 
   @override
-  MessageInputController fromPrimitives(Object? data) {
+  StreamMessageInputController fromPrimitives(Object? data) {
     final message = Message.fromJson(json.decode(data! as String));
-    return MessageInputController(message: message);
+    return StreamMessageInputController(message: message);
   }
 
   @override
