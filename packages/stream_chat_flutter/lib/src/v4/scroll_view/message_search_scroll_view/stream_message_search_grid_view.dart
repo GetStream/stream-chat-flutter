@@ -26,11 +26,8 @@ typedef StreamMessageSearchGridViewIndexedWidgetBuilder
 /// ```dart
 /// StreamMessageSearchGridView(
 ///   controller: controller,
-///   onMessageTap: (user) {
-///     // Handle user tap event
-///   },
-///   onMessageLongPress: (user) {
-///     // Handle user long press event
+///   itemBuilder: (context, messageResponses, index) {
+///     return GridTile(message: messageResponses[index]);
 ///   },
 /// )
 /// ```
