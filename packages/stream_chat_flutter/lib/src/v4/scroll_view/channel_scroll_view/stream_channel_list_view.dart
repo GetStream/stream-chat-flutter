@@ -83,10 +83,6 @@ class StreamChannelListView extends StatelessWidget {
   final StreamChannelListController controller;
 
   /// A builder that is called to build items in the [ListView].
-  ///
-  /// The `channel` parameter is the [Channel] at this position in the list
-  /// and the `defaultWidget` is the default widget used
-  /// i.e: [StreamChannelListTile].
   final StreamChannelListViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.

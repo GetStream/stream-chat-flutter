@@ -37,7 +37,7 @@ typedef StreamUserGridViewIndexedWidgetBuilder
 /// See also:
 /// * [StreamUserListTile]
 /// * [StreamUserListController]
-class StreamUserGridView<K, V> extends StatelessWidget {
+class StreamUserGridView extends StatelessWidget {
   /// Creates a new instance of [StreamUserGridView].
   const StreamUserGridView({
     Key? key,
@@ -78,8 +78,6 @@ class StreamUserGridView<K, V> extends StatelessWidget {
   final SliverGridDelegate gridDelegate;
 
   /// A builder that is called to build items in the [PagedValueGridView].
-  ///
-  /// The `value` parameter is the [V] at this position in the grid.
   final StreamUserGridViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the empty state of the grid.

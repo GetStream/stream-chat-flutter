@@ -78,10 +78,6 @@ class StreamUserListView extends StatelessWidget {
   final StreamUserListController controller;
 
   /// A builder that is called to build items in the [ListView].
-  ///
-  /// The `user` parameter is the [User] at this position in the list
-  /// and the `defaultWidget` is the default widget used
-  /// i.e: [StreamUserListTile].
   final StreamUserListViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.

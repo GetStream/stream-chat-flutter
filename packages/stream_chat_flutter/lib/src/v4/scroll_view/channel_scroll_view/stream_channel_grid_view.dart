@@ -41,7 +41,7 @@ typedef StreamChannelGridViewIndexedWidgetBuilder
 /// See also:
 /// * [StreamChannelGridTile]
 /// * [StreamChannelListController]
-class StreamChannelGridView<K, V> extends StatelessWidget {
+class StreamChannelGridView extends StatelessWidget {
   /// Creates a new instance of [StreamChannelGridView].
   const StreamChannelGridView({
     Key? key,
@@ -83,7 +83,7 @@ class StreamChannelGridView<K, V> extends StatelessWidget {
 
   /// A builder that is called to build items in the [PagedValueGridView].
   ///
-  /// The `value` parameter is the [V] at this position in the grid.
+  /// The `value` parameter is the [Channel] at this position in the grid.
   final StreamChannelGridViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the empty state of the grid.

@@ -35,7 +35,7 @@ typedef StreamMessageSearchGridViewIndexedWidgetBuilder
 /// See also:
 /// * [StreamUserListTile]
 /// * [StreamUserListController]
-class StreamMessageSearchGridView<K, V> extends StatelessWidget {
+class StreamMessageSearchGridView extends StatelessWidget {
   /// Creates a new instance of [StreamMessageSearchGridView].
   const StreamMessageSearchGridView({
     Key? key,
@@ -75,7 +75,7 @@ class StreamMessageSearchGridView<K, V> extends StatelessWidget {
 
   /// A builder that is called to build items in the [PagedValueGridView].
   ///
-  /// The `value` parameter is the [V] at this position in the grid.
+  /// The `value` parameter is the [GetMessageBuilder] at this position in the grid.
   final StreamMessageSearchGridViewIndexedWidgetBuilder itemBuilder;
 
   /// A builder that is called to build the empty state of the grid.

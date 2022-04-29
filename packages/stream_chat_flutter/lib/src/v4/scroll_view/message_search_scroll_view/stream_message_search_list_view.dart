@@ -80,10 +80,6 @@ class StreamMessageSearchListView extends StatelessWidget {
   final StreamMessageSearchListController controller;
 
   /// A builder that is called to build items in the [ListView].
-  ///
-  /// The `messageResponse` parameter is the [GetMessageResponse] at this
-  /// position in the list and the `defaultWidget` is the default widget used
-  /// i.e: [StreamMessageSearchListTile].
   final StreamMessageSearchListViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.
