@@ -77,7 +77,7 @@ class StreamUserGridTile extends StatelessWidget {
           child: Text(
             user.name,
             textAlign: TextAlign.center,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontWeight: FontWeight.bold,

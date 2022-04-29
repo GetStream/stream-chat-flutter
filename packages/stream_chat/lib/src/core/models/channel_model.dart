@@ -13,7 +13,7 @@ class ChannelModel {
     String? id,
     String? type,
     String? cid,
-    this.ownCapabilities = const [],
+    this.ownCapabilities,
     ChannelConfig? config,
     this.createdBy,
     this.frozen = false,
@@ -54,7 +54,7 @@ class ChannelModel {
 
   /// List of user permissions on this channel
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
-  final List<String> ownCapabilities;
+  final List<String>? ownCapabilities;
 
   /// The channel configuration data
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)

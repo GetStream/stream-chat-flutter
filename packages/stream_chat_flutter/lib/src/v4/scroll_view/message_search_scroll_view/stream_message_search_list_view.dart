@@ -87,18 +87,12 @@ class StreamMessageSearchListView extends StatelessWidget {
       separatorBuilder;
 
   /// A builder that is called to build the empty state of the list.
-  ///
-  /// If not provided, [StreamMessageSearchListEmptyWidget] will be used.
   final WidgetBuilder? emptyBuilder;
 
   /// A builder that is called to build the loading state of the list.
-  ///
-  /// If not provided, [StreamMessageSearchListLoadingTile] will be used.
   final WidgetBuilder? loadingBuilder;
 
   /// A builder that is called to build the error state of the list.
-  ///
-  /// If not provided, [StreamMessageSearchListErrorWidget] will be used.
   final Widget Function(BuildContext, StreamChatError)? errorBuilder;
 
   /// Called when the user taps this list tile.

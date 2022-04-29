@@ -89,13 +89,9 @@ class StreamChannelListView extends StatelessWidget {
   final PagedValueScrollViewIndexedWidgetBuilder<Channel> separatorBuilder;
 
   /// A builder that is called to build the empty state of the list.
-  ///
-  /// If not provided, [StreamChannelListEmptyWidget] will be used.
   final WidgetBuilder? emptyBuilder;
 
   /// A builder that is called to build the loading state of the list.
-  ///
-  /// If not provided, [StreamChannelListLoadingTile] will be used.
   final WidgetBuilder? loadingBuilder;
 
   /// A builder that is called to build the error state of the list.

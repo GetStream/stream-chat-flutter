@@ -11,7 +11,8 @@ export 'src/message_list_core.dart' hide MessageListCoreState;
 export 'src/message_search_bloc.dart';
 export 'src/message_search_list_core.dart' hide MessageSearchListCoreState;
 export 'src/message_text_field_controller.dart';
-export 'src/paged_value_notifier.dart' show PagedValueListenableBuilder;
+export 'src/paged_value_notifier.dart'
+    show PagedValueListenableBuilder, PagedValue;
 export 'src/paged_value_scroll_view.dart';
 export 'src/stream_channel.dart';
 export 'src/stream_channel_list_controller.dart';
