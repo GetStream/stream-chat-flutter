@@ -59,7 +59,7 @@ export 'src/v4/scroll_view/channel_scroll_view/stream_channel_grid_view.dart';
 // v4
 export 'src/v4/scroll_view/channel_scroll_view/stream_channel_list_tile.dart';
 export 'src/v4/scroll_view/channel_scroll_view/stream_channel_list_view.dart';
-
+export 'src/v4/scroll_view/message_search_scroll_view/stream_message_search_grid_view.dart';
 export 'src/v4/scroll_view/message_search_scroll_view/stream_message_search_list_tile.dart';
 export 'src/v4/scroll_view/message_search_scroll_view/stream_message_search_list_view.dart';
 export 'src/v4/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
