@@ -19,12 +19,13 @@ class ThreadPage extends StatefulWidget {
 
 class _ThreadPageState extends State<ThreadPage> {
   FocusNode _focusNode = FocusNode();
-  late MessageInputController _messageInputController;
+  late StreamMessageInputController _messageInputController;
 
   @override
   void initState() {
     super.initState();
-    _messageInputController = MessageInputController(message: widget.parent);
+    _messageInputController =
+        StreamMessageInputController(message: widget.parent);
   }
 
   @override

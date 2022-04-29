@@ -35,7 +35,7 @@ class ChannelPage extends StatefulWidget {
 
 class _ChannelPageState extends State<ChannelPage> {
   FocusNode? _focusNode;
-  MessageInputController _messageInputController = MessageInputController();
+  StreamMessageInputController _messageInputController = StreamMessageInputController();
 
   @override
   void initState() {

@@ -278,31 +278,33 @@ class _ChannelList extends State<ChannelList> {
                       emptyBuilder: (_) {
                         return Center(
                           child: Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Expanded(child: StreamChannelListEmptyWidget()),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      Routes.NEW_CHAT,
-                                    );
-                                  },
-                                  child: Text(
-                                    'Start a chat',
-                                    style: StreamChatTheme.of(context)
-                                        .textTheme
-                                        .bodyBold
-                                        .copyWith(
-                                          color: StreamChatTheme.of(context)
-                                              .colorTheme
-                                              .accentPrimary,
-                                        ),
-                                  ),
+                            padding: const EdgeInsets.all(8),
+                            child: StreamScrollViewEmptyWidget(
+                              emptyIcon: StreamSvgIcon.message(
+                                size: 148,
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .disabled,
+                              ),
+                              emptyTitle: TextButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    Routes.NEW_CHAT,
+                                  );
+                                },
+                                child: Text(
+                                  'Start a chat',
+                                  style: StreamChatTheme.of(context)
+                                      .textTheme
+                                      .bodyBold
+                                      .copyWith(
+                                        color: StreamChatTheme.of(context)
+                                            .colorTheme
+                                            .accentPrimary,
+                                      ),
                                 ),
-                              ],
+                              ),
                             ),
                           ),
                         );

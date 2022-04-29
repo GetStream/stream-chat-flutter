@@ -1,60 +1,34 @@
 import 'package:example/localizations.dart';
+import 'package:example/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:video_player/video_player.dart';
+
+import 'channel_page.dart';
 
 class PinnedMessagesScreen extends StatefulWidget {
-  /// The sorting used for the channels matching the filters.
-  /// Sorting is based on field and direction, multiple sorting options can be provided.
-  /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
-  /// Direction can be ascending or descending.
-  final List<SortOption>? sortOptions;
-
-  /// Pagination parameters
-  /// limit: the number of users to return (max is 30)
-  /// offset: the offset (max is 1000)
-  /// message_limit: how many messages should be included to each channel
-  final PaginationParams paginationParams;
-
-  /// The builder used when the file list is empty.
-  final WidgetBuilder? emptyBuilder;
-
-  final ShowMessageCallback? onShowMessage;
-
-  final StreamMessageThemeData messageTheme;
-
-  const PinnedMessagesScreen({
-    required this.messageTheme,
-    this.sortOptions,
-    this.paginationParams = const PaginationParams(limit: 20),
-    this.emptyBuilder,
-    this.onShowMessage,
-  });
-
   @override
-  _PinnedMessagesScreenState createState() => _PinnedMessagesScreenState();
+  State<PinnedMessagesScreen> createState() => _PinnedMessagesScreenState();
 }
 
 class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
-  Map<String?, VideoPlayerController?> controllerCache = {};
-
-  @override
-  void initState() {
-    super.initState();
-    final messageSearchBloc = MessageSearchBloc.of(context);
-    messageSearchBloc.search(
-      filter: Filter.in_(
-        'cid',
-        [StreamChannel.of(context).channel.cid!],
+  late final controller = StreamMessageSearchListController(
+    client: StreamChat.of(context).client,
+    filter: Filter.in_(
+      'cid',
+      [StreamChannel.of(context).channel.cid!],
+    ),
+    messageFilter: Filter.equal(
+      'pinned',
+      true,
+    ),
+    sort: [
+      SortOption(
+        'created_at',
+        direction: SortOption.ASC,
       ),
-      messageFilter: Filter.equal(
-        'pinned',
-        true,
-      ),
-      sort: widget.sortOptions,
-      pagination: widget.paginationParams,
-    );
-  }
+    ],
+    limit: 20,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -73,25 +47,9 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
         leading: StreamBackButton(),
         backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       ),
-      body: _buildMediaGrid(),
-    );
-  }
-
-  Widget _buildMediaGrid() {
-    final messageSearchBloc = MessageSearchBloc.of(context);
-
-    return StreamBuilder<List<GetMessageResponse>>(
-      builder: (context, snapshot) {
-        if (snapshot.data == null) {
-          return Center(
-            child: const CircularProgressIndicator(),
-          );
-        }
-
-        if (snapshot.data!.isEmpty) {
-          if (widget.emptyBuilder != null) {
-            return widget.emptyBuilder!(context);
-          }
+      body: StreamMessageSearchListView(
+        controller: controller,
+        emptyBuilder: (_) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -140,74 +98,33 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
               ],
             ),
           );
-        }
-
-        var data = snapshot.data ?? [];
-
-        return LazyLoadScrollView(
-          onEndOfPage: () => messageSearchBloc.search(
-            filter: Filter.in_(
-              'cid',
-              [StreamChannel.of(context).channel.cid!],
+        },
+        onMessageTap: (messageResponse) async {
+          final client = StreamChat.of(context).client;
+          final message = messageResponse.message;
+          final channel = client.channel(
+            messageResponse.channel!.type,
+            id: messageResponse.channel!.id,
+          );
+          if (channel.state == null) {
+            await channel.watch();
+          }
+          Navigator.pushNamed(
+            context,
+            Routes.CHANNEL_PAGE,
+            arguments: ChannelPageArgs(
+              channel: channel,
+              initialMessage: message,
             ),
-            messageFilter: Filter.equal(
-              'pinned',
-              true,
-            ),
-            sort: widget.sortOptions,
-            pagination: widget.paginationParams.copyWith(
-              offset: messageSearchBloc.messageResponses?.length ?? 0,
-            ),
-          ),
-          child: ListView.builder(
-            itemBuilder: (context, position) {
-              var user = data[position].message.user!;
-              var attachments = data[position].message.attachments;
-              var text = data[position].message.text ?? '';
-
-              return ListTile(
-                leading: StreamUserAvatar(
-                  user: user,
-                  constraints: BoxConstraints.tightFor(
-                    width: 40.0,
-                    height: 40.0,
-                  ),
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                title: Text(
-                  user.name,
-                  style: TextStyle(
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .textHighEmphasis,
-                      fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(
-                  text != ''
-                      ? text
-                      : (attachments.isNotEmpty
-                          ? '${attachments.length} ${attachments.length > 1 ? AppLocalizations.of(context).attachments : AppLocalizations.of(context).attachment}'
-                          : ''),
-                ),
-                onTap: () {
-                  widget.onShowMessage?.call(data[position].message,
-                      StreamChannel.of(context).channel);
-                },
-              );
-            },
-            itemCount: snapshot.data!.length,
-          ),
-        );
-      },
-      stream: messageSearchBloc.messagesStream,
+          );
+        },
+      ),
     );
   }
 
   @override
   void dispose() {
+    controller.dispose();
     super.dispose();
-    for (var c in controllerCache.values) {
-      c!.dispose();
-    }
   }
 }
