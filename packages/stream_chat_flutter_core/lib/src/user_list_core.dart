@@ -53,6 +53,11 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 ///
 /// The parameters [listBuilder], [loadingBuilder], [emptyBuilder] and
 /// [errorBuilder] must all be supplied and not null.
+@Deprecated('''
+UserListCore is deprecated and will be removed in the next 
+major version. Use StreamUserListController instead to create your custom list.
+More details here https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter_core/stream_user_list_controller
+''')
 class UserListCore extends StatefulWidget {
   /// Instantiate a new [UserListCore]
   const UserListCore({

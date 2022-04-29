@@ -54,6 +54,11 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 ///
 /// Make sure to have a [StreamChatCore] ancestor in order to provide the
 /// information about the channels.
+@Deprecated('''
+ChannelListCore is deprecated and will be removed in the next 
+major version. Use StreamChannelListController instead to create your custom list.
+More details here https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter_core/stream_channel_list_controller
+''')
 class ChannelListCore extends StatefulWidget {
   /// Instantiate a new ChannelListView
   const ChannelListCore({
