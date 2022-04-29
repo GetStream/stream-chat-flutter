@@ -31,8 +31,10 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: const Scaffold(
-              body: ChannelAvatar(),
+            child: Scaffold(
+              body: StreamChannelAvatar(
+                channel: channel,
+              ),
             ),
           ),
         ),
@@ -101,8 +103,10 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: const Scaffold(
-              body: ChannelAvatar(),
+            child: Scaffold(
+              body: StreamChannelAvatar(
+                channel: channel,
+              ),
             ),
           ),
         ),
@@ -162,8 +166,10 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: const Scaffold(
-              body: ChannelAvatar(),
+            child: Scaffold(
+              body: StreamChannelAvatar(
+                channel: channel,
+              ),
             ),
           ),
         ),
@@ -202,9 +208,10 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: const Scaffold(
-              body: ChannelAvatar(
+            child: Scaffold(
+              body: StreamChannelAvatar(
                 selected: true,
+                channel: channel,
               ),
             ),
           ),

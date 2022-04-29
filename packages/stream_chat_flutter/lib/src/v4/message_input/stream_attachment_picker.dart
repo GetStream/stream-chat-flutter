@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
+import 'package:stream_chat_flutter/src/media_list_view_controller.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Callback for when a file has to be picked.
@@ -47,8 +48,8 @@ class StreamAttachmentPicker extends StatefulWidget {
   /// The picker size in height.
   final double pickerSize;
 
-  /// The [MessageInputController] linked to this picker.
-  final MessageInputController messageInputController;
+  /// The [StreamMessageInputController] linked to this picker.
+  final StreamMessageInputController messageInputController;
 
   /// The limit of attachments that can be picked.
   final int attachmentLimit;
@@ -77,7 +78,7 @@ class StreamAttachmentPicker extends StatefulWidget {
   /// properties.
   StreamAttachmentPicker copyWith({
     Key? key,
-    MessageInputController? messageInputController,
+    StreamMessageInputController? messageInputController,
     FilePickerCallback? onFilePicked,
     bool? isOpen,
     double? pickerSize,
@@ -113,6 +114,7 @@ class StreamAttachmentPicker extends StatefulWidget {
 
 class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
   int _filePickerIndex = 0;
+  final _mediaListViewController = MediaListViewController();
 
   @override
   Widget build(BuildContext context) {
@@ -281,6 +283,26 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                       ),
                   ],
                 ),
+                const Spacer(),
+                FutureBuilder(
+                  future: PhotoManager.requestPermissionExtend(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData &&
+                        snapshot.data == PermissionState.limited) {
+                      return TextButton(
+                        child: Text(context.translations.viewLibrary),
+                        onPressed: () async {
+                          await PhotoManager.presentLimited();
+                          _mediaListViewController.updateMedia(
+                            newValue: true,
+                          );
+                        },
+                      );
+                    }
+
+                    return const SizedBox.shrink();
+                  },
+                ),
                 DecoratedBox(
                   decoration: BoxDecoration(
                     color: _streamChatTheme.colorTheme.barsBg,
@@ -315,6 +337,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: _PickerWidget(
+                        mediaListViewController: _mediaListViewController,
                         filePickerIndex: _filePickerIndex,
                         streamChatTheme: _streamChatTheme,
                         containsFile: _attachmentContainsFile,
@@ -410,6 +433,7 @@ class _PickerWidget extends StatefulWidget {
     required this.streamChatTheme,
     required this.allowedAttachmentTypes,
     required this.customAttachmentTypes,
+    required this.mediaListViewController,
   }) : super(key: key);
 
   final int filePickerIndex;
@@ -420,6 +444,7 @@ class _PickerWidget extends StatefulWidget {
   final StreamChatThemeData streamChatTheme;
   final List<DefaultAttachmentTypes> allowedAttachmentTypes;
   final List<CustomAttachmentType> customAttachmentTypes;
+  final MediaListViewController mediaListViewController;
 
   @override
   _PickerWidgetState createState() => _PickerWidgetState();
@@ -473,6 +498,7 @@ class _PickerWidgetState extends State<_PickerWidget> {
           return StreamMediaListView(
             selectedIds: widget.selectedMedias,
             onSelect: widget.onMediaSelected,
+            controller: widget.mediaListViewController,
           );
         }
 

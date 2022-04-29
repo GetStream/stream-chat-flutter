@@ -246,6 +246,8 @@ class StreamMessageReactionsModal extends StatelessWidget {
             reaction.user!.name.split(' ')[0],
             style: chatThemeData.textTheme.footnoteBold,
             textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ],
       ),

@@ -382,4 +382,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   @override
   String get sendMessagePermissionError =>
       'Você não tem permissão para enviar mensagens';
+
+  @override
+  String get viewLibrary => 'Ver biblioteca';
 }

@@ -280,7 +280,7 @@ void main() {
 
       expect(find.text('test'), findsNothing);
       expect(find.byType(StreamBackButton), findsNothing);
-      expect(find.byType(ChannelAvatar), findsNothing);
+      expect(find.byType(StreamChannelAvatar), findsNothing);
       expect(find.byType(StreamChannelInfo), findsNothing);
       expect(find.text('leading'), findsOneWidget);
       expect(find.text('title'), findsOneWidget);

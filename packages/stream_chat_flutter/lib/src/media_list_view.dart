@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:stream_chat_flutter/src/media_list_view_controller.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@macro media_list_view}
@@ -20,6 +21,7 @@ class StreamMediaListView extends StatefulWidget {
     Key? key,
     this.selectedIds = const [],
     this.onSelect,
+    this.controller,
   }) : super(key: key);
 
   /// Stores the media selected
@@ -28,18 +30,28 @@ class StreamMediaListView extends StatefulWidget {
   /// Callback for on media selected
   final void Function(AssetEntity media)? onSelect;
 
+  /// Controller that handles MediaListView
+  final MediaListViewController? controller;
+
   @override
   _StreamMediaListViewState createState() => _StreamMediaListViewState();
 }
 
 class _StreamMediaListViewState extends State<StreamMediaListView> {
-  final _media = <AssetEntity>[];
-  final ScrollController _scrollController = ScrollController();
-  int _currentPage = 0;
+  var _media = <AssetEntity>[];
+  var _currentPage = 0;
+  final _scrollController = ScrollController();
+
+  /// Controller necessary to verify limited access to photo gallery in iOS and
+  /// update the media list when listerners are emitted
+  late final controller = widget.controller ?? MediaListViewController();
 
   @override
   Widget build(BuildContext context) => LazyLoadScrollView(
-        onEndOfPage: () async => _getMedia(),
+        onEndOfPage: () async {
+          await _getMedia();
+          _updatePage();
+        },
         child: GridView.builder(
           itemCount: _media.length,
           controller: _scrollController,
@@ -136,7 +148,27 @@ class _StreamMediaListViewState extends State<StreamMediaListView> {
   @override
   void initState() {
     super.initState();
+    controller.addListener(_updateMediaList);
     _getMedia();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.removeListener(_updateMediaList);
+    if (widget.controller == null) {
+      controller.dispose();
+    }
+  }
+
+  void _updateMediaList() {
+    if (controller.shouldUpdateMedia) {
+      _getMedia();
+    }
+  }
+
+  void _updatePage() {
+    ++_currentPage;
   }
 
   Future<void> _getMedia() async {
@@ -157,13 +189,11 @@ class _StreamMediaListViewState extends State<StreamMediaListView> {
       page: _currentPage,
       size: 50,
     );
-
     if (media?.isNotEmpty == true) {
       setState(() {
-        _media.addAll(media!);
+        _media = media!;
       });
     }
-    ++_currentPage;
   }
 }
 

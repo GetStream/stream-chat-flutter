@@ -379,4 +379,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get linkDisabledError => 'Links are disabled';
+
+  @override
+  String get viewLibrary => 'View library';
 }

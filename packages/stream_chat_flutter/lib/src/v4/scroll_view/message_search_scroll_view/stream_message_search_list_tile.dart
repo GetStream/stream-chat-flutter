@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/v4/stream_message_preview_text.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that displays a message search item.
@@ -158,15 +157,19 @@ class StreamMessageSearchListTile extends StatelessWidget {
   }
 }
 
+/// A widget that displays the title of a [StreamMessageSearchListTile].
 class MessageSearchListTileTitle extends StatelessWidget {
+  /// Creates a new [MessageSearchListTileTitle] instance.
   const MessageSearchListTileTitle({
     Key? key,
     required this.messageResponse,
     this.textStyle,
   }) : super(key: key);
 
+  /// The message response for the tile.
   final GetMessageResponse messageResponse;
 
+  /// The style to use for the title.
   final TextStyle? textStyle;
 
   @override
@@ -200,6 +203,7 @@ class MessageSearchListTileTitle extends StatelessWidget {
   }
 }
 
+/// A widget which shows formatted created date of the passed [message].
 class MessageSearchTileMessageDate extends StatelessWidget {
   /// Creates a new instance of [MessageSearchTileMessageDate].
   const MessageSearchTileMessageDate({

@@ -49,22 +49,8 @@ class StreamChannelListEventHandler {
   /// This event is fired when a channel is updated.
   ///
   /// By default, this updates the channel received in the event.
-  void onChannelUpdated(Event event, StreamChannelListController controller) {
-    final eventChannel = event.channel;
-    if (eventChannel == null) return;
-
-    final channels = [...controller.currentItems];
-    final channelIndex = channels.indexWhere(
-      (it) => it.cid == (event.cid ?? eventChannel.cid),
-    );
-
-    if (channelIndex >= 0) {
-      final channelState = ChannelState(channel: eventChannel);
-      channels[channelIndex].state?.updateChannelState(channelState);
-    }
-
-    controller.channels = channels;
-  }
+  // ignore: no-empty-block
+  void onChannelUpdated(Event event, StreamChannelListController controller) {}
 
   /// Function which gets called for the event
   /// [EventType.channelVisible].

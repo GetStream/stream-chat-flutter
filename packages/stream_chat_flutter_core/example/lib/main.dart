@@ -60,102 +60,114 @@ class StreamExample extends StatelessWidget {
 }
 
 /// Basic layout displaying a list of [Channel]s the user is a part of.
-/// This is implemented using [ChannelListCore].
+/// This is implemented using a [StreamChannelListController].
 ///
-/// [ChannelListCore] is a `builder` with callbacks for constructing UIs based
-/// on different scenarios.
-class HomeScreen extends StatelessWidget {
+/// [StreamChannelListController] is a controller that lets you manage a list of
+/// channels.
+class HomeScreen extends StatefulWidget {
   /// Builds a basic layout displaying a list of [Channel]s the user is a
   /// part of.
-  HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({Key? key}) : super(key: key);
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   /// Controller used for loading more data and controlling pagination in
-  /// [ChannelListCore].
-  final channelListController = ChannelListController();
+  /// [StreamChannelListController].
+  late final channelListController = StreamChannelListController(
+    client: StreamChatCore.of(context).client,
+    filter: Filter.and([
+      Filter.equal('type', 'messaging'),
+      Filter.in_(
+        'members',
+        [
+          StreamChatCore.of(context).currentUser!.id,
+        ],
+      ),
+    ]),
+  );
+
+  @override
+  void initState() {
+    channelListController.doInitialLoad();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    channelListController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: const Text('Channels'),
         ),
-        body: ChannelsBloc(
-          child: ChannelListCore(
-            channelListController: channelListController,
-            filter: Filter.and([
-              Filter.equal('type', 'messaging'),
-              Filter.in_(
-                'members',
-                [
-                  StreamChatCore.of(context).currentUser!.id,
-                ],
-              ),
-            ]),
-            emptyBuilder: (BuildContext context) => const Center(
-              child: Text('Looks like you are not in any channels'),
-            ),
-            loadingBuilder: (BuildContext context) => const Center(
-              child: SizedBox(
-                height: 100,
-                width: 100,
-                child: CircularProgressIndicator(),
-              ),
-            ),
-            errorBuilder: (
-              BuildContext context,
-              dynamic error,
-            ) =>
-                Center(
-              child: Text(
-                'Oh no, something went wrong. '
-                'Please check your config. $error',
-              ),
-            ),
-            listBuilder: (
-              BuildContext context,
-              List<Channel> channels,
-            ) =>
-                LazyLoadScrollView(
-              onEndOfPage: () async {
-                channelListController.paginateData!();
-              },
-              child: ListView.builder(
-                itemCount: channels.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final _item = channels[index];
-                  return ListTile(
-                    title: Text(_item.name ?? ''),
-                    subtitle: StreamBuilder<Message?>(
-                      stream: _item.state!.lastMessageStream,
-                      initialData: _item.state!.lastMessage,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return Text(snapshot.data!.text!);
-                        }
-
-                        return const SizedBox();
-                      },
-                    ),
-                    onTap: () {
-                      /// Display a list of messages when the user taps on
-                      /// an item. We can use [StreamChannel] to wrap our
-                      /// [MessageScreen] screen with the selected channel.
-                      ///
-                      /// This allows us to use a built-in inherited widget
-                      /// for accessing our `channel` later on.
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => StreamChannel(
-                            channel: _item,
-                            child: const MessageScreen(),
-                          ),
-                        ),
-                      );
-                    },
-                  );
+        body: PagedValueListenableBuilder<int, Channel>(
+          valueListenable: channelListController,
+          builder: (context, value, child) {
+            return value.when(
+              (channels, nextPageKey, error) => LazyLoadScrollView(
+                onEndOfPage: () async {
+                  if (nextPageKey != null) {
+                    channelListController.loadMore(nextPageKey);
+                  }
                 },
+                child: ListView.builder(
+                  itemCount: channels.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final _item = channels[index];
+                    return ListTile(
+                      title: Text(_item.name ?? ''),
+                      subtitle: StreamBuilder<Message?>(
+                        stream: _item.state!.lastMessageStream,
+                        initialData: _item.state!.lastMessage,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(snapshot.data!.text!);
+                          }
+
+                          return const SizedBox();
+                        },
+                      ),
+                      onTap: () {
+                        /// Display a list of messages when the user taps on
+                        /// an item. We can use [StreamChannel] to wrap our
+                        /// [MessageScreen] screen with the selected channel.
+                        ///
+                        /// This allows us to use a built-in inherited widget
+                        /// for accessing our `channel` later on.
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => StreamChannel(
+                              channel: _item,
+                              child: const MessageScreen(),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ),
+              loading: () => const Center(
+                child: SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              error: (e) => Center(
+                child: Text(
+                  'Oh no, something went wrong. '
+                  'Please check your config. $e',
+                ),
+              ),
+            );
+          },
         ),
       );
 }
