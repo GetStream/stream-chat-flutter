@@ -11,7 +11,6 @@ import 'channel_media_display_screen.dart';
 import 'channel_page.dart';
 import 'chat_info_screen.dart';
 import 'pinned_messages_screen.dart';
-import 'routes/routes.dart';
 
 class GroupInfoScreen extends StatefulWidget {
   final StreamMessageThemeData messageTheme;

@@ -5,9 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'channel_file_display_screen.dart';
 import 'channel_media_display_screen.dart';
-import 'channel_page.dart';
 import 'pinned_messages_screen.dart';
-import 'routes/routes.dart';
 
 /// Detail screen for a 1:1 chat correspondence
 class ChatInfoScreen extends StatefulWidget {
