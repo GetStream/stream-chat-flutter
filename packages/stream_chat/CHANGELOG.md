@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `push_provider_name` to `addDevice` API call
+
 ## 4.0.0-beta.2
 
 🐞 Fixed

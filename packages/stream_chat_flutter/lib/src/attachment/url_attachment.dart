@@ -43,11 +43,11 @@ class StreamUrlAttachment extends StatelessWidget {
     final chatThemeData = StreamChatTheme.of(context);
     return GestureDetector(
       onTap: () {
-        final titleLink = urlAttachment.titleLink;
-        if (titleLink != null) {
+        final ogScrapeUrl = urlAttachment.ogScrapeUrl;
+        if (ogScrapeUrl != null) {
           onLinkTap != null
-              ? onLinkTap!(titleLink)
-              : launchURL(context, titleLink);
+              ? onLinkTap!(ogScrapeUrl)
+              : launchURL(context, ogScrapeUrl);
         }
       },
       child: Column(

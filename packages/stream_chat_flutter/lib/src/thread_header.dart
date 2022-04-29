@@ -72,11 +72,13 @@ class StreamThreadHeader extends StatelessWidget
     this.onBackPressed,
     this.title,
     this.subtitle,
+    this.centerTitle,
     this.leading,
     this.actions,
     this.onTitleTap,
     this.showTypingIndicator = true,
     this.backgroundColor,
+    this.elevation = 1,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -99,6 +101,9 @@ class StreamThreadHeader extends StatelessWidget
   /// Subtitle widget
   final Widget? subtitle;
 
+  /// Whether the title should be centered
+  final bool? centerTitle;
+
   /// Leading widget
   final Widget? leading;
 
@@ -112,8 +117,17 @@ class StreamThreadHeader extends StatelessWidget
   /// The background color of this [StreamThreadHeader].
   final Color? backgroundColor;
 
+  /// The elevation for this [StreamThreadHeader].
+  final double elevation;
+
   @override
   Widget build(BuildContext context) {
+    final effectiveCenterTitle = getEffectiveCenterTitle(
+      Theme.of(context),
+      actions: actions,
+      centerTitle: centerTitle,
+    );
+
     final channelHeaderTheme = StreamChannelHeaderTheme.of(context);
 
     final defaultSubtitle = subtitle ??
@@ -126,7 +140,8 @@ class StreamThreadHeader extends StatelessWidget
               style: channelHeaderTheme.subtitleStyle,
             ),
             Flexible(
-              child: ChannelName(
+              child: StreamChannelName(
+                channel: StreamChannel.of(context).channel,
                 textStyle: channelHeaderTheme.subtitleStyle,
               ),
             ),
@@ -141,7 +156,7 @@ class StreamThreadHeader extends StatelessWidget
       systemOverlayStyle: theme.brightness == Brightness.dark
           ? SystemUiOverlayStyle.light
           : SystemUiOverlayStyle.dark,
-      elevation: 1,
+      elevation: elevation,
       leading: leading ??
           (showBackButton
               ? StreamBackButton(
@@ -151,7 +166,7 @@ class StreamThreadHeader extends StatelessWidget
                 )
               : const SizedBox()),
       backgroundColor: backgroundColor ?? channelHeaderTheme.color,
-      centerTitle: true,
+      centerTitle: centerTitle,
       actions: actions,
       title: InkWell(
         onTap: onTitleTap,
@@ -160,6 +175,9 @@ class StreamThreadHeader extends StatelessWidget
           width: 250,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: effectiveCenterTitle
+                ? CrossAxisAlignment.center
+                : CrossAxisAlignment.stretch,
             children: [
               title ??
                   Text(

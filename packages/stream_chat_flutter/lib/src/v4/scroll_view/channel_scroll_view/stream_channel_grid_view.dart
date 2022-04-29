@@ -158,7 +158,8 @@ class StreamChannelGridView extends StatelessWidget {
   /// only scroll the view if it has sufficient content. See [physics].
   ///
   /// Also when true, the scroll view is used for default [ScrollAction]s. If a
-  /// ScrollAction is not handled by an otherwise focused part of the application,
+  /// ScrollAction is not handled by
+  /// an otherwise focused part of the application,
   /// the ScrollAction will be evaluated using this scroll view, for example,
   /// when executing [Shortcuts] key events like page up and down.
   ///
@@ -288,7 +289,8 @@ class StreamChannelGridView extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
+  ///  * [SemanticsConfiguration.scrollChildCount],
+  ///  the corresponding semantics property.
   final int? semanticChildCount;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}

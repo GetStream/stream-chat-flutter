@@ -581,11 +581,11 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   bool get isOnlyEmoji => widget.message.text?.isOnlyEmoji == true;
 
   bool get hasNonUrlAttachments => widget.message.attachments
-      .where((it) => it.titleLink == null || it.type == 'giphy')
+      .where((it) => it.ogScrapeUrl == null || it.type == 'giphy')
       .isNotEmpty;
 
   bool get hasUrlAttachments => widget.message.attachments
-      .any((it) => it.titleLink != null && it.type != 'giphy');
+      .any((it) => it.ogScrapeUrl != null && it.type != 'giphy');
 
   bool get showBottomRow =>
       showThreadReplyIndicator ||
@@ -1006,9 +1006,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
   Widget _buildUrlAttachment() {
     final urlAttachment = widget.message.attachments
-        .firstWhere((element) => element.titleLink != null);
+        .firstWhere((element) => element.ogScrapeUrl != null);
 
-    final host = Uri.parse(urlAttachment.titleLink!).host;
+    final host = Uri.parse(urlAttachment.ogScrapeUrl!).withScheme.host;
     final splitList = host.split('.');
     final hostName = splitList.length == 3 ? splitList[1] : splitList[0];
     final hostDisplayName = urlAttachment.authorName?.capitalize() ??
@@ -1176,7 +1176,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
     widget.message.attachments
         .where((element) =>
-            (element.titleLink == null && element.type != null) ||
+            (element.ogScrapeUrl == null && element.type != null) ||
             element.type == 'giphy')
         .forEach((e) {
       if (attachmentGroups[e.type] == null) {

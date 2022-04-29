@@ -13,7 +13,6 @@ import 'package:stream_chat_flutter/src/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/multi_overlay.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/user_mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/v4/message_input/simple_safe_area.dart';

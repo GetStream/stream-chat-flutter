@@ -22,6 +22,7 @@ export 'src/info_tile.dart';
 export 'src/localization/stream_chat_localizations.dart';
 export 'src/localization/translations.dart' show DefaultTranslations;
 export 'src/message_action.dart';
+// ignore: deprecated_member_use_from_same_package
 export 'src/message_input.dart' show MessageInput, MessageInputState;
 export 'src/message_list_view.dart';
 export 'src/message_search_item.dart';

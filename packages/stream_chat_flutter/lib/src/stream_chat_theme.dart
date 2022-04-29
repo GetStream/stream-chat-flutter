@@ -414,7 +414,7 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamUserListView] widget.
   final StreamUserListViewThemeData userListViewTheme;
 
-  /// Theme configuration for the [MessageSearchListView] widget.
+  /// Theme configuration for the [StreamMessageSearchListView] widget.
   final StreamMessageSearchListViewThemeData messageSearchListViewTheme;
 
   /// Creates a copy of [StreamChatThemeData] with specified attributes

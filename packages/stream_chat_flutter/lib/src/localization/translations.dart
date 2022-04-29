@@ -1,7 +1,6 @@
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/connection_status_builder.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
-import 'package:stream_chat_flutter/src/message_search_list_view.dart';
 import 'package:stream_chat_flutter/src/v4/message_input/stream_message_input.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart'
     show User;
@@ -320,6 +319,9 @@ abstract class Translations {
 
   /// The label for "Reply to message"
   String get replyToMessageLabel;
+
+  /// The label for "View library"
+  String get viewLibrary;
 
   /// Label for "Attachment limit exceeded:
   /// it's not possible to add more than $limit attachments"
@@ -695,6 +697,9 @@ class DefaultTranslations implements Translations {
 
   @override
   String get slowModeOnLabel => 'Slow mode ON';
+
+  @override
+  String get viewLibrary => 'View library';
 
   @override
   String attachmentLimitExceedError(int limit) => """

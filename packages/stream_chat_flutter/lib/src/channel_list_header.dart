@@ -62,9 +62,11 @@ class StreamChannelListHeader extends StatelessWidget
     this.showConnectionStateTile = false,
     this.preNavigationCallback,
     this.subtitle,
+    this.centerTitle,
     this.leading,
     this.actions,
     this.backgroundColor,
+    this.elevation = 1,
   }) : super(key: key);
 
   /// Pass this if you don't have a [StreamChatClient] in your widget tree.
@@ -89,6 +91,9 @@ class StreamChannelListHeader extends StatelessWidget
   /// Subtitle widget
   final Widget? subtitle;
 
+  /// Whether the title should be centered
+  final bool? centerTitle;
+
   /// Leading widget
   /// By default it shows the logged in user avatar
   final Widget? leading;
@@ -99,6 +104,9 @@ class StreamChannelListHeader extends StatelessWidget
 
   /// The background color for this [StreamChannelListHeader].
   final Color? backgroundColor;
+
+  /// The elevation for this [StreamChannelListHeader].
+  final double elevation;
 
   @override
   Widget build(BuildContext context) {
@@ -135,10 +143,10 @@ class StreamChannelListHeader extends StatelessWidget
             systemOverlayStyle: theme.brightness == Brightness.dark
                 ? SystemUiOverlayStyle.light
                 : SystemUiOverlayStyle.dark,
-            elevation: 1,
+            elevation: elevation,
             backgroundColor:
                 backgroundColor ?? channelListHeaderThemeData.color,
-            centerTitle: true,
+            centerTitle: centerTitle,
             leading: leading ??
                 Center(
                   child: user != null

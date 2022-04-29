@@ -48,10 +48,11 @@ class StreamUserListTile extends StatelessWidget {
   /// A widget to display at the end of tile.
   final Widget? selectedWidget;
 
-  /// If this tile is also [enabled] then icons and text are rendered with the same color.
+  /// If this tile is also [enabled] then icons
+  /// and text are rendered with the same color.
   ///
-  /// By default the selected color is the theme's primary color. The selected color
-  /// can be overridden with a [ListTileTheme].
+  /// By default the selected color is the theme's primary color.
+  /// The selected color can be overridden with a [ListTileTheme].
   ///
   /// {@tool dartpad}
   /// Here is an example of using a [StatefulWidget] to keep track of the

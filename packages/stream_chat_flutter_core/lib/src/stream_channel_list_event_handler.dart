@@ -49,6 +49,7 @@ class StreamChannelListEventHandler {
   /// This event is fired when a channel is updated.
   ///
   /// By default, this updates the channel received in the event.
+  // ignore: no-empty-block
   void onChannelUpdated(Event event, StreamChannelListController controller) {}
 
   /// Function which gets called for the event

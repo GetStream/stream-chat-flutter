@@ -1,3 +1,16 @@
+## Upcoming
+
+✅ Added
+
+- [[#1087]](https://github.com/GetStream/stream-chat-flutter/issues/1087): Handle limited access to camera on iOS.
+- `centerTitle` and `elevation` properties to `ChannelHeader`, `ThreadHeader` and `ChannelListHeader`.
+
+🐞 Fixed
+
+- [[#1067]](https://github.com/GetStream/stream-chat-flutter/issues/1067): Fix name text overflow in reaction card.
+- [[#842]](https://github.com/GetStream/stream-chat-flutter/issues/842): show date divider for first message.
+- Loosen up url check for attachment download.
+- Use `ogScrapeUrl` for LinkAttachments.
 ## 4.0.0-beta.2
 
 ✅ Added

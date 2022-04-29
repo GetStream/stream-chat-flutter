@@ -1,7 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_empty_widget.dart';
 import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_error.dart';
 import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_indicator.dart';
@@ -152,7 +151,8 @@ class StreamUserGridView extends StatelessWidget {
   /// only scroll the view if it has sufficient content. See [physics].
   ///
   /// Also when true, the scroll view is used for default [ScrollAction]s. If a
-  /// ScrollAction is not handled by an otherwise focused part of the application,
+  /// ScrollAction is not handled by
+  /// an otherwise focused part of the application,
   /// the ScrollAction will be evaluated using this scroll view, for example,
   /// when executing [Shortcuts] key events like page up and down.
   ///
@@ -282,7 +282,8 @@ class StreamUserGridView extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
+  ///  * [SemanticsConfiguration.scrollChildCount],
+  /// the corresponding semantics property.
   final int? semanticChildCount;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}

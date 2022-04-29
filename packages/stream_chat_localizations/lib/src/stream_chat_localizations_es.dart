@@ -377,6 +377,9 @@ No es posible añadir más de $limit archivos adjuntos
   ''';
 
   @override
+  String get viewLibrary => 'Ver Librería';
+
+  @override
   String get slowModeOnLabel => 'Modo lento activado';
 
   @override

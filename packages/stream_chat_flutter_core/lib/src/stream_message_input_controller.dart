@@ -274,8 +274,9 @@ class StreamMessageInputController extends ValueNotifier<Message> {
 /// A [RestorableProperty] that knows how to store and restore a
 /// [StreamMessageInputController].
 ///
-/// The [StreamMessageInputController] is accessible via the [value] getter. During
-/// state restoration, the property will restore [StreamMessageInputController.value]
+/// The [StreamMessageInputController] is accessible via the [value] getter.
+/// During state restoration,
+/// the property will restore [StreamMessageInputController.value]
 /// to the value it had when the restoration data it is getting restored from
 /// was collected.
 class StreamRestorableMessageInputController
