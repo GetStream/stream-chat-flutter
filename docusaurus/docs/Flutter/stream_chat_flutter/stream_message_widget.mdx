@@ -1,25 +1,25 @@
 ---
-id: message_widget
+id: stream_message_widget
 sidebar_position: 11
-title: MessageWidget
+title: StreamMessageWidget
 ---
 
 A Widget For Displaying Messages And Attachments
 
-Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/MessageWidget-class.html)
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamMessageWidget-class.html)
 
 ### Background
 
 There are several things that need to be displayed with text in a message in a modern messaging app:
 attachments, highlights if the message is pinned, user avatars of the sender, etc.
 
-To encapsulate all of this functionality into one widget, the Flutter SDK contains a `MessageWidget`
+To encapsulate all of this functionality into one widget, the Flutter SDK contains a `StreamMessageWidget`
 widget which provides these out of the box.
 
-### Basic Example (Modifying `MessageWidget` in `MessageListView`)
+### Basic Example (Modifying `StreamMessageWidget` in `StreamMessageListView`)
 
-Primarily, the `MessageWidget` is used in the `MessageListView`. To customize only a few properties
-of the `MessageWidget` without supplying all other properties, the `messageBuilder` builder supplies
+Primarily, the `StreamMessageWidget` is used in the `StreamMessageListView`. To customize only a few properties
+of the `StreamMessageWidget` without supplying all other properties, the `messageBuilder` builder supplies
 a default implementation of the widget for us to modify.
 
 ```dart
@@ -31,7 +31,7 @@ class ChannelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: MessageListView(
+      body: StreamMessageListView(
         messageBuilder: (context, details, messageList, defaultMessageWidget) {
            return defaultMessageWidget.copyWith(
              showThreadReplyIndicator: false,
@@ -52,7 +52,7 @@ how to build it. For this purpose, we can use the `customAttachmentBuilders` par
 As an example, if a message has a attachment type 'location', we do:
 
 ```dart
-MessageWidget(
+StreamMessageWidget(
     //...
     customAttachmentBuilders: {
         'location': (context, message, attachments) {
@@ -77,7 +77,7 @@ You can decide to show, hide, or remove user avatars of the sender of the messag
 the `showUserAvatar` property like this:
 
 ```dart
-MessageWidget(
+StreamMessageWidget(
     //...
     showUserAvatar = DisplayWidget.show,
 )
@@ -85,13 +85,13 @@ MessageWidget(
 
 ### Reverse the message
 
-In most cases, `MessageWidget` needs to be a different orientation depending upon if the sender is the
+In most cases, `StreamMessageWidget` needs to be a different orientation depending upon if the sender is the
 user or someone else.
 
 For this, we use the `reverse` parameter to change the orientation of the message:
 
 ```dart
-MessageWidget(
+StreamMessageWidget(
     //...
     reverse = true,
 )
