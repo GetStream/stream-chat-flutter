@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list_loading_tile.dart';
-import 'package:stream_chat_flutter/src/v4/channel_list_view/stream_channel_list_tile.dart';
-import 'package:stream_chat_flutter/src/v4/stream_list_view_indexed_widget_builder.dart';
+import 'package:stream_chat_flutter/src/v4/scroll_view/channel_scroll_view/stream_channel_list_tile.dart';
+import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_empty_widget.dart';
+
+import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_error_widget.dart';
+import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
+import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_error.dart';
+import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_indicator.dart';
+import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Default separator builder for [StreamChannelListView].
@@ -19,7 +24,7 @@ Widget defaultChannelListViewSeparatorBuilder(
 /// Signature for the item builder that creates the children of the
 /// [StreamChannelListView].
 typedef StreamChannelListViewIndexedWidgetBuilder
-    = StreamListViewIndexedWidgetBuilder<Channel, StreamChannelListTile>;
+    = StreamScrollViewIndexedWidgetBuilder<Channel, StreamChannelListTile>;
 
 /// A [ListView] that shows a list of [Channel]s,
 /// it uses [StreamChannelListTile] as a default item.
@@ -328,94 +333,50 @@ class StreamChannelListView extends StatelessWidget {
               ) ??
               streamChannelListTile;
         },
-        emptyBuilder: (context) =>
-            emptyBuilder?.call(context) ??
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(8),
-                child: StreamChannelListEmptyWidget(),
-              ),
-            ),
+        emptyBuilder: (context) {
+          final chatThemeData = StreamChatTheme.of(context);
+          return emptyBuilder?.call(context) ??
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: StreamScrollViewEmptyWidget(
+                    emptyIcon: StreamSvgIcon.message(
+                      size: 148,
+                      color: chatThemeData.colorTheme.disabled,
+                    ),
+                    emptyTitle: Text(
+                      context.translations.letsStartChattingLabel,
+                      style: chatThemeData.textTheme.headline,
+                    ),
+                  ),
+                ),
+              );
+        },
         loadMoreErrorBuilder: (context, error) =>
-            StreamChannelListLoadMoreError(onTap: controller.retry),
+            StreamScrollViewLoadMoreError.list(
+          onTap: controller.retry,
+          error: Text(context.translations.loadingChannelsError),
+        ),
         loadMoreIndicatorBuilder: (context) => const Center(
           child: Padding(
             padding: EdgeInsets.all(16),
-            child: StreamChannelListLoadMoreIndicator(),
+            child: StreamScrollViewLoadMoreIndicator(),
           ),
         ),
         loadingBuilder: (context) =>
             loadingBuilder?.call(context) ??
-            ListView.separated(
-              padding: padding,
-              physics: physics,
-              reverse: reverse,
-              itemCount: 25,
-              separatorBuilder: (_, __) => const StreamChannelListSeparator(),
-              itemBuilder: (_, __) => const StreamChannelListLoadingTile(),
+            const Center(
+              child: StreamScrollViewLoadingWidget(),
             ),
         errorBuilder: (context, error) =>
             errorBuilder?.call(context, error) ??
             Center(
-              child: StreamChannelListErrorWidget(
-                onPressed: controller.refresh,
+              child: StreamScrollViewErrorWidget(
+                errorTitle: Text(context.translations.loadingChannelsError),
+                onRetryPressed: controller.refresh,
               ),
             ),
       );
-}
-
-/// A [StreamChannelListTile] that can be used in a [ListView] to show a
-/// loading tile while waiting for the [StreamChannelListController] to load
-/// more channels.
-class StreamChannelListLoadMoreIndicator extends StatelessWidget {
-  /// Creates a new instance of [StreamChannelListLoadMoreIndicator].
-  const StreamChannelListLoadMoreIndicator({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => const SizedBox(
-        height: 16,
-        width: 16,
-        child: CircularProgressIndicator.adaptive(),
-      );
-}
-
-/// A [StreamChannelListTile] that is used to display the error indicator when
-/// loading more channels fails.
-class StreamChannelListLoadMoreError extends StatelessWidget {
-  /// Creates a new instance of [StreamChannelListLoadMoreError].
-  const StreamChannelListLoadMoreError({
-    Key? key,
-    this.onTap,
-  }) : super(key: key);
-
-  /// The callback to invoke when the user taps on the error indicator.
-  final GestureTapCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        color: theme.colorTheme.textLowEmphasis.withOpacity(0.9),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                context.translations.loadingChannelsError,
-                style: theme.textTheme.body.copyWith(
-                  color: Colors.white,
-                ),
-              ),
-              StreamSvgIcon.retry(color: Colors.white),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// A widget that is used to display a separator between
@@ -470,30 +431,4 @@ class StreamChannelListErrorWidget extends StatelessWidget {
           ),
         ],
       );
-}
-
-/// A widget that is used to display an empty state when
-/// [StreamChannelListController] loads zero channels.
-class StreamChannelListEmptyWidget extends StatelessWidget {
-  /// Creates a new instance of [StreamChannelListEmptyWidget] widget.
-  const StreamChannelListEmptyWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        StreamSvgIcon.message(
-          size: 148,
-          color: chatThemeData.colorTheme.disabled,
-        ),
-        const SizedBox(height: 28),
-        Text(
-          context.translations.letsStartChattingLabel,
-          style: chatThemeData.textTheme.headline,
-        ),
-      ],
-    );
-  }
 }

@@ -47,8 +47,8 @@ class StreamAttachmentPicker extends StatefulWidget {
   /// The picker size in height.
   final double pickerSize;
 
-  /// The [MessageInputController] linked to this picker.
-  final MessageInputController messageInputController;
+  /// The [StreamMessageInputController] linked to this picker.
+  final StreamMessageInputController messageInputController;
 
   /// The limit of attachments that can be picked.
   final int attachmentLimit;
@@ -77,7 +77,7 @@ class StreamAttachmentPicker extends StatefulWidget {
   /// properties.
   StreamAttachmentPicker copyWith({
     Key? key,
-    MessageInputController? messageInputController,
+    StreamMessageInputController? messageInputController,
     FilePickerCallback? onFilePicked,
     bool? isOpen,
     double? pickerSize,

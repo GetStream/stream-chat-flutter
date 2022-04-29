@@ -76,16 +76,16 @@ typedef ActionButtonBuilder = Widget Function(
 );
 
 /// Widget builder for widgets that may require data from the
-/// [MessageInputController].
+/// [StreamMessageInputController].
 typedef MessageRelatedBuilder = Widget Function(
   BuildContext context,
-  MessageInputController messageInputController,
+  StreamMessageInputController messageInputController,
 );
 
 /// Widget builder for a custom attachment picker.
 typedef AttachmentsPickerBuilder = Widget Function(
   BuildContext context,
-  MessageInputController messageInputController,
+  StreamMessageInputController messageInputController,
   StreamAttachmentPicker defaultPicker,
 );
 
@@ -246,7 +246,7 @@ class StreamMessageInput extends StatefulWidget {
   final bool hideSendAsDm;
 
   /// The text controller of the TextField.
-  final MessageInputController? messageInputController;
+  final StreamMessageInputController? messageInputController;
 
   /// List of action widgets.
   final List<Widget> actions;
@@ -375,14 +375,14 @@ class StreamMessageInputState extends State<StreamMessageInput>
   bool get _disableEmojiSuggestionsOverlay =>
       widget.disableEmojiSuggestionsOverlay ?? false;
 
-  RestorableMessageInputController? _controller;
+  StreamRestorableMessageInputController? _controller;
 
-  MessageInputController get _effectiveController =>
+  StreamMessageInputController get _effectiveController =>
       widget.messageInputController ?? _controller!.value;
 
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
-    _controller = RestorableMessageInputController(message: message);
+    _controller = StreamRestorableMessageInputController(message: message);
   }
 
   void _registerController() {
@@ -502,7 +502,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         ),
       );
     }
-    return MessageValueListenableBuilder(
+    return StreamMessageValueListenableBuilder(
       valueListenable: _effectiveController,
       builder: (context, value, _) {
         Widget child = DecoratedBox(

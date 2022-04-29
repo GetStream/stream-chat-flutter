@@ -639,7 +639,7 @@ class _StreamMessageActionsModalState extends State<StreamMessageActionsModal> {
                 widget.editMessageInputBuilder!(context, widget.message)
               else
                 StreamMessageInput(
-                  messageInputController: MessageInputController(
+                  messageInputController: StreamMessageInputController(
                     message: widget.message,
                   ),
                   preMessageSending: (m) {

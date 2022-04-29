@@ -181,8 +181,8 @@ class StreamMessageTextField extends StatefulWidget {
 
   /// Controls the message being edited.
   ///
-  /// If null, this widget will create its own [MessageInputController].
-  final MessageInputController? controller;
+  /// If null, this widget will create its own [StreamMessageInputController].
+  final StreamMessageInputController? controller;
 
   /// Defines the keyboard focus for this widget.
   ///
@@ -656,9 +656,9 @@ class StreamMessageTextField extends StatefulWidget {
 
 class _StreamMessageTextFieldState extends State<StreamMessageTextField>
     with RestorationMixin<StreamMessageTextField> {
-  RestorableMessageInputController? _controller;
+  StreamRestorableMessageInputController? _controller;
 
-  MessageInputController get _effectiveController =>
+  StreamMessageInputController get _effectiveController =>
       widget.controller ?? _controller!.value;
 
   @override
@@ -671,7 +671,7 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
 
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
-    _controller = RestorableMessageInputController(message: message);
+    _controller = StreamRestorableMessageInputController(message: message);
   }
 
   @override

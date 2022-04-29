@@ -48,23 +48,30 @@ export 'src/user_item.dart';
 export 'src/user_list_view.dart';
 export 'src/user_mention_tile.dart';
 export 'src/utils.dart';
-
-// v4
-export 'src/v4/channel_list_view/stream_channel_list_loading_tile.dart';
-export 'src/v4/channel_list_view/stream_channel_list_tile.dart';
-export 'src/v4/channel_list_view/stream_channel_list_view.dart';
 export 'src/v4/message_input/countdown_button.dart';
 export 'src/v4/message_input/stream_attachment_picker.dart';
 export 'src/v4/message_input/stream_message_input.dart';
 export 'src/v4/message_input/stream_message_send_button.dart';
 export 'src/v4/message_input/stream_message_text_field.dart';
-export 'src/v4/message_search_list_view/stream_message_search_list_tile.dart';
-export 'src/v4/message_search_list_view/stream_message_search_list_view.dart';
+export 'src/v4/scroll_view/channel_scroll_view/stream_channel_grid_tile.dart';
+export 'src/v4/scroll_view/channel_scroll_view/stream_channel_grid_view.dart';
+
+// v4
+export 'src/v4/scroll_view/channel_scroll_view/stream_channel_list_loading_tile.dart';
+export 'src/v4/scroll_view/channel_scroll_view/stream_channel_list_tile.dart';
+export 'src/v4/scroll_view/channel_scroll_view/stream_channel_list_view.dart';
+
+export 'src/v4/scroll_view/message_search_scroll_view/stream_message_search_list_tile.dart';
+export 'src/v4/scroll_view/message_search_scroll_view/stream_message_search_list_view.dart';
+export 'src/v4/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
+export 'src/v4/scroll_view/user_scroll_view/stream_user_grid_tile.dart';
+export 'src/v4/scroll_view/user_scroll_view/stream_user_grid_tile.dart';
+export 'src/v4/scroll_view/user_scroll_view/stream_user_grid_view.dart';
+export 'src/v4/scroll_view/user_scroll_view/stream_user_grid_view.dart';
+export 'src/v4/scroll_view/user_scroll_view/stream_user_list_tile.dart';
+export 'src/v4/scroll_view/user_scroll_view/stream_user_list_view.dart';
 export 'src/v4/stream_channel_avatar.dart';
 export 'src/v4/stream_channel_info_bottom_sheet.dart';
 export 'src/v4/stream_channel_name.dart';
-export 'src/v4/stream_list_view_indexed_widget_builder.dart';
 export 'src/v4/stream_message_preview_text.dart';
-export 'src/v4/user_list_view/stream_user_list_tile.dart';
-export 'src/v4/user_list_view/stream_user_list_view.dart';
 export 'src/visible_footnote.dart';
