@@ -1344,14 +1344,6 @@ class Channel {
     return _client.unmuteChannel(cid!);
   }
 
-  /// Bans the user with given [userID] from the channel.
-  @Deprecated("Use 'banMember' instead. This method will be removed in v4.0.0")
-  Future<EmptyResponse> banUser(
-    String userID,
-    Map<String, dynamic> options,
-  ) =>
-      banMember(userID, options);
-
   /// Bans the member with given [userID] from the channel.
   Future<EmptyResponse> banMember(
     String userID,
@@ -1365,12 +1357,6 @@ class Channel {
       });
     return _client.banUser(userID, opts);
   }
-
-  /// Remove the ban for the user with given [userID] in the channel.
-  @Deprecated(
-    "Use 'unbanMember' instead. This method will be removed in v4.0.0",
-  )
-  Future<EmptyResponse> unbanUser(String userID) => unbanMember(userID);
 
   /// Remove the ban for the member with given [userID] in the channel.
   Future<EmptyResponse> unbanMember(String userID) async {
@@ -1839,10 +1825,6 @@ class ChannelClientState {
       }
     }));
   }
-
-  /// Add a [message] to this [channelState].
-  @Deprecated('Use updateMessage instead')
-  void addMessage(Message message) => updateMessage(message);
 
   /// Updates the [message] in the state if it exists. Adds it otherwise.
   void updateMessage(Message message) {

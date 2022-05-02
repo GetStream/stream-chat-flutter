@@ -190,8 +190,6 @@ class StreamMessageInput extends StatefulWidget {
     this.idleSendButton,
     this.activeSendButton,
     this.showCommandsButton = true,
-    @Deprecated('''Use `userMentionsTileBuilder` instead. Will be removed in future release''')
-        this.mentionsTileBuilder,
     this.userMentionsTileBuilder,
     this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
     this.onError,
@@ -270,9 +268,6 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Send button widget in an active state
   final Widget? activeSendButton;
-
-  /// Customize the tile for the mentions overlay.
-  final MentionTileBuilder? mentionsTileBuilder;
 
   /// Customize the tile for the mentions overlay.
   final UserMentionTileBuilder? userMentionsTileBuilder;
@@ -1154,19 +1149,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     // ignore: cast_nullable_to_non_nullable
     final renderObject = context.findRenderObject() as RenderBox;
 
-    var tileBuilder = widget.userMentionsTileBuilder;
-    if (tileBuilder == null && widget.mentionsTileBuilder != null) {
-      tileBuilder = (context, user) {
-        final member = Member(
-          user: user,
-          userId: user.id,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-        );
-        return widget.mentionsTileBuilder!(context, member);
-      };
-    }
-
     return LayoutBuilder(
       builder: (context, snapshot) => StreamUserMentionsOverlay(
         query: query,
@@ -1177,7 +1159,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
           renderObject.size.width - 16,
           min(400, (snapshot.maxHeight - renderObject.size.height - 16).abs()),
         ),
-        mentionsTileBuilder: tileBuilder,
+        mentionsTileBuilder: widget.userMentionsTileBuilder,
         onMentionUserTap: (user) {
           _effectiveController.addMentionedUser(user);
           splits[splits.length - 1] = user.name;

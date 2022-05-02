@@ -101,14 +101,6 @@ class StreamMessageWidget extends StatefulWidget {
       vertical: 8,
     ),
     this.attachmentPadding = EdgeInsets.zero,
-    @Deprecated('''
-    allRead is now deprecated and it will be removed in future releases. 
-    The MessageWidget now listens for read events on its own.
-    ''') this.allRead = false,
-    @Deprecated('''
-    readList is now deprecated and it will be removed in future releases. 
-    The MessageWidget now listens for read events on its own.
-    ''') this.readList,
     this.onQuotedMessageTap,
     this.customActions = const [],
     this.onAttachmentTap,
@@ -347,9 +339,6 @@ class StreamMessageWidget extends StatefulWidget {
   /// If true the widget will show the reactions
   final bool showReactions;
 
-  ///
-  final bool allRead;
-
   /// If true the widget will show the thread reply indicator
   final bool showThreadReplyIndicator;
 
@@ -364,9 +353,6 @@ class StreamMessageWidget extends StatefulWidget {
 
   /// Used in [StreamMessageReactionsModal] and [StreamMessageActionsModal]
   final bool showReactionPickerIndicator;
-
-  /// List of users who read
-  final List<Read>? readList;
 
   /// Callback when show message is tapped
   final ShowMessageCallback? onShowMessage;

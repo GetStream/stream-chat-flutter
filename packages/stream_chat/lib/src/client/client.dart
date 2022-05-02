@@ -29,7 +29,6 @@ import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/location.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/version.dart';
@@ -66,10 +65,6 @@ class StreamChatClient {
     this.logLevel = Level.WARNING,
     this.logHandlerFunction = StreamChatClient.defaultLogHandler,
     RetryPolicy? retryPolicy,
-    @Deprecated('''
-    Location is now deprecated in favor of the new edge server. Will be removed in v4.0.0.
-    Read more here: https://getstream.io/blog/chat-edge-infrastructure
-    ''') Location? location,
     String? baseURL,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
@@ -1558,18 +1553,6 @@ class ClientState {
 
   /// The current user as a stream
   Stream<OwnUser?> get currentUserStream => _currentUserController.stream;
-
-  // coverage:ignore-start
-
-  /// The current user
-  @Deprecated('Use `.currentUser` instead, Will be removed in future releases')
-  OwnUser? get user => _currentUserController.valueOrNull;
-
-  /// The current user as a stream
-  @Deprecated(
-    'Use `.currentUserStream` instead, Will be removed in future releases',
-  )
-  Stream<OwnUser?> get userStream => _currentUserController.stream;
 
   // coverage:ignore-end
 
