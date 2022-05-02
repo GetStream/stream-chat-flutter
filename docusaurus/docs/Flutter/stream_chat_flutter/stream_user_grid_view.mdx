@@ -1,0 +1,74 @@
+---
+id: stream_user_grid_view
+sidebar_position: 7
+title: StreamUserGridView
+---
+
+A Widget For Displaying And Selecting Users
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamUserGridView-class.html)
+
+### Background
+
+The `StreamUserGridView` widget allows displaying a list of users in a `GridView`.
+
+:::note
+Make sure to check the [StreamUserListView](./stream_user_list_view.mdx) documentation to know how to show results in a `ListView`.
+:::
+
+### Basic Example
+
+```dart
+class UserGridPage extends StatefulWidget {
+  const UserGridPage({
+    Key? key,
+    required this.client,
+  }) : super(key: key);
+
+  final StreamChatClient client;
+
+  @override
+  State<UserGridPage> createState() => _UserGridPageState();
+}
+
+class _UserGridPageState extends State<UserGridPage> {
+  late final _controller = StreamUserListController(
+    client: widget.client,
+    limit: 25,
+    filter: Filter.and([
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+    ]),
+    sort: [
+      SortOption(
+        'name',
+        direction: 1,
+      ),
+    ],
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: RefreshIndicator(
+          onRefresh: _controller.refresh,
+          child: StreamUserGridView(
+            controller: _controller,
+            onChannelTap: (channel) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StreamChannel(
+                  channel: channel,
+                  child: const ChannelPage(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+```
