@@ -1,30 +1,26 @@
 ---
-id: stream_user_list_view
+id: stream_user_grid_view
 sidebar_position: 7
-title: StreamUserListView
+title: StreamUserGridView
 ---
 
 A Widget For Displaying And Selecting Users
 
-Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamUserListView-class.html)
-
-![](../assets/user_list_view.png)
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamUserGridView-class.html)
 
 ### Background
 
-A list of users is required for many different purposes: showing a list of users in a Channel,
-selecting users to add in a channel, etc. The `StreamUserListView` displays a list
-of users.
+The `StreamUserGridView` widget allows displaying a list of users in a `GridView`.
 
 :::note
-Make sure to check the [StreamUserListController](./stream_user_list_controller.mdx) documentation for more information on how to use the controller to manipulate the `StreamUserListView`.
+Make sure to check the [StreamUserListView](./stream_user_list_view.mdx) documentation to know how to show results in a `ListView`.
 :::
 
 ### Basic Example
 
 ```dart
-class UserListPage extends StatefulWidget {
-  const UserListPage({
+class UserGridPage extends StatefulWidget {
+  const UserGridPage({
     Key? key,
     required this.client,
   }) : super(key: key);
@@ -32,10 +28,10 @@ class UserListPage extends StatefulWidget {
   final StreamChatClient client;
 
   @override
-  State<UserListPage> createState() => _UserListPageState();
+  State<UserGridPage> createState() => _UserGridPageState();
 }
 
-class _UserListPageState extends State<UserListPage> {
+class _UserGridPageState extends State<UserGridPage> {
   late final _controller = StreamUserListController(
     client: widget.client,
     limit: 25,
@@ -60,7 +56,7 @@ class _UserListPageState extends State<UserListPage> {
   Widget build(BuildContext context) => Scaffold(
         body: RefreshIndicator(
           onRefresh: _controller.refresh,
-          child: StreamChannelListView(
+          child: StreamUserGridView(
             controller: _controller,
             onChannelTap: (channel) => Navigator.push(
               context,
@@ -75,17 +71,4 @@ class _UserListPageState extends State<UserListPage> {
         ),
       );
 }
-```
-
-### Customize The User Items
-
-You can use your own widget for the user items using the `itemBuilder` parameter.
-
-```dart
-StreamUsersListView(
-  // ...
-  itemBuilder: (context, users, index, defaultWidget) {
-    return Text(user[index].name);
-  },
-),
 ```
