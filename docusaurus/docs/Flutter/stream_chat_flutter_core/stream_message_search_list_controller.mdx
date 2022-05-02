@@ -1,6 +1,6 @@
 ---
 id: stream_message_search_list_controller
-sidebar_position: 5
+sidebar_position: 6
 title: StreamMessageSearchListController
 ---
 
@@ -20,7 +20,7 @@ First of all we should create an instance of the `StreamMessageSearchListControl
 You can also add a `Filter`, a list of `SortOption`s and other pagination-related parameters.
 
 ```dart
-class SearchListPage extends State<HomeScreen> {
+class SearchListPageState extends State<SearchListPage> {
   /// Controller used for loading more data and controlling pagination in
   /// [StreamMessageSearchListController].
   late final messageSearchListController = StreamMessageSearchListController(

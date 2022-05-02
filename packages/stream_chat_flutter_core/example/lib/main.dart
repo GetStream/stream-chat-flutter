@@ -205,20 +205,20 @@ class MessageScreen extends StatefulWidget {
 }
 
 class _MessageScreenState extends State<MessageScreen> {
-  late final TextEditingController _controller;
+  final StreamMessageInputController messageInputController =
+      StreamMessageInputController();
   late final ScrollController _scrollController;
   final messageListController = MessageListController();
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
     _scrollController = ScrollController();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    messageInputController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -319,7 +319,8 @@ class _MessageScreenState extends State<MessageScreen> {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: _controller,
+                      controller: messageInputController.textEditingController,
+                      onChanged: (s) => messageInputController.text = s,
                       decoration: const InputDecoration(
                         hintText: 'Enter your message',
                       ),
@@ -331,12 +332,13 @@ class _MessageScreenState extends State<MessageScreen> {
                     clipBehavior: Clip.hardEdge,
                     child: InkWell(
                       onTap: () async {
-                        if (_controller.value.text.isNotEmpty) {
+                        if (messageInputController.message.text?.isNotEmpty ==
+                            true) {
                           await channel.sendMessage(
-                            Message(text: _controller.value.text),
+                            messageInputController.message,
                           );
+                          messageInputController.clear();
                           if (mounted) {
-                            _controller.clear();
                             _updateList();
                           }
                         }
