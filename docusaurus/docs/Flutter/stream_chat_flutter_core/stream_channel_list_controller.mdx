@@ -14,6 +14,9 @@ The `StreamChannelListController` is a controller class that allows you to contr
 `StreamChannelListController` is a required parameter of the `StreamChannelListView` widget.
 Check the [`StreamChannelListView` documentation](../stream_chat_flutter/stream_channel_list_view.mdx) to read more about that.
 
+The `StreamChannelListController` also listens for various events and manipulates the current list of channels accordingly.
+Passing a `StreamChannelListEventHandler` to the `StreamChannelListController` will allow you to customize this behaviour.
+
 ### Basic Example
 
 Building a custom channel list is a very common task. Here is an example of how to use the `StreamChannelListController` to build a simple list with pagination.
