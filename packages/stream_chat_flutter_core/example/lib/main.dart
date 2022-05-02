@@ -127,7 +127,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (BuildContext context, int index) {
                     if (index == channels.length) {
                       if (error != null) {
-                        return Text(error.message);
+                        return TextButton(
+                          onPressed: () {
+                            channelListController.retry();
+                          },
+                          child: Text(error.message),
+                        );
                       }
                       return CircularProgressIndicator();
                     }
