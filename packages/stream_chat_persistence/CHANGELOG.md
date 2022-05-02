@@ -1,3 +1,7 @@
+## 4.0.0
+
+- Updated `stream_chat` dependency to [`4.0.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 4.0.0-beta.0
 
 - Updated `stream_chat` dependency to [`4.0.0-beta.0`](https://pub.dev/packages/stream_chat/changelog).

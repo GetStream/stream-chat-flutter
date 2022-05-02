@@ -1,4 +1,4 @@
-## Upcoming
+## 4.0.0
 
 - Deprecated `UsersBloc` in favor of `StreamUserListController` to control the user list.
 - Deprecated `MessageSearchBloc` in favor of `StreamMessageSearchListController` to control the user list.
