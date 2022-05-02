@@ -1,0 +1,141 @@
+---
+id: stream_channel_list_controller
+sidebar_position: 4
+title: StreamChannelListController
+---
+
+A Widget For Controlling A List Of Channels
+
+### Background
+
+The `StreamChannelListController` is a controller class that allows you to control a list of channels.
+`StreamChannelListController` is a required parameter of the `StreamChannelListView` widget.
+Check the [`StreamChannelListView` documentation](../stream_chat_flutter/stream_channel_list_view.mdx) to read more about that.
+
+### Basic Example
+
+Building a custom channel list is a very common task. Here is an example of how to use the `StreamChannelListController` to build a simple list with pagination.
+
+First of all we should create an instance of the `StreamChannelListController` and provide it with the `StreamChatClient` instance.
+You can also add a `Filter`, a list of `SortOption`s and other pagination-related parameters.
+
+```dart
+class ChannelListPageState extends State<HomeScreen> {
+  /// Controller used for loading more data and controlling pagination in
+  /// [StreamChannelListController].
+  late final channelListController = StreamChannelListController(
+    client: StreamChatCore.of(context).client,
+    filter: Filter.and([
+      Filter.equal('type', 'messaging'),
+      Filter.in_(
+        'members',
+        [
+          StreamChatCore.of(context).currentUser!.id,
+        ],
+      ),
+    ]),
+  );
+```
+
+Make sure you call `channelListController.doInitialLoad()` to load the initial data and `channelListController.dispose()` when the controller is no longer required.
+
+```dart
+@override
+void initState() {
+  channelListController.doInitialLoad();
+  super.initState();
+}
+
+@override
+void dispose() {
+  channelListController.dispose();
+  super.dispose();
+}
+```
+
+The `StreamChannelListController` is basically a [`PagedValueNotifier`](./paged_value_notifier.mdx) that notifies you when the list of channels has changed.
+You can use a [`PagedValueListenableBuilder`](./paged_value_listenable_builder.mdx) to build your UI depending on the latest channels.
+
+```dart
+@override
+Widget build(BuildContext context) => Scaffold(
+      body: PagedValueListenableBuilder<int, Channel>(
+        valueListenable: channelListController,
+        builder: (context, value, child) {
+          return value.when(
+            (channels, nextPageKey, error) => LazyLoadScrollView(
+              onEndOfPage: () async {
+                if (nextPageKey != null) {
+                  channelListController.loadMore(nextPageKey);
+                }
+              },
+              child: ListView.builder(
+                /// We're using the channels length when there are no more
+                /// pages to load and there are no errors with pagination.
+                /// In case we need to show a loading indicator or and error
+                /// tile we're increasing the count by 1.
+                itemCount: (nextPageKey != null || error != null)
+                    ? channels.length + 1
+                    : channels.length,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == channels.length) {
+                    if (error != null) {
+                      return Text(error.message);
+                    }
+                    return CircularProgressIndicator();
+                  }
+
+                  final _item = channels[index];
+                  return ListTile(
+                    title: Text(_item.name ?? ''),
+                    subtitle: StreamBuilder<Message?>(
+                      stream: _item.state!.lastMessageStream,
+                      initialData: _item.state!.lastMessage,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return Text(snapshot.data!.text!);
+                        }
+
+                        return const SizedBox();
+                      },
+                    ),
+                    onTap: () {
+                      /// Display a list of messages when the user taps on
+                      /// an item. We can use [StreamChannel] to wrap our
+                      /// [MessageScreen] screen with the selected channel.
+                      ///
+                      /// This allows us to use a built-in inherited widget
+                      /// for accessing our `channel` later on.
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => StreamChannel(
+                            channel: _item,
+                            child: const MessageScreen(),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+            loading: () => const Center(
+              child: SizedBox(
+                height: 100,
+                width: 100,
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (e) => Center(
+              child: Text(
+                'Oh no, something went wrong. '
+                'Please check your config. $e',
+              ),
+            ),
+          );
+        },
+      ),
+    );
+```
+
+In this case we're using the [`LazyLoadScrollView`](./lazy_load_scroll_view.mdx) widget to load more data when the user scrolls to the bottom of the list.

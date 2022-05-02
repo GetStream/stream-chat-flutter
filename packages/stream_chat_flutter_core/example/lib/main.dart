@@ -117,8 +117,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                 },
                 child: ListView.builder(
-                  itemCount: channels.length,
+                  /// We're using the channels length when there are no more
+                  /// pages to load and there are no errors with pagination.
+                  /// In case we need to show a loading indicator or and error
+                  /// tile we're increasing the count by 1.
+                  itemCount: (nextPageKey != null || error != null)
+                      ? channels.length + 1
+                      : channels.length,
                   itemBuilder: (BuildContext context, int index) {
+                    if (index == channels.length) {
+                      if (error != null) {
+                        return Text(error.message);
+                      }
+                      return CircularProgressIndicator();
+                    }
+
                     final _item = channels[index];
                     return ListTile(
                       title: Text(_item.name ?? ''),
