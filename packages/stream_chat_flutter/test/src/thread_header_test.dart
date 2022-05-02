@@ -63,7 +63,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('with '), findsOneWidget);
-      expect(find.byType(ChannelName), findsOneWidget);
+      expect(find.byType(StreamChannelName), findsOneWidget);
       expect(find.byType(StreamBackButton), findsOneWidget);
       expect(find.text('Thread Reply'), findsOneWidget);
     },
