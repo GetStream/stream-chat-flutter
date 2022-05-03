@@ -13,6 +13,10 @@
 - [Chat UI Kit](https://getstream.io/chat/ui-kit/)
 - [Chat Client Docs](https://getstream.io/chat/docs/flutter-dart/?language=dart)
 
+**V4 Migration Guide**
+
+For upgrading from V3 to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
+
 ### Changelog
 
 Check out the [changelog on pub.dev](https://pub.dev/packages/stream_chat/changelog) to see the latest changes in the package.

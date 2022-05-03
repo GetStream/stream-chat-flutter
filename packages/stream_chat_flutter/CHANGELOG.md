@@ -1,5 +1,7 @@
 ## 4.0.0
 
+For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
+
 ✅ Added
 
 - [[#1087]](https://github.com/GetStream/stream-chat-flutter/issues/1087): Handle limited access to camera on iOS.
@@ -11,6 +13,7 @@
 - [[#842]](https://github.com/GetStream/stream-chat-flutter/issues/842): show date divider for first message.
 - Loosen up url check for attachment download.
 - Use `ogScrapeUrl` for LinkAttachments.
+
 ## 4.0.0-beta.2
 
 ✅ Added

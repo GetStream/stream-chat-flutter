@@ -1,5 +1,7 @@
 ## 4.0.0
 
+For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
+
 - Deprecated `UsersBloc` in favor of `StreamUserListController` to control the user list.
 - Deprecated `MessageSearchBloc` in favor of `StreamMessageSearchListController` to control the user list.
 
