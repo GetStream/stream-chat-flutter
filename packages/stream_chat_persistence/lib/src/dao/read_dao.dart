@@ -33,11 +33,13 @@ class ReadDao extends DatabaseAccessor<DriftChatDatabase> with _$ReadDaoMixin {
       bulkUpdateReads({cid: readList});
 
   /// Bulk updates the reads data of multiple channels
-  Future<void> bulkUpdateReads(Map<String, List<Read>> channelWithReads) {
+  Future<void> bulkUpdateReads(Map<String, List<Read>?> channelWithReads) {
     final entities = channelWithReads.entries
-        .map((entry) => entry.value.map(
+        .map((entry) =>
+            entry.value?.map(
               (read) => read.toEntity(cid: entry.key),
-            ))
+            ) ??
+            [])
         .expand((it) => it)
         .toList(growable: false);
     return batch((batch) => batch.insertAllOnConflictUpdate(reads, entities));

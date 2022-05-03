@@ -61,10 +61,10 @@ void main() {
       );
 
       expect(channelState, isA<ChannelState>());
-      expect(channelState.members.length, members.length);
-      expect(channelState.read.length, reads.length);
-      expect(channelState.messages.length, messages.length);
-      expect(channelState.pinnedMessages.length, messages.length);
+      expect(channelState.members?.length, members.length);
+      expect(channelState.read?.length, reads.length);
+      expect(channelState.messages?.length, messages.length);
+      expect(channelState.pinnedMessages?.length, messages.length);
 
       final channelModel = channelState.channel!;
       expect(channelModel.id, entity.id);

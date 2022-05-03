@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs
+// ignore_for_file: prefer_expression_function_bodies
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -15,9 +16,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// We start by changing how channel previews are shown in the channel list
 /// and include the number of unread messages for each.
 ///
-/// We're passing a custom widget to [ChannelListView.channelPreviewBuilder];
-/// this will override the default [ChannelPreview] and allows you to create
-/// one yourself.
+/// We're passing a custom widget
+/// to [StreamChannelListView.itemBuilder];
+/// this will override the default [StreamChannelListTile] and allows you
+/// to create one yourself.
 ///
 /// There are a couple interesting things we do in this widget:
 ///
@@ -56,7 +58,6 @@ class MyApp extends StatelessWidget {
   final StreamChatClient client;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, child) => StreamChat(
@@ -68,31 +69,57 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class ChannelListPage extends StatelessWidget {
+class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
     Key? key,
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ChannelsBloc(
-        child: ChannelListView(
-          filter: Filter.in_(
-            'members',
-            [StreamChat.of(context).currentUser!.id],
-          ),
-          channelPreviewBuilder: _channelPreviewBuilder,
-          // sort: [SortOption('last_message_at')],
-          limit: 20,
-          channelWidget: const ChannelPage(),
-        ),
-      ),
-    );
+  State<ChannelListPage> createState() => _ChannelListPageState();
+}
+
+class _ChannelListPageState extends State<ChannelListPage> {
+  late final _listController = StreamChannelListController(
+    client: StreamChat.of(context).client,
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).currentUser!.id],
+    ),
+    sort: const [SortOption('last_message_at')],
+    limit: 20,
+  );
+
+  @override
+  void dispose() {
+    _listController.dispose();
+    super.dispose();
   }
 
-  Widget _channelPreviewBuilder(BuildContext context, Channel channel) {
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: StreamChannelListView(
+          controller: _listController,
+          itemBuilder: _channelPreviewBuilder,
+          onChannelTap: (channel) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => StreamChannel(
+                  channel: channel,
+                  child: const ChannelPage(),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+  Widget _channelPreviewBuilder(
+    BuildContext context,
+    List<Channel> channels,
+    int index,
+    StreamChannelListTile defaultTile,
+  ) {
+    final channel = channels[index];
     final lastMessage = channel.state?.messages.reversed.firstWhereOrNull(
       (message) => !message.isDeleted,
     );
@@ -112,16 +139,17 @@ class ChannelListPage extends StatelessWidget {
           ),
         );
       },
-      leading: ChannelAvatar(
+      leading: StreamChannelAvatar(
         channel: channel,
       ),
-      title: ChannelName(
-        textStyle: ChannelPreviewTheme.of(context).titleStyle!.copyWith(
+      title: StreamChannelName(
+        textStyle: StreamChannelPreviewTheme.of(context).titleStyle!.copyWith(
               color: StreamChatTheme.of(context)
                   .colorTheme
                   .textHighEmphasis
                   .withOpacity(opacity),
             ),
+        channel: channel,
       ),
       subtitle: Text(subtitle),
       trailing: channel.state!.unreadCount > 0
@@ -140,16 +168,15 @@ class ChannelPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const ChannelHeader(),
+      appBar: const StreamChannelHeader(),
       body: Column(
         children: const <Widget>[
           Expanded(
-            child: MessageListView(),
+            child: StreamMessageListView(),
           ),
-          MessageInput(),
+          StreamMessageInput(),
         ],
       ),
     );

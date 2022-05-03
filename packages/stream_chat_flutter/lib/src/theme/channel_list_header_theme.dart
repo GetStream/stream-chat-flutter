@@ -3,27 +3,34 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
 
+/// {@macro channel_list_header_theme}
+@Deprecated("Use 'StreamChannelListHeaderTheme' instead")
+typedef ChannelListHeaderTheme = StreamChannelListHeaderTheme;
+
+/// {@template channel_list_header_theme}
 /// Overrides the default style of [ChannelListHeader] descendants.
 ///
 /// See also:
 ///
-///  * [ChannelListHeaderThemeData], which is used to configure this theme.
-class ChannelListHeaderTheme extends InheritedTheme {
-  /// Creates a [ChannelListHeaderTheme].
+///  * [StreamChannelListHeaderThemeData], which is used
+/// to configure this theme.
+/// {@endtemplate}
+class StreamChannelListHeaderTheme extends InheritedTheme {
+  /// Creates a [StreamChannelListHeaderTheme].
   ///
   /// The [data] parameter must not be null.
-  const ChannelListHeaderTheme({
+  const StreamChannelListHeaderTheme({
     Key? key,
     required this.data,
     required Widget child,
   }) : super(key: key, child: child);
 
   /// The configuration of this theme.
-  final ChannelListHeaderThemeData data;
+  final StreamChannelListHeaderThemeData data;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [ChannelListHeaderTheme] widget, then
+  /// If there is no enclosing [StreamChannelListHeaderTheme] widget, then
   /// [StreamChatThemeData.channelListHeaderTheme] is used.
   ///
   /// Typical usage is as follows:
@@ -31,26 +38,32 @@ class ChannelListHeaderTheme extends InheritedTheme {
   /// ```dart
   /// final theme = ChannelListHeaderTheme.of(context);
   /// ```
-  static ChannelListHeaderThemeData of(BuildContext context) {
-    final channelListHeaderTheme =
-        context.dependOnInheritedWidgetOfExactType<ChannelListHeaderTheme>();
+  static StreamChannelListHeaderThemeData of(BuildContext context) {
+    final channelListHeaderTheme = context
+        .dependOnInheritedWidgetOfExactType<StreamChannelListHeaderTheme>();
     return channelListHeaderTheme?.data ??
         StreamChatTheme.of(context).channelListHeaderTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) =>
-      ChannelListHeaderTheme(data: data, child: child);
+      StreamChannelListHeaderTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(ChannelListHeaderTheme oldWidget) =>
+  bool updateShouldNotify(StreamChannelListHeaderTheme oldWidget) =>
       data != oldWidget.data;
 }
 
+/// {@macro channel_list_header_theme_data}
+@Deprecated("Use ''StreamChannelListHeaderThemeData' instead")
+typedef ChannelListHeaderThemeData = StreamChannelListHeaderThemeData;
+
+/// {@template channel_list_header_theme_data}
 /// Theme dedicated to the [ChannelListHeader]
-class ChannelListHeaderThemeData with Diagnosticable {
-  /// Returns a new [ChannelListHeaderThemeData]
-  const ChannelListHeaderThemeData({
+/// {@endtemplate}
+class StreamChannelListHeaderThemeData with Diagnosticable {
+  /// Returns a new [StreamChannelListHeaderThemeData]
+  const StreamChannelListHeaderThemeData({
     this.titleStyle,
     this.avatarTheme,
     this.color,
@@ -60,39 +73,42 @@ class ChannelListHeaderThemeData with Diagnosticable {
   final TextStyle? titleStyle;
 
   /// Theme dedicated to the userAvatar
-  final AvatarThemeData? avatarTheme;
+  final StreamAvatarThemeData? avatarTheme;
 
   /// Background color of the appbar
   final Color? color;
 
-  /// Returns a new [ChannelListHeaderThemeData] replacing some of its
+  /// Returns a new [StreamChannelListHeaderThemeData] replacing some of its
   /// properties
-  ChannelListHeaderThemeData copyWith({
+  StreamChannelListHeaderThemeData copyWith({
     TextStyle? titleStyle,
-    AvatarThemeData? avatarTheme,
+    StreamAvatarThemeData? avatarTheme,
     Color? color,
   }) =>
-      ChannelListHeaderThemeData(
+      StreamChannelListHeaderThemeData(
         titleStyle: titleStyle ?? this.titleStyle,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         color: color ?? this.color,
       );
 
-  /// Linearly interpolate from one [ChannelListHeaderThemeData] to another.
-  ChannelListHeaderThemeData lerp(
-    ChannelListHeaderThemeData a,
-    ChannelListHeaderThemeData b,
+  /// Linearly interpolate from one [StreamChannelListHeaderThemeData]
+  /// to another.
+  StreamChannelListHeaderThemeData lerp(
+    StreamChannelListHeaderThemeData a,
+    StreamChannelListHeaderThemeData b,
     double t,
   ) =>
-      ChannelListHeaderThemeData(
-        avatarTheme:
-            const AvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+      StreamChannelListHeaderThemeData(
+        avatarTheme: const StreamAvatarThemeData()
+            .lerp(a.avatarTheme!, b.avatarTheme!, t),
         color: Color.lerp(a.color, b.color, t),
         titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
       );
 
-  /// Merges [this] [ChannelListHeaderThemeData] with the [other]
-  ChannelListHeaderThemeData merge(ChannelListHeaderThemeData? other) {
+  /// Merges [this] [StreamChannelListHeaderThemeData] with the [other]
+  StreamChannelListHeaderThemeData merge(
+    StreamChannelListHeaderThemeData? other,
+  ) {
     if (other == null) return this;
     return copyWith(
       titleStyle: titleStyle?.merge(other.titleStyle) ?? other.titleStyle,
@@ -104,7 +120,7 @@ class ChannelListHeaderThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ChannelListHeaderThemeData &&
+      other is StreamChannelListHeaderThemeData &&
           runtimeType == other.runtimeType &&
           titleStyle == other.titleStyle &&
           avatarTheme == other.avatarTheme &&

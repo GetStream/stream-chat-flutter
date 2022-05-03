@@ -26,9 +26,8 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(
       authorIcon: json['author_icon'] as String?,
       assetUrl: json['asset_url'] as String?,
       actions: (json['actions'] as List<dynamic>?)
-              ?.map((e) => Action.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
+          ?.map((e) => Action.fromJson(e as Map<String, dynamic>))
+          .toList(),
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       file: json['file'] == null
           ? null
@@ -64,7 +63,7 @@ Map<String, dynamic> _$AttachmentToJson(Attachment instance) {
   writeNotNull('author_link', instance.authorLink);
   writeNotNull('author_icon', instance.authorIcon);
   writeNotNull('asset_url', instance.assetUrl);
-  val['actions'] = instance.actions.map((e) => e.toJson()).toList();
+  writeNotNull('actions', instance.actions?.map((e) => e.toJson()).toList());
   writeNotNull('file', instance.file?.toJson());
   val['upload_state'] = instance.uploadState.toJson();
   val['extra_data'] = instance.extraData;

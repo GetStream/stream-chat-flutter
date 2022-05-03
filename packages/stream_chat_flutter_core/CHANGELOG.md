@@ -1,3 +1,23 @@
+## 4.0.0
+
+- Deprecated `UsersBloc` in favor of `StreamUserListController` to control the user list.
+- Deprecated `MessageSearchBloc` in favor of `StreamMessageSearchListController` to control the user list.
+
+## 4.0.0-beta.2
+
+- Updated `stream_chat` dependency to [`4.0.0-beta.2`](https://pub.dev/packages/stream_chat/changelog).
+
+## 4.0.0-beta.0
+
+✅ Added
+
+- Added `MessageInputController` to hold `Message` related data.
+- Deprecated old widgets in favor of Stream-prefixed ones.
+- Deprecated `ChannelsBloc` in favor of `StreamChannelListController` to control the channel list.
+- Added `MessageTextFieldController` to be used with the new `StreamTextField` ui widget.
+
+- Updated `stream_chat` dependency to [`4.0.0-beta.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 3.6.1
 
 - Updated `stream_chat` dependency to [`3.6.1`](https://pub.dev/packages/stream_chat/changelog).

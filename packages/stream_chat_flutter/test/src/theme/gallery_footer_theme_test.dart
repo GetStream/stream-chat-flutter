@@ -7,18 +7,20 @@ class MockStreamChatClient extends Mock implements StreamChatClient {}
 
 void main() {
   test('GalleryFooterThemeData copyWith, ==, hashCode basics', () {
-    expect(const GalleryFooterThemeData(),
-        const GalleryFooterThemeData().copyWith());
-    expect(const GalleryFooterThemeData().hashCode,
-        const GalleryFooterThemeData().copyWith().hashCode);
+    expect(const StreamGalleryFooterThemeData(),
+        const StreamGalleryFooterThemeData().copyWith());
+    expect(const StreamGalleryFooterThemeData().hashCode,
+        const StreamGalleryFooterThemeData().copyWith().hashCode);
   });
 
   test(
       '''Light GalleryFooterThemeData lerps completely to dark GalleryFooterThemeData''',
       () {
     expect(
-        const GalleryFooterThemeData().lerp(_galleryFooterThemeDataControl,
-            _galleryFooterThemeDataControlDark, 1),
+        const StreamGalleryFooterThemeData().lerp(
+            _galleryFooterThemeDataControl,
+            _galleryFooterThemeDataControlDark,
+            1),
         _galleryFooterThemeDataControlDark);
   });
 
@@ -26,8 +28,10 @@ void main() {
       '''Light GalleryFooterThemeData lerps halfway to dark GalleryFooterThemeData''',
       () {
     expect(
-        const GalleryFooterThemeData().lerp(_galleryFooterThemeDataControl,
-            _galleryFooterThemeDataControlDark, 0.5),
+        const StreamGalleryFooterThemeData().lerp(
+            _galleryFooterThemeDataControl,
+            _galleryFooterThemeDataControlDark,
+            0.5),
         _galleryFooterThemeDataControlMidLerp);
   });
 
@@ -35,8 +39,10 @@ void main() {
       '''Dark GalleryFooterThemeData lerps completely to light GalleryFooterThemeData''',
       () {
     expect(
-        const GalleryFooterThemeData().lerp(_galleryFooterThemeDataControlDark,
-            _galleryFooterThemeDataControl, 1),
+        const StreamGalleryFooterThemeData().lerp(
+            _galleryFooterThemeDataControlDark,
+            _galleryFooterThemeDataControl,
+            1),
         _galleryFooterThemeDataControl);
   });
 
@@ -68,8 +74,8 @@ void main() {
           builder: (context) {
             _context = context;
             return Scaffold(
-              appBar: GalleryFooter(
-                message: Message(),
+              appBar: StreamGalleryFooter(
+                mediaAttachmentPackages: Message().getAttachmentPackageList(),
               ),
             );
           },
@@ -77,7 +83,7 @@ void main() {
       ),
     );
 
-    final imageFooterTheme = GalleryFooterTheme.of(_context);
+    final imageFooterTheme = StreamGalleryFooterTheme.of(_context);
     expect(imageFooterTheme.backgroundColor,
         _galleryFooterThemeDataControl.backgroundColor);
     expect(imageFooterTheme.shareIconColor,
@@ -111,8 +117,8 @@ void main() {
           builder: (context) {
             _context = context;
             return Scaffold(
-              appBar: GalleryFooter(
-                message: Message(),
+              appBar: StreamGalleryFooter(
+                mediaAttachmentPackages: Message().getAttachmentPackageList(),
               ),
             );
           },
@@ -120,7 +126,7 @@ void main() {
       ),
     );
 
-    final imageFooterTheme = GalleryFooterTheme.of(_context);
+    final imageFooterTheme = StreamGalleryFooterTheme.of(_context);
     expect(imageFooterTheme.backgroundColor,
         _galleryFooterThemeDataControlDark.backgroundColor);
     expect(imageFooterTheme.shareIconColor,
@@ -141,19 +147,19 @@ void main() {
 }
 
 // Light theme control
-final _galleryFooterThemeDataControl = GalleryFooterThemeData(
-  backgroundColor: ColorTheme.light().barsBg,
-  shareIconColor: ColorTheme.light().textHighEmphasis,
-  titleTextStyle: TextTheme.light().headlineBold,
-  gridIconButtonColor: ColorTheme.light().textHighEmphasis,
-  bottomSheetBackgroundColor: ColorTheme.light().barsBg,
-  bottomSheetBarrierColor: ColorTheme.light().overlay,
-  bottomSheetCloseIconColor: ColorTheme.light().textHighEmphasis,
-  bottomSheetPhotosTextStyle: TextTheme.light().headlineBold,
+final _galleryFooterThemeDataControl = StreamGalleryFooterThemeData(
+  backgroundColor: StreamColorTheme.light().barsBg,
+  shareIconColor: StreamColorTheme.light().textHighEmphasis,
+  titleTextStyle: StreamTextTheme.light().headlineBold,
+  gridIconButtonColor: StreamColorTheme.light().textHighEmphasis,
+  bottomSheetBackgroundColor: StreamColorTheme.light().barsBg,
+  bottomSheetBarrierColor: StreamColorTheme.light().overlay,
+  bottomSheetCloseIconColor: StreamColorTheme.light().textHighEmphasis,
+  bottomSheetPhotosTextStyle: StreamTextTheme.light().headlineBold,
 );
 
 // Mid-lerp theme control
-const _galleryFooterThemeDataControlMidLerp = GalleryFooterThemeData(
+const _galleryFooterThemeDataControlMidLerp = StreamGalleryFooterThemeData(
   backgroundColor: Color(0xff87898b),
   shareIconColor: Color(0xff7f7f7f),
   titleTextStyle: TextStyle(
@@ -173,13 +179,13 @@ const _galleryFooterThemeDataControlMidLerp = GalleryFooterThemeData(
 );
 
 // Dark theme control
-final _galleryFooterThemeDataControlDark = GalleryFooterThemeData(
-  backgroundColor: ColorTheme.dark().barsBg,
-  shareIconColor: ColorTheme.dark().textHighEmphasis,
-  titleTextStyle: TextTheme.dark().headlineBold,
-  gridIconButtonColor: ColorTheme.dark().textHighEmphasis,
-  bottomSheetBackgroundColor: ColorTheme.dark().barsBg,
-  bottomSheetBarrierColor: ColorTheme.dark().overlay,
-  bottomSheetCloseIconColor: ColorTheme.dark().textHighEmphasis,
-  bottomSheetPhotosTextStyle: TextTheme.dark().headlineBold,
+final _galleryFooterThemeDataControlDark = StreamGalleryFooterThemeData(
+  backgroundColor: StreamColorTheme.dark().barsBg,
+  shareIconColor: StreamColorTheme.dark().textHighEmphasis,
+  titleTextStyle: StreamTextTheme.dark().headlineBold,
+  gridIconButtonColor: StreamColorTheme.dark().textHighEmphasis,
+  bottomSheetBackgroundColor: StreamColorTheme.dark().barsBg,
+  bottomSheetBarrierColor: StreamColorTheme.dark().overlay,
+  bottomSheetCloseIconColor: StreamColorTheme.dark().textHighEmphasis,
+  bottomSheetPhotosTextStyle: StreamTextTheme.dark().headlineBold,
 );

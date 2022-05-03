@@ -61,6 +61,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get sendMessagePermissionError => '메시지를 보낼 수 있는 권한이 없습니다';
+
+  @override
   String get emptyMessagesText => '현재 메시지가 없습니다';
 
   @override
@@ -355,6 +358,13 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   @override
   String get viewLibrary => '라이브러리 보기';
 
+  @override
   String attachmentLimitExceedError(int limit) =>
       '첨부 파일 제한 초과: $limit 이상의 첨부 파일을 추가할 수 없습니다';
+
+  @override
+  String get linkDisabledDetails => '이 대화에서는 링크를 보낼 수 없습니다.';
+
+  @override
+  String get linkDisabledError => '링크가 비활성화되었습니다.';
 }

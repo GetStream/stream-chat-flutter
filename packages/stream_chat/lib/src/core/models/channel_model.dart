@@ -13,6 +13,7 @@ class ChannelModel {
     String? id,
     String? type,
     String? cid,
+    this.ownCapabilities,
     ChannelConfig? config,
     this.createdBy,
     this.frozen = false,
@@ -50,6 +51,10 @@ class ChannelModel {
   /// The cid of this channel
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final String cid;
+
+  /// List of user permissions on this channel
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  final List<String>? ownCapabilities;
 
   /// The channel configuration data
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
@@ -101,6 +106,7 @@ class ChannelModel {
     'id',
     'type',
     'cid',
+    'own_capabilities',
     'config',
     'created_by',
     'frozen',
@@ -127,6 +133,7 @@ class ChannelModel {
     String? id,
     String? type,
     String? cid,
+    List<String>? ownCapabilities,
     ChannelConfig? config,
     User? createdBy,
     bool? frozen,
@@ -143,6 +150,7 @@ class ChannelModel {
         id: id ?? this.id,
         type: type ?? this.type,
         cid: cid ?? this.cid,
+        ownCapabilities: ownCapabilities ?? this.ownCapabilities,
         config: config ?? this.config,
         createdBy: createdBy ?? this.createdBy,
         frozen: frozen ?? this.frozen,
@@ -164,6 +172,7 @@ class ChannelModel {
       id: other.id,
       type: other.type,
       cid: other.cid,
+      ownCapabilities: other.ownCapabilities,
       config: other.config,
       createdBy: other.createdBy,
       frozen: other.frozen,

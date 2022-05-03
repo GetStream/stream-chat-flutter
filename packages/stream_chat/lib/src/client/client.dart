@@ -29,7 +29,6 @@ import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/location.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/version.dart';
@@ -66,10 +65,6 @@ class StreamChatClient {
     this.logLevel = Level.WARNING,
     this.logHandlerFunction = StreamChatClient.defaultLogHandler,
     RetryPolicy? retryPolicy,
-    @Deprecated('''
-    Location is now deprecated in favor of the new edge server. Will be removed in v4.0.0.
-    Read more here: https://getstream.io/blog/chat-edge-infrastructure
-    ''') Location? location,
     String? baseURL,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
@@ -426,6 +421,7 @@ class StreamChatClient {
   }
 
   void _connectionStatusHandler(ConnectionStatus status) async {
+    final previousState = wsConnectionStatus;
     final currentState = _wsConnectionStatus = status;
 
     handleEvent(Event(
@@ -433,7 +429,8 @@ class StreamChatClient {
       online: status == ConnectionStatus.connected,
     ));
 
-    if (currentState == ConnectionStatus.connected) {
+    if (currentState == ConnectionStatus.connected &&
+        previousState != ConnectionStatus.connected) {
       // connection recovered
       final cids = state.channels.keys.toList(growable: false);
       if (cids.isNotEmpty) {
@@ -621,7 +618,7 @@ class StreamChatClient {
     final channels = res.channels;
 
     final users = channels
-        .expand((it) => it.members)
+        .expand((it) => it.members ?? <Member>[])
         .map((it) => it.user)
         .toList(growable: false);
 
@@ -1238,12 +1235,14 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     bool skipPush = false,
+    bool skipEnrichUrl = false,
   }) =>
       _chatApi.message.sendMessage(
         channelId,
         channelType,
         message,
         skipPush: skipPush,
+        skipEnrichUrl: skipEnrichUrl,
       );
 
   /// Lists all the message replies for the [parentId]
@@ -1267,8 +1266,14 @@ class StreamChatClient {
       );
 
   /// Update the given message
-  Future<UpdateMessageResponse> updateMessage(Message message) =>
-      _chatApi.message.updateMessage(message);
+  Future<UpdateMessageResponse> updateMessage(
+    Message message, {
+    bool skipEnrichUrl = false,
+  }) =>
+      _chatApi.message.updateMessage(
+        message,
+        skipEnrichUrl: skipEnrichUrl,
+      );
 
   /// Partially update the given [messageId]
   /// Use [set] to define values to be set
@@ -1277,11 +1282,13 @@ class StreamChatClient {
     String messageId, {
     Map<String, Object?>? set,
     List<String>? unset,
+    bool skipEnrichUrl = false,
   }) =>
       _chatApi.message.partialUpdateMessage(
         messageId,
         set: set,
         unset: unset,
+        skipEnrichUrl: skipEnrichUrl,
       );
 
   /// Deletes the given message
@@ -1546,18 +1553,6 @@ class ClientState {
 
   /// The current user as a stream
   Stream<OwnUser?> get currentUserStream => _currentUserController.stream;
-
-  // coverage:ignore-start
-
-  /// The current user
-  @Deprecated('Use `.currentUser` instead, Will be removed in future releases')
-  OwnUser? get user => _currentUserController.valueOrNull;
-
-  /// The current user as a stream
-  @Deprecated(
-    'Use `.currentUserStream` instead, Will be removed in future releases',
-  )
-  Stream<OwnUser?> get userStream => _currentUserController.stream;
 
   // coverage:ignore-end
 

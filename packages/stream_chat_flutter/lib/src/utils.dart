@@ -9,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// Launch URL
 Future<void> launchURL(BuildContext context, String url) async {
   try {
-    await launch(Uri.parse(url).withScheme.toString());
+    await launchUrl(Uri.parse(url).withScheme);
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(context.translations.launchUrlError)),
@@ -450,4 +450,20 @@ int levenshtein(String s, String t, {bool caseSensitive = true}) {
   }
 
   return v1[t.length];
+}
+
+/// An easy way to handle attachment related operations on a message
+extension AttachmentPackagesX on Message {
+  /// This extension will return a List of type [StreamAttachmentPackage]
+  /// from the existing attachments of the message
+  List<StreamAttachmentPackage> getAttachmentPackageList() {
+    final _attachmentPackages = List<StreamAttachmentPackage>.generate(
+      attachments.length,
+      (index) => StreamAttachmentPackage(
+        attachment: attachments[index],
+        message: this,
+      ),
+    );
+    return _attachmentPackages;
+  }
 }

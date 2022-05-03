@@ -1,3 +1,6 @@
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: deprecated_member_use_from_same_package, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -8,7 +11,7 @@ typedef UserTapCallback = void Function(User, Widget?);
 /// Builder used to create a custom [ListUserItem] from a [User]
 typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 
-///
+/// {@template user_list_view}
 /// It shows the list of current users.
 ///
 /// ```dart
@@ -42,6 +45,8 @@ typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 /// The widget components render the ui based on the first ancestor of
 /// type [StreamChatTheme].
 /// Modify it to change the widget appearance.
+/// {@endtemplate}
+@Deprecated("Use 'StreamUserListView' instead")
 class UserListView extends StatefulWidget {
   /// Instantiate a new UserListView
   UserListView({
@@ -203,7 +208,7 @@ class _UserListViewState extends State<UserListView>
       userListController: _userListController,
     );
 
-    final backgroundColor = UserListViewTheme.of(context).backgroundColor;
+    final backgroundColor = StreamUserListViewTheme.of(context).backgroundColor;
 
     Widget child;
 
@@ -332,7 +337,7 @@ class _UserListViewState extends State<UserListView>
             key: ValueKey<String>('USER-${user.id}'),
             child: widget.userItemBuilder != null
                 ? widget.userItemBuilder!(context, user, selected)
-                : UserItem(
+                : StreamUserItem(
                     user: user,
                     onTap: (user) => widget.onUserTap!(user, widget.userWidget),
                     onLongPress: widget.onUserLongPress,
@@ -362,7 +367,7 @@ class _UserListViewState extends State<UserListView>
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      UserAvatar(
+                      StreamUserAvatar(
                         user: user,
                         borderRadius: BorderRadius.circular(32),
                         selected: selected,

@@ -105,11 +105,11 @@ void main() {
     );
 
     expect(res, isNotNull);
-    expect(res.messages.length, channelState.messages.length);
-    expect(res.pinnedMessages.length, channelState.pinnedMessages.length);
-    expect(res.members.length, channelState.members.length);
-    expect(res.read.length, channelState.read.length);
-    expect(res.watchers.length, channelState.watchers.length);
+    expect(res.messages?.length, channelState.messages?.length);
+    expect(res.pinnedMessages?.length, channelState.pinnedMessages?.length);
+    expect(res.members?.length, channelState.members?.length);
+    expect(res.read?.length, channelState.read?.length);
+    expect(res.watchers?.length, channelState.watchers?.length);
     expect(res.watcherCount, channelState.watcherCount);
 
     verify(() => client.post(path, data: any(named: 'data'))).called(1);

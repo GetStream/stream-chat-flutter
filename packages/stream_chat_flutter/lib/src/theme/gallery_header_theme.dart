@@ -2,27 +2,33 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// {@macro gallery_header_them}
+@Deprecated("Use 'StreamGalleryHeaderTheme' instead")
+typedef GalleryHeaderTheme = StreamGalleryHeaderTheme;
+
+/// {@template gallery_header_theme}
 /// Overrides the default style of [GalleryHeader] descendants.
 ///
 /// See also:
 ///
-///  * [GalleryHeaderThemeData], which is used to configure this theme.
-class GalleryHeaderTheme extends InheritedTheme {
-  /// Creates a [GalleryHeaderTheme].
+///  * [StreamGalleryHeaderThemeData], which is used to configure this theme.
+/// {@endtemplate}
+class StreamGalleryHeaderTheme extends InheritedTheme {
+  /// Creates a [StreamGalleryHeaderTheme].
   ///
   /// The [data] parameter must not be null.
-  const GalleryHeaderTheme({
+  const StreamGalleryHeaderTheme({
     Key? key,
     required this.data,
     required Widget child,
   }) : super(key: key, child: child);
 
   /// The configuration of this theme.
-  final GalleryHeaderThemeData data;
+  final StreamGalleryHeaderThemeData data;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [GalleryHeaderTheme] widget, then
+  /// If there is no enclosing [StreamGalleryHeaderTheme] widget, then
   /// [StreamChatThemeData.galleryHeaderTheme] is used.
   ///
   /// Typical usage is as follows:
@@ -30,34 +36,40 @@ class GalleryHeaderTheme extends InheritedTheme {
   /// ```dart
   /// ImageHeaderTheme theme = ImageHeaderTheme.of(context);
   /// ```
-  static GalleryHeaderThemeData of(BuildContext context) {
+  static StreamGalleryHeaderThemeData of(BuildContext context) {
     final galleryHeaderTheme =
-        context.dependOnInheritedWidgetOfExactType<GalleryHeaderTheme>();
+        context.dependOnInheritedWidgetOfExactType<StreamGalleryHeaderTheme>();
     return galleryHeaderTheme?.data ??
         StreamChatTheme.of(context).galleryHeaderTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) =>
-      GalleryHeaderTheme(data: data, child: child);
+      StreamGalleryHeaderTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(GalleryHeaderTheme oldWidget) =>
+  bool updateShouldNotify(StreamGalleryHeaderTheme oldWidget) =>
       data != oldWidget.data;
 }
 
+/// {@macro gallery_header_theme_data}
+@Deprecated("Use 'StreamGalleryHeaderThemeData' instead")
+typedef GalleryHeaderThemeData = StreamGalleryHeaderThemeData;
+
+/// {@template gallery_header_theme_data}
 /// A style that overrides the default appearance of [GalleryHeader]s when used
-/// with [GalleryHeaderTheme] or with the overall [StreamChatTheme]'s
+/// with [StreamGalleryHeaderTheme] or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.galleryHeaderTheme].
 ///
 /// See also:
 ///
-/// * [GalleryHeaderTheme], the theme which is configured with this class.
+/// * [StreamGalleryHeaderTheme], the theme which is configured with this class.
 /// * [StreamChatThemeData.galleryHeaderTheme], which can be used to override
 /// the default style for [GalleryHeader]s below the overall [StreamChatTheme].
-class GalleryHeaderThemeData with Diagnosticable {
-  /// Creates an [GalleryHeaderThemeData].
-  const GalleryHeaderThemeData({
+/// {@endtemplate}
+class StreamGalleryHeaderThemeData with Diagnosticable {
+  /// Creates an [StreamGalleryHeaderThemeData].
+  const StreamGalleryHeaderThemeData({
     this.closeButtonColor,
     this.backgroundColor,
     this.iconMenuPointColor,
@@ -92,8 +104,8 @@ class GalleryHeaderThemeData with Diagnosticable {
   ///
   final Color? bottomSheetBarrierColor;
 
-  /// Copies this [GalleryHeaderThemeData] to another.
-  GalleryHeaderThemeData copyWith({
+  /// Copies this [StreamGalleryHeaderThemeData] to another.
+  StreamGalleryHeaderThemeData copyWith({
     Color? closeButtonColor,
     Color? backgroundColor,
     Color? iconMenuPointColor,
@@ -101,7 +113,7 @@ class GalleryHeaderThemeData with Diagnosticable {
     TextStyle? subtitleTextStyle,
     Color? bottomSheetBarrierColor,
   }) =>
-      GalleryHeaderThemeData(
+      StreamGalleryHeaderThemeData(
         closeButtonColor: closeButtonColor ?? this.closeButtonColor,
         backgroundColor: backgroundColor ?? this.backgroundColor,
         iconMenuPointColor: iconMenuPointColor ?? this.iconMenuPointColor,
@@ -114,12 +126,12 @@ class GalleryHeaderThemeData with Diagnosticable {
   /// Linearly interpolate between two [GalleryHeader] themes.
   ///
   /// All the properties must be non-null.
-  GalleryHeaderThemeData lerp(
-    GalleryHeaderThemeData a,
-    GalleryHeaderThemeData b,
+  StreamGalleryHeaderThemeData lerp(
+    StreamGalleryHeaderThemeData a,
+    StreamGalleryHeaderThemeData b,
     double t,
   ) =>
-      GalleryHeaderThemeData(
+      StreamGalleryHeaderThemeData(
         closeButtonColor: Color.lerp(a.closeButtonColor, b.closeButtonColor, t),
         backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
         iconMenuPointColor:
@@ -131,8 +143,8 @@ class GalleryHeaderThemeData with Diagnosticable {
             Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
       );
 
-  /// Merges one [GalleryHeaderThemeData] with the another
-  GalleryHeaderThemeData merge(GalleryHeaderThemeData? other) {
+  /// Merges one [StreamGalleryHeaderThemeData] with the another
+  StreamGalleryHeaderThemeData merge(StreamGalleryHeaderThemeData? other) {
     if (other == null) return this;
     return copyWith(
       closeButtonColor: other.closeButtonColor,
@@ -147,7 +159,7 @@ class GalleryHeaderThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is GalleryHeaderThemeData &&
+      other is StreamGalleryHeaderThemeData &&
           runtimeType == other.runtimeType &&
           closeButtonColor == other.closeButtonColor &&
           backgroundColor == other.backgroundColor &&
