@@ -4,10 +4,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
   test('ChannelPreviewThemeData copyWith, ==, hashCode basics', () {
-    expect(const ChannelPreviewThemeData(),
-        const ChannelPreviewThemeData().copyWith());
-    expect(const ChannelPreviewThemeData().hashCode,
-        const ChannelPreviewThemeData().copyWith().hashCode);
+    expect(const StreamChannelPreviewThemeData(),
+        const StreamChannelPreviewThemeData().copyWith());
+    expect(const StreamChannelPreviewThemeData().hashCode,
+        const StreamChannelPreviewThemeData().copyWith().hashCode);
   });
 
   group('ChannelPreviewThemeData lerps', () {
@@ -15,7 +15,7 @@ void main() {
         '''Light ChannelPreviewThemeData lerps completely to dark ChannelPreviewThemeData''',
         () {
       expect(
-          const ChannelPreviewThemeData().lerp(
+          const StreamChannelPreviewThemeData().lerp(
               _channelPreviewThemeControl, _channelPreviewThemeControlDark, 1),
           _channelPreviewThemeControlDark);
     });
@@ -24,8 +24,10 @@ void main() {
         '''Light ChannelPreviewThemeData lerps halfway to dark ChannelPreviewThemeData''',
         () {
       expect(
-          const ChannelPreviewThemeData().lerp(_channelPreviewThemeControl,
-              _channelPreviewThemeControlDark, 0.5),
+          const StreamChannelPreviewThemeData().lerp(
+              _channelPreviewThemeControl,
+              _channelPreviewThemeControlDark,
+              0.5),
           _channelPreviewThemeControlMidLerp);
     });
 
@@ -33,7 +35,7 @@ void main() {
         '''Dark ChannelPreviewThemeData lerps completely to light ChannelPreviewThemeData''',
         () {
       expect(
-          const ChannelPreviewThemeData().lerp(
+          const StreamChannelPreviewThemeData().lerp(
               _channelPreviewThemeControlDark, _channelPreviewThemeControl, 1),
           _channelPreviewThemeControl);
     });
@@ -45,28 +47,28 @@ void main() {
   });
 }
 
-final _channelPreviewThemeControl = ChannelPreviewThemeData(
-  unreadCounterColor: ColorTheme.light().accentError,
-  avatarTheme: AvatarThemeData(
+final _channelPreviewThemeControl = StreamChannelPreviewThemeData(
+  unreadCounterColor: StreamColorTheme.light().accentError,
+  avatarTheme: StreamAvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
       height: 40,
       width: 40,
     ),
   ),
-  titleStyle: TextTheme.light().bodyBold,
-  subtitleStyle: TextTheme.light().footnote.copyWith(
+  titleStyle: StreamTextTheme.light().bodyBold,
+  subtitleStyle: StreamTextTheme.light().footnote.copyWith(
         color: const Color(0xff7A7A7A),
       ),
-  lastMessageAtStyle: TextTheme.light().footnote.copyWith(
-        color: ColorTheme.light().textHighEmphasis.withOpacity(0.5),
+  lastMessageAtStyle: StreamTextTheme.light().footnote.copyWith(
+        color: StreamColorTheme.light().textHighEmphasis.withOpacity(0.5),
       ),
   indicatorIconSize: 16,
 );
 
-final _channelPreviewThemeControlMidLerp = ChannelPreviewThemeData(
+final _channelPreviewThemeControlMidLerp = StreamChannelPreviewThemeData(
   unreadCounterColor: const Color(0xffff3742),
-  avatarTheme: AvatarThemeData(
+  avatarTheme: StreamAvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
       height: 40,
@@ -82,27 +84,27 @@ final _channelPreviewThemeControlMidLerp = ChannelPreviewThemeData(
     color: Color(0xff7a7a7a),
     fontSize: 12,
   ),
-  lastMessageAtStyle: TextTheme.light().footnote.copyWith(
+  lastMessageAtStyle: StreamTextTheme.light().footnote.copyWith(
         color: const Color(0x807f7f7f).withOpacity(0.5),
       ),
   indicatorIconSize: 16,
 );
 
-final _channelPreviewThemeControlDark = ChannelPreviewThemeData(
-  unreadCounterColor: ColorTheme.dark().accentError,
-  avatarTheme: AvatarThemeData(
+final _channelPreviewThemeControlDark = StreamChannelPreviewThemeData(
+  unreadCounterColor: StreamColorTheme.dark().accentError,
+  avatarTheme: StreamAvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
       height: 40,
       width: 40,
     ),
   ),
-  titleStyle: TextTheme.dark().bodyBold,
-  subtitleStyle: TextTheme.dark().footnote.copyWith(
+  titleStyle: StreamTextTheme.dark().bodyBold,
+  subtitleStyle: StreamTextTheme.dark().footnote.copyWith(
         color: const Color(0xff7A7A7A),
       ),
-  lastMessageAtStyle: TextTheme.dark().footnote.copyWith(
-        color: ColorTheme.dark().textHighEmphasis.withOpacity(0.5),
+  lastMessageAtStyle: StreamTextTheme.dark().footnote.copyWith(
+        color: StreamColorTheme.dark().textHighEmphasis.withOpacity(0.5),
       ),
   indicatorIconSize: 16,
 );

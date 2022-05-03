@@ -371,4 +371,18 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get slowModeOnLabel => 'Modo lento ativado';
+
+  @override
+  String get linkDisabledDetails =>
+      'O envio de links não é permitido nesta conversa.';
+
+  @override
+  String get linkDisabledError => 'Os links estão desativados';
+
+  @override
+  String get sendMessagePermissionError =>
+      'Você não tem permissão para enviar mensagens';
+
+  @override
+  String get viewLibrary => 'Ver biblioteca';
 }

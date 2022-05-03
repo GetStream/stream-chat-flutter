@@ -1,6 +1,65 @@
+## 4.0.0
+
+✅ Added
+
+- Added `push_provider_name` to `addDevice` API call
+
+## 4.0.0-beta.2
+
+🐞 Fixed
+
+- Fixed reactions not working for threads in offline mode.
+- [[#1046]](https://github.com/GetStream/stream-chat-flutter/issues/1046) After `/mute` command on reload cannot access
+  any channel.
+- [[#1047]](https://github.com/GetStream/stream-chat-flutter/issues/1047) `own_capabilities` extraData missing after
+  channel update.
+- [[#1054]](https://github.com/GetStream/stream-chat-flutter/issues/1054) Fix `Unsupported operation: Cannot remove from an unmodifiable list`.
+- [[#1033]](https://github.com/GetStream/stream-chat-flutter/issues/1033) Hard delete from dashboard does not delete message from client.
+- Send only `user_id` while reconnecting.
+
+✅ Added
+
+- Handle `event.message` in `channel.truncate` events
+- Added additional parameters to `channel.truncate`
+
+## 4.0.0-beta.0
+
+✅ Added
+
+- Added support for ownCapabilities.
+
+🐞 Fixed
+
+- Minor fixes and improvements.
+
+## 3.6.1
+
+🐞 Fixed
+
+- [[#1081]](https://github.com/GetStream/stream-chat-flutter/issues/1081) Fixed a bug with user reconnection.
+
+## 3.6.0
+
+🐞 Fixed
+
+- Fixed reactions not working for threads in offline mode.
+- [[#1046]](https://github.com/GetStream/stream-chat-flutter/issues/1046) After `/mute` command on reload cannot access
+  any channel.
+- [[#1047]](https://github.com/GetStream/stream-chat-flutter/issues/1047) `own_capabilities` extraData missing after
+  channel update.
+- [[#1054]](https://github.com/GetStream/stream-chat-flutter/issues/1054) Fix `Unsupported operation: Cannot remove from an unmodifiable list`.
+- [[#1033]](https://github.com/GetStream/stream-chat-flutter/issues/1033) Hard delete from dashboard does not delete message from client.
+- Send only `user_id` while reconnecting.
+
+✅ Added
+
+- Handle `event.message` in `channel.truncate` events
+- Added additional parameters to `channel.truncate`
+
 ## 3.5.1
 
 🐞 Fixed
+
 - `channel.unreadCount` was being set as using global unread count on a very specific case.
 - The reconnection logic for the WebSocket connection is now more robust.
 
@@ -16,7 +75,7 @@
 - [[#890]](https://github.com/GetStream/stream-chat-flutter/pull/890) Fixed Reactions not updating on thread messages.
   Thanks [bstolinski](https://github.com/bstolinski).
 - [[#897]](https://github.com/GetStream/stream-chat-flutter/issues/897) Fixed error type mis-match in `AuthInterceptor`.
-- [[#891]](https://github.com/GetStream/stream-chat-flutter/pull/891) Fixed reply counter for parent message not 
+- [[#891]](https://github.com/GetStream/stream-chat-flutter/pull/891) Fixed reply counter for parent message not
   updating correctly after deleting thread message.
 - Fix `channelState.copyWith` with respect to pinnedMessages.
 

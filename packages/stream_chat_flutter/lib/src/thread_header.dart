@@ -3,6 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro thread_header}
+@Deprecated("Use 'StreamThreadHeader' instead")
+typedef ThreadHeader = StreamThreadHeader;
+
+/// {@template thread_header}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header_paint.png)
 ///
@@ -56,20 +61,24 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The widget components render the ui based on the first ancestor of type
 /// [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
 /// Modify it to change the widget appearance.
-class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
+/// {@endtemplate}
+class StreamThreadHeader extends StatelessWidget
+    implements PreferredSizeWidget {
   /// Instantiate a new ThreadHeader
-  const ThreadHeader({
+  const StreamThreadHeader({
     Key? key,
     required this.parent,
     this.showBackButton = true,
     this.onBackPressed,
     this.title,
     this.subtitle,
+    this.centerTitle,
     this.leading,
     this.actions,
     this.onTitleTap,
     this.showTypingIndicator = true,
     this.backgroundColor,
+    this.elevation = 1,
   })  : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -92,6 +101,9 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Subtitle widget
   final Widget? subtitle;
 
+  /// Whether the title should be centered
+  final bool? centerTitle;
+
   /// Leading widget
   final Widget? leading;
 
@@ -102,12 +114,21 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// if a user is typing in this thread
   final bool showTypingIndicator;
 
-  /// The background color of this [ThreadHeader].
+  /// The background color of this [StreamThreadHeader].
   final Color? backgroundColor;
+
+  /// The elevation for this [StreamThreadHeader].
+  final double elevation;
 
   @override
   Widget build(BuildContext context) {
-    final channelHeaderTheme = ChannelHeaderTheme.of(context);
+    final effectiveCenterTitle = getEffectiveCenterTitle(
+      Theme.of(context),
+      actions: actions,
+      centerTitle: centerTitle,
+    );
+
+    final channelHeaderTheme = StreamChannelHeaderTheme.of(context);
 
     final defaultSubtitle = subtitle ??
         Row(
@@ -119,7 +140,8 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
               style: channelHeaderTheme.subtitleStyle,
             ),
             Flexible(
-              child: ChannelName(
+              child: StreamChannelName(
+                channel: StreamChannel.of(context).channel,
                 textStyle: channelHeaderTheme.subtitleStyle,
               ),
             ),
@@ -134,7 +156,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
       systemOverlayStyle: theme.brightness == Brightness.dark
           ? SystemUiOverlayStyle.light
           : SystemUiOverlayStyle.dark,
-      elevation: 1,
+      elevation: elevation,
       leading: leading ??
           (showBackButton
               ? StreamBackButton(
@@ -144,7 +166,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                 )
               : const SizedBox()),
       backgroundColor: backgroundColor ?? channelHeaderTheme.color,
-      centerTitle: true,
+      centerTitle: centerTitle,
       actions: actions,
       title: InkWell(
         onTap: onTitleTap,
@@ -153,6 +175,9 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
           width: 250,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: effectiveCenterTitle
+                ? CrossAxisAlignment.center
+                : CrossAxisAlignment.stretch,
             children: [
               title ??
                   Text(
@@ -161,12 +186,13 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                   ),
               const SizedBox(height: 2),
               if (showTypingIndicator)
-                TypingIndicator(
-                  alignment: Alignment.center,
-                  channel: StreamChannel.of(context).channel,
-                  style: channelHeaderTheme.subtitleStyle,
-                  parentId: parent.id,
-                  alternativeWidget: defaultSubtitle,
+                Align(
+                  child: StreamTypingIndicator(
+                    channel: StreamChannel.of(context).channel,
+                    style: channelHeaderTheme.subtitleStyle,
+                    parentId: parent.id,
+                    alternativeWidget: defaultSubtitle,
+                  ),
                 )
               else
                 defaultSubtitle,

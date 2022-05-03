@@ -1,31 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro attachment_title}
+@Deprecated("Use 'StreamAttachmentTitle' instead")
+typedef AttachmentTitle = StreamAttachmentTitle;
+
+/// {@template attachment_title}
 /// Title for attachments
-class AttachmentTitle extends StatelessWidget {
+/// {@endtemplate}
+class StreamAttachmentTitle extends StatelessWidget {
   /// Supply attachment and theme for constructing title
-  const AttachmentTitle({
+  const StreamAttachmentTitle({
     Key? key,
     required this.attachment,
     required this.messageTheme,
   }) : super(key: key);
 
   /// Theme to apply to text
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   /// Attachment data to display
   final Attachment attachment;
 
   @override
   Widget build(BuildContext context) {
-    final normalizedTitleLink = attachment.titleLink?.replaceFirst(
-      RegExp(r'https?://(www\.)?'),
-      '',
-    );
+    final ogScrapeUrl = attachment.ogScrapeUrl;
     return GestureDetector(
       onTap: () {
-        final titleLink = attachment.titleLink;
-        if (titleLink != null) launchURL(context, titleLink);
+        final ogScrapeUrl = attachment.ogScrapeUrl;
+        if (ogScrapeUrl != null) launchURL(context, ogScrapeUrl);
       },
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -42,8 +45,8 @@ class AttachmentTitle extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            if (normalizedTitleLink != null)
-              Text(normalizedTitleLink, style: messageTheme.messageTextStyle),
+            if (ogScrapeUrl != null)
+              Text(ogScrapeUrl, style: messageTheme.messageTextStyle),
           ],
         ),
       ),

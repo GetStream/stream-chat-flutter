@@ -59,7 +59,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: const Scaffold(
-              body: MessageInput(),
+              body: StreamMessageInput(),
             ),
           ),
         ),
@@ -125,7 +125,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: const Scaffold(
-              body: MessageInput(),
+              body: StreamMessageInput(),
             ),
           ),
         ),

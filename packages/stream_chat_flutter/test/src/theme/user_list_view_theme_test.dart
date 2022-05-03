@@ -1,3 +1,6 @@
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: deprecated_member_use_from_same_package, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -6,15 +9,15 @@ import '../mocks.dart';
 
 void main() {
   test('UserListViewThemeData copyWith, ==, hashCode basics', () {
-    expect(const UserListViewThemeData(),
-        const UserListViewThemeData().copyWith());
+    expect(const StreamUserListViewThemeData(),
+        const StreamUserListViewThemeData().copyWith());
   });
 
   test(
       '''Light UserListViewThemeData lerps completely to dark UserListViewThemeData''',
       () {
     expect(
-        const UserListViewThemeData().lerp(_userListViewThemeDataControl,
+        const StreamUserListViewThemeData().lerp(_userListViewThemeDataControl,
             _userListViewThemeDataControlDark, 1),
         _userListViewThemeDataControlDark);
   });
@@ -23,7 +26,7 @@ void main() {
       '''Light UserListViewThemeData lerps halfway to dark UserListViewThemeData''',
       () {
     expect(
-        const UserListViewThemeData().lerp(_userListViewThemeDataControl,
+        const StreamUserListViewThemeData().lerp(_userListViewThemeDataControl,
             _userListViewThemeDataControlDark, 0.5),
         _userListViewThemeDataControlHalfLerp);
   });
@@ -32,8 +35,10 @@ void main() {
       '''Dark UserListViewThemeData lerps completely to light UserListViewThemeData''',
       () {
     expect(
-        const UserListViewThemeData().lerp(_userListViewThemeDataControlDark,
-            _userListViewThemeDataControl, 1),
+        const StreamUserListViewThemeData().lerp(
+            _userListViewThemeDataControlDark,
+            _userListViewThemeDataControl,
+            1),
         _userListViewThemeDataControl);
   });
 
@@ -66,7 +71,7 @@ void main() {
       ),
     );
 
-    final userListViewTheme = UserListViewTheme.of(_context);
+    final userListViewTheme = StreamUserListViewTheme.of(_context);
     expect(userListViewTheme.backgroundColor,
         _userListViewThemeDataControl.backgroundColor);
   });
@@ -95,20 +100,20 @@ void main() {
       ),
     );
 
-    final userListViewTheme = UserListViewTheme.of(_context);
+    final userListViewTheme = StreamUserListViewTheme.of(_context);
     expect(userListViewTheme.backgroundColor,
         _userListViewThemeDataControlDark.backgroundColor);
   });
 }
 
-final _userListViewThemeDataControl = UserListViewThemeData(
-  backgroundColor: ColorTheme.light().appBg,
+final _userListViewThemeDataControl = StreamUserListViewThemeData(
+  backgroundColor: StreamColorTheme.light().appBg,
 );
 
-const _userListViewThemeDataControlHalfLerp = UserListViewThemeData(
+const _userListViewThemeDataControlHalfLerp = StreamUserListViewThemeData(
   backgroundColor: Color(0xff818384),
 );
 
-final _userListViewThemeDataControlDark = UserListViewThemeData(
-  backgroundColor: ColorTheme.dark().appBg,
+final _userListViewThemeDataControlDark = StreamUserListViewThemeData(
+  backgroundColor: StreamColorTheme.dark().appBg,
 );

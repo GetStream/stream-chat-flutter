@@ -2,10 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro user_avatar}
+@Deprecated("Use 'StreamUserAvatar' instead")
+typedef UserAvatar = StreamUserAvatar;
+
+/// {@template user_avatar}
 /// Widget that displays a user avatar
-class UserAvatar extends StatelessWidget {
-  /// Constructor to create a [UserAvatar]
-  const UserAvatar({
+/// {@endtemplate}
+class StreamUserAvatar extends StatelessWidget {
+  /// Constructor to create a [StreamUserAvatar]
+  const StreamUserAvatar({
     Key? key,
     required this.user,
     this.constraints,

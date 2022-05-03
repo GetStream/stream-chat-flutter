@@ -147,12 +147,15 @@ class WebSocket with TimerHelper {
     }
   }
 
-  Future<Uri> _buildUri({bool refreshToken = false}) async {
+  Future<Uri> _buildUri({
+    bool refreshToken = false,
+    bool includeUserDetails = true,
+  }) async {
     final user = _user!;
     final token = await tokenManager.loadToken(refresh: refreshToken);
     final params = {
       'user_id': user.id,
-      'user_details': user,
+      'user_details': includeUserDetails ? user : {'id': user.id},
       'user_token': token.rawValue,
       'server_determines_connection_id': true,
     };
@@ -176,7 +179,10 @@ class WebSocket with TimerHelper {
   bool _connectRequestInProgress = false;
 
   /// Connect the WS using the parameters passed in the constructor
-  Future<Event> connect(User user) async {
+  Future<Event> connect(
+    User user, {
+    bool includeUserDetails = false,
+  }) async {
     if (_connectRequestInProgress) {
       throw const StreamWebSocketError('''
         You've called connect twice,
@@ -191,7 +197,9 @@ class WebSocket with TimerHelper {
     connectionCompleter = Completer<Event>();
 
     try {
-      final uri = await _buildUri();
+      final uri = await _buildUri(
+        includeUserDetails: includeUserDetails,
+      );
       _initWebSocketChannel(uri);
     } catch (e, stk) {
       _onConnectionError(e, stk);
@@ -219,7 +227,10 @@ class WebSocket with TimerHelper {
     setTimer(
       Duration(milliseconds: delay),
       () async {
-        final uri = await _buildUri(refreshToken: refreshToken);
+        final uri = await _buildUri(
+          refreshToken: refreshToken,
+          includeUserDetails: false,
+        );
         try {
           _initWebSocketChannel(uri);
         } catch (e, stk) {

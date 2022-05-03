@@ -30,14 +30,16 @@ void main() {
         channelState.channel?.extraData['image'],
         'https://cdn.chrisshort.net/testing-certificate-chains-in-go/GOPHER_MIC_DROP.png',
       );
+      expect(channelState.messages, isNotNull);
+      expect(channelState.messages, isNotEmpty);
       expect(channelState.messages, hasLength(25));
-      expect(channelState.messages[0], isA<Message>());
-      expect(channelState.messages[0], isNotNull);
+      expect(channelState.messages![0], isA<Message>());
+      expect(channelState.messages![0], isNotNull);
       expect(
-        channelState.messages[0].createdAt,
+        channelState.messages![0].createdAt,
         DateTime.parse('2020-01-29T03:23:02.843948Z'),
       );
-      expect(channelState.messages[0].user, isA<User>());
+      expect(channelState.messages![0].user, isA<User>());
       expect(channelState.watcherCount, 5);
     });
 

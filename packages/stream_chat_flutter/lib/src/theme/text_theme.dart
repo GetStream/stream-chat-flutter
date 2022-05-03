@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
+/// {@macro text_theme}
+@Deprecated("Use 'StreamTextTheme' instead")
+typedef TextTheme = StreamTextTheme;
+
+/// {@template text_theme}
 /// Class for holding text theme
-class TextTheme {
+/// {@endtemplate}
+class StreamTextTheme {
   /// Initialise light text theme
-  TextTheme.light({
+  StreamTextTheme.light({
     this.title = const TextStyle(
       fontSize: 22,
       fontWeight: FontWeight.bold,
@@ -46,7 +52,7 @@ class TextTheme {
   });
 
   /// Initialise with dark theme
-  TextTheme.dark({
+  StreamTextTheme.dark({
     this.title = const TextStyle(
       fontSize: 22,
       fontWeight: FontWeight.bold,
@@ -113,7 +119,7 @@ class TextTheme {
   final TextStyle captionBold;
 
   /// Copy with theme
-  TextTheme copyWith({
+  StreamTextTheme copyWith({
     Brightness brightness = Brightness.light,
     TextStyle? body,
     TextStyle? title,
@@ -125,7 +131,7 @@ class TextTheme {
     TextStyle? captionBold,
   }) =>
       brightness == Brightness.light
-          ? TextTheme.light(
+          ? StreamTextTheme.light(
               body: body ?? this.body,
               title: title ?? this.title,
               headlineBold: headlineBold ?? this.headlineBold,
@@ -135,7 +141,7 @@ class TextTheme {
               footnote: footnote ?? this.footnote,
               captionBold: captionBold ?? this.captionBold,
             )
-          : TextTheme.dark(
+          : StreamTextTheme.dark(
               body: body ?? this.body,
               title: title ?? this.title,
               headlineBold: headlineBold ?? this.headlineBold,
@@ -147,7 +153,7 @@ class TextTheme {
             );
 
   /// Merge text theme
-  TextTheme merge(TextTheme? other) {
+  StreamTextTheme merge(StreamTextTheme? other) {
     if (other == null) return this;
     return copyWith(
       body: body.merge(other.body),

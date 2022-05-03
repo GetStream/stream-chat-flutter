@@ -11,38 +11,38 @@ Customizing Text Messages
 Every application provides a unique look and feel to their own messaging interface including and not
 limited to fonts, colors, and shapes.
 
-This guide details how to customize message text in the `MessageListView` / `MessageWidget` in the
+This guide details how to customize message text in the `StreamMessageListView` / `StreamMessageWidget` in the
 Stream Chat Flutter UI SDK.
 
 :::note
-This guide is specifically for the `MessageListView` but if you intend to display a `MessageWidget`
+This guide is specifically for the `StreamMessageListView` but if you intend to display a `StreamMessageWidget`
 separately, follow the same process without the `.copyWith` and use the default constructor instead.
 :::
 
-### Basics of customizing a `MessageWidget`
+### Basics of customizing a `StreamMessageWidget`
 
-First, add a `MessageListView` in the appropriate place where you intend to display messages from a
+First, add a `StreamMessageListView` in the appropriate place where you intend to display messages from a
 channel.
 
 ```dart
-MessageListView(
+StreamMessageListView(
     ...
 )
 ```
 
 Now, we use the `messageBuilder` parameter to build a custom message. The builder function also provides
-the default implementation of the `MessageWidget` so that we can change certain aspects of the widget
+the default implementation of the `StreamMessageWidget` so that we can change certain aspects of the widget
 without redoing all of the default parameters.
 
 :::note
-In earlier versions of the SDK, some `MessageWidget` parameters were exposed directly through the `MessageListView`,
+In earlier versions of the SDK, some `StreamMessageWidget` parameters were exposed directly through the `StreamMessageListView`,
 however, this quickly becomes hard to maintain as more parameters and customizations are added to the
-`MessageWidget`. Newer version utilise a cleaner interface to change the parameters by supplying a
+`StreamMessageWidget`. Newer version utilise a cleaner interface to change the parameters by supplying a
 default message implementation as aforementioned.
 :::
 
 ```dart
-MessageListView(
+StreamMessageListView(
     ...
     messageBuilder: (context, messageDetails, messageList, defaultWidget) {
         return defaultWidget;
@@ -53,7 +53,7 @@ MessageListView(
 We use `.copyWith()` to customize the widget:
 
 ```dart
-MessageListView(
+StreamMessageListView(
     ...
     messageBuilder: (context, messageDetails, messageList, defaultWidget) {
         return defaultWidget.copyWith(
@@ -66,28 +66,28 @@ MessageListView(
 ### Customizing text
 
 If you intend to simply change the theme for the text, you need not recreate the whole widget. The
-`MessageWidget` has a `messageTheme` parameter that allows you to pass the theme for most aspects
+`StreamMessageWidget` has a `messageTheme` parameter that allows you to pass the theme for most aspects
 of the message.
 
 ```dart
-MessageListView(
+StreamMessageListView(
     ...
     messageBuilder: (context, messageDetails, messageList, defaultWidget) {
         return defaultWidget.copyWith(
-            messageTheme: MessageTheme(
+            messageTheme: StreamMessageThemeData(
                 ...
-                messageText: TextStyle(),
+                messageTextStyle: TextStyle(),
             ),
         );
     },
 )
 ```
 
-If you want to replace the entire text widget in the `MessageWidget`, you can use the `textBuilder`
+If you want to replace the entire text widget in the `StreamMessageWidget`, you can use the `textBuilder`
 parameter which provides a builder for creating a widget to substitute the default text.parameter
 
 ```dart
-MessageListView(
+StreamMessageListView(
     ...
     messageBuilder: (context, messageDetails, messageList, defaultWidget) {
         return defaultWidget.copyWith(
@@ -101,10 +101,10 @@ MessageListView(
 
 ### Adding Hashtags
 
-To add elements like hashtags, we can override the `textBuilder` in the MessageWidget:
+To add elements like hashtags, we can override the `textBuilder` in the StreamMessageWidget:
 
 ```dart
-MessageListView(
+StreamMessageListView(
     ...
     messageBuilder: (context, messageDetails, messageList, defaultWidget) {
         return defaultWidget.copyWith(

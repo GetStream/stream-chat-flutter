@@ -6,6 +6,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// The widget uses a [StreamBuilder] to render the channel information
 /// image as soon as it updates.
+@Deprecated("Use 'StreamChannelName' instead")
 class ChannelName extends StatelessWidget {
   /// Instantiate a new ChannelName
   const ChannelName({

@@ -645,8 +645,8 @@ void main() {
 
           when(() => persistence.getChannelThreads(any()))
               .thenAnswer((_) async => {});
-          when(() => persistence.updateMessages(any(), any()))
-              .thenAnswer((_) => Future.value());
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async => {});
           when(() => persistence.getChannelStateByCid(any(),
               messagePagination: any(named: 'messagePagination'),
               pinnedMessagePagination:
@@ -692,7 +692,7 @@ void main() {
 
           verify(() => persistence.getChannelThreads(any()))
               .called((persistentChannelStates + channelStates).length);
-          verify(() => persistence.updateMessages(any(), any()))
+          verify(() => persistence.updateChannelThreads(any(), any()))
               .called((persistentChannelStates + channelStates).length);
           verify(
             () => persistence.getChannelStateByCid(any(),
@@ -733,8 +733,8 @@ void main() {
 
           when(() => persistence.getChannelThreads(any()))
               .thenAnswer((_) async => {});
-          when(() => persistence.updateMessages(any(), any()))
-              .thenAnswer((_) => Future.value());
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async => {});
           when(() => persistence.getChannelStateByCid(any(),
               messagePagination: any(named: 'messagePagination'),
               pinnedMessagePagination:
@@ -775,7 +775,7 @@ void main() {
 
           verify(() => persistence.getChannelThreads(any()))
               .called(persistentChannelStates.length);
-          verify(() => persistence.updateMessages(any(), any()))
+          verify(() => persistence.updateChannelThreads(any(), any()))
               .called(persistentChannelStates.length);
           verify(
             () => persistence.getChannelStateByCid(any(),
@@ -1171,7 +1171,7 @@ void main() {
       verifyNoMoreInteractions(api.channel);
     });
 
-    test('`.addDevice`', () async {
+    test('`.addDevice should work`', () async {
       const id = 'test-device-id';
       const provider = PushProvider.firebase;
 
@@ -1182,6 +1182,34 @@ void main() {
       expect(res, isNotNull);
 
       verify(() => api.device.addDevice(id, provider)).called(1);
+      verifyNoMoreInteractions(api.device);
+    });
+
+    test('`.addDevice should work with pushProviderName`', () async {
+      const id = 'test-device-id';
+      const provider = PushProvider.firebase;
+      const pushProviderName = 'my-custom-config';
+
+      when(
+        () => api.device.addDevice(
+          id,
+          provider,
+          pushProviderName: pushProviderName,
+        ),
+      ).thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.addDevice(
+        id,
+        provider,
+        pushProviderName: pushProviderName,
+      );
+      expect(res, isNotNull);
+
+      verify(() => api.device.addDevice(
+            id,
+            provider,
+            pushProviderName: pushProviderName,
+          )).called(1);
       verifyNoMoreInteractions(api.device);
     });
 

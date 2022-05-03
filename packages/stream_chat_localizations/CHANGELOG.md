@@ -1,3 +1,11 @@
+## 3.0.0
+
+* Added translations for viewLibrary.
+
+## 3.0.0-beta.1
+
+* Updated `stream_chat_flutter` dependency to [`4.0.0-beta.1`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
 ## 2.1.0
 
 ✅ Added

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 import 'dart:math';
 
@@ -15,15 +17,11 @@ import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
-import 'package:stream_chat_flutter/src/multi_overlay.dart';
+import 'package:stream_chat_flutter/src/media_list_view_controller.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/user_mentions_overlay.dart';
-import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:video_compress/video_compress.dart';
-
-export 'package:video_compress/video_compress.dart' show VideoQuality;
 
 /// A callback that can be passed to [MessageInput.onError].
 ///
@@ -59,7 +57,7 @@ typedef MentionTileBuilder = Widget Function(
 
 /// Builder function for building a user mention tile.
 ///
-/// Use [UserMentionTile] for the default implementation.
+/// Use [StreamUserMentionTile] for the default implementation.
 typedef UserMentionTileBuilder = Widget Function(
   BuildContext context,
   User user,
@@ -155,12 +153,13 @@ const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 /// }
 /// ```
 ///
-/// You usually put this widget in the same page of a [MessageListView]
+/// You usually put this widget in the same page of a [StreamMessageListView]
 /// as the bottom widget.
 ///
 /// The widget renders the ui based on the first ancestor of
 /// type [StreamChatTheme].
 /// Modify it to change the widget appearance.
+@Deprecated("Use 'StreamMessageInput' instead")
 class MessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
   const MessageInput({
@@ -190,8 +189,6 @@ class MessageInput extends StatefulWidget {
         this.mentionsTileBuilder,
     this.userMentionsTileBuilder,
     this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
-    this.compressedVideoQuality = VideoQuality.DefaultQuality,
-    this.compressedVideoFrameRate = 30,
     this.onError,
     this.attachmentLimit = 10,
     this.onAttachmentLimitExceed,
@@ -211,12 +208,6 @@ class MessageInput extends StatefulWidget {
 
   /// Message to edit
   final Message? editMessage;
-
-  /// Video quality to use when compressing the videos
-  final VideoQuality compressedVideoQuality;
-
-  /// Frame rate to use when compressing the videos
-  final int compressedVideoFrameRate;
 
   /// Max attachment size in bytes
   /// Defaults to 20 MB
@@ -338,11 +329,13 @@ class MessageInput extends StatefulWidget {
 }
 
 /// State of [MessageInput]
+@Deprecated("Use 'StreamMessageInput' instead")
 class MessageInputState extends State<MessageInput> {
   final _attachments = <String, Attachment>{};
   final List<User> _mentionedUsers = [];
 
   final _imagePicker = ImagePicker();
+  final _mediaListViewController = MediaListViewController();
   late final _focusNode = widget.focusNode ?? FocusNode();
   late final _isInternalFocusNode = widget.focusNode == null;
   bool _inputEnabled = true;
@@ -361,7 +354,7 @@ class MessageInputState extends State<MessageInput> {
       widget.textEditingController ?? TextEditingController();
 
   late StreamChatThemeData _streamChatTheme;
-  late MessageInputThemeData _messageInputTheme;
+  late StreamMessageInputThemeData _messageInputTheme;
 
   bool get _hasQuotedMessage => widget.quotedMessage != null;
 
@@ -480,11 +473,12 @@ class MessageInputState extends State<MessageInput> {
     if (widget.editMessage == null) {
       child = Material(
         elevation: 8,
+        color: _messageInputTheme.inputBackgroundColor,
         child: child,
       );
     }
 
-    return MultiOverlay(
+    return StreamMultiOverlay(
       childAnchor: Alignment.topCenter,
       overlayAnchor: Alignment.bottomCenter,
       overlayOptions: [
@@ -679,6 +673,7 @@ class MessageInputState extends State<MessageInput> {
           gradient: _focusNode.hasFocus
               ? _messageInputTheme.activeBorderGradient
               : _messageInputTheme.idleBorderGradient,
+          color: _messageInputTheme.inputBackgroundColor,
         ),
         child: Padding(
           padding: const EdgeInsets.all(1.5),
@@ -928,7 +923,7 @@ class MessageInputState extends State<MessageInput> {
     if (renderObject == null) {
       return const Offstage();
     }
-    return CommandsOverlay(
+    return StreamCommandsOverlay(
       channel: StreamChannel.of(context).channel,
       size: Size(renderObject.size.width - 16, 400),
       text: text,
@@ -1054,6 +1049,26 @@ class MessageInputState extends State<MessageInput> {
                               );
                             },
                     ),
+                    const Spacer(),
+                    FutureBuilder(
+                      future: PhotoManager.requestPermissionExtend(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData &&
+                            snapshot.data == PermissionState.limited) {
+                          return TextButton(
+                            child: Text(context.translations.viewLibrary),
+                            onPressed: () async {
+                              await PhotoManager.presentLimited();
+                              _mediaListViewController.updateMedia(
+                                newValue: true,
+                              );
+                            },
+                          );
+                        }
+
+                        return const SizedBox.shrink();
+                      },
+                    ),
                   ],
                 ),
                 DecoratedBox(
@@ -1086,6 +1101,7 @@ class MessageInputState extends State<MessageInput> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: _PickerWidget(
+                        mediaListViewController: _mediaListViewController,
                         filePickerIndex: _filePickerIndex,
                         streamChatTheme: _streamChatTheme,
                         containsFile: _attachmentContainsFile,
@@ -1117,41 +1133,18 @@ class MessageInputState extends State<MessageInput> {
 
     if (mediaFile == null) return;
 
-    var file = AttachmentFile(
+    final file = AttachmentFile(
       path: mediaFile.path,
       size: await mediaFile.length(),
       bytes: mediaFile.readAsBytesSync(),
     );
 
     if (file.size! > widget.maxAttachmentSize) {
-      if (medium.type == AssetType.video && file.path != null) {
-        final mediaInfo = await VideoService.compressVideo(
-          file.path!,
-          frameRate: widget.compressedVideoFrameRate,
-          quality: widget.compressedVideoQuality,
-        );
-
-        if (mediaInfo == null ||
-            mediaInfo.filesize! > widget.maxAttachmentSize) {
-          _showErrorAlert(
-            context.translations.fileTooLargeAfterCompressionError(
-              widget.maxAttachmentSize / (1024 * 1024),
-            ),
-          );
-          return;
-        }
-        file = AttachmentFile(
-          name: file.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file?.readAsBytes(),
-          path: mediaInfo.path,
-        );
-      } else {
-        _showErrorAlert(context.translations.fileTooLargeError(
+      return _showErrorAlert(
+        context.translations.fileTooLargeError(
           widget.maxAttachmentSize / (1024 * 1024),
-        ));
-        return;
-      }
+        ),
+      );
     }
 
     setState(() {
@@ -1193,7 +1186,7 @@ class MessageInputState extends State<MessageInput> {
     }
 
     return LayoutBuilder(
-      builder: (context, snapshot) => UserMentionsOverlay(
+      builder: (context, snapshot) => StreamUserMentionsOverlay(
         query: query,
         mentionAllAppUsers: widget.mentionAllAppUsers,
         client: StreamChat.of(context).client,
@@ -1238,7 +1231,7 @@ class MessageInputState extends State<MessageInput> {
     // ignore: cast_nullable_to_non_nullable
     final renderObject = context.findRenderObject() as RenderBox;
 
-    return EmojiOverlay(
+    return StreamEmojiOverlay(
       size: Size(renderObject.size.width - 16, 200),
       query: query,
       onEmojiResult: (emoji) {
@@ -1272,8 +1265,8 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return const Offstage();
     final containsUrl = widget.quotedMessage!.attachments
-        .any((element) => element.titleLink != null);
-    return QuotedMessageWidget(
+        .any((element) => element.ogScrapeUrl != null);
+    return StreamQuotedMessageWidget(
       reverse: true,
       showBorder: !containsUrl,
       message: widget.quotedMessage!,
@@ -1304,10 +1297,8 @@ class MessageInputState extends State<MessageInput> {
                     .map<Widget>(
                       (e) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: FileAttachment(
-                          message: Message(
-                            status: MessageSendingStatus.sending,
-                          ), // dummy message
+                        child: StreamFileAttachment(
+                          message: Message(), // dummy message
                           attachment: e,
                           size: Size(
                             MediaQuery.of(context).size.width * 0.65,
@@ -1428,7 +1419,7 @@ class MessageInputState extends State<MessageInput> {
       case 'video':
         return Stack(
           children: [
-            VideoThumbnailImage(
+            StreamVideoThumbnailImage(
               height: 104,
               width: 104,
               video: (attachment.file?.path ?? attachment.assetUrl)!,
@@ -1678,33 +1669,11 @@ class MessageInputState extends State<MessageInput> {
     );
 
     if (file.size! > widget.maxAttachmentSize) {
-      if (attachmentType == 'video' && file.path != null) {
-        final mediaInfo = await (VideoService.compressVideo(
-          file.path!,
-          frameRate: widget.compressedVideoFrameRate,
-          quality: widget.compressedVideoQuality,
-        ) as FutureOr<MediaInfo>);
-
-        if (mediaInfo.filesize! > widget.maxAttachmentSize) {
-          _showErrorAlert(
-            context.translations.fileTooLargeAfterCompressionError(
-              widget.maxAttachmentSize / (1024 * 1024),
-            ),
-          );
-          return;
-        }
-        file = AttachmentFile(
-          name: file.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file!.readAsBytes(),
-          path: mediaInfo.path,
-        );
-      } else {
-        _showErrorAlert(context.translations.fileTooLargeError(
+      return _showErrorAlert(
+        context.translations.fileTooLargeError(
           widget.maxAttachmentSize / (1024 * 1024),
-        ));
-        return;
-      }
+        ),
+      );
     }
 
     setState(() {
@@ -1943,7 +1912,7 @@ class MessageInputState extends State<MessageInput> {
   @override
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
-    _messageInputTheme = MessageInputTheme.of(context);
+    _messageInputTheme = StreamMessageInputTheme.of(context);
     if (widget.editMessage == null) _startSlowMode();
 
     if ((widget.editMessage != null || widget.initialMessage != null) &&
@@ -1964,6 +1933,7 @@ class _PickerWidget extends StatefulWidget {
     required this.onAddMoreFilesClick,
     required this.onMediaSelected,
     required this.streamChatTheme,
+    required this.mediaListViewController,
   }) : super(key: key);
 
   final int filePickerIndex;
@@ -1972,6 +1942,7 @@ class _PickerWidget extends StatefulWidget {
   final void Function(DefaultAttachmentTypes) onAddMoreFilesClick;
   final void Function(AssetEntity) onMediaSelected;
   final StreamChatThemeData streamChatTheme;
+  final MediaListViewController mediaListViewController;
 
   @override
   _PickerWidgetState createState() => _PickerWidgetState();
@@ -2019,7 +1990,9 @@ class _PickerWidgetState extends State<_PickerWidget> {
               ),
             );
           }
-          return MediaListView(
+
+          return StreamMediaListView(
+            controller: widget.mediaListViewController,
             selectedIds: widget.selectedMedias,
             onSelect: widget.onMediaSelected,
           );

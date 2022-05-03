@@ -3,10 +3,16 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 
-/// Widget to display deleted message
-class DeletedMessage extends StatelessWidget {
-  /// Constructor to create [DeletedMessage]
-  const DeletedMessage({
+/// {@macro deleted_message}
+@Deprecated("Use 'StreamDeletedMessage' instead")
+typedef DeletedMessage = StreamDeletedMessage;
+
+/// {@template deleted_message}
+/// Widget to display deleted message.
+/// {@endtemplate}
+class StreamDeletedMessage extends StatelessWidget {
+  /// Constructor to create [StreamDeletedMessage]
+  const StreamDeletedMessage({
     Key? key,
     required this.messageTheme,
     this.borderRadiusGeometry,
@@ -16,7 +22,7 @@ class DeletedMessage extends StatelessWidget {
   }) : super(key: key);
 
   /// The theme of the message
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   /// The border radius of the message text
   final BorderRadiusGeometry? borderRadiusGeometry;

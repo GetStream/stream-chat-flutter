@@ -1,0 +1,753 @@
+---
+id: migration_guide_4_0
+sidebar_position: 14
+title: Migration Guide For The Stream Chat Flutter SDK v4.0
+---
+
+**Version 4.0.0** of the Stream Chat Flutter SDK carries significant architectural changes to improve the developer experience by giving you more control and flexibility in how you use our core components and UI widgets.
+
+This guide is intended to enumerate and better explain the changes in the SDK.
+
+If you find any bugs or have any questions, please file an [issue on our GitHub repository](https://github.com/GetStream/stream-chat-flutter/issues). We want to support you as much as we can with this migration.
+
+Code examples:
+
+- See our [Stream Chat Flutter tutorial](https://getstream.io/chat/flutter/tutorial/) for an up-to-date guide using the latest Stream Chat version.
+- See the [Stream Flutter Samples repository](https://github.com/GetStream/flutter-samples) with our fully-fledged messaging [sample application](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1).
+
+All of our documentation has also been updated to support v4, so all of the guides and examples will have updated code.
+
+### Dependencies
+
+To migrate to v4.0.0, update your `pubspec.yaml` with the correct Stream chat package you're using:
+
+```yaml
+dependencies:
+	stream_chat_flutter: ^4.0.0 # full UI, core and client packages
+	stream_chat_flutter_core: ^4.0.0 # core and client packages
+	stream_chat: ^4.0.0 # client package
+```
+
+---
+
+## Name Changes
+
+The majority of the Stream Chat widgets and classes have now been renamed to have a “Stream” prefix associated with them. This increases Stream widgets' discoverability and avoids name conflicts when importing.
+
+For example, `MessageListView` is now called `StreamMessageListView`, and `UserAvatar` is renamed to `StreamUserAvatar`.
+
+**The old class names are deprecated and will be removed in the next major release (v5.0.0).**
+
+See the sections below on “deprecated classes” for a complete list of changes. Some of these classes/widgets have undergone functional changes as well, that will be explore in the following sections.
+
+## Removed Functionality/Widgets
+
+This section highlights functionality removed.
+
+## Removed methods and classes
+
+In version 4 we removed the following deprecated methods and classes:
+
+* `Channel.banUser`
+
+* `Channel.unbanUser`
+
+* `ClientState.user`
+
+* `ClientState.userStream`
+
+* `MessageWidget.allRead`
+
+* `MessageWidget.readList`
+
+* `StreamChat.user`
+
+* `StreamChat.userStream`
+
+* `StreamChatCore.user`
+
+* `StreamChatCore.userStream`
+
+These were marked as deprecated in v3.
+
+### Video Compression
+
+The automatic video compression when uploading a video has been removed. You can integrate this yourself by manipulating attachments using a [custom attachment uploader](https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart).
+
+### Slidable Channel List Item
+
+The default slidable channel preview behavior has been removed. We have created a [guide](slidable_channel_list_preview.mdx) showing you how you can easily add this functionality yourself.
+
+![Slidable demo](../assets/slidable_demo.jpg)
+
+### Pin Permission
+
+`pinPermissions` is no longer needed in the **MessageListView** widget. The permissions are automatically fetched for each Stream project. To enable users to pin the message, make sure the pin permissions are granted for different types of users on your [Stream application dashboard](https://dashboard.getstream.io/).
+
+---
+
+## Deprecated Classes
+
+This section covers all the deprecated classes and widgets in the Stream chat packages. Some of these have also undergone functional changes, for example, **MessageInput** and **ChannelsBloc**. These are discussed in more detail below.
+
+The majority of the Stream widgets and classes have now been renamed to have a **"Stream"** prefix associated with them.
+
+Changes:
+
+- `AttachmentTitle` in favor of `StreamAttachmentTitle`
+- `AttachmentUploadStateBuilder` in favor of `StreamAttachmentsUploadStateBuilder`
+- `AttachmentWidget` in favor of `StreamAttachmentWidget`
+- `AvatarThemeData` in favor of `StreamAvatarThemeData`
+- `ChannelAvatar` in favor of `StreamChannelAvatar`
+- `ChannelBottomSheet` in favor of `StreamChannelInfoBottomSheet`
+- `ChannelHeader` in favor of `StreamChannelHeader`
+- `ChannelHeaderTheme` in favor of `StreamChannelHeaderTheme`
+- `ChannelHeaderThemeData` in favor of `StreamChannelHeaderThemeData`
+- `ChannelInfo` in favor of `StreamChannelInfo`
+- `ChannelListHeader` in favor of `StreamChannelListHeader`
+- `ChannelListHeaderTheme` in favor of `StreamChannelListHeaderTheme`
+- `ChannelListHeaderThemeData` in favor of `StreamChannelListHeaderThemeData`
+- `ChannelListView` in favor of `StreamChannelListView`
+- `ChannelListViewTheme` in favor of `StreamChannelListViewTheme`
+- `ChannelListViewThemeData` in favor of `StreamChannelListViewThemeData`
+- `ChannelListHeader` in favor of `StreamChannelListHeader`
+- `ChannelListView` in favor of `StreamChannelListView`
+- `ChannelName` in favor of `StreamChannelName`
+- `ChannelPreview` in favor of `StreamChannelListTile`
+- `ChannelPreviewTheme` in favor of `StreamChannelPreviewTheme`
+- `ChannelPreviewThemeData` in favor of `StreamChannelPreviewThemeData`
+- `ChannelName` in favor of `StreamChannelName`
+- `ColorTheme` in favor of `StreamColorTheme`
+- `CommandsOverlay` in favor of `StreamCommandsOverlay`
+- `ConnectionStatusBuilder` in favor of `StreamConnectionStatusBuilder`
+- `DateDivider` in favor of `StreamDateDivider`
+- `DeletedMessage` in favor of `StreamDeletedMessage`
+- `EmojiOverlay` in favor of `StreamEmojiOverlay`
+- `FileAttachment` in favor of `StreamFileAttachment`
+- `FullScreenMedia` in favor of `StreamFullScreenMedia`
+- `GalleryFooter` in favor of `StreamGalleryFooter`
+- `GalleryFooterThemeData` in favor of `StreamGalleryFooterThemeData`
+- `GalleryHeader` in favor of `StreamGalleryHeader`
+- `GalleryHeaderTheme` in favor of `StreamGalleryHeaderTheme`
+- `GalleryHeaderThemeData` in favor of `StreamGalleryHeaderThemeData`
+- `GiphyAttachment` in favor of `StreamGiphyAttachment`
+- `GradientAvatar` in favor of `StreamGradientAvatar`
+- `GroupAvatar` in favor of `StreamGroupAvatar`
+- `ImageAttachment` in favor of `StreamImageAttachment`
+- `ImageGroup` in favor of `StreamImageGroup`
+- `InfoTile` in favor of `StreamInfoTile`
+- `MediaListView` in favor of `StreamMediaListView`
+- `MessageAction` in favor of `StreamMessageAction`
+- `MessageActionsModal` in favor `StreamMessageActionsModal`
+- `MessageInput` in favor of `StreamMessageInput`
+- `MessageInputTheme` in favor of `StreamMessageInputTheme`
+- `MessageInputThemeData` in favor of `StreamMessageInputThemeData`
+- `MessageInputState` in favor of `StreamMessageInput`
+- `MessageListView` in favor of `StreamMessageListView`
+- `MessageListViewTheme` in favor of `StreamMessageListViewTheme`
+- `MessageListViewThemeData` in favor of `StreamMessageListViewThemeData`
+- `MessageSearchListView` in favor of `StreamMessageSearchListView`
+- `MessageSearchListViewTheme` in favor of `StreamMessageSearchListViewTheme`
+- `MessageSearchListViewThemeData` in favor of `StreamMessageSearchListViewThemeData`
+- `MessageReactionsModal` in favor of `StreamMessageReactionsModal`
+- `MessageSearchItem` in favor of `StreamMessageSearchItem`
+- `MessageSearchListView` in favor of `StreamMessageSearchListView`
+- `MessageText` in favor of `StreamMessageText`
+- `MessageWidget` in favor of `StreamMessageWidget`
+- `MessageThemeData` in favor of `StreamMessageThemeData`
+- `MultiOverlay` in favor of `StreamMultiOverlay`
+- `OptionListTile` in favor of `StreamOptionListTile`
+- `QuotedMessageWidget` in favor of `StreamQuotedMessageWidget`
+- `ReactionBubble` in favor of `StreamReactionBubble`
+- `ReactionIcon` in favor of `StreamReactionIcon`
+- `ReactionPicker` in favor of `StreamReactionPicker`
+- `SendingIndicator` in favor of `StreamSendingIndicator`
+- `SystemMessage` in favor of `StreamSystemMessage`
+- `TextTheme` in favor of `StreamTextTheme`
+- `ThreadHeader` in favor of `StreamThreadHeader`
+- `TypingIndicator` in favor of `StreamTypingIndicator`
+- `UnreadIndicator` in favor of `SteamUnreadIndicator`
+- `UploadProgressIndicator` in favor of `StreamUploadProgressIndicator`
+- `UrlAttachment` in favor of `StreamUrlAttachment`
+- `UserAvatar` in favor of `StreamUserAvatar`
+- `UserItem` in favor of `StreamUserItem`
+- `UserListView` in favor of `StreamUserListView`
+- `UserListViewTheme` in favor of `StreamUserListViewTheme`
+- `UserListViewThemeData` in favor of `StreamUserListViewThemeData`
+- `UserMentionTile` in favor of `StreamUserMentionTile`
+- `UserMentionsOverlay` in favor of `StreamUserMentionsOverlay`
+- `VideoAttachment` in favor of `StreamVideoAttachment`
+- `VideoService` in favor of `StreamVideoService`
+- `VideoThumbnailImage` in favor of `StreamVideoThumbnailImage`
+- `VisibleFootnote` in favor of `StreamVisibleFootnote`
+
+## ChannelListView to StreamChannelListView
+
+The `ChannelListView` widget has been deprecated, and it is now recommended to use `StreamChannelListView`.
+
+Version 4 of the Stream Chat Flutter packages introduces a new controller called, `StreamChannelListController`. This controller manages the content for a channel list; it lets you perform tasks such as:
+
+- Load initial data.
+- Use channel events handlers.
+- Load more data using `loadMore`.
+- Replace the previously loaded channels.
+- Return/Create a new channel and start watching it.
+- Pause and Resume all subscriptions added to this composite.
+
+For more information see the [`StreamChannelListView` documentation](../stream_chat_flutter/stream_channel_list_view.mdx).
+
+### ChannelsBloc to StreamChannelListController
+
+The `ChannelsBloc` widget should be replaced with `StreamChannelListController`. This controller provides all the functionality needed to query and manipulate channel data previously accessible through `ChannelsBloc`.
+
+For more information see the [`StreamChannelListController` documentation](../stream_chat_flutter_core/stream_channel_list_controller.mdx).
+
+### StreamChannelListView Examples
+
+Let's explore some examples of the functional differences when using the new `StreamChannelListView`.
+
+The **StreamChannelListController** provides various methods, such as:
+
+- **deleteChannel**
+- **loadMore**
+- **muteChannel**
+- **deleteChannel**
+
+For a complete list with additional information, see the code documentation.
+
+#### Basic Use
+
+The following code demonstrates the old way of creating a **ChannelListPage**, that displays a list of channels:
+
+```dart
+class ChannelListPage extends StatelessWidget {
+  const ChannelListPage({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  // ignore: prefer_expression_function_bodies
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: ChannelsBloc(
+        child: ChannelListView(
+          filter: Filter.in_(
+            'members',
+            [StreamChat.of(context).currentUser!.id],
+          ),
+          sort: const [SortOption('last_message_at')],
+          limit: 20,
+          channelWidget: const ChannelPage(),
+        ),
+      ),
+    );
+  }
+}
+```
+
+In **v4** this can now be achieved with the following:
+
+```dart
+class ChannelListPage extends StatefulWidget {
+  const ChannelListPage({
+    Key? key,
+    required this.client,
+  }) : super(key: key);
+
+  final StreamChatClient client;
+
+  @override
+  State<ChannelListPage> createState() => _ChannelListPageState();
+}
+
+class _ChannelListPageState extends State<ChannelListPage> {
+  late final _controller = StreamChannelListController(
+    client: widget.client,
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).currentUser!.id],
+    ),
+    sort: const [SortOption('last_message_at')],
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: RefreshIndicator(
+          onRefresh: _controller.refresh,
+          child: StreamChannelListView(
+            controller: _controller,
+            onChannelTap: (channel) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StreamChannel(
+                  channel: channel,
+                  child: const ChannelPage(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+```
+
+As you can see, the **ChannelsBloc** has been replaced with a **StreamChannelListController**, where the **filter**, **limit**, and **sort** arguments can be set. The above code also demonstrates how to refresh the channel list by calling `_controller.refresh()`.
+
+## MessageSearchListView to StreamMessageSearchListView
+
+The `MessageSearchListView` widget has been deprecated, and it is now recommended to use `StreamMessageSearchListView`.
+
+Version 4 of the Stream Chat Flutter packages introduces a new controller called, `StreamMessageSearchListController`. This controller manages the content when searching for a message; it lets you perform tasks such as:
+
+- Load initial data.
+- Set filters and search terms.
+- Load more data using `loadMore`.
+- Refresh data.
+
+For more information see the [`StreamMessageSearchListView` documentation](../stream_chat_flutter/stream_message_search_list_view.mdx).
+
+### MessageSearchBloc to StreamMessageSearchListController
+
+The `MessageSearchBloc` widget should be replaced with a `StreamMessageSearchListController`. This controller provides all the functionality needed to query and manipulate message search data previously accessible through `MessageSearchBloc`.
+
+For more information see the [`StreamMessageSearchListController` documentation](../stream_chat_flutter_core/stream_message_search_list_controller.mdx).
+
+### StreamMessageSearchListView Example
+
+The following code demonstrates the old way of searching for messages:
+
+```dart
+class SearchExample extends StatelessWidget {
+  const SearchExample({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MessageSearchBloc(
+      child: MessageSearchListView(
+        showErrorTile: true,
+        messageQuery: 'message query',
+        filters: Filter.in_('members', const ['user-id']),
+        sortOptions: const [
+          SortOption(
+            'created_at',
+            direction: SortOption.ASC,
+          ),
+        ],
+        pullToRefresh: false,
+        limit: 30,
+        emptyBuilder: (context) => const Text('Nothing to show'),
+				itemBuilder: (context, messageResponse) {
+					/// Return widget
+				}
+        onItemTap: (messageResponse) {
+          /// Handle on tap
+        }
+      ),
+    );
+  }
+}
+```
+
+In **v4**, this can now be achieved with the following:
+
+```dart
+class SearchExample extends StatefulWidget {
+  const SearchExample({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<SearchExample> createState() => _SearchExampleState();
+}
+
+class _SearchExampleState extends State<SearchExample> {
+  late final StreamMessageSearchListController _messageSearchListController =
+      StreamMessageSearchListController(
+    client: StreamChat.of(context).client,
+    filter: Filter.in_('members', [StreamChat.of(context).currentUser!.id]),
+    limit: 5,
+    searchQuery: '',
+    sort: [
+      const SortOption(
+        'created_at',
+        direction: SortOption.ASC,
+      ),
+    ],
+  );
+
+	search() {
+    _messageSearchListController.searchQuery = 'search-value';
+    _messageSearchListController.doInitialLoad();
+  }
+
+  @override
+  dispose() {
+    _messageSearchListController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamMessageSearchListView(
+        controller: _messageSearchListController,
+        emptyBuilder: (context) => const Text('Nothing to show'),
+        itemBuilder: (
+          context,
+          messageResponses,
+          index,
+          defaultWidget,
+        ) {
+          return defaultWidget.copyWith(); // modify default widget
+        });
+  }
+}
+```
+
+## UserListView to StreamUserListView
+
+The `UserListView` widget has been deprecated, and it is now recommended to use `StreamUserListView`.
+
+Version 4 of the Stream Chat Flutter packages introduces a new controller called, `StreamUserListController`. This controller manages the content when retrieving Stream users; it let's you perform tasks, such as:
+
+- Load data.
+- Set filters.
+- Refresh data.
+
+For more information see the [`StreamUserListView` documentation](../stream_chat_flutter/stream_user_list_view.mdx).
+
+### UsersBloc to StreamUserListController
+
+The `UsersBloc` widget should be replaced with a `StreamUserListController`. This controller provides all the functionality needed to query and manipulate user data previously accessible through `UsersBloc`.
+
+For more information see the [`StreamUserListController` documentation](../stream_chat_flutter_core/stream_user_list_controller.mdx).
+
+### StreamUserListView Example
+
+The following code demonstrates the old way of displaying all users:
+
+```dart
+class UsersExample extends StatelessWidget {
+  const UsersExample({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return UsersBloc(
+      child: UserListView(
+        groupAlphabetically: true,
+        onUserTap: (user, _) {
+          /// Handle on tap
+        },
+        limit: 25,
+        filter: Filter.and([
+          Filter.autoComplete('name', 'some-name'),
+          Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+        ]),
+        sort: const [
+          SortOption(
+            'name',
+            direction: 1,
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+In **v4**, this can now be achieved with the following:
+
+```dart
+class UsersExample extends StatefulWidget {
+  const UsersExample({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<UsersExample> createState() => _UsersExampleState();
+}
+
+class _UsersExampleState extends State<UsersExample> {
+  late final userListController = StreamUserListController(
+    client: StreamChat.of(context).client,
+    limit: 25,
+    filter: Filter.and([
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+    ]),
+    sort: [
+      const SortOption(
+        'name',
+        direction: 1,
+      ),
+    ],
+  );
+
+  void _load() {
+    userListController.filter = Filter.and([
+      Filter.autoComplete('name', 'some-name'),
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+    ]);
+    userListController.doInitialLoad();
+  }
+
+  @override
+  dispose() {
+    userListController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamUserListView(
+      controller: userListController,
+      onUserTap: (user) {
+        /// Handle on tap
+      },
+      emptyBuilder: (context) => const Text('Nothing to show'),
+      itemBuilder: (
+        context,
+        users,
+        index,
+        defaultWidget,
+      ) {
+        return defaultWidget.copyWith(); // modify default widget
+      },
+    );
+  }
+}
+```
+
+## MessageInput to StreamMessageInput
+
+The `MessageInput` widget has been deprecated, and it is now recommended to use `StreamMessageInput`.
+
+Version 4 of the Stream Chat Flutter packages introduces a new controller called, `MessageInputController`. This controller maintains the state of the message input and exposes various methods to allow you to customize and manipulate the underlying **Message** value.
+
+Creating a separate controller allows easier control over the message input content by moving logic out of the deprecated `MessageInput` and into the controller. This controller can then be created, managed, and exposed in whatever way you like.
+
+The widget is also separated into smaller components: `StreamCountDownButton`, `StreamAttachmentPicker`, etc.
+
+> ❗The `MessageInputController` is exposed by the **stream_chat_flutter_core** package. This allows you to use the controller even if you're not using the UI components.
+
+As a result of this extra control, it is no longer needed for the new `StreamMessageInput` widget to expose these `MessageInput` arguments:
+
+- `parentMessage`: parent message in case of a thread
+- `editMessage`: message to edit
+- `initialMessage`: message to start with
+- `quotedMessage`: message to quote/reply
+- `onQuotedMessageCleared`: callback for clearing quoted message
+- `textEditingController`: the text controller of the text field
+
+The following arguments are newly introduced to the `StreamMessageInput`, and are not available on the old `MessageInput`:
+
+- `messageInputController`: the controller for the message input
+- `attachmentsPickerBuilder`: builder for bottom sheet when attachment picker is opened
+- `sendButtonBuilder`: builder for creating send button
+- `validator`: a callback function that validates the message
+- `restorationId`: restoration ID to save and restore the state of the MessageInput
+- `enableSafeArea`: wraps the **StreamMessageInput** widget with a **SafeArea** widget
+- `elevation`: elevation of the **StreamMessageInput** widget
+- `shadow`: **Shadow** for the **StreamMessageInput** widget
+
+For more information see the [`StreamMessageInput` documentation](../stream_chat_flutter_core/stream_message_input_controller.mdx).
+
+### StreamMessageInput Examples
+
+Let's explore some examples of the functional differences when using the new `StreamMessageInput`.
+
+#### Basic Use
+
+Unless you want to programmatically manipulate the value of the message input, then there is no difference in how you would use the message input widget.
+
+The following code demonstrates the old way of creating a **ChannelPage** widget that displays a chat screen:
+
+```dart
+class ChannelPage extends StatelessWidget {
+  const ChannelPage({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const ChannelHeader(),
+      body: Column(
+        children: const <Widget>[
+          Expanded(
+            child: MessageListView(),
+          ),
+          MessageInput(),
+        ],
+      ),
+    );
+  }
+}
+```
+
+In **v4** this is the same, the only difference being that all the Stream widgets are now prefixed with **Stream**. For example, **MessageListView** becomes **StreamMessageListView**, and so forth.
+
+```dart
+class ChannelPage extends StatelessWidget {
+  const ChannelPage({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: const StreamChannelHeader(),
+        body: Column(
+          children: const <Widget>[
+            Expanded(
+              child: StreamMessageListView(),
+            ),
+            StreamMessageInput(),
+          ],
+        ),
+      );
+}
+```
+
+However, you can optionally pass in a **MessageInputController** in the **StreamMessageInput**, which gives extra control over the message input value.
+
+#### Thread Page
+
+The following code demonstrates the old way of creating a thread page:
+
+```dart
+class ThreadPage extends StatelessWidget {
+  const ThreadPage({
+    Key? key,
+    this.parent,
+  }) : super(key: key);
+
+  final Message? parent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: ThreadHeader(
+        parent: parent!,
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: MessageListView(
+              parentMessage: parent,
+            ),
+          ),
+          MessageInput(
+            parentMessage: parent,
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+In **v4** the only difference is the **Stream** prefix and the way that the parent message is passed to the message input:
+
+```dart
+class ThreadPage extends StatelessWidget {
+  const ThreadPage({
+    Key? key,
+    this.parent,
+  }) : super(key: key);
+
+  final Message? parent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: StreamThreadHeader(
+        parent: parent!,
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: StreamMessageListView(
+              parentMessage: parent,
+            ),
+          ),
+          StreamMessageInput(
+            messageInputController: MessageInputController(
+              message: Message(parentId: parent!.id),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+To send a thread message, you need to specify the message's parent ID for which you're creating a thread.
+
+#### Reply/Quote Message
+
+The following code demonstrates the old way of replying to a message:
+
+```dart
+...
+
+void _reply(Message message) {
+  setState(() => _quotedMessage = message);
+}
+
+...
+
+MessageInput
+	quotedMessage: _quotedMessage,
+  onQuotedMessageCleared: () {
+    setState(() => _quotedMessage = null);
+  },
+),
+```
+
+To reply to a message in **v4**:
+
+```dart
+...
+
+void _reply(Message message) {
+  _messageInputController.quotedMessage = message;
+}
+
+...
+
+StreamMessageInput(
+  messageInputController: _messageInputController,
+),
+```
+
+The controller makes it much simpler to dynamically modify the message input.
+
+## Stream Chat Flutter Core
+
+Various changes have been made to the Core package, most notably, the indroduction of all of the controllers mentioned above:
+
+These controllers replace the business logic implementations (Bloc). Please note that this is not related to the well-known Flutter Bloc package, but instead refers to the naming we used for our business logic components.
+
+In this version we're introducing controllers in place of their bloc counterparts:
+**StreamChannelListController** in favor of **ChannelsBloc**
+**StreamMessageSearchListController** in favor of **MessageSearchBloc**
+**StreamUserListController** in favor of **UsersBloc**
+
+The Bloc components are deprecated in v4.0.0 but can still be used. They will be removed in the next major release (v5.0.0).
+
+Additionally, we also now have the **StreamMessageInputController**, as discussed above. This can be used outside of our UI package as well.
+
+Finally, the following Core builders are also deprecated as their functionality can be replaced using their controller counterparts:
+
+- ChannelListCore
+- MessageSearchListCore
+- UserListCore

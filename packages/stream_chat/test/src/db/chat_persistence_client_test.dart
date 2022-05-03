@@ -117,19 +117,20 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> updateUsers(List<User> users) => Future.value();
 
   @override
-  Future<void> bulkUpdateMembers(Map<String, List<Member>> members) =>
+  Future<void> bulkUpdateMembers(Map<String, List<Member>?> members) =>
       Future.value();
 
   @override
-  Future<void> bulkUpdateMessages(Map<String, List<Message>> messages) =>
+  Future<void> bulkUpdateMessages(Map<String, List<Message>?> messages) =>
       Future.value();
 
   @override
-  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>> messages) =>
+  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>?> messages) =>
       Future.value();
 
   @override
-  Future<void> bulkUpdateReads(Map<String, List<Read>> reads) => Future.value();
+  Future<void> bulkUpdateReads(Map<String, List<Read>?> reads) =>
+      Future.value();
 }
 
 void main() {
@@ -160,6 +161,23 @@ void main() {
       const cid = 'test:cid';
       final channelState = await persistenceClient.getChannelStateByCid(cid);
       expect(channelState, isNotNull);
+    });
+
+    test('updateChannelThreads', () async {
+      const cid = 'test:cid';
+      final user = User(id: 'test-user-id');
+      final threads = {
+        'parent-test-message': [
+          Message(
+            id: 'test-message',
+            text: 'test-message',
+            user: user,
+            ownReactions: [Reaction(type: 'test', user: user)],
+            latestReactions: [Reaction(type: 'test', user: user)],
+          )
+        ]
+      };
+      persistenceClient.updateChannelThreads(cid, threads);
     });
 
     test('updateChannelState', () async {

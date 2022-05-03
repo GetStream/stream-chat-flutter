@@ -71,16 +71,16 @@ If you require the maximum amount of control over the API, please use the low le
 These are the available Widgets that you can use to build your application UI.
 Every widget uses the `StreamChat` or `StreamChannel` widgets to manage the state and communicate with Stream services.
 
-- [ChannelHeader](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ChannelHeader-class.html)
-- [ChannelImage](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ChannelImage-class.html)
-- [ChannelListView](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ChannelListView-class.html)
-- [ChannelName](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ChannelName-class.html)
-- [ChannelPreview](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ChannelPreview-class.html)
-- [MessageInput](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/MessageInput-class.html)
-- [MessageListView](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/MessageListView-class.html)
-- [MessageWidget](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/MessageWidget-class.html)
+- [StreamChannelHeader](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChannelHeader-class.html)
+- [StreamChannelAvatar](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChannelAvatar-class.html)
+- [StreamChannelListView](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChannelListView-class.html)
+- [StreamChannelName](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChannelName-class.html)
+- [StreamChannelListTile](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChannelListTile-class.html)
+- [StreamMessageInput](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamMessageInput-class.html)
+- [StreamMessageListView](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamMessageListView-class.html)
+- [StreamMessageWidget](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamMessageWidget-class.html)
 - [StreamChatTheme](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChatTheme-class.html)
-- [ThreadHeader](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ThreadHeader-class.html)
+- [StreamThreadHeader](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamThreadHeader-class.html)
 - ...
 
 ### Customizing styles

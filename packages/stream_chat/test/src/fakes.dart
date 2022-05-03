@@ -124,7 +124,10 @@ class FakeWebSocket extends Fake implements WebSocket {
   Completer<Event>? connectionCompleter;
 
   @override
-  Future<Event> connect(User user) async {
+  Future<Event> connect(
+    User user, {
+    bool? includeUserDetails = true,
+  }) async {
     connectionStatus = ConnectionStatus.connecting;
     final event = Event(
       type: EventType.healthCheck,
@@ -167,7 +170,10 @@ class FakeWebSocketWithConnectionError extends Fake implements WebSocket {
   Completer<Event>? connectionCompleter;
 
   @override
-  Future<Event> connect(User user) async {
+  Future<Event> connect(
+    User user, {
+    bool? includeUserDetails = true,
+  }) async {
     connectionStatus = ConnectionStatus.connecting;
     const error = StreamWebSocketError('Error Connecting');
     connectionCompleter = Completer()..completeError(error);

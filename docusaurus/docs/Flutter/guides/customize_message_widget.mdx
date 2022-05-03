@@ -1,7 +1,7 @@
 ---
 id: customize_message_widget
 sidebar_position: 11
-title: Customizing The MessageWidget
+title: Customizing The StreamMessageWidget
 ---
 
 Customizing Text Messages
@@ -11,16 +11,16 @@ Customizing Text Messages
 Every application provides a unique look and feel to their own messaging interface including and not
 limited to fonts, colors, and shapes.
 
-This guide details how to customize the `MessageWidget` in the Stream Chat Flutter UI SDK.
+This guide details how to customize the `StreamMessageWidget` in the Stream Chat Flutter UI SDK.
 
 ### Building Custom Messages
 
-This guide goes into detail about the ability to customize the `MessageWidget`. However, if you want
-to customize the default `MessageWidget` in the `MessageListView` provided, you can use the `.copyWith()` method
-provided inside the `messageBuilder` parameter of the `MessageListView` like this:
+This guide goes into detail about the ability to customize the `StreamMessageWidget`. However, if you want
+to customize the default `StreamMessageWidget` in the `StreamMessageListView` provided, you can use the `.copyWith()` method
+provided inside the `messageBuilder` parameter of the `StreamMessageListView` like this:
 
 ```dart
-MessageListView(
+StreamMessageListView(
     messageBuilder: (context, details, messageList, defaultImpl) {
         // Your implementation of the message here
         // E.g: return Text(details.message.text ?? '');
@@ -30,8 +30,8 @@ MessageListView(
 
 ### Theming
 
-You can customize the `MessageWidget` using the `StreamChatTheme` class, so that you can change the
-message theme at the top instead of creating your own `MessageWidget` at the lower implementation level.
+You can customize the `StreamMessageWidget` using the `StreamChatTheme` class, so that you can change the
+message theme at the top instead of creating your own `StreamMessageWidget` at the lower implementation level.
 
 There are several things you can change in the theme including text styles and colors of various elements.
 
@@ -49,13 +49,13 @@ Here is an example:
 StreamChatThemeData(
 
   /// Sets theme for user's messages
-  ownMessageTheme: MessageThemeData(
+  ownMessageTheme: StreamMessageThemeData(
     messageBackgroundColor: colorTheme.textHighEmphasis,
   ),
 
   /// Sets theme for received messages
-  otherMessageTheme: MessageThemeData(
-    avatarTheme: AvatarThemeData(
+  otherMessageTheme: StreamMessageThemeData(
+    avatarTheme: StreamAvatarThemeData(
       borderRadius: BorderRadius.circular(8),
     ),
   ),
@@ -67,11 +67,11 @@ StreamChatThemeData(
 
 #### Change message text style
 
-The `MessageWidget` has multiple `Text` widgets that you can manipulate the styles of. The three main
+The `StreamMessageWidget` has multiple `Text` widgets that you can manipulate the styles of. The three main
 are the actual message text, user name, message links, and the message timestamp.
 
 ```dart
-MessageThemeData(
+StreamMessageThemeData(
   messageTextStyle: TextStyle(...),
   createdAtStyle: TextStyle(...),
   messageAuthorStyle: TextStyle(...),
@@ -86,8 +86,8 @@ MessageThemeData(
 You can change the attributes of the avatar (if displayed) using the `avatarTheme` property.
 
 ```dart
-MessageThemeData(
-    avatarTheme: AvatarThemeData(
+StreamMessageThemeData(
+    avatarTheme: StreamAvatarThemeData(
       borderRadius: BorderRadius.circular(8),
     ),
 )
@@ -100,7 +100,7 @@ MessageThemeData(
 You also customize the reactions attached to every message using the theme.
 
 ```dart
-MessageThemeData(
+StreamMessageThemeData(
   reactionsBackgroundColor: Colors.red,
   reactionsBorderColor: Colors.redAccent,
   reactionsMaskColor: Colors.pink,
@@ -111,12 +111,12 @@ MessageThemeData(
 
 ### Changing Message Actions
 
-When a message is long pressed, the `MessageActionsModal` is shown.
+When a message is long pressed, the `StreamMessageActionsModal` is shown.
 
-The `MessageWidget` allows showing or hiding some options if you so choose.
+The `StreamMessageWidget` allows showing or hiding some options if you so choose.
 
 ```dart
-MessageWidget(
+StreamMessageWidget(
     ...
     showUsername = true,
     showTimestamp = true,
@@ -137,11 +137,11 @@ MessageWidget(
 
 ### Building attachments
 
-The `customAttachmentBuilder` property allows you to build any kind of attachment (inbuilt or custom)
+The `customAttachmentBuilders` property allows you to build any kind of attachment (inbuilt or custom)
 in your own way. While a separate guide is written for this, it is included here because of relevance.
 
 ```dart
-MessageListView(
+StreamMessageListView(
   messageBuilder: (context, details, messages, defaultMessage) {
     return defaultMessage.copyWith(
         customAttachmentBuilders: {
@@ -163,7 +163,7 @@ MessageListView(
 
 ### Widget Builders
 
-Some parameters allow you to construct your own widget in place of some elements in the `MessageWidget`.
+Some parameters allow you to construct your own widget in place of some elements in the `StreamMessageWidget`.
 
 These are:
 * `userAvatarBuilder`  : Allows user to substitute their own widget in place of the user avatar.
@@ -173,7 +173,7 @@ These are:
 * `deletedBottomRowBuilder` : Allows user to substitute their own widget in the bottom of the message when deleted.
 
 ```dart
-MessageWidget(
+StreamMessageWidget(
     ...
     textBuilder: (context, message) {
         // Add your own text implementation here.

@@ -62,6 +62,10 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get sendMessagePermissionError =>
+      'Vous n\'êtes pas autorisé à envoyer des messages';
+
+  @override
   String get emptyMessagesText => "Il n'y a pas de messages actuellement";
 
   @override
@@ -372,5 +376,15 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   ''';
 
   @override
+  String get viewLibrary => 'Voir la bibliothèque';
+
+  @override
   String get slowModeOnLabel => 'Mode lent activé';
+
+  @override
+  String get linkDisabledDetails =>
+      'L\'envoi de liens n\'est pas autorisé dans cette conversation.';
+
+  @override
+  String get linkDisabledError => 'Les liens sont désactivés';
 }

@@ -183,12 +183,14 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
 
   /// Bulk updates the message data of multiple channels
   Future<void> bulkUpdateMessages(
-    Map<String, List<Message>> channelWithMessages,
+    Map<String, List<Message>?> channelWithMessages,
   ) {
     final entities = channelWithMessages.entries
-        .map((entry) => entry.value.map(
+        .map((entry) =>
+            entry.value?.map(
               (message) => message.toPinnedEntity(cid: entry.key),
-            ))
+            ) ??
+            [])
         .expand((it) => it)
         .toList(growable: false);
     return batch(
