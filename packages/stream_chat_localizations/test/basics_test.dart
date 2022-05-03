@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_localizations/src/stream_chat_localizations.dart';
+import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
 void main() {
   testWidgets('Nested Localizations', (WidgetTester tester) async {
@@ -41,6 +41,8 @@ void main() {
         localizationsDelegates: const [
           DummyLocalizations.delegate,
           GlobalStreamChatLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
         ],
         home: PageView(),
       ));
@@ -54,9 +56,7 @@ void main() {
   testWidgets('Locale without countryCode', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/16782
     await tester.pumpWidget(MaterialApp(
-      localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-        GlobalStreamChatLocalizations.delegate,
-      ],
+      localizationsDelegates: GlobalStreamChatLocalizations.delegates,
       supportedLocales: const <Locale>[
         Locale('en', 'US'),
         Locale('hi'),
