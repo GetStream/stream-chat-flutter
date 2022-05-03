@@ -143,7 +143,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                           Navigator.pushNamedAndRemoveUntil(
                             context,
                             Routes.CHANNEL_PAGE,
-                            ModalRoute.withName(Routes.HOME),
+                            ModalRoute.withName(Routes.CHANNEL_LIST_PAGE),
                             arguments: ChannelPageArgs(channel: channel),
                           );
                         } catch (err) {

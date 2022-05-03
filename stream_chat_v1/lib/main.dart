@@ -8,12 +8,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
-import 'app_config.dart';
 import 'routes/app_routes.dart';
 import 'routes/routes.dart';
 
@@ -22,8 +22,65 @@ final chatPersistentClient = StreamChatPersistenceClient(
   connectionMode: ConnectionMode.regular,
 );
 
+void sampleAppLogHandler(LogRecord record) async {
+  if (kDebugMode) StreamChatClient.defaultLogHandler(record);
+
+  // report errors to sentry
+  if (record.error != null || record.stackTrace != null) {
+    await Sentry.captureException(
+      record.error,
+      stackTrace: record.stackTrace,
+    );
+  }
+}
+
+StreamChatClient buildStreamChatClient(
+  String apiKey, {
+  Level logLevel = Level.SEVERE,
+}) {
+  return StreamChatClient(
+    apiKey,
+    logLevel: logLevel,
+    logHandlerFunction: sampleAppLogHandler,
+  )..chatPersistenceClient = chatPersistentClient;
+}
+
 void main() async {
-  runApp(MyApp());
+  const sentryDsn =
+      'https://6381ef88de4140db8f5e25ab37e0f08c@o1213503.ingest.sentry.io/6352870';
+
+  /// Captures errors reported by the Flutter framework.
+  FlutterError.onError = (FlutterErrorDetails details) {
+    if (kDebugMode) {
+      // In development mode, simply print to console.
+      FlutterError.dumpErrorToConsole(details);
+    } else {
+      // In production mode, report to the application zone to report to sentry.
+      Zone.current.handleUncaughtError(details.exception, details.stack!);
+    }
+  };
+
+  Future<void> _reportError(dynamic error, StackTrace stackTrace) async {
+    // Print the exception to the console.
+    if (kDebugMode) {
+      // Print the full stacktrace in debug mode.
+      print(stackTrace);
+      return;
+    } else {
+      // Send the Exception and Stacktrace to sentry in Production mode.
+      await Sentry.captureException(error, stackTrace: stackTrace);
+    }
+  }
+
+  runZonedGuarded(
+    () async {
+      await SentryFlutter.init(
+        (options) => options.dsn = sentryDsn,
+      );
+      runApp(MyApp());
+    },
+    _reportError,
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -45,10 +102,7 @@ class _MyAppState extends State<MyApp>
       token = await secureStorage.read(key: kStreamToken);
     }
 
-    final client = StreamChatClient(
-      apiKey ?? kDefaultStreamApiKey,
-      logLevel: Level.SEVERE,
-    )..chatPersistenceClient = chatPersistentClient;
+    final client = buildStreamChatClient(apiKey ?? kStreamApiKey);
 
     if (userId != null && token != null) {
       await client.connectUser(
