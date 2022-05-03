@@ -1,3 +1,8 @@
+## 4.0.1
+
+- Minor fixes
+- Updated `stream_chat` dependency to [`4.0.1`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 4.0.0
 
 For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
