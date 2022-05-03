@@ -21,7 +21,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_markdown: ^0.6.1
-  flutter_portal: ^0.4.0
+  flutter_portal: ^1.0.0
   flutter_slidable: ^1.2.0
   flutter_svg: ^1.0.1
   http_parser: ^4.0.0

@@ -659,9 +659,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                                 if (widget.showUserAvatar == DisplayWidget.hide)
                                   SizedBox(width: avatarWidth + 4),
                                 Flexible(
-                                  child: PortalEntry(
+                                  child: PortalTarget(
                                     visible: showReactions,
-                                    portal: showReactions
+                                    portalFollower: showReactions
                                         ? Container(
                                             transform:
                                                 Matrix4.translationValues(
@@ -677,10 +677,16 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                                             ),
                                           )
                                         : null,
-                                    portalAnchor:
-                                        Alignment(widget.reverse ? 1 : -1, -1),
-                                    childAnchor:
-                                        Alignment(widget.reverse ? -1 : 1, -1),
+                                    anchor: Aligned(
+                                      follower: Alignment(
+                                        widget.reverse ? 1 : -1,
+                                        -1,
+                                      ),
+                                      target: Alignment(
+                                        widget.reverse ? -1 : 1,
+                                        -1,
+                                      ),
+                                    ),
                                     child: Stack(
                                       clipBehavior: Clip.none,
                                       children: [
