@@ -43,13 +43,7 @@ This package requires no custom setup on any platform since it does not depend o
 
 This package provides business logic to fetch common things required for integrating Stream Chat into your application.
 The core package allows more customisation and hence provides business logic but no UI components.
-Please use the stream_chat_flutter package for the full fledged suite of UI components or stream_chat for the low-level client.
-
-The package primarily contains three types of classes:
-
-1) Business Logic Components
-2) Core Components
-3) Core Controllers
+Please use the `stream_chat_flutter` package for the full fledged suite of UI components or `stream_chat` for the low-level client.
 
 ### Business Logic Components
 
@@ -62,23 +56,24 @@ The BLoCs we provide are:
 
 ### Core Components
 
-Core components usually are an easy way to fetch data associated with Stream Chat which are decoupled from UI and often expose UI builders.
-Data fetching can be controlled with the controllers of the respective core components.
+In the early days of the Flutter SDK, the SDK was only split into the LLC (`stream_chat`) and
+the UI package (`stream_chat_flutter`). With this you could use a fully built interface with the UI package
+or a fully custom interface with the LLC. However, we soon recognised the need for a third intermediary
+package which made tasks like building and modifying a list of channels or messages easy but without
+the complexity of using low level components. The Core package (`stream_chat_flutter_core`) is a manifestation
+of the same idea and allows you to build an interface with Stream Chat without having to deal with
+low level code and architecture as well as implementing your own theme and UI effortlessly. 
+Also, it has very few dependencies.
 
-1) ChannelListCore (Fetch a list of channels)
-2) MessageListCore (Fetch a list of messages from a channel)
-3) MessageSearchListCore (Fetch a list of search messages)
-4) UserListCore (Fetch  a list of users)
-5) StreamChatCore (This is different from the other core components - it is a version of StreamChat decoupled from theme and initialisations.)
+The package primarily contains a bunch of controller classes.
+Controllers are used to handle the business logic of the chat. You can use them together with our UI widgets, or you can even use them to build your own UI.
 
-### Core Controllers
-
-Core Controllers are supplied to respective CoreList widgets which allows reloading and pagination of data whenever needed.
-
-1) ChannelListController
-2) MessageListController
-3) MessageSearchListController
-4) ChannelListController
+* StreamChannelListController
+* StreamUserListController
+* StreamMessageSearchListController
+* StreamMessageInputController
+* LazyLoadScrollView
+* PagedValueListenableBuilder
 
 ## Contributing
 
