@@ -62,7 +62,7 @@ platform :ios do
 
         settings_to_override = {
           :BUNDLE_IDENTIFIER => "io.getstream.flutter",
-          :PROVISIONING_PROFILE_SPECIFIER => "match AppStore io.getstream.flutter 1630916072"
+          :PROVISIONING_PROFILE_SPECIFIER => "match AppStore io.getstream.flutter 1651569762"
         }
 
         gym(
