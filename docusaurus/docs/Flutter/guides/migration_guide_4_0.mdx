@@ -44,6 +44,32 @@ See the sections below on “deprecated classes” for a complete list of change
 
 This section highlights functionality removed.
 
+## Removed methods and classes
+
+In version 4 we removed the following deprecated methods and classes:
+
+* `Channel.banUser`
+
+* `Channel.unbanUser`
+
+* `ClientState.user`
+
+* `ClientState.userStream`
+
+* `MessageWidget.allRead`
+
+* `MessageWidget.readList`
+
+* `StreamChat.user`
+
+* `StreamChat.userStream`
+
+* `StreamChatCore.user`
+
+* `StreamChatCore.userStream`
+
+These were marked as deprecated in v3.
+
 ### Video Compression
 
 The automatic video compression when uploading a video has been removed. You can integrate this yourself by manipulating attachments using a [custom attachment uploader](https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart).
