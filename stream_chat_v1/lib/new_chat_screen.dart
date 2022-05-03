@@ -19,6 +19,20 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   late TextEditingController _controller;
 
+  late final userListController = StreamUserListController(
+    client: StreamChat.of(context).client,
+    limit: 25,
+    filter: Filter.and([
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+    ]),
+    sort: [
+      SortOption(
+        'name',
+        direction: 1,
+      ),
+    ],
+  );
+
   ChipInputTextFieldState? get _chipInputTextFieldState =>
       _chipInputTextFieldStateKey.currentState;
 
@@ -45,6 +59,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
           _userNameQuery = _controller.text;
           _isSearchActive = _userNameQuery.isNotEmpty;
         });
+      userListController.filter = Filter.and([
+        if (_userNameQuery.isNotEmpty)
+          Filter.autoComplete('name', _userNameQuery),
+        Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+      ]);
+      userListController.doInitialLoad();
     });
   }
 
@@ -112,6 +132,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
     _controller.clear();
     _controller.removeListener(_userNameListener);
     _controller.dispose();
+    userListController.dispose();
     super.dispose();
   }
 
@@ -130,7 +151,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
         ),
         centerTitle: true,
       ),
-      body: ConnectionStatusBuilder(
+      body: StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
           String statusString = '';
           bool showStatus = true;
@@ -147,7 +168,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
               statusString = AppLocalizations.of(context).disconnected;
               break;
           }
-          return InfoTile(
+          return StreamInfoTile(
             showMessage: showStatus,
             tileAnchor: Alignment.topCenter,
             childAnchor: Alignment.topCenter,
@@ -200,7 +221,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                     .overlay,
                                 shape: BoxShape.circle,
                               ),
-                              child: UserAvatar(
+                              child: StreamUserAvatar(
                                 showOnlineStatus: false,
                                 user: user,
                                 constraints: BoxConstraints.tightFor(
@@ -287,86 +308,81 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         ? GestureDetector(
                             behavior: HitTestBehavior.opaque,
                             onPanDown: (_) => FocusScope.of(context).unfocus(),
-                            child: UsersBloc(
-                              child: UserListView(
-                                selectedUsers: _selectedUsers,
-                                groupAlphabetically:
-                                    _isSearchActive ? false : true,
-                                onUserTap: (user, _) {
-                                  _controller.clear();
-                                  if (!_selectedUsers.contains(user)) {
-                                    _chipInputTextFieldState
-                                      ?..addItem(user)
-                                      ..pauseItemAddition();
-                                  } else {
-                                    _chipInputTextFieldState!.removeItem(user);
-                                  }
-                                },
-                                limit: 25,
-                                filter: Filter.and([
-                                  if (_userNameQuery.isNotEmpty)
-                                    Filter.autoComplete('name', _userNameQuery),
-                                  Filter.notEqual('id',
-                                      StreamChat.of(context).currentUser!.id),
-                                ]),
-                                sort: [
-                                  SortOption(
-                                    'name',
-                                    direction: 1,
-                                  ),
-                                ],
-                                emptyBuilder: (_) {
-                                  return LayoutBuilder(
-                                    builder: (context, viewportConstraints) {
-                                      return SingleChildScrollView(
-                                        physics:
-                                            AlwaysScrollableScrollPhysics(),
-                                        child: ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            minHeight:
-                                                viewportConstraints.maxHeight,
-                                          ),
-                                          child: Center(
-                                            child: Column(
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(24),
-                                                  child: StreamSvgIcon.search(
-                                                    size: 96,
-                                                    color: Colors.grey,
-                                                  ),
+                            child: StreamUserListView(
+                              controller: userListController,
+                              // groupAlphabetically:
+                              //     _isSearchActive ? false : true,
+                              onUserTap: (user) {
+                                _controller.clear();
+                                if (!_selectedUsers.contains(user)) {
+                                  _chipInputTextFieldState
+                                    ?..addItem(user)
+                                    ..pauseItemAddition();
+                                } else {
+                                  _chipInputTextFieldState!.removeItem(user);
+                                }
+                              },
+                              itemBuilder: (
+                                context,
+                                users,
+                                index,
+                                defaultWidget,
+                              ) {
+                                return defaultWidget.copyWith(
+                                  selected:
+                                      _selectedUsers.contains(users[index]),
+                                );
+                              },
+                              emptyBuilder: (_) {
+                                return LayoutBuilder(
+                                  builder: (context, viewportConstraints) {
+                                    return SingleChildScrollView(
+                                      physics: AlwaysScrollableScrollPhysics(),
+                                      child: ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          minHeight:
+                                              viewportConstraints.maxHeight,
+                                        ),
+                                        child: Center(
+                                          child: Column(
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(24),
+                                                child: StreamSvgIcon.search(
+                                                  size: 96,
+                                                  color: Colors.grey,
                                                 ),
-                                                Text(
-                                                  AppLocalizations.of(context)
-                                                      .noUserMatchesTheseKeywords,
-                                                  style: StreamChatTheme.of(
-                                                          context)
-                                                      .textTheme
-                                                      .footnote
-                                                      .copyWith(
-                                                          color: StreamChatTheme
-                                                                  .of(context)
-                                                              .colorTheme
-                                                              .textHighEmphasis
-                                                              .withOpacity(.5)),
-                                                ),
-                                              ],
-                                            ),
+                                              ),
+                                              Text(
+                                                AppLocalizations.of(context)
+                                                    .noUserMatchesTheseKeywords,
+                                                style: StreamChatTheme.of(
+                                                        context)
+                                                    .textTheme
+                                                    .footnote
+                                                    .copyWith(
+                                                        color: StreamChatTheme
+                                                                .of(context)
+                                                            .colorTheme
+                                                            .textHighEmphasis
+                                                            .withOpacity(.5)),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
                             ),
                           )
                         : FutureBuilder<bool>(
                             future: channel!.initialized,
                             builder: (context, snapshot) {
                               if (snapshot.data == true) {
-                                return MessageListView();
+                                return StreamMessageListView();
                               }
 
                               return Center(
@@ -384,7 +400,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             },
                           ),
                   ),
-                  MessageInput(
+                  StreamMessageInput(
                     focusNode: _messageInputFocusNode,
                     preMessageSending: (message) async {
                       await channel!.watch();

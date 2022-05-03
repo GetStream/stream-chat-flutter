@@ -18,8 +18,15 @@ class ThreadPage extends StatefulWidget {
 }
 
 class _ThreadPageState extends State<ThreadPage> {
-  Message? _quotedMessage;
   FocusNode _focusNode = FocusNode();
+  late StreamMessageInputController _messageInputController;
+
+  @override
+  void initState() {
+    super.initState();
+    _messageInputController =
+        StreamMessageInputController(message: widget.parent);
+  }
 
   @override
   void dispose() {
@@ -28,7 +35,7 @@ class _ThreadPageState extends State<ThreadPage> {
   }
 
   void _reply(Message message) {
-    setState(() => _quotedMessage = message);
+    _messageInputController.quotedMessage = message;
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
       _focusNode.requestFocus();
     });
@@ -38,13 +45,13 @@ class _ThreadPageState extends State<ThreadPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-      appBar: ThreadHeader(
+      appBar: StreamThreadHeader(
         parent: widget.parent,
       ),
       body: Column(
         children: <Widget>[
           Expanded(
-            child: MessageListView(
+            child: StreamMessageListView(
               parentMessage: widget.parent,
               initialScrollIndex: widget.initialScrollIndex,
               initialAlignment: widget.initialAlignment,
@@ -56,22 +63,16 @@ class _ThreadPageState extends State<ThreadPage> {
                 return defaultMessage.copyWith(
                   onReplyTap: _reply,
                   deletedBottomRowBuilder: (context, message) {
-                    return const VisibleFootnote();
+                    return const StreamVisibleFootnote();
                   },
                 );
               },
-              pinPermissions: ['owner', 'admin', 'member'],
             ),
           ),
           if (widget.parent.type != 'deleted')
-            MessageInput(
-              parentMessage: widget.parent,
+            StreamMessageInput(
               focusNode: _focusNode,
-              quotedMessage: _quotedMessage,
-              onQuotedMessageCleared: () {
-                setState(() => _quotedMessage = null);
-                _focusNode.unfocus();
-              },
+              messageInputController: _messageInputController,
             ),
         ],
       ),

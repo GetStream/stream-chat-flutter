@@ -1,22 +1,18 @@
-import 'package:collection/collection.dart' show IterableExtension;
 import 'package:example/localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'channel_file_display_screen.dart';
 import 'channel_media_display_screen.dart';
-import 'channel_page.dart';
 import 'pinned_messages_screen.dart';
-import 'routes/routes.dart';
 
 /// Detail screen for a 1:1 chat correspondence
 class ChatInfoScreen extends StatefulWidget {
   /// User in consideration
   final User? user;
 
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   const ChatInfoScreen({
     Key? key,
@@ -54,13 +50,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             height: 8.0,
             color: StreamChatTheme.of(context).colorTheme.disabled,
           ),
-          if ([
-            'admin',
-            'owner',
-          ].contains(channel.state!.members
-              .firstWhereOrNull(
-                  (m) => m.userId == channel.client.state.currentUser!.id)
-              ?.role))
+          if (channel.ownCapabilities.contains(PermissionType.deleteChannel))
             _buildDeleteListTile(),
         ],
       ),
@@ -78,7 +68,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: UserAvatar(
+                  child: StreamUserAvatar(
                     user: widget.user!,
                     constraints: BoxConstraints.tightFor(
                       width: 72.0,
@@ -95,7 +85,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 SizedBox(height: 7.0),
                 _buildConnectedTitleState(),
                 SizedBox(height: 15.0),
-                OptionListTile(
+                StreamOptionListTile(
                   title: '@${widget.user!.id}',
                   tileColor: StreamChatTheme.of(context).colorTheme.appBg,
                   trailing: Padding(
@@ -148,7 +138,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             builder: (context, snapshot) {
               mutedBool.value = snapshot.data;
 
-              return OptionListTile(
+              return StreamOptionListTile(
                 tileColor: StreamChatTheme.of(context).colorTheme.appBg,
                 title: AppLocalizations.of(context).muteUser,
                 titleTextStyle: StreamChatTheme.of(context).textTheme.body,
@@ -201,7 +191,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         //   ),
         //   onTap: () {},
         // ),
-        OptionListTile(
+        StreamOptionListTile(
           title: AppLocalizations.of(context).pinnedMessages,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
@@ -226,43 +216,13 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
                   channel: channel,
-                  child: MessageSearchBloc(
-                    child: PinnedMessagesScreen(
-                      messageTheme: widget.messageTheme,
-                      sortOptions: [
-                        SortOption(
-                          'created_at',
-                          direction: SortOption.ASC,
-                        ),
-                      ],
-                      onShowMessage: (m, c) async {
-                        final client = StreamChat.of(context).client;
-                        final message = m;
-                        final channel = client.channel(
-                          c.type,
-                          id: c.id,
-                        );
-                        if (channel.state == null) {
-                          await channel.watch();
-                        }
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          Routes.CHANNEL_PAGE,
-                          ModalRoute.withName(Routes.CHANNEL_LIST_PAGE),
-                          arguments: ChannelPageArgs(
-                            channel: c,
-                            initialMessage: m,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  child: PinnedMessagesScreen(),
                 ),
               ),
             );
           },
         ),
-        OptionListTile(
+        StreamOptionListTile(
           title: AppLocalizations.of(context).photosAndVideos,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
@@ -287,42 +247,15 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
                   channel: channel,
-                  child: MessageSearchBloc(
-                    child: ChannelMediaDisplayScreen(
-                      messageTheme: widget.messageTheme,
-                      sortOptions: [
-                        SortOption(
-                          'created_at',
-                          direction: SortOption.ASC,
-                        ),
-                      ],
-                      onShowMessage: (m, c) async {
-                        final client = StreamChat.of(context).client;
-                        final message = m;
-                        final channel = client.channel(
-                          c.type,
-                          id: c.id,
-                        );
-                        if (channel.state == null) {
-                          await channel.watch();
-                        }
-                        Navigator.pushNamed(
-                          context,
-                          Routes.CHANNEL_PAGE,
-                          arguments: ChannelPageArgs(
-                            channel: channel,
-                            initialMessage: message,
-                          ),
-                        );
-                      },
-                    ),
+                  child: ChannelMediaDisplayScreen(
+                    messageTheme: widget.messageTheme,
                   ),
                 ),
               ),
             );
           },
         ),
-        OptionListTile(
+        StreamOptionListTile(
           title: AppLocalizations.of(context).files,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
@@ -347,22 +280,15 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
                   channel: channel,
-                  child: MessageSearchBloc(
-                    child: ChannelFileDisplayScreen(
-                      sortOptions: [
-                        SortOption(
-                          'created_at',
-                          direction: SortOption.ASC,
-                        ),
-                      ],
-                    ),
+                  child: ChannelFileDisplayScreen(
+                    messageTheme: widget.messageTheme,
                   ),
                 ),
               ),
             );
           },
         ),
-        OptionListTile(
+        StreamOptionListTile(
           title: AppLocalizations.of(context).sharedGroups,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
@@ -392,7 +318,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   }
 
   Widget _buildDeleteListTile() {
-    return OptionListTile(
+    return StreamOptionListTile(
       title: 'Delete Conversation',
       tileColor: StreamChatTheme.of(context).colorTheme.appBg,
       titleTextStyle: StreamChatTheme.of(context).textTheme.body.copyWith(
@@ -633,7 +559,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: ChannelAvatar(
+                    child: StreamChannelAvatar(
                       channel: channel,
                       constraints:
                           BoxConstraints(maxWidth: 40.0, maxHeight: 40.0),

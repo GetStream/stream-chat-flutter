@@ -34,8 +34,8 @@ class ChannelPage extends StatefulWidget {
 }
 
 class _ChannelPageState extends State<ChannelPage> {
-  Message? _quotedMessage;
   FocusNode? _focusNode;
+  StreamMessageInputController _messageInputController = StreamMessageInputController();
 
   @override
   void initState() {
@@ -50,7 +50,7 @@ class _ChannelPageState extends State<ChannelPage> {
   }
 
   void _reply(Message message) {
-    setState(() => _quotedMessage = message);
+    _messageInputController.quotedMessage = message;
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
       _focusNode!.requestFocus();
     });
@@ -60,7 +60,7 @@ class _ChannelPageState extends State<ChannelPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-      appBar: ChannelHeader(
+      appBar: StreamChannelHeader(
         showTypingIndicator: false,
         onImageTap: () async {
           var channel = StreamChannel.of(context).channel;
@@ -108,7 +108,7 @@ class _ChannelPageState extends State<ChannelPage> {
           Expanded(
             child: Stack(
               children: <Widget>[
-                MessageListView(
+                StreamMessageListView(
                   initialScrollIndex: widget.initialScrollIndex,
                   initialAlignment: widget.initialAlignment,
                   highlightInitialMessage: widget.highlightInitialMessage,
@@ -137,14 +137,13 @@ class _ChannelPageState extends State<ChannelPage> {
                         );
                       },
                       deletedBottomRowBuilder: (context, message) {
-                        return const VisibleFootnote();
+                        return const StreamVisibleFootnote();
                       },
                     );
                   },
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(parent: parentMessage!);
                   },
-                  pinPermissions: ['owner', 'admin', 'member'],
                 ),
                 Positioned(
                   bottom: 0,
@@ -156,8 +155,7 @@ class _ChannelPageState extends State<ChannelPage> {
                         .colorTheme
                         .appBg
                         .withOpacity(.9),
-                    child: TypingIndicator(
-                      alignment: Alignment.centerLeft,
+                    child: StreamTypingIndicator(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 4,
@@ -175,13 +173,9 @@ class _ChannelPageState extends State<ChannelPage> {
               ],
             ),
           ),
-          MessageInput(
+          StreamMessageInput(
             focusNode: _focusNode,
-            quotedMessage: _quotedMessage,
-            onQuotedMessageCleared: () {
-              setState(() => _quotedMessage = null);
-              _focusNode!.unfocus();
-            },
+            messageInputController: _messageInputController,
           ),
         ],
       ),

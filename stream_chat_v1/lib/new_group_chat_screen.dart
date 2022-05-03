@@ -23,6 +23,20 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 
   Timer? _debounce;
 
+  late final userListController = StreamUserListController(
+    client: StreamChat.of(context).client,
+    sort: [
+      SortOption(
+        'name',
+        direction: 1,
+      ),
+    ],
+    limit: 25,
+    filter: Filter.and([
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+    ]),
+  );
+
   void _userNameListener() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
@@ -31,6 +45,12 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
           _userNameQuery = _controller!.text;
           _isSearchActive = _userNameQuery.isNotEmpty;
         });
+        userListController.filter = Filter.and([
+          if (_userNameQuery.isNotEmpty)
+            Filter.autoComplete('name', _userNameQuery),
+          Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+        ]);
+        userListController.doInitialLoad();
       }
     });
   }
@@ -46,6 +66,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
     _controller?.clear();
     _controller?.removeListener(_userNameListener);
     _controller?.dispose();
+    userListController.dispose();
     super.dispose();
   }
 
@@ -88,7 +109,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
             )
         ],
       ),
-      body: ConnectionStatusBuilder(
+      body: StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
           String statusString = '';
           bool showStatus = true;
@@ -105,7 +126,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
               statusString = AppLocalizations.of(context).disconnected;
               break;
           }
-          return InfoTile(
+          return StreamInfoTile(
             showMessage: showStatus,
             tileAnchor: Alignment.topCenter,
             childAnchor: Alignment.topCenter,
@@ -136,7 +157,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                               children: [
                                 Stack(
                                   children: [
-                                    UserAvatar(
+                                    StreamUserAvatar(
                                       onlineIndicatorAlignment:
                                           Alignment(0.9, 0.9),
                                       user: user,
@@ -228,77 +249,66 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
               body: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onPanDown: (_) => FocusScope.of(context).unfocus(),
-                child: UsersBloc(
-                  child: UserListView(
-                    selectedUsers: _selectedUsers,
-                    pullToRefresh: false,
-                    groupAlphabetically: _isSearchActive ? false : true,
-                    onUserTap: (user, _) {
-                      if (!_selectedUsers.contains(user)) {
-                        setState(() {
-                          _selectedUsers.add(user);
-                        });
-                      } else {
-                        setState(() {
-                          _selectedUsers.remove(user);
-                        });
-                      }
-                    },
-                    limit: 25,
-                    filter: Filter.and([
-                      if (_userNameQuery.isNotEmpty)
-                        Filter.autoComplete('name', _userNameQuery),
-                      Filter.notEqual(
-                          'id', StreamChat.of(context).currentUser!.id),
-                    ]),
-                    sort: [
-                      SortOption(
-                        'name',
-                        direction: 1,
-                      ),
-                    ],
-                    emptyBuilder: (_) {
-                      return LayoutBuilder(
-                        builder: (context, viewportConstraints) {
-                          return SingleChildScrollView(
-                            physics: AlwaysScrollableScrollPhysics(),
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                minHeight: viewportConstraints.maxHeight,
-                              ),
-                              child: Center(
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(24),
-                                      child: StreamSvgIcon.search(
-                                        size: 96,
-                                        color: StreamChatTheme.of(context)
-                                            .colorTheme
-                                            .textLowEmphasis,
-                                      ),
+                child: StreamUserListView(
+                  controller: userListController,
+                  // groupAlphabetically: _isSearchActive ? false : true,
+                  itemBuilder: (context, items, index, defaultWidget) {
+                    return defaultWidget.copyWith(
+                      selected: _selectedUsers.contains(items[index]),
+                    );
+                  },
+                  onUserTap: (user) {
+                    if (!_selectedUsers.contains(user)) {
+                      setState(() {
+                        _selectedUsers.add(user);
+                      });
+                    } else {
+                      setState(() {
+                        _selectedUsers.remove(user);
+                      });
+                    }
+                  },
+                  emptyBuilder: (_) {
+                    return LayoutBuilder(
+                      builder: (context, viewportConstraints) {
+                        return SingleChildScrollView(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: viewportConstraints.maxHeight,
+                            ),
+                            child: Center(
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(24),
+                                    child: StreamSvgIcon.search(
+                                      size: 96,
+                                      color: StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .textLowEmphasis,
                                     ),
-                                    Text(
-                                      AppLocalizations.of(context)
-                                          .noUserMatchesTheseKeywords,
-                                      style: StreamChatTheme.of(context)
-                                          .textTheme
-                                          .footnote
-                                          .copyWith(
-                                            color: StreamChatTheme.of(context)
-                                                .colorTheme
-                                                .textLowEmphasis,
-                                          ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                  Text(
+                                    AppLocalizations.of(context)
+                                        .noUserMatchesTheseKeywords,
+                                    style: StreamChatTheme.of(context)
+                                        .textTheme
+                                        .footnote
+                                        .copyWith(
+                                          color: StreamChatTheme.of(context)
+                                              .colorTheme
+                                              .textLowEmphasis,
+                                        ),
+                                  ),
+                                ],
                               ),
                             ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ),

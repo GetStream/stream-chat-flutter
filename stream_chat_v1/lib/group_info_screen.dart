@@ -4,7 +4,6 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:example/localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'channel_file_display_screen.dart';
@@ -12,10 +11,9 @@ import 'channel_media_display_screen.dart';
 import 'channel_page.dart';
 import 'chat_info_screen.dart';
 import 'pinned_messages_screen.dart';
-import 'routes/routes.dart';
 
 class GroupInfoScreen extends StatefulWidget {
-  final MessageThemeData messageTheme;
+  final StreamMessageThemeData messageTheme;
 
   const GroupInfoScreen({
     Key? key,
@@ -41,16 +39,52 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
   ValueNotifier<bool?> mutedBool = ValueNotifier(false);
 
+  late final channel = StreamChannel.of(context).channel;
+
+  late final userListController = StreamUserListController(
+    client: StreamChat.of(context).client,
+    limit: 25,
+    filter: Filter.and(
+      [
+        if (_searchController!.text.isNotEmpty)
+          Filter.autoComplete('name', _userNameQuery),
+        Filter.notIn('id', [
+          StreamChat.of(context).currentUser!.id,
+          ...channel.state!.members
+              .map<String?>(((e) => e.userId))
+              .whereType<String>(),
+        ]),
+      ],
+    ),
+    sort: [
+      SortOption(
+        'name',
+        direction: 1,
+      ),
+    ],
+  );
+
   void _userNameListener() {
     if (_searchController!.text == _userNameQuery) {
       return;
     }
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
-      if (mounted && modalSetStateCallback != null) {
-        modalSetStateCallback!(() {
-          _userNameQuery = _searchController!.text;
-        });
+      if (mounted) {
+        _userNameQuery = _searchController!.text;
+        userListController.filter = Filter.and(
+          [
+            if (_searchController!.text.isNotEmpty)
+              Filter.autoComplete('name', _userNameQuery),
+            Filter.notIn('id', [
+              StreamChat.of(context).currentUser!.id,
+              ...channel.state!.members
+                  .map<String?>(((e) => e.userId))
+                  .whereType<String>(),
+            ]),
+          ],
+        );
+        userListController.doInitialLoad();
       }
     });
   }
@@ -58,25 +92,28 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   @override
   void initState() {
     super.initState();
-    var channel = StreamChannel.of(context);
+
     _nameController = TextEditingController.fromValue(
-      TextEditingValue(
-          text: (channel.channel.extraData['name'] as String?) ?? ''),
+      TextEditingValue(text: (channel.extraData['name'] as String?) ?? ''),
     );
     _searchController = TextEditingController()..addListener(_userNameListener);
 
     _nameController!.addListener(() {
       setState(() {});
     });
-    mutedBool = ValueNotifier(StreamChannel.of(context).channel.isMuted);
+    mutedBool = ValueNotifier(channel.isMuted);
+  }
+
+  @override
+  void dispose() {
+    userListController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    var channel = StreamChannel.of(context);
-
     return StreamBuilder<List<Member>>(
-        stream: channel.channel.state!.membersStream,
+        stream: channel.state!.membersStream,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Container(
@@ -84,11 +121,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               child: Center(child: CircularProgressIndicator()),
             );
           }
-
-          var userMember = snapshot.data!.firstWhereOrNull(
-            (e) => e.user!.id == StreamChat.of(context).currentUser!.id,
-          );
-          var isOwner = userMember?.role == 'owner';
 
           return Scaffold(
             backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
@@ -100,7 +132,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               title: Column(
                 children: [
                   StreamBuilder<ChannelState>(
-                      stream: channel.channelStateStream,
+                      stream: channel.state?.channelStateStream,
                       builder: (context, state) {
                         if (!state.hasData) {
                           return Text(
@@ -137,7 +169,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     height: 3.0,
                   ),
                   Text(
-                    '${channel.channel.memberCount} ${AppLocalizations.of(context).members}, ${snapshot.data?.where((e) => e.user!.online).length ?? 0} ${AppLocalizations.of(context).online}',
+                    '${channel.memberCount} ${AppLocalizations.of(context).members}, ${snapshot.data?.where((e) => e.user!.online).length ?? 0} ${AppLocalizations.of(context).online}',
                     style: TextStyle(
                       color: StreamChatTheme.of(context)
                           .colorTheme
@@ -150,7 +182,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               ),
               centerTitle: true,
               actions: [
-                if (!channel.channel.isDistinct && isOwner)
+                if (channel.ownCapabilities
+                    .contains(PermissionType.updateChannelMembers))
                   StreamNeumorphicButton(
                     child: InkWell(
                       onTap: () {
@@ -174,7 +207,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   height: 8.0,
                   color: StreamChatTheme.of(context).colorTheme.disabled,
                 ),
-                if (isOwner) _buildNameTile(),
+                if (channel.ownCapabilities
+                    .contains(PermissionType.updateChannel))
+                  _buildNameTile(),
                 _buildOptionListTiles(),
               ],
             ),
@@ -224,7 +259,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                               horizontal: 8.0,
                               vertical: 12.0,
                             ),
-                            child: UserAvatar(
+                            child: StreamUserAvatar(
                               user: member.user!,
                               constraints: BoxConstraints.tightFor(
                                 height: 40.0,
@@ -339,7 +374,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   }
 
   Widget _buildNameTile() {
-    var channel = StreamChannel.of(context).channel;
     var channelName = (channel.extraData['name'] as String?) ?? '';
 
     return Material(
@@ -365,6 +399,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             ),
             Expanded(
               child: TextField(
+                enabled: channel.ownCapabilities
+                    .contains(PermissionType.updateChannel),
                 focusNode: _focusNode,
                 controller: _nameController,
                 cursorColor:
@@ -413,7 +449,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         size: 24.0,
                       ),
                       onTap: () {
-                        StreamChannel.of(context).channel.update({
+                        channel.update({
                           'name': _nameController!.text.trim(),
                         }).catchError((err) {
                           setState(() {
@@ -433,8 +469,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   }
 
   Widget _buildOptionListTiles() {
-    var channel = StreamChannel.of(context);
-
     return Column(
       children: [
         // OptionListTile(
@@ -449,48 +483,50 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         //   ),
         //   onTap: () {},
         // ),
-        StreamBuilder<bool>(
-            stream: StreamChannel.of(context).channel.isMutedStream,
-            builder: (context, snapshot) {
-              mutedBool.value = snapshot.data;
+        if (channel.ownCapabilities.contains(PermissionType.muteChannel))
+          StreamBuilder<bool>(
+              stream: channel.isMutedStream,
+              builder: (context, snapshot) {
+                mutedBool.value = snapshot.data;
 
-              return OptionListTile(
-                tileColor: StreamChatTheme.of(context).colorTheme.appBg,
-                separatorColor: StreamChatTheme.of(context).colorTheme.disabled,
-                title: AppLocalizations.of(context).muteGroup,
-                titleTextStyle: StreamChatTheme.of(context).textTheme.body,
-                leading: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: StreamSvgIcon.mute(
-                    size: 24.0,
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .textHighEmphasis
-                        .withOpacity(0.5),
+                return StreamOptionListTile(
+                  tileColor: StreamChatTheme.of(context).colorTheme.appBg,
+                  separatorColor:
+                      StreamChatTheme.of(context).colorTheme.disabled,
+                  title: AppLocalizations.of(context).muteGroup,
+                  titleTextStyle: StreamChatTheme.of(context).textTheme.body,
+                  leading: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: StreamSvgIcon.mute(
+                      size: 24.0,
+                      color: StreamChatTheme.of(context)
+                          .colorTheme
+                          .textHighEmphasis
+                          .withOpacity(0.5),
+                    ),
                   ),
-                ),
-                trailing: snapshot.data == null
-                    ? CircularProgressIndicator()
-                    : ValueListenableBuilder<bool?>(
-                        valueListenable: mutedBool,
-                        builder: (context, value, _) {
-                          return CupertinoSwitch(
-                            value: value!,
-                            onChanged: (val) {
-                              mutedBool.value = val;
+                  trailing: snapshot.data == null
+                      ? CircularProgressIndicator()
+                      : ValueListenableBuilder<bool?>(
+                          valueListenable: mutedBool,
+                          builder: (context, value, _) {
+                            return CupertinoSwitch(
+                              value: value!,
+                              onChanged: (val) {
+                                mutedBool.value = val;
 
-                              if (snapshot.data!) {
-                                channel.channel.unmute();
-                              } else {
-                                channel.channel.mute();
-                              }
-                            },
-                          );
-                        }),
-                onTap: () {},
-              );
-            }),
-        OptionListTile(
+                                if (snapshot.data!) {
+                                  channel.unmute();
+                                } else {
+                                  channel.mute();
+                                }
+                              },
+                            );
+                          }),
+                  onTap: () {},
+                );
+              }),
+        StreamOptionListTile(
           title: AppLocalizations.of(context).pinnedMessages,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
@@ -515,43 +551,13 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
                   channel: channel,
-                  child: MessageSearchBloc(
-                    child: PinnedMessagesScreen(
-                      messageTheme: widget.messageTheme,
-                      sortOptions: [
-                        SortOption(
-                          'created_at',
-                          direction: SortOption.ASC,
-                        ),
-                      ],
-                      onShowMessage: (m, c) async {
-                        final client = StreamChat.of(context).client;
-                        final message = m;
-                        final channel = client.channel(
-                          c.type,
-                          id: c.id,
-                        );
-                        if (channel.state == null) {
-                          await channel.watch();
-                        }
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          Routes.CHANNEL_PAGE,
-                          ModalRoute.withName(Routes.CHANNEL_LIST_PAGE),
-                          arguments: ChannelPageArgs(
-                            channel: channel,
-                            initialMessage: message,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  child: PinnedMessagesScreen(),
                 ),
               ),
             );
           },
         ),
-        OptionListTile(
+        StreamOptionListTile(
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           separatorColor: StreamChatTheme.of(context).colorTheme.disabled,
           title: AppLocalizations.of(context).photosAndVideos,
@@ -577,43 +583,15 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
                   channel: channel,
-                  child: MessageSearchBloc(
-                    child: ChannelMediaDisplayScreen(
-                      messageTheme: widget.messageTheme,
-                      sortOptions: [
-                        SortOption(
-                          'created_at',
-                          direction: SortOption.ASC,
-                        ),
-                      ],
-                      paginationParams: PaginationParams(limit: 20),
-                      onShowMessage: (m, c) async {
-                        final client = StreamChat.of(context).client;
-                        final message = m;
-                        final channel = client.channel(
-                          c.type,
-                          id: c.id,
-                        );
-                        if (channel.state == null) {
-                          await channel.watch();
-                        }
-                        await Navigator.pushNamed(
-                          context,
-                          Routes.CHANNEL_PAGE,
-                          arguments: ChannelPageArgs(
-                            channel: channel,
-                            initialMessage: message,
-                          ),
-                        );
-                      },
-                    ),
+                  child: ChannelMediaDisplayScreen(
+                    messageTheme: widget.messageTheme,
                   ),
                 ),
               ),
             );
           },
         ),
-        OptionListTile(
+        StreamOptionListTile(
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
           separatorColor: StreamChatTheme.of(context).colorTheme.disabled,
           title: AppLocalizations.of(context).files,
@@ -639,24 +617,17 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
                   channel: channel,
-                  child: MessageSearchBloc(
-                    child: ChannelFileDisplayScreen(
-                      sortOptions: [
-                        SortOption(
-                          'created_at',
-                          direction: SortOption.ASC,
-                        ),
-                      ],
-                      paginationParams: PaginationParams(limit: 20),
-                    ),
+                  child: ChannelFileDisplayScreen(
+                    messageTheme: widget.messageTheme,
                   ),
                 ),
               ),
             );
           },
         ),
-        if (!channel.channel.isDistinct)
-          OptionListTile(
+        if (!channel.isDistinct &&
+            channel.ownCapabilities.contains(PermissionType.leaveChannel))
+          StreamOptionListTile(
             tileColor: StreamChatTheme.of(context).colorTheme.appBg,
             separatorColor: StreamChatTheme.of(context).colorTheme.disabled,
             title: AppLocalizations.of(context).leaveGroup,
@@ -700,106 +671,81 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   }
 
   void _buildAddUserModal(context) {
-    var channel = StreamChannel.of(context).channel;
-
     showDialog(
       useRootNavigator: false,
       context: context,
       barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
       builder: (context) {
-        return StatefulBuilder(builder: (context, modalSetState) {
-          modalSetStateCallback = modalSetState;
-          return Padding(
-            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
-            child: Material(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16.0),
-                topRight: Radius.circular(16.0),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Scaffold(
-                body: UsersBloc(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: _buildTextInputSection(modalSetState),
-                      ),
-                      Expanded(
-                        child: UserListView(
-                          selectedUsers: {},
-                          onUserTap: (user, _) async {
-                            _searchController!.clear();
+        return Padding(
+          padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
+          child: Material(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16.0),
+              topRight: Radius.circular(16.0),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Scaffold(
+              body: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: _buildTextInputSection(),
+                  ),
+                  Expanded(
+                    child: StreamUserGridView(
+                      controller: userListController,
+                      onUserTap: (user) async {
+                        _searchController!.clear();
 
-                            await channel.addMembers([user.id]);
-                            Navigator.pop(context);
-                            setState(() {});
-                          },
-                          crossAxisCount: 4,
-                          limit: 25,
-                          filter: Filter.and(
-                            [
-                              if (_searchController!.text.isNotEmpty)
-                                Filter.autoComplete('name', _userNameQuery),
-                              Filter.notIn('id', [
-                                StreamChat.of(context).currentUser!.id,
-                                ...channel.state!.members
-                                    .map<String?>(((e) => e.userId))
-                                    .whereType<String>(),
-                              ]),
-                            ],
-                          ),
-                          sort: [
-                            SortOption(
-                              'name',
-                              direction: 1,
-                            ),
-                          ],
-                          emptyBuilder: (_) {
-                            return LayoutBuilder(
-                              builder: (context, viewportConstraints) {
-                                return SingleChildScrollView(
-                                  physics: AlwaysScrollableScrollPhysics(),
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      minHeight: viewportConstraints.maxHeight,
-                                    ),
-                                    child: Center(
-                                      child: Column(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(24),
-                                            child: StreamSvgIcon.search(
-                                              size: 96,
-                                              color: StreamChatTheme.of(context)
-                                                  .colorTheme
-                                                  .textLowEmphasis,
-                                            ),
-                                          ),
-                                          Text(AppLocalizations.of(context)
-                                              .noUserMatchesTheseKeywords),
-                                        ],
+                        await channel.addMembers([user.id]);
+                        Navigator.pop(context);
+                        setState(() {});
+                      },
+                      emptyBuilder: (_) {
+                        return LayoutBuilder(
+                          builder: (context, viewportConstraints) {
+                            return SingleChildScrollView(
+                              physics: AlwaysScrollableScrollPhysics(),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight: viewportConstraints.maxHeight,
+                                ),
+                                child: Center(
+                                  child: Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(24),
+                                        child: StreamSvgIcon.search(
+                                          size: 96,
+                                          color: StreamChatTheme.of(context)
+                                              .colorTheme
+                                              .textLowEmphasis,
+                                        ),
                                       ),
-                                    ),
+                                      Text(AppLocalizations.of(context)
+                                          .noUserMatchesTheseKeywords),
+                                    ],
                                   ),
-                                );
-                              },
+                                ),
+                              ),
                             );
                           },
-                        ),
-                      ),
-                    ],
+                        );
+                      },
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
-          );
-        });
+          ),
+        );
       },
-    );
+    ).whenComplete(() {
+      _searchController?.clear();
+    });
   }
 
-  Widget _buildTextInputSection(modalSetState) {
+  Widget _buildTextInputSection() {
     final theme = StreamChatTheme.of(context);
     return Column(
       children: [
@@ -859,7 +805,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   }
 
   void _showUserInfoModal(User? user, bool isUserAdmin) {
-    var channel = StreamChannel.of(context).channel;
     final color = StreamChatTheme.of(context).colorTheme.barsBg;
 
     showModalBottomSheet(
@@ -896,7 +841,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: UserAvatar(
+                      child: StreamUserAvatar(
                         user: user,
                         constraints: BoxConstraints.tightFor(
                           height: 64.0,
