@@ -1,4 +1,10 @@
+## 4.0.1
+
+- Minor fixes
+
 ## 4.0.0
+
+For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
 
 ✅ Added
 

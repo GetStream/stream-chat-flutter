@@ -41,11 +41,13 @@ class StreamMultiOverlay extends StatelessWidget {
     final visibleOverlay =
         overlayOptions.firstWhereOrNull((element) => element.visible);
 
-    return PortalEntry(
-      childAnchor: childAnchor,
-      portalAnchor: overlayAnchor,
+    return PortalTarget(
+      anchor: Aligned(
+        follower: overlayAnchor ?? Alignment.center,
+        target: childAnchor ?? Alignment.center,
+      ),
       visible: visibleOverlay != null,
-      portal: visibleOverlay?.widget,
+      portalFollower: visibleOverlay?.widget,
       child: child,
     );
   }

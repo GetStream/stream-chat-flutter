@@ -1,4 +1,11 @@
+## 4.0.1
+
+- Minor fixes
+- Updated `stream_chat_flutter_core` dependency to [`4.0.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 4.0.0
+
+For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
 
 ✅ Added
 
@@ -11,6 +18,7 @@
 - [[#842]](https://github.com/GetStream/stream-chat-flutter/issues/842): show date divider for first message.
 - Loosen up url check for attachment download.
 - Use `ogScrapeUrl` for LinkAttachments.
+
 ## 4.0.0-beta.2
 
 ✅ Added

@@ -46,11 +46,13 @@ class StreamInfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
-    return PortalEntry(
+    return PortalTarget(
       visible: showMessage,
-      portalAnchor: tileAnchor ?? Alignment.topCenter,
-      childAnchor: childAnchor ?? Alignment.bottomCenter,
-      portal: Container(
+      anchor: Aligned(
+        follower: tileAnchor ?? Alignment.topCenter,
+        target: childAnchor ?? Alignment.bottomCenter,
+      ),
+      portalFollower: Container(
         height: 25,
         color: backgroundColor ??
             chatThemeData.colorTheme.textLowEmphasis.withOpacity(0.9),

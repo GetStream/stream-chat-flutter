@@ -166,8 +166,8 @@ void main() {
       final Key textKey = UniqueKey();
 
       await tester.pumpWidget(buildFrame(
-        delegates: <LocalizationsDelegate<StreamChatLocalizations>>[
-          GlobalStreamChatLocalizations.delegate,
+        delegates: <LocalizationsDelegate>[
+          ...GlobalStreamChatLocalizations.delegates,
           const FooStreamChatLocalizationsDelegate(
             supportedLanguage: 'fr',
             launchUrlError: "Impossible de lancer l'url",
@@ -217,10 +217,11 @@ void main() {
         // Accept whatever locale we're given
         localeResolutionCallback:
             (Locale? locale, Iterable<Locale> supportedLocales) => locale,
-        delegates: <FooStreamChatLocalizationsDelegate>[
+        delegates: [
           const FooStreamChatLocalizationsDelegate(
             supportedLanguage: 'allLanguages',
           ),
+          ...GlobalStreamChatLocalizations.delegates,
         ],
         buildContent: (BuildContext context) {
           // Should always be 'foo', no matter what the locale is

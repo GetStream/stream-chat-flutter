@@ -390,9 +390,10 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
 
 class $ChannelsTable extends Channels
     with TableInfo<$ChannelsTable, ChannelEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ChannelsTable(this._db, [this._alias]);
+  $ChannelsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
@@ -557,7 +558,7 @@ class $ChannelsTable extends Channels
 
   @override
   $ChannelsTable createAlias(String alias) {
-    return $ChannelsTable(_db, alias);
+    return $ChannelsTable(attachedDatabase, alias);
   }
 
   static TypeConverter<Map<String, dynamic>, String> $converter0 =
@@ -1337,9 +1338,10 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
 
 class $MessagesTable extends Messages
     with TableInfo<$MessagesTable, MessageEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $MessagesTable(this._db, [this._alias]);
+  $MessagesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
@@ -1647,7 +1649,7 @@ class $MessagesTable extends Messages
 
   @override
   $MessagesTable createAlias(String alias) {
-    return $MessagesTable(_db, alias);
+    return $MessagesTable(attachedDatabase, alias);
   }
 
   static TypeConverter<List<String>, String> $converter0 =
@@ -2442,9 +2444,10 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
 
 class $PinnedMessagesTable extends PinnedMessages
     with TableInfo<$PinnedMessagesTable, PinnedMessageEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $PinnedMessagesTable(this._db, [this._alias]);
+  $PinnedMessagesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
@@ -2755,7 +2758,7 @@ class $PinnedMessagesTable extends PinnedMessages
 
   @override
   $PinnedMessagesTable createAlias(String alias) {
-    return $PinnedMessagesTable(_db, alias);
+    return $PinnedMessagesTable(attachedDatabase, alias);
   }
 
   static TypeConverter<List<String>, String> $converter0 =
@@ -3005,9 +3008,10 @@ class PinnedMessageReactionsCompanion
 
 class $PinnedMessageReactionsTable extends PinnedMessageReactions
     with TableInfo<$PinnedMessageReactionsTable, PinnedMessageReactionEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $PinnedMessageReactionsTable(this._db, [this._alias]);
+  $PinnedMessageReactionsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
@@ -3100,7 +3104,7 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
 
   @override
   $PinnedMessageReactionsTable createAlias(String alias) {
-    return $PinnedMessageReactionsTable(_db, alias);
+    return $PinnedMessageReactionsTable(attachedDatabase, alias);
   }
 
   static TypeConverter<Map<String, Object?>, String> $converter0 =
@@ -3334,9 +3338,10 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
 
 class $ReactionsTable extends Reactions
     with TableInfo<$ReactionsTable, ReactionEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ReactionsTable(this._db, [this._alias]);
+  $ReactionsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
@@ -3426,7 +3431,7 @@ class $ReactionsTable extends Reactions
 
   @override
   $ReactionsTable createAlias(String alias) {
-    return $ReactionsTable(_db, alias);
+    return $ReactionsTable(attachedDatabase, alias);
   }
 
   static TypeConverter<Map<String, Object?>, String> $converter0 =
@@ -3736,9 +3741,10 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
 }
 
 class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $UsersTable(this._db, [this._alias]);
+  $UsersTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
@@ -3865,7 +3871,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
 
   @override
   $UsersTable createAlias(String alias) {
-    return $UsersTable(_db, alias);
+    return $UsersTable(attachedDatabase, alias);
   }
 
   static TypeConverter<Map<String, Object?>, String> $converter0 =
@@ -4235,9 +4241,10 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
 
 class $MembersTable extends Members
     with TableInfo<$MembersTable, MemberEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $MembersTable(this._db, [this._alias]);
+  $MembersTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
@@ -4409,7 +4416,7 @@ class $MembersTable extends Members
 
   @override
   $MembersTable createAlias(String alias) {
-    return $MembersTable(_db, alias);
+    return $MembersTable(attachedDatabase, alias);
   }
 }
 
@@ -4585,9 +4592,10 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
 }
 
 class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ReadsTable(this._db, [this._alias]);
+  $ReadsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _lastReadMeta = const VerificationMeta('lastRead');
   @override
   late final GeneratedColumn<DateTime?> lastRead = GeneratedColumn<DateTime?>(
@@ -4664,7 +4672,7 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
 
   @override
   $ReadsTable createAlias(String alias) {
-    return $ReadsTable(_db, alias);
+    return $ReadsTable(attachedDatabase, alias);
   }
 }
 
@@ -4789,9 +4797,10 @@ class ChannelQueriesCompanion extends UpdateCompanion<ChannelQueryEntity> {
 
 class $ChannelQueriesTable extends ChannelQueries
     with TableInfo<$ChannelQueriesTable, ChannelQueryEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ChannelQueriesTable(this._db, [this._alias]);
+  $ChannelQueriesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _queryHashMeta = const VerificationMeta('queryHash');
   @override
   late final GeneratedColumn<String?> queryHash = GeneratedColumn<String?>(
@@ -4840,7 +4849,7 @@ class $ChannelQueriesTable extends ChannelQueries
 
   @override
   $ChannelQueriesTable createAlias(String alias) {
-    return $ChannelQueriesTable(_db, alias);
+    return $ChannelQueriesTable(attachedDatabase, alias);
   }
 }
 
@@ -5105,9 +5114,10 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
 
 class $ConnectionEventsTable extends ConnectionEvents
     with TableInfo<$ConnectionEventsTable, ConnectionEventEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ConnectionEventsTable(this._db, [this._alias]);
+  $ConnectionEventsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -5215,7 +5225,7 @@ class $ConnectionEventsTable extends ConnectionEvents
 
   @override
   $ConnectionEventsTable createAlias(String alias) {
-    return $ConnectionEventsTable(_db, alias);
+    return $ConnectionEventsTable(attachedDatabase, alias);
   }
 
   static TypeConverter<Map<String, dynamic>, String> $converter0 =
