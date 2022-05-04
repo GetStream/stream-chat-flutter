@@ -52,7 +52,8 @@ typedef ChannelHeader = StreamChannelHeader;
 /// with [onBackPressed].
 ///
 /// The widget components render the ui based on the first ancestor of type
-/// [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
+/// [StreamChatTheme] and on its [StreamChatThemeData.channelHeaderTheme]
+/// property.
 /// Modify it to change the widget appearance.
 /// {@endtemplate}
 class StreamChannelHeader extends StatelessWidget
