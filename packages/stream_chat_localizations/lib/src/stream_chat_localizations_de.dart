@@ -1,7 +1,7 @@
 part of 'stream_chat_localizations.dart';
 
 /// The translations for German (`de`).
-class StreamChatLocalizationsDE extends GlobalStreamChatLocalizations {
+class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for German.
   const StreamChatLocalizationsDe({String localeName = 'de'})
       : super(localeName: localeName);
@@ -122,7 +122,8 @@ class StreamChatLocalizationsDE extends GlobalStreamChatLocalizations {
 
   @override
   String fileTooLargeError(double limitInMB) =>
-      'Die Datei ist zu groß zum Hochladen. Die Dateigröße ist begrenzt auf $limitInMB MB.';
+      'Die Datei ist zu groß zum Hochladen. '
+      'Die Dateigröße ist begrenzt auf $limitInMB MB.';
 
   @override
   String emojiMatchingQueryText(String query) => 'Emoji-Abgleich "$query"';
@@ -263,8 +264,8 @@ class StreamChatLocalizationsDE extends GlobalStreamChatLocalizations {
   String get letsStartChattingLabel => 'Lass uns anfangen zu chatten!';
 
   @override
-  String get sendingFirstMessageLabel =>
-      'Wie wäre es, wenn Sie Ihre erste Nachricht an einen Freund senden würden?';
+  String get sendingFirstMessageLabel => 'Wie wäre es, wenn Sie Ihre erste '
+      'Nachricht an einen Freund senden würden?';
 
   @override
   String get startAChatLabel => 'Einen Chat beginnen';
@@ -368,4 +369,18 @@ class StreamChatLocalizationsDE extends GlobalStreamChatLocalizations {
 
   @override
   String get slowModeOnLabel => 'Langsam-Modus EIN';
+
+  @override
+  String get linkDisabledDetails =>
+      'Das Senden von Links ist in dieser Konversation nicht erlaubt.';
+
+  @override
+  String get linkDisabledError => 'Verknüpfungen sind deaktiviert';
+
+  @override
+  String get sendMessagePermissionError =>
+      'Sie sind nicht berechtigt, Nachrichten zu senden';
+
+  @override
+  String get viewLibrary => 'Bibliothek ansehen';
 }
