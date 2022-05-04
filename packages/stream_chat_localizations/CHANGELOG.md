@@ -1,3 +1,7 @@
+## Upcoming
+
+* Added support for [German](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_de.dart) locale.
+
 ## 3.0.0
 
 * Added translations for viewLibrary.
