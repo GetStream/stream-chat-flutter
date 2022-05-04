@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - Fixed attachment picker ui.
+- Fixed message widget thread indicator in reverse mode.
 
 ## 4.0.1
 
