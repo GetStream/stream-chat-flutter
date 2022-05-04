@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed attachment picker ui.
+
 ## 4.0.1
 
 - Minor fixes
