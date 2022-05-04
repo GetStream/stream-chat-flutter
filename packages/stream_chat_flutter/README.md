@@ -47,7 +47,7 @@ You should then run `flutter packages get`
 ### Android
 
 The package uses [photo_manager](https://pub.dev/packages/photo_manager) to access the device's photo library.
-Follow [this wiki](https://pub.dev/packages/photo_manager#android-10-q-29) to fullfill the Android requirements.
+Follow [this wiki](https://pub.dev/packages/photo_manager#android-10-q-29) to fulfil the Android requirements.
 
 ### iOS
 
