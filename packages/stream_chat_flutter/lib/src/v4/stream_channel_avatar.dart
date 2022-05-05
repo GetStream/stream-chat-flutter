@@ -184,16 +184,17 @@ class StreamChannelAvatar extends StatelessWidget {
         }
 
         // Group conversation
-        return StreamGroupAvatar(
-          channel: channel,
-          members: otherMembers,
-          borderRadius: borderRadius ?? previewTheme?.borderRadius,
-          constraints: constraints ?? previewTheme?.constraints,
-          onTap: onTap,
-          selected: selected,
-          selectionColor: selectionColor ?? colorTheme.accentPrimary,
-          selectionThickness: selectionThickness,
-        );
+        return chatThemeData.defaultGroupImage?.call(context, otherMembers) ??
+            StreamGroupAvatar(
+              channel: channel,
+              members: otherMembers,
+              borderRadius: borderRadius ?? previewTheme?.borderRadius,
+              constraints: constraints ?? previewTheme?.constraints,
+              onTap: onTap,
+              selected: selected,
+              selectionColor: selectionColor ?? colorTheme.accentPrimary,
+              selectionThickness: selectionThickness,
+            );
       },
     );
   }

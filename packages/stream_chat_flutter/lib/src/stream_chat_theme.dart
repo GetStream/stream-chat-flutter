@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart' hide TextTheme;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template streamChatTheme}
 /// Inherited widget providing the [StreamChatThemeData] to the widget tree
+/// {@endtemplate}
 class StreamChatTheme extends InheritedWidget {
-  /// Constructor for creating a [StreamChatTheme]
+  /// {@macro streamChatTheme}
   const StreamChatTheme({
     Key? key,
     required this.data,
@@ -13,7 +15,7 @@ class StreamChatTheme extends InheritedWidget {
           child: child,
         );
 
-  /// Theme data
+  /// {@macro streamChatThemeData}
   final StreamChatThemeData data;
 
   @override
@@ -33,9 +35,11 @@ class StreamChatTheme extends InheritedWidget {
   }
 }
 
-/// Theme data
+/// {@template streamChatThemeData}
+/// Theme data for Stream Chat
+/// {@endtemplate}
 class StreamChatThemeData {
-  /// Create a theme from scratch
+  /// Creates a theme from scratch
   factory StreamChatThemeData({
     Brightness? brightness,
     StreamTextTheme? textTheme,
@@ -47,6 +51,7 @@ class StreamChatThemeData {
     StreamMessageThemeData? ownMessageTheme,
     StreamMessageInputThemeData? messageInputTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
+    Widget Function(BuildContext, List<Member>)? defaultGroupImage,
     Widget Function(BuildContext, User)? placeholderUserImage,
     IconThemeData? primaryIconTheme,
     List<StreamReactionIcon>? reactionIcons,
@@ -75,6 +80,7 @@ class StreamChatThemeData {
       ownMessageTheme: ownMessageTheme,
       messageInputTheme: messageInputTheme,
       defaultUserImage: defaultUserImage,
+      defaultGroupImage: defaultGroupImage,
       placeholderUserImage: placeholderUserImage,
       primaryIconTheme: primaryIconTheme,
       reactionIcons: reactionIcons,
@@ -89,15 +95,15 @@ class StreamChatThemeData {
     return defaultData.merge(customizedData);
   }
 
-  /// Theme initialised with light
+  /// Theme initialized with light
   factory StreamChatThemeData.light() =>
       StreamChatThemeData(brightness: Brightness.light);
 
-  /// Theme initialised with dark
+  /// Theme initialized with dark
   factory StreamChatThemeData.dark() =>
       StreamChatThemeData(brightness: Brightness.dark);
 
-  /// Raw theme init
+  /// Raw theme initialization
   const StreamChatThemeData.raw({
     required this.textTheme,
     required this.colorTheme,
@@ -108,6 +114,7 @@ class StreamChatThemeData {
     required this.ownMessageTheme,
     required this.messageInputTheme,
     required this.defaultUserImage,
+    this.defaultGroupImage,
     this.placeholderUserImage,
     required this.primaryIconTheme,
     required this.reactionIcons,
@@ -119,7 +126,7 @@ class StreamChatThemeData {
     required this.messageSearchListViewTheme,
   });
 
-  /// Create a theme from a Material [Theme]
+  /// Creates a theme from a Material [Theme]
   factory StreamChatThemeData.fromTheme(ThemeData theme) {
     final defaultTheme = StreamChatThemeData(brightness: theme.brightness);
     final customizedTheme = StreamChatThemeData.fromColorAndTextTheme(
@@ -131,7 +138,7 @@ class StreamChatThemeData {
     return defaultTheme.merge(customizedTheme);
   }
 
-  /// Create theme from color and text theme
+  /// Creates a theme from a [StreamColorTheme] and a [StreamTextTheme]
   factory StreamChatThemeData.fromColorAndTextTheme(
     StreamColorTheme colorTheme,
     StreamTextTheme textTheme,
@@ -396,7 +403,10 @@ class StreamChatThemeData {
   /// The widget that will be built when the user image is unavailable
   final Widget Function(BuildContext, User) defaultUserImage;
 
-  /// The widget that will be built when the user image is loading
+  /// The default widget that will be built for group avatars
+  final Widget Function(BuildContext, List<Member>)? defaultGroupImage;
+
+  /// {@macro placeholderUserImage}
   final Widget Function(BuildContext, User)? placeholderUserImage;
 
   /// Primary icon theme
@@ -428,6 +438,7 @@ class StreamChatThemeData {
     StreamMessageThemeData? otherMessageTheme,
     StreamMessageInputThemeData? messageInputTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
+    Widget Function(BuildContext, List<Member>)? defaultGroupImage,
     Widget Function(BuildContext, User)? placeholderUserImage,
     IconThemeData? primaryIconTheme,
     StreamChannelListHeaderThemeData? channelListHeaderTheme,
@@ -446,6 +457,7 @@ class StreamChatThemeData {
         colorTheme: this.colorTheme.merge(colorTheme),
         primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
         defaultUserImage: defaultUserImage ?? this.defaultUserImage,
+        defaultGroupImage: defaultGroupImage ?? this.defaultGroupImage,
         placeholderUserImage: placeholderUserImage ?? this.placeholderUserImage,
         channelPreviewTheme:
             this.channelPreviewTheme.merge(channelPreviewTheme),
@@ -473,6 +485,7 @@ class StreamChatThemeData {
       colorTheme: colorTheme.merge(other.colorTheme),
       primaryIconTheme: other.primaryIconTheme,
       defaultUserImage: other.defaultUserImage,
+      defaultGroupImage: other.defaultGroupImage,
       placeholderUserImage: other.placeholderUserImage,
       channelPreviewTheme: channelPreviewTheme.merge(other.channelPreviewTheme),
       channelHeaderTheme: channelHeaderTheme.merge(other.channelHeaderTheme),
