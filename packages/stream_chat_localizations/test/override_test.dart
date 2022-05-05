@@ -173,8 +173,8 @@ void main() {
             launchUrlError: "Impossible de lancer l'url",
           ),
           const FooStreamChatLocalizationsDelegate(
-            supportedLanguage: 'de',
-            launchUrlError: 'Kann die URL nicht starten',
+            supportedLanguage: 'uz',
+            launchUrlError: 'test',
           ),
         ],
         supportedLocales: const <Locale>[
@@ -182,6 +182,7 @@ void main() {
           Locale('hi'),
           Locale('fr'),
           Locale('de'),
+          Locale('uz'),
         ],
         buildContent: (BuildContext context) => Text(
           StreamChatLocalizations.of(context)!.launchUrlError,
@@ -202,9 +203,9 @@ void main() {
       await tester.pump();
       expect(find.text("Impossible de lancer l'url"), findsOneWidget);
 
-      await tester.binding.setLocale('de', 'DE');
+      await tester.binding.setLocale('uz', 'UZ');
       await tester.pump();
-      expect(find.text('Kann die URL nicht starten'), findsOneWidget);
+      expect(find.text('test'), findsOneWidget);
     },
   );
 
