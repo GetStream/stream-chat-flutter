@@ -1,5 +1,8 @@
 ## Upcoming
 
+✅ Added
+- [[#1095]](https://github.com/GetStream/stream-chat-flutter/issues/1095): Add the ability to override the default `StreamGroupAvatar`
+
 🐞 Fixed
 
 - Fixed attachment picker ui.
