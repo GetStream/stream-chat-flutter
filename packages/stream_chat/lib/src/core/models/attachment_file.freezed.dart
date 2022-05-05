@@ -1,5 +1,6 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
 
 part of 'attachment_file.dart';
@@ -11,7 +12,7 @@ part of 'attachment_file.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more informations: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 UploadState _$UploadStateFromJson(Map<String, dynamic> json) {
   switch (json['runtimeType']) {
@@ -29,39 +30,6 @@ UploadState _$UploadStateFromJson(Map<String, dynamic> json) {
           'Invalid union type "${json['runtimeType']}"!');
   }
 }
-
-/// @nodoc
-class _$UploadStateTearOff {
-  const _$UploadStateTearOff();
-
-  Preparing preparing() {
-    return const Preparing();
-  }
-
-  InProgress inProgress({required int uploaded, required int total}) {
-    return InProgress(
-      uploaded: uploaded,
-      total: total,
-    );
-  }
-
-  Success success() {
-    return const Success();
-  }
-
-  Failed failed({required String error}) {
-    return Failed(
-      error: error,
-    );
-  }
-
-  UploadState fromJson(Map<String, Object?> json) {
-    return UploadState.fromJson(json);
-  }
-}
-
-/// @nodoc
-const $UploadState = _$UploadStateTearOff();
 
 /// @nodoc
 mixin _$UploadState {
@@ -153,7 +121,7 @@ class _$PreparingCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$Preparing implements Preparing {
-  const _$Preparing({String? $type}) : $type = $type ?? 'preparing';
+  const _$Preparing({final String? $type}) : $type = $type ?? 'preparing';
 
   factory _$Preparing.fromJson(Map<String, dynamic> json) =>
       _$$PreparingFromJson(json);
@@ -172,6 +140,7 @@ class _$Preparing implements Preparing {
         (other.runtimeType == runtimeType && other is Preparing);
   }
 
+  @JsonKey(ignore: true)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -300,7 +269,7 @@ class _$InProgressCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 @JsonSerializable()
 class _$InProgress implements InProgress {
   const _$InProgress(
-      {required this.uploaded, required this.total, String? $type})
+      {required this.uploaded, required this.total, final String? $type})
       : $type = $type ?? 'inProgress';
 
   factory _$InProgress.fromJson(Map<String, dynamic> json) =>
@@ -324,13 +293,16 @@ class _$InProgress implements InProgress {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is InProgress &&
-            (identical(other.uploaded, uploaded) ||
-                other.uploaded == uploaded) &&
-            (identical(other.total, total) || other.total == total));
+            const DeepCollectionEquality().equals(other.uploaded, uploaded) &&
+            const DeepCollectionEquality().equals(other.total, total));
   }
 
+  @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, uploaded, total);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(uploaded),
+      const DeepCollectionEquality().hash(total));
 
   @JsonKey(ignore: true)
   @override
@@ -418,14 +390,14 @@ class _$InProgress implements InProgress {
 }
 
 abstract class InProgress implements UploadState {
-  const factory InProgress({required int uploaded, required int total}) =
-      _$InProgress;
+  const factory InProgress(
+      {required final int uploaded, required final int total}) = _$InProgress;
 
   factory InProgress.fromJson(Map<String, dynamic> json) =
       _$InProgress.fromJson;
 
-  int get uploaded;
-  int get total;
+  int get uploaded => throw _privateConstructorUsedError;
+  int get total => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $InProgressCopyWith<InProgress> get copyWith =>
       throw _privateConstructorUsedError;
@@ -450,7 +422,7 @@ class _$SuccessCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$Success implements Success {
-  const _$Success({String? $type}) : $type = $type ?? 'success';
+  const _$Success({final String? $type}) : $type = $type ?? 'success';
 
   factory _$Success.fromJson(Map<String, dynamic> json) =>
       _$$SuccessFromJson(json);
@@ -469,6 +441,7 @@ class _$Success implements Success {
         (other.runtimeType == runtimeType && other is Success);
   }
 
+  @JsonKey(ignore: true)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -590,7 +563,7 @@ class _$FailedCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$Failed implements Failed {
-  const _$Failed({required this.error, String? $type})
+  const _$Failed({required this.error, final String? $type})
       : $type = $type ?? 'failed';
 
   factory _$Failed.fromJson(Map<String, dynamic> json) =>
@@ -612,11 +585,13 @@ class _$Failed implements Failed {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Failed &&
-            (identical(other.error, error) || other.error == error));
+            const DeepCollectionEquality().equals(other.error, error));
   }
 
+  @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, error);
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(error));
 
   @JsonKey(ignore: true)
   @override
@@ -704,11 +679,11 @@ class _$Failed implements Failed {
 }
 
 abstract class Failed implements UploadState {
-  const factory Failed({required String error}) = _$Failed;
+  const factory Failed({required final String error}) = _$Failed;
 
   factory Failed.fromJson(Map<String, dynamic> json) = _$Failed.fromJson;
 
-  String get error;
+  String get error => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $FailedCopyWith<Failed> get copyWith => throw _privateConstructorUsedError;
 }

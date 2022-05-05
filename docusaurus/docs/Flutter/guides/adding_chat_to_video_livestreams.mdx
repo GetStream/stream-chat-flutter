@@ -40,9 +40,9 @@ Scaffold(
         child: Column(
           children: [
            Expanded(
-             child: MessageListView(),
+             child: StreamMessageListView(),
            ),
-           MessageInput(),
+           StreamMessageInput(),
           ],
         ),
       ),
@@ -81,17 +81,18 @@ Stack(
       child: Column(
         children: const [
           Expanded(
-            child: MessageListViewTheme(
-              data: MessageListViewThemeData(
+            child: StreamMessageListViewTheme(
+              data: StreamMessageListViewThemeData(
                 backgroundColor: Colors.transparent,
               ),
-              child: MessageListView(),
+              child: StreamMessageListView(),
             ),
           ),
-          MessageInput(),
+          StreamMessageInput(),
         ],
       ),
     ),
   ],
 ),
 ```
+

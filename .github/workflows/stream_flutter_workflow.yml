@@ -2,8 +2,8 @@ name: stream_flutter_workflow
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  flutter_version: "2.8.1"
-  melos_version: "1.2.0"
+  flutter_version: "2.10.5"
+  melos_version: "2.1.0"
 
 on:
   pull_request:
@@ -35,7 +35,7 @@ jobs:
         run: |
           flutter pub global activate melos ${{ env.melos_version }}
       - name: "Bootstrap Workspace"
-        run: melos bootstrap
+        run: melos bootstrap --verbose
       - name: "Dart Analyze"
         run: |
           melos run analyze

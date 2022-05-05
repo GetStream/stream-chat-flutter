@@ -1,3 +1,6 @@
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: deprecated_member_use, deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -6,17 +9,17 @@ import '../mocks.dart';
 
 void main() {
   test('MessageSearchListViewThemeData copyWith, ==, hashCode basics', () {
-    expect(const MessageSearchListViewThemeData(),
-        const MessageSearchListViewThemeData().copyWith());
-    expect(const MessageSearchListViewThemeData().hashCode,
-        const MessageSearchListViewThemeData().copyWith().hashCode);
+    expect(const StreamMessageSearchListViewThemeData(),
+        const StreamMessageSearchListViewThemeData().copyWith());
+    expect(const StreamMessageSearchListViewThemeData().hashCode,
+        const StreamMessageSearchListViewThemeData().copyWith().hashCode);
   });
 
   test(
       '''Light MessageSearchListViewThemeData lerps completely to dark MessageSearchListViewThemeData''',
       () {
     expect(
-        const MessageSearchListViewThemeData().lerp(
+        const StreamMessageSearchListViewThemeData().lerp(
             _messageSearchListViewThemeDataControl,
             _messageSearchListViewThemeDataControlDark,
             1),
@@ -27,7 +30,7 @@ void main() {
       '''Light MessageSearchListViewThemeData lerps halfway to dark MessageSearchListViewThemeData''',
       () {
     expect(
-        const MessageSearchListViewThemeData().lerp(
+        const StreamMessageSearchListViewThemeData().lerp(
             _messageSearchListViewThemeDataControl,
             _messageSearchListViewThemeDataControlDark,
             0.5),
@@ -38,7 +41,7 @@ void main() {
       '''Dark MessageSearchListViewThemeData lerps completely to light MessageSearchListViewThemeData''',
       () {
     expect(
-        const MessageSearchListViewThemeData().lerp(
+        const StreamMessageSearchListViewThemeData().lerp(
             _messageSearchListViewThemeDataControlDark,
             _messageSearchListViewThemeDataControl,
             1),
@@ -78,7 +81,8 @@ void main() {
       ),
     );
 
-    final messageSearchListViewTheme = MessageSearchListViewTheme.of(_context);
+    final messageSearchListViewTheme =
+        StreamMessageSearchListViewTheme.of(_context);
     expect(messageSearchListViewTheme.backgroundColor,
         _messageSearchListViewThemeDataControl.backgroundColor);
   });
@@ -110,22 +114,24 @@ void main() {
       ),
     );
 
-    final messageSearchListViewTheme = MessageSearchListViewTheme.of(_context);
+    final messageSearchListViewTheme =
+        StreamMessageSearchListViewTheme.of(_context);
     expect(messageSearchListViewTheme.backgroundColor,
         _messageSearchListViewThemeDataControlDark.backgroundColor);
   });
 }
 
-final _messageSearchListViewThemeDataControl = MessageSearchListViewThemeData(
-  backgroundColor: ColorTheme.light().appBg,
+final _messageSearchListViewThemeDataControl =
+    StreamMessageSearchListViewThemeData(
+  backgroundColor: StreamColorTheme.light().appBg,
 );
 
 const _messageSearchListViewThemeDataControlHalfLerp =
-    MessageSearchListViewThemeData(
+    StreamMessageSearchListViewThemeData(
   backgroundColor: Color(0xff818384),
 );
 
 final _messageSearchListViewThemeDataControlDark =
-    MessageSearchListViewThemeData(
-  backgroundColor: ColorTheme.dark().appBg,
+    StreamMessageSearchListViewThemeData(
+  backgroundColor: StreamColorTheme.dark().appBg,
 );

@@ -44,10 +44,10 @@ abstract class ChatPersistenceClient {
   Future<ChannelModel?> getChannelByCid(String cid);
 
   /// Get stored channel [Member]s by providing channel [cid]
-  Future<List<Member>> getMembersByCid(String cid);
+  Future<List<Member>?> getMembersByCid(String cid);
 
   /// Get stored channel [Read]s by providing channel [cid]
-  Future<List<Read>> getReadsByCid(String cid);
+  Future<List<Read>?> getReadsByCid(String cid);
 
   /// Get stored [Message]s by providing channel [cid]
   ///
@@ -78,15 +78,11 @@ abstract class ChatPersistenceClient {
       getPinnedMessagesByCid(cid, messagePagination: pinnedMessagePagination),
     ]);
     return ChannelState(
-      // ignore: cast_nullable_to_non_nullable
-      members: data[0] as List<Member>,
-      // ignore: cast_nullable_to_non_nullable
-      read: data[1] as List<Read>,
+      members: data[0] as List<Member>?,
+      read: data[1] as List<Read>?,
       channel: data[2] as ChannelModel?,
-      // ignore: cast_nullable_to_non_nullable
-      messages: data[3] as List<Message>,
-      // ignore: cast_nullable_to_non_nullable
-      pinnedMessages: data[4] as List<Message>,
+      messages: data[3] as List<Message>?,
+      pinnedMessages: data[4] as List<Message>?,
     );
   }
 
@@ -146,7 +142,7 @@ abstract class ChatPersistenceClient {
       bulkUpdateMessages({cid: messages});
 
   /// Bulk updates the message data of multiple channels.
-  Future<void> bulkUpdateMessages(Map<String, List<Message>> messages);
+  Future<void> bulkUpdateMessages(Map<String, List<Message>?> messages);
 
   /// Updates the pinned message data of a particular channel [cid] with
   /// the new [messages] data
@@ -154,7 +150,7 @@ abstract class ChatPersistenceClient {
       bulkUpdatePinnedMessages({cid: messages});
 
   /// Bulk updates the message data of multiple channels.
-  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>> messages);
+  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>?> messages);
 
   /// Returns all the threads by parent message of a particular channel by
   /// providing channel [cid]
@@ -169,7 +165,7 @@ abstract class ChatPersistenceClient {
       bulkUpdateMembers({cid: members});
 
   /// Bulk updates the members data of multiple channels.
-  Future<void> bulkUpdateMembers(Map<String, List<Member>> members);
+  Future<void> bulkUpdateMembers(Map<String, List<Member>?> members);
 
   /// Updates the read data of a particular channel [cid] with
   /// the new [reads] data
@@ -177,7 +173,7 @@ abstract class ChatPersistenceClient {
       bulkUpdateReads({cid: reads});
 
   /// Bulk updates the read data of multiple channels.
-  Future<void> bulkUpdateReads(Map<String, List<Read>> reads);
+  Future<void> bulkUpdateReads(Map<String, List<Read>?> reads);
 
   /// Updates the users data with the new [users] data
   Future<void> updateUsers(List<User> users);
@@ -230,10 +226,10 @@ abstract class ChatPersistenceClient {
     final membersToDelete = <String>[];
 
     final channels = <ChannelModel>[];
-    final channelWithMessages = <String, List<Message>>{};
-    final channelWithPinnedMessages = <String, List<Message>>{};
-    final channelWithReads = <String, List<Read>>{};
-    final channelWithMembers = <String, List<Member>>{};
+    final channelWithMessages = <String, List<Message>?>{};
+    final channelWithPinnedMessages = <String, List<Message>?>{};
+    final channelWithReads = <String, List<Read>?>{};
+    final channelWithMembers = <String, List<Member>?>{};
 
     final users = <User>[];
     final reactions = <Reaction>[];
@@ -252,8 +248,9 @@ abstract class ChatPersistenceClient {
 
         // Preparing deletion data
         membersToDelete.add(cid);
-        reactionsToDelete.addAll(state.messages.map((it) => it.id));
-        pinnedReactionsToDelete.addAll(state.pinnedMessages.map((it) => it.id));
+        reactionsToDelete.addAll(state.messages?.map((it) => it.id) ?? []);
+        pinnedReactionsToDelete
+            .addAll(state.pinnedMessages?.map((it) => it.id) ?? []);
 
         // preparing addition data
         channelWithReads[cid] = reads;
@@ -261,14 +258,14 @@ abstract class ChatPersistenceClient {
         channelWithMessages[cid] = messages;
         channelWithPinnedMessages[cid] = pinnedMessages;
 
-        reactions.addAll(messages.expand(_expandReactions));
-        pinnedReactions.addAll(pinnedMessages.expand(_expandReactions));
+        reactions.addAll(messages?.expand(_expandReactions) ?? []);
+        pinnedReactions.addAll(pinnedMessages?.expand(_expandReactions) ?? []);
 
         users.addAll([
           channel.createdBy,
-          ...messages.map((it) => it.user),
-          ...reads.map((it) => it.user),
-          ...members.map((it) => it.user),
+          ...messages?.map((it) => it.user) ?? <User>[],
+          ...reads?.map((it) => it.user) ?? <User>[],
+          ...members?.map((it) => it.user) ?? <User>[],
           ...reactions.map((it) => it.user),
           ...pinnedReactions.map((it) => it.user),
         ].withNullifyer);

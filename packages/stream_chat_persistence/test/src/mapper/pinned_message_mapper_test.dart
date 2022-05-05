@@ -147,7 +147,6 @@ void main() {
         (prev, curr) =>
             prev?..update(curr.type, (value) => value + 1, ifAbsent: () => 1),
       ),
-      status: MessageSendingStatus.sending,
       updatedAt: DateTime.now(),
       extraData: const {'extra_test_data': 'extraData'},
       user: user,

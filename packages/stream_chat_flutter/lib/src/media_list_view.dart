@@ -8,21 +8,16 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/media_list_view_controller.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-extension on Duration {
-  String format() {
-    final s = '$this'.split('.')[0].padLeft(8, '0');
-    if (s.startsWith('00:')) {
-      return s.replaceFirst('00:', '');
-    }
+/// {@macro media_list_view}
+@Deprecated("Use 'StreamMediaListView' instead")
+typedef MediaListView = StreamMediaListView;
 
-    return s;
-  }
-}
-
+/// {@template media_list_view}
 /// Constructs a list of media
-class MediaListView extends StatefulWidget {
-  /// Constructor for creating a [MediaListView] widget
-  const MediaListView({
+/// {@endtemplate}
+class StreamMediaListView extends StatefulWidget {
+  /// Constructor for creating a [StreamMediaListView] widget
+  const StreamMediaListView({
     Key? key,
     this.selectedIds = const [],
     this.onSelect,
@@ -39,10 +34,10 @@ class MediaListView extends StatefulWidget {
   final MediaListViewController? controller;
 
   @override
-  _MediaListViewState createState() => _MediaListViewState();
+  _StreamMediaListViewState createState() => _StreamMediaListViewState();
 }
 
-class _MediaListViewState extends State<MediaListView> {
+class _StreamMediaListViewState extends State<StreamMediaListView> {
   var _media = <AssetEntity>[];
   var _currentPage = 0;
   final _scrollController = ScrollController();
@@ -251,4 +246,15 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
 
   @override
   String toString() => '$runtimeType("${media.id}")';
+}
+
+extension on Duration {
+  String format() {
+    final s = '$this'.split('.')[0].padLeft(8, '0');
+    if (s.startsWith('00:')) {
+      return s.replaceFirst('00:', '');
+    }
+
+    return s;
+  }
 }

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
+/// {@macro color_theme}
+@Deprecated("Use 'StreamColorTheme' instead")
+typedef ColorTheme = StreamColorTheme;
+
+/// {@template color_theme}
 /// Theme that holds colors
-class ColorTheme {
+/// {@endtemplate}
+class StreamColorTheme {
   /// Initialise with light theme
-  ColorTheme.light({
+  StreamColorTheme.light({
     this.textHighEmphasis = const Color(0xff000000),
     this.textLowEmphasis = const Color(0xff7a7a7a),
     this.disabled = const Color(0xffdbdbdb),
@@ -55,7 +61,7 @@ class ColorTheme {
   }) : brightness = Brightness.light;
 
   /// Initialise with dark theme
-  ColorTheme.dark({
+  StreamColorTheme.dark({
     this.textHighEmphasis = const Color(0xffffffff),
     this.textLowEmphasis = const Color(0xff7a7a7a),
     this.disabled = const Color(0xff2d2f2f),
@@ -169,7 +175,7 @@ class ColorTheme {
   final Brightness brightness;
 
   /// Copy with theme
-  ColorTheme copyWith({
+  StreamColorTheme copyWith({
     Brightness brightness = Brightness.light,
     Color? textHighEmphasis,
     Color? textLowEmphasis,
@@ -192,7 +198,7 @@ class ColorTheme {
     Gradient? bgGradient,
   }) =>
       brightness == Brightness.light
-          ? ColorTheme.light(
+          ? StreamColorTheme.light(
               textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
               textLowEmphasis: textLowEmphasis ?? this.textLowEmphasis,
               disabled: disabled ?? this.disabled,
@@ -213,7 +219,7 @@ class ColorTheme {
               overlayDark: overlayDark ?? this.overlayDark,
               bgGradient: bgGradient ?? this.bgGradient,
             )
-          : ColorTheme.dark(
+          : StreamColorTheme.dark(
               textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
               textLowEmphasis: textLowEmphasis ?? this.textLowEmphasis,
               disabled: disabled ?? this.disabled,
@@ -236,7 +242,7 @@ class ColorTheme {
             );
 
   /// Merge color theme
-  ColorTheme merge(ColorTheme? other) {
+  StreamColorTheme merge(StreamColorTheme? other) {
     if (other == null) return this;
     return copyWith(
       textHighEmphasis: other.textHighEmphasis,

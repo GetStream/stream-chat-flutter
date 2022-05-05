@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -16,6 +18,7 @@ import 'package:stream_chat_flutter_core/src/stream_controller_extension.dart';
 /// using Flutter's [BuildContext].
 ///
 /// API docs: https://getstream.io/chat/docs/flutter-dart/query_channels/
+@Deprecated("Use 'StreamChannelListController' instead")
 class ChannelsBloc extends StatefulWidget {
   /// Creates a new [ChannelsBloc]. The parameter [child] must be supplied and
   /// not null.

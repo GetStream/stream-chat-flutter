@@ -1,0 +1,48 @@
+---
+id: setup
+sidebar_position: 2
+title: Setup
+---
+
+Understanding Setup For `stream_chat_flutter`
+
+### Add pub.dev dependency
+
+First, you need to add the `stream_chat_flutter` dependency to your `pubspec.yaml`.
+
+You can either run this command:
+
+```shell
+flutter pub add stream_chat_flutter
+```
+
+OR
+
+Add this line in the dependencies section of your pubspec.yaml after substituting latest version:
+
+```yaml
+dependencies:
+  stream_chat_flutter: ^latest_version
+```
+
+You can find the package details on [pub.dev](https://pub.dev/packages/stream_chat_flutter).
+
+### Details On Platform Support
+
+`stream_chat_flutter` was originally created for Android and iOS mobile platforms. As Flutter matured,
+support for additional platforms was added and the package now has experimental support for web and desktop as
+[detailed here](https://getstream.io/blog/announcing-experimental-multi-platform-support-for-the-stream-flutter-sdk/).
+
+However, platforms other than mobile may have additional constraints due to not supporting all plugins,
+which will be addressed by the respective plugin creators over time.
+
+### Setup: iOS
+
+The library uses [flutter file picker plugin](https://github.com/miguelpruivo/flutter_file_picker) to pick files from the os.
+Follow [this wiki](https://github.com/miguelpruivo/flutter_file_picker/wiki/Setup#ios) to fulfill iOS requirements.
+
+We also use [video_player](https://pub.dev/packages/video_player) to reproduce videos.
+Follow [this guide](https://pub.dev/packages/video_player#installation) to fulfill the requirements.
+
+To pick images from the camera, we use the [image_picker](https://pub.dev/packages/image_picker) plugin.
+Follow [these instructions](https://pub.dev/packages/image_picker#ios) to check the requirements.

@@ -1,8 +1,7 @@
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/connection_status_builder.dart';
-import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
-import 'package:stream_chat_flutter/src/message_search_list_view.dart';
+import 'package:stream_chat_flutter/src/v4/message_input/stream_message_input.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart'
     show User;
 
@@ -59,7 +58,7 @@ abstract class Translations {
   /// The error shown when loading messages fails
   String get loadingMessagesError;
 
-  /// The text for showing the result count in [MessageSearchListView]
+  /// The text for showing the result count in [StreamMessageSearchListView]
   String resultCountText(int count);
 
   /// The text for showing the message is deleted
@@ -74,44 +73,48 @@ abstract class Translations {
   /// The text for showing there are no chats
   String get emptyChatMessagesText;
 
-  /// The text for showing the thread separator in case [MessageListView]
+  /// The text for showing the thread separator in case [StreamMessageListView]
   /// contains a parent message
   String threadSeparatorText(int replyCount);
 
-  /// The label for "connected" in [ConnectionStatusBuilder]
+  /// The label for "connected" in [StreamConnectionStatusBuilder]
   String get connectedLabel;
 
-  /// The label for "disconnected" in [ConnectionStatusBuilder]
+  /// The label for "disconnected" in [StreamConnectionStatusBuilder]
   String get disconnectedLabel;
 
-  /// The label for "reconnecting" in [ConnectionStatusBuilder]
+  /// The label for "reconnecting" in [StreamConnectionStatusBuilder]
   String get reconnectingLabel;
 
-  /// The label for also send as direct message "checkbox"" in [MessageInput]
+  /// The label for also send
+  /// as direct message "checkbox"" in [StreamMessageInput]
   String get alsoSendAsDirectMessageLabel;
 
   /// The label for search Gif
   String get searchGifLabel;
 
+  /// The label for the MessageInput hint when permission denied on sendMessage
+  String get sendMessagePermissionError;
+
   /// The label for add a comment or send in case of
-  /// attachments inside [MessageInput]
+  /// attachments inside [StreamMessageInput]
   String get addACommentOrSendLabel;
 
-  /// The label for write a message in [MessageInput]
+  /// The label for write a message in [StreamMessageInput]
   String get writeAMessageLabel;
 
-  /// The label for slow mode enabled in [MessageInput]
+  /// The label for slow mode enabled in [StreamMessageInput]
   String get slowModeOnLabel;
 
-  /// The label for instant commands in [MessageInput]
+  /// The label for instant commands in [StreamMessageInput]
   String get instantCommandsLabel;
 
   /// The error shown in case the fi"le is too large even after compression
-  /// while uploading via [MessageInput]
+  /// while uploading via [StreamMessageInput]
   String fileTooLargeAfterCompressionError(double limitInMB);
 
   /// The error shown in case the file is too large
-  /// while uploading via [MessageInput]
+  /// while uploading via [StreamMessageInput]
   String fileTooLargeError(double limitInMB);
 
   /// The text for showing the query while searching for emojis
@@ -140,6 +143,12 @@ abstract class Translations {
 
   /// The label for "OK"
   String get okLabel;
+
+  /// The label for a link disabled error
+  String get linkDisabledError;
+
+  /// The additional info on a link disabled error
+  String get linkDisabledDetails;
 
   /// The label for "add more files"
   String get addMoreFilesLabel;
@@ -379,6 +388,10 @@ class DefaultTranslations implements Translations {
     if (pinnedByCurrentUser) return 'Pinned by You';
     return 'Pinned by ${pinnedBy.name}';
   }
+
+  @override
+  String get sendMessagePermissionError =>
+      'You don\'t have permission to send messages';
 
   @override
   String get emptyMessagesText => 'There are no messages currently';
@@ -691,4 +704,11 @@ class DefaultTranslations implements Translations {
   @override
   String attachmentLimitExceedError(int limit) => """
 Attachment limit exceeded: it's not possible to add more than $limit attachments""";
+
+  @override
+  String get linkDisabledDetails =>
+      'Sending links is not allowed in this conversation.';
+
+  @override
+  String get linkDisabledError => 'Links are disabled';
 }

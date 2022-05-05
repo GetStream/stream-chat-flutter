@@ -2,27 +2,33 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// {@macro user_list_view_theme}
+@Deprecated("Use 'StreamUserListViewTheme' instead")
+typedef UserListViewTheme = StreamUserListViewTheme;
+
+/// {@template user_list_view_theme}
 /// Overrides the default style of [UserListView] descendants.
 ///
 /// See also:
 ///
-///  * [UserListViewThemeData], which is used to configure this theme.
-class UserListViewTheme extends InheritedTheme {
-  /// Creates a [UserListViewTheme].
+///  * [StreamUserListViewThemeData], which is used to configure this theme.
+/// {@endtemplate}
+class StreamUserListViewTheme extends InheritedTheme {
+  /// Creates a [StreamUserListViewTheme].
   ///
   /// The [data] parameter must not be null.
-  const UserListViewTheme({
+  const StreamUserListViewTheme({
     Key? key,
     required this.data,
     required Widget child,
   }) : super(key: key, child: child);
 
   /// The configuration of this theme.
-  final UserListViewThemeData data;
+  final StreamUserListViewThemeData data;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [UserListViewTheme] widget, then
+  /// If there is no enclosing [StreamUserListViewTheme] widget, then
   /// [StreamChatThemeData.userListViewTheme] is used.
   ///
   /// Typical usage is as follows:
@@ -30,35 +36,41 @@ class UserListViewTheme extends InheritedTheme {
   /// ```dart
   /// UserListViewTheme theme = UserListViewTheme.of(context);
   /// ```
-  static UserListViewThemeData of(BuildContext context) {
+  static StreamUserListViewThemeData of(BuildContext context) {
     final userListViewTheme =
-        context.dependOnInheritedWidgetOfExactType<UserListViewTheme>();
+        context.dependOnInheritedWidgetOfExactType<StreamUserListViewTheme>();
     return userListViewTheme?.data ??
         StreamChatTheme.of(context).userListViewTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) =>
-      UserListViewTheme(data: data, child: child);
+      StreamUserListViewTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(UserListViewTheme oldWidget) =>
+  bool updateShouldNotify(StreamUserListViewTheme oldWidget) =>
       data != oldWidget.data;
 }
 
+/// {@macro user_list_view_theme_data}
+@Deprecated("Use 'StreamUserListViewThemeData' instead")
+typedef UserListViewThemeData = StreamUserListViewThemeData;
+
+/// {@template user_list_view_theme_data}
 /// A style that overrides the default appearance of [UserListView]s when
-/// used with [UserListViewTheme] or with the overall [StreamChatTheme]'s
+/// used with [StreamUserListViewTheme] or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.userListViewTheme].
 ///
 /// See also:
 ///
-/// * [UserListViewTheme], the theme which is configured with this class.
+/// * [StreamUserListViewTheme], the theme which is configured with this class.
 /// * [StreamChatThemeData.userListViewTheme], which can be used to override
 /// the default style for [UserListView]s below the overall
 /// [StreamChatTheme].
-class UserListViewThemeData with Diagnosticable {
-  /// Creates a [UserListViewThemeData].
-  const UserListViewThemeData({
+/// {@endtemplate}
+class StreamUserListViewThemeData with Diagnosticable {
+  /// Creates a [StreamUserListViewThemeData].
+  const StreamUserListViewThemeData({
     this.backgroundColor,
   });
 
@@ -66,27 +78,27 @@ class UserListViewThemeData with Diagnosticable {
   final Color? backgroundColor;
 
   /// Copies this [ChannelListViewThemeData] to another.
-  UserListViewThemeData copyWith({
+  StreamUserListViewThemeData copyWith({
     Color? backgroundColor,
   }) =>
-      UserListViewThemeData(
+      StreamUserListViewThemeData(
         backgroundColor: backgroundColor ?? this.backgroundColor,
       );
 
-  /// Linearly interpolate between two [UserListViewThemeData] themes.
+  /// Linearly interpolate between two [StreamUserListViewThemeData] themes.
   ///
   /// All the properties must be non-null.
-  UserListViewThemeData lerp(
-    UserListViewThemeData a,
-    UserListViewThemeData b,
+  StreamUserListViewThemeData lerp(
+    StreamUserListViewThemeData a,
+    StreamUserListViewThemeData b,
     double t,
   ) =>
-      UserListViewThemeData(
+      StreamUserListViewThemeData(
         backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       );
 
-  /// Merges one [UserListViewThemeData] with another.
-  UserListViewThemeData merge(UserListViewThemeData? other) {
+  /// Merges one [StreamUserListViewThemeData] with another.
+  StreamUserListViewThemeData merge(StreamUserListViewThemeData? other) {
     if (other == null) return this;
     return copyWith(
       backgroundColor: other.backgroundColor,
@@ -96,7 +108,7 @@ class UserListViewThemeData with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UserListViewThemeData &&
+      other is StreamUserListViewThemeData &&
           runtimeType == other.runtimeType &&
           backgroundColor == other.backgroundColor;
 

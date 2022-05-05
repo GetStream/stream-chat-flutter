@@ -13,7 +13,7 @@ own types of attachments through the SDK such as location, audio, etc.
 
 This involves doing three things:
 
-1) Rendering the attachment thumbnail in the `MessageInput`
+1) Rendering the attachment thumbnail in the `StreamMessageInput`
 
 2) Sending a message with the custom attachment
 
@@ -27,7 +27,7 @@ Let's build an example of location sharing option in the app:
 
 ![](../assets/location_sharing_example.jpg)
 
-* Show a "Share Location" button next to MessageInput Textfield.
+* Show a "Share Location" button next to StreamMessageInput Textfield.
 
 * When the user presses this button, it should fetch the current location coordinates of the user, and send a message on the channel as follows:
 
@@ -53,14 +53,14 @@ Please check their [setup instructions](https://pub.dev/packages/geolocator) on 
 NOTE: If you are testing on iOS simulator, you will need to set some dummy coordinates, as mentioned [here](https://stackoverflow.com/a/31238119/7489541).
 Also don't forget to enable "location update" capability in background mode, from XCode.
 
-On the receiver end, `location` type attachment should be rendered in map view, in the `MessageListView`.
+On the receiver end, `location` type attachment should be rendered in map view, in the `StreamMessageListView`.
 We are going to use [Google Static Maps API](https://developers.google.com/maps/documentation/maps-static/overview) to render the map in the message.
 You can use other libraries as well such as [google_maps_flutter](https://pub.dev/packages/google_maps_flutter).
 
 First, we add a button which when clicked fetches and shares location into the `MessageInput`:
 
 ```dart
-MessageInput(
+StreamMessageInput(
   actions: [
     InkWell(
       child: Icon(
@@ -146,10 +146,10 @@ Next, we build the Static Maps URL (Add your API key before using the code snipp
   }
 ```
 
-And then modify the `MessageListView` and tell it how to build a location attachment, using the `messageBuilder` property and copying the default message implementation overriding the `customAttachmentBuilders` property:
+And then modify the `StreamMessageListView` and tell it how to build a location attachment, using the `messageBuilder` property and copying the default message implementation overriding the `customAttachmentBuilders` property:
 
 ```dart
-MessageListView(
+StreamMessageListView(
   messageBuilder: (context, details, messages, defaultMessage) {
     return defaultMessage.copyWith(
         customAttachmentBuilders: {
@@ -179,15 +179,15 @@ To do this, we will:
 
 1) Add an attachment instead of sending a message
 
-2) Customize the `MessageInput`
+2) Customize the `StreamMessageInput`
 
 First, we add the attachment when the location button is clicked:
 
 ```dart
- GlobalKey<MessageInputState> _messageInputKey = GlobalKey();
+ StreamMessageInputController _messageInputController = StreamMessageInputController();
 
- MessageInput(
-   key: _messageInputKey,
+ StreamMessageInput(
+   messageInputController: _messageInputController,
    actions: [
      InkWell(
        child: Icon(
@@ -197,7 +197,7 @@ First, we add the attachment when the location button is clicked:
         ),
       onTap: () {
         _determinePosition().then((value) {
-           _messageInputKey.currentState.addAttachment(
+           _messageInputController.addAttachment(
               Attachment(
                 uploadState: UploadState.success(),
                 type: 'location',
@@ -219,8 +219,8 @@ First, we add the attachment when the location button is clicked:
 After this, we can build the thumbnail:
 
 ```dart
-MessageInput(
-  key: _messageInputKey,
+StreamMessageInput(
+  messageInputController: _messageInputController,
   actions: [
     InkWell(
       child: Icon(
@@ -230,7 +230,7 @@ MessageInput(
       ),
      onTap: () {
        _determinePosition().then((value) {
-         _messageInputKey.currentState.addAttachment(
+         _messageInputController.addAttachment(
            Attachment(
              uploadState: UploadState.success(),
              type: 'location',
@@ -259,6 +259,6 @@ MessageInput(
 ),
 ```
 
-And we can see the thumbnails in the MessageInput:
+And we can see the thumbnails in the StreamMessageInput:
 
 ![](../assets/location_sharing_example_message_thumbnail.jpg)

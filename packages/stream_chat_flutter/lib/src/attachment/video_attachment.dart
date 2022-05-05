@@ -4,10 +4,16 @@ import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro video_attachment}
+@Deprecated("Use 'StreamVideoAttachment' instead")
+typedef VideoAttachment = StreamVideoAttachment;
+
+/// {@template video_attachment}
 /// Widget for showing a video attachment
-class VideoAttachment extends AttachmentWidget {
-  /// Constructor for creating a [VideoAttachment] widget
-  const VideoAttachment({
+/// {@endtemplate}
+class StreamVideoAttachment extends StreamAttachmentWidget {
+  /// Constructor for creating a [StreamVideoAttachment] widget
+  const StreamVideoAttachment({
     Key? key,
     required Message message,
     required Attachment attachment,
@@ -23,8 +29,8 @@ class VideoAttachment extends AttachmentWidget {
           size: size,
         );
 
-  /// [MessageThemeData] for showing title
-  final MessageThemeData messageTheme;
+  /// [StreamMessageThemeData] for showing title
+  final StreamMessageThemeData messageTheme;
 
   /// Callback when show message is tapped
   final ShowMessageCallback? onShowMessage;
@@ -43,7 +49,7 @@ class VideoAttachment extends AttachmentWidget {
           }
           return _buildVideoAttachment(
             context,
-            VideoThumbnailImage(
+            StreamVideoThumbnailImage(
               video: attachment.file!.path!,
               height: size?.height,
               width: size?.width,
@@ -58,7 +64,7 @@ class VideoAttachment extends AttachmentWidget {
           }
           return _buildVideoAttachment(
             context,
-            VideoThumbnailImage(
+            StreamVideoThumbnailImage(
               video: attachment.assetUrl!,
               height: size?.height,
               width: size?.width,
@@ -84,12 +90,12 @@ class VideoAttachment extends AttachmentWidget {
                         MaterialPageRoute(
                           builder: (_) => StreamChannel(
                             channel: channel,
-                            child: FullScreenMedia(
-                              mediaAttachments: message.attachments,
+                            child: StreamFullScreenMedia(
+                              mediaAttachmentPackages:
+                                  message.getAttachmentPackageList(),
                               startIndex:
                                   message.attachments.indexOf(attachment),
                               userName: message.user?.name,
-                              message: message,
                               onShowMessage: onShowMessage,
                             ),
                           ),
@@ -111,7 +117,7 @@ class VideoAttachment extends AttachmentWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8),
-                      child: AttachmentUploadStateBuilder(
+                      child: StreamAttachmentUploadStateBuilder(
                         message: message,
                         attachment: attachment,
                       ),
@@ -123,7 +129,7 @@ class VideoAttachment extends AttachmentWidget {
             if (attachment.title != null)
               Material(
                 color: messageTheme.messageBackgroundColor,
-                child: AttachmentTitle(
+                child: StreamAttachmentTitle(
                   messageTheme: messageTheme,
                   attachment: attachment,
                 ),

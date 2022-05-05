@@ -3,6 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro thread_header}
+@Deprecated("Use 'StreamThreadHeader' instead")
+typedef ThreadHeader = StreamThreadHeader;
+
+/// {@template thread_header}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header_paint.png)
 ///
@@ -56,9 +61,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The widget components render the ui based on the first ancestor of type
 /// [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
 /// Modify it to change the widget appearance.
-class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
+/// {@endtemplate}
+class StreamThreadHeader extends StatelessWidget
+    implements PreferredSizeWidget {
   /// Instantiate a new ThreadHeader
-  const ThreadHeader({
+  const StreamThreadHeader({
     Key? key,
     required this.parent,
     this.showBackButton = true,
@@ -107,10 +114,10 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// if a user is typing in this thread
   final bool showTypingIndicator;
 
-  /// The background color of this [ThreadHeader].
+  /// The background color of this [StreamThreadHeader].
   final Color? backgroundColor;
 
-  /// The elevation for this [ThreadHeader].
+  /// The elevation for this [StreamThreadHeader].
   final double elevation;
 
   @override
@@ -121,7 +128,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: centerTitle,
     );
 
-    final channelHeaderTheme = ChannelHeaderTheme.of(context);
+    final channelHeaderTheme = StreamChannelHeaderTheme.of(context);
 
     final defaultSubtitle = subtitle ??
         Row(
@@ -133,7 +140,8 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
               style: channelHeaderTheme.subtitleStyle,
             ),
             Flexible(
-              child: ChannelName(
+              child: StreamChannelName(
+                channel: StreamChannel.of(context).channel,
                 textStyle: channelHeaderTheme.subtitleStyle,
               ),
             ),
@@ -178,12 +186,13 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                   ),
               const SizedBox(height: 2),
               if (showTypingIndicator)
-                TypingIndicator(
-                  alignment: Alignment.center,
-                  channel: StreamChannel.of(context).channel,
-                  style: channelHeaderTheme.subtitleStyle,
-                  parentId: parent.id,
-                  alternativeWidget: defaultSubtitle,
+                Align(
+                  child: StreamTypingIndicator(
+                    channel: StreamChannel.of(context).channel,
+                    style: channelHeaderTheme.subtitleStyle,
+                    parentId: parent.id,
+                    alternativeWidget: defaultSubtitle,
+                  ),
                 )
               else
                 defaultSubtitle,

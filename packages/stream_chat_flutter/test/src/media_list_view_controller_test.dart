@@ -1,5 +1,5 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/media_list_view_controller.dart';
-import 'package:test/test.dart';
 
 void main() {
   test('should update media', () {

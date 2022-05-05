@@ -16,12 +16,14 @@ class MessageApi {
     String channelType,
     Message message, {
     bool skipPush = false,
+    bool skipEnrichUrl = false,
   }) async {
     final response = await _client.post(
       '/channels/$channelType/$channelId/message',
       data: {
         'message': message,
         'skip_push': skipPush,
+        'skip_enrich_url': skipEnrichUrl,
       },
     );
     return SendMessageResponse.fromJson(response.data);
@@ -51,11 +53,15 @@ class MessageApi {
 
   /// Updates the given [message]
   Future<UpdateMessageResponse> updateMessage(
-    Message message,
-  ) async {
+    Message message, {
+    bool skipEnrichUrl = false,
+  }) async {
     final response = await _client.post(
       '/messages/${message.id}',
-      data: {'message': message},
+      data: {
+        'message': message,
+        'skip_enrich_url': skipEnrichUrl,
+      },
     );
     return UpdateMessageResponse.fromJson(response.data);
   }
@@ -67,12 +73,14 @@ class MessageApi {
     String messageId, {
     Map<String, Object?>? set,
     List<String>? unset,
+    bool skipEnrichUrl = false,
   }) async {
     final response = await _client.put(
       '/messages/$messageId',
       data: {
         if (set != null) 'set': set,
         if (unset != null) 'unset': unset,
+        'skip_enrich_url': skipEnrichUrl,
       },
     );
     return UpdateMessageResponse.fromJson(response.data);

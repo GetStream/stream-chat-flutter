@@ -49,6 +49,9 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       updatedAt: json['updated_at'] == null
           ? null
           : DateTime.parse(json['updated_at'] as String),
+      deletedAt: json['deleted_at'] == null
+          ? null
+          : DateTime.parse(json['deleted_at'] as String),
       user: json['user'] == null
           ? null
           : User.fromJson(json['user'] as Map<String, dynamic>),
@@ -63,9 +66,6 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
           ? null
           : User.fromJson(json['pinned_by'] as Map<String, dynamic>),
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
-      deletedAt: json['deleted_at'] == null
-          ? null
-          : DateTime.parse(json['deleted_at'] as String),
       i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
       ),
@@ -99,6 +99,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   val['silent'] = instance.silent;
   writeNotNull('shadowed', readonly(instance.shadowed));
   writeNotNull('command', readonly(instance.command));
+  writeNotNull('deleted_at', readonly(instance.deletedAt));
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));
   writeNotNull('user', readonly(instance.user));
@@ -107,7 +108,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   val['pin_expires'] = instance.pinExpires?.toIso8601String();
   val['pinned_by'] = readonly(instance.pinnedBy);
   val['extra_data'] = instance.extraData;
-  writeNotNull('deleted_at', readonly(instance.deletedAt));
   writeNotNull('i18n', instance.i18n);
   return val;
 }

@@ -98,8 +98,9 @@ class HomeScreen extends StatelessWidget {
             AsyncSnapshot<ChannelState?> snapshot,
           ) {
             if (snapshot.hasData && snapshot.data != null) {
+              final _messages = snapshot.data!.messages ?? [];
               return MessageView(
-                messages: snapshot.data!.messages.reversed.toList(),
+                messages: _messages.reversed.toList(),
                 channel: channel,
               );
             } else if (snapshot.hasError) {

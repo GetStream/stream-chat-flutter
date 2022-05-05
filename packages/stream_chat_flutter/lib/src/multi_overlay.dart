@@ -2,15 +2,21 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
+/// {@macro multi_overlay}
+@Deprecated("Use 'StreamMultiOverlay' instead")
+typedef MultiOverlay = StreamMultiOverlay;
+
+/// {@template multi_overlay}
 /// Widget that renders a single overlay widget from a list of [overlayOptions]
 /// It shows the first one that is visible
-class MultiOverlay extends StatelessWidget {
+/// {@endtemplate}
+class StreamMultiOverlay extends StatelessWidget {
   /// Constructs a new MultiOverlay widget
   /// [overlayOptions] - the list of overlay options
   /// [overlayAnchor] - the anchor relative to the overlay
   /// [childAnchor] - the anchor relative to the child
   /// [child] - the child widget
-  const MultiOverlay({
+  const StreamMultiOverlay({
     Key? key,
     required this.overlayOptions,
     required this.child,
@@ -35,11 +41,13 @@ class MultiOverlay extends StatelessWidget {
     final visibleOverlay =
         overlayOptions.firstWhereOrNull((element) => element.visible);
 
-    return PortalEntry(
-      childAnchor: childAnchor,
-      portalAnchor: overlayAnchor,
+    return PortalTarget(
+      anchor: Aligned(
+        follower: overlayAnchor ?? Alignment.center,
+        target: childAnchor ?? Alignment.center,
+      ),
       visible: visibleOverlay != null,
-      portal: visibleOverlay?.widget,
+      portalFollower: visibleOverlay?.widget,
       child: child,
     );
   }

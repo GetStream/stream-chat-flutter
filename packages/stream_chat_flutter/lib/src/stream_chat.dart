@@ -132,20 +132,6 @@ class StreamChatState extends State<StreamChat> {
     return defaultTheme.merge(themeData);
   }
 
-  // coverage:ignore-start
-
-  /// The current user
-  @Deprecated('Use `.currentUser` instead, Will be removed in future releases')
-  User? get user => widget.client.state.currentUser;
-
-  /// The current user as a stream
-  @Deprecated(
-    'Use `.currentUserStream` instead, Will be removed in future releases',
-  )
-  Stream<User?> get userStream => widget.client.state.currentUserStream;
-
-  // coverage:ignore-end
-
   /// The current user
   User? get currentUser => widget.client.state.currentUser;
 
