@@ -7,16 +7,16 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       : super(localeName: localeName);
 
   @override
-  String get launchUrlError => 'Kann die Url nicht geöffnet werden';
+  String get launchUrlError => 'Die Url kann nicht geöffnet werden';
 
   @override
-  String get loadingUsersError => 'Fehler beim Laden von Benutzern';
+  String get loadingUsersError => 'Fehler beim Laden von Usern';
 
   @override
-  String get noUsersLabel => 'Derzeit gibt es keine Benutzer';
+  String get noUsersLabel => 'Derzeit gibt es keine User';
 
   @override
-  String get retryLabel => 'Wiederholen';
+  String get retryLabel => 'Erneut versuchen';
 
   @override
   String get userLastOnlineText => 'Zuletzt online';
@@ -31,17 +31,17 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
     if (users.length == 1) {
       return '${first.name} tippt';
     }
-    return '${first.name} und ${users.length - 1} mehr tippen';
+    return '${first.name} und ${users.length - 1} weitere tippen';
   }
 
   @override
-  String get threadReplyLabel => 'Thread Antwort';
+  String get threadReplyLabel => 'Thread-Antwort';
 
   @override
   String get onlyVisibleToYouText => 'Nur für dich sichtbar';
 
   @override
-  String threadReplyCountText(int count) => '$count Thread Antworten';
+  String threadReplyCountText(int count) => '$count Thread-Antworten';
 
   @override
   String attachmentsUploadProgressText({
@@ -79,10 +79,10 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Nachricht gelöscht';
 
   @override
-  String get messageReactionsLabel => 'Nachricht Reaktionen';
+  String get messageReactionsLabel => 'Nachricht-Reaktionen';
 
   @override
-  String get emptyChatMessagesText => 'Noch keine Unterhaltung hier...';
+  String get emptyChatMessagesText => 'Noch keine Nachrichten hier...';
 
   @override
   String threadSeparatorText(int replyCount) {
@@ -97,22 +97,22 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get disconnectedLabel => 'Getrennt';
 
   @override
-  String get reconnectingLabel => 'Wiederherstellung der Verbindung...';
+  String get reconnectingLabel => 'Verbindung wird wiederhergestellt...';
 
   @override
   String get alsoSendAsDirectMessageLabel => 'Auch als Direktnachricht senden';
 
   @override
-  String get addACommentOrSendLabel => 'Einen Kommentar hinzufügen oder senden';
+  String get addACommentOrSendLabel => 'Kommentar hinzufügen oder senden';
 
   @override
   String get searchGifLabel => 'GIFs suchen';
 
   @override
-  String get writeAMessageLabel => 'Eine Nachricht schreiben';
+  String get writeAMessageLabel => 'Nachricht schreiben';
 
   @override
-  String get instantCommandsLabel => 'Sofortige Befehle';
+  String get instantCommandsLabel => 'Sofort-Befehle';
 
   @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
@@ -129,19 +129,19 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String emojiMatchingQueryText(String query) => 'Emoji-Abgleich "$query"';
 
   @override
-  String get addAFileLabel => 'Eine Datei hinzufügen';
+  String get addAFileLabel => 'Datei hinzufügen';
 
   @override
   String get photoFromCameraLabel => 'Foto von der Kamera';
 
   @override
-  String get uploadAFileLabel => 'Eine Datei hochladen';
+  String get uploadAFileLabel => 'Datei hochladen';
 
   @override
-  String get uploadAPhotoLabel => 'Ein Foto hochladen';
+  String get uploadAPhotoLabel => 'Foto hochladen';
 
   @override
-  String get uploadAVideoLabel => 'Ein Video hochladen';
+  String get uploadAVideoLabel => 'Video hochladen';
 
   @override
   String get videoFromCameraLabel => 'Video von der Kamera';
@@ -164,7 +164,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get allowGalleryAccessMessage => 'Zugang zu Ihrer Galerie gewähren';
 
   @override
-  String get flagMessageLabel => 'Markierte-Nachricht';
+  String get flagMessageLabel => 'Markierte Nachricht';
 
   @override
   String get flagMessageQuestion =>
@@ -209,7 +209,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String toggleDeleteRetryDeleteMessageText({required bool isDeleteFailed}) {
-    if (isDeleteFailed) return 'Wiederholen Löschen der Nachricht';
+    if (isDeleteFailed) return 'Löschen der Nachricht wiederholen';
     return 'Nachricht löschen';
   }
 
@@ -268,7 +268,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       'Nachricht an einen Freund senden würden?';
 
   @override
-  String get startAChatLabel => 'Einen Chat beginnen';
+  String get startAChatLabel => 'Chat beginnen';
 
   @override
   String get loadingChannelsError => 'Fehler beim Laden der Kanäle';
@@ -300,7 +300,6 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String watchersCountText(int count) {
-    if (count == 1) return '1 Online';
     return '$count Online';
   }
 
@@ -361,14 +360,14 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get fileText => 'Datei';
 
   @override
-  String get replyToMessageLabel => 'Nachricht antworten';
+  String get replyToMessageLabel => 'Auf Nachricht antworten';
 
   @override
   String attachmentLimitExceedError(int limit) =>
       'Dateigröße überschritten, Grenze: $limit';
 
   @override
-  String get slowModeOnLabel => 'Langsam-Modus EIN';
+  String get slowModeOnLabel => 'Langsamer Modus: EIN';
 
   @override
   String get linkDisabledDetails =>
@@ -379,7 +378,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get sendMessagePermissionError =>
-      'Sie sind nicht berechtigt, Nachrichten zu senden';
+      'Sie sind nicht berechtigt Nachrichten zu senden';
 
   @override
   String get viewLibrary => 'Bibliothek ansehen';
