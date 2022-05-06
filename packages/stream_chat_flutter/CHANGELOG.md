@@ -13,6 +13,7 @@
 🔄 Changed
 
 - Removed `isOwner` condition from `ChannelBottomSheet` and `StreamChannelInfoBottomSheet` for delete option tile.
+- [[#1125]](https://github.com/GetStream/stream-chat-flutter/issues/1125) `defaultUserImage`, `placeholderUserImage`, and `reactionIcons` have been refactored out of `StreamChatThemeData` and into the new `StreamChatConfiguration` class.
 
 ## 4.0.1
 
