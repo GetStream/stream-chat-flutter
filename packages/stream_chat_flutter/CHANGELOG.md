@@ -1,5 +1,10 @@
 ## Upcoming
 
+✅ Added
+
+- [[#1119]](https://github.com/GetStream/stream-chat-flutter/issues/1119) Added an option to disable mentions overlay in `StreamMessageInput`
+- Deprecated `disableEmojiSuggestionsOverlay` in favor of `enableEmojiSuggestionsOverlay` in `StreamMessageInput`
+
 🐞 Fixed
 
 - Fixed attachment picker ui.
