@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,7 +72,6 @@ class MyApp extends StatelessWidget {
           Locale('it'),
           Locale('es'),
         ],
-        localizationsDelegates: GlobalStreamChatLocalizations.delegates,
         builder: (context, widget) => StreamChat(
           client: client,
           child: widget,
