@@ -331,7 +331,7 @@ class StreamMessageInput extends StatefulWidget {
   /// autoCorrect is enabled by default
   final bool autoCorrect;
 
-  /// Disable the default emoji
+  /// Disable the default emoji suggestions
   /// Enabled by default
   @Deprecated('Please use enableEmojiSuggestionsOverlay')
   final bool disableEmojiSuggestionsOverlay;
