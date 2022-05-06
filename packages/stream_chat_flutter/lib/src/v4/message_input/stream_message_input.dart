@@ -208,6 +208,7 @@ class StreamMessageInput extends StatefulWidget {
     this.elevation,
     this.shadow,
     this.autoCorrect = true,
+    this.disableEmojiSuggestionsOverlay = false,
     this.enableEmojiSuggestionsOverlay = true,
     this.enableMentionsOverlay = true,
   }) : super(key: key);
@@ -329,6 +330,11 @@ class StreamMessageInput extends StatefulWidget {
   /// Disable autoCorrect by passing false
   /// autoCorrect is enabled by default
   final bool autoCorrect;
+
+  /// Disable the default emoji
+  /// Enabled by default
+  @Deprecated('Please use enableEmojiSuggestionsOverlay')
+  final bool disableEmojiSuggestionsOverlay;
 
   /// Disable the default emoji suggestions by passing `false`
   /// Enabled by default
@@ -598,7 +604,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
               visible: _showCommandsOverlay,
               widget: _buildCommandsOverlayEntry(),
             ),
-            if (widget.enableEmojiSuggestionsOverlay)
+            if (widget.enableEmojiSuggestionsOverlay &&
+                !widget.disableEmojiSuggestionsOverlay)
               OverlayOptions(
                 visible: _focusNode.hasFocus &&
                     _effectiveController.text.isNotEmpty &&
