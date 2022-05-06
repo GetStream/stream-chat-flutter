@@ -2007,7 +2007,7 @@ class ChannelClientState {
       );
 
   /// User role for the current user.
-  String? get currentUserRole => currentUserMember?.role;
+  String? get currentUserRole => currentUserMember?.channelRole;
 
   /// Channel read list.
   List<Read> get read => _channelState.read ?? <Read>[];

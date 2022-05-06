@@ -15,6 +15,7 @@ class Member extends Equatable {
     this.inviteRejectedAt,
     this.invited = false,
     this.role,
+    this.channelRole,
     this.userId,
     this.isModerator = false,
     DateTime? createdAt,
@@ -46,7 +47,11 @@ class Member extends Equatable {
   final bool invited;
 
   /// The role of the user in the channel
+  @Deprecated('Please use channelRole')
   final String? role;
+
+  /// The role of this member in the channel
+  final String? channelRole;
 
   /// The id of the interested user
   final String? userId;
@@ -76,6 +81,7 @@ class Member extends Equatable {
     DateTime? inviteRejectedAt,
     bool? invited,
     String? role,
+    String? channelRole,
     String? userId,
     bool? isModerator,
     DateTime? createdAt,
@@ -93,6 +99,7 @@ class Member extends Equatable {
         banExpires: banExpires ?? this.banExpires,
         shadowBanned: shadowBanned ?? this.shadowBanned,
         role: role ?? this.role,
+        channelRole: channelRole ?? this.channelRole,
         userId: userId ?? this.userId,
         isModerator: isModerator ?? this.isModerator,
         createdAt: createdAt ?? this.createdAt,
@@ -109,6 +116,7 @@ class Member extends Equatable {
         inviteRejectedAt,
         invited,
         role,
+        channelRole,
         userId,
         isModerator,
         banned,

@@ -12,6 +12,7 @@ extension MemberEntityX on MemberEntity {
         updatedAt: updatedAt,
         createdAt: createdAt,
         role: role,
+        channelRole: channelRole,
         inviteAcceptedAt: inviteAcceptedAt,
         invited: invited,
         inviteRejectedAt: inviteRejectedAt,
@@ -33,6 +34,7 @@ extension MemberX on Member {
         invited: invited,
         inviteAcceptedAt: inviteAcceptedAt,
         role: role,
+        channelRole: channelRole,
         updatedAt: updatedAt,
       );
 }
