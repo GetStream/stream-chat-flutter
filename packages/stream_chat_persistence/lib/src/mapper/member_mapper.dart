@@ -33,6 +33,7 @@ extension MemberX on Member {
         inviteRejectedAt: inviteRejectedAt,
         invited: invited,
         inviteAcceptedAt: inviteAcceptedAt,
+        // ignore: deprecated_member_use
         role: role,
         channelRole: channelRole,
         updatedAt: updatedAt,
