@@ -909,7 +909,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     const usernameKey = Key('username');
 
     children.addAll([
-      if (showUsername) _buildUsername(usernameKey),
+      if (showUsername) Flexible(child: _buildUsername(usernameKey)),
       if (showTimeStamp)
         Text(
           Jiffy(widget.message.createdAt.toLocal()).jm,
@@ -955,21 +955,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       mainAxisAlignment:
           widget.reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        if (showThreadTail && !widget.reverse) ...threadIndicatorWidgets,
-        ...children.map(
-          (child) {
-            Widget mappedChild = SizedBox(
-              height: context.textScaleFactor * 14,
-              child: child,
-            );
-            if (child.key == usernameKey) {
-              mappedChild = Flexible(child: mappedChild);
-            }
-            return mappedChild;
-          },
-        ),
-        if (showThreadTail && widget.reverse)
-          ...threadIndicatorWidgets.reversed,
+        if (!widget.reverse) ...threadIndicatorWidgets,
+        ...children,
+        if (widget.reverse) ...threadIndicatorWidgets.reversed,
       ].insertBetween(const SizedBox(width: 8)),
     );
   }
