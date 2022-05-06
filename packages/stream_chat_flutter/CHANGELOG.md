@@ -10,6 +10,10 @@
 - Fixed attachment picker ui.
 - Fixed message widget thread indicator in reverse mode.
 
+🔄 Changed
+
+- Removed `isOwner` condition from `ChannelBottomSheet` and `StreamChannelInfoBottomSheet` for delete option tile.
+
 ## 4.0.1
 
 - Minor fixes

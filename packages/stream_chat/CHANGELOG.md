@@ -4,6 +4,11 @@
 
 - Added support for extra data in attachment file uploader. Thanks, [@rlee1990](https://github.com/rlee1990).
 
+🔄 Changed
+
+- Deprecated `role` in `Member` in favor of `channelRole`
+- Deprecated `currentUserRole` getter in `Channel` in favor of `currentUserChannelRole`
+
 ## 4.0.1
 
 - Minor fixes
