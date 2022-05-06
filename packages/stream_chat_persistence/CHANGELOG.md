@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Deprecated `role` field in `Member` table in favor of `channelRole`
+
 ## 4.0.1
 
 - Updated `stream_chat` dependency to [`4.0.1`](https://pub.dev/packages/stream_chat/changelog).

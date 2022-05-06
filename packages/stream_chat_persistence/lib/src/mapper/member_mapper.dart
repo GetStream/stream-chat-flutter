@@ -12,6 +12,7 @@ extension MemberEntityX on MemberEntity {
         updatedAt: updatedAt,
         createdAt: createdAt,
         role: role,
+        channelRole: channelRole,
         inviteAcceptedAt: inviteAcceptedAt,
         invited: invited,
         inviteRejectedAt: inviteRejectedAt,
@@ -32,7 +33,9 @@ extension MemberX on Member {
         inviteRejectedAt: inviteRejectedAt,
         invited: invited,
         inviteAcceptedAt: inviteAcceptedAt,
+        // ignore: deprecated_member_use
         role: role,
+        channelRole: channelRole,
         updatedAt: updatedAt,
       );
 }

@@ -9,7 +9,7 @@
     "name": "Robin Papa",
     "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg"
   },
-  "role": "member",
+  "channel_role": "channel_member",
   "created_at": "2020-01-28T22:17:30.95443Z",
   "updated_at": "2020-01-28T22:17:30.95443Z"
 }

@@ -33,7 +33,6 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
 
     final userAsMember = members
         .firstWhere((e) => e.user?.id == _streamChatState.currentUser?.id);
-    final isOwner = userAsMember.role == 'owner';
 
     return Material(
       color: _streamChatThemeData.colorTheme.barsBg,
@@ -179,9 +178,8 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                       });
                     },
                   ),
-                if (isOwner &&
-                    channel.ownCapabilities
-                        .contains(PermissionType.deleteChannel))
+                if (channel.ownCapabilities
+                    .contains(PermissionType.deleteChannel))
                   StreamOptionListTile(
                     leading: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
