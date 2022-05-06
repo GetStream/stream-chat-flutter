@@ -208,8 +208,8 @@ class StreamMessageInput extends StatefulWidget {
     this.elevation,
     this.shadow,
     this.autoCorrect = true,
-    this.disableEmojiSuggestionsOverlay = false,
-    this.disableMentionsOverlay = false,
+    this.enableEmojiSuggestionsOverlay = true,
+    this.enableMentionsOverlay = true,
   }) : super(key: key);
 
   /// List of options for showing overlays.
@@ -330,13 +330,13 @@ class StreamMessageInput extends StatefulWidget {
   /// autoCorrect is enabled by default
   final bool autoCorrect;
 
-  /// Disable the default emoji suggestions
+  /// Disable the default emoji suggestions by passing `false`
   /// Enabled by default
-  final bool disableEmojiSuggestionsOverlay;
+  final bool enableEmojiSuggestionsOverlay;
 
-  /// Disable the mentions overlay
+  /// Disable the mentions overlay by passing false
   /// Enabled by default
-  final bool disableMentionsOverlay;
+  final bool enableMentionsOverlay;
 
   static bool _defaultValidator(Message message) =>
       message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
@@ -598,7 +598,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
               visible: _showCommandsOverlay,
               widget: _buildCommandsOverlayEntry(),
             ),
-            if (!widget.disableEmojiSuggestionsOverlay)
+            if (widget.enableEmojiSuggestionsOverlay)
               OverlayOptions(
                 visible: _focusNode.hasFocus &&
                     _effectiveController.text.isNotEmpty &&
@@ -611,7 +611,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                         .contains(':'),
                 widget: _buildEmojiOverlay(),
               ),
-            if (!widget.disableMentionsOverlay)
+            if (widget.enableMentionsOverlay)
               OverlayOptions(
                 visible: _showMentionsOverlay,
                 widget: _buildMentionsOverlayEntry(),
