@@ -313,6 +313,7 @@ void main() {
               channelType,
               onSendProgress: any(named: 'onSendProgress'),
               cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
             )).thenAnswer((_) async => sendImageResponse);
 
         when(() => client.sendFile(
@@ -321,6 +322,7 @@ void main() {
               channelType,
               onSendProgress: any(named: 'onSendProgress'),
               cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
             )).thenAnswer((_) async => sendFileResponse);
 
         when(() => client.sendMessage(
@@ -440,6 +442,7 @@ void main() {
               channelType,
               onSendProgress: any(named: 'onSendProgress'),
               cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
             )).called(2);
 
         verify(() => client.sendFile(
@@ -448,6 +451,7 @@ void main() {
               channelType,
               onSendProgress: any(named: 'onSendProgress'),
               cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
             )).called(1);
 
         verify(() => client.sendMessage(
@@ -524,6 +528,7 @@ void main() {
               channelType,
               onSendProgress: any(named: 'onSendProgress'),
               cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
             )).thenAnswer((_) async => sendImageResponse);
 
         when(() => client.sendFile(
@@ -532,6 +537,7 @@ void main() {
               channelType,
               onSendProgress: any(named: 'onSendProgress'),
               cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
             )).thenAnswer((_) async => sendFileResponse);
 
         when(() => client.updateMessage(
@@ -649,6 +655,7 @@ void main() {
               channelType,
               onSendProgress: any(named: 'onSendProgress'),
               cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
             )).called(2);
 
         verify(() => client.sendFile(
@@ -657,6 +664,7 @@ void main() {
               channelType,
               onSendProgress: any(named: 'onSendProgress'),
               cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
             )).called(1);
 
         verify(() => client.updateMessage(

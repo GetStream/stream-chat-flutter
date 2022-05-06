@@ -2,6 +2,10 @@
 
 ✅ Added
 
+- Added support for extra data in attachment file uploader. Thanks, [@rlee1990](https://github.com/rlee1990).
+
+🔄 Changed
+
 - Deprecated `role` in `Member` in favor of `channelRole`
 
 ## 4.0.1
@@ -10,7 +14,8 @@
 
 ## 4.0.0
 
-For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
+For upgrading to V4, please refer to
+the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
 
 ✅ Added
 
@@ -25,8 +30,10 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
   any channel.
 - [[#1047]](https://github.com/GetStream/stream-chat-flutter/issues/1047) `own_capabilities` extraData missing after
   channel update.
-- [[#1054]](https://github.com/GetStream/stream-chat-flutter/issues/1054) Fix `Unsupported operation: Cannot remove from an unmodifiable list`.
-- [[#1033]](https://github.com/GetStream/stream-chat-flutter/issues/1033) Hard delete from dashboard does not delete message from client.
+- [[#1054]](https://github.com/GetStream/stream-chat-flutter/issues/1054)
+  Fix `Unsupported operation: Cannot remove from an unmodifiable list`.
+- [[#1033]](https://github.com/GetStream/stream-chat-flutter/issues/1033) Hard delete from dashboard does not delete
+  message from client.
 - Send only `user_id` while reconnecting.
 
 ✅ Added
@@ -59,8 +66,10 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
   any channel.
 - [[#1047]](https://github.com/GetStream/stream-chat-flutter/issues/1047) `own_capabilities` extraData missing after
   channel update.
-- [[#1054]](https://github.com/GetStream/stream-chat-flutter/issues/1054) Fix `Unsupported operation: Cannot remove from an unmodifiable list`.
-- [[#1033]](https://github.com/GetStream/stream-chat-flutter/issues/1033) Hard delete from dashboard does not delete message from client.
+- [[#1054]](https://github.com/GetStream/stream-chat-flutter/issues/1054)
+  Fix `Unsupported operation: Cannot remove from an unmodifiable list`.
+- [[#1033]](https://github.com/GetStream/stream-chat-flutter/issues/1033) Hard delete from dashboard does not delete
+  message from client.
 - Send only `user_id` while reconnecting.
 
 ✅ Added
