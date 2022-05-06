@@ -7,6 +7,7 @@
 🔄 Changed
 
 - Deprecated `role` in `Member` in favor of `channelRole`
+- Deprecated `currentUserRole` getter in `Channel` in favor of `currentUserChannelRole`
 
 ## 4.0.1
 
