@@ -107,10 +107,7 @@ class StreamChatThemeData {
     required this.otherMessageTheme,
     required this.ownMessageTheme,
     required this.messageInputTheme,
-    required this.defaultUserImage,
-    this.placeholderUserImage,
     required this.primaryIconTheme,
-    required this.reactionIcons,
     required this.galleryHeaderTheme,
     required this.galleryFooterTheme,
     required this.messageListViewTheme,
@@ -175,12 +172,6 @@ class StreamChatThemeData {
       textTheme: textTheme,
       colorTheme: colorTheme,
       primaryIconTheme: iconTheme,
-      defaultUserImage: (context, user) => Center(
-        child: StreamGradientAvatar(
-          name: user.name,
-          userId: user.id,
-        ),
-      ),
       channelPreviewTheme: channelPreviewTheme,
       channelListHeaderTheme: StreamChannelListHeaderThemeData(
         avatarTheme: StreamAvatarThemeData(
@@ -266,68 +257,6 @@ class StreamChatThemeData {
           ],
         ),
       ),
-      reactionIcons: [
-        StreamReactionIcon(
-          type: 'love',
-          builder: (context, highlighted, size) {
-            final theme = StreamChatTheme.of(context);
-            return StreamSvgIcon.loveReaction(
-              color: highlighted
-                  ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(0.5),
-              size: size,
-            );
-          },
-        ),
-        StreamReactionIcon(
-          type: 'like',
-          builder: (context, highlighted, size) {
-            final theme = StreamChatTheme.of(context);
-            return StreamSvgIcon.thumbsUpReaction(
-              color: highlighted
-                  ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(0.5),
-              size: size,
-            );
-          },
-        ),
-        StreamReactionIcon(
-          type: 'sad',
-          builder: (context, highlighted, size) {
-            final theme = StreamChatTheme.of(context);
-            return StreamSvgIcon.thumbsDownReaction(
-              color: highlighted
-                  ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(0.5),
-              size: size,
-            );
-          },
-        ),
-        StreamReactionIcon(
-          type: 'haha',
-          builder: (context, highlighted, size) {
-            final theme = StreamChatTheme.of(context);
-            return StreamSvgIcon.lolReaction(
-              color: highlighted
-                  ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(0.5),
-              size: size,
-            );
-          },
-        ),
-        StreamReactionIcon(
-          type: 'wow',
-          builder: (context, highlighted, size) {
-            final theme = StreamChatTheme.of(context);
-            return StreamSvgIcon.wutReaction(
-              color: highlighted
-                  ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(0.5),
-              size: size,
-            );
-          },
-        ),
-      ],
       galleryHeaderTheme: StreamGalleryHeaderThemeData(
         closeButtonColor: colorTheme.textHighEmphasis,
         backgroundColor: channelHeaderTheme.color,
@@ -393,17 +322,8 @@ class StreamChatThemeData {
   /// Theme dedicated to the [StreamMessageInput] widget
   final StreamMessageInputThemeData messageInputTheme;
 
-  /// The widget that will be built when the user image is unavailable
-  final Widget Function(BuildContext, User) defaultUserImage;
-
-  /// The widget that will be built when the user image is loading
-  final Widget Function(BuildContext, User)? placeholderUserImage;
-
   /// Primary icon theme
   final IconThemeData primaryIconTheme;
-
-  /// Assets used for rendering reactions
-  final List<StreamReactionIcon> reactionIcons;
 
   /// Theme configuration for the [StreamMessageListView] widget.
   final StreamMessageListViewThemeData messageListViewTheme;
@@ -445,15 +365,12 @@ class StreamChatThemeData {
         textTheme: this.textTheme.merge(textTheme),
         colorTheme: this.colorTheme.merge(colorTheme),
         primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
-        defaultUserImage: defaultUserImage ?? this.defaultUserImage,
-        placeholderUserImage: placeholderUserImage ?? this.placeholderUserImage,
         channelPreviewTheme:
             this.channelPreviewTheme.merge(channelPreviewTheme),
         channelHeaderTheme: this.channelHeaderTheme.merge(channelHeaderTheme),
         ownMessageTheme: this.ownMessageTheme.merge(ownMessageTheme),
         otherMessageTheme: this.otherMessageTheme.merge(otherMessageTheme),
         messageInputTheme: this.messageInputTheme.merge(messageInputTheme),
-        reactionIcons: reactionIcons ?? this.reactionIcons,
         galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
         galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
         messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
@@ -472,14 +389,11 @@ class StreamChatThemeData {
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
       primaryIconTheme: other.primaryIconTheme,
-      defaultUserImage: other.defaultUserImage,
-      placeholderUserImage: other.placeholderUserImage,
       channelPreviewTheme: channelPreviewTheme.merge(other.channelPreviewTheme),
       channelHeaderTheme: channelHeaderTheme.merge(other.channelHeaderTheme),
       ownMessageTheme: ownMessageTheme.merge(other.ownMessageTheme),
       otherMessageTheme: otherMessageTheme.merge(other.otherMessageTheme),
       messageInputTheme: messageInputTheme.merge(other.messageInputTheme),
-      reactionIcons: other.reactionIcons,
       galleryHeaderTheme: galleryHeaderTheme.merge(other.galleryHeaderTheme),
       galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),
       messageListViewTheme:

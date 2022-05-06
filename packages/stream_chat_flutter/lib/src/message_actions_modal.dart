@@ -126,8 +126,9 @@ class _StreamMessageActionsModalState extends State<StreamMessageActionsModal> {
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
     final streamChatThemeData = StreamChatTheme.of(context);
+    final streamChatConfig = StreamChat.of(context).config;
 
-    final numberOfReactions = streamChatThemeData.reactionIcons.length;
+    final numberOfReactions = streamChatConfig.reactionIcons?.length ?? 0;
     final shiftFactor =
         numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
 

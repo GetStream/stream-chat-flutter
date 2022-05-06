@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget used to provide information about the chat to the widget tree
@@ -32,6 +33,7 @@ class StreamChat extends StatefulWidget {
     required this.client,
     required this.child,
     this.streamChatThemeData,
+    this.config,
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(minutes: 1),
     this.connectivityStream,
@@ -45,6 +47,9 @@ class StreamChat extends StatefulWidget {
 
   /// Theme to pass on
   final StreamChatThemeData? streamChatThemeData;
+
+  /// Non-theme related UI configuration options.
+  final StreamChatConfiguration? config;
 
   /// The amount of time that will pass before disconnecting the client
   /// in the background
@@ -83,6 +88,10 @@ class StreamChat extends StatefulWidget {
 class StreamChatState extends State<StreamChat> {
   /// Gets client from widget
   StreamChatClient get client => widget.client;
+
+  /// Gets configuration options from widget
+  StreamChatConfiguration get config =>
+      widget.config ?? StreamChatConfiguration.defaults();
 
   @override
   Widget build(BuildContext context) {
