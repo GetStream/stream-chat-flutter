@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Deprecated `role` in `Member` in favor of `channelRole`
+
 ## 4.0.1
 
 - Minor fixes
