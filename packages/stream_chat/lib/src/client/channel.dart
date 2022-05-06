@@ -2017,7 +2017,11 @@ class ChannelClientState {
       );
 
   /// User role for the current user.
-  String? get currentUserRole => currentUserMember?.channelRole;
+  @Deprecated('Please use currentUserChannelRole')
+  String? get currentUserRole => currentUserMember?.role;
+
+  /// Channel role for the current user
+  String? get currentUserChannelRole => currentUserMember?.channelRole;
 
   /// Channel read list.
   List<Read> get read => _channelState.read ?? <Read>[];
