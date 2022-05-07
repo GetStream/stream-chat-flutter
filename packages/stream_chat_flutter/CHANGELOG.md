@@ -1,3 +1,19 @@
+## 4.1.0
+
+✅ Added
+
+- [[#1119]](https://github.com/GetStream/stream-chat-flutter/issues/1119) Added an option to disable mentions overlay in `StreamMessageInput`
+- Deprecated `disableEmojiSuggestionsOverlay` in favor of `enableEmojiSuggestionsOverlay` in `StreamMessageInput`
+
+🐞 Fixed
+
+- Fixed attachment picker ui.
+- Fixed message widget thread indicator in reverse mode.
+
+🔄 Changed
+
+- Removed `isOwner` condition from `ChannelBottomSheet` and `StreamChannelInfoBottomSheet` for delete option tile.
+
 ## 4.0.1
 
 - Minor fixes

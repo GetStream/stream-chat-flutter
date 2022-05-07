@@ -56,10 +56,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeData = ThemeData(primarySwatch: Colors.green);
+    final themeData = ThemeData(
+      colorScheme: ColorScheme.fromSwatch(
+        accentColor: Colors.green,
+      ),
+    );
     final defaultTheme = StreamChatThemeData.fromTheme(themeData);
     final colorTheme = defaultTheme.colorTheme;
-    final customTheme = defaultTheme.merge(StreamChatThemeData(
+    final customTheme = StreamChatThemeData(
       channelPreviewTheme: StreamChannelPreviewThemeData(
         avatarTheme: StreamAvatarThemeData(
           borderRadius: BorderRadius.circular(8),
@@ -81,7 +85,7 @@ class MyApp extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-    ));
+    ).merge(defaultTheme);
 
     return MaterialApp(
       theme: themeData,

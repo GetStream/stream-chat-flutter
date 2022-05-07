@@ -16,6 +16,7 @@ abstract class AttachmentFileUploader {
     String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   });
 
   /// Uploads a [file] to the given channel.
@@ -29,6 +30,7 @@ abstract class AttachmentFileUploader {
     String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   });
 
   /// Deletes a image using its [url] from the given channel.
@@ -40,6 +42,7 @@ abstract class AttachmentFileUploader {
     String channelId,
     String channelType, {
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   });
 
   /// Deletes a file using its [url] from the given channel.
@@ -51,6 +54,7 @@ abstract class AttachmentFileUploader {
     String channelId,
     String channelType, {
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   });
 }
 
@@ -68,6 +72,7 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) async {
     final multiPartFile = await file.toMultipartFile();
     final response = await _client.postFile(
@@ -86,6 +91,7 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) async {
     final multiPartFile = await file.toMultipartFile();
     final response = await _client.postFile(
@@ -103,6 +109,7 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     String channelId,
     String channelType, {
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) async {
     final response = await _client.delete(
       '/channels/$channelType/$channelId/image',
@@ -118,6 +125,7 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     String channelId,
     String channelType, {
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) async {
     final response = await _client.delete(
       '/channels/$channelType/$channelId/file',

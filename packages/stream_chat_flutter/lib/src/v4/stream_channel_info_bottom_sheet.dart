@@ -59,10 +59,6 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
 
     final members = channel.state?.members ?? [];
 
-    final isOwner = members.any(
-      (it) => it.user?.id == currentUser?.id && it.role == 'owner',
-    );
-
     // remove current user in case it's 1-1 conversation
     if (isOneToOneChannel) {
       members.removeWhere((it) => it.user?.id == currentUser?.id);
@@ -153,7 +149,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
             ),
             onTap: onLeaveChannelTap,
           ),
-        if (isOwner)
+        if (channel.ownCapabilities.contains(PermissionType.deleteChannel))
           StreamOptionListTile(
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
