@@ -878,7 +878,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           const Offstage();
     }
 
-    final children = <Widget>[];
+    final children = <WidgetSpan>[];
 
     final threadParticipants = widget.message.threadParticipants?.take(2);
     final showThreadParticipants = threadParticipants?.isNotEmpty == true;
@@ -909,56 +909,70 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     const usernameKey = Key('username');
 
     children.addAll([
-      if (showUsername) Flexible(child: _buildUsername(usernameKey)),
+      if (showUsername)
+        WidgetSpan(child: Flexible(child: _buildUsername(usernameKey))),
       if (showTimeStamp)
-        Text(
-          Jiffy(widget.message.createdAt.toLocal()).jm,
-          style: widget.messageTheme.createdAtStyle,
+        WidgetSpan(
+          child: Text(
+            Jiffy(widget.message.createdAt.toLocal()).jm,
+            style: widget.messageTheme.createdAtStyle,
+          ),
         ),
-      if (showSendingIndicator) _buildSendingIndicator(),
+      if (showSendingIndicator)
+        WidgetSpan(
+          child: _buildSendingIndicator(),
+          alignment: PlaceholderAlignment.top,
+        ),
     ]);
 
     final showThreadTail = !(hasUrlAttachments || isGiphy || isOnlyEmoji) &&
         (showThreadReplyIndicator || showInChannel);
 
-    final threadIndicatorWidgets = <Widget>[
+    final threadIndicatorWidgets = <InlineSpan>[
       if (showThreadTail)
-        Container(
-          margin: EdgeInsets.only(
-            bottom: context.textScaleFactor *
-                ((widget.messageTheme.repliesStyle?.fontSize ?? 1) / 2),
-          ),
-          child: CustomPaint(
-            size: const Size(16, 32) * context.textScaleFactor,
-            painter: _ThreadReplyPainter(
-              context: context,
-              color: widget.messageTheme.messageBorderColor,
-              reverse: widget.reverse,
+        WidgetSpan(
+          child: Container(
+            margin: EdgeInsets.only(
+              bottom: context.textScaleFactor *
+                  ((widget.messageTheme.repliesStyle?.fontSize ?? 1) / 2),
+            ),
+            child: CustomPaint(
+              size: const Size(16, 32) * context.textScaleFactor,
+              painter: _ThreadReplyPainter(
+                context: context,
+                color: widget.messageTheme.messageBorderColor,
+                reverse: widget.reverse,
+              ),
             ),
           ),
         ),
       if (showInChannel || showThreadReplyIndicator) ...[
         if (showThreadParticipants)
-          SizedBox.fromSize(
-            size: Size((threadParticipants!.length * 8.0) + 8, 16),
-            child: _buildThreadParticipantsIndicator(threadParticipants),
+          WidgetSpan(
+            child: SizedBox.fromSize(
+              size: Size((threadParticipants!.length * 8.0) + 8, 16),
+              child: _buildThreadParticipantsIndicator(threadParticipants),
+            ),
           ),
-        InkWell(
-          onTap: widget.onThreadTap != null ? onThreadTap : null,
-          child: Text(msg, style: widget.messageTheme.repliesStyle),
+        WidgetSpan(
+          child: InkWell(
+            onTap: widget.onThreadTap != null ? onThreadTap : null,
+            child: Text(msg, style: widget.messageTheme.repliesStyle),
+          ),
         ),
       ],
     ];
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment:
-          widget.reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
-      children: [
-        if (!widget.reverse) ...threadIndicatorWidgets,
-        ...children,
-        if (widget.reverse) ...threadIndicatorWidgets.reversed,
-      ].insertBetween(const SizedBox(width: 8)),
+    return Text.rich(
+      TextSpan(
+        children: [
+          if (!widget.reverse) ...threadIndicatorWidgets,
+          ...children,
+          if (widget.reverse) ...threadIndicatorWidgets.reversed,
+        ].insertBetween(const WidgetSpan(child: SizedBox(width: 8))),
+      ),
+      maxLines: 1,
+      textAlign: widget.reverse ? TextAlign.right : TextAlign.left,
     );
   }
 
@@ -1247,6 +1261,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         );
         if (isMessageRead) {
           child = Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               if (memberCount > 2)
                 Text(
