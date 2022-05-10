@@ -910,7 +910,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
     children.addAll([
       if (showUsername)
-        WidgetSpan(child: Flexible(child: _buildUsername(usernameKey))),
+        WidgetSpan(child: _buildUsername(usernameKey)),
       if (showTimeStamp)
         WidgetSpan(
           child: Text(
@@ -921,7 +921,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       if (showSendingIndicator)
         WidgetSpan(
           child: _buildSendingIndicator(),
-          alignment: PlaceholderAlignment.top,
+          alignment: PlaceholderAlignment.middle,
         ),
     ]);
 
