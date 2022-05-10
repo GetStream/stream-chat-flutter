@@ -909,8 +909,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     const usernameKey = Key('username');
 
     children.addAll([
-      if (showUsername)
-        WidgetSpan(child: _buildUsername(usernameKey)),
+      if (showUsername) WidgetSpan(child: _buildUsername(usernameKey)),
       if (showTimeStamp)
         WidgetSpan(
           child: Text(
@@ -921,7 +920,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       if (showSendingIndicator)
         WidgetSpan(
           child: _buildSendingIndicator(),
-          alignment: PlaceholderAlignment.middle,
         ),
     ]);
 
