@@ -207,8 +207,10 @@ class StreamMessageInput extends StatefulWidget {
     this.enableSafeArea,
     this.elevation,
     this.shadow,
-    this.autoCorrect,
-    this.disableEmojiSuggestionsOverlay,
+    this.autoCorrect = true,
+    this.disableEmojiSuggestionsOverlay = false,
+    this.enableEmojiSuggestionsOverlay = true,
+    this.enableMentionsOverlay = true,
   }) : super(key: key);
 
   /// List of options for showing overlays.
@@ -327,11 +329,20 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Disable autoCorrect by passing false
   /// autoCorrect is enabled by default
-  final bool? autoCorrect;
+  final bool autoCorrect;
 
   /// Disable the default emoji suggestions
   /// Enabled by default
-  final bool? disableEmojiSuggestionsOverlay;
+  @Deprecated('Please use enableEmojiSuggestionsOverlay')
+  final bool disableEmojiSuggestionsOverlay;
+
+  /// Disable the default emoji suggestions by passing `false`
+  /// Enabled by default
+  final bool enableEmojiSuggestionsOverlay;
+
+  /// Disable the mentions overlay by passing false
+  /// Enabled by default
+  final bool enableMentionsOverlay;
 
   static bool _defaultValidator(Message message) =>
       message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
@@ -363,11 +374,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   bool get _isEditing =>
       _effectiveController.value.status != MessageSendingStatus.sending;
-
-  bool get _autoCorrect => widget.autoCorrect ?? true;
-
-  bool get _disableEmojiSuggestionsOverlay =>
-      widget.disableEmojiSuggestionsOverlay ?? false;
 
   StreamRestorableMessageInputController? _controller;
 
@@ -598,7 +604,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
               visible: _showCommandsOverlay,
               widget: _buildCommandsOverlayEntry(),
             ),
-            if (!_disableEmojiSuggestionsOverlay)
+            if (widget.enableEmojiSuggestionsOverlay &&
+                !widget.disableEmojiSuggestionsOverlay)
               OverlayOptions(
                 visible: _focusNode.hasFocus &&
                     _effectiveController.text.isNotEmpty &&
@@ -611,10 +618,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
                         .contains(':'),
                 widget: _buildEmojiOverlay(),
               ),
-            OverlayOptions(
-              visible: _showMentionsOverlay,
-              widget: _buildMentionsOverlayEntry(),
-            ),
+            if (widget.enableMentionsOverlay)
+              OverlayOptions(
+                visible: _showMentionsOverlay,
+                widget: _buildMentionsOverlayEntry(),
+              ),
             ...widget.customOverlays,
           ],
           child: child,
@@ -813,7 +821,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     textAlignVertical: TextAlignVertical.center,
                     decoration: _getInputDecoration(context),
                     textCapitalization: TextCapitalization.sentences,
-                    autocorrect: _autoCorrect,
+                    autocorrect: widget.autoCorrect,
                   ),
                 ),
               ],

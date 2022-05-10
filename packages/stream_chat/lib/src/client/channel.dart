@@ -448,12 +448,14 @@ class Channel {
           it.file!,
           onSendProgress: onSendProgress,
           cancelToken: cancelToken,
+          extraData: it.extraData,
         ).then((it) => it.file);
       } else {
         future = sendFile(
           it.file!,
           onSendProgress: onSendProgress,
           cancelToken: cancelToken,
+          extraData: it.extraData,
         ).then((it) => it.file);
       }
       _cancelableAttachmentUploadRequest[it.id] = cancelToken;
@@ -757,6 +759,7 @@ class Channel {
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) {
     _checkInitialized();
     return _client.sendFile(
@@ -765,6 +768,7 @@ class Channel {
       type,
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,
+      extraData: extraData,
     );
   }
 
@@ -773,6 +777,7 @@ class Channel {
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) {
     _checkInitialized();
     return _client.sendImage(
@@ -781,6 +786,7 @@ class Channel {
       type,
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,
+      extraData: extraData,
     );
   }
 
@@ -805,6 +811,7 @@ class Channel {
   Future<EmptyResponse> deleteFile(
     String url, {
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) {
     _checkInitialized();
     return _client.deleteFile(
@@ -812,6 +819,7 @@ class Channel {
       id!,
       type,
       cancelToken: cancelToken,
+      extraData: extraData,
     );
   }
 
@@ -819,6 +827,7 @@ class Channel {
   Future<EmptyResponse> deleteImage(
     String url, {
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) {
     _checkInitialized();
     return _client.deleteImage(
@@ -826,6 +835,7 @@ class Channel {
       id!,
       type,
       cancelToken: cancelToken,
+      extraData: extraData,
     );
   }
 
@@ -2007,7 +2017,11 @@ class ChannelClientState {
       );
 
   /// User role for the current user.
+  @Deprecated('Please use currentUserChannelRole')
   String? get currentUserRole => currentUserMember?.role;
+
+  /// Channel role for the current user
+  String? get currentUserChannelRole => currentUserMember?.channelRole;
 
   /// Channel read list.
   List<Read> get read => _channelState.read ?? <Read>[];

@@ -728,6 +728,7 @@ class StreamChatClient {
     String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) =>
       _chatApi.fileUploader.sendFile(
         file,
@@ -735,6 +736,7 @@ class StreamChatClient {
         channelType,
         onSendProgress: onSendProgress,
         cancelToken: cancelToken,
+        extraData: extraData,
       );
 
   /// Send a [image] to the [channelId] of type [channelType]
@@ -744,6 +746,7 @@ class StreamChatClient {
     String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) =>
       _chatApi.fileUploader.sendImage(
         image,
@@ -751,6 +754,7 @@ class StreamChatClient {
         channelType,
         onSendProgress: onSendProgress,
         cancelToken: cancelToken,
+        extraData: extraData,
       );
 
   /// Delete a file from this channel
@@ -759,12 +763,14 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) =>
       _chatApi.fileUploader.deleteFile(
         url,
         channelId,
         channelType,
         cancelToken: cancelToken,
+        extraData: extraData,
       );
 
   /// Delete an image from this channel
@@ -773,12 +779,14 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) =>
       _chatApi.fileUploader.deleteImage(
         url,
         channelId,
         channelType,
         cancelToken: cancelToken,
+        extraData: extraData,
       );
 
   /// Replaces the [channelId] of type [ChannelType] data with [data].
