@@ -926,7 +926,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     final showThreadTail = !(hasUrlAttachments || isGiphy || isOnlyEmoji) &&
         (showThreadReplyIndicator || showInChannel);
 
-    final threadIndicatorWidgets = <InlineSpan>[
+    final threadIndicatorWidgets = <WidgetSpan>[
       if (showThreadTail)
         WidgetSpan(
           child: Container(
@@ -961,12 +961,16 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       ],
     ];
 
+    if (widget.reverse) {
+      children.addAll(threadIndicatorWidgets.reversed);
+    } else {
+      children.insertAll(0, threadIndicatorWidgets);
+    }
+
     return Text.rich(
       TextSpan(
         children: [
-          if (!widget.reverse) ...threadIndicatorWidgets,
           ...children,
-          if (widget.reverse) ...threadIndicatorWidgets.reversed,
         ].insertBetween(const WidgetSpan(child: SizedBox(width: 8))),
       ),
       maxLines: 1,
