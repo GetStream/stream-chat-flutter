@@ -1107,6 +1107,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               widget.onThreadTap != null,
           showFlagButton: widget.showFlagButton,
           customActions: widget.customActions,
+          showDeleteMessage: widget.showDeleteMessage,
+          showEditMessage: widget.showEditMessage,
+          showPinButton: widget.showPinButton,
+          showReactions: widget.showReactions,
         ),
       ),
     );
