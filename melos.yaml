@@ -1,4 +1,5 @@
 name: stream_chat_flutter
+repository: https://github.com/GetStream/stream-chat-flutter
 
 versioning:
   mode: independent
@@ -91,5 +92,5 @@ dev_dependencies:
   dart_code_metrics: ^4.4.0
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
-  flutter: '>=1.17.0 <2.0.0'
+  sdk: '>=2.17.0 <3.0.0'
+  flutter: '>=1.17.0 <3.0.0'
