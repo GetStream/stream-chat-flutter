@@ -100,12 +100,10 @@ class StreamChannelInfo extends StatelessWidget {
       return alternativeWidget ?? const Offstage();
     }
 
-    return Align(
-      child: StreamTypingIndicator(
-        parentId: parentId,
-        style: textStyle,
-        alternativeWidget: alternativeWidget,
-      ),
+    return StreamTypingIndicator(
+      parentId: parentId,
+      style: textStyle,
+      alternativeWidget: alternativeWidget,
     );
   }
 

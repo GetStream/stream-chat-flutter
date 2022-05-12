@@ -186,13 +186,11 @@ class StreamThreadHeader extends StatelessWidget
                   ),
               const SizedBox(height: 2),
               if (showTypingIndicator)
-                Align(
-                  child: StreamTypingIndicator(
-                    channel: StreamChannel.of(context).channel,
-                    style: channelHeaderTheme.subtitleStyle,
-                    parentId: parent.id,
-                    alternativeWidget: defaultSubtitle,
-                  ),
+                StreamTypingIndicator(
+                  channel: StreamChannel.of(context).channel,
+                  style: channelHeaderTheme.subtitleStyle,
+                  parentId: parent.id,
+                  alternativeWidget: defaultSubtitle,
                 )
               else
                 defaultSubtitle,
