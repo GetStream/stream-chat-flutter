@@ -322,7 +322,7 @@ class _PagedValueListViewState<K, V> extends State<PagedValueListView<K, V>> {
                       index == newPageRequestTriggerIndex;
                   if (nextPageKey != null && isBuildingTriggerIndexItem) {
                     // Schedules the request for the end of this frame.
-                    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+                    WidgetsBinding.instance.addPostFrameCallback((_) async {
                       if (error == null) {
                         await _controller.loadMore(nextPageKey);
                       }
@@ -678,7 +678,7 @@ class _PagedValueGridViewState<K, V> extends State<PagedValueGridView<K, V>> {
                       index == newPageRequestTriggerIndex;
                   if (nextPageKey != null && isBuildingTriggerIndexItem) {
                     // Schedules the request for the end of this frame.
-                    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+                    WidgetsBinding.instance.addPostFrameCallback((_) async {
                       if (error == null) {
                         await _controller.loadMore(nextPageKey);
                       }

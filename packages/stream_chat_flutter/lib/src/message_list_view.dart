@@ -889,7 +889,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       initialIndex = 0;
       await streamChannel!.reloadChannel();
 
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollController!.jumpTo(index: 0);
       });
     } else {
@@ -1341,7 +1341,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         if (event.message?.parentId == widget.parentMessage?.id &&
             event.message!.user!.id ==
                 streamChannel!.channel.client.state.currentUser!.id) {
-          WidgetsBinding.instance!.addPostFrameCallback((_) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
             _scrollController?.scrollTo(
               index: 0,
               duration: const Duration(seconds: 1),

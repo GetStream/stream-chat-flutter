@@ -1317,7 +1317,7 @@ void main() {
     await setUpWidgetTest(tester, itemPositionsListener: itemPositionsListener);
 
     final root = WidgetsBinding
-        .instance!.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
+        .instance.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
 
     final semanticNodes = <SemanticsNode>[root];
 
