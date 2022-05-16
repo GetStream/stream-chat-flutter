@@ -11,7 +11,7 @@ typedef UploadProgressIndicator = StreamUploadProgressIndicator;
 class StreamUploadProgressIndicator extends StatelessWidget {
   /// Constructor for creating an [StreamUploadProgressIndicator]
   const StreamUploadProgressIndicator({
-    Key? key,
+    super.key,
     required this.uploaded,
     required this.total,
     this.progressIndicatorColor = const Color(0xffb2b2b2),
@@ -23,7 +23,7 @@ class StreamUploadProgressIndicator extends StatelessWidget {
     ),
     this.showBackground = true,
     this.textStyle,
-  }) : super(key: key);
+  });
 
   /// Bytes uploaded
   final int uploaded;
@@ -72,7 +72,7 @@ class StreamUploadProgressIndicator extends StatelessWidget {
       ),
     );
     if (showBackground) {
-      child = Container(
+      child = DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: theme.colorTheme.overlayDark.withOpacity(0.6),

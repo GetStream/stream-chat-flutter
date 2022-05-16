@@ -49,6 +49,7 @@ void main() {
         channel: ChannelModel.fromJson(j['channel']),
         members: [],
         messages:
+            // ignore: unnecessary_lambdas
             (j['messages'] as List).map((m) => Message.fromJson(m)).toList(),
         read: [],
         watcherCount: 5,

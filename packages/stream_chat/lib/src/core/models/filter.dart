@@ -60,21 +60,21 @@ enum FilterOperator {
 extension FilterOperatorX on FilterOperator {
   /// Converts [FilterOperator] into rew values
   String get rawValue => {
-        FilterOperator.equal: '\$eq',
-        FilterOperator.notEqual: '\$ne',
-        FilterOperator.greater: '\$gt',
-        FilterOperator.greaterOrEqual: '\$gte',
-        FilterOperator.less: '\$lt',
-        FilterOperator.lessOrEqual: '\$lte',
-        FilterOperator.in_: '\$in',
-        FilterOperator.notIn: '\$nin',
-        FilterOperator.query: '\$q',
-        FilterOperator.autoComplete: '\$autocomplete',
-        FilterOperator.exists: '\$exists',
-        FilterOperator.and: '\$and',
-        FilterOperator.or: '\$or',
-        FilterOperator.nor: '\$nor',
-        FilterOperator.contains: '\$contains',
+        FilterOperator.equal: r'$eq',
+        FilterOperator.notEqual: r'$ne',
+        FilterOperator.greater: r'$gt',
+        FilterOperator.greaterOrEqual: r'$gte',
+        FilterOperator.less: r'$lt',
+        FilterOperator.lessOrEqual: r'$lte',
+        FilterOperator.in_: r'$in',
+        FilterOperator.notIn: r'$nin',
+        FilterOperator.query: r'$q',
+        FilterOperator.autoComplete: r'$autocomplete',
+        FilterOperator.exists: r'$exists',
+        FilterOperator.and: r'$and',
+        FilterOperator.or: r'$or',
+        FilterOperator.nor: r'$nor',
+        FilterOperator.contains: r'$contains',
       }[this]!;
 }
 

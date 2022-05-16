@@ -15,19 +15,14 @@ typedef GiphyAttachment = StreamGiphyAttachment;
 class StreamGiphyAttachment extends StreamAttachmentWidget {
   /// Constructor for creating a [StreamGiphyAttachment] widget
   const StreamGiphyAttachment({
-    Key? key,
-    required Message message,
-    required Attachment attachment,
-    Size? size,
+    super.key,
+    required super.message,
+    required super.attachment,
+    super.size,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
-  }) : super(
-          key: key,
-          message: message,
-          attachment: attachment,
-          size: size,
-        );
+  });
 
   /// Callback when show message is tapped
   final ShowMessageCallback? onShowMessage;

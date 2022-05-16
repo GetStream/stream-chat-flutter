@@ -6,11 +6,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamBackButton extends StatelessWidget {
   /// Constructor for creating back button
   const StreamBackButton({
-    Key? key,
+    super.key,
     this.onPressed,
     this.showUnreads = false,
     this.cid,
-  }) : super(key: key);
+  });
 
   /// Callback for when button is pressed
   final VoidCallback? onPressed;

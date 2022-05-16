@@ -22,14 +22,14 @@ typedef UserItem = StreamUserItem;
 class StreamUserItem extends StatelessWidget {
   /// Instantiate a new UserItem
   const StreamUserItem({
-    Key? key,
+    super.key,
     required this.user,
     this.onTap,
     this.onLongPress,
     this.onImageTap,
     this.selected = false,
     this.showLastOnline = true,
-  }) : super(key: key);
+  });
 
   /// Function called when tapping this widget
   final void Function(User)? onTap;
@@ -53,23 +53,11 @@ class StreamUserItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
     return ListTile(
-      onTap: () {
-        if (onTap != null) {
-          onTap!(user);
-        }
-      },
-      onLongPress: () {
-        if (onLongPress != null) {
-          onLongPress!(user);
-        }
-      },
+      onTap: onTap == null ? null : () => onTap!(user),
+      onLongPress: onLongPress == null ? null : () => onLongPress!(user),
       leading: StreamUserAvatar(
         user: user,
-        onTap: (user) {
-          if (onImageTap != null) {
-            onImageTap!(user);
-          }
-        },
+        onTap: onImageTap,
         constraints: const BoxConstraints.tightFor(
           height: 40,
           width: 40,

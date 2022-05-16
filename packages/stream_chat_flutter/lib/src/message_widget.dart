@@ -52,7 +52,7 @@ typedef MessageWidget = StreamMessageWidget;
 class StreamMessageWidget extends StatefulWidget {
   /// Creates a new instance of the message widget.
   StreamMessageWidget({
-    Key? key,
+    super.key,
     required this.message,
     required this.messageTheme,
     this.reverse = false,
@@ -105,7 +105,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.customActions = const [],
     this.onAttachmentTap,
     this.usernameBuilder,
-  })  : attachmentBuilders = {
+  }) : attachmentBuilders = {
           'image': (context, message, attachments) {
             final border = RoundedRectangleBorder(
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
@@ -261,8 +261,7 @@ class StreamMessageWidget extends StatefulWidget {
                   .toList(),
             );
           },
-        }..addAll(customAttachmentBuilders ?? {}),
-        super(key: key);
+        }..addAll(customAttachmentBuilders ?? {});
 
   /// Function called on mention tap
   final void Function(User)? onMentionTap;
@@ -1080,7 +1079,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             showTimestamp: false,
             translateUserAvatar: false,
             showSendingIndicator: false,
-            padding: const EdgeInsets.all(0),
+            padding: EdgeInsets.zero,
             showReactionPickerIndicator: widget.showReactions &&
                 (widget.message.status == MessageSendingStatus.sent) &&
                 channel.ownCapabilities.contains(PermissionType.sendReaction),
@@ -1144,7 +1143,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             showTimestamp: false,
             translateUserAvatar: false,
             showSendingIndicator: false,
-            padding: const EdgeInsets.all(0),
+            padding: EdgeInsets.zero,
             showReactionPickerIndicator: widget.showReactions &&
                 (widget.message.status == MessageSendingStatus.sent) &&
                 channel.ownCapabilities.contains(PermissionType.sendReaction),
@@ -1408,11 +1407,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
 class _ThreadParticipants extends StatelessWidget {
   const _ThreadParticipants({
-    Key? key,
     required StreamChatThemeData streamChatTheme,
     required this.threadParticipants,
-  })  : _streamChatTheme = streamChatTheme,
-        super(key: key);
+  }) : _streamChatTheme = streamChatTheme;
 
   final StreamChatThemeData _streamChatTheme;
   final Iterable<User> threadParticipants;

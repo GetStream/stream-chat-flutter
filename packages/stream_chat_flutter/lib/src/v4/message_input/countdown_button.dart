@@ -5,9 +5,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamCountdownButton extends StatelessWidget {
   /// Constructor for creating [StreamCountdownButton].
   const StreamCountdownButton({
-    Key? key,
+    super.key,
     required this.count,
-  }) : super(key: key);
+  });
 
   /// Count of time remaining to show to the user.
   final int count;

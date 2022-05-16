@@ -58,10 +58,10 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({
-    Key? key,
+    super.key,
     required this.client,
     required this.channel,
-  }) : super(key: key);
+  });
 
   final StreamChatClient client;
 
@@ -86,8 +86,8 @@ class MyApp extends StatelessWidget {
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => Scaffold(

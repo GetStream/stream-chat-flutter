@@ -15,8 +15,8 @@ class BetterStreamBuilder<T extends Object> extends StatefulWidget {
     this.noDataBuilder,
     this.errorBuilder,
     this.comparator,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// The stream to listen to
   final Stream<T?>? stream;

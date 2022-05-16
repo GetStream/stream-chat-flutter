@@ -15,14 +15,14 @@ typedef MessageReactionsModal = StreamMessageReactionsModal;
 class StreamMessageReactionsModal extends StatelessWidget {
   /// Constructor for creating a [StreamMessageReactionsModal] reactions
   const StreamMessageReactionsModal({
-    Key? key,
+    super.key,
     required this.message,
     required this.messageWidget,
     required this.messageTheme,
     this.showReactions,
     this.reverse = false,
     this.onUserAvatarTap,
-  }) : super(key: key);
+  });
 
   /// Widget that shows the message
   final Widget messageWidget;

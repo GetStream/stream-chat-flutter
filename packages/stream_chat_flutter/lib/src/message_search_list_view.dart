@@ -54,8 +54,9 @@ typedef EmptyMessageSearchBuilder = Widget Function(
 @Deprecated("Use 'StreamMessageSearchListView' instead")
 class MessageSearchListView extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
+  @Deprecated("Use 'StreamMessageSearchListView' instead")
   const MessageSearchListView({
-    Key? key,
+    super.key,
     required this.filters,
     this.messageQuery,
     this.sortOptions,
@@ -72,7 +73,7 @@ class MessageSearchListView extends StatefulWidget {
     this.loadingBuilder,
     this.childBuilder,
     this.messageSearchListController,
-  }) : super(key: key);
+  });
 
   /// Message String to search on
   final String? messageQuery;
@@ -238,7 +239,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       initialData: false,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Container(
+          return ColoredBox(
             color: StreamChatTheme.of(context)
                 .colorTheme
                 .accentError

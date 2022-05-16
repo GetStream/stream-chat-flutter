@@ -114,9 +114,9 @@ void main() {
     });
 
     bool findBackground(Widget widget) =>
-        widget is Container &&
+        widget is DecoratedBox &&
         widget.decoration is BoxDecoration &&
-        (widget.decoration! as BoxDecoration).image != null;
+        (widget.decoration as BoxDecoration).image != null;
 
     expect(find.byType(StreamMessageListView), findsOneWidget);
     expect(find.byKey(nonEmptyWidgetKey), findsOneWidget);
