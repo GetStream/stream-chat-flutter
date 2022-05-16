@@ -55,7 +55,7 @@ class StreamChannelAvatar extends StatelessWidget {
     this.selected = false,
     this.selectionColor,
     this.selectionThickness = 4,
-  })  : assert(
+  }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
         );

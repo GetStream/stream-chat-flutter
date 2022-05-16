@@ -28,5 +28,4 @@ class CustomGoldenFileComparator extends LocalFileComparator {
     }
     return true;
   }
-
 }

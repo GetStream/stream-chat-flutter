@@ -17,7 +17,7 @@ class StreamScrollViewLoadMoreError extends StatelessWidget {
     this.mainAxisSize = MainAxisSize.max,
     this.mainAxisAlignment = MainAxisAlignment.spaceBetween,
     this.crossAxisAlignment = CrossAxisAlignment.center,
-  })  : _isList = true;
+  }) : _isList = true;
 
   /// Creates a new instance of [StreamScrollViewLoadMoreError.grid].
   const StreamScrollViewLoadMoreError.grid({
@@ -31,7 +31,7 @@ class StreamScrollViewLoadMoreError extends StatelessWidget {
     this.mainAxisSize = MainAxisSize.max,
     this.mainAxisAlignment = MainAxisAlignment.spaceEvenly,
     this.crossAxisAlignment = CrossAxisAlignment.center,
-  })  : _isList = false;
+  }) : _isList = false;
 
   /// The error message to display.
   final Widget? error;

@@ -14,7 +14,7 @@ class StreamChannelName extends StatelessWidget {
     required this.channel,
     this.textStyle,
     this.textOverflow = TextOverflow.ellipsis,
-  })  : assert(
+  }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
         );

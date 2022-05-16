@@ -74,7 +74,7 @@ class StreamChannelHeader extends StatelessWidget
     this.actions,
     this.backgroundColor,
     this.elevation = 1,
-  })  : preferredSize = const Size.fromHeight(kToolbarHeight);
+  }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// True if this header shows the leading back button
   final bool showBackButton;

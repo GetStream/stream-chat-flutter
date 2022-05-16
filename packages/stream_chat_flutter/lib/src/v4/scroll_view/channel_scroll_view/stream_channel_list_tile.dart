@@ -30,7 +30,7 @@ class StreamChannelListTile extends StatelessWidget {
     this.contentPadding = const EdgeInsets.symmetric(horizontal: 8),
     this.unreadIndicatorBuilder,
     this.sendingIndicatorBuilder,
-  })  : assert(
+  }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
         );
@@ -230,7 +230,7 @@ class ChannelLastMessageDate extends StatelessWidget {
     super.key,
     required this.channel,
     this.textStyle,
-  })  : assert(
+  }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
         );
@@ -282,7 +282,7 @@ class ChannelListTileSubtitle extends StatelessWidget {
     super.key,
     required this.channel,
     this.textStyle,
-  })  : assert(
+  }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
         );
@@ -325,7 +325,7 @@ class ChannelLastMessageText extends StatelessWidget {
     super.key,
     required this.channel,
     this.textStyle,
-  })  : assert(
+  }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
         );

@@ -43,7 +43,7 @@ abstract class StreamAttachmentWidget extends StatelessWidget {
     required this.attachment,
     this.size,
     AttachmentSource? source,
-  })  : _source = source;
+  }) : _source = source;
 
   /// Size of attachments
   final Size? size;

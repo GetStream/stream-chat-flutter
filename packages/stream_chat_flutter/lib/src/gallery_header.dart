@@ -38,7 +38,7 @@ class StreamGalleryHeader extends StatelessWidget
     this.sentAt = '',
     this.backgroundColor,
     this.attachmentActionsModalBuilder,
-  })  : preferredSize = const Size.fromHeight(kToolbarHeight);
+  }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// True if this header shows the leading back button
   final bool showBackButton;

@@ -20,7 +20,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
     this.onLeaveChannelTap,
     this.onDeleteConversationTap,
     this.onCancelTap,
-  })  : assert(
+  }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
         );

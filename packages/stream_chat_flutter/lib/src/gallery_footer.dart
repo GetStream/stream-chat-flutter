@@ -29,7 +29,7 @@ class StreamGalleryFooter extends StatefulWidget
     required this.mediaAttachmentPackages,
     this.mediaSelectedCallBack,
     this.backgroundColor,
-  })  : preferredSize = const Size.fromHeight(kToolbarHeight);
+  }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// Callback to call when pressing the back button.
   /// By default it calls [Navigator.pop]

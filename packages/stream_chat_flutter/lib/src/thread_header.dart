@@ -79,7 +79,7 @@ class StreamThreadHeader extends StatelessWidget
     this.showTypingIndicator = true,
     this.backgroundColor,
     this.elevation = 1,
-  })  : preferredSize = const Size.fromHeight(kToolbarHeight);
+  }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// True if this header shows the leading back button
   final bool showBackButton;

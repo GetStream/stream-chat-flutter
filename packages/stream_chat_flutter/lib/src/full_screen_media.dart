@@ -38,7 +38,7 @@ class StreamFullScreenMedia extends StatefulWidget {
     this.onShowMessage,
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
-  })  : userName = userName ?? '';
+  }) : userName = userName ?? '';
 
   /// The url of the image
   final List<StreamAttachmentPackage> mediaAttachmentPackages;
