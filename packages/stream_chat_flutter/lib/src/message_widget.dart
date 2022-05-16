@@ -1110,6 +1110,13 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               widget.onThreadTap != null,
           showFlagButton: widget.showFlagButton,
           customActions: widget.customActions,
+          showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
+          showEditMessage: widget.showEditMessage &&
+              !isDeleteFailed &&
+              !widget.message.attachments
+                  .any((element) => element.type == 'giphy'),
+          showPinButton: widget.showPinButton,
+          showReactions: widget.showReactions,
         ),
       ),
     );
