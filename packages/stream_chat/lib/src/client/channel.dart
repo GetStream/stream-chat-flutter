@@ -2173,7 +2173,7 @@ class ChannelClientState {
 
   /// The channel threads related to this channel.
   Map<String, List<Message>> get threads =>
-      _threadsController.value.map((key, value) => MapEntry(key, value));
+      _threadsController.value.map(MapEntry.new);
 
   /// The channel threads related to this channel as a stream.
   Stream<Map<String, List<Message>>> get threadsStream =>

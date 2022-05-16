@@ -47,7 +47,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamChannelAvatar extends StatelessWidget {
   /// Instantiate a new ChannelImage
   StreamChannelAvatar({
-    Key? key,
+    super.key,
     required this.channel,
     this.constraints,
     this.onTap,
@@ -55,11 +55,10 @@ class StreamChannelAvatar extends StatelessWidget {
     this.selected = false,
     this.selectionColor,
     this.selectionThickness = 4,
-  })  : assert(
+  }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
-        ),
-        super(key: key);
+        );
 
   /// [BorderRadius] to display the widget
   final BorderRadius? borderRadius;

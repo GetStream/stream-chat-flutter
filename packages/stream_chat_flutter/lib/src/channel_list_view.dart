@@ -57,8 +57,9 @@ typedef ViewInfoCallback = void Function(Channel);
 @Deprecated("Use 'StreamChannelListView' instead")
 class ChannelListView extends StatefulWidget {
   /// Instantiate a new ChannelListView
+  @Deprecated("Use 'StreamChannelListView' instead")
   ChannelListView({
-    Key? key,
+    super.key,
     this.filter,
     this.sort,
     this.state = true,
@@ -93,8 +94,7 @@ class ChannelListView extends StatefulWidget {
     this.onDeletePressed,
     this.swipeActions,
     this.channelListController,
-  })  : limit = limit ?? pagination?.limit ?? 25,
-        super(key: key);
+  }) : limit = limit ?? pagination?.limit ?? 25;
 
   /// If true a default swipe to action behaviour will be added to this widget
   final bool swipeToAction;
@@ -688,7 +688,7 @@ class _ChannelListViewState extends State<ChannelListView> {
         initialData: false,
         errorBuilder: (context, err) {
           final theme = StreamChatTheme.of(context);
-          return Container(
+          return ColoredBox(
             color: theme.colorTheme.textLowEmphasis.withOpacity(0.9),
             child: Padding(
               padding: const EdgeInsets.all(16),

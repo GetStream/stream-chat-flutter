@@ -6,14 +6,14 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 class StreamScrollViewEmptyWidget extends StatelessWidget {
   /// Creates a new instance of the [StreamScrollViewEmptyWidget].
   const StreamScrollViewEmptyWidget({
-    Key? key,
+    super.key,
     required this.emptyIcon,
     required this.emptyTitle,
     this.emptyTitleStyle,
     this.mainAxisSize = MainAxisSize.max,
     this.mainAxisAlignment = MainAxisAlignment.center,
     this.crossAxisAlignment = CrossAxisAlignment.center,
-  }) : super(key: key);
+  });
 
   /// The title of the empty view.
   final Widget emptyTitle;

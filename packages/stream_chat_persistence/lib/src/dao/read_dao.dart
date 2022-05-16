@@ -11,7 +11,7 @@ part 'read_dao.g.dart';
 @DriftAccessor(tables: [Reads, Users])
 class ReadDao extends DatabaseAccessor<DriftChatDatabase> with _$ReadDaoMixin {
   /// Creates a new read dao instance
-  ReadDao(DriftChatDatabase db) : super(db);
+  ReadDao(super.db);
 
   /// Get all reads where [Reads.channelCid] matches [cid]
   Future<List<Read>> getReadsByCid(String cid) async => (select(reads).join([

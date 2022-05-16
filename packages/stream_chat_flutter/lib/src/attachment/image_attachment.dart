@@ -15,21 +15,16 @@ typedef ImageAttachment = StreamImageAttachment;
 class StreamImageAttachment extends StreamAttachmentWidget {
   /// Constructor for creating a [StreamImageAttachment] widget
   const StreamImageAttachment({
-    Key? key,
-    required Message message,
-    required Attachment attachment,
+    super.key,
+    required super.message,
+    required super.attachment,
     required this.messageTheme,
-    Size? size,
+    super.size,
     this.showTitle = false,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
-  }) : super(
-          key: key,
-          message: message,
-          attachment: attachment,
-          size: size,
-        );
+  });
 
   /// [StreamMessageThemeData] for showing image title
   final StreamMessageThemeData messageTheme;

@@ -11,11 +11,11 @@ typedef SendingIndicator = StreamSendingIndicator;
 class StreamSendingIndicator extends StatelessWidget {
   /// Constructor for creating a [StreamSendingIndicator] widget
   const StreamSendingIndicator({
-    Key? key,
+    super.key,
     required this.message,
     this.isMessageRead = false,
     this.size = 12,
-  }) : super(key: key);
+  });
 
   /// Message for sending indicator
   final Message message;

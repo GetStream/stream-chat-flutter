@@ -14,7 +14,7 @@ part 'member_dao.g.dart';
 class MemberDao extends DatabaseAccessor<DriftChatDatabase>
     with _$MemberDaoMixin {
   /// Creates a new member dao instance
-  MemberDao(DriftChatDatabase db) : super(db);
+  MemberDao(super.db);
 
   /// Get all members where [Members.channelCid] matches [cid]
   Future<List<Member>> getMembersByCid(String cid) async =>

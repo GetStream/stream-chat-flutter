@@ -12,7 +12,7 @@ part 'connection_event_dao.g.dart';
 class ConnectionEventDao extends DatabaseAccessor<DriftChatDatabase>
     with _$ConnectionEventDaoMixin {
   /// Creates a new connection event dao instance
-  ConnectionEventDao(DriftChatDatabase db) : super(db);
+  ConnectionEventDao(super.db);
 
   /// Get the latest stored connection event
   Future<Event?> get connectionEvent => select(connectionEvents)

@@ -12,7 +12,7 @@ part 'channel_dao.g.dart';
 class ChannelDao extends DatabaseAccessor<DriftChatDatabase>
     with _$ChannelDaoMixin {
   /// Creates a new channel dao instance
-  ChannelDao(DriftChatDatabase db) : super(db);
+  ChannelDao(super.db);
 
   /// Get channel by cid
   Future<ChannelModel?> getChannelByCid(String cid) async =>

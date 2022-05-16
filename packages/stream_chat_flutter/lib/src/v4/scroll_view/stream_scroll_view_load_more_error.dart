@@ -7,7 +7,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 class StreamScrollViewLoadMoreError extends StatelessWidget {
   /// Creates a new instance of [StreamScrollViewLoadMoreError.list].
   const StreamScrollViewLoadMoreError.list({
-    Key? key,
+    super.key,
     this.error,
     this.errorStyle,
     this.errorIcon,
@@ -17,12 +17,11 @@ class StreamScrollViewLoadMoreError extends StatelessWidget {
     this.mainAxisSize = MainAxisSize.max,
     this.mainAxisAlignment = MainAxisAlignment.spaceBetween,
     this.crossAxisAlignment = CrossAxisAlignment.center,
-  })  : _isList = true,
-        super(key: key);
+  }) : _isList = true;
 
   /// Creates a new instance of [StreamScrollViewLoadMoreError.grid].
   const StreamScrollViewLoadMoreError.grid({
-    Key? key,
+    super.key,
     this.error,
     this.errorStyle,
     this.errorIcon,
@@ -32,8 +31,7 @@ class StreamScrollViewLoadMoreError extends StatelessWidget {
     this.mainAxisSize = MainAxisSize.max,
     this.mainAxisAlignment = MainAxisAlignment.spaceEvenly,
     this.crossAxisAlignment = CrossAxisAlignment.center,
-  })  : _isList = false,
-        super(key: key);
+  }) : _isList = false;
 
   /// The error message to display.
   final Widget? error;
@@ -86,7 +84,7 @@ class StreamScrollViewLoadMoreError extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      child: Container(
+      child: ColoredBox(
         color: backgroundColor,
         child: Padding(
           padding: padding,

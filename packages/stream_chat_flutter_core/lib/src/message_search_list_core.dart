@@ -46,7 +46,7 @@ class MessageSearchListCore extends StatefulWidget {
   /// * [loadingBuilder]
   /// * [childBuilder]
   MessageSearchListCore({
-    Key? key,
+    super.key,
     required this.emptyBuilder,
     required this.errorBuilder,
     required this.loadingBuilder,
@@ -76,8 +76,7 @@ class MessageSearchListCore extends StatefulWidget {
               sortOptions == null,
           'Cannot specify `offset` with `sortOptions` parameter',
         ),
-        limit = limit ?? paginationParams?.limit ?? 30,
-        super(key: key);
+        limit = limit ?? paginationParams?.limit ?? 30;
 
   /// A [MessageSearchListController] allows reloading and pagination.
   /// Use [MessageSearchListController.loadData] and

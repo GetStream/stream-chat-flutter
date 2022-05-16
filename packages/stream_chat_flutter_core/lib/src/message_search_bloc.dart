@@ -17,9 +17,9 @@ import 'package:stream_chat_flutter_core/src/stream_controller_extension.dart';
 class MessageSearchBloc extends StatefulWidget {
   /// Instantiate a new MessageSearchBloc
   const MessageSearchBloc({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// The widget child
   final Widget child;

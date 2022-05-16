@@ -20,19 +20,14 @@ typedef FileAttachment = StreamFileAttachment;
 class StreamFileAttachment extends StreamAttachmentWidget {
   /// Constructor for creating a widget when attachment is of type 'file'
   const StreamFileAttachment({
-    Key? key,
-    required Message message,
-    required Attachment attachment,
-    Size? size,
+    super.key,
+    required super.message,
+    required super.attachment,
+    super.size,
     this.title,
     this.trailing,
     this.onAttachmentTap,
-  }) : super(
-          key: key,
-          message: message,
-          attachment: attachment,
-          size: size,
-        );
+  });
 
   /// Title for attachment
   final Widget? title;

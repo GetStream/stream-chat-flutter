@@ -11,7 +11,7 @@ typedef GroupAvatar = StreamGroupAvatar;
 class StreamGroupAvatar extends StatelessWidget {
   /// Constructor for creating a [StreamGroupAvatar]
   const StreamGroupAvatar({
-    Key? key,
+    super.key,
     this.channel,
     required this.members,
     this.constraints,
@@ -20,7 +20,7 @@ class StreamGroupAvatar extends StatelessWidget {
     this.selected = false,
     this.selectionColor,
     this.selectionThickness = 4,
-  }) : super(key: key);
+  });
 
   /// The channel of the avatar
   final Channel? channel;

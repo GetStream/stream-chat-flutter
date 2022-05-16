@@ -25,7 +25,7 @@ class ChannelPreview extends StatelessWidget {
   /// Constructor for creating [ChannelPreview]
   const ChannelPreview({
     required this.channel,
-    Key? key,
+    super.key,
     this.onTap,
     this.onLongPress,
     this.onImageTap,
@@ -34,7 +34,7 @@ class ChannelPreview extends StatelessWidget {
     this.leading,
     this.sendingIndicator,
     this.trailing,
-  }) : super(key: key);
+  });
 
   /// Function called when tapping this widget
   final void Function(Channel)? onTap;

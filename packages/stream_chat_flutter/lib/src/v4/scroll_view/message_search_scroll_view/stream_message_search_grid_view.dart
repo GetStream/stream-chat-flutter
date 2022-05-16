@@ -37,7 +37,7 @@ typedef StreamMessageSearchGridViewIndexedWidgetBuilder
 class StreamMessageSearchGridView extends StatelessWidget {
   /// Creates a new instance of [StreamMessageSearchGridView].
   const StreamMessageSearchGridView({
-    Key? key,
+    super.key,
     required this.controller,
     required this.itemBuilder,
     this.gridDelegate = defaultMessageSearchGridViewDelegate,
@@ -63,7 +63,7 @@ class StreamMessageSearchGridView extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : super(key: key);
+  });
 
   /// The [StreamUserListController] used to control the grid of users.
   final StreamMessageSearchListController controller;

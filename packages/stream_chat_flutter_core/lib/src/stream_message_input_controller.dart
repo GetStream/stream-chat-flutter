@@ -52,7 +52,7 @@ class StreamMessageInputController extends ValueNotifier<Message> {
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
   })  : _textEditingController = MessageTextFieldController.fromValue(
           initialMessage.text == null
-              ? const TextEditingValue()
+              ? TextEditingValue.empty
               : TextEditingValue(
                   text: initialMessage.text!,
                   composing: TextRange.collapsed(initialMessage.text!.length),

@@ -10,10 +10,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ChannelName extends StatelessWidget {
   /// Instantiate a new ChannelName
   const ChannelName({
-    Key? key,
+    super.key,
     this.textStyle,
     this.textOverflow = TextOverflow.ellipsis,
-  }) : super(key: key);
+  });
 
   /// The style of the text displayed
   final TextStyle? textStyle;

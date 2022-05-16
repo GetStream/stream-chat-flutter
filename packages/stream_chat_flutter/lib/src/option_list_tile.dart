@@ -11,7 +11,7 @@ typedef OptionListTile = StreamOptionListTile;
 class StreamOptionListTile extends StatelessWidget {
   /// Constructor for creating [StreamOptionListTile]
   const StreamOptionListTile({
-    Key? key,
+    super.key,
     required this.title,
     this.leading,
     this.trailing,
@@ -20,7 +20,7 @@ class StreamOptionListTile extends StatelessWidget {
     this.tileColor,
     this.separatorColor,
     this.titleTextStyle,
-  }) : super(key: key);
+  });
 
   /// Title for tile
   final String title;
