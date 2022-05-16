@@ -3,8 +3,7 @@ part of 'stream_chat_localizations.dart';
 /// The translations for German (`de`).
 class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for German.
-  const StreamChatLocalizationsDe({String localeName = 'de'})
-      : super(localeName: localeName);
+  const StreamChatLocalizationsDe({super.localeName = 'de'});
 
   @override
   String get launchUrlError => 'Die Url kann nicht geöffnet werden';

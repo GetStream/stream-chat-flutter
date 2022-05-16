@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#1133]](https://github.com/GetStream/stream-chat-flutter/issues/1133) Visibility override flags not being passed to `StreamMessageActionsModal`
+
 ## 4.1.0
 
 ✅ Added

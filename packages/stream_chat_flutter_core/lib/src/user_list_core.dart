@@ -67,14 +67,14 @@ class UserListCore extends StatefulWidget {
     required this.emptyBuilder,
     required this.loadingBuilder,
     required this.listBuilder,
-    Key? key,
+    super.key,
     this.filter = const Filter.empty(),
     this.sort,
     this.presence,
     this.groupAlphabetically = false,
     this.userListController,
     this.limit = 30,
-  }) : super(key: key);
+  });
 
   /// A [UserListController] allows reloading and pagination.
   /// Use [UserListController.loadData] and [UserListController.paginateData]
@@ -170,11 +170,11 @@ class UserListCoreState extends State<UserListCore>
             for (final key in groupedUsers.keys) {
               items
                 ..add(ListHeaderItem(key))
-                ..addAll(groupedUsers[key]!.map((e) => ListUserItem(e)));
+                ..addAll(groupedUsers[key]!.map(ListUserItem.new));
             }
             return items;
           }
-          return users.map((e) => ListUserItem(e)).toList();
+          return users.map(ListUserItem.new).toList();
         },
       );
 

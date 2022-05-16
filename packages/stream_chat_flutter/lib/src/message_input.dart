@@ -163,7 +163,7 @@ const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 class MessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
   const MessageInput({
-    Key? key,
+    super.key,
     this.onMessageSent,
     this.preMessageSending,
     this.parentMessage,
@@ -197,11 +197,10 @@ class MessageInput extends StatefulWidget {
     this.customOverlays = const [],
     this.mentionAllAppUsers = false,
     this.shouldKeepFocusAfterMessage,
-  })  : assert(
+  }) : assert(
           initialMessage == null || editMessage == null,
           "Can't provide both `initialMessage` and `editMessage`",
-        ),
-        super(key: key);
+        );
 
   /// List of options for showing overlays
   final List<OverlayOptions> customOverlays;
@@ -628,7 +627,7 @@ class MessageInputState extends State<MessageInput> {
               color: _messageInputTheme.expandButtonColor,
             ),
           ),
-          padding: const EdgeInsets.all(0),
+          padding: EdgeInsets.zero,
           constraints: const BoxConstraints.tightFor(
             height: 24,
             width: 24,
@@ -797,7 +796,7 @@ class MessageInputState extends State<MessageInput> {
               child: IconButton(
                 icon: StreamSvgIcon.closeSmall(),
                 splashRadius: 24,
-                padding: const EdgeInsets.all(0),
+                padding: EdgeInsets.zero,
                 constraints: const BoxConstraints.tightFor(
                   height: 24,
                   width: 24,
@@ -980,7 +979,7 @@ class MessageInputState extends State<MessageInput> {
     return AnimatedContainer(
       duration: _openFilePickerSection
           ? const Duration(milliseconds: 300)
-          : const Duration(),
+          : Duration.zero,
       curve: Curves.easeOut,
       height: _openFilePickerSection ? _kMinMediaPickerSize : 0,
       child: SingleChildScrollView(
@@ -1034,7 +1033,7 @@ class MessageInputState extends State<MessageInput> {
                             },
                     ),
                     IconButton(
-                      padding: const EdgeInsets.all(0),
+                      padding: EdgeInsets.zero,
                       icon: StreamSvgIcon.record(
                         color: _getIconColor(3),
                       ),
@@ -1436,9 +1435,9 @@ class MessageInputState extends State<MessageInput> {
           ],
         );
       default:
-        return Container(
+        return const ColoredBox(
           color: Colors.black26,
-          child: const Icon(Icons.insert_drive_file),
+          child: Icon(Icons.insert_drive_file),
         );
     }
   }
@@ -1453,7 +1452,7 @@ class MessageInputState extends State<MessageInput> {
                 ? _messageInputTheme.actionButtonColor
                 : _messageInputTheme.actionButtonIdleColor),
       ),
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(
         height: 24,
         width: 24,
@@ -1482,7 +1481,7 @@ class MessageInputState extends State<MessageInput> {
             ? _messageInputTheme.actionButtonColor
             : _messageInputTheme.actionButtonIdleColor,
       ),
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(
         height: 24,
         width: 24,
@@ -1699,7 +1698,7 @@ class MessageInputState extends State<MessageInput> {
         padding: const EdgeInsets.all(8),
         child: IconButton(
           onPressed: sendMessage,
-          padding: const EdgeInsets.all(0),
+          padding: EdgeInsets.zero,
           splashRadius: 24,
           constraints: const BoxConstraints.tightFor(
             height: 24,
@@ -1926,7 +1925,6 @@ class MessageInputState extends State<MessageInput> {
 
 class _PickerWidget extends StatefulWidget {
   const _PickerWidget({
-    Key? key,
     required this.filePickerIndex,
     required this.containsFile,
     required this.selectedMedias,
@@ -1934,7 +1932,7 @@ class _PickerWidget extends StatefulWidget {
     required this.onMediaSelected,
     required this.streamChatTheme,
     required this.mediaListViewController,
-  }) : super(key: key);
+  });
 
   final int filePickerIndex;
   final bool containsFile;
@@ -2002,7 +2000,7 @@ class _PickerWidgetState extends State<_PickerWidget> {
           onTap: () async {
             PhotoManager.openSetting();
           },
-          child: Container(
+          child: ColoredBox(
             color: widget.streamChatTheme.colorTheme.inputBg,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -2040,10 +2038,7 @@ class _PickerWidgetState extends State<_PickerWidget> {
 }
 
 class _CountdownButton extends StatelessWidget {
-  const _CountdownButton({
-    Key? key,
-    required this.count,
-  }) : super(key: key);
+  const _CountdownButton({required this.count});
 
   final int count;
 

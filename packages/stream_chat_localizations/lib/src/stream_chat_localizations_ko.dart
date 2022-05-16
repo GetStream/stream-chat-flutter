@@ -3,8 +3,7 @@ part of 'stream_chat_localizations.dart';
 /// The translations for Korean (`ko`).
 class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for Korean.
-  const StreamChatLocalizationsKo({String localeName = 'ko'})
-      : super(localeName: localeName);
+  const StreamChatLocalizationsKo({super.localeName = 'ko'});
 
   @override
   String get launchUrlError => 'URL을 시작할 수 없습니다';

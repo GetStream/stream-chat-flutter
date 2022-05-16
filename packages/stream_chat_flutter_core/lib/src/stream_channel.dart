@@ -22,12 +22,12 @@ class StreamChannel extends StatefulWidget {
   /// Creates a new instance of [StreamChannel]. Both [child] and [client] must
   /// be supplied and not null.
   const StreamChannel({
-    Key? key,
+    super.key,
     required this.child,
     required this.channel,
     this.showLoading = true,
     this.initialMessageId,
-  }) : super(key: key);
+  });
 
   /// The child of the widget
   final Widget child;

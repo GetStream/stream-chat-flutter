@@ -10,7 +10,7 @@ part 'user_dao.g.dart';
 @DriftAccessor(tables: [Users])
 class UserDao extends DatabaseAccessor<DriftChatDatabase> with _$UserDaoMixin {
   /// Creates a new user dao instance
-  UserDao(DriftChatDatabase db) : super(db);
+  UserDao(super.db);
 
   /// Updates the users data with the new [userList] data
   Future<void> updateUsers(List<User> userList) => batch(

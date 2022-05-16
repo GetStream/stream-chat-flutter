@@ -15,7 +15,7 @@ part 'channel_query_dao.g.dart';
 class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
     with _$ChannelQueryDaoMixin {
   /// Creates a new channel query dao instance
-  ChannelQueryDao(DriftChatDatabase db) : super(db);
+  ChannelQueryDao(super.db);
 
   String _computeHash(Filter? filter) {
     if (filter == null) {

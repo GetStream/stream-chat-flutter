@@ -13,13 +13,13 @@ typedef TypingIndicator = StreamTypingIndicator;
 class StreamTypingIndicator extends StatelessWidget {
   /// Instantiate a new TypingIndicator
   const StreamTypingIndicator({
-    Key? key,
+    super.key,
     this.channel,
     this.alternativeWidget,
     this.style,
-    this.padding = const EdgeInsets.all(0),
+    this.padding = EdgeInsets.zero,
     this.parentId,
-  }) : super(key: key);
+  });
 
   /// Style of the text widget
   final TextStyle? style;

@@ -7,7 +7,7 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 class StreamScrollViewErrorWidget extends StatelessWidget {
   /// Creates a new instance of the [StreamScrollViewErrorWidget].
   const StreamScrollViewErrorWidget({
-    Key? key,
+    super.key,
     this.errorTitle,
     this.errorTitleStyle,
     this.errorIcon,
@@ -17,7 +17,7 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
     this.mainAxisSize = MainAxisSize.max,
     this.mainAxisAlignment = MainAxisAlignment.center,
     this.crossAxisAlignment = CrossAxisAlignment.center,
-  }) : super(key: key);
+  });
 
   /// The title of the error.
   final Widget? errorTitle;

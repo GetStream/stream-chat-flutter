@@ -7,14 +7,14 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class Swipeable extends StatefulWidget {
   /// Constructor for creating a [Swipeable] widget
   const Swipeable({
-    Key? key,
+    super.key,
     required this.child,
     required this.backgroundIcon,
     this.onSwipeStart,
     this.onSwipeCancel,
     this.onSwipeEnd,
     this.threshold = 82.0,
-  }) : super(key: key);
+  });
 
   /// Child to make swipeable
   final Widget child;
@@ -77,9 +77,7 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
   }
 
   void _handleDragStart(DragStartDetails details) {
-    if (widget.onSwipeStart != null) {
-      widget.onSwipeStart!();
-    }
+    widget.onSwipeStart?.call();
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {

@@ -94,7 +94,7 @@ jobs:
       - name: "Install Tools"
         run: |
           flutter pub global activate melos ${{ env.melos_version }}
-          pub global activate remove_from_coverage
+          flutter pub global activate remove_from_coverage
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: "Flutter Test"

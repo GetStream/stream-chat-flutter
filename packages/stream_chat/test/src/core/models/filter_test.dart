@@ -123,7 +123,7 @@ void main() {
     test('custom', () {
       const key = 'testKey';
       const value = 'testValue';
-      const operator = '\$customOperator';
+      const operator = r'$customOperator';
       const filter = Filter.custom(operator: operator, key: key, value: value);
       expect(filter.key, key);
       expect(filter.value, value);

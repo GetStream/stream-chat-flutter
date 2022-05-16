@@ -25,7 +25,7 @@ class StreamAttachmentPicker extends StatefulWidget {
   /// Default constructor for [StreamAttachmentPicker] which creates the Stream
   /// attachment picker widget.
   const StreamAttachmentPicker({
-    Key? key,
+    super.key,
     required this.messageInputController,
     required this.onFilePicked,
     this.isOpen = false,
@@ -40,7 +40,7 @@ class StreamAttachmentPicker extends StatefulWidget {
       DefaultAttachmentTypes.video,
     ],
     this.customAttachmentTypes = const [],
-  }) : super(key: key);
+  });
 
   /// True if the picker is open.
   final bool isOpen;
@@ -179,7 +179,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
 
     return AnimatedContainer(
       duration:
-          widget.isOpen ? const Duration(milliseconds: 300) : const Duration(),
+          widget.isOpen ? const Duration(milliseconds: 300) : Duration.zero,
       curve: Curves.easeOut,
       height: widget.isOpen ? widget.pickerSize : 0,
       child: SingleChildScrollView(
@@ -245,7 +245,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                     if (widget.allowedAttachmentTypes
                         .contains(DefaultAttachmentTypes.video))
                       IconButton(
-                        padding: const EdgeInsets.all(0),
+                        padding: EdgeInsets.zero,
                         icon: StreamSvgIcon.record(
                           color: _getIconColor(3),
                         ),
@@ -424,7 +424,6 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
 
 class _PickerWidget extends StatefulWidget {
   const _PickerWidget({
-    Key? key,
     required this.filePickerIndex,
     required this.containsFile,
     required this.selectedMedias,
@@ -434,7 +433,7 @@ class _PickerWidget extends StatefulWidget {
     required this.allowedAttachmentTypes,
     required this.customAttachmentTypes,
     required this.mediaListViewController,
-  }) : super(key: key);
+  });
 
   final int filePickerIndex;
   final bool containsFile;
@@ -506,7 +505,7 @@ class _PickerWidgetState extends State<_PickerWidget> {
           onTap: () async {
             PhotoManager.openSetting();
           },
-          child: Container(
+          child: ColoredBox(
             color: widget.streamChatTheme.colorTheme.inputBg,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

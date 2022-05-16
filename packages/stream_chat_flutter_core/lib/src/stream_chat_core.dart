@@ -38,13 +38,13 @@ class StreamChatCore extends StatefulWidget {
   /// [StreamChatCore] is a stateful widget which reacts to system events and
   /// updates Stream's connection status accordingly.
   const StreamChatCore({
-    Key? key,
+    super.key,
     required this.client,
     required this.child,
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(minutes: 1),
     this.connectivityStream,
-  }) : super(key: key);
+  });
 
   /// Instance of Stream Chat Client containing information about the current
   /// application.

@@ -933,6 +933,11 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  final fadeTransitionFinder = find.descendant(
+    of: find.byType(ScrollablePositionedList),
+    matching: find.byType(FadeTransition),
+  );
+
   testWidgets('Scroll to 0 stop before half way', (WidgetTester tester) async {
     final itemScrollController = ItemScrollController();
     await setUpWidgetTest(tester, itemScrollController: itemScrollController);
@@ -951,7 +956,7 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('Item 91')).dy, 0);
-    expect(find.byType(FadeTransition), findsNWidgets(2));
+    expect(fadeTransitionFinder, findsNWidgets(1));
 
     await tester.pumpAndSettle();
   });
@@ -976,7 +981,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('Item 100')).dy,
         closeTo(screenHeight, tolerance));
     expect(find.text('Item 9', skipOffstage: false), findsNothing);
-    expect(find.byType(FadeTransition), findsNWidgets(2));
+    expect(fadeTransitionFinder, findsNWidgets(1));
 
     await tester.pumpAndSettle();
   });
@@ -999,11 +1004,7 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('Item 9')).dy, closeTo(0, tolerance));
-    final fadeTransition = tester.widget<FadeTransition>(find
-        .descendant(
-            of: find.byType(ScrollablePositionedList),
-            matching: find.byType(FadeTransition))
-        .last);
+    final fadeTransition = tester.widget<FadeTransition>(fadeTransitionFinder);
     expect(fadeTransition.opacity.value, 1.0);
 
     await tester.pumpAndSettle();
@@ -1021,13 +1022,14 @@ void main() {
         itemScrollController.scrollTo(index: 0, duration: scrollDuration));
     await tester.pump();
     await tester.pump();
-    await tester.pump(scrollDuration ~/ 2);
+    await tester.pump(scrollDuration ~/ 2 + scrollDuration ~/ 20);
 
     await tester.tap(find.byType(ScrollablePositionedList));
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('Item 90')).dy, 0);
-    expect(find.byType(FadeTransition), findsNWidgets(2));
+    expect(tester.getTopLeft(find.text('Item 9')).dy, closeTo(0, tolerance));
+    final fadeTransition = tester.widget<FadeTransition>(fadeTransitionFinder);
+    expect(fadeTransition.opacity.value, 1.0);
 
     await tester.pumpAndSettle();
   });

@@ -13,13 +13,13 @@ typedef DeletedMessage = StreamDeletedMessage;
 class StreamDeletedMessage extends StatelessWidget {
   /// Constructor to create [StreamDeletedMessage]
   const StreamDeletedMessage({
-    Key? key,
+    super.key,
     required this.messageTheme,
     this.borderRadiusGeometry,
     this.shape,
     this.borderSide,
     this.reverse = false,
-  }) : super(key: key);
+  });
 
   /// The theme of the message
   final StreamMessageThemeData messageTheme;

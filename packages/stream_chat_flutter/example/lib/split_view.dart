@@ -22,9 +22,9 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({
-    Key? key,
+    super.key,
     required this.client,
-  }) : super(key: key);
+  });
 
   final StreamChatClient client;
 
@@ -40,8 +40,8 @@ class MyApp extends StatelessWidget {
 
 class SplitView extends StatefulWidget {
   const SplitView({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _SplitViewState createState() => _SplitViewState();
@@ -86,9 +86,9 @@ class _SplitViewState extends State<SplitView> {
 
 class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
-    Key? key,
+    super.key,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final void Function(Channel)? onTap;
 
@@ -118,8 +118,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => Navigator(

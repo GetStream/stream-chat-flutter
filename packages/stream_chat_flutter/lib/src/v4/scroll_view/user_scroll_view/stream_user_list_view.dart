@@ -48,7 +48,7 @@ typedef StreamUserListViewIndexedWidgetBuilder
 class StreamUserListView extends StatelessWidget {
   /// Creates a new instance of [StreamUserListView].
   const StreamUserListView({
-    Key? key,
+    super.key,
     required this.controller,
     this.itemBuilder,
     this.separatorBuilder = defaultUserListViewSeparatorBuilder,
@@ -73,7 +73,7 @@ class StreamUserListView extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : super(key: key);
+  });
 
   /// The [StreamUserListController] used to control the list of users.
   final StreamUserListController controller;
@@ -368,7 +368,7 @@ class StreamUserListView extends StatelessWidget {
 /// [StreamUserListTile] items.
 class StreamUserListSeparator extends StatelessWidget {
   /// Creates a new instance of [StreamUserListSeparator].
-  const StreamUserListSeparator({Key? key}) : super(key: key);
+  const StreamUserListSeparator({super.key});
 
   @override
   Widget build(BuildContext context) {

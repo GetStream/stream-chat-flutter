@@ -92,7 +92,7 @@ class DummyLocalizations {
 }
 
 class LocalizationTracker extends StatefulWidget {
-  const LocalizationTracker({Key? key}) : super(key: key);
+  const LocalizationTracker({super.key});
 
   @override
   State<StatefulWidget> createState() => LocalizationTrackerState();

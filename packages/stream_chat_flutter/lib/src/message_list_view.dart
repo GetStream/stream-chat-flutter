@@ -169,7 +169,7 @@ typedef MessageListView = StreamMessageListView;
 class StreamMessageListView extends StatefulWidget {
   /// Instantiate a new StreamMessageListView.
   const StreamMessageListView({
-    Key? key,
+    super.key,
     this.showScrollToBottom = true,
     this.scrollToBottomBuilder,
     this.messageBuilder,
@@ -206,7 +206,7 @@ class StreamMessageListView extends StatefulWidget {
     this.paginationLoadingIndicatorBuilder,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
     this.spacingWidgetBuilder,
-  }) : super(key: key);
+  });
 
   /// [ScrollViewKeyboardDismissBehavior] the defines how this [PositionedList] will
   /// dismiss the keyboard automatically.
@@ -751,7 +751,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         StreamMessageListViewTheme.of(context).backgroundImage;
 
     if (backgroundColor != null || backgroundImage != null) {
-      return Container(
+      return DecoratedBox(
         decoration: BoxDecoration(
           color: backgroundColor,
           image: backgroundImage,
@@ -1039,9 +1039,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         }
       },
       onMessageTap: (message) {
-        if (widget.onMessageTap != null) {
-          widget.onMessageTap!(message);
-        }
+        widget.onMessageTap?.call(message);
         FocusScope.of(context).unfocus();
       },
       showPinButton: currentUserMember != null &&
@@ -1066,9 +1064,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           StreamSystemMessage(
             message: message,
             onMessageTap: (message) {
-              if (widget.onSystemMessageTap != null) {
-                widget.onSystemMessageTap!(message);
-              }
+              widget.onSystemMessageTap?.call(message);
               FocusScope.of(context).unfocus();
             },
           );
@@ -1230,9 +1226,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         }
       },
       onMessageTap: (message) {
-        if (widget.onMessageTap != null) {
-          widget.onMessageTap!(message);
-        }
+        widget.onMessageTap?.call(message);
         FocusScope.of(context).unfocus();
       },
       showPinButton: currentUserMember != null &&
@@ -1287,8 +1281,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         ),
         duration: const Duration(seconds: 3),
         onEnd: () => initialMessageHighlightComplete = true,
-        builder: (_, color, child) => Container(
-          color: color,
+        builder: (_, color, child) => ColoredBox(
+          color: color!,
           child: child,
         ),
         child: Padding(
@@ -1389,11 +1383,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   void _getOnThreadTap() {
     if (widget.onThreadTap != null) {
       _onThreadTap = (Message message) {
+        final threadBuilder = widget.threadBuilder;
         widget.onThreadTap!(
           message,
-          widget.threadBuilder != null
-              ? widget.threadBuilder!(context, message)
-              : null,
+          threadBuilder != null ? threadBuilder(context, message) : null,
         );
       };
     } else if (widget.threadBuilder != null) {
@@ -1431,13 +1424,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
 class _LoadingIndicator extends StatelessWidget {
   const _LoadingIndicator({
-    Key? key,
     required this.streamTheme,
     required this.isThreadConversation,
     required this.direction,
     required this.streamChannel,
     this.indicatorBuilder,
-  }) : super(key: key);
+  });
 
   final StreamChatThemeData streamTheme;
   final bool isThreadConversation;
@@ -1454,7 +1446,7 @@ class _LoadingIndicator extends StatelessWidget {
       key: Key('LOADING-INDICATOR $direction'),
       stream: stream,
       initialData: false,
-      errorBuilder: (context, error) => Container(
+      errorBuilder: (context, error) => ColoredBox(
         color: streamTheme.colorTheme.accentError.withOpacity(0.2),
         child: Center(
           child: Text(context.translations.loadingMessagesError),

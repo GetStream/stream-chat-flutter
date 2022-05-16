@@ -18,11 +18,11 @@ typedef MediaListView = StreamMediaListView;
 class StreamMediaListView extends StatefulWidget {
   /// Constructor for creating a [StreamMediaListView] widget
   const StreamMediaListView({
-    Key? key,
+    super.key,
     this.selectedIds = const [],
     this.onSelect,
     this.controller,
-  }) : super(key: key);
+  });
 
   /// Stores the media selected
   final List<String> selectedIds;
@@ -67,11 +67,9 @@ class _StreamMediaListViewState extends State<StreamMediaListView> {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
               child: InkWell(
-                onTap: () {
-                  if (widget.onSelect != null) {
-                    widget.onSelect!(media);
-                  }
-                },
+                onTap: widget.onSelect == null
+                    ? null
+                    : () => widget.onSelect!(media),
                 child: Stack(
                   children: [
                     AspectRatio(

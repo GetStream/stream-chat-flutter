@@ -31,15 +31,14 @@ typedef FullScreenMedia = StreamFullScreenMedia;
 class StreamFullScreenMedia extends StatefulWidget {
   /// Instantiate a new FullScreenImage
   const StreamFullScreenMedia({
-    Key? key,
+    super.key,
     required this.mediaAttachmentPackages,
     this.startIndex = 0,
     String? userName,
     this.onShowMessage,
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
-  })  : userName = userName ?? '',
-        super(key: key);
+  }) : userName = userName ?? '';
 
   /// The url of the image
   final List<StreamAttachmentPackage> mediaAttachmentPackages;

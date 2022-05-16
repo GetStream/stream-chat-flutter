@@ -7,7 +7,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 @Deprecated("Use 'StreamChannelInfoBottomSheet' instead")
 class ChannelBottomSheet extends StatefulWidget {
   /// Constructor for creating bottom sheet
-  const ChannelBottomSheet({Key? key, this.onViewInfoTap}) : super(key: key);
+  const ChannelBottomSheet({super.key, this.onViewInfoTap});
 
   /// Callback when 'View Info' is tapped
   final VoidCallback? onViewInfoTap;

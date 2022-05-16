@@ -52,7 +52,7 @@ typedef StreamChannelListViewIndexedWidgetBuilder
 class StreamChannelListView extends StatelessWidget {
   /// Creates a new instance of [StreamChannelListView].
   const StreamChannelListView({
-    Key? key,
+    super.key,
     required this.controller,
     this.itemBuilder,
     this.separatorBuilder = defaultChannelListViewSeparatorBuilder,
@@ -77,7 +77,7 @@ class StreamChannelListView extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : super(key: key);
+  });
 
   /// The [StreamChannelListController] used to control the list of channels.
   final StreamChannelListController controller;
@@ -375,7 +375,7 @@ class StreamChannelListView extends StatelessWidget {
 /// [StreamChannelListTile] items.
 class StreamChannelListSeparator extends StatelessWidget {
   /// Creates a new instance of [StreamChannelListSeparator].
-  const StreamChannelListSeparator({Key? key}) : super(key: key);
+  const StreamChannelListSeparator({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -392,9 +392,9 @@ class StreamChannelListSeparator extends StatelessWidget {
 class StreamChannelListErrorWidget extends StatelessWidget {
   /// Creates a new instance of [StreamChannelListErrorWidget] widget.
   const StreamChannelListErrorWidget({
-    Key? key,
+    super.key,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   /// The callback to invoke when the user taps on the retry button.
   final VoidCallback? onPressed;

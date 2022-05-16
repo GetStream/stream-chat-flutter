@@ -13,13 +13,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamUserGridTile extends StatelessWidget {
   /// Creates a new instance of [StreamUserGridTile] widget.
   const StreamUserGridTile({
-    Key? key,
+    super.key,
     required this.user,
     this.child,
     this.footer,
     this.onTap,
     this.onLongPress,
-  }) : super(key: key);
+  });
 
   /// The user to display.
   final User user;
