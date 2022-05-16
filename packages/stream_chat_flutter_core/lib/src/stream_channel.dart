@@ -221,7 +221,7 @@ class StreamChannelState extends State<StreamChannel> {
   Future<void> loadChannelAtMessage(
     String? messageId, {
     @Deprecated('before is deprecated, use limit instead') int before = 20,
-    @Deprecated('before is deprecated, use limit instead') int after = 20,
+    @Deprecated('after is deprecated, use limit instead') int after = 20,
     int limit = 20,
     bool preferOffline = false,
   }) =>
