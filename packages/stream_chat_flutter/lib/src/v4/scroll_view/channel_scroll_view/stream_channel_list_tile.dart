@@ -17,7 +17,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamChannelListTile extends StatelessWidget {
   /// Creates a new instance of [StreamChannelListTile] widget.
   StreamChannelListTile({
-    Key? key,
+    super.key,
     required this.channel,
     this.leading,
     this.title,
@@ -33,8 +33,7 @@ class StreamChannelListTile extends StatelessWidget {
   })  : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
-        ),
-        super(key: key);
+        );
 
   /// The channel to display.
   final Channel channel;
@@ -228,14 +227,13 @@ class StreamChannelListTile extends StatelessWidget {
 class ChannelLastMessageDate extends StatelessWidget {
   /// Creates a new instance of the [ChannelLastMessageDate] widget.
   ChannelLastMessageDate({
-    Key? key,
+    super.key,
     required this.channel,
     this.textStyle,
   })  : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
-        ),
-        super(key: key);
+        );
 
   /// The channel to display the last message date for.
   final Channel channel;
@@ -281,14 +279,13 @@ class ChannelLastMessageDate extends StatelessWidget {
 class ChannelListTileSubtitle extends StatelessWidget {
   /// Creates a new instance of [StreamChannelListTileSubtitle] widget.
   ChannelListTileSubtitle({
-    Key? key,
+    super.key,
     required this.channel,
     this.textStyle,
   })  : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
-        ),
-        super(key: key);
+        );
 
   /// The channel to create the subtitle from.
   final Channel channel;
@@ -325,14 +322,13 @@ class ChannelListTileSubtitle extends StatelessWidget {
 class ChannelLastMessageText extends StatelessWidget {
   /// Creates a new instance of [ChannelLastMessageText] widget.
   ChannelLastMessageText({
-    Key? key,
+    super.key,
     required this.channel,
     this.textStyle,
   })  : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
-        ),
-        super(key: key);
+        );
 
   /// The channel to display the last message of.
   final Channel channel;

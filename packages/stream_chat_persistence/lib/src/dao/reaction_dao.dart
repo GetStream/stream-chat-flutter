@@ -12,7 +12,7 @@ part 'reaction_dao.g.dart';
 class ReactionDao extends DatabaseAccessor<DriftChatDatabase>
     with _$ReactionDaoMixin {
   /// Creates a new reaction dao instance
-  ReactionDao(DriftChatDatabase db) : super(db);
+  ReactionDao(super.db);
 
   /// Returns all the reactions of a particular message by matching
   /// [Reactions.messageId] with [messageId]

@@ -26,7 +26,7 @@ class StreamGalleryHeader extends StatelessWidget
     implements PreferredSizeWidget {
   /// Creates a channel header
   const StreamGalleryHeader({
-    Key? key,
+    super.key,
     required this.message,
     required this.attachment,
     this.showBackButton = true,
@@ -38,8 +38,7 @@ class StreamGalleryHeader extends StatelessWidget
     this.sentAt = '',
     this.backgroundColor,
     this.attachmentActionsModalBuilder,
-  })  : preferredSize = const Size.fromHeight(kToolbarHeight),
-        super(key: key);
+  })  : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// True if this header shows the leading back button
   final bool showBackButton;

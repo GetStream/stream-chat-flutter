@@ -147,6 +147,22 @@ linter:
     - tighten_type_of_initializing_formals
     - null_check_on_nullable_type_parameter
 
+    - conditional_uri_does_not_exist
+    - secure_pubspec_urls
+    - sized_box_shrink_expand
+    - unnecessary_constructor_name
+    - unnecessary_late
+    - use_colored_box
+    - use_decorated_box
+    - use_enums
+    - use_super_parameters
+    - avoid_escaping_inner_quotes
+    - unnecessary_overrides
+    - prefer_null_aware_method_calls
+    - prefer_null_aware_operators
+    - use_named_constants
+    - use_raw_strings
+
 # https://dartcodemetrics.dev/docs/getting-started/introduction
 dart_code_metrics:
   rules:

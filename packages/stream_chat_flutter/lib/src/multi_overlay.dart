@@ -17,12 +17,12 @@ class StreamMultiOverlay extends StatelessWidget {
   /// [childAnchor] - the anchor relative to the child
   /// [child] - the child widget
   const StreamMultiOverlay({
-    Key? key,
+    super.key,
     required this.overlayOptions,
     required this.child,
     required this.overlayAnchor,
     required this.childAnchor,
-  }) : super(key: key);
+  });
 
   /// The list of overlay options
   final List<OverlayOptions> overlayOptions;

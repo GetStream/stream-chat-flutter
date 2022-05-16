@@ -12,7 +12,7 @@ typedef UrlAttachment = StreamUrlAttachment;
 class StreamUrlAttachment extends StatelessWidget {
   /// Constructor for creating a [StreamUrlAttachment]
   const StreamUrlAttachment({
-    Key? key,
+    super.key,
     required this.urlAttachment,
     required this.hostDisplayName,
     required this.messageTheme,
@@ -21,7 +21,7 @@ class StreamUrlAttachment extends StatelessWidget {
       vertical: 8,
     ),
     this.onLinkTap,
-  }) : super(key: key);
+  });
 
   /// Attachment to be displayed
   final Attachment urlAttachment;
@@ -70,7 +70,7 @@ class StreamUrlAttachment extends StatelessWidget {
                   Positioned(
                     left: 0,
                     bottom: -1,
-                    child: Container(
+                    child: DecoratedBox(
                       decoration: BoxDecoration(
                         borderRadius: const BorderRadius.only(
                           topRight: Radius.circular(16),

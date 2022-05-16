@@ -38,13 +38,12 @@ typedef AttachmentWidget = StreamAttachmentWidget;
 abstract class StreamAttachmentWidget extends StatelessWidget {
   /// Constructor for creating attachment widget
   const StreamAttachmentWidget({
-    Key? key,
+    super.key,
     required this.message,
     required this.attachment,
     this.size,
     AttachmentSource? source,
-  })  : _source = source,
-        super(key: key);
+  })  : _source = source;
 
   /// Size of attachments
   final Size? size;
@@ -68,9 +67,9 @@ abstract class StreamAttachmentWidget extends StatelessWidget {
 class AttachmentError extends StatelessWidget {
   /// Constructor for creating AttachmentError
   const AttachmentError({
-    Key? key,
+    super.key,
     this.size,
-  }) : super(key: key);
+  });
 
   /// Size of error
   final Size? size;

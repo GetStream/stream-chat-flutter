@@ -19,7 +19,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart'
 class StreamUserListTile extends StatelessWidget {
   /// Creates a new instance of [StreamUserListTile].
   const StreamUserListTile({
-    Key? key,
+    super.key,
     required this.user,
     this.leading,
     this.title,
@@ -31,7 +31,7 @@ class StreamUserListTile extends StatelessWidget {
     this.tileColor,
     this.visualDensity = VisualDensity.compact,
     this.contentPadding = const EdgeInsets.symmetric(horizontal: 8),
-  }) : super(key: key);
+  });
 
   /// The user to display.
   final User user;
@@ -171,9 +171,9 @@ class StreamUserListTile extends StatelessWidget {
 class UserLastActive extends StatelessWidget {
   /// Creates a new instance of the [UserLastActive] widget.
   const UserLastActive({
-    Key? key,
+    super.key,
     required this.user,
-  }) : super(key: key);
+  });
 
   /// The user whose last active time is displayed.
   final User user;

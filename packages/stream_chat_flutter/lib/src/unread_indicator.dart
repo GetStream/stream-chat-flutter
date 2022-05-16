@@ -11,9 +11,9 @@ typedef UnreadIndicator = StreamUnreadIndicator;
 class StreamUnreadIndicator extends StatelessWidget {
   /// Constructor for creating an [StreamUnreadIndicator]
   const StreamUnreadIndicator({
-    Key? key,
+    super.key,
     this.cid,
-  }) : super(key: key);
+  });
 
   /// Channel cid used to retrieve unread count
   final String? cid;

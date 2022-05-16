@@ -15,7 +15,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamMessageSearchListTile extends StatelessWidget {
   /// Creates a new instance of [StreamMessageSearchListTile].
   const StreamMessageSearchListTile({
-    Key? key,
+    super.key,
     required this.messageResponse,
     this.leading,
     this.title,
@@ -26,7 +26,7 @@ class StreamMessageSearchListTile extends StatelessWidget {
     this.tileColor,
     this.visualDensity = VisualDensity.compact,
     this.contentPadding = const EdgeInsets.symmetric(horizontal: 8),
-  }) : super(key: key);
+  });
 
   /// The message response to display.
   final GetMessageResponse messageResponse;
@@ -161,10 +161,10 @@ class StreamMessageSearchListTile extends StatelessWidget {
 class MessageSearchListTileTitle extends StatelessWidget {
   /// Creates a new [MessageSearchListTileTitle] instance.
   const MessageSearchListTileTitle({
-    Key? key,
+    super.key,
     required this.messageResponse,
     this.textStyle,
-  }) : super(key: key);
+  });
 
   /// The message response for the tile.
   final GetMessageResponse messageResponse;
@@ -207,10 +207,10 @@ class MessageSearchListTileTitle extends StatelessWidget {
 class MessageSearchTileMessageDate extends StatelessWidget {
   /// Creates a new instance of [MessageSearchTileMessageDate].
   const MessageSearchTileMessageDate({
-    Key? key,
+    super.key,
     required this.message,
     this.textStyle,
-  }) : super(key: key);
+  });
 
   /// The searched message response.
   final Message message;

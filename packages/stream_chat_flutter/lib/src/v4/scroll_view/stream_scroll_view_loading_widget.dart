@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 class StreamScrollViewLoadingWidget extends StatelessWidget {
   /// Creates a new instance of [StreamScrollViewLoadingWidget].
   const StreamScrollViewLoadingWidget({
-    Key? key,
+    super.key,
     this.height = 42,
     this.width = 42,
-  }) : super(key: key);
+  });
 
   /// The height of the indicator.
   final double height;

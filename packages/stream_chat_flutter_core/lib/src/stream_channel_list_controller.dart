@@ -55,7 +55,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
 
   /// Creates a [StreamChannelListController] from the passed [value].
   StreamChannelListController.fromValue(
-    PagedValue<int, Channel> value, {
+    super.value, {
     required this.client,
     StreamChannelListEventHandler? eventHandler,
     this.filter,
@@ -64,8 +64,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
-  })  : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
-        super(value);
+  })  : _eventHandler = eventHandler ?? StreamChannelListEventHandler();
 
   /// The client to use for the channels list.
   final StreamChatClient client;

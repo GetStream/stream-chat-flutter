@@ -75,7 +75,7 @@ void main() {
   );
 
   testWidgets(
-    'it should hide delete if it\'s not my message',
+    "it should hide delete if it's not my message",
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -364,7 +364,7 @@ void main() {
 
   testWidgets(
     // ignore: lines_longer_than_80_chars
-    'tapping on delete in chat should remove the message if that\'s the only attachment and there is no text',
+    "tapping on delete in chat should remove the message if that's the only attachment and there is no text",
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();

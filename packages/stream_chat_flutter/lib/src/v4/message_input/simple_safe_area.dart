@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 class SimpleSafeArea extends StatelessWidget {
   /// Constructor for [SimpleSafeArea]
   const SimpleSafeArea({
-    Key? key,
+    super.key,
     this.enabled = true,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// Wrap [child] with [SafeArea]
   final bool enabled;

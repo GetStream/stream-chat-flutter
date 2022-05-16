@@ -10,15 +10,14 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 class StreamChannelName extends StatelessWidget {
   /// Instantiate a new ChannelName
   StreamChannelName({
-    Key? key,
+    super.key,
     required this.channel,
     this.textStyle,
     this.textOverflow = TextOverflow.ellipsis,
   })  : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
-        ),
-        super(key: key);
+        );
 
   /// The [Channel] to show the name for.
   final Channel channel;

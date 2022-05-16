@@ -21,9 +21,9 @@ class StreamChatError with EquatableMixin implements Exception {
 class StreamWebSocketError extends StreamChatError {
   ///
   const StreamWebSocketError(
-    String message, {
+    super.message, {
     this.data,
-  }) : super(message);
+  });
 
   ///
   factory StreamWebSocketError.fromStreamError(Map<String, Object?> error) {

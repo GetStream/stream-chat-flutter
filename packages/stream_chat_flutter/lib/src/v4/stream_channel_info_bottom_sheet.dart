@@ -13,7 +13,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 class StreamChannelInfoBottomSheet extends StatelessWidget {
   /// Creates a new instance [StreamChannelInfoBottomSheet] widget.
   StreamChannelInfoBottomSheet({
-    Key? key,
+    super.key,
     required this.channel,
     this.onMemberTap,
     this.onViewInfoTap,
@@ -23,8 +23,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
   })  : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
-        ),
-        super(key: key);
+        );
 
   /// The [Channel] to show information about.
   final Channel channel;
