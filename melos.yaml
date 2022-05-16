@@ -8,6 +8,10 @@ packages:
   - packages/**
 
 scripts:
+  postclean:
+    run: melos run clean:flutter --no-select
+    description: Runs "flutter clean" in all Flutter packages
+
   lint:all:
     run: melos run analyze && melos run format
     description: Run all static analysis checks
@@ -74,6 +78,12 @@ scripts:
     select-package:
       flutter: true
       dir-exists: test
+
+  clean:flutter:
+    run: melos exec -c 4 --fail-fast -- "flutter clean"
+    description: Run Flutter clean for a specific package in this project.
+    select-package:
+      flutter: true
 
   coverage:ignore-file:
     run: |

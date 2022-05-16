@@ -48,9 +48,9 @@ void main() {
       final channelState = ChannelState(
         channel: ChannelModel.fromJson(j['channel']),
         members: [],
-        messages: (j['messages'] as List<Map<String, dynamic>>)
-            .map(Message.fromJson)
-            .toList(),
+        messages:
+            // ignore: unnecessary_lambdas
+            (j['messages'] as List).map((m) => Message.fromJson(m)).toList(),
         read: [],
         watcherCount: 5,
         pinnedMessages: [],
