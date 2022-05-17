@@ -1,3 +1,10 @@
+## Upcoming
+
+🔄 Changed
+
+- Deprecated `before` and `after` parameters in `StreamChannel.queryAroundMessage`. Use `limit` instead.
+- Deprecated `before` and `after` parameters in `StreamChannel.loadChannelAtMessage`. Use `limit` instead.
+
 ## 4.1.0
 
 - Updated `stream_chat` dependency to [`4.1.0`](https://pub.dev/packages/stream_chat/changelog).
