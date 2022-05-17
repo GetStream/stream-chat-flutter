@@ -29,7 +29,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamChat extends StatefulWidget {
   /// Constructor for creating a [StreamChat] widget
   const StreamChat({
-    Key? key,
+    super.key,
     required this.client,
     required this.child,
     this.streamChatThemeData,
@@ -37,7 +37,7 @@ class StreamChat extends StatefulWidget {
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(minutes: 1),
     this.connectivityStream,
-  }) : super(key: key);
+  });
 
   /// Client to do chat ops with
   final StreamChatClient client;

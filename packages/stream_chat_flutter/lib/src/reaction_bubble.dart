@@ -14,7 +14,7 @@ typedef ReactionBubble = StreamReactionBubble;
 class StreamReactionBubble extends StatelessWidget {
   /// Constructor for creating a [StreamReactionBubble]
   const StreamReactionBubble({
-    Key? key,
+    super.key,
     required this.reactions,
     required this.borderColor,
     required this.backgroundColor,
@@ -23,7 +23,7 @@ class StreamReactionBubble extends StatelessWidget {
     this.flipTail = false,
     this.highlightOwnReactions = true,
     this.tailCirclesSpacing = 0,
-  }) : super(key: key);
+  });
 
   /// Reactions to show
   final List<Reaction> reactions;

@@ -26,7 +26,7 @@ typedef PagedValueScrollViewLoadMoreErrorBuilder = Widget Function(
 class PagedValueListView<K, V> extends StatefulWidget {
   /// Creates a new instance of [PagedValueListView] widget.
   const PagedValueListView({
-    Key? key,
+    super.key,
     required this.controller,
     required this.itemBuilder,
     required this.separatorBuilder,
@@ -51,7 +51,7 @@ class PagedValueListView<K, V> extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : super(key: key);
+  });
 
   /// The [PagedValueNotifier] used to control the list of items.
   final PagedValueNotifier<K, V> controller;
@@ -322,7 +322,7 @@ class _PagedValueListViewState<K, V> extends State<PagedValueListView<K, V>> {
                       index == newPageRequestTriggerIndex;
                   if (nextPageKey != null && isBuildingTriggerIndexItem) {
                     // Schedules the request for the end of this frame.
-                    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+                    WidgetsBinding.instance.addPostFrameCallback((_) async {
                       if (error == null) {
                         await _controller.loadMore(nextPageKey);
                       }
@@ -357,7 +357,7 @@ class _PagedValueListViewState<K, V> extends State<PagedValueListView<K, V>> {
 class PagedValueGridView<K, V> extends StatefulWidget {
   /// Creates a new instance of [PagedValueGridView] widget.
   const PagedValueGridView({
-    Key? key,
+    super.key,
     required this.controller,
     required this.gridDelegate,
     required this.itemBuilder,
@@ -383,7 +383,7 @@ class PagedValueGridView<K, V> extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : super(key: key);
+  });
 
   /// The [PagedValueNotifier] used to control the list of items.
   final PagedValueNotifier<K, V> controller;
@@ -678,7 +678,7 @@ class _PagedValueGridViewState<K, V> extends State<PagedValueGridView<K, V>> {
                       index == newPageRequestTriggerIndex;
                   if (nextPageKey != null && isBuildingTriggerIndexItem) {
                     // Schedules the request for the end of this frame.
-                    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+                    WidgetsBinding.instance.addPostFrameCallback((_) async {
                       if (error == null) {
                         await _controller.loadMore(nextPageKey);
                       }

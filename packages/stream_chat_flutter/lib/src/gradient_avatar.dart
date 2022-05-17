@@ -13,10 +13,10 @@ typedef GradientAvatar = StreamGradientAvatar;
 class StreamGradientAvatar extends StatefulWidget {
   /// Constructor for [StreamGradientAvatar]
   const StreamGradientAvatar({
-    Key? key,
+    super.key,
     required this.name,
     required this.userId,
-  }) : super(key: key);
+  });
 
   /// Name of user to shorten and display
   final String name;

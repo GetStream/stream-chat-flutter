@@ -5,19 +5,16 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamChatTheme extends InheritedWidget {
   /// Constructor for creating a [StreamChatTheme]
   const StreamChatTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(
-          key: key,
-          child: child,
-        );
+    required super.child,
+  });
 
   /// Theme data
   final StreamChatThemeData data;
 
   @override
-  bool updateShouldNotify(StreamChatTheme old) => data != old.data;
+  bool updateShouldNotify(StreamChatTheme oldWidget) => data != oldWidget.data;
 
   /// Use this method to get the current [StreamChatThemeData] instance
   static StreamChatThemeData of(BuildContext context) {

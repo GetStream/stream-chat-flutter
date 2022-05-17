@@ -16,11 +16,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class MessageSearchItem extends StatelessWidget {
   /// Instantiate a new MessageSearchItem
   const MessageSearchItem({
-    Key? key,
+    super.key,
     required this.getMessageResponse,
     this.onTap,
     this.showOnlineStatus = true,
-  }) : super(key: key);
+  });
 
   /// [Message] displayed
   final GetMessageResponse getMessageResponse;

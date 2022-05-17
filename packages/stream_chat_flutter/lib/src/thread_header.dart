@@ -66,7 +66,7 @@ class StreamThreadHeader extends StatelessWidget
     implements PreferredSizeWidget {
   /// Instantiate a new ThreadHeader
   const StreamThreadHeader({
-    Key? key,
+    super.key,
     required this.parent,
     this.showBackButton = true,
     this.onBackPressed,
@@ -79,8 +79,7 @@ class StreamThreadHeader extends StatelessWidget
     this.showTypingIndicator = true,
     this.backgroundColor,
     this.elevation = 1,
-  })  : preferredSize = const Size.fromHeight(kToolbarHeight),
-        super(key: key);
+  }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// True if this header shows the leading back button
   final bool showBackButton;
@@ -186,13 +185,11 @@ class StreamThreadHeader extends StatelessWidget
                   ),
               const SizedBox(height: 2),
               if (showTypingIndicator)
-                Align(
-                  child: StreamTypingIndicator(
-                    channel: StreamChannel.of(context).channel,
-                    style: channelHeaderTheme.subtitleStyle,
-                    parentId: parent.id,
-                    alternativeWidget: defaultSubtitle,
-                  ),
+                StreamTypingIndicator(
+                  channel: StreamChannel.of(context).channel,
+                  style: channelHeaderTheme.subtitleStyle,
+                  parentId: parent.id,
+                  alternativeWidget: defaultSubtitle,
                 )
               else
                 defaultSubtitle,

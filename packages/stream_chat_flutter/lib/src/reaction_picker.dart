@@ -19,9 +19,9 @@ typedef ReactionPicker = StreamReactionPicker;
 class StreamReactionPicker extends StatefulWidget {
   /// Constructor for creating a [StreamReactionPicker] widget
   const StreamReactionPicker({
-    Key? key,
+    super.key,
     required this.message,
-  }) : super(key: key);
+  });
 
   /// Message to attach the reaction to
   final Message message;

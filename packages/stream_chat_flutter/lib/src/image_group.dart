@@ -11,7 +11,7 @@ typedef ImageGroup = StreamImageGroup;
 class StreamImageGroup extends StatelessWidget {
   /// Constructor for creating [StreamImageGroup] widget
   const StreamImageGroup({
-    Key? key,
+    super.key,
     required this.images,
     required this.message,
     required this.messageTheme,
@@ -19,7 +19,7 @@ class StreamImageGroup extends StatelessWidget {
     this.onReturnAction,
     this.onShowMessage,
     this.onAttachmentTap,
-  }) : super(key: key);
+  });
 
   /// List of attachments to show
   final List<Attachment> images;

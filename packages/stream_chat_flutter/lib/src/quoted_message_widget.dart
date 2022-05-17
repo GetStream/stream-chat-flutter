@@ -18,7 +18,7 @@ typedef QuotedMessageWidget = StreamQuotedMessageWidget;
 class StreamQuotedMessageWidget extends StatelessWidget {
   /// Creates a new instance of the widget.
   const StreamQuotedMessageWidget({
-    Key? key,
+    super.key,
     required this.message,
     required this.messageTheme,
     this.reverse = false,
@@ -27,7 +27,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
     this.attachmentThumbnailBuilders,
     this.padding = const EdgeInsets.all(8),
     this.onTap,
-  }) : super(key: key);
+  });
 
   /// The message
   final Message message;
@@ -251,12 +251,10 @@ class StreamQuotedMessageWidget extends StatelessWidget {
 
 class _VideoAttachmentThumbnail extends StatefulWidget {
   const _VideoAttachmentThumbnail({
-    Key? key,
+    super.key,
     required this.attachment,
-    this.size = const Size(32, 32),
-  }) : super(key: key);
+  });
 
-  final Size size;
   final Attachment attachment;
 
   @override
@@ -285,8 +283,8 @@ class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: widget.size.height,
-        width: widget.size.width,
+        height: 32,
+        width: 32,
         child: _controller.value.isInitialized
             ? VideoPlayer(_controller)
             : const CircularProgressIndicator(),

@@ -52,7 +52,7 @@ class StreamMessageSearchListController
 
   /// Creates a [StreamUserListController] from the passed [value].
   StreamMessageSearchListController.fromValue(
-    PagedValue<String, GetMessageResponse> value, {
+    super.value, {
     required this.client,
     required this.filter,
     this.messageFilter,
@@ -70,8 +70,7 @@ class StreamMessageSearchListController
         _activeFilter = filter,
         _activeMessageFilter = messageFilter,
         _activeSearchQuery = searchQuery,
-        _activeSort = sort,
-        super(value);
+        _activeSort = sort;
 
   /// The client to use for the channels list.
   final StreamChatClient client;

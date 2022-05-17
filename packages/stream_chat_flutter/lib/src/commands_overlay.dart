@@ -17,8 +17,8 @@ class StreamCommandsOverlay extends StatelessWidget {
     required this.onCommandResult,
     required this.size,
     required this.channel,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// The size of the overlay
   final Size size;
@@ -60,7 +60,7 @@ class StreamCommandsOverlay extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: ListView(
-            padding: const EdgeInsets.all(0),
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             children: [
               if (commands.isNotEmpty)

@@ -2,6 +2,20 @@
 
 ✅ Added
 
+- Added `PaginationParams.createdAtAfterOrEqual` for message pagination.
+- Added `PaginationParams.createdAtAfter` for message pagination.
+- Added `PaginationParams.createdAtBeforeOrEqual` for message pagination.
+- Added `PaginationParams.createdAtBefore` for message pagination.
+- Added `PaginationParams.createdAtAround` for message pagination.
+
+🔄 Changed
+
+- Deprecated `PaginationParams.before` and `PaginationParams.after`. Use `PaginationParams.limit` instead. 
+
+## 4.1.0
+
+✅ Added
+
 - Added support for extra data in attachment file uploader. Thanks, [@rlee1990](https://github.com/rlee1990).
 
 🔄 Changed

@@ -13,7 +13,7 @@ typedef MessageActionsModal = StreamMessageActionsModal;
 class StreamMessageActionsModal extends StatefulWidget {
   /// Constructor for creating a [StreamMessageActionsModal] widget
   const StreamMessageActionsModal({
-    Key? key,
+    super.key,
     required this.message,
     required this.messageWidget,
     required this.messageTheme,
@@ -32,7 +32,7 @@ class StreamMessageActionsModal extends StatefulWidget {
     this.reverse = false,
     this.customActions = const [],
     this.onCopyTap,
-  }) : super(key: key);
+  });
 
   /// Widget that shows the message
   final Widget messageWidget;
@@ -253,7 +253,7 @@ class _StreamMessageActionsModalState extends State<StreamMessageActionsModal> {
                 sigmaX: 10,
                 sigmaY: 10,
               ),
-              child: Container(
+              child: ColoredBox(
                 color: streamChatThemeData.colorTheme.overlay,
               ),
             ),
@@ -407,9 +407,7 @@ class _StreamMessageActionsModalState extends State<StreamMessageActionsModal> {
     return InkWell(
       onTap: () {
         Navigator.pop(context);
-        if (widget.onReplyTap != null) {
-          widget.onReplyTap!(widget.message);
-        }
+        widget.onReplyTap?.call(widget.message);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
@@ -661,9 +659,7 @@ class _StreamMessageActionsModalState extends State<StreamMessageActionsModal> {
     return InkWell(
       onTap: () {
         Navigator.pop(context);
-        if (widget.onThreadReplyTap != null) {
-          widget.onThreadReplyTap!(widget.message);
-        }
+        widget.onThreadReplyTap?.call(widget.message);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),

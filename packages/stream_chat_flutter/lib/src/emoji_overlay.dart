@@ -17,8 +17,8 @@ class StreamEmojiOverlay extends StatelessWidget {
     required this.query,
     required this.onEmojiResult,
     required this.size,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// The size of the overlay
   final Size size;
@@ -65,7 +65,7 @@ class StreamEmojiOverlay extends StatelessWidget {
           color: _streamChatTheme.colorTheme.barsBg,
         ),
         child: ListView.builder(
-          padding: const EdgeInsets.all(0),
+          padding: EdgeInsets.zero,
           shrinkWrap: true,
           itemCount: emojis.length + 1,
           itemBuilder: (context, i) {

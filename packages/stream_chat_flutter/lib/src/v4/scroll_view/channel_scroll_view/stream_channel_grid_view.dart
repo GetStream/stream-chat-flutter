@@ -44,7 +44,7 @@ typedef StreamChannelGridViewIndexedWidgetBuilder
 class StreamChannelGridView extends StatelessWidget {
   /// Creates a new instance of [StreamChannelGridView].
   const StreamChannelGridView({
-    Key? key,
+    super.key,
     required this.controller,
     this.gridDelegate = defaultChannelGridViewDelegate,
     this.itemBuilder,
@@ -72,7 +72,7 @@ class StreamChannelGridView extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : super(key: key);
+  });
 
   /// The [StreamUserListController] used to control the grid of users.
   final StreamChannelListController controller;

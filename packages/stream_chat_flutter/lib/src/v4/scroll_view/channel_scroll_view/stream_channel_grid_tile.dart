@@ -14,13 +14,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamChannelGridTile extends StatelessWidget {
   /// Creates a new instance of [StreamChannelGridTile] widget.
   const StreamChannelGridTile({
-    Key? key,
+    super.key,
     required this.channel,
     this.child,
     this.footer,
     this.onTap,
     this.onLongPress,
-  }) : super(key: key);
+  });
 
   /// The channel to display.
   final Channel channel;

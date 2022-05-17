@@ -49,7 +49,7 @@ typedef StreamMessageSearchListViewIndexedWidgetBuilder
 class StreamMessageSearchListView extends StatelessWidget {
   /// Creates a new instance of [StreamMessageSearchListView].
   const StreamMessageSearchListView({
-    Key? key,
+    super.key,
     required this.controller,
     this.itemBuilder,
     this.separatorBuilder = defaultMessageSearchListViewSeparatorBuilder,
@@ -74,7 +74,7 @@ class StreamMessageSearchListView extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : super(key: key);
+  });
 
   /// The [StreamUserListController] used to control the list of
   /// searched messages.
@@ -373,7 +373,7 @@ class StreamMessageSearchListView extends StatelessWidget {
 /// [StreamMessageSearchListTile] items.
 class StreamMessageSearchListSeparator extends StatelessWidget {
   /// Creates a new instance of [StreamMessageSearchListSeparator].
-  const StreamMessageSearchListSeparator({Key? key}) : super(key: key);
+  const StreamMessageSearchListSeparator({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -22,7 +22,7 @@ typedef UserMentionsOverlay = StreamUserMentionsOverlay;
 class StreamUserMentionsOverlay extends StatefulWidget {
   /// Constructor for creating a [StreamUserMentionsOverlay].
   StreamUserMentionsOverlay({
-    Key? key,
+    super.key,
     required this.query,
     required this.channel,
     required this.size,
@@ -38,8 +38,7 @@ class StreamUserMentionsOverlay extends StatefulWidget {
         assert(
           !mentionAllAppUsers || (mentionAllAppUsers && client != null),
           'StreamChatClient is required in order to use mentionAllAppUsers',
-        ),
-        super(key: key);
+        );
 
   /// Query for searching users.
   final String query;
@@ -113,7 +112,7 @@ class _StreamUserMentionsOverlayState extends State<StreamUserMentionsOverlay> {
             if (!snapshot.hasData) return const Offstage();
             final users = snapshot.data!;
             return ListView.builder(
-              padding: const EdgeInsets.all(0),
+              padding: EdgeInsets.zero,
               shrinkWrap: true,
               itemCount: users.length,
               itemBuilder: (context, index) {

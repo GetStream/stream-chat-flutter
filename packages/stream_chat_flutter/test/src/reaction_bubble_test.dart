@@ -60,7 +60,7 @@ void main() {
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           connectivityStream: Stream.value(ConnectivityResult.mobile),
-          child: Container(
+          child: ColoredBox(
             color: Colors.black,
             child: StreamReactionBubble(
               reactions: [
@@ -97,7 +97,7 @@ void main() {
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           connectivityStream: Stream.value(ConnectivityResult.mobile),
-          child: Container(
+          child: ColoredBox(
             color: Colors.black,
             child: StreamReactionBubble(
               reactions: [
@@ -142,7 +142,7 @@ void main() {
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           connectivityStream: Stream.value(ConnectivityResult.mobile),
-          child: Container(
+          child: ColoredBox(
             color: Colors.black,
             child: StreamReactionBubble(
               reactions: [
