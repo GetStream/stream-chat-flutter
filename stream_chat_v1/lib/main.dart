@@ -36,7 +36,7 @@ void sampleAppLogHandler(LogRecord record) async {
 
 StreamChatClient buildStreamChatClient(
   String apiKey, {
-  Level logLevel = Level.SEVERE,
+  Level logLevel = Level.INFO,
 }) {
   return StreamChatClient(
     apiKey,
@@ -129,7 +129,7 @@ class _MyAppState extends State<MyApp>
         final now = DateTime.now().millisecondsSinceEpoch;
 
         if (now - timeOfStartMs > 1500) {
-          SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
+          SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
             forwardAnimations();
           });
         } else {

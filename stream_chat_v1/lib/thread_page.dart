@@ -24,8 +24,10 @@ class _ThreadPageState extends State<ThreadPage> {
   @override
   void initState() {
     super.initState();
-    _messageInputController =
-        StreamMessageInputController(message: widget.parent);
+    _messageInputController = StreamMessageInputController(
+        message: Message(
+      parentId: widget.parent.id,
+    ));
   }
 
   @override
@@ -36,7 +38,7 @@ class _ThreadPageState extends State<ThreadPage> {
 
   void _reply(Message message) {
     _messageInputController.quotedMessage = message;
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _focusNode.requestFocus();
     });
   }

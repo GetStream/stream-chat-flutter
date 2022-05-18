@@ -41,28 +41,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
   late final channel = StreamChannel.of(context).channel;
 
-  late final userListController = StreamUserListController(
-    client: StreamChat.of(context).client,
-    limit: 25,
-    filter: Filter.and(
-      [
-        if (_searchController!.text.isNotEmpty)
-          Filter.autoComplete('name', _userNameQuery),
-        Filter.notIn('id', [
-          StreamChat.of(context).currentUser!.id,
-          ...channel.state!.members
-              .map<String?>(((e) => e.userId))
-              .whereType<String>(),
-        ]),
-      ],
-    ),
-    sort: [
-      SortOption(
-        'name',
-        direction: 1,
-      ),
-    ],
-  );
+  late StreamUserListController userListController;
 
   void _userNameListener() {
     if (_searchController!.text == _userNameQuery) {
@@ -102,6 +81,33 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
       setState(() {});
     });
     mutedBool = ValueNotifier(channel.isMuted);
+  }
+
+  @override
+  void didChangeDependencies() {
+    userListController = StreamUserListController(
+      client: StreamChat.of(context).client,
+      limit: 25,
+      filter: Filter.and(
+        [
+          if (_searchController!.text.isNotEmpty)
+            Filter.autoComplete('name', _userNameQuery),
+          Filter.notIn('id', [
+            StreamChat.of(context).currentUser!.id,
+            ...channel.state!.members
+                .map<String?>(((e) => e.userId))
+                .whereType<String>(),
+          ]),
+        ],
+      ),
+      sort: [
+        SortOption(
+          'name',
+          direction: 1,
+        ),
+      ],
+    );
+    super.didChangeDependencies();
   }
 
   @override
@@ -220,7 +226,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   Widget _buildMembers(List<Member> members) {
     final groupMembers = members
       ..sort((prev, curr) {
-        if (curr.role == 'owner') return 1;
+        if (curr.userId == channel.createdBy?.id) return 1;
         return 0;
       });
 
@@ -246,7 +252,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   final userMember = groupMembers.firstWhereOrNull(
                     (e) => e.user!.id == StreamChat.of(context).currentUser!.id,
                   );
-                  _showUserInfoModal(member.user, userMember?.role == 'owner');
+                  _showUserInfoModal(
+                      member.user, userMember?.userId == channel.createdBy?.id);
                 },
                 child: Container(
                   height: 65.0,
@@ -293,7 +300,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              member.role == 'owner'
+                              member.userId == channel.createdBy?.id
                                   ? AppLocalizations.of(context).owner
                                   : '',
                               style: TextStyle(
@@ -920,18 +927,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         );
                       },
                     ),
-                  // if (!channel.isDistinct &&
-                  //     StreamChat.of(context).user!.id != user.id &&
-                  //     isUserAdmin)
-                  //   _buildModalListTile(
-                  //       context,
-                  //       StreamSvgIcon.iconUserSettings(
-                  //         color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
-                  //         size: 24.0,
-                  //       ),
-                  //       'Make Owner', () {
-                  //     // TODO: Add make owner implementation (Remaining from backend)
-                  //   }),
                   if (!channel.isDistinct &&
                       StreamChat.of(context).currentUser!.id != user.id &&
                       isUserAdmin)
