@@ -73,6 +73,9 @@ class EventType {
   /// Event sent when a member is removed to a channel
   static const String memberRemoved = 'member.removed';
 
+  /// Event sent when a member is updated in a channel
+  static const String memberUpdated = 'member.updated';
+
   /// Event sent when a member is removed to a channel
   static const String userBanned = 'user.banned';
 

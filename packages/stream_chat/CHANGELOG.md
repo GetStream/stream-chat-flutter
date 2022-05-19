@@ -9,6 +9,7 @@
 - Added `PaginationParams.createdAtAround` for message pagination.
 - Added support for `channel.disabled`, `channel.hidden` and `channel.truncatedAt` in `Channel`.
 - Added support for `channel.membership` and `channel.membershipStream` in `Channel`.
+- `Channel` now listens for `member.updated` events and updates the `Channel.members` accordingly.
 
 🔄 Changed
 
