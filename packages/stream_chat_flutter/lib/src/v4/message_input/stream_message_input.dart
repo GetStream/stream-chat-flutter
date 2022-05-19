@@ -608,7 +608,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
               widget: _buildCommandsOverlayEntry(),
             ),
             if (widget.enableEmojiSuggestionsOverlay &&
-                // ignore: deprecated_member_use_from_same_package
                 !widget.disableEmojiSuggestionsOverlay)
               OverlayOptions(
                 visible: _focusNode.hasFocus &&
