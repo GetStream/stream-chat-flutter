@@ -76,10 +76,8 @@ class OwnUser extends User {
       OwnUser(
         id: id ?? this.id,
         role: role ?? this.role,
-        // if null, it will be retrieved from extraData['name']
-        name: name,
-        // if null, it will be retrieved from extraData['image']
-        image: image,
+        name: name ?? extraData?['name'] as String? ?? this.name,
+        image: image ?? extraData?['image'] as String? ?? this.image,
         banned: banned ?? this.banned,
         banExpires: banExpires ?? this.banExpires,
         createdAt: createdAt ?? this.createdAt,

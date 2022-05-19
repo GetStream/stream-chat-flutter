@@ -36,11 +36,6 @@ ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) => ChannelModel(
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       team: json['team'] as String?,
       cooldown: json['cooldown'] as int? ?? 0,
-      disabled: json['disabled'] as bool? ?? false,
-      hidden: json['hidden'] as bool? ?? false,
-      truncatedAt: json['truncated_at'] == null
-          ? null
-          : DateTime.parse(json['truncated_at'] as String),
     );
 
 Map<String, dynamic> _$ChannelModelToJson(ChannelModel instance) {
@@ -66,9 +61,6 @@ Map<String, dynamic> _$ChannelModelToJson(ChannelModel instance) {
   writeNotNull('deleted_at', readonly(instance.deletedAt));
   writeNotNull('member_count', readonly(instance.memberCount));
   val['cooldown'] = instance.cooldown;
-  val['disabled'] = instance.disabled;
-  val['hidden'] = instance.hidden;
-  val['truncated_at'] = instance.truncatedAt?.toIso8601String();
   val['extra_data'] = instance.extraData;
   writeNotNull('team', readonly(instance.team));
   return val;

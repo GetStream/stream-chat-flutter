@@ -46,6 +46,7 @@ class User extends Equatable {
     this.language,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now(),
+        // TODO: Make them top-level fields in v5
         // For backwards compatibility, set 'name', 'image' in [extraData].
         extraData = {
           ...extraData,
@@ -171,10 +172,8 @@ class User extends Equatable {
       User(
         id: id ?? this.id,
         role: role ?? this.role,
-        // if null, it will be retrieved from extraData['name']
-        name: name,
-        // if null, it will be retrieved from extraData['image']
-        image: image,
+        name: name ?? extraData?['name'] as String? ?? this.name,
+        image: image ?? extraData?['image'] as String? ?? this.image,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         lastActive: lastActive ?? this.lastActive,
