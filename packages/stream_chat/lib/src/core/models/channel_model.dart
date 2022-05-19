@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
+import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 
@@ -25,6 +26,7 @@ class ChannelModel {
     this.extraData = const {},
     this.team,
     this.cooldown = 0,
+    this.membership,
   })  : assert(
           (cid != null && cid.contains(':')) || (id != null && type != null),
           'provide either a cid or an id and type',
@@ -100,6 +102,10 @@ class ChannelModel {
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final String? team;
 
+  /// Relationship of the current user to this channel.
+  @JsonKey(includeIfNull: false)
+  final Member? membership;
+
   /// Known top level fields.
   /// Useful for [Serializer] methods.
   static const topLevelFields = [
@@ -117,6 +123,7 @@ class ChannelModel {
     'member_count',
     'team',
     'cooldown',
+    'membership',
   ];
 
   /// Shortcut for channel name
@@ -145,6 +152,7 @@ class ChannelModel {
     Map<String, Object?>? extraData,
     String? team,
     int? cooldown,
+    Member? membership,
   }) =>
       ChannelModel(
         id: id ?? this.id,
@@ -162,6 +170,7 @@ class ChannelModel {
         extraData: extraData ?? this.extraData,
         team: team ?? this.team,
         cooldown: cooldown ?? this.cooldown,
+        membership: membership ?? this.membership,
       );
 
   /// Returns a new [ChannelModel] that is a combination of this channelModel
@@ -184,6 +193,7 @@ class ChannelModel {
       extraData: {...extraData, ...other.extraData},
       team: other.team,
       cooldown: other.cooldown,
+      membership: other.membership,
     );
   }
 }
