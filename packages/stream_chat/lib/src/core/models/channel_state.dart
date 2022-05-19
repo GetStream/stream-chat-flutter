@@ -43,7 +43,7 @@ class ChannelState {
   /// The list of channel reads
   final List<Read>? read;
 
-  ///
+  /// Relationship of the current user to this channel.
   final Member? membership;
 
   /// Create a new instance from a json
