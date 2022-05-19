@@ -42,33 +42,33 @@ jobs:
         uses: dart-code-checker/dart-code-metrics-action@v2.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          relative_path: 'packages/stream_chat'
+          relative_path: 'packages/melos_stream_chat'
           folders: ${{ env.folders }}
 
       - name: "Stream Chat Flutter Core Metrics"
         uses: dart-code-checker/dart-code-metrics-action@v2.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          relative_path: 'packages/stream_chat_flutter_core'
+          relative_path: 'packages/melos_stream_chat_flutter_core'
           folders: ${{ env.folders }}
 
       - name: "Stream Chat Flutter Metrics"
         uses: dart-code-checker/dart-code-metrics-action@v2.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          relative_path: 'packages/stream_chat_flutter'
+          relative_path: 'packages/melos_stream_chat_flutter'
           folders: ${{ env.folders }}
 
       - name: "Stream Chat Localizations Metrics"
         uses: dart-code-checker/dart-code-metrics-action@v2.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          relative_path: 'packages/stream_chat_localizations'
+          relative_path: 'packages/melos_stream_chat_localizations'
           folders: ${{ env.folders }}
 
       - name: "Stream Chat Persistence Metrics"
         uses: dart-code-checker/dart-code-metrics-action@v2.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          relative_path: 'packages/stream_chat_persistence'
+          relative_path: 'packages/melos_stream_chat_persistence'
           folders: ${{ env.folders }}
