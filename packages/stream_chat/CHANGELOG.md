@@ -8,10 +8,11 @@
 - Added `PaginationParams.createdAtBefore` for message pagination.
 - Added `PaginationParams.createdAtAround` for message pagination.
 - Added support for `channel.membership` and `channel.membershipStream` in `Channel`.
+- `Channel` now listens for `member.updated` events and updates the `Channel.members` accordingly.
 
 🔄 Changed
 
-- Deprecated `PaginationParams.before` and `PaginationParams.after`. Use `PaginationParams.limit` instead. 
+- Deprecated `PaginationParams.before` and `PaginationParams.after`. Use `PaginationParams.limit` instead.
 
 ## 4.1.0
 
