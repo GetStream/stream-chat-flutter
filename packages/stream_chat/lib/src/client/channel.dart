@@ -1552,6 +1552,8 @@ class ChannelClientState {
 
     _listenMemberRemoved();
 
+    _listenMemberUpdated();
+
     _listenMemberBanned();
 
     _listenMemberUnbanned();
@@ -1639,6 +1641,18 @@ class ChannelClientState {
             .toList(growable: false),
         read: existingRead
             .where((r) => r.user.id != user!.id)
+            .toList(growable: false),
+      ));
+    }));
+  }
+
+  void _listenMemberUpdated() {
+    _subscriptions.add(_channel.on(EventType.memberUpdated).listen((Event e) {
+      final member = e.member;
+      final existingMembers = channelState.members ?? [];
+      updateChannelState(channelState.copyWith(
+        members: existingMembers
+            .map((m) => m.userId == member!.userId ? member : m)
             .toList(growable: false),
       ));
     }));
