@@ -41,6 +41,8 @@ class OwnUser extends User {
   factory OwnUser.fromUser(User user) => OwnUser(
         id: user.id,
         role: user.role,
+        name: user.name,
+        image: user.image,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         lastActive: user.lastActive,
@@ -101,6 +103,8 @@ class OwnUser extends User {
     return copyWith(
       id: other.id,
       role: other.role,
+      name: other.name,
+      image: other.image,
       banned: other.banned,
       channelMutes: other.channelMutes,
       createdAt: other.createdAt,
