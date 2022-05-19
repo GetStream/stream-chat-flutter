@@ -171,6 +171,18 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.config);
   }
 
+  /// Relationship of the current user to this channel.
+  Member? get membership {
+    _checkInitialized();
+    return state!._channelState.membership;
+  }
+
+  /// Relationship of the current user to this channel as a stream.
+  Stream<Member?> get membershipStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.membership);
+  }
+
   /// Channel user creator.
   User? get createdBy {
     _checkInitialized();

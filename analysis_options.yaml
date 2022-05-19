@@ -159,7 +159,6 @@ linter:
     - avoid_escaping_inner_quotes
     - unnecessary_overrides
     - prefer_null_aware_method_calls
-    - prefer_null_aware_operators
     - use_named_constants
     - use_raw_strings
 
