@@ -19,6 +19,7 @@ class ChannelState {
     this.watcherCount,
     this.watchers,
     this.read,
+    this.membership,
   });
 
   /// The channel to which this state belongs
@@ -42,6 +43,9 @@ class ChannelState {
   /// The list of channel reads
   final List<Read>? read;
 
+  ///
+  final Member? membership;
+
   /// Create a new instance from a json
   static ChannelState fromJson(Map<String, dynamic> json) =>
       _$ChannelStateFromJson(json);
@@ -58,6 +62,7 @@ class ChannelState {
     int? watcherCount,
     List<User>? watchers,
     List<Read>? read,
+    Member? membership,
   }) =>
       ChannelState(
         channel: channel ?? this.channel,
@@ -67,5 +72,6 @@ class ChannelState {
         watcherCount: watcherCount ?? this.watcherCount,
         watchers: watchers ?? this.watchers,
         read: read ?? this.read,
+        membership: membership ?? this.membership,
       );
 }

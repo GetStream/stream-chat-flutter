@@ -174,13 +174,13 @@ class Channel {
   /// Relationship of the current user to this channel.
   Member? get membership {
     _checkInitialized();
-    return state!._channelState.channel?.membership;
+    return state!._channelState.membership;
   }
 
   /// Relationship of the current user to this channel as a stream.
   Stream<Member?> get membershipStream {
     _checkInitialized();
-    return state!.channelStateStream.map((cs) => cs.channel?.membership);
+    return state!.channelStateStream.map((cs) => cs.membership);
   }
 
   /// Channel user creator.
