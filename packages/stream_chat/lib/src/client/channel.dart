@@ -195,6 +195,42 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.frozen == true);
   }
 
+  /// Channel disabled status.
+  bool get disabled {
+    _checkInitialized();
+    return state!._channelState.channel?.disabled == true;
+  }
+
+  /// Channel disabled status as a stream.
+  Stream<bool> get disabledStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.channel?.disabled == true);
+  }
+
+  /// Channel hidden status.
+  bool get hidden {
+    _checkInitialized();
+    return state!._channelState.channel?.hidden == true;
+  }
+
+  /// Channel hidden status as a stream.
+  Stream<bool> get hiddenStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.channel?.hidden == true);
+  }
+
+  /// The last date at which the channel got truncated.
+  DateTime? get truncatedAt {
+    _checkInitialized();
+    return state!._channelState.channel?.truncatedAt;
+  }
+
+  /// The last date at which the channel got truncated as a stream.
+  Stream<DateTime?> get truncatedAtStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.channel?.truncatedAt);
+  }
+
   /// Cooldown count
   int get cooldown {
     _checkInitialized();

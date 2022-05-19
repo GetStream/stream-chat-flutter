@@ -25,6 +25,9 @@ class ChannelModel {
     this.extraData = const {},
     this.team,
     this.cooldown = 0,
+    this.disabled = false,
+    this.hidden = false,
+    this.truncatedAt,
   })  : assert(
           (cid != null && cid.contains(':')) || (id != null && type != null),
           'provide either a cid or an id and type',
@@ -92,6 +95,15 @@ class ChannelModel {
   @JsonKey(includeIfNull: false)
   final int cooldown;
 
+  /// True if the channel is disabled
+  final bool disabled;
+
+  /// True if the channel is hidden
+  final bool hidden;
+
+  /// The date of the last time channel got truncated
+  final DateTime? truncatedAt;
+
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
@@ -117,6 +129,9 @@ class ChannelModel {
     'member_count',
     'team',
     'cooldown',
+    'disabled',
+    'hidden',
+    'truncated_at',
   ];
 
   /// Shortcut for channel name
@@ -145,6 +160,9 @@ class ChannelModel {
     Map<String, Object?>? extraData,
     String? team,
     int? cooldown,
+    bool? disabled,
+    bool? hidden,
+    DateTime? truncatedAt,
   }) =>
       ChannelModel(
         id: id ?? this.id,
@@ -162,6 +180,9 @@ class ChannelModel {
         extraData: extraData ?? this.extraData,
         team: team ?? this.team,
         cooldown: cooldown ?? this.cooldown,
+        disabled: disabled ?? this.disabled,
+        hidden: hidden ?? this.hidden,
+        truncatedAt: truncatedAt ?? this.truncatedAt,
       );
 
   /// Returns a new [ChannelModel] that is a combination of this channelModel
@@ -181,9 +202,12 @@ class ChannelModel {
       updatedAt: other.updatedAt,
       deletedAt: other.deletedAt,
       memberCount: other.memberCount,
-      extraData: {...extraData, ...other.extraData},
+      extraData: other.extraData,
       team: other.team,
       cooldown: other.cooldown,
+      disabled: other.disabled,
+      hidden: other.hidden,
+      truncatedAt: other.truncatedAt,
     );
   }
 }
