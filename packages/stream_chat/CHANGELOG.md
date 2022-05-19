@@ -7,6 +7,7 @@
 - Added `PaginationParams.createdAtBeforeOrEqual` for message pagination.
 - Added `PaginationParams.createdAtBefore` for message pagination.
 - Added `PaginationParams.createdAtAround` for message pagination.
+- Added support for `channel.membership` and `channel.membershipStream` in `Channel`.
 
 🔄 Changed
 
