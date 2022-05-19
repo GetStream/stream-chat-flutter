@@ -1432,7 +1432,7 @@ class _ThreadParticipants extends StatelessWidget {
             padding: const EdgeInsets.all(1),
             child: StreamUserAvatar(
               user: user,
-              constraints: BoxConstraints.loose(const Size.fromRadius(7)),
+              constraints: BoxConstraints.tight(const Size.fromRadius(7)),
               showOnlineStatus: false,
             ),
           ),
