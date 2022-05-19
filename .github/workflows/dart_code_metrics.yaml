@@ -4,7 +4,6 @@ env:
   flutter_version: "3.0.0"
   folders: "lib, test"
   melos_version: "2.1.0"
-  metrics_version: "v2.0.0"
 
 on:
   pull_request:
@@ -40,35 +39,35 @@ jobs:
         run: melos bootstrap
 
       - name: "Stream Chat Metrics"
-        uses: dart-code-checker/dart-code-metrics-action@${{ env.metrics_version }}
+        uses: dart-code-checker/dart-code-metrics-action@v2.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           relative_path: 'packages/stream_chat'
           folders: ${{ env.folders }}
 
       - name: "Stream Chat Flutter Core Metrics"
-        uses: dart-code-checker/dart-code-metrics-action@${{ env.metrics_version }}
+        uses: dart-code-checker/dart-code-metrics-action@v2.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           relative_path: 'packages/stream_chat_flutter_core'
           folders: ${{ env.folders }}
 
       - name: "Stream Chat Flutter Metrics"
-        uses: dart-code-checker/dart-code-metrics-action@${{ env.metrics_version }}
+        uses: dart-code-checker/dart-code-metrics-action@v2.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           relative_path: 'packages/stream_chat_flutter'
           folders: ${{ env.folders }}
 
       - name: "Stream Chat Localizations Metrics"
-        uses: dart-code-checker/dart-code-metrics-action@${{ env.metrics_version }}
+        uses: dart-code-checker/dart-code-metrics-action@v2.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           relative_path: 'packages/stream_chat_localizations'
           folders: ${{ env.folders }}
 
       - name: "Stream Chat Persistence Metrics"
-        uses: dart-code-checker/dart-code-metrics-action@${{ env.metrics_version }}
+        uses: dart-code-checker/dart-code-metrics-action@v2.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           relative_path: 'packages/stream_chat_persistence'
