@@ -7,12 +7,18 @@
 - Added `PaginationParams.createdAtBeforeOrEqual` for message pagination.
 - Added `PaginationParams.createdAtBefore` for message pagination.
 - Added `PaginationParams.createdAtAround` for message pagination.
+- Added support for `channel.disabled`, `channel.hidden` and `channel.truncatedAt` in `Channel`.
 - Added support for `channel.membership` and `channel.membershipStream` in `Channel`.
 - `Channel` now listens for `member.updated` events and updates the `Channel.members` accordingly.
 
 🔄 Changed
 
 - Deprecated `PaginationParams.before` and `PaginationParams.after`. Use `PaginationParams.limit` instead.
+
+🐞 Fixed
+
+- [[#1147]](https://github.com/GetStream/stream-chat-flutter/issues/1147) `channel.unset` not updating the extra data
+  stream.
 
 ## 4.1.0
 
