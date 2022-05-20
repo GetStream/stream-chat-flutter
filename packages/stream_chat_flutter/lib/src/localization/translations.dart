@@ -391,7 +391,7 @@ class DefaultTranslations implements Translations {
 
   @override
   String get sendMessagePermissionError =>
-      'You don\'t have permission to send messages';
+      "You don't have permission to send messages";
 
   @override
   String get emptyMessagesText => 'There are no messages currently';
@@ -528,7 +528,7 @@ class DefaultTranslations implements Translations {
 
   @override
   String get operationCouldNotBeCompletedText =>
-      'The operation couldn\'t be completed.';
+      "The operation couldn't be completed.";
 
   @override
   String get replyLabel => 'Reply';

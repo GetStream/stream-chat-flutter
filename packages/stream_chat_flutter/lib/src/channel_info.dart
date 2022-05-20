@@ -13,12 +13,12 @@ typedef ChannelInfo = StreamChannelInfo;
 class StreamChannelInfo extends StatelessWidget {
   /// Constructor which creates a [StreamChannelInfo] widget
   const StreamChannelInfo({
-    Key? key,
+    super.key,
     required this.channel,
     this.textStyle,
     this.showTypingIndicator = true,
     this.parentId,
-  }) : super(key: key);
+  });
 
   /// The channel about which the info is to be displayed
   final Channel channel;
@@ -100,12 +100,10 @@ class StreamChannelInfo extends StatelessWidget {
       return alternativeWidget ?? const Offstage();
     }
 
-    return Align(
-      child: StreamTypingIndicator(
-        parentId: parentId,
-        style: textStyle,
-        alternativeWidget: alternativeWidget,
-      ),
+    return StreamTypingIndicator(
+      parentId: parentId,
+      style: textStyle,
+      alternativeWidget: alternativeWidget,
     );
   }
 
@@ -140,7 +138,7 @@ class StreamChannelInfo extends StatelessWidget {
           ),
           TextButton(
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.all(0),
+              padding: EdgeInsets.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               visualDensity: const VisualDensity(
                 horizontal: VisualDensity.minimumDensity,

@@ -39,7 +39,7 @@ typedef StreamUserGridViewIndexedWidgetBuilder
 class StreamUserGridView extends StatelessWidget {
   /// Creates a new instance of [StreamUserGridView].
   const StreamUserGridView({
-    Key? key,
+    super.key,
     required this.controller,
     this.gridDelegate = defaultUserGridViewDelegate,
     this.itemBuilder,
@@ -67,7 +67,7 @@ class StreamUserGridView extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : super(key: key);
+  });
 
   /// The [StreamUserListController] used to control the grid of users.
   final StreamUserListController controller;

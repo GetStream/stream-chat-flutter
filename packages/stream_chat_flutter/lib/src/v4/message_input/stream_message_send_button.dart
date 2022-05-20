@@ -7,7 +7,7 @@ class StreamMessageSendButton extends StatelessWidget {
   /// [isCommandEnabled], [isEditEnabled], [idleSendButton], [activeSendButton],
   /// [onSendMessage].
   const StreamMessageSendButton({
-    Key? key,
+    super.key,
     this.timeOut = 0,
     this.isIdle = true,
     this.isCommandEnabled = false,
@@ -15,7 +15,7 @@ class StreamMessageSendButton extends StatelessWidget {
     this.idleSendButton,
     this.activeSendButton,
     required this.onSendMessage,
-  }) : super(key: key);
+  });
 
   /// Time out related to slow mode.
   final int timeOut;
@@ -81,7 +81,7 @@ class StreamMessageSendButton extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       child: IconButton(
         onPressed: onSendMessage,
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         splashRadius: 24,
         constraints: const BoxConstraints.tightFor(
           height: 24,

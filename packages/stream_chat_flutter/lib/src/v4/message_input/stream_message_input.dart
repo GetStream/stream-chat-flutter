@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 import 'dart:math';
 
@@ -173,7 +175,7 @@ const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 class StreamMessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
   const StreamMessageInput({
-    Key? key,
+    super.key,
     this.onMessageSent,
     this.preMessageSending,
     this.maxHeight = 150,
@@ -208,10 +210,11 @@ class StreamMessageInput extends StatefulWidget {
     this.elevation,
     this.shadow,
     this.autoCorrect = true,
-    this.disableEmojiSuggestionsOverlay = false,
+    @Deprecated('Please use enableEmojiSuggestionsOverlay')
+        this.disableEmojiSuggestionsOverlay = false,
     this.enableEmojiSuggestionsOverlay = true,
     this.enableMentionsOverlay = true,
-  }) : super(key: key);
+  });
 
   /// List of options for showing overlays.
   final List<OverlayOptions> customOverlays;
@@ -744,7 +747,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
               color: _messageInputTheme.expandButtonColor,
             ),
           ),
-          padding: const EdgeInsets.all(0),
+          padding: EdgeInsets.zero,
           constraints: const BoxConstraints.tightFor(
             height: 24,
             width: 24,
@@ -916,7 +919,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
               child: IconButton(
                 icon: StreamSvgIcon.closeSmall(),
                 splashRadius: 24,
-                padding: const EdgeInsets.all(0),
+                padding: EdgeInsets.zero,
                 constraints: const BoxConstraints.tightFor(
                   height: 24,
                   width: 24,
@@ -1402,9 +1405,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
           ],
         );
       default:
-        return Container(
+        return const ColoredBox(
           color: Colors.black26,
-          child: const Icon(Icons.insert_drive_file),
+          child: Icon(Icons.insert_drive_file),
         );
     }
   }
@@ -1419,7 +1422,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                 ? _messageInputTheme.actionButtonColor
                 : _messageInputTheme.actionButtonIdleColor),
       ),
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(
         height: 24,
         width: 24,
@@ -1448,7 +1451,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             ? _messageInputTheme.actionButtonColor
             : _messageInputTheme.actionButtonIdleColor,
       ),
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(
         height: 24,
         width: 24,
@@ -1809,10 +1812,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
 class OGAttachmentPreview extends StatelessWidget {
   /// Returns a new instance of [OGAttachmentPreview]
   const OGAttachmentPreview({
-    Key? key,
+    super.key,
     required this.attachment,
     this.onDismissPreviewPressed,
-  }) : super(key: key);
+  });
 
   /// The attachment to be rendered.
   final Attachment attachment;

@@ -38,7 +38,7 @@ This method level parameter will be removed in an upcoming release. This can be 
 }
 
 class CustomGoldenFileComparator extends LocalFileComparator {
-  CustomGoldenFileComparator(Uri testFile) : super(testFile);
+  CustomGoldenFileComparator(super.testFile);
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {

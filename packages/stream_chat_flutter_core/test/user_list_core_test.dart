@@ -265,7 +265,7 @@ void main() {
                 .map((e) => Container(
                       key: Key(e.key ?? ''),
                       child: e.when(
-                        headerItem: (heading) => Text(heading),
+                        headerItem: Text.new,
                         userItem: (user) => Text(user.id),
                       ),
                     ))
@@ -333,7 +333,7 @@ void main() {
                 .map((e) => Container(
                       key: Key(e.key ?? ''),
                       child: e.when(
-                        headerItem: (heading) => Text(heading),
+                        headerItem: Text.new,
                         userItem: (user) => Text(user.id),
                       ),
                     ))
@@ -438,7 +438,7 @@ void main() {
                     .map((e) => Container(
                           key: Key(e.key ?? ''),
                           child: e.when(
-                            headerItem: (heading) => Text(heading),
+                            headerItem: Text.new,
                             userItem: (user) => Text(user.id),
                           ),
                         ))

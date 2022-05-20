@@ -171,6 +171,18 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.config);
   }
 
+  /// Relationship of the current user to this channel.
+  Member? get membership {
+    _checkInitialized();
+    return state!._channelState.membership;
+  }
+
+  /// Relationship of the current user to this channel as a stream.
+  Stream<Member?> get membershipStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.membership);
+  }
+
   /// Channel user creator.
   User? get createdBy {
     _checkInitialized();
@@ -193,6 +205,42 @@ class Channel {
   Stream<bool> get frozenStream {
     _checkInitialized();
     return state!.channelStateStream.map((cs) => cs.channel?.frozen == true);
+  }
+
+  /// Channel disabled status.
+  bool get disabled {
+    _checkInitialized();
+    return state!._channelState.channel?.disabled == true;
+  }
+
+  /// Channel disabled status as a stream.
+  Stream<bool> get disabledStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.channel?.disabled == true);
+  }
+
+  /// Channel hidden status.
+  bool get hidden {
+    _checkInitialized();
+    return state!._channelState.channel?.hidden == true;
+  }
+
+  /// Channel hidden status as a stream.
+  Stream<bool> get hiddenStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.channel?.hidden == true);
+  }
+
+  /// The last date at which the channel got truncated.
+  DateTime? get truncatedAt {
+    _checkInitialized();
+    return state!._channelState.channel?.truncatedAt;
+  }
+
+  /// The last date at which the channel got truncated as a stream.
+  Stream<DateTime?> get truncatedAtStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.channel?.truncatedAt);
   }
 
   /// Cooldown count
@@ -1540,6 +1588,8 @@ class ChannelClientState {
 
     _listenMemberRemoved();
 
+    _listenMemberUpdated();
+
     _listenMemberBanned();
 
     _listenMemberUnbanned();
@@ -1627,6 +1677,18 @@ class ChannelClientState {
             .toList(growable: false),
         read: existingRead
             .where((r) => r.user.id != user!.id)
+            .toList(growable: false),
+      ));
+    }));
+  }
+
+  void _listenMemberUpdated() {
+    _subscriptions.add(_channel.on(EventType.memberUpdated).listen((Event e) {
+      final member = e.member;
+      final existingMembers = channelState.members ?? [];
+      updateChannelState(channelState.copyWith(
+        members: existingMembers
+            .map((m) => m.userId == member!.userId ? member : m)
             .toList(growable: false),
       ));
     }));
@@ -2173,7 +2235,7 @@ class ChannelClientState {
 
   /// The channel threads related to this channel.
   Map<String, List<Message>> get threads =>
-      _threadsController.value.map((key, value) => MapEntry(key, value));
+      _threadsController.value.map(MapEntry.new);
 
   /// The channel threads related to this channel as a stream.
   Stream<Map<String, List<Message>>> get threadsStream =>

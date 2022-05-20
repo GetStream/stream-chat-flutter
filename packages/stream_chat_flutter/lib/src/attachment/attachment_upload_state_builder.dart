@@ -19,14 +19,14 @@ typedef AttachmentUploadStateBuilder = StreamAttachmentUploadStateBuilder;
 class StreamAttachmentUploadStateBuilder extends StatelessWidget {
   /// Constructor for creating an [StreamAttachmentUploadStateBuilder] widget
   const StreamAttachmentUploadStateBuilder({
-    Key? key,
+    super.key,
     required this.message,
     required this.attachment,
     this.failedBuilder,
     this.successBuilder,
     this.inProgressBuilder,
     this.preparingBuilder,
-  }) : super(key: key);
+  });
 
   /// Message which attachment is added to
   final Message message;
@@ -85,30 +85,24 @@ class StreamAttachmentUploadStateBuilder extends StatelessWidget {
 
 class _IconButton extends StatelessWidget {
   const _IconButton({
-    Key? key,
     this.icon,
-    this.iconSize = 24.0,
     this.onPressed,
-    this.fillColor,
-  }) : super(key: key);
+  });
 
   final Widget? icon;
-  final double iconSize;
   final VoidCallback? onPressed;
-  final Color? fillColor;
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: iconSize,
-        width: iconSize,
+        height: 24,
+        width: 24,
         child: RawMaterialButton(
           elevation: 0,
           highlightElevation: 0,
           focusElevation: 0,
           hoverElevation: 0,
           onPressed: onPressed,
-          fillColor:
-              fillColor ?? StreamChatTheme.of(context).colorTheme.overlayDark,
+          fillColor: StreamChatTheme.of(context).colorTheme.overlayDark,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -118,10 +112,7 @@ class _IconButton extends StatelessWidget {
 }
 
 class _PreparingState extends StatelessWidget {
-  const _PreparingState({
-    Key? key,
-    required this.attachmentId,
-  }) : super(key: key);
+  const _PreparingState({required this.attachmentId});
 
   final String attachmentId;
 
@@ -155,11 +146,10 @@ class _PreparingState extends StatelessWidget {
 
 class _InProgressState extends StatelessWidget {
   const _InProgressState({
-    Key? key,
     required this.sent,
     required this.total,
     required this.attachmentId,
-  }) : super(key: key);
+  });
 
   final int sent;
   final int total;
@@ -195,11 +185,10 @@ class _InProgressState extends StatelessWidget {
 
 class _FailedState extends StatelessWidget {
   const _FailedState({
-    Key? key,
     this.error,
     required this.messageId,
     required this.attachmentId,
-  }) : super(key: key);
+  });
 
   final String? error;
   final String messageId;
@@ -222,7 +211,7 @@ class _FailedState extends StatelessWidget {
           },
         ),
         Center(
-          child: Container(
+          child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: theme.colorTheme.overlayDark.withOpacity(0.6),

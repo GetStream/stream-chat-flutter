@@ -1,5 +1,4 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/core/api/device_api.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -2514,7 +2513,7 @@ void main() {
     });
 
     test(
-      '''setting the `currentUser` should also compute and update the unreadCounts''',
+      'setting the `currentUser` should also compute and update the unreadCounts',
       () {
         final state = client.state;
         final initialUser = OwnUser.fromUser(user);

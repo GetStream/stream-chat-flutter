@@ -64,7 +64,7 @@ More details here https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter
 class ChannelListCore extends StatefulWidget {
   /// Instantiate a new ChannelListView
   const ChannelListCore({
-    Key? key,
+    super.key,
     required this.errorBuilder,
     required this.emptyBuilder,
     required this.loadingBuilder,
@@ -78,7 +78,7 @@ class ChannelListCore extends StatefulWidget {
     this.sort,
     this.channelListController,
     this.limit = 25,
-  }) : super(key: key);
+  });
 
   /// A [ChannelListController] allows reloading and pagination.
   /// Use [ChannelListController.loadData] and

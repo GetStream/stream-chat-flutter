@@ -47,10 +47,10 @@ class MyApp extends StatelessWidget {
   /// If you'd prefer using minimal wrapper widgets for your app, please see
   /// our other package, `stream_chat_flutter_core`.
   const MyApp({
-    Key? key,
+    super.key,
     required this.client,
     required this.channel,
-  }) : super(key: key);
+  });
 
   /// Instance of Stream Client.
   ///
@@ -94,8 +94,8 @@ class MyApp extends StatelessWidget {
 class ChannelPage extends StatelessWidget {
   /// Creates the page that shows the list of messages
   const ChannelPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => Scaffold(

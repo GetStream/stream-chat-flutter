@@ -22,12 +22,12 @@ class StreamChannel extends StatefulWidget {
   /// Creates a new instance of [StreamChannel]. Both [child] and [client] must
   /// be supplied and not null.
   const StreamChannel({
-    Key? key,
+    super.key,
     required this.child,
     required this.channel,
     this.showLoading = true,
     this.initialMessageId,
-  }) : super(key: key);
+  });
 
   /// The child of the widget
   final Widget child;
@@ -220,21 +220,20 @@ class StreamChannelState extends State<StreamChannel> {
   /// Loads channel at specific message
   Future<void> loadChannelAtMessage(
     String? messageId, {
-    int before = 20,
-    int after = 20,
+    @Deprecated('before is deprecated, use limit instead') int before = 20,
+    @Deprecated('after is deprecated, use limit instead') int after = 20,
+    int limit = 20,
     bool preferOffline = false,
   }) =>
       _queryAtMessage(
         messageId: messageId,
-        before: before,
-        after: after,
+        limit: limit,
         preferOffline: preferOffline,
       );
 
   Future<ChannelState?> _queryAtMessage({
     String? messageId,
-    int before = 20,
-    int after = 20,
+    int limit = 20,
     bool preferOffline = false,
   }) async {
     if (channel.state == null) return null;
@@ -244,7 +243,7 @@ class StreamChannelState extends State<StreamChannel> {
     if (messageId == null) {
       await channel.query(
         messagesPagination: PaginationParams(
-          limit: before,
+          limit: limit,
         ),
         preferOffline: preferOffline,
       );
@@ -254,8 +253,7 @@ class StreamChannelState extends State<StreamChannel> {
 
     return queryAroundMessage(
       messageId,
-      before: before,
-      after: after,
+      limit: limit,
       preferOffline: preferOffline,
     );
   }
@@ -263,15 +261,15 @@ class StreamChannelState extends State<StreamChannel> {
   ///
   Future<ChannelState> queryAroundMessage(
     String messageId, {
-    int before = 20,
-    int after = 20,
+    @Deprecated('before is deprecated, use limit instead') int before = 20,
+    @Deprecated('after is deprecated, use limit instead') int after = 20,
+    int limit = 20,
     bool preferOffline = false,
   }) =>
       channel.query(
         messagesPagination: PaginationParams(
           idAround: messageId,
-          before: before,
-          after: after,
+          limit: limit,
         ),
         preferOffline: preferOffline,
       );
@@ -338,7 +336,7 @@ class StreamChannelState extends State<StreamChannel> {
   }
 
   /// Reloads the channel with latest message
-  Future<void> reloadChannel() => _queryAtMessage(before: 30);
+  Future<void> reloadChannel() => _queryAtMessage(limit: 30);
 
   late List<Future<bool>> _futures;
 

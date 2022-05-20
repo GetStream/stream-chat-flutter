@@ -1,3 +1,9 @@
+## 4.2.0
+
+🐞 Fixed
+
+- [[#1133]](https://github.com/GetStream/stream-chat-flutter/issues/1133) Visibility override flags not being passed to `StreamMessageActionsModal`
+
 ## 4.1.0
 
 ✅ Added
@@ -8,7 +14,9 @@
 🐞 Fixed
 
 - Fixed attachment picker ui.
+- Fixed StreamChannelHeader and StreamThreadHeader subtitle alignment.
 - Fixed message widget thread indicator in reverse mode.
+- [[#1044]](https://github.com/GetStream/stream-chat-flutter/issues/1044): Refactor StreamMessageWidget bottom row to use Text.rich.
 
 🔄 Changed
 

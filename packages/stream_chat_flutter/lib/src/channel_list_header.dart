@@ -54,7 +54,7 @@ class StreamChannelListHeader extends StatelessWidget
     implements PreferredSizeWidget {
   /// Instantiates a ChannelListHeader
   const StreamChannelListHeader({
-    Key? key,
+    super.key,
     this.client,
     this.titleBuilder,
     this.onUserAvatarTap,
@@ -67,7 +67,7 @@ class StreamChannelListHeader extends StatelessWidget
     this.actions,
     this.backgroundColor,
     this.elevation = 1,
-  }) : super(key: key);
+  });
 
   /// Pass this if you don't have a [StreamChatClient] in your widget tree.
   final StreamChatClient? client;
@@ -155,9 +155,7 @@ class StreamChannelListHeader extends StatelessWidget
                           showOnlineStatus: false,
                           onTap: onUserAvatarTap ??
                               (_) {
-                                if (preNavigationCallback != null) {
-                                  preNavigationCallback!();
-                                }
+                                preNavigationCallback?.call();
                                 Scaffold.of(context).openDrawer();
                               },
                           borderRadius: channelListHeaderThemeData

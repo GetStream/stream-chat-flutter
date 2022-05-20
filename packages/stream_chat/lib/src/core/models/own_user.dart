@@ -17,34 +17,20 @@ class OwnUser extends User {
     this.totalUnreadCount = 0,
     this.unreadChannels = 0,
     this.channelMutes = const [],
-    required String id,
-    String? role,
-    String? name,
-    String? image,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastActive,
-    bool online = false,
-    Map<String, Object?> extraData = const {},
-    bool banned = false,
-    DateTime? banExpires,
-    List<String> teams = const [],
-    String? language,
-  }) : super(
-          id: id,
-          role: role,
-          name: name,
-          image: image,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-          lastActive: lastActive,
-          online: online,
-          extraData: extraData,
-          banned: banned,
-          banExpires: banExpires,
-          teams: teams,
-          language: language,
-        );
+    required super.id,
+    super.role,
+    super.name,
+    super.image,
+    super.createdAt,
+    super.updatedAt,
+    super.lastActive,
+    super.online,
+    super.extraData,
+    super.banned,
+    super.banExpires,
+    super.teams,
+    super.language,
+  });
 
   /// Create a new instance from json.
   factory OwnUser.fromJson(Map<String, dynamic> json) => _$OwnUserFromJson(
@@ -55,6 +41,9 @@ class OwnUser extends User {
   factory OwnUser.fromUser(User user) => OwnUser(
         id: user.id,
         role: user.role,
+        // Using extraData value in order to not use id as name.
+        name: user.extraData['name'] as String?,
+        image: user.image,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         lastActive: user.lastActive,
@@ -90,10 +79,11 @@ class OwnUser extends User {
       OwnUser(
         id: id ?? this.id,
         role: role ?? this.role,
-        // if null, it will be retrieved from extraData['name']
-        name: name,
-        // if null, it will be retrieved from extraData['image']
-        image: image,
+        name: name ??
+            extraData?['name'] as String? ??
+            // Using extraData value in order to not use id as name.
+            this.extraData['name'] as String?,
+        image: image ?? extraData?['image'] as String? ?? this.image,
         banned: banned ?? this.banned,
         banExpires: banExpires ?? this.banExpires,
         createdAt: createdAt ?? this.createdAt,
@@ -117,6 +107,9 @@ class OwnUser extends User {
     return copyWith(
       id: other.id,
       role: other.role,
+      // Using extraData value in order to not use id as name.
+      name: other.extraData['name'] as String?,
+      image: other.image,
       banned: other.banned,
       channelMutes: other.channelMutes,
       createdAt: other.createdAt,

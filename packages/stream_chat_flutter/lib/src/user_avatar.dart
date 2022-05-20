@@ -12,7 +12,7 @@ typedef UserAvatar = StreamUserAvatar;
 class StreamUserAvatar extends StatelessWidget {
   /// Constructor to create a [StreamUserAvatar]
   const StreamUserAvatar({
-    Key? key,
+    super.key,
     required this.user,
     this.constraints,
     this.onlineIndicatorConstraints,
@@ -25,7 +25,7 @@ class StreamUserAvatar extends StatelessWidget {
     this.selectionColor,
     this.selectionThickness = 4,
     this.placeholder,
-  }) : super(key: key);
+  });
 
   /// User whose avatar is to displayed
   final User user;
@@ -91,7 +91,7 @@ class StreamUserAvatar extends StatelessWidget {
                 placeholder: placeholder != null
                     ? (context, __) => placeholder(context, user)
                     : null,
-                imageBuilder: (context, imageProvider) => Container(
+                imageBuilder: (context, imageProvider) => DecoratedBox(
                   decoration: BoxDecoration(
                     borderRadius: borderRadius ??
                         streamChatTheme

@@ -11,10 +11,10 @@ typedef AttachmentTitle = StreamAttachmentTitle;
 class StreamAttachmentTitle extends StatelessWidget {
   /// Supply attachment and theme for constructing title
   const StreamAttachmentTitle({
-    Key? key,
+    super.key,
     required this.attachment,
     required this.messageTheme,
-  }) : super(key: key);
+  });
 
   /// Theme to apply to text
   final StreamMessageThemeData messageTheme;

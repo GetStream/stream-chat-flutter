@@ -10,7 +10,7 @@ void main() {
     expect(token.userId, userId);
     expect(token.rawValue, isEmpty);
     expect(token.authType, AuthType.anonymous);
-    expect(token.authType.raw, AuthType.anonymous.raw);
+    expect(token.authType.name, AuthType.anonymous.name);
   });
 
   test('`.fromRawValue` should create token from rawValue', () {
@@ -36,7 +36,7 @@ void main() {
     expect(token.userId, userId);
     expect(token.rawValue, isNotEmpty);
     expect(token.authType, AuthType.jwt);
-    expect(token.authType.raw, AuthType.jwt.raw);
+    expect(token.authType.name, AuthType.jwt.name);
   });
 
   test(
@@ -51,7 +51,7 @@ void main() {
       expect(token.userId, user.id);
       expect(token.rawValue, isNotEmpty);
       expect(token.authType, AuthType.jwt);
-      expect(token.authType.raw, AuthType.jwt.raw);
+      expect(token.authType.name, AuthType.jwt.name);
     },
   );
 }

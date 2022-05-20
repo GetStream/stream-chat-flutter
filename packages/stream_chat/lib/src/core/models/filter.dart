@@ -53,29 +53,43 @@ enum FilterOperator {
   nor,
 
   /// Matches any list that contains the specified value
-  contains,
-}
+  contains;
 
-/// Helper extension for [FilterOperator]
-extension FilterOperatorX on FilterOperator {
-  /// Converts [FilterOperator] into rew values
-  String get rawValue => {
-        FilterOperator.equal: '\$eq',
-        FilterOperator.notEqual: '\$ne',
-        FilterOperator.greater: '\$gt',
-        FilterOperator.greaterOrEqual: '\$gte',
-        FilterOperator.less: '\$lt',
-        FilterOperator.lessOrEqual: '\$lte',
-        FilterOperator.in_: '\$in',
-        FilterOperator.notIn: '\$nin',
-        FilterOperator.query: '\$q',
-        FilterOperator.autoComplete: '\$autocomplete',
-        FilterOperator.exists: '\$exists',
-        FilterOperator.and: '\$and',
-        FilterOperator.or: '\$or',
-        FilterOperator.nor: '\$nor',
-        FilterOperator.contains: '\$contains',
-      }[this]!;
+  @override
+  String toString() {
+    switch (this) {
+      case FilterOperator.equal:
+        return r'$eq';
+      case FilterOperator.notEqual:
+        return r'$ne';
+      case FilterOperator.greater:
+        return r'$gt';
+      case FilterOperator.greaterOrEqual:
+        return r'$gte';
+      case FilterOperator.less:
+        return r'$lt';
+      case FilterOperator.lessOrEqual:
+        return r'$lte';
+      case FilterOperator.in_:
+        return r'$in';
+      case FilterOperator.notIn:
+        return r'$nin';
+      case FilterOperator.query:
+        return r'$q';
+      case FilterOperator.autoComplete:
+        return r'$autocomplete';
+      case FilterOperator.exists:
+        return r'$exists';
+      case FilterOperator.and:
+        return r'$and';
+      case FilterOperator.or:
+        return r'$or';
+      case FilterOperator.nor:
+        return r'$nor';
+      case FilterOperator.contains:
+        return r'$contains';
+    }
+  }
 }
 
 /// Stream supports a limited set of filters for querying channels,
@@ -96,11 +110,11 @@ class Filter extends Equatable {
     this.key,
   });
 
-  Filter._({
+  const Filter._({
     required FilterOperator operator,
     required this.value,
     this.key,
-  }) : operator = operator.rawValue;
+  }) : operator = '$operator';
 
   /// An empty filter
   const Filter.empty()
@@ -215,7 +229,7 @@ class Filter extends Equatable {
   /// Serializes to json object
   Map<String, Object?> toJson() {
     final json = <String, Object?>{};
-    final groupOperators = _groupOperators.map((it) => it.rawValue);
+    final groupOperators = _groupOperators.map((it) => '$it');
 
     if (groupOperators.contains(operator)) {
       // Filters with group operators are encoded in the following form:

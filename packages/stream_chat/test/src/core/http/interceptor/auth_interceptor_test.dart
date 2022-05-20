@@ -46,7 +46,7 @@ void main() {
       expect(updateHeaders.containsKey('Authorization'), isTrue);
       expect(updateHeaders['Authorization'], token.rawValue);
       expect(updateHeaders.containsKey('stream-auth-type'), isTrue);
-      expect(updateHeaders['stream-auth-type'], token.authType.raw);
+      expect(updateHeaders['stream-auth-type'], token.authType.name);
       expect(updatedQueryParams.containsKey('user_id'), isTrue);
       expect(updatedQueryParams['user_id'], token.userId);
 
