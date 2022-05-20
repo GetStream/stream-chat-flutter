@@ -2514,7 +2514,7 @@ void main() {
     });
 
     test(
-      '''setting the `currentUser` should also compute and update the unreadCounts''',
+      'setting the `currentUser` should also compute and update the unreadCounts',
       () {
         final state = client.state;
         final initialUser = OwnUser.fromUser(user);
