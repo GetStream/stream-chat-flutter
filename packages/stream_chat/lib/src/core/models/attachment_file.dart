@@ -90,6 +90,9 @@ class AttachmentFile {
 /// Union class to hold various [UploadState] of a attachment.
 @freezed
 class UploadState with _$UploadState {
+  // Dummy private constructor in order to use getters
+  const UploadState._();
+
   /// Preparing state of the union
   const factory UploadState.preparing() = Preparing;
 
