@@ -11,7 +11,7 @@ void main() {
       final filter = Filter.equal(key, value);
       expect(filter.key, key);
       expect(filter.value, value);
-      expect(filter.operator, FilterOperator.equal.rawValue);
+      expect(filter.operator, FilterOperator.equal.toString());
     });
 
     test('notEqual', () {
@@ -20,7 +20,7 @@ void main() {
       final filter = Filter.notEqual(key, value);
       expect(filter.key, key);
       expect(filter.value, value);
-      expect(filter.operator, FilterOperator.notEqual.rawValue);
+      expect(filter.operator, FilterOperator.notEqual.toString());
     });
 
     test('greater', () {
@@ -29,7 +29,7 @@ void main() {
       final filter = Filter.greater(key, value);
       expect(filter.key, key);
       expect(filter.value, value);
-      expect(filter.operator, FilterOperator.greater.rawValue);
+      expect(filter.operator, FilterOperator.greater.toString());
     });
 
     test('greaterOrEqual', () {
@@ -38,7 +38,7 @@ void main() {
       final filter = Filter.greaterOrEqual(key, value);
       expect(filter.key, key);
       expect(filter.value, value);
-      expect(filter.operator, FilterOperator.greaterOrEqual.rawValue);
+      expect(filter.operator, FilterOperator.greaterOrEqual.toString());
     });
 
     test('less', () {
@@ -47,7 +47,7 @@ void main() {
       final filter = Filter.less(key, value);
       expect(filter.key, key);
       expect(filter.value, value);
-      expect(filter.operator, FilterOperator.less.rawValue);
+      expect(filter.operator, FilterOperator.less.toString());
     });
 
     test('lessOrEqual', () {
@@ -56,7 +56,7 @@ void main() {
       final filter = Filter.lessOrEqual(key, value);
       expect(filter.key, key);
       expect(filter.value, value);
-      expect(filter.operator, FilterOperator.lessOrEqual.rawValue);
+      expect(filter.operator, FilterOperator.lessOrEqual.toString());
     });
 
     test('in', () {
@@ -65,7 +65,7 @@ void main() {
       final filter = Filter.in_(key, values);
       expect(filter.key, key);
       expect(filter.value, values);
-      expect(filter.operator, FilterOperator.in_.rawValue);
+      expect(filter.operator, FilterOperator.in_.toString());
     });
 
     test('in', () {
@@ -74,7 +74,7 @@ void main() {
       final filter = Filter.in_(key, values);
       expect(filter.key, key);
       expect(filter.value, values);
-      expect(filter.operator, FilterOperator.in_.rawValue);
+      expect(filter.operator, FilterOperator.in_.toString());
     });
 
     test('notIn', () {
@@ -83,7 +83,7 @@ void main() {
       final filter = Filter.notIn(key, values);
       expect(filter.key, key);
       expect(filter.value, values);
-      expect(filter.operator, FilterOperator.notIn.rawValue);
+      expect(filter.operator, FilterOperator.notIn.toString());
     });
 
     test('query', () {
@@ -92,7 +92,7 @@ void main() {
       final filter = Filter.query(key, value);
       expect(filter.key, key);
       expect(filter.value, value);
-      expect(filter.operator, FilterOperator.query.rawValue);
+      expect(filter.operator, FilterOperator.query.toString());
     });
 
     test('autoComplete', () {
@@ -101,7 +101,7 @@ void main() {
       final filter = Filter.autoComplete(key, value);
       expect(filter.key, key);
       expect(filter.value, value);
-      expect(filter.operator, FilterOperator.autoComplete.rawValue);
+      expect(filter.operator, FilterOperator.autoComplete.toString());
     });
 
     test('exists', () {
@@ -109,7 +109,7 @@ void main() {
       final filter = Filter.exists(key);
       expect(filter.key, key);
       expect(filter.value, isTrue);
-      expect(filter.operator, FilterOperator.exists.rawValue);
+      expect(filter.operator, FilterOperator.exists.toString());
     });
 
     test('notExists', () {
@@ -117,7 +117,7 @@ void main() {
       final filter = Filter.notExists(key);
       expect(filter.key, key);
       expect(filter.value, isFalse);
-      expect(filter.operator, FilterOperator.exists.rawValue);
+      expect(filter.operator, FilterOperator.exists.toString());
     });
 
     test('custom', () {
@@ -149,7 +149,7 @@ void main() {
       final filter = Filter.contains(key, values);
       expect(filter.key, key);
       expect(filter.value, values);
-      expect(filter.operator, FilterOperator.contains.rawValue);
+      expect(filter.operator, FilterOperator.contains.toString());
     });
 
     group('groupedOperator', () {
@@ -161,21 +161,21 @@ void main() {
         final filter = Filter.and(filters);
         expect(filter.key, isNull);
         expect(filter.value, filters);
-        expect(filter.operator, FilterOperator.and.rawValue);
+        expect(filter.operator, FilterOperator.and.toString());
       });
 
       test('or', () {
         final filter = Filter.or(filters);
         expect(filter.key, isNull);
         expect(filter.value, filters);
-        expect(filter.operator, FilterOperator.or.rawValue);
+        expect(filter.operator, FilterOperator.or.toString());
       });
 
       test('nor', () {
         final filter = Filter.nor(filters);
         expect(filter.key, isNull);
         expect(filter.value, filters);
-        expect(filter.operator, FilterOperator.nor.rawValue);
+        expect(filter.operator, FilterOperator.nor.toString());
       });
     });
   });
@@ -189,7 +189,7 @@ void main() {
         final encoded = json.encode(filter);
         expect(
           encoded,
-          '{"$key":{"${FilterOperator.equal.rawValue}":${json.encode(value)}}}',
+          '{"$key":{"${FilterOperator.equal.toString()}":${json.encode(value)}}}',
         );
       });
       test('listValue', () {
@@ -199,7 +199,7 @@ void main() {
         final encoded = json.encode(filter);
         expect(
           encoded,
-          '{"$key":{"${FilterOperator.in_.rawValue}":${json.encode(values)}}}',
+          '{"$key":{"${FilterOperator.in_.toString()}":${json.encode(values)}}}',
         );
       });
 
@@ -243,7 +243,7 @@ void main() {
       final encoded = json.encode(filter);
       expect(
         encoded,
-        '{"${FilterOperator.and.rawValue}":${json.encode(filters)}}',
+        '{"${FilterOperator.and.toString()}":${json.encode(filters)}}',
       );
     });
 

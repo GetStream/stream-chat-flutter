@@ -108,10 +108,7 @@ class UploadState with _$UploadState {
   /// Creates a new instance from a json
   factory UploadState.fromJson(Map<String, dynamic> json) =>
       _$UploadStateFromJson(json);
-}
 
-/// Helper extension for UploadState
-extension UploadStateX on UploadState? {
   /// Returns true if state is [Preparing]
   bool get isPreparing => this is Preparing;
 

@@ -163,7 +163,7 @@ class WebSocket with TimerHelper {
       'json': jsonEncode(params),
       'api_key': apiKey,
       'authorization': token.rawValue,
-      'stream-auth-type': token.authType.raw,
+      'stream-auth-type': token.authType.name,
       ...queryParameters,
     };
     final scheme = baseUrl.startsWith('https') ? 'wss' : 'ws';
