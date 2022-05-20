@@ -36,7 +36,7 @@ class AuthInterceptor extends Interceptor {
     final params = {'user_id': token.userId};
     final headers = {
       'Authorization': token.rawValue,
-      'stream-auth-type': token.authType.raw,
+      'stream-auth-type': token.authType.name,
     };
     options
       ..queryParameters.addAll(params)

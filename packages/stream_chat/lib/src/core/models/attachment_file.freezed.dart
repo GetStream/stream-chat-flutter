@@ -122,8 +122,10 @@ class __$$PreparingCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$Preparing implements Preparing {
-  const _$Preparing({final String? $type}) : $type = $type ?? 'preparing';
+class _$Preparing extends Preparing {
+  const _$Preparing({final String? $type})
+      : $type = $type ?? 'preparing',
+        super._();
 
   factory _$Preparing.fromJson(Map<String, dynamic> json) =>
       _$$PreparingFromJson(json);
@@ -226,8 +228,9 @@ class _$Preparing implements Preparing {
   }
 }
 
-abstract class Preparing implements UploadState {
+abstract class Preparing extends UploadState {
   const factory Preparing() = _$Preparing;
+  const Preparing._() : super._();
 
   factory Preparing.fromJson(Map<String, dynamic> json) = _$Preparing.fromJson;
 }
@@ -270,10 +273,11 @@ class __$$InProgressCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$InProgress implements InProgress {
+class _$InProgress extends InProgress {
   const _$InProgress(
       {required this.uploaded, required this.total, final String? $type})
-      : $type = $type ?? 'inProgress';
+      : $type = $type ?? 'inProgress',
+        super._();
 
   factory _$InProgress.fromJson(Map<String, dynamic> json) =>
       _$$InProgressFromJson(json);
@@ -392,9 +396,10 @@ class _$InProgress implements InProgress {
   }
 }
 
-abstract class InProgress implements UploadState {
+abstract class InProgress extends UploadState {
   const factory InProgress(
       {required final int uploaded, required final int total}) = _$InProgress;
+  const InProgress._() : super._();
 
   factory InProgress.fromJson(Map<String, dynamic> json) =
       _$InProgress.fromJson;
@@ -424,8 +429,10 @@ class __$$SuccessCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$Success implements Success {
-  const _$Success({final String? $type}) : $type = $type ?? 'success';
+class _$Success extends Success {
+  const _$Success({final String? $type})
+      : $type = $type ?? 'success',
+        super._();
 
   factory _$Success.fromJson(Map<String, dynamic> json) =>
       _$$SuccessFromJson(json);
@@ -528,8 +535,9 @@ class _$Success implements Success {
   }
 }
 
-abstract class Success implements UploadState {
+abstract class Success extends UploadState {
   const factory Success() = _$Success;
+  const Success._() : super._();
 
   factory Success.fromJson(Map<String, dynamic> json) = _$Success.fromJson;
 }
@@ -565,9 +573,10 @@ class __$$FailedCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$Failed implements Failed {
+class _$Failed extends Failed {
   const _$Failed({required this.error, final String? $type})
-      : $type = $type ?? 'failed';
+      : $type = $type ?? 'failed',
+        super._();
 
   factory _$Failed.fromJson(Map<String, dynamic> json) =>
       _$$FailedFromJson(json);
@@ -681,8 +690,9 @@ class _$Failed implements Failed {
   }
 }
 
-abstract class Failed implements UploadState {
+abstract class Failed extends UploadState {
   const factory Failed({required final String error}) = _$Failed;
+  const Failed._() : super._();
 
   factory Failed.fromJson(Map<String, dynamic> json) = _$Failed.fromJson;
 
