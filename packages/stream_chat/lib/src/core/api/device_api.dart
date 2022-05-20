@@ -10,15 +10,6 @@ enum PushProvider {
   apn,
 }
 
-/// Helper extension for [PushProvider]
-extension PushProviderX on PushProvider {
-  /// Returns the string notion for [PushProvider].
-  String get name => {
-        PushProvider.apn: 'apn',
-        PushProvider.firebase: 'firebase',
-      }[this]!;
-}
-
 /// Defines the api dedicated to device operations
 class DeviceApi {
   /// Initialize a new device api
