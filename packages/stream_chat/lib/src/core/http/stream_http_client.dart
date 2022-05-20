@@ -76,20 +76,6 @@ class StreamHttpClient {
   @visibleForTesting
   final Dio httpClient;
 
-  /// Lock the current [StreamHttpClient] instance.
-  ///
-  /// [StreamHttpClient] will enqueue the incoming request tasks instead
-  /// send them directly when [interceptor.requestOptions] is locked.
-  void lock() => httpClient.lock();
-
-  /// Unlock the current [StreamHttpClient] instance.
-  ///
-  /// [StreamHttpClient] instance dequeue the request task。
-  void unlock() => httpClient.unlock();
-
-  /// Clear the current [StreamHttpClient] instance waiting queue.
-  void clear() => httpClient.clear();
-
   /// Shuts down the [StreamHttpClient].
   ///
   /// If [force] is `false` the [StreamHttpClient] will be kept alive

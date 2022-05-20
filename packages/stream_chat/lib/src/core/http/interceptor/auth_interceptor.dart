@@ -8,7 +8,7 @@ import 'package:stream_chat/src/core/http/token_manager.dart';
 
 /// Authentication interceptor that refreshes the token if
 /// an auth error is received
-class AuthInterceptor extends Interceptor {
+class AuthInterceptor extends QueuedInterceptor {
   /// Initialize a new auth interceptor
   AuthInterceptor(this._client, this._tokenManager);
 
@@ -57,9 +57,7 @@ class AuthInterceptor extends Interceptor {
     final error = ErrorResponse.fromJson(data);
     if (error.code == ChatErrorCode.tokenExpired.code) {
       if (_tokenManager.isStatic) return handler.next(err);
-      _client.lock();
       await _tokenManager.loadToken(refresh: true);
-      _client.unlock();
       try {
         final options = err.requestOptions;
         final response = await _client.request(

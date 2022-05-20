@@ -93,13 +93,9 @@ void main() {
 
     when(() => tokenManager.isStatic).thenReturn(false);
 
-    when(() => client.lock()).thenReturn(() {});
-
     final token = Token.development('test-user-id');
     when(() => tokenManager.loadToken(refresh: true))
         .thenAnswer((_) async => token);
-
-    when(() => client.unlock()).thenReturn(() {});
 
     when(() => client.request(
           path,
@@ -127,12 +123,9 @@ void main() {
 
     verify(() => tokenManager.isStatic).called(1);
 
-    verify(() => client.lock()).called(1);
-
     verify(() => tokenManager.loadToken(refresh: true)).called(1);
     verifyNoMoreInteractions(tokenManager);
 
-    verify(() => client.unlock()).called(1);
     verify(() => client.request(
           path,
           data: options.data,
@@ -163,13 +156,9 @@ void main() {
 
       when(() => tokenManager.isStatic).thenReturn(false);
 
-      when(() => client.lock()).thenReturn(() {});
-
       final token = Token.development('test-user-id');
       when(() => tokenManager.loadToken(refresh: true))
           .thenAnswer((_) async => token);
-
-      when(() => client.unlock()).thenReturn(() {});
 
       when(() => client.request(
             path,
@@ -193,12 +182,9 @@ void main() {
 
       verify(() => tokenManager.isStatic).called(1);
 
-      verify(() => client.lock()).called(1);
-
       verify(() => tokenManager.loadToken(refresh: true)).called(1);
       verifyNoMoreInteractions(tokenManager);
 
-      verify(() => client.unlock()).called(1);
       verify(() => client.request(
             path,
             data: options.data,
