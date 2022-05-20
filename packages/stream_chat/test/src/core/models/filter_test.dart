@@ -189,7 +189,7 @@ void main() {
         final encoded = json.encode(filter);
         expect(
           encoded,
-          '{"$key":{"${FilterOperator.equal.toString()}":${json.encode(value)}}}',
+          '''''{"$key":{"${FilterOperator.equal.toString()}":${json.encode(value)}}}''',
         );
       });
       test('listValue', () {
@@ -199,7 +199,7 @@ void main() {
         final encoded = json.encode(filter);
         expect(
           encoded,
-          '{"$key":{"${FilterOperator.in_.toString()}":${json.encode(values)}}}',
+          '''{"$key":{"${FilterOperator.in_.toString()}":${json.encode(values)}}}''',
         );
       });
 
