@@ -172,7 +172,10 @@ class User extends Equatable {
       User(
         id: id ?? this.id,
         role: role ?? this.role,
-        name: name ?? extraData?['name'] as String? ?? this.name,
+        name: name ??
+            extraData?['name'] as String? ??
+            // Using extraData value in order to not use id as name.
+            this.extraData['name'] as String?,
         image: image ?? extraData?['image'] as String? ?? this.image,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,

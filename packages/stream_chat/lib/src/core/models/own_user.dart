@@ -41,7 +41,8 @@ class OwnUser extends User {
   factory OwnUser.fromUser(User user) => OwnUser(
         id: user.id,
         role: user.role,
-        name: user.name,
+        // Using extraData value in order to not use id as name.
+        name: user.extraData['name'] as String?,
         image: user.image,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -78,7 +79,10 @@ class OwnUser extends User {
       OwnUser(
         id: id ?? this.id,
         role: role ?? this.role,
-        name: name ?? extraData?['name'] as String? ?? this.name,
+        name: name ??
+            extraData?['name'] as String? ??
+            // Using extraData value in order to not use id as name.
+            this.extraData['name'] as String?,
         image: image ?? extraData?['image'] as String? ?? this.image,
         banned: banned ?? this.banned,
         banExpires: banExpires ?? this.banExpires,
@@ -103,7 +107,8 @@ class OwnUser extends User {
     return copyWith(
       id: other.id,
       role: other.role,
-      name: other.name,
+      // Using extraData value in order to not use id as name.
+      name: other.extraData['name'] as String?,
       image: other.image,
       banned: other.banned,
       channelMutes: other.channelMutes,
