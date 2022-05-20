@@ -66,7 +66,7 @@ typedef UserMentionTileBuilder = Widget Function(
 /// Widget builder for action button.
 ///
 /// [defaultActionButton] is the default [IconButton] configuration,
-/// use [defaultActionButton.copyWith] to easily customize it.
+/// use .copyWith to easily customize it.
 typedef ActionButtonBuilder = Widget Function(
   BuildContext context,
   IconButton defaultActionButton,
