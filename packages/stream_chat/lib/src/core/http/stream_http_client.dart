@@ -266,4 +266,17 @@ class StreamHttpClient {
       throw _parseError(error);
     }
   }
+
+  /// Handy method to make http requests from [RequestOptions]
+  /// with error parsing.
+  Future<Response<T>> fetch<T>(
+    RequestOptions requestOptions,
+  ) async {
+    try {
+      final response = await httpClient.fetch<T>(requestOptions);
+      return response;
+    } on DioError catch (error) {
+      throw _parseError(error);
+    }
+  }
 }
