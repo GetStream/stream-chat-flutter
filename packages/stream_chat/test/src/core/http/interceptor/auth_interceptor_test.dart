@@ -97,15 +97,7 @@ void main() {
     when(() => tokenManager.loadToken(refresh: true))
         .thenAnswer((_) async => token);
 
-    when(() => client.request(
-          path,
-          data: options.data,
-          onReceiveProgress: options.onReceiveProgress,
-          onSendProgress: options.onSendProgress,
-          queryParameters: options.queryParameters,
-          cancelToken: options.cancelToken,
-          options: any(named: 'options'),
-        )).thenAnswer((_) async => Response(
+    when(() => client.fetch(options)).thenAnswer((_) async => Response(
           requestOptions: options,
           statusCode: 200,
         ));
@@ -126,15 +118,7 @@ void main() {
     verify(() => tokenManager.loadToken(refresh: true)).called(1);
     verifyNoMoreInteractions(tokenManager);
 
-    verify(() => client.request(
-          path,
-          data: options.data,
-          onReceiveProgress: options.onReceiveProgress,
-          onSendProgress: options.onSendProgress,
-          queryParameters: options.queryParameters,
-          cancelToken: options.cancelToken,
-          options: any(named: 'options'),
-        )).called(1);
+    verify(() => client.fetch(options)).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -160,15 +144,7 @@ void main() {
       when(() => tokenManager.loadToken(refresh: true))
           .thenAnswer((_) async => token);
 
-      when(() => client.request(
-            path,
-            data: options.data,
-            onReceiveProgress: options.onReceiveProgress,
-            onSendProgress: options.onSendProgress,
-            queryParameters: options.queryParameters,
-            cancelToken: options.cancelToken,
-            options: any(named: 'options'),
-          )).thenThrow(err);
+      when(() => client.fetch(options)).thenThrow(err);
 
       authInterceptor.onError(err, handler);
 
@@ -185,15 +161,7 @@ void main() {
       verify(() => tokenManager.loadToken(refresh: true)).called(1);
       verifyNoMoreInteractions(tokenManager);
 
-      verify(() => client.request(
-            path,
-            data: options.data,
-            onReceiveProgress: options.onReceiveProgress,
-            onSendProgress: options.onSendProgress,
-            queryParameters: options.queryParameters,
-            cancelToken: options.cancelToken,
-            options: any(named: 'options'),
-          )).called(1);
+      verify(() => client.fetch(options)).called(1);
       verifyNoMoreInteractions(client);
     },
   );
