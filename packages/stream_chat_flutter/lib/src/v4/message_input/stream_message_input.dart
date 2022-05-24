@@ -214,6 +214,7 @@ class StreamMessageInput extends StatefulWidget {
         this.disableEmojiSuggestionsOverlay = false,
     this.enableEmojiSuggestionsOverlay = true,
     this.enableMentionsOverlay = true,
+    this.usersToMention,
   });
 
   /// List of options for showing overlays.
@@ -346,6 +347,10 @@ class StreamMessageInput extends StatefulWidget {
   /// Disable the mentions overlay by passing false
   /// Enabled by default
   final bool enableMentionsOverlay;
+
+  /// A custom list of users that will be displayed the mentions overlay. It
+  /// overrides [mentionAllAppUsers].
+  final List<User>? usersToMention;
 
   static bool _defaultValidator(Message message) =>
       message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
@@ -1164,6 +1169,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       builder: (context, snapshot) => StreamUserMentionsOverlay(
         query: query,
         mentionAllAppUsers: widget.mentionAllAppUsers,
+        usersToMention: widget.usersToMention,
         client: StreamChat.of(context).client,
         channel: channel,
         size: Size(

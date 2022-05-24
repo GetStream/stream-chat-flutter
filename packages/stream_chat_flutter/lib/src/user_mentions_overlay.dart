@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
@@ -29,6 +30,7 @@ class StreamUserMentionsOverlay extends StatefulWidget {
     this.client,
     this.limit = 10,
     this.mentionAllAppUsers = false,
+    this.usersToMention,
     this.mentionsTileBuilder,
     this.onMentionUserTap,
   })  : assert(
@@ -66,6 +68,10 @@ class StreamUserMentionsOverlay extends StatefulWidget {
   /// Callback called when a user is selected.
   final void Function(User user)? onMentionUserTap;
 
+  /// A custom list of users that will be displayed the mentions overlay. It
+  /// overrides [mentionAllAppUsers].
+  final List<User>? usersToMention;
+
   @override
   _StreamUserMentionsOverlayState createState() =>
       _StreamUserMentionsOverlayState();
@@ -86,7 +92,8 @@ class _StreamUserMentionsOverlayState extends State<StreamUserMentionsOverlay> {
     if (widget.channel != oldWidget.channel ||
         widget.query != oldWidget.query ||
         widget.mentionAllAppUsers != oldWidget.mentionAllAppUsers ||
-        widget.limit != oldWidget.limit) {
+        widget.limit != oldWidget.limit ||
+        listEquals(widget.usersToMention, oldWidget.usersToMention)) {
       userMentionsFuture = queryMentions(widget.query);
     }
   }
@@ -142,6 +149,10 @@ class _StreamUserMentionsOverlayState extends State<StreamUserMentionsOverlay> {
   }
 
   Future<List<User>> queryMentions(String query) async {
+    if (widget.usersToMention != null) {
+      return _queryProvidedUsersToMention(query);
+    }
+
     if (widget.mentionAllAppUsers) {
       return _queryUsers(query);
     }
@@ -193,5 +204,9 @@ class _StreamUserMentionsOverlayState extends State<StreamUserMentionsOverlay> {
       sort: [const SortOption('id', direction: SortOption.ASC)],
     );
     return response.users;
+  }
+
+  List<User> _queryProvidedUsersToMention(String query) {
+    return widget.usersToMention!.search(query);
   }
 }
