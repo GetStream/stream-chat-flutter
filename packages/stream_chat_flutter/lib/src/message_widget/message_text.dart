@@ -14,12 +14,12 @@ typedef MessageText = StreamMessageText;
 class StreamMessageText extends StatelessWidget {
   /// {@macro streamMessageText}
   const StreamMessageText({
-    Key? key,
+    super.key,
     required this.message,
     required this.messageTheme,
     this.onMentionTap,
     this.onLinkTap,
-  }) : super(key: key);
+  });
 
   /// Message whose text is to be displayed
   final Message message;

@@ -10,10 +10,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ThreadReplyButton extends StatelessWidget {
   /// {@macro threadReplyButton}
   const ThreadReplyButton({
-    Key? key,
+    super.key,
     required this.message,
     this.onThreadReplyTap,
-  }) : super(key: key);
+  });
 
   /// The message to start a thread reply to.
   final Message message;

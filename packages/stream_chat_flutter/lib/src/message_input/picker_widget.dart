@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:stream_chat_flutter/src/media_list_view_controller.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -13,19 +14,23 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class PickerWidget extends StatefulWidget {
   /// {@macro pickerWidget}
   const PickerWidget({
-    Key? key,
+    super.key,
+    required this.mediaListViewController,
     required this.filePickerIndex,
     required this.containsFile,
     required this.selectedMedias,
     required this.onAddMoreFilesClick,
     required this.onMediaSelected,
     required this.streamChatTheme,
-  }) : super(key: key);
+  });
 
-  ///
+  /// TODO: Document me!
+  final MediaListViewController mediaListViewController;
+
+  /// TODO: Document me!
   final int filePickerIndex;
 
-  ///
+  /// TODO: Document me!
   final bool containsFile;
 
   /// The selected media to upload.
@@ -94,7 +99,7 @@ class _PickerWidgetState extends State<PickerWidget> {
 
         return InkWell(
           onTap: () async => PhotoManager.openSetting(),
-          child: Container(
+          child: ColoredBox(
             color: widget.streamChatTheme.colorTheme.inputBg,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

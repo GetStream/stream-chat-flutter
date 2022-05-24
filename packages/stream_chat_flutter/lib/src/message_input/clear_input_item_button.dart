@@ -10,9 +10,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ClearInputItemButton extends StatelessWidget {
   /// {@macro clearInputItemButton}
   const ClearInputItemButton({
-    Key? key,
+    super.key,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   /// The callback to be performed when the button is tapped or clicked.
   final VoidCallback? onTap;

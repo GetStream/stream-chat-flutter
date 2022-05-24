@@ -211,8 +211,7 @@ void main() {
 
       final paginationParams = PaginationParams(
         idAround: initialMessageId,
-        after: 20,
-        before: 20,
+        limit: 20,
       );
 
       when(() => mockChannel.initialized).thenAnswer((_) async => true);

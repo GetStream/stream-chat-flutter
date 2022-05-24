@@ -9,11 +9,11 @@ import 'package:stream_chat_flutter/platform_widget_builder/src/desktop_widget_b
 class DesktopWidget extends DesktopWidgetBase<Widget, Widget, Widget> {
   /// Builds a [DesktopWidget].
   const DesktopWidget({
-    Key? key,
+    super.key,
     this.macOS,
     this.windows,
     this.linux,
-  }) : super(key: key);
+  });
 
   /// The widget to build for macOS.
   final PlatformBuilder<Widget?>? macOS;

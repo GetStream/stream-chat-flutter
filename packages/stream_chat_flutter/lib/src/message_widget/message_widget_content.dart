@@ -12,7 +12,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class MessageWidgetContent extends StatelessWidget {
   /// {@macro messageWidgetContent}
   const MessageWidgetContent({
-    Key? key,
+    super.key,
     required this.reverse,
     required this.isPinned,
     required this.showPinHighlight,
@@ -54,7 +54,7 @@ class MessageWidgetContent extends StatelessWidget {
     this.bottomRowBuilder,
     this.onThreadTap,
     this.deletedBottomRowBuilder,
-  }) : super(key: key);
+  });
 
   /// {@macro reverse}
   final bool reverse;
@@ -225,9 +225,9 @@ class MessageWidgetContent extends StatelessWidget {
                       if (showUserAvatar == DisplayWidget.hide)
                         SizedBox(width: avatarWidth + 4),
                       Flexible(
-                        child: PortalEntry(
+                        child: PortalTarget(
                           visible: showReactions,
-                          portal: showReactions
+                          portalFollower: showReactions
                               ? ReactionIndicator(
                                   message: message,
                                   messageTheme: messageTheme,
@@ -240,13 +240,15 @@ class MessageWidgetContent extends StatelessWidget {
                                   ),
                                 )
                               : null,
-                          portalAnchor: Alignment(
-                            reverse ? 1 : -1,
-                            -1,
-                          ),
-                          childAnchor: Alignment(
-                            reverse ? -1 : 1,
-                            -1,
+                          anchor: Aligned(
+                            follower: Alignment(
+                              reverse ? 1 : -1,
+                              -1,
+                            ),
+                            target: Alignment(
+                              reverse ? -1 : 1,
+                              -1,
+                            ),
                           ),
                           child: Stack(
                             clipBehavior: Clip.none,
@@ -408,7 +410,7 @@ class MessageWidgetContent extends StatelessWidget {
             showTimestamp: false,
             translateUserAvatar: false,
             showSendingIndicator: false,
-            padding: const EdgeInsets.all(0),
+            padding: EdgeInsets.zero,
             showReactionPickerIndicator:
                 showReactions && (message.status == MessageSendingStatus.sent),
             showPinHighlight: false,

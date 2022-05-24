@@ -7,9 +7,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class CountdownButton extends StatelessWidget {
   /// {@macro countdownButton}
   const CountdownButton({
-    Key? key,
+    super.key,
     required this.count,
-  }) : super(key: key);
+  });
 
   /// The countdown, in seconds.
   final int count;

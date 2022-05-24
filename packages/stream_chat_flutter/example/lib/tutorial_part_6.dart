@@ -46,18 +46,22 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({
-    Key? key,
+    super.key,
     required this.client,
-  }) : super(key: key);
+  });
 
   final StreamChatClient client;
 
   @override
   Widget build(BuildContext context) {
-    final themeData = ThemeData(primarySwatch: Colors.green);
+    final themeData = ThemeData(
+      colorScheme: ColorScheme.fromSwatch(
+        accentColor: Colors.green,
+      ),
+    );
     final defaultTheme = StreamChatThemeData.fromTheme(themeData);
     final colorTheme = defaultTheme.colorTheme;
-    final customTheme = defaultTheme.merge(StreamChatThemeData(
+    final customTheme = StreamChatThemeData(
       channelPreviewTheme: StreamChannelPreviewThemeData(
         avatarTheme: StreamAvatarThemeData(
           borderRadius: BorderRadius.circular(8),
@@ -79,7 +83,7 @@ class MyApp extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-    ));
+    ).merge(defaultTheme);
 
     return MaterialApp(
       theme: themeData,
@@ -95,8 +99,8 @@ class MyApp extends StatelessWidget {
 
 class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ChannelListPage> createState() => _ChannelListPageState();
@@ -141,8 +145,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -166,9 +170,9 @@ class ChannelPage extends StatelessWidget {
 
 class ThreadPage extends StatelessWidget {
   const ThreadPage({
-    Key? key,
+    super.key,
     this.parent,
-  }) : super(key: key);
+  });
 
   final Message? parent;
 
@@ -186,7 +190,7 @@ class ThreadPage extends StatelessWidget {
             ),
           ),
           StreamMessageInput(
-            messageInputController: MessageInputController(
+            messageInputController: StreamMessageInputController(
               message: Message(parentId: parent!.id),
             ),
           ),

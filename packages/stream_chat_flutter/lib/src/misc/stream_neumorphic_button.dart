@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 class StreamNeumorphicButton extends StatelessWidget {
   /// {@macro neumorphicButton}
   const StreamNeumorphicButton({
-    Key? key,
+    super.key,
     required this.child,
     this.backgroundColor = Colors.white,
-  }) : super(key: key);
+  });
 
   /// Child contained in the button
   final Widget child;

@@ -67,7 +67,7 @@ class StreamMessageTextField extends StatefulWidget {
   ///  * [maxLength], which discusses the precise meaning of "number of
   ///    characters" and how it may differ from the intuitive meaning.
   const StreamMessageTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.focusNode,
     this.decoration = const InputDecoration(),
@@ -176,13 +176,12 @@ class StreamMessageTextField extends StatefulWidget {
                     cut: true,
                     selectAll: true,
                     paste: true,
-                  )),
-        super(key: key);
+                  ));
 
   /// Controls the message being edited.
   ///
-  /// If null, this widget will create its own [MessageInputController].
-  final MessageInputController? controller;
+  /// If null, this widget will create its own [StreamMessageInputController].
+  final StreamMessageInputController? controller;
 
   /// Defines the keyboard focus for this widget.
   ///
@@ -655,9 +654,9 @@ class StreamMessageTextField extends StatefulWidget {
 
 class _StreamMessageTextFieldState extends State<StreamMessageTextField>
     with RestorationMixin<StreamMessageTextField> {
-  RestorableMessageInputController? _controller;
+  StreamRestorableMessageInputController? _controller;
 
-  MessageInputController get _effectiveController =>
+  StreamMessageInputController get _effectiveController =>
       widget.controller ?? _controller!.value;
 
   @override
@@ -670,7 +669,7 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
 
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
-    _controller = RestorableMessageInputController(message: message);
+    _controller = StreamRestorableMessageInputController(message: message);
   }
 
   @override

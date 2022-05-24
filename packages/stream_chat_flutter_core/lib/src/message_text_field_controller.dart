@@ -10,15 +10,15 @@ typedef TextStyleBuilder = TextStyle? Function(
 class MessageTextFieldController extends TextEditingController {
   /// Returns a new MessageTextFieldController
   MessageTextFieldController({
-    String? text,
+    super.text,
     this.textPatternStyle,
-  }) : super(text: text);
+  });
 
   /// Returns a new MessageTextFieldController with the given text [value].
   MessageTextFieldController.fromValue(
-    TextEditingValue? value, {
+    super.value, {
     this.textPatternStyle,
-  }) : super.fromValue(value);
+  }) : super.fromValue();
 
   /// A map of style to apply to the text matching the RegExp patterns.
   final Map<RegExp, TextStyleBuilder>? textPatternStyle;

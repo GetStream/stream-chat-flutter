@@ -8,11 +8,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class EditMessageSheet extends StatefulWidget {
   /// {@macro editMessageSheet}
   const EditMessageSheet({
-    Key? key,
+    super.key,
     required this.message,
     required this.channel,
     this.editMessageInputBuilder,
-  }) : super(key: key);
+  });
 
   /// {@macro editMessageInputBuilder}
   final EditMessageInputBuilder? editMessageInputBuilder;
@@ -28,7 +28,7 @@ class EditMessageSheet extends StatefulWidget {
 }
 
 class _EditMessageSheetState extends State<EditMessageSheet> {
-  late final controller = MessageInputController(
+  late final controller = StreamMessageInputController(
     message: widget.message,
   );
 

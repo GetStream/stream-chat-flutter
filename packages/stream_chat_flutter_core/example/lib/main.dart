@@ -60,102 +60,132 @@ class StreamExample extends StatelessWidget {
 }
 
 /// Basic layout displaying a list of [Channel]s the user is a part of.
-/// This is implemented using [ChannelListCore].
+/// This is implemented using a [StreamChannelListController].
 ///
-/// [ChannelListCore] is a `builder` with callbacks for constructing UIs based
-/// on different scenarios.
-class HomeScreen extends StatelessWidget {
+/// [StreamChannelListController] is a controller that lets you manage a list of
+/// channels.
+class HomeScreen extends StatefulWidget {
   /// Builds a basic layout displaying a list of [Channel]s the user is a
   /// part of.
-  HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({Key? key}) : super(key: key);
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   /// Controller used for loading more data and controlling pagination in
-  /// [ChannelListCore].
-  final channelListController = ChannelListController();
+  /// [StreamChannelListController].
+  late final channelListController = StreamChannelListController(
+    client: StreamChatCore.of(context).client,
+    filter: Filter.and([
+      Filter.equal('type', 'messaging'),
+      Filter.in_(
+        'members',
+        [
+          StreamChatCore.of(context).currentUser!.id,
+        ],
+      ),
+    ]),
+  );
+
+  @override
+  void initState() {
+    channelListController.doInitialLoad();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    channelListController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: const Text('Channels'),
         ),
-        body: ChannelsBloc(
-          child: ChannelListCore(
-            channelListController: channelListController,
-            filter: Filter.and([
-              Filter.equal('type', 'messaging'),
-              Filter.in_(
-                'members',
-                [
-                  StreamChatCore.of(context).currentUser!.id,
-                ],
-              ),
-            ]),
-            emptyBuilder: (BuildContext context) => const Center(
-              child: Text('Looks like you are not in any channels'),
-            ),
-            loadingBuilder: (BuildContext context) => const Center(
-              child: SizedBox(
-                height: 100,
-                width: 100,
-                child: CircularProgressIndicator(),
-              ),
-            ),
-            errorBuilder: (
-              BuildContext context,
-              dynamic error,
-            ) =>
-                Center(
-              child: Text(
-                'Oh no, something went wrong. '
-                'Please check your config. $error',
-              ),
-            ),
-            listBuilder: (
-              BuildContext context,
-              List<Channel> channels,
-            ) =>
-                LazyLoadScrollView(
-              onEndOfPage: () async {
-                channelListController.paginateData!();
-              },
-              child: ListView.builder(
-                itemCount: channels.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final _item = channels[index];
-                  return ListTile(
-                    title: Text(_item.name ?? ''),
-                    subtitle: StreamBuilder<Message?>(
-                      stream: _item.state!.lastMessageStream,
-                      initialData: _item.state!.lastMessage,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return Text(snapshot.data!.text!);
-                        }
-
-                        return const SizedBox();
-                      },
-                    ),
-                    onTap: () {
-                      /// Display a list of messages when the user taps on
-                      /// an item. We can use [StreamChannel] to wrap our
-                      /// [MessageScreen] screen with the selected channel.
-                      ///
-                      /// This allows us to use a built-in inherited widget
-                      /// for accessing our `channel` later on.
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => StreamChannel(
-                            channel: _item,
-                            child: const MessageScreen(),
-                          ),
-                        ),
-                      );
-                    },
-                  );
+        body: PagedValueListenableBuilder<int, Channel>(
+          valueListenable: channelListController,
+          builder: (context, value, child) {
+            return value.when(
+              (channels, nextPageKey, error) => LazyLoadScrollView(
+                onEndOfPage: () async {
+                  if (nextPageKey != null) {
+                    channelListController.loadMore(nextPageKey);
+                  }
                 },
+                child: ListView.builder(
+                  /// We're using the channels length when there are no more
+                  /// pages to load and there are no errors with pagination.
+                  /// In case we need to show a loading indicator or and error
+                  /// tile we're increasing the count by 1.
+                  itemCount: (nextPageKey != null || error != null)
+                      ? channels.length + 1
+                      : channels.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == channels.length) {
+                      if (error != null) {
+                        return TextButton(
+                          onPressed: () {
+                            channelListController.retry();
+                          },
+                          child: Text(error.message),
+                        );
+                      }
+                      return CircularProgressIndicator();
+                    }
+
+                    final _item = channels[index];
+                    return ListTile(
+                      title: Text(_item.name ?? ''),
+                      subtitle: StreamBuilder<Message?>(
+                        stream: _item.state!.lastMessageStream,
+                        initialData: _item.state!.lastMessage,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(snapshot.data!.text!);
+                          }
+
+                          return const SizedBox();
+                        },
+                      ),
+                      onTap: () {
+                        /// Display a list of messages when the user taps on
+                        /// an item. We can use [StreamChannel] to wrap our
+                        /// [MessageScreen] screen with the selected channel.
+                        ///
+                        /// This allows us to use a built-in inherited widget
+                        /// for accessing our `channel` later on.
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => StreamChannel(
+                              channel: _item,
+                              child: const MessageScreen(),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ),
+              loading: () => const Center(
+                child: SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              error: (e) => Center(
+                child: Text(
+                  'Oh no, something went wrong. '
+                  'Please check your config. $e',
+                ),
+              ),
+            );
+          },
         ),
       );
 }
@@ -175,20 +205,20 @@ class MessageScreen extends StatefulWidget {
 }
 
 class _MessageScreenState extends State<MessageScreen> {
-  late final TextEditingController _controller;
+  final StreamMessageInputController messageInputController =
+      StreamMessageInputController();
   late final ScrollController _scrollController;
   final messageListController = MessageListController();
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
     _scrollController = ScrollController();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    messageInputController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -289,7 +319,8 @@ class _MessageScreenState extends State<MessageScreen> {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: _controller,
+                      controller: messageInputController.textEditingController,
+                      onChanged: (s) => messageInputController.text = s,
                       decoration: const InputDecoration(
                         hintText: 'Enter your message',
                       ),
@@ -301,12 +332,13 @@ class _MessageScreenState extends State<MessageScreen> {
                     clipBehavior: Clip.hardEdge,
                     child: InkWell(
                       onTap: () async {
-                        if (_controller.value.text.isNotEmpty) {
+                        if (messageInputController.message.text?.isNotEmpty ==
+                            true) {
                           await channel.sendMessage(
-                            Message(text: _controller.value.text),
+                            messageInputController.message,
                           );
+                          messageInputController.clear();
                           if (mounted) {
-                            _controller.clear();
                             _updateList();
                           }
                         }

@@ -20,12 +20,12 @@ typedef PlatformTargetBuilder = Widget? Function(
 class PlatformWidgetBuilder extends StatelessWidget {
   /// Builds a [PlatformWidgetBuilder].
   const PlatformWidgetBuilder({
-    Key? key,
+    super.key,
     this.child,
     this.mobile,
     this.desktop,
     this.web,
-  }) : super(key: key);
+  });
 
   /// The child widget.
   final Widget? child;

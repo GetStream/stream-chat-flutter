@@ -8,12 +8,12 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ConfirmationDialog extends StatelessWidget {
   /// {@macro confirmationDialog}
   const ConfirmationDialog({
-    Key? key,
+    super.key,
     required this.titleText,
     required this.promptText,
     required this.affirmativeText,
     required this.onConfirmation,
-  }) : super(key: key);
+  });
 
   /// The text to use for the dialog title.
   final String titleText;

@@ -8,12 +8,12 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class DmCheckbox extends StatelessWidget {
   /// {@macro dmCheckbox}
   const DmCheckbox({
-    Key? key,
+    super.key,
     required this.foregroundDecoration,
     required this.color,
     required this.onTap,
     required this.crossFadeState,
-  }) : super(key: key);
+  });
 
   /// The decoration to use for the button's foreground.
   final BoxDecoration foregroundDecoration;

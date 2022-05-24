@@ -11,7 +11,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class MessageActionsModal extends StatefulWidget {
   /// {@macro messageActionsModal}
   const MessageActionsModal({
-    Key? key,
+    super.key,
     required this.message,
     required this.messageWidget,
     required this.messageTheme,
@@ -30,7 +30,7 @@ class MessageActionsModal extends StatefulWidget {
     this.reverse = false,
     this.customActions = const [],
     this.onCopyTap,
-  }) : super(key: key);
+  });
 
   /// Widget that shows the message
   final Widget messageWidget;
@@ -260,7 +260,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                 sigmaX: 10,
                 sigmaY: 10,
               ),
-              child: Container(
+              child: ColoredBox(
                 color: streamChatThemeData.colorTheme.overlay,
               ),
             ),

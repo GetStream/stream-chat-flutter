@@ -28,7 +28,7 @@ class ChannelPreview extends StatelessWidget {
   /// {@macro channelPreview}
   const ChannelPreview({
     required this.channel,
-    Key? key,
+    super.key,
     this.onTap,
     this.onLongPress,
     this.onViewInfoTap,
@@ -38,7 +38,7 @@ class ChannelPreview extends StatelessWidget {
     this.leading,
     this.sendingIndicator,
     this.trailing,
-  }) : super(key: key);
+  });
 
   /// The action to perform when this widget is tapped or clicked.
   final void Function(Channel)? onTap;
@@ -327,9 +327,9 @@ class ChannelPreview extends StatelessWidget {
 
 class _Date extends StatelessWidget {
   const _Date({
-    Key? key,
+    super.key,
     required this.channel,
-  }) : super(key: key);
+  });
 
   final Channel channel;
 
@@ -371,9 +371,9 @@ class _Date extends StatelessWidget {
 
 class _Subtitle extends StatelessWidget {
   const _Subtitle({
-    Key? key,
+    super.key,
     required this.channel,
-  }) : super(key: key);
+  });
 
   final Channel channel;
 
@@ -406,9 +406,9 @@ class _Subtitle extends StatelessWidget {
 
 class _LastMessage extends StatelessWidget {
   const _LastMessage({
-    Key? key,
+    super.key,
     required this.channel,
-  }) : super(key: key);
+  });
 
   final Channel channel;
 

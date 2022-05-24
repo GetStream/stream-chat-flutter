@@ -1,4 +1,5 @@
-// ignore_for_file: deprecated_member_use_from_same_package
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: deprecated_member_use_from_same_package, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_search/query_progress_indicator.dart';
@@ -39,8 +40,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 @Deprecated('Use StreamMessageSearchListView instead')
 class MessageSearchListView extends StatefulWidget {
   /// {@macro messageSearchListView}
+  @Deprecated("Use 'StreamMessageSearchListView' instead")
   const MessageSearchListView({
-    Key? key,
+    super.key,
     required this.filters,
     this.messageQuery,
     this.sortOptions,
@@ -57,7 +59,7 @@ class MessageSearchListView extends StatefulWidget {
     this.loadingBuilder,
     this.childBuilder,
     this.messageSearchListController,
-  }) : super(key: key);
+  });
 
   /// Message String to search on
   final String? messageQuery;
@@ -219,7 +221,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
           if (widget.itemBuilder != null) {
             return widget.itemBuilder!(context, items[index]);
           }
-          return StreamMessageSearchItem(
+          return MessageSearchItem(
             getMessageResponse: items[index],
             onTap: () => widget.onItemTap!(items[index]),
           );

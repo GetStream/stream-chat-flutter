@@ -22,19 +22,14 @@ typedef FileAttachment = StreamFileAttachment;
 class StreamFileAttachment extends StreamAttachmentWidget {
   /// {@macro streamFileAttachment}
   const StreamFileAttachment({
-    Key? key,
-    required Message message,
-    required Attachment attachment,
-    Size? size,
+    super.key,
+    required super.message,
+    required super.attachment,
+    super.size,
     this.title,
     this.trailing,
     this.onAttachmentTap,
-  }) : super(
-          key: key,
-          message: message,
-          attachment: attachment,
-          size: size,
-        );
+  });
 
   /// Title for the attachment
   final Widget? title;
@@ -114,12 +109,12 @@ class StreamFileAttachment extends StreamAttachmentWidget {
 
 class _FileTypeImage extends StatelessWidget {
   const _FileTypeImage({
-    Key? key,
+    super.key,
     required this.isImageAttachment,
     required this.isVideoAttachment,
     required this.source,
     required this.attachment,
-  }) : super(key: key);
+  });
 
   final bool isImageAttachment;
   final bool isVideoAttachment;
@@ -223,11 +218,11 @@ class _FileTypeImage extends StatelessWidget {
 
 class _Trailing extends StatelessWidget {
   const _Trailing({
-    Key? key,
+    super.key,
     required this.attachment,
     required this.message,
     this.trailing,
-  }) : super(key: key);
+  });
 
   final Attachment attachment;
   final Message message;
@@ -311,12 +306,12 @@ class _Trailing extends StatelessWidget {
 
 class _TrailingButton extends StatelessWidget {
   const _TrailingButton({
-    Key? key,
+    super.key,
     this.iconSize,
     this.onPressed,
     this.fillColor,
     this.icon,
-  }) : super(key: key);
+  });
 
   final double? iconSize;
   final VoidCallback? onPressed;
@@ -344,9 +339,9 @@ class _TrailingButton extends StatelessWidget {
 
 class _FileAttachmentSubtitle extends StatelessWidget {
   const _FileAttachmentSubtitle({
-    Key? key,
+    super.key,
     required this.attachment,
-  }) : super(key: key);
+  });
 
   final Attachment attachment;
 

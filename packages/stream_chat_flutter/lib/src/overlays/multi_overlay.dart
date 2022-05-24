@@ -14,12 +14,12 @@ typedef MultiOverlay = StreamMultiOverlay;
 class StreamMultiOverlay extends StatelessWidget {
   /// {@macro streamMultiOverlay}
   const StreamMultiOverlay({
-    Key? key,
+    super.key,
     required this.overlayOptions,
     required this.child,
     required this.overlayAnchor,
     required this.childAnchor,
-  }) : super(key: key);
+  });
 
   /// The list of overlay options
   final List<OverlayOptions> overlayOptions;
@@ -38,11 +38,13 @@ class StreamMultiOverlay extends StatelessWidget {
     final visibleOverlay =
         overlayOptions.firstWhereOrNull((element) => element.visible);
 
-    return PortalEntry(
-      childAnchor: childAnchor,
-      portalAnchor: overlayAnchor,
+    return PortalTarget(
+      anchor: Aligned(
+        follower: overlayAnchor ?? Alignment.center,
+        target: childAnchor ?? Alignment.center,
+      ),
       visible: visibleOverlay != null,
-      portal: visibleOverlay?.widget,
+      portalFollower: visibleOverlay?.widget,
       child: child,
     );
   }

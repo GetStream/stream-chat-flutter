@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 class CommandButton extends StatelessWidget {
   /// {@macro commandButton}
   const CommandButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   /// The icon to use.
   final Widget icon;
@@ -21,7 +21,7 @@ class CommandButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       icon: icon,
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(
         height: 24,
         width: 24,

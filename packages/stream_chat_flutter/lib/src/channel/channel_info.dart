@@ -9,12 +9,12 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamChannelInfo extends StatelessWidget {
   /// {@macro streamChannelInfo}
   const StreamChannelInfo({
-    Key? key,
+    super.key,
     required this.channel,
     this.textStyle,
     this.showTypingIndicator = true,
     this.parentId,
-  }) : super(key: key);
+  });
 
   /// The channel to display information about
   final Channel channel;
@@ -65,13 +65,13 @@ class StreamChannelInfo extends StatelessWidget {
 
 class _ConnectedTitleState extends StatelessWidget {
   const _ConnectedTitleState({
-    Key? key,
+    super.key,
     required this.channel,
     required this.showTypingIndicator,
     this.members,
     this.textStyle,
     this.parentId,
-  }) : super(key: key);
+  });
 
   final Channel channel;
   final List<Member>? members;
@@ -131,9 +131,9 @@ class _ConnectedTitleState extends StatelessWidget {
 
 class _ConnectingTitleState extends StatelessWidget {
   const _ConnectingTitleState({
-    Key? key,
+    super.key,
     this.textStyle,
-  }) : super(key: key);
+  });
 
   final TextStyle? textStyle;
 
@@ -161,10 +161,10 @@ class _ConnectingTitleState extends StatelessWidget {
 
 class _DisconnectedTitleState extends StatelessWidget {
   const _DisconnectedTitleState({
-    Key? key,
+    super.key,
     required this.client,
     this.textStyle,
-  }) : super(key: key);
+  });
 
   final StreamChatClient client;
   final TextStyle? textStyle;
@@ -180,7 +180,7 @@ class _DisconnectedTitleState extends StatelessWidget {
         ),
         TextButton(
           style: TextButton.styleFrom(
-            padding: const EdgeInsets.all(0),
+            padding: EdgeInsets.zero,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             visualDensity: const VisualDensity(
               horizontal: VisualDensity.minimumDensity,

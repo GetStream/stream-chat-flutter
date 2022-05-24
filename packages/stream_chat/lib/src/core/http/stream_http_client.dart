@@ -76,20 +76,6 @@ class StreamHttpClient {
   @visibleForTesting
   final Dio httpClient;
 
-  /// Lock the current [StreamHttpClient] instance.
-  ///
-  /// [StreamHttpClient] will enqueue the incoming request tasks instead
-  /// send them directly when [interceptor.requestOptions] is locked.
-  void lock() => httpClient.lock();
-
-  /// Unlock the current [StreamHttpClient] instance.
-  ///
-  /// [StreamHttpClient] instance dequeue the request task。
-  void unlock() => httpClient.unlock();
-
-  /// Clear the current [StreamHttpClient] instance waiting queue.
-  void clear() => httpClient.clear();
-
   /// Shuts down the [StreamHttpClient].
   ///
   /// If [force] is `false` the [StreamHttpClient] will be kept alive
@@ -275,6 +261,19 @@ class StreamHttpClient {
         onReceiveProgress: onReceiveProgress,
         cancelToken: cancelToken,
       );
+      return response;
+    } on DioError catch (error) {
+      throw _parseError(error);
+    }
+  }
+
+  /// Handy method to make http requests from [RequestOptions]
+  /// with error parsing.
+  Future<Response<T>> fetch<T>(
+    RequestOptions requestOptions,
+  ) async {
+    try {
+      final response = await httpClient.fetch<T>(requestOptions);
       return response;
     } on DioError catch (error) {
       throw _parseError(error);

@@ -9,11 +9,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class SendButton extends StatelessWidget {
   /// {@macro sendButton}
   const SendButton({
-    Key? key,
+    super.key,
     required this.assetName,
     required this.color,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   /// The asset name to use for the icon.
   final String assetName;
@@ -30,7 +30,7 @@ class SendButton extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       child: IconButton(
         onPressed: onPressed,
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         splashRadius: 24,
         constraints: const BoxConstraints.tightFor(
           height: 24,

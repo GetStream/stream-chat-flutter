@@ -62,8 +62,10 @@ void main() {
             client: client,
             child: StreamChannel(
               channel: channel,
-              child: const Scaffold(
-                body: ChannelName(),
+              child: Scaffold(
+                body: StreamChannelName(
+                channel: channel,
+              ),
               ),
             ),
           ),

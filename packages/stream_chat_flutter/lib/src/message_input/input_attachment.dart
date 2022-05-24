@@ -11,10 +11,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class InputAttachment extends StatelessWidget {
   /// {@macro inputAttachment}
   const InputAttachment({
-    Key? key,
+    super.key,
     required this.attachment,
     this.attachmentThumbnailBuilders,
-  }) : super(key: key);
+  });
 
   /// The attachment to build.
   final Attachment attachment;

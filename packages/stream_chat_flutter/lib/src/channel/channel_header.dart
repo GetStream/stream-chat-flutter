@@ -52,14 +52,14 @@ typedef ChannelHeader = StreamChannelHeader;
 /// callback.
 ///
 /// The UI is rendered based on the first ancestor of type [StreamChatTheme]
-/// and the [ChannelTheme.channelHeaderTheme] property. Modify it to change
-/// the widget's appearance.
+/// and the [StreamChatThemeData.channelHeaderTheme] property. Modify it to
+/// change the widget's appearance.
 /// {@endtemplate}
 class StreamChannelHeader extends StatelessWidget
     implements PreferredSizeWidget {
   /// {@macro streamChannelHeader}
   const StreamChannelHeader({
-    Key? key,
+    super.key,
     this.showBackButton = true,
     this.onBackPressed,
     this.onTitleTap,
@@ -68,11 +68,12 @@ class StreamChannelHeader extends StatelessWidget
     this.showConnectionStateTile = false,
     this.title,
     this.subtitle,
+    this.centerTitle,
     this.leading,
     this.actions,
     this.backgroundColor,
-  })  : preferredSize = const Size.fromHeight(kToolbarHeight),
-        super(key: key);
+    this.elevation = 1,
+  }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// Whether to show the leading back button
   ///
@@ -104,6 +105,9 @@ class StreamChannelHeader extends StatelessWidget
   /// Subtitle widget
   final Widget? subtitle;
 
+  /// Whether the title should be centered
+  final bool? centerTitle;
+
   /// Leading widget
   final Widget? leading;
 
@@ -115,11 +119,19 @@ class StreamChannelHeader extends StatelessWidget
   /// The background color for this [StreamChannelHeader].
   final Color? backgroundColor;
 
+  /// The elevation for this [StreamChannelHeader].
+  final double elevation;
+
   @override
   final Size preferredSize;
 
   @override
   Widget build(BuildContext context) {
+    final effectiveCenterTitle = getEffectiveCenterTitle(
+      Theme.of(context),
+      actions: actions,
+      centerTitle: centerTitle,
+    );
     final channel = StreamChannel.of(context).channel;
     final channelHeaderTheme = StreamChannelHeaderTheme.of(context);
 
@@ -160,7 +172,7 @@ class StreamChannelHeader extends StatelessWidget
             systemOverlayStyle: theme.brightness == Brightness.dark
                 ? SystemUiOverlayStyle.light
                 : SystemUiOverlayStyle.dark,
-            elevation: 1, //TODO(Groovin): no elevation on desktop & web
+            elevation: elevation, //TODO(Groovin): no elevation on desktop & web
             leading: leadingWidget,
             backgroundColor: backgroundColor ?? channelHeaderTheme.color,
             actions: actions ??
@@ -179,14 +191,16 @@ class StreamChannelHeader extends StatelessWidget
                     ),
                   ),
                 ],
-            centerTitle: true,
+            centerTitle: centerTitle,
             title: InkWell(
               onTap: onTitleTap,
               child: SizedBox(
                 height: preferredSize.height,
-                width: preferredSize.width,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: effectiveCenterTitle
+                      ? CrossAxisAlignment.center
+                      : CrossAxisAlignment.stretch,
                   children: <Widget>[
                     title ??
                         StreamChannelName(

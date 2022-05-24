@@ -7,9 +7,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class AttachmentError extends StatelessWidget {
   /// {@macro attachmentError}
   const AttachmentError({
-    Key? key,
+    super.key,
     this.size,
-  }) : super(key: key);
+  });
 
   /// Size of error
   final Size? size;

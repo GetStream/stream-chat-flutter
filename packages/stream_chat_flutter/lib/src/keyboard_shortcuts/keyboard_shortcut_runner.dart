@@ -7,11 +7,11 @@ import 'package:stream_chat_flutter/src/keyboard_shortcuts/keysets.dart';
 class KeyboardShortcutRunner extends StatelessWidget {
   /// Builds a [KeyboardShortcutRunner].
   const KeyboardShortcutRunner({
-    Key? key,
+    super.key,
     required this.child,
     required this.onEnterKeypress,
     required this.onEscapeKeypress,
-  }) : super(key: key);
+  });
 
   /// This child of this widget.
   final Widget child;

@@ -11,11 +11,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ParseAttachments extends StatelessWidget {
   /// {@macro parseAttachments}
   const ParseAttachments({
-    Key? key,
+    super.key,
     required this.message,
     required this.attachmentBuilders,
     required this.attachmentPadding,
-  }) : super(key: key);
+  });
 
   /// {@macro message}
   final Message message;

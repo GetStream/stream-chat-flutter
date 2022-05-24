@@ -15,19 +15,14 @@ typedef GiphyAttachment = StreamGiphyAttachment;
 class StreamGiphyAttachment extends StreamAttachmentWidget {
   /// {@macro streamGiphyAttachment}
   const StreamGiphyAttachment({
-    Key? key,
-    required Message message,
-    required Attachment attachment,
-    Size? size,
+    super.key,
+    required super.message,
+    required super.attachment,
+    super.size,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
-  }) : super(
-          key: key,
-          message: message,
-          attachment: attachment,
-          size: size,
-        );
+  });
 
   /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
@@ -45,7 +40,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
     if (imageUrl == null) {
       return const AttachmentError();
     }
-    if (attachment.actions.isNotEmpty) {
+    if (attachment.actions != null && attachment.actions!.isNotEmpty) {
       return _buildSendingAttachment(context, imageUrl);
     }
     return _buildSentAttachment(context, imageUrl);

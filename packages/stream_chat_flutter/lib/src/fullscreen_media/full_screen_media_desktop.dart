@@ -37,15 +37,14 @@ FullScreenMediaWidget getFsm({
 class FullScreenMediaDesktop extends FullScreenMediaWidget {
   /// Instantiate a new FullScreenImage
   const FullScreenMediaDesktop({
-    Key? key,
+    super.key,
     required this.mediaAttachmentPackages,
     this.startIndex = 0,
     String? userName,
     this.onShowMessage,
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
-  })  : userName = userName ?? '',
-        super(key: key);
+  }) : userName = userName ?? '';
 
   /// The url of the image
   final List<StreamAttachmentPackage> mediaAttachmentPackages;
@@ -383,14 +382,14 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
 class GalleryNavigationItem extends StatelessWidget {
   /// Builds a [GalleryNavigationItem].
   const GalleryNavigationItem({
-    Key? key,
+    super.key,
     required this.icon,
     required this.onClick,
     required this.opacityAnimation,
     required this.currentPage,
     this.left,
     this.right,
-  }) : super(key: key);
+  });
 
   /// The icon to display.
   final IconData icon;
@@ -471,10 +470,10 @@ class DesktopVideoPackage {
 
 class _PlaylistPlayer extends StatelessWidget {
   const _PlaylistPlayer({
-    Key? key,
+    super.key,
     required this.packages,
     required this.autoStart,
-  }) : super(key: key);
+  });
 
   final List<DesktopVideoPackage> packages;
   final bool autoStart;

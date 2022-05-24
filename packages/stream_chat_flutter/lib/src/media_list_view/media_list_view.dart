@@ -24,10 +24,10 @@ extension on Duration {
 class StreamMediaListView extends StatefulWidget {
   /// {@macro streamMediaListView}
   const StreamMediaListView({
-    Key? key,
+    super.key,
     this.selectedIds = const [],
     this.onSelect,
-  }) : super(key: key);
+  });
 
   /// Stores the media selected
   final List<String> selectedIds;

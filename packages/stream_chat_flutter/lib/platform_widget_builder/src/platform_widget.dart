@@ -9,11 +9,11 @@ import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_
 class PlatformWidget extends PlatformWidgetBase<Widget, Widget, Widget> {
   /// Builds a [PlatformWidget].
   const PlatformWidget({
-    Key? key,
+    super.key,
     this.desktop,
     this.mobile,
     this.web,
-  }) : super(key: key);
+  });
 
   /// The mobile widget to build.
   final PlatformBuilder<Widget?>? mobile;

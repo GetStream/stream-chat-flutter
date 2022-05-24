@@ -10,10 +10,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ResendMessageButton extends StatelessWidget {
   /// {@macro resendMessageButton}
   const ResendMessageButton({
-    Key? key,
+    super.key,
     required this.message,
     required this.channel,
-  }) : super(key: key);
+  });
 
   /// The message to resend.
   final Message message;

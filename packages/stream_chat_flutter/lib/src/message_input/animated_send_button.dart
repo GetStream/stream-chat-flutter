@@ -17,7 +17,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class AnimatedSendButton extends StatelessWidget {
   /// {@macro animatedSendButton}
   const AnimatedSendButton({
-    Key? key,
+    super.key,
     required this.cooldown,
     required this.messageIsPresent,
     required this.attachmentsIsEmpty,
@@ -27,7 +27,7 @@ class AnimatedSendButton extends StatelessWidget {
     this.editMessage,
     this.idleSendButton,
     this.activeSendButton,
-  }) : super(key: key);
+  });
 
   /// The amount of time for the cooldown, measured in seconds.
   final int cooldown;

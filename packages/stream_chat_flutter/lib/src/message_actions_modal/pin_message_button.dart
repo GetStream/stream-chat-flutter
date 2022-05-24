@@ -10,10 +10,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class PinMessageButton extends StatelessWidget {
   /// {@macro pinMessageButton}
   const PinMessageButton({
-    Key? key,
+    super.key,
     required this.onTap,
     required this.pinned,
-  }) : super(key: key);
+  });
 
   /// The callback to perform when the button is tapped.
   final VoidCallback onTap;

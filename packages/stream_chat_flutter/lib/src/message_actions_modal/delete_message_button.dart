@@ -10,10 +10,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class DeleteMessageButton extends StatelessWidget {
   /// {@macro deleteMessageButton}
   const DeleteMessageButton({
-    Key? key,
+    super.key,
     required this.isDeleteFailed,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   /// Indicates whether the deletion has failed or not.
   final bool isDeleteFailed;

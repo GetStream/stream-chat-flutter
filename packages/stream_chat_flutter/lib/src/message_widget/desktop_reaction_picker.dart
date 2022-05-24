@@ -15,9 +15,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class DesktopReactionPicker extends StatefulWidget {
   /// {@macro desktopReactionPicker}
   const DesktopReactionPicker({
-    Key? key,
+    super.key,
     required this.message,
-  }) : super(key: key);
+  });
 
   /// The message to react to.
   final Message message;

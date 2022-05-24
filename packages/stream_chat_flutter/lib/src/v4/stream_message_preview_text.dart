@@ -6,11 +6,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamMessagePreviewText extends StatelessWidget {
   /// Creates a new instance of [StreamMessagePreviewText].
   const StreamMessagePreviewText({
-    Key? key,
+    super.key,
     required this.message,
     this.language,
     this.textStyle,
-  }) : super(key: key);
+  });
 
   /// The message to display.
   final Message message;

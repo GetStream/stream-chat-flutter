@@ -12,10 +12,10 @@ typedef SystemMessage = StreamSystemMessage;
 class StreamSystemMessage extends StatelessWidget {
   /// {@macro streamSystemMessage}
   const StreamSystemMessage({
-    Key? key,
+    super.key,
     required this.message,
     this.onMessageTap,
-  }) : super(key: key);
+  });
 
   /// This message
   /// FIXME: This is NOT a good description!
@@ -29,11 +29,7 @@ class StreamSystemMessage extends StatelessWidget {
     final theme = StreamChatTheme.of(context);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () {
-        if (onMessageTap != null) {
-          onMessageTap!(message);
-        }
-      },
+      onTap: onMessageTap == null ? null : () => onMessageTap!(message),
       child: Text(
         message.text!,
         textAlign: TextAlign.center,

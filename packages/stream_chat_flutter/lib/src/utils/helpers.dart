@@ -8,12 +8,34 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// Launch URL
 Future<void> launchURL(BuildContext context, String url) async {
-  if (await canLaunch(url)) {
-    await launch(url);
-  } else {
+  try {
+    await launchUrl(Uri.parse(url).withScheme);
+  } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(context.translations.launchUrlError)),
     );
+  }
+}
+
+/// Get centerTitle considering a default and platform specific behaviour
+bool getEffectiveCenterTitle(
+  ThemeData theme, {
+  bool? centerTitle,
+  List<Widget>? actions,
+}) {
+  if (centerTitle != null) return centerTitle;
+  if (theme.appBarTheme.centerTitle != null) {
+    return theme.appBarTheme.centerTitle!;
+  }
+  switch (theme.platform) {
+    case TargetPlatform.android:
+    case TargetPlatform.fuchsia:
+    case TargetPlatform.linux:
+    case TargetPlatform.windows:
+      return false;
+    case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
+      return actions == null || actions.length < 2;
   }
 }
 
@@ -333,11 +355,11 @@ StreamSvgIcon getFileTypeImage(String? type) {
 class WrapAttachmentWidget extends StatelessWidget {
   /// Builds a [WrapAttachmentWidget].
   const WrapAttachmentWidget({
-    Key? key,
+    super.key,
     required this.attachmentWidget,
     required this.attachmentShape,
     required this.reverse,
-  }) : super(key: key);
+  });
 
   /// The widget to wrap
   final Widget attachmentWidget;

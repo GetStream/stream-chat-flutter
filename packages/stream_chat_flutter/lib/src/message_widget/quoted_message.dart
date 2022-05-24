@@ -10,12 +10,12 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class QuotedMessage extends StatefulWidget {
   /// {@macro quotedMessage}
   const QuotedMessage({
-    Key? key,
+    super.key,
     required this.message,
     required this.reverse,
     required this.hasNonUrlAttachments,
     this.onQuotedMessageTap,
-  }) : super(key: key);
+  });
 
   /// {@macro message}
   final Message message;

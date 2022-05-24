@@ -11,10 +11,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ChannelName extends StatelessWidget {
   /// {@macro channelName}
   const ChannelName({
-    Key? key,
+    super.key,
     this.textStyle,
     this.textOverflow = TextOverflow.ellipsis,
-  }) : super(key: key);
+  });
 
   /// The style of the text displayed
   final TextStyle? textStyle;
@@ -49,12 +49,12 @@ class ChannelName extends StatelessWidget {
 
 class _NameGenerator extends StatelessWidget {
   const _NameGenerator({
-    Key? key,
+    super.key,
     required this.currentUser,
     required this.members,
     this.textStyle,
     this.textOverflow,
-  }) : super(key: key);
+  });
 
   final User currentUser;
   final List<Member> members;

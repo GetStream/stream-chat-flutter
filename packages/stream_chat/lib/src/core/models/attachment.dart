@@ -124,8 +124,7 @@ class Attachment extends Equatable {
   final String? assetUrl;
 
   /// Actions from a command
-  @JsonKey(defaultValue: [])
-  final List<Action> actions;
+  final List<Action>? actions;
 
   final Uri? localUri;
 

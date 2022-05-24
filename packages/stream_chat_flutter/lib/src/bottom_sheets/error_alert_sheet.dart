@@ -10,9 +10,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ErrorAlertSheet extends StatelessWidget {
   /// {@macro errorAlertSheet}
   const ErrorAlertSheet({
-    Key? key,
+    super.key,
     required this.errorDescription,
-  }) : super(key: key);
+  });
 
   /// The description of the error.
   final String errorDescription;

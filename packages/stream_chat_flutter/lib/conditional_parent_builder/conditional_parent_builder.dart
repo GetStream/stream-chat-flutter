@@ -37,10 +37,10 @@ typedef ParentBuilder = Widget Function(
 class ConditionalParentBuilder extends StatelessWidget {
   /// {@macro conditionalParentBuilder}
   const ConditionalParentBuilder({
-    Key? key,
+    super.key,
     required this.builder,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// {@macro parentBuilder}
   final ParentBuilder builder;

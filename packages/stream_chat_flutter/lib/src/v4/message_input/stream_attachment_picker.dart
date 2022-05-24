@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:stream_chat_flutter/src/media_list_view_controller.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -23,7 +24,7 @@ class StreamAttachmentPicker extends StatefulWidget {
   /// Default constructor for [StreamAttachmentPicker] which creates the Stream
   /// attachment picker widget.
   const StreamAttachmentPicker({
-    Key? key,
+    super.key,
     required this.messageInputController,
     required this.onFilePicked,
     this.isOpen = false,
@@ -38,7 +39,7 @@ class StreamAttachmentPicker extends StatefulWidget {
       DefaultAttachmentTypes.video,
     ],
     this.customAttachmentTypes = const [],
-  }) : super(key: key);
+  });
 
   /// True if the picker is open.
   final bool isOpen;
@@ -46,8 +47,8 @@ class StreamAttachmentPicker extends StatefulWidget {
   /// The picker size in height.
   final double pickerSize;
 
-  /// The [MessageInputController] linked to this picker.
-  final MessageInputController messageInputController;
+  /// The [StreamMessageInputController] linked to this picker.
+  final StreamMessageInputController messageInputController;
 
   /// The limit of attachments that can be picked.
   final int attachmentLimit;
@@ -76,7 +77,7 @@ class StreamAttachmentPicker extends StatefulWidget {
   /// properties.
   StreamAttachmentPicker copyWith({
     Key? key,
-    MessageInputController? messageInputController,
+    StreamMessageInputController? messageInputController,
     FilePickerCallback? onFilePicked,
     bool? isOpen,
     double? pickerSize,
@@ -112,6 +113,7 @@ class StreamAttachmentPicker extends StatefulWidget {
 
 class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
   int _filePickerIndex = 0;
+  final _mediaListViewController = MediaListViewController();
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +178,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
 
     return AnimatedContainer(
       duration:
-          widget.isOpen ? const Duration(milliseconds: 300) : const Duration(),
+          widget.isOpen ? const Duration(milliseconds: 300) : Duration.zero,
       curve: Curves.easeOut,
       height: widget.isOpen ? widget.pickerSize : 0,
       child: SingleChildScrollView(
@@ -242,7 +244,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                     if (widget.allowedAttachmentTypes
                         .contains(DefaultAttachmentTypes.video))
                       IconButton(
-                        padding: const EdgeInsets.all(0),
+                        padding: EdgeInsets.zero,
                         icon: StreamSvgIcon.record(
                           color: _getIconColor(3),
                         ),
@@ -278,6 +280,26 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                         icon: widget.customAttachmentTypes[i]
                             .iconBuilder(context, _filePickerIndex == i + 1),
                       ),
+                    const Spacer(),
+                    FutureBuilder(
+                      future: PhotoManager.requestPermissionExtend(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData &&
+                            snapshot.data == PermissionState.limited) {
+                          return TextButton(
+                            child: Text(context.translations.viewLibrary),
+                            onPressed: () async {
+                              await PhotoManager.presentLimited();
+                              _mediaListViewController.updateMedia(
+                                newValue: true,
+                              );
+                            },
+                          );
+                        }
+
+                        return const SizedBox.shrink();
+                      },
+                    ),
                   ],
                 ),
                 DecoratedBox(
@@ -314,6 +336,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: _PickerWidget(
+                        mediaListViewController: _mediaListViewController,
                         filePickerIndex: _filePickerIndex,
                         streamChatTheme: _streamChatTheme,
                         containsFile: _attachmentContainsFile,
@@ -400,7 +423,6 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
 
 class _PickerWidget extends StatefulWidget {
   const _PickerWidget({
-    Key? key,
     required this.filePickerIndex,
     required this.containsFile,
     required this.selectedMedias,
@@ -409,7 +431,8 @@ class _PickerWidget extends StatefulWidget {
     required this.streamChatTheme,
     required this.allowedAttachmentTypes,
     required this.customAttachmentTypes,
-  }) : super(key: key);
+    required this.mediaListViewController,
+  });
 
   final int filePickerIndex;
   final bool containsFile;
@@ -419,6 +442,7 @@ class _PickerWidget extends StatefulWidget {
   final StreamChatThemeData streamChatTheme;
   final List<DefaultAttachmentTypes> allowedAttachmentTypes;
   final List<CustomAttachmentType> customAttachmentTypes;
+  final MediaListViewController mediaListViewController;
 
   @override
   _PickerWidgetState createState() => _PickerWidgetState();
@@ -479,7 +503,7 @@ class _PickerWidgetState extends State<_PickerWidget> {
           onTap: () async {
             PhotoManager.openSetting();
           },
-          child: Container(
+          child: ColoredBox(
             color: widget.streamChatTheme.colorTheme.inputBg,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

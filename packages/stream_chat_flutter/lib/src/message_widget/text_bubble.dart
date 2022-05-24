@@ -11,7 +11,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class TextBubble extends StatelessWidget {
   /// {@macro textBubble}
   const TextBubble({
-    Key? key,
+    super.key,
     required this.message,
     required this.isOnlyEmoji,
     required this.textPadding,
@@ -21,7 +21,7 @@ class TextBubble extends StatelessWidget {
     this.textBuilder,
     this.onLinkTap,
     this.onMentionTap,
-  }) : super(key: key);
+  });
 
   /// {@macro message}
   final Message message;

@@ -13,8 +13,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class QueryProgressIndicator extends StatelessWidget {
   /// {@macro queryProgressIndicator}
   const QueryProgressIndicator({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class QueryProgressIndicator extends StatelessWidget {
       initialData: false,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Container(
+          return ColoredBox(
             color: StreamChatTheme.of(context)
                 .colorTheme
                 .accentError

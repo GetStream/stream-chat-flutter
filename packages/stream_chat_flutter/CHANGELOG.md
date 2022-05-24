@@ -1,3 +1,48 @@
+## 4.2.0
+
+🐞 Fixed
+
+- [[#1133]](https://github.com/GetStream/stream-chat-flutter/issues/1133) Visibility override flags not being passed to `StreamMessageActionsModal`
+
+## 4.1.0
+
+✅ Added
+
+- [[#1119]](https://github.com/GetStream/stream-chat-flutter/issues/1119) Added an option to disable mentions overlay in `StreamMessageInput`
+- Deprecated `disableEmojiSuggestionsOverlay` in favor of `enableEmojiSuggestionsOverlay` in `StreamMessageInput`
+
+🐞 Fixed
+
+- Fixed attachment picker ui.
+- Fixed StreamChannelHeader and StreamThreadHeader subtitle alignment.
+- Fixed message widget thread indicator in reverse mode.
+- [[#1044]](https://github.com/GetStream/stream-chat-flutter/issues/1044): Refactor StreamMessageWidget bottom row to use Text.rich.
+
+🔄 Changed
+
+- Removed `isOwner` condition from `ChannelBottomSheet` and `StreamChannelInfoBottomSheet` for delete option tile.
+
+## 4.0.1
+
+- Minor fixes
+- Updated `stream_chat_flutter_core` dependency to [`4.0.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
+## 4.0.0
+
+For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
+
+✅ Added
+
+- [[#1087]](https://github.com/GetStream/stream-chat-flutter/issues/1087): Handle limited access to camera on iOS.
+- `centerTitle` and `elevation` properties to `ChannelHeader`, `ThreadHeader` and `ChannelListHeader`.
+
+🐞 Fixed
+
+- [[#1067]](https://github.com/GetStream/stream-chat-flutter/issues/1067): Fix name text overflow in reaction card.
+- [[#842]](https://github.com/GetStream/stream-chat-flutter/issues/842): show date divider for first message.
+- Loosen up url check for attachment download.
+- Use `ogScrapeUrl` for LinkAttachments.
+
 ## 4.0.0-beta.2
 
 ✅ Added

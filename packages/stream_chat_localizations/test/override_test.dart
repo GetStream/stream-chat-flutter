@@ -166,15 +166,15 @@ void main() {
       final Key textKey = UniqueKey();
 
       await tester.pumpWidget(buildFrame(
-        delegates: <LocalizationsDelegate<StreamChatLocalizations>>[
-          GlobalStreamChatLocalizations.delegate,
+        delegates: <LocalizationsDelegate>[
+          ...GlobalStreamChatLocalizations.delegates,
           const FooStreamChatLocalizationsDelegate(
             supportedLanguage: 'fr',
             launchUrlError: "Impossible de lancer l'url",
           ),
           const FooStreamChatLocalizationsDelegate(
-            supportedLanguage: 'de',
-            launchUrlError: 'Kann die URL nicht starten',
+            supportedLanguage: 'uz',
+            launchUrlError: 'test',
           ),
         ],
         supportedLocales: const <Locale>[
@@ -182,6 +182,7 @@ void main() {
           Locale('hi'),
           Locale('fr'),
           Locale('de'),
+          Locale('uz'),
         ],
         buildContent: (BuildContext context) => Text(
           StreamChatLocalizations.of(context)!.launchUrlError,
@@ -202,9 +203,9 @@ void main() {
       await tester.pump();
       expect(find.text("Impossible de lancer l'url"), findsOneWidget);
 
-      await tester.binding.setLocale('de', 'DE');
+      await tester.binding.setLocale('uz', 'UZ');
       await tester.pump();
-      expect(find.text('Kann die URL nicht starten'), findsOneWidget);
+      expect(find.text('test'), findsOneWidget);
     },
   );
 
@@ -217,10 +218,11 @@ void main() {
         // Accept whatever locale we're given
         localeResolutionCallback:
             (Locale? locale, Iterable<Locale> supportedLocales) => locale,
-        delegates: <FooStreamChatLocalizationsDelegate>[
+        delegates: [
           const FooStreamChatLocalizationsDelegate(
             supportedLanguage: 'allLanguages',
           ),
+          ...GlobalStreamChatLocalizations.delegates,
         ],
         buildContent: (BuildContext context) {
           // Should always be 'foo', no matter what the locale is

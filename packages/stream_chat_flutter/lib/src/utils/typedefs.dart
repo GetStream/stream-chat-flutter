@@ -337,7 +337,7 @@ typedef OnScrollToBottom = Function(int unreadCount);
 /// Widget builder for a custom attachment picker.
 typedef AttachmentsPickerBuilder = Widget Function(
   BuildContext context,
-  MessageInputController messageInputController,
+  StreamMessageInputController messageInputController,
   StreamAttachmentPicker defaultPicker,
 );
 
@@ -345,7 +345,7 @@ typedef AttachmentsPickerBuilder = Widget Function(
 /// [MessageInputController].
 typedef MessageRelatedBuilder = Widget Function(
   BuildContext context,
-  MessageInputController messageInputController,
+  StreamMessageInputController messageInputController,
 );
 
 /// A function that returns true if the message is valid and can be sent.

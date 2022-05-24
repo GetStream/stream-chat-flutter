@@ -7,11 +7,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class Username extends StatelessWidget {
   /// {@macro username}
   const Username({
-    Key? key,
+    super.key,
     required this.message,
     required this.messageTheme,
     this.usernameBuilder,
-  }) : super(key: key);
+  });
 
   /// {@macro usernameBuilder}
   final Widget Function(BuildContext, Message)? usernameBuilder;

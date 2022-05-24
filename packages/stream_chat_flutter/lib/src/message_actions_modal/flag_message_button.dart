@@ -10,9 +10,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class FlagMessageButton extends StatelessWidget {
   /// {@macro flagMessageButton}
   const FlagMessageButton({
-    Key? key,
+    super.key,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   /// The callback to perform when the button is tapped.
   final VoidCallback onTap;

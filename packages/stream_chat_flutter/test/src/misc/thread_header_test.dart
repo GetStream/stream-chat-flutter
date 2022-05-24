@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -63,7 +65,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('with '), findsOneWidget);
-      expect(find.byType(ChannelName), findsOneWidget);
+      expect(find.byType(StreamChannelName), findsOneWidget);
       expect(find.byType(StreamBackButton), findsOneWidget);
       expect(find.text('Thread Reply'), findsOneWidget);
     },

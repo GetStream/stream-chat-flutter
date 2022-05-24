@@ -16,7 +16,7 @@ typedef VideoThumbnailImage = StreamVideoThumbnailImage;
 class StreamVideoThumbnailImage extends StatefulWidget {
   /// {@macro streamVideoThumbnailImage}
   const StreamVideoThumbnailImage({
-    Key? key,
+    super.key,
     required this.video,
     this.width,
     this.height,
@@ -24,7 +24,7 @@ class StreamVideoThumbnailImage extends StatefulWidget {
     this.format = ImageFormat.PNG,
     this.errorBuilder,
     this.placeholderBuilder,
-  }) : super(key: key);
+  });
 
   /// Video path
   final String video;

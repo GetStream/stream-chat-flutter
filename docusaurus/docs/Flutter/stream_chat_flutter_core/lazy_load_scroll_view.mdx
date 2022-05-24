@@ -1,0 +1,41 @@
+---
+id: lazy_load_scroll_view
+sidebar_position: 8
+title: LazyLoadScrollView
+---
+
+A Widget For Building A Paginated List
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter_core/latest/stream_chat_flutter_core/LazyLoadScrollView-class.html)
+
+### Background
+
+The `LazyLoadScrollView` is a widget that helps you build a paginated list.
+It provides callbacks to notify you when the list has been scrolled to the bottom and when the list has been scrolled to the top and other necessary callbacks.
+
+#### Callbacks
+
+* onStartOfPage: called when the list has been scrolled to the top of the page.
+
+* onEndOfPage: called when the list has been scrolled to the bottom of the page.
+
+* onPageScrollStart: called when the scroll of the list starts.
+
+* onPageScrollEnd: called when the scroll of the list ends.
+
+* onInBetweenOfPage: called when the list is not either at the top nor at the bottom of the page.
+
+### Basic Example
+
+Building a paginated list is a very common task. Here is an example of how to use the `LazyLoadScrollView` to build a simple list with pagination.
+
+```dart
+LazyLoadScrollView(
+  onEndOfPage: _paginateData,
+  /// The child could be any widget which dispatches [ScrollNotification]s.
+  /// For example [ListView], [GridView] or [CustomScrollView].
+  child: ListView.builder(
+    itemBuilder: ((context, index) => _buildListTile),
+  ),
+)
+```

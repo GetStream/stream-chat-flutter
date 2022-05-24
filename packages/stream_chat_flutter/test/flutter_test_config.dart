@@ -13,7 +13,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 }
 
 class CustomGoldenFileComparator extends LocalFileComparator {
-  CustomGoldenFileComparator(Uri testFile) : super(testFile);
+  CustomGoldenFileComparator(super.testFile);
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
@@ -28,8 +28,4 @@ class CustomGoldenFileComparator extends LocalFileComparator {
     }
     return true;
   }
-
-  @override
-  Future<void> update(Uri golden, Uint8List imageBytes) =>
-      super.update(golden, imageBytes);
 }

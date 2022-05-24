@@ -3,8 +3,7 @@ part of 'stream_chat_localizations.dart';
 /// The translations for Hindi (`hi`).
 class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for Hindi.
-  const StreamChatLocalizationsHi({String localeName = 'hi'})
-      : super(localeName: localeName);
+  const StreamChatLocalizationsHi({super.localeName = 'hi'});
 
   @override
   String get launchUrlError => 'यूआरएल लॉन्च नहीं कर सकते';
@@ -371,6 +370,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String attachmentLimitExceedError(int limit) => '''
 अटैचमेंट लिमिट: $limit अटैचमेंट से अधिक जोड़ना संभव नहीं है
   ''';
+
+  @override
+  String get viewLibrary => 'पुस्तकालय देखिये';
 
   @override
   String get slowModeOnLabel => 'स्लो मोड चालू';

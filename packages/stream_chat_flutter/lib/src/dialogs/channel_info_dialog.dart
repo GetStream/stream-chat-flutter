@@ -7,9 +7,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ChannelInfoDialog extends StatelessWidget {
   /// {@macro channelInfoDialog}
   const ChannelInfoDialog({
-    Key? key,
+    super.key,
     required this.channel,
-  }) : super(key: key);
+  });
 
   /// The channel to display information about.
   final Channel channel;

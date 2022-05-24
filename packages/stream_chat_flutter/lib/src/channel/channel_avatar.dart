@@ -52,7 +52,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ChannelAvatar extends StatelessWidget {
   /// {@macro channelAvatar}
   const ChannelAvatar({
-    Key? key,
+    super.key,
     this.channel,
     this.constraints,
     this.onTap,
@@ -60,7 +60,7 @@ class ChannelAvatar extends StatelessWidget {
     this.selected = false,
     this.selectionColor,
     this.selectionThickness = 4,
-  }) : super(key: key);
+  });
 
   /// The [BorderRadius] for this [ChannelAvatar]
   final BorderRadius? borderRadius;

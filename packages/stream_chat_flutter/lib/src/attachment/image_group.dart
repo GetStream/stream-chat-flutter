@@ -7,7 +7,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ImageGroup extends StatelessWidget {
   /// {@macro imageGroup}
   const ImageGroup({
-    Key? key,
+    super.key,
     required this.images,
     required this.message,
     required this.messageTheme,
@@ -15,7 +15,7 @@ class ImageGroup extends StatelessWidget {
     this.onReturnAction,
     this.onShowMessage,
     this.onAttachmentTap,
-  }) : super(key: key);
+  });
 
   /// List of attachments to show
   final List<Attachment> images;

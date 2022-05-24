@@ -17,15 +17,14 @@ import 'package:video_player/video_player.dart';
 class FullScreenMedia extends FullScreenMediaWidget {
   /// Instantiate a new FullScreenImage
   const FullScreenMedia({
-    Key? key,
+    super.key,
     required this.mediaAttachmentPackages,
     this.startIndex = 0,
     String? userName,
     this.onShowMessage,
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
-  })  : userName = userName ?? '',
-        super(key: key);
+  }) : userName = userName ?? '';
 
   /// The url of the image
   final List<StreamAttachmentPackage> mediaAttachmentPackages;
@@ -329,14 +328,14 @@ class _FullScreenMediaState extends State<FullScreenMedia>
 class GalleryNavigationItem extends StatelessWidget {
   /// Builds a [GalleryNavigationItem].
   const GalleryNavigationItem({
-    Key? key,
+    super.key,
     required this.icon,
     required this.onClick,
     required this.opacityAnimation,
     required this.currentPage,
     this.left,
     this.right,
-  }) : super(key: key);
+  });
 
   /// The icon to display.
   final IconData icon;

@@ -28,23 +28,13 @@ void main() {
 
   testWidgets('ConditionalParentBuilder does not build the parent widget',
       (tester) async {
-    const shouldBuildParent = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
             child: ConditionalParentBuilder(
               builder: (context, child) {
-                if (shouldBuildParent) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      child,
-                    ],
-                  );
-                } else {
-                  return child;
-                }
+                return child;
               },
               child: const Text('Hello World!'),
             ),

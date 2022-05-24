@@ -14,9 +14,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class DownloadMenuItem extends StatelessWidget {
   /// {@macro downloadMenuItem}
   const DownloadMenuItem({
-    Key? key,
+    super.key,
     required this.attachment,
-  }) : super(key: key);
+  });
 
   /// The attachment to download.
   final Attachment attachment;

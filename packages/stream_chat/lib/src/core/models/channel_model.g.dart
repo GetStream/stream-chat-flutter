@@ -11,9 +11,8 @@ ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) => ChannelModel(
       type: json['type'] as String?,
       cid: json['cid'] as String?,
       ownCapabilities: (json['own_capabilities'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
+          ?.map((e) => e as String)
+          .toList(),
       config: json['config'] == null
           ? null
           : ChannelConfig.fromJson(json['config'] as Map<String, dynamic>),

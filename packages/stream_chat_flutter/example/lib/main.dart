@@ -10,7 +10,7 @@ Future<void> main() async {
   /// from your project dashboard.
   final client = StreamChatClient(
     's2dxdhpxd94g',
-    logLevel: Level.OFF,
+    logLevel: Level.INFO,
   );
 
   /// Set the current user and connect the websocket. In a production
@@ -48,10 +48,10 @@ class MyApp extends StatelessWidget {
   /// If you'd prefer using minimal wrapper widgets for your app, please see
   /// our other package, `stream_chat_flutter_core`.
   const MyApp({
-    Key? key,
+    super.key,
     required this.client,
     required this.channel,
-  }) : super(key: key);
+  });
 
   /// Instance of Stream Client.
   ///
@@ -92,8 +92,8 @@ class MyApp extends StatelessWidget {
 class ResponsiveChat extends StatelessWidget {
   // ignore: public_member_api_docs
   const ResponsiveChat({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -118,9 +118,9 @@ class ResponsiveChat extends StatelessWidget {
 class DesktopLayout extends StatefulWidget {
   // ignore: public_member_api_docs
   const DesktopLayout({
-    Key? key,
+    super.key,
     required this.initialChannel,
-  }) : super(key: key);
+  });
 
   // ignore: public_member_api_docs
   final Channel initialChannel;
@@ -202,9 +202,9 @@ class _DesktopLayoutState extends State<DesktopLayout> {
 class ChannelPage extends StatefulWidget {
   /// Creates the page that shows the list of messages
   const ChannelPage({
-    Key? key,
+    super.key,
     required this.channel,
-  }) : super(key: key);
+  });
 
   // ignore: public_member_api_docs
   final Channel channel;
@@ -215,7 +215,7 @@ class ChannelPage extends StatefulWidget {
 
 class _ChannelPageState extends State<ChannelPage> {
   late FocusNode? _focusNode;
-  final _messageInputController = MessageInputController();
+  final _messageInputController = StreamMessageInputController();
 
   @override
   void initState() {
@@ -231,7 +231,7 @@ class _ChannelPageState extends State<ChannelPage> {
 
   void _reply(Message message) {
     _messageInputController.quotedMessage = message;
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _focusNode!.requestFocus();
     });
   }

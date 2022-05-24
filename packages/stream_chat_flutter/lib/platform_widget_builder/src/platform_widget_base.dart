@@ -25,8 +25,8 @@ abstract class PlatformWidgetBase<M extends Widget, D extends Widget,
     W extends Widget> extends StatelessWidget {
   /// Builds a [PlatformWidgetBase].
   const PlatformWidgetBase({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

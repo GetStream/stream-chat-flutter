@@ -9,7 +9,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class MessageCard extends StatelessWidget {
   /// {@macro messageCard}
   const MessageCard({
-    Key? key,
+    super.key,
     required this.message,
     required this.isFailedState,
     required this.showUserAvatar,
@@ -30,7 +30,7 @@ class MessageCard extends StatelessWidget {
     this.onLinkTap,
     this.onMentionTap,
     this.onQuotedMessageTap,
-  }) : super(key: key);
+  });
 
   /// {@macro isFailedState}
   final bool isFailedState;

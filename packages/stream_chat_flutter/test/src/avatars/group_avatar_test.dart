@@ -42,7 +42,7 @@ void main() {
     methodChannel.setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'listen') {
         try {
-          await ServicesBinding.instance!.defaultBinaryMessenger
+          await ServicesBinding.instance.defaultBinaryMessenger
               .handlePlatformMessage(
             methodChannel.name,
             methodChannel.codec.encodeSuccessEnvelope('wifi'),

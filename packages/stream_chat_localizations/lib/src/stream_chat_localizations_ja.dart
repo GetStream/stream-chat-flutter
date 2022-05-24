@@ -3,8 +3,7 @@ part of 'stream_chat_localizations.dart';
 /// The translations for Japanese (`ja`).
 class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for Japanese.
-  const StreamChatLocalizationsJa({String localeName = 'ja'})
-      : super(localeName: localeName);
+  const StreamChatLocalizationsJa({super.localeName = 'ja'});
 
   @override
   String get launchUrlError => 'URLの起動ができません';
@@ -355,6 +354,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get slowModeOnLabel => 'スローモードオン';
+
+  @override
+  String get viewLibrary => 'ライブラリを表示';
 
   @override
   String attachmentLimitExceedError(int limit) => '''

@@ -10,13 +10,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class SendingIndicatorWrapper extends StatelessWidget {
   /// {@macro sendingIndicatorWrapper}
   const SendingIndicatorWrapper({
-    Key? key,
+    super.key,
     required this.messageTheme,
     required this.message,
     required this.hasNonUrlAttachments,
     required this.streamChat,
     required this.streamChatTheme,
-  }) : super(key: key);
+  });
 
   /// {@macro messageTheme}
   final StreamMessageThemeData messageTheme;

@@ -9,13 +9,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class UserAvatarTransform extends StatelessWidget {
   /// {@macro userAvatarTransform}
   const UserAvatarTransform({
-    Key? key,
+    super.key,
     required this.translateUserAvatar,
     required this.messageTheme,
     required this.message,
     this.userAvatarBuilder,
     this.onUserAvatarTap,
-  }) : super(key: key);
+  });
 
   /// {@macro translateUserAvatar}
   final bool translateUserAvatar;

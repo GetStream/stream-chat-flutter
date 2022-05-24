@@ -10,11 +10,11 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 class AttachmentModalSheet extends StatelessWidget {
   /// {@macro attachmentModalSheet}
   const AttachmentModalSheet({
-    Key? key,
+    super.key,
     required this.onFileTap,
     required this.onPhotoTap,
     required this.onVideoTap,
-  }) : super(key: key);
+  });
 
   /// The action to perform when the "file" button is tapped.
   final VoidCallback onFileTap;

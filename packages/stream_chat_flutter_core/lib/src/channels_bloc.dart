@@ -23,12 +23,12 @@ class ChannelsBloc extends StatefulWidget {
   /// Creates a new [ChannelsBloc]. The parameter [child] must be supplied and
   /// not null.
   const ChannelsBloc({
-    Key? key,
+    super.key,
     required this.child,
     this.lockChannelsOrder = false,
     this.channelsComparator,
     this.shouldAddChannel,
-  }) : super(key: key);
+  });
 
   /// The widget child
   final Widget child;

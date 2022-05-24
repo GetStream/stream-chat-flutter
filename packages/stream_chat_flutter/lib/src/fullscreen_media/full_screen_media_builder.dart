@@ -25,14 +25,14 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class FullScreenMediaBuilder extends StatelessWidget {
   /// {@macro fsmBuilder}
   const FullScreenMediaBuilder({
-    Key? key,
+    super.key,
     required this.mediaAttachmentPackages,
     required this.startIndex,
     required this.userName,
     this.onShowMessage,
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
-  }) : super(key: key);
+  });
 
   /// The url of the image
   final List<StreamAttachmentPackage> mediaAttachmentPackages;

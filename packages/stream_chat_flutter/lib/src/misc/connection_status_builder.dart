@@ -15,12 +15,12 @@ typedef ConnectionStatusBuilder = StreamConnectionStatusBuilder;
 class StreamConnectionStatusBuilder extends StatelessWidget {
   /// {@macro streamConnectionStatusBuilder}
   const StreamConnectionStatusBuilder({
-    Key? key,
+    super.key,
     required this.statusBuilder,
     this.connectionStatusStream,
     this.errorBuilder,
     this.loadingBuilder,
-  }) : super(key: key);
+  });
 
   /// The asynchronous computation to which this builder is currently connected.
   final Stream<ConnectionStatus>? connectionStatusStream;

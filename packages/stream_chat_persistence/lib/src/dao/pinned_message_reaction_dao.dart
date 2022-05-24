@@ -12,7 +12,7 @@ part 'pinned_message_reaction_dao.g.dart';
 class PinnedMessageReactionDao extends DatabaseAccessor<DriftChatDatabase>
     with _$PinnedMessageReactionDaoMixin {
   /// Creates a new reaction dao instance
-  PinnedMessageReactionDao(DriftChatDatabase db) : super(db);
+  PinnedMessageReactionDao(super.db);
 
   /// Returns all the reactions of a particular message by matching
   /// [Reactions.messageId] with [messageId]

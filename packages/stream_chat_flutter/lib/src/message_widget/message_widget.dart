@@ -41,7 +41,7 @@ enum DisplayWidget {
 class StreamMessageWidget extends StatefulWidget {
   /// {@macro messageWidget}
   StreamMessageWidget({
-    Key? key,
+    super.key,
     required this.message,
     required this.messageTheme,
     this.reverse = false,
@@ -102,7 +102,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.customActions = const [],
     this.onAttachmentTap,
     this.usernameBuilder,
-  })  : attachmentBuilders = {
+  }) : attachmentBuilders = {
           'image': (context, message, attachments) {
             final border = RoundedRectangleBorder(
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
@@ -253,8 +253,7 @@ class StreamMessageWidget extends StatefulWidget {
                   .toList(),
             );
           },
-        }..addAll(customAttachmentBuilders ?? {}),
-        super(key: key);
+        }..addAll(customAttachmentBuilders ?? {});
 
   /// {@template onMentionTap}
   /// Function called on mention tap
@@ -1007,7 +1006,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             showTimestamp: false,
             translateUserAvatar: false,
             showSendingIndicator: false,
-            padding: const EdgeInsets.all(0),
+            padding: EdgeInsets.zero,
             showReactionPickerIndicator: widget.showReactions &&
                 (widget.message.status == MessageSendingStatus.sent),
             showPinHighlight: false,

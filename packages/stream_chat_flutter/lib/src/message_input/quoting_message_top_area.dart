@@ -13,10 +13,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class QuotingMessageTopArea extends StatelessWidget {
   /// {@macro quotingMessageTopArea}
   const QuotingMessageTopArea({
-    Key? key,
+    super.key,
     required this.hasQuotedMessage,
     this.onQuotedMessageCleared,
-  }) : super(key: key);
+  });
 
   ///
   final bool hasQuotedMessage;

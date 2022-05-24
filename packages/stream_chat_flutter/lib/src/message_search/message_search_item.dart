@@ -6,25 +6,14 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@macro streamMessageSearchItem}
 @Deprecated("Use 'StreamMessageSearchItem' instead")
-typedef MessageSearchItem = StreamMessageSearchItem;
-
-/// {@template streamMessageSearchItem}
-/// Shows a preview of a message search result.
-///
-/// It is not recommended to use this widget directly as it's the default item
-/// used by [MessageSearchListView].
-///
-/// The UI based on the first ancestor of type [StreamChatTheme].
-/// Modify it to change the widget's appearance.
-/// {@endtemplate}
-class StreamMessageSearchItem extends StatelessWidget {
-  /// {@macro streamMessageSearchItem}
-  const StreamMessageSearchItem({
-    Key? key,
+class MessageSearchItem extends StatelessWidget {
+  /// Instantiate a new MessageSearchItem
+  const MessageSearchItem({
+    super.key,
     required this.getMessageResponse,
     this.onTap,
     this.showOnlineStatus = true,
-  }) : super(key: key);
+  });
 
   /// [Message] displayed
   final GetMessageResponse getMessageResponse;
@@ -87,9 +76,9 @@ class StreamMessageSearchItem extends StatelessWidget {
 
 class _Date extends StatelessWidget {
   const _Date({
-    Key? key,
+    super.key,
     required this.message,
-  }) : super(key: key);
+  });
 
   final Message message;
 
@@ -116,9 +105,9 @@ class _Date extends StatelessWidget {
 
 class _SearchItemSubtitle extends StatelessWidget {
   const _SearchItemSubtitle({
-    Key? key,
+    super.key,
     required this.message,
-  }) : super(key: key);
+  });
 
   final Message message;
 

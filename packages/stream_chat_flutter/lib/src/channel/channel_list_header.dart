@@ -46,7 +46,7 @@ class StreamChannelListHeader extends StatelessWidget
     implements PreferredSizeWidget {
   /// {@macro streamChannelListHeader}
   const StreamChannelListHeader({
-    Key? key,
+    super.key,
     this.client,
     this.titleBuilder,
     this.onUserAvatarTap,
@@ -54,10 +54,12 @@ class StreamChannelListHeader extends StatelessWidget
     this.showConnectionStateTile = false,
     this.preNavigationCallback,
     this.subtitle,
+    this.centerTitle,
     this.leading,
     this.actions,
     this.backgroundColor,
-  }) : super(key: key);
+    this.elevation = 1,
+  });
 
   /// Use this if you don't have a [StreamChatClient] in your widget tree.
   final StreamChatClient? client;
@@ -82,6 +84,9 @@ class StreamChannelListHeader extends StatelessWidget
   /// Subtitle widget
   final Widget? subtitle;
 
+  /// Whether the title should be centered
+  final bool? centerTitle;
+
   /// Leading widget
   ///
   /// By default it shows the logged in user's avatar
@@ -94,6 +99,9 @@ class StreamChannelListHeader extends StatelessWidget
 
   /// The background color for this [StreamChannelListHeader].
   final Color? backgroundColor;
+
+  /// The elevation for this [StreamChannelListHeader].
+  final double elevation;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -133,10 +141,10 @@ class StreamChannelListHeader extends StatelessWidget
             systemOverlayStyle: theme.brightness == Brightness.dark
                 ? SystemUiOverlayStyle.light
                 : SystemUiOverlayStyle.dark,
-            elevation: 1,
+            elevation: elevation,
             backgroundColor:
                 backgroundColor ?? channelListHeaderThemeData.color,
-            centerTitle: true,
+            centerTitle: centerTitle,
             leading: leading ??
                 Center(
                   child: user != null
@@ -145,9 +153,7 @@ class StreamChannelListHeader extends StatelessWidget
                           showOnlineStatus: false,
                           onTap: onUserAvatarTap ??
                               (_) {
-                                if (preNavigationCallback != null) {
-                                  preNavigationCallback!();
-                                }
+                                preNavigationCallback?.call();
                                 Scaffold.of(context).openDrawer();
                               },
                           borderRadius: channelListHeaderThemeData
@@ -218,7 +224,7 @@ class StreamChannelListHeader extends StatelessWidget
 }
 
 class _ConnectedTitleState extends StatelessWidget {
-  const _ConnectedTitleState({Key? key}) : super(key: key);
+  const _ConnectedTitleState({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -233,7 +239,7 @@ class _ConnectedTitleState extends StatelessWidget {
 }
 
 class _ConnectingTitleState extends StatelessWidget {
-  const _ConnectingTitleState({Key? key}) : super(key: key);
+  const _ConnectingTitleState({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -262,9 +268,9 @@ class _ConnectingTitleState extends StatelessWidget {
 
 class _DisconnectedTitleState extends StatelessWidget {
   const _DisconnectedTitleState({
-    Key? key,
+    super.key,
     required this.client,
-  }) : super(key: key);
+  });
 
   final StreamChatClient client;
 

@@ -3,8 +3,7 @@ part of 'stream_chat_localizations.dart';
 /// The translations for French (`fr`).
 class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for French.
-  const StreamChatLocalizationsFr({String localeName = 'fr'})
-      : super(localeName: localeName);
+  const StreamChatLocalizationsFr({super.localeName = 'fr'});
 
   @override
   String get launchUrlError => "Impossible de lancer l'url";
@@ -63,7 +62,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
 
   @override
   String get sendMessagePermissionError =>
-      'Vous n\'êtes pas autorisé à envoyer des messages';
+      "Vous n'êtes pas autorisé à envoyer des messages";
 
   @override
   String get emptyMessagesText => "Il n'y a pas de messages actuellement";
@@ -380,6 +379,9 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   ''';
 
   @override
+  String get viewLibrary => 'Voir la bibliothèque';
+
+  @override
   String get slowModeOnLabel => 'Mode lent activé';
 
   @override
@@ -388,7 +390,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   @override
   String toggleMuteUnmuteUserText({required bool isMuted}) {
     if (isMuted) {
-      return 'Réactiver l\'utilisateur';
+      return "Réactiver l'utilisateur";
     } else {
       return 'Utilisateur muet';
     }
@@ -432,7 +434,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get linkDisabledDetails =>
-      'L\'envoi de liens n\'est pas autorisé dans cette conversation.';
+      "L'envoi de liens n'est pas autorisé dans cette conversation.";
 
   @override
   String get linkDisabledError => 'Les liens sont désactivés';

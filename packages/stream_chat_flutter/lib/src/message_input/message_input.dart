@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
@@ -10,6 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
+import 'package:stream_chat_flutter/src/media_list_view_controller.dart';
 import 'package:stream_chat_flutter/src/message_input/animated_send_button.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
@@ -80,7 +83,7 @@ const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 class MessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
   const MessageInput({
-    Key? key,
+    super.key,
     this.onMessageSent,
     this.preMessageSending,
     this.parentMessage,
@@ -114,11 +117,10 @@ class MessageInput extends StatefulWidget {
     this.customOverlays = const [],
     this.mentionAllAppUsers = false,
     this.shouldKeepFocusAfterMessage,
-  })  : assert(
+  }) : assert(
           initialMessage == null || editMessage == null,
           "Can't provide both `initialMessage` and `editMessage`",
-        ),
-        super(key: key);
+        );
 
   /// List of options for showing overlays
   final List<OverlayOptions> customOverlays;
@@ -252,6 +254,7 @@ class MessageInputState extends State<MessageInput> {
   final List<User> _mentionedUsers = [];
 
   final _imagePicker = ImagePicker();
+  final _mediaListViewController = MediaListViewController();
   late final _focusNode = widget.focusNode ?? FocusNode();
   late final _isInternalFocusNode = widget.focusNode == null;
   bool _inputEnabled = true;
@@ -481,7 +484,7 @@ class MessageInputState extends State<MessageInput> {
               color: _messageInputTheme.expandButtonColor,
             ),
           ),
-          padding: const EdgeInsets.all(0),
+          padding: EdgeInsets.zero,
           constraints: const BoxConstraints.tightFor(
             height: 24,
             width: 24,
@@ -726,7 +729,7 @@ class MessageInputState extends State<MessageInput> {
               child: IconButton(
                 icon: StreamSvgIcon.closeSmall(),
                 splashRadius: 24,
-                padding: const EdgeInsets.all(0),
+                padding: EdgeInsets.zero,
                 constraints: const BoxConstraints.tightFor(
                   height: 24,
                   width: 24,
@@ -909,7 +912,7 @@ class MessageInputState extends State<MessageInput> {
     return AnimatedContainer(
       duration: _openFilePickerSection
           ? const Duration(milliseconds: 300)
-          : const Duration(),
+          : Duration.zero,
       curve: Curves.easeOut,
       height: _openFilePickerSection ? _kMinMediaPickerSize : 0,
       child: SingleChildScrollView(
@@ -963,7 +966,7 @@ class MessageInputState extends State<MessageInput> {
                             },
                     ),
                     IconButton(
-                      padding: const EdgeInsets.all(0),
+                      padding: EdgeInsets.zero,
                       icon: StreamSvgIcon.record(
                         color: _getIconColor(3),
                       ),
@@ -977,6 +980,26 @@ class MessageInputState extends State<MessageInput> {
                                 camera: true,
                               );
                             },
+                    ),
+                    const Spacer(),
+                    FutureBuilder(
+                      future: PhotoManager.requestPermissionExtend(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData &&
+                            snapshot.data == PermissionState.limited) {
+                          return TextButton(
+                            child: Text(context.translations.viewLibrary),
+                            onPressed: () async {
+                              await PhotoManager.presentLimited();
+                              _mediaListViewController.updateMedia(
+                                newValue: true,
+                              );
+                            },
+                          );
+                        }
+
+                        return const SizedBox.shrink();
+                      },
                     ),
                   ],
                 ),
@@ -1010,6 +1033,7 @@ class MessageInputState extends State<MessageInput> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: PickerWidget(
+                        mediaListViewController: _mediaListViewController,
                         filePickerIndex: _filePickerIndex,
                         streamChatTheme: _streamChatTheme,
                         containsFile: _attachmentContainsFile,
@@ -1173,7 +1197,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return const Offstage();
     final containsUrl = widget.quotedMessage!.attachments
-        .any((element) => element.titleLink != null);
+        .any((element) => element.ogScrapeUrl != null);
     return StreamQuotedMessageWidget(
       reverse: true,
       showBorder: !containsUrl,

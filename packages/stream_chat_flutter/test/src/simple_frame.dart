@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SimpleFrame extends StatelessWidget {
-  const SimpleFrame({Key? key, required this.child}) : super(key: key);
+  const SimpleFrame({super.key, required this.child});
 
   final Widget child;
 

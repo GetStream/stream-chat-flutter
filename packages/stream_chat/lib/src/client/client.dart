@@ -29,7 +29,6 @@ import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/location.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/version.dart';
@@ -64,12 +63,8 @@ class StreamChatClient {
   StreamChatClient(
     String apiKey, {
     this.logLevel = Level.WARNING,
-    LogHandlerFunction? logHandlerFunction,
+    this.logHandlerFunction = StreamChatClient.defaultLogHandler,
     RetryPolicy? retryPolicy,
-    @Deprecated('''
-    Location is now deprecated in favor of the new edge server. Will be removed in v4.0.0.
-    Read more here: https://getstream.io/blog/chat-edge-infrastructure
-    ''') Location? location,
     String? baseURL,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
@@ -77,7 +72,6 @@ class StreamChatClient {
     WebSocket? ws,
     AttachmentFileUploader? attachmentFileUploader,
   }) {
-    this.logHandlerFunction = logHandlerFunction ?? _defaultLogHandler;
     logger.info('Initiating new StreamChatClient');
 
     final options = StreamHttpClientOptions(
@@ -134,7 +128,7 @@ class StreamChatClient {
       '${CurrentPlatform.name}-'
       '${PACKAGE_VERSION.split('+')[0]}';
 
-  /// Additionals headers for all requests
+  /// Additional headers for all requests
   static Map<String, Object?> additionalHeaders = {};
 
   ChatPersistenceClient? _originalChatPersistenceClient;
@@ -189,7 +183,7 @@ class StreamChatClient {
   /// final client = StreamChatClient("stream-chat-api-key",
   /// logHandlerFunction: myLogHandlerFunction);
   ///```
-  late LogHandlerFunction logHandlerFunction;
+  final LogHandlerFunction logHandlerFunction;
 
   StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
 
@@ -214,17 +208,18 @@ class StreamChatClient {
   Stream<ConnectionStatus> get wsConnectionStatusStream =>
       _wsConnectionStatusController.stream.distinct();
 
-  LogHandlerFunction get _defaultLogHandler => (LogRecord record) {
-        print(
-          '${record.time} '
-          '${_levelEmojiMapper[record.level] ?? record.level.name} '
-          '${record.loggerName} ${record.message} ',
-        );
-        if (record.error != null) print(record.error);
-        if (record.stackTrace != null) print(record.stackTrace);
-      };
+  /// Default log handler function for the [StreamChatClient] logger.
+  static void defaultLogHandler(LogRecord record) {
+    print(
+      '${record.time} '
+      '${_levelEmojiMapper[record.level] ?? record.level.name} '
+      '${record.loggerName} ${record.message} ',
+    );
+    if (record.error != null) print(record.error);
+    if (record.stackTrace != null) print(record.stackTrace);
+  }
 
-  ///
+  /// Default logger for the [StreamChatClient].
   Logger detachedLogger(String name) => Logger.detached(name)
     ..level = logLevel
     ..onRecord.listen(logHandlerFunction);
@@ -623,7 +618,7 @@ class StreamChatClient {
     final channels = res.channels;
 
     final users = channels
-        .expand((it) => it.members)
+        .expand((it) => it.members ?? <Member>[])
         .map((it) => it.user)
         .toList(growable: false);
 
@@ -733,6 +728,7 @@ class StreamChatClient {
     String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) =>
       _chatApi.fileUploader.sendFile(
         file,
@@ -740,6 +736,7 @@ class StreamChatClient {
         channelType,
         onSendProgress: onSendProgress,
         cancelToken: cancelToken,
+        extraData: extraData,
       );
 
   /// Send a [image] to the [channelId] of type [channelType]
@@ -749,6 +746,7 @@ class StreamChatClient {
     String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) =>
       _chatApi.fileUploader.sendImage(
         image,
@@ -756,6 +754,7 @@ class StreamChatClient {
         channelType,
         onSendProgress: onSendProgress,
         cancelToken: cancelToken,
+        extraData: extraData,
       );
 
   /// Delete a file from this channel
@@ -764,12 +763,14 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) =>
       _chatApi.fileUploader.deleteFile(
         url,
         channelId,
         channelType,
         cancelToken: cancelToken,
+        extraData: extraData,
       );
 
   /// Delete an image from this channel
@@ -778,12 +779,14 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) =>
       _chatApi.fileUploader.deleteImage(
         url,
         channelId,
         channelType,
         cancelToken: cancelToken,
+        extraData: extraData,
       );
 
   /// Replaces the [channelId] of type [ChannelType] data with [data].
@@ -820,8 +823,16 @@ class StreamChatClient {
       );
 
   /// Add a device for Push Notifications.
-  Future<EmptyResponse> addDevice(String id, PushProvider pushProvider) =>
-      _chatApi.device.addDevice(id, pushProvider);
+  Future<EmptyResponse> addDevice(
+    String id,
+    PushProvider pushProvider, {
+    String? pushProviderName,
+  }) =>
+      _chatApi.device.addDevice(
+        id,
+        pushProvider,
+        pushProviderName: pushProviderName,
+      );
 
   /// Gets a list of user devices.
   Future<ListDevicesResponse> getDevices() => _chatApi.device.getDevices();
@@ -1550,18 +1561,6 @@ class ClientState {
 
   /// The current user as a stream
   Stream<OwnUser?> get currentUserStream => _currentUserController.stream;
-
-  // coverage:ignore-start
-
-  /// The current user
-  @Deprecated('Use `.currentUser` instead, Will be removed in future releases')
-  OwnUser? get user => _currentUserController.valueOrNull;
-
-  /// The current user as a stream
-  @Deprecated(
-    'Use `.currentUserStream` instead, Will be removed in future releases',
-  )
-  Stream<OwnUser?> get userStream => _currentUserController.stream;
 
   // coverage:ignore-end
 

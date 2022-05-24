@@ -43,8 +43,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 @Deprecated('User StreamUserListView instead')
 class UserListView extends StatefulWidget {
   /// {@macro userListView}
+  @Deprecated("Use 'StreamUserListView' instead")
   UserListView({
-    Key? key,
+    super.key,
     this.filter = const Filter.empty(),
     this.sort,
     this.presence,
@@ -73,8 +74,7 @@ class UserListView extends StatefulWidget {
           crossAxisCount == 1 || !groupAlphabetically,
           'Cannot group alphabetically when crossAxisCount > 1',
         ),
-        limit = limit ?? pagination?.limit ?? 30,
-        super(key: key);
+        limit = limit ?? pagination?.limit ?? 30;
 
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -310,7 +310,7 @@ class _UserListViewState extends State<UserListView>
       return item.when(
         headerItem: (header) {
           final chatThemeData = StreamChatTheme.of(context);
-          return Container(
+          return ColoredBox(
             key: ValueKey<String>('HEADER-$header'),
             color: chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.05),
             child: Padding(
@@ -409,7 +409,7 @@ class _UserListViewState extends State<UserListView>
         initialData: false,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Container(
+            return ColoredBox(
               color: StreamChatTheme.of(context)
                   .colorTheme
                   .accentError

@@ -13,13 +13,13 @@ typedef TypingIndicator = StreamTypingIndicator;
 class StreamTypingIndicator extends StatelessWidget {
   /// {@macro streamTypingIndicator}
   const StreamTypingIndicator({
-    Key? key,
+    super.key,
     this.channel,
     this.alternativeWidget,
     this.style,
-    this.padding = const EdgeInsets.all(0),
+    this.padding = EdgeInsets.zero,
     this.parentId,
-  }) : super(key: key);
+  });
 
   /// Style of the text widget
   final TextStyle? style;
@@ -50,6 +50,12 @@ class StreamTypingIndicator extends StatelessWidget {
           .where((element) => element.value.parentId == parentId)
           .map((e) => e.key)),
       builder: (context, users) => AnimatedSwitcher(
+        layoutBuilder: (currentChild, previousChildren) => Stack(
+          children: <Widget>[
+            ...previousChildren,
+            if (currentChild != null) currentChild,
+          ],
+        ),
         duration: const Duration(milliseconds: 300),
         child: users.isNotEmpty
             ? Padding(

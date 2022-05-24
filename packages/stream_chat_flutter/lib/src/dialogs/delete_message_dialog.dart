@@ -9,8 +9,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class DeleteMessageDialog extends StatelessWidget {
   /// {@macro deleteMessageDialog}
   const DeleteMessageDialog({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

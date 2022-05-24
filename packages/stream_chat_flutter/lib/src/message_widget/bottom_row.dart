@@ -14,7 +14,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class BottomRow extends StatelessWidget {
   /// {@macro bottomRow}
   const BottomRow({
-    Key? key,
+    super.key,
     required this.isDeleted,
     required this.message,
     required this.showThreadReplyIndicator,
@@ -32,7 +32,7 @@ class BottomRow extends StatelessWidget {
     required this.streamChat,
     this.deletedBottomRowBuilder,
     this.onThreadTap,
-  }) : super(key: key);
+  });
 
   /// {@macro messageIsDeleted}
   final bool isDeleted;

@@ -6,18 +6,17 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamChannelInfoBottomSheet extends StatelessWidget {
   /// Creates a new instance [StreamChannelInfoBottomSheet] widget.
   StreamChannelInfoBottomSheet({
-    Key? key,
+    super.key,
     required this.channel,
     this.onMemberTap,
     this.onViewInfoTap,
     this.onLeaveChannelTap,
     this.onDeleteConversationTap,
     this.onCancelTap,
-  })  : assert(
+  }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
-        ),
-        super(key: key);
+        );
 
   /// The [Channel] to show information about.
   final Channel channel;
@@ -51,10 +50,6 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
     final isOneToOneChannel = channel.isDistinct && channel.memberCount == 2;
 
     final members = channel.state?.members ?? [];
-
-    final isOwner = members.any(
-      (it) => it.user?.id == currentUser?.id && it.role == 'owner',
-    );
 
     // remove current user in case it's 1-1 conversation
     if (isOneToOneChannel) {
@@ -146,7 +141,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
             ),
             onTap: onLeaveChannelTap,
           ),
-        if (isOwner)
+        if (channel.ownCapabilities.contains(PermissionType.deleteChannel))
           StreamOptionListTile(
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),

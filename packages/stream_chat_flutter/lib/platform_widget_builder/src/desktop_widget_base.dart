@@ -24,7 +24,7 @@ typedef PlatformBuilder<T> = T Function(
 abstract class DesktopWidgetBase<M extends Widget, W extends Widget,
     L extends Widget> extends StatelessWidget {
   /// Builds a [DesktopWidgetBase].
-  const DesktopWidgetBase({Key? key}) : super(key: key);
+  const DesktopWidgetBase({super.key});
 
   @override
   Widget build(BuildContext context) {

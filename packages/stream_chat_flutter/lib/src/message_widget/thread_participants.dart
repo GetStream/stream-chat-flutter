@@ -9,11 +9,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ThreadParticipants extends StatelessWidget {
   /// {@macro threadParticipants}
   const ThreadParticipants({
-    Key? key,
+    super.key,
     required StreamChatThemeData streamChatTheme,
     required this.threadParticipants,
-  })  : _streamChatTheme = streamChatTheme,
-        super(key: key);
+  }) : _streamChatTheme = streamChatTheme;
 
   /// {@macro streamChatThemeData}
   final StreamChatThemeData _streamChatTheme;

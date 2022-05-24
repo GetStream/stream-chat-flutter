@@ -11,13 +11,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class FloatingDateDivider extends StatelessWidget {
   /// {@macro floatingDateDivider}
   const FloatingDateDivider({
-    Key? key,
+    super.key,
     required this.itemPositionListener,
     required this.reverse,
     required this.messages,
     required this.itemCount,
     this.dateDividerBuilder,
-  }) : super(key: key);
+  });
 
   // ignore: public_member_api_docs
   final ItemPositionsListener itemPositionListener;

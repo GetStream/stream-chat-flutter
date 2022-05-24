@@ -7,12 +7,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 class StreamSvgIcon extends StatelessWidget {
   /// {@macro streamSvgIcon}
   const StreamSvgIcon({
-    Key? key,
+    super.key,
     this.assetName,
     this.color,
     this.width = 24,
     this.height = 24,
-  }) : super(key: key);
+  });
 
   /// [StreamSvgIcon] type
   factory StreamSvgIcon.settings({

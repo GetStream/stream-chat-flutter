@@ -1,0 +1,64 @@
+---
+id: stream_channel_list_event_handler
+sidebar_position: 10
+title: StreamChannelListEventHandler
+---
+
+A Class To Customize The Event Handler For The StreamChannelListController. 
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter_core/latest/stream_chat_flutter_core/StreamChannelListEventHandler-class.html)
+
+### Background
+
+A `StreamChannelListEventHandler` is a class that handles the events that are related to the channel list loaded by `StreamChannelListController`.
+The `StreamChannelListController` automatically creates a `StreamChannelListEventHandler` internally and handles the events. In order to provide a custom
+implementation of `StreamChannelListEventHandler`, you need to create a class that extends the `StreamChannelListEventHandler` class.
+
+### Basic Example
+
+There are 2 ways to provide a custom implementation of `StreamChannelListEventHandler`:
+
+* Create a class that extends the `StreamChannelListEventHandler` and pass it down to the controller.
+
+```dart
+class MyCustomEventHandler extends StreamChannelListEventHandler {
+  @override
+  void onConnectionRecovered(
+    Event event,
+    StreamChannelListController controller,
+  ) {
+    // Write your own custom implementation here
+  }
+}
+```
+
+Pass it down to the controller:
+
+```dart
+  late final listController = StreamChannelListController(
+    client: StreamChat.of(context).client,
+    eventHandler: MyCustomEventHandler(),
+  );
+```
+
+* Mix the `StreamChannelListEventHandler` into your widget state.
+
+```dart
+class _ChannelListPageState extends State<ChannelListPage>
+    with StreamChannelListEventHandler {
+  
+  @override
+  void onConnectionRecovered(
+    Event event,
+    StreamChannelListController controller,
+  ) {
+    // Write your own custom implementation here
+  }
+
+  late final _listController = StreamChannelListController(
+    client: StreamChat.of(context).client,
+    eventHandler: this,
+  );
+}
+```
+

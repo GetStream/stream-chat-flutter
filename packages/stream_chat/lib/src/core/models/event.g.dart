@@ -81,6 +81,9 @@ EventChannel _$EventChannelFromJson(Map<String, dynamic> json) => EventChannel(
       id: json['id'] as String?,
       type: json['type'] as String?,
       cid: json['cid'] as String,
+      ownCapabilities: (json['own_capabilities'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       config: ChannelConfig.fromJson(json['config'] as Map<String, dynamic>),
       createdBy: json['created_by'] == null
           ? null

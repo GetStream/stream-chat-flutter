@@ -10,10 +10,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class PinnedMessage extends StatelessWidget {
   /// {@macro pinnedMessage}
   const PinnedMessage({
-    Key? key,
+    super.key,
     required this.pinnedBy,
     required this.currentUser,
-  }) : super(key: key);
+  });
 
   /// The [User] who pinned this message.
   final User pinnedBy;

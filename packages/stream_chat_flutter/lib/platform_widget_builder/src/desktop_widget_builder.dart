@@ -21,12 +21,12 @@ typedef DesktopTargetBuilder = Widget? Function(
 class DesktopWidgetBuilder extends StatelessWidget {
   /// Builds a [DesktopWidgetBuilder].
   const DesktopWidgetBuilder({
-    Key? key,
+    super.key,
     this.child,
     this.macOS,
     this.windows,
     this.linux,
-  }) : super(key: key);
+  });
 
   /// The child widget.
   final Widget? child;

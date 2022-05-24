@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, deprecated_member_use_from_same_package
 
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -45,8 +45,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 @Deprecated("Use 'StreamChannelListView' instead")
 class ChannelListView extends StatefulWidget {
   /// {@macro channelListView}
+  @Deprecated("Use 'StreamChannelListView' instead")
   ChannelListView({
-    Key? key,
+    super.key,
     this.filter,
     this.sort,
     this.showChannelState = true,
@@ -81,8 +82,7 @@ class ChannelListView extends StatefulWidget {
     this.onDeletePressed,
     this.swipeActions,
     this.channelListController,
-  })  : limit = limit ?? pagination?.limit ?? 25,
-        super(key: key);
+  }) : limit = limit ?? pagination?.limit ?? 25;
 
   /// Whether to add a default swipe action behavior to this widget.
   ///
@@ -215,7 +215,6 @@ class ChannelListView extends StatefulWidget {
   _ChannelListViewState createState() => _ChannelListViewState();
 }
 
-// ignore: deprecated_member_use_from_same_package
 class _ChannelListViewState extends State<ChannelListView> {
   late final _defaultController = ChannelListController();
 
@@ -660,12 +659,12 @@ class _ChannelListViewState extends State<ChannelListView> {
 
 class _GridItemBuilder extends StatelessWidget {
   const _GridItemBuilder({
-    Key? key,
+    super.key,
     required this.index,
     required this.channels,
     required this.selectedChannels,
     required this.channelTapCallback,
-  }) : super(key: key);
+  });
 
   final int index;
   final List<Channel> channels;
@@ -715,9 +714,9 @@ class _GridItemBuilder extends StatelessWidget {
 
 class _QueryProgressIndicator extends StatelessWidget {
   const _QueryProgressIndicator({
-    Key? key,
+    super.key,
     required this.channelsProvider,
-  }) : super(key: key);
+  });
 
   final ChannelsBlocState channelsProvider;
 
@@ -728,7 +727,7 @@ class _QueryProgressIndicator extends StatelessWidget {
       initialData: false,
       errorBuilder: (context, err) {
         final theme = StreamChatTheme.of(context);
-        return Container(
+        return ColoredBox(
           color: theme.colorTheme.textLowEmphasis.withOpacity(0.9),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -756,9 +755,9 @@ class _QueryProgressIndicator extends StatelessWidget {
 
 class _Separator extends StatelessWidget {
   const _Separator({
-    Key? key,
+    super.key,
     required this.index,
-  }) : super(key: key);
+  });
 
   final int index;
 

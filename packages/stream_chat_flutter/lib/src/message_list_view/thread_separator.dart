@@ -9,10 +9,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ThreadSeparator extends StatelessWidget {
   ///{@macro threadSeparator}
   const ThreadSeparator({
-    Key? key,
+    super.key,
     this.threadSeparatorBuilder,
     this.parentMessage,
-  }) : super(key: key);
+  });
 
   // ignore: public_member_api_docs
   final WidgetBuilder? threadSeparatorBuilder;

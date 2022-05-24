@@ -92,7 +92,7 @@ void main() {
                 width: 100,
                 height: 100,
                 child: StreamGradientAvatar(
-                  name: 'd123@/d de:\$as',
+                  name: r'd123@/d de:$as',
                   userId: 'demo123',
                 ),
               ),
@@ -116,7 +116,7 @@ void main() {
                 width: 100,
                 height: 100,
                 child: StreamGradientAvatar(
-                    name: '123@/d \$as', userId: 'demo123'),
+                    name: r'123@/d $as', userId: 'demo123'),
               ),
             ),
           ),

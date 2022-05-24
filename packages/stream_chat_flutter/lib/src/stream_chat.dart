@@ -31,14 +31,14 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamChat extends StatefulWidget {
   /// {@macro streamChat}
   const StreamChat({
-    Key? key,
+    super.key,
     required this.client,
     required this.child,
     this.streamChatThemeData,
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(minutes: 1),
     this.connectivityStream,
-  }) : super(key: key);
+  });
 
   /// Client to do chat operations with
   final StreamChatClient client;
@@ -143,20 +143,6 @@ class StreamChatState extends State<StreamChat> {
     final defaultTheme = StreamChatThemeData(brightness: appBrightness);
     return defaultTheme.merge(themeData);
   }
-
-  // coverage:ignore-start
-
-  /// The current user
-  @Deprecated('Use `.currentUser` instead, Will be removed in future releases')
-  User? get user => widget.client.state.currentUser;
-
-  /// The current user as a stream
-  @Deprecated(
-    'Use `.currentUserStream` instead, Will be removed in future releases',
-  )
-  Stream<User?> get userStream => widget.client.state.currentUserStream;
-
-  // coverage:ignore-end
 
   /// The current user
   User? get currentUser => widget.client.state.currentUser;

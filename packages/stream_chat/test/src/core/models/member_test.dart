@@ -9,7 +9,7 @@ void main() {
     test('should parse json correctly', () {
       final member = Member.fromJson(jsonFixture('member.json'));
       expect(member.user, isA<User>());
-      expect(member.role, 'member');
+      expect(member.channelRole, 'channel_member');
       expect(member.createdAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
       expect(member.updatedAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
     });

@@ -3,8 +3,7 @@ part of 'stream_chat_localizations.dart';
 /// The translations for Portuguese (`pt`).
 class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for Portuguese.
-  const StreamChatLocalizationsPt({String localeName = 'pt'})
-      : super(localeName: localeName);
+  const StreamChatLocalizationsPt({super.localeName = 'pt'});
 
   @override
   String get launchUrlError => 'O URL não pôde ser aberto';
@@ -434,4 +433,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   @override
   String get sendMessagePermissionError =>
       'Você não tem permissão para enviar mensagens';
+
+  @override
+  String get viewLibrary => 'Ver biblioteca';
 }

@@ -1,4 +1,24 @@
-## Upcoming
+## 4.2.0
+
+- Updated `stream_chat` dependency to [`4.2.0`](https://pub.dev/packages/stream_chat/changelog).
+
+🔄 Changed
+
+- Deprecated `before` and `after` parameters in `StreamChannel.queryAroundMessage`. Use `limit` instead.
+- Deprecated `before` and `after` parameters in `StreamChannel.loadChannelAtMessage`. Use `limit` instead.
+
+## 4.1.0
+
+- Updated `stream_chat` dependency to [`4.1.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 4.0.1
+
+- Minor fixes
+- Updated `stream_chat` dependency to [`4.0.1`](https://pub.dev/packages/stream_chat/changelog).
+
+## 4.0.0
+
+For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
 
 - Deprecated `UsersBloc` in favor of `StreamUserListController` to control the user list.
 - Deprecated `MessageSearchBloc` in favor of `StreamMessageSearchListController` to control the user list.

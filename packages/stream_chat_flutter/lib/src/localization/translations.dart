@@ -323,6 +323,9 @@ abstract class Translations {
   /// The label for "Reply to message"
   String get replyToMessageLabel;
 
+  /// The label for "View library"
+  String get viewLibrary;
+
   /// Label for "Attachment limit exceeded:
   /// it's not possible to add more than $limit attachments"
   String attachmentLimitExceedError(int limit);
@@ -411,7 +414,7 @@ class DefaultTranslations implements Translations {
 
   @override
   String get sendMessagePermissionError =>
-      'You don\'t have permission to send messages';
+      "You don't have permission to send messages";
 
   @override
   String get emptyMessagesText => 'There are no messages currently';
@@ -552,7 +555,7 @@ class DefaultTranslations implements Translations {
 
   @override
   String get operationCouldNotBeCompletedText =>
-      'The operation couldn\'t be completed.';
+      "The operation couldn't be completed.";
 
   @override
   String get replyLabel => 'Reply';
@@ -721,6 +724,9 @@ class DefaultTranslations implements Translations {
 
   @override
   String get slowModeOnLabel => 'Slow mode ON';
+
+  @override
+  String get viewLibrary => 'View library';
 
   @override
   String attachmentLimitExceedError(int limit) => """

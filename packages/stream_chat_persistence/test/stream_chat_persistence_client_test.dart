@@ -219,10 +219,10 @@ void main() {
           .thenAnswer((_) async => messages);
 
       final fetchedChannelState = await client.getChannelStateByCid(cid);
-      expect(fetchedChannelState.messages.length, messages.length);
-      expect(fetchedChannelState.pinnedMessages.length, messages.length);
-      expect(fetchedChannelState.members.length, members.length);
-      expect(fetchedChannelState.read.length, reads.length);
+      expect(fetchedChannelState.messages?.length, messages.length);
+      expect(fetchedChannelState.pinnedMessages?.length, messages.length);
+      expect(fetchedChannelState.members?.length, members.length);
+      expect(fetchedChannelState.read?.length, reads.length);
       expect(fetchedChannelState.channel!.cid, channel.cid);
 
       verify(() => mockDatabase.memberDao.getMembersByCid(cid)).called(1);
@@ -277,10 +277,10 @@ void main() {
       for (var i = 0; i < fetchedChannelStates.length; i++) {
         final original = channelStates[i];
         final fetched = fetchedChannelStates[i];
-        expect(fetched.members.length, original.members.length);
-        expect(fetched.messages.length, original.messages.length);
-        expect(fetched.pinnedMessages.length, original.pinnedMessages.length);
-        expect(fetched.read.length, original.read.length);
+        expect(fetched.members?.length, original.members?.length);
+        expect(fetched.messages?.length, original.messages?.length);
+        expect(fetched.pinnedMessages?.length, original.pinnedMessages?.length);
+        expect(fetched.read?.length, original.read?.length);
         expect(fetched.channel!.cid, original.channel!.cid);
       }
 

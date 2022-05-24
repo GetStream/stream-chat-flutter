@@ -9,7 +9,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class AttachmentActionsModal extends StatelessWidget {
   /// Returns a new [AttachmentActionsModal]
   const AttachmentActionsModal({
-    Key? key,
+    super.key,
     required this.attachment,
     required this.message,
     this.onShowMessage,
@@ -20,7 +20,7 @@ class AttachmentActionsModal extends StatelessWidget {
     this.showSave = true,
     this.showDelete = true,
     this.customActions = const [],
-  }) : super(key: key);
+  });
 
   /// The attachment object for which the actions are to be performed
   final Attachment attachment;

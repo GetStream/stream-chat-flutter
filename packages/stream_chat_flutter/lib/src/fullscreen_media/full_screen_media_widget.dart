@@ -6,5 +6,5 @@ import 'package:flutter/material.dart';
 /// {@endtemplate}
 abstract class FullScreenMediaWidget extends StatefulWidget {
   /// {@macro fsmWidget}
-  const FullScreenMediaWidget({Key? key}) : super(key: key);
+  const FullScreenMediaWidget({super.key});
 }

@@ -9,13 +9,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class LoadingIndicator extends StatelessWidget {
   /// {@macro loadingIndicatorMLV}
   const LoadingIndicator({
-    Key? key,
+    super.key,
     required this.streamTheme,
     required this.isThreadConversation,
     required this.direction,
     required this.streamChannelState,
     this.indicatorBuilder,
-  }) : super(key: key);
+  });
 
   // ignore: public_member_api_docs
   final StreamChatThemeData streamTheme;
@@ -41,7 +41,7 @@ class LoadingIndicator extends StatelessWidget {
       key: Key('LOADING-INDICATOR $direction'),
       stream: stream,
       initialData: false,
-      errorBuilder: (context, error) => Container(
+      errorBuilder: (context, error) => ColoredBox(
         color: streamTheme.colorTheme.accentError.withOpacity(0.2),
         child: Center(
           child: Text(context.translations.loadingMessagesError),

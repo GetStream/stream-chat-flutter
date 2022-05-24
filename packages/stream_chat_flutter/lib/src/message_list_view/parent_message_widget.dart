@@ -7,13 +7,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ParentMessageWidget extends StatelessWidget {
   // ignore: public_member_api_docs
   const ParentMessageWidget({
-    Key? key,
+    super.key,
     this.parentMessageBuilder,
     required this.parentMessage,
     this.onMessageSwiped,
     this.onMessageTap,
     required this.pinPermissions,
-  }) : super(key: key);
+  });
 
   // ignore: public_member_api_docs
   final ParentMessageBuilder? parentMessageBuilder;
@@ -87,7 +87,7 @@ class ParentMessageWidget extends StatelessWidget {
         FocusScope.of(context).unfocus();
       },
       showPinButton: currentUserMember != null &&
-          pinPermissions.contains(currentUserMember.role),
+          pinPermissions.contains(currentUserMember.channelRole),
     );
 
     if (parentMessageBuilder != null) {

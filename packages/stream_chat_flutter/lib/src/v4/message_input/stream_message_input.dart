@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
@@ -76,7 +78,7 @@ const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 class StreamMessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
   const StreamMessageInput({
-    Key? key,
+    super.key,
     this.onMessageSent,
     this.preMessageSending,
     this.maxHeight = 150,
@@ -93,8 +95,6 @@ class StreamMessageInput extends StatefulWidget {
     this.idleSendButton,
     this.activeSendButton,
     this.showCommandsButton = true,
-    @Deprecated('''Use `userMentionsTileBuilder` instead. Will be removed in future release''')
-        this.mentionsTileBuilder,
     this.userMentionsTileBuilder,
     this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
     this.onError,
@@ -112,10 +112,13 @@ class StreamMessageInput extends StatefulWidget {
     this.enableSafeArea,
     this.elevation,
     this.shadow,
-    this.autoCorrect,
-    this.disableEmojiSuggestionsOverlay,
+    this.autoCorrect = true,
+    @Deprecated('Please use enableEmojiSuggestionsOverlay')
+        this.disableEmojiSuggestionsOverlay = false,
+    this.enableEmojiSuggestionsOverlay = true,
+    this.enableMentionsOverlay = true,
     this.onQuotedMessageCleared,
-  }) : super(key: key);
+  });
 
   /// List of options for showing overlays.
   final List<OverlayOptions> customOverlays;
@@ -149,7 +152,7 @@ class StreamMessageInput extends StatefulWidget {
   final bool hideSendAsDm;
 
   /// The text controller of the TextField.
-  final MessageInputController? messageInputController;
+  final StreamMessageInputController? messageInputController;
 
   /// List of action widgets.
   final List<Widget> actions;
@@ -174,9 +177,6 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Send button widget in an active state
   final Widget? activeSendButton;
-
-  /// Customize the tile for the mentions overlay.
-  final MentionTileBuilder? mentionsTileBuilder;
 
   /// Customize the tile for the mentions overlay.
   final UserMentionTileBuilder? userMentionsTileBuilder;
@@ -236,11 +236,20 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Disable autoCorrect by passing false
   /// autoCorrect is enabled by default
-  final bool? autoCorrect;
+  final bool autoCorrect;
 
   /// Disable the default emoji suggestions
   /// Enabled by default
-  final bool? disableEmojiSuggestionsOverlay;
+  @Deprecated('Please use enableEmojiSuggestionsOverlay')
+  final bool disableEmojiSuggestionsOverlay;
+
+  /// Disable the default emoji suggestions by passing `false`
+  /// Enabled by default
+  final bool enableEmojiSuggestionsOverlay;
+
+  /// Disable the mentions overlay by passing false
+  /// Enabled by default
+  final bool enableMentionsOverlay;
 
   /// TODO: document me!
   final VoidCallback? onQuotedMessageCleared;
@@ -276,21 +285,16 @@ class StreamMessageInputState extends State<StreamMessageInput>
   bool get _isEditing =>
       _effectiveController.value.status != MessageSendingStatus.sending;
 
-  bool get _autoCorrect => widget.autoCorrect ?? true;
+  StreamRestorableMessageInputController? _controller;
 
-  bool get _disableEmojiSuggestionsOverlay =>
-      widget.disableEmojiSuggestionsOverlay ?? false;
-
-  RestorableMessageInputController? _controller;
-
-  MessageInputController get _effectiveController =>
+  StreamMessageInputController get _effectiveController =>
       widget.messageInputController ?? _controller!.value;
 
   BoxBorder? _draggingBorder;
 
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
-    _controller = RestorableMessageInputController(message: message);
+    _controller = StreamRestorableMessageInputController(message: message);
   }
 
   void _registerController() {
@@ -418,7 +422,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         ),
       );
     }
-    return MessageValueListenableBuilder(
+    return StreamMessageValueListenableBuilder(
       valueListenable: _effectiveController,
       builder: (context, value, _) {
         Widget child = DecoratedBox(
@@ -524,7 +528,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
               visible: _showCommandsOverlay,
               widget: _buildCommandsOverlayEntry(),
             ),
-            if (!_disableEmojiSuggestionsOverlay)
+            if (widget.enableEmojiSuggestionsOverlay &&
+                !widget.disableEmojiSuggestionsOverlay)
               OverlayOptions(
                 visible: _focusNode.hasFocus &&
                     _effectiveController.text.isNotEmpty &&
@@ -537,10 +542,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
                         .contains(':'),
                 widget: _buildEmojiOverlay(),
               ),
-            OverlayOptions(
-              visible: _showMentionsOverlay,
-              widget: _buildMentionsOverlayEntry(),
-            ),
+            if (widget.enableMentionsOverlay)
+              OverlayOptions(
+                visible: _showMentionsOverlay,
+                widget: _buildMentionsOverlayEntry(),
+              ),
             ...widget.customOverlays,
           ],
           child: child,
@@ -604,7 +610,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
               color: _messageInputTheme.expandButtonColor,
             ),
           ),
-          padding: const EdgeInsets.all(0),
+          padding: EdgeInsets.zero,
           constraints: const BoxConstraints.tightFor(
             height: 24,
             width: 24,
@@ -751,7 +757,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                         textAlignVertical: TextAlignVertical.center,
                         decoration: _getInputDecoration(context),
                         textCapitalization: TextCapitalization.sentences,
-                        autocorrect: _autoCorrect,
+                        autocorrect: widget.autoCorrect,
                       ),
                     ),
                   ),
@@ -848,7 +854,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
               child: IconButton(
                 icon: StreamSvgIcon.closeSmall(),
                 splashRadius: 24,
-                padding: const EdgeInsets.all(0),
+                padding: EdgeInsets.zero,
                 constraints: const BoxConstraints.tightFor(
                   height: 24,
                   width: 24,
@@ -1079,19 +1085,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     // ignore: cast_nullable_to_non_nullable
     final renderObject = context.findRenderObject() as RenderBox;
 
-    var tileBuilder = widget.userMentionsTileBuilder;
-    if (tileBuilder == null && widget.mentionsTileBuilder != null) {
-      tileBuilder = (context, user) {
-        final member = Member(
-          user: user,
-          userId: user.id,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-        );
-        return widget.mentionsTileBuilder!(context, member);
-      };
-    }
-
     return LayoutBuilder(
       builder: (context, snapshot) {
         return StreamUserMentionsOverlay(
@@ -1106,7 +1099,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
               (snapshot.maxHeight - renderObject.size.height - 16).abs(),
             ),
           ),
-          mentionsTileBuilder: tileBuilder,
+          mentionsTileBuilder: widget.userMentionsTileBuilder,
           onMentionUserTap: (user) {
             _effectiveController.addMentionedUser(user);
             splits[splits.length - 1] = user.name;
@@ -1341,9 +1334,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
           ],
         );
       default:
-        return Container(
+        return const ColoredBox(
           color: Colors.black26,
-          child: const Icon(Icons.insert_drive_file),
+          child: Icon(Icons.insert_drive_file),
         );
     }
   }
@@ -1358,7 +1351,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                 ? _messageInputTheme.actionButtonColor
                 : _messageInputTheme.actionButtonIdleColor),
       ),
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(
         height: 24,
         width: 24,
@@ -1583,10 +1576,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
 class OGAttachmentPreview extends StatelessWidget {
   /// Returns a new instance of [OGAttachmentPreview]
   const OGAttachmentPreview({
-    Key? key,
+    super.key,
     required this.attachment,
     this.onDismissPreviewPressed,
-  }) : super(key: key);
+  });
 
   /// The attachment to be rendered.
   final Attachment attachment;

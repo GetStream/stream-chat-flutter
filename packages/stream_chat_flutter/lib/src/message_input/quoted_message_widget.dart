@@ -16,7 +16,7 @@ typedef QuotedMessageWidget = StreamQuotedMessageWidget;
 class StreamQuotedMessageWidget extends StatelessWidget {
   /// {@macro streamQuotedMessage}
   const StreamQuotedMessageWidget({
-    Key? key,
+    super.key,
     required this.message,
     required this.messageTheme,
     this.reverse = false,
@@ -27,7 +27,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
     this.onTap,
     this.onQuotedMessageClear,
     this.composing = true,
-  }) : super(key: key);
+  });
 
   /// The message
   final Message message;
@@ -57,11 +57,13 @@ class StreamQuotedMessageWidget extends StatelessWidget {
   /// Callback for clearing quoted messages.
   final VoidCallback? onQuotedMessageClear;
 
-  /// Whether the user is currently composing a message in response to the
-  /// quoted message.
-  ///
-  /// Defaults to `true`.
-  final bool composing;
+  /// TODO: Document me!
+  final bool? composing;
+
+  bool get _containsLinkAttachment =>
+      message.attachments.any((element) => element.ogScrapeUrl != null);
+
+  bool get _containsText => message.text?.isNotEmpty == true;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +72,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
         child: _QuotedMessage(
           message: message,
           textLimit: textLimit,
-          composing: composing,
+          composing: composing!,
           onQuotedMessageClear: onQuotedMessageClear,
           messageTheme: messageTheme,
           showBorder: showBorder,
@@ -104,7 +106,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
 
 class _QuotedMessage extends StatelessWidget {
   const _QuotedMessage({
-    Key? key,
+    super.key,
     required this.message,
     required this.textLimit,
     required this.composing,
@@ -113,7 +115,7 @@ class _QuotedMessage extends StatelessWidget {
     required this.showBorder,
     required this.reverse,
     this.attachmentThumbnailBuilders,
-  }) : super(key: key);
+  });
 
   final Message message;
   final int textLimit;
@@ -213,11 +215,11 @@ class _QuotedMessage extends StatelessWidget {
 
 class _ParseAttachments extends StatelessWidget {
   const _ParseAttachments({
-    Key? key,
+    super.key,
     required this.message,
     required this.messageTheme,
     this.attachmentThumbnailBuilders,
-  }) : super(key: key);
+  });
 
   final Message message;
   final StreamMessageThemeData messageTheme;
@@ -233,7 +235,7 @@ class _ParseAttachments extends StatelessWidget {
     Attachment attachment;
     if (_containsLinkAttachment) {
       attachment = message.attachments.firstWhere(
-        (element) => element.titleLink != null,
+        (element) => element.ogScrapeUrl != null,
       );
       child = _UrlAttachment(attachment: attachment);
     } else {
@@ -317,9 +319,9 @@ class _ParseAttachments extends StatelessWidget {
 
 class _UrlAttachment extends StatelessWidget {
   const _UrlAttachment({
-    Key? key,
+    super.key,
     required this.attachment,
-  }) : super(key: key);
+  });
 
   final Attachment attachment;
 
@@ -346,12 +348,10 @@ class _UrlAttachment extends StatelessWidget {
 
 class _VideoAttachmentThumbnail extends StatefulWidget {
   const _VideoAttachmentThumbnail({
-    Key? key,
+    super.key,
     required this.attachment,
-    this.size = const Size(32, 32),
-  }) : super(key: key);
+  });
 
-  final Size size;
   final Attachment attachment;
 
   @override
@@ -381,8 +381,8 @@ class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: widget.size.height,
-      width: widget.size.width,
+      height: 32,
+      width: 32,
       child: _controller.value.isInitialized
           ? VideoPlayer(_controller)
           : const CircularProgressIndicator(),

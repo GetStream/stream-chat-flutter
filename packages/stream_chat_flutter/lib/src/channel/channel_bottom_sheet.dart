@@ -8,7 +8,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 @Deprecated("Use 'StreamChannelInfoBottomSheet' instead")
 class ChannelBottomSheet extends StatefulWidget {
   /// {@macro channelBottomSheet}
-  const ChannelBottomSheet({Key? key, this.onViewInfoTap}) : super(key: key);
+  const ChannelBottomSheet({super.key, this.onViewInfoTap});
 
   /// The action to perform when 'View Info' is tapped or clicked.
   final VoidCallback? onViewInfoTap;
@@ -43,7 +43,6 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
 
     final userAsMember = members
         .firstWhere((e) => e.user?.id == _streamChatState.currentUser?.id);
-    final isOwner = userAsMember.role == 'owner';
 
     return Material(
       color: _streamChatThemeData.colorTheme.barsBg,
@@ -185,9 +184,8 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                       setState(() => _showActions = true);
                     },
                   ),
-                if (isOwner &&
-                    channel.ownCapabilities
-                        .contains(PermissionType.deleteChannel))
+                if (channel.ownCapabilities
+                    .contains(PermissionType.deleteChannel))
                   StreamOptionListTile(
                     leading: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),

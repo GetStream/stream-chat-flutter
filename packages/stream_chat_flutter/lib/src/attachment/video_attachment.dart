@@ -13,20 +13,15 @@ typedef VideoAttachment = StreamVideoAttachment;
 class StreamVideoAttachment extends StreamAttachmentWidget {
   /// {@macro streamVideoAttachment}
   const StreamVideoAttachment({
-    Key? key,
-    required Message message,
-    required Attachment attachment,
+    super.key,
+    required super.message,
+    required super.attachment,
     required this.messageTheme,
-    Size? size,
+    super.size,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
-  }) : super(
-          key: key,
-          message: message,
-          attachment: attachment,
-          size: size,
-        );
+  });
 
   /// The [StreamMessageThemeData] to use for the title
   final StreamMessageThemeData messageTheme;

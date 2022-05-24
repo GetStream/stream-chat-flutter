@@ -14,10 +14,10 @@ typedef DateDivider = StreamDateDivider;
 class StreamDateDivider extends StatelessWidget {
   /// {@macro streamDateDivider}
   const StreamDateDivider({
-    Key? key,
+    super.key,
     required this.dateTime,
     this.uppercase = false,
-  }) : super(key: key);
+  });
 
   /// [DateTime] to display
   final DateTime dateTime;

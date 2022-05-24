@@ -14,7 +14,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class MessageBuilderWidget extends StatelessWidget {
   /// {@macro messageBuilder}
   const MessageBuilderWidget({
-    Key? key,
+    super.key,
     required this.message,
     this.systemMessageBuilder,
     this.onSystemMessageTap,
@@ -33,7 +33,7 @@ class MessageBuilderWidget extends StatelessWidget {
     required this.highlightInitialMessage,
     this.messageHighlightColor,
     required this.onTweenEnd,
-  }) : super(key: key);
+  });
 
   // ignore: public_member_api_docs
   final Message message;
@@ -249,7 +249,7 @@ class MessageBuilderWidget extends StatelessWidget {
         FocusScope.of(context).unfocus();
       },
       showPinButton: currentUserMember != null &&
-          pinPermissions.contains(currentUserMember.role),
+          pinPermissions.contains(currentUserMember.channelRole),
     );
 
     if (messageBuilder != null) {
@@ -299,8 +299,8 @@ class MessageBuilderWidget extends StatelessWidget {
         ),
         duration: const Duration(seconds: 3),
         onEnd: onTweenEnd,
-        builder: (_, color, child) => Container(
-          color: color,
+        builder: (_, color, child) => ColoredBox(
+          color: color!,
           child: child,
         ),
         child: Padding(

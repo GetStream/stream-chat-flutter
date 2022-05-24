@@ -7,12 +7,12 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamChatContextMenuItem extends StatelessWidget {
   /// {@macro streamChatContextMenuItem}
   const StreamChatContextMenuItem({
-    Key? key,
+    super.key,
     this.child,
     this.leading,
     this.title,
     this.onClick,
-  }) : super(key: key);
+  });
 
   /// The child widget for this menu item. Usually a [DesktopReactionPicker].
   ///

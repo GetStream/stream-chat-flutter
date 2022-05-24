@@ -15,12 +15,12 @@ class StreamUserMentionTile extends StatelessWidget {
   /// {@macro streamUserMentionTile}
   const StreamUserMentionTile(
     this.user, {
-    Key? key,
+    super.key,
     this.title,
     this.subtitle,
     this.leading,
     this.trailing,
-  }) : super(key: key);
+  });
 
   /// User to display in the tile
   final User user;

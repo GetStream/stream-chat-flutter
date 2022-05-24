@@ -7,10 +7,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class AttachmentButton extends StatelessWidget {
   /// {@macro attachmentButton}
   const AttachmentButton({
-    Key? key,
+    super.key,
     required this.color,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   /// The color of the button.
   final Color color;
@@ -24,7 +24,7 @@ class AttachmentButton extends StatelessWidget {
       icon: StreamSvgIcon.attach(
         color: color,
       ),
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(
         height: 24,
         width: 24,

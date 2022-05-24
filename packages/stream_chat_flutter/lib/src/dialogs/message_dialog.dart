@@ -12,11 +12,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class MessageDialog extends StatelessWidget {
   /// {@macro messageDialog}
   const MessageDialog({
-    Key? key,
+    super.key,
     this.titleText,
     this.messageText,
     this.showMessage = true,
-  }) : super(key: key);
+  });
 
   /// The optional error message title to use.
   final String? titleText;

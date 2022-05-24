@@ -40,15 +40,14 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
 
   /// Creates a [StreamUserListController] from the passed [value].
   StreamUserListController.fromValue(
-    PagedValue<int, User> value, {
+    super.value, {
     required this.client,
     this.filter,
     this.sort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
   })  : _activeFilter = filter,
-        _activeSort = sort,
-        super(value);
+        _activeSort = sort;
 
   /// The client to use for the channels list.
   final StreamChatClient client;

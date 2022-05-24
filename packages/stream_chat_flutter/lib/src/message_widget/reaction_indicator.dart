@@ -10,14 +10,14 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ReactionIndicator extends StatelessWidget {
   /// {@macro reactionIndicator}
   const ReactionIndicator({
-    Key? key,
+    super.key,
     required this.ownId,
     required this.message,
     required this.shouldShowReactions,
     required this.onTap,
     required this.reverse,
     required this.messageTheme,
-  }) : super(key: key);
+  });
 
   /// The id of the current user.
   final String ownId;

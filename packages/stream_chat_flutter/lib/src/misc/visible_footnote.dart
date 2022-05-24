@@ -14,7 +14,7 @@ typedef VisibleFootnote = StreamVisibleFootnote;
 /// {@endtemplate}
 class StreamVisibleFootnote extends StatelessWidget {
   /// {@macro streamVisibleFootnote}
-  const StreamVisibleFootnote({Key? key}) : super(key: key);
+  const StreamVisibleFootnote({super.key});
 
   @override
   Widget build(BuildContext context) {

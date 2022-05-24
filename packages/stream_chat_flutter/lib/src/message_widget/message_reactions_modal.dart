@@ -15,14 +15,14 @@ typedef MessageReactionsModal = StreamMessageReactionsModal;
 class StreamMessageReactionsModal extends StatelessWidget {
   /// {@macro streamMessageReactionsModal}
   const StreamMessageReactionsModal({
-    Key? key,
+    super.key,
     required this.message,
     required this.messageWidget,
     required this.messageTheme,
     this.showReactions,
     this.reverse = false,
     this.onUserAvatarTap,
-  }) : super(key: key);
+  });
 
   /// Widget that shows the message
   final Widget messageWidget;
@@ -245,6 +245,8 @@ class StreamMessageReactionsModal extends StatelessWidget {
             reaction.user!.name.split(' ')[0],
             style: chatThemeData.textTheme.footnoteBold,
             textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ],
       ),
