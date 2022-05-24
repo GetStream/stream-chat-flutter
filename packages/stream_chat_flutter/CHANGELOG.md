@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- [[#1178]](https://github.com/GetStream/stream-chat-flutter/issues/1178) Added an option `usersToMention` in `StreamMessageInput` and `StreamMessageInput`.
+
 ## 4.2.0
 
 🐞 Fixed
