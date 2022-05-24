@@ -82,7 +82,7 @@ class ParentMessageWidget extends StatelessWidget {
       },
       onMessageTap: (message) {
         if (onMessageTap != null) {
-          onMessageTap!(message);
+          onMessageTap?.call(message);
         }
         FocusScope.of(context).unfocus();
       },

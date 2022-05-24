@@ -98,7 +98,7 @@ class MessageBuilderWidget extends StatelessWidget {
             message: message,
             onMessageTap: (message) {
               if (onSystemMessageTap != null) {
-                onSystemMessageTap!(message);
+                onSystemMessageTap?.call(message);
               }
               FocusScope.of(context).unfocus();
             },
@@ -244,7 +244,7 @@ class MessageBuilderWidget extends StatelessWidget {
       },
       onMessageTap: (message) {
         if (onMessageTap != null) {
-          onMessageTap!(message);
+          onMessageTap?.call(message);
         }
         FocusScope.of(context).unfocus();
       },

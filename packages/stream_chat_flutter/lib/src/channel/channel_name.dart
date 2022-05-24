@@ -49,7 +49,6 @@ class ChannelName extends StatelessWidget {
 
 class _NameGenerator extends StatelessWidget {
   const _NameGenerator({
-    super.key,
     required this.currentUser,
     required this.members,
     this.textStyle,

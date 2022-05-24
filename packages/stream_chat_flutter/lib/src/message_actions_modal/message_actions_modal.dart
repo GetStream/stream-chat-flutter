@@ -182,7 +182,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             onTap: () {
                               Navigator.of(context).pop();
                               if (widget.onReplyTap != null) {
-                                widget.onReplyTap!(widget.message);
+                                widget.onReplyTap?.call(widget.message);
                               }
                             },
                           ),

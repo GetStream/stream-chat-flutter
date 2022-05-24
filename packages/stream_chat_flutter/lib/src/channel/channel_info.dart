@@ -65,7 +65,6 @@ class StreamChannelInfo extends StatelessWidget {
 
 class _ConnectedTitleState extends StatelessWidget {
   const _ConnectedTitleState({
-    super.key,
     required this.channel,
     required this.showTypingIndicator,
     this.members,
@@ -131,7 +130,6 @@ class _ConnectedTitleState extends StatelessWidget {
 
 class _ConnectingTitleState extends StatelessWidget {
   const _ConnectingTitleState({
-    super.key,
     this.textStyle,
   });
 
@@ -161,7 +159,6 @@ class _ConnectingTitleState extends StatelessWidget {
 
 class _DisconnectedTitleState extends StatelessWidget {
   const _DisconnectedTitleState({
-    super.key,
     required this.client,
     this.textStyle,
   });

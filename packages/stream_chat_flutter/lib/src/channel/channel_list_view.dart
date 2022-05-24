@@ -659,7 +659,6 @@ class _ChannelListViewState extends State<ChannelListView> {
 
 class _GridItemBuilder extends StatelessWidget {
   const _GridItemBuilder({
-    super.key,
     required this.index,
     required this.channels,
     required this.selectedChannels,
@@ -714,7 +713,6 @@ class _GridItemBuilder extends StatelessWidget {
 
 class _QueryProgressIndicator extends StatelessWidget {
   const _QueryProgressIndicator({
-    super.key,
     required this.channelsProvider,
   });
 
@@ -755,7 +753,6 @@ class _QueryProgressIndicator extends StatelessWidget {
 
 class _Separator extends StatelessWidget {
   const _Separator({
-    super.key,
     required this.index,
   });
 

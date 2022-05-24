@@ -109,7 +109,6 @@ class StreamFileAttachment extends StreamAttachmentWidget {
 
 class _FileTypeImage extends StatelessWidget {
   const _FileTypeImage({
-    super.key,
     required this.isImageAttachment,
     required this.isVideoAttachment,
     required this.source,
@@ -218,22 +217,19 @@ class _FileTypeImage extends StatelessWidget {
 
 class _Trailing extends StatelessWidget {
   const _Trailing({
-    super.key,
     required this.attachment,
     required this.message,
-    this.trailing,
   });
 
   final Attachment attachment;
   final Message message;
-  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
     final channel = StreamChannel.of(context).channel;
     final attachmentId = attachment.id;
-    var trailingWidget = trailing;
+    Widget? trailingWidget;
     trailingWidget ??= attachment.uploadState.when(
       preparing: () => Padding(
         padding: const EdgeInsets.all(8),
@@ -306,7 +302,6 @@ class _Trailing extends StatelessWidget {
 
 class _TrailingButton extends StatelessWidget {
   const _TrailingButton({
-    super.key,
     this.iconSize,
     this.onPressed,
     this.fillColor,
@@ -339,7 +334,6 @@ class _TrailingButton extends StatelessWidget {
 
 class _FileAttachmentSubtitle extends StatelessWidget {
   const _FileAttachmentSubtitle({
-    super.key,
     required this.attachment,
   });
 

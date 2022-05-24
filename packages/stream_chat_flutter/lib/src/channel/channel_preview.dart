@@ -327,7 +327,6 @@ class ChannelPreview extends StatelessWidget {
 
 class _Date extends StatelessWidget {
   const _Date({
-    super.key,
     required this.channel,
   });
 
@@ -371,7 +370,6 @@ class _Date extends StatelessWidget {
 
 class _Subtitle extends StatelessWidget {
   const _Subtitle({
-    super.key,
     required this.channel,
   });
 
@@ -406,7 +404,6 @@ class _Subtitle extends StatelessWidget {
 
 class _LastMessage extends StatelessWidget {
   const _LastMessage({
-    super.key,
     required this.channel,
   });
 

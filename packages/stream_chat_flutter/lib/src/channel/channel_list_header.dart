@@ -203,9 +203,9 @@ class StreamChannelListHeader extends StatelessWidget
                     }
                     switch (status) {
                       case ConnectionStatus.connected:
-                        return const _ConnectedTitleState();
+                        return _ConnectedTitleState();
                       case ConnectionStatus.connecting:
-                        return const _ConnectingTitleState();
+                        return _ConnectingTitleState();
                       case ConnectionStatus.disconnected:
                         return _DisconnectedTitleState(client: _client);
                       default:
@@ -224,8 +224,6 @@ class StreamChannelListHeader extends StatelessWidget
 }
 
 class _ConnectedTitleState extends StatelessWidget {
-  const _ConnectedTitleState({super.key});
-
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
@@ -239,8 +237,6 @@ class _ConnectedTitleState extends StatelessWidget {
 }
 
 class _ConnectingTitleState extends StatelessWidget {
-  const _ConnectingTitleState({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -268,7 +264,6 @@ class _ConnectingTitleState extends StatelessWidget {
 
 class _DisconnectedTitleState extends StatelessWidget {
   const _DisconnectedTitleState({
-    super.key,
     required this.client,
   });
 

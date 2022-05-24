@@ -470,7 +470,6 @@ class DesktopVideoPackage {
 
 class _PlaylistPlayer extends StatelessWidget {
   const _PlaylistPlayer({
-    super.key,
     required this.packages,
     required this.autoStart,
   });

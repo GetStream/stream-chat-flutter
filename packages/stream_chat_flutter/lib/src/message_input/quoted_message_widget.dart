@@ -60,11 +60,6 @@ class StreamQuotedMessageWidget extends StatelessWidget {
   /// TODO: Document me!
   final bool? composing;
 
-  bool get _containsLinkAttachment =>
-      message.attachments.any((element) => element.ogScrapeUrl != null);
-
-  bool get _containsText => message.text?.isNotEmpty == true;
-
   @override
   Widget build(BuildContext context) {
     final children = [
@@ -77,6 +72,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
           messageTheme: messageTheme,
           showBorder: showBorder,
           reverse: reverse,
+          attachmentThumbnailBuilders: attachmentThumbnailBuilders,
         ),
       ),
       const SizedBox(width: 8),
@@ -106,7 +102,6 @@ class StreamQuotedMessageWidget extends StatelessWidget {
 
 class _QuotedMessage extends StatelessWidget {
   const _QuotedMessage({
-    super.key,
     required this.message,
     required this.textLimit,
     required this.composing,
@@ -215,7 +210,6 @@ class _QuotedMessage extends StatelessWidget {
 
 class _ParseAttachments extends StatelessWidget {
   const _ParseAttachments({
-    super.key,
     required this.message,
     required this.messageTheme,
     this.attachmentThumbnailBuilders,
@@ -319,7 +313,6 @@ class _ParseAttachments extends StatelessWidget {
 
 class _UrlAttachment extends StatelessWidget {
   const _UrlAttachment({
-    super.key,
     required this.attachment,
   });
 

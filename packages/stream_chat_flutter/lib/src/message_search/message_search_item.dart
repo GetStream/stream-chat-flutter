@@ -76,7 +76,6 @@ class MessageSearchItem extends StatelessWidget {
 
 class _Date extends StatelessWidget {
   const _Date({
-    super.key,
     required this.message,
   });
 
@@ -105,7 +104,6 @@ class _Date extends StatelessWidget {
 
 class _SearchItemSubtitle extends StatelessWidget {
   const _SearchItemSubtitle({
-    super.key,
     required this.message,
   });
 

@@ -28,7 +28,7 @@ class ThreadReplyButton extends StatelessWidget {
       onTap: () {
         Navigator.of(context).pop();
         if (onThreadReplyTap != null) {
-          onThreadReplyTap!(message);
+          onThreadReplyTap?.call(message);
         }
       },
       child: Padding(

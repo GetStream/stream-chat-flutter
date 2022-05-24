@@ -65,7 +65,7 @@ class _StreamMediaListViewState extends State<StreamMediaListView> {
             child: InkWell(
               onTap: () {
                 if (widget.onSelect != null) {
-                  widget.onSelect!(media);
+                  widget.onSelect?.call(media);
                 }
               },
               child: Stack(
