@@ -229,7 +229,6 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
                             ],
                             child: Video(
                               player: package.player,
-                              playlistLength: videoPackages.values.length,
                             ),
                           ),
                         ),
@@ -492,7 +491,6 @@ class _PlaylistPlayer extends StatelessWidget {
     return Video(
       player: packages.first.player,
       fit: BoxFit.cover,
-      playlistLength: packages.length,
     );
   }
 }
