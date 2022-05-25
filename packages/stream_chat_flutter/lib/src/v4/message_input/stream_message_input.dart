@@ -626,12 +626,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                   if (!widget.disableAttachments &&
                       channel.ownCapabilities
                           .contains(PermissionType.uploadFile))
-                    AttachmentButton(
-                      color: _openFilePickerSection
-                          ? _messageInputTheme.actionButtonColor!
-                          : _messageInputTheme.actionButtonIdleColor!,
-                      onPressed: _handleFileSelect,
-                    ),
+                    _buildAttachmentButton(context),
                   if (widget.showCommandsButton &&
                       !_isEditing &&
                       channel.state != null &&
@@ -644,6 +639,18 @@ class StreamMessageInputState extends State<StreamMessageInput>
         alignment: Alignment.center,
       ),
     );
+  }
+
+  Widget _buildAttachmentButton(BuildContext context) {
+    final defaultButton = AttachmentButton(
+      color: _openFilePickerSection
+          ? _messageInputTheme.actionButtonColor!
+          : _messageInputTheme.actionButtonIdleColor!,
+      onPressed: _handleFileSelect,
+    );
+
+    return widget.attachmentButtonBuilder?.call(context, defaultButton) ??
+        defaultButton;
   }
 
   /// Handle the platform-specific logic for selecting files.
