@@ -66,6 +66,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       supportedLocales: const [
@@ -173,6 +174,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
             width: 250,
             child: Column(
               children: [
+                const SizedBox(height: 40),
                 Expanded(
                   child: StreamChannelListView(
                     controller: controller,
