@@ -302,13 +302,11 @@ class _Trailing extends StatelessWidget {
 
 class _TrailingButton extends StatelessWidget {
   const _TrailingButton({
-    this.iconSize,
     this.onPressed,
     this.fillColor,
     this.icon,
   });
 
-  final double? iconSize;
   final VoidCallback? onPressed;
   final Color? fillColor;
   final Widget? icon;
@@ -316,8 +314,8 @@ class _TrailingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: iconSize,
-      width: iconSize,
+      height: 24,
+      width: 24,
       child: RawMaterialButton(
         elevation: 0,
         highlightElevation: 0,
