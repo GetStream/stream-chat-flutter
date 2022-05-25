@@ -1476,6 +1476,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   /// Sends the current message
   Future<void> sendMessage() async {
+    if (_effectiveController.text.trim().isEmpty &&
+        _effectiveController.attachments.isEmpty) {
+      return;
+    }
+
     final streamChannel = StreamChannel.of(context);
     var message = _effectiveController.value;
     if (!streamChannel.channel.ownCapabilities
