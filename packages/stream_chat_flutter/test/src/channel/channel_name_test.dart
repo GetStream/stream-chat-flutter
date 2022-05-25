@@ -64,8 +64,8 @@ void main() {
               channel: channel,
               child: Scaffold(
                 body: StreamChannelName(
-                channel: channel,
-              ),
+                  channel: channel,
+                ),
               ),
             ),
           ),
