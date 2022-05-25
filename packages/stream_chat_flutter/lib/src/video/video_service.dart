@@ -38,8 +38,10 @@ class _IVideoService {
   }) async {
     if (isDesktopDevice) {
       try {
-        final image = await thumblr.generateThumbnail(filePath: video);
-        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+        final thumbnail = await thumblr.generateThumbnail(filePath: video);
+        final byteData = await thumbnail.image.toByteData(
+          format: ui.ImageByteFormat.png,
+        );
         final bytesList = byteData?.buffer.asUint8List() ?? Uint8List(0);
         if (bytesList.isNotEmpty) {
           return bytesList;
