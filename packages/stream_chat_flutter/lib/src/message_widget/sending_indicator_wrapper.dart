@@ -77,6 +77,7 @@ class SendingIndicatorWrapper extends StatelessWidget {
         );
         if (isMessageRead) {
           child = Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               if (memberCount > 2)
                 Text(

@@ -95,7 +95,7 @@ class BottomRow extends StatelessWidget {
           const Offstage();
     }
 
-    final children = <Widget>[];
+    final children = <WidgetSpan>[];
 
     final threadParticipants = message.threadParticipants?.take(2);
     final showThreadParticipants = threadParticipants?.isNotEmpty == true;
@@ -109,12 +109,12 @@ class BottomRow extends StatelessWidget {
     // ignore: prefer_function_declarations_over_variables
     final _onThreadTap = () async {
       try {
-        var _message = message;
+        var message = this.message;
         if (showInChannel) {
           final channel = StreamChannel.of(context);
-          _message = await channel.getMessage(message.parentId!);
+          message = await channel.getMessage(message.parentId!);
         }
-        return onThreadTap!(_message);
+        return onThreadTap!(message);
       } catch (e, stk) {
         print(e);
         print(stk);
@@ -127,81 +127,87 @@ class BottomRow extends StatelessWidget {
 
     children.addAll([
       if (showUsername)
-        Username(
-          key: usernameKey,
-          message: message,
-          messageTheme: messageTheme,
+        WidgetSpan(
+          child: Username(
+            key: usernameKey,
+            message: message,
+            messageTheme: messageTheme,
+          ),
         ),
       if (showTimeStamp)
-        Text(
-          Jiffy(message.createdAt.toLocal()).jm,
-          style: messageTheme.createdAtStyle,
+        WidgetSpan(
+          child: Text(
+            Jiffy(message.createdAt.toLocal()).jm,
+            style: messageTheme.createdAtStyle,
+          ),
         ),
       if (showSendingIndicator)
-        SendingIndicatorWrapper(
-          messageTheme: messageTheme,
-          message: message,
-          hasNonUrlAttachments: hasNonUrlAttachments,
-          streamChat: streamChat,
-          streamChatTheme: streamChatTheme,
+        WidgetSpan(
+          child: SendingIndicatorWrapper(
+            messageTheme: messageTheme,
+            message: message,
+            hasNonUrlAttachments: hasNonUrlAttachments,
+            streamChat: streamChat,
+            streamChatTheme: streamChatTheme,
+          ),
         ),
     ]);
 
     final showThreadTail = !(hasUrlAttachments || isGiphy || isOnlyEmoji) &&
         (showThreadReplyIndicator || showInChannel);
 
-    final threadIndicatorWidgets = <Widget>[
+    final threadIndicatorWidgets = <WidgetSpan>[
       if (showThreadTail)
-        Container(
-          margin: EdgeInsets.only(
-            bottom: context.textScaleFactor *
-                ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
-          ),
-          child: CustomPaint(
-            size: const Size(16, 32) * context.textScaleFactor,
-            painter: ThreadReplyPainter(
-              context: context,
-              color: messageTheme.messageBorderColor,
-              reverse: reverse,
+        WidgetSpan(
+          child: Container(
+            margin: EdgeInsets.only(
+              bottom: context.textScaleFactor *
+                  ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
+            ),
+            child: CustomPaint(
+              size: const Size(16, 32) * context.textScaleFactor,
+              painter: ThreadReplyPainter(
+                context: context,
+                color: messageTheme.messageBorderColor,
+                reverse: reverse,
+              ),
             ),
           ),
         ),
       if (showInChannel || showThreadReplyIndicator) ...[
         if (showThreadParticipants)
-          SizedBox.fromSize(
-            size: Size((threadParticipants!.length * 8.0) + 8, 16),
-            child: ThreadParticipants(
-              streamChatTheme: streamChatTheme,
-              threadParticipants: threadParticipants,
+          WidgetSpan(
+            child: SizedBox.fromSize(
+              size: Size((threadParticipants!.length * 8.0) + 8, 16),
+              child: ThreadParticipants(
+                threadParticipants: threadParticipants,
+                streamChatTheme: streamChatTheme,
+              ),
             ),
           ),
-        InkWell(
-          onTap: _onThreadTap,
-          child: Text(msg, style: messageTheme.repliesStyle),
+        WidgetSpan(
+          child: InkWell(
+            onTap: _onThreadTap,
+            child: Text(msg, style: messageTheme.repliesStyle),
+          ),
         ),
       ],
     ];
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment:
-          reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
-      children: [
-        if (showThreadTail && !reverse) ...threadIndicatorWidgets,
-        ...children.map(
-          (child) {
-            Widget mappedChild = SizedBox(
-              height: context.textScaleFactor * 14,
-              child: child,
-            );
-            if (child.key == usernameKey) {
-              mappedChild = Flexible(child: mappedChild);
-            }
-            return mappedChild;
-          },
-        ),
-        if (showThreadTail && reverse) ...threadIndicatorWidgets.reversed,
-      ].insertBetween(const SizedBox(width: 8)),
+    if (reverse) {
+      children.addAll(threadIndicatorWidgets.reversed);
+    } else {
+      children.insertAll(0, threadIndicatorWidgets);
+    }
+
+    return Text.rich(
+      TextSpan(
+        children: [
+          ...children,
+        ].insertBetween(const WidgetSpan(child: SizedBox(width: 8))),
+      ),
+      maxLines: 1,
+      textAlign: reverse ? TextAlign.right : TextAlign.left,
     );
   }
 }

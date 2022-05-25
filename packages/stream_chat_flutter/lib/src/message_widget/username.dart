@@ -10,11 +10,7 @@ class Username extends StatelessWidget {
     super.key,
     required this.message,
     required this.messageTheme,
-    this.usernameBuilder,
   });
-
-  /// {@macro usernameBuilder}
-  final Widget Function(BuildContext, Message)? usernameBuilder;
 
   /// {@macro message}
   final Message message;
@@ -24,9 +20,6 @@ class Username extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (usernameBuilder != null) {
-      return usernameBuilder!(context, message);
-    }
     return Text(
       message.user?.name ?? '',
       maxLines: 1,
