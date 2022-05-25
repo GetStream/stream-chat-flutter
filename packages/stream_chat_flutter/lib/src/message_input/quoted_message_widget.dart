@@ -229,7 +229,7 @@ class _ParseAttachments extends StatelessWidget {
     Attachment attachment;
     if (_containsLinkAttachment) {
       attachment = message.attachments.firstWhere(
-        (element) => element.ogScrapeUrl != null,
+        (element) => element.ogScrapeUrl != null || element.titleLink != null,
       );
       child = _UrlAttachment(attachment: attachment);
     } else {
