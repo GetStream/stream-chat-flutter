@@ -126,20 +126,6 @@ class BottomRow extends StatelessWidget {
     const usernameKey = Key('username');
 
     children.addAll([
-      if (showInChannel || showThreadReplyIndicator) ...[
-        if (showThreadParticipants)
-          SizedBox.fromSize(
-            size: Size((threadParticipants!.length * 8.0) + 8, 16),
-            child: ThreadParticipants(
-              streamChatTheme: streamChatTheme,
-              threadParticipants: threadParticipants,
-            ),
-          ),
-        InkWell(
-          onTap: onThreadTap != null ? _onThreadTap : null,
-          child: Text(msg, style: messageTheme.repliesStyle),
-        ),
-      ],
       if (showUsername)
         Username(
           key: usernameKey,
@@ -164,26 +150,44 @@ class BottomRow extends StatelessWidget {
     final showThreadTail = !(hasUrlAttachments || isGiphy || isOnlyEmoji) &&
         (showThreadReplyIndicator || showInChannel);
 
+    final threadIndicatorWidgets = <Widget>[
+      if (showThreadTail)
+        Container(
+          margin: EdgeInsets.only(
+            bottom: context.textScaleFactor *
+                ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
+          ),
+          child: CustomPaint(
+            size: const Size(16, 32) * context.textScaleFactor,
+            painter: ThreadReplyPainter(
+              context: context,
+              color: messageTheme.messageBorderColor,
+              reverse: reverse,
+            ),
+          ),
+        ),
+      if (showInChannel || showThreadReplyIndicator) ...[
+        if (showThreadParticipants)
+          SizedBox.fromSize(
+            size: Size((threadParticipants!.length * 8.0) + 8, 16),
+            child: ThreadParticipants(
+              streamChatTheme: streamChatTheme,
+              threadParticipants: threadParticipants,
+            ),
+          ),
+        InkWell(
+          onTap: _onThreadTap,
+          child: Text(msg, style: messageTheme.repliesStyle),
+        ),
+      ],
+    ];
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment:
           reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        if (showThreadTail && !reverse)
-          Container(
-            margin: EdgeInsets.only(
-              bottom: context.textScaleFactor *
-                  ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
-            ),
-            child: CustomPaint(
-              size: const Size(16, 32) * context.textScaleFactor,
-              painter: ThreadReplyPainter(
-                context: context,
-                color: messageTheme.messageBorderColor,
-                reverse: reverse,
-              ),
-            ),
-          ),
+        if (showThreadTail && !reverse) ...threadIndicatorWidgets,
         ...children.map(
           (child) {
             Widget mappedChild = SizedBox(
@@ -196,21 +200,7 @@ class BottomRow extends StatelessWidget {
             return mappedChild;
           },
         ),
-        if (showThreadTail && reverse)
-          Container(
-            margin: EdgeInsets.only(
-              bottom: context.textScaleFactor *
-                  ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
-            ),
-            child: CustomPaint(
-              size: const Size(16, 32) * context.textScaleFactor,
-              painter: ThreadReplyPainter(
-                context: context,
-                color: messageTheme.messageBorderColor,
-                reverse: reverse,
-              ),
-            ),
-          ),
+        if (showThreadTail && reverse) ...threadIndicatorWidgets.reversed,
       ].insertBetween(const SizedBox(width: 8)),
     );
   }
