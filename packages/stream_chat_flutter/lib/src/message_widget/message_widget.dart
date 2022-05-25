@@ -718,6 +718,34 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       (widget.message.reactionCounts?.isNotEmpty == true) &&
       !widget.message.isDeleted;
 
+  bool get shouldShowReplyAction =>
+      widget.showReplyMessage && !isFailedState && widget.onReplyTap != null;
+
+  bool get shouldShowEditAction =>
+      widget.showEditMessage &&
+      !isDeleteFailed &&
+      !widget.message.attachments.any((element) => element.type == 'giphy');
+
+  bool get shouldShowResendAction =>
+      widget.showResendMessage && (isSendFailed || isUpdateFailed);
+
+  bool get shouldShowCopyAction =>
+      widget.showCopyMessage &&
+      !isFailedState &&
+      widget.message.text?.trim().isNotEmpty == true;
+
+  bool get shouldShowEditMessage =>
+      widget.showEditMessage &&
+      !isDeleteFailed &&
+      !widget.message.attachments.any((element) => element.type == 'giphy');
+
+  bool get shouldShowThreadReplyAction =>
+      widget.showThreadReplyMessage &&
+      !isFailedState &&
+      widget.onThreadTap != null;
+
+  bool get shouldShowDeleteAction => widget.showDeleteMessage || isDeleteFailed;
+
   @override
   bool get wantKeepAlive => widget.message.attachments.isNotEmpty;
 
@@ -845,15 +873,17 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           ),
         ),
       ),
-      StreamChatContextMenuItem(
-        leading: StreamSvgIcon.reply(),
-        title: Text(context.translations.replyLabel),
-        onClick: () {
-          Navigator.of(context, rootNavigator: true).pop();
-          widget.onReplyTap!(widget.message);
-        },
-      ),
-      if (widget.onThreadTap != null)
+      if (shouldShowReplyAction) ...[
+        StreamChatContextMenuItem(
+          leading: StreamSvgIcon.reply(),
+          title: Text(context.translations.replyLabel),
+          onClick: () {
+            Navigator.of(context, rootNavigator: true).pop();
+            widget.onReplyTap!(widget.message);
+          },
+        ),
+      ],
+      if (shouldShowThreadReplyAction)
         StreamChatContextMenuItem(
           leading: StreamSvgIcon.thread(),
           title: Text(context.translations.threadReplyLabel),
@@ -862,7 +892,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             widget.onThreadTap!(widget.message);
           },
         ),
-      if (widget.message.text != null && widget.message.text!.isNotEmpty)
+      if (shouldShowCopyAction)
         StreamChatContextMenuItem(
           leading: StreamSvgIcon.copy(),
           title: Text(context.translations.copyMessageLabel),
@@ -871,55 +901,58 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             Clipboard.setData(ClipboardData(text: widget.message.text));
           },
         ),
-      StreamChatContextMenuItem(
-        leading: StreamSvgIcon.edit(color: Colors.grey),
-        title: Text(context.translations.editMessageLabel),
-        onClick: () {
-          Navigator.of(context, rootNavigator: true).pop();
-          showModalBottomSheet(
-            context: context,
-            elevation: 2,
-            clipBehavior: Clip.hardEdge,
-            isScrollControlled: true,
-            backgroundColor:
-                StreamMessageInputTheme.of(context).inputBackgroundColor,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+      if (shouldShowEditAction) ...[
+        StreamChatContextMenuItem(
+          leading: StreamSvgIcon.edit(color: Colors.grey),
+          title: Text(context.translations.editMessageLabel),
+          onClick: () {
+            Navigator.of(context, rootNavigator: true).pop();
+            showModalBottomSheet(
+              context: context,
+              elevation: 2,
+              clipBehavior: Clip.hardEdge,
+              isScrollControlled: true,
+              backgroundColor:
+                  StreamMessageInputTheme.of(context).inputBackgroundColor,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
               ),
-            ),
-            builder: (_) => EditMessageSheet(
-              message: widget.message,
-              channel: StreamChannel.of(context).channel,
-            ),
-          );
-        },
-      ),
-      StreamChatContextMenuItem(
-        leading: StreamSvgIcon.pin(
-          color: Colors.grey,
-          size: 24,
+              builder: (_) => EditMessageSheet(
+                message: widget.message,
+                channel: StreamChannel.of(context).channel,
+              ),
+            );
+          },
         ),
-        title: Text(
-          context.translations.togglePinUnpinText(
-            pinned: widget.message.pinned,
+      ],
+      if (widget.showPinButton)
+        StreamChatContextMenuItem(
+          leading: StreamSvgIcon.pin(
+            color: Colors.grey,
+            size: 24,
           ),
-        ),
-        onClick: () async {
-          Navigator.of(context, rootNavigator: true).pop();
-          try {
-            if (!widget.message.pinned) {
-              await channel.pinMessage(widget.message);
-            } else {
-              await channel.unpinMessage(widget.message);
+          title: Text(
+            context.translations.togglePinUnpinText(
+              pinned: widget.message.pinned,
+            ),
+          ),
+          onClick: () async {
+            Navigator.of(context, rootNavigator: true).pop();
+            try {
+              if (!widget.message.pinned) {
+                await channel.pinMessage(widget.message);
+              } else {
+                await channel.unpinMessage(widget.message);
+              }
+            } catch (e) {
+              throw Exception(e);
             }
-          } catch (e) {
-            throw Exception(e);
-          }
-        },
-      ),
-      if (widget.showResendMessage && (isSendFailed || isUpdateFailed))
+          },
+        ),
+      if (shouldShowResendAction)
         StreamChatContextMenuItem(
           leading: StreamSvgIcon.iconSendMessage(),
           title: Text(
@@ -940,7 +973,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             }
           },
         ),
-      if (widget.showDeleteMessage || isDeleteFailed)
+      if (shouldShowDeleteAction)
         StreamChatContextMenuItem(
           leading: StreamSvgIcon.delete(color: Colors.red),
           title: Text(
@@ -1020,27 +1053,17 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               Clipboard.setData(ClipboardData(text: message.text)),
           messageTheme: widget.messageTheme,
           reverse: widget.reverse,
-          showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
+          showDeleteMessage: shouldShowDeleteAction,
           message: widget.message,
           editMessageInputBuilder: widget.editMessageInputBuilder,
           onReplyTap: widget.onReplyTap,
           onThreadReplyTap: widget.onThreadTap,
-          showResendMessage:
-              widget.showResendMessage && (isSendFailed || isUpdateFailed),
-          showCopyMessage: widget.showCopyMessage &&
-              !isFailedState &&
-              widget.message.text?.trim().isNotEmpty == true,
-          showEditMessage: widget.showEditMessage &&
-              !isDeleteFailed &&
-              !widget.message.attachments
-                  .any((element) => element.type == 'giphy'),
+          showResendMessage: shouldShowResendAction,
+          showCopyMessage: shouldShowCopyAction,
+          showEditMessage: shouldShowEditAction,
           showReactions: widget.showReactions,
-          showReplyMessage: widget.showReplyMessage &&
-              !isFailedState &&
-              widget.onReplyTap != null,
-          showThreadReplyMessage: widget.showThreadReplyMessage &&
-              !isFailedState &&
-              widget.onThreadTap != null,
+          showReplyMessage: shouldShowReplyAction,
+          showThreadReplyMessage: shouldShowThreadReplyAction,
           showFlagButton: widget.showFlagButton,
           showPinButton: widget.showPinButton,
           customActions: widget.customActions,
