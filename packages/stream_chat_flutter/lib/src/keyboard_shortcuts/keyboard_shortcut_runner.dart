@@ -9,18 +9,26 @@ class KeyboardShortcutRunner extends StatelessWidget {
   const KeyboardShortcutRunner({
     super.key,
     required this.child,
-    required this.onEnterKeypress,
-    required this.onEscapeKeypress,
+    this.onEnterKeypress,
+    this.onEscapeKeypress,
+    this.onRightArrowKeypress,
+    this.onLeftArrowKeypress,
   });
 
   /// This child of this widget.
   final Widget child;
 
   /// The function to execute when the "enter" key is pressed.
-  final VoidCallback onEnterKeypress;
+  final VoidCallback? onEnterKeypress;
 
   /// The function to execute when the "escape" key is pressed.
-  final VoidCallback onEscapeKeypress;
+  final VoidCallback? onEscapeKeypress;
+
+  /// The function to execute when the "right arrow" key is pressed.
+  final VoidCallback? onRightArrowKeypress;
+
+  /// The function to execute when the "left arrow" key is pressed.
+  final VoidCallback? onLeftArrowKeypress;
 
   @override
   Widget build(BuildContext context) {
@@ -29,13 +37,21 @@ class KeyboardShortcutRunner extends StatelessWidget {
       shortcuts: {
         sendMessageKeySet: SendMessageIntent(),
         removeReplyKeySet: RemoveReplyIntent(),
+        nextGalleryItemKeySet: NextGalleryItemIntent(),
+        previousGalleryItemKeySet: PreviousGalleryItemIntent(),
       },
       actions: {
         SendMessageIntent: CallbackAction(
-          onInvoke: (e) => onEnterKeypress.call(),
+          onInvoke: (e) => onEnterKeypress?.call(),
         ),
         RemoveReplyIntent: CallbackAction(
-          onInvoke: (e) => onEscapeKeypress.call(),
+          onInvoke: (e) => onEscapeKeypress?.call(),
+        ),
+        NextGalleryItemIntent: CallbackAction(
+          onInvoke: (e) => onRightArrowKeypress?.call(),
+        ),
+        PreviousGalleryItemIntent: CallbackAction(
+          onInvoke: (e) => onLeftArrowKeypress?.call(),
         ),
       },
       child: child,

@@ -10,3 +10,13 @@ final sendMessageKeySet = LogicalKeySet(
 final removeReplyKeySet = LogicalKeySet(
   LogicalKeyboardKey.escape,
 );
+
+/// The keyset for navigating to the next gallery item.
+final nextGalleryItemKeySet = LogicalKeySet(
+  LogicalKeyboardKey.arrowRight,
+);
+
+/// The keyset for navigating to the previous gallery item.
+final previousGalleryItemKeySet = LogicalKeySet(
+  LogicalKeyboardKey.arrowLeft,
+);

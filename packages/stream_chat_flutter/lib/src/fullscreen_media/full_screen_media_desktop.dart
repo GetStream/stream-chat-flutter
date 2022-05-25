@@ -126,117 +126,140 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
       body: widget.mediaAttachmentPackages.length != videoPackages.length
           ? Stack(
               children: [
-                PageView.builder(
-                  controller: _pageController,
-                  onPageChanged: (val) {
-                    _currentPage.value = val;
-
-                    if (videoPackages.isEmpty) {
-                      return;
-                    }
-
-                    final currentAttachment =
-                        widget.mediaAttachmentPackages[val].attachment;
-
-                    for (final p in videoPackages.values) {
-                      if (p.attachment != currentAttachment) {
-                        p.player.pause();
-                      }
-                    }
-
-                    if (widget.autoplayVideos &&
-                        currentAttachment.type == 'video') {
-                      final package = videoPackages[currentAttachment.id]!;
-                      package.player.play();
+                KeyboardShortcutRunner(
+                  onRightArrowKeypress: () {
+                    if (widget.mediaAttachmentPackages.length > 1 &&
+                        _currentPage.value !=
+                            widget.mediaAttachmentPackages.length - 1) {
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeIn,
+                      );
+                      setState(() => _currentPage.value++);
                     }
                   },
-                  itemBuilder: (context, index) {
-                    final attachment =
-                        widget.mediaAttachmentPackages[index].attachment;
-                    if (attachment.type == 'image' ||
-                        attachment.type == 'giphy') {
-                      final imageUrl = attachment.imageUrl ??
-                          attachment.assetUrl ??
-                          attachment.thumbUrl;
-                      return AnimatedBuilder(
-                        animation: _curvedAnimation,
-                        builder: (context, child) => ContextMenuArea(
-                          verticalPadding: 0,
-                          builder: (_) => [
-                            DownloadMenuItem(
-                              attachment: attachment,
-                            ),
-                          ],
-                          child: PhotoView(
-                            loadingBuilder: (context, image) =>
-                                const Offstage(),
-                            imageProvider: (imageUrl == null &&
-                                    attachment.localUri != null &&
-                                    attachment.file?.bytes != null)
-                                ? Image.memory(attachment.file!.bytes!).image
-                                : CachedNetworkImageProvider(imageUrl!),
-                            maxScale: PhotoViewComputedScale.covered,
-                            minScale: PhotoViewComputedScale.contained,
-                            heroAttributes: PhotoViewHeroAttributes(
-                              tag: widget.mediaAttachmentPackages,
-                            ),
-                            backgroundDecoration: BoxDecoration(
-                              color: ColorTween(
-                                begin:
-                                    StreamChannelHeaderTheme.of(context).color,
-                                end: Colors.black,
-                              ).lerp(_curvedAnimation.value),
-                            ),
-                            onTapUp: (a, b, c) {
-                              if (_animationController.isCompleted) {
-                                _animationController.reverse();
-                              } else {
-                                _animationController.forward();
-                              }
-                            },
-                          ),
-                        ),
+                  onLeftArrowKeypress: () {
+                    if (widget.mediaAttachmentPackages.length > 1 &&
+                        _currentPage.value != 0) {
+                      _pageController.previousPage(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOut,
                       );
-                    } else if (attachment.type == 'video') {
-                      final package = videoPackages[attachment.id]!;
-                      package.player.open(
-                        Playlist(
-                          medias: [
-                            Media.network(package.attachment.assetUrl),
-                          ],
-                        ),
-                        autoStart: widget.autoplayVideos,
-                      );
-                      return InkWell(
-                        splashFactory: NoSplash.splashFactory,
-                        onTap: () {
-                          if (_animationController.isCompleted) {
-                            _animationController.reverse();
-                          } else {
-                            _animationController.forward();
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 50,
-                          ),
-                          child: ContextMenuArea(
+                      setState(() => _currentPage.value--);
+                    }
+                  },
+                  child: PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: (val) {
+                      _currentPage.value = val;
+
+                      if (videoPackages.isEmpty) {
+                        return;
+                      }
+
+                      final currentAttachment =
+                          widget.mediaAttachmentPackages[val].attachment;
+
+                      for (final p in videoPackages.values) {
+                        if (p.attachment != currentAttachment) {
+                          p.player.pause();
+                        }
+                      }
+
+                      if (widget.autoplayVideos &&
+                          currentAttachment.type == 'video') {
+                        final package = videoPackages[currentAttachment.id]!;
+                        package.player.play();
+                      }
+                    },
+                    itemBuilder: (context, index) {
+                      final attachment =
+                          widget.mediaAttachmentPackages[index].attachment;
+                      if (attachment.type == 'image' ||
+                          attachment.type == 'giphy') {
+                        final imageUrl = attachment.imageUrl ??
+                            attachment.assetUrl ??
+                            attachment.thumbUrl;
+                        return AnimatedBuilder(
+                          animation: _curvedAnimation,
+                          builder: (context, child) => ContextMenuArea(
                             verticalPadding: 0,
                             builder: (_) => [
                               DownloadMenuItem(
                                 attachment: attachment,
                               ),
                             ],
-                            child: Video(
-                              player: package.player,
+                            child: PhotoView(
+                              loadingBuilder: (context, image) =>
+                                  const Offstage(),
+                              imageProvider: (imageUrl == null &&
+                                      attachment.localUri != null &&
+                                      attachment.file?.bytes != null)
+                                  ? Image.memory(attachment.file!.bytes!).image
+                                  : CachedNetworkImageProvider(imageUrl!),
+                              maxScale: PhotoViewComputedScale.covered,
+                              minScale: PhotoViewComputedScale.contained,
+                              heroAttributes: PhotoViewHeroAttributes(
+                                tag: widget.mediaAttachmentPackages,
+                              ),
+                              backgroundDecoration: BoxDecoration(
+                                color: ColorTween(
+                                  begin: StreamChannelHeaderTheme.of(context)
+                                      .color,
+                                  end: Colors.black,
+                                ).lerp(_curvedAnimation.value),
+                              ),
+                              onTapUp: (a, b, c) {
+                                if (_animationController.isCompleted) {
+                                  _animationController.reverse();
+                                } else {
+                                  _animationController.forward();
+                                }
+                              },
                             ),
                           ),
-                        ),
-                      );
-                    }
-                    return const SizedBox();
-                  },
-                  itemCount: widget.mediaAttachmentPackages.length,
+                        );
+                      } else if (attachment.type == 'video') {
+                        final package = videoPackages[attachment.id]!;
+                        package.player.open(
+                          Playlist(
+                            medias: [
+                              Media.network(package.attachment.assetUrl),
+                            ],
+                          ),
+                          autoStart: widget.autoplayVideos,
+                        );
+                        return InkWell(
+                          splashFactory: NoSplash.splashFactory,
+                          onTap: () {
+                            if (_animationController.isCompleted) {
+                              _animationController.reverse();
+                            } else {
+                              _animationController.forward();
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 50,
+                            ),
+                            child: ContextMenuArea(
+                              verticalPadding: 0,
+                              builder: (_) => [
+                                DownloadMenuItem(
+                                  attachment: attachment,
+                                ),
+                              ],
+                              child: Video(
+                                player: package.player,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox();
+                    },
+                    itemCount: widget.mediaAttachmentPackages.length,
+                  ),
                 ),
                 FadeTransition(
                   opacity: _opacityAnimation,
