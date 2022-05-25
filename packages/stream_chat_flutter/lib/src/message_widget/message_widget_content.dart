@@ -54,6 +54,7 @@ class MessageWidgetContent extends StatelessWidget {
     this.bottomRowBuilder,
     this.onThreadTap,
     this.deletedBottomRowBuilder,
+    this.userAvatarBuilder,
   });
 
   /// {@macro reverse}
@@ -179,6 +180,9 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro messageWidget}
   final StreamMessageWidget messageWidget;
 
+  /// {@macro userAvatarBuilder}
+  final Widget Function(BuildContext, User)? userAvatarBuilder;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -216,6 +220,8 @@ class MessageWidgetContent extends StatelessWidget {
                           showUserAvatar == DisplayWidget.show &&
                           message.user != null) ...[
                         UserAvatarTransform(
+                          onUserAvatarTap: onUserAvatarTap,
+                          userAvatarBuilder: userAvatarBuilder,
                           translateUserAvatar: translateUserAvatar,
                           messageTheme: messageTheme,
                           message: message,
