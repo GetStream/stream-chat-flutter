@@ -253,12 +253,14 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia>
                       onBackPressed: () => Navigator.of(context).pop(),
                       message: _currentMessage,
                       attachment: _currentAttachment,
-                      onShowMessage: () {
-                        widget.onShowMessage?.call(
-                          _currentMessage,
-                          StreamChannel.of(context).channel,
-                        );
-                      },
+                      onShowMessage: widget.onShowMessage != null
+                          ? () {
+                              widget.onShowMessage?.call(
+                                _currentMessage,
+                                StreamChannel.of(context).channel,
+                              );
+                            }
+                          : null,
                       attachmentActionsModalBuilder:
                           widget.attachmentActionsModalBuilder,
                     ),
