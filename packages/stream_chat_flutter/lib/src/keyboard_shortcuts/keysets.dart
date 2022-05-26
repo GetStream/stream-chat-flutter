@@ -1,22 +1,32 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-/// The keyset for sending a message.
-final sendMessageKeySet = LogicalKeySet(
+/// The "enter" keyset.
+///
+/// Use to quickly send a message in [StreamMessageInput].
+final enterKeySet = LogicalKeySet(
   LogicalKeyboardKey.enter,
 );
 
-/// The keyset for removing a reply.
-final removeReplyKeySet = LogicalKeySet(
+/// The "escape" keyset.
+///
+/// Use for:
+/// * Removing a reply from [StreamMessageInput].
+/// * Closing [FullScreenMediaDesktop].
+final escapeKeySet = LogicalKeySet(
   LogicalKeyboardKey.escape,
 );
 
-/// The keyset for navigating to the next gallery item.
-final nextGalleryItemKeySet = LogicalKeySet(
+/// The "right arrow" keyset.
+///
+/// Use for navigating to the next [FullScreenMediaDesktop] item.
+final rightArrowKeySet = LogicalKeySet(
   LogicalKeyboardKey.arrowRight,
 );
 
-/// The keyset for navigating to the previous gallery item.
-final previousGalleryItemKeySet = LogicalKeySet(
+/// The "left arrow" keyset.
+///
+/// Use for navigating to the previous [FullScreenMediaDesktop] item.
+final leftArrowKeySet = LogicalKeySet(
   LogicalKeyboardKey.arrowLeft,
 );

@@ -127,6 +127,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
           ? Stack(
               children: [
                 KeyboardShortcutRunner(
+                  onEscapeKeypress: () => Navigator.of(context).pop(),
                   onRightArrowKeypress: () {
                     if (widget.mediaAttachmentPackages.length > 1 &&
                         _currentPage.value !=

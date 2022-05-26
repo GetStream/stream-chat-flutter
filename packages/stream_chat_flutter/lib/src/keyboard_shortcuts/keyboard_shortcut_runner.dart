@@ -35,22 +35,22 @@ class KeyboardShortcutRunner extends StatelessWidget {
     return FocusableActionDetector(
       autofocus: true,
       shortcuts: {
-        sendMessageKeySet: SendMessageIntent(),
-        removeReplyKeySet: RemoveReplyIntent(),
-        nextGalleryItemKeySet: NextGalleryItemIntent(),
-        previousGalleryItemKeySet: PreviousGalleryItemIntent(),
+        enterKeySet: EnterKeyIntent(),
+        escapeKeySet: EscapeKeyIntent(),
+        rightArrowKeySet: RightArrowKeyIntent(),
+        leftArrowKeySet: LeftArrowKeyIntent(),
       },
       actions: {
-        SendMessageIntent: CallbackAction(
+        EnterKeyIntent: CallbackAction(
           onInvoke: (e) => onEnterKeypress?.call(),
         ),
-        RemoveReplyIntent: CallbackAction(
+        EscapeKeyIntent: CallbackAction(
           onInvoke: (e) => onEscapeKeypress?.call(),
         ),
-        NextGalleryItemIntent: CallbackAction(
+        RightArrowKeyIntent: CallbackAction(
           onInvoke: (e) => onRightArrowKeypress?.call(),
         ),
-        PreviousGalleryItemIntent: CallbackAction(
+        LeftArrowKeyIntent: CallbackAction(
           onInvoke: (e) => onLeftArrowKeypress?.call(),
         ),
       },

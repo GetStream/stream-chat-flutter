@@ -1,13 +1,13 @@
 import 'package:flutter/widgets.dart';
 
-/// The intent for sending a message.
-class SendMessageIntent extends Intent {}
+/// The intent for pressing the "enter" key.
+class EnterKeyIntent extends Intent {}
 
-/// The intent for removing a reply
-class RemoveReplyIntent extends Intent {}
+/// The intent for pressing the "escape" key.
+class EscapeKeyIntent extends Intent {}
 
-/// The intent for navigating to the next gallery item.
-class NextGalleryItemIntent extends Intent {}
+/// The intent for pressing the "right" arrow key.
+class RightArrowKeyIntent extends Intent {}
 
-/// The intent for navigating to the previous gallery item.
-class PreviousGalleryItemIntent extends Intent {}
+/// The intent for pressing the "left" arrow key.
+class LeftArrowKeyIntent extends Intent {}
