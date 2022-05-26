@@ -245,7 +245,7 @@ class MessageWidgetContent extends StatelessWidget {
                                   reverse: reverse,
                                   shouldShowReactions: shouldShowReactions,
                                   onTap: () =>
-                                      _showMessageReactionsModalBottomSheet(
+                                      _showMessageReactionsModal(
                                     context,
                                   ),
                                 )
@@ -439,7 +439,7 @@ class MessageWidgetContent extends StatelessWidget {
     );
   }
 
-  void _showMessageReactionsModalBottomSheet(BuildContext context) {
+  void _showMessageReactionsModal(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     showDialog(
       useRootNavigator: false,
