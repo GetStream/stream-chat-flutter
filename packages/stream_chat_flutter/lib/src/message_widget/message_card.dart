@@ -92,6 +92,13 @@ class MessageCard extends StatelessWidget {
   /// {@macro reverse}
   final bool reverse;
 
+  /// Whether the message is a long text-only message.
+  bool get isLongTextMessage =>
+      !hasUrlAttachments &&
+      !hasNonUrlAttachments &&
+      message.text != null &&
+      message.text!.length > 100;
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -128,7 +135,7 @@ class MessageCard extends StatelessWidget {
               attachmentBuilders: attachmentBuilders,
               attachmentPadding: attachmentPadding,
             ),
-          if (!isGiphy)
+          if (!isGiphy && !isLongTextMessage)
             TextBubble(
               messageTheme: messageTheme,
               message: message,
@@ -139,6 +146,23 @@ class MessageCard extends StatelessWidget {
               hasUrlAttachments: hasUrlAttachments,
               onLinkTap: onLinkTap,
               onMentionTap: onMentionTap,
+            ),
+          if (!isGiphy && isLongTextMessage)
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.35,
+              ),
+              child: TextBubble(
+                messageTheme: messageTheme,
+                message: message,
+                textPadding: textPadding,
+                textBuilder: textBuilder,
+                isOnlyEmoji: isOnlyEmoji,
+                hasQuotedMessage: hasQuotedMessage,
+                hasUrlAttachments: hasUrlAttachments,
+                onLinkTap: onLinkTap,
+                onMentionTap: onMentionTap,
+              ),
             ),
         ],
       ),
