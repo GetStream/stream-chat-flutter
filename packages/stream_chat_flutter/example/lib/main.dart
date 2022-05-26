@@ -265,6 +265,7 @@ class _ChannelPageState extends State<ChannelPage> {
                     defaultMessageWidget.copyWith(
                   onReplyTap: _reply,
                 ),
+                onMessageSwiped: _reply,
               ),
             ),
             StreamMessageInput(
