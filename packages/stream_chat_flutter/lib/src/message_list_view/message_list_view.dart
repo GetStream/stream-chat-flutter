@@ -712,6 +712,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             itemPositionListener: _itemPositionListener,
             messages: messages,
             dateDividerBuilder: widget.dateDividerBuilder,
+            isThreadConversation: _isThreadConversation,
           ),
       ],
     );
