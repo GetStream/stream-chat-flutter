@@ -171,7 +171,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
       body: Row(
         children: [
           SizedBox(
-            width: 250,
+            width: 350,
             child: Column(
               children: [
                 const SizedBox(height: 40),

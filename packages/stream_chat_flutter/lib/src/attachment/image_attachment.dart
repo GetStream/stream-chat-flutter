@@ -128,30 +128,34 @@ class StreamImageAttachment extends StreamAttachmentWidget {
           Expanded(
             child: Stack(
               children: [
-                GestureDetector(
-                  onTap: onAttachmentTap ??
-                      () async {
-                        final result = await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) {
-                              final channel = StreamChannel.of(context).channel;
-                              return StreamChannel(
-                                channel: channel,
-                                child: FullScreenMediaBuilder(
-                                  mediaAttachmentPackages:
-                                      message.getAttachmentPackageList(),
-                                  startIndex:
-                                      message.attachments.indexOf(attachment),
-                                  userName: message.user!.name,
-                                  onShowMessage: onShowMessage,
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                        if (result != null) onReturnAction?.call(result);
-                      },
-                  child: imageWidget,
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: onAttachmentTap ??
+                        () async {
+                          final result = await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) {
+                                final channel =
+                                    StreamChannel.of(context).channel;
+                                return StreamChannel(
+                                  channel: channel,
+                                  child: FullScreenMediaBuilder(
+                                    mediaAttachmentPackages:
+                                        message.getAttachmentPackageList(),
+                                    startIndex:
+                                        message.attachments.indexOf(attachment),
+                                    userName: message.user!.name,
+                                    onShowMessage: onShowMessage,
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                          if (result != null) onReturnAction?.call(result);
+                        },
+                    child: imageWidget,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8),

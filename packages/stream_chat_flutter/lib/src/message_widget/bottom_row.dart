@@ -186,9 +186,12 @@ class BottomRow extends StatelessWidget {
             ),
           ),
         WidgetSpan(
-          child: InkWell(
-            onTap: _onThreadTap,
-            child: Text(msg, style: messageTheme.repliesStyle),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: _onThreadTap,
+              child: Text(msg, style: messageTheme.repliesStyle),
+            ),
           ),
         ),
       ],

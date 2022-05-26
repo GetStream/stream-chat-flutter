@@ -86,14 +86,18 @@ class StreamQuotedMessageWidget extends StatelessWidget {
           showOnlineStatus: false,
         ),
     ];
-    return Padding(
-      padding: padding,
-      child: InkWell(
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: reverse ? children.reversed.toList() : children,
+        child: Padding(
+          padding: padding,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: reverse ? children.reversed.toList() : children,
+          ),
         ),
       ),
     );
