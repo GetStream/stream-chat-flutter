@@ -307,9 +307,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   @override
   void initState() {
     super.initState();
+
     _scrollController = widget.scrollController ?? ItemScrollController();
     _itemPositionListener =
         widget.itemPositionListener ?? ItemPositionsListener.create();
+    _itemPositionListener.itemPositions
+        .addListener(_handleItemPositionsChanged);
 
     _getOnThreadTap();
   }
@@ -367,6 +370,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       streamChannel!.reloadChannel();
     }
     _messageNewListener?.cancel();
+    _itemPositionListener.itemPositions
+        .removeListener(_handleItemPositionsChanged);
     super.dispose();
   }
 
@@ -874,10 +879,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     });
                   } else {
                     _showScrollToBottom.value = false;
-                    _scrollController!.scrollTo(
+                    _scrollController!.jumpTo(
                       index: 0,
-                      duration: const Duration(seconds: 1),
-                      curve: Curves.easeInOut,
                     );
                   }
                 },
@@ -1150,6 +1153,34 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       );
     }
     return child;
+  }
+
+  void _handleItemPositionsChanged() {
+    final _itemPositions = _itemPositionListener.itemPositions.value.toList();
+    final _firstItemIndex =
+        _itemPositions.indexWhere((element) => element.index == 1);
+    var _isFirstItemVisible = false;
+    if (_firstItemIndex != -1) {
+      final _firstItem = _itemPositions[_firstItemIndex];
+      _isFirstItemVisible =
+          _firstItem.itemLeadingEdge > 0 && _firstItem.itemTrailingEdge < 1;
+    }
+    if (_isFirstItemVisible) {
+      // most recent message is visible
+      final channel = streamChannel?.channel;
+      if (channel != null) {
+        if (_upToDate &&
+            channel.config?.readEvents == true &&
+            channel.state!.unreadCount > 0) {
+          streamChannel!.channel.markRead();
+        }
+      }
+    }
+    if (mounted) {
+      if (_showScrollToBottom.value == _isFirstItemVisible) {
+        _showScrollToBottom.value = !_isFirstItemVisible;
+      }
+    }
   }
 
   void _getOnThreadTap() {
