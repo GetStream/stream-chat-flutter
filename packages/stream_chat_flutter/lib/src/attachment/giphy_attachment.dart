@@ -267,6 +267,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
 
   Widget _buildSentAttachment(BuildContext context, String imageUrl) {
     return SizedBox(
+      //TODO: Remove unused SizedBox
       child: GestureDetector(
         onTap: () {
           if (onAttachmentTap != null) {
