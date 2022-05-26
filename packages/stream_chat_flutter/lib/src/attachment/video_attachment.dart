@@ -85,7 +85,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
                       MaterialPageRoute(
                         builder: (_) => StreamChannel(
                           channel: channel,
-                          child: FullScreenMediaBuilder(
+                          child: StreamFullScreenMediaBuilder(
                             mediaAttachmentPackages:
                                 message.getAttachmentPackageList(),
                             startIndex: message.attachments.indexOf(attachment),

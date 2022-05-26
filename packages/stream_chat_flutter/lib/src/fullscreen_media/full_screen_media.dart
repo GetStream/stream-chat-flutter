@@ -14,9 +14,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
 /// A full screen image widget
-class FullScreenMedia extends FullScreenMediaWidget {
+class StreamFullScreenMedia extends FullScreenMediaWidget {
   /// Instantiate a new FullScreenImage
-  const FullScreenMedia({
+  const StreamFullScreenMedia({
     super.key,
     required this.mediaAttachmentPackages,
     this.startIndex = 0,
@@ -50,7 +50,7 @@ class FullScreenMedia extends FullScreenMediaWidget {
   _FullScreenMediaState createState() => _FullScreenMediaState();
 }
 
-class _FullScreenMediaState extends State<FullScreenMedia>
+class _FullScreenMediaState extends State<StreamFullScreenMedia>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
   late final PageController _pageController;

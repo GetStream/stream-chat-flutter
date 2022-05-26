@@ -132,7 +132,7 @@ class ImageGroup extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => StreamChannel(
           channel: channel,
-          child: FullScreenMediaBuilder(
+          child: StreamFullScreenMediaBuilder(
             mediaAttachmentPackages: message.getAttachmentPackageList(),
             startIndex: index,
             userName: message.user!.name,

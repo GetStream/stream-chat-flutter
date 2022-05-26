@@ -5,9 +5,10 @@ import 'package:stream_chat_flutter/src/fullscreen_media/fsm_stub.dart'
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template fsmBuilder}
-/// A wrapper widget for conditionally providing the proper FullScreenMedia
-/// widget when writing an application that targets all available Flutter
-/// platforms (Android, iOS, macOS, Windows, Linux, & Web).
+/// A wrapper widget for conditionally providing the proper
+/// StreamFullScreenMedia widget when writing an application that targets
+/// all available Flutter platforms (Android, iOS, macOS, Windows, Linux,
+/// & Web).
 ///
 /// This is required because:
 /// * `package:video_player` and `package:chewie` do not support macOS, Windows,
@@ -16,15 +17,15 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// has the unfortunate consequence of not supporting Web.
 ///
 /// This widget makes use of dart's conditional imports to ensure that Stream's
-/// desktop implementation of FullScreenMedia is not imported when building
-/// applications that target web. Additionally, this widget ensures that
-/// applications targeting mobile platforms do not build the version of
-/// FullScreenMedia that targets desktop platforms (even though
+/// desktop implementation of StreamFullScreenMedia is not imported when
+/// building applications that target web. Additionally, this widget ensures
+/// that applications targeting mobile platforms do not build the version of
+/// StreamFullScreenMedia that targets desktop platforms (even though
 /// `package:dart_vlc` technically supports iOS).
 /// {@endtemplate}
-class FullScreenMediaBuilder extends StatelessWidget {
+class StreamFullScreenMediaBuilder extends StatelessWidget {
   /// {@macro fsmBuilder}
-  const FullScreenMediaBuilder({
+  const StreamFullScreenMediaBuilder({
     super.key,
     required this.mediaAttachmentPackages,
     required this.startIndex,
@@ -65,7 +66,7 @@ class FullScreenMediaBuilder extends StatelessWidget {
           autoplayVideos: autoplayVideos,
         );
       } else {
-        return FullScreenMedia(
+        return StreamFullScreenMedia(
           mediaAttachmentPackages: mediaAttachmentPackages,
           startIndex: startIndex,
           userName: userName,
@@ -75,7 +76,7 @@ class FullScreenMediaBuilder extends StatelessWidget {
         );
       }
     } else {
-      return FullScreenMedia(
+      return StreamFullScreenMedia(
         mediaAttachmentPackages: mediaAttachmentPackages,
         startIndex: startIndex,
         userName: userName,

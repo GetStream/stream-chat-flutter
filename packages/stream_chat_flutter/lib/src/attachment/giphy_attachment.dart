@@ -252,7 +252,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
           final channel = StreamChannel.of(context).channel;
           return StreamChannel(
             channel: channel,
-            child: FullScreenMediaBuilder(
+            child: StreamFullScreenMediaBuilder(
               mediaAttachmentPackages: message.getAttachmentPackageList(),
               startIndex: message.attachments.indexOf(attachment),
               userName: message.user!.name,

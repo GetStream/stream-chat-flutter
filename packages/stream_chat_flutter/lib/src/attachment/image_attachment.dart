@@ -140,7 +140,7 @@ class StreamImageAttachment extends StreamAttachmentWidget {
                                     StreamChannel.of(context).channel;
                                 return StreamChannel(
                                   channel: channel,
-                                  child: FullScreenMediaBuilder(
+                                  child: StreamFullScreenMediaBuilder(
                                     mediaAttachmentPackages:
                                         message.getAttachmentPackageList(),
                                     startIndex:
