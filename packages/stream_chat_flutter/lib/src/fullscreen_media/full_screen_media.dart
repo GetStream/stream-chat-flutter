@@ -250,9 +250,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia>
                         time: widget.mediaAttachmentPackages[_currentPage.value]
                             .message.createdAt,
                       ),
-                      onBackPressed: () {
-                        Navigator.of(context).pop();
-                      },
+                      onBackPressed: () => Navigator.of(context).pop(),
                       message: _currentMessage,
                       attachment: _currentAttachment,
                       onShowMessage: () {

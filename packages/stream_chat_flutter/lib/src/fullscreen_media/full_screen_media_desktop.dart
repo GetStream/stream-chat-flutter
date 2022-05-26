@@ -275,6 +275,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           StreamGalleryHeader(
+                            elevation: 0,
                             attachment: _currentAttachment,
                             userName: widget.userName,
                             sentAt: context.translations.sentAtText(

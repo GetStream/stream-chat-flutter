@@ -30,6 +30,7 @@ class StreamGalleryHeader extends StatelessWidget
     this.sentAt = '',
     this.backgroundColor,
     this.attachmentActionsModalBuilder,
+    this.elevation = 1.0,
   }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// True if this header shows the leading back button
@@ -66,6 +67,12 @@ class StreamGalleryHeader extends StatelessWidget
   /// {@macro attachmentActionsBuilder}
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
+  /// The elevation of this [StreamGalleryHeader].
+  ///
+  /// Defaults to `1.0`. When used for desktop & web platforms, it should
+  /// be set to `0.0`.
+  final double elevation;
+
   @override
   Widget build(BuildContext context) {
     final galleryHeaderThemeData = StreamGalleryHeaderTheme.of(context);
@@ -76,7 +83,7 @@ class StreamGalleryHeader extends StatelessWidget
       systemOverlayStyle: theme.brightness == Brightness.dark
           ? SystemUiOverlayStyle.light
           : SystemUiOverlayStyle.dark,
-      elevation: 1,
+      elevation: elevation,
       leading: showBackButton
           ? IconButton(
               icon: StreamSvgIcon.close(
