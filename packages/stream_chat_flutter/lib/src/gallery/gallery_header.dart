@@ -33,7 +33,9 @@ class StreamGalleryHeader extends StatelessWidget
     this.elevation = 1.0,
   }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
-  /// True if this header shows the leading back button
+  /// Whether to show the leading back button.
+  ///
+  /// Defaults to `true`.
   final bool showBackButton;
 
   /// Callback to call when pressing the back button.
