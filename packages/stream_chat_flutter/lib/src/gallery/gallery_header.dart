@@ -101,9 +101,7 @@ class StreamGalleryHeader extends StatelessWidget
             icon: StreamSvgIcon.iconMenuPoint(
               color: galleryHeaderThemeData.iconMenuPointColor,
             ),
-            onPressed: () {
-              _showMessageActionModalBottomSheet(context);
-            },
+            onPressed: () => _showMessageActionModalBottomSheet(context),
           ),
       ],
       centerTitle: true,
@@ -145,6 +143,7 @@ class StreamGalleryHeader extends StatelessWidget
       attachment: attachment,
       message: message,
       onShowMessage: onShowMessage,
+      showShowInChat: onShowMessage != null,
     );
 
     final effectiveModal = attachmentActionsModalBuilder?.call(

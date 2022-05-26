@@ -290,12 +290,14 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
                             ),
                             onBackPressed: () => Navigator.of(context).pop(),
                             message: _currentMessage,
-                            onShowMessage: () {
-                              widget.onShowMessage?.call(
-                                _currentMessage,
-                                StreamChannel.of(context).channel,
-                              );
-                            },
+                            onShowMessage: widget.onShowMessage != null
+                                ? () {
+                                    widget.onShowMessage?.call(
+                                      _currentMessage,
+                                      StreamChannel.of(context).channel,
+                                    );
+                                  }
+                                : null,
                             attachmentActionsModalBuilder:
                                 widget.attachmentActionsModalBuilder,
                           ),
