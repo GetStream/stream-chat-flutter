@@ -179,7 +179,10 @@ class _DesktopLayoutState extends State<DesktopLayout> {
                   child: StreamChannelListView(
                     controller: controller,
                     onChannelTap: (channel) {
-                      setState(() => _page = ChannelPage(channel: channel));
+                      setState(() => _page = ChannelPage(
+                            channel: channel,
+                            showBackButton: false,
+                          ));
                     },
                   ),
                 ),
@@ -206,10 +209,14 @@ class ChannelPage extends StatefulWidget {
   const ChannelPage({
     super.key,
     required this.channel,
+    this.showBackButton = true,
   });
 
-  // ignore: public_member_api_docs
+  /// The channel to show messages from
   final Channel channel;
+
+  /// Whether to show the back button
+  final bool showBackButton;
 
   @override
   State<ChannelPage> createState() => _ChannelPageState();
@@ -244,6 +251,7 @@ class _ChannelPageState extends State<ChannelPage> {
       channel: widget.channel,
       child: Scaffold(
         appBar: StreamChannelHeader(
+          showBackButton: widget.showBackButton,
           title: ChannelName(
             textStyle:
                 StreamChatTheme.of(context).channelHeaderTheme.titleStyle,
