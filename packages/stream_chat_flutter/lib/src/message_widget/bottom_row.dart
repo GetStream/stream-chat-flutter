@@ -32,6 +32,7 @@ class BottomRow extends StatelessWidget {
     required this.streamChat,
     this.deletedBottomRowBuilder,
     this.onThreadTap,
+    this.usernameBuilder,
   });
 
   /// {@macro messageIsDeleted}
@@ -85,6 +86,9 @@ class BottomRow extends StatelessWidget {
   /// {@macro streamChat}
   final StreamChatState streamChat;
 
+  /// {@macro usernameBuilder}
+  final Widget Function(BuildContext, Message)? usernameBuilder;
+
   @override
   Widget build(BuildContext context) {
     if (isDeleted) {
@@ -128,11 +132,12 @@ class BottomRow extends StatelessWidget {
     children.addAll([
       if (showUsername)
         WidgetSpan(
-          child: Username(
-            key: usernameKey,
-            message: message,
-            messageTheme: messageTheme,
-          ),
+          child: usernameBuilder?.call(context, message) ??
+              Username(
+                key: usernameKey,
+                message: message,
+                messageTheme: messageTheme,
+              ),
         ),
       if (showTimeStamp)
         WidgetSpan(

@@ -55,6 +55,7 @@ class MessageWidgetContent extends StatelessWidget {
     this.onThreadTap,
     this.deletedBottomRowBuilder,
     this.userAvatarBuilder,
+    this.usernameBuilder,
   });
 
   /// {@macro reverse}
@@ -182,6 +183,9 @@ class MessageWidgetContent extends StatelessWidget {
 
   /// {@macro userAvatarBuilder}
   final Widget Function(BuildContext, User)? userAvatarBuilder;
+
+  /// {@macro usernameBuilder}
+  final Widget Function(BuildContext, Message)? usernameBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -380,6 +384,7 @@ class MessageWidgetContent extends StatelessWidget {
                       deletedBottomRowBuilder: deletedBottomRowBuilder,
                       streamChat: streamChat,
                       hasNonUrlAttachments: hasNonUrlAttachments,
+                      usernameBuilder: usernameBuilder,
                     ),
               ),
             if (isFailedState)

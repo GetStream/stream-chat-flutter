@@ -852,6 +852,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                   bottomRowBuilder: widget.bottomRowBuilder,
                   onUserAvatarTap: widget.onUserAvatarTap,
                   userAvatarBuilder: widget.userAvatarBuilder,
+                  usernameBuilder: widget.usernameBuilder,
                 ),
               ),
             ),
