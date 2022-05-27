@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template attachmentError}
@@ -8,18 +9,17 @@ class AttachmentError extends StatelessWidget {
   /// {@macro attachmentError}
   const AttachmentError({
     super.key,
-    this.size,
+    this.constraints,
   });
 
-  /// Size of error
-  final Size? size;
+  /// constraints of error
+  final BoxConstraints? constraints;
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: size?.width,
-        height: size?.height,
+        constraints: constraints ?? const BoxConstraints.expand(),
         color:
             StreamChatTheme.of(context).colorTheme.accentError.withOpacity(0.1),
         child: Center(

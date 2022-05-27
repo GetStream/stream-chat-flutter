@@ -18,7 +18,7 @@ class StreamImageAttachment extends StreamAttachmentWidget {
     required super.message,
     required super.attachment,
     required this.messageTheme,
-    super.size,
+    super.constraints,
     this.showTitle = false,
     this.onShowMessage,
     this.onReturnAction,
@@ -45,14 +45,14 @@ class StreamImageAttachment extends StreamAttachmentWidget {
     return source.when(
       local: () {
         if (attachment.localUri == null || attachment.file?.bytes == null) {
-          return AttachmentError(size: size);
+          return AttachmentError(constraints: constraints);
         }
         return _buildImageAttachment(
           context,
           Image.memory(
             attachment.file!.bytes!,
-            height: size?.height,
-            width: size?.width,
+            height: constraints?.maxHeight,
+            width: constraints?.maxWidth,
             fit: BoxFit.cover,
             errorBuilder: (context, _, __) => Image.asset(
               'images/placeholder.png',
@@ -66,7 +66,7 @@ class StreamImageAttachment extends StreamAttachmentWidget {
             attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
 
         if (imageUrl == null) {
-          return AttachmentError(size: size);
+          return AttachmentError(constraints: constraints);
         }
 
         var imageUri = Uri.parse(imageUrl);
@@ -96,8 +96,8 @@ class StreamImageAttachment extends StreamAttachmentWidget {
           context,
           CachedNetworkImage(
             cacheKey: imageUri.replace(queryParameters: {}).toString(),
-            height: size?.height,
-            width: size?.width,
+            height: constraints?.maxHeight,
+            width: constraints?.maxWidth,
             placeholder: (context, __) {
               final image = Image.asset(
                 'images/placeholder.png',
@@ -112,7 +112,8 @@ class StreamImageAttachment extends StreamAttachmentWidget {
               );
             },
             imageUrl: imageUrl,
-            errorWidget: (context, url, error) => AttachmentError(size: size),
+            errorWidget: (context, url, error) =>
+                AttachmentError(constraints: constraints),
             fit: BoxFit.cover,
           ),
         );
@@ -121,8 +122,8 @@ class StreamImageAttachment extends StreamAttachmentWidget {
   }
 
   Widget _buildImageAttachment(BuildContext context, Widget imageWidget) {
-    return ConstrainedBox(
-      constraints: BoxConstraints.loose(size!),
+    return Container(
+      constraints: constraints,
       child: Column(
         children: <Widget>[
           Expanded(

@@ -17,7 +17,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
     required super.message,
     required super.attachment,
     required this.messageTheme,
-    super.size,
+    super.constraints,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
@@ -40,31 +40,29 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
     return source.when(
       local: () {
         if (attachment.file == null) {
-          return AttachmentError(size: size);
+          return AttachmentError(constraints: constraints);
         }
         return _buildVideoAttachment(
           context,
           StreamVideoThumbnailImage(
             video: attachment.file!.path!,
-            height: size?.height,
-            width: size?.width,
+            constraints: constraints,
             fit: BoxFit.cover,
-            errorBuilder: (_, __) => AttachmentError(size: size),
+            errorBuilder: (_, __) => AttachmentError(constraints: constraints),
           ),
         );
       },
       network: () {
         if (attachment.assetUrl == null) {
-          return AttachmentError(size: size);
+          return AttachmentError(constraints: constraints);
         }
         return _buildVideoAttachment(
           context,
           StreamVideoThumbnailImage(
             video: attachment.assetUrl!,
-            height: size?.height,
-            width: size?.width,
+            constraints: constraints,
             fit: BoxFit.cover,
-            errorBuilder: (_, __) => AttachmentError(size: size),
+            errorBuilder: (_, __) => AttachmentError(constraints: constraints),
           ),
         );
       },
@@ -73,7 +71,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
 
   Widget _buildVideoAttachment(BuildContext context, Widget videoWidget) {
     return ConstrainedBox(
-      constraints: BoxConstraints.loose(size ?? Size.infinite),
+      constraints: constraints ?? const BoxConstraints.expand(),
       child: Column(
         children: <Widget>[
           Expanded(

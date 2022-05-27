@@ -52,10 +52,10 @@ class _InputAttachmentsState extends State<InputAttachments> {
                         child: StreamFileAttachment(
                           message: Message(), // dummy message
                           attachment: e,
-                          size: Size(
+                          constraints: BoxConstraints.loose(Size(
                             MediaQuery.of(context).size.width * 0.65,
                             56,
-                          ),
+                          )),
                           trailing: Padding(
                             padding: const EdgeInsets.all(8),
                             child: ClearInputItemButton(

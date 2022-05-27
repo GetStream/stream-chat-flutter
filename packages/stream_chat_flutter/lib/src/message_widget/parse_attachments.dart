@@ -56,18 +56,13 @@ class ParseAttachments extends StatelessWidget {
       attachmentList.add(attachmentWidget);
     });
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        maxWidth: 300,
-      ),
-      child: Padding(
-        padding: attachmentPadding,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: attachmentList.insertBetween(
-            SizedBox(
-              height: attachmentPadding.vertical / 2,
-            ),
+    return Padding(
+      padding: attachmentPadding,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: attachmentList.insertBetween(
+          SizedBox(
+            height: attachmentPadding.vertical / 2,
           ),
         ),
       ),

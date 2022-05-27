@@ -244,8 +244,7 @@ class MessageWidgetContent extends StatelessWidget {
                                   ownId: streamChat.currentUser!.id,
                                   reverse: reverse,
                                   shouldShowReactions: shouldShowReactions,
-                                  onTap: () =>
-                                      _showMessageReactionsModal(
+                                  onTap: () => _showMessageReactionsModal(
                                     context,
                                   ),
                                 )
@@ -293,69 +292,30 @@ class MessageWidgetContent extends StatelessWidget {
                                           messageTheme: messageTheme,
                                         ),
                                       )
-                                    : !hasUrlAttachments // kinda hacky :/
-                                        ? MessageCard(
-                                            message: message,
-                                            isFailedState: isFailedState,
-                                            showUserAvatar: showUserAvatar,
-                                            messageTheme: messageTheme,
-                                            hasQuotedMessage: hasQuotedMessage,
-                                            hasUrlAttachments:
-                                                hasUrlAttachments,
-                                            hasNonUrlAttachments:
-                                                hasNonUrlAttachments,
-                                            isOnlyEmoji: isOnlyEmoji,
-                                            isGiphy: isGiphy,
-                                            attachmentBuilders:
-                                                attachmentBuilders,
-                                            attachmentPadding:
-                                                attachmentPadding,
-                                            textPadding: textPadding,
-                                            reverse: reverse,
-                                            onQuotedMessageTap:
-                                                onQuotedMessageTap,
-                                            onMentionTap: onMentionTap,
-                                            onLinkTap: onLinkTap,
-                                            textBuilder: textBuilder,
-                                            borderRadiusGeometry:
-                                                borderRadiusGeometry,
-                                            borderSide: borderSide,
-                                            shape: shape,
-                                          )
-                                        : ConstrainedBox(
-                                            constraints: const BoxConstraints(
-                                              maxWidth: 300,
-                                            ),
-                                            child: MessageCard(
-                                              message: message,
-                                              isFailedState: isFailedState,
-                                              showUserAvatar: showUserAvatar,
-                                              messageTheme: messageTheme,
-                                              hasQuotedMessage:
-                                                  hasQuotedMessage,
-                                              hasUrlAttachments:
-                                                  hasUrlAttachments,
-                                              hasNonUrlAttachments:
-                                                  hasNonUrlAttachments,
-                                              isOnlyEmoji: isOnlyEmoji,
-                                              isGiphy: isGiphy,
-                                              attachmentBuilders:
-                                                  attachmentBuilders,
-                                              attachmentPadding:
-                                                  attachmentPadding,
-                                              textPadding: textPadding,
-                                              reverse: reverse,
-                                              onQuotedMessageTap:
-                                                  onQuotedMessageTap,
-                                              onMentionTap: onMentionTap,
-                                              onLinkTap: onLinkTap,
-                                              textBuilder: textBuilder,
-                                              borderRadiusGeometry:
-                                                  borderRadiusGeometry,
-                                              borderSide: borderSide,
-                                              shape: shape,
-                                            ),
-                                          ),
+                                    : MessageCard(
+                                        message: message,
+                                        isFailedState: isFailedState,
+                                        showUserAvatar: showUserAvatar,
+                                        messageTheme: messageTheme,
+                                        hasQuotedMessage: hasQuotedMessage,
+                                        hasUrlAttachments: hasUrlAttachments,
+                                        hasNonUrlAttachments:
+                                            hasNonUrlAttachments,
+                                        isOnlyEmoji: isOnlyEmoji,
+                                        isGiphy: isGiphy,
+                                        attachmentBuilders: attachmentBuilders,
+                                        attachmentPadding: attachmentPadding,
+                                        textPadding: textPadding,
+                                        reverse: reverse,
+                                        onQuotedMessageTap: onQuotedMessageTap,
+                                        onMentionTap: onMentionTap,
+                                        onLinkTap: onLinkTap,
+                                        textBuilder: textBuilder,
+                                        borderRadiusGeometry:
+                                            borderRadiusGeometry,
+                                        borderSide: borderSide,
+                                        shape: shape,
+                                      ),
                               ),
                               if (showReactionPickerIndicator)
                                 Positioned(

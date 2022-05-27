@@ -271,7 +271,7 @@ class _ParseAttachments extends StatelessWidget {
           attachment: attachment,
           message: message,
           messageTheme: messageTheme,
-          size: const Size(32, 32),
+          constraints: BoxConstraints.loose(const Size(32, 32)),
         );
       },
       'video': (_, attachment) {
@@ -298,7 +298,7 @@ class _ParseAttachments extends StatelessWidget {
               attachment.imageUrl ??
               attachment.assetUrl!,
           errorWidget: (context, url, error) =>
-              const AttachmentError(size: size),
+              AttachmentError(constraints: BoxConstraints.loose(size)),
           fit: BoxFit.cover,
         );
       },
@@ -339,7 +339,7 @@ class _UrlAttachment extends StatelessWidget {
         ),
       );
     }
-    return const AttachmentError(size: size);
+    return AttachmentError(constraints: BoxConstraints.loose(size));
   }
 }
 

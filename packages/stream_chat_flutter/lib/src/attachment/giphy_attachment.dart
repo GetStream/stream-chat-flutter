@@ -18,7 +18,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
     super.key,
     required super.message,
     required super.attachment,
-    super.size,
+    super.constraints,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
@@ -105,18 +105,19 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                     }
                   },
                   child: CachedNetworkImage(
-                    height: size?.height,
-                    width: size?.width,
+                    height: constraints?.maxHeight,
+                    width: constraints?.maxWidth,
                     placeholder: (_, __) => SizedBox(
-                      width: size?.width,
-                      height: size?.height,
+                      width: constraints?.maxHeight,
+                      height: constraints?.maxWidth,
                       child: const Center(
                         child: CircularProgressIndicator(),
                       ),
                     ),
                     imageUrl: imageUrl,
-                    errorWidget: (context, url, error) =>
-                        AttachmentError(size: size),
+                    errorWidget: (context, url, error) => AttachmentError(
+                      constraints: constraints,
+                    ),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -279,8 +280,8 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
         child: Stack(
           children: [
             CachedNetworkImage(
-              height: size?.height,
-              width: size?.width,
+              height: constraints?.maxHeight,
+              width: constraints?.maxWidth,
               placeholder: (_, __) {
                 final image = Image.asset(
                   'images/placeholder.png',
@@ -296,7 +297,9 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                 );
               },
               imageUrl: imageUrl,
-              errorWidget: (context, url, error) => AttachmentError(size: size),
+              errorWidget: (context, url, error) => AttachmentError(
+                constraints: constraints,
+              ),
               fit: BoxFit.cover,
             ),
             Positioned(

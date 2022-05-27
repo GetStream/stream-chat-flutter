@@ -116,9 +116,10 @@ class StreamMessageWidget extends StatefulWidget {
                   attachmentWidget: Material(
                     color: messageTheme.messageBackgroundColor,
                     child: ImageGroup(
-                      size: Size(
-                        mediaQueryData.size.width * 0.8,
-                        mediaQueryData.size.height * 0.3,
+                      constraints: BoxConstraints(
+                        maxWidth: 400,
+                        minWidth: 400,
+                        maxHeight: mediaQueryData.size.height * 0.3,
                       ),
                       images: attachments,
                       message: message,
@@ -139,9 +140,10 @@ class StreamMessageWidget extends StatefulWidget {
                 attachment: attachments[0],
                 message: message,
                 messageTheme: messageTheme,
-                size: Size(
-                  mediaQueryData.size.width * 0.8,
-                  mediaQueryData.size.height * 0.3,
+                constraints: BoxConstraints(
+                  maxWidth: 400,
+                  minWidth: 400,
+                  maxHeight: mediaQueryData.size.height * 0.3,
                 ),
                 onShowMessage: onShowMessage,
                 onReturnAction: onReturnAction,
@@ -167,9 +169,10 @@ class StreamMessageWidget extends StatefulWidget {
                   return StreamVideoAttachment(
                     attachment: attachment,
                     messageTheme: messageTheme,
-                    size: Size(
-                      mediaQueryData.size.width * 0.8,
-                      mediaQueryData.size.height * 0.3,
+                    constraints: BoxConstraints(
+                      maxWidth: 400,
+                      minWidth: 400,
+                      maxHeight: mediaQueryData.size.height * 0.3,
                     ),
                     message: message,
                     onShowMessage: onShowMessage,
@@ -198,9 +201,10 @@ class StreamMessageWidget extends StatefulWidget {
                   return StreamGiphyAttachment(
                     attachment: attachment,
                     message: message,
-                    size: Size(
-                      mediaQueryData.size.width * 0.8,
-                      mediaQueryData.size.height * 0.3,
+                    constraints: BoxConstraints(
+                      maxWidth: 400,
+                      minWidth: 400,
+                      maxHeight: mediaQueryData.size.height * 0.3,
                     ),
                     onShowMessage: onShowMessage,
                     onReturnAction: onReturnAction,
@@ -233,9 +237,10 @@ class StreamMessageWidget extends StatefulWidget {
                       attachmentWidget: StreamFileAttachment(
                         message: message,
                         attachment: attachment,
-                        size: Size(
-                          mediaQueryData.size.width * 0.8,
-                          mediaQueryData.size.height * 0.3,
+                        constraints: BoxConstraints(
+                          maxWidth: 400,
+                          minWidth: 400,
+                          maxHeight: mediaQueryData.size.height * 0.3,
                         ),
                         onAttachmentTap: onAttachmentTap != null
                             ? () {

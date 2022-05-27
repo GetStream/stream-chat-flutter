@@ -64,8 +64,10 @@ class InputAttachment extends StatelessWidget {
         return Stack(
           children: [
             StreamVideoThumbnailImage(
-              height: 104,
-              width: 104,
+              constraints: const BoxConstraints.tightFor(
+                height: 104,
+                width: 104,
+              ),
               video: (attachment.file?.path ?? attachment.assetUrl)!,
               fit: BoxFit.cover,
             ),

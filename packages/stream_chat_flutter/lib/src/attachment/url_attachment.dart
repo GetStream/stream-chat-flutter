@@ -41,85 +41,92 @@ class StreamUrlAttachment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: () {
-          final ogScrapeUrl = urlAttachment.ogScrapeUrl;
-          if (ogScrapeUrl != null) {
-            onLinkTap != null
-                ? onLinkTap!(ogScrapeUrl)
-                : launchURL(context, ogScrapeUrl);
-          }
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (urlAttachment.imageUrl != null)
-              Container(
-                clipBehavior: Clip.hardEdge,
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Stack(
-                  children: [
-                    CachedNetworkImage(
-                      width: double.infinity,
-                      imageUrl: urlAttachment.imageUrl!,
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      left: 0,
-                      bottom: -1,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(16),
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        maxWidth: 400,
+        minWidth: 400,
+      ),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () {
+            final ogScrapeUrl = urlAttachment.ogScrapeUrl;
+            if (ogScrapeUrl != null) {
+              onLinkTap != null
+                  ? onLinkTap!(ogScrapeUrl)
+                  : launchURL(context, ogScrapeUrl);
+            }
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (urlAttachment.imageUrl != null)
+                Container(
+                  clipBehavior: Clip.hardEdge,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Stack(
+                    children: [
+                      CachedNetworkImage(
+                        width: double.infinity,
+                        imageUrl: urlAttachment.imageUrl!,
+                        fit: BoxFit.cover,
+                      ),
+                      Positioned(
+                        left: 0,
+                        bottom: -1,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(16),
+                            ),
+                            color: messageTheme.linkBackgroundColor,
                           ),
-                          color: messageTheme.linkBackgroundColor,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            top: 8,
-                            left: 8,
-                            right: 8,
-                          ),
-                          child: Text(
-                            hostDisplayName,
-                            style: chatThemeData.textTheme.bodyBold.copyWith(
-                              color: chatThemeData.colorTheme.accentPrimary,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              top: 8,
+                              left: 8,
+                              right: 8,
+                            ),
+                            child: Text(
+                              hostDisplayName,
+                              style: chatThemeData.textTheme.bodyBold.copyWith(
+                                color: chatThemeData.colorTheme.accentPrimary,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
+                  ),
+                ),
+              Padding(
+                padding: textPadding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (urlAttachment.title != null)
+                      Text(
+                        urlAttachment.title!.trim(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: chatThemeData.textTheme.body
+                            .copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    if (urlAttachment.text != null)
+                      Text(
+                        urlAttachment.text!,
+                        style: chatThemeData.textTheme.body
+                            .copyWith(fontWeight: FontWeight.w400),
+                      ),
                   ],
                 ),
               ),
-            Padding(
-              padding: textPadding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (urlAttachment.title != null)
-                    Text(
-                      urlAttachment.title!.trim(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: chatThemeData.textTheme.body
-                          .copyWith(fontWeight: FontWeight.w700),
-                    ),
-                  if (urlAttachment.text != null)
-                    Text(
-                      urlAttachment.text!,
-                      style: chatThemeData.textTheme.body
-                          .copyWith(fontWeight: FontWeight.w400),
-                    ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

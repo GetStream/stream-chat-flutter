@@ -18,8 +18,7 @@ class StreamVideoThumbnailImage extends StatefulWidget {
   const StreamVideoThumbnailImage({
     super.key,
     required this.video,
-    this.width,
-    this.height,
+    this.constraints,
     this.fit,
     this.format = ImageFormat.PNG,
     this.errorBuilder,
@@ -29,11 +28,8 @@ class StreamVideoThumbnailImage extends StatefulWidget {
   /// Video path
   final String video;
 
-  /// Width of widget
-  final double? width;
-
-  /// Height of widget
-  final double? height;
+  /// Contraints of attachments
+  final BoxConstraints? constraints;
 
   /// Fit of image
   final BoxFit? fit;
@@ -116,8 +112,8 @@ class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
             return Image.memory(
               snapshot.data!,
               fit: widget.fit,
-              height: widget.height,
-              width: widget.width,
+              height: widget.constraints?.maxHeight ?? double.infinity,
+              width: widget.constraints?.maxWidth ?? double.infinity,
             );
           },
         ),

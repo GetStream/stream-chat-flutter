@@ -350,9 +350,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             event.message!.user!.id ==
                 streamChannel!.channel.client.state.currentUser!.id) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            _scrollController?.scrollTo(
+            _scrollController?.jumpTo(
               index: 0,
-              duration: const Duration(seconds: 1),
             );
           });
         }

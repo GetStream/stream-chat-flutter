@@ -1203,10 +1203,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
                         child: StreamFileAttachment(
                           message: Message(), // dummy message
                           attachment: e,
-                          size: Size(
+                          constraints: BoxConstraints.loose(Size(
                             MediaQuery.of(context).size.width * 0.65,
                             56,
-                          ),
+                          )),
                           trailing: Padding(
                             padding: const EdgeInsets.all(8),
                             child: _buildRemoveButton(e),
@@ -1325,8 +1325,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
         return Stack(
           children: [
             StreamVideoThumbnailImage(
-              height: 104,
-              width: 104,
+              constraints: BoxConstraints.loose(
+                const Size(
+                  104,
+                  104,
+                ),
+              ),
               video: (attachment.file?.path ?? attachment.assetUrl)!,
               fit: BoxFit.cover,
             ),

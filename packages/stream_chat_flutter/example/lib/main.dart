@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_example/tutorial_part_4.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
 Future<void> main() async {
@@ -139,6 +140,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
     super.initState();
     _page = ChannelPage(
       channel: widget.initialChannel,
+      showBackButton: false,
     );
   }
 
@@ -266,6 +268,11 @@ class _ChannelPageState extends State<ChannelPage> {
                   onReplyTap: _reply,
                 ),
                 onMessageSwiped: _reply,
+                threadBuilder: (context, message) {
+                  return ThreadPage(
+                    parent: message,
+                  );
+                },
               ),
             ),
             StreamMessageInput(

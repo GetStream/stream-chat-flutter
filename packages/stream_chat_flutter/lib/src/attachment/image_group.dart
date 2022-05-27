@@ -11,7 +11,7 @@ class ImageGroup extends StatelessWidget {
     required this.images,
     required this.message,
     required this.messageTheme,
-    required this.size,
+    required this.constraints,
     this.onReturnAction,
     this.onShowMessage,
     this.onAttachmentTap,
@@ -32,8 +32,8 @@ class ImageGroup extends StatelessWidget {
   /// The [StreamMessageThemeData] to apply to this [message]
   final StreamMessageThemeData messageTheme;
 
-  /// The total size of the [images]
-  final Size size;
+  /// The constraints of the [images]
+  final BoxConstraints constraints;
 
   /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
@@ -41,7 +41,7 @@ class ImageGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: BoxConstraints.loose(size),
+      constraints: constraints,
       child: Flex(
         direction: Axis.vertical,
         children: <Widget>[
@@ -147,7 +147,7 @@ class ImageGroup extends StatelessWidget {
   Widget _buildImage(BuildContext context, int index) {
     return StreamImageAttachment(
       attachment: images[index],
-      size: size,
+      constraints: constraints,
       message: message,
       messageTheme: messageTheme,
       onAttachmentTap: () => _onTap(context, index),

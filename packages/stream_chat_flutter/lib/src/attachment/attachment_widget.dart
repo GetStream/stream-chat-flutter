@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Enum for identifying type of attachment
@@ -37,12 +38,13 @@ abstract class StreamAttachmentWidget extends StatelessWidget {
     super.key,
     required this.message,
     required this.attachment,
-    this.size,
+    this.constraints,
     AttachmentSource? source,
   }) : _source = source;
 
-  /// Size of attachments
-  final Size? size;
+  /// Contraints of attachments
+  final BoxConstraints? constraints;
+
   final AttachmentSource? _source;
 
   /// The message that [attachment] is associated with

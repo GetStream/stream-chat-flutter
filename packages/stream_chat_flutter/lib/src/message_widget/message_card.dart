@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template messageCard}
@@ -6,7 +7,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// Used in [MessageWidgetContent]. Should not be used elsewhere.
 /// {@endtemplate}
-class MessageCard extends StatelessWidget {
+class MessageCard extends StatefulWidget {
   /// {@macro messageCard}
   const MessageCard({
     super.key,
@@ -92,12 +93,29 @@ class MessageCard extends StatelessWidget {
   /// {@macro reverse}
   final bool reverse;
 
-  /// Whether the message is a long text-only message.
-  bool get isLongTextMessage =>
-      !hasUrlAttachments &&
-      !hasNonUrlAttachments &&
-      message.text != null &&
-      message.text!.length > 100;
+  @override
+  State<MessageCard> createState() => _MessageCardState();
+}
+
+class _MessageCardState extends State<MessageCard> {
+  final GlobalKey attachmentsKey = GlobalKey();
+  double? attachmentsWidth;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final renderBox =
+          attachmentsKey.currentContext?.findRenderObject() as RenderBox?;
+      final size = renderBox?.size;
+
+      if (mounted && attachmentsWidth != size?.width) {
+        setState(() {
+          attachmentsWidth = size?.width;
+        });
+      }
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,87 +123,100 @@ class MessageCard extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       elevation: 0,
       margin: EdgeInsets.symmetric(
-        horizontal: (isFailedState ? 15.0 : 0.0) +
-            // ignore: lines_longer_than_80_chars
-            (showUserAvatar == DisplayWidget.gone ? 0 : 4.0),
+        horizontal: (widget.isFailedState ? 15.0 : 0.0) +
+            (widget.showUserAvatar == DisplayWidget.gone ? 0 : 4.0),
       ),
-      shape: shape ??
+      shape: widget.shape ??
           RoundedRectangleBorder(
-            side: borderSide ??
+            side: widget.borderSide ??
                 BorderSide(
-                  color: messageTheme.messageBorderColor ?? Colors.grey,
+                  color: widget.messageTheme.messageBorderColor ?? Colors.grey,
                 ),
-            borderRadius: borderRadiusGeometry ?? BorderRadius.zero,
+            borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
           ),
       color: _getBackgroundColor(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (hasQuotedMessage)
-            QuotedMessage(
-              reverse: reverse,
-              message: message,
-              hasNonUrlAttachments: hasNonUrlAttachments,
-              onQuotedMessageTap: onQuotedMessageTap,
-            ),
-          if (hasNonUrlAttachments)
-            ParseAttachments(
-              message: message,
-              attachmentBuilders: attachmentBuilders,
-              attachmentPadding: attachmentPadding,
-            ),
-          if (!isGiphy && !isLongTextMessage)
-            TextBubble(
-              messageTheme: messageTheme,
-              message: message,
-              textPadding: textPadding,
-              textBuilder: textBuilder,
-              isOnlyEmoji: isOnlyEmoji,
-              hasQuotedMessage: hasQuotedMessage,
-              hasUrlAttachments: hasUrlAttachments,
-              onLinkTap: onLinkTap,
-              onMentionTap: onMentionTap,
-            ),
-          if (!isGiphy && isLongTextMessage)
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.35,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: attachmentsWidth ?? double.infinity,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (widget.hasQuotedMessage)
+              QuotedMessage(
+                reverse: widget.reverse,
+                message: widget.message,
+                hasNonUrlAttachments: widget.hasNonUrlAttachments,
+                onQuotedMessageTap: widget.onQuotedMessageTap,
               ),
-              child: TextBubble(
-                messageTheme: messageTheme,
-                message: message,
-                textPadding: textPadding,
-                textBuilder: textBuilder,
-                isOnlyEmoji: isOnlyEmoji,
-                hasQuotedMessage: hasQuotedMessage,
-                hasUrlAttachments: hasUrlAttachments,
-                onLinkTap: onLinkTap,
-                onMentionTap: onMentionTap,
+            if (widget.hasNonUrlAttachments)
+              ParseAttachments(
+                key: attachmentsKey,
+                message: widget.message,
+                attachmentBuilders: widget.attachmentBuilders,
+                attachmentPadding: widget.attachmentPadding,
               ),
-            ),
-        ],
+            if (!widget.isGiphy)
+              ConstrainedBox(
+                constraints: BoxConstraints.loose(const Size.fromWidth(500)),
+                child: TextBubble(
+                  messageTheme: widget.messageTheme,
+                  message: widget.message,
+                  textPadding: widget.textPadding,
+                  textBuilder: widget.textBuilder,
+                  isOnlyEmoji: widget.isOnlyEmoji,
+                  hasQuotedMessage: widget.hasQuotedMessage,
+                  hasUrlAttachments: widget.hasUrlAttachments,
+                  onLinkTap: widget.onLinkTap,
+                  onMentionTap: widget.onMentionTap,
+                ),
+              ),
+            if (widget.hasUrlAttachments && !widget.hasQuotedMessage)
+              _buildUrlAttachment(),
+          ],
+        ),
       ),
     );
   }
 
+  Widget _buildUrlAttachment() {
+    final urlAttachment = widget.message.attachments
+        .firstWhere((element) => element.titleLink != null);
+
+    final host = Uri.parse(urlAttachment.titleLink!).host;
+    final splitList = host.split('.');
+    final hostName = splitList.length == 3 ? splitList[1] : splitList[0];
+    final hostDisplayName = urlAttachment.authorName?.capitalize() ??
+        getWebsiteName(hostName.toLowerCase()) ??
+        hostName.capitalize();
+
+    return StreamUrlAttachment(
+      key: attachmentsKey,
+      urlAttachment: urlAttachment,
+      hostDisplayName: hostDisplayName,
+      textPadding: widget.textPadding,
+      messageTheme: widget.messageTheme,
+    );
+  }
+
   Color? _getBackgroundColor() {
-    if (hasQuotedMessage) {
-      return messageTheme.messageBackgroundColor;
+    if (widget.hasQuotedMessage) {
+      return widget.messageTheme.messageBackgroundColor;
     }
 
-    if (hasUrlAttachments) {
-      return messageTheme.linkBackgroundColor;
+    if (widget.hasUrlAttachments) {
+      return widget.messageTheme.linkBackgroundColor;
     }
 
-    if (isOnlyEmoji) {
+    if (widget.isOnlyEmoji) {
       return Colors.transparent;
     }
 
-    if (isGiphy) {
+    if (widget.isGiphy) {
       return Colors.transparent;
     }
 
-    return messageTheme.messageBackgroundColor;
+    return widget.messageTheme.messageBackgroundColor;
   }
 }

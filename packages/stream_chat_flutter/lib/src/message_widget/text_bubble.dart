@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content_components.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template textBubble}
@@ -53,48 +52,22 @@ class TextBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (message.text?.trim().isEmpty ?? false) return const Offstage();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: isOnlyEmoji ? EdgeInsets.zero : textPadding,
-          child: textBuilder != null
-              ? textBuilder!(context, message)
-              : StreamMessageText(
-                  onLinkTap: onLinkTap,
-                  message: message,
-                  onMentionTap: onMentionTap,
-                  messageTheme: isOnlyEmoji
-                      ? messageTheme.copyWith(
-                          messageTextStyle:
-                              messageTheme.messageTextStyle!.copyWith(
-                            fontSize: 42,
-                          ),
-                        )
-                      : messageTheme,
-                ),
-        ),
-        if (hasUrlAttachments && !hasQuotedMessage) _buildUrlAttachment(),
-      ],
-    );
-  }
-
-  Widget _buildUrlAttachment() {
-    final urlAttachment =
-        message.attachments.firstWhere((element) => element.titleLink != null);
-
-    final host = Uri.parse(urlAttachment.titleLink!).host;
-    final splitList = host.split('.');
-    final hostName = splitList.length == 3 ? splitList[1] : splitList[0];
-    final hostDisplayName = urlAttachment.authorName?.capitalize() ??
-        getWebsiteName(hostName.toLowerCase()) ??
-        hostName.capitalize();
-
-    return StreamUrlAttachment(
-      urlAttachment: urlAttachment,
-      hostDisplayName: hostDisplayName,
-      textPadding: textPadding,
-      messageTheme: messageTheme,
+    return Padding(
+      padding: isOnlyEmoji ? EdgeInsets.zero : textPadding,
+      child: textBuilder != null
+          ? textBuilder!(context, message)
+          : StreamMessageText(
+              onLinkTap: onLinkTap,
+              message: message,
+              onMentionTap: onMentionTap,
+              messageTheme: isOnlyEmoji
+                  ? messageTheme.copyWith(
+                      messageTextStyle: messageTheme.messageTextStyle!.copyWith(
+                        fontSize: 42,
+                      ),
+                    )
+                  : messageTheme,
+            ),
     );
   }
 }

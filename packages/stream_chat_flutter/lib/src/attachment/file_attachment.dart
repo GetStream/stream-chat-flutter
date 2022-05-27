@@ -25,7 +25,7 @@ class StreamFileAttachment extends StreamAttachmentWidget {
     super.key,
     required super.message,
     required super.attachment,
-    super.size,
+    super.constraints,
     this.title,
     this.trailing,
     this.onAttachmentTap,
@@ -54,7 +54,7 @@ class StreamFileAttachment extends StreamAttachmentWidget {
       child: GestureDetector(
         onTap: onAttachmentTap,
         child: Container(
-          width: size?.width ?? 100,
+          constraints: constraints ?? const BoxConstraints.tightFor(width: 100),
           height: 56,
           decoration: BoxDecoration(
             color: colorTheme.barsBg,
