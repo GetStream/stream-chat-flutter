@@ -183,6 +183,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
                     onChannelTap: (channel) {
                       setState(() => _page = ChannelPage(
                             channel: channel,
+                            key: ValueKey(channel.cid),
                             showBackButton: false,
                           ));
                     },
