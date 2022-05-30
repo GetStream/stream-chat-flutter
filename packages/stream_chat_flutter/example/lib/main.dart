@@ -1,5 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -217,6 +219,7 @@ class ChannelPage extends StatefulWidget {
 
 class _ChannelPageState extends State<ChannelPage> {
   late final messageInputController = StreamMessageInputController();
+  final focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) => Navigator(
@@ -229,14 +232,25 @@ class _ChannelPageState extends State<ChannelPage> {
               children: <Widget>[
                 Expanded(
                   child: StreamMessageListView(
+                    onMessageSwiped:
+                        (Platform.isAndroid || Platform.isIOS) ? reply : null,
                     threadBuilder: (context, parent) {
                       return ThreadPage(
                         parent: parent!,
                       );
                     },
+                    messageBuilder:
+                        (context, details, messages, defaultWidget) {
+                      return defaultWidget.copyWith(
+                        onReplyTap: reply,
+                      );
+                    },
                   ),
                 ),
                 StreamMessageInput(
+                  onQuotedMessageCleared:
+                      messageInputController.clearQuotedMessage,
+                  focusNode: focusNode,
                   messageInputController: messageInputController,
                 ),
               ],
@@ -244,6 +258,19 @@ class _ChannelPageState extends State<ChannelPage> {
           ),
         ),
       );
+
+  void reply(Message message) {
+    messageInputController.quotedMessage = message;
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    super.dispose();
+  }
 }
 
 class ThreadPage extends StatelessWidget {
