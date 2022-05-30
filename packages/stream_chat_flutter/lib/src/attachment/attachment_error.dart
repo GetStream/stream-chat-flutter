@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template attachmentError}

@@ -27,10 +27,10 @@ void main() {
               child: SizedBox(
                 child: ImageGroup(
                   messageTheme: streamTheme.ownMessageTheme,
-                  size: const Size(
+                  constraints: BoxConstraints.tight(const Size(
                     300,
                     300,
-                  ),
+                  )),
                   message: Message(),
                   images: [
                     Attachment(

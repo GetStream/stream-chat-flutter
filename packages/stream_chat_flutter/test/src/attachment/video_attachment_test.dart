@@ -26,10 +26,10 @@ void main() {
               child: SizedBox(
                 child: StreamVideoAttachment(
                   messageTheme: streamTheme.ownMessageTheme,
-                  size: const Size(
+                  constraints: BoxConstraints.tight(const Size(
                     300,
                     300,
-                  ),
+                  )),
                   message: Message(),
                   attachment: Attachment(
                     type: 'video',
