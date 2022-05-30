@@ -1,7 +1,8 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_example/tutorial_part_4.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
 Future<void> main() async {
@@ -90,135 +91,124 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ignore: public_member_api_docs
 class ResponsiveChat extends StatelessWidget {
-  // ignore: public_member_api_docs
   const ResponsiveChat({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    final initialChannel = StreamChannel.of(context).channel;
-    return ScreenTypeLayout(
+    return ResponsiveBuilder(
+      builder: (context, sizingInformation) {
+        if (sizingInformation.isMobile) {
+          return const ChannelListPage();
+        }
+
+        return const SplitView();
+      },
       breakpoints: const ScreenBreakpoints(
         desktop: 550,
         tablet: 550,
         watch: 300,
       ),
-      desktop: DesktopLayout(
-        initialChannel: initialChannel,
-      ),
-      mobile: ChannelPage(
-        channel: initialChannel,
-      ),
     );
   }
 }
 
-// ignore: public_member_api_docs
-class DesktopLayout extends StatefulWidget {
-  // ignore: public_member_api_docs
-  const DesktopLayout({
+class SplitView extends StatefulWidget {
+  const SplitView({
     super.key,
-    required this.initialChannel,
   });
 
-  // ignore: public_member_api_docs
-  final Channel initialChannel;
-
   @override
-  State<DesktopLayout> createState() => _DesktopLayoutState();
+  _SplitViewState createState() => _SplitViewState();
 }
 
-class _DesktopLayoutState extends State<DesktopLayout> {
-  late Widget _page;
-  late StreamChannelListController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _page = ChannelPage(
-      channel: widget.initialChannel,
-      showBackButton: false,
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final client = StreamChat.of(context).client;
-    controller = StreamChannelListController(
-      client: client,
-      filter: Filter.in_(
-        'members',
-        [
-          StreamChat.of(context).currentUser!.id,
-        ],
-      ),
-      sort: const [SortOption('last_message_at')],
-      limit: 20,
-    );
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
+class _SplitViewState extends State<SplitView> {
+  Channel? selectedChannel;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          SizedBox(
-            width: 350,
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-                Expanded(
-                  child: StreamChannelListView(
-                    controller: controller,
-                    onChannelTap: (channel) {
-                      setState(() => _page = ChannelPage(
-                            channel: channel,
-                            key: ValueKey(channel.cid),
-                            showBackButton: false,
-                          ));
-                    },
+    return Flex(
+      direction: Axis.horizontal,
+      children: <Widget>[
+        Flexible(
+          child: ChannelListPage(
+            onTap: (channel) {
+              setState(() {
+                selectedChannel = channel;
+              });
+            },
+            selectedChannel: selectedChannel,
+          ),
+        ),
+        Flexible(
+          flex: 2,
+          child: Scaffold(
+            body: selectedChannel != null
+                ? StreamChannel(
+                    key: ValueKey(selectedChannel!.cid),
+                    channel: selectedChannel!,
+                    child: const ChannelPage(showBackButton: false),
+                  )
+                : Center(
+                    child: Text(
+                      'Pick a channel to show the messages 💬',
+                      style: Theme.of(context).textTheme.headline5,
+                    ),
                   ),
-                ),
-              ],
-            ),
           ),
-          Expanded(
-            child: _page,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-/// A list of messages sent in the current channel.
-///
-/// This is implemented using [StreamMessageListView],
-/// a widget that provides query
-/// functionalities fetching the messages from the api and showing them in a
-/// listView.
+class ChannelListPage extends StatefulWidget {
+  const ChannelListPage({
+    super.key,
+    this.onTap,
+    this.selectedChannel,
+  });
+
+  final void Function(Channel)? onTap;
+  final Channel? selectedChannel;
+
+  @override
+  State<ChannelListPage> createState() => _ChannelListPageState();
+}
+
+class _ChannelListPageState extends State<ChannelListPage> {
+  late final _listController = StreamChannelListController(
+    client: StreamChat.of(context).client,
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).currentUser!.id],
+    ),
+    sort: const [SortOption('last_message_at')],
+    limit: 20,
+  );
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: StreamChannelListView(
+          onChannelTap: widget.onTap,
+          controller: _listController,
+          itemBuilder: (context, channels, index, defaultWidget) {
+            return defaultWidget.copyWith(
+              selected: channels[index] == widget.selectedChannel,
+            );
+          },
+        ),
+      );
+}
+
 class ChannelPage extends StatefulWidget {
-  /// Creates the page that shows the list of messages
   const ChannelPage({
     super.key,
-    required this.channel,
     this.showBackButton = true,
   });
 
-  /// The channel to show messages from
-  final Channel channel;
-
-  /// Whether to show the back button
   final bool showBackButton;
 
   @override
@@ -226,66 +216,63 @@ class ChannelPage extends StatefulWidget {
 }
 
 class _ChannelPageState extends State<ChannelPage> {
-  late FocusNode? _focusNode;
-  final _messageInputController = StreamMessageInputController();
+  late final messageInputController = StreamMessageInputController();
 
   @override
-  void initState() {
-    super.initState();
-    _focusNode = FocusNode();
-  }
+  Widget build(BuildContext context) => Navigator(
+        onGenerateRoute: (settings) => MaterialPageRoute(
+          builder: (context) => Scaffold(
+            appBar: StreamChannelHeader(
+              showBackButton: widget.showBackButton,
+            ),
+            body: Column(
+              children: <Widget>[
+                Expanded(
+                  child: StreamMessageListView(
+                    threadBuilder: (context, parent) {
+                      return ThreadPage(
+                        parent: parent!,
+                      );
+                    },
+                  ),
+                ),
+                StreamMessageInput(
+                  messageInputController: messageInputController,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+}
 
-  @override
-  void dispose() {
-    _focusNode!.dispose();
-    super.dispose();
-  }
+class ThreadPage extends StatelessWidget {
+  const ThreadPage({
+    super.key,
+    required this.parent,
+  });
 
-  void _reply(Message message) {
-    _messageInputController.quotedMessage = message;
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _focusNode!.requestFocus();
-    });
-  }
+  final Message parent;
 
   @override
   Widget build(BuildContext context) {
-    return StreamChannel(
-      channel: widget.channel,
-      child: Scaffold(
-        appBar: StreamChannelHeader(
-          showBackButton: widget.showBackButton,
-          title: ChannelName(
-            textStyle:
-                StreamChatTheme.of(context).channelHeaderTheme.titleStyle,
+    return Scaffold(
+      appBar: StreamThreadHeader(
+        parent: parent,
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: StreamMessageListView(
+              parentMessage: parent,
+            ),
           ),
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: StreamMessageListView(
-                messageBuilder: (p0, p1, p2, defaultMessageWidget) =>
-                    defaultMessageWidget.copyWith(
-                  onReplyTap: _reply,
-                ),
-                onMessageSwiped: _reply,
-                threadBuilder: (context, message) {
-                  return ThreadPage(
-                    parent: message,
-                  );
-                },
-              ),
+          StreamMessageInput(
+            messageInputController: StreamMessageInputController(
+              message: Message(parentId: parent.id),
             ),
-            StreamMessageInput(
-              messageInputController: _messageInputController,
-              attachmentLimit: 3,
-              onQuotedMessageCleared: () {
-                _messageInputController.clearQuotedMessage();
-                _focusNode!.unfocus();
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
