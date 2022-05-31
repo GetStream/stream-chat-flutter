@@ -56,21 +56,3 @@ abstract class StreamChatOverrides {
     return _asyncRunZoned(body, zoneValues: {_token: overrides});
   }
 }
-
-// void main() {
-//   testWidgets('test name', (tester) async {
-//     StreamChatOverrides.runZoned(() async {
-//       // final themeData = ThemeData();
-//       // final streamTheme = StreamChatThemeData.fromTheme(themeData);
-//       await tester.pumpWidget(MaterialApp(
-//           home: StreamChat(
-//         client: StreamChatOverrides.current!.client,
-//         child: null,
-//       )));
-
-//       // final client = StreamChat(client: ,)
-//       // when(() => StreamChatOverrides.current!.clientState.currentUser)
-//       //     .thenReturn(OwnUser(id: 'user-id'));
-//     });
-//   });
-// }
