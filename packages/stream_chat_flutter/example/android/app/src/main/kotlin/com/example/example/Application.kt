@@ -10,8 +10,8 @@ class Application : FlutterApplication(), PluginRegistrantCallback {
         super.onCreate()
     }
 
-    override fun registerWith(registry: PluginRegistry?) {
-        PathProviderPlugin.registerWith(registry?.registrarFor(
+    override fun registerWith(registry: PluginRegistry) {
+        PathProviderPlugin.registerWith(registry.registrarFor(
                 "io.flutter.plugins.pathprovider.PathProviderPlugin"))
     }
 }
