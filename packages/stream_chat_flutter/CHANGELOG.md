@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+-[[#1180]](https://github.com/GetStream/stream-chat-flutter/issues/1180) Fix file download
+
 ## 4.2.0
 
 🐞 Fixed
