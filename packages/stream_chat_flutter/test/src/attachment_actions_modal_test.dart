@@ -6,6 +6,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'mocks.dart';
+import 'stream_chat_overrides.dart';
 
 class MockAttachmentDownloader extends Mock {
   ProgressCallback? progressCallback;
@@ -33,44 +34,41 @@ void main() {
   testWidgets(
     'it should show all the actions',
     (WidgetTester tester) async {
-      final client = MockClient();
-      final clientState = MockClientState();
 
-      when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-
-      final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.fromTheme(themeData);
-      final attachment = Attachment(
-        type: 'image',
-        title: 'text.jpg',
-      );
-      final message = Message(
-        text: 'test',
-        user: User(
-          id: 'user-id',
-        ),
-        attachments: [
-          attachment,
-        ],
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: themeData,
-          home: StreamChat(
-            streamChatThemeData: streamTheme,
-            client: client,
-            child: AttachmentActionsModal(
-              message: message,
-              attachment: attachment,
+      await StreamChatOverrides.runZoned(() async {
+        final themeData = ThemeData();
+        final streamTheme = StreamChatThemeData.fromTheme(themeData);
+        final attachment = Attachment(
+          type: 'image',
+          title: 'text.jpg',
+        );
+        final message = Message(
+          text: 'test',
+          user: User(
+            id: 'user-id',
+          ),
+          attachments: [
+            attachment,
+          ],
+        );
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: themeData,
+            home: StreamChat(
+              streamChatThemeData: streamTheme,
+              client: StreamChatOverrides.current!.client,
+              child: AttachmentActionsModal(
+                message: message,
+                attachment: attachment,
+              ),
             ),
           ),
-        ),
-      );
-      expect(find.text('Reply'), findsOneWidget);
-      expect(find.text('Show in Chat'), findsOneWidget);
-      expect(find.text('Save Image'), findsOneWidget);
-      expect(find.text('Delete'), findsOneWidget);
+        );
+        expect(find.text('Reply'), findsOneWidget);
+        expect(find.text('Show in Chat'), findsOneWidget);
+        expect(find.text('Save Image'), findsOneWidget);
+        expect(find.text('Delete'), findsOneWidget);
+      });
     },
   );
 
