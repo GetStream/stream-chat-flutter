@@ -15,23 +15,89 @@ This guide assumes that you are familiar with Firebase Authentication and Cloud 
 In this guide, you'll explore how you can use Firebase Auth as an authentication provider and create Firebase Cloud functions to securely
 generate Stream Chat user tokens.
 
-You will use Stream's [NodeJS client](https://getstream.io/chat/docs/node/?language=javascript) for Stream account creation and
-token generation, and [Flutter Cloud Functions for Firebase](https://firebase.flutter.dev/docs/functions/overview) to invoke the cloud functions
-from your Flutter app.
+This guide makes use of Firebase's [Authenticate with Stream Chat](https://firebase.google.com/products/extensions/stream-auth-chat) extension. See [here](https://getstream.io/blog/stream-firebase-extensions/) for additional information on Stream's Firebase extensions.
 
-Stream supports several different [backend clients](https://getstream.io/chat/sdk/#backend-clients) to integrate with your server. This guide only shows an easy way to integrate Stream Chat authentication using Firebase and Flutter.
+The Firebase Stream Auth extension manages the Firebase cloud function code needed to create Stream Chat frontend tokens.
 
-### Flutter Firebase
+Alternatively, you could implement the Firebase cloud functions yourself by making use of our Stream's [NodeJS client](https://getstream.io/chat/docs/node/?language=javascript).
+Take a look at the [extension implementation](https://github.com/GetStream/stream-firebase-extensions/tree/main/auth-chat) for additional details. We've also written a [blog post](https://getstream.io/blog/serverless-auth-flutter-firebase/) detailing how you can set this up manually by writing your own cloud functions.
 
-See the [Flutter Firebase getting started](https://firebase.flutter.dev/docs/overview) docs for setup and installation instructions.
+Stream supports several different [backend clients](https://getstream.io/chat/sdk/#backend-clients) to integrate with your server. This guide only shows an automated way to integrate Stream Chat authentication using Firebase and Flutter.
 
-You will also need to add the [Flutter Firebase Authentication](https://firebase.flutter.dev/docs/auth/overview), and [Flutter Firebase Cloud Functions](https://firebase.flutter.dev/docs/functions/overview) packages to your app. Depending on the platform that you target, there may be specific configurations that you need to do.
+### Flutter Firebase Setup
 
-#### Starting Code
+If you're new to Flutter Firebase, see the [add Firebase to your Flutter app](https://firebase.google.com/docs/flutter/setup?platform=ios) docs for Firebase setup and installation instructions.
 
-The following code shows a basic application with **FirebaseAuth** and **FirebaseFunctions**.
+You will need to add the [Flutter Firebase Authentication](https://pub.dev/packages/firebase_auth), [Flutter Firebase Cloud Functions](https://pub.dev/packages/cloud_functions), and [Flutter Firebase Core](https://pub.dev/packages/firebase_core) dependencies to your Flutter app.
 
-You will extend this later to execute cloud functions.
+Add the following dependencies in `pubspec.yaml`:
+
+```yaml
+firebase_auth: ^3.3.19
+cloud_functions: ^3.2.16
+firebase_core: ^1.17.1
+```
+
+:::note
+This guide uses the above versions. Different versions may have breaking, or other, changes.
+:::
+
+### Install Firebase Extensions - Stream Chat Cloud Functions
+
+To follow this guide, you will need to install the Stream Chat Auth Firebase extension in your Firebase project.
+This extension automatically provisions your Firebase project with the necessary cloud functions to create and delete Stream user accounts and to generate and revoke user tokens.
+
+1. Go to: https://firebase.google.com/products/extensions/stream-auth-chat
+2. Press the **Install in console** button
+3. Select the correct Firebase project
+4. Follow the installation instructions
+
+:::note
+Enabling cloud functions requires you to enable billing (Blaze plan) for your project. You won't be charged unless you reach a certain usage threshold, and you will also be prompted to set up cost limits.
+:::
+
+During the installation process you'll be presented with a screen similar to this:
+
+![Firebase extensions installation](../assets/install_stream_chat_firebase_extension.jpg)
+
+The extensions sets up the following cloud functions:
+
+- createStreamUser
+- deleteStreamUser
+- getStreamUserToken
+- revokeStreamUserToken
+
+Depending on your current project configuration, you may also be promoted to enable **Authentication** and **Secret Manager**. For the extension to work these will need to be enabled, by pressing the **Enable** buttons.
+
+![Firebase enable Authentication and Secret Manager](../assets/firebase_cloud_secrets_management.jpg)
+
+In the final step of the installation you will need to provide your Stream app's API Key and Secret.
+
+![Firebase enable Authentication and Secret Manager](../assets/stream_firebase_extension_configuration.jpg)
+
+1. After entering your Stream Secret, press **Create secret**
+2. Press **Install extension**
+
+You can retrieve your app key and secret from your [Stream Project Dashboard](https://dashboard.getstream.io/).
+
+![Stream Chat API Key and Secret](../assets/stream_chat_app_access_keys.jpg)
+
+The extension will take a while to be installed, you'll be able to see the installation progress on the **Extensions** tab on Firebase.
+
+Once installed, you'll be able to view information on how the Stream extension works and options to reconfigure it.
+
+![Stream Chat Firebase extension usage](../assets/firebase_stream_chat_extension_usage.jpg)
+
+This extension automatically creates and deletes a user on Stream when a Firebase user is created or deleted.
+
+It also allows you to generate, and revoke, a Stream frontend token for an authenticated Firebase user:
+
+- **ext-auth-chat-getStreamUserToken**
+- **ext-auth-chat-revokeStreamUserToken**
+
+### Flutter Code
+
+The following is the complete Flutter code needed to run a basic example using Firebase Auth and Cloud Functions with your newly installed Stream Chat Firebase extension.
 
 ```dart
 import 'package:cloud_functions/cloud_functions.dart';
@@ -40,16 +106,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:flutter_firebase_extensions/firebase_options.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MyApp());
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         body: Auth(),
       ),
@@ -58,10 +130,10 @@ class MyApp extends StatelessWidget {
 }
 
 class Auth extends StatefulWidget {
-  Auth({Key? key}) : super(key: key);
+  const Auth({Key? key}) : super(key: key);
 
   @override
-  _AuthState createState() => _AuthState();
+  State<Auth> createState() => _AuthState();
 }
 
 class _AuthState extends State<Auth> {
@@ -72,29 +144,81 @@ class _AuthState extends State<Auth> {
   void initState() {
     super.initState();
     auth = FirebaseAuth.instance;
-    functions = FirebaseFunctions.instance;
+    functions = FirebaseFunctions.instanceFor(region: 'us-central1');
   }
 
   final email = 'test@getstream.io';
   final password = 'password';
 
-  Future<void> createAccount() async {
-    // Create Firebase account
-    await auth.createUserWithEmailAndPassword(email: email, password: password);
-    print('Firebase account created');
+  /// Create User with Firebase and return Stream Token.
+  Future<String?> _createAccountAndGetToken() async {
+    try {
+      await auth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      print('Firebase account created');
+
+      return _getToken();
+    } on FirebaseAuthException catch (error) {
+      print(error.code);
+      print(error.message);
+    }
+    return null;
   }
 
-  Future<void> signIn() async {
-    // Sign in with Firebase
-    await auth.signInWithEmailAndPassword(email: email, password: password);
-    print('Firebase signed in');
+  /// Sign in with Firebase and retrieve Stream chat token.
+  Future<String?> _signInAndGetToken() async {
+    try {
+      await auth.signInWithEmailAndPassword(email: email, password: password);
+      print('Firebase signed in');
+      return _getToken();
+    } on FirebaseAuthException catch (error) {
+      print(error.code);
+      print(error.message);
+    }
+    return null;
   }
 
-  Future<void> signOut() async {
-    // Revoke Stream chat token.
-    final callable = functions.httpsCallable('revokeStreamUserToken');
-    await callable();
-    print('Stream user token revoked');
+  /// Sign out of Firebase and revoke Stream chat token.
+  Future<void> _signOutAndRevokeToken() async {
+    await _revokeToken();
+
+    await auth.signOut();
+    print('Firebase Signed Out');
+  }
+
+  /// Gets a Stream user token for current authenticated user
+  ///
+  /// Need to be authenticated to Firebase to call this function.
+  Future<String?> _getToken() async {
+    try {
+      final result = await functions
+          .httpsCallable('ext-auth-chat-getStreamUserToken')
+          .call();
+
+      print('Stream user token retrieved: ${result.data}');
+      return result.data;
+    } on FirebaseFunctionsException catch (error) {
+      print(error.code);
+      print(error.details);
+      print(error.message);
+    }
+    return null;
+  }
+
+  /// Revoke Stream user token for current authenticated user.
+  ///
+  /// Need to be authenticated to Firebase to call this function.
+  Future<void> _revokeToken() async {
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable('ext-auth-chat-revokeStreamUserToken')
+          .call();
+      print('Stream user token revoked');
+    } on FirebaseFunctionsException catch (error) {
+      print(error.code);
+      print(error.details);
+      print(error.message);
+    }
   }
 
   @override
@@ -107,16 +231,16 @@ class _AuthState extends State<Auth> {
             streamUser: auth.authStateChanges(),
           ),
           ElevatedButton(
-            onPressed: createAccount,
-            child: Text('Create account'),
+            onPressed: _createAccountAndGetToken,
+            child: const Text('Create account'),
           ),
           ElevatedButton(
-            onPressed: signIn,
-            child: Text('Sign in'),
+            onPressed: _signInAndGetToken,
+            child: const Text('Sign in'),
           ),
           ElevatedButton(
-            onPressed: signOut,
-            child: Text('Sign out'),
+            onPressed: _signOutAndRevokeToken,
+            child: const Text('Sign out'),
           ),
         ],
       ),
@@ -139,225 +263,98 @@ class AuthenticationState extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return (snapshot.data != null)
-              ? Text('Authenticated')
-              : Text('Not Authenticated');
+              ? const Text('Authenticated')
+              : const Text('Not Authenticated');
         }
-        return Text('Not Authenticated');
+        return const Text('Not Authenticated');
       },
     );
   }
 }
-
 ```
 
-Running the above will give this:
+Running the above will show a screen similar to this:
 
-![](../assets/authentication_demo_app.jpg)
+![Firebase auth demo UI output](../assets/authentication_demo_app.jpg)
+
+#### Flutter Firebase Authentication
 
 The `Auth` widget handles all of the authentication logic. It initializes a `FirebaseAuth.instance` and uses that
-in the `createAccount`, `signIn` and `signOut` methods. There is a button to envoke each of these methods.
+in the `_createAccountAndGetToken`, `_signInAndGetToken` and `_signOutAndRevokeToken` methods. There is a button to invoke each of these methods.
 
-The `FirebaseFunctions.instance` will be used later in this guide.
+This example uses a hardcoded **email** and **password** and demonstrates basic authentication.
 
 The `AuthenticationState` widget listens to `auth.authStateChanges()` to display a message
 indicating if a user is authenticated.
 
-### Firebase Cloud Functions
+:::note
+Ensure that you've enabled the email and password authentication provider within the Firebase Auth console.
+:::
+
+#### Flutter Firebase Cloud Functions
 
 Firebase Cloud Functions allows you to extend Firebase with custom operations that an event can trigger:
-- **Internal event**: For example, when creating a new Firebase account this is automatically triggered.
-- **External event**: For example, directly calling a cloud function from your Flutter application.
 
-To set up your local environment to deploy cloud functions, please see the
-[Cloud Functions getting started](https://firebase.flutter.dev/docs/overview) docs.
+- **Internal event**: For example, when creating a new Firebase account a function is automatically triggered to create a Stream user.
+- **External event**: For example, directly calling a cloud function from your Flutter application - creating/revoking a Stream user token.
 
-After initializing your project with cloud functions, you should have a **functions** folder in your project, including a `package.json` file.
+To call external cloud functions from Flutter, you will need to use the `cloud_functions` package.
 
-There should be two dependencies already added, **firebase-admin** and **firebase-functions**. You will also need to add the **stream-chat** dependency.
-
-Navigate to the **functions** folder and run `npm install stream-chat --save-prod`.
-
-This will install the node module and add it as a dependency to `package.json`.
-
-Now open `index.js` and add the following (this is the complete example):
-
-```js
-const StreamChat = require('stream-chat').StreamChat;
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
-
-admin.initializeApp();
-
-const serverClient = StreamChat.getInstance(functions.config().stream.key, functions.config().stream.secret);
-
-
-// When a user is deleted from Firebase their associated Stream account is also deleted.
-exports.deleteStreamUser = functions.auth.user().onDelete((user, context) => {
-  return serverClient.deleteUser(user.uid);
-});
-
-// Create a Stream user and return auth token.
-exports.createStreamUserAndGetToken = functions.https.onCall(async (data, context) => {
-  // Checking that the user is authenticated.
-  if (!context.auth) {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +
-      'while authenticated.');
-  } else {
-    try {
-      // Create user using the serverClient.
-      await serverClient.upsertUser({
-        id: context.auth.uid,
-        name: context.auth.token.name,
-        email: context.auth.token.email,
-        image: context.auth.token.image,
-      });
-
-      /// Create and return user auth token.
-      return serverClient.createToken(context.auth.uid);
-    } catch (err) {
-      console.error(`Unable to create user with ID ${context.auth.uid} on Stream. Error ${err}`);
-      // Throwing an HttpsError so that the client gets the error details.
-      throw new functions.https.HttpsError('aborted', "Could not create Stream user");
-    }
-  }
-});
-
-// Get Stream user token.
-exports.getStreamUserToken = functions.https.onCall((data, context) => {
-  // Checking that the user is authenticated.
-  if (!context.auth) {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +
-      'while authenticated.');
-  } else {
-    try {
-      return serverClient.createToken(context.auth.uid);
-    } catch (err) {
-      console.error(`Unable to get user token with ID ${context.auth.uid} on Stream. Error ${err}`);
-      // Throwing an HttpsError so that the client gets the error details.
-      throw new functions.https.HttpsError('aborted', "Could not get Stream user");
-    }
-  }
-});
-
-// Revoke the authenticated user's Stream chat token.
-exports.revokeStreamUserToken = functions.https.onCall((data, context) => {
-  // Checking that the user is authenticated.
-  if (!context.auth) {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +
-      'while authenticated.');
-  } else {
-    try {
-      return serverClient.revokeUserToken(context.auth.uid);
-    } catch (err) {
-      console.error(`Unable to revoke user token with ID ${context.auth.uid} on Stream. Error ${err}`);
-      // Throwing an HttpsError so that the client gets the error details.
-      throw new functions.https.HttpsError('aborted', "Could not get Stream user");
-    }
-  }
-});
-
-```
-
-First, you import the necessary packages and call `admin.initializeApp();` to set up Firebase cloud functions.
-
-Next, you initialize the **StreamChat** server client by calling `StreamChat.getInstance`. This function requires your Stream app's
-**token** and **secret**. You can get this from the Stream Dashboard for your app.
-
-Set these values as environment data on Firebase Functions.
-
-```bash
- firebase functions:config:set stream.key="app-key" stream.secret="app-secret"
-```
-
-*Replace **app-key** and **app-secret** with the values for your Stream app.*
-
-This creates an object of **stream** with properties **key** and **secret**. To access this environment
-data use `functions.config().stream.key` and `functions.config().stream.secret`.
-
-See the [Firebase environment configuration](https://firebase.google.com/docs/functions/config-env)
-documentation for additional information.
-
-To deploy these functions to Firebase, run:
-
-```bash
-firebase deploy --only functions
-```
-
-### Create a Stream User and Get the User's Token
-
-In the `createStreamUserAndGetToken` cloud function you create an `onCall` HTTPS handler, which exposes
-a cloud function that can be envoked from your Flutter app.
-
-```js
-// Create a Stream user and return auth token.
-exports.createStreamUserAndGetToken = functions.https.onCall(async (data, context) => {
-  // Checking that the user is authenticated.
-  if (!context.auth) {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +
-      'while authenticated.');
-  } else {
-    try {
-      // Create user using the serverClient.
-      await serverClient.upsertUser({
-        id: context.auth.uid,
-        name: context.auth.token.name,
-        email: context.auth.token.email,
-        image: context.auth.token.image,
-      });
-
-      /// Create and return user auth token.
-      return serverClient.createToken(context.auth.uid);
-    } catch (err) {
-      console.error(`Unable to create user with ID ${context.auth.uid} on Stream. Error ${err}`);
-      // Throwing an HttpsError so that the client gets the error details.
-      throw new functions.https.HttpsError('aborted', "Could not create Stream user");
-    }
-  }
-});
-```
-
-This function first does a check to see that the client that calls it is authenticated,
-by ensuring that `context.auth` is not null. If it is null, then it throws an `HttpsError` with a descriptive
-message. This error can be caught in your Flutter application.
-
-If the caller is authenticated the function proceeds to use the `serverClient` to create a new Stream Chat
-user by calling the `upsertUser` method and passing in some user data. It uses the authenticated caller's **uid** as an **id**.
-
-After the user is created it generates a token for that user. This token is then returned to the caller.
-
-To call this from Flutter, you will need to use the `cloud_functions` package.
-
-Update the **createAccount** method in your Flutter code to the following:
+In the code sample given above, in the `initState` method, you're also creating a Firebase function instance:
 
 ```dart
-Future<void> createAccount() async {
-  // Create Firebase account
-  await auth.createUserWithEmailAndPassword(email: email, password: password);
-  print('Firebase account created');
+functions = FirebaseFunctions.instanceFor(region: 'us-central1');
+```
 
-  // Create Stream user and get token
-  final callable = functions.httpsCallable('createStreamUserAndGetToken');
-  final results = await callable();
-  print('Stream account created, token: ${results.data}');
+Be sure to set the region to be the same as what you configured your Firebase Chat Auth Extension to use.
+
+#### Create a User and Get the User's Stream Token
+
+Let's explore the code to create a new user and retrieve the frontend token.
+
+The `_createAccountAndGetToken` method does the following:
+
+1. Creates a user on Firebase using the demo credentials
+2. An **internal** cloud function is automatically triggered on Firebase to create a new user within your Stream backend app
+3. Call the `_getToken` method
+
+Let's explore the `_getToken` method:
+
+```dart
+/// Gets a Stream user token for the currently authenticated user
+///
+/// Need to be authenticated to Firebase to call this function.
+Future<String?> _getToken() async {
+  try {
+    final result = await functions
+        .httpsCallable('ext-auth-chat-getStreamUserToken')
+        .call();
+
+    print('Stream user token retrieved: ${result.data}');
+    return result.data;
+  } on FirebaseFunctionsException catch (error) {
+    print(error.code);
+    print(error.details);
+    print(error.message);
+  }
+  return null;
 }
 ```
 
-Calling this method will do the following:
-1. Create a new Firebase User and authenticate that user.
-2. Call the `createStreamUserAndGetToken` cloud function and get the Stream user token for the authenticated user.
+:::note
+The user needs to be authenticated to call this cloud function. Otherwise, the function will throw
+a **failed-precondition** error.
+:::
 
-As you can see, calling a cloud function is easy and will also send all the necessary user authentication information (such as the UID)
+This method calls the `ext-auth-chat-getStreamUserToken` cloud function, which was created automatically when the Stream Firebase extension was installed.
+This cloud function will look at the calling user and if they are authenticated to Firebase it will create and return a new frontend user token.
+
+As you can see, calling a cloud function is easy and will also send all the necessary Firebase user authentication information (such as the user UID)
 in the request.
 
-Once you have the Stream user token, you can authenticate your Stream Chat user as you normally would.
+Once you have the Stream user token, you can authenticate your Stream Chat user as you normally would. Please see our [initialization documention](https://getstream.io/chat/docs/flutter-dart/init_and_users/?language=dart) for more information.
 
-Please see our [initialization documention](https://getstream.io/chat/docs/flutter-dart/init_and_users/?language=dart) for more information.
-
-As you can see below, the User ID matches on both Firebase's and Stream's user database.
+As you can see below, the **User ID** matches in both Firebase's and Stream's user database.
 
 ##### Firebase Authentication Database
 
@@ -367,82 +364,66 @@ As you can see below, the User ID matches on both Firebase's and Stream's user d
 
 ![Stream chat user database new account created](../assets/stream_chat_user_database.jpg)
 
+#### Login and Get the User's Stream Token
 
-### Get the Stream User Token
-
-The `getStreamUserToken` cloud function is very similar to the `createStreamUserAndGetToken` function. The only difference is
-that it only creates a user token and does not create a new user account on Stream.
-
-Update the **signIn** method in your Flutter code to the following:
+Lets explore the process of user login and token generation within the `_signInAndGetToken` method:
 
 ```dart
-Future<void> signIn() async {
-  // Sign in with Firebase
-  await auth.signInWithEmailAndPassword(email: email, password: password);
-  print('Firebase signed in');
-
-  // Get Stream user token
-  final callable = functions.httpsCallable('getStreamUserToken');
-  final results = await callable();
-  print('Stream user token retrieved: ${results.data}');
+/// Sign in with Firebase and retrieve Stream chat token.
+Future<String?> _signInAndGetToken() async {
+  try {
+    await auth.signInWithEmailAndPassword(email: email, password: password);
+    print('Firebase signed in');
+    return _getToken();
+  } on FirebaseAuthException catch (error) {
+    print(error.code);
+    print(error.message);
+  }
+  return null;
 }
 ```
 
-Calling this method will do the following:
-1. Sign in using Firebase Auth.
-2. Call the `getStreamUserToken` cloud function to get a Stream user token.
+This process is similar to account creation. Here you sign in using Firebase, and if successful proceed to create a Stream frontend token using the `_getToken` method - which we already explored.
 
-:::note
-The user needs to be authenticated to call this cloud function. Otherwise, the function will throw
-the **failed-precondition** error that you specified.
-:::
+#### Sign Out and Revoke Stream User Token
 
-### Revoke Stream User Token
+You probably also want to revoke the Stream user token if you sign out from Firebase.
 
-You may also want to revoke the Stream user token if you sign out from Firebase.
+Let's explore the `_signOutAndRevokeToken` method:
 
-Update the `signOut` method in your Flutter code to the following:
+1. This calls, and awaits, the `_revokeToken` method
+2. Signs out of Firebase
+
+In the `_revokeToken` method you execute the **ext-auth-chat-revokeStreamUserToken** cloud function:
 
 ```dart
-Future<void> signOut() async {
-  // Revoke Stream user token.
-  final callable = functions.httpsCallable('revokeStreamUserToken');
-  await callable();
-  print('Stream user token revoked');
-
-  // Sign out Firebase.
-  await auth.signOut();
-  print('Firebase signed out');
+/// Revoke Stream user token for current authenticated user.
+///
+/// Need to be authenticated to Firebase to call this function.
+Future<void> _revokeToken() async {
+  try {
+    await FirebaseFunctions.instance
+        .httpsCallable('ext-auth-chat-revokeStreamUserToken')
+        .call();
+    print('Stream user token revoked');
+  } on FirebaseFunctionsException catch (error) {
+    print(error.code);
+    print(error.details);
+    print(error.message);
+  }
 }
 ```
+
 :::note
-Call the cloud function before signing out from Firebase.
+You need to call the cloud function before signing out off Firebase. That is why we `await` the result of `_revokeToken` within `_signOutAndRevokeToken`.
 :::
 
-### Delete Stream User
+#### Delete Firebase and Stream User
 
-When deleting a Firebase user account, it would make sense also to delete the
-associated Stream user account.
-
-The cloud function looks like this:
-
-```js
-// When a user is deleted from Firebase their associated Stream account is also deleted.
-exports.deleteStreamUser = functions.auth.user().onDelete((user, context) => {
- return serverClient.deleteUser(user.uid);
-});
-```
-
-In this function, you are listening to delete events on Firebase auth. When an account is deleted, this function will be triggered, and you can get the
-user's **uid** and call the `deleteUser` method on the `serverClient`.
-
-This is not an external cloud function; it can only be triggered when an
-account is deleted.
+When deleting a Firebase user account, the **ext-auth-chat-deleteStreamUser** cloud function is automatically triggered. This is not an external cloud function; it can only be triggered when an
+account is deleted on Firebase itself.
 
 ### Conclusion
 
-In this guide, you have seen how to securely create Stream Chat tokens using
+In this guide, you have seen how to quickly and securely create Stream Chat tokens using
 Firebase Authentication and Cloud Functions.
-
-The principles shown in this guide can be applied to your preferred authentication
-provider and cloud architecture of choice.
