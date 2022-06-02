@@ -45,7 +45,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
           return _buildVideoAttachment(
             context,
             StreamVideoThumbnailImage(
-              video: attachment.file!.path!,
+              video: attachment.file!.path,
               height: size?.height,
               width: size?.width,
               fit: BoxFit.cover,

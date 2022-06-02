@@ -160,7 +160,7 @@ class StreamFileAttachment extends StreamAttachmentWidget {
         child: source.when(
           local: () => StreamVideoThumbnailImage(
             fit: BoxFit.cover,
-            video: attachment.file!.path!,
+            video: attachment.file!.path,
             placeholderBuilder: (_) => const Center(
               child: SizedBox(
                 width: 20,

@@ -26,8 +26,8 @@ class StreamVideoThumbnailImage extends StatefulWidget {
     this.placeholderBuilder,
   });
 
-  /// Video path
-  final String video;
+  /// Video path (can be null on web)
+  final String? video;
 
   /// Width of widget
   final double? width;
@@ -58,10 +58,12 @@ class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
 
   @override
   void initState() {
-    thumbnailFuture = StreamVideoService.generateVideoThumbnail(
-      video: widget.video,
-      imageFormat: widget.format,
-    );
+    thumbnailFuture = widget.video != null
+        ? StreamVideoService.generateVideoThumbnail(
+            video: widget.video!,
+            imageFormat: widget.format,
+          )
+        : Future.value();
     super.initState();
   }
 
@@ -74,10 +76,12 @@ class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
   @override
   void didUpdateWidget(covariant StreamVideoThumbnailImage oldWidget) {
     if (oldWidget.video != widget.video || oldWidget.format != widget.format) {
-      thumbnailFuture = StreamVideoService.generateVideoThumbnail(
-        video: widget.video,
-        imageFormat: widget.format,
-      );
+      if (widget.video != null) {
+        thumbnailFuture = StreamVideoService.generateVideoThumbnail(
+          video: widget.video!,
+          imageFormat: widget.format,
+        );
+      }
     }
     super.didUpdateWidget(oldWidget);
   }
