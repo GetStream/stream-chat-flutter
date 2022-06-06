@@ -328,7 +328,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
                       widget.mediaAttachmentPackages.length - 1) ...[
                     GalleryNavigationItem(
                       icon: Icons.chevron_right,
-                      right: 0,
+                      right: 8,
                       opacityAnimation: _opacityAnimation,
                       currentPage: _currentPage,
                       onClick: () {
@@ -343,7 +343,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
                   if (_currentPage.value != 0) ...[
                     GalleryNavigationItem(
                       icon: Icons.chevron_left,
-                      left: 0,
+                      left: 8,
                       opacityAnimation: _opacityAnimation,
                       currentPage: _currentPage,
                       onClick: () {
@@ -448,18 +448,18 @@ class GalleryNavigationItem extends StatelessWidget {
           opacity: opacityAnimation,
           child: ValueListenableBuilder<int>(
             valueListenable: currentPage,
-            builder: (context, value, child) => GestureDetector(
-              onTap: onClick,
-              child: Icon(
-                icon,
-                size: 50,
-              ),
-            ),
+            builder: (context, value, child) => child!,
             child: GestureDetector(
               onTap: onClick,
-              child: Icon(
-                icon,
-                size: 50,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: StreamChatTheme.of(context).colorTheme.appBg,
+                  shape: BoxShape.circle,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Icon(icon),
+                ),
               ),
             ),
           ),
