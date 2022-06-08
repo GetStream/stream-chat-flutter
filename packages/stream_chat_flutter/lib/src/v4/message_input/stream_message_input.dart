@@ -1221,7 +1221,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   void _setCommand(Command c) {
     _effectiveController
-      ..clear()
+      ..reset()
       ..command = c;
     setState(() {
       _showCommandsOverlay = false;
