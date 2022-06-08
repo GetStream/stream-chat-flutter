@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
+import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
@@ -135,6 +136,9 @@ class _QuotedMessage extends StatelessWidget {
   bool get _containsLinkAttachment =>
       message.attachments.any((element) => element.titleLink != null);
 
+  bool get _isGiphy =>
+      message.attachments.any((element) => element.type == 'giphy');
+
   @override
   Widget build(BuildContext context) {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
@@ -160,7 +164,7 @@ class _QuotedMessage extends StatelessWidget {
           messageTheme: messageTheme,
           attachmentThumbnailBuilders: attachmentThumbnailBuilders,
         ),
-      if (msg.text!.isNotEmpty)
+      if (msg.text!.isNotEmpty && !_isGiphy)
         Flexible(
           child: StreamMessageText(
             message: msg,
@@ -275,9 +279,14 @@ class _ParseAttachments extends StatelessWidget {
         );
       },
       'video': (_, attachment) {
-        return _VideoAttachmentThumbnail(
+        return StreamVideoThumbnailImage(
           key: ValueKey(attachment.assetUrl),
-          attachment: attachment,
+          video: attachment.file?.path ?? attachment.assetUrl!,
+          constraints: BoxConstraints.loose(const Size(32, 32)),
+          fit: BoxFit.cover,
+          errorBuilder: (_, __) => AttachmentError(
+            constraints: BoxConstraints.loose(const Size(32, 32)),
+          ),
         );
       },
       'giphy': (_, attachment) {

@@ -81,41 +81,44 @@ class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Uint8List?>(
-      future: thumbnailFuture,
-      builder: (context, snapshot) => AnimatedSwitcher(
-        duration: const Duration(milliseconds: 350),
-        child: Builder(
-          key: ValueKey<AsyncSnapshot<Uint8List?>>(snapshot),
-          builder: (_) {
-            if (snapshot.hasError) {
-              return widget.errorBuilder?.call(context, snapshot.error) ??
-                  Center(
-                    child: StreamSvgIcon.error(),
-                  );
-            }
-            if (!snapshot.hasData) {
-              return Container(
-                constraints: const BoxConstraints.expand(),
-                child: widget.placeholderBuilder?.call(context) ??
-                    Shimmer.fromColors(
-                      baseColor: _streamChatTheme.colorTheme.disabled,
-                      highlightColor: _streamChatTheme.colorTheme.inputBg,
-                      child: Image.asset(
-                        'images/placeholder.png',
-                        fit: BoxFit.cover,
-                        package: 'stream_chat_flutter',
+    return ConstrainedBox(
+      constraints: widget.constraints ?? const BoxConstraints.expand(),
+      child: FutureBuilder<Uint8List?>(
+        future: thumbnailFuture,
+        builder: (context, snapshot) => AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          child: Builder(
+            key: ValueKey<AsyncSnapshot<Uint8List?>>(snapshot),
+            builder: (_) {
+              if (snapshot.hasError) {
+                return widget.errorBuilder?.call(context, snapshot.error) ??
+                    Center(
+                      child: StreamSvgIcon.error(),
+                    );
+              }
+              if (!snapshot.hasData) {
+                return Container(
+                  constraints: const BoxConstraints.expand(),
+                  child: widget.placeholderBuilder?.call(context) ??
+                      Shimmer.fromColors(
+                        baseColor: _streamChatTheme.colorTheme.disabled,
+                        highlightColor: _streamChatTheme.colorTheme.inputBg,
+                        child: Image.asset(
+                          'images/placeholder.png',
+                          fit: BoxFit.cover,
+                          package: 'stream_chat_flutter',
+                        ),
                       ),
-                    ),
+                );
+              }
+              return Image.memory(
+                snapshot.data!,
+                fit: widget.fit,
+                height: widget.constraints?.maxHeight ?? double.infinity,
+                width: widget.constraints?.maxWidth ?? double.infinity,
               );
-            }
-            return Image.memory(
-              snapshot.data!,
-              fit: widget.fit,
-              height: widget.constraints?.maxHeight ?? double.infinity,
-              width: widget.constraints?.maxWidth ?? double.infinity,
-            );
-          },
+            },
+          ),
         ),
       ),
     );
