@@ -146,19 +146,21 @@ class _SplitViewState extends State<SplitView> {
         ),
         Flexible(
           flex: 2,
-          child: Scaffold(
-            body: selectedChannel != null
-                ? StreamChannel(
-                    key: ValueKey(selectedChannel!.cid),
-                    channel: selectedChannel!,
-                    child: const ChannelPage(showBackButton: false),
-                  )
-                : Center(
-                    child: Text(
-                      'Pick a channel to show the messages 💬',
-                      style: Theme.of(context).textTheme.headline5,
+          child: ClipPath(
+            child: Scaffold(
+              body: selectedChannel != null
+                  ? StreamChannel(
+                      key: ValueKey(selectedChannel!.cid),
+                      channel: selectedChannel!,
+                      child: const ChannelPage(showBackButton: false),
+                    )
+                  : Center(
+                      child: Text(
+                        'Pick a channel to show the messages 💬',
+                        style: Theme.of(context).textTheme.headline5,
+                      ),
                     ),
-                  ),
+            ),
           ),
         ),
       ],
