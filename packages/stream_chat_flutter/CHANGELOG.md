@@ -3,6 +3,7 @@
 🐞 Fixed
 
 -[[#1180]](https://github.com/GetStream/stream-chat-flutter/issues/1180) Fix file download
+- Fix commands resetting the `StreamMessageInputController.value`
 
 ## 4.2.0
 
