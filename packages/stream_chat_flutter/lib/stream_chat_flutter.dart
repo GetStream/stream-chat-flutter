@@ -51,7 +51,7 @@ export 'src/message_search/message_search_list_view.dart';
 export 'src/message_widget/deleted_message.dart';
 export 'src/message_widget/message_text.dart';
 export 'src/message_widget/message_widget.dart';
-export 'src/message_widget/reaction_picker.dart';
+export 'src/message_widget/reactions/reaction_picker.dart';
 export 'src/message_widget/text_bubble.dart';
 export 'src/misc/back_button.dart';
 export 'src/misc/connection_status_builder.dart';

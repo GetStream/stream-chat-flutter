@@ -103,7 +103,28 @@ class ResponsiveChat extends StatelessWidget {
     return ResponsiveBuilder(
       builder: (context, sizingInformation) {
         if (sizingInformation.isMobile) {
-          return const ChannelListPage();
+          return ChannelListPage(
+            onTap: (c) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return StreamChannel(
+                      channel: c,
+                      child: ChannelPage(
+                        onBackPressed: (context) {
+                          Navigator.of(
+                            context,
+                            rootNavigator: true,
+                          ).pop();
+                        },
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
         }
 
         return const SplitView();
@@ -211,9 +232,11 @@ class ChannelPage extends StatefulWidget {
   const ChannelPage({
     super.key,
     this.showBackButton = true,
+    this.onBackPressed,
   });
 
   final bool showBackButton;
+  final void Function(BuildContext)? onBackPressed;
 
   @override
   State<ChannelPage> createState() => _ChannelPageState();
@@ -228,6 +251,11 @@ class _ChannelPageState extends State<ChannelPage> {
         onGenerateRoute: (settings) => MaterialPageRoute(
           builder: (context) => Scaffold(
             appBar: StreamChannelHeader(
+              onBackPressed: widget.onBackPressed != null
+                  ? () {
+                      widget.onBackPressed!(context);
+                    }
+                  : null,
               showBackButton: widget.showBackButton,
             ),
             body: Column(

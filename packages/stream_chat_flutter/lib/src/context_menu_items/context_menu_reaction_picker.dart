@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template desktopReactionPicker}
-/// Allows the user to select reactions to a message on desktop & web.
+/// {@template contextMenuReactionPicker}
+/// Allows the user to select reactions to a message on desktop & web via
+/// context menu.
 ///
 /// This differs slightly from [StreamReactionPicker] in order to match our
 /// design spec.
@@ -12,9 +13,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// Used by the `_buildContextMenu()` function found in `message_widget.dart`.
 /// It is not recommended to use this widget directly.
 /// {@endtemplate}
-class DesktopReactionPicker extends StatefulWidget {
-  /// {@macro desktopReactionPicker}
-  const DesktopReactionPicker({
+class ContextMenuReactionPicker extends StatefulWidget {
+  /// {@macro contextMenuReactionPicker}
+  const ContextMenuReactionPicker({
     super.key,
     required this.message,
   });
@@ -23,12 +24,51 @@ class DesktopReactionPicker extends StatefulWidget {
   final Message message;
 
   @override
-  _DesktopReactionPickerState createState() => _DesktopReactionPickerState();
+  State<ContextMenuReactionPicker> createState() =>
+      _ContextMenuReactionPickerState();
 }
 
-class _DesktopReactionPickerState extends State<DesktopReactionPicker>
+class _ContextMenuReactionPickerState extends State<ContextMenuReactionPicker>
     with TickerProviderStateMixin {
   List<EzAnimation> animations = [];
+
+  Future<void> triggerAnimations() async {
+    for (final a in animations) {
+      a.start();
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+  }
+
+  Future<void> pop() async {
+    for (final a in animations) {
+      a.stop();
+    }
+    Navigator.of(context).pop();
+  }
+
+  /// Add a reaction to the message
+  void sendReaction(BuildContext context, String reactionType) {
+    StreamChannel.of(context).channel.sendReaction(
+          widget.message,
+          reactionType,
+          enforceUnique: true,
+        );
+    pop();
+  }
+
+  /// Remove a reaction from the message
+  void removeReaction(BuildContext context, Reaction reaction) {
+    StreamChannel.of(context).channel.deleteReaction(widget.message, reaction);
+    pop();
+  }
+
+  @override
+  void dispose() {
+    for (final a in animations) {
+      a.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,43 +172,5 @@ class _DesktopReactionPickerState extends State<DesktopReactionPicker>
       ),
       child: child,
     );
-  }
-
-  Future<void> triggerAnimations() async {
-    for (final a in animations) {
-      a.start();
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
-  }
-
-  Future<void> pop() async {
-    for (final a in animations) {
-      a.stop();
-    }
-    Navigator.of(context).pop();
-  }
-
-  /// Add a reaction to the message
-  void sendReaction(BuildContext context, String reactionType) {
-    StreamChannel.of(context).channel.sendReaction(
-          widget.message,
-          reactionType,
-          enforceUnique: true,
-        );
-    pop();
-  }
-
-  /// Remove a reaction from the message
-  void removeReaction(BuildContext context, Reaction reaction) {
-    StreamChannel.of(context).channel.deleteReaction(widget.message, reaction);
-    pop();
-  }
-
-  @override
-  void dispose() {
-    for (final a in animations) {
-      a.dispose();
-    }
-    super.dispose();
   }
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/src/message_list_view/floating_date_divider.dart';
 import 'package:stream_chat_flutter/src/message_list_view/loading_indicator.dart';
@@ -376,37 +377,42 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   @override
   Widget build(BuildContext context) {
-    return MessageListCore(
-      paginationLimit: widget.paginationLimit,
-      messageFilter: widget.messageFilter,
-      loadingBuilder: widget.loadingBuilder ??
-          (context) => const Center(
-                child: CircularProgressIndicator(),
-              ),
-      emptyBuilder: widget.emptyBuilder ??
-          (context) => Center(
-                child: Text(
-                  context.translations.emptyChatMessagesText,
-                  style: _streamTheme.textTheme.footnote.copyWith(
-                    color: _streamTheme.colorTheme.textHighEmphasis
-                        .withOpacity(0.5),
+    return Portal(
+      labels: const [
+        kPortalMessageListViewLable,
+      ],
+      child: MessageListCore(
+        paginationLimit: widget.paginationLimit,
+        messageFilter: widget.messageFilter,
+        loadingBuilder: widget.loadingBuilder ??
+            (context) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+        emptyBuilder: widget.emptyBuilder ??
+            (context) => Center(
+                  child: Text(
+                    context.translations.emptyChatMessagesText,
+                    style: _streamTheme.textTheme.footnote.copyWith(
+                      color: _streamTheme.colorTheme.textHighEmphasis
+                          .withOpacity(0.5),
+                    ),
                   ),
                 ),
-              ),
-      messageListBuilder:
-          widget.messageListBuilder ?? (context, list) => _buildListView(list),
-      messageListController: _messageListController,
-      parentMessage: widget.parentMessage,
-      errorBuilder: widget.errorBuilder ??
-          (BuildContext context, Object error) => Center(
-                child: Text(
-                  context.translations.genericErrorText,
-                  style: _streamTheme.textTheme.footnote.copyWith(
-                    color: _streamTheme.colorTheme.textHighEmphasis
-                        .withOpacity(0.5),
+        messageListBuilder: widget.messageListBuilder ??
+            (context, list) => _buildListView(list),
+        messageListController: _messageListController,
+        parentMessage: widget.parentMessage,
+        errorBuilder: widget.errorBuilder ??
+            (BuildContext context, Object error) => Center(
+                  child: Text(
+                    context.translations.genericErrorText,
+                    style: _streamTheme.textTheme.footnote.copyWith(
+                      color: _streamTheme.colorTheme.textHighEmphasis
+                          .withOpacity(0.5),
+                    ),
                   ),
                 ),
-              ),
+      ),
     );
   }
 

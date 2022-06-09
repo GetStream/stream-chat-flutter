@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content_components.dart';
+import 'package:stream_chat_flutter/src/message_widget/reactions/desktop_reactions_builder.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -236,8 +238,8 @@ class MessageWidgetContent extends StatelessWidget {
                         SizedBox(width: avatarWidth + 4),
                       Flexible(
                         child: PortalTarget(
-                          visible: showReactions,
-                          portalFollower: showReactions
+                          visible: isMobileDevice && showReactions,
+                          portalFollower: isMobileDevice && showReactions
                               ? ReactionIndicator(
                                   message: message,
                                   messageTheme: messageTheme,
@@ -347,6 +349,14 @@ class MessageWidgetContent extends StatelessWidget {
                       ],
                     ],
                   ),
+                  if (isDesktopDeviceOrWeb && shouldShowReactions)
+                    DesktopReactionsBuilder(
+                      message: message,
+                      messageTheme: messageTheme,
+                      shouldShowReactions: shouldShowReactions,
+                      borderSide: borderSide,
+                      reverse: reverse,
+                    ),
                   if (showBottomRow)
                     SizedBox(
                       height: context.textScaleFactor * 18.0,

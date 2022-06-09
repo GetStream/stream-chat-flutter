@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -479,4 +480,14 @@ extension AttachmentPackagesX on Message {
     );
     return _attachmentPackages;
   }
+}
+
+/// PortalLabel that refers to [StreamMessageListView]
+const kPortalMessageListViewLable = _PortalMessageListViewLable();
+
+class _PortalMessageListViewLable extends PortalLabel<void> {
+  const _PortalMessageListViewLable() : super(null);
+
+  @override
+  String toString() => 'PortalLabel.MessageWidget';
 }

@@ -4,12 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/conditional_parent_builder/conditional_parent_builder.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
+import 'package:stream_chat_flutter/src/context_menu_items/context_menu_reaction_picker.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
-import 'package:stream_chat_flutter/src/message_widget/desktop_reaction_picker.dart';
-import 'package:stream_chat_flutter/src/message_widget/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
+import 'package:stream_chat_flutter/src/message_widget/reactions/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -874,7 +874,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       StreamChatContextMenuItem(
         child: StreamChannel(
           channel: channel,
-          child: DesktopReactionPicker(
+          child: ContextMenuReactionPicker(
             message: widget.message,
           ),
         ),

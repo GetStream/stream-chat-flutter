@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/reaction_bubble.dart';
+import 'package:stream_chat_flutter/src/message_widget/reactions/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template reactionIndicator}
