@@ -320,6 +320,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           // 9.7 inch iPad Pro
           result = shiftFactor + 0.3;
           cont = false;
+        } else if (constraints.maxWidth >= 200 &&
+            constraints.maxWidth <= 400) {
+          // Phone (?)
+          print('phone');
+          result = shiftFactor - 0.2;
+          cont = false;
         }
 
         if (cont) {
