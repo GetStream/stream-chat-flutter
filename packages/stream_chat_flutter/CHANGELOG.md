@@ -1,5 +1,7 @@
 ## Upcoming
 
+- Updated `photo_view` dependency to [`0.14.0`](https://pub.dev/packages/photo_view/changelog).
+
 🐞 Fixed
 
 -[[#1180]](https://github.com/GetStream/stream-chat-flutter/issues/1180) Fix file download
