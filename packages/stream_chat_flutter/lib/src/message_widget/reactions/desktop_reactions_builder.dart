@@ -78,7 +78,6 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
     final reactionIcons = StreamChatTheme.of(context).reactionIcons;
     final streamChat = StreamChat.of(context);
     final streamChatTheme = StreamChatTheme.of(context);
-    final userId = StreamChat.of(context).currentUser?.id;
 
     final reactionsMap = <String, Reaction>{};
     var reactionsList = <Reaction>[];
@@ -92,7 +91,6 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
       reactionsList = reactionsMap.values.toList()
         ..sort((a, b) => a.user!.id == streamChat.currentUser?.id ? 1 : -1);
     }
-
     return PortalTarget(
       visible: _showReactionsPopup,
       portalCandidateLabels: const [kPortalMessageListViewLable],
@@ -104,88 +102,50 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
         ),
       ),
       portalFollower: IgnorePointer(
-        child: Card(
-          color: streamChatTheme.colorTheme.barsBg,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 336,
+            maxHeight: 342,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '''${reactionsList.length} ${context.translations.messageReactionsLabel}''',
-                  style: streamChatTheme.textTheme.headlineBold,
-                ),
-                const SizedBox(height: 24),
-                Wrap(
-                  children: [
-                    ...reactionsList.map((reaction) {
-                      final reactionIcon = reactionIcons.firstWhereOrNull(
-                        (r) => r.type == reaction.type,
-                      );
-                      return Column(
-                        children: [
-                          Stack(
-                            children: [
-                              StreamUserAvatar(
-                                user: reaction.user!,
-                                constraints: const BoxConstraints.tightFor(
-                                  height: 64,
-                                  width: 64,
-                                ),
-                                borderRadius: BorderRadius.circular(32),
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    color: streamChatTheme.colorTheme.inputBg,
-                                    border: Border.all(
-                                      color: streamChatTheme.colorTheme.barsBg,
-                                      width: 2,
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: reactionIcon?.builder(
-                                          context,
-                                          reaction.user?.id == userId,
-                                          16,
-                                        ) ??
-                                        Icon(
-                                          Icons.help_outline_rounded,
-                                          size: 16,
-                                          color: reaction.user?.id == userId
-                                              ? streamChatTheme
-                                                  .colorTheme.accentPrimary
-                                              : streamChatTheme
-                                                  .colorTheme.textHighEmphasis
-                                                  .withOpacity(0.5),
-                                        ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(reaction.user!.name),
-                        ],
-                      );
-                    }).toList(),
-                  ],
-                ),
-              ],
+          child: Card(
+            color: streamChatTheme.colorTheme.barsBg,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '''${reactionsList.length} ${context.translations.messageReactionsLabel}''',
+                    style: streamChatTheme.textTheme.headlineBold,
+                  ),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    spacing: 16,
+                    children: [
+                      ...reactionsList.map((reaction) {
+                        final reactionIcon = reactionIcons.firstWhereOrNull(
+                          (r) => r.type == reaction.type,
+                        );
+                        return _StackedReaction(
+                          reaction: reaction,
+                          streamChatTheme: streamChatTheme,
+                          reactionIcon: reactionIcon,
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
       child: Column(
         children: [
-          if (!widget.reverse)
-            const SizedBox(height: 16),
+          if (!widget.reverse) const SizedBox(height: 16),
           MouseRegion(
             cursor: SystemMouseCursors.click,
             onEnter: (event) async {
@@ -202,75 +162,188 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
                     (r) => r.type == reaction.type,
                   );
 
-                  return GestureDetector(
-                    onTap: () {
-                      if (reaction.userId == userId) {
-                        StreamChannel.of(context).channel.deleteReaction(
-                              widget.message,
-                              reaction,
-                            );
-                      } else if (reactionIcon != null) {
-                        StreamChannel.of(context).channel.sendReaction(
-                              widget.message,
-                              reactionIcon.type,
-                              enforceUnique: true,
-                            );
-                      }
-                    },
-                    child: Card(
-                      shape: StadiumBorder(
-                        side: widget.borderSide ??
-                            BorderSide(
-                              color: widget.messageTheme.messageBorderColor ??
-                                  Colors.grey,
-                            ),
-                      ),
-                      color: widget.messageTheme.messageBackgroundColor,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ConstrainedBox(
-                              constraints: BoxConstraints.tight(
-                                const Size.square(16),
-                              ),
-                              child: reactionIcon?.builder(
-                                    context,
-                                    reaction.user?.id == userId,
-                                    16,
-                                  ) ??
-                                  Icon(
-                                    Icons.help_outline_rounded,
-                                    size: 16,
-                                    color: reaction.user?.id == userId
-                                        ? streamChatTheme.colorTheme.accentPrimary
-                                        : streamChatTheme
-                                            .colorTheme.textHighEmphasis
-                                            .withOpacity(0.5),
-                                  ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${reaction.score}',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  return _BottomReaction(
+                    reaction: reaction,
+                    message: widget.message,
+                    borderSide: widget.borderSide,
+                    messageTheme: widget.messageTheme,
+                    reactionIcon: reactionIcon,
+                    streamChatTheme: streamChatTheme,
                   );
                 }).toList(),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BottomReaction extends StatelessWidget {
+  const _BottomReaction({
+    required this.reaction,
+    required this.message,
+    required this.borderSide,
+    required this.messageTheme,
+    required this.reactionIcon,
+    required this.streamChatTheme,
+  });
+
+  final Reaction reaction;
+  final Message message;
+  final BorderSide? borderSide;
+  final StreamMessageThemeData? messageTheme;
+  final StreamReactionIcon? reactionIcon;
+  final StreamChatThemeData streamChatTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final userId = StreamChat.of(context).currentUser?.id;
+    return GestureDetector(
+      onTap: () {
+        if (reaction.userId == userId) {
+          StreamChannel.of(context).channel.deleteReaction(
+                message,
+                reaction,
+              );
+        } else if (reactionIcon != null) {
+          StreamChannel.of(context).channel.sendReaction(
+                message,
+                reactionIcon!.type,
+                score: reaction.score + 1,
+              );
+        }
+      },
+      child: Card(
+        shape: StadiumBorder(
+          side: borderSide ??
+              BorderSide(
+                color: messageTheme?.messageBorderColor ?? Colors.grey,
+              ),
+        ),
+        color: messageTheme?.messageBackgroundColor,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 6,
+            vertical: 2,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints.tight(
+                  const Size.square(16),
+                ),
+                child: reactionIcon?.builder(
+                      context,
+                      reaction.user?.id == userId,
+                      16,
+                    ) ??
+                    Icon(
+                      Icons.help_outline_rounded,
+                      size: 16,
+                      color: reaction.user?.id == userId
+                          ? streamChatTheme.colorTheme.accentPrimary
+                          : streamChatTheme.colorTheme.textHighEmphasis
+                              .withOpacity(0.5),
+                    ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '${reaction.score}',
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Reaction>('reaction', reaction));
+    properties.add(DiagnosticsProperty<Message>('message', message));
+  }
+}
+
+class _StackedReaction extends StatelessWidget {
+  const _StackedReaction({
+    required this.reaction,
+    required this.streamChatTheme,
+    required this.reactionIcon,
+  });
+
+  final Reaction reaction;
+  final StreamChatThemeData streamChatTheme;
+  final StreamReactionIcon? reactionIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    final userId = StreamChat.of(context).currentUser?.id;
+    return Column(
+      children: [
+        Stack(
+          children: [
+            StreamUserAvatar(
+              user: reaction.user!,
+              constraints: const BoxConstraints.tightFor(
+                height: 64,
+                width: 64,
+              ),
+              borderRadius: BorderRadius.circular(32),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: streamChatTheme.colorTheme.inputBg,
+                  border: Border.all(
+                    color: streamChatTheme.colorTheme.barsBg,
+                    width: 2,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: reactionIcon?.builder(
+                        context,
+                        reaction.userId == userId,
+                        16,
+                      ) ??
+                      Icon(
+                        Icons.help_outline_rounded,
+                        size: 16,
+                        color: reaction.user?.id == userId
+                            ? streamChatTheme.colorTheme.accentPrimary
+                            : streamChatTheme.colorTheme.textHighEmphasis
+                                .withOpacity(0.5),
+                      ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Text(reaction.user!.name),
+      ],
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<Reaction>('reaction', reaction),
+    );
+    properties.add(
+      DiagnosticsProperty<StreamReactionIcon?>(
+        'reactionIcon',
+        reactionIcon,
       ),
     );
   }
