@@ -99,7 +99,6 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
       anchor: Aligned(
         target: widget.reverse ? Alignment.topRight : Alignment.topLeft,
         follower: widget.reverse ? Alignment.bottomRight : Alignment.bottomLeft,
-
         shiftToWithinBound: const AxisFlag(
           y: true,
         ),
@@ -183,89 +182,95 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
           ),
         ),
       ),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (event) async {
-          // await Future.delayed(const Duration(milliseconds: 1500));
-          setState(() => _showReactionsPopup = !_showReactionsPopup);
-        },
-        onExit: (event) {
-          setState(() => _showReactionsPopup = !_showReactionsPopup);
-        },
-        child: Wrap(
-          children: [
-            ...reactionsList.map((reaction) {
-              final reactionIcon = reactionIcons.firstWhereOrNull(
-                (r) => r.type == reaction.type,
-              );
+      child: Column(
+        children: [
+          if (!widget.reverse)
+            const SizedBox(height: 16),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            onEnter: (event) async {
+              // await Future.delayed(const Duration(milliseconds: 1500));
+              setState(() => _showReactionsPopup = !_showReactionsPopup);
+            },
+            onExit: (event) {
+              setState(() => _showReactionsPopup = !_showReactionsPopup);
+            },
+            child: Wrap(
+              children: [
+                ...reactionsList.map((reaction) {
+                  final reactionIcon = reactionIcons.firstWhereOrNull(
+                    (r) => r.type == reaction.type,
+                  );
 
-              return GestureDetector(
-                onTap: () {
-                  if (reaction.userId == userId) {
-                    StreamChannel.of(context).channel.deleteReaction(
-                          widget.message,
-                          reaction,
-                        );
-                  } else if (reactionIcon != null) {
-                    StreamChannel.of(context).channel.sendReaction(
-                          widget.message,
-                          reactionIcon.type,
-                          enforceUnique: true,
-                        );
-                  }
-                },
-                child: Card(
-                  shape: StadiumBorder(
-                    side: widget.borderSide ??
-                        BorderSide(
-                          color: widget.messageTheme.messageBorderColor ??
-                              Colors.grey,
+                  return GestureDetector(
+                    onTap: () {
+                      if (reaction.userId == userId) {
+                        StreamChannel.of(context).channel.deleteReaction(
+                              widget.message,
+                              reaction,
+                            );
+                      } else if (reactionIcon != null) {
+                        StreamChannel.of(context).channel.sendReaction(
+                              widget.message,
+                              reactionIcon.type,
+                              enforceUnique: true,
+                            );
+                      }
+                    },
+                    child: Card(
+                      shape: StadiumBorder(
+                        side: widget.borderSide ??
+                            BorderSide(
+                              color: widget.messageTheme.messageBorderColor ??
+                                  Colors.grey,
+                            ),
+                      ),
+                      color: widget.messageTheme.messageBackgroundColor,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
                         ),
-                  ),
-                  color: widget.messageTheme.messageBackgroundColor,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ConstrainedBox(
-                          constraints: BoxConstraints.tight(
-                            const Size.square(16),
-                          ),
-                          child: reactionIcon?.builder(
-                                context,
-                                reaction.user?.id == userId,
-                                16,
-                              ) ??
-                              Icon(
-                                Icons.help_outline_rounded,
-                                size: 16,
-                                color: reaction.user?.id == userId
-                                    ? streamChatTheme.colorTheme.accentPrimary
-                                    : streamChatTheme
-                                        .colorTheme.textHighEmphasis
-                                        .withOpacity(0.5),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ConstrainedBox(
+                              constraints: BoxConstraints.tight(
+                                const Size.square(16),
                               ),
+                              child: reactionIcon?.builder(
+                                    context,
+                                    reaction.user?.id == userId,
+                                    16,
+                                  ) ??
+                                  Icon(
+                                    Icons.help_outline_rounded,
+                                    size: 16,
+                                    color: reaction.user?.id == userId
+                                        ? streamChatTheme.colorTheme.accentPrimary
+                                        : streamChatTheme
+                                            .colorTheme.textHighEmphasis
+                                            .withOpacity(0.5),
+                                  ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${reaction.score}',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${reaction.score}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ],
-        ),
+                  );
+                }).toList(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
