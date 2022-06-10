@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:stream_chat_flutter/src/analytics/client/stream_chat_analytics_client.dart';
 import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -94,6 +95,10 @@ class StreamChatState extends State<StreamChat> {
   /// Gets configuration options from widget
   StreamChatConfigurationData get streamChatConfigData =>
       widget.streamChatConfigData ?? StreamChatConfigurationData();
+  late StreamChatAnalyticsClient _analyticsClient;
+
+  /// The analytics client
+  StreamChatAnalyticsClient get analyticsClient => _analyticsClient;
 
   @override
   void initState() {
@@ -102,6 +107,14 @@ class StreamChatState extends State<StreamChat> {
     if (!isTestEnvironment && isDesktopVideoPlayerSupported) {
       VlcManager.instance.initialize();
     }
+    _analyticsClient = StreamChatAnalyticsClient();
+    _analyticsClient.init();
+  }
+
+  @override
+  void dispose() {
+    _analyticsClient.dispose();
+    super.dispose();
   }
 
   @override
