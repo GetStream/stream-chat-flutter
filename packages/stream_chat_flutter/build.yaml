@@ -1,0 +1,9 @@
+targets:
+  $default:
+    builders:
+      json_serializable|json_serializable:
+        generate_for:
+          - "lib/src/analytics/**"
+      freezed|freezed:
+        generate_for:
+          - "lib/src/analytics/**"
