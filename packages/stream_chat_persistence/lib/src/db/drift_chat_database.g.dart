@@ -6,7 +6,7 @@ part of 'drift_chat_database.dart';
 // MoorGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
+// ignore_for_file: type=lint
 class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   /// The id of this channel
   final String id;
@@ -16,6 +16,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
 
   /// The cid of this channel
   final String cid;
+
+  /// List of user permissions on this channel
+  final List<String>? ownCapabilities;
 
   /// The channel configuration data
   final Map<String, dynamic> config;
@@ -47,6 +50,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       {required this.id,
       required this.type,
       required this.cid,
+      this.ownCapabilities,
       required this.config,
       required this.frozen,
       this.lastMessageAt,
@@ -65,7 +69,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
       cid: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}cid'])!,
-      config: $ChannelsTable.$converter0.mapToDart(const StringType()
+      ownCapabilities: $ChannelsTable.$converter0.mapToDart(const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}own_capabilities'])),
+      config: $ChannelsTable.$converter1.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}config']))!,
       frozen: const BoolType()
           .mapFromDatabaseResponse(data['${effectivePrefix}frozen'])!,
@@ -81,7 +87,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           .mapFromDatabaseResponse(data['${effectivePrefix}member_count'])!,
       createdById: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_by_id']),
-      extraData: $ChannelsTable.$converter1.mapToDart(const StringType()
+      extraData: $ChannelsTable.$converter2.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
@@ -91,8 +97,13 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
     map['id'] = Variable<String>(id);
     map['type'] = Variable<String>(type);
     map['cid'] = Variable<String>(cid);
-    {
+    if (!nullToAbsent || ownCapabilities != null) {
       final converter = $ChannelsTable.$converter0;
+      map['own_capabilities'] =
+          Variable<String?>(converter.mapToSql(ownCapabilities));
+    }
+    {
+      final converter = $ChannelsTable.$converter1;
       map['config'] = Variable<String>(converter.mapToSql(config)!);
     }
     map['frozen'] = Variable<bool>(frozen);
@@ -109,7 +120,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       map['created_by_id'] = Variable<String?>(createdById);
     }
     if (!nullToAbsent || extraData != null) {
-      final converter = $ChannelsTable.$converter1;
+      final converter = $ChannelsTable.$converter2;
       map['extra_data'] = Variable<String?>(converter.mapToSql(extraData));
     }
     return map;
@@ -122,6 +133,8 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       id: serializer.fromJson<String>(json['id']),
       type: serializer.fromJson<String>(json['type']),
       cid: serializer.fromJson<String>(json['cid']),
+      ownCapabilities:
+          serializer.fromJson<List<String>?>(json['ownCapabilities']),
       config: serializer.fromJson<Map<String, dynamic>>(json['config']),
       frozen: serializer.fromJson<bool>(json['frozen']),
       lastMessageAt: serializer.fromJson<DateTime?>(json['lastMessageAt']),
@@ -140,6 +153,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       'id': serializer.toJson<String>(id),
       'type': serializer.toJson<String>(type),
       'cid': serializer.toJson<String>(cid),
+      'ownCapabilities': serializer.toJson<List<String>?>(ownCapabilities),
       'config': serializer.toJson<Map<String, dynamic>>(config),
       'frozen': serializer.toJson<bool>(frozen),
       'lastMessageAt': serializer.toJson<DateTime?>(lastMessageAt),
@@ -156,6 +170,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           {String? id,
           String? type,
           String? cid,
+          Value<List<String>?> ownCapabilities = const Value.absent(),
           Map<String, dynamic>? config,
           bool? frozen,
           Value<DateTime?> lastMessageAt = const Value.absent(),
@@ -169,6 +184,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
         id: id ?? this.id,
         type: type ?? this.type,
         cid: cid ?? this.cid,
+        ownCapabilities: ownCapabilities.present
+            ? ownCapabilities.value
+            : this.ownCapabilities,
         config: config ?? this.config,
         frozen: frozen ?? this.frozen,
         lastMessageAt:
@@ -186,6 +204,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           ..write('id: $id, ')
           ..write('type: $type, ')
           ..write('cid: $cid, ')
+          ..write('ownCapabilities: $ownCapabilities, ')
           ..write('config: $config, ')
           ..write('frozen: $frozen, ')
           ..write('lastMessageAt: $lastMessageAt, ')
@@ -200,8 +219,20 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   }
 
   @override
-  int get hashCode => Object.hash(id, type, cid, config, frozen, lastMessageAt,
-      createdAt, updatedAt, deletedAt, memberCount, createdById, extraData);
+  int get hashCode => Object.hash(
+      id,
+      type,
+      cid,
+      ownCapabilities,
+      config,
+      frozen,
+      lastMessageAt,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      memberCount,
+      createdById,
+      extraData);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -209,6 +240,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           other.id == this.id &&
           other.type == this.type &&
           other.cid == this.cid &&
+          other.ownCapabilities == this.ownCapabilities &&
           other.config == this.config &&
           other.frozen == this.frozen &&
           other.lastMessageAt == this.lastMessageAt &&
@@ -224,6 +256,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
   final Value<String> id;
   final Value<String> type;
   final Value<String> cid;
+  final Value<List<String>?> ownCapabilities;
   final Value<Map<String, dynamic>> config;
   final Value<bool> frozen;
   final Value<DateTime?> lastMessageAt;
@@ -237,6 +270,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     this.id = const Value.absent(),
     this.type = const Value.absent(),
     this.cid = const Value.absent(),
+    this.ownCapabilities = const Value.absent(),
     this.config = const Value.absent(),
     this.frozen = const Value.absent(),
     this.lastMessageAt = const Value.absent(),
@@ -251,6 +285,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     required String id,
     required String type,
     required String cid,
+    this.ownCapabilities = const Value.absent(),
     required Map<String, dynamic> config,
     this.frozen = const Value.absent(),
     this.lastMessageAt = const Value.absent(),
@@ -268,6 +303,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     Expression<String>? id,
     Expression<String>? type,
     Expression<String>? cid,
+    Expression<List<String>?>? ownCapabilities,
     Expression<Map<String, dynamic>>? config,
     Expression<bool>? frozen,
     Expression<DateTime?>? lastMessageAt,
@@ -282,6 +318,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       if (id != null) 'id': id,
       if (type != null) 'type': type,
       if (cid != null) 'cid': cid,
+      if (ownCapabilities != null) 'own_capabilities': ownCapabilities,
       if (config != null) 'config': config,
       if (frozen != null) 'frozen': frozen,
       if (lastMessageAt != null) 'last_message_at': lastMessageAt,
@@ -298,6 +335,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       {Value<String>? id,
       Value<String>? type,
       Value<String>? cid,
+      Value<List<String>?>? ownCapabilities,
       Value<Map<String, dynamic>>? config,
       Value<bool>? frozen,
       Value<DateTime?>? lastMessageAt,
@@ -311,6 +349,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       id: id ?? this.id,
       type: type ?? this.type,
       cid: cid ?? this.cid,
+      ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       config: config ?? this.config,
       frozen: frozen ?? this.frozen,
       lastMessageAt: lastMessageAt ?? this.lastMessageAt,
@@ -335,8 +374,13 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     if (cid.present) {
       map['cid'] = Variable<String>(cid.value);
     }
-    if (config.present) {
+    if (ownCapabilities.present) {
       final converter = $ChannelsTable.$converter0;
+      map['own_capabilities'] =
+          Variable<String?>(converter.mapToSql(ownCapabilities.value));
+    }
+    if (config.present) {
+      final converter = $ChannelsTable.$converter1;
       map['config'] = Variable<String>(converter.mapToSql(config.value)!);
     }
     if (frozen.present) {
@@ -361,7 +405,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       map['created_by_id'] = Variable<String?>(createdById.value);
     }
     if (extraData.present) {
-      final converter = $ChannelsTable.$converter1;
+      final converter = $ChannelsTable.$converter2;
       map['extra_data'] =
           Variable<String?>(converter.mapToSql(extraData.value));
     }
@@ -374,6 +418,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
           ..write('id: $id, ')
           ..write('type: $type, ')
           ..write('cid: $cid, ')
+          ..write('ownCapabilities: $ownCapabilities, ')
           ..write('config: $config, ')
           ..write('frozen: $frozen, ')
           ..write('lastMessageAt: $lastMessageAt, ')
@@ -409,12 +454,20 @@ class $ChannelsTable extends Channels
   late final GeneratedColumn<String?> cid = GeneratedColumn<String?>(
       'cid', aliasedName, false,
       type: const StringType(), requiredDuringInsert: true);
+  final VerificationMeta _ownCapabilitiesMeta =
+      const VerificationMeta('ownCapabilities');
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String?>
+      ownCapabilities = GeneratedColumn<String?>(
+              'own_capabilities', aliasedName, true,
+              type: const StringType(), requiredDuringInsert: false)
+          .withConverter<List<String>>($ChannelsTable.$converter0);
   final VerificationMeta _configMeta = const VerificationMeta('config');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String?>
       config = GeneratedColumn<String?>('config', aliasedName, false,
               type: const StringType(), requiredDuringInsert: true)
-          .withConverter<Map<String, dynamic>>($ChannelsTable.$converter0);
+          .withConverter<Map<String, dynamic>>($ChannelsTable.$converter1);
   final VerificationMeta _frozenMeta = const VerificationMeta('frozen');
   @override
   late final GeneratedColumn<bool?> frozen = GeneratedColumn<bool?>(
@@ -467,12 +520,13 @@ class $ChannelsTable extends Channels
   late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
       extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
               type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, Object?>>($ChannelsTable.$converter1);
+          .withConverter<Map<String, Object?>>($ChannelsTable.$converter2);
   @override
   List<GeneratedColumn> get $columns => [
         id,
         type,
         cid,
+        ownCapabilities,
         config,
         frozen,
         lastMessageAt,
@@ -509,6 +563,7 @@ class $ChannelsTable extends Channels
     } else if (isInserting) {
       context.missing(_cidMeta);
     }
+    context.handle(_ownCapabilitiesMeta, const VerificationResult.success());
     context.handle(_configMeta, const VerificationResult.success());
     if (data.containsKey('frozen')) {
       context.handle(_frozenMeta,
@@ -561,9 +616,11 @@ class $ChannelsTable extends Channels
     return $ChannelsTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<Map<String, dynamic>, String> $converter0 =
+  static TypeConverter<List<String>, String> $converter0 =
+      ListConverter<String>();
+  static TypeConverter<Map<String, dynamic>, String> $converter1 =
       MapConverter();
-  static TypeConverter<Map<String, Object?>, String> $converter1 =
+  static TypeConverter<Map<String, Object?>, String> $converter2 =
       MapConverter<Object?>();
 }
 

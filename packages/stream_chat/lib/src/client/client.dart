@@ -1489,13 +1489,12 @@ class ClientState {
   }
 
   void _listenChannelHidden() {
-    _subscriptions.add(_client.on(EventType.channelHidden).listen((event) {
-      final cid = event.cid;
-
-      if (cid != null) {
-        _client.chatPersistenceClient?.deleteChannels([cid]);
-      }
-      channels = channels..removeWhere((cid, ch) => cid == event.cid);
+    _subscriptions
+        .add(_client.on(EventType.channelHidden).listen((event) async {
+      final eventChannel = event.channel!;
+      await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
+      channels[eventChannel.cid]?.dispose();
+      channels = channels..remove(eventChannel.cid);
     }));
   }
 

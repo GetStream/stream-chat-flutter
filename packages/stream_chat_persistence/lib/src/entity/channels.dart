@@ -1,6 +1,6 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
-import 'package:stream_chat_persistence/src/converter/map_converter.dart';
+import 'package:stream_chat_persistence/src/converter/converter.dart';
 
 /// Represents a [Channels] table in [MoorChatDatabase].
 @DataClassName('ChannelEntity')
@@ -13,6 +13,10 @@ class Channels extends Table {
 
   /// The cid of this channel
   TextColumn get cid => text()();
+
+  /// List of user permissions on this channel
+  TextColumn get ownCapabilities =>
+      text().nullable().map(ListConverter<String>())();
 
   /// The channel configuration data
   TextColumn get config => text().map(MapConverter())();

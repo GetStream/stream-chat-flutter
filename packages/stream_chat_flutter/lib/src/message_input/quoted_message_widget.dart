@@ -354,7 +354,6 @@ class _UrlAttachment extends StatelessWidget {
 
 class _VideoAttachmentThumbnail extends StatefulWidget {
   const _VideoAttachmentThumbnail({
-    super.key,
     required this.attachment,
   });
 

@@ -8,6 +8,7 @@ extension ChannelEntityX on ChannelEntity {
     final config = ChannelConfig.fromJson(this.config);
     return ChannelModel(
       id: id,
+      ownCapabilities: ownCapabilities,
       config: config,
       type: type,
       frozen: frozen,
@@ -46,6 +47,7 @@ extension ChannelModelX on ChannelModel {
         id: id,
         type: type,
         cid: cid,
+        ownCapabilities: ownCapabilities,
         config: config.toJson(),
         frozen: frozen,
         lastMessageAt: lastMessageAt,

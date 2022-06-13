@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#1135]](https://github.com/GetStream/stream-chat-flutter/issues/1135) Persistence was not
+  removing the hidden channels.
+
 ## 4.2.0
 
 ✅ Added
@@ -13,18 +20,20 @@
 
 🔄 Changed
 
-- Deprecated `PaginationParams.before` and `PaginationParams.after`. Use `PaginationParams.limit` instead.
+- Deprecated `PaginationParams.before` and `PaginationParams.after`. Use `PaginationParams.limit`
+  instead.
 
 🐞 Fixed
 
-- [[#1147]](https://github.com/GetStream/stream-chat-flutter/issues/1147) `channel.unset` not updating the extra data
-  stream.
+- [[#1147]](https://github.com/GetStream/stream-chat-flutter/issues/1147) `channel.unset` not
+  updating the extra data stream.
 
 ## 4.1.0
 
 ✅ Added
 
-- Added support for extra data in attachment file uploader. Thanks, [@rlee1990](https://github.com/rlee1990).
+- Added support for extra data in attachment file uploader.
+  Thanks, [@rlee1990](https://github.com/rlee1990).
 
 🔄 Changed
 
@@ -49,14 +58,14 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 🐞 Fixed
 
 - Fixed reactions not working for threads in offline mode.
-- [[#1046]](https://github.com/GetStream/stream-chat-flutter/issues/1046) After `/mute` command on reload cannot access
-  any channel.
-- [[#1047]](https://github.com/GetStream/stream-chat-flutter/issues/1047) `own_capabilities` extraData missing after
-  channel update.
+- [[#1046]](https://github.com/GetStream/stream-chat-flutter/issues/1046) After `/mute` command on
+  reload cannot access any channel.
+- [[#1047]](https://github.com/GetStream/stream-chat-flutter/issues/1047) `own_capabilities`
+  extraData missing after channel update.
 - [[#1054]](https://github.com/GetStream/stream-chat-flutter/issues/1054)
   Fix `Unsupported operation: Cannot remove from an unmodifiable list`.
-- [[#1033]](https://github.com/GetStream/stream-chat-flutter/issues/1033) Hard delete from dashboard does not delete
-  message from client.
+- [[#1033]](https://github.com/GetStream/stream-chat-flutter/issues/1033) Hard delete from dashboard
+  does not delete message from client.
 - Send only `user_id` while reconnecting.
 
 ✅ Added
@@ -78,21 +87,22 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 🐞 Fixed
 
-- [[#1081]](https://github.com/GetStream/stream-chat-flutter/issues/1081) Fixed a bug with user reconnection.
+- [[#1081]](https://github.com/GetStream/stream-chat-flutter/issues/1081) Fixed a bug with user
+  reconnection.
 
 ## 3.6.0
 
 🐞 Fixed
 
 - Fixed reactions not working for threads in offline mode.
-- [[#1046]](https://github.com/GetStream/stream-chat-flutter/issues/1046) After `/mute` command on reload cannot access
-  any channel.
-- [[#1047]](https://github.com/GetStream/stream-chat-flutter/issues/1047) `own_capabilities` extraData missing after
-  channel update.
+- [[#1046]](https://github.com/GetStream/stream-chat-flutter/issues/1046) After `/mute` command on
+  reload cannot access any channel.
+- [[#1047]](https://github.com/GetStream/stream-chat-flutter/issues/1047) `own_capabilities`
+  extraData missing after channel update.
 - [[#1054]](https://github.com/GetStream/stream-chat-flutter/issues/1054)
   Fix `Unsupported operation: Cannot remove from an unmodifiable list`.
-- [[#1033]](https://github.com/GetStream/stream-chat-flutter/issues/1033) Hard delete from dashboard does not delete
-  message from client.
+- [[#1033]](https://github.com/GetStream/stream-chat-flutter/issues/1033) Hard delete from dashboard
+  does not delete message from client.
 - Send only `user_id` while reconnecting.
 
 ✅ Added
@@ -116,24 +126,26 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 🐞 Fixed
 
-- [[#890]](https://github.com/GetStream/stream-chat-flutter/pull/890) Fixed Reactions not updating on thread messages.
-  Thanks [bstolinski](https://github.com/bstolinski).
-- [[#897]](https://github.com/GetStream/stream-chat-flutter/issues/897) Fixed error type mis-match in `AuthInterceptor`.
-- [[#891]](https://github.com/GetStream/stream-chat-flutter/pull/891) Fixed reply counter for parent message not
-  updating correctly after deleting thread message.
+- [[#890]](https://github.com/GetStream/stream-chat-flutter/pull/890) Fixed Reactions not updating
+  on thread messages. Thanks [bstolinski](https://github.com/bstolinski).
+- [[#897]](https://github.com/GetStream/stream-chat-flutter/issues/897) Fixed error type mis-match
+  in `AuthInterceptor`.
+- [[#891]](https://github.com/GetStream/stream-chat-flutter/pull/891) Fixed reply counter for parent
+  message not updating correctly after deleting thread message.
 - Fix `channelState.copyWith` with respect to pinnedMessages.
 
 ## 3.4.0
 
 🐞 Fixed
 
-- [[#857]](https://github.com/GetStream/stream-chat-flutter/issues/857) Channel now listens for member ban/unban and
-  updates the channel state with the latest data.
-- [[#748]](https://github.com/GetStream/stream-chat-flutter/issues/748) `Message.user` is now also included while saving
-  users in persistence.
-- [[#871]](https://github.com/GetStream/stream-chat-flutter/issues/871) Fixed thread message deletion.
-- [[#846]](https://github.com/GetStream/stream-chat-flutter/issues/846) Fixed `message.ownReactions` getting truncated
-  when receiving a reaction event.
+- [[#857]](https://github.com/GetStream/stream-chat-flutter/issues/857) Channel now listens for
+  member ban/unban and updates the channel state with the latest data.
+- [[#748]](https://github.com/GetStream/stream-chat-flutter/issues/748) `Message.user` is now also
+  included while saving users in persistence.
+- [[#871]](https://github.com/GetStream/stream-chat-flutter/issues/871) Fixed thread message
+  deletion.
+- [[#846]](https://github.com/GetStream/stream-chat-flutter/issues/846) Fixed `message.ownReactions`
+  getting truncated when receiving a reaction event.
 - Add check for invalid image URLs
 - Fix `channelState.pinnedMessagesStream` getting reset to `0` after a channel update.
 - Fixed `unreadCount` after removing user from a channel.
@@ -141,7 +153,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 🔄 Changed
 
 - `client.location` is now deprecated in favor of the
-  new [edge server](https://getstream.io/blog/chat-edge-infrastructure) and will be removed in v4.0.0.
+  new [edge server](https://getstream.io/blog/chat-edge-infrastructure) and will be removed in
+  v4.0.0.
 - `channel.banUser`, `channel.unbanUser` is now deprecated in favor of the new `channel.banMember`
   and `channel.unbanMember`. These deprecated methods will be removed in v4.0.0.
 - Added `banExpires` property of type `DateTime` on the `Member`, `OwnUser`, and `User` models.
@@ -155,8 +168,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 🐞 Fixed
 
-- [[#799]](https://github.com/GetStream/stream-chat-flutter/issues/799) Fixed `totalUnreadCount` is not updating when
-  app is resumed from background mode.
+- [[#799]](https://github.com/GetStream/stream-chat-flutter/issues/799) Fixed `totalUnreadCount` is
+  not updating when app is resumed from background mode.
 - Fix retry mechanism failing in some cases.
 
 ## 3.3.0
@@ -171,7 +184,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 - `closeConnection()` now uses `normalClosure` status when closing websocket.
 - Fixed local unread count indicator increasing for thread replies.
 - Fixed user presence indicator not updating correctly.
-- `ChannelEvent.membersCount` defaults to 0 avoiding parsing errors due to missing `members_count` field.
+- `ChannelEvent.membersCount` defaults to 0 avoiding parsing errors due to missing `members_count`
+  field.
 
 ## 3.2.1
 
@@ -184,7 +198,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 🐞 Fixed
 
 - `markAllRead()` now updates local channel states.
-- [[#744]](https://github.com/GetStream/stream-chat-flutter/issues/744) Fixed unread count not updating correctly
+- [[#744]](https://github.com/GetStream/stream-chat-flutter/issues/744) Fixed unread count not
+  updating correctly
 
 ## 3.1.1
 
@@ -194,7 +209,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 🐞 Fixed
 
-- [[#710]](https://github.com/GetStream/stream-chat-flutter/issues/710) Fixed JWT requiring using `String` as id.
+- [[#710]](https://github.com/GetStream/stream-chat-flutter/issues/710) Fixed JWT requiring
+  using `String` as id.
 - Fixed expired CDN attachment links not updating correctly.
 
 ## 3.0.0
@@ -214,16 +230,19 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 - Added `Filter.contains` and `Filter.empty`
 - Added support for `next`, `previous` value pagination in `client.search`
   , [read more.](https://getstream.io/chat/docs/other-rest/search/#pagination)
-- `Attachment` class now has a `fileSize` and `mimeType` property. Setting a `file` will also set the `file_size`
+- `Attachment` class now has a `fileSize` and `mimeType` property. Setting a `file` will also set
+  the `file_size`
   , `mime_type` key on `extraData`, so `attachment.fileSize`, `attachment.mimetype`
   and `attachment.extraData['file_size']`
   , `attachment.extraData['mime_type]` is same respectively.
 
 🐞 Fixed
 
-- [[#659]](https://github.com/GetStream/stream-chat-flutter/issues/659) Fixed unread count not updating correctly.
+- [[#659]](https://github.com/GetStream/stream-chat-flutter/issues/659) Fixed unread count not
+  updating correctly.
 - Fix `Filter.empty()` json encoding.
-- [[#700]](https://github.com/GetStream/stream-chat-flutter/issues/700) Connecting user without providing `name`
+- [[#700]](https://github.com/GetStream/stream-chat-flutter/issues/700) Connecting user without
+  providing `name`
   uses `id` instead for setting `user.name`.
 
 ## 2.2.1
@@ -241,14 +260,14 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 ✅ Added
 
-- `User` and `OwnUser` classes now have an `image` property. Setting an image will also set the 'image' key
-  on `extraData`, so `user.image` and `user.extraData['image']` is the same.
-- `User` and `OwnUser` classes now have a `name` property. Setting a name will also set the 'name' key on `extraData`,
-  so `user.name` and `user.extraData['name']` is the same.
-- `Channel` class now has extra `image` getter and setter. As well as an `updateImage` to do a partial update after a
-  channel has been initialized.
-- `Channel` class now has extra `name` getter and setter. As well as an `updateName` to do a partial update after a
-  channel has been initialized.
+- `User` and `OwnUser` classes now have an `image` property. Setting an image will also set the '
+  image' key on `extraData`, so `user.image` and `user.extraData['image']` is the same.
+- `User` and `OwnUser` classes now have a `name` property. Setting a name will also set the 'name'
+  key on `extraData`, so `user.name` and `user.extraData['name']` is the same.
+- `Channel` class now has extra `image` getter and setter. As well as an `updateImage` to do a
+  partial update after a channel has been initialized.
+- `Channel` class now has extra `name` getter and setter. As well as an `updateName` to do a partial
+  update after a channel has been initialized.
 - Added slow mode which allows a cooldown period after a user sends a message.
 
 ## 2.1.1
@@ -261,7 +280,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 🛑️ Removed
 
-- The `MessageTranslation` class has been removed. Use the new `i18n` field in the `Message` class instead.
+- The `MessageTranslation` class has been removed. Use the new `i18n` field in the `Message` class
+  instead.
 
 ✅ Added
 
@@ -275,7 +295,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 🐞 Fixed
 
-- [#563](https://github.com/GetStream/stream-chat-flutter/issues/563): `Channel.stopWatching()` not working
+- [#563](https://github.com/GetStream/stream-chat-flutter/issues/563): `Channel.stopWatching()` not
+  working
 - [#575](https://github.com/GetStream/stream-chat-flutter/issues/575): Wrong `OwnUser.*`
 
 ## 2.0.0
@@ -283,7 +304,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 🛑️ Breaking Changes from `1.5.3`
 
 - migrate this package to null safety
-- `ConnectUserWithProvider` now requires `tokenProvider` as a required param. (Removed from the constructor)
+- `ConnectUserWithProvider` now requires `tokenProvider` as a required param. (Removed from the
+  constructor)
 - `client.disconnect()` is now divided into two different functions
     - `client.closeConnection()` -> for closing user websocket connection.
     - `client.disconnectUser()` -> for disconnecting user and resetting client state.
@@ -303,15 +325,16 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 🐞 Fixed
 
-- [#369](https://github.com/GetStream/stream-chat-flutter/issues/369): Client does not return without internet
-  connection
+- [#369](https://github.com/GetStream/stream-chat-flutter/issues/369): Client does not return
+  without internet connection
 - several minor fixes
 - performance improvements
 
 ✅ Added
 
 - New `Location` enum is introduced for easily changing the client location/baseUrl.
-- New `client.openConnection()` and `client.closeConnection()` is introduced to connect/disconnect user ws connection.
+- New `client.openConnection()` and `client.closeConnection()` is introduced to connect/disconnect
+  user ws connection.
 - New `client.partialUpdateMessage` and `channel.partialUpdateMessage` methods
 - `connectWebSocket` parameter in connect user calls to use the client in "connection-less" mode.
 
@@ -329,7 +352,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 🛑️ Breaking Changes from `2.0.0-nullsafety.6`
 
-- `ConnectUserWithProvider` now requires `tokenProvider` as a required param. (Removed from the constructor)
+- `ConnectUserWithProvider` now requires `tokenProvider` as a required param. (Removed from the
+  constructor)
 - `client.disconnect()` is now divided into two different functions
     - `client.closeConnection()` -> for closing user websocket connection.
     - `client.disconnectUser()` -> for disconnecting user and resetting client state.
@@ -348,7 +372,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 ✅ Added
 
 - New `Location` enum is introduced for easily changing the client location/baseUrl.
-- New `client.openConnection()` and `client.closeConnection()` is introduced to connect/disconnect user ws connection.
+- New `client.openConnection()` and `client.closeConnection()` is introduced to connect/disconnect
+  user ws connection.
 
 🔄 Changed
 
@@ -412,14 +437,16 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 - Save pinned messages in offline storage
 - Minor fixes
-- `StreamClient.QueryChannels` now returns a Stream and fetches the channels from storage before calling the api
-- Added `StreamClient.QueryChannelsOnline` and `StreamClient.QueryChannelsOffline` to fetch channels only from online or
-  offline
+- `StreamClient.QueryChannels` now returns a Stream and fetches the channels from storage before
+  calling the api
+- Added `StreamClient.QueryChannelsOnline` and `StreamClient.QueryChannelsOffline` to fetch channels
+  only from online or offline
 
 ## 1.2.0-beta
 
 - 🛑 **BREAKING** Changed signature of `StreamClient.search` method
-- Added `pinMessage` feature [docs here](https://getstream.io/chat/docs/flutter-dart/pinned_messages/?language=dart)
+- Added `pinMessage`
+  feature [docs here](https://getstream.io/chat/docs/flutter-dart/pinned_messages/?language=dart)
 - Fixed minor bugs
 
 ## 1.1.0-beta
@@ -436,7 +463,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 ## 1.0.2-beta
 
-- Deprecated `setUser`, `setGuestUser`, `setUserWithProvider` in favor of `connectUser`, `connectGuestUser`
+- Deprecated `setUser`, `setGuestUser`, `setUserWithProvider` in favor of `connectUser`
+  , `connectGuestUser`
   , `connectUserWithProvider`
 - Optimised reaction updates - i.e., Update first call Api later.
 
@@ -449,9 +477,11 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 - 🛑 **BREAKING** Renamed `Client` to less generic `StreamChatClient`
 - 🛑 **BREAKING** Segregated the persistence layer into separate
   package [stream_chat_persistence](https://pub.dev/packages/stream_chat_persistence)
-- 🛑 **BREAKING** Moved `Client.backgroundKeepAlive` to [core package](https://pub.dev/packages/stream_chat_core)
-- 🛑 **BREAKING** Moved `Client.showLocalNotification` to [core package](https://pub.dev/packages/stream_chat_core) and
-  renamed it to `StreamChatCore.onBackgroundEventReceived`
+- 🛑 **BREAKING** Moved `Client.backgroundKeepAlive`
+  to [core package](https://pub.dev/packages/stream_chat_core)
+- 🛑 **BREAKING** Moved `Client.showLocalNotification`
+  to [core package](https://pub.dev/packages/stream_chat_core) and renamed it
+  to `StreamChatCore.onBackgroundEventReceived`
 - Removed `flutter` dependency. This is now a pure Dart package 🥳
 - Minor improvements and bugfixes
 
@@ -475,7 +505,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 ## 0.2.23+2
 
-- Do not throw an error when calling queryChannels without an active connection if the offline storage is enabled
+- Do not throw an error when calling queryChannels without an active connection if the offline
+  storage is enabled
 
 ## 0.2.23+1
 
@@ -506,8 +537,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 ## 0.2.20
 
-- Return offline data only if the backend is unreachable. This avoids the glitch of the ChannelListView because we
-  cannot sort by custom properties.
+- Return offline data only if the backend is unreachable. This avoids the glitch of the
+  ChannelListView because we cannot sort by custom properties.
 
 ## 0.2.19
 
@@ -561,7 +592,8 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 ## 0.2.12
 
-- Do not save channels in memory if not being watched. This was leading to some bugs in some specific use-cases.
+- Do not save channels in memory if not being watched. This was leading to some bugs in some
+  specific use-cases.
 
 ## 0.2.11
 
