@@ -708,7 +708,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                                             child: (widget.message.isDeleted &&
                                                     !isFailedState)
                                                 ? Container(
-                                                    // ignore: lines_longer_than_80_chars
                                                     margin:
                                                         EdgeInsets.symmetric(
                                                       horizontal:
@@ -720,6 +719,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                                                               : 4.0,
                                                     ),
                                                     child: StreamDeletedMessage(
+                                                      // ignore: lines_longer_than_80_chars
                                                       borderRadiusGeometry: widget
                                                           .borderRadiusGeometry,
                                                       borderSide:
@@ -761,8 +761,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                                                                   .borderRadiusGeometry ??
                                                               BorderRadius.zero,
                                                         ),
-                                                    color:
-                                                        _getBackgroundColor(),
+                                                    color: _backgroundColor,
                                                     child: Column(
                                                       crossAxisAlignment:
                                                           CrossAxisAlignment
@@ -772,6 +771,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                                                       children: <Widget>[
                                                         if (hasQuotedMessage)
                                                           _buildQuotedMessage(),
+                                                        // ignore: lines_longer_than_80_chars
                                                         if (hasNonUrlAttachments)
                                                           _parseAttachments(),
                                                         if (!isGiphy)
@@ -811,7 +811,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                               ),
                               if (showBottomRow)
                                 SizedBox(
-                                    height: context.textScaleFactor * 18.0),
+                                  height: context.textScaleFactor * 18.0,
+                                ),
                             ],
                           ),
                         ),
@@ -1374,7 +1375,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
   bool get isPinned => widget.message.pinned;
 
-  Color? _getBackgroundColor() {
+  Color? get _backgroundColor {
     if (hasQuotedMessage) {
       return widget.messageTheme.messageBackgroundColor;
     }
