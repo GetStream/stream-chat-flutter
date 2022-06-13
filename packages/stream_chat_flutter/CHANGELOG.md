@@ -9,6 +9,11 @@
 - [[#996]](https://github.com/GetStream/stream-chat-flutter/issues/996) Videos break bottom photo
   carousal.
 
+✅ Added
+
+- [[#1011]](https://github.com/GetStream/stream-chat-flutter/issues/1011) Animate the background
+  color of pinned messages.
+
 ## 4.2.0
 
 🐞 Fixed
