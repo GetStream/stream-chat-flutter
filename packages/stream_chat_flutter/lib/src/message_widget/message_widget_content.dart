@@ -202,6 +202,38 @@ class MessageWidgetContent extends StatelessWidget {
               ? AlignmentDirectional.bottomEnd
               : AlignmentDirectional.bottomStart,
           children: [
+            if (showBottomRow)
+              Padding(
+                padding: EdgeInsets.only(
+                  left: !reverse ? bottomRowPadding : 0,
+                  right: reverse ? bottomRowPadding : 0,
+                  bottom: isPinned && showPinHighlight ? 6.0 : 0.0,
+                ),
+                child: bottomRowBuilder?.call(
+                      context,
+                      message,
+                    ) ??
+                    BottomRow(
+                      message: message,
+                      reverse: reverse,
+                      messageTheme: messageTheme,
+                      hasUrlAttachments: hasUrlAttachments,
+                      isOnlyEmoji: isOnlyEmoji,
+                      isDeleted: message.isDeleted,
+                      isGiphy: isGiphy,
+                      showInChannel: showInChannel,
+                      showSendingIndicator: showSendingIndicator,
+                      showThreadReplyIndicator: showThreadReplyIndicator,
+                      showTimeStamp: showTimeStamp,
+                      showUsername: showUsername,
+                      streamChatTheme: streamChatTheme,
+                      onThreadTap: onThreadTap,
+                      deletedBottomRowBuilder: deletedBottomRowBuilder,
+                      streamChat: streamChat,
+                      hasNonUrlAttachments: hasNonUrlAttachments,
+                      usernameBuilder: usernameBuilder,
+                    ),
+              ),
             Padding(
               padding: EdgeInsets.only(
                 bottom: isPinned && showPinHighlight ? 8.0 : 0.0,
@@ -347,16 +379,27 @@ class MessageWidgetContent extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                       ],
+                      if (showUserAvatar == DisplayWidget.hide)
+                        SizedBox(width: avatarWidth + 4),
                     ],
                   ),
-                  if (isDesktopDeviceOrWeb && shouldShowReactions)
-                    DesktopReactionsBuilder(
-                      message: message,
-                      messageTheme: messageTheme,
-                      shouldShowReactions: shouldShowReactions,
-                      borderSide: borderSide,
-                      reverse: reverse,
+                  if (isDesktopDeviceOrWeb && shouldShowReactions) ...[
+                    Padding(
+                      padding: showUserAvatar != DisplayWidget.gone
+                          ? EdgeInsets.only(
+                              left: avatarWidth + 4,
+                              right: avatarWidth + 4,
+                            )
+                          : EdgeInsets.zero,
+                      child: DesktopReactionsBuilder(
+                        message: message,
+                        messageTheme: messageTheme,
+                        shouldShowReactions: shouldShowReactions,
+                        borderSide: borderSide,
+                        reverse: reverse,
+                      ),
                     ),
+                  ],
                   if (showBottomRow)
                     SizedBox(
                       height: context.textScaleFactor * 18.0,
@@ -364,38 +407,43 @@ class MessageWidgetContent extends StatelessWidget {
                 ],
               ),
             ),
-            if (showBottomRow)
-              Padding(
-                padding: EdgeInsets.only(
-                  left: !reverse ? bottomRowPadding : 0,
-                  right: reverse ? bottomRowPadding : 0,
-                  bottom: isPinned && showPinHighlight ? 6.0 : 0.0,
+            /*if (showBottomRow)
+              DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: Colors.red,
                 ),
-                child: bottomRowBuilder?.call(
-                      context,
-                      message,
-                    ) ??
-                    BottomRow(
-                      message: message,
-                      reverse: reverse,
-                      messageTheme: messageTheme,
-                      hasUrlAttachments: hasUrlAttachments,
-                      isOnlyEmoji: isOnlyEmoji,
-                      isDeleted: message.isDeleted,
-                      isGiphy: isGiphy,
-                      showInChannel: showInChannel,
-                      showSendingIndicator: showSendingIndicator,
-                      showThreadReplyIndicator: showThreadReplyIndicator,
-                      showTimeStamp: showTimeStamp,
-                      showUsername: showUsername,
-                      streamChatTheme: streamChatTheme,
-                      onThreadTap: onThreadTap,
-                      deletedBottomRowBuilder: deletedBottomRowBuilder,
-                      streamChat: streamChat,
-                      hasNonUrlAttachments: hasNonUrlAttachments,
-                      usernameBuilder: usernameBuilder,
-                    ),
-              ),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: !reverse ? bottomRowPadding : 0,
+                    right: reverse ? bottomRowPadding : 0,
+                    bottom: isPinned && showPinHighlight ? 6.0 : 0.0,
+                  ),
+                  child: bottomRowBuilder?.call(
+                        context,
+                        message,
+                      ) ??
+                      BottomRow(
+                        message: message,
+                        reverse: reverse,
+                        messageTheme: messageTheme,
+                        hasUrlAttachments: hasUrlAttachments,
+                        isOnlyEmoji: isOnlyEmoji,
+                        isDeleted: message.isDeleted,
+                        isGiphy: isGiphy,
+                        showInChannel: showInChannel,
+                        showSendingIndicator: showSendingIndicator,
+                        showThreadReplyIndicator: showThreadReplyIndicator,
+                        showTimeStamp: showTimeStamp,
+                        showUsername: showUsername,
+                        streamChatTheme: streamChatTheme,
+                        onThreadTap: onThreadTap,
+                        deletedBottomRowBuilder: deletedBottomRowBuilder,
+                        streamChat: streamChat,
+                        hasNonUrlAttachments: hasNonUrlAttachments,
+                        usernameBuilder: usernameBuilder,
+                      ),
+                ),
+              ),*/
             if (isFailedState)
               Positioned(
                 right: reverse ? 0 : null,

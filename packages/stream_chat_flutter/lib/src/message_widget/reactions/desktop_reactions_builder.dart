@@ -88,9 +88,11 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
           reactionsMap[element.type] = element;
         }
       });
+
       reactionsList = reactionsMap.values.toList()
         ..sort((a, b) => a.user!.id == streamChat.currentUser?.id ? 1 : -1);
     }
+
     return PortalTarget(
       visible: _showReactionsPopup,
       portalCandidateLabels: const [kPortalMessageListViewLable],
@@ -118,14 +120,14 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '''${reactionsList.length} ${context.translations.messageReactionsLabel}''',
+                    '''${widget.message.latestReactions!.length} ${context.translations.messageReactionsLabel}''',
                     style: streamChatTheme.textTheme.headlineBold,
                   ),
                   const SizedBox(height: 24),
                   Wrap(
                     spacing: 16,
                     children: [
-                      ...reactionsList.map((reaction) {
+                      ...widget.message.latestReactions!.map((reaction) {
                         final reactionIcon = reactionIcons.firstWhereOrNull(
                           (r) => r.type == reaction.type,
                         );
@@ -143,38 +145,33 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
           ),
         ),
       ),
-      child: Column(
-        children: [
-          if (!widget.reverse) const SizedBox(height: 16),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            onEnter: (event) async {
-              // await Future.delayed(const Duration(milliseconds: 1500));
-              setState(() => _showReactionsPopup = !_showReactionsPopup);
-            },
-            onExit: (event) {
-              setState(() => _showReactionsPopup = !_showReactionsPopup);
-            },
-            child: Wrap(
-              children: [
-                ...reactionsList.map((reaction) {
-                  final reactionIcon = reactionIcons.firstWhereOrNull(
-                    (r) => r.type == reaction.type,
-                  );
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (event) async {
+          // await Future.delayed(const Duration(milliseconds: 1500));
+          setState(() => _showReactionsPopup = !_showReactionsPopup);
+        },
+        onExit: (event) {
+          setState(() => _showReactionsPopup = !_showReactionsPopup);
+        },
+        child: Wrap(
+          children: [
+            ...reactionsList.map((reaction) {
+              final reactionIcon = reactionIcons.firstWhereOrNull(
+                (r) => r.type == reaction.type,
+              );
 
-                  return _BottomReaction(
-                    reaction: reaction,
-                    message: widget.message,
-                    borderSide: widget.borderSide,
-                    messageTheme: widget.messageTheme,
-                    reactionIcon: reactionIcon,
-                    streamChatTheme: streamChatTheme,
-                  );
-                }).toList(),
-              ],
-            ),
-          ),
-        ],
+              return _BottomReaction(
+                reaction: reaction,
+                message: widget.message,
+                borderSide: widget.borderSide,
+                messageTheme: widget.messageTheme,
+                reactionIcon: reactionIcon,
+                streamChatTheme: streamChatTheme,
+              );
+            }).toList(),
+          ],
+        ),
       ),
     );
   }
@@ -201,6 +198,7 @@ class _BottomReaction extends StatelessWidget {
   Widget build(BuildContext context) {
     final userId = StreamChat.of(context).currentUser?.id;
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         if (reaction.userId == userId) {
           StreamChannel.of(context).channel.deleteReaction(
@@ -263,6 +261,7 @@ class _BottomReaction extends StatelessWidget {
       ),
     );
   }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);

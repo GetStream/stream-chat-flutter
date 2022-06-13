@@ -164,8 +164,8 @@ class BottomRow extends StatelessWidget {
     final threadIndicatorWidgets = <WidgetSpan>[
       if (showThreadTail)
         WidgetSpan(
-          child: Container(
-            margin: EdgeInsets.only(
+          child: Padding(
+            padding: EdgeInsets.only(
               bottom: context.textScaleFactor *
                   ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
             ),
