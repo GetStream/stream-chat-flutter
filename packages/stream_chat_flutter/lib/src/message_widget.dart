@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
@@ -120,6 +122,11 @@ class StreamMessageWidget extends StatefulWidget {
                   Material(
                     color: messageTheme.messageBackgroundColor,
                     child: StreamImageGroup(
+                      onReplyMessage: onReplyTap != null
+                          ? (message, channel) {
+                              onReplyTap.call(message);
+                            }
+                          : null,
                       size: Size(
                         mediaQueryData.size.width * 0.8,
                         mediaQueryData.size.height * 0.3,
@@ -149,6 +156,11 @@ class StreamMessageWidget extends StatefulWidget {
                   mediaQueryData.size.height * 0.3,
                 ),
                 onShowMessage: onShowMessage,
+                onReplyMessage: onReplyTap != null
+                    ? (message, channel) {
+                        onReplyTap.call(message);
+                      }
+                    : null,
                 onReturnAction: onReturnAction,
                 onAttachmentTap: onAttachmentTap != null
                     ? () {
@@ -179,6 +191,11 @@ class StreamMessageWidget extends StatefulWidget {
                     ),
                     message: message,
                     onShowMessage: onShowMessage,
+                    onReplyMessage: onReplyTap != null
+                        ? (message, channel) {
+                            onReplyTap.call(message);
+                          }
+                        : null,
                     onReturnAction: onReturnAction,
                     onAttachmentTap: onAttachmentTap != null
                         ? () {
@@ -210,6 +227,11 @@ class StreamMessageWidget extends StatefulWidget {
                       mediaQueryData.size.height * 0.3,
                     ),
                     onShowMessage: onShowMessage,
+                    onReplyMessage: onReplyTap != null
+                        ? (message, channel) {
+                            onReplyTap.call(message);
+                          }
+                        : null,
                     onReturnAction: onReturnAction,
                     onAttachmentTap: onAttachmentTap != null
                         ? () {
@@ -357,6 +379,7 @@ class StreamMessageWidget extends StatefulWidget {
   final ShowMessageCallback? onShowMessage;
 
   /// Handle return actions like reply message
+  @Deprecated('onReturnAction is deprecated, use onReplyTap instead')
   final ValueChanged<ReturnActionType>? onReturnAction;
 
   /// If true show the users username next to the timestamp of the message

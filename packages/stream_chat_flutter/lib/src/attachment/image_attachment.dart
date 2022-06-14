@@ -22,6 +22,7 @@ class StreamImageAttachment extends StreamAttachmentWidget {
     super.size,
     this.showTitle = false,
     this.onShowMessage,
+    this.onReplyMessage,
     this.onReturnAction,
     this.onAttachmentTap,
   });
@@ -34,6 +35,9 @@ class StreamImageAttachment extends StreamAttachmentWidget {
 
   /// Callback when show message is tapped
   final ShowMessageCallback? onShowMessage;
+
+  /// Callback for when reply message is tapped
+  final ShowMessageCallback? onReplyMessage;
 
   /// Callback when attachment is returned to from other screens
   final ValueChanged<ReturnActionType>? onReturnAction;
@@ -145,6 +149,7 @@ class StreamImageAttachment extends StreamAttachmentWidget {
                                         message.attachments.indexOf(attachment),
                                     userName: message.user?.name,
                                     onShowMessage: onShowMessage,
+                                    onReplyMessage: onReplyMessage,
                                   ),
                                 );
                               },

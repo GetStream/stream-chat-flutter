@@ -1,4 +1,4 @@
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: lines_longer_than_80_chars, deprecated_member_use_from_same_package
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -185,6 +185,10 @@ class StreamMessageListView extends StatefulWidget {
     this.scrollController,
     this.itemPositionListener,
     this.onMessageSwiped,
+    this.onSwipeEnd,
+    this.onSwipeCancel,
+    this.onSwipeStart,
+    this.onSwipeThreshold = 82,
     this.highlightInitialMessage = false,
     this.messageHighlightColor,
     this.showConnectionStateTile = false,
@@ -286,7 +290,22 @@ class StreamMessageListView extends StatefulWidget {
   final ScrollPhysics? scrollPhysics;
 
   /// Called when message item gets swiped
+  @Deprecated(
+    'onMessageSwiped has been deprecated. Use onSwipeEnd and onReply instead.',
+  )
   final OnMessageSwiped? onMessageSwiped;
+
+  /// Called when message item gets swiped at the end
+  final OnMessageSwiped? onSwipeEnd;
+
+  /// Called when message item swiped gets canceled
+  final OnMessageSwiped? onSwipeCancel;
+
+  /// Called when message item gets swiped at the start
+  final OnMessageSwiped? onSwipeStart;
+
+  /// Threshold used to trigger the swipe
+  final double onSwipeThreshold;
 
   /// If true the list will highlight the initialMessage if there is any.
   ///
@@ -1258,8 +1277,21 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         child: Swipeable(
           onSwipeEnd: () {
             FocusScope.of(context).unfocus();
-            widget.onMessageSwiped?.call(message);
+            if (widget.onSwipeEnd != null) {
+              widget.onSwipeEnd!.call(message);
+            } else if (widget.onMessageSwiped != null) {
+              widget.onMessageSwiped!.call(message);
+            }
           },
+          onSwipeCancel: () {
+            FocusScope.of(context).unfocus();
+            widget.onSwipeCancel?.call(message);
+          },
+          onSwipeStart: () {
+            FocusScope.of(context).unfocus();
+            widget.onSwipeStart?.call(message);
+          },
+          threshold: widget.onSwipeThreshold,
           backgroundIcon: StreamSvgIcon.reply(
             color: _streamTheme.colorTheme.accentPrimary,
           ),

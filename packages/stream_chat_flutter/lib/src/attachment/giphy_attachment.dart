@@ -20,12 +20,16 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
     required super.attachment,
     super.size,
     this.onShowMessage,
+    this.onReplyMessage,
     this.onReturnAction,
     this.onAttachmentTap,
   });
 
   /// Callback when show message is tapped
   final ShowMessageCallback? onShowMessage;
+
+  /// Callback for when reply message is tapped
+  final ShowMessageCallback? onReplyMessage;
 
   /// Callback when attachment is returned to from other screens
   final ValueChanged<ReturnActionType>? onReturnAction;
@@ -249,6 +253,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
               startIndex: message.attachments.indexOf(attachment),
               userName: message.user?.name,
               onShowMessage: onShowMessage,
+              onReplyMessage: onReplyMessage,
             ),
           );
         },

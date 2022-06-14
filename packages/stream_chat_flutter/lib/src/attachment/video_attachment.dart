@@ -20,6 +20,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
     required this.messageTheme,
     super.size,
     this.onShowMessage,
+    this.onReplyMessage,
     this.onReturnAction,
     this.onAttachmentTap,
   });
@@ -29,6 +30,9 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
 
   /// Callback when show message is tapped
   final ShowMessageCallback? onShowMessage;
+
+  /// Callback for when reply message is tapped
+  final ShowMessageCallback? onReplyMessage;
 
   /// Callback when attachment is returned to from other screens
   final ValueChanged<ReturnActionType>? onReturnAction;
@@ -92,6 +96,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
                                   message.attachments.indexOf(attachment),
                               userName: message.user?.name,
                               onShowMessage: onShowMessage,
+                              onReplyMessage: onReplyMessage,
                             ),
                           ),
                         ),

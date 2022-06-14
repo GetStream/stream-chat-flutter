@@ -38,6 +38,7 @@ class StreamFullScreenMedia extends StatefulWidget {
     this.onShowMessage,
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
+    this.onReplyMessage,
   }) : userName = userName ?? '';
 
   /// The url of the image
@@ -51,6 +52,9 @@ class StreamFullScreenMedia extends StatefulWidget {
 
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
+
+  /// Callback for when reply message is tapped
+  final ShowMessageCallback? onReplyMessage;
 
   /// Widget builder for attachment actions modal
   /// [defaultActionsModal] is the default [AttachmentActionsModal] config
@@ -251,6 +255,12 @@ class _StreamFullScreenMediaState extends State<StreamFullScreenMedia>
                         attachment: _currentAttachment,
                         onShowMessage: () {
                           widget.onShowMessage?.call(
+                            _currentMessage,
+                            StreamChannel.of(context).channel,
+                          );
+                        },
+                        onReplyMessage: () {
+                          widget.onReplyMessage?.call(
                             _currentMessage,
                             StreamChannel.of(context).channel,
                           );

@@ -23,6 +23,7 @@ class AttachmentActionsModal extends StatelessWidget {
     required this.attachment,
     required this.message,
     this.onShowMessage,
+    this.onReplyMessage,
     this.imageDownloader,
     this.fileDownloader,
     this.showReply = true,
@@ -40,6 +41,9 @@ class AttachmentActionsModal extends StatelessWidget {
 
   /// Callback to show the message
   final VoidCallback? onShowMessage;
+
+  /// Callback to reply to the message
+  final VoidCallback? onReplyMessage;
 
   /// Callback to download images
   final AttachmentDownloader? imageDownloader;
@@ -69,6 +73,7 @@ class AttachmentActionsModal extends StatelessWidget {
     Attachment? attachment,
     Message? message,
     VoidCallback? onShowMessage,
+    VoidCallback? onReplyMessage,
     AttachmentDownloader? imageDownloader,
     AttachmentDownloader? fileDownloader,
     bool? showReply,
@@ -89,6 +94,7 @@ class AttachmentActionsModal extends StatelessWidget {
         showSave: showSave ?? this.showSave,
         showDelete: showDelete ?? this.showDelete,
         customActions: customActions ?? this.customActions,
+        onReplyMessage: onReplyMessage ?? this.onReplyMessage,
       );
 
   @override
@@ -126,7 +132,13 @@ class AttachmentActionsModal extends StatelessWidget {
                         color: theme.colorTheme.textLowEmphasis,
                       ),
                       () {
-                        Navigator.pop(context, ReturnActionType.reply);
+                        if (onReplyMessage != null) {
+                          onReplyMessage!.call();
+                        } else {
+                          // todo: remove this once
+                          // we remove MessageWidget.onReturnAction
+                          Navigator.pop(context, ReturnActionType.reply);
+                        }
                       },
                     ),
                   if (showShowInChat)

@@ -18,6 +18,7 @@ class StreamImageGroup extends StatelessWidget {
     required this.size,
     this.onReturnAction,
     this.onShowMessage,
+    this.onReplyMessage,
     this.onAttachmentTap,
   });
 
@@ -36,11 +37,14 @@ class StreamImageGroup extends StatelessWidget {
   /// [StreamMessageThemeData] to apply to message
   final StreamMessageThemeData messageTheme;
 
-  /// Size of iamges
+  /// Size of images
   final Size size;
 
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
+
+  /// Callback for when reply message is tapped
+  final ShowMessageCallback? onReplyMessage;
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(
@@ -140,6 +144,7 @@ class StreamImageGroup extends StatelessWidget {
             startIndex: index,
             userName: message.user?.name,
             onShowMessage: onShowMessage,
+            onReplyMessage: onReplyMessage,
           ),
         ),
       ),
