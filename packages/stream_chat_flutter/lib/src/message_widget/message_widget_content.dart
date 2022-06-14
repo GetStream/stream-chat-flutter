@@ -406,43 +406,6 @@ class MessageWidgetContent extends StatelessWidget {
                 ],
               ),
             ),
-            /*if (showBottomRow)
-              DecoratedBox(
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                ),
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: !reverse ? bottomRowPadding : 0,
-                    right: reverse ? bottomRowPadding : 0,
-                    bottom: isPinned && showPinHighlight ? 6.0 : 0.0,
-                  ),
-                  child: bottomRowBuilder?.call(
-                        context,
-                        message,
-                      ) ??
-                      BottomRow(
-                        message: message,
-                        reverse: reverse,
-                        messageTheme: messageTheme,
-                        hasUrlAttachments: hasUrlAttachments,
-                        isOnlyEmoji: isOnlyEmoji,
-                        isDeleted: message.isDeleted,
-                        isGiphy: isGiphy,
-                        showInChannel: showInChannel,
-                        showSendingIndicator: showSendingIndicator,
-                        showThreadReplyIndicator: showThreadReplyIndicator,
-                        showTimeStamp: showTimeStamp,
-                        showUsername: showUsername,
-                        streamChatTheme: streamChatTheme,
-                        onThreadTap: onThreadTap,
-                        deletedBottomRowBuilder: deletedBottomRowBuilder,
-                        streamChat: streamChat,
-                        hasNonUrlAttachments: hasNonUrlAttachments,
-                        usernameBuilder: usernameBuilder,
-                      ),
-                ),
-              ),*/
             if (isFailedState)
               Positioned(
                 right: reverse ? 0 : null,

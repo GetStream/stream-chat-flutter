@@ -787,77 +787,78 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         }
       },
       child: Material(
-        type: widget.message.pinned && widget.showPinHighlight
-            ? MaterialType.card
-            : MaterialType.transparency,
-        color: widget.message.pinned && widget.showPinHighlight
-            ? _streamChatTheme.colorTheme.highlight
-            : null,
-        child: Portal(
-          child: PlatformWidgetBuilder(
-            mobile: (context, child) {
-              return InkWell(
-                onTap: () => widget.onMessageTap!(widget.message),
-                onLongPress: widget.message.isDeleted && !isFailedState
-                    ? null
-                    : () => onLongPress(context),
-                child: child,
-              );
-            },
-            desktop: (_, child) => MouseRegion(child: child),
-            web: (_, child) => MouseRegion(child: child),
-            child: Padding(
-              padding: widget.padding ?? const EdgeInsets.all(8),
-              child: FractionallySizedBox(
-                alignment: widget.reverse
-                    ? Alignment.centerRight
-                    : Alignment.centerLeft,
-                widthFactor: 0.78,
-                child: MessageWidgetContent(
-                  streamChatTheme: _streamChatTheme,
-                  showUsername: showUsername,
-                  showTimeStamp: showTimeStamp,
-                  showThreadReplyIndicator: showThreadReplyIndicator,
-                  showSendingIndicator: showSendingIndicator,
-                  showInChannel: showInChannel,
-                  isGiphy: isGiphy,
-                  isOnlyEmoji: isOnlyEmoji,
-                  hasUrlAttachments: hasUrlAttachments,
-                  messageTheme: widget.messageTheme,
-                  reverse: widget.reverse,
-                  message: widget.message,
-                  hasNonUrlAttachments: hasNonUrlAttachments,
-                  shouldShowReactions: shouldShowReactions,
-                  hasQuotedMessage: hasQuotedMessage,
-                  textPadding: widget.textPadding,
-                  attachmentBuilders: widget.attachmentBuilders,
-                  attachmentPadding: widget.attachmentPadding,
-                  avatarWidth: avatarWidth,
-                  bottomRowPadding: bottomRowPadding,
-                  isFailedState: isFailedState,
-                  isPinned: isPinned,
-                  messageWidget: widget,
-                  showBottomRow: showBottomRow,
-                  showPinHighlight: widget.showPinHighlight,
-                  showReactionPickerIndicator:
-                      widget.showReactionPickerIndicator,
-                  showReactions: showReactions,
-                  showUserAvatar: widget.showUserAvatar,
-                  streamChat: _streamChat,
-                  translateUserAvatar: widget.translateUserAvatar,
-                  deletedBottomRowBuilder: widget.deletedBottomRowBuilder,
-                  onThreadTap: widget.onThreadTap,
-                  shape: widget.shape,
-                  borderSide: widget.borderSide,
-                  borderRadiusGeometry: widget.borderRadiusGeometry,
-                  textBuilder: widget.textBuilder,
-                  onLinkTap: widget.onLinkTap,
-                  onMentionTap: widget.onMentionTap,
-                  onQuotedMessageTap: widget.onQuotedMessageTap,
-                  bottomRowBuilder: widget.bottomRowBuilder,
-                  onUserAvatarTap: widget.onUserAvatarTap,
-                  userAvatarBuilder: widget.userAvatarBuilder,
-                  usernameBuilder: widget.usernameBuilder,
+        type: MaterialType.transparency,
+        child: AnimatedContainer(
+          duration: const Duration(seconds: 1),
+          color: widget.message.pinned && widget.showPinHighlight
+              ? _streamChatTheme.colorTheme.highlight
+              : _streamChatTheme.colorTheme.barsBg.withOpacity(0),
+          child: Portal(
+            child: PlatformWidgetBuilder(
+              mobile: (context, child) {
+                return InkWell(
+                  onTap: () => widget.onMessageTap!(widget.message),
+                  onLongPress: widget.message.isDeleted && !isFailedState
+                      ? null
+                      : () => onLongPress(context),
+                  child: child,
+                );
+              },
+              desktop: (_, child) => MouseRegion(child: child),
+              web: (_, child) => MouseRegion(child: child),
+              child: Padding(
+                padding: widget.padding ?? const EdgeInsets.all(8),
+                child: FractionallySizedBox(
+                  alignment: widget.reverse
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
+                  widthFactor: 0.78,
+                  child: MessageWidgetContent(
+                    streamChatTheme: _streamChatTheme,
+                    showUsername: showUsername,
+                    showTimeStamp: showTimeStamp,
+                    showThreadReplyIndicator: showThreadReplyIndicator,
+                    showSendingIndicator: showSendingIndicator,
+                    showInChannel: showInChannel,
+                    isGiphy: isGiphy,
+                    isOnlyEmoji: isOnlyEmoji,
+                    hasUrlAttachments: hasUrlAttachments,
+                    messageTheme: widget.messageTheme,
+                    reverse: widget.reverse,
+                    message: widget.message,
+                    hasNonUrlAttachments: hasNonUrlAttachments,
+                    shouldShowReactions: shouldShowReactions,
+                    hasQuotedMessage: hasQuotedMessage,
+                    textPadding: widget.textPadding,
+                    attachmentBuilders: widget.attachmentBuilders,
+                    attachmentPadding: widget.attachmentPadding,
+                    avatarWidth: avatarWidth,
+                    bottomRowPadding: bottomRowPadding,
+                    isFailedState: isFailedState,
+                    isPinned: isPinned,
+                    messageWidget: widget,
+                    showBottomRow: showBottomRow,
+                    showPinHighlight: widget.showPinHighlight,
+                    showReactionPickerIndicator:
+                        widget.showReactionPickerIndicator,
+                    showReactions: showReactions,
+                    showUserAvatar: widget.showUserAvatar,
+                    streamChat: _streamChat,
+                    translateUserAvatar: widget.translateUserAvatar,
+                    deletedBottomRowBuilder: widget.deletedBottomRowBuilder,
+                    onThreadTap: widget.onThreadTap,
+                    shape: widget.shape,
+                    borderSide: widget.borderSide,
+                    borderRadiusGeometry: widget.borderRadiusGeometry,
+                    textBuilder: widget.textBuilder,
+                    onLinkTap: widget.onLinkTap,
+                    onMentionTap: widget.onMentionTap,
+                    onQuotedMessageTap: widget.onQuotedMessageTap,
+                    bottomRowBuilder: widget.bottomRowBuilder,
+                    onUserAvatarTap: widget.onUserAvatarTap,
+                    userAvatarBuilder: widget.userAvatarBuilder,
+                    usernameBuilder: widget.usernameBuilder,
+                  ),
                 ),
               ),
             ),
