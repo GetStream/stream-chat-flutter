@@ -126,6 +126,7 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
                   const SizedBox(height: 24),
                   Wrap(
                     spacing: 16,
+                    runSpacing: 16,
                     children: [
                       ...widget.message.latestReactions!.map((reaction) {
                         final reactionIcon = reactionIcons.firstWhereOrNull(
@@ -284,52 +285,58 @@ class _StackedReaction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userId = StreamChat.of(context).currentUser?.id;
-    return Column(
-      children: [
-        Stack(
-          children: [
-            StreamUserAvatar(
-              user: reaction.user!,
-              constraints: const BoxConstraints.tightFor(
-                height: 64,
-                width: 64,
+    return SizedBox(
+      width: 80,
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              StreamUserAvatar(
+                user: reaction.user!,
+                constraints: const BoxConstraints.tightFor(
+                  height: 64,
+                  width: 64,
+                ),
+                borderRadius: BorderRadius.circular(32),
               ),
-              borderRadius: BorderRadius.circular(32),
-            ),
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: streamChatTheme.colorTheme.inputBg,
-                  border: Border.all(
-                    color: streamChatTheme.colorTheme.barsBg,
-                    width: 2,
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: streamChatTheme.colorTheme.inputBg,
+                    border: Border.all(
+                      color: streamChatTheme.colorTheme.barsBg,
+                      width: 2,
+                    ),
+                    shape: BoxShape.circle,
                   ),
-                  shape: BoxShape.circle,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: reactionIcon?.builder(
-                        context,
-                        reaction.userId == userId,
-                        16,
-                      ) ??
-                      Icon(
-                        Icons.help_outline_rounded,
-                        size: 16,
-                        color: reaction.user?.id == userId
-                            ? streamChatTheme.colorTheme.accentPrimary
-                            : streamChatTheme.colorTheme.textHighEmphasis
-                                .withOpacity(0.5),
-                      ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: reactionIcon?.builder(
+                          context,
+                          reaction.userId == userId,
+                          16,
+                        ) ??
+                        Icon(
+                          Icons.help_outline_rounded,
+                          size: 16,
+                          color: reaction.user?.id == userId
+                              ? streamChatTheme.colorTheme.accentPrimary
+                              : streamChatTheme.colorTheme.textHighEmphasis
+                                  .withOpacity(0.5),
+                        ),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        Text(reaction.user!.name),
-      ],
+            ],
+          ),
+          Text(
+            userId == reaction.user!.name ? 'You' : reaction.user!.name,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
