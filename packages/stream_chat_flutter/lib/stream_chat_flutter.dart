@@ -3,6 +3,9 @@ export 'package:stream_chat_flutter/src/message_widget/parse_attachments.dart';
 export 'package:stream_chat_flutter/src/message_widget/quoted_message.dart';
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+// analytics
+export 'src/analytics/client/stream_chat_analytics_client.dart';
+export 'src/analytics/models/stream_chat_analytics_event.dart';
 export 'src/attachment/attachment.dart';
 export 'src/attachment/attachment_handler/attachment_handler.dart';
 export 'src/attachment/attachment_handler/desktop_attachment_handler.dart';
