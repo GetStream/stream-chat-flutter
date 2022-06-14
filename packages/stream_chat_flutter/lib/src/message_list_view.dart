@@ -291,7 +291,7 @@ class StreamMessageListView extends StatefulWidget {
 
   /// Called when message item gets swiped
   @Deprecated(
-    'onMessageSwiped has been deprecated. Use onSwipeEnd and onReply instead.',
+    'onMessageSwiped has been deprecated. Use onSwipeEnd instead.',
   )
   final OnMessageSwiped? onMessageSwiped;
 
