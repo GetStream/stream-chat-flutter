@@ -1,6 +1,9 @@
 export 'package:jiffy/jiffy.dart';
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+// analytics
+export 'src/analytics/client/stream_chat_analytics_client.dart';
+export 'src/analytics/models/stream_chat_analytics_event.dart';
 export 'src/attachment/attachment.dart';
 export 'src/attachment_actions_modal.dart';
 export 'src/back_button.dart';

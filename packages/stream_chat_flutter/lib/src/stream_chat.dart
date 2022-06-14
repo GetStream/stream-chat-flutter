@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/analytics/client/stream_chat_analytics_client.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget used to provide information about the chat to the widget tree
@@ -31,6 +30,7 @@ class StreamChat extends StatefulWidget {
   const StreamChat({
     super.key,
     required this.client,
+    required this.analyticsClient,
     required this.child,
     this.streamChatThemeData,
     this.onBackgroundEventReceived,
@@ -40,6 +40,9 @@ class StreamChat extends StatefulWidget {
 
   /// Client to do chat ops with
   final StreamChatClient client;
+
+  /// Client that deals with all the analytics events in UI
+  final StreamChatAnalyticsClient analyticsClient;
 
   /// Child which inherits details
   final Widget? child;
@@ -85,21 +88,12 @@ class StreamChatState extends State<StreamChat> {
   /// Gets client from widget
   StreamChatClient get client => widget.client;
 
-  late StreamChatAnalyticsClient _analyticsClient;
-
   /// The analytics client
-  StreamChatAnalyticsClient get analyticsClient => _analyticsClient;
-
-  @override
-  void initState() {
-    super.initState();
-    _analyticsClient = StreamChatAnalyticsClient();
-    _analyticsClient.init();
-  }
+  StreamChatAnalyticsClient get analyticsClient => widget.analyticsClient;
 
   @override
   void dispose() {
-    _analyticsClient.dispose();
+    analyticsClient.dispose();
     super.dispose();
   }
 

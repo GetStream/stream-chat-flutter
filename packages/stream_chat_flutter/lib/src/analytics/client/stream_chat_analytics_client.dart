@@ -5,19 +5,18 @@ import 'package:stream_chat_flutter/src/analytics/models/stream_chat_analytics_e
 /// The StreamChatAnalyticsClient helps track the different events that are
 /// triggered by the SDK based on interactions with the UI
 class StreamChatAnalyticsClient {
+  ///
+  StreamChatAnalyticsClient() {
+    _analyticsEventStreamController =
+        StreamController<StreamChatAnalyticsEvent>.broadcast();
+    analyticsEventStream = _analyticsEventStreamController.stream;
+  }
   late StreamController<StreamChatAnalyticsEvent>
       _analyticsEventStreamController;
 
   /// Subscribe to this stream to get the events and data, as and when
   /// the UI interactions take place
   late Stream<StreamChatAnalyticsEvent> analyticsEventStream;
-
-  /// Initialise the members of the client
-  void init() {
-    _analyticsEventStreamController =
-        StreamController<StreamChatAnalyticsEvent>.broadcast();
-    analyticsEventStream = _analyticsEventStreamController.stream;
-  }
 
   /// Clean up the members of the client
   void dispose() {
