@@ -43,6 +43,9 @@ typedef ThreadTapCallback = void Function(Message, Widget?);
 /// Callback on message swiped
 typedef OnMessageSwiped = void Function(Message);
 
+/// Builder for on message swiped callback
+typedef OnMessageSwipedBuilder = VoidCallback Function(Message);
+
 /// Callback on message tapped
 typedef OnMessageTap = void Function(Message);
 
@@ -185,9 +188,9 @@ class StreamMessageListView extends StatefulWidget {
     this.scrollController,
     this.itemPositionListener,
     this.onMessageSwiped,
-    this.onSwipeEnd,
-    this.onSwipeCancel,
-    this.onSwipeStart,
+    this.onSwipeEndBuilder,
+    this.onSwipeCancelBuilder,
+    this.onSwipeStartBuilder,
     this.onSwipeThreshold = 82,
     this.highlightInitialMessage = false,
     this.messageHighlightColor,
@@ -291,18 +294,18 @@ class StreamMessageListView extends StatefulWidget {
 
   /// Called when message item gets swiped
   @Deprecated(
-    'onMessageSwiped has been deprecated. Use onSwipeEnd instead.',
+    'onMessageSwiped has been deprecated. Use onSwipeEndBuilder instead.',
   )
   final OnMessageSwiped? onMessageSwiped;
 
   /// Called when message item gets swiped at the end
-  final OnMessageSwiped? onSwipeEnd;
+  final OnMessageSwipedBuilder? onSwipeEndBuilder;
 
   /// Called when message item swiped gets canceled
-  final OnMessageSwiped? onSwipeCancel;
+  final OnMessageSwipedBuilder? onSwipeCancelBuilder;
 
   /// Called when message item gets swiped at the start
-  final OnMessageSwiped? onSwipeStart;
+  final OnMessageSwipedBuilder? onSwipeStartBuilder;
 
   /// Threshold used to trigger the swipe
   final double onSwipeThreshold;
@@ -407,6 +410,18 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final initialAlignment = widget.initialAlignment;
     if (initialAlignment != null) return initialAlignment;
     return streamChannel!.initialMessageId == null ? 0 : 0.1;
+  }
+
+  VoidCallback? _onSwipeEndBuilder(Message message) {
+    if (widget.onSwipeEndBuilder != null) {
+      return widget.onSwipeEndBuilder!(message);
+    }
+
+    if (widget.onMessageSwiped != null) {
+      return () => widget.onMessageSwiped!(message);
+    }
+
+    return null;
   }
 
   bool _isInitialMessage(String id) => streamChannel!.initialMessageId == id;
@@ -1270,27 +1285,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (!message.isDeleted &&
         !message.isSystem &&
         !message.isEphemeral &&
-        widget.onMessageSwiped != null) {
+        (widget.onMessageSwiped != null ||
+            widget.onSwipeEndBuilder != null ||
+            widget.onSwipeStartBuilder != null ||
+            widget.onSwipeCancelBuilder != null)) {
       child = Container(
         decoration: const BoxDecoration(),
         clipBehavior: Clip.hardEdge,
         child: Swipeable(
-          onSwipeEnd: () {
-            FocusScope.of(context).unfocus();
-            if (widget.onSwipeEnd != null) {
-              widget.onSwipeEnd!.call(message);
-            } else if (widget.onMessageSwiped != null) {
-              widget.onMessageSwiped!.call(message);
-            }
-          },
-          onSwipeCancel: () {
-            FocusScope.of(context).unfocus();
-            widget.onSwipeCancel?.call(message);
-          },
-          onSwipeStart: () {
-            FocusScope.of(context).unfocus();
-            widget.onSwipeStart?.call(message);
-          },
+          onSwipeEnd: _onSwipeEndBuilder(message),
+          onSwipeCancel: widget.onSwipeCancelBuilder?.call(message),
+          onSwipeStart: widget.onSwipeStartBuilder?.call(message),
           threshold: widget.onSwipeThreshold,
           backgroundIcon: StreamSvgIcon.reply(
             color: _streamTheme.colorTheme.accentPrimary,
