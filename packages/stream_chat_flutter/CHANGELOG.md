@@ -8,6 +8,7 @@
 - Fix commands resetting the `StreamMessageInputController.value`.
 - [[#996]](https://github.com/GetStream/stream-chat-flutter/issues/996) Videos break bottom photo
   carousal.
+- Fix: URLs with path and/or query params are not enriched.
 
 ✅ Added
 
