@@ -998,7 +998,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _lastSearchedContainsUrlText = value;
 
     final matchedUrls = _urlRegex.allMatches(value).toList()
-      ..removeWhere((it) => it.group(0)?.split('.').last.isValidTLD() == false);
+      ..removeWhere((it) {
+        final _parsedMatch = Uri.tryParse(it.group(0) ?? '')?.withScheme;
+        return _parsedMatch?.host.split('.').last.isValidTLD() == false;
+      });
 
     // Reset the og attachment if the text doesn't contain any url
     if (matchedUrls.isEmpty ||
