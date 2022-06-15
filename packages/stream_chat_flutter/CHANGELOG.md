@@ -13,7 +13,7 @@
 
 - [[#1011]](https://github.com/GetStream/stream-chat-flutter/issues/1011) Animate the background
   color of pinned messages.
-- [[#1069]](https://github.com/GetStream/stream-chat-flutter/issues/1069) Added `StreamMessageListView.onSwipeStart`, `StreamMessageListView.onSwipeEnd`, `StreamMessageListView.onSwipeCancel` callbacks.
+- [[#1069]](https://github.com/GetStream/stream-chat-flutter/issues/1069) Added `StreamMessageListView.onSwipeStartBuilder`, `StreamMessageListView.onSwipeEndBuilder`, `StreamMessageListView.onSwipeCancelBuilder` callbacks.
 - Added `StreamMessageListView.onSwipeThreshold`.
 
 🔄 Changed
