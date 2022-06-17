@@ -387,6 +387,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       if (index != 0) return index + 1;
       return index;
     }
+
+    if (unreadCount > 0) {
+      return unreadCount + 1;
+    }
+
     return 0;
   }
 
@@ -932,6 +937,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (unreadCount > 0) {
       streamChannel!.channel.markRead();
     }
+
+    final index = unreadCount > 0 ? unreadCount + 1 : 0;
+
     if (!_upToDate) {
       _bottomPaginationActive = false;
       initialAlignment = 0;
@@ -939,11 +947,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       await streamChannel!.reloadChannel();
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollController!.jumpTo(index: unreadCount);
+        _scrollController!.jumpTo(index: index);
       });
     } else {
       _scrollController!.scrollTo(
-        index: unreadCount,
+        index: index,
         duration: const Duration(seconds: 1),
         curve: Curves.easeInOut,
       );
@@ -1366,6 +1374,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
       _messageNewListener?.cancel();
+
+      unreadCount = streamChannel?.channel.state?.unreadCount ?? 0;
       initialIndex = _initialIndex;
       initialAlignment = _initialAlignment;
 
@@ -1376,8 +1386,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         );
       }
 
-      _messageNewListener =
-          streamChannel!.channel.on(EventType.messageNew).listen((event) {
+      _messageNewListener = streamChannel!.channel
+          .on(EventType.messageNew)
+          .skip(1) //skipping the first event
+          .listen((event) {
         if (_upToDate) {
           _bottomPaginationActive = false;
         }
@@ -1395,6 +1407,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             );
           });
         } else if (streamChannel?.channel.state?.unreadCount != 0) {
+          print('increasing unread');
           setState(() {
             unreadCount = unreadCount + 1;
           });
