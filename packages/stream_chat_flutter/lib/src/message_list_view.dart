@@ -1407,7 +1407,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             );
           });
         } else if (streamChannel?.channel.state?.unreadCount != 0) {
-          print('increasing unread');
           setState(() {
             unreadCount = unreadCount + 1;
           });
