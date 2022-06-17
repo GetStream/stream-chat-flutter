@@ -381,4 +381,12 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get viewLibrary => 'Bibliothek öffnen';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 ungelesene Nachricht';
+    }
+    return '$unreadCount ungelesene Nachrichten';
+  }
 }

@@ -380,4 +380,12 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get linkDisabledError => 'लिंक भेजना प्रतिबंधित';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 अपठित संदेश';
+    }
+    return '$unreadCount अपठित संदेश';
+  }
 }

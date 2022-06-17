@@ -77,6 +77,10 @@ abstract class Translations {
   /// contains a parent message
   String threadSeparatorText(int replyCount);
 
+  /// The text for showing the unread messages count
+  /// in the [StreamMessageListView]
+  String unreadMessagesSeparatorText(int unreadCount);
+
   /// The label for "connected" in [StreamConnectionStatusBuilder]
   String get connectedLabel;
 
@@ -711,4 +715,12 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get linkDisabledError => 'Links are disabled';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 unread message';
+    }
+    return '$unreadCount unread messages';
+  }
 }
