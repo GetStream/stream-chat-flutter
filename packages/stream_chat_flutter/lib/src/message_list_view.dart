@@ -339,7 +339,8 @@ class StreamMessageListView extends StatefulWidget {
   final WidgetBuilder? threadSeparatorBuilder;
 
   /// Builder used to build the unread message separator
-  final WidgetBuilder? unreadMessagesSeparatorBuilder;
+  final Widget Function(BuildContext context, int unreadCount)?
+      unreadMessagesSeparatorBuilder;
 
   /// A [MessageListController] allows pagination.
   /// Use [ChannelListController.paginateData] pagination.
@@ -661,8 +662,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                         const SizedBox(height: 2);
 
                     if (!isThread && unreadCount > 0 && unreadCount == i - 1) {
-                      final unreadMessagesSeparator =
-                          widget.unreadMessagesSeparatorBuilder?.call(context);
+                      final unreadMessagesSeparator = widget
+                          .unreadMessagesSeparatorBuilder
+                          ?.call(context, unreadCount);
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
