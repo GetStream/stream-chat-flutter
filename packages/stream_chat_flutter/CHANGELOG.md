@@ -14,6 +14,8 @@
 
 - [[#1011]](https://github.com/GetStream/stream-chat-flutter/issues/1011) Animate the background
   color of pinned messages.
+- Added unread messages divider in `StreamMessageListView`.
+- Added `StreamMessageListView.unreadMessagesSeparatorBuilder`.
 
 ## 4.2.0
 
