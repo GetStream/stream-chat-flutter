@@ -1386,10 +1386,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         );
       }
 
-      _messageNewListener = streamChannel!.channel
-          .on(EventType.messageNew)
-          .skip(1) //skipping the first event
-          .listen((event) {
+      _messageNewListener =
+          streamChannel!.channel.on(EventType.messageNew).skip(1)
+              //skipping the first event because
+              //the StreamController is a BehaviorSubject
+              .listen((event) {
         if (_upToDate) {
           _bottomPaginationActive = false;
         }
