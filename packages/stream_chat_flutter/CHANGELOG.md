@@ -17,6 +17,7 @@
 - Added unread messages divider in `StreamMessageListView`.
 - Added `StreamMessageListView.unreadMessagesSeparatorBuilder`.
 - Now `StreamMessageListView` opens to the oldest unread message by default.
+
 ## 4.2.0
 
 🐞 Fixed
