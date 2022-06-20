@@ -36,7 +36,7 @@ dependencies:
   rxdart: ^0.27.0
   share_plus: ^4.0.1
   shimmer: ^2.0.0
-  stream_chat_flutter_core: ^4.2.0
+  stream_chat_flutter_core: ^4.3.0
   substring_highlight: ^1.0.26
   url_launcher: ^6.1.0
   video_player: ^2.1.0
