@@ -1,3 +1,7 @@
+## 4.2.1
+
+ - **FIX**: fix x-stream-client header.
+
 ## Upcoming
 
 - Updated `photo_view` dependency to [`0.14.0`](https://pub.dev/packages/photo_view/changelog).

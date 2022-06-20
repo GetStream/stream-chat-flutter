@@ -1,3 +1,7 @@
+## 4.2.1
+
+ - **FIX**: fix x-stream-client header.
+
 ## 4.2.0
 
 - Updated `stream_chat` dependency to [`4.2.0`](https://pub.dev/packages/stream_chat/changelog).

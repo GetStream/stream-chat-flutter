@@ -1,3 +1,7 @@
+## 4.2.1
+
+ - **FIX**: fix x-stream-client header.
+
 ## Upcoming
 
 🐞 Fixed
