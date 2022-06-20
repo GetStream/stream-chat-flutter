@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   stream_chat: ^4.3.0
-  stream_chat_persistence: ^4.1.0
+  stream_chat_persistence: ^4.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
