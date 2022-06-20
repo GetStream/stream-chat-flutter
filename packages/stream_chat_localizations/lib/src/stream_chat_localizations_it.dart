@@ -40,7 +40,12 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String get onlyVisibleToYouText => 'Visible solo a te';
 
   @override
-  String threadReplyCountText(int count) => '$count risposte al thread';
+  String threadReplyCountText(int count) {
+    if (count == 1) {
+      return '1 risposta al thread';
+    }
+    return '$count risposte al thread';
+  }
 
   @override
   String attachmentsUploadProgressText({
@@ -383,4 +388,12 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get linkDisabledError => 'I links sono disattivati';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 messaggio non letto';
+    }
+    return '$unreadCount messaggi non letti';
+  }
 }

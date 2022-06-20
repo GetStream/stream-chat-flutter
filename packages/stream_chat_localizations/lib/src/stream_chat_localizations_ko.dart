@@ -366,4 +366,12 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get linkDisabledError => '링크가 비활성화되었습니다.';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '읽지 않은 메시지 1개';
+    }
+    return '읽지 않은 메시지 $unreadCount개';
+  }
 }

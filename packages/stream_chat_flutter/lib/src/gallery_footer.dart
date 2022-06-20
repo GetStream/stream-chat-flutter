@@ -225,11 +225,12 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                       if (attachment.type == 'video') {
                         media = InkWell(
                           onTap: () => widget.mediaSelectedCallBack!(index),
-                          child: FittedBox(
-                            fit: BoxFit.cover,
+                          child: AspectRatio(
+                            aspectRatio: 1,
                             child: StreamVideoThumbnailImage(
                               video: (attachment.file?.path ??
                                   attachment.assetUrl)!,
+                              fit: BoxFit.cover,
                             ),
                           ),
                         );

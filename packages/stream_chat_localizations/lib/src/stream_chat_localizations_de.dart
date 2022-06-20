@@ -163,7 +163,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get allowGalleryAccessMessage => 'Zugang zu Ihrer Galerie gewähren';
 
   @override
-  String get flagMessageLabel => 'Markierte Nachricht';
+  String get flagMessageLabel => 'Nachricht melden';
 
   @override
   String get flagMessageQuestion =>
@@ -171,13 +171,13 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       '\nModerator für weitere Untersuchungen senden?';
 
   @override
-  String get flagLabel => 'MARKIEREN';
+  String get flagLabel => 'MELDEN';
 
   @override
   String get cancelLabel => 'ABBRECHEN';
 
   @override
-  String get flagMessageSuccessfulLabel => 'Nachricht markiert';
+  String get flagMessageSuccessfulLabel => 'Nachricht gemeldet';
 
   @override
   String get flagMessageSuccessfulText =>
@@ -283,7 +283,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get streamChatLabel => 'Stream Chat';
 
   @override
-  String get searchingForNetworkText => 'Searching for Network';
+  String get searchingForNetworkText => 'Netzwerk wird gesucht';
 
   @override
   String get offlineLabel => 'Offline...';
@@ -380,5 +380,13 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       'Sie sind nicht berechtigt Nachrichten zu senden';
 
   @override
-  String get viewLibrary => 'Bibliothek ansehen';
+  String get viewLibrary => 'Bibliothek öffnen';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 ungelesene Nachricht';
+    }
+    return '$unreadCount ungelesene Nachrichten';
+  }
 }

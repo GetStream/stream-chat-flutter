@@ -70,7 +70,7 @@ typedef UserMentionTileBuilder = Widget Function(
 /// Widget builder for action button.
 ///
 /// [defaultActionButton] is the default [IconButton] configuration,
-/// use [defaultActionButton.copyWith] to easily customize it.
+/// use .copyWith to easily customize it.
 typedef ActionButtonBuilder = Widget Function(
   BuildContext context,
   IconButton defaultActionButton,
@@ -998,7 +998,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _lastSearchedContainsUrlText = value;
 
     final matchedUrls = _urlRegex.allMatches(value).toList()
-      ..removeWhere((it) => it.group(0)?.split('.').last.isValidTLD() == false);
+      ..removeWhere((it) {
+        final _parsedMatch = Uri.tryParse(it.group(0) ?? '')?.withScheme;
+        return _parsedMatch?.host.split('.').last.isValidTLD() == false;
+      });
 
     // Reset the og attachment if the text doesn't contain any url
     if (matchedUrls.isEmpty ||
@@ -1221,7 +1224,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   void _setCommand(Command c) {
     _effectiveController
-      ..clear()
+      ..reset()
       ..command = c;
     setState(() {
       _showCommandsOverlay = false;

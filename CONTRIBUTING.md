@@ -82,7 +82,7 @@ To run a script, use `melos run <script name>`.
 
 # How can I contribute?
 
-Are you ready to dive into code? It's pretty easy to get up and running with your first Stream contribution. If this is your first time sending a PR to Stream, please read the above section on [local setup](https://www.notion.so/Stream-s-Contribution-Guide-e18e1d57295f4fa8836a115d3fa3d5e7) before continuing. 
+Are you ready to dive into code? It's pretty easy to get up and running with your first Stream contribution. If this is your first time sending a PR to Stream, please read the above section on [local setup](https://github.com/GetStream/stream-chat-flutter/blob/develop/CONTRIBUTING.md#local-setup) before continuing. 
 
 ## Filing bugs 🐛
 

@@ -14,6 +14,7 @@ void main() {
       id: 'testId',
       type: 'testType',
       cid: 'testCid',
+      ownCapabilities: ['testCapability'],
       config: {'max_message_length': 33},
       frozen: math.Random().nextBool(),
       lastMessageAt: DateTime.now(),
@@ -29,6 +30,7 @@ void main() {
       final channelModel = entity.toChannelModel(createdBy: user);
       expect(channelModel, isA<ChannelModel>());
       expect(channelModel.id, entity.id);
+      expect(channelModel.ownCapabilities, entity.ownCapabilities);
       expect(channelModel.config.toJson()['max_message_length'], 33);
       expect(channelModel.frozen, entity.frozen);
       expect(channelModel.createdAt, isSameDateAs(entity.createdAt));
@@ -68,6 +70,7 @@ void main() {
 
       final channelModel = channelState.channel!;
       expect(channelModel.id, entity.id);
+      expect(channelModel.ownCapabilities, entity.ownCapabilities);
       expect(channelModel.config.toJson()['max_message_length'], 33);
       expect(channelModel.frozen, entity.frozen);
       expect(channelModel.createdAt, isSameDateAs(entity.createdAt));
@@ -87,6 +90,7 @@ void main() {
       id: 'testId',
       type: 'testType',
       cid: 'testCid',
+      ownCapabilities: ['testCapability'],
       config: ChannelConfig(maxMessageLength: 33),
       frozen: math.Random().nextBool(),
       lastMessageAt: DateTime.now(),
@@ -101,6 +105,7 @@ void main() {
     final channelEntity = model.toEntity();
     expect(channelEntity, isA<ChannelEntity>());
     expect(channelEntity.id, model.id);
+    expect(channelEntity.ownCapabilities, model.ownCapabilities);
     expect(
       channelEntity.config['max_message_length'],
       model.config.maxMessageLength,

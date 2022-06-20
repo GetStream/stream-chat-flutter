@@ -1,45 +1,77 @@
+## 4.3.0
+
+- Updated `photo_view` dependency to [`0.14.0`](https://pub.dev/packages/photo_view/changelog).
+
+🐞 Fixed
+
+- [[#1180]](https://github.com/GetStream/stream-chat-flutter/issues/1180) Fix file download.
+- Fix commands resetting the `StreamMessageInputController.value`.
+- [[#996]](https://github.com/GetStream/stream-chat-flutter/issues/996) Videos break bottom photo
+  carousal.
+- Fix: URLs with path and/or query params are not enriched.
+- [[#1194]](https://github.com/GetStream/stream-chat-flutter/issues/1194) Request permission to access gallery when opening the file picker.
+
+✅ Added
+
+- [[#1011]](https://github.com/GetStream/stream-chat-flutter/issues/1011) Animate the background
+  color of pinned messages.
+- Added unread messages divider in `StreamMessageListView`.
+- Added `StreamMessageListView.unreadMessagesSeparatorBuilder`.
+- Now `StreamMessageListView` opens to the oldest unread message by default.
+
 ## 4.2.0
 
 🐞 Fixed
 
-- [[#1133]](https://github.com/GetStream/stream-chat-flutter/issues/1133) Visibility override flags not being passed to `StreamMessageActionsModal`
+- [[#1133]](https://github.com/GetStream/stream-chat-flutter/issues/1133) Visibility override flags
+  not being passed to `StreamMessageActionsModal`
 
 ## 4.1.0
 
 ✅ Added
 
-- [[#1119]](https://github.com/GetStream/stream-chat-flutter/issues/1119) Added an option to disable mentions overlay in `StreamMessageInput`
-- Deprecated `disableEmojiSuggestionsOverlay` in favor of `enableEmojiSuggestionsOverlay` in `StreamMessageInput`
+- [[#1119]](https://github.com/GetStream/stream-chat-flutter/issues/1119) Added an option to disable
+  mentions overlay in `StreamMessageInput`
+- Deprecated `disableEmojiSuggestionsOverlay` in favor of `enableEmojiSuggestionsOverlay`
+  in `StreamMessageInput`
 
 🐞 Fixed
 
 - Fixed attachment picker ui.
 - Fixed StreamChannelHeader and StreamThreadHeader subtitle alignment.
 - Fixed message widget thread indicator in reverse mode.
-- [[#1044]](https://github.com/GetStream/stream-chat-flutter/issues/1044): Refactor StreamMessageWidget bottom row to use Text.rich.
+- [[#1044]](https://github.com/GetStream/stream-chat-flutter/issues/1044): Refactor
+  StreamMessageWidget bottom row to use Text.rich.
 
 🔄 Changed
 
-- Removed `isOwner` condition from `ChannelBottomSheet` and `StreamChannelInfoBottomSheet` for delete option tile.
+- Removed `isOwner` condition from `ChannelBottomSheet` and `StreamChannelInfoBottomSheet` for
+  delete option tile.
 
 ## 4.0.1
 
 - Minor fixes
-- Updated `stream_chat_flutter_core` dependency to [`4.0.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Updated `stream_chat_flutter_core` dependency
+  to [`4.0.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 4.0.0
 
-For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
+For upgrading to V4, please refer to
+the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
 
 ✅ Added
 
-- [[#1087]](https://github.com/GetStream/stream-chat-flutter/issues/1087): Handle limited access to camera on iOS.
-- `centerTitle` and `elevation` properties to `ChannelHeader`, `ThreadHeader` and `ChannelListHeader`.
+- [[#1087]](https://github.com/GetStream/stream-chat-flutter/issues/1087): Handle limited access to
+  camera on iOS.
+- `centerTitle` and `elevation` properties to `ChannelHeader`, `ThreadHeader`
+  and `ChannelListHeader`.
 
 🐞 Fixed
 
-- [[#1067]](https://github.com/GetStream/stream-chat-flutter/issues/1067): Fix name text overflow in reaction card.
-- [[#842]](https://github.com/GetStream/stream-chat-flutter/issues/842): show date divider for first message.
+- [[#1067]](https://github.com/GetStream/stream-chat-flutter/issues/1067): Fix name text overflow in
+  reaction card.
+- [[#842]](https://github.com/GetStream/stream-chat-flutter/issues/842): show date divider for first
+  message.
 - Loosen up url check for attachment download.
 - Use `ogScrapeUrl` for LinkAttachments.
 
@@ -48,16 +80,20 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 ✅ Added
 
 - Added support to pass `autoCorrect` to `StreamMessageInput` for the text input field
-- Added support to control the visibility of the default emoji suggestions overlay in `StreamMessageInput`
+- Added support to control the visibility of the default emoji suggestions overlay
+  in `StreamMessageInput`
 - Added support to build custom widget for scrollToBottom in `StreamMessageListView`
 
 🐞 Fixed
 
 - Minor fixes and improvements
--[[#892]](https://github.com/GetStream/stream-chat-flutter/issues/892): Fix default `initialAlignment` in `MessageListView`.
-- Fix `MessageInputTheme.inputBackgroundColor` color not being used in some widgets of `MessageInput`
+  -[[#892]](https://github.com/GetStream/stream-chat-flutter/issues/892): Fix
+  default `initialAlignment` in `MessageListView`.
+- Fix `MessageInputTheme.inputBackgroundColor` color not being used in some widgets
+  of `MessageInput`
 - Removed dependency on `visibility_detector`
-- [[#1071]](https://github.com/GetStream/stream-chat-flutter/issues/1071): Fixed the way attachment actions were handled in full screen
+- [[#1071]](https://github.com/GetStream/stream-chat-flutter/issues/1071): Fixed the way attachment
+  actions were handled in full screen
 
 ## 4.0.0-beta.1
 
@@ -70,22 +106,27 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 - Deprecated `ChannelAvatar` in favor of `StreamChannelAvatar`.
 - Deprecated `ChannelName` in favor of `StreamChannelName`.
 - Deprecated `MessageInput` in favor of `StreamMessageInput`.
-- Separated `MessageInput` widget in smaller components. (For example `CountDownButton`, `StreamAttachmentPicker`...)
-- Updated `stream_chat_flutter_core` dependency to [`4.0.0-beta.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Separated `MessageInput` widget in smaller components. (For example `CountDownButton`
+  , `StreamAttachmentPicker`...)
+- Updated `stream_chat_flutter_core` dependency
+  to [`4.0.0-beta.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 - Added OpenGraph preview support for links in `StreamMessageInput`.
 - Removed video compression.
 
 ## 3.6.1
 
-- Updated `stream_chat_flutter_core` dependency to [`3.6.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Updated `stream_chat_flutter_core` dependency
+  to [`3.6.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 3.6.0
 
 🐞 Fixed
 
 - Minor fixes and improvements
--[[#892]](https://github.com/GetStream/stream-chat-flutter/issues/892): Fix default `initialAlignment` in `MessageListView`.
-- Fix `MessageInputTheme.inputBackgroundColor` color not being used in some widgets of `MessageInput`
+  -[[#892]](https://github.com/GetStream/stream-chat-flutter/issues/892): Fix
+  default `initialAlignment` in `MessageListView`.
+- Fix `MessageInputTheme.inputBackgroundColor` color not being used in some widgets
+  of `MessageInput`
 - Removed dependency on `visibility_detector`
 
 ## 3.5.1
@@ -98,32 +139,35 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 🐞 Fixed
 
 - Mentions overlay now doesn't overflow when there is not enough height available
-- Updated `stream_chat_flutter_core` dependency to [`3.5.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
-
+- Updated `stream_chat_flutter_core` dependency
+  to [`3.5.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ✅ Added
 
 - `onLinkTap` for `MessageWidget` can now be passed down to `UrlAttachment`.
 
-
 ## 3.5.0
 
 🐞 Fixed
 
-- [[#888]](https://github.com/GetStream/stream-chat-flutter/issues/888) Fix `unban` command not working in `MessageInput`.
-- [[#805]](https://github.com/GetStream/stream-chat-flutter/issues/805) Updated chewie dependency version to 1.3.0
+- [[#888]](https://github.com/GetStream/stream-chat-flutter/issues/888) Fix `unban` command not
+  working in `MessageInput`.
+- [[#805]](https://github.com/GetStream/stream-chat-flutter/issues/805) Updated chewie dependency
+  version to 1.3.0
 - Fix `showScrollToBottom` in `MessageListView` not respecting false value.
 - Fix default `Channel` route not opening from `ChannelListView` when `ChannelAvatar` is tapped
 
 ## 3.4.0
 
-- Updated `stream_chat_flutter_core` dependency to [`3.4.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Updated `stream_chat_flutter_core` dependency
+  to [`3.4.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 🐞 Fixed
 
 - SVG rendering fixes.
 - Use file extension instead of mimeType for downloading files.
-- [[#860]](https://github.com/GetStream/stream-chat-flutter/issues/860) CastError while compressing Videos.
+- [[#860]](https://github.com/GetStream/stream-chat-flutter/issues/860) CastError while compressing
+  Videos.
 
 ✅ Added
 
@@ -136,22 +180,26 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 
 ## 3.3.2
 
-- Updated `stream_chat_flutter_core` dependency to [`3.3.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Updated `stream_chat_flutter_core` dependency
+  to [`3.3.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 3.3.1
 
 ✅ Added
 
-- `MessageListView` now allows more better control over spacing after messages using `spacingWidgetBuilder`.
+- `MessageListView` now allows more better control over spacing after messages
+  using `spacingWidgetBuilder`.
 - `StreamChannel` can now fetch messages around a message ID with the `queryAroundMessage` call.
 - Added `MessageListView.keyboardDismissBehavior` property.
 
 🐞 Fixed
 
-- [[#766]](https://github.com/GetStream/stream-chat-flutter/issues/766) `AttachmentActionsModal` now has customisation options for actions.
+- [[#766]](https://github.com/GetStream/stream-chat-flutter/issues/766) `AttachmentActionsModal` now
+  has customisation options for actions.
 - Fixed `MessageWidget` null errors associated with `channel.memberCount`.
 - Fixed adding attachments on web.
-- [[#767]](https://github.com/GetStream/stream-chat-flutter/issues/767): Fix `MessageInput` focus behaviour when sending messages.
+- [[#767]](https://github.com/GetStream/stream-chat-flutter/issues/767): Fix `MessageInput` focus
+  behaviour when sending messages.
 - Fixed user presence indicator not updating correctly.
 - Do not use `withData: true` in `FilePicker` calls.
 - Fixed read indicator not updating correctly in specific situations.
@@ -159,29 +207,35 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 ## 3.2.0
 
 - Updated Dart SDK constraints to `>=2.14.0 <3.0.0`.
-- Updated `stream_chat_flutter_core` dependency to [`3.2.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Updated `stream_chat_flutter_core` dependency
+  to [`3.2.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 🐞 Fixed
 
 - Fixed message highlight animation alignment in `MessageListView`.
-- [[#491]](https://github.com/GetStream/stream-chat-flutter/issues/491): Fix `MediaListView` showing media in wrong order.
+- [[#491]](https://github.com/GetStream/stream-chat-flutter/issues/491): Fix `MediaListView` showing
+  media in wrong order.
 - Fixed `MessageListView` initialIndex not working in some cases.
 - Improved `MessageListView` rendering in case of reordering.
 - Fix image thumbnail generation when using Stream CDN.
 
 ✅ Added
 
-- `MessageListViewThemeData` now accepts a `DecorationImage` as a background image for `MessageListView`.
+- `MessageListViewThemeData` now accepts a `DecorationImage` as a background image
+  for `MessageListView`.
 
 ## 3.1.1
 
-- Updated `stream_chat_flutter_core` dependency to [`3.1.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Updated `stream_chat_flutter_core` dependency
+  to [`3.1.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 - Updated `file_picker`, `image_gallery_saver`, and `video_thumbnail` to the latest versions.
 
 🐞 Fixed
 
-- [[#687]](https://github.com/GetStream/stream-chat-flutter/issues/687): Fix Users losing their place in the conversation after replying in threads.
-- Fixed floating date stream subscription causing "Bad state: stream has already been listened.” error.
+- [[#687]](https://github.com/GetStream/stream-chat-flutter/issues/687): Fix Users losing their
+  place in the conversation after replying in threads.
+- Fixed floating date stream subscription causing "Bad state: stream has already been listened.”
+  error.
 - Fixed `String` capitalize extension not working on empty strings.
 
 ✅ Added
@@ -189,17 +243,21 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 - Added `MessageInput.customOverlays` property to add custom overlays to the message input.
 - Added `MessageInput.mentionAllAppUsers` property to mention all app users in the message input.
 - The `MessageInput` now supports local search for channels with less than 100 members.
-- Added `MessageListView.paginationLoadingIndicatorBuilder` to override the default loading indicator shown while paginating the message list.
-- Added new `linkBackgroundColor` in `MessageTheme` for setting background colors of link attachments.
+- Added `MessageListView.paginationLoadingIndicatorBuilder` to override the default loading
+  indicator shown while paginating the message list.
+- Added new `linkBackgroundColor` in `MessageTheme` for setting background colors of link
+  attachments.
 
 ⚠️ Deprecated
 
-- `MessageInput.mentionsTileBuilder` is now deprecated in favor of `MessageInput.userMentionsTileBuilder`.
+- `MessageInput.mentionsTileBuilder` is now deprecated in favor
+  of `MessageInput.userMentionsTileBuilder`.
 - `MentionTile` is now deprecated in favor of `UserMentionsTile`.
 
 ## 3.0.0
 
-- Updated `stream_chat_flutter_core` dependency to [`3.0.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Updated `stream_chat_flutter_core` dependency
+  to [`3.0.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 🛑️ Breaking Changes from `2.2.1`
 
@@ -207,16 +265,19 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 
 🐞 Fixed
 
-- [[#668]](https://github.com/GetStream/stream-chat-flutter/issues/668): Fix `MessageInput` rendering errors in case
-  there are no actions available to show.
-- [[#349]](https://github.com/GetStream/stream-chat-flutter/issues/349): Fix `MessageInput` attachment render overflow error.
+- [[#668]](https://github.com/GetStream/stream-chat-flutter/issues/668): Fix `MessageInput`
+  rendering errors in case there are no actions available to show.
+- [[#349]](https://github.com/GetStream/stream-chat-flutter/issues/349): Fix `MessageInput`
+  attachment render overflow error.
 - `MessageInput` overlays now follow the `MessageInput` focus.
-- [[#674]](https://github.com/GetStream/stream-chat-flutter/issues/674): Check scrollController is attached before calling jump in MessageListView.
+- [[#674]](https://github.com/GetStream/stream-chat-flutter/issues/674): Check scrollController is
+  attached before calling jump in MessageListView.
 - Fixed `MessageListView` header and footer when `reverse: false`.
 
 🔄 Changed
 
-- Animation curves changed from default `Curves.linear` to `Curves.easeOut` and `Curves.easeIn` for attachment controls.
+- Animation curves changed from default `Curves.linear` to `Curves.easeOut` and `Curves.easeIn` for
+  attachment controls.
 - Removed default padding in `DateDivider` in `MessageListView`
 
 ✅ Added
@@ -273,17 +334,20 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 ✅ Added
 
 - [#516](https://github.com/GetStream/stream-chat-flutter/issues/516):
-  Added `StreamChatThemeData.placeholderUserImage` for building a widget when the `UserAvatar` image is loading
+  Added `StreamChatThemeData.placeholderUserImage` for building a widget when the `UserAvatar` image
+  is loading
 - Added a `backgroundColor` property to the following widgets:
     - `ChannelHeader`
     - `ChannelListHeader`
     - `GalleryHeader`
     - `GalleryFooter`
     - `ThreadHeader`
-- Added `MessageInput.attachmentLimit` in order to limit the no. of attachments that can be sent with a single message.
-- Added `MessageInput.onAttachmentLimitExceed` callback which will be called when the `attachmentLimit` is exceeded.
-  This will override the default error alert behaviour.
-- Added `MessageInput.attachmentButtonBuilder` and `MessageInput.commandButtonBuilder` for more customizations.
+- Added `MessageInput.attachmentLimit` in order to limit the no. of attachments that can be sent
+  with a single message.
+- Added `MessageInput.onAttachmentLimitExceed` callback which will be called when
+  the `attachmentLimit` is exceeded. This will override the default error alert behaviour.
+- Added `MessageInput.attachmentButtonBuilder` and `MessageInput.commandButtonBuilder` for more
+  customizations.
 
 ```dart
 typedef ActionButtonBuilder = Widget Function(
@@ -299,8 +363,9 @@ You can call `.copyWith` to customize just a subset of properties.
 
 🔄 Changed
 
-Theming has been upgraded! Most theme classes now have `InheritedTheme` classes associated with them, and have been
-upgraded with some goodies like `lerp` functions. Here's the full naming breakdown:
+Theming has been upgraded! Most theme classes now have `InheritedTheme` classes associated with
+them, and have been upgraded with some goodies like `lerp` functions. Here's the full naming
+breakdown:
 
 * `AvatarTheme` is now `AvatarThemeData`
 * `ChannelHeaderTheme` is now `ChannelHeaderThemeData`
@@ -317,18 +382,20 @@ upgraded with some goodies like `lerp` functions. Here's the full naming breakdo
 
 🐞 Fixed
 
-- Fixed `MessageInput` textField case where `input` is not enabled if the file picked from the camera is null.
+- Fixed `MessageInput` textField case where `input` is not enabled if the file picked from the
+  camera is null.
 - Fixed date dividers position/alignment in non reversed `MessageListView`.
-- Fixed `MessageListView` not opening to the right initialMessage if `StreamChannel.initialMessageId` is set.
-- Fixed null check errors when accessing `message.text` in `MessageWidget` and `MessageListView`; this occurred when
-  sending a message with no text.
+- Fixed `MessageListView` not opening to the right initialMessage
+  if `StreamChannel.initialMessageId` is set.
+- Fixed null check errors when accessing `message.text` in `MessageWidget` and `MessageListView`;
+  this occurred when sending a message with no text.
 
 ## 2.1.2
 
 🐞 Fixed
 
-- [#590](https://github.com/GetStream/stream-chat-flutter/issues/590): livestream use case, no members when sending
-  message
+- [#590](https://github.com/GetStream/stream-chat-flutter/issues/590): livestream use case, no
+  members when sending message
 
 ## 2.1.1
 
@@ -346,7 +413,8 @@ upgraded with some goodies like `lerp` functions. Here's the full naming breakdo
 🔄 Changed
 
 - `StreamChat.of(context).user` is now deprecated in favor of `StreamChat.of(context).currentUser`.
-- `StreamChat.of(context).userStream` is now deprecated in favor of `StreamChat.of(context).currentUserStream`.
+- `StreamChat.of(context).userStream` is now deprecated in favor
+  of `StreamChat.of(context).currentUserStream`.
 
 🐞 Fixed
 
@@ -399,7 +467,8 @@ You can call `.copyWith` to customize just a subset of properties
 
 - Added video compress options (frame and quality) to `MessageInput`
 - TypingIndicator now has a property called `parentId` to show typing indicator specific to threads
-- [#493](https://github.com/GetStream/stream-chat-flutter/pull/493): add support for messageListView header/footer
+- [#493](https://github.com/GetStream/stream-chat-flutter/pull/493): add support for messageListView
+  header/footer
 - `MessageWidget` accepts a `userAvatarBuilder`
 - Added pinMessage ui support
 - Added `MessageListView.threadSeparatorBuilder` property
@@ -408,10 +477,12 @@ You can call `.copyWith` to customize just a subset of properties
 
 🐞 Fixed
 
-- [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text box when editing
-  message
-- Modals are shown using the nearest `Navigator` to make using the SDK easier in a nested navigator use case
-- [#484](https://github.com/GetStream/stream-chat-flutter/issues/484): messages don't update without a reload
+- [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text
+  box when editing message
+- Modals are shown using the nearest `Navigator` to make using the SDK easier in a nested navigator
+  use case
+- [#484](https://github.com/GetStream/stream-chat-flutter/issues/484): messages don't update without
+  a reload
 - `MessageListView` not rendering if the user is not a member of the channel
 - Fix `MessageInput` overflow when there are no actions
 - Minor fixes and improvements
@@ -464,15 +535,18 @@ You can call `.copyWith` to customize just a subset of properties.
 ✅ Added
 
 - TypingIndicator now has a property called `parentId` to show typing indicator specific to threads
-- [#493](https://github.com/GetStream/stream-chat-flutter/pull/493): add support for messageListView header/footer
+- [#493](https://github.com/GetStream/stream-chat-flutter/pull/493): add support for messageListView
+  header/footer
 - `MessageWidget` accepts a `userAvatarBuilder`
 
 🐞 Fixed
 
-- [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text box when editing
-  message
-- Modals are shown using the nearest `Navigator` to make using the SDK easier in a nested navigator use case
-- [#484](https://github.com/GetStream/stream-chat-flutter/issues/484): messages don't update without a reload
+- [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text
+  box when editing message
+- Modals are shown using the nearest `Navigator` to make using the SDK easier in a nested navigator
+  use case
+- [#484](https://github.com/GetStream/stream-chat-flutter/issues/484): messages don't update without
+  a reload
 - `MessageListView` not rendering if the user is not a member of the channel
 
 ## 2.0.0-nullsafety.7
@@ -542,7 +616,8 @@ You can call `.copyWith` to customize just a subset of properties.
 - Show error messages as system and keep them in the message input
 - Remove notification badge logic
 - Use shimmer while loading images
-- Polished `StreamChatTheme` adding more options and a new `MessageInputTheme` dedicated to `MessageInput`
+- Polished `StreamChatTheme` adding more options and a new `MessageInputTheme` dedicated
+  to `MessageInput`
 - Add possibility to specify custom message actions using `MessageWidget.customActions`
 - Added `MessageListView.onAttachmentTap` callback
 - Fixed message newline issue
@@ -599,7 +674,8 @@ You can call `.copyWith` to customize just a subset of properties.
 - Improved api documentation
 - Updated `stream_chat` dependency to `^1.0.0-beta`
 - Extracted sample app into dedicated [repo](https://github.com/GetStream/flutter-samples)
-- Reimplemented existing widgets using [stream_chat_flutter_core](https://pub.dev/packages/stream_chat_flutter_core)
+- Reimplemented existing widgets
+  using [stream_chat_flutter_core](https://pub.dev/packages/stream_chat_flutter_core)
 
 ## 0.2.21
 
@@ -616,8 +692,8 @@ You can call `.copyWith` to customize just a subset of properties.
 
 ## 0.2.20+2
 
-- Added `shouldAddChannel` to ChannelsBloc in order to check if a channel has to be added to the list when a new message
-  arrives
+- Added `shouldAddChannel` to ChannelsBloc in order to check if a channel has to be added to the
+  list when a new message arrives
 
 ## 0.2.20+1
 
@@ -651,7 +727,8 @@ You can call `.copyWith` to customize just a subset of properties.
 
 ## 0.2.16
 
-- Do not wrap channel preview builder. Users will have to implement they're custom onTap/onLongPress implementation
+- Do not wrap channel preview builder. Users will have to implement they're custom onTap/onLongPress
+  implementation
 - Make public autofocus field of the TextField of message_input
 
 ## 0.2.15
@@ -836,10 +913,11 @@ You can call `.copyWith` to customize just a subset of properties.
 
 ## 0.2.1-alpha+1
 
-- Removed the additional `Navigator` in `StreamChat` widget. It was added to make the app have the `StreamChat` widget
-  as ancestor in every route. Now the recommended way to add `StreamChat` to your app is using the `builder` property of
-  your `MaterialApp` widget. Otherwise you can use it in the usual way, but you need to add a `StreamChat` widget to
-  every route of your app. Read [this issue](https://github.com/GetStream/stream-chat-flutter/issues/47) for more
+- Removed the additional `Navigator` in `StreamChat` widget. It was added to make the app have
+  the `StreamChat` widget as ancestor in every route. Now the recommended way to add `StreamChat` to
+  your app is using the `builder` property of your `MaterialApp` widget. Otherwise you can use it in
+  the usual way, but you need to add a `StreamChat` widget to every route of your app.
+  Read [this issue](https://github.com/GetStream/stream-chat-flutter/issues/47) for more
   information.
 
 ```dart
@@ -941,8 +1019,8 @@ Widget build(BuildContext context) {
 
 - Add gesture (vertical drag down) to close the keyboard
 
-- Add keyboard type parameters (set it to TextInputType.text to show the submit button that will even close the
-  keyboard)
+- Add keyboard type parameters (set it to TextInputType.text to show the submit button that will
+  even close the keyboard)
 
 The property showVideoFullScreen was added mainly because of this issue brianegan/chewie#261
 

@@ -365,4 +365,12 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get linkDisabledError => 'リンクが無効になっています';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '未読メッセージ1通';
+    }
+    return '$unreadCountつの未読メッセージ';
+  }
 }
