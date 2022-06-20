@@ -282,25 +282,26 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                             .iconBuilder(context, _filePickerIndex == i + 1),
                       ),
                     const Spacer(),
-                    FutureBuilder(
-                      future: PhotoManager.requestPermissionExtend(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData &&
-                            snapshot.data == PermissionState.limited) {
-                          return TextButton(
-                            child: Text(context.translations.viewLibrary),
-                            onPressed: () async {
-                              await PhotoManager.presentLimited();
-                              _mediaListViewController.updateMedia(
-                                newValue: true,
-                              );
-                            },
-                          );
-                        }
+                    if (widget.isOpen)
+                      FutureBuilder(
+                        future: PhotoManager.requestPermissionExtend(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData &&
+                              snapshot.data == PermissionState.limited) {
+                            return TextButton(
+                              child: Text(context.translations.viewLibrary),
+                              onPressed: () async {
+                                await PhotoManager.presentLimited();
+                                _mediaListViewController.updateMedia(
+                                  newValue: true,
+                                );
+                              },
+                            );
+                          }
 
-                        return const SizedBox.shrink();
-                      },
-                    ),
+                          return const SizedBox.shrink();
+                        },
+                      ),
                   ],
                 ),
                 DecoratedBox(
