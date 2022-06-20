@@ -4,7 +4,7 @@
 
 - [[#1135]](https://github.com/GetStream/stream-chat-flutter/issues/1135) Persistence was not
   removing the hidden channels.
-
+- Fix `x-stream-client` header generation.
 ## 4.2.0
 
 ✅ Added
