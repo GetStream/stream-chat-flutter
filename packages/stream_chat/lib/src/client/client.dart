@@ -98,7 +98,9 @@ class StreamChatClient {
           tokenManager: _tokenManager,
           handler: handleEvent,
           logger: detachedLogger('🔌'),
-          queryParameters: {'X-Stream-Client': defaultUserAgent},
+          queryParameters: {
+            'X-Stream-Client': '$defaultUserAgent-$packageVersion',
+          },
         );
 
     _retryPolicy = retryPolicy ??
@@ -124,12 +126,14 @@ class StreamChatClient {
   }
 
   /// Default user agent for all requests
-  static String defaultUserAgent = 'stream-chat-dart-client-'
-      '${CurrentPlatform.name}-'
-      '${PACKAGE_VERSION.split('+')[0]}';
+  static String defaultUserAgent =
+      'stream-chat-dart-client-${CurrentPlatform.name}';
 
   /// Additional headers for all requests
   static Map<String, Object?> additionalHeaders = {};
+
+  /// The current package version
+  static const packageVersion = PACKAGE_VERSION;
 
   ChatPersistenceClient? _originalChatPersistenceClient;
 
