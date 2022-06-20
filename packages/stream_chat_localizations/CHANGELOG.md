@@ -1,3 +1,29 @@
+## 3.2.0
+
+ - **FIX**: fix tests.
+ - **FIX**: fix japanese translations.
+ - **FIX**: fix typos in italian strings.
+ - **FIX**: update changelog.
+ - **FIX**: fix changelog entry.
+ - **FIX**: it translations.
+ - **FIX**: cooldown and teams, added correct textfield hint.
+ - **FIX**: Fix hindi translations.
+ - **FIX**: ios build config.
+ - **FIX**: minor fixes.
+ - **FEAT**: add unread messages label.
+ - **FEAT**: add German localization.
+ - **FEAT**: add dart_code_metrics.
+ - **FEAT**: add localized strings.
+ - **FEAT**: Move attachment limit exceeded error to translations.
+ - **FEAT**: support for japanese.
+ - **DOCS**: spelling and grammar.
+ - **DOCS**: move header.
+ - **DOCS**: add image.
+ - **DOCS**: additional localization examples.
+ - **DOCS**: fix ios locales link.
+ - **DOCS**: fix translation links.
+ - **DOCS**: add localization docs.
+
 ## Upcoming
 
 ✅ Added

@@ -1,3 +1,252 @@
+## 5.0.0
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**: Deprecate `.user`, `.userStream` in favor of `.currentUser`, `.currentUserStream`.
+ - **REFACTOR**: early return `Offstage` in case index is null.
+ - **REFACTOR**: migrate enums to v3.
+ - **REFACTOR**: refactor thread indicators.
+ - **REFACTOR**: rename ChannelEvents to ChannelEventHandlers.
+ - **REFACTOR**: remove video compression.
+ - **REFACTOR**: Deprecate v3.
+ - **REFACTOR**: make cooldown non-nullable.
+ - **REFACTOR**: use local path dependencies.
+ - **REFACTOR**: minor doc changes.
+ - **REFACTOR**: improve channel list and controller.
+ - **REFACTOR**: add stream_channel_info_bottom_sheet.dart.
+ - **REFACTOR**: add channel list empty and error state widgets.
+ - **REFACTOR**: minor event handler changes.
+ - **REFACTOR**: add ChannelEvents class and remove event callbacks.
+ - **REFACTOR**: improve message input controller.
+ - **REFACTOR**: rename deprecated args.
+ - **REFACTOR**: IndexKey to ValueKey.
+ - **REFACTOR**: deprecate `MentionTileBuilder`.
+ - **REFACTOR**: rename portal to overlays.
+ - **REFACTOR**: added `MultiPortal` and `customPortalOptions`.
+ - **REFACTOR**: use portal.
+ - **REFACTOR**: refactor overlays.
+ - **REFACTOR**: remove context from Commands and Mentions overlays.
+ - **REFACTOR**: remove context and add size property to EmojiOverlay.
+ - **REFACTOR**: Make Streams non-nullable wherever possible.
+ - **REFACTOR**: remove redundant web pickers from MessageInput.
+ - **REFACTOR**: make initialIndex, initialAlignment non nullable.
+ - **REFACTOR**: use `BetterStreamBuilder` in `ChannelAvatar` and `ChannelName`.
+ - **REFACTOR**: Replace `channel.extraDataStream` with `channel.nameStream`, `channel.imageStream` in `ChannelName` and `ChannelAvatar` widget respectively.
+ - **REFACTOR**: update core dependency.
+ - **PERF**: improve full screen media animations.
+ - **PERF**: only build reaction indicator when needed.
+ - **FIX**: fix messageInput removing last space.
+ - **FIX**: Channel list builder perf fix.
+ - **FIX**: Corrected message padding.
+ - **FIX**: fix channel list tile style for mentioned users.
+ - **FIX**: paint bubble.
+ - **FIX**: video breaks bottom photo carousel.
+ - **FIX**: Timestamp alignment.
+ - **FIX**: Fix commands resetting the `StreamMessageInputController.value.
+ - **FIX**: fix file download.
+ - **FIX**: overflow of mentions overlay & input focus node.
+ - **FIX**: sample app gradle fixes.
+ - **FIX**: sample app version bump.
+ - **FIX**: analysis.
+ - **FIX**: controllers not disposed.
+ - **FIX**: scrollToBottom not respecting false value.
+ - **FIX**: fix `unban` command not working in `MessageInput`.
+ - **FIX**: fix cast error while compressing video.
+ - **FIX**: tests.
+ - **FIX**: tutorial_part_3.dart.
+ - **FIX**: make ChannelListViewThemeData constructor const.
+ - **FIX**: use all message attachments in FullScreenMedia page.
+ - **FIX**: use file extension instead of mimeType.
+ - **FIX**: registration.
+ - **FIX**: fix thread indicator overflow.
+ - **FIX**: fix message pagination parameters.
+ - **FIX**: pass unreadCount to unreadMessagesSeparatorBuilder.
+ - **FIX**: fix baseline.
+ - **FIX**: fix layout.
+ - **FIX**: add comment.
+ - **FIX**: refactor message widget bottom row.
+ - **FIX**: theme channel_list_view.dart background color in the proper place.
+ - **FIX**: revert message action.
+ - **FIX**: revert message action.
+ - **FIX**: revert message action.
+ - **FIX**: retry queue now follows the creation date.
+ - **FIX**: fix retry queue mechanism.
+ - **FIX**: update core dependency.
+ - **FIX**: fix headers alignment.
+ - **FIX**: fix message widget thread indicator.
+ - **FIX**: do not use `withData: true` property.
+ - **FIX**: listen for read events in the message widget.
+ - **FIX**: fix user presence indicator update.
+ - **FIX**: add `MessageListView.ScrollViewKeyboardDismissBehavior`.
+ - **FIX**: export attachment_actions_modal.
+ - **FIX**: dartfmt on a couple of files.
+ - **FIX**: curly brace lint.
+ - **FIX**: remove deps.
+ - **FIX**: fixed slow mode.
+ - **FIX**: request permission only when showing the picker.
+ - **FIX**: fixed attachment error.
+ - **FIX**: text style correction.
+ - **FIX**: fix positioned list view null check.
+ - **FIX**: fix image reloading.
+ - **FIX**: fix cancel label capitalization.
+ - **FIX**: use isUpToDateStream.
+ - **FIX**: revert scroll physics.
+ - **FIX**: fix quoted message scroll.
+ - **FIX**: fix scroll to bottom logic.
+ - **FIX**: refactor scroll to bottom button.
+ - **FIX**: change default alignment.
+ - **FIX**: fix image attachment resizing.
+ - **FIX**: fix image attachment resizing.
+ - **FIX**: fix image attachment resizing.
+ - **FIX**: fix image attachment resizing.
+ - **FIX**: add initialIndex and alignment to didUpdateWidget in scrollable list.
+ - **FIX**: use didUpdateWidget to scroll to new initial index.
+ - **FIX**: default message filter.
+ - **FIX**: positioned list initial index.
+ - **FIX**: Replaced stack text with canvas text.
+ - **FIX**: analysis.
+ - **FIX**: check assetList is not null.
+ - **FIX**: analysis.
+ - **FIX**: analysis.
+ - **FIX**: use createdAt to sort media (the default value is updatedAt).
+ - **FIX**: fix broken test.
+ - **FIX**: fix tests.
+ - **FIX**: cleanup.
+ - **FIX**: fix message widget thread indicator in reverse mode.
+ - **FIX**: missing trailing comma.
+ - **FIX**: fix message highlight alignment.
+ - **FIX**: check if locale is supported before setting it.
+ - **FIX**: update sdk contraints to reflect the code.
+ - **FIX**: fixed tests.
+ - **FIX**: update goldens.
+ - **FIX**: fix `fileTooLargeAfterCompressionError`, `fileTooLargeError`.
+ - **FIX**: fix floating date stream subscription.
+ - **FIX**: fix attachment picker ui.
+ - **FIX**: fix tests.
+ - **FIX**: always show date divider.
+ - **FIX**: thread reply scrolling main list.
+ - **FIX**: fixed tests.
+ - **FIX**: analysis.
+ - **FIX**: add missing code.
+ - **FIX**: .copy and export reactionIcons.
+ - **FIX**: attachment borders.
+ - **FIX**: add default loading builder in photoview.
+ - **FIX**: fix review.
+ - **FIX**: fix centerTitle for ThreadHeader.
+ - **FIX**: remove default padding in date divider.
+ - **FIX**: fix `MessageListView` header and footer while reverse: false".
+ - **FIX**: fix `MessageListView` header and footer while reverse: false.
+ - **FIX**: fix `MessageListView` header and footer while reverse: false.
+ - **FIX**: fix ios.
+ - **FIX**: fix failing tests.
+ - **FIX**: remove dead code.
+ - **FIX**: update currentUser after successful connection.
+ - **FIX**: fix example logs.
+ - **FIX**: fix centerTitle for ChannelHeader.
+ - **FIX**: check scrollController is attached before calling jump.
+ - **FIX**: Fix the wrong call on byShortName.
+ - **FIX**: render overflow for image attachements.
+ - **FIX**: flickering loading indicator.
+ - **FIX**: remove duplicate exports in stream_chat_flutter.dart.
+ - **FIX**: attachment buttons render overflow.
+ - **FIX**: fix giphy attachment tap callback.
+ - **FIX**: fix giphy attachment tap callback.
+ - **FIX**: jiffy use app level locale.
+ - **FIX**: add null-check in currentUserMember.
+ - **FIX**: instances where new naming wasn't applied.
+ - **FIX**: Remove `FittedBox` from actions widget.
+ - **FIX**: use ogScrapeUrl for link attachments.
+ - **FIX**: attachment borders.
+ - **FIX**: remove background color from `UserAvatar`.
+ - **FIX**: remove check for launchUrl.
+ - **FIX**: show portal conditionally.
+ - **FIX**: make the list work correctly with separators and findChildIndexCallback.
+ - **FIX**: Fix a `MessageInput` bug.
+ - **FIX**: doc image file paths.
+ - **FIX**: Fixed threads.
+ - **FIX**: analysis.
+ - **FIX**: show date divider for first message.
+ - **FIX**: add 8 left padding to textInput if command is enabled.
+ - **FIX**: disable camera and video button if attachment limit is crossed.
+ - **FIX**: date dividers in not reversed message list view.
+ - **FIX**: add null check for message.text while parsing existing message.
+ - **FIX**: fix test.
+ - **FIX**: add null checks to message text.
+ - **FIX**: add null checks on message text.
+ - **FIX**: align new widgets to develop fixes.
+ - **FIX**: send only `user_id` while reconnecting.
+ - **FIX**: paint bubble.
+ - **FIX**: update goldens.
+ - **FIX**: analysis.
+ - **FIX**: timer dispose, added widget test.
+ - **FIX**: open `MessageListView` at a specific message.
+ - **FIX**: revert wrapping ChannelPreview in a DecoratedBox because of Slidable.
+ - **FIX**: cooldown and teams, added correct textfield hint.
+ - **FIX**: fix initial alignment in message list view.
+ - **FIX**: fixed slow mode.
+ - **FIX**: fix early command check.
+ - **FEAT**: align channel_header center title with AppBar.
+ - **FEAT**: add localized strings.
+ - **FEAT**: Improve pagination invocation by using paginationEnded flag.
+ - **FEAT**: Move attachment limit exceeded error to translations.
+ - **FEAT**: add possibility to limit attachments in `MessageInput`.
+ - **FEAT**: add support for `attachmentButtonBuilder`, `commandButtonBuilder` in `MessageInput`.
+ - **FEAT**: added backgroundColor property to GalleryFooter.
+ - **FEAT**: added backgroundColor property to the various header widgets.
+ - **FEAT**: use IndexedKey to track list index.
+ - **FEAT**: add image property to user.
+ - **FEAT**: add `onAttachmentTap` to `ImageGroup`.
+ - **FEAT**: Add default empty filter in `UserListView`.
+ - **FEAT**: deprecate `pagination` in favor of `limit`.
+ - **FEAT**: update attachment buttons animation curve.
+ - **FEAT**: open message list to unread position.
+ - **FEAT**: add customOverlays to `MessageInput`.
+ - **FEAT**: add support for translated message in MessageText.
+ - **FEAT**: add unread messages label.
+ - **FEAT**: Added new builders and restructured.
+ - **FEAT**: Extracted visible_footnote.dart, corrected default filter.
+ - **FEAT**: Focus message input if initial message is provided.
+ - **FEAT**: improve add support for `mentionAllAppUsers` in `UserMentionsOverlay`.
+ - **FEAT**: add dart_code_metrics.
+ - **FEAT**: copy linkBg theme property in message theme.
+ - **FEAT**: add `paginationLoadingIndicatorBuilder` in `MessageListView`.
+ - **FEAT**: Added tests and minor fixes.
+ - **FEAT**: add messagesIndex to keep track of list indexes.
+ - **FEAT**: add the ability to add a background image in MessageListView.
+ - **FEAT**: move scrollable positioned list to internal.
+ - **FEAT**: add MessageListView.reverse property.
+ - **FEAT**: send used package in the headers.
+ - **FEAT**: Added allowed attachment types.
+ - **FEAT**: Added docs and cleanup.
+ - **FEAT**: Added gradient avatar.
+ - **FEAT**: Added ability to add custom attachment types.
+ - **FEAT**: Added copyWith to stream_attachment_picker.dart.
+ - **FEAT**: add channel list event handler in channel list controller.
+ - **FEAT**: add support for OG Attachment preview.
+ - **FEAT**: add macos support to stream_chat_flutter example app.
+ - **FEAT**: handle ogAttachment modification via message_input_controller.dart.
+ - **FEAT**: animate pinned message color.
+ - **FEAT**: minor fixes and improvements.
+ - **FEAT**: add GalleryHeader/GalleryFooter theme classes (#546).
+ - **FEAT**: Initial implementation.
+ - **FEAT**: add flag for floating date divider.
+ - **FEAT**: add elevation and centerTitle to ThreadHeader and ChannelListHeader.
+ - **FEAT**: Added list of actions to channel_list_view.dart.
+ - **FEAT**: Added callbacks for default slidable options.
+ - **FEAT**: Update slidable to 1.2.0.
+ - **FEAT**: Added pin permissions list.
+ - **FEAT**: add stream_message_search_grid_view.dart.
+ - **FEAT**: Calculate slidable extentRatio in case of custom actions.
+ - **FEAT**: add grid views, minor refactoring.
+ - **FEAT**: add remaining v4 list-views.
+ - **FEAT**: added PagedValueGridView, added additional params in ListViews.
+ - **FEAT**: Added pin message functionality.
+ - **DOCS**: update CHANGELOG.md.
+ - **DOCS**: change paginationParams to limit.
+ - **DOCS**: add code docs.
+ - **DOCS**: update code documentation and tutorials.
+ - **BREAKING** **REFACTOR**: rename ChannelImage -> ChannelAvatar, GroupImage -> GroupAvatar.
+
 ## Upcoming
 
 - Updated `photo_view` dependency to [`0.14.0`](https://pub.dev/packages/photo_view/changelog).

@@ -1,3 +1,41 @@
+## 4.3.0
+
+ - **REFACTOR**: Deprecate `.user`, `.userStream` in favor of `.currentUser`, `.currentUserStream`.
+ - **REFACTOR**: Deprecate v3.
+ - **REFACTOR**: improve message input controller.
+ - **FIX**: message search pagination.
+ - **FIX**: dispose channel on deletion.
+ - **FIX**: Replaced all `StreamController.add()` with `.safeAdd()` to fix bad state errors.
+ - **FIX**: do not move a channel when the new message is a thread reply.
+ - **FIX**: fix message pagination parameters.
+ - **FIX**: fix tests.
+ - **FIX**: fix analysis.
+ - **FIX**: match oldWidget objects using jsonEncode.
+ - **FIX**: default message filter.
+ - **FIX**: `ChannelListView` pagination on refresh.
+ - **FIX**: fix analysis.
+ - **FEAT**: Added a queryAround implementation.
+ - **FEAT**: Added a queryAround implementation.
+ - **FEAT**: Added a queryAround implementation.
+ - **FEAT**: only handle the latest events in channelEventSubscription.
+ - **FEAT**: send used package in the headers.
+ - **FEAT**: added PagedValueGridView, added additional params in ListViews.
+ - **FEAT**: handle ogAttachment modification via message_input_controller.dart.
+ - **FEAT**: add dart_code_metrics.
+ - **FEAT**: add remaining v4 list-views.
+ - **FEAT**: minor fixes and improvements.
+ - **FEAT**: Extracted visible_footnote.dart, corrected default filter.
+ - **FEAT**: deprecate `pagination` in favor of `limit`.
+ - **FEAT**: Add default empty filter in `UserListView`.
+ - **FEAT**: add grid views, minor refactoring.
+ - **FEAT**: Improve pagination invocation by using paginationEnded flag.
+ - **FEAT**: improve add support for `mentionAllAppUsers` in `UserMentionsOverlay`.
+ - **FEAT**: improve the message for skipping the event.
+ - **FEAT**: add name get, set and update on Channel.
+ - **FEAT**: Added a queryAround implementation.
+ - **DOCS**: change paginationParams to limit.
+ - **DOCS**: fix example folder link.
+
 ## 4.2.0
 
 - Updated `stream_chat` dependency to [`4.2.0`](https://pub.dev/packages/stream_chat/changelog).

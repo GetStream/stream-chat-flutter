@@ -1,3 +1,126 @@
+## 4.3.0
+
+ - **REFACTOR**: rename _computeInitialUnread to _computeUnread.
+ - **REFACTOR**: use `dio.fetch` instead of `dio.request`.
+ - **REFACTOR**: remove dio deprecated methods.
+ - **REFACTOR**: regenerate attachment_file.freezed.dart.
+ - **REFACTOR**: migrate enums to v3.
+ - **REFACTOR**: convert the implementation into non-breaking.
+ - **REFACTOR**: move membership from channel_model to channel_state.
+ - **REFACTOR**: Deprecate `.user`, `.userStream` in favor of `.currentUser`, `.currentUserStream`.
+ - **REFACTOR**: make cooldown non-nullable.
+ - **REFACTOR**: Make Streams non-nullable wherever possible.
+ - **REFACTOR**: improve channel list and controller.
+ - **REFACTOR**: improve message input controller.
+ - **REFACTOR**: rename deprecated tests.
+ - **REFACTOR**: fix sendAction.
+ - **REFACTOR**: refactor overlays.
+ - **REFACTOR**: make `Filter.empty` constructor const.
+ - **FIX**: thread message reactions  (#1).
+ - **FIX**: fix failing tests.
+ - **FIX**: add doc.
+ - **FIX**: fix llc.
+ - **FIX**: ignore healthcheck user.me objects.
+ - **FIX**: send only `user_id` while reconnecting.
+ - **FIX**: remove hard delete messages from persistence storage.
+ - **FIX**: use where.
+ - **FIX**: member removed.
+ - **FIX**: merge channel in channel.update event.
+ - **FIX**: segregate mute from channel mutes.
+ - **FIX**: Remove old thread reactions before saving new.
+ - **FIX**: also save reactions while saving threads data in persistence.
+ - **FIX**: update currentUser after successful connection.
+ - **FIX**: ensure reconnection is automatic.
+ - **FIX**: make ws reconnection more robust.
+ - **FIX**: unread count specific to channel setting wrong number.
+ - **FIX**: Remove regular message in case `showInChannel` is true. (#3).
+ - **FIX**: fix `pinnedMessage` inconsistencies.
+ - **FIX**: Fix `channelState.copyWith` with respect to pinnedMessages.
+ - **FIX**: use channel partial update for slowmode.
+ - **FIX**: add type check in auth_interceptor.dart.
+ - **FIX**: improve removeMessage logic.
+ - **FIX**: handle user extra data name null condition.
+ - **FIX**: fix ChannelState copyWith with respect to pinnedMessages default value.
+ - **FIX**: thread message deletion.
+ - **FIX**: include `message.user` while saving users in persistence.
+ - **FIX**: Update channel state when member gets banned/unbanned.
+ - **FIX**: Add missing forward slash to markAllRead url.
+ - **FIX**: channel.markAllRead.
+ - **FIX**: Update channel state when member gets banned/unbanned.
+ - **FIX**: don't return `cid` in case `name` is null, minor improvements.
+ - **FIX**: tests.
+ - **FIX**: remove deleted reaction in case of reaction.delete event.
+ - **FIX**: reassign latestReactions.
+ - **FIX**: include `message.user` while saving users in persistence.
+ - **FIX**: use local ownCapabilities for `channel.updated` events.
+ - **FIX**: thread message deletion.
+ - **FIX**: fix ownReactions population.
+ - **FIX**: fix truncate channel payload.
+ - **FIX**: tests.
+ - **FIX**: use the right stream for cooldown stream.
+ - **FIX**: Avoid invalid url.
+ - **FIX**: send only `user_id` while manually reconnecting.
+ - **FIX**: reverse user, event.me merge position.
+ - **FIX**: retry queue now follows the creation date.
+ - **FIX**: fix retry queue mechanism.
+ - **FIX**: fix message pagination parameters.
+ - **FIX**: fix user, channel unreadCount.
+ - **FIX**: Persistence not removing hidden channels.
+ - **FIX**: dispose channel on deletion.
+ - **FIX**: ChannelEvent.membersCount default to 0.
+ - **FIX**: listen for read events in the message widget.
+ - **FIX**: fix user presence indicator update.
+ - **FIX**: cooldown and teams, added correct textfield hint.
+ - **FIX**: fix client.markAllRead api request.
+ - **FIX**: fix tests.
+ - **FIX**: channel.show body.
+ - **FIX**: fix channel unread count.
+ - **FIX**: reduce test to satisfy dependency for code metrics.
+ - **FIX**: fix event model.
+ - **FIX**: regenerate code and remove default values where possible.
+ - **FIX**: update tests.
+ - **FIX**: JsonKey for User.language.
+ - **FIX**: fixed expired cdn attachment links.
+ - **FIX**: format and analyze.
+ - **FIX**: Connecting user without providing `name` uses `id` instead for setting `user.name`.
+ - **FIX**: align new widgets to develop fixes.
+ - **FIX**: fix reconnection.
+ - **FIX**: Fix `Filter.empty` encoding.
+ - **FIX**: fix tests.
+ - **FIX**: Fix unread count not updating when the current user is set.
+ - **FIX**: fix contains filter params.
+ - **FIX**: unread count not updating.
+ - **FIX**: pass includeUserDetailsInConnectCall to WS.
+ - **FIX**: message search pagination.
+ - **FIX**: `updateChannelStates` invocation sequence as per foreign keys relations.
+ - **FIX**: use unread count when > 0.
+ - **FIX**: fix tests.
+ - **FEAT**: add crud for pinned message reactions.
+ - **FEAT**: add tests.
+ - **FEAT**: add dart_code_metrics.
+ - **FEAT**: send used package in the headers.
+ - **FEAT**: Add enrichUrl endpoint.
+ - **FEAT**: Added a queryAround implementation.
+ - **FEAT**: add support for OG Attachment preview.
+ - **FEAT**: Deprecate location in favor of edge server.
+ - **FEAT**: Add `queryBannedUsers` endpoint.
+ - **FEAT**: deprecate `channel.banUser` in favor of `channel.banMember`.
+ - **FEAT**: add name get, set and update on Channel.
+ - **FEAT**: add image get, set and update to channel.
+ - **FEAT**: minor fixes, add support for `name` in user.dart.
+ - **FEAT**: add image property to user.
+ - **FEAT**: Add `queryBannedUsers` endpoint.
+ - **FEAT**: deprecate `channel.banUser` in favor of `channel.banMember`.
+ - **FEAT**: add support for `partialUserUpdate` endpoint.
+ - **FEAT**: handle event.message in channel.truncate events.
+ - **FEAT**: add additional parameters to channel.truncate.
+ - **FEAT**: add support for extraData in while uploading file.
+ - **FEAT**: add support for channel.membership.
+ - **FEAT**: create disabled, hidden, truncatedAt a field in channel.
+ - **FEAT**: handle member.updated events in channel client.
+ - **FEAT**: add contains and empty filters.
+ - **DOCS**: add localization docs.
+
 ## Upcoming
 
 🐞 Fixed

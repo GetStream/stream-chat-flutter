@@ -1,3 +1,17 @@
+## 4.2.0
+
+ - **REFACTOR**: moor to drift name change migration.
+ - **REFACTOR**: Deprecate `.user`, `.userStream` in favor of `.currentUser`, `.currentUserStream`.
+ - **FIX**: message search pagination.
+ - **FIX**: `updateChannelStates` invocation sequence as per foreign keys relations.
+ - **FIX**: change mode insert or replace to upsert.
+ - **FIX**: enable pragma foreign_keys.
+ - **FEAT**: save channel.ownCapabilities in db.
+ - **FEAT**: Use hard-coded drift versions.
+ - **FEAT**: add dart_code_metrics.
+ - **FEAT**: add pinned message reactions table.
+ - **FEAT**: add support for message.i18n.
+
 ## Upcoming
 
 - Added support for `Channel.ownCapabilities`
