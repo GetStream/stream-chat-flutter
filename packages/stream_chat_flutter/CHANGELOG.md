@@ -1,3 +1,5 @@
+## 4.3.0
+
 ## Upcoming
 
 - Updated `photo_view` dependency to [`0.14.0`](https://pub.dev/packages/photo_view/changelog).
