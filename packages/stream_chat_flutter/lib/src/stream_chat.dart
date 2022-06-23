@@ -91,7 +91,7 @@ class StreamChatState extends State<StreamChat> {
   void initState() {
     super.initState();
     // Ensures that VLC only initializes in real desktop environments
-    if (!isTestEnvironment && isDesktopDevice) {
+    if (!isTestEnvironment && isDesktopVideoPlayerSupported) {
       VlcManager.instance.initialize();
     }
   }

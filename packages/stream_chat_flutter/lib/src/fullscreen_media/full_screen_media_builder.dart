@@ -58,7 +58,7 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb) {
-      if (isDesktopDevice) {
+      if (isDesktopVideoPlayerSupported) {
         return desktop_fsm.getFsm(
           mediaAttachmentPackages: mediaAttachmentPackages,
           startIndex: startIndex,

@@ -2,16 +2,19 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-// ignore: public_member_api_docs
+// ignore_for_file: public_member_api_docs
+
 bool get isMobileDevice => !kIsWeb && (Platform.isIOS || Platform.isAndroid);
-// ignore: public_member_api_docs
+
 bool get isDesktopDevice =>
     !kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux);
-// ignore: public_member_api_docs
+
+bool get isDesktopVideoPlayerSupported =>
+    !kIsWeb && (!Platform.isMacOS && Platform.isWindows || Platform.isLinux);
+
 bool get isMobileDeviceOrWeb => kIsWeb || isMobileDevice;
-// ignore: public_member_api_docs
+
 bool get isDesktopDeviceOrWeb => kIsWeb || isDesktopDevice;
 
-// ignore: public_member_api_docs
 bool get isTestEnvironment =>
     !kIsWeb && (Platform.environment.containsKey('FLUTTER_TEST'));
