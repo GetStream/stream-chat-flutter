@@ -357,7 +357,7 @@ abstract class Translations {
 
 /// Default implementation of Translation strings for the stream chat widgets
 class DefaultTranslations implements Translations {
-  const DefaultTranslations._(); 
+  const DefaultTranslations._();
 
   /// Singleton instance of [DefaultTranslations]
   static const instance = DefaultTranslations._();
