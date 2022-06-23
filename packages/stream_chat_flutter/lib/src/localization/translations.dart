@@ -353,15 +353,11 @@ abstract class Translations {
 
   /// The text for "MUTE"/"UNMUTE" based on the value of [isMuted].
   String toggleMuteUnmuteAction({required bool isMuted});
-
-  /// The text for showing the unread messages count
-  /// in the [StreamMessageListView]
-  String unreadMessagesSeparatorText(int unreadCount);
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
 class DefaultTranslations implements Translations {
-  const DefaultTranslations._();
+  const DefaultTranslations._(); 
 
   /// Singleton instance of [DefaultTranslations]
   static const instance = DefaultTranslations._();
