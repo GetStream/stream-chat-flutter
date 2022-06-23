@@ -556,7 +556,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                         return const Offstage();
                       }
 
-                      if (widget.threadSeparatorBuilder == null) {
+                      if (widget.threadSeparatorBuilder != null) {
                         return widget.threadSeparatorBuilder!
                             .call(context, widget.parentMessage!);
                       }
