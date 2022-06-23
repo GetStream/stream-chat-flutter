@@ -433,4 +433,12 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get viewLibrary => 'View library';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 unread message';
+    }
+    return '$unreadCount unread messages';
+  }
 }

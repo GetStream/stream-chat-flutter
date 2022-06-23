@@ -435,4 +435,12 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get linkDisabledError => 'I links sono disattivati';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 messaggio non letto';
+    }
+    return '$unreadCount messaggi non letti';
+  }
 }

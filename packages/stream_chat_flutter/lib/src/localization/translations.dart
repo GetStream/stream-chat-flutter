@@ -349,6 +349,10 @@ abstract class Translations {
 
   /// The text for "MUTE"/"UNMUTE" based on the value of [isMuted].
   String toggleMuteUnmuteAction({required bool isMuted});
+
+  /// The text for showing the unread messages count
+  /// in the [StreamMessageListView]
+  String unreadMessagesSeparatorText(int unreadCount);
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -786,4 +790,12 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get linkDisabledError => 'Links are disabled';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 unread message';
+    }
+    return '$unreadCount unread messages';
+  }
 }

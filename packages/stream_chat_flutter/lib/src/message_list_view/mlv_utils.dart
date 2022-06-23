@@ -10,6 +10,7 @@ int getInitialIndex(
   int? initialScrollIndex,
   StreamChannelState channelState,
   bool Function(Message)? messageFilter,
+  int unreadCount,
 ) {
   if (initialScrollIndex != null) {
     return initialScrollIndex;
@@ -27,6 +28,9 @@ int getInitialIndex(
     final index = totalMessages - messageIndex;
     if (index != 0) return index + 1;
     return index;
+  }
+  if (unreadCount > 0) {
+    return unreadCount + 1;
   }
   return 0;
 }

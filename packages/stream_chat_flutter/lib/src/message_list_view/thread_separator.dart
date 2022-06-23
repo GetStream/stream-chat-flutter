@@ -10,22 +10,14 @@ class ThreadSeparator extends StatelessWidget {
   ///{@macro threadSeparator}
   const ThreadSeparator({
     super.key,
-    this.threadSeparatorBuilder,
     this.parentMessage,
   });
-
-  // ignore: public_member_api_docs
-  final WidgetBuilder? threadSeparatorBuilder;
 
   // ignore: public_member_api_docs
   final Message? parentMessage;
 
   @override
   Widget build(BuildContext context) {
-    if (threadSeparatorBuilder != null) {
-      return threadSeparatorBuilder!.call(context);
-    }
-
     final replyCount = parentMessage!.replyCount!;
     return DecoratedBox(
       decoration: BoxDecoration(
