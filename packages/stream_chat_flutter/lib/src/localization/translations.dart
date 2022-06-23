@@ -77,6 +77,10 @@ abstract class Translations {
   /// contains a parent message
   String threadSeparatorText(int replyCount);
 
+  /// The text for showing the unread messages count
+  /// in the [StreamMessageListView]
+  String unreadMessagesSeparatorText(int unreadCount);
+
   /// The label for "connected" in [StreamConnectionStatusBuilder]
   String get connectedLabel;
 

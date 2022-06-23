@@ -40,7 +40,12 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String get onlyVisibleToYouText => 'Visible solo a te';
 
   @override
-  String threadReplyCountText(int count) => '$count risposte al thread';
+  String threadReplyCountText(int count) {
+    if (count == 1) {
+      return '1 risposta al thread';
+    }
+    return '$count risposte al thread';
+  }
 
   @override
   String attachmentsUploadProgressText({

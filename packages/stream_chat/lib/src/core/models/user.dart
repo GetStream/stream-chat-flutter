@@ -82,7 +82,7 @@ class User extends Equatable {
   /// {@macro name}
   @JsonKey(ignore: true)
   String get name {
-    if (extraData.containsKey('name')) {
+    if (extraData.containsKey('name') && extraData['name'] != null) {
       final name = extraData['name']! as String;
       if (name.isNotEmpty) return name;
     }

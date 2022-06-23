@@ -24,26 +24,22 @@ Make sure to check the [StreamUserListController](./stream_user_list_controller.
 
 ```dart
 class UserListPage extends StatefulWidget {
-  const UserListPage({
-    Key? key,
-    required this.client,
-  }) : super(key: key);
-
-  final StreamChatClient client;
+  const UserListPage({Key? key}) : super(key: key);
 
   @override
   State<UserListPage> createState() => _UserListPageState();
 }
 
 class _UserListPageState extends State<UserListPage> {
-  late final _controller = StreamUserListController(
-    client: widget.client,
+  late final StreamUserListController _userListController =
+      StreamUserListController(
+    client: StreamChat.of(context).client,
     limit: 25,
-    filter: Filter.and([
-      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-    ]),
+    filter: Filter.and(
+      [Filter.notEqual('id', StreamChat.of(context).currentUser!.id)],
+    ),
     sort: [
-      SortOption(
+      const SortOption(
         'name',
         direction: 1,
       ),
@@ -51,29 +47,14 @@ class _UserListPageState extends State<UserListPage> {
   );
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: () => _userListController.refresh(),
+      child: StreamUserListView(
+        controller: _userListController,
+      ),
+    );
   }
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        body: RefreshIndicator(
-          onRefresh: _controller.refresh,
-          child: StreamChannelListView(
-            controller: _controller,
-            onChannelTap: (channel) => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => StreamChannel(
-                  channel: channel,
-                  child: const ChannelPage(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
 }
 ```
 
@@ -88,4 +69,26 @@ StreamUsersListView(
     return Text(user[index].name);
   },
 ),
+```
+
+### Selecting Users
+
+The `StreamUserListView` widget allows selecting users in a list. The `defaultWidget` returned can be customized to indicate that it has been selected.
+
+```dart
+Set<User> _selectedUsers = {};
+
+StreamUserListView(
+  controller: _userListController,
+  itemBuilder: (context, users, index, defaultWidget) {
+    return defaultWidget.copyWith(
+      selected: _selectedUsers.contains(users[index]),
+    );
+  },
+  onUserTap: (user) {
+    setState(() {
+      _selectedUsers.add(user);
+    });
+  },
+);
 ```
