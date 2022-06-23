@@ -1487,7 +1487,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
     final streamChannel = StreamChannel.of(context);
     var message = _effectiveController.value;
-    print('message.parentId: ${message.parentId}');
+    
     if (!streamChannel.channel.ownCapabilities
             .contains(PermissionType.sendLinks) &&
         _urlRegex.allMatches(message.text ?? '').any((element) =>

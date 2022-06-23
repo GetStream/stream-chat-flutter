@@ -116,8 +116,8 @@ class MobileAttachmentHandler extends AttachmentHandler {
 
     final extraDataMap = <String, Object>{};
 
-    if (mimeType?.subtype != null) {
-      extraDataMap['mime_type'] = mimeType!.subtype.toLowerCase();
+    if (mimeType != null) {
+      extraDataMap['mime_type'] = mimeType.mimeType;
     }
 
     extraDataMap['file_size'] = file.size!;
