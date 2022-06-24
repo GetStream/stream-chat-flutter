@@ -68,7 +68,6 @@ void main() {
       ),
     );
 
-    expect(find.byType(ColoredBox), findsOneWidget);
     expect(find.byIcon(Icons.insert_drive_file), findsOneWidget);
   });
 }

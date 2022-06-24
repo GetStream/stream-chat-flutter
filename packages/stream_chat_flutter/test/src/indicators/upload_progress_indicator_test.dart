@@ -89,8 +89,8 @@ void main() {
     );
 
     final backgroundColor =
-        ((find.byType(Container).evaluate().first.widget as Container)
-                .decoration! as BoxDecoration)
+        ((find.byType(DecoratedBox).evaluate().first.widget as DecoratedBox)
+                .decoration as BoxDecoration)
             .color;
 
     expect(const Color(0x99000000), backgroundColor);

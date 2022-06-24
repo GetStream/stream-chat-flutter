@@ -23,6 +23,7 @@ void main() {
                     title: 'Test Attachment',
                     type: 'video',
                     titleLink: 'https://www.youtube.com/watch?v=lytQi-slT5Y',
+                    ogScrapeUrl: 'https://www.youtube.com/watch?v=lytQi-slT5Y',
                   ),
                   messageTheme: StreamChatTheme.of(context).ownMessageTheme,
                 ),
@@ -35,6 +36,7 @@ void main() {
 
     expect(find.byType(StreamAttachmentTitle), findsOneWidget);
     expect(find.text('Test Attachment'), findsOneWidget);
-    expect(find.text('youtube.com/watch?v=lytQi-slT5Y'), findsOneWidget);
+    expect(find.text('https://www.youtube.com/watch?v=lytQi-slT5Y'),
+        findsOneWidget);
   });
 }
