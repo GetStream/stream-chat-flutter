@@ -1604,9 +1604,7 @@ Stream<T> _valueListenableToStreamAdapter<T>(ValueListenable<T> listenable) {
 /// [BouncingScrollPhysics].
 class StreamChatScrollBehaviour extends ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
-  const StreamChatScrollBehaviour({
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
-  }) : super(androidOverscrollIndicator: androidOverscrollIndicator);
+  const StreamChatScrollBehaviour();
 
   static const ScrollPhysics _bouncingPhysicsWithClamp =
       BouncingScrollPhysicsWithClamp();
@@ -1639,8 +1637,7 @@ class BouncingScrollPhysicsWithClamp extends BouncingScrollPhysics {
   /// Creates scroll physics that bounce back from the edge. Similar to
   /// [BouncingScrollPhysics], however this enforces a clamp to the bottom edge,
   /// preventing initial overscroll.
-  const BouncingScrollPhysicsWithClamp({ScrollPhysics? parent})
-      : super(parent: parent);
+  const BouncingScrollPhysicsWithClamp({super.parent});
 
   @override
   BouncingScrollPhysics applyTo(ScrollPhysics? ancestor) =>
