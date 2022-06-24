@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -263,7 +265,7 @@ void main() {
                 .map((e) => Container(
                       key: Key(e.key ?? ''),
                       child: e.when(
-                        headerItem: (heading) => Text(heading),
+                        headerItem: Text.new,
                         userItem: (user) => Text(user.id),
                       ),
                     ))
@@ -331,7 +333,7 @@ void main() {
                 .map((e) => Container(
                       key: Key(e.key ?? ''),
                       child: e.when(
-                        headerItem: (heading) => Text(heading),
+                        headerItem: Text.new,
                         userItem: (user) => Text(user.id),
                       ),
                     ))
@@ -436,7 +438,7 @@ void main() {
                     .map((e) => Container(
                           key: Key(e.key ?? ''),
                           child: e.when(
-                            headerItem: (heading) => Text(heading),
+                            headerItem: Text.new,
                             userItem: (user) => Text(user.id),
                           ),
                         ))

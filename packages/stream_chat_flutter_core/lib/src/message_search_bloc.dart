@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -11,12 +13,13 @@ import 'package:stream_chat_flutter_core/src/stream_controller_extension.dart';
 /// using Flutter's [BuildContext].
 ///
 /// API docs: https://getstream.io/chat/docs/flutter-dart/send_message/
+@Deprecated("Use 'StreamMessageSearchListController' instead")
 class MessageSearchBloc extends StatefulWidget {
   /// Instantiate a new MessageSearchBloc
   const MessageSearchBloc({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// The widget child
   final Widget child;

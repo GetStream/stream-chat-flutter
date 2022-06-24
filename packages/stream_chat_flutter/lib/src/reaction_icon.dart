@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
 /// Reaction icon data
-class ReactionIcon {
-  /// Constructor for creating [ReactionIcon]
-  ReactionIcon({
+@Deprecated("Use 'StreamReactionIcon' instead")
+typedef ReactionIcon = StreamReactionIcon;
+
+/// Reaction icon data
+class StreamReactionIcon {
+  /// Constructor for creating [StreamReactionIcon]
+  StreamReactionIcon({
     required this.type,
     required this.builder,
   });

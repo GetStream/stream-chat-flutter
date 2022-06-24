@@ -1,3 +1,6 @@
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: deprecated_member_use_from_same_package, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -8,7 +11,7 @@ typedef UserTapCallback = void Function(User, Widget?);
 /// Builder used to create a custom [ListUserItem] from a [User]
 typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 
-///
+/// {@template user_list_view}
 /// It shows the list of current users.
 ///
 /// ```dart
@@ -42,10 +45,13 @@ typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 /// The widget components render the ui based on the first ancestor of
 /// type [StreamChatTheme].
 /// Modify it to change the widget appearance.
+/// {@endtemplate}
+@Deprecated("Use 'StreamUserListView' instead")
 class UserListView extends StatefulWidget {
   /// Instantiate a new UserListView
+  @Deprecated("Use 'StreamUserListView' instead")
   UserListView({
-    Key? key,
+    super.key,
     this.filter = const Filter.empty(),
     this.sort,
     this.presence,
@@ -74,8 +80,7 @@ class UserListView extends StatefulWidget {
           crossAxisCount == 1 || !groupAlphabetically,
           'Cannot group alphabetically when crossAxisCount > 1',
         ),
-        limit = limit ?? pagination?.limit ?? 30,
-        super(key: key);
+        limit = limit ?? pagination?.limit ?? 30;
 
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -203,7 +208,7 @@ class _UserListViewState extends State<UserListView>
       userListController: _userListController,
     );
 
-    final backgroundColor = UserListViewTheme.of(context).backgroundColor;
+    final backgroundColor = StreamUserListViewTheme.of(context).backgroundColor;
 
     Widget child;
 
@@ -310,7 +315,7 @@ class _UserListViewState extends State<UserListView>
       return item.when(
         headerItem: (header) {
           final chatThemeData = StreamChatTheme.of(context);
-          return Container(
+          return ColoredBox(
             key: ValueKey<String>('HEADER-$header'),
             color: chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.05),
             child: Padding(
@@ -332,7 +337,7 @@ class _UserListViewState extends State<UserListView>
             key: ValueKey<String>('USER-${user.id}'),
             child: widget.userItemBuilder != null
                 ? widget.userItemBuilder!(context, user, selected)
-                : UserItem(
+                : StreamUserItem(
                     user: user,
                     onTap: (user) => widget.onUserTap!(user, widget.userWidget),
                     onLongPress: widget.onUserLongPress,
@@ -362,7 +367,7 @@ class _UserListViewState extends State<UserListView>
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      UserAvatar(
+                      StreamUserAvatar(
                         user: user,
                         borderRadius: BorderRadius.circular(32),
                         selected: selected,
@@ -409,7 +414,7 @@ class _UserListViewState extends State<UserListView>
         initialData: false,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Container(
+            return ColoredBox(
               color: StreamChatTheme.of(context)
                   .colorTheme
                   .accentError

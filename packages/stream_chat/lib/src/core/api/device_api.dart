@@ -10,15 +10,6 @@ enum PushProvider {
   apn,
 }
 
-/// Helper extension for [PushProvider]
-extension PushProviderX on PushProvider {
-  /// Returns the string notion for [PushProvider].
-  String get name => {
-        PushProvider.apn: 'apn',
-        PushProvider.firebase: 'firebase',
-      }[this]!;
-}
-
 /// Defines the api dedicated to device operations
 class DeviceApi {
   /// Initialize a new device api
@@ -29,13 +20,16 @@ class DeviceApi {
   /// Add a device for Push Notifications.
   Future<EmptyResponse> addDevice(
     String deviceId,
-    PushProvider pushProvider,
-  ) async {
+    PushProvider pushProvider, {
+    String? pushProviderName,
+  }) async {
     final response = await _client.post(
       '/devices',
       data: {
         'id': deviceId,
         'push_provider': pushProvider.name,
+        if (pushProviderName != null && pushProviderName.isNotEmpty)
+          'push_provider_name': pushProviderName,
       },
     );
     return EmptyResponse.fromJson(response.data);

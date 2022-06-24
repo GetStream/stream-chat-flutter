@@ -105,11 +105,11 @@ void main() {
     );
 
     expect(res, isNotNull);
-    expect(res.messages.length, channelState.messages.length);
-    expect(res.pinnedMessages.length, channelState.pinnedMessages.length);
-    expect(res.members.length, channelState.members.length);
-    expect(res.read.length, channelState.read.length);
-    expect(res.watchers.length, channelState.watchers.length);
+    expect(res.messages?.length, channelState.messages?.length);
+    expect(res.pinnedMessages?.length, channelState.pinnedMessages?.length);
+    expect(res.members?.length, channelState.members?.length);
+    expect(res.read?.length, channelState.read?.length);
+    expect(res.watchers?.length, channelState.watchers?.length);
     expect(res.watcherCount, channelState.watcherCount);
 
     verify(() => client.post(path, data: any(named: 'data'))).called(1);
@@ -481,14 +481,21 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/truncate';
 
-    when(() => client.post(path)).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(() => client.post(
+              path,
+              data: {},
+            ))
+        .thenAnswer(
+            (_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.truncateChannel(channelId, channelType);
 
     expect(res, isNotNull);
 
-    verify(() => client.post(path)).called(1);
+    verify(() => client.post(
+          path,
+          data: {},
+        )).called(1);
     verifyNoMoreInteractions(client);
   });
 

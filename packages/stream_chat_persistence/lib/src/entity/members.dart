@@ -12,7 +12,11 @@ class Members extends Table {
       text().customConstraint('REFERENCES channels(cid) ON DELETE CASCADE')();
 
   /// The role of the user in the channel
+  @Deprecated('Please use channelRole')
   TextColumn get role => text().nullable()();
+
+  /// The role of the user in the channel
+  TextColumn get channelRole => text().nullable()();
 
   /// The date on which the user accepted the invite to the channel
   DateTimeColumn get inviteAcceptedAt => dateTime().nullable()();

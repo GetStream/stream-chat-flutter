@@ -18,6 +18,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
@@ -31,18 +32,25 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: SizedBox(
-              child: MessageActionsModal(
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
+              child: StreamChannel(
+                channel: channel,
+                child: StreamMessageActionsModal(
+                  message: Message(
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
+                    status: MessageSendingStatus.sent,
                   ),
+                  messageWidget: const Text(
+                    'test',
+                    key: Key('MessageWidget'),
+                  ),
+                  messageTheme: streamTheme.ownMessageTheme,
+                  showThreadReplyMessage: true,
+                  showEditMessage: true,
+                  showDeleteMessage: true,
                 ),
-                messageWidget: const Text(
-                  'test',
-                  key: Key('MessageWidget'),
-                ),
-                messageTheme: streamTheme.ownMessageTheme,
               ),
             ),
           ),
@@ -64,6 +72,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
@@ -77,22 +86,23 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: SizedBox(
-              child: MessageActionsModal(
-                showEditMessage: false,
-                showCopyMessage: false,
-                showDeleteMessage: false,
-                showReplyMessage: false,
-                showThreadReplyMessage: false,
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
+              child: StreamChannel(
+                channel: channel,
+                child: StreamMessageActionsModal(
+                  showCopyMessage: false,
+                  showReplyMessage: false,
+                  showThreadReplyMessage: false,
+                  message: Message(
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
                   ),
-                ),
-                messageTheme: streamTheme.ownMessageTheme,
-                messageWidget: const Text(
-                  'test',
-                  key: Key('MessageWidget'),
+                  messageTheme: streamTheme.ownMessageTheme,
+                  messageWidget: const Text(
+                    'test',
+                    key: Key('MessageWidget'),
+                  ),
                 ),
               ),
             ),
@@ -115,6 +125,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
@@ -130,24 +141,27 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: SizedBox(
-              child: MessageActionsModal(
-                messageWidget: const Text('test'),
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
+              child: StreamChannel(
+                channel: channel,
+                child: StreamMessageActionsModal(
+                  messageWidget: const Text('test'),
+                  message: Message(
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
                   ),
+                  messageTheme: streamTheme.ownMessageTheme,
+                  customActions: [
+                    StreamMessageAction(
+                      leading: const Icon(Icons.check),
+                      title: const Text('title'),
+                      onTap: (m) {
+                        tapped = true;
+                      },
+                    ),
+                  ],
                 ),
-                messageTheme: streamTheme.ownMessageTheme,
-                customActions: [
-                  MessageAction(
-                    leading: const Icon(Icons.check),
-                    title: const Text('title'),
-                    onTap: (m) {
-                      tapped = true;
-                    },
-                  ),
-                ],
               ),
             ),
           ),
@@ -170,6 +184,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
@@ -186,18 +201,22 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: SizedBox(
-              child: MessageActionsModal(
-                messageWidget: const Text('test'),
-                onReplyTap: (m) {
-                  tapped = true;
-                },
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
+              child: StreamChannel(
+                channel: channel,
+                child: StreamMessageActionsModal(
+                  messageWidget: const Text('test'),
+                  onReplyTap: (m) {
+                    tapped = true;
+                  },
+                  message: Message(
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
+                    status: MessageSendingStatus.sent,
                   ),
+                  messageTheme: streamTheme.ownMessageTheme,
                 ),
-                messageTheme: streamTheme.ownMessageTheme,
               ),
             ),
           ),
@@ -216,6 +235,7 @@ void main() {
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
+      final channel = MockChannel();
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
@@ -232,18 +252,23 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: SizedBox(
-              child: MessageActionsModal(
-                messageWidget: const Text('test'),
-                onThreadReplyTap: (m) {
-                  tapped = true;
-                },
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
+              child: StreamChannel(
+                channel: channel,
+                child: StreamMessageActionsModal(
+                  messageWidget: const Text('test'),
+                  onThreadReplyTap: (m) {
+                    tapped = true;
+                  },
+                  message: Message(
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
+                    status: MessageSendingStatus.sent,
                   ),
+                  messageTheme: streamTheme.ownMessageTheme,
+                  showThreadReplyMessage: true,
                 ),
-                messageTheme: streamTheme.ownMessageTheme,
               ),
             ),
           ),
@@ -284,7 +309,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   text: 'test',
@@ -293,6 +318,7 @@ void main() {
                   ),
                 ),
                 messageTheme: streamTheme.ownMessageTheme,
+                showEditMessage: true,
               ),
             ),
           ),
@@ -304,7 +330,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.byType(MessageInput), findsOneWidget);
+      expect(find.byType(StreamMessageInput), findsOneWidget);
     },
   );
 
@@ -333,7 +359,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 editMessageInputBuilder: (context, m) => const Text('test'),
                 message: Message(
@@ -343,6 +369,7 @@ void main() {
                   ),
                 ),
                 messageTheme: streamTheme.ownMessageTheme,
+                showEditMessage: true,
               ),
             ),
           ),
@@ -385,7 +412,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 onCopyTap: (m) => tapped = true,
                 message: Message(
@@ -435,7 +462,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   status: MessageSendingStatus.failed,
@@ -485,7 +512,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   status: MessageSendingStatus.failed_update,
@@ -533,7 +560,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
@@ -543,6 +570,7 @@ void main() {
                   ),
                 ),
                 messageTheme: streamTheme.ownMessageTheme,
+                showFlagButton: true,
               ),
             ),
           ),
@@ -589,7 +617,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
@@ -599,6 +627,7 @@ void main() {
                   ),
                 ),
                 messageTheme: streamTheme.ownMessageTheme,
+                showFlagButton: true,
               ),
             ),
           ),
@@ -645,7 +674,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
@@ -655,6 +684,7 @@ void main() {
                   ),
                 ),
                 messageTheme: streamTheme.ownMessageTheme,
+                showFlagButton: true,
               ),
             ),
           ),
@@ -699,7 +729,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
@@ -709,6 +739,7 @@ void main() {
                   ),
                 ),
                 messageTheme: streamTheme.ownMessageTheme,
+                showDeleteMessage: true,
               ),
             ),
           ),
@@ -755,7 +786,7 @@ void main() {
             showLoading: false,
             channel: channel,
             child: SizedBox(
-              child: MessageActionsModal(
+              child: StreamMessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
@@ -765,6 +796,7 @@ void main() {
                   ),
                 ),
                 messageTheme: streamTheme.ownMessageTheme,
+                showDeleteMessage: true,
               ),
             ),
           ),

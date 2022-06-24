@@ -25,7 +25,7 @@ void main() {
           streamChatThemeData: theme,
           connectivityStream: Stream.value(ConnectivityResult.mobile),
           child: SizedBox(
-            child: ReactionBubble(
+            child: StreamReactionBubble(
               reactions: [
                 Reaction(
                   type: 'like',
@@ -60,9 +60,9 @@ void main() {
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           connectivityStream: Stream.value(ConnectivityResult.mobile),
-          child: Container(
+          child: ColoredBox(
             color: Colors.black,
-            child: ReactionBubble(
+            child: StreamReactionBubble(
               reactions: [
                 Reaction(
                   type: 'like',
@@ -97,9 +97,9 @@ void main() {
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           connectivityStream: Stream.value(ConnectivityResult.mobile),
-          child: Container(
+          child: ColoredBox(
             color: Colors.black,
-            child: ReactionBubble(
+            child: StreamReactionBubble(
               reactions: [
                 Reaction(
                   type: 'like',
@@ -142,9 +142,9 @@ void main() {
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           connectivityStream: Stream.value(ConnectivityResult.mobile),
-          child: Container(
+          child: ColoredBox(
             color: Colors.black,
-            child: ReactionBubble(
+            child: StreamReactionBubble(
               reactions: [
                 Reaction(
                   type: 'like',
@@ -187,7 +187,7 @@ void main() {
           connectivityStream: Stream.value(ConnectivityResult.mobile),
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           child: SizedBox(
-            child: ReactionBubble(
+            child: StreamReactionBubble(
               reactions: [
                 Reaction(
                   type: 'like',

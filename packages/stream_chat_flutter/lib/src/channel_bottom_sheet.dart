@@ -4,9 +4,10 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Bottom Sheet with options
+@Deprecated("Use 'StreamChannelInfoBottomSheet' instead")
 class ChannelBottomSheet extends StatefulWidget {
   /// Constructor for creating bottom sheet
-  const ChannelBottomSheet({Key? key, this.onViewInfoTap}) : super(key: key);
+  const ChannelBottomSheet({super.key, this.onViewInfoTap});
 
   /// Callback when 'View Info' is tapped
   final VoidCallback? onViewInfoTap;
@@ -15,11 +16,12 @@ class ChannelBottomSheet extends StatefulWidget {
   _ChannelBottomSheetState createState() => _ChannelBottomSheetState();
 }
 
+// ignore: deprecated_member_use_from_same_package
 class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
   bool _showActions = true;
 
   late StreamChannelState _streamChannelState;
-  late ChannelPreviewThemeData _channelPreviewThemeData;
+  late StreamChannelPreviewThemeData _channelPreviewThemeData;
   late StreamChatThemeData _streamChatThemeData;
   late StreamChatState _streamChatState;
 
@@ -31,7 +33,6 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
 
     final userAsMember = members
         .firstWhere((e) => e.user?.id == _streamChatState.currentUser?.id);
-    final isOwner = userAsMember.role == 'owner';
 
     return Material(
       color: _streamChatThemeData.colorTheme.barsBg,
@@ -53,7 +54,8 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ChannelName(
+                    child: StreamChannelName(
+                      channel: channel,
                       textStyle: _streamChatThemeData.textTheme.headlineBold,
                     ),
                   ),
@@ -62,7 +64,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                   height: 5,
                 ),
                 Center(
-                  child: ChannelInfo(
+                  child: StreamChannelInfo(
                     showTypingIndicator: false,
                     channel: _streamChannelState.channel,
                     textStyle: _channelPreviewThemeData.subtitleStyle,
@@ -74,7 +76,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                 if (channel.isDistinct && channel.memberCount == 2)
                   Column(
                     children: [
-                      UserAvatar(
+                      StreamUserAvatar(
                         user: members
                             .firstWhere(
                               (e) => e.user?.id != userAsMember.user?.id,
@@ -117,7 +119,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Column(
                           children: [
-                            UserAvatar(
+                            StreamUserAvatar(
                               user: members[index].user!,
                               constraints: const BoxConstraints.tightFor(
                                 height: 64,
@@ -145,7 +147,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                 const SizedBox(
                   height: 24,
                 ),
-                OptionListTile(
+                StreamOptionListTile(
                   leading: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: StreamSvgIcon.user(
@@ -155,8 +157,10 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                   title: context.translations.viewInfoLabel,
                   onTap: widget.onViewInfoTap,
                 ),
-                if (!channel.isDistinct)
-                  OptionListTile(
+                if (!channel.isDistinct &&
+                    channel.ownCapabilities
+                        .contains(PermissionType.leaveChannel))
+                  StreamOptionListTile(
                     leading: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: StreamSvgIcon.userRemove(
@@ -174,8 +178,9 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                       });
                     },
                   ),
-                if (isOwner)
-                  OptionListTile(
+                if (channel.ownCapabilities
+                    .contains(PermissionType.deleteChannel))
+                  StreamOptionListTile(
                     leading: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: StreamSvgIcon.delete(
@@ -194,7 +199,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                       });
                     },
                   ),
-                OptionListTile(
+                StreamOptionListTile(
                   leading: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: StreamSvgIcon.closeSmall(
@@ -215,7 +220,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
   void didChangeDependencies() {
     _streamChannelState = StreamChannel.of(context);
     _streamChatThemeData = StreamChatTheme.of(context);
-    _channelPreviewThemeData = ChannelPreviewTheme.of(context);
+    _channelPreviewThemeData = StreamChannelPreviewTheme.of(context);
     _streamChatState = StreamChat.of(context);
     super.didChangeDependencies();
   }

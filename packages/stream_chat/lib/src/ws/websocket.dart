@@ -6,7 +6,6 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/core/error/error.dart';
-import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/user.dart';
@@ -147,12 +146,15 @@ class WebSocket with TimerHelper {
     }
   }
 
-  Future<Uri> _buildUri({bool refreshToken = false}) async {
+  Future<Uri> _buildUri({
+    bool refreshToken = false,
+    bool includeUserDetails = true,
+  }) async {
     final user = _user!;
     final token = await tokenManager.loadToken(refresh: refreshToken);
     final params = {
       'user_id': user.id,
-      'user_details': user,
+      'user_details': includeUserDetails ? user : {'id': user.id},
       'user_token': token.rawValue,
       'server_determines_connection_id': true,
     };
@@ -160,7 +162,7 @@ class WebSocket with TimerHelper {
       'json': jsonEncode(params),
       'api_key': apiKey,
       'authorization': token.rawValue,
-      'stream-auth-type': token.authType.raw,
+      'stream-auth-type': token.authType.name,
       ...queryParameters,
     };
     final scheme = baseUrl.startsWith('https') ? 'wss' : 'ws';
@@ -176,7 +178,10 @@ class WebSocket with TimerHelper {
   bool _connectRequestInProgress = false;
 
   /// Connect the WS using the parameters passed in the constructor
-  Future<Event> connect(User user) async {
+  Future<Event> connect(
+    User user, {
+    bool includeUserDetails = false,
+  }) async {
     if (_connectRequestInProgress) {
       throw const StreamWebSocketError('''
         You've called connect twice,
@@ -190,8 +195,14 @@ class WebSocket with TimerHelper {
     _connectionStatus = ConnectionStatus.connecting;
     connectionCompleter = Completer<Event>();
 
-    final uri = await _buildUri();
-    _initWebSocketChannel(uri);
+    try {
+      final uri = await _buildUri(
+        includeUserDetails: includeUserDetails,
+      );
+      _initWebSocketChannel(uri);
+    } catch (e, stk) {
+      _onConnectionError(e, stk);
+    }
 
     return connectionCompleter!.future;
   }
@@ -215,8 +226,15 @@ class WebSocket with TimerHelper {
     setTimer(
       Duration(milliseconds: delay),
       () async {
-        final uri = await _buildUri(refreshToken: refreshToken);
-        _initWebSocketChannel(uri);
+        final uri = await _buildUri(
+          refreshToken: refreshToken,
+          includeUserDetails: false,
+        );
+        try {
+          _initWebSocketChannel(uri);
+        } catch (e, stk) {
+          _onConnectionError(e, stk);
+        }
       },
     );
   }

@@ -1,3 +1,6 @@
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: deprecated_member_use_from_same_package, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -17,7 +20,7 @@ typedef EmptyMessageSearchBuilder = Widget Function(
   String searchQuery,
 );
 
-///
+/// {@template message_search_list_view}
 /// It shows the list of searched messages.
 ///
 /// ```dart
@@ -47,10 +50,13 @@ typedef EmptyMessageSearchBuilder = Widget Function(
 /// The widget components render the ui based on the first ancestor of type
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
+/// {@endtemplate}
+@Deprecated("Use 'StreamMessageSearchListView' instead")
 class MessageSearchListView extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
+  @Deprecated("Use 'StreamMessageSearchListView' instead")
   const MessageSearchListView({
-    Key? key,
+    super.key,
     required this.filters,
     this.messageQuery,
     this.sortOptions,
@@ -67,7 +73,7 @@ class MessageSearchListView extends StatefulWidget {
     this.loadingBuilder,
     this.childBuilder,
     this.messageSearchListController,
-  }) : super(key: key);
+  });
 
   /// Message String to search on
   final String? messageQuery;
@@ -168,7 +174,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
             if (error is Error) {
               print(error.stackTrace);
             }
-            return InfoTile(
+            return StreamInfoTile(
               showMessage: widget.showErrorTile,
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
@@ -195,7 +201,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     );
 
     final backgroundColor =
-        MessageSearchListViewTheme.of(context).backgroundColor;
+        StreamMessageSearchListViewTheme.of(context).backgroundColor;
 
     if (backgroundColor != null) {
       return ColoredBox(
@@ -233,7 +239,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       initialData: false,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Container(
+          return ColoredBox(
             color: StreamChatTheme.of(context)
                 .colorTheme
                 .accentError

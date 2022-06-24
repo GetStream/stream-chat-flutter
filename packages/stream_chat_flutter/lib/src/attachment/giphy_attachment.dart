@@ -5,23 +5,24 @@ import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro giphy_attachment}
+@Deprecated("Use 'StreamGiphyAttachment' instead")
+typedef GiphyAttachment = StreamGiphyAttachment;
+
+/// {@template giphy_attachment}
 /// Widget for showing a GIF attachment
-class GiphyAttachment extends AttachmentWidget {
-  /// Constructor for creating a [GiphyAttachment] widget
-  const GiphyAttachment({
-    Key? key,
-    required Message message,
-    required Attachment attachment,
-    Size? size,
+/// {@endtemplate}
+class StreamGiphyAttachment extends StreamAttachmentWidget {
+  /// Constructor for creating a [StreamGiphyAttachment] widget
+  const StreamGiphyAttachment({
+    super.key,
+    required super.message,
+    required super.attachment,
+    super.size,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
-  }) : super(
-          key: key,
-          message: message,
-          attachment: attachment,
-          size: size,
-        );
+  });
 
   /// Callback when show message is tapped
   final ShowMessageCallback? onShowMessage;
@@ -39,7 +40,7 @@ class GiphyAttachment extends AttachmentWidget {
     if (imageUrl == null) {
       return const AttachmentError();
     }
-    if (attachment.actions.isNotEmpty) {
+    if (attachment.actions != null && attachment.actions!.isNotEmpty) {
       return _buildSendingAttachment(context, imageUrl);
     }
     return _buildSentAttachment(context, imageUrl);
@@ -228,7 +229,7 @@ class GiphyAttachment extends AttachmentWidget {
           alignment: Alignment.centerRight,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: VisibleFootnote(),
+            child: StreamVisibleFootnote(),
           ),
         ),
       ],
@@ -243,11 +244,10 @@ class GiphyAttachment extends AttachmentWidget {
           final channel = StreamChannel.of(context).channel;
           return StreamChannel(
             channel: channel,
-            child: FullScreenMedia(
-              mediaAttachments: message.attachments,
+            child: StreamFullScreenMedia(
+              mediaAttachmentPackages: message.getAttachmentPackageList(),
               startIndex: message.attachments.indexOf(attachment),
               userName: message.user?.name,
-              message: message,
               onShowMessage: onShowMessage,
             ),
           );

@@ -2,16 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro commands_overlay}
+@Deprecated("Use 'StreamCommandsOverlay' instead")
+typedef CommandsOverlay = StreamCommandsOverlay;
+
+/// {@template commands_overlay}
 /// Overlay for displaying commands that can be used
-class CommandsOverlay extends StatelessWidget {
-  /// Constructor for creating a [CommandsOverlay]
-  const CommandsOverlay({
+/// to interact with the channel.
+/// {@endtemplate}
+class StreamCommandsOverlay extends StatelessWidget {
+  /// Constructor for creating a [StreamCommandsOverlay]
+  const StreamCommandsOverlay({
     required this.text,
     required this.onCommandResult,
     required this.size,
     required this.channel,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// The size of the overlay
   final Size size;
@@ -53,7 +60,7 @@ class CommandsOverlay extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: ListView(
-            padding: const EdgeInsets.all(0),
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             children: [
               if (commands.isNotEmpty)

@@ -19,8 +19,10 @@ void main() {
         attachment.thumbUrl,
         'https://media0.giphy.com/media/3o7TKnCdBx5cMg0qti/giphy.gif',
       );
+      expect(attachment.actions, isNotNull);
+      expect(attachment.actions, isNotEmpty);
       expect(attachment.actions, hasLength(3));
-      expect(attachment.actions[0], isA<Action>());
+      expect(attachment.actions![0], isA<Action>());
     });
 
     test('should serialize to json correctly', () {

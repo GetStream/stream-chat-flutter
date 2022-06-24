@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 import 'dart:math';
 
@@ -15,15 +17,11 @@ import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
-import 'package:stream_chat_flutter/src/multi_overlay.dart';
+import 'package:stream_chat_flutter/src/media_list_view_controller.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/user_mentions_overlay.dart';
-import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:video_compress/video_compress.dart';
-
-export 'package:video_compress/video_compress.dart' show VideoQuality;
 
 /// A callback that can be passed to [MessageInput.onError].
 ///
@@ -59,7 +57,7 @@ typedef MentionTileBuilder = Widget Function(
 
 /// Builder function for building a user mention tile.
 ///
-/// Use [UserMentionTile] for the default implementation.
+/// Use [StreamUserMentionTile] for the default implementation.
 typedef UserMentionTileBuilder = Widget Function(
   BuildContext context,
   User user,
@@ -68,7 +66,7 @@ typedef UserMentionTileBuilder = Widget Function(
 /// Widget builder for action button.
 ///
 /// [defaultActionButton] is the default [IconButton] configuration,
-/// use [defaultActionButton.copyWith] to easily customize it.
+/// use .copyWith to easily customize it.
 typedef ActionButtonBuilder = Widget Function(
   BuildContext context,
   IconButton defaultActionButton,
@@ -155,16 +153,17 @@ const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 /// }
 /// ```
 ///
-/// You usually put this widget in the same page of a [MessageListView]
+/// You usually put this widget in the same page of a [StreamMessageListView]
 /// as the bottom widget.
 ///
 /// The widget renders the ui based on the first ancestor of
 /// type [StreamChatTheme].
 /// Modify it to change the widget appearance.
+@Deprecated("Use 'StreamMessageInput' instead")
 class MessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
   const MessageInput({
-    Key? key,
+    super.key,
     this.onMessageSent,
     this.preMessageSending,
     this.parentMessage,
@@ -190,8 +189,6 @@ class MessageInput extends StatefulWidget {
         this.mentionsTileBuilder,
     this.userMentionsTileBuilder,
     this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
-    this.compressedVideoQuality = VideoQuality.DefaultQuality,
-    this.compressedVideoFrameRate = 30,
     this.onError,
     this.attachmentLimit = 10,
     this.onAttachmentLimitExceed,
@@ -200,23 +197,16 @@ class MessageInput extends StatefulWidget {
     this.customOverlays = const [],
     this.mentionAllAppUsers = false,
     this.shouldKeepFocusAfterMessage,
-  })  : assert(
+  }) : assert(
           initialMessage == null || editMessage == null,
           "Can't provide both `initialMessage` and `editMessage`",
-        ),
-        super(key: key);
+        );
 
   /// List of options for showing overlays
   final List<OverlayOptions> customOverlays;
 
   /// Message to edit
   final Message? editMessage;
-
-  /// Video quality to use when compressing the videos
-  final VideoQuality compressedVideoQuality;
-
-  /// Frame rate to use when compressing the videos
-  final int compressedVideoFrameRate;
 
   /// Max attachment size in bytes
   /// Defaults to 20 MB
@@ -338,11 +328,13 @@ class MessageInput extends StatefulWidget {
 }
 
 /// State of [MessageInput]
+@Deprecated("Use 'StreamMessageInput' instead")
 class MessageInputState extends State<MessageInput> {
   final _attachments = <String, Attachment>{};
   final List<User> _mentionedUsers = [];
 
   final _imagePicker = ImagePicker();
+  final _mediaListViewController = MediaListViewController();
   late final _focusNode = widget.focusNode ?? FocusNode();
   late final _isInternalFocusNode = widget.focusNode == null;
   bool _inputEnabled = true;
@@ -361,7 +353,7 @@ class MessageInputState extends State<MessageInput> {
       widget.textEditingController ?? TextEditingController();
 
   late StreamChatThemeData _streamChatTheme;
-  late MessageInputThemeData _messageInputTheme;
+  late StreamMessageInputThemeData _messageInputTheme;
 
   bool get _hasQuotedMessage => widget.quotedMessage != null;
 
@@ -480,11 +472,12 @@ class MessageInputState extends State<MessageInput> {
     if (widget.editMessage == null) {
       child = Material(
         elevation: 8,
+        color: _messageInputTheme.inputBackgroundColor,
         child: child,
       );
     }
 
-    return MultiOverlay(
+    return StreamMultiOverlay(
       childAnchor: Alignment.topCenter,
       overlayAnchor: Alignment.bottomCenter,
       overlayOptions: [
@@ -634,7 +627,7 @@ class MessageInputState extends State<MessageInput> {
               color: _messageInputTheme.expandButtonColor,
             ),
           ),
-          padding: const EdgeInsets.all(0),
+          padding: EdgeInsets.zero,
           constraints: const BoxConstraints.tightFor(
             height: 24,
             width: 24,
@@ -679,6 +672,7 @@ class MessageInputState extends State<MessageInput> {
           gradient: _focusNode.hasFocus
               ? _messageInputTheme.activeBorderGradient
               : _messageInputTheme.idleBorderGradient,
+          color: _messageInputTheme.inputBackgroundColor,
         ),
         child: Padding(
           padding: const EdgeInsets.all(1.5),
@@ -802,7 +796,7 @@ class MessageInputState extends State<MessageInput> {
               child: IconButton(
                 icon: StreamSvgIcon.closeSmall(),
                 splashRadius: 24,
-                padding: const EdgeInsets.all(0),
+                padding: EdgeInsets.zero,
                 constraints: const BoxConstraints.tightFor(
                   height: 24,
                   width: 24,
@@ -928,7 +922,7 @@ class MessageInputState extends State<MessageInput> {
     if (renderObject == null) {
       return const Offstage();
     }
-    return CommandsOverlay(
+    return StreamCommandsOverlay(
       channel: StreamChannel.of(context).channel,
       size: Size(renderObject.size.width - 16, 400),
       text: text,
@@ -985,7 +979,7 @@ class MessageInputState extends State<MessageInput> {
     return AnimatedContainer(
       duration: _openFilePickerSection
           ? const Duration(milliseconds: 300)
-          : const Duration(),
+          : Duration.zero,
       curve: Curves.easeOut,
       height: _openFilePickerSection ? _kMinMediaPickerSize : 0,
       child: SingleChildScrollView(
@@ -1039,7 +1033,7 @@ class MessageInputState extends State<MessageInput> {
                             },
                     ),
                     IconButton(
-                      padding: const EdgeInsets.all(0),
+                      padding: EdgeInsets.zero,
                       icon: StreamSvgIcon.record(
                         color: _getIconColor(3),
                       ),
@@ -1053,6 +1047,26 @@ class MessageInputState extends State<MessageInput> {
                                 camera: true,
                               );
                             },
+                    ),
+                    const Spacer(),
+                    FutureBuilder(
+                      future: PhotoManager.requestPermissionExtend(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData &&
+                            snapshot.data == PermissionState.limited) {
+                          return TextButton(
+                            child: Text(context.translations.viewLibrary),
+                            onPressed: () async {
+                              await PhotoManager.presentLimited();
+                              _mediaListViewController.updateMedia(
+                                newValue: true,
+                              );
+                            },
+                          );
+                        }
+
+                        return const SizedBox.shrink();
+                      },
                     ),
                   ],
                 ),
@@ -1086,6 +1100,7 @@ class MessageInputState extends State<MessageInput> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: _PickerWidget(
+                        mediaListViewController: _mediaListViewController,
                         filePickerIndex: _filePickerIndex,
                         streamChatTheme: _streamChatTheme,
                         containsFile: _attachmentContainsFile,
@@ -1117,41 +1132,18 @@ class MessageInputState extends State<MessageInput> {
 
     if (mediaFile == null) return;
 
-    var file = AttachmentFile(
+    final file = AttachmentFile(
       path: mediaFile.path,
       size: await mediaFile.length(),
       bytes: mediaFile.readAsBytesSync(),
     );
 
     if (file.size! > widget.maxAttachmentSize) {
-      if (medium.type == AssetType.video && file.path != null) {
-        final mediaInfo = await VideoService.compressVideo(
-          file.path!,
-          frameRate: widget.compressedVideoFrameRate,
-          quality: widget.compressedVideoQuality,
-        );
-
-        if (mediaInfo == null ||
-            mediaInfo.filesize! > widget.maxAttachmentSize) {
-          _showErrorAlert(
-            context.translations.fileTooLargeAfterCompressionError(
-              widget.maxAttachmentSize / (1024 * 1024),
-            ),
-          );
-          return;
-        }
-        file = AttachmentFile(
-          name: file.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file?.readAsBytes(),
-          path: mediaInfo.path,
-        );
-      } else {
-        _showErrorAlert(context.translations.fileTooLargeError(
+      return _showErrorAlert(
+        context.translations.fileTooLargeError(
           widget.maxAttachmentSize / (1024 * 1024),
-        ));
-        return;
-      }
+        ),
+      );
     }
 
     setState(() {
@@ -1193,7 +1185,7 @@ class MessageInputState extends State<MessageInput> {
     }
 
     return LayoutBuilder(
-      builder: (context, snapshot) => UserMentionsOverlay(
+      builder: (context, snapshot) => StreamUserMentionsOverlay(
         query: query,
         mentionAllAppUsers: widget.mentionAllAppUsers,
         client: StreamChat.of(context).client,
@@ -1238,7 +1230,7 @@ class MessageInputState extends State<MessageInput> {
     // ignore: cast_nullable_to_non_nullable
     final renderObject = context.findRenderObject() as RenderBox;
 
-    return EmojiOverlay(
+    return StreamEmojiOverlay(
       size: Size(renderObject.size.width - 16, 200),
       query: query,
       onEmojiResult: (emoji) {
@@ -1272,8 +1264,8 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return const Offstage();
     final containsUrl = widget.quotedMessage!.attachments
-        .any((element) => element.titleLink != null);
-    return QuotedMessageWidget(
+        .any((element) => element.ogScrapeUrl != null);
+    return StreamQuotedMessageWidget(
       reverse: true,
       showBorder: !containsUrl,
       message: widget.quotedMessage!,
@@ -1304,10 +1296,8 @@ class MessageInputState extends State<MessageInput> {
                     .map<Widget>(
                       (e) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: FileAttachment(
-                          message: Message(
-                            status: MessageSendingStatus.sending,
-                          ), // dummy message
+                        child: StreamFileAttachment(
+                          message: Message(), // dummy message
                           attachment: e,
                           size: Size(
                             MediaQuery.of(context).size.width * 0.65,
@@ -1428,7 +1418,7 @@ class MessageInputState extends State<MessageInput> {
       case 'video':
         return Stack(
           children: [
-            VideoThumbnailImage(
+            StreamVideoThumbnailImage(
               height: 104,
               width: 104,
               video: (attachment.file?.path ?? attachment.assetUrl)!,
@@ -1445,9 +1435,9 @@ class MessageInputState extends State<MessageInput> {
           ],
         );
       default:
-        return Container(
+        return const ColoredBox(
           color: Colors.black26,
-          child: const Icon(Icons.insert_drive_file),
+          child: Icon(Icons.insert_drive_file),
         );
     }
   }
@@ -1462,7 +1452,7 @@ class MessageInputState extends State<MessageInput> {
                 ? _messageInputTheme.actionButtonColor
                 : _messageInputTheme.actionButtonIdleColor),
       ),
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(
         height: 24,
         width: 24,
@@ -1491,7 +1481,7 @@ class MessageInputState extends State<MessageInput> {
             ? _messageInputTheme.actionButtonColor
             : _messageInputTheme.actionButtonIdleColor,
       ),
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(
         height: 24,
         width: 24,
@@ -1678,33 +1668,11 @@ class MessageInputState extends State<MessageInput> {
     );
 
     if (file.size! > widget.maxAttachmentSize) {
-      if (attachmentType == 'video' && file.path != null) {
-        final mediaInfo = await (VideoService.compressVideo(
-          file.path!,
-          frameRate: widget.compressedVideoFrameRate,
-          quality: widget.compressedVideoQuality,
-        ) as FutureOr<MediaInfo>);
-
-        if (mediaInfo.filesize! > widget.maxAttachmentSize) {
-          _showErrorAlert(
-            context.translations.fileTooLargeAfterCompressionError(
-              widget.maxAttachmentSize / (1024 * 1024),
-            ),
-          );
-          return;
-        }
-        file = AttachmentFile(
-          name: file.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file!.readAsBytes(),
-          path: mediaInfo.path,
-        );
-      } else {
-        _showErrorAlert(context.translations.fileTooLargeError(
+      return _showErrorAlert(
+        context.translations.fileTooLargeError(
           widget.maxAttachmentSize / (1024 * 1024),
-        ));
-        return;
-      }
+        ),
+      );
     }
 
     setState(() {
@@ -1730,7 +1698,7 @@ class MessageInputState extends State<MessageInput> {
         padding: const EdgeInsets.all(8),
         child: IconButton(
           onPressed: sendMessage,
-          padding: const EdgeInsets.all(0),
+          padding: EdgeInsets.zero,
           splashRadius: 24,
           constraints: const BoxConstraints.tightFor(
             height: 24,
@@ -1943,7 +1911,7 @@ class MessageInputState extends State<MessageInput> {
   @override
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
-    _messageInputTheme = MessageInputTheme.of(context);
+    _messageInputTheme = StreamMessageInputTheme.of(context);
     if (widget.editMessage == null) _startSlowMode();
 
     if ((widget.editMessage != null || widget.initialMessage != null) &&
@@ -1957,14 +1925,14 @@ class MessageInputState extends State<MessageInput> {
 
 class _PickerWidget extends StatefulWidget {
   const _PickerWidget({
-    Key? key,
     required this.filePickerIndex,
     required this.containsFile,
     required this.selectedMedias,
     required this.onAddMoreFilesClick,
     required this.onMediaSelected,
     required this.streamChatTheme,
-  }) : super(key: key);
+    required this.mediaListViewController,
+  });
 
   final int filePickerIndex;
   final bool containsFile;
@@ -1972,18 +1940,19 @@ class _PickerWidget extends StatefulWidget {
   final void Function(DefaultAttachmentTypes) onAddMoreFilesClick;
   final void Function(AssetEntity) onMediaSelected;
   final StreamChatThemeData streamChatTheme;
+  final MediaListViewController mediaListViewController;
 
   @override
   _PickerWidgetState createState() => _PickerWidgetState();
 }
 
 class _PickerWidgetState extends State<_PickerWidget> {
-  Future<bool>? requestPermission;
+  Future<PermissionState>? requestPermission;
 
   @override
   void initState() {
     super.initState();
-    requestPermission = PhotoManager.requestPermission();
+    requestPermission = PhotoManager.requestPermissionExtend();
   }
 
   @override
@@ -1991,14 +1960,15 @@ class _PickerWidgetState extends State<_PickerWidget> {
     if (widget.filePickerIndex != 0) {
       return const Offstage();
     }
-    return FutureBuilder<bool>(
+    return FutureBuilder<PermissionState>(
       future: requestPermission,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Offstage();
         }
 
-        if (snapshot.data!) {
+        if ([PermissionState.authorized, PermissionState.limited]
+            .contains(snapshot.data)) {
           if (widget.containsFile) {
             return GestureDetector(
               onTap: () {
@@ -2018,7 +1988,9 @@ class _PickerWidgetState extends State<_PickerWidget> {
               ),
             );
           }
-          return MediaListView(
+
+          return StreamMediaListView(
+            controller: widget.mediaListViewController,
             selectedIds: widget.selectedMedias,
             onSelect: widget.onMediaSelected,
           );
@@ -2028,7 +2000,7 @@ class _PickerWidgetState extends State<_PickerWidget> {
           onTap: () async {
             PhotoManager.openSetting();
           },
-          child: Container(
+          child: ColoredBox(
             color: widget.streamChatTheme.colorTheme.inputBg,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -2066,10 +2038,7 @@ class _PickerWidgetState extends State<_PickerWidget> {
 }
 
 class _CountdownButton extends StatelessWidget {
-  const _CountdownButton({
-    Key? key,
-    required this.count,
-  }) : super(key: key);
+  const _CountdownButton({required this.count});
 
   final int count;
 

@@ -28,7 +28,7 @@ void main() {
     expect(member.user!.id, entity.userId);
     expect(member.createdAt, isSameDateAs(entity.createdAt));
     expect(member.updatedAt, isSameDateAs(entity.updatedAt));
-    expect(member.role, entity.role);
+    expect(member.channelRole, entity.channelRole);
     expect(member.inviteAcceptedAt, isSameDateAs(entity.inviteAcceptedAt!));
     expect(member.inviteRejectedAt, isSameDateAs(entity.inviteRejectedAt!));
     expect(member.invited, entity.invited);
@@ -58,7 +58,7 @@ void main() {
     expect(entity.userId, member.user!.id);
     expect(entity.createdAt, isSameDateAs(member.createdAt));
     expect(entity.updatedAt, isSameDateAs(member.updatedAt));
-    expect(entity.role, member.role);
+    expect(entity.channelRole, member.channelRole);
     expect(entity.inviteAcceptedAt, isSameDateAs(member.inviteAcceptedAt!));
     expect(entity.inviteRejectedAt, isSameDateAs(member.inviteRejectedAt!));
     expect(entity.invited, member.invited);

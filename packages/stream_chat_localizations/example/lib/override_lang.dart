@@ -72,10 +72,10 @@ class MyApp extends StatelessWidget {
   /// If you'd prefer using minimal wrapper widgets for your app, please see
   /// our other package, `stream_chat_flutter_core`.
   const MyApp({
-    Key? key,
+    super.key,
     required this.client,
     required this.channel,
-  }) : super(key: key);
+  });
 
   /// Instance of Stream Client.
   ///
@@ -121,24 +121,25 @@ class MyApp extends StatelessWidget {
 
 /// A list of messages sent in the current channel.
 ///
-/// This is implemented using [MessageListView], a widget that provides query
+/// This is implemented using [StreamMessageListView],
+/// a widget that provides query
 /// functionalities fetching the messages from the api and showing them in a
 /// listView.
 class ChannelPage extends StatelessWidget {
   /// Creates the page that shows the list of messages
   const ChannelPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: const ChannelHeader(),
+        appBar: const StreamChannelHeader(),
         body: Column(
           children: const <Widget>[
             Expanded(
-              child: MessageListView(),
+              child: StreamMessageListView(),
             ),
-            MessageInput(),
+            StreamMessageInput(),
           ],
         ),
       );

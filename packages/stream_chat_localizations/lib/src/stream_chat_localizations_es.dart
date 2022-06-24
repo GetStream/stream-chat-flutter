@@ -3,8 +3,7 @@ part of 'stream_chat_localizations.dart';
 /// The translations for Spanish (`es`).
 class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for Spanish.
-  const StreamChatLocalizationsEs({String localeName = 'es'})
-      : super(localeName: localeName);
+  const StreamChatLocalizationsEs({super.localeName = 'es'});
 
   @override
   String get launchUrlError => 'No se pudo abrir la url';
@@ -60,6 +59,10 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
     if (pinnedByCurrentUser) return 'Fijado por ti';
     return 'Fijado por ${pinnedBy.name}';
   }
+
+  @override
+  String get sendMessagePermissionError =>
+      'No tienes permiso para enviar mensajes';
 
   @override
   String get emptyMessagesText => 'Actualmente no hay mensajes';
@@ -373,5 +376,23 @@ No es posible añadir más de $limit archivos adjuntos
   ''';
 
   @override
+  String get viewLibrary => 'Ver Librería';
+
+  @override
   String get slowModeOnLabel => 'Modo lento activado';
+
+  @override
+  String get linkDisabledDetails =>
+      'No se permite enviar enlaces en esta conversación.';
+
+  @override
+  String get linkDisabledError => 'Los enlaces están deshabilitados';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 mensaje no leído';
+    }
+    return '$unreadCount mensajes no leídos';
+  }
 }

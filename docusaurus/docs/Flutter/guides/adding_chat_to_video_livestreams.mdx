@@ -40,9 +40,9 @@ Scaffold(
         child: Column(
           children: [
            Expanded(
-             child: MessageListView(),
+             child: StreamMessageListView(),
            ),
-           MessageInput(),
+           StreamMessageInput(),
           ],
         ),
       ),
@@ -64,30 +64,35 @@ The second type looks like this:
 We can use a `Stack` for achieving this:
 
 ```dart
-Scaffold(
-  body: Stack(
-    children: <Widget>[
-      // Add your video implementation here
-      ShaderMask(
-        shaderCallback: (rect) {
-          return LinearGradient(
+Stack(
+  children: <Widget>[
+    // Add your video implementation here
+    ShaderMask(
+      shaderCallback: (rect) {
+        return const LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
-           colors: [Colors.black, Colors.transparent],
-           stops: [0.4, 0.65]
-          ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
-        },
-       blendMode: BlendMode.dstIn,
-         child: Column(
-           children: [
-             Expanded(
-               child: MessageListView(),
-             ),
-             MessageInput(),
-           ],
-         ),
-       ),
-     ],
-   ),
- )
+            colors: [Colors.black, Colors.transparent],
+            stops: [0.4, 0.8]).createShader(
+          Rect.fromLTRB(0, 0, rect.width, rect.height),
+        );
+      },
+      blendMode: BlendMode.dstIn,
+      child: Column(
+        children: const [
+          Expanded(
+            child: StreamMessageListViewTheme(
+              data: StreamMessageListViewThemeData(
+                backgroundColor: Colors.transparent,
+              ),
+              child: StreamMessageListView(),
+            ),
+          ),
+          StreamMessageInput(),
+        ],
+      ),
+    ),
+  ],
+),
 ```
+

@@ -4,11 +4,17 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro reaction_bubble}
+@Deprecated("Use 'StreamReactionBubble' instead")
+typedef ReactionBubble = StreamReactionBubble;
+
+/// {@template reaction_bubble}
 /// Creates reaction bubble widget for displaying over messages
-class ReactionBubble extends StatelessWidget {
-  /// Constructor for creating a [ReactionBubble]
-  const ReactionBubble({
-    Key? key,
+/// {@endtemplate}
+class StreamReactionBubble extends StatelessWidget {
+  /// Constructor for creating a [StreamReactionBubble]
+  const StreamReactionBubble({
+    super.key,
     required this.reactions,
     required this.borderColor,
     required this.backgroundColor,
@@ -17,7 +23,7 @@ class ReactionBubble extends StatelessWidget {
     this.flipTail = false,
     this.highlightOwnReactions = true,
     this.tailCirclesSpacing = 0,
-  }) : super(key: key);
+  });
 
   /// Reactions to show
   final List<Reaction> reactions;
@@ -111,7 +117,7 @@ class ReactionBubble extends StatelessWidget {
   }
 
   Widget _buildReaction(
-    List<ReactionIcon> reactionIcons,
+    List<StreamReactionIcon> reactionIcons,
     Reaction reaction,
     BuildContext context,
   ) {

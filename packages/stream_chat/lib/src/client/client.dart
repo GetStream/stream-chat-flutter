@@ -29,7 +29,6 @@ import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/location.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/version.dart';
@@ -64,12 +63,8 @@ class StreamChatClient {
   StreamChatClient(
     String apiKey, {
     this.logLevel = Level.WARNING,
-    LogHandlerFunction? logHandlerFunction,
+    this.logHandlerFunction = StreamChatClient.defaultLogHandler,
     RetryPolicy? retryPolicy,
-    @Deprecated('''
-    Location is now deprecated in favor of the new edge server. Will be removed in v4.0.0.
-    Read more here: https://getstream.io/blog/chat-edge-infrastructure
-    ''') Location? location,
     String? baseURL,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
@@ -77,7 +72,6 @@ class StreamChatClient {
     WebSocket? ws,
     AttachmentFileUploader? attachmentFileUploader,
   }) {
-    this.logHandlerFunction = logHandlerFunction ?? _defaultLogHandler;
     logger.info('Initiating new StreamChatClient');
 
     final options = StreamHttpClientOptions(
@@ -104,7 +98,9 @@ class StreamChatClient {
           tokenManager: _tokenManager,
           handler: handleEvent,
           logger: detachedLogger('🔌'),
-          queryParameters: {'X-Stream-Client': defaultUserAgent},
+          queryParameters: {
+            'X-Stream-Client': '$defaultUserAgent-$packageVersion',
+          },
         );
 
     _retryPolicy = retryPolicy ??
@@ -130,12 +126,14 @@ class StreamChatClient {
   }
 
   /// Default user agent for all requests
-  static String defaultUserAgent = 'stream-chat-dart-client-'
-      '${CurrentPlatform.name}-'
-      '${PACKAGE_VERSION.split('+')[0]}';
+  static String defaultUserAgent =
+      'stream-chat-dart-client-${CurrentPlatform.name}';
 
-  /// Additionals headers for all requests
+  /// Additional headers for all requests
   static Map<String, Object?> additionalHeaders = {};
+
+  /// The current package version
+  static const packageVersion = PACKAGE_VERSION;
 
   ChatPersistenceClient? _originalChatPersistenceClient;
 
@@ -189,7 +187,7 @@ class StreamChatClient {
   /// final client = StreamChatClient("stream-chat-api-key",
   /// logHandlerFunction: myLogHandlerFunction);
   ///```
-  late LogHandlerFunction logHandlerFunction;
+  final LogHandlerFunction logHandlerFunction;
 
   StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
 
@@ -214,17 +212,18 @@ class StreamChatClient {
   Stream<ConnectionStatus> get wsConnectionStatusStream =>
       _wsConnectionStatusController.stream.distinct();
 
-  LogHandlerFunction get _defaultLogHandler => (LogRecord record) {
-        print(
-          '${record.time} '
-          '${_levelEmojiMapper[record.level] ?? record.level.name} '
-          '${record.loggerName} ${record.message} ',
-        );
-        if (record.error != null) print(record.error);
-        if (record.stackTrace != null) print(record.stackTrace);
-      };
+  /// Default log handler function for the [StreamChatClient] logger.
+  static void defaultLogHandler(LogRecord record) {
+    print(
+      '${record.time} '
+      '${_levelEmojiMapper[record.level] ?? record.level.name} '
+      '${record.loggerName} ${record.message} ',
+    );
+    if (record.error != null) print(record.error);
+    if (record.stackTrace != null) print(record.stackTrace);
+  }
 
-  ///
+  /// Default logger for the [StreamChatClient].
   Logger detachedLogger(String name) => Logger.detached(name)
     ..level = logLevel
     ..onRecord.listen(logHandlerFunction);
@@ -328,7 +327,9 @@ class StreamChatClient {
         _chatPersistenceClient = _originalChatPersistenceClient;
         await _chatPersistenceClient!.connect(ownUser.id);
       }
-      final connectedUser = await openConnection();
+      final connectedUser = await openConnection(
+        includeUserDetailsInConnectCall: true,
+      );
       return state.currentUser = connectedUser;
     } catch (e, stk) {
       if (e is StreamWebSocketError && e.isRetriable) {
@@ -341,7 +342,11 @@ class StreamChatClient {
   }
 
   /// Creates a new WebSocket connection with the current user.
-  Future<OwnUser> openConnection() async {
+  /// If [includeUserDetailsInConnectCall] is true it will include the current
+  /// user details in the connect call.
+  Future<OwnUser> openConnection({
+    bool includeUserDetailsInConnectCall = false,
+  }) async {
     assert(
       state.currentUser != null,
       'User is not set on client, '
@@ -371,7 +376,10 @@ class StreamChatClient {
         _ws.connectionStatusStream.skip(1).listen(_connectionStatusHandler);
 
     try {
-      final event = await _ws.connect(user);
+      final event = await _ws.connect(
+        user,
+        includeUserDetails: includeUserDetailsInConnectCall,
+      );
       return user.merge(event.me);
     } catch (e, stk) {
       logger.severe('error connecting ws', e, stk);
@@ -417,6 +425,7 @@ class StreamChatClient {
   }
 
   void _connectionStatusHandler(ConnectionStatus status) async {
+    final previousState = wsConnectionStatus;
     final currentState = _wsConnectionStatus = status;
 
     handleEvent(Event(
@@ -424,7 +433,8 @@ class StreamChatClient {
       online: status == ConnectionStatus.connected,
     ));
 
-    if (currentState == ConnectionStatus.connected) {
+    if (currentState == ConnectionStatus.connected &&
+        previousState != ConnectionStatus.connected) {
       // connection recovered
       final cids = state.channels.keys.toList(growable: false);
       if (cids.isNotEmpty) {
@@ -612,7 +622,7 @@ class StreamChatClient {
     final channels = res.channels;
 
     final users = channels
-        .expand((it) => it.members)
+        .expand((it) => it.members ?? <Member>[])
         .map((it) => it.user)
         .toList(growable: false);
 
@@ -722,6 +732,7 @@ class StreamChatClient {
     String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) =>
       _chatApi.fileUploader.sendFile(
         file,
@@ -729,6 +740,7 @@ class StreamChatClient {
         channelType,
         onSendProgress: onSendProgress,
         cancelToken: cancelToken,
+        extraData: extraData,
       );
 
   /// Send a [image] to the [channelId] of type [channelType]
@@ -738,6 +750,7 @@ class StreamChatClient {
     String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) =>
       _chatApi.fileUploader.sendImage(
         image,
@@ -745,6 +758,7 @@ class StreamChatClient {
         channelType,
         onSendProgress: onSendProgress,
         cancelToken: cancelToken,
+        extraData: extraData,
       );
 
   /// Delete a file from this channel
@@ -753,12 +767,14 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) =>
       _chatApi.fileUploader.deleteFile(
         url,
         channelId,
         channelType,
         cancelToken: cancelToken,
+        extraData: extraData,
       );
 
   /// Delete an image from this channel
@@ -767,12 +783,14 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
   }) =>
       _chatApi.fileUploader.deleteImage(
         url,
         channelId,
         channelType,
         cancelToken: cancelToken,
+        extraData: extraData,
       );
 
   /// Replaces the [channelId] of type [ChannelType] data with [data].
@@ -809,8 +827,16 @@ class StreamChatClient {
       );
 
   /// Add a device for Push Notifications.
-  Future<EmptyResponse> addDevice(String id, PushProvider pushProvider) =>
-      _chatApi.device.addDevice(id, pushProvider);
+  Future<EmptyResponse> addDevice(
+    String id,
+    PushProvider pushProvider, {
+    String? pushProviderName,
+  }) =>
+      _chatApi.device.addDevice(
+        id,
+        pushProvider,
+        pushProviderName: pushProviderName,
+      );
 
   /// Gets a list of user devices.
   Future<ListDevicesResponse> getDevices() => _chatApi.device.getDevices();
@@ -938,14 +964,23 @@ class StreamChatClient {
         channelType,
       );
 
-  /// Removes all messages from the channel
+  /// Removes all messages from the channel up to [truncatedAt] or now if
+  /// [truncatedAt] is not provided.
+  /// If [skipPush] is true, no push notification will be sent.
+  /// [Message] is the system message that will be sent to the channel.
   Future<EmptyResponse> truncateChannel(
     String channelId,
-    String channelType,
-  ) =>
+    String channelType, {
+    Message? message,
+    bool? skipPush,
+    DateTime? truncatedAt,
+  }) =>
       _chatApi.channel.truncateChannel(
         channelId,
         channelType,
+        message: message,
+        skipPush: skipPush,
+        truncatedAt: truncatedAt,
       );
 
   /// Mutes the channel
@@ -1212,12 +1247,14 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     bool skipPush = false,
+    bool skipEnrichUrl = false,
   }) =>
       _chatApi.message.sendMessage(
         channelId,
         channelType,
         message,
         skipPush: skipPush,
+        skipEnrichUrl: skipEnrichUrl,
       );
 
   /// Lists all the message replies for the [parentId]
@@ -1241,8 +1278,14 @@ class StreamChatClient {
       );
 
   /// Update the given message
-  Future<UpdateMessageResponse> updateMessage(Message message) =>
-      _chatApi.message.updateMessage(message);
+  Future<UpdateMessageResponse> updateMessage(
+    Message message, {
+    bool skipEnrichUrl = false,
+  }) =>
+      _chatApi.message.updateMessage(
+        message,
+        skipEnrichUrl: skipEnrichUrl,
+      );
 
   /// Partially update the given [messageId]
   /// Use [set] to define values to be set
@@ -1251,11 +1294,13 @@ class StreamChatClient {
     String messageId, {
     Map<String, Object?>? set,
     List<String>? unset,
+    bool skipEnrichUrl = false,
   }) =>
       _chatApi.message.partialUpdateMessage(
         messageId,
         set: set,
         unset: unset,
+        skipEnrichUrl: skipEnrichUrl,
       );
 
   /// Deletes the given message
@@ -1448,13 +1493,12 @@ class ClientState {
   }
 
   void _listenChannelHidden() {
-    _subscriptions.add(_client.on(EventType.channelHidden).listen((event) {
-      final cid = event.cid;
-
-      if (cid != null) {
-        _client.chatPersistenceClient?.deleteChannels([cid]);
-      }
-      channels = channels..removeWhere((cid, ch) => cid == event.cid);
+    _subscriptions
+        .add(_client.on(EventType.channelHidden).listen((event) async {
+      final eventChannel = event.channel!;
+      await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
+      channels[eventChannel.cid]?.dispose();
+      channels = channels..remove(eventChannel.cid);
     }));
   }
 
@@ -1520,18 +1564,6 @@ class ClientState {
 
   /// The current user as a stream
   Stream<OwnUser?> get currentUserStream => _currentUserController.stream;
-
-  // coverage:ignore-start
-
-  /// The current user
-  @Deprecated('Use `.currentUser` instead, Will be removed in future releases')
-  OwnUser? get user => _currentUserController.valueOrNull;
-
-  /// The current user as a stream
-  @Deprecated(
-    'Use `.currentUserStream` instead, Will be removed in future releases',
-  )
-  Stream<OwnUser?> get userStream => _currentUserController.stream;
 
   // coverage:ignore-end
 

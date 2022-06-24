@@ -3,8 +3,7 @@ part of 'stream_chat_localizations.dart';
 /// The translations for Korean (`ko`).
 class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for Korean.
-  const StreamChatLocalizationsKo({String localeName = 'ko'})
-      : super(localeName: localeName);
+  const StreamChatLocalizationsKo({super.localeName = 'ko'});
 
   @override
   String get launchUrlError => 'URL을 시작할 수 없습니다';
@@ -59,6 +58,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
     if (pinnedByCurrentUser) return '당신의 핀';
     return '${pinnedBy.name}의 핀';
   }
+
+  @override
+  String get sendMessagePermissionError => '메시지를 보낼 수 있는 권한이 없습니다';
 
   @override
   String get emptyMessagesText => '현재 메시지가 없습니다';
@@ -352,6 +354,24 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => '슬로모드 켜짐';
 
   @override
+  @override
+  String get viewLibrary => '라이브러리 보기';
+
+  @override
   String attachmentLimitExceedError(int limit) =>
       '첨부 파일 제한 초과: $limit 이상의 첨부 파일을 추가할 수 없습니다';
+
+  @override
+  String get linkDisabledDetails => '이 대화에서는 링크를 보낼 수 없습니다.';
+
+  @override
+  String get linkDisabledError => '링크가 비활성화되었습니다.';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '읽지 않은 메시지 1개';
+    }
+    return '읽지 않은 메시지 $unreadCount개';
+  }
 }

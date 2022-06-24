@@ -5,14 +5,21 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
   cupertino_icons: ^1.0.3
   flutter:
     sdk: flutter
-  stream_chat_flutter: ^2.2.1
-  stream_chat_localizations: ^1.1.0
+  stream_chat_flutter:
+    path: ../../stream_chat_flutter
+  stream_chat_localizations: 
+    path: ../
+
+
+dependency_overrides: 
+  stream_chat_flutter: 
+    path: ../../stream_chat_flutter
 
 dev_dependencies:
   flutter_test:

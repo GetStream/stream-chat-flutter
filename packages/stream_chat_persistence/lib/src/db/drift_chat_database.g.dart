@@ -6,7 +6,7 @@ part of 'drift_chat_database.dart';
 // MoorGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
+// ignore_for_file: type=lint
 class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   /// The id of this channel
   final String id;
@@ -16,6 +16,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
 
   /// The cid of this channel
   final String cid;
+
+  /// List of user permissions on this channel
+  final List<String>? ownCapabilities;
 
   /// The channel configuration data
   final Map<String, dynamic> config;
@@ -47,6 +50,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       {required this.id,
       required this.type,
       required this.cid,
+      this.ownCapabilities,
       required this.config,
       required this.frozen,
       this.lastMessageAt,
@@ -65,7 +69,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
       cid: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}cid'])!,
-      config: $ChannelsTable.$converter0.mapToDart(const StringType()
+      ownCapabilities: $ChannelsTable.$converter0.mapToDart(const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}own_capabilities'])),
+      config: $ChannelsTable.$converter1.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}config']))!,
       frozen: const BoolType()
           .mapFromDatabaseResponse(data['${effectivePrefix}frozen'])!,
@@ -81,7 +87,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           .mapFromDatabaseResponse(data['${effectivePrefix}member_count'])!,
       createdById: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_by_id']),
-      extraData: $ChannelsTable.$converter1.mapToDart(const StringType()
+      extraData: $ChannelsTable.$converter2.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
@@ -91,8 +97,13 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
     map['id'] = Variable<String>(id);
     map['type'] = Variable<String>(type);
     map['cid'] = Variable<String>(cid);
-    {
+    if (!nullToAbsent || ownCapabilities != null) {
       final converter = $ChannelsTable.$converter0;
+      map['own_capabilities'] =
+          Variable<String?>(converter.mapToSql(ownCapabilities));
+    }
+    {
+      final converter = $ChannelsTable.$converter1;
       map['config'] = Variable<String>(converter.mapToSql(config)!);
     }
     map['frozen'] = Variable<bool>(frozen);
@@ -109,7 +120,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       map['created_by_id'] = Variable<String?>(createdById);
     }
     if (!nullToAbsent || extraData != null) {
-      final converter = $ChannelsTable.$converter1;
+      final converter = $ChannelsTable.$converter2;
       map['extra_data'] = Variable<String?>(converter.mapToSql(extraData));
     }
     return map;
@@ -122,6 +133,8 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       id: serializer.fromJson<String>(json['id']),
       type: serializer.fromJson<String>(json['type']),
       cid: serializer.fromJson<String>(json['cid']),
+      ownCapabilities:
+          serializer.fromJson<List<String>?>(json['ownCapabilities']),
       config: serializer.fromJson<Map<String, dynamic>>(json['config']),
       frozen: serializer.fromJson<bool>(json['frozen']),
       lastMessageAt: serializer.fromJson<DateTime?>(json['lastMessageAt']),
@@ -140,6 +153,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       'id': serializer.toJson<String>(id),
       'type': serializer.toJson<String>(type),
       'cid': serializer.toJson<String>(cid),
+      'ownCapabilities': serializer.toJson<List<String>?>(ownCapabilities),
       'config': serializer.toJson<Map<String, dynamic>>(config),
       'frozen': serializer.toJson<bool>(frozen),
       'lastMessageAt': serializer.toJson<DateTime?>(lastMessageAt),
@@ -156,6 +170,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           {String? id,
           String? type,
           String? cid,
+          Value<List<String>?> ownCapabilities = const Value.absent(),
           Map<String, dynamic>? config,
           bool? frozen,
           Value<DateTime?> lastMessageAt = const Value.absent(),
@@ -169,6 +184,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
         id: id ?? this.id,
         type: type ?? this.type,
         cid: cid ?? this.cid,
+        ownCapabilities: ownCapabilities.present
+            ? ownCapabilities.value
+            : this.ownCapabilities,
         config: config ?? this.config,
         frozen: frozen ?? this.frozen,
         lastMessageAt:
@@ -186,6 +204,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           ..write('id: $id, ')
           ..write('type: $type, ')
           ..write('cid: $cid, ')
+          ..write('ownCapabilities: $ownCapabilities, ')
           ..write('config: $config, ')
           ..write('frozen: $frozen, ')
           ..write('lastMessageAt: $lastMessageAt, ')
@@ -200,8 +219,20 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   }
 
   @override
-  int get hashCode => Object.hash(id, type, cid, config, frozen, lastMessageAt,
-      createdAt, updatedAt, deletedAt, memberCount, createdById, extraData);
+  int get hashCode => Object.hash(
+      id,
+      type,
+      cid,
+      ownCapabilities,
+      config,
+      frozen,
+      lastMessageAt,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      memberCount,
+      createdById,
+      extraData);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -209,6 +240,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           other.id == this.id &&
           other.type == this.type &&
           other.cid == this.cid &&
+          other.ownCapabilities == this.ownCapabilities &&
           other.config == this.config &&
           other.frozen == this.frozen &&
           other.lastMessageAt == this.lastMessageAt &&
@@ -224,6 +256,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
   final Value<String> id;
   final Value<String> type;
   final Value<String> cid;
+  final Value<List<String>?> ownCapabilities;
   final Value<Map<String, dynamic>> config;
   final Value<bool> frozen;
   final Value<DateTime?> lastMessageAt;
@@ -237,6 +270,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     this.id = const Value.absent(),
     this.type = const Value.absent(),
     this.cid = const Value.absent(),
+    this.ownCapabilities = const Value.absent(),
     this.config = const Value.absent(),
     this.frozen = const Value.absent(),
     this.lastMessageAt = const Value.absent(),
@@ -251,6 +285,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     required String id,
     required String type,
     required String cid,
+    this.ownCapabilities = const Value.absent(),
     required Map<String, dynamic> config,
     this.frozen = const Value.absent(),
     this.lastMessageAt = const Value.absent(),
@@ -268,6 +303,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     Expression<String>? id,
     Expression<String>? type,
     Expression<String>? cid,
+    Expression<List<String>?>? ownCapabilities,
     Expression<Map<String, dynamic>>? config,
     Expression<bool>? frozen,
     Expression<DateTime?>? lastMessageAt,
@@ -282,6 +318,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       if (id != null) 'id': id,
       if (type != null) 'type': type,
       if (cid != null) 'cid': cid,
+      if (ownCapabilities != null) 'own_capabilities': ownCapabilities,
       if (config != null) 'config': config,
       if (frozen != null) 'frozen': frozen,
       if (lastMessageAt != null) 'last_message_at': lastMessageAt,
@@ -298,6 +335,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       {Value<String>? id,
       Value<String>? type,
       Value<String>? cid,
+      Value<List<String>?>? ownCapabilities,
       Value<Map<String, dynamic>>? config,
       Value<bool>? frozen,
       Value<DateTime?>? lastMessageAt,
@@ -311,6 +349,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       id: id ?? this.id,
       type: type ?? this.type,
       cid: cid ?? this.cid,
+      ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       config: config ?? this.config,
       frozen: frozen ?? this.frozen,
       lastMessageAt: lastMessageAt ?? this.lastMessageAt,
@@ -335,8 +374,13 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     if (cid.present) {
       map['cid'] = Variable<String>(cid.value);
     }
-    if (config.present) {
+    if (ownCapabilities.present) {
       final converter = $ChannelsTable.$converter0;
+      map['own_capabilities'] =
+          Variable<String?>(converter.mapToSql(ownCapabilities.value));
+    }
+    if (config.present) {
+      final converter = $ChannelsTable.$converter1;
       map['config'] = Variable<String>(converter.mapToSql(config.value)!);
     }
     if (frozen.present) {
@@ -361,7 +405,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       map['created_by_id'] = Variable<String?>(createdById.value);
     }
     if (extraData.present) {
-      final converter = $ChannelsTable.$converter1;
+      final converter = $ChannelsTable.$converter2;
       map['extra_data'] =
           Variable<String?>(converter.mapToSql(extraData.value));
     }
@@ -374,6 +418,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
           ..write('id: $id, ')
           ..write('type: $type, ')
           ..write('cid: $cid, ')
+          ..write('ownCapabilities: $ownCapabilities, ')
           ..write('config: $config, ')
           ..write('frozen: $frozen, ')
           ..write('lastMessageAt: $lastMessageAt, ')
@@ -390,9 +435,10 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
 
 class $ChannelsTable extends Channels
     with TableInfo<$ChannelsTable, ChannelEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ChannelsTable(this._db, [this._alias]);
+  $ChannelsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
@@ -408,12 +454,20 @@ class $ChannelsTable extends Channels
   late final GeneratedColumn<String?> cid = GeneratedColumn<String?>(
       'cid', aliasedName, false,
       type: const StringType(), requiredDuringInsert: true);
+  final VerificationMeta _ownCapabilitiesMeta =
+      const VerificationMeta('ownCapabilities');
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String?>
+      ownCapabilities = GeneratedColumn<String?>(
+              'own_capabilities', aliasedName, true,
+              type: const StringType(), requiredDuringInsert: false)
+          .withConverter<List<String>>($ChannelsTable.$converter0);
   final VerificationMeta _configMeta = const VerificationMeta('config');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String?>
       config = GeneratedColumn<String?>('config', aliasedName, false,
               type: const StringType(), requiredDuringInsert: true)
-          .withConverter<Map<String, dynamic>>($ChannelsTable.$converter0);
+          .withConverter<Map<String, dynamic>>($ChannelsTable.$converter1);
   final VerificationMeta _frozenMeta = const VerificationMeta('frozen');
   @override
   late final GeneratedColumn<bool?> frozen = GeneratedColumn<bool?>(
@@ -466,12 +520,13 @@ class $ChannelsTable extends Channels
   late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
       extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
               type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, Object?>>($ChannelsTable.$converter1);
+          .withConverter<Map<String, Object?>>($ChannelsTable.$converter2);
   @override
   List<GeneratedColumn> get $columns => [
         id,
         type,
         cid,
+        ownCapabilities,
         config,
         frozen,
         lastMessageAt,
@@ -508,6 +563,7 @@ class $ChannelsTable extends Channels
     } else if (isInserting) {
       context.missing(_cidMeta);
     }
+    context.handle(_ownCapabilitiesMeta, const VerificationResult.success());
     context.handle(_configMeta, const VerificationResult.success());
     if (data.containsKey('frozen')) {
       context.handle(_frozenMeta,
@@ -557,12 +613,14 @@ class $ChannelsTable extends Channels
 
   @override
   $ChannelsTable createAlias(String alias) {
-    return $ChannelsTable(_db, alias);
+    return $ChannelsTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<Map<String, dynamic>, String> $converter0 =
+  static TypeConverter<List<String>, String> $converter0 =
+      ListConverter<String>();
+  static TypeConverter<Map<String, dynamic>, String> $converter1 =
       MapConverter();
-  static TypeConverter<Map<String, Object?>, String> $converter1 =
+  static TypeConverter<Map<String, Object?>, String> $converter2 =
       MapConverter<Object?>();
 }
 
@@ -1337,9 +1395,10 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
 
 class $MessagesTable extends Messages
     with TableInfo<$MessagesTable, MessageEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $MessagesTable(this._db, [this._alias]);
+  $MessagesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
@@ -1647,7 +1706,7 @@ class $MessagesTable extends Messages
 
   @override
   $MessagesTable createAlias(String alias) {
-    return $MessagesTable(_db, alias);
+    return $MessagesTable(attachedDatabase, alias);
   }
 
   static TypeConverter<List<String>, String> $converter0 =
@@ -2442,9 +2501,10 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
 
 class $PinnedMessagesTable extends PinnedMessages
     with TableInfo<$PinnedMessagesTable, PinnedMessageEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $PinnedMessagesTable(this._db, [this._alias]);
+  $PinnedMessagesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
@@ -2755,7 +2815,7 @@ class $PinnedMessagesTable extends PinnedMessages
 
   @override
   $PinnedMessagesTable createAlias(String alias) {
-    return $PinnedMessagesTable(_db, alias);
+    return $PinnedMessagesTable(attachedDatabase, alias);
   }
 
   static TypeConverter<List<String>, String> $converter0 =
@@ -3005,9 +3065,10 @@ class PinnedMessageReactionsCompanion
 
 class $PinnedMessageReactionsTable extends PinnedMessageReactions
     with TableInfo<$PinnedMessageReactionsTable, PinnedMessageReactionEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $PinnedMessageReactionsTable(this._db, [this._alias]);
+  $PinnedMessageReactionsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
@@ -3100,7 +3161,7 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
 
   @override
   $PinnedMessageReactionsTable createAlias(String alias) {
-    return $PinnedMessageReactionsTable(_db, alias);
+    return $PinnedMessageReactionsTable(attachedDatabase, alias);
   }
 
   static TypeConverter<Map<String, Object?>, String> $converter0 =
@@ -3334,9 +3395,10 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
 
 class $ReactionsTable extends Reactions
     with TableInfo<$ReactionsTable, ReactionEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ReactionsTable(this._db, [this._alias]);
+  $ReactionsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
@@ -3426,7 +3488,7 @@ class $ReactionsTable extends Reactions
 
   @override
   $ReactionsTable createAlias(String alias) {
-    return $ReactionsTable(_db, alias);
+    return $ReactionsTable(attachedDatabase, alias);
   }
 
   static TypeConverter<Map<String, Object?>, String> $converter0 =
@@ -3736,9 +3798,10 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
 }
 
 class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $UsersTable(this._db, [this._alias]);
+  $UsersTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
@@ -3865,7 +3928,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
 
   @override
   $UsersTable createAlias(String alias) {
-    return $UsersTable(_db, alias);
+    return $UsersTable(attachedDatabase, alias);
   }
 
   static TypeConverter<Map<String, Object?>, String> $converter0 =
@@ -3881,6 +3944,9 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
 
   /// The role of the user in the channel
   final String? role;
+
+  /// The role of the user in the channel
+  final String? channelRole;
 
   /// The date on which the user accepted the invite to the channel
   final DateTime? inviteAcceptedAt;
@@ -3909,6 +3975,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       {required this.userId,
       required this.channelCid,
       this.role,
+      this.channelRole,
       this.inviteAcceptedAt,
       this.inviteRejectedAt,
       required this.invited,
@@ -3926,6 +3993,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid'])!,
       role: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}role']),
+      channelRole: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}channel_role']),
       inviteAcceptedAt: const DateTimeType().mapFromDatabaseResponse(
           data['${effectivePrefix}invite_accepted_at']),
       inviteRejectedAt: const DateTimeType().mapFromDatabaseResponse(
@@ -3952,6 +4021,9 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     if (!nullToAbsent || role != null) {
       map['role'] = Variable<String?>(role);
     }
+    if (!nullToAbsent || channelRole != null) {
+      map['channel_role'] = Variable<String?>(channelRole);
+    }
     if (!nullToAbsent || inviteAcceptedAt != null) {
       map['invite_accepted_at'] = Variable<DateTime?>(inviteAcceptedAt);
     }
@@ -3974,6 +4046,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       userId: serializer.fromJson<String>(json['userId']),
       channelCid: serializer.fromJson<String>(json['channelCid']),
       role: serializer.fromJson<String?>(json['role']),
+      channelRole: serializer.fromJson<String?>(json['channelRole']),
       inviteAcceptedAt:
           serializer.fromJson<DateTime?>(json['inviteAcceptedAt']),
       inviteRejectedAt:
@@ -3993,6 +4066,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       'userId': serializer.toJson<String>(userId),
       'channelCid': serializer.toJson<String>(channelCid),
       'role': serializer.toJson<String?>(role),
+      'channelRole': serializer.toJson<String?>(channelRole),
       'inviteAcceptedAt': serializer.toJson<DateTime?>(inviteAcceptedAt),
       'inviteRejectedAt': serializer.toJson<DateTime?>(inviteRejectedAt),
       'invited': serializer.toJson<bool>(invited),
@@ -4008,6 +4082,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           {String? userId,
           String? channelCid,
           Value<String?> role = const Value.absent(),
+          Value<String?> channelRole = const Value.absent(),
           Value<DateTime?> inviteAcceptedAt = const Value.absent(),
           Value<DateTime?> inviteRejectedAt = const Value.absent(),
           bool? invited,
@@ -4020,6 +4095,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
         userId: userId ?? this.userId,
         channelCid: channelCid ?? this.channelCid,
         role: role.present ? role.value : this.role,
+        channelRole: channelRole.present ? channelRole.value : this.channelRole,
         inviteAcceptedAt: inviteAcceptedAt.present
             ? inviteAcceptedAt.value
             : this.inviteAcceptedAt,
@@ -4039,6 +4115,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           ..write('userId: $userId, ')
           ..write('channelCid: $channelCid, ')
           ..write('role: $role, ')
+          ..write('channelRole: $channelRole, ')
           ..write('inviteAcceptedAt: $inviteAcceptedAt, ')
           ..write('inviteRejectedAt: $inviteRejectedAt, ')
           ..write('invited: $invited, ')
@@ -4056,6 +4133,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       userId,
       channelCid,
       role,
+      channelRole,
       inviteAcceptedAt,
       inviteRejectedAt,
       invited,
@@ -4071,6 +4149,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           other.userId == this.userId &&
           other.channelCid == this.channelCid &&
           other.role == this.role &&
+          other.channelRole == this.channelRole &&
           other.inviteAcceptedAt == this.inviteAcceptedAt &&
           other.inviteRejectedAt == this.inviteRejectedAt &&
           other.invited == this.invited &&
@@ -4085,6 +4164,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
   final Value<String> userId;
   final Value<String> channelCid;
   final Value<String?> role;
+  final Value<String?> channelRole;
   final Value<DateTime?> inviteAcceptedAt;
   final Value<DateTime?> inviteRejectedAt;
   final Value<bool> invited;
@@ -4097,6 +4177,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     this.userId = const Value.absent(),
     this.channelCid = const Value.absent(),
     this.role = const Value.absent(),
+    this.channelRole = const Value.absent(),
     this.inviteAcceptedAt = const Value.absent(),
     this.inviteRejectedAt = const Value.absent(),
     this.invited = const Value.absent(),
@@ -4110,6 +4191,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     required String userId,
     required String channelCid,
     this.role = const Value.absent(),
+    this.channelRole = const Value.absent(),
     this.inviteAcceptedAt = const Value.absent(),
     this.inviteRejectedAt = const Value.absent(),
     this.invited = const Value.absent(),
@@ -4124,6 +4206,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     Expression<String>? userId,
     Expression<String>? channelCid,
     Expression<String?>? role,
+    Expression<String?>? channelRole,
     Expression<DateTime?>? inviteAcceptedAt,
     Expression<DateTime?>? inviteRejectedAt,
     Expression<bool>? invited,
@@ -4137,6 +4220,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       if (userId != null) 'user_id': userId,
       if (channelCid != null) 'channel_cid': channelCid,
       if (role != null) 'role': role,
+      if (channelRole != null) 'channel_role': channelRole,
       if (inviteAcceptedAt != null) 'invite_accepted_at': inviteAcceptedAt,
       if (inviteRejectedAt != null) 'invite_rejected_at': inviteRejectedAt,
       if (invited != null) 'invited': invited,
@@ -4152,6 +4236,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       {Value<String>? userId,
       Value<String>? channelCid,
       Value<String?>? role,
+      Value<String?>? channelRole,
       Value<DateTime?>? inviteAcceptedAt,
       Value<DateTime?>? inviteRejectedAt,
       Value<bool>? invited,
@@ -4164,6 +4249,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       userId: userId ?? this.userId,
       channelCid: channelCid ?? this.channelCid,
       role: role ?? this.role,
+      channelRole: channelRole ?? this.channelRole,
       inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
       inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
       invited: invited ?? this.invited,
@@ -4186,6 +4272,9 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     }
     if (role.present) {
       map['role'] = Variable<String?>(role.value);
+    }
+    if (channelRole.present) {
+      map['channel_role'] = Variable<String?>(channelRole.value);
     }
     if (inviteAcceptedAt.present) {
       map['invite_accepted_at'] = Variable<DateTime?>(inviteAcceptedAt.value);
@@ -4220,6 +4309,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
           ..write('userId: $userId, ')
           ..write('channelCid: $channelCid, ')
           ..write('role: $role, ')
+          ..write('channelRole: $channelRole, ')
           ..write('inviteAcceptedAt: $inviteAcceptedAt, ')
           ..write('inviteRejectedAt: $inviteRejectedAt, ')
           ..write('invited: $invited, ')
@@ -4235,9 +4325,10 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
 
 class $MembersTable extends Members
     with TableInfo<$MembersTable, MemberEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $MembersTable(this._db, [this._alias]);
+  $MembersTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
@@ -4254,6 +4345,12 @@ class $MembersTable extends Members
   @override
   late final GeneratedColumn<String?> role = GeneratedColumn<String?>(
       'role', aliasedName, true,
+      type: const StringType(), requiredDuringInsert: false);
+  final VerificationMeta _channelRoleMeta =
+      const VerificationMeta('channelRole');
+  @override
+  late final GeneratedColumn<String?> channelRole = GeneratedColumn<String?>(
+      'channel_role', aliasedName, true,
       type: const StringType(), requiredDuringInsert: false);
   final VerificationMeta _inviteAcceptedAtMeta =
       const VerificationMeta('inviteAcceptedAt');
@@ -4320,6 +4417,7 @@ class $MembersTable extends Members
         userId,
         channelCid,
         role,
+        channelRole,
         inviteAcceptedAt,
         inviteRejectedAt,
         invited,
@@ -4355,6 +4453,12 @@ class $MembersTable extends Members
     if (data.containsKey('role')) {
       context.handle(
           _roleMeta, role.isAcceptableOrUnknown(data['role']!, _roleMeta));
+    }
+    if (data.containsKey('channel_role')) {
+      context.handle(
+          _channelRoleMeta,
+          channelRole.isAcceptableOrUnknown(
+              data['channel_role']!, _channelRoleMeta));
     }
     if (data.containsKey('invite_accepted_at')) {
       context.handle(
@@ -4409,7 +4513,7 @@ class $MembersTable extends Members
 
   @override
   $MembersTable createAlias(String alias) {
-    return $MembersTable(_db, alias);
+    return $MembersTable(attachedDatabase, alias);
   }
 }
 
@@ -4585,9 +4689,10 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
 }
 
 class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ReadsTable(this._db, [this._alias]);
+  $ReadsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _lastReadMeta = const VerificationMeta('lastRead');
   @override
   late final GeneratedColumn<DateTime?> lastRead = GeneratedColumn<DateTime?>(
@@ -4664,7 +4769,7 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
 
   @override
   $ReadsTable createAlias(String alias) {
-    return $ReadsTable(_db, alias);
+    return $ReadsTable(attachedDatabase, alias);
   }
 }
 
@@ -4789,9 +4894,10 @@ class ChannelQueriesCompanion extends UpdateCompanion<ChannelQueryEntity> {
 
 class $ChannelQueriesTable extends ChannelQueries
     with TableInfo<$ChannelQueriesTable, ChannelQueryEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ChannelQueriesTable(this._db, [this._alias]);
+  $ChannelQueriesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _queryHashMeta = const VerificationMeta('queryHash');
   @override
   late final GeneratedColumn<String?> queryHash = GeneratedColumn<String?>(
@@ -4840,7 +4946,7 @@ class $ChannelQueriesTable extends ChannelQueries
 
   @override
   $ChannelQueriesTable createAlias(String alias) {
-    return $ChannelQueriesTable(_db, alias);
+    return $ChannelQueriesTable(attachedDatabase, alias);
   }
 }
 
@@ -5105,9 +5211,10 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
 
 class $ConnectionEventsTable extends ConnectionEvents
     with TableInfo<$ConnectionEventsTable, ConnectionEventEntity> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ConnectionEventsTable(this._db, [this._alias]);
+  $ConnectionEventsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -5215,7 +5322,7 @@ class $ConnectionEventsTable extends ConnectionEvents
 
   @override
   $ConnectionEventsTable createAlias(String alias) {
-    return $ConnectionEventsTable(_db, alias);
+    return $ConnectionEventsTable(attachedDatabase, alias);
   }
 
   static TypeConverter<Map<String, dynamic>, String> $converter0 =

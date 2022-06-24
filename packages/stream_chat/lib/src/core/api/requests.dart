@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -69,6 +71,11 @@ class PaginationParams extends Equatable {
     this.greaterThanOrEqual,
     this.lessThan,
     this.lessThanOrEqual,
+    this.createdAtAfterOrEqual,
+    this.createdAtAfter,
+    this.createdAtBeforeOrEqual,
+    this.createdAtBefore,
+    this.createdAtAround,
   }) : assert(
           offset == null || offset == 0 || next == null,
           'Cannot specify non-zero `offset` with `next` parameter',
@@ -82,9 +89,11 @@ class PaginationParams extends Equatable {
   final int limit;
 
   /// The amount of items requested before message ID from the APIs.
+  @Deprecated('before is deprecated, use limit instead')
   final int before;
 
   /// The amount of items requested after message ID from the APIs.
+  @Deprecated('after is deprecated, use limit instead')
   final int after;
 
   /// The offset of requesting items.
@@ -113,6 +122,26 @@ class PaginationParams extends Equatable {
   @JsonKey(name: 'id_lte')
   final String? lessThanOrEqual;
 
+  /// Filter on createdAt greater than or equal the given value.
+  @JsonKey(name: 'created_at_after_or_equal')
+  final DateTime? createdAtAfterOrEqual;
+
+  /// Filter on createdAt greater than the given value.
+  @JsonKey(name: 'created_at_after')
+  final DateTime? createdAtAfter;
+
+  /// Filter on createdAt smaller than or equal the given value.
+  @JsonKey(name: 'created_at_before_or_equal')
+  final DateTime? createdAtBeforeOrEqual;
+
+  /// Filter on createdAt smaller than the given value.
+  @JsonKey(name: 'created_at_before')
+  final DateTime? createdAtBefore;
+
+  /// Filter on createdAt around the given value.
+  @JsonKey(name: 'created_at_around')
+  final DateTime? createdAtAround;
+
   /// Serialize model to json
   Map<String, dynamic> toJson() => _$PaginationParamsToJson(this);
 
@@ -128,6 +157,11 @@ class PaginationParams extends Equatable {
     String? greaterThanOrEqual,
     String? lessThan,
     String? lessThanOrEqual,
+    DateTime? createdAtAfterOrEqual,
+    DateTime? createdAtAfter,
+    DateTime? createdAtBeforeOrEqual,
+    DateTime? createdAtBefore,
+    DateTime? createdAtAround,
   }) =>
       PaginationParams(
         limit: limit ?? this.limit,
@@ -140,6 +174,13 @@ class PaginationParams extends Equatable {
         greaterThanOrEqual: greaterThanOrEqual ?? this.greaterThanOrEqual,
         lessThan: lessThan ?? this.lessThan,
         lessThanOrEqual: lessThanOrEqual ?? this.lessThanOrEqual,
+        createdAtAfterOrEqual:
+            createdAtAfterOrEqual ?? this.createdAtAfterOrEqual,
+        createdAtAfter: createdAtAfter ?? this.createdAtAfter,
+        createdAtBeforeOrEqual:
+            createdAtBeforeOrEqual ?? this.createdAtBeforeOrEqual,
+        createdAtBefore: createdAtBefore ?? this.createdAtBefore,
+        createdAtAround: createdAtAround ?? this.createdAtAround,
       );
 
   @override

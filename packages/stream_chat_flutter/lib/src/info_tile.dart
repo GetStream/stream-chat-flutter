@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// {@macro info_tile}
+@Deprecated("Use 'StreamInfoTile' instead")
+typedef InfoTile = StreamInfoTile;
+
+/// {@template info_tile}
 /// Tile to display a message, used in stream chat to display connection status
-class InfoTile extends StatelessWidget {
-  /// Constructor for creating an [InfoTile] widget
-  const InfoTile({
-    Key? key,
+/// {@endtemplate}
+class StreamInfoTile extends StatelessWidget {
+  /// Constructor for creating an [StreamInfoTile] widget
+  const StreamInfoTile({
+    super.key,
     required this.message,
     required this.child,
     required this.showMessage,
@@ -14,7 +20,7 @@ class InfoTile extends StatelessWidget {
     this.childAnchor,
     this.textStyle,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   /// String to display
   final String message;
@@ -40,11 +46,13 @@ class InfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
-    return PortalEntry(
+    return PortalTarget(
       visible: showMessage,
-      portalAnchor: tileAnchor ?? Alignment.topCenter,
-      childAnchor: childAnchor ?? Alignment.bottomCenter,
-      portal: Container(
+      anchor: Aligned(
+        follower: tileAnchor ?? Alignment.topCenter,
+        target: childAnchor ?? Alignment.bottomCenter,
+      ),
+      portalFollower: Container(
         height: 25,
         color: backgroundColor ??
             chatThemeData.colorTheme.textLowEmphasis.withOpacity(0.9),

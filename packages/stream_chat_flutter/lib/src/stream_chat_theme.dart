@@ -5,19 +5,16 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class StreamChatTheme extends InheritedWidget {
   /// Constructor for creating a [StreamChatTheme]
   const StreamChatTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(
-          key: key,
-          child: child,
-        );
+    required super.child,
+  });
 
   /// Theme data
   final StreamChatThemeData data;
 
   @override
-  bool updateShouldNotify(StreamChatTheme old) => data != old.data;
+  bool updateShouldNotify(StreamChatTheme oldWidget) => data != oldWidget.data;
 
   /// Use this method to get the current [StreamChatThemeData] instance
   static StreamChatThemeData of(BuildContext context) {
@@ -38,29 +35,29 @@ class StreamChatThemeData {
   /// Create a theme from scratch
   factory StreamChatThemeData({
     Brightness? brightness,
-    TextTheme? textTheme,
-    ColorTheme? colorTheme,
-    ChannelListHeaderThemeData? channelListHeaderTheme,
-    ChannelPreviewThemeData? channelPreviewTheme,
-    ChannelHeaderThemeData? channelHeaderTheme,
-    MessageThemeData? otherMessageTheme,
-    MessageThemeData? ownMessageTheme,
-    MessageInputThemeData? messageInputTheme,
+    StreamTextTheme? textTheme,
+    StreamColorTheme? colorTheme,
+    StreamChannelListHeaderThemeData? channelListHeaderTheme,
+    StreamChannelPreviewThemeData? channelPreviewTheme,
+    StreamChannelHeaderThemeData? channelHeaderTheme,
+    StreamMessageThemeData? otherMessageTheme,
+    StreamMessageThemeData? ownMessageTheme,
+    StreamMessageInputThemeData? messageInputTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     Widget Function(BuildContext, User)? placeholderUserImage,
     IconThemeData? primaryIconTheme,
-    List<ReactionIcon>? reactionIcons,
-    GalleryHeaderThemeData? imageHeaderTheme,
-    GalleryFooterThemeData? imageFooterTheme,
-    MessageListViewThemeData? messageListViewTheme,
-    ChannelListViewThemeData? channelListViewTheme,
-    UserListViewThemeData? userListViewTheme,
-    MessageSearchListViewThemeData? messageSearchListViewTheme,
+    List<StreamReactionIcon>? reactionIcons,
+    StreamGalleryHeaderThemeData? imageHeaderTheme,
+    StreamGalleryFooterThemeData? imageFooterTheme,
+    StreamMessageListViewThemeData? messageListViewTheme,
+    StreamChannelListViewThemeData? channelListViewTheme,
+    StreamUserListViewThemeData? userListViewTheme,
+    StreamMessageSearchListViewThemeData? messageSearchListViewTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
-    textTheme ??= isDark ? TextTheme.dark() : TextTheme.light();
-    colorTheme ??= isDark ? ColorTheme.dark() : ColorTheme.light();
+    textTheme ??= isDark ? StreamTextTheme.dark() : StreamTextTheme.light();
+    colorTheme ??= isDark ? StreamColorTheme.dark() : StreamColorTheme.light();
 
     final defaultData = StreamChatThemeData.fromColorAndTextTheme(
       colorTheme,
@@ -133,14 +130,14 @@ class StreamChatThemeData {
 
   /// Create theme from color and text theme
   factory StreamChatThemeData.fromColorAndTextTheme(
-    ColorTheme colorTheme,
-    TextTheme textTheme,
+    StreamColorTheme colorTheme,
+    StreamTextTheme textTheme,
   ) {
     final accentColor = colorTheme.accentPrimary;
     final iconTheme =
         IconThemeData(color: colorTheme.textHighEmphasis.withOpacity(0.5));
-    final channelHeaderTheme = ChannelHeaderThemeData(
-      avatarTheme: AvatarThemeData(
+    final channelHeaderTheme = StreamChannelHeaderThemeData(
+      avatarTheme: StreamAvatarThemeData(
         borderRadius: BorderRadius.circular(20),
         constraints: const BoxConstraints.tightFor(
           height: 40,
@@ -153,9 +150,9 @@ class StreamChatThemeData {
         color: const Color(0xff7A7A7A),
       ),
     );
-    final channelPreviewTheme = ChannelPreviewThemeData(
+    final channelPreviewTheme = StreamChannelPreviewThemeData(
       unreadCounterColor: colorTheme.accentError,
-      avatarTheme: AvatarThemeData(
+      avatarTheme: StreamAvatarThemeData(
         borderRadius: BorderRadius.circular(20),
         constraints: const BoxConstraints.tightFor(
           height: 40,
@@ -176,14 +173,14 @@ class StreamChatThemeData {
       colorTheme: colorTheme,
       primaryIconTheme: iconTheme,
       defaultUserImage: (context, user) => Center(
-        child: GradientAvatar(
+        child: StreamGradientAvatar(
           name: user.name,
           userId: user.id,
         ),
       ),
       channelPreviewTheme: channelPreviewTheme,
-      channelListHeaderTheme: ChannelListHeaderThemeData(
-        avatarTheme: AvatarThemeData(
+      channelListHeaderTheme: StreamChannelListHeaderThemeData(
+        avatarTheme: StreamAvatarThemeData(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
             height: 40,
@@ -194,7 +191,7 @@ class StreamChatThemeData {
         titleStyle: textTheme.headlineBold,
       ),
       channelHeaderTheme: channelHeaderTheme,
-      ownMessageTheme: MessageThemeData(
+      ownMessageTheme: StreamMessageThemeData(
         messageAuthorStyle:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         messageTextStyle: textTheme.body,
@@ -206,7 +203,7 @@ class StreamChatThemeData {
         reactionsBorderColor: colorTheme.borders,
         reactionsMaskColor: colorTheme.appBg,
         messageBorderColor: colorTheme.disabled,
-        avatarTheme: AvatarThemeData(
+        avatarTheme: StreamAvatarThemeData(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
             height: 32,
@@ -218,7 +215,7 @@ class StreamChatThemeData {
         ),
         linkBackgroundColor: colorTheme.linkBg,
       ),
-      otherMessageTheme: MessageThemeData(
+      otherMessageTheme: StreamMessageThemeData(
         reactionsBackgroundColor: colorTheme.disabled,
         reactionsBorderColor: colorTheme.barsBg,
         reactionsMaskColor: colorTheme.appBg,
@@ -233,7 +230,7 @@ class StreamChatThemeData {
         ),
         messageBackgroundColor: colorTheme.barsBg,
         messageBorderColor: colorTheme.borders,
-        avatarTheme: AvatarThemeData(
+        avatarTheme: StreamAvatarThemeData(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
             height: 32,
@@ -242,7 +239,7 @@ class StreamChatThemeData {
         ),
         linkBackgroundColor: colorTheme.linkBg,
       ),
-      messageInputTheme: MessageInputThemeData(
+      messageInputTheme: StreamMessageInputThemeData(
         borderRadius: BorderRadius.circular(20),
         sendAnimationDuration: const Duration(milliseconds: 300),
         actionButtonColor: colorTheme.accentPrimary,
@@ -252,6 +249,7 @@ class StreamChatThemeData {
         sendButtonIdleColor: colorTheme.disabled,
         inputBackgroundColor: colorTheme.barsBg,
         inputTextStyle: textTheme.body,
+        linkHighlightColor: colorTheme.accentPrimary,
         idleBorderGradient: LinearGradient(
           colors: [
             colorTheme.disabled,
@@ -266,7 +264,7 @@ class StreamChatThemeData {
         ),
       ),
       reactionIcons: [
-        ReactionIcon(
+        StreamReactionIcon(
           type: 'love',
           builder: (context, highlighted, size) {
             final theme = StreamChatTheme.of(context);
@@ -278,7 +276,7 @@ class StreamChatThemeData {
             );
           },
         ),
-        ReactionIcon(
+        StreamReactionIcon(
           type: 'like',
           builder: (context, highlighted, size) {
             final theme = StreamChatTheme.of(context);
@@ -290,7 +288,7 @@ class StreamChatThemeData {
             );
           },
         ),
-        ReactionIcon(
+        StreamReactionIcon(
           type: 'sad',
           builder: (context, highlighted, size) {
             final theme = StreamChatTheme.of(context);
@@ -302,7 +300,7 @@ class StreamChatThemeData {
             );
           },
         ),
-        ReactionIcon(
+        StreamReactionIcon(
           type: 'haha',
           builder: (context, highlighted, size) {
             final theme = StreamChatTheme.of(context);
@@ -314,7 +312,7 @@ class StreamChatThemeData {
             );
           },
         ),
-        ReactionIcon(
+        StreamReactionIcon(
           type: 'wow',
           builder: (context, highlighted, size) {
             final theme = StreamChatTheme.of(context);
@@ -327,7 +325,7 @@ class StreamChatThemeData {
           },
         ),
       ],
-      galleryHeaderTheme: GalleryHeaderThemeData(
+      galleryHeaderTheme: StreamGalleryHeaderThemeData(
         closeButtonColor: colorTheme.textHighEmphasis,
         backgroundColor: channelHeaderTheme.color,
         iconMenuPointColor: colorTheme.textHighEmphasis,
@@ -335,7 +333,7 @@ class StreamChatThemeData {
         subtitleTextStyle: channelPreviewTheme.subtitleStyle,
         bottomSheetBarrierColor: colorTheme.overlay,
       ),
-      galleryFooterTheme: GalleryFooterThemeData(
+      galleryFooterTheme: StreamGalleryFooterThemeData(
         backgroundColor: colorTheme.barsBg,
         shareIconColor: colorTheme.textHighEmphasis,
         titleTextStyle: textTheme.headlineBold,
@@ -345,52 +343,52 @@ class StreamChatThemeData {
         bottomSheetPhotosTextStyle: textTheme.headlineBold,
         bottomSheetCloseIconColor: colorTheme.textHighEmphasis,
       ),
-      messageListViewTheme: MessageListViewThemeData(
+      messageListViewTheme: StreamMessageListViewThemeData(
         backgroundColor: colorTheme.barsBg,
       ),
-      channelListViewTheme: ChannelListViewThemeData(
+      channelListViewTheme: StreamChannelListViewThemeData(
         backgroundColor: colorTheme.appBg,
       ),
-      userListViewTheme: UserListViewThemeData(
+      userListViewTheme: StreamUserListViewThemeData(
         backgroundColor: colorTheme.appBg,
       ),
-      messageSearchListViewTheme: MessageSearchListViewThemeData(
+      messageSearchListViewTheme: StreamMessageSearchListViewThemeData(
         backgroundColor: colorTheme.appBg,
       ),
     );
   }
 
   /// The text themes used in the widgets
-  final TextTheme textTheme;
+  final StreamTextTheme textTheme;
 
   /// The color themes used in the widgets
-  final ColorTheme colorTheme;
+  final StreamColorTheme colorTheme;
 
-  /// Theme of the [ChannelPreview]
-  final ChannelPreviewThemeData channelPreviewTheme;
+  /// Theme of the [StreamChannelPreview]
+  final StreamChannelPreviewThemeData channelPreviewTheme;
 
-  /// Theme of the [ChannelListHeader]
-  final ChannelListHeaderThemeData channelListHeaderTheme;
+  /// Theme of the [StreamChannelListHeader]
+  final StreamChannelListHeaderThemeData channelListHeaderTheme;
 
   /// Theme of the chat widgets dedicated to a channel header
-  final ChannelHeaderThemeData channelHeaderTheme;
+  final StreamChannelHeaderThemeData channelHeaderTheme;
 
-  /// The default style for [GalleryHeader]s below the overall
+  /// The default style for [StreamGalleryHeader]s below the overall
   /// [StreamChatTheme].
-  final GalleryHeaderThemeData galleryHeaderTheme;
+  final StreamGalleryHeaderThemeData galleryHeaderTheme;
 
-  /// The default style for [GalleryFooter]s below the overall
+  /// The default style for [StreamGalleryFooter]s below the overall
   /// [StreamChatTheme].
-  final GalleryFooterThemeData galleryFooterTheme;
+  final StreamGalleryFooterThemeData galleryFooterTheme;
 
   /// Theme of the current user messages
-  final MessageThemeData ownMessageTheme;
+  final StreamMessageThemeData ownMessageTheme;
 
   /// Theme of other users messages
-  final MessageThemeData otherMessageTheme;
+  final StreamMessageThemeData otherMessageTheme;
 
-  /// Theme dedicated to the [MessageInput] widget
-  final MessageInputThemeData messageInputTheme;
+  /// Theme dedicated to the [StreamMessageInput] widget
+  final StreamMessageInputThemeData messageInputTheme;
 
   /// The widget that will be built when the user image is unavailable
   final Widget Function(BuildContext, User) defaultUserImage;
@@ -402,41 +400,41 @@ class StreamChatThemeData {
   final IconThemeData primaryIconTheme;
 
   /// Assets used for rendering reactions
-  final List<ReactionIcon> reactionIcons;
+  final List<StreamReactionIcon> reactionIcons;
 
-  /// Theme configuration for the [MessageListView] widget.
-  final MessageListViewThemeData messageListViewTheme;
+  /// Theme configuration for the [StreamMessageListView] widget.
+  final StreamMessageListViewThemeData messageListViewTheme;
 
-  /// Theme configuration for the [ChannelListView] widget.
-  final ChannelListViewThemeData channelListViewTheme;
+  /// Theme configuration for the [StreamChannelListView] widget.
+  final StreamChannelListViewThemeData channelListViewTheme;
 
-  /// Theme configuration for the [UserListView] widget.
-  final UserListViewThemeData userListViewTheme;
+  /// Theme configuration for the [StreamUserListView] widget.
+  final StreamUserListViewThemeData userListViewTheme;
 
-  /// Theme configuration for the [MessageSearchListView] widget.
-  final MessageSearchListViewThemeData messageSearchListViewTheme;
+  /// Theme configuration for the [StreamMessageSearchListView] widget.
+  final StreamMessageSearchListViewThemeData messageSearchListViewTheme;
 
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
-    TextTheme? textTheme,
-    ColorTheme? colorTheme,
-    ChannelPreviewThemeData? channelPreviewTheme,
-    ChannelHeaderThemeData? channelHeaderTheme,
-    MessageThemeData? ownMessageTheme,
-    MessageThemeData? otherMessageTheme,
-    MessageInputThemeData? messageInputTheme,
+    StreamTextTheme? textTheme,
+    StreamColorTheme? colorTheme,
+    StreamChannelPreviewThemeData? channelPreviewTheme,
+    StreamChannelHeaderThemeData? channelHeaderTheme,
+    StreamMessageThemeData? ownMessageTheme,
+    StreamMessageThemeData? otherMessageTheme,
+    StreamMessageInputThemeData? messageInputTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     Widget Function(BuildContext, User)? placeholderUserImage,
     IconThemeData? primaryIconTheme,
-    ChannelListHeaderThemeData? channelListHeaderTheme,
-    List<ReactionIcon>? reactionIcons,
-    GalleryHeaderThemeData? galleryHeaderTheme,
-    GalleryFooterThemeData? galleryFooterTheme,
-    MessageListViewThemeData? messageListViewTheme,
-    ChannelListViewThemeData? channelListViewTheme,
-    UserListViewThemeData? userListViewTheme,
-    MessageSearchListViewThemeData? messageSearchListViewTheme,
+    StreamChannelListHeaderThemeData? channelListHeaderTheme,
+    List<StreamReactionIcon>? reactionIcons,
+    StreamGalleryHeaderThemeData? galleryHeaderTheme,
+    StreamGalleryFooterThemeData? galleryFooterTheme,
+    StreamMessageListViewThemeData? messageListViewTheme,
+    StreamChannelListViewThemeData? channelListViewTheme,
+    StreamUserListViewThemeData? userListViewTheme,
+    StreamMessageSearchListViewThemeData? messageSearchListViewTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:

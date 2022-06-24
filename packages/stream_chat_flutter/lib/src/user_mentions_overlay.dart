@@ -6,17 +6,23 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Builder function for building a mention tile.
 ///
-/// Use [UserMentionTile] for the default implementation.
+/// Use [StreamUserMentionTile] for the default implementation.
 typedef MentionTileBuilder = Widget Function(
   BuildContext context,
   User user,
 );
 
+/// {@macro user_mention_tile}
+@Deprecated("Use 'StreamUserMentionsOverlay' instead")
+typedef UserMentionsOverlay = StreamUserMentionsOverlay;
+
+/// {@template user_mentions_overlay}
 /// Overlay for displaying users that can be mentioned.
-class UserMentionsOverlay extends StatefulWidget {
-  /// Constructor for creating a [UserMentionsOverlay].
-  UserMentionsOverlay({
-    Key? key,
+/// {@endtemplate}
+class StreamUserMentionsOverlay extends StatefulWidget {
+  /// Constructor for creating a [StreamUserMentionsOverlay].
+  StreamUserMentionsOverlay({
+    super.key,
     required this.query,
     required this.channel,
     required this.size,
@@ -32,8 +38,7 @@ class UserMentionsOverlay extends StatefulWidget {
         assert(
           !mentionAllAppUsers || (mentionAllAppUsers && client != null),
           'StreamChatClient is required in order to use mentionAllAppUsers',
-        ),
-        super(key: key);
+        );
 
   /// Query for searching users.
   final String query;
@@ -62,10 +67,11 @@ class UserMentionsOverlay extends StatefulWidget {
   final void Function(User user)? onMentionUserTap;
 
   @override
-  _UserMentionsOverlayState createState() => _UserMentionsOverlayState();
+  _StreamUserMentionsOverlayState createState() =>
+      _StreamUserMentionsOverlayState();
 }
 
-class _UserMentionsOverlayState extends State<UserMentionsOverlay> {
+class _StreamUserMentionsOverlayState extends State<StreamUserMentionsOverlay> {
   late Future<List<User>> userMentionsFuture;
 
   @override
@@ -75,7 +81,7 @@ class _UserMentionsOverlayState extends State<UserMentionsOverlay> {
   }
 
   @override
-  void didUpdateWidget(covariant UserMentionsOverlay oldWidget) {
+  void didUpdateWidget(covariant StreamUserMentionsOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.channel != oldWidget.channel ||
         widget.query != oldWidget.query ||
@@ -106,7 +112,7 @@ class _UserMentionsOverlayState extends State<UserMentionsOverlay> {
             if (!snapshot.hasData) return const Offstage();
             final users = snapshot.data!;
             return ListView.builder(
-              padding: const EdgeInsets.all(0),
+              padding: EdgeInsets.zero,
               shrinkWrap: true,
               itemCount: users.length,
               itemBuilder: (context, index) {
@@ -116,7 +122,7 @@ class _UserMentionsOverlayState extends State<UserMentionsOverlay> {
                   child: InkWell(
                     onTap: () => widget.onMentionUserTap?.call(user),
                     child: widget.mentionsTileBuilder?.call(context, user) ??
-                        UserMentionTile(user),
+                        StreamUserMentionTile(user),
                   ),
                 );
               },

@@ -3,17 +3,16 @@ part of 'stream_chat_localizations.dart';
 /// The translations for Italian (`it`).
 class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for Italian.
-  const StreamChatLocalizationsIt({String localeName = 'it'})
-      : super(localeName: localeName);
+  const StreamChatLocalizationsIt({super.localeName = 'it'});
 
   @override
-  String get launchUrlError => 'Impossibile aprire l\'url';
+  String get launchUrlError => "Impossibile aprire l'url";
 
   @override
   String get loadingUsersError => 'Errore durante il carimento degli utenti';
 
   @override
-  String get noUsersLabel => 'Non c\'é nessun utente al momento';
+  String get noUsersLabel => "Non c'é nessun utente al momento";
 
   @override
   String get retryLabel => 'Riprova';
@@ -41,7 +40,12 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String get onlyVisibleToYouText => 'Visible solo a te';
 
   @override
-  String threadReplyCountText(int count) => '$count risposte al thread';
+  String threadReplyCountText(int count) {
+    if (count == 1) {
+      return '1 risposta al thread';
+    }
+    return '$count risposte al thread';
+  }
 
   @override
   String attachmentsUploadProgressText({
@@ -61,7 +65,11 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get emptyMessagesText => 'Non c\'é nessun messaggio al momento';
+  String get sendMessagePermissionError =>
+      "Non hai l'autorizzazione per inviare messaggi";
+
+  @override
+  String get emptyMessagesText => "Non c'é nessun messaggio al momento";
 
   @override
   String get genericErrorText => 'Qualcosa è andato storto';
@@ -158,11 +166,11 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Per favore attiva l\'accesso alle foto'
+      "Per favore attiva l'accesso alle foto"
       '\ne ai video cosí potrai condividerli con i tuoi amici.';
 
   @override
-  String get allowGalleryAccessMessage => 'Permetti l\'accesso alla galleria';
+  String get allowGalleryAccessMessage => "Permetti l'accesso alla galleria";
 
   @override
   String get flagMessageLabel => 'Segnala messaggio';
@@ -369,5 +377,23 @@ Attenzione: il limite massimo di $limit file è stato superato.
   ''';
 
   @override
+  String get viewLibrary => 'Vedi la biblioteca';
+
+  @override
   String get slowModeOnLabel => 'Slowmode attiva';
+
+  @override
+  String get linkDisabledDetails =>
+      'Non è permesso condividere link in questa convesazione.';
+
+  @override
+  String get linkDisabledError => 'I links sono disattivati';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 messaggio non letto';
+    }
+    return '$unreadCount messaggi non letti';
+  }
 }

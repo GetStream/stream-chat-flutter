@@ -22,9 +22,9 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({
-    Key? key,
+    super.key,
     required this.client,
-  }) : super(key: key);
+  });
 
   final StreamChatClient client;
 
@@ -40,8 +40,8 @@ class MyApp extends StatelessWidget {
 
 class SplitView extends StatefulWidget {
   const SplitView({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _SplitViewState createState() => _SplitViewState();
@@ -84,52 +84,56 @@ class _SplitViewState extends State<SplitView> {
       );
 }
 
-class ChannelListPage extends StatelessWidget {
+class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
-    Key? key,
+    super.key,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final void Function(Channel)? onTap;
 
   @override
+  State<ChannelListPage> createState() => _ChannelListPageState();
+}
+
+class _ChannelListPageState extends State<ChannelListPage> {
+  late final _listController = StreamChannelListController(
+    client: StreamChat.of(context).client,
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).currentUser!.id],
+    ),
+    sort: const [SortOption('last_message_at')],
+    limit: 20,
+  );
+
+  @override
   Widget build(BuildContext context) => Scaffold(
-        body: ChannelsBloc(
-          child: ChannelListView(
-            onChannelTap: onTap != null
-                ? (channel, _) {
-                    onTap!(channel);
-                  }
-                : null,
-            filter: Filter.in_(
-              'members',
-              [StreamChat.of(context).currentUser!.id],
-            ),
-            sort: const [SortOption('last_message_at')],
-            limit: 20,
-          ),
+        body: StreamChannelListView(
+          onChannelTap: widget.onTap,
+          controller: _listController,
         ),
       );
 }
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => Navigator(
         onGenerateRoute: (settings) => MaterialPageRoute(
           builder: (context) => Scaffold(
-            appBar: const ChannelHeader(
+            appBar: const StreamChannelHeader(
               showBackButton: false,
             ),
             body: Column(
               children: const <Widget>[
                 Expanded(
-                  child: MessageListView(),
+                  child: StreamMessageListView(),
                 ),
-                MessageInput(),
+                StreamMessageInput(),
               ],
             ),
           ),

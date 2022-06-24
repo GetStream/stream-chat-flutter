@@ -5,27 +5,24 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:stream_chat_flutter/src/media_list_view_controller.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-extension on Duration {
-  String format() {
-    final s = '$this'.split('.')[0].padLeft(8, '0');
-    if (s.startsWith('00:')) {
-      return s.replaceFirst('00:', '');
-    }
+/// {@macro media_list_view}
+@Deprecated("Use 'StreamMediaListView' instead")
+typedef MediaListView = StreamMediaListView;
 
-    return s;
-  }
-}
-
+/// {@template media_list_view}
 /// Constructs a list of media
-class MediaListView extends StatefulWidget {
-  /// Constructor for creating a [MediaListView] widget
-  const MediaListView({
-    Key? key,
+/// {@endtemplate}
+class StreamMediaListView extends StatefulWidget {
+  /// Constructor for creating a [StreamMediaListView] widget
+  const StreamMediaListView({
+    super.key,
     this.selectedIds = const [],
     this.onSelect,
-  }) : super(key: key);
+    this.controller,
+  });
 
   /// Stores the media selected
   final List<String> selectedIds;
@@ -33,18 +30,28 @@ class MediaListView extends StatefulWidget {
   /// Callback for on media selected
   final void Function(AssetEntity media)? onSelect;
 
+  /// Controller that handles MediaListView
+  final MediaListViewController? controller;
+
   @override
-  _MediaListViewState createState() => _MediaListViewState();
+  _StreamMediaListViewState createState() => _StreamMediaListViewState();
 }
 
-class _MediaListViewState extends State<MediaListView> {
-  final _media = <AssetEntity>[];
-  final ScrollController _scrollController = ScrollController();
-  int _currentPage = 0;
+class _StreamMediaListViewState extends State<StreamMediaListView> {
+  var _media = <AssetEntity>[];
+  var _currentPage = 0;
+  final _scrollController = ScrollController();
+
+  /// Controller necessary to verify limited access to photo gallery in iOS and
+  /// update the media list when listerners are emitted
+  late final controller = widget.controller ?? MediaListViewController();
 
   @override
   Widget build(BuildContext context) => LazyLoadScrollView(
-        onEndOfPage: () async => _getMedia(),
+        onEndOfPage: () async {
+          await _getMedia();
+          _updatePage();
+        },
         child: GridView.builder(
           itemCount: _media.length,
           controller: _scrollController,
@@ -60,11 +67,9 @@ class _MediaListViewState extends State<MediaListView> {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
               child: InkWell(
-                onTap: () {
-                  if (widget.onSelect != null) {
-                    widget.onSelect!(media);
-                  }
-                },
+                onTap: widget.onSelect == null
+                    ? null
+                    : () => widget.onSelect!(media),
                 child: Stack(
                   children: [
                     AspectRatio(
@@ -141,7 +146,27 @@ class _MediaListViewState extends State<MediaListView> {
   @override
   void initState() {
     super.initState();
+    controller.addListener(_updateMediaList);
     _getMedia();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.removeListener(_updateMediaList);
+    if (widget.controller == null) {
+      controller.dispose();
+    }
+  }
+
+  void _updateMediaList() {
+    if (controller.shouldUpdateMedia) {
+      _getMedia();
+    }
+  }
+
+  void _updatePage() {
+    ++_currentPage;
   }
 
   Future<void> _getMedia() async {
@@ -158,14 +183,15 @@ class _MediaListViewState extends State<MediaListView> {
     ))
         .firstOrNull;
 
-    final media = await assetList?.getAssetListPaged(_currentPage, 50);
-
+    final media = await assetList?.getAssetListPaged(
+      page: _currentPage,
+      size: 50,
+    );
     if (media?.isNotEmpty == true) {
       setState(() {
-        _media.addAll(media!);
+        _media = media!;
       });
     }
-    ++_currentPage;
   }
 }
 
@@ -197,7 +223,7 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
     DecoderCallback decode,
   ) async {
     assert(key == this, 'Checks MediaThumbnailProvider');
-    final bytes = await media.thumbData;
+    final bytes = await media.thumbnailData;
 
     return decode(bytes!);
   }
@@ -218,4 +244,15 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
 
   @override
   String toString() => '$runtimeType("${media.id}")';
+}
+
+extension on Duration {
+  String format() {
+    final s = '$this'.split('.')[0].padLeft(8, '0');
+    if (s.startsWith('00:')) {
+      return s.replaceFirst('00:', '');
+    }
+
+    return s;
+  }
 }

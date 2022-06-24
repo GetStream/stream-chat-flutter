@@ -4,15 +4,21 @@ import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 
+/// {@macro emoji_overlay}
+@Deprecated("Use 'StreamEmojiOverlay' instead")
+typedef EmojiOverlay = StreamEmojiOverlay;
+
+/// {@template emoji_overlay}
 /// Overlay for displaying emoji that can be used
-class EmojiOverlay extends StatelessWidget {
-  /// Constructor for creating a [EmojiOverlay]
-  const EmojiOverlay({
+/// {@endtemplate}
+class StreamEmojiOverlay extends StatelessWidget {
+  /// Constructor for creating a [StreamEmojiOverlay]
+  const StreamEmojiOverlay({
     required this.query,
     required this.onEmojiResult,
     required this.size,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// The size of the overlay
   final Size size;
@@ -59,7 +65,7 @@ class EmojiOverlay extends StatelessWidget {
           color: _streamChatTheme.colorTheme.barsBg,
         ),
         child: ListView.builder(
-          padding: const EdgeInsets.all(0),
+          padding: EdgeInsets.zero,
           shrinkWrap: true,
           itemCount: emojis.length + 1,
           itemBuilder: (context, i) {

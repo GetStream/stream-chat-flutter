@@ -9,7 +9,7 @@ class LazyLoadScrollView extends StatefulWidget {
   /// Creates a new instance of [LazyLoadScrollView]. The parameter [child]
   /// must be supplied and not null.
   const LazyLoadScrollView({
-    Key? key,
+    super.key,
     required this.child,
     this.onStartOfPage,
     this.onEndOfPage,
@@ -17,7 +17,7 @@ class LazyLoadScrollView extends StatefulWidget {
     this.onPageScrollEnd,
     this.onInBetweenOfPage,
     this.scrollOffset = 100,
-  }) : super(key: key);
+  });
 
   /// The [Widget] that this widget watches for changes on
   final Widget child;

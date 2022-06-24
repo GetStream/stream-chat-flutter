@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro upload_progress_indicator}
+@Deprecated("Use 'StreamUploadProgressIndicator' instead")
+typedef UploadProgressIndicator = StreamUploadProgressIndicator;
+
+/// {@template upload_progress_indicator}
 /// Widget for showing upload progress
-class UploadProgressIndicator extends StatelessWidget {
-  /// Constructor for creating an [UploadProgressIndicator]
-  const UploadProgressIndicator({
-    Key? key,
+/// {@endtemplate}
+class StreamUploadProgressIndicator extends StatelessWidget {
+  /// Constructor for creating an [StreamUploadProgressIndicator]
+  const StreamUploadProgressIndicator({
+    super.key,
     required this.uploaded,
     required this.total,
     this.progressIndicatorColor = const Color(0xffb2b2b2),
@@ -17,7 +23,7 @@ class UploadProgressIndicator extends StatelessWidget {
     ),
     this.showBackground = true,
     this.textStyle,
-  }) : super(key: key);
+  });
 
   /// Bytes uploaded
   final int uploaded;
@@ -66,7 +72,7 @@ class UploadProgressIndicator extends StatelessWidget {
       ),
     );
     if (showBackground) {
-      child = Container(
+      child = DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: theme.colorTheme.overlayDark.withOpacity(0.6),

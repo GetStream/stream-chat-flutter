@@ -2,11 +2,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro user_avatar}
+@Deprecated("Use 'StreamUserAvatar' instead")
+typedef UserAvatar = StreamUserAvatar;
+
+/// {@template user_avatar}
 /// Widget that displays a user avatar
-class UserAvatar extends StatelessWidget {
-  /// Constructor to create a [UserAvatar]
-  const UserAvatar({
-    Key? key,
+/// {@endtemplate}
+class StreamUserAvatar extends StatelessWidget {
+  /// Constructor to create a [StreamUserAvatar]
+  const StreamUserAvatar({
+    super.key,
     required this.user,
     this.constraints,
     this.onlineIndicatorConstraints,
@@ -19,7 +25,7 @@ class UserAvatar extends StatelessWidget {
     this.selectionColor,
     this.selectionThickness = 4,
     this.placeholder,
-  }) : super(key: key);
+  });
 
   /// User whose avatar is to displayed
   final User user;
@@ -85,7 +91,7 @@ class UserAvatar extends StatelessWidget {
                 placeholder: placeholder != null
                     ? (context, __) => placeholder(context, user)
                     : null,
-                imageBuilder: (context, imageProvider) => Container(
+                imageBuilder: (context, imageProvider) => DecoratedBox(
                   decoration: BoxDecoration(
                     borderRadius: borderRadius ??
                         streamChatTheme

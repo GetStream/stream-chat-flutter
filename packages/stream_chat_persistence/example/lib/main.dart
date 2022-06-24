@@ -52,10 +52,10 @@ class StreamExample extends StatelessWidget {
   /// To initialize this example, an instance of
   /// [client] and [channel] is required.
   const StreamExample({
-    Key? key,
+    super.key,
     required this.client,
     required this.channel,
-  }) : super(key: key);
+  });
 
   /// Instance of [StreamChatClient] we created earlier.
   /// This contains information about our application and connection state.
@@ -76,9 +76,9 @@ class StreamExample extends StatelessWidget {
 class HomeScreen extends StatelessWidget {
   /// [HomeScreen] is constructed using the [Channel] we defined earlier.
   const HomeScreen({
-    Key? key,
+    super.key,
     required this.channel,
-  }) : super(key: key);
+  });
 
   /// Channel object containing the [Channel.id] we'd like to observe.
   final Channel channel;
@@ -98,8 +98,9 @@ class HomeScreen extends StatelessWidget {
             AsyncSnapshot<ChannelState?> snapshot,
           ) {
             if (snapshot.hasData && snapshot.data != null) {
+              final _messages = snapshot.data!.messages ?? [];
               return MessageView(
-                messages: snapshot.data!.messages.reversed.toList(),
+                messages: _messages.reversed.toList(),
                 channel: channel,
               );
             } else if (snapshot.hasError) {
@@ -128,10 +129,10 @@ class HomeScreen extends StatelessWidget {
 class MessageView extends StatefulWidget {
   /// Message takes the latest list of messages and the current channel.
   const MessageView({
-    Key? key,
+    super.key,
     required this.messages,
     required this.channel,
-  }) : super(key: key);
+  });
 
   /// List of messages sent in the given channel.
   final List<Message> messages;

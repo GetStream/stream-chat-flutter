@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs
+// ignore_for_file: prefer_expression_function_bodies
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -8,8 +10,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// to create sub-conversations inside the same channel.
 ///
 /// Using threaded conversations is very simple and mostly a matter of
-/// plugging the [MessageListView] to another widget that renders the widget.
-/// To make this simple, such a widget only needs to build [MessageListView]
+/// plugging the [StreamMessageListView]
+/// to another widget that renders the widget.
+/// To make this simple, such a widget only needs
+/// to build [StreamMessageListView]
 /// with the parent attribute set to the thread’s root message.
 ///
 /// Now we can open threads and create new ones as well. If you long-press a
@@ -34,14 +38,13 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({
-    Key? key,
+    super.key,
     required this.client,
-  }) : super(key: key);
+  });
 
   final StreamChatClient client;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, child) => StreamChat(
@@ -53,80 +56,98 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class ChannelListPage extends StatelessWidget {
+class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
-  // ignore: prefer_expression_function_bodies
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ChannelsBloc(
-        child: ChannelListView(
-          filter: Filter.in_(
-            'members',
-            [StreamChat.of(context).currentUser!.id],
-          ),
-          sort: const [SortOption('last_message_at')],
-          limit: 20,
-          channelWidget: const ChannelPage(),
-        ),
-      ),
-    );
+  State<ChannelListPage> createState() => _ChannelListPageState();
+}
+
+class _ChannelListPageState extends State<ChannelListPage> {
+  late final _listController = StreamChannelListController(
+    client: StreamChat.of(context).client,
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).currentUser!.id],
+    ),
+    sort: const [SortOption('last_message_at')],
+    limit: 20,
+  );
+
+  @override
+  void dispose() {
+    _listController.dispose();
+    super.dispose();
   }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: StreamChannelListView(
+          controller: _listController,
+          onChannelTap: (channel) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => StreamChannel(
+                  channel: channel,
+                  child: const ChannelPage(),
+                ),
+              ),
+            );
+          },
+        ),
+      );
 }
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
-  // ignore: prefer_expression_function_bodies
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const ChannelHeader(),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: MessageListView(
-              threadBuilder: (_, parentMessage) => ThreadPage(
-                parent: parentMessage,
+  Widget build(BuildContext context) => Scaffold(
+        appBar: const StreamChannelHeader(),
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: StreamMessageListView(
+                threadBuilder: (_, parentMessage) => ThreadPage(
+                  parent: parentMessage,
+                ),
               ),
             ),
-          ),
-          const MessageInput(),
-        ],
-      ),
-    );
-  }
+            const StreamMessageInput(),
+          ],
+        ),
+      );
 }
 
 class ThreadPage extends StatelessWidget {
   const ThreadPage({
-    Key? key,
+    super.key,
     this.parent,
-  }) : super(key: key);
+  });
 
   final Message? parent;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ThreadHeader(
+      appBar: StreamThreadHeader(
         parent: parent!,
       ),
       body: Column(
         children: <Widget>[
           Expanded(
-            child: MessageListView(
+            child: StreamMessageListView(
               parentMessage: parent,
             ),
           ),
-          MessageInput(
-            parentMessage: parent,
+          StreamMessageInput(
+            messageInputController: StreamMessageInputController(
+              message: Message(parentId: parent!.id),
+            ),
           ),
         ],
       ),

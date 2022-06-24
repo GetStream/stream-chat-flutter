@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -31,6 +33,11 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 /// information about the messages.
 /// The widget uses a [ListView.separated] to render the list of messages.
 ///
+@Deprecated('''
+MessageSearchListCore is deprecated and will be removed in the next 
+major version. Use StreamMessageSearchListController instead to create your custom list.
+More details here https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter_core/stream_message_search_list_controller
+''')
 class MessageSearchListCore extends StatefulWidget {
   /// Instantiate a new [MessageSearchListView].
   /// The following parameters must be supplied and not null:
@@ -39,7 +46,7 @@ class MessageSearchListCore extends StatefulWidget {
   /// * [loadingBuilder]
   /// * [childBuilder]
   MessageSearchListCore({
-    Key? key,
+    super.key,
     required this.emptyBuilder,
     required this.errorBuilder,
     required this.loadingBuilder,
@@ -69,8 +76,7 @@ class MessageSearchListCore extends StatefulWidget {
               sortOptions == null,
           'Cannot specify `offset` with `sortOptions` parameter',
         ),
-        limit = limit ?? paginationParams?.limit ?? 30,
-        super(key: key);
+        limit = limit ?? paginationParams?.limit ?? 30;
 
   /// A [MessageSearchListController] allows reloading and pagination.
   /// Use [MessageSearchListController.loadData] and

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -83,7 +85,7 @@ void main() {
       expect(find.text('test name'), findsOneWidget);
       expect(find.text('1'), findsOneWidget);
       expect(find.text('hello'), findsOneWidget);
-      expect(find.byType(ChannelAvatar), findsOneWidget);
+      expect(find.byType(StreamChannelAvatar), findsOneWidget);
     },
   );
 }

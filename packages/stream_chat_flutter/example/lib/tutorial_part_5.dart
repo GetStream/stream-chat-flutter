@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs
+// ignore_for_file: prefer_expression_function_bodies
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -8,7 +9,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// the SDK supports easily.
 ///
 /// Replacing the built-in message component with your own is done by passing
-/// it as a builder function to the [MessageListView] widget.
+/// it as a builder function to the [StreamMessageListView] widget.
 ///
 /// The message builder function will get the usual [BuildContext] argument
 /// as well as the [Message] object and its position inside the list.
@@ -40,14 +41,13 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({
-    Key? key,
+    super.key,
     required this.client,
-  }) : super(key: key);
+  });
 
   final StreamChatClient client;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, child) => StreamChat(
@@ -59,48 +59,67 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class ChannelListPage extends StatelessWidget {
+class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
-  // ignore: prefer_expression_function_bodies
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ChannelsBloc(
-        child: ChannelListView(
-          filter: Filter.in_(
-            'members',
-            [StreamChat.of(context).currentUser!.id],
-          ),
-          sort: const [SortOption('last_message_at')],
-          limit: 20,
-          channelWidget: const ChannelPage(),
-        ),
-      ),
-    );
+  State<ChannelListPage> createState() => _ChannelListPageState();
+}
+
+class _ChannelListPageState extends State<ChannelListPage> {
+  late final _listController = StreamChannelListController(
+    client: StreamChat.of(context).client,
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).currentUser!.id],
+    ),
+    sort: const [SortOption('last_message_at')],
+    limit: 20,
+  );
+
+  @override
+  void dispose() {
+    _listController.dispose();
+    super.dispose();
   }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: StreamChannelListView(
+          controller: _listController,
+          onChannelTap: (channel) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => StreamChannel(
+                  channel: channel,
+                  child: const ChannelPage(),
+                ),
+              ),
+            );
+          },
+        ),
+      );
 }
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const ChannelHeader(),
+      appBar: const StreamChannelHeader(),
       body: Column(
         children: <Widget>[
           Expanded(
-            child: MessageListView(
+            child: StreamMessageListView(
               messageBuilder: _messageBuilder,
             ),
           ),
-          const MessageInput(),
+          const StreamMessageInput(),
         ],
       ),
     );
@@ -110,7 +129,7 @@ class ChannelPage extends StatelessWidget {
     BuildContext context,
     MessageDetails details,
     List<Message> messages,
-    MessageWidget _,
+    StreamMessageWidget _,
   ) {
     final message = details.message;
     final isCurrentUser =
@@ -120,7 +139,7 @@ class ChannelPage extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.all(5),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           border: Border.all(
             color: color,

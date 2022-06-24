@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// It shows a date divider depending on the date difference
-class SystemMessage extends StatelessWidget {
-  /// Constructor for creating a [SystemMessage]
-  const SystemMessage({
-    Key? key,
+/// {@macro system_message}
+@Deprecated("Use 'StreamSystemMessage' instead")
+typedef SystemMessage = StreamSystemMessage;
+
+/// {@template system_message}
+/// It shows a widget for the message with a system message type.
+/// {@endtemplate}
+class StreamSystemMessage extends StatelessWidget {
+  /// Constructor for creating a [StreamSystemMessage]
+  const StreamSystemMessage({
+    super.key,
     required this.message,
     this.onMessageTap,
-  }) : super(key: key);
+  });
 
   /// This message
   final Message message;
@@ -22,11 +28,7 @@ class SystemMessage extends StatelessWidget {
     final theme = StreamChatTheme.of(context);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () {
-        if (onMessageTap != null) {
-          onMessageTap!(message);
-        }
-      },
+      onTap: onMessageTap == null ? null : () => onMessageTap!(message),
       child: Text(
         message.text!,
         textAlign: TextAlign.center,

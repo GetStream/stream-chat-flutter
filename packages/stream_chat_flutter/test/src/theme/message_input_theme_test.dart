@@ -4,30 +4,30 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
   test('MessageInputThemeData copyWith, ==, hashCode basics', () {
-    expect(const MessageInputThemeData(),
-        const MessageInputThemeData().copyWith());
-    expect(const MessageInputThemeData().hashCode,
-        const MessageInputThemeData().copyWith().hashCode);
+    expect(const StreamMessageInputThemeData(),
+        const StreamMessageInputThemeData().copyWith());
+    expect(const StreamMessageInputThemeData().hashCode,
+        const StreamMessageInputThemeData().copyWith().hashCode);
   });
 
   group('MessageInputThemeData lerps correctly', () {
     test('Lerp completely from light to dark', () {
       expect(
-          const MessageInputThemeData().lerp(
+          const StreamMessageInputThemeData().lerp(
               _messageInputThemeControl, _messageInputThemeControlDark, 1),
           _messageInputThemeControlDark);
     });
 
     test('Lerp halfway from light to dark', () {
       expect(
-          const MessageInputThemeData().lerp(
+          const StreamMessageInputThemeData().lerp(
               _messageInputThemeControl, _messageInputThemeControlDark, 0.5),
           _messageInputThemeControlMidLerp);
     });
 
     test('Lerp completely from dark to light', () {
       expect(
-          const MessageInputThemeData().lerp(
+          const StreamMessageInputThemeData().lerp(
               _messageInputThemeControlDark, _messageInputThemeControl, 1),
           _messageInputThemeControl);
     });
@@ -39,33 +39,33 @@ void main() {
   });
 }
 
-final _messageInputThemeControl = MessageInputThemeData(
+final _messageInputThemeControl = StreamMessageInputThemeData(
   borderRadius: BorderRadius.circular(20),
   sendAnimationDuration: const Duration(milliseconds: 300),
-  actionButtonColor: ColorTheme.light().accentPrimary,
-  actionButtonIdleColor: ColorTheme.light().textLowEmphasis,
-  expandButtonColor: ColorTheme.light().accentPrimary,
-  sendButtonColor: ColorTheme.light().accentPrimary,
-  sendButtonIdleColor: ColorTheme.light().disabled,
-  inputBackgroundColor: ColorTheme.light().barsBg,
-  inputTextStyle: TextTheme.light().body,
+  actionButtonColor: StreamColorTheme.light().accentPrimary,
+  actionButtonIdleColor: StreamColorTheme.light().textLowEmphasis,
+  expandButtonColor: StreamColorTheme.light().accentPrimary,
+  sendButtonColor: StreamColorTheme.light().accentPrimary,
+  sendButtonIdleColor: StreamColorTheme.light().disabled,
+  inputBackgroundColor: StreamColorTheme.light().barsBg,
+  inputTextStyle: StreamTextTheme.light().body,
   idleBorderGradient: LinearGradient(
     stops: const [0.0, 1.0],
     colors: [
-      ColorTheme.light().disabled,
-      ColorTheme.light().disabled,
+      StreamColorTheme.light().disabled,
+      StreamColorTheme.light().disabled,
     ],
   ),
   activeBorderGradient: LinearGradient(
     stops: const [0.0, 1.0],
     colors: [
-      ColorTheme.light().disabled,
-      ColorTheme.light().disabled,
+      StreamColorTheme.light().disabled,
+      StreamColorTheme.light().disabled,
     ],
   ),
 );
 
-final _messageInputThemeControlMidLerp = MessageInputThemeData(
+final _messageInputThemeControlMidLerp = StreamMessageInputThemeData(
   borderRadius: BorderRadius.circular(20),
   sendAnimationDuration: const Duration(milliseconds: 300),
   inputBackgroundColor: const Color(0xff87898b),
@@ -95,28 +95,28 @@ final _messageInputThemeControlMidLerp = MessageInputThemeData(
   ),
 );
 
-final _messageInputThemeControlDark = MessageInputThemeData(
+final _messageInputThemeControlDark = StreamMessageInputThemeData(
   borderRadius: BorderRadius.circular(20),
   sendAnimationDuration: const Duration(milliseconds: 300),
-  actionButtonColor: ColorTheme.dark().accentPrimary,
-  actionButtonIdleColor: ColorTheme.dark().textLowEmphasis,
-  expandButtonColor: ColorTheme.dark().accentPrimary,
-  sendButtonColor: ColorTheme.dark().accentPrimary,
-  sendButtonIdleColor: ColorTheme.dark().disabled,
-  inputBackgroundColor: ColorTheme.dark().barsBg,
-  inputTextStyle: TextTheme.dark().body,
+  actionButtonColor: StreamColorTheme.dark().accentPrimary,
+  actionButtonIdleColor: StreamColorTheme.dark().textLowEmphasis,
+  expandButtonColor: StreamColorTheme.dark().accentPrimary,
+  sendButtonColor: StreamColorTheme.dark().accentPrimary,
+  sendButtonIdleColor: StreamColorTheme.dark().disabled,
+  inputBackgroundColor: StreamColorTheme.dark().barsBg,
+  inputTextStyle: StreamTextTheme.dark().body,
   idleBorderGradient: LinearGradient(
     stops: const [0.0, 1.0],
     colors: [
-      ColorTheme.dark().disabled,
-      ColorTheme.dark().disabled,
+      StreamColorTheme.dark().disabled,
+      StreamColorTheme.dark().disabled,
     ],
   ),
   activeBorderGradient: LinearGradient(
     stops: const [0.0, 1.0],
     colors: [
-      ColorTheme.dark().disabled,
-      ColorTheme.dark().disabled,
+      StreamColorTheme.dark().disabled,
+      StreamColorTheme.dark().disabled,
     ],
   ),
 );

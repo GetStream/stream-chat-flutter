@@ -6,11 +6,17 @@ import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
+/// {@macro video_thumbnail_image}
+@Deprecated("Use 'StreamVideoThumbnailImage' instead")
+typedef VideoThumbnailImage = StreamVideoThumbnailImage;
+
+/// {@template video_thumbnail_image}
 /// Widget for creating video thumbnail image
-class VideoThumbnailImage extends StatefulWidget {
-  /// Constructor for creating [VideoThumbnailImage]
-  const VideoThumbnailImage({
-    Key? key,
+/// {@endtemplate}
+class StreamVideoThumbnailImage extends StatefulWidget {
+  /// Constructor for creating [StreamVideoThumbnailImage]
+  const StreamVideoThumbnailImage({
+    super.key,
     required this.video,
     this.width,
     this.height,
@@ -18,7 +24,7 @@ class VideoThumbnailImage extends StatefulWidget {
     this.format = ImageFormat.PNG,
     this.errorBuilder,
     this.placeholderBuilder,
-  }) : super(key: key);
+  });
 
   /// Video path
   final String video;
@@ -42,16 +48,17 @@ class VideoThumbnailImage extends StatefulWidget {
   final WidgetBuilder? placeholderBuilder;
 
   @override
-  _VideoThumbnailImageState createState() => _VideoThumbnailImageState();
+  _StreamVideoThumbnailImageState createState() =>
+      _StreamVideoThumbnailImageState();
 }
 
-class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
+class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
   late Future<Uint8List?> thumbnailFuture;
   late StreamChatThemeData _streamChatTheme;
 
   @override
   void initState() {
-    thumbnailFuture = VideoService.generateVideoThumbnail(
+    thumbnailFuture = StreamVideoService.generateVideoThumbnail(
       video: widget.video,
       imageFormat: widget.format,
     );
@@ -65,9 +72,9 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
   }
 
   @override
-  void didUpdateWidget(covariant VideoThumbnailImage oldWidget) {
+  void didUpdateWidget(covariant StreamVideoThumbnailImage oldWidget) {
     if (oldWidget.video != widget.video || oldWidget.format != widget.format) {
-      thumbnailFuture = VideoService.generateVideoThumbnail(
+      thumbnailFuture = StreamVideoService.generateVideoThumbnail(
         video: widget.video,
         imageFormat: widget.format,
       );
@@ -90,8 +97,9 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
                     );
               }
               if (!snapshot.hasData) {
-                return Container(
-                  constraints: const BoxConstraints.expand(),
+                return SizedBox(
+                  height: double.maxFinite,
+                  width: double.maxFinite,
                   child: widget.placeholderBuilder?.call(context) ??
                       Shimmer.fromColors(
                         baseColor: _streamChatTheme.colorTheme.disabled,
@@ -99,16 +107,22 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
                         child: Image.asset(
                           'images/placeholder.png',
                           fit: BoxFit.cover,
+                          height: widget.height,
+                          width: widget.width,
                           package: 'stream_chat_flutter',
                         ),
                       ),
                 );
               }
-              return Image.memory(
-                snapshot.data!,
-                fit: widget.fit,
-                height: widget.height,
-                width: widget.width,
+              return SizedBox(
+                height: double.maxFinite,
+                width: double.maxFinite,
+                child: Image.memory(
+                  snapshot.data!,
+                  fit: widget.fit,
+                  height: widget.height,
+                  width: widget.width,
+                ),
               );
             },
           ),

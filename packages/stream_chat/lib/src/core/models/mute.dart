@@ -1,7 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'mute.g.dart';
 
@@ -11,27 +9,27 @@ class Mute {
   /// Constructor used for json serialization
   Mute({
     required this.user,
-    required this.channel,
+    required this.target,
     required this.createdAt,
     required this.updatedAt,
+    this.expires,
   });
 
   /// Create a new instance from a json
   factory Mute.fromJson(Map<String, dynamic> json) => _$MuteFromJson(json);
 
   /// The user that performed the muting action
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final User user;
 
   /// The target user
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
-  final ChannelModel channel;
+  final User target;
 
   /// The date in which the use was muted
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime createdAt;
 
   /// The date of the last update
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime updatedAt;
+
+  /// The date in which the mute expires
+  final DateTime? expires;
 }

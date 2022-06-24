@@ -2,11 +2,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@macro url_attachment}
+@Deprecated("Use 'StreamUrlAttachment' instead")
+typedef UrlAttachment = StreamUrlAttachment;
+
+/// {@template url_attachment}
 /// Widget to display URL attachment
-class UrlAttachment extends StatelessWidget {
-  /// Constructor for creating a [UrlAttachment]
-  const UrlAttachment({
-    Key? key,
+/// {@endtemplate}
+class StreamUrlAttachment extends StatelessWidget {
+  /// Constructor for creating a [StreamUrlAttachment]
+  const StreamUrlAttachment({
+    super.key,
     required this.urlAttachment,
     required this.hostDisplayName,
     required this.messageTheme,
@@ -14,7 +20,8 @@ class UrlAttachment extends StatelessWidget {
       horizontal: 16,
       vertical: 8,
     ),
-  }) : super(key: key);
+    this.onLinkTap,
+  });
 
   /// Attachment to be displayed
   final Attachment urlAttachment;
@@ -25,16 +32,23 @@ class UrlAttachment extends StatelessWidget {
   /// Padding for text
   final EdgeInsets textPadding;
 
-  /// [MessageThemeData] for showing image title
-  final MessageThemeData messageTheme;
+  /// [StreamMessageThemeData] for showing image title
+  final StreamMessageThemeData messageTheme;
+
+  /// The function called when tapping on a link
+  final void Function(String)? onLinkTap;
 
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
     return GestureDetector(
       onTap: () {
-        final titleLink = urlAttachment.titleLink;
-        if (titleLink != null) launchURL(context, titleLink);
+        final ogScrapeUrl = urlAttachment.ogScrapeUrl;
+        if (ogScrapeUrl != null) {
+          onLinkTap != null
+              ? onLinkTap!(ogScrapeUrl)
+              : launchURL(context, ogScrapeUrl);
+        }
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -56,7 +70,7 @@ class UrlAttachment extends StatelessWidget {
                   Positioned(
                     left: 0,
                     bottom: -1,
-                    child: Container(
+                    child: DecoratedBox(
                       decoration: BoxDecoration(
                         borderRadius: const BorderRadius.only(
                           topRight: Radius.circular(16),

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -53,6 +55,11 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 ///
 /// The parameters [listBuilder], [loadingBuilder], [emptyBuilder] and
 /// [errorBuilder] must all be supplied and not null.
+@Deprecated('''
+UserListCore is deprecated and will be removed in the next 
+major version. Use StreamUserListController instead to create your custom list.
+More details here https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter_core/stream_user_list_controller
+''')
 class UserListCore extends StatefulWidget {
   /// Instantiate a new [UserListCore]
   const UserListCore({
@@ -60,14 +67,14 @@ class UserListCore extends StatefulWidget {
     required this.emptyBuilder,
     required this.loadingBuilder,
     required this.listBuilder,
-    Key? key,
+    super.key,
     this.filter = const Filter.empty(),
     this.sort,
     this.presence,
     this.groupAlphabetically = false,
     this.userListController,
     this.limit = 30,
-  }) : super(key: key);
+  });
 
   /// A [UserListController] allows reloading and pagination.
   /// Use [UserListController.loadData] and [UserListController.paginateData]
@@ -163,11 +170,11 @@ class UserListCoreState extends State<UserListCore>
             for (final key in groupedUsers.keys) {
               items
                 ..add(ListHeaderItem(key))
-                ..addAll(groupedUsers[key]!.map((e) => ListUserItem(e)));
+                ..addAll(groupedUsers[key]!.map(ListUserItem.new));
             }
             return items;
           }
-          return users.map((e) => ListUserItem(e)).toList();
+          return users.map(ListUserItem.new).toList();
         },
       );
 

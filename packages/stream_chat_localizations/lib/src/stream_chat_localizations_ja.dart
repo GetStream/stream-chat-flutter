@@ -3,8 +3,7 @@ part of 'stream_chat_localizations.dart';
 /// The translations for Japanese (`ja`).
 class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for Japanese.
-  const StreamChatLocalizationsJa({String localeName = 'ja'})
-      : super(localeName: localeName);
+  const StreamChatLocalizationsJa({super.localeName = 'ja'});
 
   @override
   String get launchUrlError => 'URLの起動ができません';
@@ -59,6 +58,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
     if (pinnedByCurrentUser) return 'あなたのピン';
     return '${pinnedBy.name}のピン';
   }
+
+  @override
+  String get sendMessagePermissionError => 'メッセージを送信する権限がありません';
 
   @override
   String get emptyMessagesText => '現在、メッセージはありません。';
@@ -351,7 +353,24 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'スローモードオン';
 
   @override
+  String get viewLibrary => 'ライブラリを表示';
+
+  @override
   String attachmentLimitExceedError(int limit) => '''
 添付ファイルの制限を超えました：$limit個のファイル以上を添付することはできません
   ''';
+
+  @override
+  String get linkDisabledDetails => 'この会話では、リンクの送信は許可されていません。';
+
+  @override
+  String get linkDisabledError => 'リンクが無効になっています';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '未読メッセージ1通';
+    }
+    return '$unreadCountつの未読メッセージ';
+  }
 }

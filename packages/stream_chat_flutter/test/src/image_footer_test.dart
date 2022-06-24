@@ -37,8 +37,8 @@ void main() {
             child: WillPopScope(
               onWillPop: () async => false,
               child: Scaffold(
-                body: GalleryFooter(
-                  message: Message(),
+                body: StreamGalleryFooter(
+                  mediaAttachmentPackages: Message().getAttachmentPackageList(),
                 ),
               ),
             ),

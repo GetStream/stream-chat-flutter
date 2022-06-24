@@ -70,7 +70,7 @@ bool Function(Message) defaultMessageFilter(String currentUserId) =>
 class MessageListCore extends StatefulWidget {
   /// Instantiate a new [MessageListView].
   const MessageListCore({
-    Key? key,
+    super.key,
     required this.loadingBuilder,
     required this.emptyBuilder,
     required this.messageListBuilder,
@@ -80,7 +80,7 @@ class MessageListCore extends StatefulWidget {
     this.messageFilter,
     this.paginationLimit = 20,
     this.artificialDelayBeforePaginate,
-  }) : super(key: key);
+  });
 
   /// A [MessageListController] allows pagination.
   /// Use [ChannelListController.paginateData] pagination.

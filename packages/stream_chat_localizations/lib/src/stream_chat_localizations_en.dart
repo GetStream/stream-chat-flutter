@@ -3,8 +3,7 @@ part of 'stream_chat_localizations.dart';
 /// The translations for English (`en`).
 class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   /// Create an instance of the translation bundle for English.
-  const StreamChatLocalizationsEn({String localeName = 'en'})
-      : super(localeName: localeName);
+  const StreamChatLocalizationsEn({super.localeName = 'en'});
 
   @override
   String get launchUrlError => 'Cannot launch the url';
@@ -59,6 +58,10 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
     if (pinnedByCurrentUser) return 'Pinned by You';
     return 'Pinned by ${pinnedBy.name}';
   }
+
+  @override
+  String get sendMessagePermissionError =>
+      "You don't have permission to send messages";
 
   @override
   String get emptyMessagesText => 'There are no messages currently';
@@ -195,7 +198,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get operationCouldNotBeCompletedText =>
-      'The operation couldn\'t be completed.';
+      "The operation couldn't be completed.";
 
   @override
   String get replyLabel => 'Reply';
@@ -368,4 +371,22 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get slowModeOnLabel => 'Slow mode ON';
+
+  @override
+  String get linkDisabledDetails =>
+      'Sending links is not allowed in this conversation.';
+
+  @override
+  String get linkDisabledError => 'Links are disabled';
+
+  @override
+  String get viewLibrary => 'View library';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 unread message';
+    }
+    return '$unreadCount unread messages';
+  }
 }

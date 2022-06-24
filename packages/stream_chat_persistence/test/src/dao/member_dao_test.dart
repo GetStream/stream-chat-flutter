@@ -62,7 +62,7 @@ void main() {
       expect(fetchedMember.createdAt, isSameDateAs(member.createdAt));
       expect(fetchedMember.isModerator, member.isModerator);
       expect(fetchedMember.invited, member.invited);
-      expect(fetchedMember.role, member.role);
+      expect(fetchedMember.channelRole, member.channelRole);
       expect(fetchedMember.updatedAt, isSameDateAs(member.updatedAt));
       expect(
         fetchedMember.inviteAcceptedAt,
@@ -89,7 +89,7 @@ void main() {
       expect(fetchedMember.createdAt, isSameDateAs(member.createdAt));
       expect(fetchedMember.isModerator, member.isModerator);
       expect(fetchedMember.invited, member.invited);
-      expect(fetchedMember.role, member.role);
+      expect(fetchedMember.channelRole, member.channelRole);
       expect(fetchedMember.updatedAt, isSameDateAs(member.updatedAt));
       expect(
         fetchedMember.inviteAcceptedAt,

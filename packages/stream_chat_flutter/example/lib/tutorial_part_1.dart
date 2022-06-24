@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs
+// ignore_for_file: prefer_expression_function_bodies
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -27,7 +28,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// - We make [StreamChat] the root Widget of our application
 ///
 /// - We create a single [ChannelPage] widget under [StreamChat] with three
-/// widgets: [ChannelHeader], [MessageListView] and [MessageInput]
+/// widgets: [StreamChannelHeader], [StreamMessageListView]
+/// and [StreamMessageInput]
 ///
 /// If you now run the simulator you will see a single channel UI.
 void main() async {
@@ -56,20 +58,18 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({
-    Key? key,
+    super.key,
     required this.client,
     required this.channel,
-  }) : super(key: key);
+  });
 
   final StreamChatClient client;
 
   final Channel channel;
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
     return MaterialApp(
-      // ignore: prefer_expression_function_bodies
       builder: (context, widget) {
         return StreamChat(
           client: client,
@@ -86,22 +86,19 @@ class MyApp extends StatelessWidget {
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
-  // ignore: prefer_expression_function_bodies
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const ChannelHeader(),
-      body: Column(
-        children: const <Widget>[
-          Expanded(
-            child: MessageListView(),
-          ),
-          MessageInput(),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+        appBar: const StreamChannelHeader(),
+        body: Column(
+          children: const <Widget>[
+            Expanded(
+              child: StreamMessageListView(),
+            ),
+            StreamMessageInput(),
+          ],
+        ),
+      );
 }

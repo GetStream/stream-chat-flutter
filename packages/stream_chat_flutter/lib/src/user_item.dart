@@ -2,29 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-///
+/// {@macro user_item}
+@Deprecated("Use 'StreamUserItem' instead")
+typedef UserItem = StreamUserItem;
+
+/// {@template user_item}
 /// It shows the current [User] preview.
 ///
 /// The widget uses a [StreamBuilder] to render the user information
 /// image as soon as it updates.
 ///
 /// Usually you don't use this widget as it's the default user preview used
-/// by [UserListView].
+/// by [StreamUserListView].
 ///
 /// The widget renders the ui based on the first ancestor of type
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class UserItem extends StatelessWidget {
+/// {@endtemplate}
+class StreamUserItem extends StatelessWidget {
   /// Instantiate a new UserItem
-  const UserItem({
-    Key? key,
+  const StreamUserItem({
+    super.key,
     required this.user,
     this.onTap,
     this.onLongPress,
     this.onImageTap,
     this.selected = false,
     this.showLastOnline = true,
-  }) : super(key: key);
+  });
 
   /// Function called when tapping this widget
   final void Function(User)? onTap;
@@ -38,33 +43,21 @@ class UserItem extends StatelessWidget {
   /// The function called when the image is tapped
   final void Function(User)? onImageTap;
 
-  /// If true the [UserItem] will show a trailing checkmark
+  /// If true the [StreamUserItem] will show a trailing checkmark
   final bool selected;
 
-  /// If true the [UserItem] will show the last seen
+  /// If true the [StreamUserItem] will show the last seen
   final bool showLastOnline;
 
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
     return ListTile(
-      onTap: () {
-        if (onTap != null) {
-          onTap!(user);
-        }
-      },
-      onLongPress: () {
-        if (onLongPress != null) {
-          onLongPress!(user);
-        }
-      },
-      leading: UserAvatar(
+      onTap: onTap == null ? null : () => onTap!(user),
+      onLongPress: onLongPress == null ? null : () => onLongPress!(user),
+      leading: StreamUserAvatar(
         user: user,
-        onTap: (user) {
-          if (onImageTap != null) {
-            onImageTap!(user);
-          }
-        },
+        onTap: onImageTap,
         constraints: const BoxConstraints.tightFor(
           height: 40,
           width: 40,

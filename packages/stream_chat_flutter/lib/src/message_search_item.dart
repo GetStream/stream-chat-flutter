@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template message_search_item}
 /// It shows the current [Message] preview.
 ///
 /// Usually you don't use this widget as it's the default item used by
@@ -10,14 +11,16 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The widget renders the ui based on the first ancestor of type
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
+/// {@endtemplate}
+@Deprecated("Use 'StreamMessageSearchItem' instead")
 class MessageSearchItem extends StatelessWidget {
   /// Instantiate a new MessageSearchItem
   const MessageSearchItem({
-    Key? key,
+    super.key,
     required this.getMessageResponse,
     this.onTap,
     this.showOnlineStatus = true,
-  }) : super(key: key);
+  });
 
   /// [Message] displayed
   final GetMessageResponse getMessageResponse;
@@ -34,10 +37,10 @@ class MessageSearchItem extends StatelessWidget {
     final channel = getMessageResponse.channel;
     final channelName = channel?.extraData['name'];
     final user = message.user!;
-    final channelPreviewTheme = ChannelPreviewTheme.of(context);
+    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
     return ListTile(
       onTap: onTap,
-      leading: UserAvatar(
+      leading: StreamUserAvatar(
         user: user,
         showOnlineStatus: showOnlineStatus,
         constraints: const BoxConstraints.tightFor(
@@ -120,7 +123,7 @@ class MessageSearchItem extends StatelessWidget {
       text = parts.join(' ');
     }
 
-    final channelPreviewTheme = ChannelPreviewTheme.of(context);
+    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
     return Text.rich(
       _getDisplayText(
         text!,
