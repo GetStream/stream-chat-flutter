@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart'
     show IterableExtension, ListEquality;
 import 'package:dio/dio.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
@@ -492,12 +494,25 @@ class Channel {
       final cancelToken = CancelToken();
       Future<String> future;
       if (isImage) {
-        future = sendImage(
-          it.file!,
-          onSendProgress: onSendProgress,
-          cancelToken: cancelToken,
-          extraData: it.extraData,
-        ).then((it) => it.file);
+        future = FlutterImageCompress.compressWithList(it.file!.bytes!,
+                quality: 80, autoCorrectionAngle: false)
+            .then((bytes) => (File(it.file!.path!)
+                        .writeAsBytes(List.from(bytes), flush: true))
+                    .then((newFile) {
+                  final newAttachmentFile = AttachmentFile(
+                      size: bytes.lengthInBytes,
+                      bytes: bytes,
+                      name: it.file!.name,
+                      path: it.file!.path);
+                  it = it.copyWith(file: newAttachmentFile);
+                  it.extraData['file_size'] = bytes.lengthInBytes;
+                  return sendImage(
+                    it.file!,
+                    onSendProgress: onSendProgress,
+                    cancelToken: cancelToken,
+                    extraData: it.extraData,
+                  ).then((it) => it.file);
+                }));
       } else {
         future = sendFile(
           it.file!,
