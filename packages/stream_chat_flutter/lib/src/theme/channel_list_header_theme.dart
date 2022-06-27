@@ -3,10 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro channelListHeaderTheme}
-@Deprecated("Use 'StreamChannelListHeaderTheme' instead")
-typedef ChannelListHeaderTheme = StreamChannelListHeaderTheme;
-
 /// {@template channelListHeaderTheme}
 /// Overrides the default style of [ChannelListHeader] descendants.
 ///
@@ -53,10 +49,6 @@ class StreamChannelListHeaderTheme extends InheritedTheme {
   bool updateShouldNotify(StreamChannelListHeaderTheme oldWidget) =>
       data != oldWidget.data;
 }
-
-/// {@macro channel_list_header_theme_data}
-@Deprecated("Use ''StreamChannelListHeaderThemeData' instead")
-typedef ChannelListHeaderThemeData = StreamChannelListHeaderThemeData;
 
 /// {@template channel_list_header_theme_data}
 /// Theme dedicated to the [ChannelListHeader]

@@ -7,10 +7,6 @@ import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
-/// {@macro streamQuotedMessage}
-@Deprecated("Use 'StreamQuotedMessageWidget' instead")
-typedef QuotedMessageWidget = StreamQuotedMessageWidget;
-
 /// {@template streamQuotedMessage}
 /// Widget for the quoted message.
 /// {@endtemplate}

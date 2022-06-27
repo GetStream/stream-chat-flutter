@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// {@macro streamReactionIcon}
-@Deprecated("Use 'StreamReactionIcon' instead")
-typedef ReactionIcon = StreamReactionIcon;
-
 /// {@template streamReactionIcon}
 /// Reaction icon data
 /// {@endtemplate}

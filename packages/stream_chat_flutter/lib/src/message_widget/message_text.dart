@@ -4,10 +4,6 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamMessageText}
-@Deprecated("Use 'StreamMessageText' instead")
-typedef MessageText = StreamMessageText;
-
 /// {@template streamMessageText}
 /// The text content of a message.
 /// {@endtemplate}

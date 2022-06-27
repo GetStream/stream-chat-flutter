@@ -9,10 +9,6 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamGalleryFooter}
-@Deprecated("Use 'StreamGalleryFooter' instead")
-typedef GalleryFooter = StreamGalleryFooter;
-
 /// {@template streamGalleryFooter}
 /// Footer widget for media display
 /// {@endtemplate}

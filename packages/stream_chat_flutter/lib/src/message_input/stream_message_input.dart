@@ -20,12 +20,12 @@ import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/file_upload_error_handler.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
+import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
+import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/message_input/user_mentions_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/commands_overlay.dart';
 import 'package:stream_chat_flutter/src/overlays/emoji_overlay.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
-import 'package:stream_chat_flutter/src/v4/message_input/simple_safe_area.dart';
-import 'package:stream_chat_flutter/src/v4/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -113,8 +113,6 @@ class StreamMessageInput extends StatefulWidget {
     this.elevation,
     this.shadow,
     this.autoCorrect = true,
-    @Deprecated('Please use enableEmojiSuggestionsOverlay')
-        this.disableEmojiSuggestionsOverlay = false,
     this.enableEmojiSuggestionsOverlay = true,
     this.enableMentionsOverlay = true,
     this.onQuotedMessageCleared,
@@ -237,11 +235,6 @@ class StreamMessageInput extends StatefulWidget {
   /// Disable autoCorrect by passing false
   /// autoCorrect is enabled by default
   final bool autoCorrect;
-
-  /// Disable the default emoji suggestions
-  /// Enabled by default
-  @Deprecated('Please use enableEmojiSuggestionsOverlay')
-  final bool disableEmojiSuggestionsOverlay;
 
   /// Disable the default emoji suggestions by passing `false`
   /// Enabled by default
@@ -528,8 +521,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
               visible: _showCommandsOverlay,
               widget: _buildCommandsOverlayEntry(),
             ),
-            if (widget.enableEmojiSuggestionsOverlay &&
-                !widget.disableEmojiSuggestionsOverlay)
+            if (widget.enableEmojiSuggestionsOverlay)
               OverlayOptions(
                 visible: _focusNode.hasFocus &&
                     _effectiveController.text.isNotEmpty &&

@@ -3,10 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro channelPreviewTheme}
-@Deprecated("Use 'StreamChannelPreviewTheme' instead")
-typedef ChannelPreviewTheme = StreamChannelPreviewTheme;
-
 /// {@template channelPreviewTheme}
 /// Overrides the default style of [ChannelPreview] descendants.
 ///
@@ -52,10 +48,6 @@ class StreamChannelPreviewTheme extends InheritedTheme {
   bool updateShouldNotify(StreamChannelPreviewTheme oldWidget) =>
       data != oldWidget.data;
 }
-
-/// {@macro channelPreviewThemeData}
-@Deprecated("Use 'StreamChannelPreviewThemeData' instead")
-typedef ChannelPreviewThemeData = StreamChannelPreviewThemeData;
 
 /// {@template channelPreviewThemeData}
 /// A style that overrides the default appearance of [ChannelPreview]s when used

@@ -24,10 +24,6 @@ enum AttachmentSource {
   }
 }
 
-/// {@macro streamAttachmentWidget}
-@Deprecated("Use 'StreamAttachmentWidget' instead")
-typedef AttachmentWidget = StreamAttachmentWidget;
-
 /// {@template streamAttachmentWidget}
 /// Abstract class for deriving attachment types
 /// {@endtemplate}

@@ -5,10 +5,6 @@ import 'package:stream_chat_flutter/src/message_widget/reactions/reaction_bubble
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamMessageReactionsModal}
-@Deprecated("Use 'StreamMessageReactionsModal' instead")
-typedef MessageReactionsModal = StreamMessageReactionsModal;
-
 /// {@template streamMessageReactionsModal}
 /// Modal widget for displaying message reactions
 /// {@endtemplate}

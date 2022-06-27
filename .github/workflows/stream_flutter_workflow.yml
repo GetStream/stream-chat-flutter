@@ -111,22 +111,27 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat/coverage/lcov.info
-          min_coverage: 80
+          min_coverage: 79
+      - name: "Stream Chat Persistence Coverage Check"
+        uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
+        with:
+          path: packages/stream_chat_localizations/coverage/lcov.info
+          min_coverage: 88
       - name: "Stream Chat Persistence Coverage Check"
         uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_persistence/coverage/lcov.info
-          min_coverage: 95
+          min_coverage: 97
       - name: "Stream Chat Flutter Core Coverage Check"
         uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_flutter_core/coverage/lcov.info
-          min_coverage: 90
+          min_coverage: 30
       - name: "Stream Chat Flutter Coverage Check"
         uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_flutter/coverage/lcov.info
-          min_coverage: 67
+          min_coverage: 68
 
   draft-build:
     runs-on: ubuntu-latest

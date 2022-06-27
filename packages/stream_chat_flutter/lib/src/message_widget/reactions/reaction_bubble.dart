@@ -4,10 +4,6 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamReactionBubble}
-@Deprecated("Use 'StreamReactionBubble' instead")
-typedef ReactionBubble = StreamReactionBubble;
-
 /// {@template streamReactionBubble}
 /// Creates a reaction bubble that displays over messages.
 /// {@endtemplate}

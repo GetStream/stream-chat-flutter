@@ -2,10 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
 
-/// {@macro message_theme_data}
-@Deprecated("Use 'StreamMessageThemeData' instead")
-typedef MessageThemeData = StreamMessageThemeData;
-
 /// {@template message_theme_data}
 /// Class for getting message theme
 /// {@endtemplate}

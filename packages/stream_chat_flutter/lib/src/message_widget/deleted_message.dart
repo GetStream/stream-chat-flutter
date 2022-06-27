@@ -3,10 +3,6 @@ import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
-/// {@macro streamDeletedMessage}
-@Deprecated("Use 'StreamDeletedMessage' instead")
-typedef DeletedMessage = StreamDeletedMessage;
-
 /// {@template streamDeletedMessage}
 /// Displays that a message was deleted at this position in the message list.
 /// {@endtemplate}

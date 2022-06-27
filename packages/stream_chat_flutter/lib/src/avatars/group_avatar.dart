@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamGroupAvatar}
-@Deprecated("Use 'StreamGroupAvatar' instead")
-typedef GroupAvatar = StreamGroupAvatar;
-
 /// {@template streamGroupAvatar}
 /// Widget for constructing a group of images
 /// {@endtemplate}

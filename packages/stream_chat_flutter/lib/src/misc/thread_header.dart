@@ -3,10 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamThreadHeader}
-@Deprecated("Use 'StreamThreadHeader' instead")
-typedef ThreadHeader = StreamThreadHeader;
-
 /// {@template streamThreadHeader}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header_paint.png)

@@ -10,10 +10,6 @@ import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-/// {@macro streamFileAttachment}
-@Deprecated("Use 'StreamFileAttachment' instead")
-typedef FileAttachment = StreamFileAttachment;
-
 /// {@template streamFileAttachment}
 /// Displays file attachments that have been sent in a chat.
 ///

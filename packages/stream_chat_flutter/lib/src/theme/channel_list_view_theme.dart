@@ -2,10 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro channelListViewTheme}
-@Deprecated("Use 'StreamChannelListViewTheme' instead")
-typedef ChannelListViewTheme = StreamChannelListViewTheme;
-
 /// {@template channelListViewTheme}
 /// Overrides the default style of [ChannelListView] descendants.
 ///
@@ -51,10 +47,6 @@ class StreamChannelListViewTheme extends InheritedTheme {
   bool updateShouldNotify(StreamChannelListViewTheme oldWidget) =>
       data != oldWidget.data;
 }
-
-/// {@macro channelListViewThemeData}
-@Deprecated("Use 'StreamChannelListViewThemeData' instead")
-typedef ChannelListViewThemeData = StreamChannelListViewThemeData;
 
 /// {@template channelListViewThemeData}
 /// A style that overrides the default appearance of [ChannelListView]s when

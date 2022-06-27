@@ -2,10 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro galleryFooterTheme}
-@Deprecated("Use 'StreamGalleryFooterTheme' instead")
-typedef GalleryFooterTheme = StreamGalleryFooterTheme;
-
 /// {@template galleryFooterTheme}
 /// Overrides the default style of [GalleryFooter] descendants.
 ///
@@ -51,10 +47,6 @@ class StreamGalleryFooterTheme extends InheritedTheme {
   bool updateShouldNotify(StreamGalleryFooterTheme oldWidget) =>
       data != oldWidget.data;
 }
-
-/// {@macro galleryFooterThemeData}
-@Deprecated("Use 'StreamGalleryFooterThemeData' instead")
-typedef GalleryFooterThemeData = StreamGalleryFooterThemeData;
 
 /// {@template galleryFooterThemeData}
 /// A style that overrides the default appearance of [GalleryFooter]s when used

@@ -3,10 +3,6 @@ import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
-/// {@macro streamDateDivider}
-@Deprecated("Use 'StreamDateDivider' instead")
-typedef DateDivider = StreamDateDivider;
-
 /// {@template streamDateDivider}
 /// Shows a date divider depending on the date difference
 /// FIXME: write better description!

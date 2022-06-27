@@ -2,10 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro userListViewTheme}
-@Deprecated("Use 'StreamUserListViewTheme' instead")
-typedef UserListViewTheme = StreamUserListViewTheme;
-
 /// {@template userListViewTheme}
 /// Overrides the default style of [UserListView] descendants.
 ///
@@ -51,10 +47,6 @@ class StreamUserListViewTheme extends InheritedTheme {
   bool updateShouldNotify(StreamUserListViewTheme oldWidget) =>
       data != oldWidget.data;
 }
-
-/// {@macro userListViewThemeData}
-@Deprecated("Use 'StreamUserListViewThemeData' instead")
-typedef UserListViewThemeData = StreamUserListViewThemeData;
 
 /// {@template userListViewThemeData}
 /// A style that overrides the default appearance of [UserListView]s when

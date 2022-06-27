@@ -3,10 +3,6 @@ import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamVideoAttachment}
-@Deprecated("Use 'StreamVideoAttachment' instead")
-typedef VideoAttachment = StreamVideoAttachment;
-
 /// {@template streamVideoAttachment}
 /// Shows a video attachment in a [StreamMessageWidget].
 /// {@endtemplate}

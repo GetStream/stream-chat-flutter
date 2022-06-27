@@ -30,7 +30,7 @@ void main() {
         isModerator: math.Random().nextBool(),
         invited: math.Random().nextBool(),
         inviteAcceptedAt: DateTime.now(),
-        role: 'testRole',
+        channelRole: 'testRole',
         updatedAt: DateTime.now(),
       ),
     );
@@ -108,7 +108,7 @@ void main() {
       isModerator: math.Random().nextBool(),
       invited: math.Random().nextBool(),
       inviteAcceptedAt: DateTime.now(),
-      role: 'testRole',
+      channelRole: 'testRole',
       updatedAt: DateTime.now(),
     );
     await database.userDao.updateUsers([newUser]);

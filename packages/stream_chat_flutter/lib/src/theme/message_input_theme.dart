@@ -5,10 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
-/// {@macro messageInputTheme}
-@Deprecated("Use 'StreamMessageInputTheme' instead")
-typedef MessageInputTheme = StreamMessageInputTheme;
-
 /// {@template messageInputTheme}
 /// Overrides the default style of [MessageInput] descendants.
 ///
@@ -54,10 +50,6 @@ class StreamMessageInputTheme extends InheritedTheme {
   bool updateShouldNotify(StreamMessageInputTheme oldWidget) =>
       data != oldWidget.data;
 }
-
-/// {@macro messageInputThemeData}
-@Deprecated("Use 'StreamMessageInputThemeData' instead")
-typedef MessageInputThemeData = StreamMessageInputThemeData;
 
 /// {@template messageInputThemeData}
 /// A style that overrides the default appearance of [MessageInput] widgets

@@ -3,10 +3,6 @@ import 'package:lottie/lottie.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-/// {@macro streamTypingIndicator}
-@Deprecated("Use 'StreamTypingIndicator' instead")
-typedef TypingIndicator = StreamTypingIndicator;
-
 /// {@template streamTypingIndicator}
 /// Shows the list of user who are actively typing.
 /// {@endtemplate}

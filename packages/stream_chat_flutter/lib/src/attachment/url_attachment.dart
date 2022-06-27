@@ -2,10 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamUrlAttachment}
-@Deprecated("Use 'StreamUrlAttachment' instead")
-typedef UrlAttachment = StreamUrlAttachment;
-
 /// {@template streamUrlAttachment}
 /// Displays a URL attachment in a [StreamMessageWidget].
 /// {@endtemplate}

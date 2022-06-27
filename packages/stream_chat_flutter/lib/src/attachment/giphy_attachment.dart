@@ -5,10 +5,6 @@ import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamGiphyAttachment}
-@Deprecated("Use 'StreamGiphyAttachment' instead")
-typedef GiphyAttachment = StreamGiphyAttachment;
-
 /// {@template streamGiphyAttachment}
 /// Shows a GIF attachment in a [StreamMessageWidget].
 /// {@endtemplate}

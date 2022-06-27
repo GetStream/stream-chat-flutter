@@ -2078,10 +2078,6 @@ class ChannelClientState {
         (m) => m.user?.id == _channel.client.state.currentUser?.id,
       );
 
-  /// User role for the current user.
-  @Deprecated('Please use currentUserChannelRole')
-  String? get currentUserRole => currentUserMember?.role;
-
   /// Channel role for the current user
   String? get currentUserChannelRole => currentUserMember?.channelRole;
 

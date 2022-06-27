@@ -4,10 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamChannelListHeader}
-@Deprecated("Use 'StreamChannelListHeader' instead")
-typedef ChannelListHeader = StreamChannelListHeader;
-
 /// {@template streamChannelListHeader}
 /// Shows the current [StreamChatClient] status.
 ///

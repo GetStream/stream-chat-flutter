@@ -4,10 +4,6 @@ import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamImageAttachment}
-@Deprecated("use 'StreamImageAttachment' instead")
-typedef ImageAttachment = StreamImageAttachment;
-
 /// {@template streamImageAttachment}
 /// Shows an image attachment in a [StreamMessageWidget].
 /// {@endtemplate}

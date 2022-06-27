@@ -2,10 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro messageListViewTheme}
-@Deprecated("Use 'StreamMessageListViewTheme' instead")
-typedef MessageListViewTheme = StreamMessageListViewTheme;
-
 /// {@template messageListViewTheme}
 /// Overrides the default style of [MessageListView] descendants.
 ///
@@ -51,10 +47,6 @@ class StreamMessageListViewTheme extends InheritedTheme {
   bool updateShouldNotify(StreamMessageListViewTheme oldWidget) =>
       data != oldWidget.data;
 }
-
-/// {@macro messageListViewThemeData}
-@Deprecated("Use 'StreamMessageListViewThemeData' instead")
-typedef MessageListViewThemeData = StreamMessageListViewThemeData;
 
 /// {@template messageListViewThemeData}
 /// A style that overrides the default appearance of [MessageListView]s when

@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template countdownButton}
-/// Shows the countdown to when the user can send another message.
-/// {@endtemplate}
-class CountdownButton extends StatelessWidget {
-  /// {@macro countdownButton}
-  const CountdownButton({
+/// Button for showing visual component of slow mode.
+class StreamCountdownButton extends StatelessWidget {
+  /// Constructor for creating [StreamCountdownButton].
+  const StreamCountdownButton({
     super.key,
     required this.count,
   });
 
-  /// The countdown, in seconds.
+  /// The amount of time remaining until the user can send a message again.
+  /// Measured in seconds.
   final int count;
 
   @override

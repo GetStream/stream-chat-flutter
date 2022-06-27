@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro commands_overlay}
-@Deprecated("Use 'StreamCommandsOverlay' instead")
-typedef CommandsOverlay = StreamCommandsOverlay;
-
 /// {@template streamCommandsOverlay}
 /// Overlay for displaying commands that can be used
 /// {@endtemplate}

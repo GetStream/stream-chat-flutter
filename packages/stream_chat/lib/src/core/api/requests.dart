@@ -62,8 +62,6 @@ class PaginationParams extends Equatable {
   /// ```
   const PaginationParams({
     this.limit = 10,
-    this.before = 10,
-    this.after = 10,
     this.offset,
     this.next,
     this.idAround,
@@ -87,14 +85,6 @@ class PaginationParams extends Equatable {
 
   /// The amount of items requested from the APIs.
   final int limit;
-
-  /// The amount of items requested before message ID from the APIs.
-  @Deprecated('before is deprecated, use limit instead')
-  final int before;
-
-  /// The amount of items requested after message ID from the APIs.
-  @Deprecated('after is deprecated, use limit instead')
-  final int after;
 
   /// The offset of requesting items.
   final int? offset;
@@ -165,8 +155,6 @@ class PaginationParams extends Equatable {
   }) =>
       PaginationParams(
         limit: limit ?? this.limit,
-        before: before ?? this.before,
-        after: limit ?? this.after,
         offset: offset ?? this.offset,
         idAround: idAround ?? this.idAround,
         next: next ?? this.next,
@@ -186,8 +174,6 @@ class PaginationParams extends Equatable {
   @override
   List<Object?> get props => [
         limit,
-        before,
-        after,
         offset,
         next,
         idAround,

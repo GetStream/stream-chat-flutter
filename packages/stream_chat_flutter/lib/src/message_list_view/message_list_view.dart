@@ -961,18 +961,27 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               ),
               if (showUnreadCount)
                 Positioned(
-                  width: 20,
-                  height: 20,
-                  left: 10,
+                  left: 0,
+                  right: 0,
                   top: -10,
-                  child: CircleAvatar(
-                    child: Padding(
-                      padding: const EdgeInsets.all(3),
-                      child: Text(
-                        '$unreadCount',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                  child: Center(
+                    child: Material(
+                      borderRadius: BorderRadius.circular(8),
+                      color:
+                          StreamChatTheme.of(context).colorTheme.accentPrimary,
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: 5,
+                          right: 5,
+                          top: 2,
+                          bottom: 2,
+                        ),
+                        child: Text(
+                          '${unreadCount > 99 ? '99+' : unreadCount}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),

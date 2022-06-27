@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro attachmentTitle}
-@Deprecated("Use 'StreamAttachmentTitle' instead")
-typedef AttachmentTitle = StreamAttachmentTitle;
-
 /// {@template attachmentTitle}
 /// Title for attachments
 /// {@endtemplate}

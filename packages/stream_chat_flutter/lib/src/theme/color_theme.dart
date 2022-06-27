@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// {@macro color_theme}
-@Deprecated("Use 'StreamColorTheme' instead")
-typedef ColorTheme = StreamColorTheme;
-
 /// {@template color_theme}
 /// Theme that holds colors
 /// {@endtemplate}

@@ -1,10 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// {@macro avatarThemeData}
-@Deprecated("Use 'StreamAvatarThemeData' instead")
-typedef AvatarThemeData = StreamAvatarThemeData;
-
 /// {@template avatarThemeData}
 /// A style that overrides the default appearance of various avatar widgets.
 /// {@endtemplate}

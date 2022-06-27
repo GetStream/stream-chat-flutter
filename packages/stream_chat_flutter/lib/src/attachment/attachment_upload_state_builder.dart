@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamAttachmentUploadStateBuilder}
-@Deprecated("Use 'StreamAttachmentsUploadStateBuilder' instead")
-typedef AttachmentUploadStateBuilder = StreamAttachmentUploadStateBuilder;
-
 /// {@template streamAttachmentUploadStateBuilder}
 /// Widget to display attachment upload state
 /// {@endtemplate}

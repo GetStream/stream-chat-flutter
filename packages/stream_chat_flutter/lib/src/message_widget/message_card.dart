@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -99,18 +101,27 @@ class MessageCard extends StatefulWidget {
 
 class _MessageCardState extends State<MessageCard> {
   final GlobalKey attachmentsKey = GlobalKey();
-  double? attachmentsWidth;
+  final GlobalKey linksKey = GlobalKey();
+  double? widthLimit;
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final renderBox =
+      final attachmentsRenderBox =
           attachmentsKey.currentContext?.findRenderObject() as RenderBox?;
-      final size = renderBox?.size;
+      final attachmentsWidth = attachmentsRenderBox?.size.width;
 
-      if (mounted && attachmentsWidth != size?.width) {
+      final linkRenderBox =
+          linksKey.currentContext?.findRenderObject() as RenderBox?;
+      final linkWidth = linkRenderBox?.size.width;
+
+      if (mounted) {
         setState(() {
-          attachmentsWidth = size?.width;
+          if (attachmentsWidth != null && linkWidth != null) {
+            widthLimit = max(attachmentsWidth, linkWidth);
+          } else {
+            widthLimit = attachmentsWidth ?? linkWidth;
+          }
         });
       }
     });
@@ -137,7 +148,7 @@ class _MessageCardState extends State<MessageCard> {
       color: _getBackgroundColor(),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: attachmentsWidth ?? double.infinity,
+          maxWidth: widthLimit ?? double.infinity,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,7 +203,7 @@ class _MessageCardState extends State<MessageCard> {
         hostName.capitalize();
 
     return StreamUrlAttachment(
-      key: attachmentsKey,
+      key: linksKey,
       urlAttachment: urlAttachment,
       hostDisplayName: hostDisplayName,
       textPadding: widget.textPadding,
