@@ -103,7 +103,13 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
           y: true,
         ),
       ),
-      portalFollower: IgnorePointer(
+      portalFollower: MouseRegion(
+        onEnter: (event) async {
+          setState(() => _showReactionsPopup = !_showReactionsPopup);
+        },
+        onExit: (event) {
+          setState(() => _showReactionsPopup = !_showReactionsPopup);
+        },
         child: ConstrainedBox(
           constraints: const BoxConstraints(
             maxWidth: 336,
@@ -114,34 +120,38 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
                     '''${widget.message.latestReactions!.length} ${context.translations.messageReactionsLabel}''',
                     style: streamChatTheme.textTheme.headlineBold,
                   ),
-                  const SizedBox(height: 24),
-                  Wrap(
-                    spacing: 16,
-                    runSpacing: 16,
-                    children: [
-                      ...widget.message.latestReactions!.map((reaction) {
-                        final reactionIcon = reactionIcons.firstWhereOrNull(
-                          (r) => r.type == reaction.type,
-                        );
-                        return _StackedReaction(
-                          reaction: reaction,
-                          streamChatTheme: streamChatTheme,
-                          reactionIcon: reactionIcon,
-                        );
-                      }).toList(),
-                    ],
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: [
+                        ...widget.message.latestReactions!.map((reaction) {
+                          final reactionIcon = reactionIcons.firstWhereOrNull(
+                            (r) => r.type == reaction.type,
+                          );
+                          return _StackedReaction(
+                            reaction: reaction,
+                            streamChatTheme: streamChatTheme,
+                            reactionIcon: reactionIcon,
+                          );
+                        }).toList(),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -149,7 +159,6 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (event) async {
-          // await Future.delayed(const Duration(milliseconds: 1500));
           setState(() => _showReactionsPopup = !_showReactionsPopup);
         },
         onExit: (event) {
