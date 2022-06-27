@@ -263,7 +263,9 @@ class _ChannelPageState extends State<ChannelPage> {
                 Expanded(
                   child: StreamMessageListView(
                     onMessageSwiped:
-                        (Platform.isAndroid || Platform.isIOS) ? reply : null,
+                        (CurrentPlatform.isAndroid || CurrentPlatform.isIos)
+                            ? reply
+                            : null,
                     threadBuilder: (context, parent) {
                       return ThreadPage(
                         parent: parent!,
