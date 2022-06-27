@@ -1,3 +1,7 @@
+## 5.0.0-beta.1
+
+- Updated `stream_chat` dependency to [`5.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 4.2.0
 
 - Added support for `Channel.ownCapabilities`

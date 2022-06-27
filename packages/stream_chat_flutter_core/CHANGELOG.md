@@ -1,3 +1,8 @@
+## 5.0.0-beta.1
+
+- Updated `stream_chat` dependency to [`5.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
+- Removed deprecated code.
+
 ## 4.3.0
 
 - Updated `stream_chat` dependency to [`4.3.0`](https://pub.dev/packages/stream_chat/changelog).

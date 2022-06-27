@@ -1,3 +1,8 @@
+## 5.0.0-beta.1
+
+- Minor fixes.
+- Removed deprecated code.
+
 ## 4.3.0
 
 🐞 Fixed
