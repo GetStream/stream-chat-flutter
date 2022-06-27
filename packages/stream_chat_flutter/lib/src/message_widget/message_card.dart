@@ -115,13 +115,15 @@ class _MessageCardState extends State<MessageCard> {
           linksKey.currentContext?.findRenderObject() as RenderBox?;
       final linkWidth = linkRenderBox?.size.width;
 
-      setState(() {
-        if (attachmentsWidth != null && linkWidth != null) {
-          widthLimit = max(attachmentsWidth, linkWidth);
-        } else {
-          widthLimit = attachmentsWidth ?? linkWidth;
-        }
-      });
+      if (mounted) {
+        setState(() {
+          if (attachmentsWidth != null && linkWidth != null) {
+            widthLimit = max(attachmentsWidth, linkWidth);
+          } else {
+            widthLimit = attachmentsWidth ?? linkWidth;
+          }
+        });
+      }
     });
     super.initState();
   }
