@@ -1475,7 +1475,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   /// Sends the current message
   Future<void> sendMessage() async {
-    if (_effectiveController.text.trim().isEmpty &&
+    if (_timeOut > 0 &&
+        _effectiveController.text.trim().isEmpty &&
         _effectiveController.attachments.isEmpty) {
       return;
     }
