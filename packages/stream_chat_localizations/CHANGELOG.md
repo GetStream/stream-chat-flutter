@@ -1,3 +1,15 @@
+## 3.3.0
+
+✅ Added
+
+* `couldNotReadBytesFromFileError` with translations
+* `downloadLabel` with translations
+* `toggleMuteUnmuteAction` with translations
+* `toggleMuteUnmuteGroupQuestion` with translations
+* `toggleMuteUnmuteGroupText` with translations
+* `toggleMuteUnmuteUserQuestion` with translations
+* `toggleMuteUnmuteUserText` with translations
+
 ## 3.2.0
 
 ✅ Added
