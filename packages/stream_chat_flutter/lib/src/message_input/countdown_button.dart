@@ -13,20 +13,22 @@ class StreamCountdownButton extends StatelessWidget {
   final int count;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: StreamChatTheme.of(context).colorTheme.disabled,
-            shape: BoxShape.circle,
-          ),
-          child: SizedBox(
-            height: 24,
-            width: 24,
-            child: Center(
-              child: Text('$count'),
-            ),
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: StreamChatTheme.of(context).colorTheme.disabled,
+          shape: BoxShape.circle,
+        ),
+        child: SizedBox(
+          height: 24,
+          width: 24,
+          child: Center(
+            child: Text('$count'),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
