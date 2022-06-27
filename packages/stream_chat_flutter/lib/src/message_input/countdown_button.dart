@@ -9,7 +9,8 @@ class StreamCountdownButton extends StatelessWidget {
     required this.count,
   });
 
-  /// The amount of time remaining until the user can send a message again. Measured in seconds.
+  /// The amount of time remaining until the user can send a message again.
+  /// Measured in seconds.
   final int count;
 
   @override
