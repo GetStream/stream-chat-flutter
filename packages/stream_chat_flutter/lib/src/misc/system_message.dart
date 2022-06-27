@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamSystemMessage}
-@Deprecated("Use 'StreamSystemMessage' instead")
-typedef SystemMessage = StreamSystemMessage;
-
 /// {@template streamSystemMessage}
 /// Shows a date divider depending on the date difference
 /// FIXME: This is NOT a good description!

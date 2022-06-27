@@ -2,10 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamUserAvatar}
-@Deprecated("Use 'StreamUserAvatar' instead")
-typedef UserAvatar = StreamUserAvatar;
-
 /// {@template streamUserAvatar}
 /// Displays a user's avatar.
 /// {@endtemplate}

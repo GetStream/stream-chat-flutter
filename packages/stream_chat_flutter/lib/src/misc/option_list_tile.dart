@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro streamOptionListTile}
-@Deprecated("Use 'StreamOptionListTile' instead")
-typedef OptionListTile = StreamOptionListTile;
-
 /// {@template streamOptionListTile}
 /// List tile for [ChannelBottomSheet]
 /// {@endtemplate}

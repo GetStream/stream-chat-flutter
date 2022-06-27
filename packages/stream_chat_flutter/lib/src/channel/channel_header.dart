@@ -3,10 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-///{@macro streamChannelHeader}
-@Deprecated("Use 'StreamChannelHeader' instead")
-typedef ChannelHeader = StreamChannelHeader;
-
 /// {@template streamChannelHeader}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header_paint.png)

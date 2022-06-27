@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamVisibleFootnote}
-@Deprecated("Use 'StreamVisibleFootnote' instead")
-typedef VisibleFootnote = StreamVisibleFootnote;
-
 /// {@template streamVisibleFootnote}
 /// Informs the user about a [StreamMessageWidget]'s visibility to the current
 /// user.

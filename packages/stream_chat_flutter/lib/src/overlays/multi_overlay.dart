@@ -2,10 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
-/// {@macro streamMultiOverlay}
-@Deprecated("Use 'StreamMultiOverlay' instead")
-typedef MultiOverlay = StreamMultiOverlay;
-
 /// {@template streamMultiOverlay}
 /// Renders a single overlay widget from a list of [overlayOptions].
 ///

@@ -15,8 +15,7 @@ Future<void> customExpectGoldenMatches(
   bool? autoHeight,
   Finder? finder,
   CustomPump? customPump,
-  @Deprecated('''
-This method level parameter will be removed in an upcoming release. This can be configured globally. If you have concerns, please file an issue with your use case.''') bool? skip,
+  bool? skip,
 }) {
   final goldenPath = path.join('test/src/goldens');
   print('goldenPath: $goldenPath');

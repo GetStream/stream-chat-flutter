@@ -1,63 +1,60 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_error_widget.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_error.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_indicator.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_loading_widget.dart';
+import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
+import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
+import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_indicator.dart';
+import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Default separator builder for [StreamMessageSearchListView].
-Widget defaultMessageSearchListViewSeparatorBuilder(
+/// Default separator builder for [StreamChannelListView].
+Widget defaultChannelListViewSeparatorBuilder(
   BuildContext context,
-  List<GetMessageResponse> responses,
+  List<Channel> items,
   int index,
 ) =>
-    const StreamMessageSearchListSeparator();
+    const StreamChannelListSeparator();
 
 /// Signature for the item builder that creates the children of the
-/// [StreamMessageSearchListView].
-typedef StreamMessageSearchListViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<GetMessageResponse,
-        StreamMessageSearchListTile>;
+/// [StreamChannelListView].
+typedef StreamChannelListViewIndexedWidgetBuilder
+    = StreamScrollViewIndexedWidgetBuilder<Channel, StreamChannelListTile>;
 
-/// A [ListView] that shows a list of [GetMessageResponse]s,
-/// it uses [StreamMessageSearchListTile] as a default item.
+/// A [ListView] that shows a list of [Channel]s,
+/// it uses [StreamChannelListTile] as a default item.
 ///
-/// This is the new version of [MessageSearchListView] that uses
-/// [StreamMessageSearchListController].
+/// This is the new version of [StreamChannelListView] that uses
+/// [StreamChannelListController].
 ///
 /// Example:
 ///
 /// ```dart
-/// StreamMessageSearchListView(
+/// StreamChannelListView(
 ///   controller: controller,
-///   onMessageTap: (user) {
-///     // Handle user tap event
+///   onChannelTap: (channel) {
+///     // Handle channel tap event
 ///   },
-///   onMessageLongPress: (user) {
-///     // Handle user long press event
+///   onChannelLongPress: (channel) {
+///     // Handle channel long press event
 ///   },
 /// )
 /// ```
 ///
 /// See also:
-/// * [StreamMessageSearchListTile]
-/// * [StreamMessageSearchListController]
-class StreamMessageSearchListView extends StatelessWidget {
-  /// Creates a new instance of [StreamMessageSearchListView].
-  const StreamMessageSearchListView({
+/// * [StreamChannelListTile]
+/// * [StreamChannelListController]
+class StreamChannelListView extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListView].
+  const StreamChannelListView({
     super.key,
     required this.controller,
     this.itemBuilder,
-    this.separatorBuilder = defaultMessageSearchListViewSeparatorBuilder,
+    this.separatorBuilder = defaultChannelListViewSeparatorBuilder,
     this.emptyBuilder,
     this.loadingBuilder,
     this.errorBuilder,
-    this.onMessageTap,
-    this.onMessageLongPress,
+    this.onChannelTap,
+    this.onChannelLongPress,
     this.loadMoreTriggerIndex = 3,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
@@ -76,16 +73,14 @@ class StreamMessageSearchListView extends StatelessWidget {
     this.clipBehavior = Clip.hardEdge,
   });
 
-  /// The [StreamUserListController] used to control the list of
-  /// searched messages.
-  final StreamMessageSearchListController controller;
+  /// The [StreamChannelListController] used to control the list of channels.
+  final StreamChannelListController controller;
 
   /// A builder that is called to build items in the [ListView].
-  final StreamMessageSearchListViewIndexedWidgetBuilder? itemBuilder;
+  final StreamChannelListViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.
-  final PagedValueScrollViewIndexedWidgetBuilder<GetMessageResponse>
-      separatorBuilder;
+  final PagedValueScrollViewIndexedWidgetBuilder<Channel> separatorBuilder;
 
   /// A builder that is called to build the empty state of the list.
   final WidgetBuilder? emptyBuilder;
@@ -94,13 +89,15 @@ class StreamMessageSearchListView extends StatelessWidget {
   final WidgetBuilder? loadingBuilder;
 
   /// A builder that is called to build the error state of the list.
+  ///
+  /// If not provided, [StreamChannelListErrorWidget] will be used.
   final Widget Function(BuildContext, StreamChatError)? errorBuilder;
 
   /// Called when the user taps this list tile.
-  final void Function(GetMessageResponse)? onMessageTap;
+  final void Function(Channel)? onChannelTap;
 
   /// Called when the user long-presses on this list tile.
-  final void Function(GetMessageResponse)? onMessageLongPress;
+  final void Function(Channel)? onChannelLongPress;
 
   /// The index to take into account when triggering [controller.loadMore].
   final int loadMoreTriggerIndex;
@@ -284,7 +281,7 @@ class StreamMessageSearchListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PagedValueListView<String, GetMessageResponse>(
+    return PagedValueListView<int, Channel>(
       scrollDirection: scrollDirection,
       padding: padding,
       physics: physics,
@@ -303,25 +300,24 @@ class StreamMessageSearchListView extends StatelessWidget {
       clipBehavior: clipBehavior,
       loadMoreTriggerIndex: loadMoreTriggerIndex,
       separatorBuilder: separatorBuilder,
-      itemBuilder: (context, messageResponses, index) {
-        final messageResponse = messageResponses[index];
-        final onTap = onMessageTap;
-        final onLongPress = onMessageLongPress;
+      itemBuilder: (context, channels, index) {
+        final channel = channels[index];
+        final onTap = onChannelTap;
+        final onLongPress = onChannelLongPress;
 
-        final streamMessageSearchListTile = StreamMessageSearchListTile(
-          messageResponse: messageResponse,
-          onTap: onTap == null ? null : () => onTap(messageResponse),
-          onLongPress:
-              onLongPress == null ? null : () => onLongPress(messageResponse),
+        final streamChannelListTile = StreamChannelListTile(
+          channel: channel,
+          onTap: onTap == null ? null : () => onTap(channel),
+          onLongPress: onLongPress == null ? null : () => onLongPress(channel),
         );
 
         return itemBuilder?.call(
               context,
-              messageResponses,
+              channels,
               index,
-              streamMessageSearchListTile,
+              streamChannelListTile,
             ) ??
-            streamMessageSearchListTile;
+            streamChannelListTile;
       },
       emptyBuilder: (context) {
         final chatThemeData = StreamChatTheme.of(context);
@@ -335,7 +331,7 @@ class StreamMessageSearchListView extends StatelessWidget {
                     color: chatThemeData.colorTheme.disabled,
                   ),
                   emptyTitle: Text(
-                    context.translations.emptyMessagesText,
+                    context.translations.letsStartChattingLabel,
                     style: chatThemeData.textTheme.headline,
                   ),
                 ),
@@ -345,7 +341,7 @@ class StreamMessageSearchListView extends StatelessWidget {
       loadMoreErrorBuilder: (context, error) =>
           StreamScrollViewLoadMoreError.list(
         onTap: controller.retry,
-        error: Text(context.translations.loadingMessagesError),
+        error: Text(context.translations.loadingChannelsError),
       ),
       loadMoreIndicatorBuilder: (context) => const Center(
         child: Padding(
@@ -362,7 +358,7 @@ class StreamMessageSearchListView extends StatelessWidget {
           errorBuilder?.call(context, error) ??
           Center(
             child: StreamScrollViewErrorWidget(
-              errorTitle: Text(context.translations.loadingMessagesError),
+              errorTitle: Text(context.translations.loadingChannelsError),
               onRetryPressed: controller.refresh,
             ),
           ),
@@ -371,10 +367,10 @@ class StreamMessageSearchListView extends StatelessWidget {
 }
 
 /// A widget that is used to display a separator between
-/// [StreamMessageSearchListTile] items.
-class StreamMessageSearchListSeparator extends StatelessWidget {
-  /// Creates a new instance of [StreamMessageSearchListSeparator].
-  const StreamMessageSearchListSeparator({super.key});
+/// [StreamChannelListTile] items.
+class StreamChannelListSeparator extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListSeparator].
+  const StreamChannelListSeparator({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -384,4 +380,42 @@ class StreamMessageSearchListSeparator extends StatelessWidget {
       color: effect.color!.withOpacity(effect.alpha ?? 1.0),
     );
   }
+}
+
+/// A widget that is used to display an error screen
+/// when [StreamChannelListController] fails to load initial channels.
+class StreamChannelListErrorWidget extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListErrorWidget] widget.
+  const StreamChannelListErrorWidget({
+    super.key,
+    this.onPressed,
+  });
+
+  /// The callback to invoke when the user taps on the retry button.
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text.rich(
+            TextSpan(
+              children: [
+                const WidgetSpan(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 2),
+                    child: Icon(Icons.error_outline),
+                  ),
+                ),
+                TextSpan(text: context.translations.loadingChannelsError),
+              ],
+            ),
+            style: Theme.of(context).textTheme.headline6,
+          ),
+          TextButton(
+            onPressed: onPressed,
+            child: Text(context.translations.retryLabel),
+          ),
+        ],
+      );
 }

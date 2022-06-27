@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_input/countdown_button.dart';
 import 'package:stream_chat_flutter/src/message_input/send_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -60,7 +59,7 @@ class AnimatedSendButton extends StatelessWidget {
   Widget build(BuildContext context) {
     late Widget sendButton;
     if (cooldown > 0) {
-      sendButton = CountdownButton(count: cooldown);
+      sendButton = StreamCountdownButton(count: cooldown);
     } else if (!messageIsPresent && attachmentsIsEmpty) {
       sendButton = idleSendButton ??
           Padding(

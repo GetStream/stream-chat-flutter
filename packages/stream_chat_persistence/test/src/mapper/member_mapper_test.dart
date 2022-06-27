@@ -44,7 +44,7 @@ void main() {
       user: user,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
-      role: 'testRole',
+      channelRole: 'testRole',
       inviteAcceptedAt: DateTime.now(),
       inviteRejectedAt: DateTime.now(),
       invited: math.Random().nextBool(),

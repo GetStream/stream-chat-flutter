@@ -1,55 +1,55 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
+import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
+import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_indicator.dart';
+import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_error_widget.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_error.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_indicator.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Default grid delegate  for [StreamUserGridView].
-const defaultUserGridViewDelegate =
+/// Default grid delegate  for [StreamChannelGridView].
+const defaultChannelGridViewDelegate =
     SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4);
 
 /// Signature for the item builder that creates the children of the
-/// [StreamUserGridView].
-typedef StreamUserGridViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<User, StreamUserGridTile>;
+/// [StreamChannelGridView].
+typedef StreamChannelGridViewIndexedWidgetBuilder
+    = StreamScrollViewIndexedWidgetBuilder<Channel, StreamChannelGridTile>;
 
 /// A [GridView] that shows a grid of [User]s,
-/// it uses [StreamUserGridTile] as a default item.
+/// it uses [StreamChannelGridTile] as a default item.
 ///
 /// Example:
 ///
 /// ```dart
-/// StreamUserGridView(
+/// StreamChannelGridView(
 ///   controller: controller,
-///   onUserTap: (user) {
-///     // Handle user tap event
+///   onChannelTap: (channel) {
+///     // Handle channel tap event
 ///   },
-///   onUserLongPress: (user) {
-///     // Handle user long press event
+///   onChannelLongPress: (channel) {
+///     // Handle channel long press event
 ///   },
 /// )
 /// ```
 ///
 /// See also:
-/// * [StreamUserListTile]
-/// * [StreamUserListController]
-class StreamUserGridView extends StatelessWidget {
-  /// Creates a new instance of [StreamUserGridView].
-  const StreamUserGridView({
+/// * [StreamChannelGridTile]
+/// * [StreamChannelListController]
+class StreamChannelGridView extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelGridView].
+  const StreamChannelGridView({
     super.key,
     required this.controller,
-    this.gridDelegate = defaultUserGridViewDelegate,
+    this.gridDelegate = defaultChannelGridViewDelegate,
     this.itemBuilder,
     this.emptyBuilder,
     this.loadMoreErrorBuilder,
     this.loadMoreIndicatorBuilder,
     this.loadingBuilder,
     this.errorBuilder,
-    this.onUserTap,
-    this.onUserLongPress,
+    this.onChannelTap,
+    this.onChannelLongPress,
     this.loadMoreTriggerIndex = 3,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
@@ -70,14 +70,16 @@ class StreamUserGridView extends StatelessWidget {
   });
 
   /// The [StreamUserListController] used to control the grid of users.
-  final StreamUserListController controller;
+  final StreamChannelListController controller;
 
   /// A delegate that controls the layout of the children within
   /// the [PagedValueGridView].
   final SliverGridDelegate gridDelegate;
 
   /// A builder that is called to build items in the [PagedValueGridView].
-  final StreamUserGridViewIndexedWidgetBuilder? itemBuilder;
+  ///
+  /// The `value` parameter is the [Channel] at this position in the grid.
+  final StreamChannelGridViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the empty state of the grid.
   final WidgetBuilder? emptyBuilder;
@@ -95,10 +97,10 @@ class StreamUserGridView extends StatelessWidget {
   final Widget Function(BuildContext, StreamChatError)? errorBuilder;
 
   /// Called when the user taps this grid tile.
-  final void Function(User)? onUserTap;
+  final void Function(Channel)? onChannelTap;
 
   /// Called when the user long-presses on this grid tile.
-  final void Function(User)? onUserLongPress;
+  final void Function(Channel)? onChannelLongPress;
 
   /// The index to take into account when triggering [controller.loadMore].
   final int loadMoreTriggerIndex;
@@ -283,7 +285,7 @@ class StreamUserGridView extends StatelessWidget {
   /// See also:
   ///
   ///  * [SemanticsConfiguration.scrollChildCount],
-  /// the corresponding semantics property.
+  ///  the corresponding semantics property.
   final int? semanticChildCount;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
@@ -305,7 +307,7 @@ class StreamUserGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PagedValueGridView<int, User>(
+    return PagedValueGridView<int, Channel>(
       scrollDirection: scrollDirection,
       reverse: reverse,
       controller: controller,
@@ -324,24 +326,24 @@ class StreamUserGridView extends StatelessWidget {
       restorationId: restorationId,
       clipBehavior: clipBehavior,
       gridDelegate: gridDelegate,
-      itemBuilder: (context, users, index) {
-        final user = users[index];
-        final onTap = onUserTap;
-        final onLongPress = onUserLongPress;
+      itemBuilder: (context, channels, index) {
+        final channel = channels[index];
+        final onTap = onChannelTap;
+        final onLongPress = onChannelLongPress;
 
-        final streamUserGridTile = StreamUserGridTile(
-          user: user,
-          onTap: onTap == null ? null : () => onTap(user),
-          onLongPress: onLongPress == null ? null : () => onLongPress(user),
+        final streamChannelGridTile = StreamChannelGridTile(
+          channel: channel,
+          onTap: onTap == null ? null : () => onTap(channel),
+          onLongPress: onLongPress == null ? null : () => onLongPress(channel),
         );
 
         return itemBuilder?.call(
               context,
-              users,
+              channels,
               index,
-              streamUserGridTile,
+              streamChannelGridTile,
             ) ??
-            streamUserGridTile;
+            streamChannelGridTile;
       },
       emptyBuilder: (context) {
         final chatThemeData = StreamChatTheme.of(context);
@@ -350,12 +352,12 @@ class StreamUserGridView extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
-                  emptyIcon: StreamSvgIcon.user(
+                  emptyIcon: StreamSvgIcon.message(
                     size: 148,
                     color: chatThemeData.colorTheme.disabled,
                   ),
                   emptyTitle: Text(
-                    context.translations.noUsersLabel,
+                    context.translations.letsStartChattingLabel,
                     style: chatThemeData.textTheme.headline,
                   ),
                 ),
@@ -366,7 +368,7 @@ class StreamUserGridView extends StatelessWidget {
           StreamScrollViewLoadMoreError.grid(
         onTap: controller.retry,
         error: Text(
-          context.translations.loadingUsersError,
+          context.translations.loadingChannelsError,
           textAlign: TextAlign.center,
         ),
       ),
@@ -385,7 +387,7 @@ class StreamUserGridView extends StatelessWidget {
           errorBuilder?.call(context, error) ??
           Center(
             child: StreamScrollViewErrorWidget(
-              errorTitle: Text(context.translations.loadingUsersError),
+              errorTitle: Text(context.translations.loadingChannelsError),
               onRetryPressed: controller.refresh,
             ),
           ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
-import 'package:stream_chat_flutter/src/message_input/countdown_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
@@ -12,7 +11,7 @@ void main() {
           data: StreamChatThemeData.light(),
           child: const Scaffold(
             body: Center(
-              child: CountdownButton(count: 5),
+              child: StreamCountdownButton(count: 5),
             ),
           ),
         ),
@@ -29,7 +28,7 @@ void main() {
           data: StreamChatThemeData.light(),
           child: const Scaffold(
             body: Center(
-              child: CountdownButton(count: 5),
+              child: StreamCountdownButton(count: 5),
             ),
           ),
         ),

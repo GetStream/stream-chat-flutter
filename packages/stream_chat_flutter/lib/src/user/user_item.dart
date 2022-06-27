@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamUserItem}
-@Deprecated("Use 'StreamUserItem' instead")
-typedef UserItem = StreamUserItem;
-
 /// {@template streamUserItem}
 /// Shows a preview of the current [User].
 ///

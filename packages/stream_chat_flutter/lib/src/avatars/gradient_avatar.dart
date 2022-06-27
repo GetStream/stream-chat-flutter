@@ -3,10 +3,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-/// {@macro streamGradientAvatar}
-@Deprecated("Use 'StreamGradientAvatar' instead")
-typedef GradientAvatar = StreamGradientAvatar;
-
 /// {@template streamGradientAvatar}
 /// Fallback user avatar with a polygon gradient overlaid with text
 /// {@endtemplate}

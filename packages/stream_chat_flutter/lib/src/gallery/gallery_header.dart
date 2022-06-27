@@ -8,10 +8,6 @@ import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@macro streamGalleryHeader}
-@Deprecated("Use 'StreamGalleryHeader' instead")
-typedef GalleryHeader = StreamGalleryHeader;
-
-/// {@macro streamGalleryHeader}
 /// Header/AppBar widget for media display screen
 /// {@endtemplate}
 class StreamGalleryHeader extends StatelessWidget

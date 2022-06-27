@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro streamUserMentionTile}
-@Deprecated("Use 'StreamUserMentionTile' instead")
-typedef UserMentionTile = StreamUserMentionTile;
-
 /// {@template streamUserMentionTile}
 /// Shows user tiles for mentions.
 ///

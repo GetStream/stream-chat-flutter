@@ -6,10 +6,6 @@ import 'package:stream_chat_flutter/src/video/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-/// {@macro streamVideoThumbnailImage}
-@Deprecated("Use 'StreamVideoThumbnailImage' instead")
-typedef VideoThumbnailImage = StreamVideoThumbnailImage;
-
 /// {@template streamVideoThumbnailImage}
 /// Displays a video thumbnail for video attachments in a message.
 /// {@endtemplate}
