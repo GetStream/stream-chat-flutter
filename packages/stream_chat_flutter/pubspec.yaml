@@ -29,6 +29,7 @@ dependencies:
   flutter_portal: ^1.0.0
   flutter_slidable: ^1.2.0
   flutter_svg: ^1.0.1
+  http: ^0.13.4
   http_parser: ^4.0.0
   image_gallery_saver: ^1.7.0
   image_picker: ^0.8.2
