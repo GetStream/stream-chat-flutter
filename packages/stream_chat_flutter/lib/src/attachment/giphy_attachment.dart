@@ -2,36 +2,36 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro giphy_attachment}
+/// {@macro streamGiphyAttachment}
 @Deprecated("Use 'StreamGiphyAttachment' instead")
 typedef GiphyAttachment = StreamGiphyAttachment;
 
-/// {@template giphy_attachment}
-/// Widget for showing a GIF attachment
+/// {@template streamGiphyAttachment}
+/// Shows a GIF attachment in a [StreamMessageWidget].
 /// {@endtemplate}
 class StreamGiphyAttachment extends StreamAttachmentWidget {
-  /// Constructor for creating a [StreamGiphyAttachment] widget
+  /// {@macro streamGiphyAttachment}
   const StreamGiphyAttachment({
     super.key,
     required super.message,
     required super.attachment,
-    super.size,
+    super.constraints,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
   });
 
-  /// Callback when show message is tapped
+  /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
 
-  /// Callback when attachment is returned to from other screens
-  final ValueChanged<ReturnActionType>? onReturnAction;
+  /// {@macro onReturnAction}
+  final OnReturnAction? onReturnAction;
 
-  /// Callback when attachment is tapped
-  final VoidCallback? onAttachmentTap;
+  /// {@macro onAttachmentTap}
+  final OnAttachmentTap? onAttachmentTap;
 
   @override
   Widget build(BuildContext context) {
@@ -105,18 +105,19 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                     }
                   },
                   child: CachedNetworkImage(
-                    height: size?.height,
-                    width: size?.width,
+                    height: constraints?.maxHeight,
+                    width: constraints?.maxWidth,
                     placeholder: (_, __) => SizedBox(
-                      width: size?.width,
-                      height: size?.height,
+                      width: constraints?.maxHeight,
+                      height: constraints?.maxWidth,
                       child: const Center(
                         child: CircularProgressIndicator(),
                       ),
                     ),
                     imageUrl: imageUrl,
-                    errorWidget: (context, url, error) =>
-                        AttachmentError(size: size),
+                    errorWidget: (context, url, error) => AttachmentError(
+                      constraints: constraints,
+                    ),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -136,9 +137,12 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                       height: 50,
                       child: TextButton(
                         onPressed: () {
-                          streamChannel.channel.sendAction(message, {
-                            'image_action': 'cancel',
-                          });
+                          streamChannel.channel.sendAction(
+                            message,
+                            {
+                              'image_action': 'cancel',
+                            },
+                          );
                         },
                         child: Text(
                           context.translations.cancelLabel
@@ -170,9 +174,12 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                       height: 50,
                       child: TextButton(
                         onPressed: () {
-                          streamChannel.channel.sendAction(message, {
-                            'image_action': 'shuffle',
-                          });
+                          streamChannel.channel.sendAction(
+                            message,
+                            {
+                              'image_action': 'shuffle',
+                            },
+                          );
                         },
                         child: Text(
                           context.translations.shuffleLabel,
@@ -203,9 +210,12 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                       height: 50,
                       child: TextButton(
                         onPressed: () {
-                          streamChannel.channel.sendAction(message, {
-                            'image_action': 'send',
-                          });
+                          streamChannel.channel.sendAction(
+                            message,
+                            {
+                              'image_action': 'send',
+                            },
+                          );
                         },
                         child: Text(
                           context.translations.sendLabel,
@@ -236,18 +246,17 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
     );
   }
 
-  void _onImageTap(BuildContext context) async {
-    final res = await Navigator.push(
-      context,
+  Future<void> _onImageTap(BuildContext context) async {
+    final res = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) {
           final channel = StreamChannel.of(context).channel;
           return StreamChannel(
             channel: channel,
-            child: StreamFullScreenMedia(
+            child: StreamFullScreenMediaBuilder(
               mediaAttachmentPackages: message.getAttachmentPackageList(),
               startIndex: message.attachments.indexOf(attachment),
-              userName: message.user?.name,
+              userName: message.user!.name,
               onShowMessage: onShowMessage,
             ),
           );
@@ -257,78 +266,80 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
     if (res != null) onReturnAction?.call(res);
   }
 
-  Widget _buildSentAttachment(BuildContext context, String imageUrl) =>
-      SizedBox(
-        child: GestureDetector(
-          onTap: () {
-            if (onAttachmentTap != null) {
-              onAttachmentTap?.call();
-            } else {
-              _onImageTap(context);
-            }
-          },
-          child: Stack(
-            children: [
-              CachedNetworkImage(
-                height: size?.height,
-                width: size?.width,
-                placeholder: (_, __) {
-                  final image = Image.asset(
-                    'images/placeholder.png',
-                    fit: BoxFit.cover,
-                    package: 'stream_chat_flutter',
-                  );
+  Widget _buildSentAttachment(BuildContext context, String imageUrl) {
+    return SizedBox(
+      //TODO: Remove unused SizedBox
+      child: GestureDetector(
+        onTap: () {
+          if (onAttachmentTap != null) {
+            onAttachmentTap?.call();
+          } else {
+            _onImageTap(context);
+          }
+        },
+        child: Stack(
+          children: [
+            CachedNetworkImage(
+              height: constraints?.maxHeight,
+              width: constraints?.maxWidth,
+              placeholder: (_, __) {
+                final image = Image.asset(
+                  'images/placeholder.png',
+                  fit: BoxFit.cover,
+                  package: 'stream_chat_flutter',
+                );
 
-                  final colorTheme = StreamChatTheme.of(context).colorTheme;
-                  return Shimmer.fromColors(
-                    baseColor: colorTheme.disabled,
-                    highlightColor: colorTheme.inputBg,
-                    child: image,
-                  );
-                },
-                imageUrl: imageUrl,
-                errorWidget: (context, url, error) =>
-                    AttachmentError(size: size),
-                fit: BoxFit.cover,
+                final colorTheme = StreamChatTheme.of(context).colorTheme;
+                return Shimmer.fromColors(
+                  baseColor: colorTheme.disabled,
+                  highlightColor: colorTheme.inputBg,
+                  child: image,
+                );
+              },
+              imageUrl: imageUrl,
+              errorWidget: (context, url, error) => AttachmentError(
+                constraints: constraints,
               ),
-              Positioned(
-                bottom: 8,
-                left: 8,
-                child: Material(
-                  color: StreamChatTheme.of(context)
-                      .colorTheme
-                      .textHighEmphasis
-                      .withOpacity(0.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              fit: BoxFit.cover,
+            ),
+            Positioned(
+              bottom: 8,
+              left: 8,
+              child: Material(
+                color: StreamChatTheme.of(context)
+                    .colorTheme
+                    .textHighEmphasis
+                    .withOpacity(0.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    child: Row(
-                      children: [
-                        StreamSvgIcon.lightning(
+                  child: Row(
+                    children: [
+                      StreamSvgIcon.lightning(
+                        color: StreamChatTheme.of(context).colorTheme.barsBg,
+                        size: 16,
+                      ),
+                      Text(
+                        context.translations.giphyLabel.toUpperCase(),
+                        style: TextStyle(
                           color: StreamChatTheme.of(context).colorTheme.barsBg,
-                          size: 16,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
                         ),
-                        Text(
-                          context.translations.giphyLabel.toUpperCase(),
-                          style: TextStyle(
-                            color:
-                                StreamChatTheme.of(context).colorTheme.barsBg,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }

@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/channel_info.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/option_list_tile.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/theme/themes.dart';
-import 'package:stream_chat_flutter/src/user_avatar.dart';
-import 'package:stream_chat_flutter/src/v4/stream_channel_name.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A [BottomSheet] that shows information about a [Channel].
 class StreamChannelInfoBottomSheet extends StatelessWidget {

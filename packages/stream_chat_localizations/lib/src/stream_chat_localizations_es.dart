@@ -132,6 +132,10 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
       'El límite de tamaño de los archivos es de $limitInMB MB.';
 
   @override
+  String get couldNotReadBytesFromFileError =>
+      'No se pudieron leer los bytes del archivo.';
+
+  @override
   String emojiMatchingQueryText(String query) =>
       'Emoji que corresponde a "$query"';
 
@@ -380,6 +384,54 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String get slowModeOnLabel => 'Modo lento activado';
+
+  @override
+  String get downloadLabel => 'Descargar';
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    if (isMuted) {
+      return 'No silenciar usuario';
+    } else {
+      return 'Usuario mudo';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return '¿Estás seguro de que quieres activar el silencio de este grupo?';
+    } else {
+      return '¿Estás seguro de que quieres silenciar a este grupo?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return '¿Estás seguro de que quieres activar el sonido de este usuario?';
+    } else {
+      return '¿Estás seguro de que quieres silenciar a este usuario?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return 'DESACTIVAR';
+    } else {
+      return 'SILENCIO';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Activar grupo';
+    } else {
+      return 'Silenciar grupo';
+    }
+  }
 
   @override
   String get linkDisabledDetails =>

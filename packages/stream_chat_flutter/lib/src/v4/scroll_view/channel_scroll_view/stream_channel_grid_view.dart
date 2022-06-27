@@ -1,16 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/channel_scroll_view/stream_channel_grid_tile.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_empty_widget.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_error_widget.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
 import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_error.dart';
 import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_indicator.dart';
 import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_loading_widget.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default grid delegate  for [StreamChannelGridView].
 const defaultChannelGridViewDelegate =

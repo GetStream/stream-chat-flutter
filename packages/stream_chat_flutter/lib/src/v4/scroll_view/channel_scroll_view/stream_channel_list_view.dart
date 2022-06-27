@@ -1,17 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/channel_scroll_view/stream_channel_list_tile.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_empty_widget.dart';
-
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_error_widget.dart';
-import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
 import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_error.dart';
 import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_load_more_indicator.dart';
 import 'package:stream_chat_flutter/src/v4/scroll_view/stream_scroll_view_loading_widget.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default separator builder for [StreamChannelListView].
 Widget defaultChannelListViewSeparatorBuilder(
@@ -29,7 +23,7 @@ typedef StreamChannelListViewIndexedWidgetBuilder
 /// A [ListView] that shows a list of [Channel]s,
 /// it uses [StreamChannelListTile] as a default item.
 ///
-/// This is the new version of [ChannelListView] that uses
+/// This is the new version of [StreamChannelListView] that uses
 /// [StreamChannelListController].
 ///
 /// Example:
@@ -286,89 +280,90 @@ class StreamChannelListView extends StatelessWidget {
   final Clip clipBehavior;
 
   @override
-  Widget build(BuildContext context) => PagedValueListView<int, Channel>(
-        scrollDirection: scrollDirection,
-        padding: padding,
-        physics: physics,
-        reverse: reverse,
-        controller: controller,
-        scrollController: scrollController,
-        primary: primary,
-        shrinkWrap: shrinkWrap,
-        addAutomaticKeepAlives: addAutomaticKeepAlives,
-        addRepaintBoundaries: addRepaintBoundaries,
-        addSemanticIndexes: addSemanticIndexes,
-        keyboardDismissBehavior: keyboardDismissBehavior,
-        restorationId: restorationId,
-        dragStartBehavior: dragStartBehavior,
-        cacheExtent: cacheExtent,
-        clipBehavior: clipBehavior,
-        loadMoreTriggerIndex: loadMoreTriggerIndex,
-        separatorBuilder: separatorBuilder,
-        itemBuilder: (context, channels, index) {
-          final channel = channels[index];
-          final onTap = onChannelTap;
-          final onLongPress = onChannelLongPress;
+  Widget build(BuildContext context) {
+    return PagedValueListView<int, Channel>(
+      scrollDirection: scrollDirection,
+      padding: padding,
+      physics: physics,
+      reverse: reverse,
+      controller: controller,
+      scrollController: scrollController,
+      primary: primary,
+      shrinkWrap: shrinkWrap,
+      addAutomaticKeepAlives: addAutomaticKeepAlives,
+      addRepaintBoundaries: addRepaintBoundaries,
+      addSemanticIndexes: addSemanticIndexes,
+      keyboardDismissBehavior: keyboardDismissBehavior,
+      restorationId: restorationId,
+      dragStartBehavior: dragStartBehavior,
+      cacheExtent: cacheExtent,
+      clipBehavior: clipBehavior,
+      loadMoreTriggerIndex: loadMoreTriggerIndex,
+      separatorBuilder: separatorBuilder,
+      itemBuilder: (context, channels, index) {
+        final channel = channels[index];
+        final onTap = onChannelTap;
+        final onLongPress = onChannelLongPress;
 
-          final streamChannelListTile = StreamChannelListTile(
-            channel: channel,
-            onTap: onTap == null ? null : () => onTap(channel),
-            onLongPress:
-                onLongPress == null ? null : () => onLongPress(channel),
-          );
+        final streamChannelListTile = StreamChannelListTile(
+          channel: channel,
+          onTap: onTap == null ? null : () => onTap(channel),
+          onLongPress: onLongPress == null ? null : () => onLongPress(channel),
+        );
 
-          return itemBuilder?.call(
-                context,
-                channels,
-                index,
-                streamChannelListTile,
-              ) ??
-              streamChannelListTile;
-        },
-        emptyBuilder: (context) {
-          final chatThemeData = StreamChatTheme.of(context);
-          return emptyBuilder?.call(context) ??
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: StreamScrollViewEmptyWidget(
-                    emptyIcon: StreamSvgIcon.message(
-                      size: 148,
-                      color: chatThemeData.colorTheme.disabled,
-                    ),
-                    emptyTitle: Text(
-                      context.translations.letsStartChattingLabel,
-                      style: chatThemeData.textTheme.headline,
-                    ),
+        return itemBuilder?.call(
+              context,
+              channels,
+              index,
+              streamChannelListTile,
+            ) ??
+            streamChannelListTile;
+      },
+      emptyBuilder: (context) {
+        final chatThemeData = StreamChatTheme.of(context);
+        return emptyBuilder?.call(context) ??
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: StreamScrollViewEmptyWidget(
+                  emptyIcon: StreamSvgIcon.message(
+                    size: 148,
+                    color: chatThemeData.colorTheme.disabled,
+                  ),
+                  emptyTitle: Text(
+                    context.translations.letsStartChattingLabel,
+                    style: chatThemeData.textTheme.headline,
                   ),
                 ),
-              );
-        },
-        loadMoreErrorBuilder: (context, error) =>
-            StreamScrollViewLoadMoreError.list(
-          onTap: controller.retry,
-          error: Text(context.translations.loadingChannelsError),
-        ),
-        loadMoreIndicatorBuilder: (context) => const Center(
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: StreamScrollViewLoadMoreIndicator(),
-          ),
-        ),
-        loadingBuilder: (context) =>
-            loadingBuilder?.call(context) ??
-            const Center(
-              child: StreamScrollViewLoadingWidget(),
-            ),
-        errorBuilder: (context, error) =>
-            errorBuilder?.call(context, error) ??
-            Center(
-              child: StreamScrollViewErrorWidget(
-                errorTitle: Text(context.translations.loadingChannelsError),
-                onRetryPressed: controller.refresh,
               ),
+            );
+      },
+      loadMoreErrorBuilder: (context, error) =>
+          StreamScrollViewLoadMoreError.list(
+        onTap: controller.retry,
+        error: Text(context.translations.loadingChannelsError),
+      ),
+      loadMoreIndicatorBuilder: (context) => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: StreamScrollViewLoadMoreIndicator(),
+        ),
+      ),
+      loadingBuilder: (context) =>
+          loadingBuilder?.call(context) ??
+          const Center(
+            child: StreamScrollViewLoadingWidget(),
+          ),
+      errorBuilder: (context, error) =>
+          errorBuilder?.call(context, error) ??
+          Center(
+            child: StreamScrollViewErrorWidget(
+              errorTitle: Text(context.translations.loadingChannelsError),
+              onRetryPressed: controller.refresh,
             ),
-      );
+          ),
+    );
+  }
 }
 
 /// A widget that is used to display a separator between

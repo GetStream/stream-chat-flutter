@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template streamChat}
 /// Widget used to provide information about the chat to the widget tree
 ///
 /// class MyApp extends StatelessWidget {
@@ -25,8 +27,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// }
 ///
 /// Use [StreamChat.of] to get the current [StreamChatState] instance.
+/// {@endtemplate}
 class StreamChat extends StatefulWidget {
-  /// Constructor for creating a [StreamChat] widget
+  /// {@macro streamChat}
   const StreamChat({
     super.key,
     required this.client,
@@ -37,7 +40,7 @@ class StreamChat extends StatefulWidget {
     this.connectivityStream,
   });
 
-  /// Client to do chat ops with
+  /// Client to do chat operations with
   final StreamChatClient client;
 
   /// Child which inherits details
@@ -83,6 +86,15 @@ class StreamChat extends StatefulWidget {
 class StreamChatState extends State<StreamChat> {
   /// Gets client from widget
   StreamChatClient get client => widget.client;
+
+  @override
+  void initState() {
+    super.initState();
+    // Ensures that VLC only initializes in real desktop environments
+    if (!isTestEnvironment && isDesktopVideoPlayerSupported) {
+      VlcManager.instance.initialize();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

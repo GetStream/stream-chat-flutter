@@ -226,7 +226,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
             .listen((e) {
           final channel = e.channel;
           _channelsController.safeAdd(List.from(
-            (channels ?? [])..removeWhere((c) => c.cid == channel?.cid),
+            (channels ?? <Channel>[])..removeWhere((c) => c.id == channel?.cid),
           ));
         }));
     }

@@ -1,16 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// {@macro avatar_theme_data}
+/// {@macro avatarThemeData}
 @Deprecated("Use 'StreamAvatarThemeData' instead")
 typedef AvatarThemeData = StreamAvatarThemeData;
 
-/// {@template avatar_theme_data}
+/// {@template avatarThemeData}
 /// A style that overrides the default appearance of various avatar widgets.
 /// {@endtemplate}
 // ignore: prefer-match-file-name
 class StreamAvatarThemeData with Diagnosticable {
-  /// Creates an [StreamAvatarThemeData].
+  /// {@macro avatarThemeData}
   const StreamAvatarThemeData({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
@@ -35,11 +35,12 @@ class StreamAvatarThemeData with Diagnosticable {
   StreamAvatarThemeData copyWith({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
-  }) =>
-      StreamAvatarThemeData(
-        constraints: constraints ?? _constraints,
-        borderRadius: borderRadius ?? _borderRadius,
-      );
+  }) {
+    return StreamAvatarThemeData(
+      constraints: constraints ?? _constraints,
+      borderRadius: borderRadius ?? _borderRadius,
+    );
+  }
 
   /// Linearly interpolate between two [UserAvatar] themes.
   ///
@@ -48,11 +49,12 @@ class StreamAvatarThemeData with Diagnosticable {
     StreamAvatarThemeData a,
     StreamAvatarThemeData b,
     double t,
-  ) =>
-      StreamAvatarThemeData(
-        borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
-        constraints: BoxConstraints.lerp(a.constraints, b.constraints, t),
-      );
+  ) {
+    return StreamAvatarThemeData(
+      borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
+      constraints: BoxConstraints.lerp(a.constraints, b.constraints, t),
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

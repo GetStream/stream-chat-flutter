@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that displays a channel preview.
@@ -30,6 +30,8 @@ class StreamChannelListTile extends StatelessWidget {
     this.contentPadding = const EdgeInsets.symmetric(horizontal: 8),
     this.unreadIndicatorBuilder,
     this.sendingIndicatorBuilder,
+    this.selected = false,
+    this.selectedTileColor,
   }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
@@ -92,6 +94,12 @@ class StreamChannelListTile extends StatelessWidget {
   /// status using [Message.status].
   final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
 
+  /// True if the tile is in a selected state.
+  final bool selected;
+
+  /// The color of the tile in selected state.
+  final Color? selectedTileColor;
+
   /// Creates a copy of this tile but with the given fields replaced with
   /// the new values.
   StreamChannelListTile copyWith({
@@ -104,18 +112,33 @@ class StreamChannelListTile extends StatelessWidget {
     VoidCallback? onLongPress,
     VisualDensity? visualDensity,
     EdgeInsetsGeometry? contentPadding,
-  }) =>
-      StreamChannelListTile(
-        key: key ?? this.key,
-        channel: channel ?? this.channel,
-        leading: leading ?? this.leading,
-        title: title ?? this.title,
-        subtitle: subtitle ?? this.subtitle,
-        onTap: onTap ?? this.onTap,
-        onLongPress: onLongPress ?? this.onLongPress,
-        visualDensity: visualDensity ?? this.visualDensity,
-        contentPadding: contentPadding ?? this.contentPadding,
-      );
+    bool? selected,
+    Widget Function(BuildContext, Message)? sendingIndicatorBuilder,
+    Color? tileColor,
+    Color? selectedTileColor,
+    WidgetBuilder? unreadIndicatorBuilder,
+    Widget? trailing,
+  }) {
+    return StreamChannelListTile(
+      key: key ?? this.key,
+      channel: channel ?? this.channel,
+      leading: leading ?? this.leading,
+      title: title ?? this.title,
+      subtitle: subtitle ?? this.subtitle,
+      onTap: onTap ?? this.onTap,
+      onLongPress: onLongPress ?? this.onLongPress,
+      visualDensity: visualDensity ?? this.visualDensity,
+      contentPadding: contentPadding ?? this.contentPadding,
+      sendingIndicatorBuilder:
+          sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
+      tileColor: tileColor ?? this.tileColor,
+      trailing: trailing ?? this.trailing,
+      unreadIndicatorBuilder:
+          unreadIndicatorBuilder ?? this.unreadIndicatorBuilder,
+      selected: selected ?? this.selected,
+      selectedTileColor: selectedTileColor ?? this.selectedTileColor,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,6 +183,9 @@ class StreamChannelListTile extends StatelessWidget {
           contentPadding: contentPadding,
           leading: leading,
           tileColor: tileColor,
+          selected: selected,
+          selectedTileColor: selectedTileColor ??
+              StreamChatTheme.of(context).colorTheme.borders,
           title: Row(
             children: [
               Expanded(child: title),

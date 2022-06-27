@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that shows an empty view when the [StreamScrollView] loads
 /// empty data.

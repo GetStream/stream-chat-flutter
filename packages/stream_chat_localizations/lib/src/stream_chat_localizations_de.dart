@@ -380,6 +380,54 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       'Sie sind nicht berechtigt Nachrichten zu senden';
 
   @override
+  String get couldNotReadBytesFromFileError =>
+      'Kan bytes niet uit bestand lezen.';
+
+  @override
+  String get downloadLabel => 'Downloaden';
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return 'UNMUTE';
+    } else {
+      return 'STOM';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Weet je zeker dat je het dempen van deze groep wilt opheffen?';
+    } else {
+      return 'Weet je zeker dat je deze groep wilt dempen?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Dempen groep opheffen';
+    } else {
+      return 'Groep dempen';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return '''Weet je zeker dat je het dempen van deze gebruiker wilt opheffen?''';
+    } else {
+      return 'Weet u zeker dat u deze gebruiker wilt dempen?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    return 'Gebruiker dempen';
+  }
+
+  @override
   String get viewLibrary => 'Bibliothek öffnen';
 
   @override

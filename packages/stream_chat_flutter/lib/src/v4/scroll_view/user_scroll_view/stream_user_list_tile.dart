@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/user_avatar.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart'
-    show User;
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that displays a user.
 ///
@@ -48,11 +43,11 @@ class StreamUserListTile extends StatelessWidget {
   /// A widget to display at the end of tile.
   final Widget? selectedWidget;
 
-  /// If this tile is also [enabled] then icons
-  /// and text are rendered with the same color.
+  /// If this tile is also [enabled] then icons and text are rendered with the
+  /// same color.
   ///
-  /// By default the selected color is the theme's primary color.
-  /// The selected color can be overridden with a [ListTileTheme].
+  /// By default the selected color is the theme's primary color. The selected
+  /// color can be overridden with a [ListTileTheme].
   ///
   /// {@tool dartpad}
   /// Here is an example of using a [StatefulWidget] to keep track of the

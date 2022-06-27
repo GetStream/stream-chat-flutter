@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/media_list_view_controller.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Callback for when a file has to be picked.
@@ -498,7 +497,6 @@ class _PickerWidgetState extends State<_PickerWidget> {
           return StreamMediaListView(
             selectedIds: widget.selectedMedias,
             onSelect: widget.onMediaSelected,
-            controller: widget.mediaListViewController,
           );
         }
 

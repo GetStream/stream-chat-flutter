@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/element_registry.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/indexed_key.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/item_positions_listener.dart';

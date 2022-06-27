@@ -132,15 +132,17 @@ class ChannelPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: const StreamChannelHeader(),
-        body: Column(
-          children: const <Widget>[
-            Expanded(
-              child: StreamMessageListView(),
-            ),
-            StreamMessageInput(),
-          ],
-        ),
-      );
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const StreamChannelHeader(),
+      body: Column(
+        children: const <Widget>[
+          Expanded(
+            child: StreamMessageListView(),
+          ),
+          StreamMessageInput(),
+        ],
+      ),
+    );
+  }
 }

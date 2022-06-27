@@ -1,5 +1,4 @@
 // ignore_for_file: public_member_api_docs
-// ignore_for_file: prefer_expression_function_bodies
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -32,7 +31,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// and [StreamMessageInput]
 ///
 /// If you now run the simulator you will see a single channel UI.
-void main() async {
+Future<void> main() async {
   final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
@@ -90,15 +89,18 @@ class ChannelPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: const StreamChannelHeader(),
-        body: Column(
-          children: const <Widget>[
-            Expanded(
-              child: StreamMessageListView(),
-            ),
-            StreamMessageInput(),
-          ],
-        ),
-      );
+  // ignore: prefer_expression_function_bodies
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const StreamChannelHeader(),
+      body: Column(
+        children: const <Widget>[
+          Expanded(
+            child: StreamMessageListView(),
+          ),
+          StreamMessageInput(),
+        ],
+      ),
+    );
+  }
 }
