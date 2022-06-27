@@ -9,7 +9,7 @@ class StreamCountdownButton extends StatelessWidget {
     required this.count,
   });
 
-  /// Count of time remaining to show to the user.
+  /// Count of time remaining to show to the user, in seconds.
   final int count;
 
   @override
