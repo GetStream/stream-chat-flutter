@@ -1,7 +1,5 @@
 // ignore_for_file: public_member_api_docs
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -263,7 +261,9 @@ class _ChannelPageState extends State<ChannelPage> {
                 Expanded(
                   child: StreamMessageListView(
                     onMessageSwiped:
-                        (Platform.isAndroid || Platform.isIOS) ? reply : null,
+                        (CurrentPlatform.isAndroid || CurrentPlatform.isIos)
+                            ? reply
+                            : null,
                     threadBuilder: (context, parent) {
                       return ThreadPage(
                         parent: parent!,

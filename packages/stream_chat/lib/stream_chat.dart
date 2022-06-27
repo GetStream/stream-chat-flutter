@@ -63,6 +63,7 @@ export 'src/core/models/own_user.dart';
 export 'src/core/models/reaction.dart';
 export 'src/core/models/read.dart';
 export 'src/core/models/user.dart';
+export 'src/core/platform_detector/platform_detector.dart';
 export 'src/core/util/extension.dart';
 export 'src/db/chat_persistence_client.dart';
 export 'src/event_type.dart';
