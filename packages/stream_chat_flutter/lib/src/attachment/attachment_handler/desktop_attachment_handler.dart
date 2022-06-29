@@ -37,7 +37,8 @@ class DesktopAttachmentHandler extends AttachmentHandler {
 
     /* ---IMAGES/GIFS--- */
     if (attachment.type == 'image') {
-      response = await http.get(Uri.parse(attachment.imageUrl!));
+      response = await http
+          .get(Uri.parse(attachment.imageUrl ?? attachment.assetUrl!));
       fileName = suggestedName ??
           attachment.title ??
           'attachment.${attachment.mimeType ?? 'png'}';
