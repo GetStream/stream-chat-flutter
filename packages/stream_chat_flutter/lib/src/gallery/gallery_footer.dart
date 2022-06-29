@@ -166,66 +166,58 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
         ),
       ),
       builder: (context) {
-        const crossAxisCount = 3;
-        final noOfRowToShowInitially =
-            widget.mediaAttachmentPackages.length > crossAxisCount ? 2 : 1;
-        final size = MediaQuery.of(context).size;
-        final initialChildSize =
-            48 + (size.width * noOfRowToShowInitially) / crossAxisCount;
         return DraggableScrollableSheet(
           expand: false,
-          initialChildSize: initialChildSize / size.height,
-          minChildSize: initialChildSize / size.height,
-          builder: (context, scrollController) => SingleChildScrollView(
-            controller: scrollController,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Stack(
-                  children: [
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          context.translations.photosLabel,
-                          style:
-                              galleryFooterThemeData.bottomSheetPhotosTextStyle,
-                        ),
+          initialChildSize:
+              (CurrentPlatform.isAndroid || CurrentPlatform.isIos) ? 0.3 : 0.5,
+          minChildSize: 0.3,
+          maxChildSize: 0.7,
+          builder: (context, scrollController) => Column(
+            children: [
+              Stack(
+                children: [
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        context.translations.photosLabel,
+                        style:
+                            galleryFooterThemeData.bottomSheetPhotosTextStyle,
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: IconButton(
-                        icon: StreamSvgIcon.close(
-                          color:
-                              galleryFooterThemeData.bottomSheetCloseIconColor,
-                        ),
-                        onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      icon: StreamSvgIcon.close(
+                        color: galleryFooterThemeData.bottomSheetCloseIconColor,
                       ),
+                      onPressed: () => Navigator.of(context).maybePop(),
                     ),
-                  ],
-                ),
-                Flexible(
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: widget.mediaAttachmentPackages.length,
-                    padding: const EdgeInsets.all(1),
-                    // ignore: lines_longer_than_80_chars
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: 2,
-                      crossAxisSpacing: 2,
-                    ),
-                    itemBuilder: (context, index) {
-                      Widget media;
-                      final attachmentPackage =
-                          widget.mediaAttachmentPackages[index];
-                      final attachment = attachmentPackage.attachment;
-                      final message = attachmentPackage.message;
-                      if (attachment.type == 'video') {
-                        media = InkWell(
+                  ),
+                ],
+              ),
+              Flexible(
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  controller: scrollController,
+                  itemCount: widget.mediaAttachmentPackages.length,
+                  padding: const EdgeInsets.all(1),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 2,
+                    crossAxisSpacing: 2,
+                  ),
+                  itemBuilder: (context, index) {
+                    Widget media;
+                    final attachmentPackage =
+                        widget.mediaAttachmentPackages[index];
+                    final attachment = attachmentPackage.attachment;
+                    final message = attachmentPackage.message;
+                    if (attachment.type == 'video') {
+                      media = MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
                           onTap: () => widget.mediaSelectedCallBack!(index),
                           child: AspectRatio(
                             aspectRatio: 1,
@@ -235,9 +227,12 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                               fit: BoxFit.cover,
                             ),
                           ),
-                        );
-                      } else {
-                        media = InkWell(
+                        ),
+                      );
+                    } else {
+                      media = MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
                           onTap: () => widget.mediaSelectedCallBack!(index),
                           child: AspectRatio(
                             aspectRatio: 1,
@@ -248,45 +243,45 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                               fit: BoxFit.cover,
                             ),
                           ),
-                        );
-                      }
+                        ),
+                      );
+                    }
 
-                      return Stack(
-                        children: [
-                          media,
-                          if (message.user != null)
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Container(
-                                padding: const EdgeInsets.all(2),
-                                clipBehavior: Clip.antiAlias,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withOpacity(0.6),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      blurRadius: 8,
-                                      color: chatThemeData
-                                          .colorTheme.textHighEmphasis
-                                          .withOpacity(0.3),
-                                    ),
-                                  ],
-                                ),
-                                child: StreamUserAvatar(
-                                  user: message.user!,
-                                  constraints:
-                                      BoxConstraints.tight(const Size(24, 24)),
-                                  showOnlineStatus: false,
-                                ),
+                    return Stack(
+                      children: [
+                        media,
+                        if (message.user != null)
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              clipBehavior: Clip.antiAlias,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withOpacity(0.6),
+                                boxShadow: [
+                                  BoxShadow(
+                                    blurRadius: 8,
+                                    color: chatThemeData
+                                        .colorTheme.textHighEmphasis
+                                        .withOpacity(0.3),
+                                  ),
+                                ],
+                              ),
+                              child: StreamUserAvatar(
+                                user: message.user!,
+                                constraints:
+                                    BoxConstraints.tight(const Size(24, 24)),
+                                showOnlineStatus: false,
                               ),
                             ),
-                        ],
-                      );
-                    },
-                  ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
