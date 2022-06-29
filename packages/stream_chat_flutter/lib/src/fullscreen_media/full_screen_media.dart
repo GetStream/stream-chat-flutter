@@ -270,12 +270,14 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia>
                         totalPages: widget.mediaAttachmentPackages.length,
                         mediaAttachmentPackages: widget.mediaAttachmentPackages,
                         mediaSelectedCallBack: (val) {
-                          _currentPage.value = val;
                           _pageController.animateToPage(
                             val,
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeInOut,
                           );
+                          setState(() {
+                            _currentPage.value = val;
+                          });
                           Navigator.pop(context);
                         },
                       ),
