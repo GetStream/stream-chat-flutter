@@ -16,8 +16,8 @@
   - Selectable message text
   - Gallery navigation controls with keyboard shortcuts (left and right arrow keys)
   - Appropriate message sizing for large screens
-  - Right-click context menu for `StreamChannelListView` items
-  - `StreamChannelListView` items not swipeable on desktop & web
+  - Right-click context menu for `StreamMessageListView` items
+  - `StreamMessageListView` items not swipeable on desktop & web
   - Video support for Windows & Linux through `dart_vlc`
   - Video support for macOS through `video_player_macos`
   - Replace bottom sheets with dialogs where appropriate
