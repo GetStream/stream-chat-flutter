@@ -229,9 +229,21 @@ class StreamChannelState extends State<StreamChannel> {
         preferOffline: preferOffline,
       );
 
+  /// Loads channel at specific message
+  Future<void> loadChannelAtTimestamp(
+    DateTime timestamp, {
+    int limit = 40,
+    bool preferOffline = false,
+  }) =>
+      _queryAtTimestamp(
+        timestamp: timestamp,
+        limit: limit,
+        preferOffline: preferOffline,
+      );
+
   Future<ChannelState?> _queryAtMessage({
     String? messageId,
-    int limit = 20,
+    int limit = 40,
     bool preferOffline = false,
   }) async {
     if (channel.state == null) return null;
@@ -249,26 +261,32 @@ class StreamChannelState extends State<StreamChannel> {
       return null;
     }
 
-    return queryAroundMessage(
-      messageId,
-      limit: limit,
+    return channel.query(
+      messagesPagination: PaginationParams(
+        idAround: messageId,
+        limit: limit,
+      ),
       preferOffline: preferOffline,
     );
   }
 
-  ///
-  Future<ChannelState> queryAroundMessage(
-    String messageId, {
-    int limit = 20,
+  Future<ChannelState?> _queryAtTimestamp({
+    required DateTime timestamp,
+    int limit = 40,
     bool preferOffline = false,
-  }) =>
-      channel.query(
-        messagesPagination: PaginationParams(
-          idAround: messageId,
-          limit: limit,
-        ),
-        preferOffline: preferOffline,
-      );
+  }) async {
+    if (channel.state == null) return null;
+    channel.state!.isUpToDate = false;
+    channel.state!.truncate();
+
+    return channel.query(
+      messagesPagination: PaginationParams(
+        createdAtAround: timestamp.toUtc(),
+        limit: limit,
+      ),
+      preferOffline: preferOffline,
+    );
+  }
 
   ///
   Future<ChannelState> queryBeforeMessage(
@@ -345,6 +363,15 @@ class StreamChannelState extends State<StreamChannel> {
     }
   }
 
+  Future<bool> _loadChannelAtTimestamp(DateTime timestamp) async {
+    try {
+      await loadChannelAtTimestamp(timestamp);
+      return true;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -355,6 +382,18 @@ class StreamChannelState extends State<StreamChannel> {
     _futures = [widget.channel.initialized];
     if (initialMessageId != null) {
       _futures.add(_loadChannelAtMessage);
+    } else if (channel.state != null && channel.state!.unreadCount > 0) {
+      final read = channel.state!.read.firstWhereOrNull(
+        (it) => it.user.id == channel.client.state.currentUser?.id,
+      );
+
+      if (read != null &&
+          !(channel.state!.messages
+                  .any((it) => it.createdAt.compareTo(read.lastRead) > 0) &&
+              channel.state!.messages
+                  .any((it) => it.createdAt.compareTo(read.lastRead) <= 0))) {
+        _futures.add(_loadChannelAtTimestamp(read.lastRead));
+      }
     }
   }
 
@@ -379,7 +418,7 @@ class StreamChannelState extends State<StreamChannel> {
       future: Future.wait(_futures),
       initialData: [
         channel.state != null,
-        if (initialMessageId != null) false,
+        _futures.length == 1,
       ],
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -394,10 +433,9 @@ class StreamChannelState extends State<StreamChannel> {
           }
           return Center(child: Text(message));
         }
-        final initialized = snapshot.data![0];
-        // ignore: avoid_bool_literals_in_conditional_expressions
-        final dataLoaded = initialMessageId == null ? true : snapshot.data![1];
-        if (widget.showLoading && (!initialized || !dataLoaded)) {
+
+        final dataLoaded = snapshot.data?.every((it) => it) == true;
+        if (widget.showLoading && !dataLoaded) {
           return const Center(
             child: CircularProgressIndicator(),
           );

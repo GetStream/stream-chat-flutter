@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -10,18 +11,20 @@ int getInitialIndex(
   int? initialScrollIndex,
   StreamChannelState channelState,
   bool Function(Message)? messageFilter,
-  int unreadCount,
+  Read? read,
 ) {
   if (initialScrollIndex != null) {
     return initialScrollIndex;
   }
+
+  final messages = channelState.channel.state!.messages
+      .where(messageFilter ??
+          defaultMessageFilter(
+            channelState.channel.client.state.currentUser!.id,
+          ))
+      .toList(growable: false);
+
   if (channelState.initialMessageId != null) {
-    final messages = channelState.channel.state!.messages
-        .where(messageFilter ??
-            defaultMessageFilter(
-              channelState.channel.client.state.currentUser!.id,
-            ))
-        .toList(growable: false);
     final totalMessages = messages.length;
     final messageIndex =
         messages.indexWhere((e) => e.id == channelState.initialMessageId);
@@ -29,9 +32,21 @@ int getInitialIndex(
     if (index != 0) return index + 1;
     return index;
   }
-  if (unreadCount > 0) {
-    return unreadCount + 1;
+
+  if (read != null) {
+    final oldestUnreadMessage = messages.firstWhereOrNull(
+      (it) =>
+          it.user?.id != channelState.channel.client.state.currentUser?.id &&
+          it.createdAt.compareTo(read.lastRead) > 0,
+    );
+
+    if (oldestUnreadMessage != null) {
+      final oldestUnreadMessageIndex = messages.indexOf(oldestUnreadMessage);
+      final index = messages.length - oldestUnreadMessageIndex;
+      return index + 1;
+    }
   }
+
   return 0;
 }
 
