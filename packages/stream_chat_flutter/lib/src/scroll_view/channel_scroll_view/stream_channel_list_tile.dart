@@ -345,7 +345,7 @@ class ChannelListTileSubtitle extends StatelessWidget {
 }
 
 /// A widget that displays the last message of a channel.
-class ChannelLastMessageText extends StatelessWidget {
+class ChannelLastMessageText extends StatefulWidget {
   /// Creates a new instance of [ChannelLastMessageText] widget.
   ChannelLastMessageText({
     super.key,
@@ -363,20 +363,31 @@ class ChannelLastMessageText extends StatelessWidget {
   final TextStyle? textStyle;
 
   @override
+  State<ChannelLastMessageText> createState() => _ChannelLastMessageTextState();
+}
+
+class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
+  Message? _lastMessage;
+
+  @override
   Widget build(BuildContext context) => BetterStreamBuilder<List<Message>>(
-        stream: channel.state!.messagesStream,
-        initialData: channel.state!.messages,
+        stream: widget.channel.state!.messagesStream,
+        initialData: widget.channel.state!.messages,
         builder: (context, messages) {
           final lastMessage = messages.lastWhereOrNull(
             (m) => !m.shadowed && !m.isDeleted,
           );
 
-          if (lastMessage == null) return const Offstage();
+          if (widget.channel.state?.isUpToDate == true) {
+            _lastMessage = lastMessage;
+          }
+
+          if (_lastMessage == null) return const Offstage();
 
           return StreamMessagePreviewText(
-            message: lastMessage,
-            textStyle: textStyle,
-            language: channel.client.state.currentUser?.language,
+            message: _lastMessage!,
+            textStyle: widget.textStyle,
+            language: widget.channel.client.state.currentUser?.language,
           );
         },
       );
