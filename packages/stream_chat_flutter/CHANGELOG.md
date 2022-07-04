@@ -1,3 +1,9 @@
+## Upcoming 
+
+🐞 Fixed
+
+- Fixed the unread message header in the message list view.
+
 ## 5.0.0-beta.1
 
 - 🎉 Initial support for desktop 🖥️ and web 🧑‍💻  
