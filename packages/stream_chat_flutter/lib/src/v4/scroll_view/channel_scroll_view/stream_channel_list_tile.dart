@@ -200,6 +200,14 @@ class StreamChannelListTile extends StatelessWidget {
                     return const Offstage();
                   }
 
+                  final memberReadCount = channelState.read.where((it) {
+                    return it.user.id != currentUser.id &&
+                        (it.lastRead.isAfter(lastMessage.createdAt) ||
+                            it.lastRead.isAtSameMomentAs(
+                              lastMessage.createdAt,
+                            ));
+                  }).length;
+
                   return Padding(
                     padding: const EdgeInsets.only(right: 4),
                     child:
@@ -207,9 +215,9 @@ class StreamChannelListTile extends StatelessWidget {
                             StreamSendingIndicator(
                               message: lastMessage,
                               size: channelPreviewTheme.indicatorIconSize,
-                              isMessageRead: channelState
-                                  .currentUserRead!.lastRead
-                                  .isAfter(lastMessage.createdAt),
+                              isMessageRead: memberReadCount >=
+                                  // Subtract one for the current user.
+                                  (channel.memberCount ?? 0) - 1,
                             ),
                   );
                 },

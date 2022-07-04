@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#1234]](https://github.com/GetStream/stream-chat-flutter/issues/1234) Fix `ChannelListTile`
+  sendingIndicator `isMessageRead` calculation.
+
 ## 4.3.0
 
 - Updated `photo_view` dependency to [`0.14.0`](https://pub.dev/packages/photo_view/changelog).
@@ -9,7 +16,8 @@
 - [[#996]](https://github.com/GetStream/stream-chat-flutter/issues/996) Videos break bottom photo
   carousal.
 - Fix: URLs with path and/or query params are not enriched.
-- [[#1194]](https://github.com/GetStream/stream-chat-flutter/issues/1194) Request permission to access gallery when opening the file picker.
+- [[#1194]](https://github.com/GetStream/stream-chat-flutter/issues/1194) Request permission to
+  access gallery when opening the file picker.
 
 ✅ Added
 
