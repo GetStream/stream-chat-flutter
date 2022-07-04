@@ -63,13 +63,13 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
     if (notification is ScrollStartNotification) {
       if (widget.onPageScrollStart != null) {
         widget.onPageScrollStart!();
-        return widget.allowNotificationBubbling;
+        return !widget.allowNotificationBubbling;
       }
     }
     if (notification is ScrollEndNotification) {
       if (widget.onPageScrollEnd != null) {
         widget.onPageScrollEnd!();
-        return widget.allowNotificationBubbling;
+        return !widget.allowNotificationBubbling;
       }
     }
     if (notification is ScrollUpdateNotification) {
@@ -82,7 +82,7 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
           pixels < (maxScrollExtent - scrollOffset)) {
         if (widget.onInBetweenOfPage != null) {
           widget.onInBetweenOfPage!();
-          return widget.allowNotificationBubbling;
+          return !widget.allowNotificationBubbling;
         }
       }
 
@@ -94,12 +94,12 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
       if (scrollingDown) {
         if (extentAfter <= scrollOffset) {
           _onEndOfPage();
-          return widget.allowNotificationBubbling;
+          return !widget.allowNotificationBubbling;
         }
       } else {
         if (extentBefore <= scrollOffset) {
           _onStartOfPage();
-          return widget.allowNotificationBubbling;
+          return !widget.allowNotificationBubbling;
         }
       }
     }
@@ -110,9 +110,9 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
       if (notification.overscroll < 0) {
         _onStartOfPage();
       }
-      return widget.allowNotificationBubbling;
+      return !widget.allowNotificationBubbling;
     }
-    return widget.allowNotificationBubbling;
+    return false;
   }
 
   void _onEndOfPage() {
