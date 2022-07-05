@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fix WebSocket contemporary connection calls while disconnecting
+
 ## 5.0.0-beta.1
 
 - Minor fixes.
