@@ -437,9 +437,7 @@ class WebSocket with TimerHelper {
   void disconnect() {
     if (connectionStatus == ConnectionStatus.disconnected) return;
 
-    if (connectionStatus == ConnectionStatus.connecting) {
-      _resetRequestFlags(resetAttempts: true);
-    }
+    _resetRequestFlags(resetAttempts: true);
 
     _connectionStatus = ConnectionStatus.disconnected;
 
