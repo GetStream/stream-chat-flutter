@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fix WebSocket contemporary connection calls while disconnecting
+
 ## 4.3.0
 
 🐞 Fixed
