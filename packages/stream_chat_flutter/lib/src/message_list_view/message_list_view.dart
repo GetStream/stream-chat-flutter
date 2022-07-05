@@ -286,7 +286,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   double get _initialAlignment {
     final initialAlignment = widget.initialAlignment;
     if (initialAlignment != null) return initialAlignment;
-    return streamChannel!.initialMessageId == null ? 0 : 0.1;
+    return initialIndex == 0 ? 0 : 0.1;
   }
 
   bool get _upToDate => streamChannel!.channel.state!.isUpToDate;
@@ -313,6 +313,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   StreamSubscription? _messageNewListener;
 
+  Read? _userRead;
+  Message? _oldestUnreadMessage;
+
   @override
   void initState() {
     super.initState();
@@ -335,14 +338,20 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
+
+      _userRead = streamChannel?.channel.state!.read.firstWhereOrNull(
+        (it) =>
+            it.user.id == streamChannel?.channel.client.state.currentUser?.id,
+      );
       _messageNewListener?.cancel();
       unreadCount = streamChannel?.channel.state?.unreadCount ?? 0;
       initialIndex = getInitialIndex(
         widget.initialScrollIndex,
         streamChannel!,
         widget.messageFilter,
-        unreadCount,
+        _userRead,
       );
+
       initialAlignment = _initialAlignment;
 
       if (_scrollController?.isAttached == true) {
@@ -432,6 +441,19 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   Widget _buildListView(List<Message> data) {
     messages = data;
+
+    if (_userRead != null &&
+        messages.isNotEmpty &&
+        messages.first.createdAt.isAfter(_userRead!.lastRead) &&
+        messages.last.createdAt.isBefore(_userRead!.lastRead)) {
+      _oldestUnreadMessage = messages.lastWhereOrNull(
+        (it) =>
+            it.user?.id !=
+                streamChannel?.channel.client.state.currentUser?.id &&
+            it.createdAt.compareTo(_userRead!.lastRead) > 0,
+      );
+    }
+
     for (var index = 0; index < messages.length; index++) {
       messagesIndex[messages[index].id] = index;
     }
@@ -589,7 +611,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     if (i == 1 || i == itemCount - 4) return const Offstage();
 
                     late final Message message, nextMessage;
-                    late Widget separator;
+                    Widget? separator;
                     if (widget.reverse) {
                       message = messages[i - 1];
                       nextMessage = messages[i - 2];
@@ -631,24 +653,29 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     }
 
                     if (spacingRules.isNotEmpty) {
-                      return widget.spacingWidgetBuilder
+                      separator = widget.spacingWidgetBuilder
                               ?.call(context, spacingRules) ??
                           const SizedBox(height: 8);
                     }
 
-                    separator = widget.spacingWidgetBuilder
+                    separator ??= widget.spacingWidgetBuilder
                             ?.call(context, [SpacingType.defaultSpacing]) ??
                         const SizedBox(height: 2);
 
-                    if (!isThread && unreadCount > 0 && unreadCount == i - 1) {
+                    if (!isThread &&
+                        unreadCount > 0 &&
+                        _oldestUnreadMessage?.id == nextMessage.id) {
                       final unreadMessagesSeparator = widget
-                          .unreadMessagesSeparatorBuilder
-                          ?.call(context, unreadCount);
+                              .unreadMessagesSeparatorBuilder
+                              ?.call(context, unreadCount) ??
+                          UnreadMessagesSeparator(unreadCount: unreadCount);
 
-                      return UnreadMessagesSeparator(
-                        separator: separator,
-                        unreadMessagesSeparator: unreadMessagesSeparator,
-                        unreadCount: unreadCount,
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          separator,
+                          unreadMessagesSeparator,
+                        ],
                       );
                     }
                     return separator;
