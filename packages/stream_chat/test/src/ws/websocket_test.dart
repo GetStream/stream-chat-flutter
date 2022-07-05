@@ -131,6 +131,40 @@ void main() {
     addTearDown(timer.cancel);
   });
 
+  test('`connect`, `disconnect` and `connect` again without waiting', () async {
+    final user = OwnUser(
+      id: 'test-user',
+      name: 'test',
+    );
+    const connectionId = 'test-connection-id';
+    // Sends connect event to web-socket stream
+    final timer = Timer(const Duration(milliseconds: 300), () {
+      final event = Event(
+        type: EventType.healthCheck,
+        connectionId: connectionId,
+        me: user,
+      );
+      webSocketSink.add(json.encode(event));
+    });
+
+    final event = await webSocket.connect(
+      user,
+    );
+
+    webSocket
+      ..disconnect()
+      ..connect(user)
+      ..disconnect()
+      ..connect(user);
+
+    expect(event.type, EventType.healthCheck);
+    expect(event.connectionId, connectionId);
+    expect(event.me, isNotNull);
+    expect(event.me!.id, user.id);
+
+    addTearDown(timer.cancel);
+  });
+
   test('`connect` should throw if already in connection attempt', () async {
     final user = OwnUser(id: 'test-user');
     webSocket.connect(user);
