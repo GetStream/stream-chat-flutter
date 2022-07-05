@@ -138,7 +138,7 @@ void main() {
     );
     const connectionId = 'test-connection-id';
     // Sends connect event to web-socket stream
-    final timer = Timer(const Duration(milliseconds: 300), () {
+    final timer = Timer.periodic(const Duration(milliseconds: 300), (_) {
       final event = Event(
         type: EventType.healthCheck,
         connectionId: connectionId,
@@ -147,15 +147,15 @@ void main() {
       webSocketSink.add(json.encode(event));
     });
 
-    final event = await webSocket.connect(
+    await webSocket.connect(
       user,
     );
 
     webSocket
       ..disconnect()
       ..connect(user)
-      ..disconnect()
-      ..connect(user);
+      ..disconnect();
+    final event = await webSocket.connect(user);
 
     expect(event.type, EventType.healthCheck);
     expect(event.connectionId, connectionId);
