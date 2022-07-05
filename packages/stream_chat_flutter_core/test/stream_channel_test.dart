@@ -64,6 +64,7 @@ void main() {
       const streamChannelKey = Key('streamChannel');
       const childKey = Key('childKey');
       when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
       final streamChannel = StreamChannel(
         key: streamChannelKey,
         channel: mockChannel,
@@ -97,6 +98,7 @@ void main() {
       );
       when(() => mockChannel.initialized)
           .thenAnswer((_) => Future.error(error));
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
 
       await tester.pumpWidget(
         Directionality(
@@ -127,6 +129,7 @@ void main() {
       );
 
       when(() => mockChannel.initialized).thenAnswer((_) async => false);
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
 
       await tester.pumpWidget(
         Directionality(
