@@ -22,9 +22,10 @@ class StreamChatApi {
     StreamHttpClientOptions? options,
     TokenManager? tokenManager,
     ConnectionIdManager? connectionIdManager,
-    AttachmentFileUploader? attachmentFileUploader,
+    AttachmentFileUploaderProvider? attachmentFileUploaderProvider,
     Logger? logger,
-  })  : _fileUploader = attachmentFileUploader,
+  })  : _fileUploaderProvider =
+            attachmentFileUploaderProvider ?? StreamAttachmentFileUploader.new,
         _client = client ??
             StreamHttpClient(
               apiKey,
@@ -35,6 +36,7 @@ class StreamChatApi {
             );
 
   final StreamHttpClient _client;
+  final AttachmentFileUploaderProvider _fileUploaderProvider;
 
   UserApi? _user;
 
@@ -75,5 +77,5 @@ class StreamChatApi {
 
   /// Class responsible for uploading images and files to a given channel
   AttachmentFileUploader get fileUploader =>
-      _fileUploader ??= StreamAttachmentFileUploader(_client);
+      _fileUploader ??= _fileUploaderProvider.call(_client);
 }
