@@ -67,7 +67,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get emptyMessagesText => 'Det er ingen meldinger akkurat nå';
 
   @override
-  String get genericErrorText => 'Noe gikk glat';
+  String get genericErrorText => 'Noe gikk galt';
 
   @override
   String get loadingMessagesError => 'Problem med å laste inn meldinger';
@@ -219,7 +219,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get copyMessageLabel => 'Kopier melding';
 
   @override
-  String get editMessageLabel => 'Rediger f';
+  String get editMessageLabel => 'Rediger melding';
 
   @override
   String toggleResendOrResendEditedMessage({required bool isUpdateFailed}) {
