@@ -4,6 +4,15 @@
 
 - Fix WebSocket contemporary connection calls while disconnecting
 
+✅ Added
+
+- Export `StreamAttachmentFileUploader`.
+
+🔄 Changed
+
+- Removed `StreamChatClient.attachmentFileUploader`,
+  Use `StreamChatClient.attachmentFileUploaderProvider` instead.
+
 ## 5.0.0-beta.1
 
 - Minor fixes.

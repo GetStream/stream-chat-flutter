@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:collection/collection.dart'
     show IterableExtension, ListEquality;
-import 'package:dio/dio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
