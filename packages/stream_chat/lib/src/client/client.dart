@@ -70,15 +70,9 @@ class StreamChatClient {
     Duration receiveTimeout = const Duration(seconds: 6),
     StreamChatApi? chatApi,
     WebSocket? ws,
-    @Deprecated('Use [attachmentFileUploaderProvider] instead')
-        AttachmentFileUploader? attachmentFileUploader,
-    AttachmentFileUploaderProvider? attachmentFileUploaderProvider,
-  }) : assert(
-          attachmentFileUploader == null ||
-              attachmentFileUploaderProvider == null,
-          'You can only use one of [attachmentFileUploader] '
-          'or [attachmentFileUploaderProvider]',
-        ) {
+    AttachmentFileUploaderProvider attachmentFileUploaderProvider =
+        StreamAttachmentFileUploader.new,
+  }) {
     logger.info('Initiating new StreamChatClient');
 
     final options = StreamHttpClientOptions(
@@ -88,23 +82,13 @@ class StreamChatClient {
       headers: {'X-Stream-Client': defaultUserAgent},
     );
 
-    // TODO: simplify this once we remove the deprecated field.
-    final AttachmentFileUploaderProvider fileUploaderProvider;
-    if (attachmentFileUploaderProvider != null) {
-      fileUploaderProvider = attachmentFileUploaderProvider;
-    } else if (attachmentFileUploader != null) {
-      fileUploaderProvider = (httpClient) => attachmentFileUploader;
-    } else {
-      fileUploaderProvider = StreamAttachmentFileUploader.new;
-    }
-
     _chatApi = chatApi ??
         StreamChatApi(
           apiKey,
           options: options,
           tokenManager: _tokenManager,
           connectionIdManager: _connectionIdManager,
-          attachmentFileUploaderProvider: fileUploaderProvider,
+          attachmentFileUploaderProvider: attachmentFileUploaderProvider,
           logger: detachedLogger('🕸️'),
         );
 
