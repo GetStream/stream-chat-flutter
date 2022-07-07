@@ -39,6 +39,7 @@ At the moment we support the following languages:
 - [Korean](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ko.dart)
 - [Portuguese](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_pt.dart)
 - [German](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_de.dart)
+- [Norwegian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_no.dart)
 
 More languages will be added in the future. Feel free to [contribute](https://github.com/GetStream/stream-chat-flutter/blob/master/CONTRIBUTING.md) to add more languages.
 
@@ -77,6 +78,8 @@ class MyApp extends StatelessWidget {
         Locale('ja'),
         Locale('ko'),
         Locale('pt'),
+        Locale('de'),
+        Locale('no'),
       ],
       // Add GlobalStreamChatLocalizations.delegates
       localizationsDelegates: GlobalStreamChatLocalizations.delegates,
@@ -123,6 +126,8 @@ Example:
   <string>ja</string>
   <string>ko</string>
   <string>pt</string>
+  <string>de</string>
+  <string>no</string>
 </array>
 ```
 
