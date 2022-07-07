@@ -2,6 +2,7 @@
 
 🐞 Fixed
 
+- [[#1247]](https://github.com/GetStream/stream-chat-flutter/issues/1247) Fix Jiffy initialization.
 - Fixed the unread message header in the message list view.
 
 ## 5.0.0-beta.1
