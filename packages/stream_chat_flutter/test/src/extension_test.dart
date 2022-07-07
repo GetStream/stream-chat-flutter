@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -5,6 +7,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 void main() {
   group('List<User>.search', () {
     test('should work fine', () {
+      print('Hello There');
+      print(Platform.environment);
       final tommaso = User(id: 'tommaso', name: 'Tommaso');
       final thierry = User(id: 'thierry', name: 'Thierry');
       final users = [tommaso, thierry];
