@@ -1,5 +1,7 @@
 ## Upcoming
 
+* Included the changes from version 3.3.0
+
 * Added support for [Norwegian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_no.dart) locale.
 
 ## 4.0.0-beta.1
@@ -13,6 +15,10 @@
 * `toggleMuteUnmuteGroupText` with translations
 * `toggleMuteUnmuteUserQuestion` with translations
 * `toggleMuteUnmuteUserText` with translations
+
+## 3.3.0
+
+* Added support for [Norwegian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_no.dart) locale.
 
 ## 3.2.0
 

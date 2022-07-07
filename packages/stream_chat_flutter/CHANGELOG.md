@@ -1,8 +1,9 @@
 ## Upcoming 
 
+- Included the changes from version 4.4.0
+
 🐞 Fixed
 
-- [[#1247]](https://github.com/GetStream/stream-chat-flutter/issues/1247) Fix Jiffy initialization.
 - Fixed the unread message header in the message list view.
 
 ## 5.0.0-beta.1
@@ -62,6 +63,19 @@
   - Extracted typedefs to their own file
   - Updated dartdoc documentation
   - Various code readability improvements
+
+## Upcoming 4.x
+
+🐞 Fixed
+
+- [[#1247]](https://github.com/GetStream/stream-chat-flutter/issues/1247) Fix Jiffy initialization.
+
+## 4.4.0
+
+🐞 Fixed
+
+- [[#1234]](https://github.com/GetStream/stream-chat-flutter/issues/1234) Fix `ChannelListTile`
+  sendingIndicator `isMessageRead` calculation.
 
 ## 4.3.0
 
