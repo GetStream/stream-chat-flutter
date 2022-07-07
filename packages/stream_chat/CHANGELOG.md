@@ -1,3 +1,9 @@
+## 4.4.0
+
+ - **FIX**: fix connecting while connecting and disconneting (#1237).
+ - **FIX**: fix x-stream-client header.
+ - **FEAT**: add support for AttachmentFileUploaderProvider. (#1246).
+
 ## Upcoming
 
 🐞 Fixed

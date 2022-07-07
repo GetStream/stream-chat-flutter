@@ -1,3 +1,9 @@
+## 4.3.1
+
+ - **FIX**: fix lazy load scroll view.
+ - **FIX**: allow scroll notification bubbling in lazy load scroll view.
+ - **FIX**: fix x-stream-client header.
+
 ## 4.3.0
 
 - Updated `stream_chat` dependency to [`4.3.0`](https://pub.dev/packages/stream_chat/changelog).

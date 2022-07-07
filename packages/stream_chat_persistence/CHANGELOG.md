@@ -1,3 +1,7 @@
+## 4.2.1
+
+ - Update a dependency to the latest release.
+
 ## 4.2.0
 
 - Added support for `Channel.ownCapabilities`
