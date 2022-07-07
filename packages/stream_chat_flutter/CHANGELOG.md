@@ -1,3 +1,7 @@
+## 4.4.0
+
+ - **FIX**: Fix `ChannelListTile` sendingIndicator `isMessageRead` calculation.
+
 ## Upcoming
 
 🐞 Fixed
