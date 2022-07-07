@@ -1,6 +1,6 @@
 ## Upcoming
 
-- Included the changes from version 4.3.0
+- Included the changes from version [4.3.0](#430).
 
 ## 5.0.0-beta.1
 
