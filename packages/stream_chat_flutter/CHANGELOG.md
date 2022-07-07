@@ -1,3 +1,9 @@
+## Upcming
+
+🐞 Fixed
+
+- [[#1247]](https://github.com/GetStream/stream-chat-flutter/issues/1247) Fix Jiffy initialization.
+
 ## 4.4.0
 
 🐞 Fixed
