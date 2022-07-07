@@ -1,3 +1,5 @@
+## 4.3.0
+
 ## 4.2.0
 
 - Added support for `Channel.ownCapabilities`
