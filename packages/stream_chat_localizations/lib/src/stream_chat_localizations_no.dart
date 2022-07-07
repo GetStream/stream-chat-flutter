@@ -2,7 +2,7 @@ part of 'stream_chat_localizations.dart';
 
 /// The translations for Norwegian (`no`).
 class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
-  /// Create an instance of the translation bundle for English.
+  /// Create an instance of the translation bundle for Norwegian.
   const StreamChatLocalizationsNo({super.localeName = 'no'});
 
   @override
@@ -61,7 +61,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get sendMessagePermissionError =>
-      "Du har ikke tillatelse til å sende meldinger";
+      'Du har ikke tillatelse til å sende meldinger';
 
   @override
   String get emptyMessagesText => 'Det er ingen meldinger akkurat nå';
@@ -198,7 +198,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get operationCouldNotBeCompletedText =>
-      "Denne handlingen kunne ikke bli gjennomført.";
+      'Denne handlingen kunne ikke bli gjennomført.';
 
   @override
   String get replyLabel => 'Svar';
