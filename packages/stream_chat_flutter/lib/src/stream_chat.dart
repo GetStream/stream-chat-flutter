@@ -141,7 +141,7 @@ class StreamChatState extends State<StreamChat> {
   @override
   void didChangeDependencies() {
     final currentLocale = Localizations.localeOf(context);
-    final languageCode = currentLocale.languageCode;
+    final languageCode = currentLocale.toString();
     final availableLocales = Jiffy.getAllAvailableLocales();
     if (availableLocales.contains(languageCode)) {
       Jiffy.locale(languageCode);
