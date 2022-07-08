@@ -359,11 +359,10 @@ class StreamMessageListView extends StatefulWidget {
     BuildContext context,
     List<SpacingType> spacingTypes,
   ) {
-    final isDefaultSpacing = spacingTypes.contains(SpacingType.defaultSpacing);
-    if (spacingTypes.length == 1 && isDefaultSpacing) {
-      return const SizedBox(height: 2);
+    if (!spacingTypes.contains(SpacingType.defaultSpacing)) {
+      return const SizedBox(height: 8);
     }
-    return const SizedBox(height: 8);
+    return const SizedBox(height: 2);
   }
 
   @override
@@ -631,40 +630,43 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       nextMessage = messages[i - 1];
                     }
 
+                    Widget separator;
+
+                    final isThread = message.replyCount! > 0;
+
                     if (!Jiffy(message.createdAt.toLocal()).isSame(
                       nextMessage.createdAt.toLocal(),
                       Units.DAY,
                     )) {
-                      return _buildDateDivider(nextMessage);
+                      separator = _buildDateDivider(nextMessage);
+                    } else {
+                      final timeDiff =
+                          Jiffy(nextMessage.createdAt.toLocal()).diff(
+                        message.createdAt.toLocal(),
+                        Units.MINUTE,
+                      );
+
+                      final isNextUserSame =
+                          message.user!.id == nextMessage.user?.id;
+                      final isDeleted = message.isDeleted;
+                      final hasTimeDiff = timeDiff >= 1;
+
+                      final spacingRules = [
+                        if (hasTimeDiff) SpacingType.timeDiff,
+                        if (!isNextUserSame) SpacingType.otherUser,
+                        if (isThread) SpacingType.thread,
+                        if (isDeleted) SpacingType.deleted,
+                      ];
+
+                      if (spacingRules.isEmpty) {
+                        spacingRules.add(SpacingType.defaultSpacing);
+                      }
+
+                      separator = widget.spacingWidgetBuilder.call(
+                        context,
+                        spacingRules,
+                      );
                     }
-
-                    final timeDiff =
-                        Jiffy(nextMessage.createdAt.toLocal()).diff(
-                      message.createdAt.toLocal(),
-                      Units.MINUTE,
-                    );
-
-                    final isNextUserSame =
-                        message.user!.id == nextMessage.user?.id;
-                    final isThread = message.replyCount! > 0;
-                    final isDeleted = message.isDeleted;
-                    final hasTimeDiff = timeDiff >= 1;
-
-                    final spacingRules = [
-                      if (hasTimeDiff) SpacingType.timeDiff,
-                      if (!isNextUserSame) SpacingType.otherUser,
-                      if (isThread) SpacingType.thread,
-                      if (isDeleted) SpacingType.deleted,
-                    ];
-
-                    if (spacingRules.isEmpty) {
-                      spacingRules.add(SpacingType.defaultSpacing);
-                    }
-
-                    final separator = widget.spacingWidgetBuilder.call(
-                      context,
-                      spacingRules,
-                    );
 
                     if (!isThread && unreadCount > 0 && unreadCount == i - 1) {
                       final unreadMessagesSeparator =
