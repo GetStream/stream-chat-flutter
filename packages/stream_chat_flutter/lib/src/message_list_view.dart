@@ -612,7 +612,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     }
 
                     late final Message message, nextMessage;
-                    late Widget separator;
+                    Widget? separator;
                     if (widget.reverse) {
                       message = messages[i - 1];
                       nextMessage = messages[i - 2];
@@ -658,11 +658,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     }
 
                     if (spacingRules.isNotEmpty) {
-                      separator = widget.spacingWidgetBuilder
+                      separator ??= widget.spacingWidgetBuilder
                               ?.call(context, spacingRules) ??
                           const SizedBox(height: 8);
                     }
-                    separator = widget.spacingWidgetBuilder
+                    separator ??= widget.spacingWidgetBuilder
                             ?.call(context, [SpacingType.defaultSpacing]) ??
                         const SizedBox(height: 2);
 
