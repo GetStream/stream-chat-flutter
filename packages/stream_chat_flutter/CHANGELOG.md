@@ -1,9 +1,10 @@
-## Upcming
+## Upcoming
 
 🐞 Fixed
 
 - [[#1247]](https://github.com/GetStream/stream-chat-flutter/issues/1247) Fix Jiffy initialization.
 - [[#1232]](https://github.com/getstream/stream-chat-flutter/issues/1232) Fix DateDivider not showing up in the chat.
+- Add key to MessageWidget's PortalTarget.
 
 ## 4.4.0
 
