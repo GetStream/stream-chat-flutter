@@ -16,7 +16,6 @@ class Member extends Equatable {
     this.inviteAcceptedAt,
     this.inviteRejectedAt,
     this.invited = false,
-    this.role,
     this.channelRole,
     this.userId,
     this.isModerator = false,
@@ -47,10 +46,6 @@ class Member extends Equatable {
 
   /// True if the user has been invited to the channel
   final bool invited;
-
-  /// The role of the user in the channel
-  @Deprecated('Please use channelRole')
-  final String? role;
 
   /// The role of this member in the channel
   final String? channelRole;
@@ -100,7 +95,6 @@ class Member extends Equatable {
         banned: banned ?? this.banned,
         banExpires: banExpires ?? this.banExpires,
         shadowBanned: shadowBanned ?? this.shadowBanned,
-        role: role ?? this.role,
         channelRole: channelRole ?? this.channelRole,
         userId: userId ?? this.userId,
         isModerator: isModerator ?? this.isModerator,
@@ -117,7 +111,6 @@ class Member extends Equatable {
         inviteAcceptedAt,
         inviteRejectedAt,
         invited,
-        role,
         channelRole,
         userId,
         isModerator,

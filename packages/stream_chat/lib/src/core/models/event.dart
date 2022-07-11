@@ -180,6 +180,7 @@ class EventChannel extends ChannelModel {
     super.id,
     super.type,
     required String super.cid,
+    super.ownCapabilities,
     required ChannelConfig super.config,
     super.createdBy,
     super.frozen,
@@ -191,6 +192,9 @@ class EventChannel extends ChannelModel {
     Map<String, Object?>? extraData,
     super.cooldown,
     super.team,
+    super.disabled,
+    super.hidden,
+    super.truncatedAt,
   }) : super(extraData: extraData ?? {});
 
   /// Create a new instance from a json

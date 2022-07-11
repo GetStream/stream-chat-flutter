@@ -3,6 +3,11 @@ import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 
+/// Signature for a function which provides instance of [AttachmentFileUploader]
+typedef AttachmentFileUploaderProvider = AttachmentFileUploader Function(
+  StreamHttpClient httpClient,
+);
+
 /// Class responsible for uploading images and files to a given channel
 abstract class AttachmentFileUploader {
   /// Uploads a [image] to the given channel.

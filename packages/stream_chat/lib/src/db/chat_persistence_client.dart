@@ -133,7 +133,7 @@ abstract class ChatPersistenceClient {
   /// Remove a pinned message by message [cids]
   Future<void> deletePinnedMessageByCids(List<String> cids);
 
-  /// Remove a channel by [cid]
+  /// Remove a channel by [channelId]
   Future<void> deleteChannels(List<String> cids);
 
   /// Updates the message data of a particular channel [cid] with

@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template streamChat}
 /// Widget used to provide information about the chat to the widget tree
 ///
 /// class MyApp extends StatelessWidget {
@@ -26,8 +28,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// }
 ///
 /// Use [StreamChat.of] to get the current [StreamChatState] instance.
+/// {@endtemplate}
 class StreamChat extends StatefulWidget {
-  /// Constructor for creating a [StreamChat] widget
+  /// {@macro streamChat}
   const StreamChat({
     super.key,
     required this.client,
@@ -39,7 +42,7 @@ class StreamChat extends StatefulWidget {
     this.connectivityStream,
   });
 
-  /// Client to do chat ops with
+  /// Client to do chat operations with
   final StreamChatClient client;
 
   /// Child which inherits details
@@ -94,6 +97,15 @@ class StreamChatState extends State<StreamChat> {
       widget.config ?? StreamChatConfiguration.defaults();
 
   @override
+  void initState() {
+    super.initState();
+    // Ensures that VLC only initializes in real desktop environments
+    if (!isTestEnvironment && isDesktopVideoPlayerSupported) {
+      VlcManager.instance.initialize();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = _getTheme(context, widget.streamChatThemeData);
     return Portal(
@@ -118,8 +130,8 @@ class StreamChatState extends State<StreamChat> {
                 child: Builder(
                   builder: (context) {
                     StreamChatClient.additionalHeaders = {
-                      'X-Stream-Client':
-                          '${StreamChatClient.defaultUserAgent}-ui',
+                      'X-Stream-Client': '${StreamChatClient.defaultUserAgent}-'
+                          'ui-${StreamChatClient.packageVersion}',
                     };
                     return widget.child ?? const Offstage();
                   },
@@ -149,11 +161,10 @@ class StreamChatState extends State<StreamChat> {
 
   @override
   void didChangeDependencies() {
-    final currentLocale = Localizations.localeOf(context);
-    final languageCode = currentLocale.languageCode;
+    final currentLocale = Localizations.localeOf(context).toString();
     final availableLocales = Jiffy.getAllAvailableLocales();
-    if (availableLocales.contains(languageCode)) {
-      Jiffy.locale(languageCode);
+    if (availableLocales.contains(currentLocale)) {
+      Jiffy.locale(currentLocale);
     }
     super.didChangeDependencies();
   }

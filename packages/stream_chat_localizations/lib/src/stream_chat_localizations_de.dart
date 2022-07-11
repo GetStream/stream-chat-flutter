@@ -163,7 +163,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get allowGalleryAccessMessage => 'Zugang zu Ihrer Galerie gewähren';
 
   @override
-  String get flagMessageLabel => 'Markierte Nachricht';
+  String get flagMessageLabel => 'Nachricht melden';
 
   @override
   String get flagMessageQuestion =>
@@ -171,13 +171,13 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       '\nModerator für weitere Untersuchungen senden?';
 
   @override
-  String get flagLabel => 'MARKIEREN';
+  String get flagLabel => 'MELDEN';
 
   @override
   String get cancelLabel => 'ABBRECHEN';
 
   @override
-  String get flagMessageSuccessfulLabel => 'Nachricht markiert';
+  String get flagMessageSuccessfulLabel => 'Nachricht gemeldet';
 
   @override
   String get flagMessageSuccessfulText =>
@@ -283,7 +283,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get streamChatLabel => 'Stream Chat';
 
   @override
-  String get searchingForNetworkText => 'Searching for Network';
+  String get searchingForNetworkText => 'Netzwerk wird gesucht';
 
   @override
   String get offlineLabel => 'Offline...';
@@ -380,5 +380,61 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       'Sie sind nicht berechtigt Nachrichten zu senden';
 
   @override
-  String get viewLibrary => 'Bibliothek ansehen';
+  String get couldNotReadBytesFromFileError =>
+      'Kan bytes niet uit bestand lezen.';
+
+  @override
+  String get downloadLabel => 'Downloaden';
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return 'UNMUTE';
+    } else {
+      return 'STOM';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Weet je zeker dat je het dempen van deze groep wilt opheffen?';
+    } else {
+      return 'Weet je zeker dat je deze groep wilt dempen?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Dempen groep opheffen';
+    } else {
+      return 'Groep dempen';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return '''Weet je zeker dat je het dempen van deze gebruiker wilt opheffen?''';
+    } else {
+      return 'Weet u zeker dat u deze gebruiker wilt dempen?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    return 'Gebruiker dempen';
+  }
+
+  @override
+  String get viewLibrary => 'Bibliothek öffnen';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 ungelesene Nachricht';
+    }
+    return '$unreadCount ungelesene Nachrichten';
+  }
 }

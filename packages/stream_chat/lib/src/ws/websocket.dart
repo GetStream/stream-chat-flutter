@@ -6,7 +6,6 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/core/error/error.dart';
-import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/user.dart';
@@ -163,7 +162,7 @@ class WebSocket with TimerHelper {
       'json': jsonEncode(params),
       'api_key': apiKey,
       'authorization': token.rawValue,
-      'stream-auth-type': token.authType.raw,
+      'stream-auth-type': token.authType.name,
       ...queryParameters,
     };
     final scheme = baseUrl.startsWith('https') ? 'wss' : 'ws';
@@ -437,6 +436,9 @@ class WebSocket with TimerHelper {
   /// Disconnects the WS and releases eventual resources
   void disconnect() {
     if (connectionStatus == ConnectionStatus.disconnected) return;
+
+    _resetRequestFlags(resetAttempts: true);
+
     _connectionStatus = ConnectionStatus.disconnected;
 
     _logger?.info('Disconnecting web-socket connection');
@@ -448,6 +450,7 @@ class WebSocket with TimerHelper {
     _stopMonitoringEvents();
 
     _manuallyClosed = true;
+
     _closeWebSocketChannel();
   }
 }

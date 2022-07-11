@@ -1,3 +1,32 @@
+## Upcoming
+
+* Included the changes from version [3.3.0](#330).
+
+* Added support for [Norwegian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_no.dart) locale.
+
+## 4.0.0-beta.1
+
+✅ Added
+
+* `couldNotReadBytesFromFileError` with translations
+* `downloadLabel` with translations
+* `toggleMuteUnmuteAction` with translations
+* `toggleMuteUnmuteGroupQuestion` with translations
+* `toggleMuteUnmuteGroupText` with translations
+* `toggleMuteUnmuteUserQuestion` with translations
+* `toggleMuteUnmuteUserText` with translations
+
+<a name='3.3.0'></a>
+## 3.3.0
+
+* Added support for [Norwegian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_no.dart) locale.
+
+## 3.2.0
+
+✅ Added
+
+* Added support for `unreadMessagesSeparatorText` translation.
+
 ## 3.1.0
 
 * Added support for [German](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_de.dart) locale.

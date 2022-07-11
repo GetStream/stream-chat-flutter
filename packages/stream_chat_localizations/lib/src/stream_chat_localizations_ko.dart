@@ -124,6 +124,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
       '파일이 너무 커서 업로드할 수 없습니다. 파일 크기 제한은 ${limitInMB}MB입니다.';
 
   @override
+  String get couldNotReadBytesFromFileError => '파일에서 바이트를 읽을 수 없습니다.';
+
+  @override
   String emojiMatchingQueryText(String query) => '"$query"과 일치하는 이모티콘입니다';
 
   @override
@@ -362,8 +365,64 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
       '첨부 파일 제한 초과: $limit 이상의 첨부 파일을 추가할 수 없습니다';
 
   @override
+  String get downloadLabel => '다운로드';
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    if (isMuted) {
+      return '사용자 음소거 해제';
+    } else {
+      return '사용자 음소거';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return '이 그룹의 음소거를 해제하시겠습니까?';
+    } else {
+      return '이 그룹을 음소거하시겠습니까?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return '이 사용자의 음소거를 해제하시겠습니까?';
+    } else {
+      return '이 사용자를 음소거하시겠습니까?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return '음소거 해제';
+    } else {
+      return '무음';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return '그룹 음소거 해제';
+    } else {
+      return '음소거 그룹';
+    }
+  }
+
+  @override
   String get linkDisabledDetails => '이 대화에서는 링크를 보낼 수 없습니다.';
 
   @override
   String get linkDisabledError => '링크가 비활성화되었습니다.';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '읽지 않은 메시지 1개';
+    }
+    return '읽지 않은 메시지 $unreadCount개';
+  }
 }

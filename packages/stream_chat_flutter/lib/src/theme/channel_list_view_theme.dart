@@ -1,12 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro channel_list_view_theme}
-@Deprecated("Use 'StreamChannelListViewTheme' instead")
-typedef ChannelListViewTheme = StreamChannelListViewTheme;
-
-/// {@template channel_list_view_theme}
+/// {@template channelListViewTheme}
 /// Overrides the default style of [ChannelListView] descendants.
 ///
 /// See also:
@@ -52,11 +48,7 @@ class StreamChannelListViewTheme extends InheritedTheme {
       data != oldWidget.data;
 }
 
-/// {@macro channel_list_view_theme_data}
-@Deprecated("Use 'StreamChannelListViewThemeData' instead")
-typedef ChannelListViewThemeData = StreamChannelListViewThemeData;
-
-/// {@template channel_list_view_theme_data}
+/// {@template channelListViewThemeData}
 /// A style that overrides the default appearance of [ChannelListView]s when
 /// used with [StreamChannelListViewTheme]
 /// or with the overall [StreamChatTheme]'s
@@ -82,10 +74,11 @@ class StreamChannelListViewThemeData with Diagnosticable {
   /// Copies this [StreamChannelListViewThemeData] to another.
   StreamChannelListViewThemeData copyWith({
     Color? backgroundColor,
-  }) =>
-      StreamChannelListViewThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-      );
+  }) {
+    return StreamChannelListViewThemeData(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+    );
+  }
 
   /// Linearly interpolate between two [StreamChannelListViewThemeData] themes.
   ///
@@ -94,10 +87,11 @@ class StreamChannelListViewThemeData with Diagnosticable {
     StreamChannelListViewThemeData a,
     StreamChannelListViewThemeData b,
     double t,
-  ) =>
-      StreamChannelListViewThemeData(
-        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      );
+  ) {
+    return StreamChannelListViewThemeData(
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+    );
+  }
 
   /// Merges one [StreamChannelListViewThemeData] with another.
   StreamChannelListViewThemeData merge(StreamChannelListViewThemeData? other) {

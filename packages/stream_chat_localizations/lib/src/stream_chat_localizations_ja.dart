@@ -124,6 +124,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
       'ファイルが大きすぎてアップロードできません。ファイルサイズの制限は${limitInMB}MBです。';
 
   @override
+  String get couldNotReadBytesFromFileError => 'ファイルからバイトを読み取れませんでした';
+
+  @override
   String emojiMatchingQueryText(String query) => '「"$query"」とお揃いの絵文字';
 
   @override
@@ -361,8 +364,64 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   ''';
 
   @override
+  String get downloadLabel => 'ダウンロード';
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    if (isMuted) {
+      return 'ユーザーのミュートを解除する';
+    } else {
+      return 'ユーザーをミュート';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'このグループのミュートを解除してもよろしいですか？';
+    } else {
+      return 'このグループをミュートしてもよろしいですか？';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'このユーザーのミュートを解除してもよろしいですか？';
+    } else {
+      return 'このユーザーをミュートしてもよろしいですか？';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return 'ミュートを解除する';
+    } else {
+      return 'ミュート';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return 'グループのミュートを解除';
+    } else {
+      return 'ミュートグループ';
+    }
+  }
+
+  @override
   String get linkDisabledDetails => 'この会話では、リンクの送信は許可されていません。';
 
   @override
   String get linkDisabledError => 'リンクが無効になっています';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '未読メッセージ1通';
+    }
+    return '$unreadCountつの未読メッセージ';
+  }
 }

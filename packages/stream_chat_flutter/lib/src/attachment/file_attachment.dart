@@ -1,47 +1,46 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/src/attachment/attachment_handler/desktop_attachment_handler.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/upload_progress_indicator.dart';
-import 'package:stream_chat_flutter/src/utils.dart';
-import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
+import 'package:stream_chat_flutter/src/indicators/upload_progress_indicator.dart';
+import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
+import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-/// {@macro file_attachment}
-@Deprecated("Use 'StreamFileAttachment' instead")
-typedef FileAttachment = StreamFileAttachment;
-
-/// {@template file_attachment}
-/// Widget for displaying file attachments
+/// {@template streamFileAttachment}
+/// Displays file attachments that have been sent in a chat.
+///
+/// Used in [MessageWidget].
 /// {@endtemplate}
 class StreamFileAttachment extends StreamAttachmentWidget {
-  /// Constructor for creating a widget when attachment is of type 'file'
+  /// {@macro streamFileAttachment}
   const StreamFileAttachment({
     super.key,
     required super.message,
     required super.attachment,
-    super.size,
+    super.constraints,
     this.title,
     this.trailing,
     this.onAttachmentTap,
   });
 
-  /// Title for attachment
+  /// Title for the attachment
   final Widget? title;
 
-  /// Widget for displaying at the end of attachment (such as a download button)
+  /// Widget for displaying at the end of the attachment
+  /// (such as a download button)
   final Widget? trailing;
 
-  /// Callback called when attachment widget is tapped
-  final VoidCallback? onAttachmentTap;
+  /// {@macro onAttachmentTap}
+  final OnAttachmentTap? onAttachmentTap;
 
-  /// Check if attachment is a video
+  /// Checks if the attachment is a video
   bool get isVideoAttachment => attachment.title?.mimeType?.type == 'video';
 
-  /// Check if attachment is an image
+  /// Checks if the attachment is an image
   bool get isImageAttachment => attachment.title?.mimeType?.type == 'image';
 
   @override
@@ -51,7 +50,7 @@ class StreamFileAttachment extends StreamAttachmentWidget {
       child: GestureDetector(
         onTap: onAttachmentTap,
         child: Container(
-          width: size?.width ?? 100,
+          constraints: constraints ?? const BoxConstraints.tightFor(width: 100),
           height: 56,
           decoration: BoxDecoration(
             color: colorTheme.barsBg,
@@ -67,7 +66,12 @@ class StreamFileAttachment extends StreamAttachmentWidget {
                 height: 40,
                 width: 33.33,
                 margin: const EdgeInsets.all(8),
-                child: _getFileTypeImage(context),
+                child: _FileTypeImage(
+                  isImageAttachment: isImageAttachment,
+                  isVideoAttachment: isVideoAttachment,
+                  source: source,
+                  attachment: attachment,
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -82,25 +86,45 @@ class StreamFileAttachment extends StreamAttachmentWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 3),
-                    _buildSubtitle(context),
+                    _FileAttachmentSubtitle(attachment: attachment),
                   ],
                 ),
               ),
               const SizedBox(width: 8),
-              _buildTrailing(context),
+              _Trailing(
+                attachment: attachment,
+                message: message,
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  ShapeBorder _getDefaultShape(BuildContext context) => RoundedRectangleBorder(
-        side: const BorderSide(width: 0, color: Colors.transparent),
-        borderRadius: BorderRadius.circular(8),
-      );
+class _FileTypeImage extends StatelessWidget {
+  const _FileTypeImage({
+    required this.isImageAttachment,
+    required this.isVideoAttachment,
+    required this.source,
+    required this.attachment,
+  });
 
-  Widget _getFileTypeImage(BuildContext context) {
+  final bool isImageAttachment;
+  final bool isVideoAttachment;
+  final AttachmentSource source;
+  final Attachment attachment;
+
+  ShapeBorder _getDefaultShape(BuildContext context) {
+    return RoundedRectangleBorder(
+      side: const BorderSide(width: 0, color: Colors.transparent),
+      borderRadius: BorderRadius.circular(8),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     if (isImageAttachment) {
       return Material(
         clipBehavior: Clip.hardEdge,
@@ -185,38 +209,27 @@ class StreamFileAttachment extends StreamAttachmentWidget {
     }
     return getFileTypeImage(attachment.extraData['mime_type'] as String?);
   }
+}
 
-  Widget _buildButton({
-    Widget? icon,
-    double iconSize = 24.0,
-    VoidCallback? onPressed,
-    Color? fillColor,
-  }) =>
-      SizedBox(
-        height: iconSize,
-        width: iconSize,
-        child: RawMaterialButton(
-          elevation: 0,
-          highlightElevation: 0,
-          focusElevation: 0,
-          hoverElevation: 0,
-          onPressed: onPressed,
-          fillColor: fillColor,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: icon,
-        ),
-      );
+class _Trailing extends StatelessWidget {
+  const _Trailing({
+    required this.attachment,
+    required this.message,
+  });
 
-  Widget _buildTrailing(BuildContext context) {
+  final Attachment attachment;
+  final Message message;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
     final channel = StreamChannel.of(context).channel;
     final attachmentId = attachment.id;
-    var trailingWidget = trailing;
+    Widget? trailingWidget;
     trailingWidget ??= attachment.uploadState.when(
       preparing: () => Padding(
         padding: const EdgeInsets.all(8),
-        child: _buildButton(
+        child: _TrailingButton(
           icon: StreamSvgIcon.close(color: theme.colorTheme.barsBg),
           fillColor: theme.colorTheme.overlayDark,
           onPressed: () => channel.cancelAttachmentUpload(attachmentId),
@@ -224,7 +237,7 @@ class StreamFileAttachment extends StreamAttachmentWidget {
       ),
       inProgress: (_, __) => Padding(
         padding: const EdgeInsets.all(8),
-        child: _buildButton(
+        child: _TrailingButton(
           icon: StreamSvgIcon.close(color: theme.colorTheme.barsBg),
           fillColor: theme.colorTheme.overlayDark,
           onPressed: () => channel.cancelAttachmentUpload(attachmentId),
@@ -240,7 +253,7 @@ class StreamFileAttachment extends StreamAttachmentWidget {
       ),
       failed: (_) => Padding(
         padding: const EdgeInsets.all(8),
-        child: _buildButton(
+        child: _TrailingButton(
           icon: StreamSvgIcon.retry(color: theme.colorTheme.barsBg),
           fillColor: theme.colorTheme.overlayDark,
           onPressed: () => channel.retryAttachmentUpload(
@@ -251,6 +264,7 @@ class StreamFileAttachment extends StreamAttachmentWidget {
       ),
     );
 
+    //TODO(Groovin): show a regular "file" icon if the file has been downloaded
     if (message.status == MessageSendingStatus.sent) {
       trailingWidget = IconButton(
         icon: StreamSvgIcon.cloudDownload(
@@ -258,9 +272,19 @@ class StreamFileAttachment extends StreamAttachmentWidget {
         ),
         visualDensity: VisualDensity.compact,
         splashRadius: 16,
-        onPressed: () {
+        onPressed: () async {
           final assetUrl = attachment.assetUrl;
-          if (assetUrl != null) launchURL(context, assetUrl);
+          if (assetUrl != null) {
+            if (isMobileDeviceOrWeb) {
+              launchURL(context, assetUrl);
+            } else {
+              final attachmentHandler = DesktopAttachmentHandler();
+              await attachmentHandler.download(
+                attachment,
+                suggestedName: attachment.title,
+              );
+            }
+          }
         },
       );
     }
@@ -270,8 +294,47 @@ class StreamFileAttachment extends StreamAttachmentWidget {
       child: trailingWidget,
     );
   }
+}
 
-  Widget _buildSubtitle(BuildContext context) {
+class _TrailingButton extends StatelessWidget {
+  const _TrailingButton({
+    this.onPressed,
+    this.fillColor,
+    this.icon,
+  });
+
+  final VoidCallback? onPressed;
+  final Color? fillColor;
+  final Widget? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 24,
+      width: 24,
+      child: RawMaterialButton(
+        elevation: 0,
+        highlightElevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        onPressed: onPressed,
+        fillColor: fillColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: icon,
+      ),
+    );
+  }
+}
+
+class _FileAttachmentSubtitle extends StatelessWidget {
+  const _FileAttachmentSubtitle({
+    required this.attachment,
+  });
+
+  final Attachment attachment;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
     final size = attachment.file?.size ?? attachment.extraData['file_size'];
     final textStyle = theme.textTheme.footnote.copyWith(

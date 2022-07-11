@@ -17,6 +17,7 @@ class LazyLoadScrollView extends StatefulWidget {
     this.onPageScrollEnd,
     this.onInBetweenOfPage,
     this.scrollOffset = 100,
+    this.allowNotificationBubbling = false,
   });
 
   /// The [Widget] that this widget watches for changes on
@@ -40,6 +41,9 @@ class LazyLoadScrollView extends StatefulWidget {
   /// The offset to take into account when triggering [onEndOfPage]/[onStartOfPage] in pixels
   final double scrollOffset;
 
+  /// If true the notifications will keep bubbling up the tree
+  final bool allowNotificationBubbling;
+
   @override
   State<StatefulWidget> createState() => _LazyLoadScrollViewState();
 }
@@ -59,13 +63,13 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
     if (notification is ScrollStartNotification) {
       if (widget.onPageScrollStart != null) {
         widget.onPageScrollStart!();
-        return true;
+        return !widget.allowNotificationBubbling;
       }
     }
     if (notification is ScrollEndNotification) {
       if (widget.onPageScrollEnd != null) {
         widget.onPageScrollEnd!();
-        return true;
+        return !widget.allowNotificationBubbling;
       }
     }
     if (notification is ScrollUpdateNotification) {
@@ -78,7 +82,7 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
           pixels < (maxScrollExtent - scrollOffset)) {
         if (widget.onInBetweenOfPage != null) {
           widget.onInBetweenOfPage!();
-          return true;
+          return !widget.allowNotificationBubbling;
         }
       }
 
@@ -90,12 +94,12 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
       if (scrollingDown) {
         if (extentAfter <= scrollOffset) {
           _onEndOfPage();
-          return true;
+          return !widget.allowNotificationBubbling;
         }
       } else {
         if (extentBefore <= scrollOffset) {
           _onStartOfPage();
-          return true;
+          return !widget.allowNotificationBubbling;
         }
       }
     }
@@ -106,7 +110,7 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
       if (notification.overscroll < 0) {
         _onStartOfPage();
       }
-      return true;
+      return !widget.allowNotificationBubbling;
     }
     return false;
   }

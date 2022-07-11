@@ -1,0 +1,144 @@
+---
+id: error_reporting_with_sentry
+sidebar_position: 15
+title: Error Reporting With Sentry
+---
+
+Error Reporting With Sentry
+
+## Introduction
+
+While one always tries to create apps that are free of bugs, they're sure to crop up from time to time. Since buggy apps lead to unhappy users and customers, it's important to understand how often your users experience bugs and where those bugs occur. That way, you can prioritize the bugs with the highest impact and work to fix them.
+
+Whenever an error occurs, create a report containing the error that occurred and the associated stack trace. You can then send the report to an error tracking service, such as [Sentry](https://sentry.io/), [Rollbar](https://rollbar.com/), or [Firebase Crashlytics](https://firebase.google.com/docs/crashlytics).
+
+The error tracking service aggregates all of the crashes your users experience and groups them together. This allows you to know how often your app fails and where your users run into trouble.
+
+In this guide, learn how to report Stream Chat errors to the [Sentry](https://sentry.io/welcome/) crash reporting service using the following steps.
+
+### 1. Get a DSN From Sentry
+
+Before reporting errors to Sentry, you need a “DSN” to uniquely identify your app with the Sentry service:
+To get a DSN, use the following steps:
+
+- [Create an account with Sentry](https://sentry.io/signup/).
+- Log in to the account.
+- Create a new Flutter project.
+- Copy the code snippet that includes the DSN.
+
+### 2. Import the Sentry package
+
+Import the `sentry_flutter` package into your app. The sentry package makes it easier to send error reports to the Sentry error tracking service.
+
+```yaml
+dependencies:
+  sentry_flutter: <latest_version>
+```
+
+### 3. Initialize the Sentry SDK
+
+Initialize the SDK to capture different unhandled errors automatically.
+
+```dart
+import 'package:sentry_flutter/sentry_flutter.dart';
+
+Future<void> main() async {
+  await SentryFlutter.init(
+    (options) => options.dsn = 'https://example@sentry.io/example',
+    appRunner: () => runApp(const MyApp()),
+  );
+}
+```
+
+Or, if you want to run your app in your own error zone, use `runZonedGuarded`:
+
+```dart
+void main() async {
+  /// Captures errors reported by the Flutter framework.
+  FlutterError.onError = (FlutterErrorDetails details) {
+    if (kDebugMode) {
+      // In development mode, simply print to console.
+      FlutterError.dumpErrorToConsole(details);
+    } else {
+      // In production mode, report to the application zone to report to Sentry.
+      Zone.current.handleUncaughtError(details.exception, details.stack!);
+    }
+  };
+
+  Future<void> _reportError(dynamic error, StackTrace stackTrace) async {
+    // Print the exception to the console.
+    if (kDebugMode) {
+      // Print the full stack trace in debug mode.
+      print(stackTrace);
+      return;
+    } else {
+      // Send the Exception and Stacktrace to sentry in Production mode.
+      await Sentry.captureException(error, stackTrace: stackTrace);
+    }
+  }
+
+  runZonedGuarded(
+    () async {
+      await SentryFlutter.init(
+        (options) => options.dsn = 'https://example@sentry.io/example',
+      );
+      runApp(const MyApp());
+    },
+    _reportError,
+  );
+}
+```
+
+Alternatively, you can pass the DSN to Flutter using the **dart-define** tag:
+
+```bash
+--dart-define SENTRY_DSN=https://example@sentry.io/example
+```
+
+### 4. Integration With StreamChat Applications
+
+Override the default `logHandlerFunction` to send errors to Sentry.
+
+```dart
+void sampleAppLogHandler(LogRecord record) async {
+  if (kDebugMode) StreamChatClient.defaultLogHandler(record);
+
+  // Report errors to Sentry
+  if (record.error != null || record.stackTrace != null) {
+    await Sentry.captureException(
+      record.error,
+      stackTrace: record.stackTrace,
+    );
+  }
+}
+
+StreamChatClient buildStreamChatClient(
+  String apiKey, {
+  Level logLevel = Level.SEVERE,
+}) {
+  return StreamChatClient(
+    apiKey,
+    logLevel: logLevel,
+    logHandlerFunction: sampleAppLogHandler, // Pass the overridden logHandlerFunction
+  );
+}
+```
+
+### 5. Capture Errors Programmatically
+
+Besides the automatic error reporting that Sentry generates by importing and initializing the SDK,
+you can use the API to manually report errors to Sentry:
+
+```dart
+await Sentry.captureException(exception, stackTrace: stackTrace);
+```
+
+For more information, see the [Sentry API](https://pub.dev/documentation/sentry_flutter/latest/sentry_flutter/sentry_flutter-library.html) docs on Pub.
+
+### Complete Example
+
+To view a working example, see the [Stream Sample app](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1).
+
+### Learn More
+
+Extensive documentation about using the Sentry SDK can be found on [Sentry's site](https://docs.sentry.io/platforms/flutter/).

@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// {@macro color_theme}
-@Deprecated("Use 'StreamColorTheme' instead")
-typedef ColorTheme = StreamColorTheme;
-
 /// {@template color_theme}
 /// Theme that holds colors
 /// {@endtemplate}
@@ -196,50 +192,51 @@ class StreamColorTheme {
     Color? overlay,
     Color? overlayDark,
     Gradient? bgGradient,
-  }) =>
-      brightness == Brightness.light
-          ? StreamColorTheme.light(
-              textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
-              textLowEmphasis: textLowEmphasis ?? this.textLowEmphasis,
-              disabled: disabled ?? this.disabled,
-              borders: borders ?? this.borders,
-              inputBg: inputBg ?? this.inputBg,
-              appBg: appBg ?? this.appBg,
-              barsBg: barsBg ?? this.barsBg,
-              linkBg: linkBg ?? this.linkBg,
-              accentPrimary: accentPrimary ?? this.accentPrimary,
-              accentError: accentError ?? this.accentError,
-              accentInfo: accentInfo ?? this.accentInfo,
-              borderTop: borderTop ?? this.borderTop,
-              borderBottom: borderBottom ?? this.borderBottom,
-              shadowIconButton: shadowIconButton ?? this.shadowIconButton,
-              modalShadow: modalShadow ?? this.modalShadow,
-              highlight: highlight ?? this.highlight,
-              overlay: overlay ?? this.overlay,
-              overlayDark: overlayDark ?? this.overlayDark,
-              bgGradient: bgGradient ?? this.bgGradient,
-            )
-          : StreamColorTheme.dark(
-              textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
-              textLowEmphasis: textLowEmphasis ?? this.textLowEmphasis,
-              disabled: disabled ?? this.disabled,
-              borders: borders ?? this.borders,
-              inputBg: inputBg ?? this.inputBg,
-              appBg: appBg ?? this.appBg,
-              barsBg: barsBg ?? this.barsBg,
-              linkBg: linkBg ?? this.linkBg,
-              accentPrimary: accentPrimary ?? this.accentPrimary,
-              accentError: accentError ?? this.accentError,
-              accentInfo: accentInfo ?? this.accentInfo,
-              borderTop: borderTop ?? this.borderTop,
-              borderBottom: borderBottom ?? this.borderBottom,
-              shadowIconButton: shadowIconButton ?? this.shadowIconButton,
-              modalShadow: modalShadow ?? this.modalShadow,
-              highlight: highlight ?? this.highlight,
-              overlay: overlay ?? this.overlay,
-              overlayDark: overlayDark ?? this.overlayDark,
-              bgGradient: bgGradient ?? this.bgGradient,
-            );
+  }) {
+    return brightness == Brightness.light
+        ? StreamColorTheme.light(
+            textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
+            textLowEmphasis: textLowEmphasis ?? this.textLowEmphasis,
+            disabled: disabled ?? this.disabled,
+            borders: borders ?? this.borders,
+            inputBg: inputBg ?? this.inputBg,
+            appBg: appBg ?? this.appBg,
+            barsBg: barsBg ?? this.barsBg,
+            linkBg: linkBg ?? this.linkBg,
+            accentPrimary: accentPrimary ?? this.accentPrimary,
+            accentError: accentError ?? this.accentError,
+            accentInfo: accentInfo ?? this.accentInfo,
+            borderTop: borderTop ?? this.borderTop,
+            borderBottom: borderBottom ?? this.borderBottom,
+            shadowIconButton: shadowIconButton ?? this.shadowIconButton,
+            modalShadow: modalShadow ?? this.modalShadow,
+            highlight: highlight ?? this.highlight,
+            overlay: overlay ?? this.overlay,
+            overlayDark: overlayDark ?? this.overlayDark,
+            bgGradient: bgGradient ?? this.bgGradient,
+          )
+        : StreamColorTheme.dark(
+            textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
+            textLowEmphasis: textLowEmphasis ?? this.textLowEmphasis,
+            disabled: disabled ?? this.disabled,
+            borders: borders ?? this.borders,
+            inputBg: inputBg ?? this.inputBg,
+            appBg: appBg ?? this.appBg,
+            barsBg: barsBg ?? this.barsBg,
+            linkBg: linkBg ?? this.linkBg,
+            accentPrimary: accentPrimary ?? this.accentPrimary,
+            accentError: accentError ?? this.accentError,
+            accentInfo: accentInfo ?? this.accentInfo,
+            borderTop: borderTop ?? this.borderTop,
+            borderBottom: borderBottom ?? this.borderBottom,
+            shadowIconButton: shadowIconButton ?? this.shadowIconButton,
+            modalShadow: modalShadow ?? this.modalShadow,
+            highlight: highlight ?? this.highlight,
+            overlay: overlay ?? this.overlay,
+            overlayDark: overlayDark ?? this.overlayDark,
+            bgGradient: bgGradient ?? this.bgGradient,
+          );
+  }
 
   /// Merge color theme
   StreamColorTheme merge(StreamColorTheme? other) {
@@ -301,12 +298,13 @@ class Effect {
     Color? color,
     double? alpha,
     double? blur,
-  }) =>
-      Effect(
-        sigmaX: sigmaX ?? this.sigmaX,
-        sigmaY: sigmaY ?? this.sigmaY,
-        color: color ?? this.color,
-        alpha: color as double? ?? this.alpha,
-        blur: blur ?? this.blur,
-      );
+  }) {
+    return Effect(
+      sigmaX: sigmaX ?? this.sigmaX,
+      sigmaY: sigmaY ?? this.sigmaY,
+      color: color ?? this.color,
+      alpha: color as double? ?? this.alpha,
+      blur: blur ?? this.blur,
+    );
+  }
 }

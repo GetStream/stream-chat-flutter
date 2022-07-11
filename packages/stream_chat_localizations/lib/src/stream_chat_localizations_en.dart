@@ -128,6 +128,10 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
       'The file is too large to upload. The file size limit is $limitInMB MB.';
 
   @override
+  String get couldNotReadBytesFromFileError =>
+      'Could not read bytes from file.';
+
+  @override
   String emojiMatchingQueryText(String query) => 'Emoji matching "$query"';
 
   @override
@@ -373,6 +377,54 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'Slow mode ON';
 
   @override
+  String get downloadLabel => 'Download';
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Unmute User';
+    } else {
+      return 'Mute User';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Are you sure you want to unmute this group?';
+    } else {
+      return 'Are you sure you want to mute this group?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Are you sure you want to unmute this user?';
+    } else {
+      return 'Are you sure you want to mute this user?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return 'UNMUTE';
+    } else {
+      return 'MUTE';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Unmute Group';
+    } else {
+      return 'Mute Group';
+    }
+  }
+
+  @override
   String get linkDisabledDetails =>
       'Sending links is not allowed in this conversation.';
 
@@ -381,4 +433,12 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get viewLibrary => 'View library';
+
+  @override
+  String unreadMessagesSeparatorText(int unreadCount) {
+    if (unreadCount == 1) {
+      return '1 unread message';
+    }
+    return '$unreadCount unread messages';
+  }
 }

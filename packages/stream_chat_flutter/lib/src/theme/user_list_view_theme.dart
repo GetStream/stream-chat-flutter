@@ -1,12 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro user_list_view_theme}
-@Deprecated("Use 'StreamUserListViewTheme' instead")
-typedef UserListViewTheme = StreamUserListViewTheme;
-
-/// {@template user_list_view_theme}
+/// {@template userListViewTheme}
 /// Overrides the default style of [UserListView] descendants.
 ///
 /// See also:
@@ -52,11 +48,7 @@ class StreamUserListViewTheme extends InheritedTheme {
       data != oldWidget.data;
 }
 
-/// {@macro user_list_view_theme_data}
-@Deprecated("Use 'StreamUserListViewThemeData' instead")
-typedef UserListViewThemeData = StreamUserListViewThemeData;
-
-/// {@template user_list_view_theme_data}
+/// {@template userListViewThemeData}
 /// A style that overrides the default appearance of [UserListView]s when
 /// used with [StreamUserListViewTheme] or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.userListViewTheme].
@@ -80,10 +72,11 @@ class StreamUserListViewThemeData with Diagnosticable {
   /// Copies this [ChannelListViewThemeData] to another.
   StreamUserListViewThemeData copyWith({
     Color? backgroundColor,
-  }) =>
-      StreamUserListViewThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-      );
+  }) {
+    return StreamUserListViewThemeData(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+    );
+  }
 
   /// Linearly interpolate between two [StreamUserListViewThemeData] themes.
   ///
@@ -92,10 +85,11 @@ class StreamUserListViewThemeData with Diagnosticable {
     StreamUserListViewThemeData a,
     StreamUserListViewThemeData b,
     double t,
-  ) =>
-      StreamUserListViewThemeData(
-        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      );
+  ) {
+    return StreamUserListViewThemeData(
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+    );
+  }
 
   /// Merges one [StreamUserListViewThemeData] with another.
   StreamUserListViewThemeData merge(StreamUserListViewThemeData? other) {

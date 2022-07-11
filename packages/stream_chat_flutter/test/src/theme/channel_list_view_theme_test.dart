@@ -68,7 +68,11 @@ void main() {
             return Scaffold(
               body: StreamChannel(
                 channel: MockChannel(),
-                child: ChannelListView(),
+                child: StreamChannelListView(
+                  controller: StreamChannelListController(
+                    client: MockClient(),
+                  ),
+                ),
               ),
             );
           },

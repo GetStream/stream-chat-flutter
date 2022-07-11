@@ -21,8 +21,6 @@ Map<String, dynamic> _$SortOptionToJson<T>(SortOption<T> instance) =>
 PaginationParams _$PaginationParamsFromJson(Map<String, dynamic> json) =>
     PaginationParams(
       limit: json['limit'] as int? ?? 10,
-      before: json['before'] as int? ?? 10,
-      after: json['after'] as int? ?? 10,
       offset: json['offset'] as int?,
       next: json['next'] as String?,
       idAround: json['id_around'] as String?,
@@ -50,8 +48,6 @@ PaginationParams _$PaginationParamsFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) {
   final val = <String, dynamic>{
     'limit': instance.limit,
-    'before': instance.before,
-    'after': instance.after,
   };
 
   void writeNotNull(String key, dynamic value) {

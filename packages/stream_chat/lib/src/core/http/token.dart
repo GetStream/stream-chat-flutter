@@ -18,15 +18,6 @@ enum AuthType {
   anonymous,
 }
 
-/// Extension for returning the AuthType as a string
-extension AuthTypeX on AuthType {
-  /// Returns the AuthType as a string
-  String get raw => {
-        AuthType.jwt: 'jwt',
-        AuthType.anonymous: 'anonymous',
-      }[this]!;
-}
-
 /// Token designed to store the JWT and the user it is related to.
 class Token extends Equatable {
   const Token._({

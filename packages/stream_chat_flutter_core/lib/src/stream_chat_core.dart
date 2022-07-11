@@ -96,7 +96,8 @@ class StreamChatCoreState extends State<StreamChatCore>
   @override
   Widget build(BuildContext context) {
     StreamChatClient.additionalHeaders = {
-      'X-Stream-Client': '${StreamChatClient.defaultUserAgent}-core',
+      'X-Stream-Client': '${StreamChatClient.defaultUserAgent}-'
+          'core-${StreamChatClient.packageVersion}',
     };
     return widget.child;
   }
