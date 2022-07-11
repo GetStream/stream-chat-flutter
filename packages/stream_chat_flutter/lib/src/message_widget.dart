@@ -663,6 +663,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                                     SizedBox(width: avatarWidth + 4),
                                   Flexible(
                                     child: PortalTarget(
+                                      key: ValueKey(
+                                        'portal-${widget.message.id}',
+                                      ),
                                       visible: showReactions,
                                       portalFollower: showReactions
                                           ? Container(
