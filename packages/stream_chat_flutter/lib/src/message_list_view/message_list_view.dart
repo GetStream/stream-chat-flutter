@@ -808,24 +808,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   Widget _buildUnreadMessagesSeparator(int unreadCount) {
     final unreadMessagesSeparator =
         widget.unreadMessagesSeparatorBuilder?.call(context, unreadCount) ??
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: _streamTheme.colorTheme.bgGradient,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Text(
-                    context.translations.unreadMessagesSeparatorText(
-                      unreadCount,
-                    ),
-                    textAlign: TextAlign.center,
-                    style: StreamChannelHeaderTheme.of(context).subtitleStyle,
-                  ),
-                ),
-              ),
-            );
+            UnreadMessagesSeparator(unreadCount: unreadCount);
     return unreadMessagesSeparator;
   }
 
