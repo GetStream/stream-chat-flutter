@@ -75,8 +75,8 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    final reactionIcons = StreamChatTheme.of(context).reactionIcons;
     final streamChat = StreamChat.of(context);
+    final reactionIcons = streamChat.config.reactionIcons ?? [];
     final streamChatTheme = StreamChatTheme.of(context);
 
     final reactionsMap = <String, Reaction>{};
