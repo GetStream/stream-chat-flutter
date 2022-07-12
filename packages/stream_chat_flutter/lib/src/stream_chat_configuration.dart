@@ -110,6 +110,7 @@ class StreamChatConfiguration {
     this.defaultUserImage,
     this.placeholderUserImage,
     this.reactionIcons,
+    this.enforceUniqueReactions,
   });
 
   /// Provides default configuration options
@@ -122,20 +123,24 @@ class StreamChatConfiguration {
         ),
       ),
       reactionIcons: _defaultReactionIcons,
+      enforceUniqueReactions: true,
     );
   }
 
   /// Copies the configuration options from one [StreamChatConfiguration] to
   /// another.
-  StreamChatConfiguration copyWith(
+  StreamChatConfiguration copyWith({
     Widget Function(BuildContext, User)? defaultUserImage,
     Widget Function(BuildContext, User)? placeholderUserImage,
     List<StreamReactionIcon>? reactionIcons,
-  ) {
+    bool? enforceUniqueReactions,
+  }) {
     return StreamChatConfiguration(
       defaultUserImage: defaultUserImage ?? this.defaultUserImage,
       placeholderUserImage: placeholderUserImage ?? this.placeholderUserImage,
       reactionIcons: reactionIcons ?? this.reactionIcons,
+      enforceUniqueReactions:
+          enforceUniqueReactions ?? this.enforceUniqueReactions,
     );
   }
 
@@ -147,6 +152,9 @@ class StreamChatConfiguration {
 
   /// Assets used for rendering reactions.
   final List<StreamReactionIcon>? reactionIcons;
+
+  /// Whether a new reaction should replace the existing one.
+  final bool? enforceUniqueReactions;
 
   static final _defaultReactionIcons = [
     StreamReactionIcon(

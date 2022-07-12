@@ -157,7 +157,9 @@ class _StreamReactionPickerState extends State<StreamReactionPicker>
     StreamChannel.of(context).channel.sendReaction(
           widget.message,
           reactionType,
-          enforceUnique: true,
+          enforceUnique: StreamChatConfigurationProvider.of(context)
+                  .enforceUniqueReactions ??
+              true,
         );
     pop();
   }
