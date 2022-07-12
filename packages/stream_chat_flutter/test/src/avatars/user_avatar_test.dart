@@ -51,8 +51,8 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) {
-            return StreamChatConfigurationProvider(
-              data: StreamChatConfiguration.defaults(),
+            return StreamChatConfiguration(
+              data: StreamChatConfigurationData.defaults(),
               child: child!,
             );
           },
@@ -84,8 +84,8 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) {
-            return StreamChatConfigurationProvider(
-              data: StreamChatConfiguration.defaults(),
+            return StreamChatConfiguration(
+              data: StreamChatConfigurationData.defaults(),
               child: child!,
             );
           },

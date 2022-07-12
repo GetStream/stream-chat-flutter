@@ -51,9 +51,9 @@ class _ContextMenuReactionPickerState extends State<ContextMenuReactionPicker>
     StreamChannel.of(context).channel.sendReaction(
           widget.message,
           reactionType,
-          enforceUnique: StreamChatConfigurationProvider.of(context)
-                  .enforceUniqueReactions ??
-              true,
+          enforceUnique:
+              StreamChatConfiguration.of(context).enforceUniqueReactions ??
+                  true,
         );
     pop();
   }
@@ -75,7 +75,7 @@ class _ContextMenuReactionPickerState extends State<ContextMenuReactionPicker>
   @override
   Widget build(BuildContext context) {
     final reactionIcons =
-        StreamChatConfigurationProvider.of(context).reactionIcons ?? [];
+        StreamChatConfiguration.of(context).reactionIcons ?? [];
 
     if (animations.isEmpty && reactionIcons.isNotEmpty) {
       reactionIcons.forEach((element) {

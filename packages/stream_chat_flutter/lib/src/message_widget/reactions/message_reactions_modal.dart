@@ -66,7 +66,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
     final numberOfReactions =
-        StreamChatConfigurationProvider.of(context).reactionIcons?.length ?? 0;
+        StreamChatConfiguration.of(context).reactionIcons?.length ?? 0;
     final shiftFactor =
         numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
 

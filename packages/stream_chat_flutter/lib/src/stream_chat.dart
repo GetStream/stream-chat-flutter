@@ -51,7 +51,7 @@ class StreamChat extends StatefulWidget {
   final StreamChatThemeData? streamChatThemeData;
 
   /// Non-theme related UI configuration options.
-  final StreamChatConfiguration? config;
+  final StreamChatConfigurationData? config;
 
   /// The amount of time that will pass before disconnecting the client
   /// in the background
@@ -92,8 +92,8 @@ class StreamChatState extends State<StreamChat> {
   StreamChatClient get client => widget.client;
 
   /// Gets configuration options from widget
-  StreamChatConfiguration get config =>
-      widget.config ?? StreamChatConfiguration.defaults();
+  StreamChatConfigurationData get config =>
+      widget.config ?? StreamChatConfigurationData.defaults();
 
   @override
   void initState() {
@@ -108,7 +108,7 @@ class StreamChatState extends State<StreamChat> {
   Widget build(BuildContext context) {
     final theme = _getTheme(context, widget.streamChatThemeData);
     return Portal(
-      child: StreamChatConfigurationProvider(
+      child: StreamChatConfiguration(
         data: config,
         child: StreamChatTheme(
           data: theme,

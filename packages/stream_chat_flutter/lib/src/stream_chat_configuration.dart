@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template streamChatConfigurationProvider}
-/// Inherited widget providing the [StreamChatConfiguration] to the widget tree
+/// {@template streamChatConfiguration}
+/// Inherited widget providing the [StreamChatConfigurationData]
+/// to the widget tree
 /// {@endtemplate}
-class StreamChatConfigurationProvider extends InheritedWidget {
-  /// {@macro streamChatConfigurationProvider}
-  const StreamChatConfigurationProvider({
+class StreamChatConfiguration extends InheritedWidget {
+  /// {@macro streamChatConfiguration}
+  const StreamChatConfiguration({
     super.key,
     required this.data,
     required super.child,
   });
 
-  /// {@macro streamChatConfiguration}
-  final StreamChatConfiguration data;
+  /// {@macro streamChatConfigurationData}
+  final StreamChatConfigurationData data;
 
   @override
-  bool updateShouldNotify(StreamChatConfigurationProvider oldWidget) =>
+  bool updateShouldNotify(StreamChatConfiguration oldWidget) =>
       data != oldWidget.data;
 
   /// Use this method to get the current [StreamChatThemeData] instance
-  static StreamChatConfiguration of(BuildContext context) {
-    final streamChatConfiguration = context
-        .dependOnInheritedWidgetOfExactType<StreamChatConfigurationProvider>();
+  static StreamChatConfigurationData of(BuildContext context) {
+    final streamChatConfiguration =
+        context.dependOnInheritedWidgetOfExactType<StreamChatConfiguration>();
 
     assert(
       streamChatConfiguration != null,
@@ -34,24 +35,24 @@ You must have a StreamChatConfigurationProvider widget at the top of your widget
   }
 }
 
-/// {@template streamChatConfiguration}
+/// {@template streamChatConfigurationData}
 /// Provides global, user-configurable, non-theme related configuration
 /// options to Flutter applications that use Stream Chat.
 ///
 /// In order to set these configuration options, you must pass an instance of
 /// this class to the [StreamChat] widget, or wrap a subtree using
-/// the [StreamChatConfigurationProvider] inherited widget.
+/// the [StreamChatConfiguration] inherited widget.
 ///
 /// If you need to access the configuration directly at a later point in your
-/// application, you can use the [StreamChatConfigurationProvider.of] method
+/// application, you can use the [StreamChatConfiguration.of] method
 /// to retrieve it.
 ///
-/// If no [StreamChatConfiguration] is provided, the
+/// If no [StreamChatConfigurationData] is provided, the
 /// [StreamChatConfiguration.defaults] factory constructor is used to provide a
 /// default configuration.
 ///
 /// If you want to keep some of the default values, but not others, you can use
-/// the [StreamChatConfiguration.copyWith] method to override the values in
+/// the [StreamChatConfigurationData.copyWith] method to override the values in
 /// question.
 ///
 /// Example 1:
@@ -104,9 +105,9 @@ You must have a StreamChatConfigurationProvider widget at the top of your widget
 /// }
 /// ```
 /// {@endtemplate}
-class StreamChatConfiguration {
-  /// {@macro streamChatConfiguration}
-  const StreamChatConfiguration({
+class StreamChatConfigurationData {
+  /// {@macro streamChatConfigurationData}
+  const StreamChatConfigurationData({
     this.defaultUserImage,
     this.placeholderUserImage,
     this.reactionIcons,
@@ -114,8 +115,8 @@ class StreamChatConfiguration {
   });
 
   /// Provides default configuration options
-  factory StreamChatConfiguration.defaults() {
-    return StreamChatConfiguration(
+  factory StreamChatConfigurationData.defaults() {
+    return StreamChatConfigurationData(
       defaultUserImage: (context, user) => Center(
         child: StreamGradientAvatar(
           name: user.name,
@@ -127,15 +128,15 @@ class StreamChatConfiguration {
     );
   }
 
-  /// Copies the configuration options from one [StreamChatConfiguration] to
+  /// Copies the configuration options from one [StreamChatConfigurationData] to
   /// another.
-  StreamChatConfiguration copyWith({
+  StreamChatConfigurationData copyWith({
     Widget Function(BuildContext, User)? defaultUserImage,
     Widget Function(BuildContext, User)? placeholderUserImage,
     List<StreamReactionIcon>? reactionIcons,
     bool? enforceUniqueReactions,
   }) {
-    return StreamChatConfiguration(
+    return StreamChatConfigurationData(
       defaultUserImage: defaultUserImage ?? this.defaultUserImage,
       placeholderUserImage: placeholderUserImage ?? this.placeholderUserImage,
       reactionIcons: reactionIcons ?? this.reactionIcons,

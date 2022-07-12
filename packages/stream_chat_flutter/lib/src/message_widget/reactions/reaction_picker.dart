@@ -34,7 +34,7 @@ class _StreamReactionPickerState extends State<StreamReactionPicker>
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
     final reactionIcons =
-        StreamChatConfigurationProvider.of(context).reactionIcons ?? [];
+        StreamChatConfiguration.of(context).reactionIcons ?? [];
 
     if (animations.isEmpty && reactionIcons.isNotEmpty) {
       reactionIcons.forEach((element) {
@@ -157,9 +157,9 @@ class _StreamReactionPickerState extends State<StreamReactionPicker>
     StreamChannel.of(context).channel.sendReaction(
           widget.message,
           reactionType,
-          enforceUnique: StreamChatConfigurationProvider.of(context)
-                  .enforceUniqueReactions ??
-              true,
+          enforceUnique:
+              StreamChatConfiguration.of(context).enforceUniqueReactions ??
+                  true,
         );
     pop();
   }

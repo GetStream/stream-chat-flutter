@@ -7,14 +7,13 @@ void main() {
     testWidgets(
       'should provide the StreamChatConfiguration class with default data',
       (t) async {
-        final configuration = StreamChatConfiguration.defaults();
-        late final StreamChatConfiguration configurationFromProvider;
-        await t.pumpWidget(StreamChatConfigurationProvider(
+        final configuration = StreamChatConfigurationData.defaults();
+        late final StreamChatConfigurationData configurationFromProvider;
+        await t.pumpWidget(StreamChatConfiguration(
           data: configuration,
           child: Builder(
             builder: (context) {
-              configurationFromProvider =
-                  StreamChatConfigurationProvider.of(context);
+              configurationFromProvider = StreamChatConfiguration.of(context);
               return const SizedBox();
             },
           ),
@@ -27,16 +26,15 @@ void main() {
     testWidgets(
       'should provide the StreamChatConfiguration class with custom data',
       (t) async {
-        final configuration = StreamChatConfiguration.defaults().copyWith(
+        final configuration = StreamChatConfigurationData.defaults().copyWith(
           enforceUniqueReactions: false,
         );
-        late final StreamChatConfiguration configurationFromProvider;
-        await t.pumpWidget(StreamChatConfigurationProvider(
+        late final StreamChatConfigurationData configurationFromProvider;
+        await t.pumpWidget(StreamChatConfiguration(
           data: configuration,
           child: Builder(
             builder: (context) {
-              configurationFromProvider =
-                  StreamChatConfigurationProvider.of(context);
+              configurationFromProvider = StreamChatConfiguration.of(context);
               return const SizedBox();
             },
           ),
