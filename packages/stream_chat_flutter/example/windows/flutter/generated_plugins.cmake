@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
   file_selector_windows
   flutter_native_view
+  permission_handler_windows
   screen_retriever
   thumblr_windows
   url_launcher_windows

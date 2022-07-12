@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
@@ -1331,6 +1332,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
     DefaultAttachmentTypes fileType, {
     bool camera = false,
   }) async {
+    if (camera) {
+      final permissionGranted = await _checkCameraPermission();
+      if (!permissionGranted) {
+        return;
+      }
+    }
+
     setState(() => _inputEnabled = false);
     final attachmentHandler = MobileAttachmentHandler(
       maxAttachmentSize: widget.maxAttachmentSize,
@@ -1369,6 +1377,27 @@ class StreamMessageInputState extends State<StreamMessageInput>
         }
       }
     });
+  }
+
+  Future<bool> _checkCameraPermission() async {
+    final permissionGranted = await Permission.camera.isGranted;
+    if (!permissionGranted) {
+      final res = await showConfirmationBottomSheet(
+        context,
+        icon: StreamSvgIcon.error(
+          color: StreamChatTheme.of(context).colorTheme.accentError,
+          size: 24,
+        ),
+        title: context.translations.allowGalleryAccessMessage,
+        question: context.translations.enablePhotoAndVideoAccessMessage,
+        okText: context.translations.okLabel,
+        cancelText: context.translations.cancelLabel,
+      );
+      if (res == true) {
+        await openAppSettings();
+      }
+    }
+    return permissionGranted;
   }
 
   /// Sends the current message
