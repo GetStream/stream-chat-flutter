@@ -1,17 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template streamChatConfigurationProvider}
+/// Inherited widget providing the [StreamChatConfiguration] to the widget tree
+/// {@endtemplate}
+class StreamChatConfigurationProvider extends InheritedWidget {
+  /// {@macro streamChatConfigurationProvider}
+  const StreamChatConfigurationProvider({
+    super.key,
+    required this.data,
+    required super.child,
+  });
+
+  /// {@macro streamChatConfiguration}
+  final StreamChatConfiguration data;
+
+  @override
+  bool updateShouldNotify(StreamChatConfigurationProvider oldWidget) =>
+      data != oldWidget.data;
+
+  /// Use this method to get the current [StreamChatThemeData] instance
+  static StreamChatConfiguration of(BuildContext context) {
+    final streamChatConfiguration = context
+        .dependOnInheritedWidgetOfExactType<StreamChatConfigurationProvider>();
+
+    assert(
+      streamChatConfiguration != null,
+      '''
+You must have a StreamChatConfigurationProvider widget at the top of your widget tree''',
+    );
+
+    return streamChatConfiguration!.data;
+  }
+}
+
 /// {@template streamChatConfiguration}
-/// Provides global, user-configurable, non-theme related UI configuration
+/// Provides global, user-configurable, non-theme related configuration
 /// options to Flutter applications that use Stream Chat.
 ///
 /// In order to set these configuration options, you must pass an instance of
-/// this class to the [StreamChat] widget.
+/// this class to the [StreamChat] widget, or wrap a subtree using
+/// the [StreamChatConfigurationProvider] inherited widget.
 ///
 /// If you need to access the configuration directly at a later point in your
-/// application, you can use the [StreamChat.of] method to retrieve it.
+/// application, you can use the [StreamChatConfigurationProvider.of] method
+/// to retrieve it.
 ///
-/// If no [StreamChatConfiguration] is provided to [StreamChat], the
+/// If no [StreamChatConfiguration] is provided, the
 /// [StreamChatConfiguration.defaults] factory constructor is used to provide a
 /// default configuration.
 ///
@@ -86,68 +121,7 @@ class StreamChatConfiguration {
           userId: user.id,
         ),
       ),
-      reactionIcons: [
-        StreamReactionIcon(
-          type: 'love',
-          builder: (context, highlighted, size) {
-            final theme = StreamChatTheme.of(context);
-            return StreamSvgIcon.loveReaction(
-              color: highlighted
-                  ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(0.5),
-              size: size,
-            );
-          },
-        ),
-        StreamReactionIcon(
-          type: 'like',
-          builder: (context, highlighted, size) {
-            final theme = StreamChatTheme.of(context);
-            return StreamSvgIcon.thumbsUpReaction(
-              color: highlighted
-                  ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(0.5),
-              size: size,
-            );
-          },
-        ),
-        StreamReactionIcon(
-          type: 'sad',
-          builder: (context, highlighted, size) {
-            final theme = StreamChatTheme.of(context);
-            return StreamSvgIcon.thumbsDownReaction(
-              color: highlighted
-                  ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(0.5),
-              size: size,
-            );
-          },
-        ),
-        StreamReactionIcon(
-          type: 'haha',
-          builder: (context, highlighted, size) {
-            final theme = StreamChatTheme.of(context);
-            return StreamSvgIcon.lolReaction(
-              color: highlighted
-                  ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(0.5),
-              size: size,
-            );
-          },
-        ),
-        StreamReactionIcon(
-          type: 'wow',
-          builder: (context, highlighted, size) {
-            final theme = StreamChatTheme.of(context);
-            return StreamSvgIcon.wutReaction(
-              color: highlighted
-                  ? theme.colorTheme.accentPrimary
-                  : theme.primaryIconTheme.color!.withOpacity(0.5),
-              size: size,
-            );
-          },
-        ),
-      ],
+      reactionIcons: _defaultReactionIcons,
     );
   }
 
@@ -173,4 +147,67 @@ class StreamChatConfiguration {
 
   /// Assets used for rendering reactions.
   final List<StreamReactionIcon>? reactionIcons;
+
+  static final _defaultReactionIcons = [
+    StreamReactionIcon(
+      type: 'love',
+      builder: (context, highlighted, size) {
+        final theme = StreamChatTheme.of(context);
+        return StreamSvgIcon.loveReaction(
+          color: highlighted
+              ? theme.colorTheme.accentPrimary
+              : theme.primaryIconTheme.color!.withOpacity(0.5),
+          size: size,
+        );
+      },
+    ),
+    StreamReactionIcon(
+      type: 'like',
+      builder: (context, highlighted, size) {
+        final theme = StreamChatTheme.of(context);
+        return StreamSvgIcon.thumbsUpReaction(
+          color: highlighted
+              ? theme.colorTheme.accentPrimary
+              : theme.primaryIconTheme.color!.withOpacity(0.5),
+          size: size,
+        );
+      },
+    ),
+    StreamReactionIcon(
+      type: 'sad',
+      builder: (context, highlighted, size) {
+        final theme = StreamChatTheme.of(context);
+        return StreamSvgIcon.thumbsDownReaction(
+          color: highlighted
+              ? theme.colorTheme.accentPrimary
+              : theme.primaryIconTheme.color!.withOpacity(0.5),
+          size: size,
+        );
+      },
+    ),
+    StreamReactionIcon(
+      type: 'haha',
+      builder: (context, highlighted, size) {
+        final theme = StreamChatTheme.of(context);
+        return StreamSvgIcon.lolReaction(
+          color: highlighted
+              ? theme.colorTheme.accentPrimary
+              : theme.primaryIconTheme.color!.withOpacity(0.5),
+          size: size,
+        );
+      },
+    ),
+    StreamReactionIcon(
+      type: 'wow',
+      builder: (context, highlighted, size) {
+        final theme = StreamChatTheme.of(context);
+        return StreamSvgIcon.wutReaction(
+          color: highlighted
+              ? theme.colorTheme.accentPrimary
+              : theme.primaryIconTheme.color!.withOpacity(0.5),
+          size: size,
+        );
+      },
+    ),
+  ];
 }

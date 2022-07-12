@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -76,7 +77,8 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
   @override
   Widget build(BuildContext context) {
     final streamChat = StreamChat.of(context);
-    final reactionIcons = streamChat.config.reactionIcons ?? [];
+    final reactionIcons =
+        StreamChatConfigurationProvider.of(context).reactionIcons ?? [];
     final streamChatTheme = StreamChatTheme.of(context);
 
     final reactionsMap = <String, Reaction>{};

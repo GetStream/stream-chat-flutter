@@ -109,36 +109,40 @@ class StreamChatState extends State<StreamChat> {
   Widget build(BuildContext context) {
     final theme = _getTheme(context, widget.streamChatThemeData);
     return Portal(
-      child: StreamChatTheme(
-        data: theme,
-        child: Builder(
-          builder: (context) {
-            final materialTheme = Theme.of(context);
-            final streamTheme = StreamChatTheme.of(context);
-            return Theme(
-              data: materialTheme.copyWith(
-                primaryIconTheme: streamTheme.primaryIconTheme,
-                colorScheme: materialTheme.colorScheme.copyWith(
-                  secondary: streamTheme.colorTheme.accentPrimary,
+      child: StreamChatConfigurationProvider(
+        data: config,
+        child: StreamChatTheme(
+          data: theme,
+          child: Builder(
+            builder: (context) {
+              final materialTheme = Theme.of(context);
+              final streamTheme = StreamChatTheme.of(context);
+              return Theme(
+                data: materialTheme.copyWith(
+                  primaryIconTheme: streamTheme.primaryIconTheme,
+                  colorScheme: materialTheme.colorScheme.copyWith(
+                    secondary: streamTheme.colorTheme.accentPrimary,
+                  ),
                 ),
-              ),
-              child: StreamChatCore(
-                client: client,
-                onBackgroundEventReceived: widget.onBackgroundEventReceived,
-                backgroundKeepAlive: widget.backgroundKeepAlive,
-                connectivityStream: widget.connectivityStream,
-                child: Builder(
-                  builder: (context) {
-                    StreamChatClient.additionalHeaders = {
-                      'X-Stream-Client': '${StreamChatClient.defaultUserAgent}-'
-                          'ui-${StreamChatClient.packageVersion}',
-                    };
-                    return widget.child ?? const Offstage();
-                  },
+                child: StreamChatCore(
+                  client: client,
+                  onBackgroundEventReceived: widget.onBackgroundEventReceived,
+                  backgroundKeepAlive: widget.backgroundKeepAlive,
+                  connectivityStream: widget.connectivityStream,
+                  child: Builder(
+                    builder: (context) {
+                      StreamChatClient.additionalHeaders = {
+                        'X-Stream-Client':
+                            '${StreamChatClient.defaultUserAgent}-'
+                                'ui-${StreamChatClient.packageVersion}',
+                      };
+                      return widget.child ?? const Offstage();
+                    },
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

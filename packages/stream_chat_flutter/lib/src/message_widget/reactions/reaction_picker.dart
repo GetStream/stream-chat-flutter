@@ -33,7 +33,8 @@ class _StreamReactionPickerState extends State<StreamReactionPicker>
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
-    final reactionIcons = StreamChat.of(context).config.reactionIcons ?? [];
+    final reactionIcons =
+        StreamChatConfigurationProvider.of(context).reactionIcons ?? [];
 
     if (animations.isEmpty && reactionIcons.isNotEmpty) {
       reactionIcons.forEach((element) {

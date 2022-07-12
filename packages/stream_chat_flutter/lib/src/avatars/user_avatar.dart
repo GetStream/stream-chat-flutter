@@ -71,7 +71,7 @@ class StreamUserAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasImage = user.image != null && user.image!.isNotEmpty;
     final streamChatTheme = StreamChatTheme.of(context);
-    final streamChatConfig = StreamChat.of(context).config;
+    final streamChatConfig = StreamChatConfigurationProvider.of(context);
 
     final placeholder =
         this.placeholder ?? streamChatConfig.placeholderUserImage;

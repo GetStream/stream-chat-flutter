@@ -50,6 +50,12 @@ void main() {
       when(() => user.online).thenReturn(true);
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) {
+            return StreamChatConfigurationProvider(
+              data: StreamChatConfiguration.defaults(),
+              child: child!,
+            );
+          },
           home: StreamChatTheme(
             data: StreamChatThemeData.light(),
             child: Builder(
@@ -77,6 +83,12 @@ void main() {
       when(() => user.online).thenReturn(false);
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) {
+            return StreamChatConfigurationProvider(
+              data: StreamChatConfiguration.defaults(),
+              child: child!,
+            );
+          },
           home: StreamChatTheme(
             data: StreamChatThemeData.light(),
             child: Builder(

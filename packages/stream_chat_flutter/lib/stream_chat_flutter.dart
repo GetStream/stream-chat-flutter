@@ -84,6 +84,7 @@ export 'src/scroll_view/user_scroll_view/stream_user_grid_view.dart';
 export 'src/scroll_view/user_scroll_view/stream_user_list_tile.dart';
 export 'src/scroll_view/user_scroll_view/stream_user_list_view.dart';
 export 'src/stream_chat.dart';
+export 'src/stream_chat_configuration.dart';
 export 'src/theme/stream_chat_theme.dart';
 export 'src/theme/themes.dart';
 export 'src/user/user_item.dart';

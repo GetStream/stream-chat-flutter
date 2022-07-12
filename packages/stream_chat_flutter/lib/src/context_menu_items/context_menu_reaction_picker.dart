@@ -1,5 +1,6 @@
 import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -72,7 +73,8 @@ class _ContextMenuReactionPickerState extends State<ContextMenuReactionPicker>
 
   @override
   Widget build(BuildContext context) {
-    final reactionIcons = StreamChat.of(context).config.reactionIcons ?? [];
+    final reactionIcons =
+        StreamChatConfigurationProvider.of(context).reactionIcons ?? [];
 
     if (animations.isEmpty && reactionIcons.isNotEmpty) {
       reactionIcons.forEach((element) {
