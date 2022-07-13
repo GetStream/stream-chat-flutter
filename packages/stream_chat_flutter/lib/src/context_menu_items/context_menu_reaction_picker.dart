@@ -52,8 +52,7 @@ class _ContextMenuReactionPickerState extends State<ContextMenuReactionPicker>
           widget.message,
           reactionType,
           enforceUnique:
-              StreamChatConfiguration.of(context).enforceUniqueReactions ??
-                  true,
+              StreamChatConfiguration.of(context).enforceUniqueReactions,
         );
     pop();
   }

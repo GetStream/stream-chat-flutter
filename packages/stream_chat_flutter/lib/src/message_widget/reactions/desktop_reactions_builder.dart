@@ -222,8 +222,7 @@ class _BottomReaction extends StatelessWidget {
                 reactionIcon!.type,
                 score: reaction.score + 1,
                 enforceUnique: StreamChatConfiguration.of(context)
-                        .enforceUniqueReactions ??
-                    true,
+                        .enforceUniqueReactions,
               );
         }
       },
