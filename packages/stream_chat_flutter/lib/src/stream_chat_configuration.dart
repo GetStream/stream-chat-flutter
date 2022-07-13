@@ -111,7 +111,7 @@ class StreamChatConfigurationData {
     this.defaultUserImage,
     this.placeholderUserImage,
     this.reactionIcons,
-    this.enforceUniqueReactions,
+    this.enforceUniqueReactions = true,
   });
 
   /// Provides default configuration options
@@ -124,7 +124,6 @@ class StreamChatConfigurationData {
         ),
       ),
       reactionIcons: _defaultReactionIcons,
-      enforceUniqueReactions: true,
     );
   }
 
@@ -155,7 +154,7 @@ class StreamChatConfigurationData {
   final List<StreamReactionIcon>? reactionIcons;
 
   /// Whether a new reaction should replace the existing one.
-  final bool? enforceUniqueReactions;
+  final bool enforceUniqueReactions;
 
   static final _defaultReactionIcons = [
     StreamReactionIcon(
