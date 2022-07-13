@@ -89,6 +89,9 @@ class StreamMessageInputController extends ValueNotifier<Message> {
       _textEditingController;
   final MessageTextFieldController _textEditingController;
 
+  /// Returns the textEditingValue associated with this controller.
+  TextEditingValue get textEditingValue => _textEditingController.value;
+
   /// Returns the text of the message.
   String get text => _textEditingController.text;
 

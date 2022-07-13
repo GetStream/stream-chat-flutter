@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user/user_mention_tile.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-/// {@template streamUserMentionsOverlay}
+/// {@template user_mentions_overlay}
 /// Overlay for displaying users that can be mentioned.
 /// {@endtemplate}
-class StreamUserMentionsOverlay extends StatefulWidget {
-  /// {@macro streamUserMentionsOverlay}
-  StreamUserMentionsOverlay({
+class StreamMentionAutocompleteOptions extends StatefulWidget {
+  /// Constructor for creating a [StreamMentionAutocompleteOptions].
+  StreamMentionAutocompleteOptions({
     super.key,
     required this.query,
     required this.channel,
-    required this.size,
     this.client,
     this.limit = 10,
     this.mentionAllAppUsers = false,
@@ -34,9 +34,6 @@ class StreamUserMentionsOverlay extends StatefulWidget {
   /// Limit applied on user search results.
   final int limit;
 
-  /// The size of the overlay.
-  final Size size;
-
   /// The channel to search for users.
   final Channel channel;
 
@@ -48,20 +45,19 @@ class StreamUserMentionsOverlay extends StatefulWidget {
   /// Defaults to false.
   final bool mentionAllAppUsers;
 
-  /// {@macro mentionTileOverlayBuilder}
-  ///
-  /// Use [StreamUserMentionTile] for the default implementation.
-  final MentionTileOverlayBuilder? mentionsTileBuilder;
+  /// Customize the tile for the mentions overlay.
+  final UserMentionTileBuilder? mentionsTileBuilder;
 
   /// Callback called when a user is selected.
-  final void Function(User user)? onMentionUserTap;
+  final ValueSetter<User>? onMentionUserTap;
 
   @override
-  _StreamUserMentionsOverlayState createState() =>
-      _StreamUserMentionsOverlayState();
+  _StreamMentionAutocompleteOptionsState createState() =>
+      _StreamMentionAutocompleteOptionsState();
 }
 
-class _StreamUserMentionsOverlayState extends State<StreamUserMentionsOverlay> {
+class _StreamMentionAutocompleteOptionsState
+    extends State<StreamMentionAutocompleteOptions> {
   late Future<List<User>> userMentionsFuture;
 
   @override
@@ -71,7 +67,7 @@ class _StreamUserMentionsOverlayState extends State<StreamUserMentionsOverlay> {
   }
 
   @override
-  void didUpdateWidget(covariant StreamUserMentionsOverlay oldWidget) {
+  void didUpdateWidget(covariant StreamMentionAutocompleteOptions oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.channel != oldWidget.channel ||
         widget.query != oldWidget.query ||
@@ -92,16 +88,15 @@ class _StreamUserMentionsOverlayState extends State<StreamUserMentionsOverlay> {
         borderRadius: BorderRadius.circular(8),
       ),
       clipBehavior: Clip.hardEdge,
-      child: Container(
-        constraints: BoxConstraints.loose(widget.size),
-        decoration: BoxDecoration(color: theme.colorTheme.barsBg),
-        child: FutureBuilder<List<User>>(
-          future: userMentionsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) return const Offstage();
-            if (!snapshot.hasData) return const Offstage();
-            final users = snapshot.data!;
-            return ListView.builder(
+      child: FutureBuilder<List<User>>(
+        future: userMentionsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) return const Offstage();
+          if (!snapshot.hasData) return const Offstage();
+          final users = snapshot.data!;
+          return LimitedBox(
+            maxHeight: MediaQuery.of(context).size.height * 0.5,
+            child: ListView.builder(
               padding: EdgeInsets.zero,
               shrinkWrap: true,
               itemCount: users.length,
@@ -116,9 +111,9 @@ class _StreamUserMentionsOverlayState extends State<StreamUserMentionsOverlay> {
                   ),
                 );
               },
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
