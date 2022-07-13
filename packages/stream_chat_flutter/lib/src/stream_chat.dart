@@ -93,7 +93,7 @@ class StreamChatState extends State<StreamChat> {
 
   /// Gets configuration options from widget
   StreamChatConfigurationData get streamChatConfigData =>
-      widget.streamChatConfigData ?? StreamChatConfigurationData.defaults();
+      widget.streamChatConfigData ?? StreamChatConfigurationData();
 
   @override
   void initState() {

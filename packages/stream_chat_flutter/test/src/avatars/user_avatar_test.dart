@@ -52,7 +52,7 @@ void main() {
         MaterialApp(
           builder: (context, child) {
             return StreamChatConfiguration(
-              data: StreamChatConfigurationData.defaults(),
+              data: StreamChatConfigurationData(),
               child: child!,
             );
           },
@@ -85,7 +85,7 @@ void main() {
         MaterialApp(
           builder: (context, child) {
             return StreamChatConfiguration(
-              data: StreamChatConfigurationData.defaults(),
+              data: StreamChatConfigurationData(),
               child: child!,
             );
           },

@@ -73,8 +73,7 @@ class _ContextMenuReactionPickerState extends State<ContextMenuReactionPicker>
 
   @override
   Widget build(BuildContext context) {
-    final reactionIcons =
-        StreamChatConfiguration.of(context).reactionIcons ?? [];
+    final reactionIcons = StreamChatConfiguration.of(context).reactionIcons;
 
     if (animations.isEmpty && reactionIcons.isNotEmpty) {
       reactionIcons.forEach((element) {

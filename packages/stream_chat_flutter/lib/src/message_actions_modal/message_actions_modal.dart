@@ -123,7 +123,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final streamChatThemeData = StreamChatTheme.of(context);
 
     final numberOfReactions =
-        StreamChatConfiguration.of(context).reactionIcons?.length ?? 0;
+        StreamChatConfiguration.of(context).reactionIcons.length;
     final shiftFactor =
         numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
     final channel = StreamChannel.of(context).channel;

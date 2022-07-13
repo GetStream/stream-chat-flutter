@@ -7,7 +7,7 @@ void main() {
     testWidgets(
       'should provide the StreamChatConfiguration class with default data',
       (t) async {
-        final configuration = StreamChatConfigurationData.defaults();
+        final configuration = StreamChatConfigurationData();
         late final StreamChatConfigurationData configurationFromProvider;
         await t.pumpWidget(StreamChatConfiguration(
           data: configuration,
@@ -26,7 +26,7 @@ void main() {
     testWidgets(
       'should provide the StreamChatConfiguration class with custom data',
       (t) async {
-        final configuration = StreamChatConfigurationData.defaults().copyWith(
+        final configuration = StreamChatConfigurationData().copyWith(
           enforceUniqueReactions: false,
         );
         late final StreamChatConfigurationData configurationFromProvider;

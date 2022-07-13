@@ -107,25 +107,26 @@ You must have a StreamChatConfigurationProvider widget at the top of your widget
 /// {@endtemplate}
 class StreamChatConfigurationData {
   /// {@macro streamChatConfigurationData}
-  const StreamChatConfigurationData({
-    this.defaultUserImage,
-    this.placeholderUserImage,
-    this.reactionIcons,
-    this.enforceUniqueReactions = true,
-  });
-
-  /// Provides default configuration options
-  factory StreamChatConfigurationData.defaults() {
-    return StreamChatConfigurationData(
-      defaultUserImage: (context, user) => Center(
-        child: StreamGradientAvatar(
-          name: user.name,
-          userId: user.id,
-        ),
-      ),
-      reactionIcons: _defaultReactionIcons,
+  factory StreamChatConfigurationData({
+    Widget Function(BuildContext, User)? defaultUserImage,
+    Widget Function(BuildContext, User)? placeholderUserImage,
+    List<StreamReactionIcon>? reactionIcons,
+    bool? enforceUniqueReactions,
+  }) {
+    return StreamChatConfigurationData._(
+      defaultUserImage: defaultUserImage ?? _defaultUserImage,
+      placeholderUserImage: placeholderUserImage,
+      reactionIcons: reactionIcons ?? _defaultReactionIcons,
+      enforceUniqueReactions: enforceUniqueReactions ?? true,
     );
   }
+
+  StreamChatConfigurationData._({
+    required this.defaultUserImage,
+    required this.placeholderUserImage,
+    required this.reactionIcons,
+    required this.enforceUniqueReactions,
+  });
 
   /// Copies the configuration options from one [StreamChatConfigurationData] to
   /// another.
@@ -145,13 +146,13 @@ class StreamChatConfigurationData {
   }
 
   /// The widget that will be built when the user image is unavailable.
-  final Widget Function(BuildContext, User)? defaultUserImage;
+  final Widget Function(BuildContext, User) defaultUserImage;
 
   /// The widget that will be built when the user image is loading.
   final Widget Function(BuildContext, User)? placeholderUserImage;
 
   /// Assets used for rendering reactions.
-  final List<StreamReactionIcon>? reactionIcons;
+  final List<StreamReactionIcon> reactionIcons;
 
   /// Whether a new reaction should replace the existing one.
   final bool enforceUniqueReactions;
@@ -218,4 +219,11 @@ class StreamChatConfigurationData {
       },
     ),
   ];
+
+  static Widget _defaultUserImage(BuildContext context, User user) => Center(
+        child: StreamGradientAvatar(
+          name: user.name,
+          userId: user.id,
+        ),
+      );
 }
