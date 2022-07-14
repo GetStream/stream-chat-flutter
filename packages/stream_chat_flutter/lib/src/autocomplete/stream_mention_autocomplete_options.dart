@@ -105,7 +105,9 @@ class _StreamMentionAutocompleteOptionsState
                 return Material(
                   color: theme.colorTheme.barsBg,
                   child: InkWell(
-                    onTap: () => widget.onMentionUserTap?.call(user),
+                    onTap: widget.onMentionUserTap == null
+                        ? null
+                        : () => widget.onMentionUserTap!(user),
                     child: widget.mentionsTileBuilder?.call(context, user) ??
                         StreamUserMentionTile(user),
                   ),

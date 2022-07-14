@@ -93,12 +93,6 @@ class StreamMessageTextField extends StatefulWidget {
     this.minLines,
     this.expands = false,
     this.maxLength,
-    @Deprecated(
-      'Use maxLengthEnforcement parameter which provides more specific '
-      'behavior related to the maxLength limit. '
-      'This feature was deprecated after v1.25.0-5.0.pre.',
-    )
-        this.maxLengthEnforced = true,
     this.maxLengthEnforcement,
     this.onChanged,
     this.onEditingComplete,
@@ -115,30 +109,25 @@ class StreamMessageTextField extends StatefulWidget {
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20),
     this.dragStartBehavior = DragStartBehavior.start,
-    this.enableInteractiveSelection = true,
+    bool? enableInteractiveSelection,
     this.selectionControls,
     this.onTap,
     this.mouseCursor,
     this.buildCounter,
     this.scrollController,
     this.scrollPhysics,
-    this.autofillHints,
+    this.autofillHints = const <String>[],
+    this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-  })  : assert(obscuringCharacter.length == 1,
-            '`obscuringCharacter.length` must be 1'),
+  })  : assert(obscuringCharacter.length == 1, ''),
         smartDashesType = smartDashesType ??
             (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
         smartQuotesType = smartQuotesType ??
             (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-        assert(
-          maxLengthEnforced || maxLengthEnforcement == null,
-          'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
-        ),
-        assert(maxLines == null || maxLines > 0,
-            '`maxLines` needs to be left as null or bigger than 0'),
-        assert(minLines == null || minLines > 0,
-            '`minLines` needs to be left as null or bigger than 0'),
+        assert(maxLines == null || maxLines > 0, ''),
+        assert(minLines == null || minLines > 0, ''),
         assert(
           (maxLines == null) || (minLines == null) || (maxLines >= minLines),
           "minLines can't be greater than maxLines",
@@ -153,7 +142,7 @@ class StreamMessageTextField extends StatefulWidget {
             maxLength == null ||
                 maxLength == TextField.noMaxLength ||
                 maxLength > 0,
-            '`maxLength` needs to be null or a positive integer'),
+            'maxLength must be null or a positive integer.'),
 
         // Assert the following instead of setting it directly to avoid
         // surprising the user by silently changing the value they set.
@@ -161,22 +150,36 @@ class StreamMessageTextField extends StatefulWidget {
           !identical(textInputAction, TextInputAction.newline) ||
               maxLines == 1 ||
               !identical(keyboardType, TextInputType.text),
-          '''Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.''',
+          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
         ),
         keyboardType = keyboardType ??
             (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+        enableInteractiveSelection =
+            enableInteractiveSelection ?? (!readOnly || !obscureText),
         toolbarOptions = toolbarOptions ??
             (obscureText
-                ? const ToolbarOptions(
-                    selectAll: true,
-                    paste: true,
-                  )
-                : const ToolbarOptions(
-                    copy: true,
-                    cut: true,
-                    selectAll: true,
-                    paste: true,
-                  ));
+                ? (readOnly
+                    // No point in even offering "Select All" in a read-only obscured
+                    // field.
+                    ? const ToolbarOptions()
+                    // Writable, but obscured.
+                    : const ToolbarOptions(
+                        selectAll: true,
+                        paste: true,
+                      ))
+                : (readOnly
+                    // Read-only, not obscured.
+                    ? const ToolbarOptions(
+                        selectAll: true,
+                        copy: true,
+                      )
+                    // Writable, not obscured.
+                    : const ToolbarOptions(
+                        copy: true,
+                        cut: true,
+                        selectAll: true,
+                        paste: true,
+                      )));
 
   /// Controls the message being edited.
   ///
@@ -344,19 +347,6 @@ class StreamMessageTextField extends StatefulWidget {
   ///
   /// {@macro flutter.services.lengthLimitingTextInputFormatter.maxLength}
   final int? maxLength;
-
-  /// If [maxLength] is set, [maxLengthEnforced] indicates whether or not to
-  /// enforce the limit, or merely provide a character counter and warning when
-  /// [maxLength] is exceeded.
-  ///
-  /// If true, prevents the field from allowing more than [maxLength]
-  /// characters.
-  @Deprecated(
-    'Use maxLengthEnforcement parameter which provides more specific '
-    'behavior related to the maxLength limit. '
-    'This feature was deprecated after v1.25.0-5.0.pre.',
-  )
-  final bool maxLengthEnforced;
 
   /// Determines how the [maxLength] limit should be enforced.
   ///
@@ -538,6 +528,11 @@ class StreamMessageTextField extends StatefulWidget {
   /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
   /// {@template flutter.material.textfield.restorationId}
   /// Restoration ID to save and restore the state of the text field.
   ///
@@ -557,6 +552,9 @@ class StreamMessageTextField extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationId;
 
+  /// {@macro flutter.widgets.editableText.scribbleEnabled}
+  final bool scribbleEnabled;
+
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
@@ -566,6 +564,9 @@ class StreamMessageTextField extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<StreamMessageInputController>(
+        'controller', controller,
+        defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode,
         defaultValue: null));
     properties
@@ -646,6 +647,10 @@ class StreamMessageTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<ScrollPhysics>(
         'scrollPhysics', scrollPhysics,
         defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior,
+        defaultValue: Clip.hardEdge));
+    properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled,
+        defaultValue: true));
     properties.add(DiagnosticsProperty<bool>(
         'enableIMEPersonalizedLearning', enableIMEPersonalizedLearning,
         defaultValue: true));
@@ -654,10 +659,9 @@ class StreamMessageTextField extends StatefulWidget {
 
 class _StreamMessageTextFieldState extends State<StreamMessageTextField>
     with RestorationMixin<StreamMessageTextField> {
-  StreamRestorableMessageInputController? _controller;
-
   StreamMessageInputController get _effectiveController =>
       widget.controller ?? _controller!.value;
+  StreamRestorableMessageInputController? _controller;
 
   @override
   void initState() {
@@ -676,7 +680,7 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
   void didUpdateWidget(covariant StreamMessageTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller == null && oldWidget.controller != null) {
-      _createLocalController(oldWidget.controller!.value);
+      _createLocalController(oldWidget.controller!.message);
     } else if (widget.controller != null && oldWidget.controller == null) {
       unregisterFromRestoration(_controller!);
       _controller!.dispose();
@@ -696,15 +700,12 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
 
   void _registerController() {
     assert(_controller != null, '');
-    registerForRestoration(_controller!, restorationId ?? 'controller');
+    registerForRestoration(_controller!, 'controller');
   }
 
   @override
   Widget build(BuildContext context) => TextField(
-        controller: _effectiveController.textEditingController,
-        onChanged: (newText) {
-          _effectiveController.text = newText;
-        },
+        controller: _effectiveController.textFieldController,
         focusNode: widget.focusNode,
         decoration: widget.decoration,
         keyboardType: widget.keyboardType,
@@ -752,7 +753,9 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
         scrollController: widget.scrollController,
         scrollPhysics: widget.scrollPhysics,
         autofillHints: widget.autofillHints,
+        clipBehavior: widget.clipBehavior,
         restorationId: widget.restorationId,
+        scribbleEnabled: widget.scribbleEnabled,
         enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
       );
 

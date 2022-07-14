@@ -241,7 +241,7 @@ class StreamAutocomplete extends StatefulWidget {
   /// {@end-tool}
   /// {@endtemplate}
   ///
-  /// If this parameter is not null, then [textEditingController] must also be
+  /// If this parameter is not null, then [textFieldController] must also be
   /// not null.
   final FocusNode? focusNode;
 
@@ -330,7 +330,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
     final newText = text.replaceRange(start, end, option);
     final newSelection = TextSelection.collapsed(offset: selectionOffset);
 
-    _messageEditingController.textEditingController.value = TextEditingValue(
+    _messageEditingController.textEditingValue = TextEditingValue(
       text: newText,
       selection: newSelection,
     );
@@ -381,7 +381,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
   // Called when _textEditingController changes.
   late final _onChangedField = debounce(
     () {
-      final messageValue = _messageEditingController.value;
+      final messageValue = _messageEditingController.message;
       final textEditingValue = _messageEditingController.textEditingValue;
 
       // If the content has not changed, then there is nothing to do.

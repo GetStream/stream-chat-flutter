@@ -257,11 +257,10 @@ class StreamMessageInput extends StatefulWidget {
 class StreamMessageInputState extends State<StreamMessageInput>
     with RestorationMixin<StreamMessageInput> {
   final _imagePicker = ImagePicker();
-  late FocusNode _focusNode = widget.focusNode ?? FocusNode();
-  late final _isInternalFocusNode = widget.focusNode == null;
+
   bool _inputEnabled = true;
 
-  bool get _commandEnabled => _effectiveController.value.command != null;
+  bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool _actionsShrunk = false;
   bool _openFilePickerSection = false;
@@ -270,17 +269,20 @@ class StreamMessageInputState extends State<StreamMessageInput>
   late StreamMessageInputThemeData _messageInputTheme;
 
   bool get _hasQuotedMessage =>
-      _effectiveController.value.quotedMessage != null;
+      _effectiveController.message.quotedMessage != null;
 
   bool get _isEditing =>
-      _effectiveController.value.status != MessageSendingStatus.sending;
+      _effectiveController.message.status != MessageSendingStatus.sending;
 
-  StreamRestorableMessageInputController? _controller;
+  BoxBorder? _draggingBorder;
+
+  FocusNode get _effectiveFocusNode =>
+      widget.focusNode ?? (_focusNode ??= FocusNode());
+  FocusNode? _focusNode;
 
   StreamMessageInputController get _effectiveController =>
       widget.messageInputController ?? _controller!.value;
-
-  BoxBorder? _draggingBorder;
+  StreamRestorableMessageInputController? _controller;
 
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
@@ -290,13 +292,15 @@ class StreamMessageInputState extends State<StreamMessageInput>
   void _registerController() {
     assert(_controller != null, '');
 
-    registerForRestoration(
-      _controller!,
-      widget.restorationId ?? 'messageInputController',
-    );
-    _effectiveController.textEditingController
-        .removeListener(_onChangedDebounced);
-    _effectiveController.textEditingController.addListener(_onChangedDebounced);
+    registerForRestoration(_controller!, 'messageInputController');
+    _effectiveController.removeListener(_onChangedDebounced);
+    _effectiveController.addListener(_onChangedDebounced);
+    if (!_isEditing && _timeOut <= 0) _startSlowMode();
+  }
+
+  void _initialiseEffectiveController() {
+    _effectiveController.removeListener(_onChangedDebounced);
+    _effectiveController.addListener(_onChangedDebounced);
     if (!_isEditing && _timeOut <= 0) _startSlowMode();
   }
 
@@ -308,14 +312,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
     } else {
       _initialiseEffectiveController();
     }
-    _focusNode.addListener(_focusNodeListener);
+    _effectiveFocusNode.addListener(_focusNodeListener);
   }
 
   @override
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
     _messageInputTheme = StreamMessageInputTheme.of(context);
-
     super.didChangeDependencies();
   }
 
@@ -324,7 +327,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     super.didUpdateWidget(oldWidget);
     if (widget.messageInputController == null &&
         oldWidget.messageInputController != null) {
-      _createLocalController(oldWidget.messageInputController!.value);
+      _createLocalController(oldWidget.messageInputController!.message);
     } else if (widget.messageInputController != null &&
         oldWidget.messageInputController == null) {
       unregisterFromRestoration(_controller!);
@@ -334,10 +337,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
 
     // Update _focusNode
-    if (widget.focusNode != null && oldWidget.focusNode != widget.focusNode) {
-      _focusNode.removeListener(_focusNodeListener);
-      _focusNode = widget.focusNode!;
-      _focusNode.addListener(_focusNodeListener);
+    if (widget.focusNode != oldWidget.focusNode) {
+      (oldWidget.focusNode ?? _focusNode)?.removeListener(_focusNodeListener);
+      (widget.focusNode ?? _focusNode)?.addListener(_focusNodeListener);
     }
   }
 
@@ -352,20 +354,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
   String? get restorationId => widget.restorationId;
 
   void _focusNodeListener() {
-    if (_focusNode.hasFocus) {
+    if (_effectiveFocusNode.hasFocus) {
       _openFilePickerSection = false;
     }
   }
 
   int _timeOut = 0;
   Timer? _slowModeTimer;
-
-  void _initialiseEffectiveController() {
-    _effectiveController.textEditingController
-        .removeListener(_onChangedDebounced);
-    _effectiveController.textEditingController.addListener(_onChangedDebounced);
-    if (!_isEditing && _timeOut <= 0) _startSlowMode();
-  }
 
   void _startSlowMode() {
     if (!mounted) {
@@ -412,6 +407,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         ),
       );
     }
+
     return StreamMessageValueListenableBuilder(
       valueListenable: _effectiveController,
       builder: (context, value, _) {
@@ -431,7 +427,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             child: GestureDetector(
               onPanUpdate: (details) {
                 if (details.delta.dy > 0) {
-                  _focusNode.unfocus();
+                  _effectiveFocusNode.unfocus();
                   if (_openFilePickerSection) {
                     setState(() => _openFilePickerSection = false);
                   }
@@ -454,14 +450,14 @@ class StreamMessageInputState extends State<StreamMessageInput>
                       attachment: _effectiveController.ogAttachment!,
                       onDismissPreviewPressed: () {
                         _effectiveController.clearOGAttachment();
-                        _focusNode.unfocus();
+                        _effectiveFocusNode.unfocus();
                       },
                     ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: _buildTextField(context),
                   ),
-                  if (_effectiveController.value.parentId != null &&
+                  if (_effectiveController.message.parentId != null &&
                       !widget.hideSendAsDm)
                     Padding(
                       padding: const EdgeInsets.only(
@@ -512,7 +508,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         }
 
         return StreamAutocomplete(
-          focusNode: _focusNode,
+          focusNode: _effectiveFocusNode,
           messageEditingController: _effectiveController,
           fieldViewBuilder: (_, __, ___) => child,
           autocompleteTriggers: [
@@ -530,9 +526,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                   query: query,
                   channel: StreamChannel.of(context).channel,
                   onCommandSelected: (command) {
-                    _effectiveController
-                      ..reset()
-                      ..command = command;
+                    _effectiveController.command = command.name;
                     // removing the overlay after the command is selected
                     StreamAutocomplete.of(context).closeSuggestions();
                   },
@@ -756,7 +750,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
           margin: margin,
           decoration: BoxDecoration(
             borderRadius: _messageInputTheme.borderRadius,
-            gradient: _focusNode.hasFocus
+            gradient: _effectiveFocusNode.hasFocus
                 ? _messageInputTheme.activeBorderGradient
                 : _messageInputTheme.idleBorderGradient,
             border: _draggingBorder,
@@ -791,7 +785,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                         onSubmitted: (_) => sendMessage(),
                         keyboardType: widget.keyboardType,
                         controller: _effectiveController,
-                        focusNode: _focusNode,
+                        focusNode: _effectiveFocusNode,
                         style: _messageInputTheme.inputTextStyle,
                         autofocus: widget.autofocus,
                         textAlignVertical: TextAlignVertical.center,
@@ -865,7 +859,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                           size: 16,
                         ),
                         Text(
-                          _effectiveController.value.command!.toUpperCase(),
+                          _effectiveController.message.command!.toUpperCase(),
                           style:
                               _streamChatTheme.textTheme.footnoteBold.copyWith(
                             color: Colors.white,
@@ -921,10 +915,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
       final channel = StreamChannel.of(context).channel;
       if (channel.ownCapabilities.contains(PermissionType.sendTypingEvents) &&
           value.isNotEmpty) {
-        channel
-            .keyStroke(_effectiveController.value.parentId)
-            // ignore: no-empty-block
-            .catchError((e) {});
+        // channel
+        //     .keyStroke(_effectiveController.message.parentId)
+        //     // ignore: no-empty-block
+        //     .catchError((e) {});
       }
 
       var actionsLength = widget.actions.length;
@@ -940,7 +934,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   );
 
   String _getHint(BuildContext context) {
-    if (_commandEnabled && _effectiveController.value.command == 'giphy') {
+    if (_commandEnabled && _effectiveController.message.command == 'giphy') {
       return context.translations.searchGifLabel;
     }
     if (_effectiveController.attachments.isNotEmpty) {
@@ -1047,12 +1041,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return const Offstage();
-    final containsUrl = _effectiveController.value.quotedMessage!.attachments
+    final containsUrl = _effectiveController.message.quotedMessage!.attachments
         .any((element) => element.titleLink != null);
     return StreamQuotedMessageWidget(
       reverse: true,
       showBorder: !containsUrl,
-      message: _effectiveController.value.quotedMessage!,
+      message: _effectiveController.message.quotedMessage!,
       messageTheme: _streamChatTheme.otherMessageTheme,
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       onQuotedMessageClear: widget.onQuotedMessageCleared,
@@ -1261,10 +1255,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
         // Clear the text if the commands options are already visible.
         if (isCommandOptionsVisible) {
-          _effectiveController.text = '';
+          _effectiveController.clear();
         } else {
           // This triggers the [StreamAutocomplete] to show the command trigger.
-          _effectiveController.text = _kCommandTrigger;
+          _effectiveController.textEditingValue = const TextEditingValue(
+            text: _kCommandTrigger,
+            selection: TextSelection.collapsed(offset: _kCommandTrigger.length),
+          );
         }
       },
     );
@@ -1276,8 +1273,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
   /// Show the attachment modal, making the user choose where to
   /// pick a media from
   void showAttachmentModal() {
-    if (_focusNode.hasFocus) {
-      _focusNode.unfocus();
+    if (_effectiveFocusNode.hasFocus) {
+      _effectiveFocusNode.unfocus();
     }
 
     if (!kIsWeb) {
@@ -1302,7 +1299,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
   }
 
-  /// Adds an attachment to the [messageInputController.attachments] map
+  /// Adds an attachment to the [controller.attachments] map
   void _addAttachments(Iterable<Attachment> attachments) {
     final limit = widget.attachmentLimit;
     final length = _effectiveController.attachments.length + attachments.length;
@@ -1397,6 +1394,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
       return;
     }
 
+    final containsCommand = message.command != null;
+    // If the message contains command we should append it to the text
+    // before sending it.
+    if (containsCommand) {
+      message = message.copyWith(text: '/${message.command} ${message.text}');
+    }
+
     final skipEnrichUrl = _effectiveController.ogAttachment == null;
 
     var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
@@ -1432,14 +1436,14 @@ class StreamMessageInputState extends State<StreamMessageInput>
       }
 
       if (shouldKeepFocus) {
-        FocusScope.of(context).requestFocus(_focusNode);
+        FocusScope.of(context).requestFocus(_effectiveFocusNode);
       } else {
         FocusScope.of(context).unfocus();
       }
 
       final resp = await sendingFuture;
       if (resp.message?.type == 'error') {
-        _effectiveController.value = message;
+        _effectiveController.message = message;
       }
       _startSlowMode();
       widget.onMessageSent?.call(resp.message);
@@ -1470,11 +1474,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   @override
   void dispose() {
-    _effectiveController.textEditingController
-        .removeListener(_onChangedDebounced);
+    _effectiveController.removeListener(_onChangedDebounced);
     _controller?.dispose();
-    _focusNode.removeListener(_focusNodeListener);
-    if (_isInternalFocusNode) _focusNode.dispose();
+    _effectiveFocusNode.removeListener(_focusNodeListener);
+    _focusNode?.dispose();
     _stopSlowMode();
     _onChangedDebounced.cancel();
     super.dispose();

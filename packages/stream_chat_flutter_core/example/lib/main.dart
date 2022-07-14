@@ -319,8 +319,7 @@ class _MessageScreenState extends State<MessageScreen> {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: messageInputController.textEditingController,
-                      onChanged: (s) => messageInputController.text = s,
+                      controller: messageInputController.textFieldController,
                       decoration: const InputDecoration(
                         hintText: 'Enter your message',
                       ),
@@ -332,8 +331,7 @@ class _MessageScreenState extends State<MessageScreen> {
                     clipBehavior: Clip.hardEdge,
                     child: InkWell(
                       onTap: () async {
-                        if (messageInputController.message.text?.isNotEmpty ==
-                            true) {
+                        if (messageInputController.text.isNotEmpty) {
                           await channel.sendMessage(
                             messageInputController.message,
                           );
