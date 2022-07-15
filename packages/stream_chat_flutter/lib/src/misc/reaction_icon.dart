@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// {@endtemplate}
 class StreamReactionIcon {
   /// {@macro streamReactionIcon}
-  StreamReactionIcon({
+  const StreamReactionIcon({
     required this.type,
     required this.builder,
   });

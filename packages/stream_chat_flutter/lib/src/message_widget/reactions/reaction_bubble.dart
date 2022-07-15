@@ -47,7 +47,7 @@ class StreamReactionBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reactionIcons = StreamChatTheme.of(context).reactionIcons;
+    final reactionIcons = StreamChatConfiguration.of(context).reactionIcons;
     final totalReactions = reactions.length;
     final offset =
         totalReactions > 1 ? 16.0.mirrorConditionally(flipTail) : 2.0;

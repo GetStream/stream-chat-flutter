@@ -6,6 +6,10 @@
 
 - Fixed the unread message header in the message list view.
 
+🔄 Changed
+
+- [[#1125]](https://github.com/GetStream/stream-chat-flutter/issues/1125) `defaultUserImage`, `placeholderUserImage`, and `reactionIcons` have been refactored out of `StreamChatThemeData` and into the new `StreamChatConfigurationData` class.
+
 ## 5.0.0-beta.1
 
 - 🎉 Initial support for desktop 🖥️ and web 🧑‍💻  

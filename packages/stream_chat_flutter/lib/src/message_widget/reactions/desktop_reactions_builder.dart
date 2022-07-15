@@ -75,8 +75,8 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    final reactionIcons = StreamChatTheme.of(context).reactionIcons;
     final streamChat = StreamChat.of(context);
+    final reactionIcons = StreamChatConfiguration.of(context).reactionIcons;
     final streamChatTheme = StreamChatTheme.of(context);
 
     final reactionsMap = <String, Reaction>{};
@@ -220,6 +220,8 @@ class _BottomReaction extends StatelessWidget {
                 message,
                 reactionIcon!.type,
                 score: reaction.score + 1,
+                enforceUnique:
+                    StreamChatConfiguration.of(context).enforceUniqueReactions,
               );
         }
       },
