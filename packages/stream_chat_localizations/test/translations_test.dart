@@ -178,6 +178,27 @@ void main() {
       expect(localizations.fileText, isNotNull);
       expect(localizations.replyToMessageLabel, isNotNull);
       expect(localizations.attachmentLimitExceedError(3), isNotNull);
+      expect(
+        localizations.galleryPaginationText(currentPage: 1, totalPages: 2),
+        isNotNull,
+      );
+      expect(localizations.slowModeOnLabel, isNotNull);
+      expect(localizations.linkDisabledDetails, isNotNull);
+      expect(localizations.linkDisabledError, isNotNull);
+      expect(localizations.sendMessagePermissionError, isNotNull);
+      expect(localizations.couldNotReadBytesFromFileError, isNotNull);
+      expect(localizations.toggleMuteUnmuteAction(isMuted: false), isNotNull);
+      expect(localizations.downloadLabel, isNotNull);
+      expect(localizations.toggleMuteUnmuteGroupQuestion(isMuted: true),
+          isNotNull);
+      expect(localizations.toggleMuteUnmuteGroupText(isMuted: true), isNotNull);
+      expect(
+          localizations.toggleMuteUnmuteUserQuestion(isMuted: true), isNotNull);
+      expect(localizations.toggleMuteUnmuteUserText(isMuted: true), isNotNull);
+      expect(localizations.viewLibrary, isNotNull);
+      expect(localizations.unreadMessagesSeparatorText(2), isNotNull);
+      expect(localizations.enableFileAccessMessage, isNotNull);
+      expect(localizations.allowFileAccessMessage, isNotNull);
     });
   }
 
