@@ -425,4 +425,10 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
     }
     return '읽지 않은 메시지 $unreadCount개';
   }
+
+  @override
+  String get enableFileAccessMessage => '친구와 공유할 수 있도록 파일에 대한 액세스를 허용하세요.';
+
+  @override
+  String get allowFileAccessMessage => '파일에 대한 액세스 허용';
 }

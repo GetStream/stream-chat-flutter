@@ -1,9 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/media_list_view/media_list_view_controller.dart';
+import 'package:stream_chat_flutter/src/message_input/picker_widget.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -39,10 +37,14 @@ class StreamAttachmentPicker extends StatefulWidget {
       DefaultAttachmentTypes.video,
     ],
     this.customAttachmentTypes = const [],
+    this.permissionState,
   });
 
   /// True if the picker is open.
   final bool isOpen;
+
+  /// The permission state.
+  final PermissionState? permissionState;
 
   /// The picker size in height.
   final double pickerSize;
@@ -281,24 +283,15 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                             .iconBuilder(context, _filePickerIndex == i + 1),
                       ),
                     const Spacer(),
-                    if (widget.isOpen)
-                      FutureBuilder(
-                        future: PhotoManager.requestPermissionExtend(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData &&
-                              snapshot.data == PermissionState.limited) {
-                            return TextButton(
-                              child: Text(context.translations.viewLibrary),
-                              onPressed: () async {
-                                await PhotoManager.presentLimited();
-                                _mediaListViewController.updateMedia(
-                                  newValue: true,
-                                );
-                              },
-                            );
-                          }
-
-                          return const SizedBox.shrink();
+                    if (widget.isOpen &&
+                        widget.permissionState == PermissionState.limited)
+                      TextButton(
+                        child: Text(context.translations.viewLibrary),
+                        onPressed: () async {
+                          await PhotoManager.presentLimited();
+                          _mediaListViewController.updateMedia(
+                            newValue: true,
+                          );
                         },
                       ),
                   ],
@@ -336,7 +329,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                         color: _streamChatTheme.colorTheme.barsBg,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: _PickerWidget(
+                      child: PickerWidget(
                         mediaListViewController: _mediaListViewController,
                         filePickerIndex: _filePickerIndex,
                         streamChatTheme: _streamChatTheme,
@@ -345,6 +338,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                             .map((e) => e.id)
                             .toList(),
                         onAddMoreFilesClick: widget.onFilePicked,
+                        permissionState: widget.permissionState,
                         onMediaSelected: (media) {
                           if (messageInputController.attachments
                               .any((e) => e.id == media.id)) {
@@ -354,8 +348,6 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                             _addAssetAttachment(media);
                           }
                         },
-                        allowedAttachmentTypes: widget.allowedAttachmentTypes,
-                        customAttachmentTypes: widget.customAttachmentTypes,
                       ),
                     ),
                   ),
@@ -419,125 +411,6 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
     for (final attachment in attachments) {
       widget.messageInputController.addAttachment(attachment);
     }
-  }
-}
-
-class _PickerWidget extends StatefulWidget {
-  const _PickerWidget({
-    required this.filePickerIndex,
-    required this.containsFile,
-    required this.selectedMedias,
-    required this.onAddMoreFilesClick,
-    required this.onMediaSelected,
-    required this.streamChatTheme,
-    required this.allowedAttachmentTypes,
-    required this.customAttachmentTypes,
-    required this.mediaListViewController,
-  });
-
-  final int filePickerIndex;
-  final bool containsFile;
-  final List<String> selectedMedias;
-  final void Function(DefaultAttachmentTypes) onAddMoreFilesClick;
-  final void Function(AssetEntity) onMediaSelected;
-  final StreamChatThemeData streamChatTheme;
-  final List<DefaultAttachmentTypes> allowedAttachmentTypes;
-  final List<CustomAttachmentType> customAttachmentTypes;
-  final MediaListViewController mediaListViewController;
-
-  @override
-  _PickerWidgetState createState() => _PickerWidgetState();
-}
-
-class _PickerWidgetState extends State<_PickerWidget> {
-  Future<PermissionState>? requestPermission;
-
-  @override
-  void initState() {
-    super.initState();
-    requestPermission = PhotoManager.requestPermissionExtend();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.filePickerIndex != 0) {
-      return widget.customAttachmentTypes[widget.filePickerIndex - 1]
-          .pickerBuilder(context);
-    }
-    return FutureBuilder<PermissionState>(
-      future: requestPermission,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Offstage();
-        }
-
-        if ([PermissionState.authorized, PermissionState.limited]
-            .contains(snapshot.data)) {
-          if (widget.containsFile ||
-              !widget.allowedAttachmentTypes
-                  .contains(DefaultAttachmentTypes.image)) {
-            return GestureDetector(
-              onTap: () {
-                widget.onAddMoreFilesClick(DefaultAttachmentTypes.file);
-              },
-              child: Container(
-                constraints: const BoxConstraints.expand(),
-                color: widget.streamChatTheme.colorTheme.inputBg,
-                alignment: Alignment.center,
-                child: Text(
-                  context.translations.addMoreFilesLabel,
-                  style: TextStyle(
-                    color: widget.streamChatTheme.colorTheme.accentPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            );
-          }
-          return StreamMediaListView(
-            selectedIds: widget.selectedMedias,
-            onSelect: widget.onMediaSelected,
-          );
-        }
-
-        return InkWell(
-          onTap: () async {
-            PhotoManager.openSetting();
-          },
-          child: ColoredBox(
-            color: widget.streamChatTheme.colorTheme.inputBg,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SvgPicture.asset(
-                  'svgs/icon_picture_empty_state.svg',
-                  package: 'stream_chat_flutter',
-                  height: 140,
-                  color: widget.streamChatTheme.colorTheme.disabled,
-                ),
-                Text(
-                  context.translations.enablePhotoAndVideoAccessMessage,
-                  style: widget.streamChatTheme.textTheme.body.copyWith(
-                    color: widget.streamChatTheme.colorTheme.textLowEmphasis,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 6),
-                Center(
-                  child: Text(
-                    context.translations.allowGalleryAccessMessage,
-                    style: widget.streamChatTheme.textTheme.bodyBold.copyWith(
-                      color: widget.streamChatTheme.colorTheme.accentPrimary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 }
 

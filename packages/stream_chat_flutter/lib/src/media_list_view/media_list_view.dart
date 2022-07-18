@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:stream_chat_flutter/src/media_list_view_controller.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 extension on Duration {
@@ -27,6 +28,7 @@ class StreamMediaListView extends StatefulWidget {
     super.key,
     this.selectedIds = const [],
     this.onSelect,
+    this.controller,
   });
 
   /// Stores the media selected
@@ -34,6 +36,9 @@ class StreamMediaListView extends StatefulWidget {
 
   /// The action to perform when a media is selected
   final void Function(AssetEntity media)? onSelect;
+
+  /// Controller that handles MediaListView
+  final MediaListViewController? controller;
 
   @override
   _StreamMediaListViewState createState() => _StreamMediaListViewState();
@@ -43,6 +48,10 @@ class _StreamMediaListViewState extends State<StreamMediaListView> {
   final _media = <AssetEntity>[];
   final ScrollController _scrollController = ScrollController();
   int _currentPage = 0;
+
+  /// Controller necessary to verify limited access to photo gallery in iOS and
+  /// update the media list when listerners are emitted
+  late final controller = widget.controller ?? MediaListViewController();
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +152,23 @@ class _StreamMediaListViewState extends State<StreamMediaListView> {
   @override
   void initState() {
     super.initState();
+    controller.addListener(_updateMediaList);
     _getMedia();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.removeListener(_updateMediaList);
+    if (widget.controller == null) {
+      controller.dispose();
+    }
+  }
+
+  void _updateMediaList() {
+    if (controller.shouldUpdateMedia) {
+      _getMedia();
+    }
   }
 
   Future<void> _getMedia() async {
