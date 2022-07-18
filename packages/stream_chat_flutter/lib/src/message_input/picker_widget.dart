@@ -34,6 +34,7 @@ class PickerWidget extends StatefulWidget {
   /// TODO: Document me!
   final bool containsFile;
 
+  /// The permission state.
   final PermissionState? permissionState;
 
   /// The selected media to upload.

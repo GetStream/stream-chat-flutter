@@ -442,8 +442,8 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get enableFileAccessMessage => 'कृपया फ़ाइलों तक पहुंच सक्षम करें ताकि'
-        '\nआप उन्हें मित्रों के साथ साझा कर सकें।';
+      '\nआप उन्हें मित्रों के साथ साझा कर सकें।';
 
-    @override
-    String get allowFileAccessMessage => 'फाइलों तक पहुंच की अनुमति दें';
+  @override
+  String get allowFileAccessMessage => 'फाइलों तक पहुंच की अनुमति दें';
 }
