@@ -65,8 +65,6 @@ export 'src/v4/scroll_view/message_search_scroll_view/stream_message_search_list
 export 'src/v4/scroll_view/stream_scroll_view_empty_widget.dart';
 export 'src/v4/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
 export 'src/v4/scroll_view/user_scroll_view/stream_user_grid_tile.dart';
-export 'src/v4/scroll_view/user_scroll_view/stream_user_grid_tile.dart';
-export 'src/v4/scroll_view/user_scroll_view/stream_user_grid_view.dart';
 export 'src/v4/scroll_view/user_scroll_view/stream_user_grid_view.dart';
 export 'src/v4/scroll_view/user_scroll_view/stream_user_list_tile.dart';
 export 'src/v4/scroll_view/user_scroll_view/stream_user_list_view.dart';
