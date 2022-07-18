@@ -533,52 +533,54 @@ class StreamMessageInputState extends State<StreamMessageInput>
                 );
               },
             ),
-            StreamAutocompleteTrigger(
-              trigger: _kMentionTrigger,
-              minimumRequiredCharacters: 2,
-              optionsViewBuilder: (
-                context,
-                autocompleteQuery,
-                messageEditingController,
-              ) {
-                final query = autocompleteQuery.query;
-                return StreamMentionAutocompleteOptions(
-                  query: query,
-                  channel: StreamChannel.of(context).channel,
-                  mentionAllAppUsers: widget.mentionAllAppUsers,
-                  mentionsTileBuilder: widget.userMentionsTileBuilder,
-                  onMentionUserTap: (user) {
-                    // adding the mentioned user to the controller.
-                    _effectiveController.addMentionedUser(user);
+            if (widget.enableMentionsOverlay)
+              StreamAutocompleteTrigger(
+                trigger: _kMentionTrigger,
+                minimumRequiredCharacters: 2,
+                optionsViewBuilder: (
+                  context,
+                  autocompleteQuery,
+                  messageEditingController,
+                ) {
+                  final query = autocompleteQuery.query;
+                  return StreamMentionAutocompleteOptions(
+                    query: query,
+                    channel: StreamChannel.of(context).channel,
+                    mentionAllAppUsers: widget.mentionAllAppUsers,
+                    mentionsTileBuilder: widget.userMentionsTileBuilder,
+                    onMentionUserTap: (user) {
+                      // adding the mentioned user to the controller.
+                      _effectiveController.addMentionedUser(user);
 
-                    // accepting the autocomplete option.
-                    StreamAutocomplete.of(context)
-                        .acceptAutocompleteOption(user.name);
-                  },
-                );
-              },
-            ),
-            StreamAutocompleteTrigger(
-              trigger: _kEmojiTrigger,
-              minimumRequiredCharacters: 2,
-              optionsViewBuilder: (
-                context,
-                autocompleteQuery,
-                messageEditingController,
-              ) {
-                final query = autocompleteQuery.query;
-                return StreamEmojiAutocompleteOptions(
-                  query: query,
-                  onEmojiSelected: (emoji) {
-                    // accepting the autocomplete option.
-                    StreamAutocomplete.of(context).acceptAutocompleteOption(
-                      emoji.char!,
-                      keepTrigger: false,
-                    );
-                  },
-                );
-              },
-            ),
+                      // accepting the autocomplete option.
+                      StreamAutocomplete.of(context)
+                          .acceptAutocompleteOption(user.name);
+                    },
+                  );
+                },
+              ),
+            if (widget.enableEmojiSuggestionsOverlay)
+              StreamAutocompleteTrigger(
+                trigger: _kEmojiTrigger,
+                minimumRequiredCharacters: 2,
+                optionsViewBuilder: (
+                  context,
+                  autocompleteQuery,
+                  messageEditingController,
+                ) {
+                  final query = autocompleteQuery.query;
+                  return StreamEmojiAutocompleteOptions(
+                    query: query,
+                    onEmojiSelected: (emoji) {
+                      // accepting the autocomplete option.
+                      StreamAutocomplete.of(context).acceptAutocompleteOption(
+                        emoji.char!,
+                        keepTrigger: false,
+                      );
+                    },
+                  );
+                },
+              ),
           ],
         );
       },
@@ -915,10 +917,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
       final channel = StreamChannel.of(context).channel;
       if (channel.ownCapabilities.contains(PermissionType.sendTypingEvents) &&
           value.isNotEmpty) {
-        // channel
-        //     .keyStroke(_effectiveController.message.parentId)
-        //     // ignore: no-empty-block
-        //     .catchError((e) {});
+        channel
+            .keyStroke(_effectiveController.message.parentId)
+            // ignore: no-empty-block
+            .catchError((e) {});
       }
 
       var actionsLength = widget.actions.length;

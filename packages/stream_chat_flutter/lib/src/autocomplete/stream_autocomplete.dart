@@ -339,9 +339,6 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
   }
 
   void closeSuggestions() {
-    // Cancelling debounce on closing the options.
-    _onChangedField.cancel();
-
     final prev = _currentQuery;
     if (prev == null) return;
 
@@ -495,6 +492,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
     if (widget.focusNode == null) {
       _focusNode.dispose();
     }
+    _onChangedField.cancel();
     closeSuggestions();
     super.dispose();
   }
