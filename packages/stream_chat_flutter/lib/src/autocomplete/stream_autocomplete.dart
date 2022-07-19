@@ -547,3 +547,107 @@ class _StreamAutocompleteField extends StatelessWidget {
     );
   }
 }
+
+const _kDefaultStreamAutocompleteOptionsShape = RoundedRectangleBorder(
+  borderRadius: BorderRadius.all(Radius.circular(8)),
+);
+
+/// A helper widget used to show the options of a [StreamAutocomplete].
+class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
+  /// Creates a [StreamAutocompleteOptions] widget.
+  const StreamAutocompleteOptions({
+    super.key,
+    this.color,
+    this.elevation = 2,
+    this.margin = const EdgeInsets.all(8),
+    this.clipBehavior = Clip.hardEdge,
+    required this.options,
+    this.maxHeight,
+    required this.optionBuilder,
+    this.showHeader = true,
+    this.headerBuilder,
+    this.shape = _kDefaultStreamAutocompleteOptionsShape,
+  }) : assert(
+          showHeader == (headerBuilder != null),
+          '[headerBuilder] must not provided if [showHeader] is true'
+          ' or set [showHeader] to false.',
+        );
+
+  /// The background color of the options card.
+  ///
+  /// Defaults to [StreamColorTheme.barsBg].
+  final Color? color;
+
+  /// The elevation of the options card.
+  ///
+  /// The default value is 2.
+  final double elevation;
+
+  /// The margin of the options card.
+  ///
+  /// The default value is [EdgeInsets.all(8)].
+  final EdgeInsetsGeometry margin;
+
+  /// The clip behavior of the options card.
+  ///
+  /// The default value is [Clip.hardEdge].
+  final Clip clipBehavior;
+
+  /// The shape of the options card.
+  final ShapeBorder shape;
+
+  /// The options to display.
+  final Iterable<T> options;
+
+  /// The maximum height of the options card.
+  ///
+  /// Defaults to half the height of the screen.
+  final double? maxHeight;
+
+  /// If true, a header will be displayed at the top of the options card.
+  ///
+  /// The default value is true.
+  final bool showHeader;
+
+  /// The builder for the options.
+  final Widget Function(BuildContext context, T option) optionBuilder;
+
+  /// The builder for the header of the options.
+  ///
+  /// This is only used if [showHeader] is true.
+  final WidgetBuilder? headerBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    final colorTheme = StreamChatTheme.of(context).colorTheme;
+    return Card(
+      margin: margin,
+      elevation: elevation,
+      color: color ?? colorTheme.barsBg,
+      shape: shape,
+      clipBehavior: clipBehavior,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (showHeader) ...[
+            headerBuilder!(context),
+            const Divider(height: 0),
+          ],
+          LimitedBox(
+            maxHeight: maxHeight ?? height * 0.5,
+            child: ListView.builder(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              itemCount: options.length,
+              itemBuilder: (context, index) {
+                final option = options.elementAt(index);
+                return optionBuilder(context, option);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

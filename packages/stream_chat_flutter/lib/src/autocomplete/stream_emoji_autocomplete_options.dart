@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/autocomplete/stream_autocomplete.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
@@ -24,8 +25,6 @@ class StreamEmojiAutocompleteOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _streamChatTheme = StreamChatTheme.of(context);
-
     final emojis = Emoji.all().where((it) {
       final normalizedQuery = query.toUpperCase();
       final normalizedShortName = it.shortName?.toUpperCase();
@@ -37,72 +36,54 @@ class StreamEmojiAutocompleteOptions extends StatelessWidget {
 
     if (emojis.isEmpty) return const SizedBox.shrink();
 
-    return Card(
-      margin: const EdgeInsets.all(8),
-      elevation: 2,
-      color: _streamChatTheme.colorTheme.barsBg,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            dense: true,
-            horizontalTitleGap: 0,
-            leading: StreamSvgIcon.smile(
-              color: _streamChatTheme.colorTheme.accentPrimary,
-              size: 28,
-            ),
-            title: Text(
-              context.translations.emojiMatchingQueryText(query),
-              style: TextStyle(
-                color: _streamChatTheme.colorTheme.textHighEmphasis
-                    .withOpacity(0.5),
-              ),
+    final streamChatTheme = StreamChatTheme.of(context);
+    final colorTheme = streamChatTheme.colorTheme;
+    final textTheme = streamChatTheme.textTheme;
+
+    return StreamAutocompleteOptions<Emoji>(
+      options: emojis,
+      headerBuilder: (context) {
+        return ListTile(
+          dense: true,
+          horizontalTitleGap: 0,
+          leading: StreamSvgIcon.smile(
+            color: colorTheme.accentPrimary,
+            size: 28,
+          ),
+          title: Text(
+            context.translations.emojiMatchingQueryText(query),
+            style: TextStyle(
+              color: colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
           ),
-          const Divider(height: 0),
-          LimitedBox(
-            maxHeight: MediaQuery.of(context).size.height * 0.5,
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              itemCount: emojis.length,
-              itemBuilder: (context, i) {
-                final emoji = emojis.elementAt(i);
-                final themeData = Theme.of(context);
-                return ListTile(
-                  dense: true,
-                  horizontalTitleGap: 0,
-                  leading: Text(
-                    emoji.char!,
-                    style: themeData.textTheme.headline6!.copyWith(
-                      fontSize: 24,
-                    ),
-                  ),
-                  title: SubstringHighlight(
-                    text: emoji.shortName!,
-                    term: query,
-                    textStyleHighlight: themeData.textTheme.headline6!.copyWith(
-                      color: Colors.yellow,
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textStyle: themeData.textTheme.headline6!.copyWith(
-                      fontSize: 14.5,
-                    ),
-                  ),
-                  onTap: onEmojiSelected == null
-                      ? null
-                      : () => onEmojiSelected!(emoji),
-                );
-              },
+        );
+      },
+      optionBuilder: (context, emoji) {
+        final themeData = Theme.of(context);
+        return ListTile(
+          dense: true,
+          horizontalTitleGap: 0,
+          leading: Text(
+            emoji.char!,
+            style: themeData.textTheme.headline6!.copyWith(
+              fontSize: 24,
             ),
           ),
-        ],
-      ),
+          title: SubstringHighlight(
+            text: emoji.shortName!,
+            term: query,
+            textStyleHighlight: themeData.textTheme.headline6!.copyWith(
+              color: Colors.yellow,
+              fontSize: 14.5,
+              fontWeight: FontWeight.bold,
+            ),
+            textStyle: themeData.textTheme.headline6!.copyWith(
+              fontSize: 14.5,
+            ),
+          ),
+          onTap: onEmojiSelected == null ? null : () => onEmojiSelected!(emoji),
+        );
+      },
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/autocomplete/stream_autocomplete.dart';
 import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
@@ -29,8 +30,6 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _streamChatTheme = StreamChatTheme.of(context);
-
     final commands = channel.config?.commands.where((it) {
       final normalizedQuery = query.toUpperCase();
       final normalizedName = it.name.toUpperCase();
@@ -39,71 +38,55 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
 
     if (commands == null || commands.isEmpty) return const SizedBox.shrink();
 
-    return Card(
-      margin: const EdgeInsets.all(8),
-      elevation: 2,
-      color: _streamChatTheme.colorTheme.barsBg,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            dense: true,
-            horizontalTitleGap: 0,
-            leading: StreamSvgIcon.lightning(
-              color: _streamChatTheme.colorTheme.accentPrimary,
-              size: 28,
+    final streamChatTheme = StreamChatTheme.of(context);
+    final colorTheme = streamChatTheme.colorTheme;
+    final textTheme = streamChatTheme.textTheme;
+
+    return StreamAutocompleteOptions<Command>(
+      options: commands,
+      headerBuilder: (context) {
+        return ListTile(
+          dense: true,
+          horizontalTitleGap: 0,
+          leading: StreamSvgIcon.lightning(
+            color: colorTheme.accentPrimary,
+            size: 28,
+          ),
+          title: Text(
+            context.translations.instantCommandsLabel,
+            style: TextStyle(
+              color: colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
-            title: Text(
-              context.translations.instantCommandsLabel,
-              style: TextStyle(
-                color: _streamChatTheme.colorTheme.textHighEmphasis
-                    .withOpacity(0.5),
+          ),
+        );
+      },
+      optionBuilder: (context, command) {
+        return ListTile(
+          dense: true,
+          horizontalTitleGap: 0,
+          leading: _CommandIcon(command: command),
+          title: Row(
+            children: [
+              Text(
+                command.name.capitalize(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              Text(
+                '/${command.name} ${command.args}',
+                style: textTheme.body.copyWith(
+                  color: colorTheme.textLowEmphasis,
+                ),
+              ),
+            ],
           ),
-          const Divider(height: 0),
-          LimitedBox(
-            maxHeight: MediaQuery.of(context).size.height * 0.5,
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              itemCount: commands.length,
-              itemBuilder: (context, i) {
-                final command = commands.elementAt(i);
-                return ListTile(
-                  dense: true,
-                  horizontalTitleGap: 0,
-                  leading: _CommandIcon(command: command),
-                  title: Row(
-                    children: [
-                      Text(
-                        command.name.capitalize(),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '/${command.name} ${command.args}',
-                        style: _streamChatTheme.textTheme.body.copyWith(
-                          color: _streamChatTheme.colorTheme.textLowEmphasis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  onTap: onCommandSelected == null
-                      ? null
-                      : () => onCommandSelected!(command),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+          onTap: onCommandSelected == null
+              ? null
+              : () => onCommandSelected!(command),
+        );
+      },
     );
   }
 }

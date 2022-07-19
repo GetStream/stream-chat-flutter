@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/autocomplete/stream_autocomplete.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user/user_mention_tile.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
@@ -79,44 +80,31 @@ class _StreamMentionAutocompleteOptionsState
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    return Card(
-      margin: const EdgeInsets.all(8),
-      elevation: 2,
-      color: theme.colorTheme.barsBg,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: FutureBuilder<List<User>>(
-        future: userMentionsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) return const Offstage();
-          if (!snapshot.hasData) return const Offstage();
-          final users = snapshot.data!;
-          return LimitedBox(
-            maxHeight: MediaQuery.of(context).size.height * 0.5,
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              itemCount: users.length,
-              itemBuilder: (context, index) {
-                final user = users[index];
-                return Material(
-                  color: theme.colorTheme.barsBg,
-                  child: InkWell(
-                    onTap: widget.onMentionUserTap == null
-                        ? null
-                        : () => widget.onMentionUserTap!(user),
-                    child: widget.mentionsTileBuilder?.call(context, user) ??
-                        StreamUserMentionTile(user),
-                  ),
-                );
-              },
-            ),
-          );
-        },
-      ),
+    return FutureBuilder<List<User>>(
+      future: userMentionsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) return const SizedBox.shrink();
+        if (!snapshot.hasData) return const SizedBox.shrink();
+        final users = snapshot.data!;
+
+        return StreamAutocompleteOptions<User>(
+          options: users,
+          showHeader: false,
+          optionBuilder: (context, user) {
+            final colorTheme = StreamChatTheme.of(context).colorTheme;
+            return Material(
+              color: colorTheme.barsBg,
+              child: InkWell(
+                onTap: widget.onMentionUserTap == null
+                    ? null
+                    : () => widget.onMentionUserTap!(user),
+                child: widget.mentionsTileBuilder?.call(context, user) ??
+                    StreamUserMentionTile(user),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
