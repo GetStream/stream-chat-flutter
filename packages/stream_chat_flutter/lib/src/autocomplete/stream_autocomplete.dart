@@ -569,7 +569,7 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
     this.shape = _kDefaultStreamAutocompleteOptionsShape,
   }) : assert(
           showHeader == (headerBuilder != null),
-          '[headerBuilder] must not provided if [showHeader] is true'
+          '[headerBuilder] must be provided if [showHeader] is true'
           ' or set [showHeader] to false.',
         );
 
