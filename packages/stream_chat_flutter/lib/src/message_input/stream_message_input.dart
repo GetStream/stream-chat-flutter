@@ -324,10 +324,16 @@ class StreamMessageInputState extends State<StreamMessageInput>
     super.didChangeDependencies();
   }
 
+  bool _askingForPermission = false;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (state == AppLifecycleState.resumed && _permissionState != null) {
+    if (state == AppLifecycleState.resumed &&
+        _permissionState != null &&
+        !_askingForPermission) {
+      _askingForPermission = true;
       final newPermissionState = await PhotoManager.requestPermissionExtend();
+      _askingForPermission = false;
       if (newPermissionState != _permissionState && mounted) {
         setState(() {
           _permissionState = newPermissionState;
