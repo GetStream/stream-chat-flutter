@@ -326,7 +326,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    print('state: $state');
     if (state == AppLifecycleState.resumed && _permissionState != null) {
       final newPermissionState = await PhotoManager.requestPermissionExtend();
       if (newPermissionState != _permissionState && mounted) {
