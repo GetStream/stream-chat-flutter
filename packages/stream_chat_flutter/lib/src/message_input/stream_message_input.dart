@@ -256,7 +256,7 @@ class StreamMessageInput extends StatefulWidget {
 
 /// State of [StreamMessageInput]
 class StreamMessageInputState extends State<StreamMessageInput>
-    with RestorationMixin<StreamMessageInput> {
+    with RestorationMixin<StreamMessageInput>, WidgetsBindingObserver {
   bool _inputEnabled = true;
 
   bool get _commandEnabled => _effectiveController.message.command != null;
@@ -308,6 +308,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (widget.messageInputController == null) {
       _createLocalController();
     } else {
@@ -321,6 +322,20 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _streamChatTheme = StreamChatTheme.of(context);
     _messageInputTheme = StreamMessageInputTheme.of(context);
     super.didChangeDependencies();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    print('state: $state');
+    if (state == AppLifecycleState.resumed && _permissionState != null) {
+      final newPermissionState = await PhotoManager.requestPermissionExtend();
+      if (newPermissionState != _permissionState && mounted) {
+        setState(() {
+          _permissionState = newPermissionState;
+        });
+      }
+    }
+    super.didChangeAppLifecycleState(state);
   }
 
   @override
@@ -1351,7 +1366,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
         setState(() => _addAttachments(attachments));
       }
     }).catchError((error) async {
-      print('error is PlatformException: ${error is PlatformException}');
       if (error is FileSystemException) {
         switch (error.message) {
           case 'File size too large after compression and exceeds maximum '
@@ -1510,6 +1524,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _focusNode?.dispose();
     _stopSlowMode();
     _onChangedDebounced.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }
