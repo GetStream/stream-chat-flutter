@@ -38,7 +38,6 @@ class StreamEmojiAutocompleteOptions extends StatelessWidget {
 
     final streamChatTheme = StreamChatTheme.of(context);
     final colorTheme = streamChatTheme.colorTheme;
-    final textTheme = streamChatTheme.textTheme;
 
     return StreamAutocompleteOptions<Emoji>(
       options: emojis,

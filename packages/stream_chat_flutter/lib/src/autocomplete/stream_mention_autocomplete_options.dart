@@ -89,7 +89,6 @@ class _StreamMentionAutocompleteOptionsState
 
         return StreamAutocompleteOptions<User>(
           options: users,
-          showHeader: false,
           optionBuilder: (context, user) {
             final colorTheme = StreamChatTheme.of(context).colorTheme;
             return Material(

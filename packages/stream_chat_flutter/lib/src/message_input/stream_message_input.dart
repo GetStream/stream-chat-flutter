@@ -293,14 +293,16 @@ class StreamMessageInputState extends State<StreamMessageInput>
     assert(_controller != null, '');
 
     registerForRestoration(_controller!, 'messageInputController');
-    _effectiveController.removeListener(_onChangedDebounced);
-    _effectiveController.addListener(_onChangedDebounced);
+    _effectiveController
+      ..removeListener(_onChangedDebounced)
+      ..addListener(_onChangedDebounced);
     if (!_isEditing && _timeOut <= 0) _startSlowMode();
   }
 
   void _initialiseEffectiveController() {
-    _effectiveController.removeListener(_onChangedDebounced);
-    _effectiveController.addListener(_onChangedDebounced);
+    _effectiveController
+      ..removeListener(_onChangedDebounced)
+      ..addListener(_onChangedDebounced);
     if (!_isEditing && _timeOut <= 0) _startSlowMode();
   }
 
@@ -536,7 +538,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
             if (widget.enableMentionsOverlay)
               StreamAutocompleteTrigger(
                 trigger: _kMentionTrigger,
-                minimumRequiredCharacters: 2,
                 optionsViewBuilder: (
                   context,
                   autocompleteQuery,

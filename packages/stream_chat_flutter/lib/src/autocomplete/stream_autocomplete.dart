@@ -429,8 +429,9 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
       return;
     }
     if (old == null) {
-      _messageEditingController.removeListener(_onChangedField);
-      _messageEditingController.dispose();
+      _messageEditingController
+        ..removeListener(_onChangedField)
+        ..dispose();
       _messageEditingController = current!;
     } else if (current == null) {
       _messageEditingController.removeListener(_onChangedField);
@@ -449,8 +450,9 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
       return;
     }
     if (old == null) {
-      _focusNode.removeListener(_onChangedFocus);
-      _focusNode.dispose();
+      _focusNode
+        ..removeListener(_onChangedFocus)
+        ..dispose();
       _focusNode = current!;
     } else if (current == null) {
       _focusNode.removeListener(_onChangedFocus);
@@ -564,14 +566,9 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
     required this.options,
     this.maxHeight,
     required this.optionBuilder,
-    this.showHeader = true,
     this.headerBuilder,
     this.shape = _kDefaultStreamAutocompleteOptionsShape,
-  }) : assert(
-          showHeader == (headerBuilder != null),
-          '[headerBuilder] must be provided if [showHeader] is true'
-          ' or set [showHeader] to false.',
-        );
+  });
 
   /// The background color of the options card.
   ///
@@ -604,11 +601,6 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
   /// Defaults to half the height of the screen.
   final double? maxHeight;
 
-  /// If true, a header will be displayed at the top of the options card.
-  ///
-  /// The default value is true.
-  final bool showHeader;
-
   /// The builder for the options.
   final Widget Function(BuildContext context, T option) optionBuilder;
 
@@ -630,7 +622,7 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (showHeader) ...[
+          if (headerBuilder != null) ...[
             headerBuilder!(context),
             const Divider(height: 0),
           ],
