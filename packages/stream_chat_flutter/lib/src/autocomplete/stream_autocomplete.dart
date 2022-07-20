@@ -6,8 +6,11 @@ export 'stream_command_autocomplete_options.dart';
 export 'stream_emoji_autocomplete_options.dart';
 export 'stream_mention_autocomplete_options.dart';
 
+/// {@macro stream_chat_flutter.StreamMessageInputController}
 typedef StreamMessageEditingController = StreamMessageInputController;
 
+/// Positions the [AutocompleteTrigger] options around the [TextField] or
+/// [TextFormField] that triggered the autocomplete.
 enum OptionsAlignment {
   /// The options are displayed below the field.
   below,
@@ -63,6 +66,7 @@ typedef StreamAutocompleteOptionsViewBuilder = Widget Function(
   StreamMessageEditingController messageEditingController,
 );
 
+/// The query to determine the autocomplete options.
 class StreamAutocompleteQuery {
   /// Creates a [StreamAutocompleteQuery] with the specified [query] and
   /// [selection].
@@ -85,6 +89,7 @@ class _StreamAutocompleteInvokedTriggerWithQuery {
   final StreamAutocompleteQuery query;
 }
 
+/// A
 class StreamAutocompleteTrigger {
   /// Creates a [StreamAutocompleteTrigger] which can be used to trigger
   /// autocomplete suggestions.
@@ -211,17 +216,14 @@ class StreamAutocomplete extends StatefulWidget {
   /// The triggers that trigger autocomplete.
   final Iterable<StreamAutocompleteTrigger> autocompleteTriggers;
 
-  /// {@template flutter.widgets.RawAutocomplete.fieldViewBuilder}
   /// Builds the field whose input is used to get the options.
   ///
-  /// Pass the provided [TextEditingController] to the field built here so that
-  /// RawAutocomplete can listen for changes.
-  /// {@endtemplate}
+  /// Pass the provided [StreamMessageEditingController] to the field built
+  /// here so that StreamAutocomplete can listen for changes.
   final StreamAutocompleteFieldViewBuilder fieldViewBuilder;
 
   /// The [FocusNode] that is used for the text field.
   ///
-  /// {@template flutter.widgets.RawAutocomplete.split}
   /// The main purpose of this parameter is to allow the use of a separate text
   /// field located in another part of the widget tree instead of the text
   /// field built by [fieldViewBuilder]. For example, it may be desirable to
@@ -230,32 +232,25 @@ class StreamAutocomplete extends StatefulWidget {
   /// When following this pattern, [fieldViewBuilder] can return
   /// `SizedBox.shrink()` so that nothing is drawn where the text field would
   /// normally be. A separate text field can be created elsewhere, and a
-  /// FocusNode and TextEditingController can be passed both to that text field
-  /// and to RawAutocomplete.
+  /// FocusNode and StreamMessageEditingController can be passed both to that
+  /// text field and to StreamAutocomplete.
   ///
-  /// {@tool dartpad}
-  /// This examples shows how to create an autocomplete widget with the text
-  /// field in the AppBar and the results in the main body of the app.
-  ///
-  /// ** See code in examples/api/lib/widgets/autocomplete/raw_autocomplete.focus_node.0.dart **
-  /// {@end-tool}
-  /// {@endtemplate}
-  ///
-  /// If this parameter is not null, then [textFieldController] must also be
-  /// not null.
+  /// If this parameter is not null, then [messageEditingController] must also
+  /// be not null.
   final FocusNode? focusNode;
 
-  /// The [TextEditingController] that is used for the text field.
+  /// The [StreamMessageEditingController] that is used for the text field.
   ///
   /// If this parameter is not null, then [focusNode] must also be not null.
   final StreamMessageEditingController? messageEditingController;
 
   /// The alignment of the options.
   ///
-  /// The default value is [MultiTriggerAutocompleteAlignment.below].
+  /// The default value is [OptionsAlignment.above].
   final OptionsAlignment optionsAlignment;
 
-  /// The duration of the debounce period for the [TextEditingController].
+  /// The duration of the debounce period for the
+  /// [StreamMessageEditingController].
   ///
   /// The default value is [300ms].
   final Duration debounceDuration;
@@ -274,7 +269,7 @@ class StreamAutocomplete extends StatefulWidget {
   /// Returns the nearest [StreamAutocomplete] ancestor of the given context.
   static _StreamAutocompleteState of(BuildContext context) {
     final state = context.findAncestorStateOfType<_StreamAutocompleteState>();
-    assert(state != null, '_StreamAutocompleteState not found');
+    assert(state != null, 'StreamAutocomplete not found in the widget tree');
     return state!;
   }
 
@@ -320,6 +315,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
 
     final alreadyContainsSpace = text.substring(end).startsWith(' ');
     // Having extra space helps dismissing the auto-completion view.
+    // ignore: parameter_assignments
     if (!alreadyContainsSpace) option += ' ';
 
     var selectionOffset = start + option.length;
@@ -382,7 +378,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
       final textEditingValue = _messageEditingController.textEditingValue;
 
       // If the content has not changed, then there is nothing to do.
-      if (textEditingValue.text == _lastFieldText) return closeSuggestions();
+      if (textEditingValue.text == _lastFieldText) return;
 
       // Make sure the options are no longer hidden if the content of the
       // field changes.
@@ -532,7 +528,6 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
 // The default Material-style Autocomplete text field.
 class _StreamAutocompleteField extends StatelessWidget {
   const _StreamAutocompleteField({
-    super.key,
     required this.focusNode,
     required this.messageEditingController,
   });
@@ -605,8 +600,6 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
   final Widget Function(BuildContext context, T option) optionBuilder;
 
   /// The builder for the header of the options.
-  ///
-  /// This is only used if [showHeader] is true.
   final WidgetBuilder? headerBuilder;
 
   @override

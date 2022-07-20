@@ -92,10 +92,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
 }
 
 class _CommandIcon extends StatelessWidget {
-  const _CommandIcon({
-    super.key,
-    required this.command,
-  });
+  const _CommandIcon({required this.command});
 
   final Command command;
 

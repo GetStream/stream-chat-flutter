@@ -11,7 +11,9 @@ import 'package:stream_chat_flutter_core/src/message_text_field_controller.dart'
 /// Pass in a [StreamMessageInputController] as the `valueListenable`.
 typedef StreamMessageValueListenableBuilder = ValueListenableBuilder<Message>;
 
+/// {@template stream_chat_flutter.StreamMessageInputController}
 /// Controller for storing and mutating a [Message] value.
+/// {@endtemplate}
 class StreamMessageInputController extends ValueNotifier<Message> {
   /// Creates a controller for an editable text field.
   ///
