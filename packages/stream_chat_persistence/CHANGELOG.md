@@ -5,6 +5,7 @@
 ## 4.2.0
 
 - Added support for `Channel.ownCapabilities`
+- Allowed experimental use of indexedDb on web with `webUseExperimentalIndexedDb` parameter on `StreamChatPersistenceClient`
 
 ## 4.1.0
 
