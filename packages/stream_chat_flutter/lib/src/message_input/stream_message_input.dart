@@ -1259,12 +1259,14 @@ class StreamMessageInputState extends State<StreamMessageInput>
         // Clear the text if the commands options are already visible.
         if (isCommandOptionsVisible) {
           _effectiveController.clear();
+          _effectiveFocusNode.unfocus();
         } else {
           // This triggers the [StreamAutocomplete] to show the command trigger.
           _effectiveController.textEditingValue = const TextEditingValue(
             text: _kCommandTrigger,
             selection: TextSelection.collapsed(offset: _kCommandTrigger.length),
           );
+          _effectiveFocusNode.requestFocus();
         }
       },
     );

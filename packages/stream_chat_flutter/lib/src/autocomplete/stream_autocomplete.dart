@@ -26,11 +26,13 @@ enum OptionsAlignment {
     switch (this) {
       case OptionsAlignment.below:
         return const Aligned(
+          widthFactor: 1,
           follower: Alignment.topCenter,
           target: Alignment.bottomCenter,
         );
       case OptionsAlignment.above:
         return const Aligned(
+          widthFactor: 1,
           follower: Alignment.bottomCenter,
           target: Alignment.topCenter,
         );
@@ -284,6 +286,10 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
         _currentTrigger != null;
   }
 
+  /// Accepts and replaces the current query with the given [option] and closes
+  /// the suggested options.
+  ///
+  /// Optionally, pass [keepTrigger] false to remove the trigger from the text.
   void acceptAutocompleteOption(
     String option, {
     bool keepTrigger = true,
@@ -323,6 +329,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
     return closeSuggestions();
   }
 
+  /// Closes the suggestions and resets the current query.
   void closeSuggestions() {
     final prev = _currentQuery;
     if (prev == null) return;
@@ -331,6 +338,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
     if (mounted) setState(() {});
   }
 
+  /// Starts showing the suggestions for the given [query].
   void showSuggestions(
     StreamAutocompleteQuery query,
     StreamAutocompleteTrigger trigger,
@@ -404,8 +412,8 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
     if (mounted) setState(() {});
   }
 
-// Handle a potential change in textEditingController by properly disposing of
-// the old one and setting up the new one, if needed.
+  // Handle a potential change in textEditingController by properly disposing of
+  // the old one and setting up the new one, if needed.
   void _updateTextEditingController(
     StreamMessageEditingController? old,
     StreamMessageEditingController? current,
@@ -428,8 +436,8 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
     _messageEditingController.addListener(_onChangedField);
   }
 
-// Handle a potential change in focusNode by properly disposing of the old one
-// and setting up the new one, if needed.
+  // Handle a potential change in focusNode by properly disposing of the old one
+  // and setting up the new one, if needed.
   void _updateFocusNode(FocusNode? old, FocusNode? current) {
     if ((old == null && current == null) || old == current) {
       return;
