@@ -1,3 +1,5 @@
+// ignore_for_file: no-empty-block
+
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
