@@ -43,25 +43,19 @@ enum OptionsAlignment {
 ///
 /// See also:
 ///
-///   * [RawAutocomplete.fieldViewBuilder], which is of this type.
+///   * [StreamAutocomplete.fieldViewBuilder], which is of this type.
 typedef StreamAutocompleteFieldViewBuilder = Widget Function(
   BuildContext context,
   StreamMessageEditingController messageEditingController,
   FocusNode focusNode,
 );
 
-/// The type of the [RawAutocomplete] callback which returns a [Widget] that
-/// displays the specified [options] and calls [onSelected] if the user
-/// selects an option.
-///
-/// The returned widget from this callback will be wrapped in an
-/// [AutocompleteHighlightedOption] inherited widget. This will allow
-/// this callback to determine which option is currently highlighted for
-/// keyboard navigation.
+/// The type of the [StreamAutocompleteTrigger] callback which returns a
+/// [Widget] that displays the specified [options].
 ///
 /// See also:
 ///
-///   * [RawAutocomplete.optionsViewBuilder], which is of this type.
+///   * [StreamAutocompleteTrigger.optionsViewBuilder], which is of this type.
 typedef StreamAutocompleteOptionsViewBuilder = Widget Function(
   BuildContext context,
   StreamAutocompleteQuery autocompleteQuery,
@@ -91,7 +85,8 @@ class _StreamAutocompleteInvokedTriggerWithQuery {
   final StreamAutocompleteQuery query;
 }
 
-/// A
+/// The class responsible for triggering autocomplete suggestions and
+/// displaying the options.
 class StreamAutocompleteTrigger {
   /// Creates a [StreamAutocompleteTrigger] which can be used to trigger
   /// autocomplete suggestions.
@@ -114,19 +109,11 @@ class StreamAutocompleteTrigger {
   /// a autocomplete options.
   final int minimumRequiredCharacters;
 
-  /// Builds the selectable options widgets from a list of options objects.
+  /// Builds the widget responsible for querying and displaying the
+  /// autocomplete options.
   ///
-  /// The options are displayed floating below the field using a
-  /// [CompositedTransformFollower] inside of an [Overlay], not at the same
-  /// place in the widget tree as [RawAutocomplete].
-  ///
-  /// In order to track which item is highlighted by keyboard navigation, the
-  /// resulting options will be wrapped in an inherited
-  /// [AutocompleteHighlightedOption] widget.
-  /// Inside this callback, the index of the highlighted option can be obtained
-  /// from [AutocompleteHighlightedOption.of] to display the highlighted option
-  /// with a visual highlight to indicate it will be the option selected from
-  /// the keyboard.
+  /// See also:
+  ///  * [StreamAutocompleteOptions], which helps in displaying the options.
   final StreamAutocompleteOptionsViewBuilder optionsViewBuilder;
 
   @override
