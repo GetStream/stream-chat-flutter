@@ -33,7 +33,6 @@ class StreamChat extends StatefulWidget {
   const StreamChat({
     super.key,
     required this.client,
-    required this.analyticsClient,
     required this.child,
     this.streamChatThemeData,
     this.streamChatConfigData,
@@ -44,9 +43,6 @@ class StreamChat extends StatefulWidget {
 
   /// Client to do chat operations with
   final StreamChatClient client;
-
-  /// Client that deals with all the analytics events in UI
-  final StreamChatAnalyticsClient analyticsClient;
 
   /// Child which inherits details
   final Widget? child;
