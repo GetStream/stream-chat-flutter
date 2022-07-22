@@ -730,8 +730,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
       if (_openFilePickerSection) {
         setState(() => _openFilePickerSection = false);
       } else {
-        if (_focusNode.hasFocus) {
-          _focusNode.unfocus();
+        if (_effectiveFocusNode.hasFocus) {
+          _effectiveFocusNode.unfocus();
         }
         _permissionState = await PhotoManager.requestPermissionExtend();
         setState(() => _openFilePickerSection = true);
