@@ -26,7 +26,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const _kMinMediaPickerSize = 360.0;
 
-const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
+const _kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
 
 const _kEmojiTrigger = ':';
 const _kCommandTrigger = '/';
