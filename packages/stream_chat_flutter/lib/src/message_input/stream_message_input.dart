@@ -332,13 +332,17 @@ class StreamMessageInputState extends State<StreamMessageInput>
         _permissionState != null &&
         !_askingForPermission) {
       _askingForPermission = true;
-      final newPermissionState = await PhotoManager.requestPermissionExtend();
+
+      try {
+        final newPermissionState = await PhotoManager.requestPermissionExtend();
+        if (newPermissionState != _permissionState && mounted) {
+          setState(() {
+            _permissionState = newPermissionState;
+          });
+        }
+      } catch (_) {}
+
       _askingForPermission = false;
-      if (newPermissionState != _permissionState && mounted) {
-        setState(() {
-          _permissionState = newPermissionState;
-        });
-      }
     }
     super.didChangeAppLifecycleState(state);
   }
