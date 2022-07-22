@@ -26,7 +26,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const _kMinMediaPickerSize = 360.0;
 
-const _kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
+/// The default maximum size for media attachments.
+const kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
 
 const _kEmojiTrigger = ':';
 const _kCommandTrigger = '/';
@@ -95,7 +96,7 @@ class StreamMessageInput extends StatefulWidget {
     this.activeSendButton,
     this.showCommandsButton = true,
     this.userMentionsTileBuilder,
-    this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
+    this.maxAttachmentSize = kDefaultMaxAttachmentSize,
     this.onError,
     this.attachmentLimit = 10,
     this.onAttachmentLimitExceed,
