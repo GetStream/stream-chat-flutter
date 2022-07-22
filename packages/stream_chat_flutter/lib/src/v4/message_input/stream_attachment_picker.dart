@@ -32,7 +32,7 @@ class StreamAttachmentPicker extends StatefulWidget {
     this.pickerSize = 360.0,
     this.attachmentLimit = 10,
     this.onAttachmentLimitExceeded,
-    this.maxAttachmentSize = 20971520,
+    this.maxAttachmentSize = kDefaultMaxAttachmentSize,
     this.onError,
     this.allowedAttachmentTypes = const [
       DefaultAttachmentTypes.image,

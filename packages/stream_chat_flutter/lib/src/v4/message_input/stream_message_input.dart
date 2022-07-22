@@ -128,7 +128,8 @@ enum SendButtonLocation {
 
 const _kMinMediaPickerSize = 360.0;
 
-const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
+/// Default maximum size for media attachments.
+const kDefaultMaxAttachmentSize = 1024 * 1024 * 100; // 100MB in Bytes
 
 /// Inactive state:
 ///
