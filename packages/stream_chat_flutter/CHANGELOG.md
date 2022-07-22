@@ -8,6 +8,10 @@
 - [[#1240]](https://github.com/getstream/stream-chat-flutter/issues/1240) Substitute mentioned user
   ids with user names in system message.
 
+🔄 Changed
+
+- Changed default maximum attachment size from 20MB to 100MB.
+
 ## 4.4.0
 
 🐞 Fixed
