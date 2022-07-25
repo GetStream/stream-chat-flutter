@@ -1,4 +1,4 @@
-## Upocming
+## Upcoming
 
 🐞 Fixed
 
