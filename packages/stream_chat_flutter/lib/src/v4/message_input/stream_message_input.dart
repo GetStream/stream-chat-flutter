@@ -194,7 +194,7 @@ class StreamMessageInput extends StatefulWidget {
     this.activeSendButton,
     this.showCommandsButton = true,
     this.userMentionsTileBuilder,
-    this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
+    this.maxAttachmentSize = kDefaultMaxAttachmentSize,
     this.onError,
     this.attachmentLimit = 10,
     this.onAttachmentLimitExceed,
