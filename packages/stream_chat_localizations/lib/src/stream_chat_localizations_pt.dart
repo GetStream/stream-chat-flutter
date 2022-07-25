@@ -444,4 +444,11 @@ Não é possível adicionar mais de $limit arquivos de uma vez
     }
     return '$unreadCount mensagens não lidas';
   }
+
+  @override
+  String get enableFileAccessMessage =>
+      'Ative o acesso aos arquivos' '\npara poder compartilhá-los com amigos.';
+
+  @override
+  String get allowFileAccessMessage => 'Permitir acesso aos arquivos';
 }

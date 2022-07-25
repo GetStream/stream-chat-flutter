@@ -9,8 +9,9 @@ import 'package:cached_network_image/cached_network_image.dart'
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
@@ -256,9 +257,7 @@ class StreamMessageInput extends StatefulWidget {
 
 /// State of [StreamMessageInput]
 class StreamMessageInputState extends State<StreamMessageInput>
-    with RestorationMixin<StreamMessageInput> {
-  final _imagePicker = ImagePicker();
-
+    with RestorationMixin<StreamMessageInput>, WidgetsBindingObserver {
   bool _inputEnabled = true;
 
   bool get _commandEnabled => _effectiveController.message.command != null;
@@ -310,6 +309,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (widget.messageInputController == null) {
       _createLocalController();
     } else {
@@ -323,6 +323,29 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _streamChatTheme = StreamChatTheme.of(context);
     _messageInputTheme = StreamMessageInputTheme.of(context);
     super.didChangeDependencies();
+  }
+
+  bool _askingForPermission = false;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.resumed &&
+        _permissionState != null &&
+        !_askingForPermission) {
+      _askingForPermission = true;
+
+      try {
+        final newPermissionState = await PhotoManager.requestPermissionExtend();
+        if (newPermissionState != _permissionState && mounted) {
+          setState(() {
+            _permissionState = newPermissionState;
+          });
+        }
+      } catch (_) {}
+
+      _askingForPermission = false;
+    }
+    super.didChangeAppLifecycleState(state);
   }
 
   @override
@@ -364,6 +387,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   int _timeOut = 0;
   Timer? _slowModeTimer;
+
+  PermissionState? _permissionState;
 
   void _startSlowMode() {
     if (!mounted) {
@@ -710,7 +735,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
       if (_openFilePickerSection) {
         setState(() => _openFilePickerSection = false);
       } else {
-        showAttachmentModal();
+        if (_effectiveFocusNode.hasFocus) {
+          _effectiveFocusNode.unfocus();
+        }
+        _permissionState = await PhotoManager.requestPermissionExtend();
+        setState(() => _openFilePickerSection = true);
       }
     }
   }
@@ -1030,6 +1059,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       onAttachmentLimitExceeded: widget.onAttachmentLimitExceed,
       maxAttachmentSize: widget.maxAttachmentSize,
       onError: _showErrorAlert,
+      permissionState: _permissionState,
     );
 
     if (_openFilePickerSection && widget.attachmentsPickerBuilder != null) {
@@ -1305,7 +1335,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
   }
 
-  /// Adds an attachment to the [controller.attachments] map
+  /// Adds an attachment to the [messageInputController.attachments] map
   void _addAttachments(Iterable<Attachment> attachments) {
     final limit = widget.attachmentLimit;
     final length = _effectiveController.attachments.length + attachments.length;
@@ -1335,7 +1365,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     setState(() => _inputEnabled = false);
     final attachmentHandler = MobileAttachmentHandler(
       maxAttachmentSize: widget.maxAttachmentSize,
-      imagePicker: _imagePicker,
     );
 
     attachmentHandler
@@ -1346,8 +1375,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
       if (attachments.isNotEmpty) {
         setState(() => _addAttachments(attachments));
       }
-    }).catchError((error) {
-      if (error.runtimeType == FileSystemException) {
+    }).catchError((error) async {
+      if (error is FileSystemException) {
         switch (error.message) {
           case 'File size too large after compression and exceeds maximum '
               'attachment size':
@@ -1367,6 +1396,25 @@ class StreamMessageInputState extends State<StreamMessageInput>
           default:
             _showErrorAlert(context.translations.somethingWentWrongError);
             break;
+        }
+      } else if (error is PlatformException) {
+        final res = await showConfirmationBottomSheet(
+          context,
+          icon: StreamSvgIcon.error(
+            color: StreamChatTheme.of(context).colorTheme.accentError,
+            size: 24,
+          ),
+          title: camera
+              ? context.translations.allowGalleryAccessMessage
+              : context.translations.allowFileAccessMessage,
+          question: camera
+              ? context.translations.enablePhotoAndVideoAccessMessage
+              : context.translations.enableFileAccessMessage,
+          okText: context.translations.okLabel,
+          cancelText: context.translations.cancelLabel,
+        );
+        if (res == true) {
+          await PhotoManager.openSetting();
         }
       }
     });
@@ -1486,6 +1534,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _focusNode?.dispose();
     _stopSlowMode();
     _onChangedDebounced.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }

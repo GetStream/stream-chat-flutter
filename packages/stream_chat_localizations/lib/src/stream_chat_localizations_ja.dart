@@ -424,4 +424,11 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
     }
     return '$unreadCountつの未読メッセージ';
   }
+
+  @override
+  String get enableFileAccessMessage =>
+      '友達と共有できるように、' '\nファイルへのアクセスを有効にしてください。';
+
+  @override
+  String get allowFileAccessMessage => 'ファイルへのアクセスを許可する';
 }

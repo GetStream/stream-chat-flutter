@@ -465,6 +465,12 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
     }
     return '$unreadCount unread messages';
   }
+
+  @override
+  String get enableFileAccessMessage => 'Enable file access to continue';
+
+  @override
+  String get allowFileAccessMessage => 'Allow access to files';
 }
 
 void main() async {

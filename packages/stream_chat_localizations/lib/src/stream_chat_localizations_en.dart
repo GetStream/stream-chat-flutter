@@ -441,4 +441,11 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
     }
     return '$unreadCount unread messages';
   }
+
+  @override
+  String get enableFileAccessMessage => 'Please enable access to files'
+      '\nso you can share them with friends.';
+
+  @override
+  String get allowFileAccessMessage => 'Allow access to files';
 }

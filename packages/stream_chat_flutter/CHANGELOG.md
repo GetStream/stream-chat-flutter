@@ -5,6 +5,7 @@
 🐞 Fixed
 
 - Fixed the unread message header in the message list view.
+- Show dialog after clicking on the camera button and permission is denied.
 
 🔄 Changed
 
