@@ -124,13 +124,3 @@ class UploadState with _$UploadState {
   /// Returns true if state is [Failed]
   bool get isFailed => this is Failed;
 }
-
-Uint8List? _fromString(String? bytes) {
-  if (bytes == null) return null;
-  return Uint8List.fromList(bytes.codeUnits);
-}
-
-String? _toString(Uint8List? bytes) {
-  if (bytes == null) return null;
-  return String.fromCharCodes(bytes);
-}
