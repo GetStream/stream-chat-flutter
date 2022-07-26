@@ -1588,10 +1588,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
         pickedFile = await _imagePicker.pickVideo(source: ImageSource.camera);
       }
       if (pickedFile != null) {
+        final tempPath = await pickedFile.saveToTempDir();
+
         final bytes = await pickedFile.readAsBytes();
         file = AttachmentFile(
           size: bytes.length,
-          path: pickedFile.path,
+          path: tempPath,
           bytes: bytes,
         );
       }
@@ -1608,7 +1610,15 @@ class StreamMessageInputState extends State<StreamMessageInput>
         type: type,
       );
       if (res?.files.isNotEmpty == true) {
-        file = res!.files.single.toAttachmentFile;
+        final attachmentFile = res!.files.single.toAttachmentFile;
+        final xFile = res.files.single.toXFile;
+
+        final tempPath = await xFile.saveToTempDir();
+        file = AttachmentFile(
+          size: attachmentFile.size,
+          path: tempPath,
+          bytes: attachmentFile.bytes,
+        );
       }
     }
 

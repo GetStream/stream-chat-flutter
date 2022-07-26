@@ -2,11 +2,27 @@ import 'package:diacritic/diacritic.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 final _emojiChars = Emoji.chars();
+
+/// XFile extension
+extension XFileExtension on XFile {
+  /// Copies the file to the temporary directory
+  /// and returns the path to the copied file.
+  Future<String> saveToTempDir() async {
+    final tempDir = await getTemporaryDirectory();
+
+    await saveTo(tempDir.path);
+
+    final tempPath = '${tempDir.path}/${path.split('/').last}';
+    return tempPath;
+  }
+}
 
 /// String extension
 extension StringExtension on String {
@@ -52,6 +68,19 @@ extension PlatformFileX on PlatformFile {
         bytes: bytes,
         size: size,
       );
+
+  /// Converts the [PlatformFile] into [XFile]
+  XFile get toXFile => path != null
+      ? XFile(
+          path!,
+          bytes: bytes,
+          length: bytes?.length,
+        )
+      : XFile.fromData(
+          bytes!,
+          path: path,
+          length: bytes?.length,
+        );
 }
 
 /// Extension on [InputDecoration]
