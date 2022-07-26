@@ -8,6 +8,7 @@
 - [[#1240]](https://github.com/getstream/stream-chat-flutter/issues/1240) Substitute mentioned user
   ids with user names in system message.
 - [[#1228]](https://github.com/GetStream/stream-chat-flutter/issues/1228) Fix image download on iOS.
+- Copy file to temp directory before uploading.
 
 🔄 Changed
 

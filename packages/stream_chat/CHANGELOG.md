@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `XFileExtension` to save file to temporary directory.
+
 ## 4.4.0
 
 🐞 Fixed
