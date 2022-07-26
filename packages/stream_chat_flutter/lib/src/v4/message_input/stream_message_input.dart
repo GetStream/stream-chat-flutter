@@ -1610,6 +1610,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       if (res?.files.isNotEmpty == true) {
         file = res!.files.single.toAttachmentFile;
       }
+      print('file.path: ${file?.path}');
     }
 
     setState(() => _inputEnabled = true);

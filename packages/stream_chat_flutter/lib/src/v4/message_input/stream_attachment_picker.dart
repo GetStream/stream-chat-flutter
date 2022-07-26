@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
@@ -369,17 +370,19 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
   }
 
   void _addAssetAttachment(AssetEntity medium) async {
-    final mediaFile = await medium.originFile.timeout(
-      const Duration(seconds: 5),
-      onTimeout: () => medium.originFile,
-    );
+    final mediaFile = await medium.originFile;
 
     if (mediaFile == null) return;
 
+    final tempDir = await getTemporaryDirectory();
+
+    final cachedFile = await mediaFile
+        .copy('${tempDir.path}/${mediaFile.path.split('/').last}');
+
     final file = AttachmentFile(
-      path: mediaFile.path,
-      size: await mediaFile.length(),
-      bytes: mediaFile.readAsBytesSync(),
+      path: cachedFile.path,
+      size: await cachedFile.length(),
+      bytes: cachedFile.readAsBytesSync(),
     );
 
     if (file.size! > widget.maxAttachmentSize) {
