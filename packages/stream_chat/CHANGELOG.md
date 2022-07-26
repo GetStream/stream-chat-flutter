@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Do not serialize `AttachmentFile.bytes`
+
 ## 4.4.0
 
 🐞 Fixed
