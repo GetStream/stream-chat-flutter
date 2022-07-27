@@ -11,14 +11,12 @@ AttachmentFile _$AttachmentFileFromJson(Map<String, dynamic> json) =>
       size: json['size'] as int?,
       path: json['path'] as String?,
       name: json['name'] as String?,
-      bytes: _fromString(json['bytes'] as String?),
     );
 
 Map<String, dynamic> _$AttachmentFileToJson(AttachmentFile instance) =>
     <String, dynamic>{
       'path': instance.path,
       'name': instance.name,
-      'bytes': _toString(instance.bytes),
       'size': instance.size,
     };
 
