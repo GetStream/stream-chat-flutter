@@ -246,10 +246,10 @@ abstract class ChatPersistenceClient {
         final members = state.members;
         final Iterable<Message>? messages;
         if (CurrentPlatform.isWeb) {
-          messages = state.messages?.where((it) =>
-              it.attachments.isEmpty ||
-              it.attachments.every((attachment) =>
-                  attachment.uploadState == const UploadState.success()));
+          messages = state.messages?.where((it) => !it.attachments.any(
+                (attachment) =>
+                    attachment.uploadState != const UploadState.success(),
+              ));
         } else {
           messages = state.messages;
         }
