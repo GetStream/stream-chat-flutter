@@ -9,6 +9,7 @@ import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/extension.dart';
+import 'package:stream_chat/stream_chat.dart';
 
 /// A simple client used for persisting chat data locally.
 abstract class ChatPersistenceClient {
@@ -243,7 +244,15 @@ abstract class ChatPersistenceClient {
         final cid = channel.cid;
         final reads = state.read;
         final members = state.members;
-        final messages = state.messages;
+        final Iterable<Message>? messages;
+        if (CurrentPlatform.isWeb) {
+          messages = state.messages?.where((it) =>
+              it.attachments.isEmpty ||
+              it.attachments.every((attachment) =>
+                  attachment.uploadState == const UploadState.success()));
+        } else {
+          messages = state.messages;
+        }
         final pinnedMessages = state.pinnedMessages;
 
         // Preparing deletion data
@@ -255,7 +264,7 @@ abstract class ChatPersistenceClient {
         // preparing addition data
         channelWithReads[cid] = reads;
         channelWithMembers[cid] = members;
-        channelWithMessages[cid] = messages;
+        channelWithMessages[cid] = messages?.toList();
         channelWithPinnedMessages[cid] = pinnedMessages;
 
         reactions.addAll(messages?.expand(_expandReactions) ?? []);
