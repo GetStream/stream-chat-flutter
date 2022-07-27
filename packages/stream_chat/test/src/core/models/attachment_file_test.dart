@@ -1,7 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:stream_chat/src/core/models/action.dart';
-import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:test/test.dart';
 
