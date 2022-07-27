@@ -51,7 +51,7 @@ class AttachmentFile {
 
   /// Byte data for this file. Particularly useful if you want to manipulate
   /// its data or easily upload to somewhere else.
-  @JsonKey(toJson: _toString, fromJson: _fromString)
+  @JsonKey(ignore: true)
   final Uint8List? bytes;
 
   /// The file size in bytes.
@@ -123,14 +123,4 @@ class UploadState with _$UploadState {
 
   /// Returns true if state is [Failed]
   bool get isFailed => this is Failed;
-}
-
-Uint8List? _fromString(String? bytes) {
-  if (bytes == null) return null;
-  return Uint8List.fromList(bytes.codeUnits);
-}
-
-String? _toString(Uint8List? bytes) {
-  if (bytes == null) return null;
-  return String.fromCharCodes(bytes);
 }
