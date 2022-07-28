@@ -1,3 +1,13 @@
+## 4.4.1
+
+ - **FIX**: do not serialize bytes (#1283).
+ - **FIX**: fix image download on iOS (#1280).
+ - **FIX**: rename const.
+ - **FIX**: export kDefaultMaxAttachmentSize and use it in `StreamAttachmentPicker` default, also increase it to 100Mb.
+ - **FIX**: substitute mentioned user ids with user names in system message (#1278).
+ - **FIX**: fix date divider not showing (#1259).
+ - **FIX**: fix jiffy locale initialization (#1255).
+
 ## Upcoming
 
 🐞 Fixed
