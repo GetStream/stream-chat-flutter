@@ -16,7 +16,6 @@
 * `toggleMuteUnmuteUserQuestion` with translations
 * `toggleMuteUnmuteUserText` with translations
 
-<a name='3.3.0'></a>
 ## 3.3.0
 
 * Added support for [Norwegian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_no.dart) locale.

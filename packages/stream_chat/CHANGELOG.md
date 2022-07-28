@@ -1,6 +1,6 @@
 ## Upcoming
 
-- Included the changes from version [4.4.0](#440).
+- Included the changes from version [4.4.0](#440) and [4.4.1](#441).
 
 🐞 Fixed
 
@@ -19,6 +19,12 @@
 
 - Minor fixes.
 - Removed deprecated code.
+
+## 4.4.1
+
+🐞 Fixed
+
+- Do not serialize `AttachmentFile.bytes`
 
 ## 4.4.0
 

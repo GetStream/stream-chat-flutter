@@ -1,11 +1,15 @@
 ## Upcoming 
 
-- Included the changes from version [4.4.0](#440).
+- Included the changes from version [4.4.0](#440) and [4.4.1](#441).
 
 ## 5.0.0-beta.1
 
 - Updated `stream_chat` dependency to [`5.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
 - Removed deprecated code.
+
+## 4.4.1
+
+- Updated `stream_chat` dependency to [`4.4.1`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 4.4.0
 
