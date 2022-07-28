@@ -6,10 +6,18 @@
 
 - Fixed the unread message header in the message list view.
 - Show dialog after clicking on the camera button and permission is denied.
+- Fix Jiffy initialization.
+- Fix loading to unread position in `StreamMessageListView`.
+- Minor fixes and improvements.
 
 🔄 Changed
 
-- [[#1125]](https://github.com/GetStream/stream-chat-flutter/issues/1125) `defaultUserImage`, `placeholderUserImage`, and `reactionIcons` have been refactored out of `StreamChatThemeData` and into the new `StreamChatConfigurationData` class.
+- [[#1125]](https://github.com/GetStream/stream-chat-flutter/issues/1125) `defaultUserImage`, `placeholderUserImage`, `reactionIcons`, and `enforceUniqueReactions` have been refactored out of `StreamChatThemeData` and into the new `StreamChatConfigurationData` class.
+
+✅ Added
+
+- Added `StreamAutocomplete` widget for autocomplete triggers in `StreamMessageInput`.
+- Added `StreamMessageInput.customAutocompleteTriggers` to allow users to define their custom triggers.
 
 ## 5.0.0-beta.1
 
