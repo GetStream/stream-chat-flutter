@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamSystemMessage}
@@ -23,11 +24,16 @@ class StreamSystemMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
+    final message = this.message.replaceMentions(linkify: false);
+
+    final messageText = message.text;
+    if (messageText == null) return const SizedBox.shrink();
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onMessageTap == null ? null : () => onMessageTap!(message),
       child: Text(
-        message.text!,
+        messageText,
         textAlign: TextAlign.center,
         softWrap: true,
         style: theme.textTheme.captionBold.copyWith(
