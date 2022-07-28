@@ -1,8 +1,36 @@
+## 4.0.0-beta.2
+
+ - **FIX**: fix tests.
+ - **FIX**: fix japanese translations.
+ - **FIX**: fix typos in italian strings.
+ - **FIX**: update changelog.
+ - **FIX**: fix changelog entry.
+ - **FIX**: it translations.
+ - **FIX**: cooldown and teams, added correct textfield hint.
+ - **FIX**: Fix hindi translations.
+ - **FIX**: ios build config.
+ - **FIX**: minor fixes.
+ - **FIX**: fix `fileTooLargeAfterCompressionError`, `fileTooLargeError`.
+ - **FEAT**: show dialog after clicking on the camera button and permission is denied (#1262).
+ - **FEAT**: add German localization.
+ - **FEAT**: use localization in menu item titles.
+ - **FEAT**: add could not read file bytes error message.
+ - **FEAT**: add dart_code_metrics.
+ - **FEAT**: add localized strings.
+ - **FEAT**: Move attachment limit exceeded error to translations.
+ - **FEAT**: support for japanese.
+ - **FEAT**: Initial implementation.
+ - **DOCS**: spelling and grammar.
+ - **DOCS**: move header.
+ - **DOCS**: add image.
+ - **DOCS**: additional localization examples.
+ - **DOCS**: fix ios locales link.
+ - **DOCS**: fix translation links.
+ - **DOCS**: add localization docs.
+
 ## Upcoming
 
 * Included the changes from version [3.3.0](#330).
-
-* Added support for [Norwegian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_no.dart) locale.
 
 ## 4.0.0-beta.1
 
