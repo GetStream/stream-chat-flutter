@@ -1,3 +1,7 @@
+## 4.4.0
+
+ - **FEAT**: allow experimental indexedDB on web.
+
 ## Upcoming
 
 - Allowed experimental use of indexedDb on web with `webUseExperimentalIndexedDb` parameter on `StreamChatPersistenceClient`.
