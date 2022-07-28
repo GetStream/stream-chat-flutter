@@ -1,19 +1,164 @@
+## 5.0.0-beta.2
+
+ - **REFACTOR**: Make Streams non-nullable wherever possible.
+ - **REFACTOR**: Remove deprecated attachmentFileUploader field.
+ - **REFACTOR**: remove deprecated code and cleanup.
+ - **REFACTOR**: use `dio.fetch` instead of `dio.request`.
+ - **REFACTOR**: remove dio deprecated methods.
+ - **REFACTOR**: regenerate attachment_file.freezed.dart.
+ - **REFACTOR**: migrate enums to v3.
+ - **REFACTOR**: convert the implementation into non-breaking.
+ - **REFACTOR**: move membership from channel_model to channel_state.
+ - **REFACTOR**: improve channel list and controller.
+ - **REFACTOR**: improve message input controller.
+ - **REFACTOR**: rename deprecated tests.
+ - **REFACTOR**: fix sendAction.
+ - **REFACTOR**: refactor overlays.
+ - **REFACTOR**: make `Filter.empty` constructor const.
+ - **REFACTOR**: rename _computeInitialUnread to _computeUnread.
+ - **REFACTOR**: Deprecate `.user`, `.userStream` in favor of `.currentUser`, `.currentUserStream`.
+ - **REFACTOR**: make cooldown non-nullable.
+ - **FIX**: Update channel state when member gets banned/unbanned.
+ - **FIX**: align new widgets to develop fixes.
+ - **FIX**: fix reconnection.
+ - **FIX**: fix tests.
+ - **FIX**: pass includeUserDetailsInConnectCall to WS.
+ - **FIX**: client state migrated to null.
+ - **FIX**: add doc.
+ - **FIX**: fix llc.
+ - **FIX**: send only `user_id` while manually reconnecting.
+ - **FIX**: send only `user_id` while reconnecting.
+ - **FIX**: remove hard delete messages from persistence storage.
+ - **FIX**: use where.
+ - **FIX**: member removed.
+ - **FIX**: merge channel in channel.update event.
+ - **FIX**: segregate mute from channel mutes.
+ - **FIX**: Remove old thread reactions before saving new.
+ - **FIX**: also save reactions while saving threads data in persistence.
+ - **FIX**: `queryChannels` should only throw if we do-not have any channels in cache (#394).
+ - **FIX**: ensure reconnection is automatic.
+ - **FIX**: make ws reconnection more robust.
+ - **FIX**: unread count specific to channel setting wrong number.
+ - **FIX**: Remove regular message in case `showInChannel` is true. (#3).
+ - **FIX**: fix `pinnedMessage` inconsistencies.
+ - **FIX**: Fix `channelState.copyWith` with respect to pinnedMessages.
+ - **FIX**: dartfmt.
+ - **FIX**: add type check in auth_interceptor.dart.
+ - **FIX**: improve removeMessage logic.
+ - **FIX**: thread message reactions  (#1).
+ - **FIX**: fix ChannelState copyWith with respect to pinnedMessages default value.
+ - **FIX**: thread message deletion.
+ - **FIX**: include `message.user` while saving users in persistence.
+ - **FIX**: Update channel state when member gets banned/unbanned.
+ - **FIX**: Now caches message before update.
+ - **FIX**: fixed update tests.
+ - **FIX**: copy file to tempdir before uploading a file and do not serialize bytes (#1285).
+ - **FIX**: fixed pin tests.
+ - **FIX**: fixed pin tests.
+ - **FIX**: remove deleted reaction in case of reaction.delete event.
+ - **FIX**: reassign latestReactions.
+ - **FIX**: include `message.user` while saving users in persistence.
+ - **FIX**: use local ownCapabilities for `channel.updated` events.
+ - **FIX**: thread message deletion.
+ - **FIX**: fix ownReactions population.
+ - **FIX**: fix truncate channel payload.
+ - **FIX**: Fixed trailing comma.
+ - **FIX**: Giphy cancel error.
+ - **FIX**: Avoid invalid url.
+ - **FIX**: sync events only in case persistence is enabled.
+ - **FIX**: interceptor handlers.
+ - **FIX**: retry queue now follows the creation date.
+ - **FIX**: fix retry queue mechanism.
+ - **FIX**: fix connecting while connecting and disconneting (#1237).
+ - **FIX**: fix user, channel unreadCount.
+ - **FIX**: ws disconnection (#345).
+ - **FIX**: dispose channel on deletion.
+ - **FIX**: ChannelEvent.membersCount default to 0.
+ - **FIX**: listen for read events in the message widget.
+ - **FIX**: fix user presence indicator update.
+ - **FIX**: channel.stopWatching.
+ - **FIX**: fix client.markAllRead api request.
+ - **FIX**: fix tests.
+ - **FIX**: JsonKey for User.language.
+ - **FIX**: fix channel unread count.
+ - **FIX**: reduce test to satisfy dependency for code metrics.
+ - **FIX**: fix event model.
+ - **FIX**: regenerate code and remove default values where possible.
+ - **FIX**: use the right stream for cooldown stream.
+ - **FIX**: fix tests.
+ - **FIX**: fixed expired cdn attachment links.
+ - **FIX**: format and analyze.
+ - **FIX**: Connecting user without providing `name` uses `id` instead for setting `user.name`.
+ - **FIX**: generated new models, fixed reactions.
+ - **FIX**: Persistence not removing hidden channels.
+ - **FIX**: Fix `Filter.empty` encoding.
+ - **FIX**: Review changes.
+ - **FIX**: Fix unread count not updating when the current user is set.
+ - **FIX**: fix contains filter params.
+ - **FIX**: ignore healthcheck user.me objects.
+ - **FIX**: reverse user, event.me merge position.
+ - **FIX**: message search pagination.
+ - **FIX**: `updateChannelStates` invocation sequence as per foreign keys relations.
+ - **FIX**: use unread count when > 0.
+ - **FIX**: persistence (#329).
+ - **FIX**: Review changes.
+ - **FIX**: granular scroll.
+ - **FIX**: update tests.
+ - **FIX**: channel.show body.
+ - **FIX**: fix message pagination parameters.
+ - **FIX**: cooldown and teams, added correct textfield hint.
+ - **FIX**: analysis.
+ - **FIX**: tests.
+ - **FIX**: tests.
+ - **FIX**: don't return `cid` in case `name` is null, minor improvements.
+ - **FIX**: fix failing tests.
+ - **FIX**: update currentUser after successful connection.
+ - **FIX**: use channel partial update for slowmode.
+ - **FIX**: Add missing forward slash to markAllRead url.
+ - **FIX**: channel.markAllRead.
+ - **FIX**: unread count not updating.
+ - **FEAT**: Deprecate location in favor of edge server.
+ - **FEAT**: Added updatePartial endpoint.
+ - **FEAT**: add image get, set and update to channel.
+ - **FEAT**: add name get, set and update on Channel.
+ - **FEAT**: add crud for pinned message reactions.
+ - **FEAT**: add contains and empty filters.
+ - **FEAT**: add tests.
+ - **FEAT**: add dart_code_metrics.
+ - **FEAT**: send used package in the headers.
+ - **FEAT**: Added a queryAround implementation.
+ - **FEAT**: Add enrichUrl endpoint.
+ - **FEAT**: add support for OG Attachment preview.
+ - **FEAT**: minor fixes, add support for `name` in user.dart.
+ - **FEAT**: Add `queryBannedUsers` endpoint.
+ - **FEAT**: deprecate `channel.banUser` in favor of `channel.banMember`.
+ - **FEAT**: Add `queryBannedUsers` endpoint.
+ - **FEAT**: Added new API endpoint.
+ - **FEAT**: deprecate `channel.banUser` in favor of `channel.banMember`.
+ - **FEAT**: Added pin message functionality.
+ - **FEAT**: add support for `partialUserUpdate` endpoint.
+ - **FEAT**: add support for type safe filters.
+ - **FEAT**: handle event.message in channel.truncate events.
+ - **FEAT**: add additional parameters to channel.truncate.
+ - **FEAT**: add support for extraData in while uploading file.
+ - **FEAT**: add image property to user.
+ - **FEAT**: create disabled, hidden, truncatedAt a field in channel.
+ - **FEAT**: handle member.updated events in channel client.
+ - **FEAT**: Converted to ios models part II.
+ - **FEAT**: Converted to ios models.
+ - **FEAT**: add support for AttachmentFileUploaderProvider. (#1246).
+ - **FEAT**: Apply team lints to core package (#334).
+ - **FEAT**: add StreamAutocomplete (#1263).
+ - **FEAT**: upgrade to null safe dependencies.
+ - **FEAT**: show dialog after clicking on the camera button and permission is denied (#1262).
+ - **FEAT**: Added test.
+ - **FEAT**: Added test.
+ - **FEAT**: add support for channel.membership.
+ - **DOCS**: add localization docs.
+
 ## Upcoming
 
 - Included the changes from version [4.4.0](#440) and [4.4.1](#441).
-
-🐞 Fixed
-
-- Fix WebSocket contemporary connection calls while disconnecting
-
-✅ Added
-
-- Export `StreamAttachmentFileUploader`.
-
-🔄 Changed
-
-- Removed `StreamChatClient.attachmentFileUploader`,
-  Use `StreamChatClient.attachmentFileUploaderProvider` instead.
 
 ## 5.0.0-beta.1
 
