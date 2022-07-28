@@ -40,7 +40,7 @@ dependencies:
   rxdart: ^0.27.0
   share_plus: ^4.0.1
   shimmer: ^2.0.0
-  stream_chat_flutter_core: ^5.0.0-beta.1
+  stream_chat_flutter_core: ^5.0.0-beta.2
   substring_highlight: ^1.0.26
   synchronized: ^3.0.0
   thumblr: ^0.0.4
