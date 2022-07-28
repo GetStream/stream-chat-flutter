@@ -1,3 +1,25 @@
+## 5.0.0-beta.2
+
+ - **REFACTOR**: remove deprecated code and cleanup.
+ - **REFACTOR**: moor to drift name change migration.
+ - **REFACTOR**: Deprecate `.user`, `.userStream` in favor of `.currentUser`, `.currentUserStream`.
+ - **REFACTOR**: remove redundant UsersTable getter from ConnectionEventDao.
+ - **REFACTOR**: remove dummy comments.
+ - **FIX**: message search pagination.
+ - **FIX**: `updateChannelStates` invocation sequence as per foreign keys relations.
+ - **FIX**: change mode insert or replace to upsert.
+ - **FIX**: enable pragma foreign_keys.
+ - **FIX**: isNotNull -> isNull.
+ - **FIX**: tests.
+ - **FIX**: persistence (#329).
+ - **FIX**: minor.
+ - **FEAT**: save channel.ownCapabilities in db.
+ - **FEAT**: Use hard-coded drift versions.
+ - **FEAT**: add dart_code_metrics.
+ - **FEAT**: add pinned message reactions table.
+ - **FEAT**: add support for message.i18n.
+ - **FEAT**: codecov (#327).
+
 ## Upcoming
 
 - Included the changes from version [4.3.0](#430) and [4.4.0](#440).
