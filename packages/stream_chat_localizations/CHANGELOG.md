@@ -1,8 +1,6 @@
-## Upcoming
+## 4.0.0-beta.2
 
 * Included the changes from version [3.3.0](#330).
-
-* Added support for [Norwegian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_no.dart) locale.
 
 ## 4.0.0-beta.1
 
