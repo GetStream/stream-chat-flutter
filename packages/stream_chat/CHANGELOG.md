@@ -1,3 +1,7 @@
+## 4.4.1
+
+ - **FIX**: do not serialize bytes (#1283).
+
 ## Upcoming
 
 🐞 Fixed
