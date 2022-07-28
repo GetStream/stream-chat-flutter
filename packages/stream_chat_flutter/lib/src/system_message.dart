@@ -28,7 +28,7 @@ class StreamSystemMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
-    final message = this.message.replaceMentions();
+    final message = this.message.replaceMentions(linkify: false);
 
     final messageText = message.text;
     if (messageText == null) return const SizedBox.shrink();
