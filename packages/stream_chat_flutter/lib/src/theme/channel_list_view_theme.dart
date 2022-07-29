@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template channelListViewTheme}
 /// Overrides the default style of [ChannelListView] descendants.
@@ -59,7 +59,7 @@ class StreamChannelListViewTheme extends InheritedTheme {
 /// * [StreamChannelListViewTheme], the theme
 /// which is configured with this class.
 /// * [StreamChatThemeData.channelListViewTheme], which can be used to override
-/// the default style for [ChannelListView]s below the overall
+/// the default style for [StreamChannelListView]s below the overall
 /// [StreamChatTheme].
 /// {@endtemplate}
 class StreamChannelListViewThemeData with Diagnosticable {

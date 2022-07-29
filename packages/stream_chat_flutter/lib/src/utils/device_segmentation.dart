@@ -1,4 +1,4 @@
-import 'package:stream_chat/stream_chat.dart' show CurrentPlatform;
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Returns true if the app is running on web.
 bool get isWeb => CurrentPlatform.isWeb;
