@@ -37,7 +37,7 @@ typedef StreamMemberGridTile = StreamUserGridTile;
 /// ```
 ///
 /// See also:
-/// * [StreamUserListTile]
+/// * [StreamMemberGridTile]
 /// * [StreamMemberListController]
 class StreamMemberGridView extends StatelessWidget {
   /// Creates a new instance of [StreamMemberGridView].

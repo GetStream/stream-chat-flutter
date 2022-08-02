@@ -22,8 +22,11 @@ Widget defaultMemberListViewSeparatorBuilder(
 typedef StreamMemberListViewIndexedWidgetBuilder
     = StreamScrollViewIndexedWidgetBuilder<Member, StreamUserListTile>;
 
+/// Signature for the member grid tile, currently equal to [StreamUserListTile].
+typedef StreamMemberListTile = StreamUserListTile;
+
 /// A [ListView] that shows a list of [Member]s,
-/// it uses [StreamUserListTile] as a default item.
+/// it uses [StreamMemberListTile] as a default item.
 ///
 /// Example:
 ///
@@ -40,7 +43,7 @@ typedef StreamMemberListViewIndexedWidgetBuilder
 /// ```
 ///
 /// See also:
-/// * [StreamUserListTile]
+/// * [StreamMemberListTile]
 /// * [StreamMemberListController]
 class StreamMemberListView extends StatelessWidget {
   /// Creates a new instance of [StreamMemberListView].
@@ -301,7 +304,7 @@ class StreamMemberListView extends StatelessWidget {
           final onTap = onMemberTap;
           final onLongPress = onMemberLongPress;
 
-          final streamUserListTile = StreamUserListTile(
+          final streamUserListTile = StreamMemberListTile(
             user: member.user!,
             onTap: onTap == null ? null : () => onTap(member),
             onLongPress: onLongPress == null ? null : () => onLongPress(member),
