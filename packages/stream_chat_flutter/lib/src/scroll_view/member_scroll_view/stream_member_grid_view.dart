@@ -14,10 +14,13 @@ const defaultMemberGridViewDelegate =
 /// Signature for the item builder that creates the children of the
 /// [StreamMemberGridView].
 typedef StreamMemberGridViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<Member, StreamUserGridTile>;
+    = StreamScrollViewIndexedWidgetBuilder<Member, StreamMemberGridTile>;
+
+/// Signature for the member grid tile, currently equal to [StreamUserGridTile].
+typedef StreamMemberGridTile = StreamUserGridTile;
 
 /// A [GridView] that shows a grid of [Member]s,
-/// it uses [StreamUserGridTile] as a default item.
+/// it uses [StreamMemberGridTile] as a default item.
 ///
 /// Example:
 ///
@@ -329,7 +332,7 @@ class StreamMemberGridView extends StatelessWidget {
         final onTap = onMemberTap;
         final onLongPress = onMemberLongPress;
 
-        final streamUserGridTile = StreamUserGridTile(
+        final streamMemberGridTile = StreamMemberGridTile(
           user: member.user!,
           onTap: onTap == null ? null : () => onTap(member),
           onLongPress: onLongPress == null ? null : () => onLongPress(member),
@@ -339,9 +342,9 @@ class StreamMemberGridView extends StatelessWidget {
               context,
               members,
               index,
-              streamUserGridTile,
+              streamMemberGridTile,
             ) ??
-            streamUserGridTile;
+            streamMemberGridTile;
       },
       emptyBuilder: (context) {
         final chatThemeData = StreamChatTheme.of(context);
