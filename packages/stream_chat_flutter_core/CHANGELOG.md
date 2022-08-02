@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamMemberListController`.
+
 ## 5.0.0-beta.2
 
 - Included the changes from version [4.4.0](#440) and [4.4.1](#441).

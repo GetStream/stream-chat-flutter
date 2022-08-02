@@ -14,6 +14,7 @@ export 'src/stream_channel.dart';
 export 'src/stream_channel_list_controller.dart';
 export 'src/stream_channel_list_event_handler.dart';
 export 'src/stream_chat_core.dart';
+export 'src/stream_member_list_controller.dart';
 export 'src/stream_message_input_controller.dart';
 export 'src/stream_message_search_list_controller.dart';
 export 'src/stream_user_list_controller.dart';
