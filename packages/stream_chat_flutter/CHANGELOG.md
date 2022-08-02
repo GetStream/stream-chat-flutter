@@ -4,6 +4,10 @@
 
 - Added `StreamMemberGridView` and `StreamMemberListView`.
 
+🔄 Changed
+
+- Removed Emoji picker from `StreamMessageInput`.
+
 ## 5.0.0-beta.2 
 
 - Included the changes from version [4.4.0](#440) and [4.4.1](#441).
