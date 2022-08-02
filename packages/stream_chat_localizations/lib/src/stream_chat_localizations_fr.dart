@@ -135,10 +135,6 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
       'Impossible de lire les octets du fichier.';
 
   @override
-  String emojiMatchingQueryText(String query) =>
-      'Emoji qui correspond à "$query"';
-
-  @override
   String get addAFileLabel => 'Ajouter un fichier';
 
   @override

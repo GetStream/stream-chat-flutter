@@ -5,7 +5,6 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 export 'stream_command_autocomplete_options.dart';
-export 'stream_emoji_autocomplete_options.dart';
 export 'stream_mention_autocomplete_options.dart';
 
 /// {@macro stream_chat_flutter.StreamMessageInputController}
