@@ -2658,16 +2658,22 @@ void main() {
         });
 
         test(
-          '''should send `typingStart` event if there is not already a typingEvent or the difference between the two is >= 2 seconds''',
+          '''should send `typingStart` event if there is not already a typingEvent or the difference between the two is > 3 seconds''',
           () async {
-            final typingEvent = Event(type: EventType.typingStart);
+            final startTypingEvent = Event(type: EventType.typingStart);
+            final stopTypingEvent = Event(type: EventType.typingStop);
 
             when(() => channel.config?.typingEvents).thenReturn(true);
 
             when(() => client.sendEvent(
                   channelId,
                   channelType,
-                  any(that: isSameEventAs(typingEvent)),
+                  any(that: isSameEventAs(startTypingEvent)),
+                )).thenAnswer((_) async => EmptyResponse());
+            when(() => client.sendEvent(
+                  channelId,
+                  channelType,
+                  any(that: isSameEventAs(stopTypingEvent)),
                 )).thenAnswer((_) async => EmptyResponse());
 
             await channel.keyStroke();
@@ -2675,7 +2681,12 @@ void main() {
             verify(() => client.sendEvent(
                   channelId,
                   channelType,
-                  any(that: isSameEventAs(typingEvent)),
+                  any(that: isSameEventAs(startTypingEvent)),
+                )).called(1);
+            verify(() => client.sendEvent(
+                  channelId,
+                  channelType,
+                  any(that: isSameEventAs(stopTypingEvent)),
                 )).called(1);
           },
         );
@@ -2688,7 +2699,7 @@ void main() {
 
         final typingStopEvent = Event(type: EventType.typingStop);
 
-        await channel.keyStroke();
+        await channel.stopTyping();
 
         verifyNever(() => client.sendEvent(
               channelId,

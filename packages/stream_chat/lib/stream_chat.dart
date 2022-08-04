@@ -38,6 +38,7 @@ export './src/permission_type.dart';
 export './src/ws/connection_status.dart';
 export 'src/client/channel.dart';
 export 'src/client/client.dart';
+export 'src/client/key_stroke_handler.dart';
 export 'src/core/api/attachment_file_uploader.dart' show AttachmentFileUploader;
 export 'src/core/api/requests.dart';
 export 'src/core/api/responses.dart';
