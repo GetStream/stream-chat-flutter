@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fix `Channel.removeMessage` not able to remove thread message.
+
 ## 4.4.1
 
 🐞 Fixed

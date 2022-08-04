@@ -1955,11 +1955,13 @@ class ChannelClientState {
       // Early return in case the thread is not available
       if (!newThreads.containsKey(parentId)) return;
 
-      _threads = newThreads
-        ..update(
-          parentId,
-          (messages) => messages..removeWhere((e) => e.id == message.id),
-        );
+      // Remove thread message shown in thread page.
+      newThreads.update(
+        parentId,
+        (messages) => [...messages.where((e) => e.id != message.id)],
+      );
+
+      _threads = newThreads;
 
       // Early return if the thread message is not shown in channel.
       if (message.showInChannel == false) return;
