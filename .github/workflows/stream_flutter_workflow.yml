@@ -131,7 +131,7 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_flutter/coverage/lcov.info
-          min_coverage: 68
+          min_coverage: 48
 
   draft-build:
     runs-on: ubuntu-latest
