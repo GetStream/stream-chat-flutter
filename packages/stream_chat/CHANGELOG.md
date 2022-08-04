@@ -1,3 +1,7 @@
+## Upcoming beta
+
+- Included the changes from version [Upcoming](#Upcoming).
+
 ## 5.0.0-beta.2
 
 - Included the changes from version [4.4.0](#440) and [4.4.1](#441).
@@ -6,6 +10,12 @@
 
 - Minor fixes.
 - Removed deprecated code.
+
+## Upcoming
+
+🐞 Fixed
+
+- Fix `Channel.removeMessage` not able to remove thread message.
 
 ## 4.4.1
 
