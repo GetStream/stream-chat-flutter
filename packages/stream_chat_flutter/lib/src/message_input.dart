@@ -824,9 +824,14 @@ class MessageInputState extends State<MessageInput> {
       value = value.trim();
 
       final channel = StreamChannel.of(context).channel;
-      if (value.isNotEmpty) {
-        // ignore: no-empty-block
-        channel.keyStroke(widget.parentMessage?.id).catchError((e) {});
+      if (value.isNotEmpty &&
+          channel.ownCapabilities.contains(PermissionType.sendTypingEvents)) {
+        // Notify the server that the user started typing.
+        channel.keyStroke(widget.parentMessage?.id).onError(
+          (error, stackTrace) {
+            widget.onError?.call(error!, stackTrace);
+          },
+        );
       }
 
       var actionsLength = widget.actions.length;

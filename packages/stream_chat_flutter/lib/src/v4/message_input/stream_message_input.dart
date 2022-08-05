@@ -945,12 +945,14 @@ class StreamMessageInputState extends State<StreamMessageInput>
       value = value.trim();
 
       final channel = StreamChannel.of(context).channel;
-      if (channel.ownCapabilities.contains(PermissionType.sendTypingEvents) &&
-          value.isNotEmpty) {
-        channel
-            .keyStroke(_effectiveController.value.parentId)
-            // ignore: no-empty-block
-            .catchError((e) {});
+      if (value.isNotEmpty &&
+          channel.ownCapabilities.contains(PermissionType.sendTypingEvents)) {
+        // Notify the server that the user started typing.
+        channel.keyStroke(_effectiveController.message.parentId).onError(
+          (error, stackTrace) {
+            widget.onError?.call(error!, stackTrace);
+          },
+        );
       }
 
       var actionsLength = widget.actions.length;
