@@ -94,6 +94,7 @@ class StreamAutocompleteTrigger {
   const StreamAutocompleteTrigger({
     required this.trigger,
     required this.optionsViewBuilder,
+    this.triggerOnlyAfterSpace = false,
     this.triggerOnlyAtStart = false,
     this.minimumRequiredCharacters = 0,
   });
@@ -105,6 +106,9 @@ class StreamAutocompleteTrigger {
 
   /// Whether the [trigger] should only be recognised at the start of the input.
   final bool triggerOnlyAtStart;
+
+  /// Whether the [trigger] should only be recognised after a space.
+  final bool triggerOnlyAfterSpace;
 
   /// The minimum required characters for the [trigger] to start recognising
   /// a autocomplete options.
@@ -124,12 +128,14 @@ class StreamAutocompleteTrigger {
           runtimeType == other.runtimeType &&
           trigger == other.trigger &&
           triggerOnlyAtStart == other.triggerOnlyAtStart &&
+          triggerOnlyAfterSpace == other.triggerOnlyAfterSpace &&
           minimumRequiredCharacters == other.minimumRequiredCharacters;
 
   @override
   int get hashCode =>
       trigger.hashCode ^
       triggerOnlyAtStart.hashCode ^
+      triggerOnlyAfterSpace.hashCode ^
       minimumRequiredCharacters.hashCode;
 
   /// Checks if the user is invoking the recognising [trigger] and returns
@@ -158,7 +164,9 @@ class StreamAutocompleteTrigger {
     // valid examples: "@user", "Hello @user"
     // invalid examples: "Hello@user"
     final textBeforeTrigger = text.substring(0, firstTriggerIndexBeforeCursor);
-    if (textBeforeTrigger.isNotEmpty && !textBeforeTrigger.endsWith(' ')) {
+    if (triggerOnlyAfterSpace &&
+        textBeforeTrigger.isNotEmpty &&
+        !textBeforeTrigger.endsWith(' ')) {
       return null;
     }
 
