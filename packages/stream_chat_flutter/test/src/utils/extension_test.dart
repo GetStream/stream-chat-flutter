@@ -80,6 +80,8 @@ void main() {
       expect('📝💜📝'.isOnlyEmoji, true);
       expect('🌶'.isOnlyEmoji, true);
       expect('🌶1'.isOnlyEmoji, false);
+      expect('👨‍👨👨‍👨'.isOnlyEmoji, true);
+      expect('👨‍👨👨‍👨 '.isOnlyEmoji, true);
     });
   });
 }

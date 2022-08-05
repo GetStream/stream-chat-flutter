@@ -17,9 +17,9 @@ extension StringExtension on String {
   ///  1 to 3 emojis: big size with no text bubble.
   ///  4+ emojis or emojis+text: standard size with text bubble.
   bool get isOnlyEmoji {
-    if (isEmpty) return false;
-    if (characters.length > 3) return false;
     final trimmedString = trim();
+    if (trimmedString.isEmpty) return false;
+    if (trimmedString.characters.length > 3) return false;
     final emojiRegex = RegExp(
       r'^(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])+$',
       multiLine: true,
