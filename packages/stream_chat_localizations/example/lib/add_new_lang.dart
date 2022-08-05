@@ -156,9 +156,6 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
       'Could not read bytes from file.';
 
   @override
-  String emojiMatchingQueryText(String query) => 'Emoji matching "$query"';
-
-  @override
   String get addAFileLabel => 'Add a file';
 
   @override

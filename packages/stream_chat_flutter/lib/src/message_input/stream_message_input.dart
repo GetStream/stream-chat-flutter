@@ -30,7 +30,6 @@ const _kMinMediaPickerSize = 360.0;
 /// The default maximum size for media attachments.
 const kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
 
-const _kEmojiTrigger = ':';
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
 
@@ -114,7 +113,6 @@ class StreamMessageInput extends StatefulWidget {
     this.elevation,
     this.shadow,
     this.autoCorrect = true,
-    this.enableEmojiSuggestionsOverlay = true,
     this.enableMentionsOverlay = true,
     this.onQuotedMessageCleared,
   });
@@ -236,10 +234,6 @@ class StreamMessageInput extends StatefulWidget {
   /// Disable autoCorrect by passing false
   /// autoCorrect is enabled by default
   final bool autoCorrect;
-
-  /// Disable the default emoji suggestions by passing `false`
-  /// Enabled by default
-  final bool enableEmojiSuggestionsOverlay;
 
   /// Disable the mentions overlay by passing false
   /// Enabled by default
@@ -582,28 +576,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
                       // accepting the autocomplete option.
                       StreamAutocomplete.of(context)
                           .acceptAutocompleteOption(user.name);
-                    },
-                  );
-                },
-              ),
-            if (widget.enableEmojiSuggestionsOverlay)
-              StreamAutocompleteTrigger(
-                trigger: _kEmojiTrigger,
-                minimumRequiredCharacters: 2,
-                optionsViewBuilder: (
-                  context,
-                  autocompleteQuery,
-                  messageEditingController,
-                ) {
-                  final query = autocompleteQuery.query;
-                  return StreamEmojiAutocompleteOptions(
-                    query: query,
-                    onEmojiSelected: (emoji) {
-                      // accepting the autocomplete option.
-                      StreamAutocomplete.of(context).acceptAutocompleteOption(
-                        emoji.char!,
-                        keepTrigger: false,
-                      );
                     },
                   );
                 },

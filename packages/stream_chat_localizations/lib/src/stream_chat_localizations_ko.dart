@@ -127,9 +127,6 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get couldNotReadBytesFromFileError => '파일에서 바이트를 읽을 수 없습니다.';
 
   @override
-  String emojiMatchingQueryText(String query) => '"$query"과 일치하는 이모티콘입니다';
-
-  @override
   String get addAFileLabel => '파일을 추가함';
 
   @override

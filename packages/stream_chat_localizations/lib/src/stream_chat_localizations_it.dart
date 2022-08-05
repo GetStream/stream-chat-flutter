@@ -139,9 +139,6 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
       'Impossibile leggere i byte dal file.';
 
   @override
-  String emojiMatchingQueryText(String query) => 'Emoji per "$query"';
-
-  @override
   String get addAFileLabel => 'Aggiungi un file';
 
   @override

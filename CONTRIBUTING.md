@@ -198,7 +198,6 @@ analyzer:
   exclude:
     - packages/*/lib/**/*.g.dart
     - packages/*/example/**
-    - packages/*/lib/src/emoji
     - packages/*/lib/**/*.freezed.dart
     - packages/*/test/**
 
