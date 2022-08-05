@@ -67,7 +67,7 @@ class KeyStrokeHandler {
   void cancel() {
     // If the user is typing, stop typing.
     // This is needed to prevent the user from being stuck in typing mode.
-    if (_currentParentId != null) {
+    if (_lastTypingEvent != null) {
       // We don't need to handle the error here
       _stopTyping(_currentParentId).catchError((_) {});
     }
@@ -99,7 +99,9 @@ class KeyStrokeHandler {
     final now = DateTime.now();
     final lastTypingEvent = _lastTypingEvent;
     if (lastTypingEvent == null ||
-        now.difference(lastTypingEvent).inSeconds > startTypingResendInterval) {
+        now.difference(lastTypingEvent).inMilliseconds >
+            // startTypingResendInterval in milliseconds
+            startTypingResendInterval * 1000) {
       _startTyping(parentId).onError((error, stackTrace) {
         _cancelKeyStrokeTimer();
         if (completer.isCompleted) return;
