@@ -1,5 +1,7 @@
 ## Upcoming beta
 
+- Included the changes from version [Upcoming](#Upcoming).
+
 ✅ Added
 
 - Added `StreamMemberGridView` and `StreamMemberListView`.
