@@ -8,7 +8,7 @@
 
 - Removed Emoji picker from `StreamMessageInput`.
 
-## 5.0.0-beta.2 
+## 5.0.0-beta.2
 
 - Included the changes from version [4.4.0](#440) and [4.4.1](#441).
 
@@ -22,70 +22,74 @@
 
 🔄 Changed
 
-- [[#1125]](https://github.com/GetStream/stream-chat-flutter/issues/1125) `defaultUserImage`, `placeholderUserImage`, `reactionIcons`, and `enforceUniqueReactions` have been refactored out of `StreamChatThemeData` and into the new `StreamChatConfigurationData` class.
+- [[#1125]](https://github.com/GetStream/stream-chat-flutter/issues/1125) `defaultUserImage`
+  , `placeholderUserImage`, `reactionIcons`, and `enforceUniqueReactions` have been refactored out
+  of `StreamChatThemeData` and into the new `StreamChatConfigurationData` class.
 
 ✅ Added
 
 - Added `StreamAutocomplete` widget for autocomplete triggers in `StreamMessageInput`.
-- Added `StreamMessageInput.customAutocompleteTriggers` to allow users to define their custom triggers.
+- Added `StreamMessageInput.customAutocompleteTriggers` to allow users to define their custom
+  triggers.
 
 ## 5.0.0-beta.1
 
-- 🎉 Initial support for desktop 🖥️ and web 🧑‍💻  
-  - Right-click context menus for messages and full-screen attachments
-  - Upload and download attachments using the native desktop file system
-  - Press the "enter" key to send a message
-  - If you are quoting a message and have not yet typed any text, you can press the "esc" key to remove the 
-  quoted message.
-  - A dedicated "X" button for removing a quoted message with your mouse
-  - Drag and drop attachment files to `StreamMessageInput`
-    - New `StreamMessageInput.draggingBorder` property to customize the border color of the message input when 
-    dropping a file.
-  - Message reactions bubbles
-  - Hovering over a message reaction will show the users that have reacted to the message
-  - Desktop attachment sharing UI
-  - Selectable message text
-  - Gallery navigation controls with keyboard shortcuts (left and right arrow keys)
-  - Appropriate message sizing for large screens
-  - Right-click context menu for `StreamMessageListView` items
-  - `StreamMessageListView` items not swipeable on desktop & web
-  - Video support for Windows & Linux through `dart_vlc`
-  - Video support for macOS through `video_player_macos`
-  - Replace bottom sheets with dialogs where appropriate
+- 🎉 Initial support for desktop 🖥️ and web 🧑‍💻
+    - Right-click context menus for messages and full-screen attachments
+    - Upload and download attachments using the native desktop file system
+    - Press the "enter" key to send a message
+    - If you are quoting a message and have not yet typed any text, you can press the "esc" key to
+      remove the quoted message.
+    - A dedicated "X" button for removing a quoted message with your mouse
+    - Drag and drop attachment files to `StreamMessageInput`
+        - New `StreamMessageInput.draggingBorder` property to customize the border color of the
+          message input when dropping a file.
+    - Message reactions bubbles
+    - Hovering over a message reaction will show the users that have reacted to the message
+    - Desktop attachment sharing UI
+    - Selectable message text
+    - Gallery navigation controls with keyboard shortcuts (left and right arrow keys)
+    - Appropriate message sizing for large screens
+    - Right-click context menu for `StreamMessageListView` items
+    - `StreamMessageListView` items not swipeable on desktop & web
+    - Video support for Windows & Linux through `dart_vlc`
+    - Video support for macOS through `video_player_macos`
+    - Replace bottom sheets with dialogs where appropriate
 - Other Additions ✅
-  - `onQuotedMessageCleared` to `StreamMessageInput`
-  - `selected` and `selectedTileColor` to `StreamChannelListTile`
-  - `AttachmentUploadStateBuilder.inProgressBuilder` to `AttachmentUploadStateBuilder`
-  - `AttachmentUploadStateBuilder.successBuilder` to `AttachmentUploadStateBuilder`
-  - `AttachmentUploadStateBuilder.failedBuilder` to `AttachmentUploadStateBuilder`
-  - Translations:
-    - `couldNotReadBytesFromFileError`
-    - `downloadLabel`
-    - `toggleMuteUnmuteAction`
-    - `toggleMuteUnmuteGroupQuestion`
-    - `toggleMuteUnmuteGroupText`
-    - `toggleMuteUnmuteUserQuestion`
-    - `toggleMuteUnmuteUserText`
+    - `onQuotedMessageCleared` to `StreamMessageInput`
+    - `selected` and `selectedTileColor` to `StreamChannelListTile`
+    - `AttachmentUploadStateBuilder.inProgressBuilder` to `AttachmentUploadStateBuilder`
+    - `AttachmentUploadStateBuilder.successBuilder` to `AttachmentUploadStateBuilder`
+    - `AttachmentUploadStateBuilder.failedBuilder` to `AttachmentUploadStateBuilder`
+    - Translations:
+        - `couldNotReadBytesFromFileError`
+        - `downloadLabel`
+        - `toggleMuteUnmuteAction`
+        - `toggleMuteUnmuteGroupQuestion`
+        - `toggleMuteUnmuteGroupText`
+        - `toggleMuteUnmuteUserQuestion`
+        - `toggleMuteUnmuteUserText`
 - Breaking changes 🚧
-  - Renamed `showConfirmationDialog` to `showConfirmationBottomSheet`
-  - Renamed `showInfoDialog` to `showInfoBottomSheet`
-  - `wrapAttachmentWidget` has been converted to a class
-  - `StreamImageAttachment.size` has been converted from type `Size` to type `BoxConstraints`
-  - `StreamFileAttachment.size` has been converted from type `Size` to type `BoxConstraints`
-  - `StreamGiphyAttachment.size` has been converted from type `Size` to type `BoxConstraints`
-  - `StreamVideoAttachment.size` has been converted from type `Size` to type `BoxConstraints`
-  - `StreamVideoThumbnailImage.width` and `StreamVideoThumbnailImage.height` have been removed in favor of 
-  `StreamVideoThumbnailImage.constraints`
+    - Renamed `showConfirmationDialog` to `showConfirmationBottomSheet`
+    - Renamed `showInfoDialog` to `showInfoBottomSheet`
+    - `wrapAttachmentWidget` has been converted to a class
+    - `StreamImageAttachment.size` has been converted from type `Size` to type `BoxConstraints`
+    - `StreamFileAttachment.size` has been converted from type `Size` to type `BoxConstraints`
+    - `StreamGiphyAttachment.size` has been converted from type `Size` to type `BoxConstraints`
+    - `StreamVideoAttachment.size` has been converted from type `Size` to type `BoxConstraints`
+    - `StreamVideoThumbnailImage.width` and `StreamVideoThumbnailImage.height` have been removed in
+      favor of
+      `StreamVideoThumbnailImage.constraints`
 - Dependency updates ⬆️
-  - `chewie: ^1.3.0` -> `chewie: ^1.3.4`
-  - `path_provider: ^2.0.1` -> `path_provider: ^2.0.9`
-  - `video_player: ^2.1.0` -> `video_player: ^2.4.5`
+    - `chewie: ^1.3.0` -> `chewie: ^1.3.4`
+    - `path_provider: ^2.0.1` -> `path_provider: ^2.0.9`
+    - `video_player: ^2.1.0` -> `video_player: ^2.4.5`
 - Code Improvements 🔧
-  - Extracted many widgets to classes to improve readability, maintainability, and devtools usage.
-  - Organized internal directory structure
-  - Extracted typedefs to their own file
-  - Updated dartdoc documentation
-  - Various code readability improvements
+    - Extracted many widgets to classes to improve readability, maintainability, and devtools usage.
+    - Organized internal directory structure
+    - Extracted typedefs to their own file
+    - Updated dartdoc documentation
+    - Various code readability improvements
 
 ## 4.4.1
 
@@ -120,7 +124,8 @@
 - [[#996]](https://github.com/GetStream/stream-chat-flutter/issues/996) Videos break bottom photo
   carousal.
 - Fix: URLs with path and/or query params are not enriched.
-- [[#1194]](https://github.com/GetStream/stream-chat-flutter/issues/1194) Request permission to access gallery when opening the file picker.
+- [[#1194]](https://github.com/GetStream/stream-chat-flutter/issues/1194) Request permission to
+  access gallery when opening the file picker.
 
 ✅ Added
 
