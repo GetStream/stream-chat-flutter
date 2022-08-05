@@ -448,4 +448,11 @@ Attenzione: il limite massimo di $limit file è stato superato.
     }
     return '$unreadCount messaggi non letti';
   }
+
+  @override
+  String get enableFileAccessMessage => "Per favore attiva l'accesso ai file"
+      '\ncosí potrai condividerli con i tuoi amici.';
+
+  @override
+  String get allowFileAccessMessage => "Consenti l'accesso ai file";
 }

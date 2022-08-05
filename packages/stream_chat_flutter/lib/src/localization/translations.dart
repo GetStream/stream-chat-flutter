@@ -162,8 +162,14 @@ abstract class Translations {
   /// The message shown for asking photo and video access permission
   String get enablePhotoAndVideoAccessMessage;
 
+  /// The message shown for asking photo and video access permission
+  String get enableFileAccessMessage;
+
   /// The message shown for asking gallery access permission
   String get allowGalleryAccessMessage;
+
+  /// The message shown for asking file access permission
+  String get allowFileAccessMessage;
 
   /// The label for "flag message"
   String get flagMessageLabel;
@@ -797,4 +803,11 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
     }
     return '$unreadCount unread messages';
   }
+
+  @override
+  String get enableFileAccessMessage => 'Please enable access to files'
+      '\nso you can share them with friends.';
+
+  @override
+  String get allowFileAccessMessage => 'Allow access to files';
 }

@@ -431,4 +431,11 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
     if (isMuted) return 'Opphev lyden av brukeren';
     return 'Dempe brukeren';
   }
+
+  @override
+  String get enableFileAccessMessage =>
+      'Aktiver tilgang til filer slik' '\nat du kan dele dem med venner.';
+
+  @override
+  String get allowFileAccessMessage => 'Gi tilgang til filer';
 }

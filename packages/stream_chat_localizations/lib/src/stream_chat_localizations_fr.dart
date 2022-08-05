@@ -446,4 +446,12 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
     }
     return '$unreadCount messages non lus';
   }
+
+  @override
+  String get enableFileAccessMessage =>
+      "Veuillez autoriser l'accès aux fichiers"
+      '\nafin de pouvoir les partager avec des amis.';
+
+  @override
+  String get allowFileAccessMessage => "Autoriser l'accès aux fichiers";
 }

@@ -447,4 +447,11 @@ No es posible añadir más de $limit archivos adjuntos
     }
     return '$unreadCount mensajes no leídos';
   }
+
+  @override
+  String get enableFileAccessMessage => 'Habilite el acceso a los archivos'
+      '\npara poder compartirlos con amigos.';
+
+  @override
+  String get allowFileAccessMessage => 'Permitir el acceso a los archivos';
 }

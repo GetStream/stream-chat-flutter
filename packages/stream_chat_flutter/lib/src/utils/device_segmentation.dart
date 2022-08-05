@@ -1,20 +1,28 @@
-import 'dart:io' show Platform;
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+/// Returns true if the app is running on web.
+bool get isWeb => CurrentPlatform.isWeb;
 
-// ignore_for_file: public_member_api_docs
+/// Returns true if the app is running in a mobile device.
+bool get isMobileDevice => CurrentPlatform.isIos || CurrentPlatform.isAndroid;
 
-bool get isMobileDevice => !kIsWeb && (Platform.isIOS || Platform.isAndroid);
-
+/// Returns true if the app is running in a desktop device.
 bool get isDesktopDevice =>
-    !kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux);
+    CurrentPlatform.isMacOS ||
+    CurrentPlatform.isWindows ||
+    CurrentPlatform.isLinux;
 
+/// Returns true if the app is running on windows or linux platform.
 bool get isDesktopVideoPlayerSupported =>
-    !kIsWeb && (!Platform.isMacOS && Platform.isWindows || Platform.isLinux);
+    // Dart VLC is not supported on MacOS.
+    !CurrentPlatform.isMacOS &&
+    (CurrentPlatform.isWindows || CurrentPlatform.isLinux);
 
-bool get isMobileDeviceOrWeb => kIsWeb || isMobileDevice;
+/// Returns true if the app is running in a mobile or web.
+bool get isMobileDeviceOrWeb => isWeb || isMobileDevice;
 
-bool get isDesktopDeviceOrWeb => kIsWeb || isDesktopDevice;
+/// Returns true if the app is running in a desktop or web.
+bool get isDesktopDeviceOrWeb => isWeb || isDesktopDevice;
 
-bool get isTestEnvironment =>
-    !kIsWeb && (Platform.environment.containsKey('FLUTTER_TEST'));
+/// Returns true if the app is running in a flutter test environment.
+bool get isTestEnvironment => CurrentPlatform.isFlutterTest;

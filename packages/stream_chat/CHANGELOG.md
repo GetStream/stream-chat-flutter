@@ -1,24 +1,17 @@
-## Upcoming
+## 5.0.0-beta.2
 
-- Included the changes from version [4.4.0](#440).
-
-🐞 Fixed
-
-- Fix WebSocket contemporary connection calls while disconnecting
-
-✅ Added
-
-- Export `StreamAttachmentFileUploader`.
-
-🔄 Changed
-
-- Removed `StreamChatClient.attachmentFileUploader`,
-  Use `StreamChatClient.attachmentFileUploaderProvider` instead.
+- Included the changes from version [4.4.0](#440) and [4.4.1](#441).
 
 ## 5.0.0-beta.1
 
 - Minor fixes.
 - Removed deprecated code.
+
+## 4.4.1
+
+🐞 Fixed
+
+- Do not serialize `AttachmentFile.bytes`
 
 ## 4.4.0
 

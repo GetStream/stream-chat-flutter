@@ -1,14 +1,29 @@
-## Upcoming 
+## Upcoming
 
-- Included the changes from version [4.4.0](#440).
+✅ Added
+
+- Added `StreamMemberGridView` and `StreamMemberListView`.
+
+## 5.0.0-beta.2 
+
+- Included the changes from version [4.4.0](#440) and [4.4.1](#441).
 
 🐞 Fixed
 
 - Fixed the unread message header in the message list view.
+- Show dialog after clicking on the camera button and permission is denied.
+- Fix Jiffy initialization.
+- Fix loading to unread position in `StreamMessageListView`.
+- Minor fixes and improvements.
 
 🔄 Changed
 
-- [[#1125]](https://github.com/GetStream/stream-chat-flutter/issues/1125) `defaultUserImage`, `placeholderUserImage`, and `reactionIcons` have been refactored out of `StreamChatThemeData` and into the new `StreamChatConfigurationData` class.
+- [[#1125]](https://github.com/GetStream/stream-chat-flutter/issues/1125) `defaultUserImage`, `placeholderUserImage`, `reactionIcons`, and `enforceUniqueReactions` have been refactored out of `StreamChatThemeData` and into the new `StreamChatConfigurationData` class.
+
+✅ Added
+
+- Added `StreamAutocomplete` widget for autocomplete triggers in `StreamMessageInput`.
+- Added `StreamMessageInput.customAutocompleteTriggers` to allow users to define their custom triggers.
 
 ## 5.0.0-beta.1
 
@@ -68,12 +83,20 @@
   - Updated dartdoc documentation
   - Various code readability improvements
 
-## Upcoming 4.x
+## 4.4.1
 
 🐞 Fixed
 
 - [[#1247]](https://github.com/GetStream/stream-chat-flutter/issues/1247) Fix Jiffy initialization.
-- [[#1232]](https://github.com/getstream/stream-chat-flutter/issues/1232) Fix DateDivider not showing up in the chat.
+- [[#1232]](https://github.com/getstream/stream-chat-flutter/issues/1232) Fix DateDivider not
+  showing up in the chat.
+- [[#1240]](https://github.com/getstream/stream-chat-flutter/issues/1240) Substitute mentioned user
+  ids with user names in system message.
+- [[#1228]](https://github.com/GetStream/stream-chat-flutter/issues/1228) Fix image download on iOS.
+
+🔄 Changed
+
+- Changed default maximum attachment size from 20MB to 100MB.
 
 ## 4.4.0
 

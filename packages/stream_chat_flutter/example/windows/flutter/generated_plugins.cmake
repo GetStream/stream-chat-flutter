@@ -9,6 +9,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
   flutter_native_view
   screen_retriever
+  sqlite3_flutter_libs
   thumblr_windows
   url_launcher_windows
   window_manager

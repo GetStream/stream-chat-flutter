@@ -437,4 +437,12 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
     }
     return '$unreadCount ungelesene Nachrichten';
   }
+
+  @override
+  String get enableFileAccessMessage =>
+      'Bitte aktivieren Sie den Zugriff auf Dateien,'
+      '\ndamit Sie sie mit Freunden teilen können.';
+
+  @override
+  String get allowFileAccessMessage => 'Zugriff auf Dateien zulassen';
 }

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A utility class for handling the uploading and downloading of attachments
@@ -125,6 +126,12 @@ class DesktopAttachmentHandler extends AttachmentHandler {
   /// Creates an [Attachment] from an [XFile] that is selected by a desktop
   /// user in their native file system.
   Future<Attachment?> _createAttachmentFromXFile(XFile file) async {
+    final tempDir = await getTemporaryDirectory();
+    final tempPath = Uri.file(tempDir.path, windows: CurrentPlatform.isWindows);
+    final tempFilePath = tempPath.resolve(file.name).path;
+
+    await file.saveTo(tempFilePath);
+
     final extraDataMap = <String, Object?>{};
     Uint8List? bytes;
 
@@ -137,7 +144,7 @@ class DesktopAttachmentHandler extends AttachmentHandler {
     // Create the AttachmentFile to include in the Attachment
     final attachmentFile = AttachmentFile(
       size: bytes.length,
-      path: file.path,
+      path: tempFilePath,
       bytes: bytes,
     );
 

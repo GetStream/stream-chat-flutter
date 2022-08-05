@@ -19,25 +19,16 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class MobileAttachmentHandler extends AttachmentHandler {
   /// {@macro mobileAttachmentHandler}
   MobileAttachmentHandler({
-    this.imagePicker,
     this.maxAttachmentSize,
-    this.compressedVideoFrameRate,
   });
 
-  /// The instance of [ImagePicker] to use when dealing with uploads.
-  final ImagePicker? imagePicker;
+  final _imagePicker = ImagePicker();
 
   /// Max attachment size in bytes.
   ///
   /// Include this in your instance of [MobileAttachmentHandler] when dealing
   /// with uploads.
   final int? maxAttachmentSize;
-
-  /// The frame rate to use when compressing the videos.
-  ///
-  /// Include this in your instance of [MobileAttachmentHandler] when dealing
-  /// with uploads, or use the default value of `30`.
-  final int? compressedVideoFrameRate;
 
   @override
   Future<String?> download(
@@ -81,9 +72,9 @@ class MobileAttachmentHandler extends AttachmentHandler {
     if (camera) {
       XFile? pickedFile;
       if (fileType == DefaultAttachmentTypes.image) {
-        pickedFile = await imagePicker!.pickImage(source: ImageSource.camera);
+        pickedFile = await _imagePicker.pickImage(source: ImageSource.camera);
       } else if (fileType == DefaultAttachmentTypes.video) {
-        pickedFile = await imagePicker!.pickVideo(source: ImageSource.camera);
+        pickedFile = await _imagePicker.pickVideo(source: ImageSource.camera);
       }
       if (pickedFile != null) {
         final bytes = await pickedFile.readAsBytes();
