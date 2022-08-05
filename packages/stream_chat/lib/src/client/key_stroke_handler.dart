@@ -17,11 +17,8 @@ class KeyStrokeHandler {
   /// the [onStopTyping] callback is automatically invoked.
   final int startTypingEventTimeout;
 
-  /// If the user is typing too long, `TypingEventManager` should call the
-  /// [onStartTyping] callback again.
-  ///
-  /// It should be before `.startTypingEventTimeout` and after
-  /// `.startTypingEventTimeout` will be sent the stop typing event.
+  /// The number of seconds after the last [onStartTyping] callback before
+  /// the [onStartTyping] callback is automatically invoked again.
   final int startTypingResendInterval;
 
   /// Called when a `typingStart` event needs to be send.

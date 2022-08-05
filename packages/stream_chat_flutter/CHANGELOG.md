@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#882]](https://github.com/GetStream/stream-chat-flutter/issues/882) Lots of unhandled exceptions
+  when network is off or spotty.
+
 ## 4.4.1
 
 🐞 Fixed
