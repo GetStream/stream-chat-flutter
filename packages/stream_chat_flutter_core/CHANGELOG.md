@@ -1,3 +1,8 @@
+## Upcoming
+
+- [#1269](https://github.com/GetStream/stream-chat-flutter/issues/1269)
+  Fix `ChannelListEventHandler` castError at PagedValue.asSuccess.
+
 ## 4.4.1
 
 - Updated `stream_chat` dependency to [`4.4.1`](https://pub.dev/packages/stream_chat/changelog).
@@ -16,8 +21,10 @@
 
 🔄 Changed
 
-- Deprecated `before` and `after` parameters in `StreamChannel.queryAroundMessage`. Use `limit` instead.
-- Deprecated `before` and `after` parameters in `StreamChannel.loadChannelAtMessage`. Use `limit` instead.
+- Deprecated `before` and `after` parameters in `StreamChannel.queryAroundMessage`. Use `limit`
+  instead.
+- Deprecated `before` and `after` parameters in `StreamChannel.loadChannelAtMessage`. Use `limit`
+  instead.
 
 ## 4.1.0
 
@@ -30,14 +37,17 @@
 
 ## 4.0.0
 
-For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
+For upgrading to V4, please refer to
+the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
 
 - Deprecated `UsersBloc` in favor of `StreamUserListController` to control the user list.
-- Deprecated `MessageSearchBloc` in favor of `StreamMessageSearchListController` to control the user list.
+- Deprecated `MessageSearchBloc` in favor of `StreamMessageSearchListController` to control the user
+  list.
 
 ## 4.0.0-beta.2
 
-- Updated `stream_chat` dependency to [`4.0.0-beta.2`](https://pub.dev/packages/stream_chat/changelog).
+- Updated `stream_chat` dependency
+  to [`4.0.0-beta.2`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 4.0.0-beta.0
 
@@ -48,7 +58,8 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 - Deprecated `ChannelsBloc` in favor of `StreamChannelListController` to control the channel list.
 - Added `MessageTextFieldController` to be used with the new `StreamTextField` ui widget.
 
-- Updated `stream_chat` dependency to [`4.0.0-beta.0`](https://pub.dev/packages/stream_chat/changelog).
+- Updated `stream_chat` dependency
+  to [`4.0.0-beta.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 3.6.1
 
@@ -67,12 +78,14 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 - Updated `stream_chat` dependency to [`3.5.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 3.4.0
+
 - Updated `stream_chat` dependency to [`3.4.0`](https://pub.dev/packages/stream_chat/changelog).
 
 🐞 Fixed
 
 - Do not move a channel to top if the new message is from a thread.
-- [[#848]](https://github.com/GetStream/stream-chat-flutter/issues/848) Fixed "Bad state: Cannot add new events after calling close" by replacing all `.add` methods with a new `.safeAdd`.
+- [[#848]](https://github.com/GetStream/stream-chat-flutter/issues/848) Fixed "Bad state: Cannot add
+  new events after calling close" by replacing all `.add` methods with a new `.safeAdd`.
 
 ## 3.3.1
 
@@ -133,8 +146,8 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 🐞 Fixed
 
 - Fixed `MessageSearchBloc` pagination.
-- [[#673]](https://github.com/GetStream/stream-chat-flutter/issues/673): Fix `Core Widgets` not getting rebuild with new
-  data on configuration change.
+- [[#673]](https://github.com/GetStream/stream-chat-flutter/issues/673): Fix `Core Widgets` not
+  getting rebuild with new data on configuration change.
 
 ## 2.2.1
 
@@ -152,8 +165,8 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 
 🐞 Fixed
 
-- [#612](https://github.com/GetStream/stream-chat-flutter/issues/612) `ChannelListView` pagination doesn't work after
-  refresh
+- [#612](https://github.com/GetStream/stream-chat-flutter/issues/612) `ChannelListView` pagination
+  doesn't work after refresh
 
 ## 2.1.1
 
@@ -171,20 +184,23 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 
 🔄 Changed
 
-- `StreamChatCore.of(context).user` is now deprecated in favor of `StreamChatCore.of(context).currentUser`.
-- `StreamChatCore.of(context).userStream` is now deprecated in favor of `StreamChatCore.of(context).currentUserStream`.
+- `StreamChatCore.of(context).user` is now deprecated in favor
+  of `StreamChatCore.of(context).currentUser`.
+- `StreamChatCore.of(context).userStream` is now deprecated in favor
+  of `StreamChatCore.of(context).currentUserStream`.
 
 ## 2.0.0
 
 🛑️ Breaking Changes from `1.5.3`
 
 - migrate this package to null safety
-- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of individual
-  params/properties
+- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of
+  individual params/properties
     - `options.state` -> bool state
     - `options.watch` -> bool watch
     - `options.presence` -> bool presence
-- `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual params/properties
+- `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual
+  params/properties
     - `options.presence` -> bool presence
 
 ✅ Added
@@ -204,12 +220,13 @@ For upgrading to V4, please refer to the [V4 Migration Guide](https://getstream.
 
 🛑️ Breaking Changes from `2.0.0-nullsafety.7`
 
-- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of individual
-  params/properties
+- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of
+  individual params/properties
     - `options.state` -> bool state
     - `options.watch` -> bool watch
     - `options.presence` -> bool presence
-- `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual params/properties
+- `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual
+  params/properties
     - `options.presence` -> bool presence
 
 ## 2.0.0-nullsafety.7
