@@ -210,12 +210,14 @@ class ChannelApi {
     String channelType,
     List<String> memberIds, {
     Message? message,
+    bool hideHistory = false,
   }) async {
     final response = await _client.post(
       _getChannelUrl(channelId, channelType),
       data: {
         'add_members': memberIds,
         'message': message,
+        'hide_history': hideHistory,
       },
     );
     return AddMembersResponse.fromJson(response.data);
