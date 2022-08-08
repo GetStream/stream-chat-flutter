@@ -1832,7 +1832,10 @@ void main() {
           ..message = updateMessage,
       );
 
-      final res = await channel.update(channelData, updateMessage);
+      final res = await channel.update(
+        channelData,
+        updateMessage: updateMessage,
+      );
 
       expect(res, isNotNull);
       expect(res.channel.cid, channelModel.cid);
@@ -2028,7 +2031,7 @@ void main() {
           ..message = message,
       );
 
-      final res = await channel.addMembers(memberIds, message);
+      final res = await channel.addMembers(memberIds, message: message);
 
       expect(res, isNotNull);
       expect(res.channel.cid, channelModel.cid);
@@ -2060,7 +2063,7 @@ void main() {
           ..message = message,
       );
 
-      final res = await channel.inviteMembers(memberIds, message);
+      final res = await channel.inviteMembers(memberIds, message: message);
 
       expect(res, isNotNull);
       expect(res.channel.cid, channelModel.cid);
@@ -2093,7 +2096,7 @@ void main() {
           ..message = message,
       );
 
-      final res = await channel.removeMembers(memberIds, message);
+      final res = await channel.removeMembers(memberIds, message: message);
 
       expect(res, isNotNull);
       expect(res.channel.cid, channelModel.cid);
