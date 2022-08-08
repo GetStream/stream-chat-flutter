@@ -111,6 +111,9 @@ abstract class PagedValue<Key, Value> with _$PagedValue<Key, Value> {
   /// Returns `true` if the [PagedValue] is [Success].
   bool get isSuccess => this is Success<Key, Value>;
 
+  /// Returns `true` if the [PagedValue] is not [Success].
+  bool get isNotSuccess => !isSuccess;
+
   /// Returns the [PagedValue] as [Success].
   Success<Key, Value> get asSuccess {
     assert(

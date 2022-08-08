@@ -223,6 +223,9 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         client.on().skip(1) // Skipping the last emitted event.
             // We only need to handle the latest events.
             .listen((event) {
+      // Only handle the event if the value is in success state.
+      if (value.isNotSuccess) return;
+
       // Returns early if the event is already handled by the listener.
       if (eventListener?.call(event) ?? false) return;
 
