@@ -376,6 +376,7 @@ void main() {
     const memberIds = ['test-member-id-1', 'test-member-id-2'];
     final channelModel = ChannelModel(id: channelId, type: channelType);
     final message = Message(id: 'test-message-id', text: 'members-added');
+    const hideHistory = true;
 
     final path = _getChannelUrl(channelId, channelType);
 
@@ -384,6 +385,7 @@ void main() {
           data: {
             'add_members': memberIds,
             'message': message,
+            'hide_history': hideHistory,
           },
         )).thenAnswer((_) async => successResponse(path, data: {
           'channel': channelModel.toJson(),
@@ -395,6 +397,7 @@ void main() {
       channelType,
       memberIds,
       message: message,
+      hideHistory: hideHistory,
     );
 
     expect(res, isNotNull);

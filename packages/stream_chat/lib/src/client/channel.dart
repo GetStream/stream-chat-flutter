@@ -1151,9 +1151,18 @@ class Channel {
   Future<AddMembersResponse> addMembers(
     List<String> memberIds, [
     Message? message,
+    // TODO: Convert to optional parameters in v5.0.0
+    // ignore: avoid_positional_boolean_parameters
+    bool hideHistory = false,
   ]) async {
     _checkInitialized();
-    return _client.addChannelMembers(id!, type, memberIds, message: message);
+    return _client.addChannelMembers(
+      id!,
+      type,
+      memberIds,
+      message: message,
+      hideHistory: hideHistory,
+    );
   }
 
   /// Invite members to the channel.
