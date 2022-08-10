@@ -23,12 +23,8 @@ void main() {
     const callId = 'test-call-id';
     const path = '/calls/$callId';
 
-    when(() => client.post(
-              path,
-              data: {},
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(() => client.post(path, data: {})).thenAnswer(
+        (_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await callApi.getCallToken(callId);
 

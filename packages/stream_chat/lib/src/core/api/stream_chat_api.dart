@@ -56,7 +56,7 @@ class StreamChatApi {
 
   CallApi? _call;
 
-  /// Api dedicated to guest operations
+  /// Api dedicated to call operations
   CallApi get call => _call ??= CallApi(_client);
 
   ChannelApi? _channel;
