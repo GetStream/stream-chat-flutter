@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -362,13 +365,31 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
 
   void _addAssetAttachment(AssetEntity medium) async {
     final mediaFile = await medium.originFile;
-
     if (mediaFile == null) return;
-
     final tempDir = await getTemporaryDirectory();
 
-    final cachedFile = await mediaFile
-        .copy('${tempDir.path}/${mediaFile.path.split('/').last}');
+    // TODO: Confirm that this max resolution is final
+    const maxCDNImageResolution = 16800000;
+    final imageResolution = medium.width * medium.height;
+    File? cachedFile;
+    if (imageResolution > maxCDNImageResolution) {
+      final aspect = imageResolution / maxCDNImageResolution;
+      final updatedSize = medium.size / (math.sqrt(aspect));
+      final resizedImage = await medium.thumbnailDataWithSize(
+        ThumbnailSize(
+          updatedSize.width.floor(),
+          updatedSize.height.floor(),
+        ),
+        quality: 30, // TODO: investigate compressing all images
+      );
+      cachedFile =
+          await File('${tempDir.path}/${mediaFile.path.split('/').last}')
+              .create()
+            ..writeAsBytesSync(resizedImage!);
+    } else {
+      cachedFile = await mediaFile
+          .copy('${tempDir.path}/${mediaFile.path.split('/').last}');
+    }
 
     final file = AttachmentFile(
       path: cachedFile.path,

@@ -123,6 +123,8 @@ class _FileTypeImage extends StatelessWidget {
     );
   }
 
+  // TODO: Improve image memory.
+  // This is using the full image instead of a smaller version (thumbnail)
   @override
   Widget build(BuildContext context) {
     if (isImageAttachment) {
