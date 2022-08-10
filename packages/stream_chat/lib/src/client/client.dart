@@ -595,7 +595,7 @@ class StreamChatClient {
     required String callType,
     required String channelType,
     required String channelId,
-  }) async {
+  }) {
     return _chatApi.call.createCall(
       callId: callId,
       callType: callType,

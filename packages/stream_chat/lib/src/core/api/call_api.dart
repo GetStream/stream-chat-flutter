@@ -1,7 +1,7 @@
 import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 
-/// Defines the api dedicated to video call operations
+/// Defines the api dedicated to call operations.
 class CallApi {
   /// Initialize a new call api
   CallApi(this._client);
@@ -25,11 +25,13 @@ class CallApi {
     required String channelType,
     required String channelId,
   }) async {
-    final response =
-        await _client.post(_getChannelUrl(channelId, channelType), data: {
-      'id': callId,
-      'type': callType,
-    });
+    final response = await _client.post(
+      _getChannelUrl(channelId, channelType),
+      data: {
+        'id': callId,
+        'type': callType,
+      },
+    );
     // return response.data;
     return CreateCallPayload.fromJson(response.data);
   }

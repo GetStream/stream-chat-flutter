@@ -298,21 +298,6 @@ OGAttachmentResponse _$OGAttachmentResponseFromJson(
       ..titleLink = json['title_link'] as String?
       ..type = json['type'] as String?;
 
-AgoraPayload _$AgoraPayloadFromJson(Map<String, dynamic> json) => AgoraPayload(
-      channel: json['channel'] as String,
-    );
-
-CallPayload _$CallPayloadFromJson(Map<String, dynamic> json) => CallPayload(
-      id: json['id'] as String,
-      provider: json['provider'] as String,
-      agora: json['agora'] == null
-          ? null
-          : AgoraPayload.fromJson(json['agora'] as Map<String, dynamic>),
-      hms: json['hms'] == null
-          ? null
-          : HMSPayload.fromJson(json['hms'] as Map<String, dynamic>),
-    );
-
 CallTokenPayload _$CallTokenPayloadFromJson(Map<String, dynamic> json) =>
     CallTokenPayload()
       ..duration = json['duration'] as String?
@@ -326,8 +311,3 @@ CreateCallPayload _$CreateCallPayloadFromJson(Map<String, dynamic> json) =>
       ..call = json['call'] == null
           ? null
           : CallPayload.fromJson(json['call'] as Map<String, dynamic>);
-
-HMSPayload _$HMSPayloadFromJson(Map<String, dynamic> json) => HMSPayload(
-      roomId: json['room_id'] as String,
-      roomName: json['room_name'] as String,
-    );

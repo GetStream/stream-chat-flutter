@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:stream_chat/src/core/models/call_payload.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -4341,45 +4342,21 @@ void main() {
       expect(response.message, isA<Message>());
     });
 
-    test('AgoraPayload', () {
+    test('CallTokenPayload', () {
       const jsonExample = '''
-      {"channel":"test"}
-      ''';
-      final response = AgoraPayload.fromJson(json.decode(jsonExample));
-      expect(response.channel, isA<String>());
-    });
-
-    test('CallPayload', () {
-      const jsonExample = '''
-      {"id":"test",
-      "provider": "test",
-      "agora": {"channel":"test"},
-      "hms":{"room_id":"test", "room_name":"test"}
-      }
-      ''';
-      final response = CallPayload.fromJson(json.decode(jsonExample));
-      expect(response.agora, isA<AgoraPayload>());
-      expect(response.hms, isA<HMSPayload>());
-      expect(response.id, isA<String>());
-      expect(response.provider, isA<String>());
-    });
-  });
-
-  test('CallTokenPayload', () {
-    const jsonExample = '''
       {"duration": "3ms",
       "agora_app_id":"test",
       "agora_uid": 12,
       "token": "token"}
       ''';
-    final response = CallTokenPayload.fromJson(json.decode(jsonExample));
-    expect(response.agoraAppId, isA<String>());
-    expect(response.agoraUid, isA<int>());
-    expect(response.token, isA<String>());
-  });
+      final response = CallTokenPayload.fromJson(json.decode(jsonExample));
+      expect(response.agoraAppId, isA<String>());
+      expect(response.agoraUid, isA<int>());
+      expect(response.token, isA<String>());
+    });
 
-  test('CreateCallPayload', () {
-    const jsonExample = '''
+    test('CreateCallPayload', () {
+      const jsonExample = '''
       {"call": 
       {"id":"test",
       "provider": "test",
@@ -4387,16 +4364,8 @@ void main() {
       "hms":{"room_id":"test", "room_name":"test"}
       }}
       ''';
-    final response = CreateCallPayload.fromJson(json.decode(jsonExample));
-    expect(response.call, isA<CallPayload>());
-  });
-
-  test('HMSPayload', () {
-    const jsonExample = '''
-      {"room_id":"test", "room_name":"test"}
-      ''';
-    final response = HMSPayload.fromJson(json.decode(jsonExample));
-    expect(response.roomId, isA<String>());
-    expect(response.roomName, isA<String>());
+      final response = CreateCallPayload.fromJson(json.decode(jsonExample));
+      expect(response.call, isA<CallPayload>());
+    });
   });
 }
