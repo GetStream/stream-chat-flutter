@@ -71,16 +71,20 @@ class StreamImageAttachment extends StreamAttachmentWidget {
 
           var imageUri = Uri.parse(imageUrl);
           if (imageUri.host.endsWith('stream-io-cdn.com') &&
-              imageUri.queryParameters['h'] == '*' &&
-              imageUri.queryParameters['w'] == '*' &&
-              imageUri.queryParameters['crop'] == '*' &&
-              imageUri.queryParameters['resize'] == '*') {
+              (imageUri.queryParameters['h'] == null ||
+                  imageUri.queryParameters['h'] == '*') &&
+              (imageUri.queryParameters['w'] == null ||
+                  imageUri.queryParameters['w'] == '*') &&
+              (imageUri.queryParameters['crop'] == null ||
+                  imageUri.queryParameters['crop'] == '*') &&
+              (imageUri.queryParameters['resize'] == null ||
+                  imageUri.queryParameters['resize'] == '*')) {
             imageUri = imageUri.replace(queryParameters: {
               ...imageUri.queryParameters,
-              'h': '400',
+              'h': '400', // TODO: Are these sizes optimal? Consider web/desktop
               'w': '400',
               'crop': 'center',
-              'resize': 'crop',
+              'resize': 'clip',
             });
           } else if (imageUri.host.endsWith('stream-cloud-uploads.imgix.net')) {
             imageUri = imageUri.replace(queryParameters: {
