@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'hms_payload.g.dart';
 
-@JsonSerializable(includeIfNull: false)
+@JsonSerializable()
 class HMSPayload extends Equatable {
   final String roomId;
   final String roomName;
@@ -11,6 +11,8 @@ class HMSPayload extends Equatable {
 
   factory HMSPayload.fromJson(Map<String, dynamic> json) =>
       _$HMSPayloadFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HMSPayloadToJson(this);
 
   @override
   List<Object?> get props => [roomId, roomName];

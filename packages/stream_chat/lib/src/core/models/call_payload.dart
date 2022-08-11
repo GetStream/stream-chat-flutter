@@ -5,18 +5,21 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'call_payload.g.dart';
 
-@JsonSerializable(includeIfNull: false)
+@JsonSerializable()
 class CallPayload extends Equatable {
   final String id;
   final String provider;
   final AgoraPayload? agora;
   final HMSPayload? hms;
 
-  const CallPayload({required this.id, required this.provider, this.agora, this.hms});
+  const CallPayload(
+      {required this.id, required this.provider, this.agora, this.hms});
 
   factory CallPayload.fromJson(Map<String, dynamic> json) =>
       _$CallPayloadFromJson(json);
 
+  Map<String, dynamic> toJson() => _$CallPayloadToJson(this);
+  
   @override
   List<Object?> get props => [id, provider, agora, hms];
 }

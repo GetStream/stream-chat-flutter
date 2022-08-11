@@ -17,19 +17,10 @@ CallPayload _$CallPayloadFromJson(Map<String, dynamic> json) => CallPayload(
           : HMSPayload.fromJson(json['hms'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$CallPayloadToJson(CallPayload instance) {
-  final val = <String, dynamic>{
-    'id': instance.id,
-    'provider': instance.provider,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('agora', instance.agora?.toJson());
-  writeNotNull('hms', instance.hms?.toJson());
-  return val;
-}
+Map<String, dynamic> _$CallPayloadToJson(CallPayload instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'provider': instance.provider,
+      'agora': instance.agora?.toJson(),
+      'hms': instance.hms?.toJson(),
+    };

@@ -590,12 +590,20 @@ class StreamChatClient {
   Future<CallTokenPayload> getCallToken(String callId) async =>
       _chatApi.call.getCallToken(callId);
 
-  Future<CreateCallPayload> createCall(
-    String callId,
-    String callType,
+  Future<CreateCallPayload> createCall({
+    required String callId,
+    required String callType,
+    required String channelType,
+    required String channelId,
     Map<String, Object?>? options,
-  ) async {
-    return _chatApi.call.createCall(callId, callType, options);
+  }) async {
+    return _chatApi.call.createCall(
+      callId: callId,
+      callType: callType,
+      options: options,
+      channelType: channelType,
+      channelId: channelId,
+    );
   }
 
   /// Requests channels with a given query from the API.

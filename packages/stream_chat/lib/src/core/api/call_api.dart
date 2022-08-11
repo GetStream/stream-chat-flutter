@@ -11,18 +11,28 @@ class CallApi {
   Future<CallTokenPayload> getCallToken(String callId) async {
     final response = await _client.post(
       '/calls/$callId',
+      data: {},
     );
-    return CallTokenPayload.fromJson(response.data); 
+    // return response.data;
+    return CallTokenPayload.fromJson(response.data);
   }
 
-  Future<CreateCallPayload> createCall(
-    String callId,
-    String callType,
+  Future<CreateCallPayload> createCall({
+    required String callId,
+    required String callType,
+    required String channelType,
+    required String channelId,
     Map<String, Object?>? options,
-  ) async {
-    final response = await _client.post(
-      '/channels/$callType/$callId/call',
-    );
-    return CreateCallPayload.fromJson(response.data); 
+  }) async {
+    final response =
+        await _client.post(_getChannelUrl(channelId, channelType), data: {
+      'id': '$callId',
+      'type': '$callType',
+    });
+    // return response.data;
+    return CreateCallPayload.fromJson(response.data);
   }
+
+  String _getChannelUrl(String channelId, String channelType) =>
+      '/channels/$channelType/$channelId/call';
 }
