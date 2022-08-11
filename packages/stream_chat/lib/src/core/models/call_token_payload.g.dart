@@ -13,18 +13,9 @@ CallTokenPayload _$CallTokenPayloadFromJson(Map<String, dynamic> json) =>
       agoraAppId: json['agora_app_id'] as String?,
     );
 
-Map<String, dynamic> _$CallTokenPayloadToJson(CallTokenPayload instance) {
-  final val = <String, dynamic>{
-    'token': instance.token,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('agora_uid', instance.agoraUid);
-  writeNotNull('agora_app_id', instance.agoraAppId);
-  return val;
-}
+Map<String, dynamic> _$CallTokenPayloadToJson(CallTokenPayload instance) =>
+    <String, dynamic>{
+      'token': instance.token,
+      'agora_uid': instance.agoraUid,
+      'agora_app_id': instance.agoraAppId,
+    };
