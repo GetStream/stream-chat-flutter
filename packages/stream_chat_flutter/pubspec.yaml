@@ -40,7 +40,7 @@ dependencies:
   substring_highlight: ^1.0.26
   url_launcher: ^6.1.0
   video_player: ^2.1.0
-  video_thumbnail: ^0.5.0
+  video_thumbnail: ^0.5.2
 
 flutter:
   assets:
