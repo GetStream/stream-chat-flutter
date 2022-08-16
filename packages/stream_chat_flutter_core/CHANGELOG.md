@@ -1,9 +1,16 @@
 ## Upcoming
 
+🐞 Fixed
+
 - [#1269](https://github.com/GetStream/stream-chat-flutter/issues/1269)
   Fix `ChannelListEventHandler` castError at PagedValue.asSuccess.
 - [#1241](https://github.com/GetStream/stream-chat-flutter/issues/1241) StreamChannelListView load
   more indicator non stop.
+
+✅ Added
+
+- Added setters to update `ChannelListController.filter` and `ChannelListController.sort` properties
+  in order to support runtime changes.
 
 ## 4.4.1
 
