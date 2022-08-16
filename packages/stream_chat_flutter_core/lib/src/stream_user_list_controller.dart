@@ -153,12 +153,13 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
     return super.refresh(resetValue: resetValue);
   }
 
-  /// Replaces the previously loaded users with [users] and updates
-  /// the nextPageKey.
+  /// Replaces the previously loaded users with the passed [users].
   set users(List<User> users) {
-    value = PagedValue(
-      items: users,
-      nextPageKey: users.length,
-    );
+    if (value.isSuccess) {
+      final currentValue = value.asSuccess;
+      value = currentValue.copyWith(items: users);
+    } else {
+      value = PagedValue(items: users);
+    }
   }
 }
