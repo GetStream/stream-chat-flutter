@@ -2,6 +2,8 @@
 
 - [#1269](https://github.com/GetStream/stream-chat-flutter/issues/1269)
   Fix `ChannelListEventHandler` castError at PagedValue.asSuccess.
+- [#1241](https://github.com/GetStream/stream-chat-flutter/issues/1241) StreamChannelListView load
+  more indicator non stop.
 
 ## 4.4.1
 
