@@ -4,8 +4,10 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:contextmenu/contextmenu.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
@@ -20,11 +22,11 @@ class StreamFullScreenMedia extends FullScreenMediaWidget {
     super.key,
     required this.mediaAttachmentPackages,
     this.startIndex = 0,
-    String? userName,
+    this.userName = '',
     this.onShowMessage,
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
-  }) : userName = userName ?? '';
+  }) : assert(startIndex >= 0, 'startIndex cannot be negative');
 
   /// The url of the image
   final List<StreamAttachmentPackage> mediaAttachmentPackages;
@@ -50,36 +52,21 @@ class StreamFullScreenMedia extends FullScreenMediaWidget {
   _FullScreenMediaState createState() => _FullScreenMediaState();
 }
 
-class _FullScreenMediaState extends State<StreamFullScreenMedia>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _animationController;
+class _FullScreenMediaState extends State<StreamFullScreenMedia> {
   late final PageController _pageController;
 
-  late final _curvedAnimation = CurvedAnimation(
-    parent: _animationController,
-    curve: Curves.easeOut,
-    reverseCurve: Curves.easeIn,
-  );
+  late final _currentPage = ValueNotifier(widget.startIndex);
+  late final _isDisplayingDetail = ValueNotifier<bool>(true);
 
-  final _opacityTween = Tween<double>(begin: 1, end: 0);
-  late final _opacityAnimation = _opacityTween.animate(
-    CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0, 0.6, curve: Curves.easeOut),
-    ),
-  );
-
-  late final ValueNotifier<int> _currentPage = ValueNotifier(widget.startIndex);
+  void switchDisplayingDetail() {
+    _isDisplayingDetail.value = !_isDisplayingDetail.value;
+  }
 
   final videoPackages = <String, VideoPackage>{};
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
     _pageController = PageController(initialPage: widget.startIndex);
     for (var i = 0; i < widget.mediaAttachmentPackages.length; i++) {
       final attachment = widget.mediaAttachmentPackages[i].attachment;
@@ -112,8 +99,9 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia>
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _currentPage.dispose();
     _pageController.dispose();
+    _isDisplayingDetail.dispose();
     for (final package in videoPackages.values) {
       package.dispose();
     }
@@ -124,49 +112,149 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia>
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          KeyboardShortcutRunner(
-            onEscapeKeypress: () => Navigator.of(context).pop(),
-            onRightArrowKeypress: () {
-              if (widget.mediaAttachmentPackages.length > 1 &&
-                  _currentPage.value !=
-                      widget.mediaAttachmentPackages.length - 1) {
-                _pageController.nextPage(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeIn,
+      body: ValueListenableBuilder<int>(
+        valueListenable: _currentPage,
+        builder: (context, currentPage, child) {
+          final _currentAttachmentPackage =
+              widget.mediaAttachmentPackages[currentPage];
+          final _currentMessage = _currentAttachmentPackage.message;
+          final _currentAttachment = _currentAttachmentPackage.attachment;
+          return Stack(
+            children: [
+              Positioned.fill(child: child!),
+              ValueListenableBuilder<bool>(
+                valueListenable: _isDisplayingDetail,
+                builder: (context, isDisplayingDetail, child) {
+                  final mediaQuery = MediaQuery.of(context);
+                  final topPadding = mediaQuery.padding.top;
+                  return AnimatedPositionedDirectional(
+                    duration: kThemeAnimationDuration,
+                    curve: Curves.easeInOut,
+                    top:
+                        isDisplayingDetail ? 0 : -(topPadding + kToolbarHeight),
+                    start: 0,
+                    end: 0,
+                    height: topPadding + kToolbarHeight,
+                    child: StreamGalleryHeader(
+                      userName: widget.userName,
+                      sentAt: context.translations.sentAtText(
+                        date: _currentAttachmentPackage.message.createdAt,
+                        time: _currentAttachmentPackage.message.createdAt,
+                      ),
+                      onBackPressed: Navigator.of(context).pop,
+                      message: _currentMessage,
+                      attachment: _currentAttachment,
+                      onShowMessage: () {
+                        widget.onShowMessage?.call(
+                          _currentMessage,
+                          StreamChannel.of(context).channel,
+                        );
+                      },
+                      attachmentActionsModalBuilder:
+                          widget.attachmentActionsModalBuilder,
+                    ),
+                  );
+                },
+              ),
+              if (!_currentMessage.isEphemeral)
+                ValueListenableBuilder<bool>(
+                  valueListenable: _isDisplayingDetail,
+                  builder: (context, isDisplayingDetail, child) {
+                    final mediaQuery = MediaQuery.of(context);
+                    final bottomPadding = mediaQuery.padding.bottom;
+                    return AnimatedPositionedDirectional(
+                      duration: kThemeAnimationDuration,
+                      curve: Curves.easeInOut,
+                      bottom: isDisplayingDetail
+                          ? 0
+                          : -(bottomPadding + kToolbarHeight),
+                      start: 0,
+                      end: 0,
+                      height: bottomPadding + kToolbarHeight,
+                      child: StreamGalleryFooter(
+                        currentPage: currentPage,
+                        totalPages: widget.mediaAttachmentPackages.length,
+                        mediaAttachmentPackages: widget.mediaAttachmentPackages,
+                        mediaSelectedCallBack: (val) {
+                          _currentPage.value = val;
+                          _pageController.animateToPage(
+                            val,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                          Navigator.pop(context);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              if (widget.mediaAttachmentPackages.length > 1) ...[
+                if (currentPage > 0)
+                  GalleryNavigationItem(
+                    left: 8,
+                    opacityAnimation: _isDisplayingDetail,
+                    icon: const Icon(Icons.chevron_left_rounded),
+                    onPressed: () {
+                      _currentPage.value--;
+                      _pageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                  ),
+                if (currentPage < widget.mediaAttachmentPackages.length - 1)
+                  GalleryNavigationItem(
+                    right: 8,
+                    opacityAnimation: _isDisplayingDetail,
+                    icon: const Icon(Icons.chevron_right_rounded),
+                    onPressed: () {
+                      _currentPage.value++;
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                  ),
+              ],
+            ],
+          );
+        },
+        child: InkWell(
+          onTap: switchDisplayingDetail,
+          child: KeyboardShortcutRunner(
+            onEscapeKeypress: Navigator.of(context).pop,
+            onLeftArrowKeypress: () {
+              if (_currentPage.value > 0) {
+                _currentPage.value--;
+                _pageController.previousPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
                 );
-                setState(() => _currentPage.value++);
               }
             },
-            onLeftArrowKeypress: () {
-              if (widget.mediaAttachmentPackages.length > 1 &&
-                  _currentPage.value != 0) {
-                _pageController.previousPage(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOut,
+            onRightArrowKeypress: () {
+              if (_currentPage.value <
+                  widget.mediaAttachmentPackages.length - 1) {
+                _currentPage.value++;
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
                 );
-                setState(() => _currentPage.value--);
               }
             },
             child: PageView.builder(
               controller: _pageController,
+              itemCount: widget.mediaAttachmentPackages.length,
               onPageChanged: (val) {
                 _currentPage.value = val;
-
-                if (videoPackages.isEmpty) {
-                  return;
-                }
-
+                if (videoPackages.isEmpty) return;
                 final currentAttachment =
                     widget.mediaAttachmentPackages[val].attachment;
-
                 for (final e in videoPackages.values) {
                   if (e._attachment != currentAttachment) {
                     e._chewieController?.pause();
                   }
                 }
-
                 if (widget.autoplayVideos &&
                     currentAttachment.type == 'video') {
                   final controller = videoPackages[currentAttachment.id]!;
@@ -174,46 +262,58 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia>
                 }
               },
               itemBuilder: (context, index) {
-                final attachment =
-                    widget.mediaAttachmentPackages[index].attachment;
+                final currentAttachmentPackage =
+                    widget.mediaAttachmentPackages[index];
+                final attachment = currentAttachmentPackage.attachment;
                 if (attachment.type == 'image' || attachment.type == 'giphy') {
                   final imageUrl = attachment.imageUrl ??
                       attachment.assetUrl ??
                       attachment.thumbUrl;
-                  return AnimatedBuilder(
-                    animation: _curvedAnimation,
-                    builder: (context, child) => ContextMenuArea(
-                      verticalPadding: 0,
-                      builder: (_) => [
-                        DownloadMenuItem(
-                          attachment: attachment,
+                  return ValueListenableBuilder<bool>(
+                    valueListenable: _isDisplayingDetail,
+                    builder: (context, isDisplayingDetail, _) =>
+                        AnimatedContainer(
+                      color: isDisplayingDetail
+                          ? StreamChannelHeaderTheme.of(context).color
+                          : Colors.black,
+                      duration: kThemeAnimationDuration,
+                      child: ContextMenuArea(
+                        verticalPadding: 0,
+                        builder: (_) => [
+                          DownloadMenuItem(
+                            attachment: attachment,
+                          ),
+                        ],
+                        child: PhotoView(
+                          imageProvider: (imageUrl == null &&
+                                  attachment.localUri != null &&
+                                  attachment.file?.bytes != null)
+                              ? Image.memory(attachment.file!.bytes!).image
+                              : CachedNetworkImageProvider(imageUrl!),
+                          errorBuilder: (_, __, ___) => const AttachmentError(),
+                          loadingBuilder: (context, _) {
+                            final image = Image.asset(
+                              'images/placeholder.png',
+                              fit: BoxFit.cover,
+                              package: 'stream_chat_flutter',
+                            );
+                            final colorTheme =
+                                StreamChatTheme.of(context).colorTheme;
+                            return Shimmer.fromColors(
+                              baseColor: colorTheme.disabled,
+                              highlightColor: colorTheme.inputBg,
+                              child: image,
+                            );
+                          },
+                          maxScale: PhotoViewComputedScale.covered,
+                          minScale: PhotoViewComputedScale.contained,
+                          heroAttributes: PhotoViewHeroAttributes(
+                            tag: widget.mediaAttachmentPackages,
+                          ),
+                          backgroundDecoration: const BoxDecoration(
+                            color: Colors.transparent,
+                          ),
                         ),
-                      ],
-                      child: PhotoView(
-                        loadingBuilder: (context, image) => const Offstage(),
-                        imageProvider: (imageUrl == null &&
-                                attachment.localUri != null &&
-                                attachment.file?.bytes != null)
-                            ? Image.memory(attachment.file!.bytes!).image
-                            : CachedNetworkImageProvider(imageUrl!),
-                        maxScale: PhotoViewComputedScale.covered,
-                        minScale: PhotoViewComputedScale.contained,
-                        heroAttributes: PhotoViewHeroAttributes(
-                          tag: widget.mediaAttachmentPackages,
-                        ),
-                        backgroundDecoration: BoxDecoration(
-                          color: ColorTween(
-                            begin: StreamChannelHeaderTheme.of(context).color,
-                            end: Colors.black,
-                          ).lerp(_curvedAnimation.value),
-                        ),
-                        onTapUp: (a, b, c) {
-                          if (_animationController.isCompleted) {
-                            _animationController.reverse();
-                          } else {
-                            _animationController.forward();
-                          }
-                        },
                       ),
                     ),
                   );
@@ -225,17 +325,9 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia>
                     );
                   }
                   return InkWell(
-                    onTap: () {
-                      if (_animationController.isCompleted) {
-                        _animationController.reverse();
-                      } else {
-                        _animationController.forward();
-                      }
-                    },
+                    onTap: switchDisplayingDetail,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 50,
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 50),
                       child: ContextMenuArea(
                         verticalPadding: 0,
                         builder: (_) => [
@@ -252,99 +344,9 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia>
                 }
                 return const SizedBox();
               },
-              itemCount: widget.mediaAttachmentPackages.length,
             ),
           ),
-          FadeTransition(
-            opacity: _opacityAnimation,
-            child: ValueListenableBuilder<int>(
-              valueListenable: _currentPage,
-              builder: (context, value, child) {
-                final _currentAttachmentPackage =
-                    widget.mediaAttachmentPackages[value];
-                final _currentMessage = _currentAttachmentPackage.message;
-                final _currentAttachment = _currentAttachmentPackage.attachment;
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    StreamGalleryHeader(
-                      userName: widget.userName,
-                      sentAt: context.translations.sentAtText(
-                        date: widget.mediaAttachmentPackages[_currentPage.value]
-                            .message.createdAt,
-                        time: widget.mediaAttachmentPackages[_currentPage.value]
-                            .message.createdAt,
-                      ),
-                      onBackPressed: () => Navigator.of(context).pop(),
-                      message: _currentMessage,
-                      attachment: _currentAttachment,
-                      onShowMessage: widget.onShowMessage != null
-                          ? () {
-                              widget.onShowMessage?.call(
-                                _currentMessage,
-                                StreamChannel.of(context).channel,
-                              );
-                            }
-                          : null,
-                      attachmentActionsModalBuilder:
-                          widget.attachmentActionsModalBuilder,
-                    ),
-                    if (!_currentMessage.isEphemeral)
-                      StreamGalleryFooter(
-                        currentPage: value,
-                        totalPages: widget.mediaAttachmentPackages.length,
-                        mediaAttachmentPackages: widget.mediaAttachmentPackages,
-                        mediaSelectedCallBack: (val) {
-                          _pageController.animateToPage(
-                            val,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
-                          setState(() {
-                            _currentPage.value = val;
-                          });
-                          Navigator.pop(context);
-                        },
-                      ),
-                  ],
-                );
-              },
-            ),
-          ),
-          if (widget.mediaAttachmentPackages.length > 1) ...[
-            if (_currentPage.value !=
-                widget.mediaAttachmentPackages.length - 1) ...[
-              GalleryNavigationItem(
-                icon: Icons.chevron_right,
-                right: 0,
-                opacityAnimation: _opacityAnimation,
-                currentPage: _currentPage,
-                onClick: () {
-                  _pageController.nextPage(
-                    duration: const Duration(milliseconds: 350),
-                    curve: Curves.easeIn,
-                  );
-                  setState(() => _currentPage.value++);
-                },
-              ),
-            ],
-            if (_currentPage.value != 0) ...[
-              GalleryNavigationItem(
-                icon: Icons.chevron_left,
-                left: 0,
-                opacityAnimation: _opacityAnimation,
-                currentPage: _currentPage,
-                onClick: () {
-                  _pageController.previousPage(
-                    duration: const Duration(milliseconds: 350),
-                    curve: Curves.easeOut,
-                  );
-                  setState(() => _currentPage.value--);
-                },
-              ),
-            ],
-          ],
-        ],
+        ),
       ),
     );
   }
@@ -357,24 +359,26 @@ class GalleryNavigationItem extends StatelessWidget {
   const GalleryNavigationItem({
     super.key,
     required this.icon,
-    required this.onClick,
+    this.iconSize = 48,
+    required this.onPressed,
     required this.opacityAnimation,
-    required this.currentPage,
     this.left,
     this.right,
   });
 
   /// The icon to display.
-  final IconData icon;
+  final Widget icon;
+
+  /// The size of the icon.
+  ///
+  /// Defaults to 48.
+  final double iconSize;
 
   /// The callback to perform when the button is clicked.
-  final VoidCallback onClick;
+  final VoidCallback onPressed;
 
   /// The animation for showing & hiding this widget.
-  final Animation<double> opacityAnimation;
-
-  /// The value to use for .
-  final ValueNotifier<int> currentPage;
+  final ValueListenable<bool> opacityAnimation;
 
   /// The left-hand placement of the button.
   final double? left;
@@ -391,23 +395,23 @@ class GalleryNavigationItem extends StatelessWidget {
         left: left,
         right: right,
         top: MediaQuery.of(context).size.height / 2,
-        child: FadeTransition(
-          opacity: opacityAnimation,
-          child: ValueListenableBuilder<int>(
-            valueListenable: currentPage,
-            builder: (context, value, child) => GestureDetector(
-              onTap: onClick,
-              child: Icon(
-                icon,
-                size: 50,
-              ),
-            ),
-            child: GestureDetector(
-              onTap: onClick,
-              child: Icon(
-                icon,
-                size: 50,
-              ),
+        child: ValueListenableBuilder<bool>(
+          valueListenable: opacityAnimation,
+          builder: (context, shouldShow, child) {
+            return AnimatedOpacity(
+              opacity: shouldShow ? 1 : 0,
+              duration: kThemeAnimationDuration,
+              child: child,
+            );
+          },
+          child: Material(
+            color: Colors.transparent,
+            type: MaterialType.circle,
+            clipBehavior: Clip.antiAlias,
+            child: IconButton(
+              icon: icon,
+              iconSize: iconSize,
+              onPressed: onPressed,
             ),
           ),
         ),

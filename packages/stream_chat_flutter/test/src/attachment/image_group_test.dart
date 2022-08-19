@@ -25,7 +25,7 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: SizedBox(
-                child: ImageGroup(
+                child: StreamImageGroup(
                   messageTheme: streamTheme.ownMessageTheme,
                   constraints: BoxConstraints.tight(const Size(
                     300,

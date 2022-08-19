@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template imageGroup}
+/// {@template streamImageGroup}
 /// Constructs a group of image attachments in a [StreamMessageWidget].
 /// {@endtemplate}
-class ImageGroup extends StatelessWidget {
-  /// {@macro imageGroup}
-  const ImageGroup({
+class StreamImageGroup extends StatelessWidget {
+  /// {@macro streamImageGroup}
+  const StreamImageGroup({
     super.key,
     required this.images,
     required this.message,
@@ -15,6 +15,9 @@ class ImageGroup extends StatelessWidget {
     this.onReturnAction,
     this.onShowMessage,
     this.onAttachmentTap,
+    this.imageThumbnailSize = const Size(400, 400),
+    this.imageThumbnailResizeType = 'crop',
+    this.imageThumbnailCropType = 'center',
   });
 
   /// List of attachments to show
@@ -37,6 +40,19 @@ class ImageGroup extends StatelessWidget {
 
   /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
+
+  /// Size of the attachment image thumbnail.
+  final Size imageThumbnailSize;
+
+  /// Resize type of the image attachment thumbnail.
+  ///
+  /// Defaults to [crop]
+  final String /*clip|crop|scale|fill*/ imageThumbnailResizeType;
+
+  /// Crop type of the image attachment thumbnail.
+  ///
+  /// Defaults to [center]
+  final String /*center|top|bottom|left|right*/ imageThumbnailCropType;
 
   @override
   Widget build(BuildContext context) {
@@ -151,6 +167,9 @@ class ImageGroup extends StatelessWidget {
       message: message,
       messageTheme: messageTheme,
       onAttachmentTap: () => _onTap(context, index),
+      imageThumbnailSize: imageThumbnailSize,
+      imageThumbnailResizeType: imageThumbnailResizeType,
+      imageThumbnailCropType: imageThumbnailCropType,
     );
   }
 }

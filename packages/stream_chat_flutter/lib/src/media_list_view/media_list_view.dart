@@ -8,17 +8,6 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/media_list_view/media_list_view_controller.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-extension on Duration {
-  String format() {
-    final s = '$this'.split('.')[0].padLeft(8, '0');
-    if (s.startsWith('00:')) {
-      return s.replaceFirst('00:', '');
-    }
-
-    return s;
-  }
-}
-
 /// {@template streamMediaListView}
 /// Constructs a list of media
 /// {@endtemplate}
@@ -29,6 +18,10 @@ class StreamMediaListView extends StatefulWidget {
     this.selectedIds = const [],
     this.onSelect,
     this.controller,
+    this.thumbnailSize = const ThumbnailSize(400, 400),
+    this.thumbnailFormat = ThumbnailFormat.jpeg,
+    this.thumbnailQuality = 100,
+    this.thumbnailScale = 1,
   });
 
   /// Stores the media selected
@@ -40,14 +33,29 @@ class StreamMediaListView extends StatefulWidget {
   /// Controller that handles MediaListView
   final MediaListViewController? controller;
 
+  /// The thumbnail size.
+  final ThumbnailSize thumbnailSize;
+
+  /// {@macro photo_manager.ThumbnailFormat}
+  final ThumbnailFormat thumbnailFormat;
+
+  /// The quality value for the thumbnail.
+  ///
+  /// Valid from 1 to 100.
+  /// Defaults to 100.
+  final int thumbnailQuality;
+
+  /// Scale of the image.
+  final double thumbnailScale;
+
   @override
   _StreamMediaListViewState createState() => _StreamMediaListViewState();
 }
 
 class _StreamMediaListViewState extends State<StreamMediaListView> {
   final _media = <AssetEntity>[];
-  final ScrollController _scrollController = ScrollController();
-  int _currentPage = 0;
+  var _currentPage = 0;
+  final _scrollController = ScrollController();
 
   /// Controller necessary to verify limited access to photo gallery in iOS and
   /// update the media list when listerners are emitted
@@ -72,23 +80,25 @@ class _StreamMediaListViewState extends State<StreamMediaListView> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
             child: InkWell(
-              onTap: () {
-                if (widget.onSelect != null) {
-                  widget.onSelect?.call(media);
-                }
-              },
+              onTap: widget.onSelect == null
+                  ? null
+                  : () => widget.onSelect!(media),
               child: Stack(
                 children: [
                   AspectRatio(
                     aspectRatio: 1,
                     child: FadeInImage(
+                      image: MediaThumbnailProvider(
+                        media: media,
+                        size: widget.thumbnailSize,
+                        format: widget.thumbnailFormat,
+                        quality: widget.thumbnailQuality,
+                        scale: widget.thumbnailScale,
+                      ),
                       fadeInDuration: const Duration(milliseconds: 300),
                       placeholder: const AssetImage(
                         'images/placeholder.png',
                         package: 'stream_chat_flutter',
-                      ),
-                      image: MediaThumbnailProvider(
-                        media: media,
                       ),
                       fit: BoxFit.cover,
                     ),
@@ -206,10 +216,35 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   /// {@macro mediaThumbnailProvider}
   const MediaThumbnailProvider({
     required this.media,
+    // TODO: Are these sizes optimal? Consider web/desktop
+    this.size = const ThumbnailSize(400, 400),
+    this.format = ThumbnailFormat.jpeg,
+    this.quality = 100,
+    this.scale = 2,
   });
 
   /// Media to load
   final AssetEntity media;
+
+  /// The thumbnail size.
+  final ThumbnailSize size;
+
+  /// {@macro photo_manager.ThumbnailFormat}
+  final ThumbnailFormat format;
+
+  /// The quality value for the thumbnail.
+  ///
+  /// Valid from 1 to 100.
+  /// Defaults to 100.
+  final int quality;
+
+  /// Scale of the image.
+  final double scale;
+
+  @override
+  Future<MediaThumbnailProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<MediaThumbnailProvider>(this);
+  }
 
   @override
   ImageStreamCompleter load(
@@ -218,9 +253,13 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   ) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
-      scale: 1,
+      scale: key.scale,
       informationCollector: () sync* {
-        yield ErrorDescription('Id: ${media.id}');
+        yield DiagnosticsProperty<ImageProvider>(
+          'Thumbnail provider: $this \n Thumbnail key: $key',
+          this,
+          style: DiagnosticsTreeStyle.errorProperty,
+        );
       },
     );
   }
@@ -229,26 +268,46 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
     MediaThumbnailProvider key,
     DecoderCallback decode,
   ) async {
-    assert(key == this, 'Checks MediaThumbnailProvider');
-    final bytes = await media.thumbnailData;
-
+    assert(key == this, '$key is not $this');
+    final bytes = await media.thumbnailDataWithSize(
+      size,
+      format: format,
+      quality: quality,
+    );
     return decode(bytes!);
   }
 
   @override
-  Future<MediaThumbnailProvider> obtainKey(ImageConfiguration configuration) =>
-      SynchronousFuture<MediaThumbnailProvider>(this);
-
-  @override
   bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
-    final MediaThumbnailProvider typedOther = other;
-    return media.id == typedOther.media.id;
+    if (other is MediaThumbnailProvider) {
+      return media == other.media &&
+          size == other.size &&
+          format == other.format &&
+          quality == other.quality &&
+          scale == other.scale;
+    }
+    return false;
   }
 
   @override
-  int get hashCode => media.id.hashCode;
+  int get hashCode => hashValues(media, size, format, quality, scale);
 
   @override
-  String toString() => '$runtimeType("${media.id}")';
+  String toString() => '$runtimeType('
+      'media: $media, '
+      'size: $size, '
+      'format: $format, '
+      'quality: $quality, '
+      'scale: $scale'
+      ')';
+}
+
+extension on Duration {
+  String format() {
+    final s = '$this'.split('.')[0].padLeft(8, '0');
+    if (s.startsWith('00:')) {
+      return s.replaceFirst('00:', '');
+    }
+    return s;
+  }
 }

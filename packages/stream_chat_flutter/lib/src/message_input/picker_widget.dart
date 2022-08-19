@@ -22,7 +22,13 @@ class PickerWidget extends StatefulWidget {
     required this.onAddMoreFilesClick,
     required this.onMediaSelected,
     required this.streamChatTheme,
+    required this.allowedAttachmentTypes,
+    required this.customAttachmentTypes,
     this.permissionState,
+    this.mediaThumbnailSize = const ThumbnailSize(400, 400),
+    this.mediaThumbnailFormat = ThumbnailFormat.jpeg,
+    this.mediaThumbnailQuality = 100,
+    this.mediaThumbnailScale = 1,
   });
 
   /// TODO: Document me!
@@ -48,6 +54,31 @@ class PickerWidget extends StatefulWidget {
 
   /// The theme to use for this widget.
   final StreamChatThemeData streamChatTheme;
+
+  /// The list of attachment types that can be picked.
+  final List<DefaultAttachmentTypes> allowedAttachmentTypes;
+
+  /// The list of custom attachment types that can be picked.
+  final List<CustomAttachmentType> customAttachmentTypes;
+
+  /// Size of the attachment thumbnails.
+  ///
+  /// Defaults to (400, 400).
+  final ThumbnailSize mediaThumbnailSize;
+
+  /// Format of the attachment thumbnails.
+  ///
+  /// Defaults to [ThumbnailFormat.jpeg].
+  final ThumbnailFormat mediaThumbnailFormat;
+
+  /// The quality value for the attachment thumbnails.
+  ///
+  /// Valid from 1 to 100.
+  /// Defaults to 100.
+  final int mediaThumbnailQuality;
+
+  /// The scale to apply on the [attachmentThumbnailSize].
+  final double mediaThumbnailScale;
 
   @override
   _PickerWidgetState createState() => _PickerWidgetState();
@@ -88,6 +119,11 @@ class _PickerWidgetState extends State<PickerWidget> {
       return StreamMediaListView(
         selectedIds: widget.selectedMedias,
         onSelect: widget.onMediaSelected,
+        controller: widget.mediaListViewController,
+        thumbnailSize: widget.mediaThumbnailSize,
+        thumbnailFormat: widget.mediaThumbnailFormat,
+        thumbnailQuality: widget.mediaThumbnailQuality,
+        thumbnailScale: widget.mediaThumbnailScale,
       );
     }
 

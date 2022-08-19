@@ -41,6 +41,10 @@ class StreamAttachmentPicker extends StatefulWidget {
       DefaultAttachmentTypes.video,
     ],
     this.customAttachmentTypes = const [],
+    this.attachmentThumbnailSize = const ThumbnailSize(400, 400),
+    this.attachmentThumbnailFormat = ThumbnailFormat.jpeg,
+    this.attachmentThumbnailQuality = 100,
+    this.attachmentThumbnailScale = 1,
     this.permissionState,
   });
 
@@ -79,6 +83,25 @@ class StreamAttachmentPicker extends StatefulWidget {
   /// The list of custom attachment types that can be picked.
   final List<CustomAttachmentType> customAttachmentTypes;
 
+  /// Size of the attachment thumbnails.
+  ///
+  /// Defaults to (400, 400).
+  final ThumbnailSize attachmentThumbnailSize;
+
+  /// Format of the attachment thumbnails.
+  ///
+  /// Defaults to [ThumbnailFormat.jpeg].
+  final ThumbnailFormat attachmentThumbnailFormat;
+
+  /// The quality value for the attachment thumbnails.
+  ///
+  /// Valid from 1 to 100.
+  /// Defaults to 100.
+  final int attachmentThumbnailQuality;
+
+  /// The scale to apply on the [attachmentThumbnailSize].
+  final double attachmentThumbnailScale;
+
   /// Used to create a new copy of [StreamAttachmentPicker] with modified
   /// properties.
   StreamAttachmentPicker copyWith({
@@ -93,7 +116,11 @@ class StreamAttachmentPicker extends StatefulWidget {
     ValueChanged<bool>? onChangeInputState,
     ValueChanged<String>? onError,
     List<DefaultAttachmentTypes>? allowedAttachmentTypes,
-    List<CustomAttachmentType>? customAttachmentTypes = const [],
+    List<CustomAttachmentType>? customAttachmentTypes,
+    ThumbnailSize? attachmentThumbnailSize,
+    ThumbnailFormat? attachmentThumbnailFormat,
+    int? attachmentThumbnailQuality,
+    double? attachmentThumbnailScale,
   }) =>
       StreamAttachmentPicker(
         key: key ?? this.key,
@@ -111,6 +138,14 @@ class StreamAttachmentPicker extends StatefulWidget {
             allowedAttachmentTypes ?? this.allowedAttachmentTypes,
         customAttachmentTypes:
             customAttachmentTypes ?? this.customAttachmentTypes,
+        attachmentThumbnailSize:
+            attachmentThumbnailSize ?? this.attachmentThumbnailSize,
+        attachmentThumbnailFormat:
+            attachmentThumbnailFormat ?? this.attachmentThumbnailFormat,
+        attachmentThumbnailQuality:
+            attachmentThumbnailQuality ?? this.attachmentThumbnailQuality,
+        attachmentThumbnailScale:
+            attachmentThumbnailScale ?? this.attachmentThumbnailScale,
       );
 
   @override
@@ -352,6 +387,13 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                             _addAssetAttachment(media);
                           }
                         },
+                        allowedAttachmentTypes: widget.allowedAttachmentTypes,
+                        customAttachmentTypes: widget.customAttachmentTypes,
+                        mediaThumbnailSize: widget.attachmentThumbnailSize,
+                        mediaThumbnailFormat: widget.attachmentThumbnailFormat,
+                        mediaThumbnailQuality:
+                            widget.attachmentThumbnailQuality,
+                        mediaThumbnailScale: widget.attachmentThumbnailScale,
                       ),
                     ),
                   ),
@@ -366,9 +408,11 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
   void _addAssetAttachment(AssetEntity medium) async {
     final mediaFile = await medium.originFile;
     if (mediaFile == null) return;
+
     final tempDir = await getTemporaryDirectory();
 
     // TODO: Confirm that this max resolution is final
+    // Taken from https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing
     const maxCDNImageResolution = 16800000;
     final imageResolution = medium.width * medium.height;
     File? cachedFile;
@@ -380,12 +424,13 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
           updatedSize.width.floor(),
           updatedSize.height.floor(),
         ),
-        quality: 30, // TODO: investigate compressing all images
+        quality: 70, // TODO: investigate compressing all images
       );
-      cachedFile =
+      final file =
           await File('${tempDir.path}/${mediaFile.path.split('/').last}')
-              .create()
-            ..writeAsBytesSync(resizedImage!);
+              .create();
+      file.writeAsBytesSync(resizedImage!);
+      cachedFile = file;
     } else {
       cachedFile = await mediaFile
           .copy('${tempDir.path}/${mediaFile.path.split('/').last}');

@@ -1,4 +1,6 @@
 export 'package:jiffy/jiffy.dart';
+export 'package:photo_manager/photo_manager.dart'
+    show ThumbnailSize, ThumbnailFormat;
 export 'package:stream_chat_flutter/src/message_widget/parse_attachments.dart';
 export 'package:stream_chat_flutter/src/message_widget/quoted_message.dart';
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
