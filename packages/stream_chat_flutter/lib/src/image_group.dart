@@ -19,6 +19,9 @@ class StreamImageGroup extends StatelessWidget {
     this.onReturnAction,
     this.onShowMessage,
     this.onAttachmentTap,
+    this.imageThumbnailSize = const Size(400, 400),
+    this.imageThumbnailResizeType = 'crop',
+    this.imageThumbnailCropType = 'center',
   });
 
   /// List of attachments to show
@@ -36,11 +39,24 @@ class StreamImageGroup extends StatelessWidget {
   /// [StreamMessageThemeData] to apply to message
   final StreamMessageThemeData messageTheme;
 
-  /// Size of iamges
+  /// Size of images
   final Size size;
 
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
+
+  /// Size of the attachment image thumbnail.
+  final Size imageThumbnailSize;
+
+  /// Resize type of the image attachment thumbnail.
+  ///
+  /// Defaults to [crop]
+  final String /*clip|crop|scale|fill*/ imageThumbnailResizeType;
+
+  /// Crop type of the image attachment thumbnail.
+  ///
+  /// Defaults to [center]
+  final String /*center|top|bottom|left|right*/ imageThumbnailCropType;
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(
@@ -153,5 +169,8 @@ class StreamImageGroup extends StatelessWidget {
         message: message,
         messageTheme: messageTheme,
         onAttachmentTap: () => _onTap(context, index),
+        imageThumbnailSize: imageThumbnailSize,
+        imageThumbnailResizeType: imageThumbnailResizeType,
+        imageThumbnailCropType: imageThumbnailCropType,
       );
 }

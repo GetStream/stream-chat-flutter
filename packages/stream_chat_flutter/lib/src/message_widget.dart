@@ -105,6 +105,9 @@ class StreamMessageWidget extends StatefulWidget {
     this.customActions = const [],
     this.onAttachmentTap,
     this.usernameBuilder,
+    this.imageAttachmentThumbnailSize = const Size(400, 400),
+    this.imageAttachmentThumbnailResizeType = 'crop',
+    this.imageAttachmentThumbnailCropType = 'center',
   }) : attachmentBuilders = {
           'image': (context, message, attachments) {
             final border = RoundedRectangleBorder(
@@ -130,6 +133,10 @@ class StreamMessageWidget extends StatefulWidget {
                       onShowMessage: onShowMessage,
                       onReturnAction: onReturnAction,
                       onAttachmentTap: onAttachmentTap,
+                      imageThumbnailSize: imageAttachmentThumbnailSize,
+                      imageThumbnailResizeType:
+                          imageAttachmentThumbnailResizeType,
+                      imageThumbnailCropType: imageAttachmentThumbnailCropType,
                     ),
                   ),
                   border,
@@ -155,6 +162,9 @@ class StreamMessageWidget extends StatefulWidget {
                         onAttachmentTap.call(message, attachments[0]);
                       }
                     : null,
+                imageThumbnailSize: imageAttachmentThumbnailSize,
+                imageThumbnailResizeType: imageAttachmentThumbnailResizeType,
+                imageThumbnailCropType: imageAttachmentThumbnailCropType,
               ),
               border,
               reverse,
@@ -413,6 +423,19 @@ class StreamMessageWidget extends StatefulWidget {
   /// Customize onTap on attachment
   final void Function(Message message, Attachment attachment)? onAttachmentTap;
 
+  /// Size of the image attachment thumbnail.
+  final Size imageAttachmentThumbnailSize;
+
+  /// Resize type of the image attachment thumbnail.
+  ///
+  /// Defaults to [crop]
+  final String /*clip|crop|scale|fill*/ imageAttachmentThumbnailResizeType;
+
+  /// Crop type of the image attachment thumbnail.
+  ///
+  /// Defaults to [center]
+  final String /*center|top|bottom|left|right*/ imageAttachmentThumbnailCropType;
+
   /// Creates a copy of [StreamMessageWidget] with
   /// specified attributes overridden.
   StreamMessageWidget copyWith({
@@ -468,6 +491,9 @@ class StreamMessageWidget extends StatefulWidget {
     List<StreamMessageAction>? customActions,
     void Function(Message message, Attachment attachment)? onAttachmentTap,
     Widget Function(BuildContext, User)? userAvatarBuilder,
+    Size? imageAttachmentThumbnailSize,
+    String? imageAttachmentThumbnailResizeType,
+    String? imageAttachmentThumbnailCropType,
   }) =>
       StreamMessageWidget(
         key: key ?? this.key,
@@ -528,6 +554,13 @@ class StreamMessageWidget extends StatefulWidget {
         customActions: customActions ?? this.customActions,
         onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
         userAvatarBuilder: userAvatarBuilder ?? this.userAvatarBuilder,
+        imageAttachmentThumbnailSize:
+            imageAttachmentThumbnailSize ?? this.imageAttachmentThumbnailSize,
+        imageAttachmentThumbnailResizeType:
+            imageAttachmentThumbnailResizeType ??
+                this.imageAttachmentThumbnailResizeType,
+        imageAttachmentThumbnailCropType: imageAttachmentThumbnailCropType ??
+            this.imageAttachmentThumbnailCropType,
       );
 
   @override

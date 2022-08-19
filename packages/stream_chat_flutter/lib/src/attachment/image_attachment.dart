@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_title.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@macro image_attachment}
@@ -24,6 +25,9 @@ class StreamImageAttachment extends StreamAttachmentWidget {
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
+    this.imageThumbnailSize = const Size(400, 400),
+    this.imageThumbnailResizeType = 'crop',
+    this.imageThumbnailCropType = 'center',
   });
 
   /// [StreamMessageThemeData] for showing image title
@@ -40,6 +44,19 @@ class StreamImageAttachment extends StreamAttachmentWidget {
 
   /// Callback when attachment is tapped
   final VoidCallback? onAttachmentTap;
+
+  /// Size of the attachment image thumbnail.
+  final Size imageThumbnailSize;
+
+  /// Resize type of the image attachment thumbnail.
+  ///
+  /// Defaults to [crop]
+  final String /*clip|crop|scale|fill*/ imageThumbnailResizeType;
+
+  /// Crop type of the image attachment thumbnail.
+  ///
+  /// Defaults to [center]
+  final String /*center|top|bottom|left|right*/ imageThumbnailCropType;
 
   @override
   Widget build(BuildContext context) => source.when(
@@ -65,43 +82,22 @@ class StreamImageAttachment extends StreamAttachmentWidget {
           var imageUrl =
               attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
 
-          if (imageUrl == null) {
-            return AttachmentError(size: size);
-          }
+          if (imageUrl == null) return AttachmentError(size: size);
 
-          var imageUri = Uri.parse(imageUrl);
-          if (imageUri.host.endsWith('stream-io-cdn.com') &&
-              (imageUri.queryParameters['h'] == null ||
-                  imageUri.queryParameters['h'] == '*') &&
-              (imageUri.queryParameters['w'] == null ||
-                  imageUri.queryParameters['w'] == '*') &&
-              (imageUri.queryParameters['crop'] == null ||
-                  imageUri.queryParameters['crop'] == '*') &&
-              (imageUri.queryParameters['resize'] == null ||
-                  imageUri.queryParameters['resize'] == '*')) {
-            imageUri = imageUri.replace(queryParameters: {
-              ...imageUri.queryParameters,
-              'h': '400', // TODO: Are these sizes optimal? Consider web/desktop
-              'w': '400',
-              'crop': 'center',
-              'resize': 'clip',
-            });
-          } else if (imageUri.host.endsWith('stream-cloud-uploads.imgix.net')) {
-            imageUri = imageUri.replace(queryParameters: {
-              ...imageUri.queryParameters,
-              'height': '400',
-              'width': '400',
-              'fit': 'crop',
-            });
-          }
-          imageUrl = imageUri.toString();
+          imageUrl = imageUrl.getResizedImageUrl(
+            width: imageThumbnailSize.width,
+            height: imageThumbnailSize.height,
+            resize: imageThumbnailResizeType,
+            crop: imageThumbnailCropType,
+          );
 
           return _buildImageAttachment(
             context,
             CachedNetworkImage(
-              cacheKey: imageUri.replace(queryParameters: {}).toString(),
+              imageUrl: imageUrl,
               height: size?.height,
               width: size?.width,
+              fit: BoxFit.cover,
               placeholder: (context, __) {
                 final image = Image.asset(
                   'images/placeholder.png',
@@ -115,9 +111,7 @@ class StreamImageAttachment extends StreamAttachmentWidget {
                   child: image,
                 );
               },
-              imageUrl: imageUrl,
               errorWidget: (context, url, error) => AttachmentError(size: size),
-              fit: BoxFit.cover,
             ),
           );
         },

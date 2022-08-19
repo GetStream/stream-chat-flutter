@@ -4,6 +4,45 @@
 
 - [[#882]](https://github.com/GetStream/stream-chat-flutter/issues/882) Lots of unhandled exceptions
   when network is off or spotty.
+- Fixes an error where Stream CDN images were not being resized in the message list view.
+
+🚀 Improved
+
+- Automatically resize images that are above a specific pixel count to ensure resizing works:
+  getstream.io/chat/docs/go-golang/file_uploads/#image-resizing
+
+✅ Added
+
+- Added `thumbnailSize`, `thumbnailResizeType`, and `thumbnailCropType` params
+  to `StreamMessageWidget` and `StreamAttachmentPicker` to customize the appearance of image
+  thumbnails.
+
+  ```dart
+  StreamMessageInput(
+    focusNode: _focusNode,
+    messageInputController: _messageInputController,
+    attachmentsPickerBuilder: (_, __, picker) {
+      return picker.copyWith(
+        attachmentThumbnailSize: ...,
+        attachmentThumbnailFormat: ...,
+        attachmentThumbnailQuality: ...,
+        attachmentThumbnailScale: ...,
+      );
+    },
+  ),
+  ```
+
+  ```dart
+  StreamMessageListView(
+    messageBuilder: (context, details, messages, defaultMessage) {
+      return defaultMessage.copyWith(
+        imageAttachmentThumbnailSize: ...,
+        imageAttachmentThumbnailCropType: ...,
+        imageAttachmentThumbnailResizeType: ...,
+      );
+    },
+  ),
+  ```
 
 ## 4.4.1
 
