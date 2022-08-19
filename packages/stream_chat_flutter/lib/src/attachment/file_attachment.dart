@@ -100,6 +100,8 @@ class StreamFileAttachment extends StreamAttachmentWidget {
         borderRadius: BorderRadius.circular(8),
       );
 
+  // TODO: Improve image memory. This is using the full image instead of a
+  //  smaller version (thumbnail)
   Widget _getFileTypeImage(BuildContext context) {
     if (isImageAttachment) {
       return Material(

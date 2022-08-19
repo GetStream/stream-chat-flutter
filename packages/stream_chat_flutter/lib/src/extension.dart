@@ -31,6 +31,46 @@ extension StringExtension on String {
 
   /// Levenshtein distance between this and [t].
   int levenshteinDistance(String t) => levenshtein(this, t);
+
+  /// Returns a resized imageUrl with the given [width], [height], [resize]
+  /// and [crop] if it is from Stream CDN or Dashboard.
+  ///
+  /// Read more at https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing
+  String getResizedImageUrl({
+    // TODO: Are these sizes optimal? Consider web/desktop
+    double width = 400,
+    double height = 400,
+    String /*clip|crop|scale|fill*/ resize = 'scale',
+    String /*center|top|bottom|left|right*/ crop = 'center',
+  }) {
+    final uri = Uri.parse(this);
+    final host = uri.host;
+
+    final fromStreamCDN = host.endsWith('stream-io-cdn.com');
+    final fromStreamDashboard = host.endsWith('stream-cloud-uploads.imgix.net');
+
+    if (!fromStreamCDN && !fromStreamDashboard) return this;
+
+    final queryParameters = {...uri.queryParameters};
+
+    if (fromStreamCDN) {
+      if (queryParameters['h'].isNullOrMatches('*') &&
+          queryParameters['w'].isNullOrMatches('*') &&
+          queryParameters['crop'].isNullOrMatches('*') &&
+          queryParameters['resize'].isNullOrMatches('*')) {
+        queryParameters['h'] = height.floor().toString();
+        queryParameters['w'] = width.floor().toString();
+        queryParameters['crop'] = crop;
+        queryParameters['resize'] = resize;
+      }
+    } else if (fromStreamDashboard) {
+      queryParameters['height'] = height.floor().toString();
+      queryParameters['width'] = width.floor().toString();
+      queryParameters['fit'] = crop;
+    }
+
+    return uri.replace(queryParameters: queryParameters).toString();
+  }
 }
 
 /// List extension
@@ -280,4 +320,11 @@ extension UriX on Uri {
     if (hasScheme) return this;
     return Uri.parse('http://${toString()}');
   }
+}
+
+/// Extensions on generic type [T]
+extension TypeX<T> on T? {
+  /// Returns true if the value is null or matches the given [value]
+  /// otherwise returns false.
+  bool isNullOrMatches(T value) => this == null || this == value;
 }

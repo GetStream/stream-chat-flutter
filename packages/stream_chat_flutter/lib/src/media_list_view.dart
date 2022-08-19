@@ -22,6 +22,10 @@ class StreamMediaListView extends StatefulWidget {
     this.selectedIds = const [],
     this.onSelect,
     this.controller,
+    this.thumbnailSize = const ThumbnailSize(400, 400),
+    this.thumbnailFormat = ThumbnailFormat.jpeg,
+    this.thumbnailQuality = 100,
+    this.thumbnailScale = 1,
   });
 
   /// Stores the media selected
@@ -32,6 +36,21 @@ class StreamMediaListView extends StatefulWidget {
 
   /// Controller that handles MediaListView
   final MediaListViewController? controller;
+
+  /// The thumbnail size.
+  final ThumbnailSize thumbnailSize;
+
+  /// {@macro photo_manager.ThumbnailFormat}
+  final ThumbnailFormat thumbnailFormat;
+
+  /// The quality value for the thumbnail.
+  ///
+  /// Valid from 1 to 100.
+  /// Defaults to 100.
+  final int thumbnailQuality;
+
+  /// Scale of the image.
+  final double thumbnailScale;
 
   @override
   _StreamMediaListViewState createState() => _StreamMediaListViewState();
@@ -75,13 +94,17 @@ class _StreamMediaListViewState extends State<StreamMediaListView> {
                     AspectRatio(
                       aspectRatio: 1,
                       child: FadeInImage(
+                        image: MediaThumbnailProvider(
+                          media: media,
+                          size: widget.thumbnailSize,
+                          format: widget.thumbnailFormat,
+                          quality: widget.thumbnailQuality,
+                          scale: widget.thumbnailScale,
+                        ),
                         fadeInDuration: const Duration(milliseconds: 300),
                         placeholder: const AssetImage(
                           'images/placeholder.png',
                           package: 'stream_chat_flutter',
-                        ),
-                        image: MediaThumbnailProvider(
-                          media: media,
                         ),
                         fit: BoxFit.cover,
                       ),
@@ -195,55 +218,95 @@ class _StreamMediaListViewState extends State<StreamMediaListView> {
   }
 }
 
-/// ImageProvider implementation
+/// ImageProvider implementation for [AssetEntity].
 class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   /// Constructor for creating a [MediaThumbnailProvider]
   const MediaThumbnailProvider({
     required this.media,
+    // TODO: Are these sizes optimal? Consider web/desktop
+    this.size = const ThumbnailSize(400, 400),
+    this.format = ThumbnailFormat.jpeg,
+    this.quality = 100,
+    this.scale = 2,
   });
 
-  /// Media to load
+  /// Media to get the thumbnail from.
   final AssetEntity media;
+
+  /// The thumbnail size.
+  final ThumbnailSize size;
+
+  /// {@macro photo_manager.ThumbnailFormat}
+  final ThumbnailFormat format;
+
+  /// The quality value for the thumbnail.
+  ///
+  /// Valid from 1 to 100.
+  /// Defaults to 100.
+  final int quality;
+
+  /// Scale of the image.
+  final double scale;
+
+  @override
+  Future<MediaThumbnailProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<MediaThumbnailProvider>(this);
+  }
 
   @override
   ImageStreamCompleter load(
     MediaThumbnailProvider key,
     DecoderCallback decode,
-  ) =>
-      MultiFrameImageStreamCompleter(
-        codec: _loadAsync(key, decode),
-        scale: 1,
-        informationCollector: () sync* {
-          yield ErrorDescription('Id: ${media.id}');
-        },
-      );
+  ) {
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key, decode),
+      scale: key.scale,
+      informationCollector: () sync* {
+        yield DiagnosticsProperty<ImageProvider>(
+          'Thumbnail provider: $this \n Thumbnail key: $key',
+          this,
+          style: DiagnosticsTreeStyle.errorProperty,
+        );
+      },
+    );
+  }
 
   Future<ui.Codec> _loadAsync(
     MediaThumbnailProvider key,
     DecoderCallback decode,
   ) async {
-    assert(key == this, 'Checks MediaThumbnailProvider');
-    final bytes = await media.thumbnailData;
-
+    assert(key == this, '$key is not $this');
+    final bytes = await media.thumbnailDataWithSize(
+      size,
+      format: format,
+      quality: quality,
+    );
     return decode(bytes!);
   }
 
   @override
-  Future<MediaThumbnailProvider> obtainKey(ImageConfiguration configuration) =>
-      SynchronousFuture<MediaThumbnailProvider>(this);
-
-  @override
   bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
-    final MediaThumbnailProvider typedOther = other;
-    return media.id == typedOther.media.id;
+    if (other is MediaThumbnailProvider) {
+      return media == other.media &&
+          size == other.size &&
+          format == other.format &&
+          quality == other.quality &&
+          scale == other.scale;
+    }
+    return false;
   }
 
   @override
-  int get hashCode => media.id.hashCode;
+  int get hashCode => hashValues(media, size, format, quality, scale);
 
   @override
-  String toString() => '$runtimeType("${media.id}")';
+  String toString() => '$runtimeType('
+      'media: $media, '
+      'size: $size, '
+      'format: $format, '
+      'quality: $quality, '
+      'scale: $scale'
+      ')';
 }
 
 extension on Duration {
@@ -252,7 +315,6 @@ extension on Duration {
     if (s.startsWith('00:')) {
       return s.replaceFirst('00:', '');
     }
-
     return s;
   }
 }
