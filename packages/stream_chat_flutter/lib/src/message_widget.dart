@@ -434,7 +434,8 @@ class StreamMessageWidget extends StatefulWidget {
   /// Crop type of the image attachment thumbnail.
   ///
   /// Defaults to [center]
-  final String /*center|top|bottom|left|right*/ imageAttachmentThumbnailCropType;
+  final String /*center|top|bottom|left|right*/
+      imageAttachmentThumbnailCropType;
 
   /// Creates a copy of [StreamMessageWidget] with
   /// specified attributes overridden.
