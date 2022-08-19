@@ -1,5 +1,8 @@
 ## 4.5.0
 
+- Updated `stream_chat_flutter_core` dependency
+  to [`4.5.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 🐞 Fixed
 
 - [[#882]](https://github.com/GetStream/stream-chat-flutter/issues/882) Lots of unhandled exceptions

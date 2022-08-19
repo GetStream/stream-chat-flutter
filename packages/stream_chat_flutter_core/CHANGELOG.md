@@ -1,5 +1,7 @@
 ## 4.5.0
 
+- Updated `stream_chat` dependency to [`4.5.0`](https://pub.dev/packages/stream_chat/changelog).
+
 🐞 Fixed
 
 - [#1269](https://github.com/GetStream/stream-chat-flutter/issues/1269)
