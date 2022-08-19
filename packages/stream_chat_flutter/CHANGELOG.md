@@ -1,4 +1,4 @@
-## Upcoming
+## 4.5.0
 
 🐞 Fixed
 
@@ -14,8 +14,22 @@
 ✅ Added
 
 - Added `thumbnailSize`, `thumbnailResizeType`, and `thumbnailCropType` params
-  to `StreamMessageWidget` and `StreamAttachmentPicker` to customize the appearance of image
-  thumbnails.
+  to `StreamMessageWidget` to customize the appearance of image attachment thumbnails.
+
+  ```dart
+  StreamMessageListView(
+    messageBuilder: (context, details, messages, defaultMessage) {
+      return defaultMessage.copyWith(
+        imageAttachmentThumbnailSize: ...,
+        imageAttachmentThumbnailCropType: ...,
+        imageAttachmentThumbnailResizeType: ...,
+      );
+    },
+  ),
+  ```
+
+- Added `thumbnailSize`, `thumbnailFormat`, `thumbnailQuality` and `thumbnailScale` params
+  to `StreamAttachmentPicker` to customize the appearance of image attachment thumbnails.
 
   ```dart
   StreamMessageInput(
@@ -27,18 +41,6 @@
         attachmentThumbnailFormat: ...,
         attachmentThumbnailQuality: ...,
         attachmentThumbnailScale: ...,
-      );
-    },
-  ),
-  ```
-
-  ```dart
-  StreamMessageListView(
-    messageBuilder: (context, details, messages, defaultMessage) {
-      return defaultMessage.copyWith(
-        imageAttachmentThumbnailSize: ...,
-        imageAttachmentThumbnailCropType: ...,
-        imageAttachmentThumbnailResizeType: ...,
       );
     },
   ),
