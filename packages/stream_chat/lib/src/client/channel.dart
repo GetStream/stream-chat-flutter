@@ -2386,7 +2386,7 @@ class ChannelClientState {
   void dispose() {
     _debouncedUpdatePersistenceChannelState.cancel();
     _retryQueue.dispose();
-    _subscriptions.cancel();
+    _subscriptions.dispose();
     _channelStateController.close();
     _isUpToDateController.close();
     _threadsController.close();
