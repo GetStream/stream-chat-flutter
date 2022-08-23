@@ -1,6 +1,6 @@
 ## Upcoming beta
 
-- Included the changes from version [Upcoming](#Upcoming).
+- Included the changes from version [4.5.0](#450).
 
 ✅ Added
 
@@ -16,8 +16,10 @@
   to [`5.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
 - Removed deprecated code.
 
-## Upcoming
 
+## 4.5.0
+
+- Updated `stream_chat` dependency to [`4.5.0`](https://pub.dev/packages/stream_chat/changelog).
 - [#1269](https://github.com/GetStream/stream-chat-flutter/issues/1269)
   Fix `ChannelListEventHandler` castError at PagedValue.asSuccess.
 - [#1241](https://github.com/GetStream/stream-chat-flutter/issues/1241) StreamChannelListView load

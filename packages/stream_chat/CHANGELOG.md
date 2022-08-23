@@ -1,6 +1,6 @@
 ## Upcoming beta
 
-- Included the changes from version [Upcoming](#Upcoming).
+- Included the changes from version [4.5.0](#450).
 
 🛑️ Breaking Changes from `5.0.0-beta.2`
 
@@ -30,7 +30,7 @@
 - Minor fixes.
 - Removed deprecated code.
 
-## Upcoming
+## 4.5.0
 
 🐞 Fixed
 

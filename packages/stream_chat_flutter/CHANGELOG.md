@@ -1,6 +1,6 @@
 ## Upcoming beta
 
-- Included the changes from version [Upcoming](#Upcoming).
+- Included the changes from version [4.5.0](#450).
 
 ✅ Added
 
@@ -93,7 +93,10 @@
     - Updated dartdoc documentation
     - Various code readability improvements
 
-## Upcoming
+## 4.5.0
+
+- Updated `stream_chat_flutter_core` dependency
+  to [`4.5.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 🐞 Fixed
 
@@ -109,8 +112,22 @@
 ✅ Added
 
 - Added `thumbnailSize`, `thumbnailResizeType`, and `thumbnailCropType` params
-  to `StreamMessageWidget` and `StreamAttachmentPicker` to customize the appearance of image
-  thumbnails.
+  to `StreamMessageWidget` to customize the appearance of image attachment thumbnails.
+
+  ```dart
+  StreamMessageListView(
+    messageBuilder: (context, details, messages, defaultMessage) {
+      return defaultMessage.copyWith(
+        imageAttachmentThumbnailSize: ...,
+        imageAttachmentThumbnailCropType: ...,
+        imageAttachmentThumbnailResizeType: ...,
+      );
+    },
+  ),
+  ```
+
+- Added `thumbnailSize`, `thumbnailFormat`, `thumbnailQuality` and `thumbnailScale` params
+  to `StreamAttachmentPicker` to customize the appearance of image attachment thumbnails.
 
   ```dart
   StreamMessageInput(
@@ -122,18 +139,6 @@
         attachmentThumbnailFormat: ...,
         attachmentThumbnailQuality: ...,
         attachmentThumbnailScale: ...,
-      );
-    },
-  ),
-  ```
-
-  ```dart
-  StreamMessageListView(
-    messageBuilder: (context, details, messages, defaultMessage) {
-      return defaultMessage.copyWith(
-        imageAttachmentThumbnailSize: ...,
-        imageAttachmentThumbnailCropType: ...,
-        imageAttachmentThumbnailResizeType: ...,
       );
     },
   ),
