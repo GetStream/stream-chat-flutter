@@ -1,3 +1,7 @@
+## 4.5.1
+🐞 Fixed
+- Fix `_subscriptions.cancel()` method does not exist.
+
 ## 4.5.0
 
 🐞 Fixed
