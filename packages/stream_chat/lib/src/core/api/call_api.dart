@@ -1,13 +1,14 @@
+import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/models/call_token_payload.dart';
-import 'package:stream_chat/src/core/models/create_call_payload.dart';
 
+/// Defines the api dedicated to video call operations
 class CallApi {
   /// Initialize a new call api
   CallApi(this._client);
 
   final StreamHttpClient _client;
 
+  /// Returns a token dedicated to the [callId]
   Future<CallTokenPayload> getCallToken(String callId) async {
     final response = await _client.post(
       '/calls/$callId',
@@ -17,6 +18,7 @@ class CallApi {
     return CallTokenPayload.fromJson(response.data);
   }
 
+  /// Creates a new call
   Future<CreateCallPayload> createCall({
     required String callId,
     required String callType,
@@ -26,8 +28,8 @@ class CallApi {
   }) async {
     final response =
         await _client.post(_getChannelUrl(channelId, channelType), data: {
-      'id': '$callId',
-      'type': '$callType',
+      'id': callId,
+      'type': callType,
     });
     // return response.data;
     return CreateCallPayload.fromJson(response.data);

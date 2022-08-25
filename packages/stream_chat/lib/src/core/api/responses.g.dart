@@ -297,3 +297,66 @@ OGAttachmentResponse _$OGAttachmentResponseFromJson(
       ..title = json['title'] as String?
       ..titleLink = json['title_link'] as String?
       ..type = json['type'] as String?;
+
+AgoraPayload _$AgoraPayloadFromJson(Map<String, dynamic> json) => AgoraPayload(
+      channel: json['channel'] as String,
+    );
+
+Map<String, dynamic> _$AgoraPayloadToJson(AgoraPayload instance) =>
+    <String, dynamic>{
+      'channel': instance.channel,
+    };
+
+CallPayload _$CallPayloadFromJson(Map<String, dynamic> json) => CallPayload(
+      id: json['id'] as String,
+      provider: json['provider'] as String,
+      agora: json['agora'] == null
+          ? null
+          : AgoraPayload.fromJson(json['agora'] as Map<String, dynamic>),
+      hms: json['hms'] == null
+          ? null
+          : HMSPayload.fromJson(json['hms'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$CallPayloadToJson(CallPayload instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'provider': instance.provider,
+      'agora': instance.agora?.toJson(),
+      'hms': instance.hms?.toJson(),
+    };
+
+CallTokenPayload _$CallTokenPayloadFromJson(Map<String, dynamic> json) =>
+    CallTokenPayload(
+      token: json['token'] as String,
+      agoraUid: json['agora_uid'] as int?,
+      agoraAppId: json['agora_app_id'] as String?,
+    );
+
+Map<String, dynamic> _$CallTokenPayloadToJson(CallTokenPayload instance) =>
+    <String, dynamic>{
+      'token': instance.token,
+      'agora_uid': instance.agoraUid,
+      'agora_app_id': instance.agoraAppId,
+    };
+
+CreateCallPayload _$CreateCallPayloadFromJson(Map<String, dynamic> json) =>
+    CreateCallPayload(
+      call: CallPayload.fromJson(json['call'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$CreateCallPayloadToJson(CreateCallPayload instance) =>
+    <String, dynamic>{
+      'call': instance.call.toJson(),
+    };
+
+HMSPayload _$HMSPayloadFromJson(Map<String, dynamic> json) => HMSPayload(
+      roomId: json['room_id'] as String,
+      roomName: json['room_name'] as String,
+    );
+
+Map<String, dynamic> _$HMSPayloadToJson(HMSPayload instance) =>
+    <String, dynamic>{
+      'room_id': instance.roomId,
+      'room_name': instance.roomName,
+    };
