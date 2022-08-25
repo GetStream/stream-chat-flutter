@@ -24,7 +24,6 @@ class CallApi {
     required String callType,
     required String channelType,
     required String channelId,
-    Map<String, Object?>? options,
   }) async {
     final response =
         await _client.post(_getChannelUrl(channelId, channelType), data: {

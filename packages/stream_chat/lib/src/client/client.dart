@@ -595,12 +595,10 @@ class StreamChatClient {
     required String callType,
     required String channelType,
     required String channelId,
-    Map<String, Object?>? options,
   }) async {
     return _chatApi.call.createCall(
       callId: callId,
       callType: callType,
-      options: options,
       channelType: channelType,
       channelId: channelId,
     );
