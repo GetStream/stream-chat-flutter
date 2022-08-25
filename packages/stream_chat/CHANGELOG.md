@@ -30,6 +30,12 @@
 - Minor fixes.
 - Removed deprecated code.
 
+## Upcoming
+
+✅ Added
+
+- Added `StreamChatClient.getCallToken` and `StreamChatClient.createCall` methods.
+
 ## 4.5.0
 
 🐞 Fixed
