@@ -1,5 +1,7 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client/client.dart';
+import 'package:stream_chat/src/core/api/call_api.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
@@ -494,4 +496,124 @@ class OGAttachmentResponse extends _BaseResponse {
   /// Create a new instance from a [json].
   static OGAttachmentResponse fromJson(Map<String, dynamic> json) =>
       _$OGAttachmentResponseFromJson(json);
+}
+
+/// Payload for Agora call.
+@JsonSerializable()
+class AgoraPayload {
+  /// Create a new instance.
+  const AgoraPayload({required this.channel});
+
+  /// Create a new instance from a [json].
+  factory AgoraPayload.fromJson(Map<String, dynamic> json) =>
+      _$AgoraPayloadFromJson(json);
+
+  /// The Agora channel.
+  final String channel;
+
+  /// Convert this object to a json.
+  Map<String, dynamic> toJson() => _$AgoraPayloadToJson(this);
+}
+
+/// Model containing the information about a call.
+@JsonSerializable()
+class CallPayload extends Equatable {
+  /// Create a new instance.
+  const CallPayload({
+    required this.id,
+    required this.provider,
+    this.agora,
+    this.hms,
+  });
+
+  /// Create a new instance from a [json].
+  factory CallPayload.fromJson(Map<String, dynamic> json) =>
+      _$CallPayloadFromJson(json);
+
+  /// The call id.
+  final String id;
+
+  /// The call provider.
+  final String provider;
+
+  /// The payload specific to Agora.
+  final AgoraPayload? agora;
+
+  /// The payload specific to 100ms.
+  final HMSPayload? hms;
+
+  /// Convert this object to a json.
+  Map<String, dynamic> toJson() => _$CallPayloadToJson(this);
+
+  @override
+  List<Object?> get props => [id, provider, agora, hms];
+}
+
+/// The response to [CallApi.getCallToken]
+@JsonSerializable()
+class CallTokenPayload extends Equatable {
+  /// Create a new instance.
+  const CallTokenPayload({required this.token, this.agoraUid, this.agoraAppId});
+
+  /// Create a new instance from a [json].
+  factory CallTokenPayload.fromJson(Map<String, dynamic> json) =>
+      _$CallTokenPayloadFromJson(json);
+
+  /// The token to use for the call.
+  final String token;
+
+  /// The uid specific to Agora.
+  final int? agoraUid;
+
+  /// The appId specific to 100ms.
+  final String? agoraAppId;
+
+  /// Convert this object to a json.
+  Map<String, dynamic> toJson() => _$CallTokenPayloadToJson(this);
+
+  @override
+  List<Object?> get props => [token, agoraAppId, agoraUid];
+}
+
+/// The response to [CallApi.createCall]
+@JsonSerializable()
+class CreateCallPayload extends Equatable {
+  /// Creates a new instance.
+  const CreateCallPayload({required this.call});
+
+  /// Create a new instance from a [json].
+  factory CreateCallPayload.fromJson(Map<String, dynamic> json) =>
+      _$CreateCallPayloadFromJson(json);
+
+  /// The call object.
+  final CallPayload call;
+
+  /// Convert this object to a json.
+  Map<String, dynamic> toJson() => _$CreateCallPayloadToJson(this);
+
+  @override
+  List<Object?> get props => [call];
+}
+
+/// Payload for 100ms call.
+@JsonSerializable()
+class HMSPayload extends Equatable {
+  /// Create a new instance.
+  const HMSPayload({required this.roomId, required this.roomName});
+
+  /// Create a new instance from a [json].
+  factory HMSPayload.fromJson(Map<String, dynamic> json) =>
+      _$HMSPayloadFromJson(json);
+
+  /// The id of the 100ms room.
+  final String roomId;
+
+  /// The name of the 100ms room.
+  final String roomName;
+
+  /// Convert this object to a json.
+  Map<String, dynamic> toJson() => _$HMSPayloadToJson(this);
+
+  @override
+  List<Object?> get props => [roomId, roomName];
 }
