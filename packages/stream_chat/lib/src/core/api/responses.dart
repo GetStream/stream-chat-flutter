@@ -499,7 +499,7 @@ class OGAttachmentResponse extends _BaseResponse {
 }
 
 /// Payload for Agora call.
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class AgoraPayload {
   /// Create a new instance.
   const AgoraPayload({required this.channel});
@@ -510,13 +510,10 @@ class AgoraPayload {
 
   /// The Agora channel.
   final String channel;
-
-  /// Convert this object to a json.
-  Map<String, dynamic> toJson() => _$AgoraPayloadToJson(this);
 }
 
 /// Model containing the information about a call.
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class CallPayload extends Equatable {
   /// Create a new instance.
   const CallPayload({
@@ -542,61 +539,40 @@ class CallPayload extends Equatable {
   /// The payload specific to 100ms.
   final HMSPayload? hms;
 
-  /// Convert this object to a json.
-  Map<String, dynamic> toJson() => _$CallPayloadToJson(this);
-
   @override
   List<Object?> get props => [id, provider, agora, hms];
 }
 
 /// The response to [CallApi.getCallToken]
-@JsonSerializable()
-class CallTokenPayload extends Equatable {
-  /// Create a new instance.
-  const CallTokenPayload({required this.token, this.agoraUid, this.agoraAppId});
-
+@JsonSerializable(createToJson: false)
+class CallTokenPayload extends _BaseResponse {
   /// Create a new instance from a [json].
-  factory CallTokenPayload.fromJson(Map<String, dynamic> json) =>
+  static CallTokenPayload fromJson(Map<String, dynamic> json) =>
       _$CallTokenPayloadFromJson(json);
 
   /// The token to use for the call.
-  final String token;
+  String? token;
 
-  /// The uid specific to Agora.
-  final int? agoraUid;
+  /// The user id specific to Agora.
+  int? agoraUid;
 
-  /// The appId specific to 100ms.
-  final String? agoraAppId;
-
-  /// Convert this object to a json.
-  Map<String, dynamic> toJson() => _$CallTokenPayloadToJson(this);
-
-  @override
-  List<Object?> get props => [token, agoraAppId, agoraUid];
+  /// The appId specific to Agora.
+  String? agoraAppId;
 }
 
 /// The response to [CallApi.createCall]
-@JsonSerializable()
-class CreateCallPayload extends Equatable {
-  /// Creates a new instance.
-  const CreateCallPayload({required this.call});
-
+@JsonSerializable(createToJson: false)
+class CreateCallPayload extends _BaseResponse {
   /// Create a new instance from a [json].
-  factory CreateCallPayload.fromJson(Map<String, dynamic> json) =>
+  static CreateCallPayload fromJson(Map<String, dynamic> json) =>
       _$CreateCallPayloadFromJson(json);
 
   /// The call object.
-  final CallPayload call;
-
-  /// Convert this object to a json.
-  Map<String, dynamic> toJson() => _$CreateCallPayloadToJson(this);
-
-  @override
-  List<Object?> get props => [call];
+  CallPayload? call;
 }
 
 /// Payload for 100ms call.
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class HMSPayload extends Equatable {
   /// Create a new instance.
   const HMSPayload({required this.roomId, required this.roomName});
@@ -610,9 +586,6 @@ class HMSPayload extends Equatable {
 
   /// The name of the 100ms room.
   final String roomName;
-
-  /// Convert this object to a json.
-  Map<String, dynamic> toJson() => _$HMSPayloadToJson(this);
 
   @override
   List<Object?> get props => [roomId, roomName];
