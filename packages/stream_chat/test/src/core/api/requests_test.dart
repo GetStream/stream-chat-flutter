@@ -43,6 +43,9 @@ void main() {
           idAround: 'id-around',
         );
 
+        final sameOld = params.copyWith();
+        expect(sameOld, equals(params));
+
         final newDateTime = DateTime.now().add(const Duration(days: 2));
         const newTestString = 'test';
         final newParams = params.copyWith(
