@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/call_api.dart';
-import 'package:stream_chat/src/core/api/device_api.dart';
-import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../../mocks.dart';
