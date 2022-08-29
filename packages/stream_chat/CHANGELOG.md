@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Only listen to client events when the user is connected to the websocket.
+
 ## 4.5.0
 
 🐞 Fixed
