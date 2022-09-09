@@ -54,11 +54,11 @@ scripts:
     description: Build all generated files for Dart & Flutter packages in this project.
 
   generate:dart:
-    run: melos exec -c 1 --depends-on="build_runner" --no-flutter -- "dart run build_runner build --delete-conflicting-outputs"
+    run: melos exec -c 1 --depends-on="build_runner" --no-flutter -- "dart run build_runner build --delete-conflicting-outputs --enable-experiment=super-parameters,enhanced-enums"
     description: Build all generated files for Dart packages in this project.
 
   generate:flutter:
-    run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter pub run build_runner build --delete-conflicting-outputs"
+    run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter run build_runner build --delete-conflicting-outputs --enable-experiment=super-parameters,enhanced-enums"
     description: Build all generated files for Flutter packages in this project.
 
   test:all:

@@ -592,6 +592,25 @@ class StreamChatClient {
     }
   }
 
+  /// Returns a token associated with the [callId].
+  Future<CallTokenPayload> getCallToken(String callId) async =>
+      _chatApi.call.getCallToken(callId);
+
+  /// Creates a new call.
+  Future<CreateCallPayload> createCall({
+    required String callId,
+    required String callType,
+    required String channelType,
+    required String channelId,
+  }) {
+    return _chatApi.call.createCall(
+      callId: callId,
+      callType: callType,
+      channelType: channelType,
+      channelId: channelId,
+    );
+  }
+
   /// Requests channels with a given query from the API.
   Future<List<Channel>> queryChannelsOnline({
     Filter? filter,

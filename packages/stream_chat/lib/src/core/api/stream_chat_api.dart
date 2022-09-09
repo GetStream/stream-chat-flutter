@@ -1,5 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
+import 'package:stream_chat/src/core/api/call_api.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/device_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
@@ -52,6 +53,11 @@ class StreamChatApi {
 
   /// Api dedicated to message operations
   MessageApi get message => _message ??= MessageApi(_client);
+
+  CallApi? _call;
+
+  /// Api dedicated to call operations
+  CallApi get call => _call ??= CallApi(_client);
 
   ChannelApi? _channel;
 

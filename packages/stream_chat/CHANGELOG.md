@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added `StreamChatClient.getCallToken` and `StreamChatClient.createCall` methods.
+
 🐞 Fixed
 
 - Only listen to client events when the user is connected to the websocket.

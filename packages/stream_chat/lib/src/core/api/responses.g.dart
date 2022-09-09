@@ -297,3 +297,17 @@ OGAttachmentResponse _$OGAttachmentResponseFromJson(
       ..title = json['title'] as String?
       ..titleLink = json['title_link'] as String?
       ..type = json['type'] as String?;
+
+CallTokenPayload _$CallTokenPayloadFromJson(Map<String, dynamic> json) =>
+    CallTokenPayload()
+      ..duration = json['duration'] as String?
+      ..token = json['token'] as String?
+      ..agoraUid = json['agora_uid'] as int?
+      ..agoraAppId = json['agora_app_id'] as String?;
+
+CreateCallPayload _$CreateCallPayloadFromJson(Map<String, dynamic> json) =>
+    CreateCallPayload()
+      ..duration = json['duration'] as String?
+      ..call = json['call'] == null
+          ? null
+          : CallPayload.fromJson(json['call'] as Map<String, dynamic>);
