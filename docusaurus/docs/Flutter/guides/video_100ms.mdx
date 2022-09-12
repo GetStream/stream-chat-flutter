@@ -266,10 +266,7 @@ When the user hits the call button at the top right of the channel header a new 
                 final user = StreamChat.of(context).currentUser;
                 final _meetingStore =
                     Provider.of<MeetingStore>(context, listen: false);
-                final createCallResponse =
-                    await _meetingStore.hmsSDKInteractor.createCall('123');
-                final callId = createCallResponse.call.id;
-                await _meetingStore.switchVideo();
+                final callId = await _meetingStore.create(user!.name, '123');
                 final message = await channel.sendMessage(
                   Message(
                     text: 'Incoming call from ${user!.name}',
