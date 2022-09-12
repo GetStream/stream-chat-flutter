@@ -1,0 +1,416 @@
+---
+id: video_100ms
+sidebar_position: 16
+title: 100ms Video integration guide
+---
+
+100ms Video integration guide
+
+### Integration
+
+Video calls have become an integral part of daily life since the pandemic hit. Today, we will take a look at how you can use the 100ms service to integrate video calls into the Stream Chat SDK.
+
+100ms is an infrastructure provider for services like video, audio, and live streaming. They offer native SDKs for mobile platforms and the web that allow for simple integration with very few lines of code. They cover a wide range of use-cases such as video conferencing, Telehealth, classrooms, and many more.
+
+There are a few necessary steps to follow to integrate video calling capabilities with the Stream Chat SDK, but we will go over each phase of the process to come up with a functional and reusable solution that allows your end-users to communicate with one another through a seamless video experience.
+
+
+### Setting Up an Account for 100ms
+
+First, let’s go over a quick introduction to 100ms. It is a service that allows you to do video conferencing, audio, and more. Their aim is to provide you with a wide range of extensible features, all while allowing you to get started quickly with minimum effort.
+
+To get started, you must set up an account for the platform – click the Try For Free button for a trial to use for this tutorial. You can sign up with either a Google or Github account, or you can use any other email address. You will receive an email asking you to confirm your credentials.
+
+Next, you’ll get a quick tour of how to create your own video conference. Here is an outline of the steps you must take:
+
+- Choose a template Select Video Conferencing, hit Next
+- Add a few more details Enter everything that is valid for you
+- Choose a subdomain Create a subdomain that is suitable for your use case and select the closest region (e.g. in our case, “integrationguide” and “EU” make the most sense, resulting in the domain: integrationguide.app.100ms.live)
+- Your app is ready You can join the room if you want to see a sample (not necessary)
+
+From here, click the Go to Dashboard button at the bottom. After completing the quick introductory tour, your account and app will be ready to continue. Nice job!
+
+You will come back to the Dashboard later, but we will move on to other steps next.
+### Set Up the Basic App Architecture
+### Create a Basic Layout UI
+
+You saw the UI in the video at the beginning of this guide. It’s not a complicated setup, and luckily, the SDKs provide a lot of assistance. But there’s still work to be done, so let’s get to it!
+
+#### Create the Video Call View
+
+#### Customizing the ChannelHeader
+
+This what we are going to build
+
+![](https://i.imgur.com/MmSmox7.png)
+
+
+
+Before you can use the methods from the SDK you need to build up the UI for the header itself.
+
+
+```dart
+
+class ChannelPage extends StatelessWidget {
+  /// Creates the page that shows the list of messages
+  const ChannelPage({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: StreamChannelHeader(
+          actions: [
+            StartCallButton(...)
+]));
+}
+            
+class StartCallButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const StartCallButton({Key? key, required this.onTap}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return _NormalButton(
+      iconButton: Icons.video_call,
+      label: 'Call',
+      color: Colors.blue,
+      onTap: onTap,
+    );
+  }
+}
+
+class _NormalButton extends StatelessWidget {
+  final IconData iconButton;
+  final String label;
+  final Color color;
+  final VoidCallback? onTap;
+  const _NormalButton({
+    Key? key,
+    required this.iconButton,
+    required this.color,
+    required this.label,
+    this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        CircleAvatar(
+          backgroundColor: color,
+          child: IconButton(
+              onPressed: onTap,
+              icon: Icon(
+                iconButton,
+                color: Colors.white,
+              )),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(label),
+        )
+      ],
+    );
+  }
+}
+
+```
+
+#### Creating Custom Call Attachment
+
+You will show a custom UI for call messages in the message list that will look like this: 
+
+In order to create custom messages for calls, you will leverage the custom attachments functionality of the StreamChat SDK
+
+```dart
+StreamMessageListView(
+        messageBuilder: (ctx, details, messages, defaultMessage) {
+      return defaultMessage.copyWith(
+        customAttachmentBuilders: {
+          'call': (context, message, attachments) {
+            print(attachments);
+            final attachmentWidget = AcceptCall(
+                messageId: message.id,
+                attachments[0].extraData['text']! as String,
+                callId: attachments[0].extraData['callId'] as String);
+
+            return attachmentWidget;
+          }
+        },
+      );
+    });
+```
+The `AcceptCall` widget looks like this.
+
+![AcceptCall Widget](https://i.imgur.com/BxHwz7d.png)
+
+
+It's two buttons and their labels in a Row
+```dart
+class AcceptCall extends StatelessWidget {
+  final String messageId;
+  final String callId;
+  const AcceptCall(
+      {Key? key,
+      required this.callId,
+      required this.messageId})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CallAcceptButton(
+            onTap: () async {
+              final _meetingStore =
+                  Provider.of<MeetingStore>(context, listen: false);
+              final user = StreamChat.of(context).currentUser;
+
+              await _meetingStore.join(user!.name, callId);
+
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (_) => MeetingPage(
+                  meetingLink: callId,
+                  flow: MeetingFlow.meeting,
+                  user: user.name,
+                  isAudioOn: true,
+                  localPeerNetworkQuality:
+                      _meetingStore.localPeerNetworkQuality,
+                ),
+              ));
+              print("accept");
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CallRejectButton(
+            onTap: () {
+             final channel = StreamChannel.of(context).channel;
+              channel.updateMessage(
+                Message(
+                  id: messageId,
+                  text: 'You rejected this call',
+                  attachments: [
+                    Attachment(
+                      uploadState: UploadState.success(),
+                      type: 'call',
+                      extraData: {
+                        'callId': callId,
+                        'callState': "rejected" //rejected/ended
+                      },
+                    ),
+                  ],
+                ),
+              );
+              print("rejecting call");
+            },
+          ),
+        )
+      ],
+    );
+  }
+}
+```
+
+When accepting the call we call the HMS SDK join call function and push the MeetingPage. When rejecting the call we simply update the message with a call rejected message.
+
+The code corresponding to the Accept Button is the following
+
+```dart
+
+class CallAcceptButton extends StatelessWidget {
+  const CallAcceptButton({Key? key, required this.onTap}) : super(key: key);
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return _NormalButton(
+      iconButton: Icons.call,
+      label: 'Accept',
+      color: Colors.green,
+      onTap: onTap,
+    );
+  }
+}
+
+
+```
+The Reject button is similar but with a different icon and label
+
+### Send and Edit Chat Messages for the Calls
+
+
+#### Starting a Call and Sending the Message
+
+When the user hits the call button at the top right of the channel header a new message should be sent to the channel. Therefore, a new room needs to be created with the 100ms SDK, which is happening on the backend.
+
+```dart
+  class ChannelPage extends StatelessWidget {
+  /// Creates the page that shows the list of messages
+  const ChannelPage({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: StreamChannelHeader(
+          actions: [
+            StartCallButton(
+              onTap: () async {
+                final channel = StreamChannel.of(context).channel;
+                final user = StreamChat.of(context).currentUser;
+                final _meetingStore =
+                    Provider.of<MeetingStore>(context, listen: false);
+                final createCallResponse =
+                    await _meetingStore.hmsSDKInteractor.createCall('123');
+                final callId = createCallResponse.call.id;
+                await _meetingStore.switchVideo();
+                final message = await channel.sendMessage(
+                  Message(
+                    text: 'Incoming call from ${user!.name}',
+                    attachments: [
+                      Attachment(
+                        uploadState: UploadState.success(),
+                        type: 'call',
+                        extraData: {
+                          'callId': callId,
+                          'callState': "ongoing" 
+                        },
+                      ),
+                    ],
+                  ),
+                );
+
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (_) => MeetingPage(
+                    meetingLink: callId,
+                    flow: MeetingFlow.meeting,
+                    user: user.name,
+                    isAudioOn: true,
+                    localPeerNetworkQuality:
+                        _meetingStore.localPeerNetworkQuality,
+                  ),
+                ));
+
+                print("new call");
+              },
+            )
+          ],
+        ),
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: StreamMessageListView(
+                  messageBuilder: (ctx, details, messages, defaultMessage) {
+                return defaultMessage.copyWith(
+                  customAttachmentBuilders: {
+                    'call': (context, message, attachments) {
+                      print(attachments);
+                      final attachmentWidget = AcceptCall(
+                          messageId: message.id,
+                          callId: attachments[0].extraData['callId'] as String);
+
+                      return attachmentWidget;
+                    }
+                  },
+                );
+              }),
+            ),
+            StreamMessageInput(attachmentLimit: 3),
+          ],
+        ),
+      );
+}
+
+```
+
+
+### Integrating the 100ms SDK
+
+The HMSSDKInteractor is a wrapper around 100ms SDK and the StreamChatClient. It contains WebRTC methods like switchVideo, isVideoMute etc
+
+```dart
+class HMSSDKInteractor {
+  late HMSSDK _hmsSDK;
+  final StreamChatClient client;
+
+  HMSSDKInteractor(this.client,
+      {String? appGroup, String? preferredExtension}) {
+    _hmsSDK =
+        HMSSDK(appGroup: appGroup, preferredExtension: preferredExtension);
+    _hmsSDK.build();
+  }
+  
+  Future<CallTokenPayload> joinCall(String roomId) async {
+    final authTokenResult = await client.getCallToken(roomId);
+    return authTokenResult;
+  }
+
+  Future<CreateCallPayload> createCall(String roomId) async {
+    final uuid = Uuid();
+    final callName = "$roomId-${uuid.v4()}";
+    final createCallResult = await client.createCall(
+        callId: callName,
+        callType: 'video',
+        channelType: 'messaging',
+        channelId: 'godevs2');
+    final roomID = createCallResult.call.hms?.roomId;
+    final roomName = createCallResult.call.hms?.roomName;
+    return createCallResult;
+  }
+  
+  Future<HMSException?> switchVideo({bool isOn = false}) async {
+    return await _hmsSDK.switchVideo(isOn: isOn);
+  }
+  ...
+  
+  }
+```
+The MeetingStore is a class that extends ChangeNotifier and implements HMSSDk listeners  such as HMSUpdateListener.
+When joining a call we call the StreamChat SDK for the token needed for the HMS SDK join method.
+
+```dart
+class MeetingStore extends ChangeNotifier
+    with WidgetsBindingObserver
+    implements HMSUpdateListener, HMSActionResultListener, HMSStatsListener {
+    
+      final HMSSDKInteractor hmsSDKInteractor;
+
+  MeetingStore({required this.hmsSDKInteractor});
+
+
+  Future<bool> join(String user, String roomUrl) async {
+    final response = await hmsSDKInteractor.joinCall(roomUrl);
+    HMSConfig config = HMSConfig(
+        authToken: response.token,
+        userName: user,
+        captureNetworkQualityInPreview: true);
+
+    hmsSDKInteractor.addUpdateListener(this);
+    WidgetsBinding.instance.addObserver(this);
+    hmsSDKInteractor.join(config: config);
+    this.meetingUrl = roomUrl;
+    return true;
+  }
+
+}
+```
+
+
+
+### Summary
+
+In this guide, you completed the entire integration of a video service into a chat app created with the StreamChat SDK. All this happened with a clean architectural approach that makes it straightforward to also use other video services in case you want to experiment with that.
+
+For the purpose of simplification, we have not offered audio calls in this guide. But the principle is applicable with very few changes as well.
+
+The 100ms SDK works really well in this case and allows you to quickly set up and use a video call service in your apps without complicated processes and manual work that needs to be done.
+
+In case you have any more questions about this video integration or the work with other SDKs, feel free to reach out to the team. We are happy to help and support you!
+
+Thank you for following along with this article!
