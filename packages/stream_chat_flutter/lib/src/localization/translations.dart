@@ -123,9 +123,6 @@ abstract class Translations {
   /// The error shown when the file being read has no bytes
   String get couldNotReadBytesFromFileError;
 
-  /// The text for showing the query while searching for emojis
-  String emojiMatchingQueryText(String query);
-
   /// The label for "add a file"
   String get addAFileLabel;
 
@@ -492,9 +489,6 @@ class DefaultTranslations implements Translations {
   @override
   String get couldNotReadBytesFromFileError =>
       'Could not read bytes from file.';
-
-  @override
-  String emojiMatchingQueryText(String query) => 'Emoji matching "$query"';
 
   @override
   String get addAFileLabel => 'Add a file';

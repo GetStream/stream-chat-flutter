@@ -1028,12 +1028,14 @@ class StreamChatClient {
     String channelType,
     List<String> memberIds, {
     Message? message,
+    bool hideHistory = false,
   }) =>
       _chatApi.channel.addMembers(
         channelId,
         channelType,
         memberIds,
         message: message,
+        hideHistory: hideHistory,
       );
 
   /// Remove members from the channel

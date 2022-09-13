@@ -130,10 +130,6 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
       'Não foi possível ler os bytes do arquivo.';
 
   @override
-  String emojiMatchingQueryText(String query) =>
-      'Emoji correspondente a "$query"';
-
-  @override
   String get addAFileLabel => 'Adicionar um arquivo';
 
   @override

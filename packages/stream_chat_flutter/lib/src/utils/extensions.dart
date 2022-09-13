@@ -2,11 +2,8 @@ import 'package:diacritic/diacritic.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-final _emojiChars = Emoji.chars();
 
 /// String extension
 extension StringExtension on String {
@@ -20,10 +17,15 @@ extension StringExtension on String {
   ///  1 to 3 emojis: big size with no text bubble.
   ///  4+ emojis or emojis+text: standard size with text bubble.
   bool get isOnlyEmoji {
-    if (isEmpty) return false;
-    if (length > 3) return false;
-    final characters = trim().characters;
-    return characters.every(_emojiChars.contains);
+    final trimmedString = trim();
+    if (trimmedString.isEmpty) return false;
+    if (trimmedString.characters.length > 3) return false;
+    final emojiRegex = RegExp(
+      r'^(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])+$',
+      multiLine: true,
+      caseSensitive: false,
+    );
+    return emojiRegex.hasMatch(trimmedString);
   }
 
   /// Removes accents and diacritics from the given String.

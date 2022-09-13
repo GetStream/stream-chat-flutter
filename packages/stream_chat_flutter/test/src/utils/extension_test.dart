@@ -67,4 +67,21 @@ void main() {
       expect([user].search('franc'), [user]);
     });
   });
+
+  group('String.isOnlyEmoji', () {
+    test('should return false for empty or > 3 strings', () {
+      expect(''.isOnlyEmoji, false);
+      expect('aaa📝💜'.isOnlyEmoji, false);
+      expect('📝💜📝💜'.isOnlyEmoji, false);
+    });
+
+    test('should detect strings made only by emojis', () {
+      expect('a📝💜'.isOnlyEmoji, false);
+      expect('📝💜📝'.isOnlyEmoji, true);
+      expect('🌶'.isOnlyEmoji, true);
+      expect('🌶1'.isOnlyEmoji, false);
+      expect('👨‍👨👨‍👨'.isOnlyEmoji, true);
+      expect('👨‍👨👨‍👨 '.isOnlyEmoji, true);
+    });
+  });
 }

@@ -30,7 +30,6 @@ const _kMinMediaPickerSize = 360.0;
 /// The default maximum size for media attachments.
 const kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
 
-const _kEmojiTrigger = ':';
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
 
@@ -114,7 +113,6 @@ class StreamMessageInput extends StatefulWidget {
     this.elevation,
     this.shadow,
     this.autoCorrect = true,
-    this.enableEmojiSuggestionsOverlay = true,
     this.enableMentionsOverlay = true,
     this.onQuotedMessageCleared,
   });
@@ -236,10 +234,6 @@ class StreamMessageInput extends StatefulWidget {
   /// Disable autoCorrect by passing false
   /// autoCorrect is enabled by default
   final bool autoCorrect;
-
-  /// Disable the default emoji suggestions by passing `false`
-  /// Enabled by default
-  final bool enableEmojiSuggestionsOverlay;
 
   /// Disable the mentions overlay by passing false
   /// Enabled by default
@@ -586,28 +580,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
                   );
                 },
               ),
-            if (widget.enableEmojiSuggestionsOverlay)
-              StreamAutocompleteTrigger(
-                trigger: _kEmojiTrigger,
-                minimumRequiredCharacters: 2,
-                optionsViewBuilder: (
-                  context,
-                  autocompleteQuery,
-                  messageEditingController,
-                ) {
-                  final query = autocompleteQuery.query;
-                  return StreamEmojiAutocompleteOptions(
-                    query: query,
-                    onEmojiSelected: (emoji) {
-                      // accepting the autocomplete option.
-                      StreamAutocomplete.of(context).acceptAutocompleteOption(
-                        emoji.char!,
-                        keepTrigger: false,
-                      );
-                    },
-                  );
-                },
-              ),
           ],
         );
       },
@@ -946,12 +918,14 @@ class StreamMessageInputState extends State<StreamMessageInput>
       value = value.trim();
 
       final channel = StreamChannel.of(context).channel;
-      if (channel.ownCapabilities.contains(PermissionType.sendTypingEvents) &&
-          value.isNotEmpty) {
-        channel
-            .keyStroke(_effectiveController.message.parentId)
-            // ignore: no-empty-block
-            .catchError((e) {});
+      if (value.isNotEmpty &&
+          channel.ownCapabilities.contains(PermissionType.sendTypingEvents)) {
+        // Notify the server that the user started typing.
+        channel.keyStroke(_effectiveController.message.parentId).onError(
+          (error, stackTrace) {
+            widget.onError?.call(error!, stackTrace);
+          },
+        );
       }
 
       var actionsLength = widget.actions.length;
@@ -1422,9 +1396,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   /// Sends the current message
   Future<void> sendMessage() async {
-    if (_timeOut > 0 &&
-        _effectiveController.text.trim().isEmpty &&
-        _effectiveController.attachments.isEmpty) {
+    if (_timeOut > 0 ||
+        (_effectiveController.text.trim().isEmpty &&
+            _effectiveController.attachments.isEmpty)) {
       return;
     }
 

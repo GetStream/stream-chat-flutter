@@ -127,9 +127,6 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get couldNotReadBytesFromFileError => 'ファイルからバイトを読み取れませんでした';
 
   @override
-  String emojiMatchingQueryText(String query) => '「"$query"」とお揃いの絵文字';
-
-  @override
   String get addAFileLabel => 'ファイルの追加';
 
   @override

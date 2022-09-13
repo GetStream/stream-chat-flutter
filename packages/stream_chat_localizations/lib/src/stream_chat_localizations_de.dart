@@ -125,9 +125,6 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       'Die Dateigröße ist begrenzt auf $limitInMB MB.';
 
   @override
-  String emojiMatchingQueryText(String query) => 'Emoji-Abgleich "$query"';
-
-  @override
   String get addAFileLabel => 'Datei hinzufügen';
 
   @override

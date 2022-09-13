@@ -128,9 +128,6 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
       'Filen er for stor til å laste opp. Filgrense er $limitInMB MB.';
 
   @override
-  String emojiMatchingQueryText(String query) => 'Emoji matcher "$query"';
-
-  @override
   String get addAFileLabel => 'Legg til en fil';
 
   @override

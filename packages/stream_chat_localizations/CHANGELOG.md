@@ -1,3 +1,9 @@
+## Upcoming 
+
+🔄 Changed
+
+* Removed `emojiMatchingQueryText` string.
+
 ## 4.0.0-beta.2
 
 * Included the changes from version [3.3.0](#330).
