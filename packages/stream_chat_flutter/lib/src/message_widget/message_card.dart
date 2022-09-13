@@ -131,7 +131,6 @@ class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      clipBehavior: Clip.hardEdge,
       elevation: 0,
       margin: EdgeInsets.symmetric(
         horizontal: (widget.isFailedState ? 15.0 : 0.0) +
