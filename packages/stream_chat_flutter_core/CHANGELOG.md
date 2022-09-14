@@ -1,3 +1,16 @@
+## 4.6.0
+
+ - **REFACTOR**: remove deprecated code and cleanup.
+ - **FIX**: use copyWith while setting controller items.
+ - **FIX**: only handle the channel list event if the state is success.
+ - **FIX**: fix loading to unread position.
+ - **FIX**: fix lazy load scroll view.
+ - **FIX**: fix lazy load scroll view.
+ - **FIX**: allow scroll notification bubbling in lazy load scroll view.
+ - **FIX**: allow scroll notification bubbling in lazy load scroll view.
+ - **FEAT**: Add `ChannelListController.filter` and `ChannelListController.sort` setters.
+ - **FEAT**: add StreamAutocomplete (#1263).
+
 ## 4.5.0
 
 - Updated `stream_chat` dependency to [`4.5.0`](https://pub.dev/packages/stream_chat/changelog).
