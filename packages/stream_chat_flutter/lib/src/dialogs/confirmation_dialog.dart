@@ -40,14 +40,14 @@ class ConfirmationDialog extends StatelessWidget {
       actions: [
         TextButton(
           style: TextButton.styleFrom(
-            primary: streamTheme.colorTheme.accentPrimary,
+            foregroundColor: streamTheme.colorTheme.accentPrimary,
           ),
           onPressed: () => Navigator.of(context).pop(false),
           child: Text(context.translations.cancelLabel),
         ),
         TextButton(
           style: TextButton.styleFrom(
-            primary: streamTheme.colorTheme.accentPrimary,
+            foregroundColor: streamTheme.colorTheme.accentPrimary,
           ),
           onPressed: () {
             onConfirmation.call();

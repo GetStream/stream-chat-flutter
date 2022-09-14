@@ -45,7 +45,7 @@ class MessageDialog extends StatelessWidget {
       actions: [
         TextButton(
           style: TextButton.styleFrom(
-            primary: streamTheme.colorTheme.accentPrimary,
+            foregroundColor: streamTheme.colorTheme.accentPrimary,
           ),
           child: Text(context.translations.okLabel),
           onPressed: () => Navigator.of(context).pop(),

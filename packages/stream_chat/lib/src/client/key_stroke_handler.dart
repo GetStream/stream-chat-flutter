@@ -69,6 +69,7 @@ class KeyStrokeHandler {
     // This is needed to prevent the user from being stuck in typing mode.
     if (_lastTypingEvent != null) {
       // We don't need to handle the error here
+      // ignore: no-empty-block
       _stopTyping(_currentParentId).catchError((_) {});
     }
     _cancelKeyStrokeTimer();
