@@ -108,7 +108,8 @@ class StreamMessageWidget extends StatefulWidget {
     this.imageAttachmentThumbnailSize = const Size(400, 400),
     this.imageAttachmentThumbnailResizeType = 'crop',
     this.imageAttachmentThumbnailCropType = 'center',
-  }) : attachmentBuilders = {
+  }) : 
+  attachmentBuilders = {
           'image': (context, message, attachments) {
             final border = RoundedRectangleBorder(
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
@@ -763,7 +764,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                                                           widget.messageTheme,
                                                     ),
                                                   )
-                                                : Card(
+                                                : 
+                                                // ACTUAL MESSAGE BUBBLE
+                                                Card(
                                                     clipBehavior: Clip.hardEdge,
                                                     elevation: 0,
                                                     margin:
@@ -1353,15 +1356,24 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       );
 
   Widget _buildTextBubble() {
+    final isMyMessage = widget.message.user?.id == _streamChat.currentUser?.id;
+      const usernameKey = Key('username');
     if (widget.message.text?.trim().isEmpty ?? false) return const Offstage();
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if(!isMyMessage)
+        Padding(
+          padding:const EdgeInsets.only(left: 10,top: 10,right: 10),
+          child: _buildUsername(usernameKey),
+        ),
         Padding(
           padding: isOnlyEmoji ? EdgeInsets.zero : widget.textPadding,
           child: widget.textBuilder != null
               ? widget.textBuilder!(context, widget.message)
-              : StreamMessageText(
+              :
+               StreamMessageText(
                   onLinkTap: widget.onLinkTap,
                   message: widget.message,
                   onMentionTap: widget.onMentionTap,
@@ -1375,9 +1387,49 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       : widget.messageTheme,
                 ),
         ),
+        // TIME STAMP
+        // Text(
+        //     Jiffy(widget.message.createdAt.toLocal()).jm,
+        //     style: widget.messageTheme.createdAtStyle,
+        // ),
         if (hasUrlAttachments && !hasQuotedMessage) _buildUrlAttachment(),
       ],
     );
+    //  return Wrap(
+    //   alignment: WrapAlignment.end,
+    //   runAlignment:WrapAlignment.spaceBetween,
+    // // crossAxisAlignment: CrossAxisAlignment.start,
+    //   children: [
+    //     Padding(
+    //       padding: isOnlyEmoji ? EdgeInsets.zero : widget.textPadding,
+    //       child: widget.textBuilder != null
+    //           ? widget.textBuilder!(context, widget.message)
+    //           :
+    //            StreamMessageText(
+    //               onLinkTap: widget.onLinkTap,
+    //               message: widget.message,
+    //               onMentionTap: widget.onMentionTap,
+    //               messageTheme: isOnlyEmoji
+    //                   ? widget.messageTheme.copyWith(
+    //                       messageTextStyle:
+    //                           widget.messageTheme.messageTextStyle!.copyWith(
+    //                         fontSize: 42,
+    //                       ),
+    //                     )
+    //                   : widget.messageTheme,
+    //             ),
+    //     ),
+    //     // TIME STAMP
+    //     Padding(
+    //       padding: const EdgeInsets.only(right:10.0),
+    //       child: Text(
+    //           Jiffy(widget.message.createdAt.toLocal()).jm,
+    //           style: widget.messageTheme.createdAtStyle,
+    //       ),
+    //     ),
+    //     if (hasUrlAttachments && !hasQuotedMessage) _buildUrlAttachment(),
+    //   ],
+    // );
   }
 
   Widget _buildPinnedMessage(Message message) {
