@@ -1,3 +1,21 @@
+## 4.6.0
+
+ - **REFACTOR**: clean up and add docs.
+ - **REFACTOR**: Remove deprecated attachmentFileUploader field.
+ - **REFACTOR**: remove deprecated code and cleanup.
+ - **FIX**: only start listening to event once connected.
+ - **FIX**: fix `stopTyping` unhandled exceptions when network is off or spotty. (#1296).
+ - **FIX**: Fix `Channel.removeMessage` not able to remove thread message. (#1294).
+ - **FIX**: copy file to tempdir before uploading a file and do not serialize bytes (#1285).
+ - **FIX**: do not serialize bytes (#1283).
+ - **FIX**: fix connecting while connecting and disconneting (#1237).
+ - **FIX**: fix connecting while connecting and disconneting (#1237).
+ - **FEAT**: add `hide_history` flag in `channel.addMembers`.
+ - **FEAT**: show dialog after clicking on the camera button and permission is denied (#1262).
+ - **FEAT**: add StreamAutocomplete (#1263).
+ - **FEAT**: add support for AttachmentFileUploaderProvider. (#1246).
+ - **FEAT**: add support for AttachmentFileUploaderProvider. (#1246).
+
 ## Upcoming
 
 ✅ Added
