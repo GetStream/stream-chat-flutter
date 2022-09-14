@@ -82,7 +82,11 @@ class StreamMessageInput extends StatefulWidget {
     this.onMessageSent,
     this.preMessageSending,
     this.maxHeight = 150,
-    this.keyboardType = TextInputType.multiline,
+    this.maxLines,
+    this.minLines,
+    this.textInputAction,
+    this.keyboardType,
+    this.textCapitalization = TextCapitalization.sentences,
     this.disableAttachments = false,
     this.messageInputController,
     this.actions = const [],
@@ -136,8 +140,20 @@ class StreamMessageInput extends StatefulWidget {
   /// Maximum Height for the TextField to grow before it starts scrolling.
   final double maxHeight;
 
+  /// The maximum lines of text the input can span.
+  final int? maxLines;
+
+  /// The minimum lines of text the input can span.
+  final int? minLines;
+
+  /// The type of action button to use for the keyboard.
+  final TextInputAction? textInputAction;
+
   /// The keyboard type assigned to the TextField.
-  final TextInputType keyboardType;
+  final TextInputType? keyboardType;
+
+  /// {@macro flutter.widgets.editableText.textCapitalization}
+  final TextCapitalization textCapitalization;
 
   /// If true the attachments button will not be displayed.
   final bool disableAttachments;
@@ -800,7 +816,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
                       child: StreamMessageTextField(
                         key: const Key('messageInputText'),
                         enabled: _inputEnabled,
-                        maxLines: null,
+                        maxLines: widget.maxLines,
+                        minLines: widget.minLines,
+                        textInputAction: widget.textInputAction,
                         onSubmitted: (_) => sendMessage(),
                         keyboardType: widget.keyboardType,
                         controller: _effectiveController,
@@ -809,7 +827,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                         autofocus: widget.autofocus,
                         textAlignVertical: TextAlignVertical.center,
                         decoration: _getInputDecoration(context),
-                        textCapitalization: TextCapitalization.sentences,
+                        textCapitalization: widget.textCapitalization,
                         autocorrect: widget.autoCorrect,
                       ),
                     ),

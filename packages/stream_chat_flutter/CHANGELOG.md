@@ -10,6 +10,12 @@
 ✅ Added
 
 - Added `StreamMemberGridView` and `StreamMemberListView`.
+- Added support for additional text field params in `StreamMessageInput`
+    * `maxLines`
+    * `minLines`
+    * `textInputAction`
+    * `keyboardType`
+    * `textCapitalization`
 
 🔄 Changed
 
@@ -102,7 +108,8 @@
 
 🐞 Fixed
 
-- [[#1323]](https://github.com/GetStream/stream-chat-flutter/issues/1323): Fix message text hiding because of a [flutter bug](https://github.com/flutter/flutter/issues/110628).
+- [[#1323]](https://github.com/GetStream/stream-chat-flutter/issues/1323): Fix message text hiding
+  because of a [flutter bug](https://github.com/flutter/flutter/issues/110628).
 
 ## 4.5.0
 

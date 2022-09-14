@@ -89,7 +89,7 @@ class StreamMessageTextField extends StatefulWidget {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
-    this.maxLines = 1,
+    this.maxLines,
     this.minLines,
     this.expands = false,
     this.maxLength,
@@ -709,7 +709,10 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
         focusNode: widget.focusNode,
         decoration: widget.decoration,
         keyboardType: widget.keyboardType,
-        textInputAction: widget.textInputAction,
+        textInputAction: widget.textInputAction ??
+            (widget.keyboardType == TextInputType.multiline
+                ? TextInputAction.newline
+                : TextInputAction.send),
         textCapitalization: widget.textCapitalization,
         style: widget.style,
         strutStyle: widget.strutStyle,
