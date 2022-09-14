@@ -775,14 +775,28 @@ class StreamMessageInputState extends State<StreamMessageInput>
                   _buildAttachments(),
                   LimitedBox(
                     maxHeight: widget.maxHeight,
-                    child: KeyboardShortcutRunner(
-                      onEnterKeypress: sendMessage,
-                      onEscapeKeypress: () {
-                        if (_hasQuotedMessage &&
-                            _effectiveController.text.isEmpty) {
-                          widget.onQuotedMessageCleared?.call();
-                        }
-                      },
+                    child: PlatformWidgetBuilder(
+                      web: (context, child) => KeyboardShortcutRunner(
+                        onEnterKeypress: sendMessage,
+                        onEscapeKeypress: () {
+                          if (_hasQuotedMessage &&
+                              _effectiveController.text.isEmpty) {
+                            widget.onQuotedMessageCleared?.call();
+                          }
+                        },
+                        child: child!,
+                      ),
+                      desktop: (context, child) => KeyboardShortcutRunner(
+                        onEnterKeypress: sendMessage,
+                        onEscapeKeypress: () {
+                          if (_hasQuotedMessage &&
+                              _effectiveController.text.isEmpty) {
+                            widget.onQuotedMessageCleared?.call();
+                          }
+                        },
+                        child: child!,
+                      ),
+                      mobile: (context, child) => child,
                       child: StreamMessageTextField(
                         key: const Key('messageInputText'),
                         enabled: _inputEnabled,

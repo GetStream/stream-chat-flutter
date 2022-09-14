@@ -2,6 +2,11 @@
 
 - Included the changes from version [4.5.0](#450).
 
+🐞 Fixed
+
+- [[#1326]](https://github.com/GetStream/stream-chat-flutter/issues/1326) Fixed hitting "enter" on
+  the android keyboard sends the message instead of going to a new line.
+
 ✅ Added
 
 - Added `StreamMemberGridView` and `StreamMemberListView`.
