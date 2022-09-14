@@ -1,3 +1,13 @@
+## 4.6.0
+
+ - s
+
+ - **PERF**: improve image resizing.
+ - **FIX**: Fix message text hiding because of a flutter bug (#1327).
+ - **FIX**: fix `stopTyping` unhandled exceptions when network is off or spotty. (#1296).
+ - **FIX**: do not linkify system message mentions.
+ - **FEAT**: Added `thumbnailSize`, `thumbnailResizeType`, and `thumbnailCropType` params to `StreamMessageWidget` and `StreamAttachmentPicker` to customize the appearance of image thumbnails.
+
 ## Upcoming
 
 🐞 Fixed
