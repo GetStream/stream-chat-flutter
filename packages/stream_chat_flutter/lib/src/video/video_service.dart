@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
 import 'package:thumblr/thumblr.dart' as thumblr;
@@ -35,6 +36,10 @@ class _IVideoService {
     int timeMs = 0,
     int quality = 10,
   }) async {
+    if (kIsWeb) {
+      final placeholder = await generatePlaceholderThumbnail();
+      return placeholder;
+    }
     if (isDesktopDevice) {
       try {
         final thumbnail = await thumblr.generateThumbnail(filePath: video);
@@ -67,7 +72,8 @@ class _IVideoService {
 
   /// Generates a placeholder thumbnail by loading placeholder.png from assets.
   Future<Uint8List> generatePlaceholderThumbnail() async {
-    final placeholder = await rootBundle.load('images/placeholder.png');
+    final placeholder = await rootBundle
+        .load('packages/stream_chat_flutter/images/placeholder.png');
     return placeholder.buffer.asUint8List();
   }
 }
