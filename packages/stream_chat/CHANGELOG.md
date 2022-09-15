@@ -30,7 +30,7 @@
 - Minor fixes.
 - Removed deprecated code.
 
-## Upcoming
+## 4.6.0
 
 ✅ Added
 

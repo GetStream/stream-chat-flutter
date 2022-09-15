@@ -104,7 +104,7 @@
     - Updated dartdoc documentation
     - Various code readability improvements
 
-## Upcoming
+## 4.6.0
 
 🐞 Fixed
 
