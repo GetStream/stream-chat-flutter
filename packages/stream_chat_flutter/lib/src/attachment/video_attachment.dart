@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:video_player/video_player.dart';
 
 /// {@template streamVideoAttachment}
 /// Shows a video attachment in a [StreamMessageWidget].
@@ -33,6 +35,11 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return VideoPlayer(
+        VideoPlayerController.network(attachment.assetUrl!),
+      );
+    }
     return source.when(
       local: () {
         if (attachment.file == null) {

@@ -48,7 +48,6 @@ class _IVideoService {
           return await generatePlaceholderThumbnail();
         }
       } catch (e) {
-        print(e);
         // If the thumbnail generation fails, return a placeholder image.
         final placeholder = await generatePlaceholderThumbnail();
         return placeholder;
