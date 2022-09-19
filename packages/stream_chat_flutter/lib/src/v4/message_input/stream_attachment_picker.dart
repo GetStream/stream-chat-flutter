@@ -153,6 +153,13 @@ class StreamAttachmentPicker extends StatefulWidget {
 class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
   int _filePickerIndex = 0;
   final _mediaListViewController = MediaListViewController();
+  Future<PermissionState>? requestPermission;
+
+  @override
+  void initState() {
+    super.initState();
+    requestPermission = PhotoManager.requestPermissionExtend();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -322,7 +329,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                     const Spacer(),
                     if (widget.isOpen)
                       FutureBuilder(
-                        future: PhotoManager.requestPermissionExtend(),
+                        future: requestPermission,
                         builder: (context, snapshot) {
                           if (snapshot.hasData &&
                               snapshot.data == PermissionState.limited) {
@@ -376,6 +383,7 @@ class _StreamAttachmentPickerState extends State<StreamAttachmentPicker> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: _PickerWidget(
+                        requestPermission: requestPermission,
                         mediaListViewController: _mediaListViewController,
                         filePickerIndex: _filePickerIndex,
                         streamChatTheme: _streamChatTheme,
@@ -500,6 +508,7 @@ class _PickerWidget extends StatefulWidget {
     required this.allowedAttachmentTypes,
     required this.customAttachmentTypes,
     required this.mediaListViewController,
+    required this.requestPermission,
     this.mediaThumbnailSize = const ThumbnailSize(400, 400),
     this.mediaThumbnailFormat = ThumbnailFormat.jpeg,
     this.mediaThumbnailQuality = 100,
@@ -519,18 +528,16 @@ class _PickerWidget extends StatefulWidget {
   final ThumbnailFormat mediaThumbnailFormat;
   final int mediaThumbnailQuality;
   final double mediaThumbnailScale;
+  final Future<PermissionState>? requestPermission;
 
   @override
   _PickerWidgetState createState() => _PickerWidgetState();
 }
 
 class _PickerWidgetState extends State<_PickerWidget> {
-  Future<PermissionState>? requestPermission;
-
   @override
   void initState() {
     super.initState();
-    requestPermission = PhotoManager.requestPermissionExtend();
   }
 
   @override
@@ -540,7 +547,7 @@ class _PickerWidgetState extends State<_PickerWidget> {
           .pickerBuilder(context);
     }
     return FutureBuilder<PermissionState>(
-      future: requestPermission,
+      future: widget.requestPermission,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Offstage();

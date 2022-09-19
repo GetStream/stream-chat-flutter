@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- [#1335](https://github.com/GetStream/stream-chat-flutter/pull/1335): fix(ui): Fix PERMISSION_REQUESTING exception from photo_manager
+
 ## 4.6.0
 
 🐞 Fixed
