@@ -16,7 +16,7 @@ abstract class AttachmentHandler {
   });
 
   /// Downloads an attachment.
-  Future<dynamic> download(
+  Future<bool> download(
     Attachment attachment, {
     String? suggestedName,
   });

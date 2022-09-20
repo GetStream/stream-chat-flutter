@@ -74,22 +74,25 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
             child: GestureDetector(
               onTap: onAttachmentTap ??
                   () async {
-                    final channel = StreamChannel.of(context).channel;
-                    final res = await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => StreamChannel(
-                          channel: channel,
-                          child: StreamFullScreenMediaBuilder(
-                            mediaAttachmentPackages:
-                                message.getAttachmentPackageList(),
-                            startIndex: message.attachments.indexOf(attachment),
-                            userName: message.user!.name,
-                            onShowMessage: onShowMessage,
+                    if (attachment.uploadState == const UploadState.success()) {
+                      final channel = StreamChannel.of(context).channel;
+                      final res = await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => StreamChannel(
+                            channel: channel,
+                            child: StreamFullScreenMediaBuilder(
+                              mediaAttachmentPackages:
+                                  message.getAttachmentPackageList(),
+                              startIndex:
+                                  message.attachments.indexOf(attachment),
+                              userName: message.user!.name,
+                              onShowMessage: onShowMessage,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                    if (res != null) onReturnAction?.call(res);
+                      );
+                      if (res != null) onReturnAction?.call(res);
+                    }
                   },
               child: Stack(
                 children: [
@@ -114,14 +117,6 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
               ),
             ),
           ),
-          if (attachment.title != null)
-            Material(
-              color: messageTheme.messageBackgroundColor,
-              child: StreamAttachmentTitle(
-                messageTheme: messageTheme,
-                attachment: attachment,
-              ),
-            ),
         ],
       ),
     );

@@ -1,9 +1,6 @@
 name: stream_chat_flutter
 repository: https://github.com/GetStream/stream-chat-flutter
 
-versioning:
-  mode: independent
-
 packages:
   - packages/**
 
@@ -97,10 +94,3 @@ scripts:
       npm install -g https://github.com/GetStream/stream-chat-docusaurus-cli &&
       npx stream-chat-docusaurus -i -s
     description: Runs the docusaurus documentation locally.
-
-dev_dependencies:
-  dart_code_metrics: ^4.4.0
-
-environment:
-  sdk: '>=2.17.0 <3.0.0'
-  flutter: '>=1.17.0 <3.0.0'

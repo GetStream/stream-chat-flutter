@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
@@ -140,7 +141,20 @@ class AttachmentActionsModal extends StatelessWidget {
                         size: 24,
                         color: theme.colorTheme.textLowEmphasis,
                       ),
-                      () {
+                      () async {
+                        // Closing attachment actions modal before opening
+                        // attachment download dialog
+                        Navigator.of(context).pop();
+
+                        if (kIsWeb) {
+                          return launchURL(
+                            context,
+                            attachment.imageUrl ??
+                                attachment.assetUrl ??
+                                (attachment.extraData.entries.first.value!
+                                    as Map<String, dynamic>)['original']['url'],
+                          );
+                        }
                         final isImage = attachment.type == 'image';
                         final Future<String?> Function(
                           Attachment, {
@@ -176,10 +190,6 @@ class AttachmentActionsModal extends StatelessWidget {
                         ).catchError((e, stk) {
                           progressNotifier.value = null;
                         });
-
-                        // Closing attachment actions modal before opening
-                        // attachment download dialog
-                        Navigator.of(context).pop();
 
                         showDialog(
                           barrierDismissible: false,

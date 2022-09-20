@@ -31,7 +31,7 @@ class MobileAttachmentHandler extends AttachmentHandler {
   final int? maxAttachmentSize;
 
   @override
-  Future<String?> download(
+  Future<bool> download(
     Attachment attachment, {
     String? suggestedName,
     ProgressCallback? progressCallback,
@@ -50,7 +50,7 @@ class MobileAttachmentHandler extends AttachmentHandler {
       onReceiveProgress: progressCallback,
     );
     final result = await ImageGallerySaver.saveFile(filePath!);
-    return (result as Map)['filePath'];
+    return (result as Map)['filePath'] != null;
   }
 
   @override

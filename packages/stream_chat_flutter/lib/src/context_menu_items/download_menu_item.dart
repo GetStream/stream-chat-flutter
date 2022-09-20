@@ -28,9 +28,20 @@ class DownloadMenuItem extends StatelessWidget {
       title: Text(context.translations.downloadLabel),
       onClick: () async {
         Navigator.of(context).pop();
+
+        if (kIsWeb) {
+          return launchURL(
+            context,
+            attachment.imageUrl ??
+                attachment.assetUrl ??
+                (attachment.extraData.entries.first.value!
+                    as Map<String, dynamic>)['original']['url'],
+          );
+        }
+
         final attachmentHandler = DesktopAttachmentHandler();
         final success = await attachmentHandler.download(attachment);
-        if (success && !kIsWeb) {
+        if (success) {
           showDialog(
             context: context,
             builder: (_) => const MessageDialog(

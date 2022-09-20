@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -13,7 +13,6 @@ class DesktopAttachmentHandler extends AttachmentHandler {
   /// Builds a [DesktopAttachmentHandler].
   DesktopAttachmentHandler({
     this.maxAttachmentSize,
-    this.compressedVideoFrameRate = 30,
   });
 
   /// Max attachment size in bytes.
@@ -21,12 +20,6 @@ class DesktopAttachmentHandler extends AttachmentHandler {
   /// Include this in your instance of [DesktopAttachmentHandler] when dealing
   /// with uploads.
   final int? maxAttachmentSize;
-
-  /// The frame rate to use when compressing the videos.
-  ///
-  /// Include this in your instance of [DesktopAttachmentHandler] when dealing
-  /// with uploads, or use the default value of `30`.
-  final int? compressedVideoFrameRate;
 
   @override
   Future<bool> download(
@@ -55,7 +48,7 @@ class DesktopAttachmentHandler extends AttachmentHandler {
     /* ---FILES AND VIDEOS--- */
     if (attachment.type == 'file' || attachment.type == 'video') {
       response = await http.get(Uri.parse(attachment.assetUrl!));
-      fileName = attachment.title;
+      fileName = '${suggestedName ?? attachment.title}.${attachment.mimeType}';
     }
 
     // Open the native file browser so the user can select the download
@@ -126,11 +119,15 @@ class DesktopAttachmentHandler extends AttachmentHandler {
   /// Creates an [Attachment] from an [XFile] that is selected by a desktop
   /// user in their native file system.
   Future<Attachment?> _createAttachmentFromXFile(XFile file) async {
-    final tempDir = await getTemporaryDirectory();
-    final tempPath = Uri.file(tempDir.path, windows: CurrentPlatform.isWindows);
-    final tempFilePath = tempPath.resolve(file.name).path;
+    var path = file.path;
+    if (!kIsWeb) {
+      final tempDir = await getTemporaryDirectory();
+      final tempPath =
+          Uri.file(tempDir.path, windows: CurrentPlatform.isWindows);
+      path = tempPath.resolve(file.name).path;
 
-    await file.saveTo(tempFilePath);
+      await file.saveTo(path);
+    }
 
     final extraDataMap = <String, Object?>{};
     Uint8List? bytes;
@@ -144,7 +141,7 @@ class DesktopAttachmentHandler extends AttachmentHandler {
     // Create the AttachmentFile to include in the Attachment
     final attachmentFile = AttachmentFile(
       size: bytes.length,
-      path: tempFilePath,
+      path: path,
       bytes: bytes,
     );
 
