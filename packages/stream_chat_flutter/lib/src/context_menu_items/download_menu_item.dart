@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
-import 'package:stream_chat_flutter/src/dialogs/message_dialog.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -40,16 +39,7 @@ class DownloadMenuItem extends StatelessWidget {
         }
 
         final attachmentHandler = DesktopAttachmentHandler();
-        final success = await attachmentHandler.download(attachment);
-        if (success) {
-          showDialog(
-            context: context,
-            builder: (_) => const MessageDialog(
-              titleText: 'Download Successful!',
-              showMessage: false,
-            ),
-          );
-        }
+        await attachmentHandler.download(attachment);
       },
     );
   }

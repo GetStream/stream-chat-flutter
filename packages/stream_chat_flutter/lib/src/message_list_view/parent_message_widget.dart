@@ -70,16 +70,6 @@ class ParentMessageWidget extends StatelessWidget {
       messageTheme: isMyMessage
           ? _streamTheme.ownMessageTheme
           : _streamTheme.otherMessageTheme,
-      onReturnAction: (action) {
-        switch (action) {
-          case ReturnActionType.none:
-            break;
-          case ReturnActionType.reply:
-            FocusScope.of(context).unfocus();
-            onMessageSwiped?.call(parentMessage);
-            break;
-        }
-      },
       onMessageTap: (message) {
         if (onMessageTap != null) {
           onMessageTap?.call(message);

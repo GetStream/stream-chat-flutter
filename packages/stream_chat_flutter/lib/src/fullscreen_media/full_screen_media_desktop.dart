@@ -19,6 +19,7 @@ FullScreenMediaWidget getFsm({
   required int startIndex,
   required String userName,
   ShowMessageCallback? onShowMessage,
+  ReplyMessageCallback? onReplyMessage,
   AttachmentActionsBuilder? attachmentActionsModalBuilder,
   bool? autoplayVideos,
 }) {
@@ -27,6 +28,7 @@ FullScreenMediaWidget getFsm({
     mediaAttachmentPackages: mediaAttachmentPackages,
     startIndex: startIndex,
     userName: userName,
+    onReplyMessage: onReplyMessage,
     onShowMessage: onShowMessage,
     attachmentActionsModalBuilder: attachmentActionsModalBuilder,
     autoplayVideos: autoplayVideos ?? false,
@@ -42,6 +44,7 @@ class FullScreenMediaDesktop extends FullScreenMediaWidget {
     this.startIndex = 0,
     String? userName,
     this.onShowMessage,
+    this.onReplyMessage,
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
   }) : userName = userName ?? '';
@@ -57,6 +60,9 @@ class FullScreenMediaDesktop extends FullScreenMediaWidget {
 
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
+
+  /// Callback for when reply message is tapped
+  final ReplyMessageCallback? onReplyMessage;
 
   /// Widget builder for attachment actions modal
   /// [defaultActionsModal] is the default [AttachmentActionsModal] config
@@ -272,6 +278,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
                       final _currentMessage = _currentAttachmentPackage.message;
                       final _currentAttachment =
                           _currentAttachmentPackage.attachment;
+
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -293,9 +300,20 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop>
                             message: _currentMessage,
                             onShowMessage: widget.onShowMessage != null
                                 ? () {
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
                                     widget.onShowMessage?.call(
                                       _currentMessage,
                                       StreamChannel.of(context).channel,
+                                    );
+                                  }
+                                : null,
+                            onReplyMessage: widget.onReplyMessage != null
+                                ? () {
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                    widget.onReplyMessage?.call(
+                                      _currentMessage,
                                     );
                                   }
                                 : null,

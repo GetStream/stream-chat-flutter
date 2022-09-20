@@ -18,7 +18,7 @@ class StreamImageAttachment extends StreamAttachmentWidget {
     super.constraints,
     this.showTitle = false,
     this.onShowMessage,
-    this.onReturnAction,
+    this.onReplyMessage,
     this.onAttachmentTap,
     this.imageThumbnailSize = const Size(400, 400),
     this.imageThumbnailResizeType = 'crop',
@@ -34,8 +34,8 @@ class StreamImageAttachment extends StreamAttachmentWidget {
   /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
 
-  /// {@macro onReturnAction}
-  final OnReturnAction? onReturnAction;
+  /// {@macro replyMessageCallback}
+  final ReplyMessageCallback? onReplyMessage;
 
   /// {@macro onAttachmentTap}
   final OnAttachmentTap? onAttachmentTap;
@@ -129,8 +129,8 @@ class StreamImageAttachment extends StreamAttachmentWidget {
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: onAttachmentTap ??
-                        () async {
-                          final result = await Navigator.of(context).push(
+                        () {
+                          Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) {
                                 final channel =
@@ -144,12 +144,12 @@ class StreamImageAttachment extends StreamAttachmentWidget {
                                         message.attachments.indexOf(attachment),
                                     userName: message.user!.name,
                                     onShowMessage: onShowMessage,
+                                    onReplyMessage: onReplyMessage,
                                   ),
                                 );
                               },
                             ),
                           );
-                          if (result != null) onReturnAction?.call(result);
                         },
                     child: imageWidget,
                   ),

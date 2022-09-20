@@ -14,10 +14,9 @@ class AttachmentActionsModal extends StatelessWidget {
     required this.attachment,
     required this.message,
     this.onShowMessage,
+    this.onReply,
     this.imageDownloader,
     this.fileDownloader,
-    this.showReply = true,
-    this.showShowInChat = true,
     this.showSave = true,
     this.showDelete = true,
     this.customActions = const [],
@@ -32,17 +31,14 @@ class AttachmentActionsModal extends StatelessWidget {
   /// Callback to show the message
   final VoidCallback? onShowMessage;
 
+  /// Callback to reply the message
+  final VoidCallback? onReply;
+
   /// Callback to download images
   final AttachmentDownloader? imageDownloader;
 
   /// Callback to provide download files
   final AttachmentDownloader? fileDownloader;
-
-  /// Show reply option
-  final bool showReply;
-
-  /// Show show in chat option
-  final bool showShowInChat;
 
   /// Show save option
   final bool showSave;
@@ -60,10 +56,9 @@ class AttachmentActionsModal extends StatelessWidget {
     Attachment? attachment,
     Message? message,
     VoidCallback? onShowMessage,
+    VoidCallback? onReply,
     AttachmentDownloader? imageDownloader,
     AttachmentDownloader? fileDownloader,
-    bool? showReply,
-    bool? showShowInChat,
     bool? showSave,
     bool? showDelete,
     List<AttachmentAction>? customActions,
@@ -73,10 +68,9 @@ class AttachmentActionsModal extends StatelessWidget {
       attachment: attachment ?? this.attachment,
       message: message ?? this.message,
       onShowMessage: onShowMessage ?? this.onShowMessage,
+      onReply: onReply ?? this.onReply,
       imageDownloader: imageDownloader ?? this.imageDownloader,
       fileDownloader: fileDownloader ?? this.fileDownloader,
-      showReply: showReply ?? this.showReply,
-      showShowInChat: showShowInChat ?? this.showShowInChat,
       showSave: showSave ?? this.showSave,
       showDelete: showDelete ?? this.showDelete,
       customActions: customActions ?? this.customActions,
@@ -111,7 +105,7 @@ class AttachmentActionsModal extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (showReply)
+                  if (onReply != null)
                     _buildButton(
                       context,
                       context.translations.replyLabel,
@@ -119,9 +113,9 @@ class AttachmentActionsModal extends StatelessWidget {
                         size: 24,
                         color: theme.colorTheme.textLowEmphasis,
                       ),
-                      () => Navigator.of(context).pop(ReturnActionType.reply),
+                      onReply,
                     ),
-                  if (showShowInChat)
+                  if (onShowMessage != null)
                     _buildButton(
                       context,
                       context.translations.showInChatLabel,
@@ -155,6 +149,13 @@ class AttachmentActionsModal extends StatelessWidget {
                                     as Map<String, dynamic>)['original']['url'],
                           );
                         }
+
+                        if (isDesktopDevice) {
+                          final attachmentHandler = DesktopAttachmentHandler();
+                          await attachmentHandler.download(attachment);
+                          return;
+                        }
+
                         final isImage = attachment.type == 'image';
                         final Future<String?> Function(
                           Attachment, {

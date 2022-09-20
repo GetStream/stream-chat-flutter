@@ -909,16 +909,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       messageTheme: isMyMessage
           ? _streamTheme.ownMessageTheme
           : _streamTheme.otherMessageTheme,
-      onReturnAction: (action) {
-        switch (action) {
-          case ReturnActionType.none:
-            break;
-          case ReturnActionType.reply:
-            FocusScope.of(context).unfocus();
-            widget.onMessageSwiped?.call(message);
-            break;
-        }
-      },
       onMessageTap: (message) {
         widget.onMessageTap?.call(message);
         FocusScope.of(context).unfocus();
@@ -1189,16 +1179,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       messageTheme: isMyMessage
           ? _streamTheme.ownMessageTheme
           : _streamTheme.otherMessageTheme,
-      onReturnAction: (action) {
-        switch (action) {
-          case ReturnActionType.none:
-            break;
-          case ReturnActionType.reply:
-            FocusScope.of(context).unfocus();
-            widget.onMessageSwiped?.call(message);
-            break;
-        }
-      },
       onMessageTap: (message) {
         widget.onMessageTap?.call(message);
         FocusScope.of(context).unfocus();

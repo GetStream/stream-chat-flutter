@@ -12,8 +12,8 @@ class StreamImageGroup extends StatelessWidget {
     required this.message,
     required this.messageTheme,
     required this.constraints,
-    this.onReturnAction,
     this.onShowMessage,
+    this.onReplyMessage,
     this.onAttachmentTap,
     this.imageThumbnailSize = const Size(400, 400),
     this.imageThumbnailResizeType = 'crop',
@@ -22,9 +22,6 @@ class StreamImageGroup extends StatelessWidget {
 
   /// List of attachments to show
   final List<Attachment> images;
-
-  /// {@macro onReturnAction}
-  final OnReturnAction? onReturnAction;
 
   /// {@macro onImageGroupAttachmentTap}
   final OnImageGroupAttachmentTap? onAttachmentTap;
@@ -40,6 +37,9 @@ class StreamImageGroup extends StatelessWidget {
 
   /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
+
+  /// {@macro replyMessageCallback}
+  final ReplyMessageCallback? onReplyMessage;
 
   /// Size of the attachment image thumbnail.
   final Size imageThumbnailSize;
@@ -144,7 +144,7 @@ class StreamImageGroup extends StatelessWidget {
 
     final channel = StreamChannel.of(context).channel;
 
-    final res = await Navigator.of(context).push(
+    Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => StreamChannel(
           channel: channel,
@@ -153,11 +153,11 @@ class StreamImageGroup extends StatelessWidget {
             startIndex: index,
             userName: message.user!.name,
             onShowMessage: onShowMessage,
+            onReplyMessage: onReplyMessage,
           ),
         ),
       ),
     );
-    if (res != null) onReturnAction?.call(res);
   }
 
   Widget _buildImage(BuildContext context, int index) {

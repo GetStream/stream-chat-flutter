@@ -82,7 +82,6 @@ class StreamMessageWidget extends StatefulWidget {
     this.textBuilder,
     this.bottomRowBuilder,
     this.deletedBottomRowBuilder,
-    this.onReturnAction,
     this.customAttachmentBuilders,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
@@ -120,7 +119,7 @@ class StreamMessageWidget extends StatefulWidget {
                       message: message,
                       messageTheme: messageTheme,
                       onShowMessage: onShowMessage,
-                      onReturnAction: onReturnAction,
+                      onReplyMessage: onReplyTap,
                       onAttachmentTap: onAttachmentTap,
                       imageThumbnailSize: imageAttachmentThumbnailSize,
                       imageThumbnailResizeType:
@@ -145,7 +144,7 @@ class StreamMessageWidget extends StatefulWidget {
                   maxHeight: mediaQueryData.size.height * 0.3,
                 ),
                 onShowMessage: onShowMessage,
-                onReturnAction: onReturnAction,
+                onReplyMessage: onReplyTap,
                 onAttachmentTap: onAttachmentTap != null
                     ? () {
                         onAttachmentTap.call(message, attachments[0]);
@@ -178,7 +177,7 @@ class StreamMessageWidget extends StatefulWidget {
                     ),
                     message: message,
                     onShowMessage: onShowMessage,
-                    onReturnAction: onReturnAction,
+                    onReplyMessage: onReplyTap,
                     onAttachmentTap: onAttachmentTap != null
                         ? () {
                             onAttachmentTap(message, attachment);
@@ -209,7 +208,7 @@ class StreamMessageWidget extends StatefulWidget {
                       maxHeight: mediaQueryData.size.height * 0.3,
                     ),
                     onShowMessage: onShowMessage,
-                    onReturnAction: onReturnAction,
+                    onReplyMessage: onReplyTap,
                     onAttachmentTap: onAttachmentTap != null
                         ? () {
                             onAttachmentTap(message, attachment);
@@ -417,9 +416,6 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final ShowMessageCallback? onShowMessage;
 
-  /// {@macro onReturnAction}
-  final OnReturnAction? onReturnAction;
-
   /// {@template showUsername}
   /// If true show the users username next to the timestamp of the message
   /// {@endtemplate}
@@ -556,7 +552,6 @@ class StreamMessageWidget extends StatefulWidget {
     bool? showReactionPickerIndicator,
     List<Read>? readList,
     ShowMessageCallback? onShowMessage,
-    ValueChanged<ReturnActionType>? onReturnAction,
     bool? showUsername,
     bool? showTimestamp,
     bool? showReplyMessage,
@@ -617,7 +612,6 @@ class StreamMessageWidget extends StatefulWidget {
       showReactionPickerIndicator:
           showReactionPickerIndicator ?? this.showReactionPickerIndicator,
       onShowMessage: onShowMessage ?? this.onShowMessage,
-      onReturnAction: onReturnAction ?? this.onReturnAction,
       showUsername: showUsername ?? this.showUsername,
       showTimestamp: showTimestamp ?? this.showTimestamp,
       showReplyMessage: showReplyMessage ?? this.showReplyMessage,

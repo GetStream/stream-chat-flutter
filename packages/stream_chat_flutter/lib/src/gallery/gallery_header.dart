@@ -20,6 +20,7 @@ class StreamGalleryHeader extends StatelessWidget
     this.showBackButton = true,
     this.onBackPressed,
     this.onShowMessage,
+    this.onReplyMessage,
     this.onTitleTap,
     this.onImageTap,
     this.userName = '',
@@ -40,6 +41,9 @@ class StreamGalleryHeader extends StatelessWidget
 
   /// Callback to call when pressing the show message button.
   final VoidCallback? onShowMessage;
+
+  /// Callback to call when pressing the reply message button.
+  final VoidCallback? onReplyMessage;
 
   /// Callback to call when the header is tapped.
   final VoidCallback? onTitleTap;
@@ -141,7 +145,7 @@ class StreamGalleryHeader extends StatelessWidget
       attachment: attachment,
       message: message,
       onShowMessage: onShowMessage,
-      showShowInChat: onShowMessage != null,
+      onReply: onReplyMessage,
     );
 
     final effectiveModal = attachmentActionsModalBuilder?.call(

@@ -24,6 +24,7 @@ class StreamFullScreenMedia extends FullScreenMediaWidget {
     this.startIndex = 0,
     this.userName = '',
     this.onShowMessage,
+    this.onReplyMessage,
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
   }) : assert(startIndex >= 0, 'startIndex cannot be negative');
@@ -39,6 +40,9 @@ class StreamFullScreenMedia extends FullScreenMediaWidget {
 
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
+
+  /// Callback for when reply message is tapped
+  final ReplyMessageCallback? onReplyMessage;
 
   /// Widget builder for attachment actions modal
   /// [defaultActionsModal] is the default [AttachmentActionsModal] config
@@ -144,12 +148,25 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                       onBackPressed: Navigator.of(context).pop,
                       message: _currentMessage,
                       attachment: _currentAttachment,
-                      onShowMessage: () {
-                        widget.onShowMessage?.call(
-                          _currentMessage,
-                          StreamChannel.of(context).channel,
-                        );
-                      },
+                      onShowMessage: widget.onShowMessage != null
+                          ? () {
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                              widget.onShowMessage?.call(
+                                _currentMessage,
+                                StreamChannel.of(context).channel,
+                              );
+                            }
+                          : null,
+                      onReplyMessage: widget.onReplyMessage != null
+                          ? () {
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                              widget.onReplyMessage?.call(
+                                _currentMessage,
+                              );
+                            }
+                          : null,
                       attachmentActionsModalBuilder:
                           widget.attachmentActionsModalBuilder,
                     ),

@@ -15,7 +15,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
     required this.messageTheme,
     super.constraints,
     this.onShowMessage,
-    this.onReturnAction,
+    this.onReplyMessage,
     this.onAttachmentTap,
   });
 
@@ -25,8 +25,8 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
   /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
 
-  /// {@macro onReturnAction}
-  final OnReturnAction? onReturnAction;
+  /// {@macro replyMessageCallback}
+  final ReplyMessageCallback? onReplyMessage;
 
   /// {@macro onAttachmentTap}
   final OnAttachmentTap? onAttachmentTap;
@@ -76,7 +76,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
                   () async {
                     if (attachment.uploadState == const UploadState.success()) {
                       final channel = StreamChannel.of(context).channel;
-                      final res = await Navigator.of(context).push(
+                      await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => StreamChannel(
                             channel: channel,
@@ -87,11 +87,11 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
                                   message.attachments.indexOf(attachment),
                               userName: message.user!.name,
                               onShowMessage: onShowMessage,
+                              onReplyMessage: onReplyMessage,
                             ),
                           ),
                         ),
                       );
-                      if (res != null) onReturnAction?.call(res);
                     }
                   },
               child: Stack(

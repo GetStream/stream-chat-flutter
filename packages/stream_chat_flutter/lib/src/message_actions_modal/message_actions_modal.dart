@@ -323,7 +323,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           cont = false;
         } else if (constraints.maxWidth >= 200 && constraints.maxWidth <= 400) {
           // Phone (?)
-          print('phone');
           result = shiftFactor - 0.2;
           cont = false;
         }

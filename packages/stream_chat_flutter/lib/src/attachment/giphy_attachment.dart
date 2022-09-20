@@ -16,15 +16,15 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
     required super.attachment,
     super.constraints,
     this.onShowMessage,
-    this.onReturnAction,
+    this.onReplyMessage,
     this.onAttachmentTap,
   });
 
   /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
 
-  /// {@macro onReturnAction}
-  final OnReturnAction? onReturnAction;
+  /// {@macro replyMessageCallback}
+  final ReplyMessageCallback? onReplyMessage;
 
   /// {@macro onAttachmentTap}
   final OnAttachmentTap? onAttachmentTap;
@@ -249,7 +249,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
   }
 
   Future<void> _onImageTap(BuildContext context) async {
-    final res = await Navigator.of(context).push(
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) {
           final channel = StreamChannel.of(context).channel;
@@ -260,12 +260,12 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
               startIndex: message.attachments.indexOf(attachment),
               userName: message.user!.name,
               onShowMessage: onShowMessage,
+              onReplyMessage: onReplyMessage,
             ),
           );
         },
       ),
     );
-    if (res != null) onReturnAction?.call(res);
   }
 
   Widget _buildSentAttachment(BuildContext context, String imageUrl) {

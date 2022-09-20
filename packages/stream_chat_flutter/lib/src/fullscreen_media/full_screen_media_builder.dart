@@ -31,6 +31,7 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
     required this.startIndex,
     required this.userName,
     this.onShowMessage,
+    this.onReplyMessage,
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
   });
@@ -46,6 +47,9 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
 
   /// Callback for when show message is tapped
   final ShowMessageCallback? onShowMessage;
+
+  /// Callback for when reply message is tapped
+  final ReplyMessageCallback? onReplyMessage;
 
   /// Widget builder for attachment actions modal
   /// [defaultActionsModal] is the default [AttachmentActionsModal] config
@@ -64,6 +68,9 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
           startIndex: startIndex,
           userName: userName,
           autoplayVideos: autoplayVideos,
+          onShowMessage: onShowMessage,
+          onReplyMessage: onReplyMessage,
+          attachmentActionsModalBuilder: attachmentActionsModalBuilder,
         );
       } else {
         return StreamFullScreenMedia(
@@ -71,6 +78,7 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
           startIndex: startIndex,
           userName: userName,
           onShowMessage: onShowMessage,
+          onReplyMessage: onReplyMessage,
           attachmentActionsModalBuilder: attachmentActionsModalBuilder,
           autoplayVideos: autoplayVideos,
         );
@@ -81,6 +89,7 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
         startIndex: startIndex,
         userName: userName,
         onShowMessage: onShowMessage,
+        onReplyMessage: onReplyMessage,
         attachmentActionsModalBuilder: attachmentActionsModalBuilder,
         autoplayVideos: autoplayVideos,
       );

@@ -12,6 +12,7 @@ FullScreenMediaWidget getFsm({
   required int startIndex,
   required String userName,
   ShowMessageCallback? onShowMessage,
+  ReplyMessageCallback? onReplyMessage,
   AttachmentActionsBuilder? attachmentActionsModalBuilder,
   bool? autoplayVideos,
 }) =>

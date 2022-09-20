@@ -31,11 +31,10 @@ typedef OnAttachmentTap = VoidCallback;
 /// {@endtemplate}
 typedef ShowMessageCallback = void Function(Message message, Channel channel);
 
-/// {@template onReturnAction}
-/// The function to execute when the attachment is returned to from other
-/// screens.
+/// {@template showMessageCallback}
+/// The action to perform when "reply message" is tapped
 /// {@endtemplate}
-typedef OnReturnAction = ValueChanged<ReturnActionType>;
+typedef ReplyMessageCallback = void Function(Message message);
 
 /// {@template onImageGroupAttachmentTap}
 /// The action to perform when a specific image attachment in an [ImageGroup]
