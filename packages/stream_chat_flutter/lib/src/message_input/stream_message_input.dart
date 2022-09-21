@@ -255,7 +255,7 @@ class StreamMessageInput extends StatefulWidget {
   /// Enabled by default
   final bool enableMentionsOverlay;
 
-  /// TODO: document me!
+  /// Callback for when the quoted message is cleared
   final VoidCallback? onQuotedMessageCleared;
 
   static bool _defaultValidator(Message message) =>

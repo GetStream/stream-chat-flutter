@@ -54,8 +54,8 @@ class StreamQuotedMessageWidget extends StatelessWidget {
   /// Callback for clearing quoted messages.
   final VoidCallback? onQuotedMessageClear;
 
-  /// TODO: Document me!
-  final bool? composing;
+  /// True if the message is being composed
+  final bool composing;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
         child: _QuotedMessage(
           message: message,
           textLimit: textLimit,
-          composing: composing!,
+          composing: composing,
           onQuotedMessageClear: onQuotedMessageClear,
           messageTheme: messageTheme,
           showBorder: showBorder,

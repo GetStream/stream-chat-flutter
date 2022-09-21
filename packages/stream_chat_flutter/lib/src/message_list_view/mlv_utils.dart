@@ -50,7 +50,7 @@ int getInitialIndex(
   return 0;
 }
 
-/// TODO: document me
+/// Gets the index of the top element in the viewport.
 int? getTopElementIndex(Iterable<ItemPosition> values) {
   final inView = values.where((position) => position.itemLeadingEdge < 1);
   if (inView.isEmpty) return null;
@@ -60,7 +60,7 @@ int? getTopElementIndex(Iterable<ItemPosition> values) {
       .index;
 }
 
-/// TODO: document me
+/// Gets the index of the bottom element in the viewport.
 int? getBottomElementIndex(Iterable<ItemPosition> values) {
   final inView = values.where((position) => position.itemLeadingEdge < 1);
   if (inView.isEmpty) return null;
@@ -70,7 +70,7 @@ int? getBottomElementIndex(Iterable<ItemPosition> values) {
       .index;
 }
 
-/// TODO: document me
+/// Returns true if the message is the initial message.
 bool isInitialMessage(String id, StreamChannelState? channelState) {
   return channelState!.initialMessageId == id;
 }

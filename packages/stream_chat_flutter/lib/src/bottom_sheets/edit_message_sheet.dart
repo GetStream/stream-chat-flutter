@@ -41,51 +41,53 @@ class _EditMessageSheetState extends State<EditMessageSheet> {
   @override
   Widget build(BuildContext context) {
     final streamChatThemeData = StreamChatTheme.of(context);
-    return Padding(
-      padding: MediaQuery.of(context).viewInsets,
-      child: StreamChannel(
-        channel: widget.channel,
-        child: Flex(
-          direction: Axis.vertical,
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: StreamSvgIcon.edit(
-                      color: streamChatThemeData.colorTheme.disabled,
+    return KeyboardShortcutRunner(
+      onEscapeKeypress: () => Navigator.of(context).pop(),
+      child: Padding(
+        padding: MediaQuery.of(context).viewInsets,
+        child: StreamChannel(
+          channel: widget.channel,
+          child: Flex(
+            direction: Axis.vertical,
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: StreamSvgIcon.edit(
+                        color: streamChatThemeData.colorTheme.disabled,
+                      ),
                     ),
-                  ),
-                  Text(
-                    context.translations.editMessageLabel,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    icon: StreamSvgIcon.closeSmall(),
-                    onPressed: Navigator.of(context).pop,
-                  ),
-                ],
+                    Text(
+                      context.translations.editMessageLabel,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: StreamSvgIcon.closeSmall(),
+                      onPressed: Navigator.of(context).pop,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            if (widget.editMessageInputBuilder != null)
-              widget.editMessageInputBuilder!(context, widget.message)
-            else
-              // TODO(Groovin): Esc key should close the sheet
-              StreamMessageInput(
-                messageInputController: controller,
-                preMessageSending: (m) {
-                  FocusScope.of(context).unfocus();
-                  Navigator.of(context).pop();
-                  return m;
-                },
-              ),
-          ],
+              if (widget.editMessageInputBuilder != null)
+                widget.editMessageInputBuilder!(context, widget.message)
+              else
+                StreamMessageInput(
+                  messageInputController: controller,
+                  preMessageSending: (m) {
+                    FocusScope.of(context).unfocus();
+                    Navigator.of(context).pop();
+                    return m;
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );

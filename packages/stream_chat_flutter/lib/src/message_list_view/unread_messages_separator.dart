@@ -3,7 +3,6 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template unreadMessagesSeparator}
-/// TODO: Document me!
 /// {@endtemplate}
 class UnreadMessagesSeparator extends StatelessWidget {
   /// {@macro unreadMessagesSeparator}
@@ -12,7 +11,7 @@ class UnreadMessagesSeparator extends StatelessWidget {
     required this.unreadCount,
   });
 
-  /// TODO: Document me!
+  /// Number of unread messages.
   final int unreadCount;
 
   @override

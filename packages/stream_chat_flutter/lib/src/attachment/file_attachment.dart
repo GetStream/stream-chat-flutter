@@ -266,7 +266,6 @@ class _Trailing extends StatelessWidget {
       ),
     );
 
-    //TODO(Groovin): show a regular "file" icon if the file has been downloaded
     if (message.status == MessageSendingStatus.sent) {
       trailingWidget = IconButton(
         icon: StreamSvgIcon.cloudDownload(

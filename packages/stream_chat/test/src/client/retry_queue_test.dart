@@ -68,6 +68,4 @@ void main() {
       expect(retryQueue.hasMessages, isTrue);
     });
   });
-
-  // TODO: Add more tests once macbook is fixed :(
 }

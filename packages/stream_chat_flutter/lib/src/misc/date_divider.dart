@@ -5,7 +5,6 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
 /// {@template streamDateDivider}
 /// Shows a date divider depending on the date difference
-/// FIXME: write better description!
 /// {@endtemplate}
 class StreamDateDivider extends StatelessWidget {
   /// {@macro streamDateDivider}

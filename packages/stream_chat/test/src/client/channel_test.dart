@@ -108,7 +108,6 @@ void main() {
     });
   });
 
-  // TODO : test all persistence related logic in this group
   group('Initialized Channel with Persistence', () {
     late final client = MockStreamChatClientWithPersistence();
     const channelId = 'test-channel-id';

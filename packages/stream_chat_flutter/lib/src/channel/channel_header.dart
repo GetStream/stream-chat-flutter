@@ -168,7 +168,7 @@ class StreamChannelHeader extends StatelessWidget
             systemOverlayStyle: theme.brightness == Brightness.dark
                 ? SystemUiOverlayStyle.light
                 : SystemUiOverlayStyle.dark,
-            elevation: elevation, //TODO(Groovin): no elevation on desktop & web
+            elevation: elevation,
             leading: leadingWidget,
             backgroundColor: backgroundColor ?? channelHeaderTheme.color,
             actions: actions ??

@@ -31,13 +31,13 @@ class PickerWidget extends StatefulWidget {
     this.mediaThumbnailScale = 1,
   });
 
-  /// TODO: Document me!
+  /// Controller of the media list view
   final MediaListViewController mediaListViewController;
 
-  /// TODO: Document me!
+  /// Index of the current active tab
   final int filePickerIndex;
 
-  /// TODO: Document me!
+  /// True if a file has been picked
   final bool containsFile;
 
   /// The permission state.

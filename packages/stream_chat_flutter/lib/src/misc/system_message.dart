@@ -3,8 +3,6 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamSystemMessage}
-/// Shows a date divider depending on the date difference
-/// FIXME: This is NOT a good description!
 /// {@endtemplate}
 class StreamSystemMessage extends StatelessWidget {
   /// {@macro streamSystemMessage}
@@ -14,8 +12,7 @@ class StreamSystemMessage extends StatelessWidget {
     this.onMessageTap,
   });
 
-  /// This message
-  /// FIXME: This is NOT a good description!
+  /// The message to display.
   final Message message;
 
   /// The action to perform when tapping on the message.

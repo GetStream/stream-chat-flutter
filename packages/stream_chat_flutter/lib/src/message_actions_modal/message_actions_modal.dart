@@ -282,7 +282,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     );
   }
 
-  /// TODO(Groovin): document me!
   double _calculateReactionsHorizontalAlignmentValue(
     User? user,
     num divFactor,

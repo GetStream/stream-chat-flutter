@@ -4,8 +4,6 @@ import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template floatingDateDivider}
-/// TODO: Document me!
-///
 /// Not intended for use outside of [MessageListView].
 /// {@endtemplate}
 class FloatingDateDivider extends StatelessWidget {

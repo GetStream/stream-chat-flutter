@@ -54,9 +54,6 @@ class StreamChatThemeData {
     StreamGalleryHeaderThemeData? imageHeaderTheme,
     StreamGalleryFooterThemeData? imageFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
-    StreamChannelListViewThemeData? channelListViewTheme,
-    StreamUserListViewThemeData? userListViewTheme,
-    StreamMessageSearchListViewThemeData? messageSearchListViewTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -82,9 +79,6 @@ class StreamChatThemeData {
       galleryHeaderTheme: imageHeaderTheme,
       galleryFooterTheme: imageFooterTheme,
       messageListViewTheme: messageListViewTheme,
-      channelListViewTheme: channelListViewTheme,
-      userListViewTheme: userListViewTheme,
-      messageSearchListViewTheme: messageSearchListViewTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -112,9 +106,6 @@ class StreamChatThemeData {
     required this.galleryHeaderTheme,
     required this.galleryFooterTheme,
     required this.messageListViewTheme,
-    required this.channelListViewTheme,
-    required this.userListViewTheme,
-    required this.messageSearchListViewTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -279,15 +270,6 @@ class StreamChatThemeData {
       messageListViewTheme: StreamMessageListViewThemeData(
         backgroundColor: colorTheme.barsBg,
       ),
-      channelListViewTheme: StreamChannelListViewThemeData(
-        backgroundColor: colorTheme.appBg,
-      ),
-      userListViewTheme: StreamUserListViewThemeData(
-        backgroundColor: colorTheme.appBg,
-      ),
-      messageSearchListViewTheme: StreamMessageSearchListViewThemeData(
-        backgroundColor: colorTheme.appBg,
-      ),
     );
   }
 
@@ -329,15 +311,6 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamMessageListView] widget.
   final StreamMessageListViewThemeData messageListViewTheme;
 
-  /// Theme configuration for the [StreamChannelListView] widget.
-  final StreamChannelListViewThemeData channelListViewTheme;
-
-  /// Theme configuration for the [StreamUserListView] widget.
-  final StreamUserListViewThemeData userListViewTheme;
-
-  /// Theme configuration for the [StreamMessageSearchListView] widget.
-  final StreamMessageSearchListViewThemeData messageSearchListViewTheme;
-
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -356,9 +329,6 @@ class StreamChatThemeData {
     StreamGalleryHeaderThemeData? galleryHeaderTheme,
     StreamGalleryFooterThemeData? galleryFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
-    StreamChannelListViewThemeData? channelListViewTheme,
-    StreamUserListViewThemeData? userListViewTheme,
-    StreamMessageSearchListViewThemeData? messageSearchListViewTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -375,10 +345,6 @@ class StreamChatThemeData {
         galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
         galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
         messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
-        channelListViewTheme: channelListViewTheme ?? this.channelListViewTheme,
-        userListViewTheme: userListViewTheme ?? this.userListViewTheme,
-        messageSearchListViewTheme:
-            messageSearchListViewTheme ?? this.messageSearchListViewTheme,
       );
 
   /// Merge themes
@@ -399,11 +365,6 @@ class StreamChatThemeData {
       galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),
       messageListViewTheme:
           messageListViewTheme.merge(other.messageListViewTheme),
-      channelListViewTheme:
-          channelListViewTheme.merge(other.channelListViewTheme),
-      userListViewTheme: userListViewTheme.merge(other.userListViewTheme),
-      messageSearchListViewTheme:
-          messageSearchListViewTheme.merge(other.messageSearchListViewTheme),
     );
   }
 }

@@ -24,8 +24,8 @@ class MessageDialog extends StatelessWidget {
   /// The optional error message to use.
   final String? messageText;
 
-  /// TODO(Groovin): document me
-  final bool? showMessage;
+  /// If true it shows the error message.
+  final bool showMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class MessageDialog extends StatelessWidget {
       ),
       backgroundColor: streamTheme.colorTheme.appBg,
       title: Text(titleText ?? context.translations.somethingWentWrongError),
-      content: showMessage!
+      content: showMessage
           ? Text(
               messageText ??
                   context.translations.operationCouldNotBeCompletedText,
