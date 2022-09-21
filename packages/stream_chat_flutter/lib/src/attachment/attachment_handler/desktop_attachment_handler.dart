@@ -210,8 +210,8 @@ class DesktopAttachmentHandler extends AttachmentHandler {
       case 'jpx':
       case 'jpm':
       case 'mj2':
-      case 'svg':
-      case 'svgz':
+      // case 'svg':
+      // case 'svgz': Removed because flutter does not support svg as images
       case 'ai':
       case 'eps':
         return 'image';
