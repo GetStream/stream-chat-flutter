@@ -42,7 +42,7 @@ extension StringExtension on String {
     // TODO: Are these sizes optimal? Consider web/desktop
     double width = 400,
     double height = 400,
-    String /*clip|crop|scale|fill*/ resize = 'scale',
+    String /*clip|crop|scale|fill*/ resize = 'clip',
     String /*center|top|bottom|left|right*/ crop = 'center',
   }) {
     final uri = Uri.parse(this);

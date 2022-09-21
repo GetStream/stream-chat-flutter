@@ -16,7 +16,7 @@ class StreamImageGroup extends StatelessWidget {
     this.onReplyMessage,
     this.onAttachmentTap,
     this.imageThumbnailSize = const Size(400, 400),
-    this.imageThumbnailResizeType = 'crop',
+    this.imageThumbnailResizeType = 'clip',
     this.imageThumbnailCropType = 'center',
   });
 

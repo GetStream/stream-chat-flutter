@@ -94,7 +94,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.onAttachmentTap,
     this.usernameBuilder,
     this.imageAttachmentThumbnailSize = const Size(400, 400),
-    this.imageAttachmentThumbnailResizeType = 'crop',
+    this.imageAttachmentThumbnailResizeType = 'clip',
     this.imageAttachmentThumbnailCropType = 'center',
   }) : attachmentBuilders = {
           'image': (context, message, attachments) {
