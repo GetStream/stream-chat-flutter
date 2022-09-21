@@ -61,6 +61,12 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: AttachmentActionsModal(
+              onReply: () {
+                print('reply');
+              },
+              onShowMessage: () {
+                print('show');
+              },
               message: message,
               attachment: attachment,
             ),
@@ -107,6 +113,12 @@ void main() {
             child: AttachmentActionsModal(
               message: message,
               attachment: attachment,
+              onReply: () {
+                print('reply');
+              },
+              onShowMessage: () {
+                print('show');
+              },
             ),
           ),
         ),
@@ -158,54 +170,6 @@ void main() {
         ),
       );
       expect(find.text('Save Video'), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'tapping on reply should pop',
-    (WidgetTester tester) async {
-      final client = MockClient();
-      final clientState = MockClientState();
-
-      when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-
-      final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.fromTheme(themeData);
-
-      final mockObserver = MockNavigatorObserver();
-
-      final attachment = Attachment(
-        type: 'image',
-        title: 'image.jpg',
-      );
-      final message = Message(
-        text: 'test',
-        user: User(
-          id: 'user-id',
-        ),
-        attachments: [
-          attachment,
-        ],
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: themeData,
-          navigatorObservers: [mockObserver],
-          home: StreamChat(
-            streamChatThemeData: streamTheme,
-            client: client,
-            child: SizedBox(
-              child: AttachmentActionsModal(
-                message: message,
-                attachment: attachment,
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.tap(find.text('Reply'));
-      verify(() => mockObserver.didPop(any(), any()));
     },
   );
 
@@ -406,125 +370,6 @@ void main() {
       );
       await tester.tap(find.text('Delete'));
       verify(() => mockChannel.deleteMessage(message)).called(1);
-    },
-  );
-
-  testWidgets(
-    'tapping on save in chat should call image downloader',
-    (WidgetTester tester) async {
-      final client = MockClient();
-      final clientState = MockClientState();
-
-      when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-
-      final imageDownloader = MockAttachmentDownloader();
-
-      final attachment = Attachment(
-        type: 'image',
-        title: 'image.jpg',
-      );
-      final message = Message(
-        text: 'test',
-        user: User(
-          id: 'user-id',
-        ),
-        attachments: [
-          attachment,
-        ],
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          builder: (context, child) => StreamChat(
-            client: client,
-            child: child,
-          ),
-          home: SizedBox(
-            child: AttachmentActionsModal(
-              imageDownloader: imageDownloader,
-              message: message,
-              attachment: attachment,
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('Save Image'));
-
-      imageDownloader.progressCallback!(0, 100000);
-      await tester.pump();
-      expect(find.text('0.00 MB'), findsOneWidget);
-
-      imageDownloader.progressCallback!(50000, 100000);
-      await tester.pump();
-      expect(find.text('0.05 MB'), findsOneWidget);
-
-      imageDownloader.progressCallback!(100000, 100000);
-      imageDownloader.downloadedPathCallback!('path');
-      imageDownloader.completer.complete('path');
-      await tester.pump();
-      expect(find.byKey(const Key('completedIcon')), findsOneWidget);
-      await tester.pumpAndSettle(const Duration(milliseconds: 500));
-    },
-  );
-
-  testWidgets(
-    'tapping on save in chat should call file downloader',
-    (WidgetTester tester) async {
-      final client = MockClient();
-      final clientState = MockClientState();
-
-      when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-
-      final fileDownloader = MockAttachmentDownloader();
-
-      final attachment = Attachment(
-        type: 'video',
-        title: 'video.mp4',
-      );
-      final message = Message(
-          text: 'test',
-          user: User(
-            id: 'user-id',
-          ),
-          attachments: [
-            attachment,
-          ]);
-
-      await tester.pumpWidget(
-        MaterialApp(
-          builder: (context, child) => StreamChat(
-            client: client,
-            child: child,
-          ),
-          home: SizedBox(
-            child: AttachmentActionsModal(
-              fileDownloader: fileDownloader,
-              message: message,
-              attachment: attachment,
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('Save Video'));
-
-      fileDownloader.progressCallback!(0, 100000);
-      await tester.pump();
-      expect(find.text('0.00 MB'), findsOneWidget);
-
-      fileDownloader.progressCallback!(50000, 100000);
-      await tester.pump();
-      expect(find.text('0.05 MB'), findsOneWidget);
-
-      fileDownloader.progressCallback!(100000, 100000);
-      fileDownloader.downloadedPathCallback!('path');
-      fileDownloader.completer.complete('path');
-      await tester.pump();
-      expect(find.byKey(const Key('completedIcon')), findsOneWidget);
-      await tester.pumpAndSettle(const Duration(milliseconds: 500));
     },
   );
 }
