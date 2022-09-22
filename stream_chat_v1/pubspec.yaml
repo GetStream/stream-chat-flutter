@@ -13,17 +13,17 @@ dependencies:
   stream_chat_flutter:
     git:
       url: https://github.com/GetStream/stream-chat-flutter.git
-      ref: develop
+      ref: v5
       path: packages/stream_chat_flutter
   stream_chat_persistence:
     git:
       url: https://github.com/GetStream/stream-chat-flutter.git
-      ref: develop
+      ref: v5
       path: packages/stream_chat_persistence
   stream_chat_localizations:
     git:
       url: https://github.com/GetStream/stream-chat-flutter.git
-      ref: develop
+      ref: v5
       path: packages/stream_chat_localizations
   flutter_local_notifications: ^9.0.0
   flutter_svg: ^1.0.3
@@ -34,6 +34,7 @@ dependencies:
   lottie: ^1.2.1
   collection: ^1.15.0
   sentry_flutter: ^6.5.0
+  flutter_slidable: ^2.0.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.9.2
@@ -43,17 +44,17 @@ dependency_overrides:
   stream_chat:
     git:
       url: https://github.com/GetStream/stream-chat-flutter.git
-      ref: develop
+      ref: v5
       path: packages/stream_chat
   stream_chat_flutter_core:
     git:
       url: https://github.com/GetStream/stream-chat-flutter.git
-      ref: develop
+      ref: v5
       path: packages/stream_chat_flutter_core
   stream_chat_flutter:
     git:
       url: https://github.com/GetStream/stream-chat-flutter.git
-      ref: develop
+      ref: v5
       path: packages/stream_chat_flutter
 
 flutter:

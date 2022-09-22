@@ -172,11 +172,14 @@ class _MyAppState extends State<MyApp>
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
               ],
-              builder: (context, child) => StreamChatTheme(
-                data: StreamChatThemeData(
-                  brightness: Theme.of(context).brightness,
+              builder: (context, child) => StreamChatConfiguration(
+                data: StreamChatConfigurationData(),
+                child: StreamChatTheme(
+                  data: StreamChatThemeData(
+                    brightness: Theme.of(context).brightness,
+                  ),
+                  child: child!,
                 ),
-                child: child!,
               ),
               onGenerateRoute: AppRoutes.generateRoute,
               onGenerateInitialRoutes: (initialRouteName) {

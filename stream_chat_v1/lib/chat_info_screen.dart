@@ -339,7 +339,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   }
 
   void _showDeleteDialog() async {
-    final res = await showConfirmationDialog(
+    final res = await showConfirmationBottomSheet(
       context,
       title: AppLocalizations.of(context).deleteConversationTitle,
       okText: AppLocalizations.of(context).delete.toUpperCase(),
