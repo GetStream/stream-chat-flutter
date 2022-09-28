@@ -260,6 +260,7 @@ class StreamWebOrDesktopAttachmentPickerBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final enabledTypes = controller.filterEnabledTypes(options: options);
     return ListView(
       shrinkWrap: true,
       children: [
@@ -270,7 +271,12 @@ class StreamWebOrDesktopAttachmentPickerBottomSheet extends StatelessWidget {
               this.onOptionTap?.call(context, controller, option);
             };
           }
+
+          final enabled = enabledTypes.isEmpty ||
+              enabledTypes.any((it) => it == option.type);
+
           return ListTile(
+            enabled: enabled,
             leading: option.icon,
             title: Text(option.title),
             onTap: onOptionTap,
@@ -720,7 +726,7 @@ Widget webOrDesktopAttachmentPickerBuilder({
       ),
       WebOrDesktopAttachmentPickerOption(
         type: AttachmentPickerType.videos,
-        icon: StreamSvgIcon.videoCall(size: 36).toIconThemeSvgIcon(),
+        icon: StreamSvgIcon.record(size: 36).toIconThemeSvgIcon(),
         title: 'Upload a video',
       ),
       WebOrDesktopAttachmentPickerOption(

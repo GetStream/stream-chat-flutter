@@ -89,22 +89,13 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   final colorTheme = StreamChatTheme.of(context).colorTheme;
   final color = backgroundColor ?? colorTheme.inputBg;
 
-  var bottomSheetConstraints = constraints;
-  if (bottomSheetConstraints == null) {
-    if (isDesktopDeviceOrWeb) {
-      bottomSheetConstraints = BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width * 0.6,
-      );
-    }
-  }
-
   return showModalBottomSheet<T>(
     context: context,
     backgroundColor: color,
     elevation: elevation,
     shape: shape,
     clipBehavior: clipBehavior,
-    constraints: bottomSheetConstraints,
+    constraints: constraints,
     barrierColor: barrierColor,
     isScrollControlled: isScrollControlled,
     useRootNavigator: useRootNavigator,

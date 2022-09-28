@@ -39,7 +39,6 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
   StreamAttachmentHandler.__();
 
   factory StreamAttachmentHandler._() {
-    print('Hello');
     if (isDesktopDevice) {
       return StreamAttachmentHandlerDesktop();
     }
