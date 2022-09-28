@@ -201,6 +201,30 @@ extension AttachmentPickerOptionTypeX on StreamAttachmentPickerController {
       if (containsFile) AttachmentPickerType.files,
     };
   }
+
+  /// Returns the list of enabled picker types.
+  Set<AttachmentPickerType> filterEnabledTypes({
+    required Iterable<AttachmentPickerOption> options,
+  }) {
+    final availableTypes = currentAttachmentPickerTypes;
+    final enabledTypes = <AttachmentPickerType>{};
+    for (final option in options) {
+      final supportedTypes = option.supportedTypes;
+      if (availableTypes.any(supportedTypes.contains)) {
+        enabledTypes.addAll(supportedTypes);
+      }
+    }
+    return enabledTypes;
+  }
+
+  /// Returns true if the [initialAttachments] are changed.
+  bool get isValueChanged {
+    final isEqual = UnorderedIterableEquality(
+      EqualityBy((Attachment attachment) => attachment.id),
+    ).equals(value, initialAttachments);
+
+    return !isEqual;
+  }
 }
 
 class WebOrDesktopAttachmentPickerOption extends AttachmentPickerOption {
@@ -230,7 +254,7 @@ class StreamWebOrDesktopAttachmentPickerBottomSheet extends StatelessWidget {
     this.onOptionTap,
   });
 
-  final Iterable<WebOrDesktopAttachmentPickerOption> options;
+  final List<WebOrDesktopAttachmentPickerOption> options;
   final StreamAttachmentPickerController controller;
   final OnWebOrDesktopAttachmentPickerOptionTap? onOptionTap;
 
@@ -283,7 +307,20 @@ class _StreamMobileAttachmentPickerBottomSheetState
   @override
   void initState() {
     super.initState();
-    _currentOption = widget.initialOption ?? widget.options.first;
+    if (widget.initialOption == null) {
+      final enabledTypes = widget.controller.filterEnabledTypes(
+        options: widget.options,
+      );
+      if (enabledTypes.isNotEmpty) {
+        _currentOption = widget.options.firstWhere((it) {
+          return it.supportedTypes.contains(enabledTypes.first);
+        });
+      } else {
+        _currentOption = widget.options.first;
+      }
+    } else {
+      _currentOption = widget.initialOption!;
+    }
   }
 
   @override
@@ -331,25 +368,13 @@ class _AttachmentPickerOptions extends StatelessWidget {
   final ValueSetter<AttachmentPickerOption>? onOptionSelected;
   final ValueSetter<List<Attachment>>? onSendAttachment;
 
-  Set<AttachmentPickerType> _filterEnabledTypes() {
-    final availableTypes = controller.currentAttachmentPickerTypes;
-    final enabledTypes = <AttachmentPickerType>{};
-    for (final option in options) {
-      final supportedTypes = option.supportedTypes;
-      if (availableTypes.any(supportedTypes.contains)) {
-        enabledTypes.addAll(supportedTypes);
-      }
-    }
-    return enabledTypes;
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorTheme = StreamChatTheme.of(context).colorTheme;
     return ValueListenableBuilder<List<Attachment>>(
       valueListenable: controller,
       builder: (context, attachments, __) {
-        final enabledTypes = _filterEnabledTypes();
+        final enabledTypes = controller.filterEnabledTypes(options: options);
         return Row(
           children: [
             Expanded(
@@ -387,7 +412,7 @@ class _AttachmentPickerOptions extends StatelessWidget {
             Builder(
               builder: (context) {
                 final isEnabled =
-                    attachments.isNotEmpty && onSendAttachment != null;
+                    onSendAttachment != null && controller.isValueChanged;
 
                 final onPressed = isEnabled
                     ? () {
