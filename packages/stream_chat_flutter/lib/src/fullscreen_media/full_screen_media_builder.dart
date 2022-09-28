@@ -61,38 +61,26 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!kIsWeb) {
-      if (isDesktopVideoPlayerSupported) {
-        return desktop_fsm.getFsm(
-          mediaAttachmentPackages: mediaAttachmentPackages,
-          startIndex: startIndex,
-          userName: userName,
-          autoplayVideos: autoplayVideos,
-          onShowMessage: onShowMessage,
-          onReplyMessage: onReplyMessage,
-          attachmentActionsModalBuilder: attachmentActionsModalBuilder,
-        );
-      } else {
-        return StreamFullScreenMedia(
-          mediaAttachmentPackages: mediaAttachmentPackages,
-          startIndex: startIndex,
-          userName: userName,
-          onShowMessage: onShowMessage,
-          onReplyMessage: onReplyMessage,
-          attachmentActionsModalBuilder: attachmentActionsModalBuilder,
-          autoplayVideos: autoplayVideos,
-        );
-      }
-    } else {
-      return StreamFullScreenMedia(
+    if (!kIsWeb && isDesktopVideoPlayerSupported) {
+      return desktop_fsm.getFsm(
         mediaAttachmentPackages: mediaAttachmentPackages,
         startIndex: startIndex,
         userName: userName,
+        autoplayVideos: autoplayVideos,
         onShowMessage: onShowMessage,
         onReplyMessage: onReplyMessage,
         attachmentActionsModalBuilder: attachmentActionsModalBuilder,
-        autoplayVideos: autoplayVideos,
       );
     }
+
+    return StreamFullScreenMedia(
+      mediaAttachmentPackages: mediaAttachmentPackages,
+      startIndex: startIndex,
+      userName: userName,
+      onShowMessage: onShowMessage,
+      onReplyMessage: onReplyMessage,
+      attachmentActionsModalBuilder: attachmentActionsModalBuilder,
+      autoplayVideos: autoplayVideos,
+    );
   }
 }

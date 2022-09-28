@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
@@ -27,19 +26,7 @@ class DownloadMenuItem extends StatelessWidget {
       title: Text(context.translations.downloadLabel),
       onClick: () async {
         Navigator.of(context).pop();
-
-        if (kIsWeb) {
-          return launchURL(
-            context,
-            attachment.imageUrl ??
-                attachment.assetUrl ??
-                (attachment.extraData.entries.first.value!
-                    as Map<String, dynamic>)['original']['url'],
-          );
-        }
-
-        final attachmentHandler = DesktopAttachmentHandler();
-        await attachmentHandler.download(attachment);
+        StreamAttachmentHandler.instance.downloadAttachment(attachment);
       },
     );
   }

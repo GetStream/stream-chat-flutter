@@ -95,7 +95,7 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
 
     return PortalTarget(
       visible: _showReactionsPopup,
-      portalCandidateLabels: const [kPortalMessageListViewLable],
+      portalCandidateLabels: const [kPortalMessageListViewLabel],
       anchor: Aligned(
         target: widget.reverse ? Alignment.topRight : Alignment.topLeft,
         follower: widget.reverse ? Alignment.bottomRight : Alignment.bottomLeft,

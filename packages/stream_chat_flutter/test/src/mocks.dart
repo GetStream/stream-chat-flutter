@@ -42,7 +42,7 @@ class MockVoidCallback extends Mock {
   void call();
 }
 
-class MockAttachmentHandler extends Mock implements AttachmentHandler {}
+class MockAttachmentHandler extends Mock implements StreamAttachmentHandler {}
 
 class MockMember extends Mock implements Member {}
 

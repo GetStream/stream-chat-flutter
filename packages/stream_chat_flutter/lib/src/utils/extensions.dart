@@ -2,6 +2,7 @@ import 'package:diacritic/diacritic.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -89,12 +90,70 @@ extension PlatformFileX on PlatformFile {
   /// Converts the [PlatformFile] into [AttachmentFile]
   AttachmentFile get toAttachmentFile {
     return AttachmentFile(
-      // ignore: avoid_redundant_argument_values
       path: kIsWeb ? null : path,
       name: name,
       bytes: bytes,
       size: size,
     );
+  }
+
+  /// Converts the [PlatformFile] to a [Attachment].
+  Attachment toAttachment({required String type}) {
+    final file = toAttachmentFile;
+    final extraDataMap = <String, Object>{};
+
+    final mimeType = file.mimeType?.mimeType;
+
+    if (mimeType != null) {
+      extraDataMap['mime_type'] = mimeType;
+    }
+
+    extraDataMap['file_size'] = file.size!;
+
+    final attachment = Attachment(
+      file: file,
+      type: type,
+      extraData: extraDataMap,
+    );
+
+    return attachment;
+  }
+}
+
+/// Useful extension for [XFile]
+extension XFileX on XFile {
+  /// Converts the [PlatformFile] into [AttachmentFile]
+  Future<AttachmentFile> get toAttachmentFile async {
+    final bytes = await readAsBytes();
+    return AttachmentFile(
+      name: name,
+      size: bytes.length,
+      path: path,
+      bytes: bytes,
+    );
+  }
+
+  /// Converts the [XFile] to a [Attachment].
+  Future<Attachment> toAttachment({required String type}) async {
+    final file = await toAttachmentFile;
+
+    final extraDataMap = <String, Object>{};
+
+    final mimeType = this.mimeType ?? file.mimeType?.mimeType;
+
+    if (mimeType != null) {
+      extraDataMap['mime_type'] = mimeType;
+    }
+
+    extraDataMap['file_size'] = file.size!;
+
+    final attachment = Attachment(
+      file: file,
+      type: type,
+      extraData: extraDataMap,
+    );
+
+    return attachment;
   }
 }
 
@@ -332,4 +391,48 @@ extension TypeX<T> on T? {
   /// Returns true if the value is null or matches the given [value]
   /// otherwise returns false.
   bool isNullOrMatches(T value) => this == null || this == value;
+}
+
+/// Useful extensions on [FileType]
+extension FileTypeX on FileType {
+  /// Converts the [FileType] to a [String].
+  String toAttachmentType() {
+    switch (this) {
+      case FileType.image:
+        return 'image';
+      case FileType.video:
+        return 'video';
+      case FileType.audio:
+        return 'audio';
+      case FileType.any:
+      case FileType.media:
+      case FileType.custom:
+        return 'file';
+    }
+  }
+}
+
+/// Useful extensions on [AttachmentPickerType]
+extension AttachmentPickerTypeX on AttachmentPickerType {
+  /// Converts the [AttachmentPickerType] to a [FileType].
+  FileType get fileType {
+    switch (this) {
+      case AttachmentPickerType.images:
+        return FileType.image;
+      case AttachmentPickerType.videos:
+        return FileType.video;
+      case AttachmentPickerType.files:
+        return FileType.any;
+      case AttachmentPickerType.audios:
+        return FileType.audio;
+    }
+  }
+}
+
+/// Useful extensions on [StreamSvgIcon].
+extension StreamSvgIconX on StreamSvgIcon {
+  /// Converts the [StreamSvgIcon] to a [StreamIconThemeSvgIcon].
+  StreamIconThemeSvgIcon toIconThemeSvgIcon() {
+    return StreamIconThemeSvgIcon.fromStreamSvgIcon(this);
+  }
 }

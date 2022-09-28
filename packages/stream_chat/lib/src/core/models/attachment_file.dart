@@ -86,6 +86,22 @@ class AttachmentFile {
     }
     return multiPartFile;
   }
+
+  /// Creates a copy of this [AttachmentFile] but with the given fields
+  /// replaced with the new values.
+  AttachmentFile copyWith({
+    String? path,
+    String? name,
+    Uint8List? bytes,
+    int? size,
+  }) {
+    return AttachmentFile(
+      path: path ?? this.path,
+      name: name ?? this.name,
+      bytes: bytes ?? this.bytes,
+      size: size ?? this.size,
+    );
+  }
 }
 
 /// Union class to hold various [UploadState] of a attachment.

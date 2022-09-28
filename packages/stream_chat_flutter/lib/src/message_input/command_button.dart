@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 
 /// {@template commandButton}
 /// The button that allows a user to use commands in a chat.
@@ -7,12 +8,12 @@ class CommandButton extends StatelessWidget {
   /// {@macro commandButton}
   const CommandButton({
     super.key,
-    required this.icon,
+    required this.color,
     required this.onPressed,
   });
 
-  /// The icon to use.
-  final Widget icon;
+  /// The color of the button.
+  final Color color;
 
   /// The action to perform when the button is pressed or clicked.
   final VoidCallback onPressed;
@@ -20,7 +21,9 @@ class CommandButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: icon,
+      icon: StreamSvgIcon.lightning(
+        color: color,
+      ),
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(
         height: 24,

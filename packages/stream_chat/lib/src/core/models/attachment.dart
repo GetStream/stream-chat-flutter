@@ -49,7 +49,7 @@ class Attachment extends Equatable {
           if (file?.mimeType != null) 'mime_type': file?.mimeType?.mimeType,
         } {
     this.uploadState = uploadState ??
-        ((assetUrl != null || imageUrl != null)
+        ((assetUrl != null || imageUrl != null || thumbUrl != null)
             ? const UploadState.success()
             : const UploadState.preparing());
   }

@@ -55,34 +55,6 @@ void main() {
     expect(find.text('OK'), findsOneWidget);
   });
 
-  testWidgets('MessageDialog without body', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) {
-              return Center(
-                child: StreamChatTheme(
-                  data: StreamChatThemeData.light(),
-                  child: const MessageDialog(
-                    titleText: 'Message',
-                    messageText: 'Message body',
-                    showMessage: false,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-
-    expect(find.byType(AlertDialog), findsOneWidget);
-    expect(find.text('Message'), findsOneWidget);
-    expect(find.text('Message body'), findsNothing);
-    expect(find.text('OK'), findsOneWidget);
-  });
-
   testGoldens('golden test for default MessageDialog', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -140,8 +112,6 @@ void main() {
                   data: StreamChatThemeData.light(),
                   child: const MessageDialog(
                     titleText: 'Message',
-                    messageText: 'Message body',
-                    showMessage: false,
                   ),
                 ),
               );

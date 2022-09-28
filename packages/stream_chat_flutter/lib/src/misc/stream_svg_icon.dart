@@ -10,8 +10,8 @@ class StreamSvgIcon extends StatelessWidget {
     super.key,
     this.assetName,
     this.color,
-    this.width = 24,
-    this.height = 24,
+    this.width,
+    this.height,
   });
 
   /// [StreamSvgIcon] type
@@ -1054,6 +1054,19 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
+  /// [StreamSvgIcon] type
+  factory StreamSvgIcon.videoCall({
+    double? size,
+    Color? color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'video_call_icon.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
   /// Name of icon asset
   final String? assetName;
 
@@ -1073,6 +1086,58 @@ class StreamSvgIcon extends StatelessWidget {
       'lib/svgs/$assetName',
       package: 'stream_chat_flutter',
       key: key,
+      width: width,
+      height: height,
+      color: color,
+    );
+  }
+}
+
+/// Alternative of [StreamSvgIcon] which follows the [IconTheme].
+class StreamIconThemeSvgIcon extends StatelessWidget {
+  /// Creates a [StreamIconThemeSvgIcon].
+  const StreamIconThemeSvgIcon({
+    super.key,
+    this.assetName,
+    this.width,
+    this.height,
+    this.color,
+  });
+
+  /// Factory constructor to create [StreamIconThemeSvgIcon]
+  /// from [StreamSvgIcon].
+  factory StreamIconThemeSvgIcon.fromStreamSvgIcon(
+    StreamSvgIcon streamSvgIcon,
+  ) {
+    return StreamIconThemeSvgIcon(
+      assetName: streamSvgIcon.assetName,
+      width: streamSvgIcon.width,
+      height: streamSvgIcon.height,
+      color: streamSvgIcon.color,
+    );
+  }
+
+  /// Name of icon asset
+  final String? assetName;
+
+  /// Width of icon
+  final double? width;
+
+  /// Height of icon
+  final double? height;
+
+  /// Color of icon
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final iconTheme = IconTheme.of(context);
+    final color = this.color ?? iconTheme.color;
+    final width = this.width ?? iconTheme.size;
+    final height = this.height ?? iconTheme.size;
+
+    return StreamSvgIcon(
+      assetName: assetName,
       width: width,
       height: height,
       color: color,

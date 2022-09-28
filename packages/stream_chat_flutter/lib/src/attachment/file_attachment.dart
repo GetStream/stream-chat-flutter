@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/src/attachment/attachment_handler/desktop_attachment_handler.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
+import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
 import 'package:stream_chat_flutter/src/indicators/upload_progress_indicator.dart';
 import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
@@ -91,9 +91,13 @@ class StreamFileAttachment extends StreamAttachmentWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              _Trailing(
-                attachment: attachment,
-                message: message,
+              Material(
+                type: MaterialType.transparency,
+                child: trailing ??
+                    _Trailing(
+                      attachment: attachment,
+                      message: message,
+                    ),
               ),
             ],
           ),
@@ -135,13 +139,16 @@ class _FileTypeImage extends StatelessWidget {
         child: source.when(
           local: () {
             if (attachment.file?.bytes == null) {
-              return getFileTypeImage(attachment.extraData['other'] as String?);
+              return getFileTypeImage(
+                attachment.extraData['mime_type'] as String?,
+              );
             }
             return Image.memory(
               attachment.file!.bytes!,
               fit: BoxFit.cover,
-              errorBuilder: (_, obj, trace) =>
-                  getFileTypeImage(attachment.extraData['other'] as String?),
+              errorBuilder: (_, obj, trace) => getFileTypeImage(
+                attachment.extraData['mime_type'] as String?,
+              ),
             );
           },
           network: () {
@@ -149,15 +156,18 @@ class _FileTypeImage extends StatelessWidget {
                     attachment.assetUrl ??
                     attachment.thumbUrl) ==
                 null) {
-              return getFileTypeImage(attachment.extraData['other'] as String?);
+              return getFileTypeImage(
+                attachment.extraData['mime_type'] as String?,
+              );
             }
             return CachedNetworkImage(
               imageUrl: attachment.imageUrl ??
                   attachment.assetUrl ??
                   attachment.thumbUrl!,
               fit: BoxFit.cover,
-              errorWidget: (_, obj, trace) =>
-                  getFileTypeImage(attachment.extraData['other'] as String?),
+              errorWidget: (_, obj, trace) => getFileTypeImage(
+                attachment.extraData['mime_type'] as String?,
+              ),
               placeholder: (_, __) {
                 final image = Image.asset(
                   'images/placeholder.png',
@@ -227,8 +237,29 @@ class _Trailing extends StatelessWidget {
     final theme = StreamChatTheme.of(context);
     final channel = StreamChannel.of(context).channel;
     final attachmentId = attachment.id;
-    Widget? trailingWidget;
-    trailingWidget ??= attachment.uploadState.when(
+
+    //TODO(Groovin): show a regular "file" icon if the file has been downloaded
+    if (message.status == MessageSendingStatus.sent) {
+      return IconButton(
+        icon: StreamSvgIcon.cloudDownload(
+          color: theme.colorTheme.textHighEmphasis,
+        ),
+        visualDensity: VisualDensity.compact,
+        splashRadius: 16,
+        onPressed: () async {
+          final assetUrl = attachment.assetUrl;
+          if (assetUrl != null) {
+            if (isMobileDeviceOrWeb) {
+              launchURL(context, assetUrl);
+            } else {
+              StreamAttachmentHandler.instance.downloadAttachment(attachment);
+            }
+          }
+        },
+      );
+    }
+
+    return attachment.uploadState.when(
       preparing: () => Padding(
         padding: const EdgeInsets.all(8),
         child: _TrailingButton(
@@ -264,35 +295,6 @@ class _Trailing extends StatelessWidget {
           ),
         ),
       ),
-    );
-
-    if (message.status == MessageSendingStatus.sent) {
-      trailingWidget = IconButton(
-        icon: StreamSvgIcon.cloudDownload(
-          color: theme.colorTheme.textHighEmphasis,
-        ),
-        visualDensity: VisualDensity.compact,
-        splashRadius: 16,
-        onPressed: () async {
-          final assetUrl = attachment.assetUrl;
-          if (assetUrl != null) {
-            if (isMobileDeviceOrWeb) {
-              launchURL(context, assetUrl);
-            } else {
-              final attachmentHandler = DesktopAttachmentHandler();
-              await attachmentHandler.download(
-                attachment,
-                suggestedName: attachment.title,
-              );
-            }
-          }
-        },
-      );
-    }
-
-    return Material(
-      type: MaterialType.transparency,
-      child: trailingWidget,
     );
   }
 }

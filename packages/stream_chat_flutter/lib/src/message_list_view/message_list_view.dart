@@ -411,9 +411,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   @override
   Widget build(BuildContext context) {
     return Portal(
-      labels: const [
-        kPortalMessageListViewLable,
-      ],
+      labels: const [kPortalMessageListViewLabel],
       child: MessageListCore(
         paginationLimit: widget.paginationLimit,
         messageFilter: widget.messageFilter,
