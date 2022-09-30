@@ -22,12 +22,12 @@ class ChannelModel {
     DateTime? updatedAt,
     this.deletedAt,
     this.memberCount = 0,
-    Map<String, Object?> extraData = const {},
+    this.extraData = const {},
     this.team,
     this.cooldown = 0,
-    bool? disabled,
-    bool? hidden,
-    DateTime? truncatedAt,
+    this.disabled,
+    this.hidden,
+    this.truncatedAt,
   })  : assert(
           (cid != null && cid.contains(':')) || (id != null && type != null),
           'provide either a cid or an id and type',
@@ -37,18 +37,7 @@ class ChannelModel {
         cid = cid ?? '$type:$id',
         config = config ?? ChannelConfig(),
         createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now(),
-
-        // TODO: Make them top-level fields in v5
-        // For backwards compatibility, set 'disabled', 'hidden'
-        // and 'truncated_at' in [extraData].
-        extraData = {
-          ...extraData,
-          if (disabled != null) 'disabled': disabled,
-          if (hidden != null) 'hidden': hidden,
-          if (truncatedAt != null)
-            'truncated_at': truncatedAt.toIso8601String(),
-        };
+        updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory ChannelModel.fromJson(Map<String, dynamic> json) =>
@@ -108,19 +97,15 @@ class ChannelModel {
 
   /// True if the channel is disabled
   @JsonKey(ignore: true)
-  bool? get disabled => extraData['disabled'] as bool?;
+  final bool? disabled;
 
   /// True if the channel is hidden
   @JsonKey(ignore: true)
-  bool? get hidden => extraData['hidden'] as bool?;
+  final bool? hidden;
 
   /// The date of the last time channel got truncated
   @JsonKey(ignore: true)
-  DateTime? get truncatedAt {
-    final truncatedAt = extraData['truncated_at'] as String?;
-    if (truncatedAt == null) return null;
-    return DateTime.parse(truncatedAt);
-  }
+  final DateTime? truncatedAt;
 
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
@@ -147,6 +132,9 @@ class ChannelModel {
     'member_count',
     'team',
     'cooldown',
+    'disabled',
+    'hidden',
+    'truncated_at',
   ];
 
   /// Shortcut for channel name
@@ -195,14 +183,9 @@ class ChannelModel {
         extraData: extraData ?? this.extraData,
         team: team ?? this.team,
         cooldown: cooldown ?? this.cooldown,
-        disabled: disabled ?? extraData?['disabled'] as bool? ?? this.disabled,
-        hidden: hidden ?? extraData?['hidden'] as bool? ?? this.hidden,
-        truncatedAt: truncatedAt ??
-            (extraData?['truncated_at'] == null
-                ? null
-                // ignore: cast_nullable_to_non_nullable
-                : DateTime.parse(extraData?['truncated_at'] as String)) ??
-            this.truncatedAt,
+        disabled: disabled ?? this.disabled,
+        hidden: hidden ?? this.hidden,
+        truncatedAt: truncatedAt ?? this.truncatedAt,
       );
 
   /// Returns a new [ChannelModel] that is a combination of this channelModel

@@ -247,9 +247,9 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   }
 
   @override
-  ImageStreamCompleter load(
+  ImageStreamCompleter loadBuffer(
     MediaThumbnailProvider key,
-    DecoderCallback decode,
+    DecoderBufferCallback decode,
   ) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
@@ -266,7 +266,7 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
 
   Future<ui.Codec> _loadAsync(
     MediaThumbnailProvider key,
-    DecoderCallback decode,
+    DecoderBufferCallback decode,
   ) async {
     assert(key == this, '$key is not $this');
     final bytes = await media.thumbnailDataWithSize(
@@ -274,7 +274,8 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
       format: format,
       quality: quality,
     );
-    return decode(bytes!);
+    final buffer = await ui.ImmutableBuffer.fromUint8List(bytes!);
+    return decode(buffer);
   }
 
   @override
@@ -290,7 +291,7 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   }
 
   @override
-  int get hashCode => hashValues(media, size, format, quality, scale);
+  int get hashCode => Object.hash(media, size, format, quality, scale);
 
   @override
   String toString() => '$runtimeType('
