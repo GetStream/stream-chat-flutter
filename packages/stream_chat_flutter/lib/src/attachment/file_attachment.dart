@@ -238,7 +238,6 @@ class _Trailing extends StatelessWidget {
     final channel = StreamChannel.of(context).channel;
     final attachmentId = attachment.id;
 
-    //TODO(Groovin): show a regular "file" icon if the file has been downloaded
     if (message.status == MessageSendingStatus.sent) {
       return IconButton(
         icon: StreamSvgIcon.cloudDownload(
