@@ -1,4 +1,4 @@
-## Upcoming beta
+## 5.0.0
 
 - Included the changes from version [4.5.0](#450).
 
@@ -16,6 +16,7 @@
     * `textInputAction`
     * `keyboardType`
     * `textCapitalization`
+- Added `showStreamAttachmentPickerModalBottomSheet` to show the attachment picker modal bottom sheet.
 
 🔄 Changed
 
@@ -82,10 +83,10 @@
         - `toggleMuteUnmuteGroupText`
         - `toggleMuteUnmuteUserQuestion`
         - `toggleMuteUnmuteUserText`
+    - Deprecated `showConfirmationDialog` in favor of `showConfirmationBottomSheet`
+    - Deprecated `showInfoDialog` in favor of `showInfoBottomSheet`
+    - Deprecated `wrapAttachmentWidget` in favor of the `WrapAttachmentWidget` class
 - Breaking changes 🚧
-    - Renamed `showConfirmationDialog` to `showConfirmationBottomSheet`
-    - Renamed `showInfoDialog` to `showInfoBottomSheet`
-    - `wrapAttachmentWidget` has been converted to a class
     - `StreamImageAttachment.size` has been converted from type `Size` to type `BoxConstraints`
     - `StreamFileAttachment.size` has been converted from type `Size` to type `BoxConstraints`
     - `StreamGiphyAttachment.size` has been converted from type `Size` to type `BoxConstraints`
