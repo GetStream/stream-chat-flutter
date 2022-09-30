@@ -1,4 +1,4 @@
-## Upcoming beta
+## 5.0.0
 
 - Included the changes from version [4.5.0](#450).
 
