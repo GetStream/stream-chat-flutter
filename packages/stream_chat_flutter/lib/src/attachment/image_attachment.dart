@@ -1,178 +1,179 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/src/attachment/attachment_title.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@macro image_attachment}
-@Deprecated("use 'StreamImageAttachment' instead")
-typedef ImageAttachment = StreamImageAttachment;
-
-/// {@template image_attachment}
-/// Widget for showing an image attachment
+/// {@template streamImageAttachment}
+/// Shows an image attachment in a [StreamMessageWidget].
 /// {@endtemplate}
 class StreamImageAttachment extends StreamAttachmentWidget {
-  /// Constructor for creating a [StreamImageAttachment] widget
+  /// {@macro streamImageAttachment}
   const StreamImageAttachment({
     super.key,
     required super.message,
     required super.attachment,
     required this.messageTheme,
-    super.size,
+    super.constraints,
     this.showTitle = false,
     this.onShowMessage,
-    this.onReturnAction,
+    this.onReplyMessage,
     this.onAttachmentTap,
+    this.imageThumbnailSize = const Size(400, 400),
+    this.imageThumbnailResizeType = 'clip',
+    this.imageThumbnailCropType = 'center',
   });
 
-  /// [StreamMessageThemeData] for showing image title
+  /// The [StreamMessageThemeData] to use for the image title
   final StreamMessageThemeData messageTheme;
 
-  /// Flag for showing title
+  /// Flag for whether the title should be shown or not
   final bool showTitle;
 
-  /// Callback when show message is tapped
+  /// {@macro showMessageCallback}
   final ShowMessageCallback? onShowMessage;
 
-  /// Callback when attachment is returned to from other screens
-  final ValueChanged<ReturnActionType>? onReturnAction;
+  /// {@macro replyMessageCallback}
+  final ReplyMessageCallback? onReplyMessage;
 
-  /// Callback when attachment is tapped
-  final VoidCallback? onAttachmentTap;
+  /// {@macro onAttachmentTap}
+  final OnAttachmentTap? onAttachmentTap;
+
+  /// Size of the attachment image thumbnail.
+  final Size imageThumbnailSize;
+
+  /// Resize type of the image attachment thumbnail.
+  ///
+  /// Defaults to [crop]
+  final String /*clip|crop|scale|fill*/ imageThumbnailResizeType;
+
+  /// Crop type of the image attachment thumbnail.
+  ///
+  /// Defaults to [center]
+  final String /*center|top|bottom|left|right*/ imageThumbnailCropType;
 
   @override
-  Widget build(BuildContext context) => source.when(
-        local: () {
-          if (attachment.localUri == null || attachment.file?.bytes == null) {
-            return AttachmentError(size: size);
-          }
-          return _buildImageAttachment(
-            context,
-            Image.memory(
-              attachment.file!.bytes!,
-              height: size?.height,
-              width: size?.width,
-              fit: BoxFit.cover,
-              errorBuilder: (context, _, __) => Image.asset(
+  Widget build(BuildContext context) {
+    return source.when(
+      local: () {
+        if (attachment.localUri == null || attachment.file?.bytes == null) {
+          return AttachmentError(constraints: constraints);
+        }
+        return _buildImageAttachment(
+          context,
+          Image.memory(
+            attachment.file!.bytes!,
+            height: constraints?.maxHeight,
+            width: constraints?.maxWidth,
+            fit: BoxFit.cover,
+            errorBuilder: (context, _, __) => Image.asset(
+              'images/placeholder.png',
+              package: 'stream_chat_flutter',
+            ),
+          ),
+        );
+      },
+      network: () {
+        var imageUrl =
+            attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
+
+        if (imageUrl == null) {
+          return AttachmentError(constraints: constraints);
+        }
+
+        imageUrl = imageUrl.getResizedImageUrl(
+          width: imageThumbnailSize.width,
+          height: imageThumbnailSize.height,
+          resize: imageThumbnailResizeType,
+          crop: imageThumbnailCropType,
+        );
+
+        return _buildImageAttachment(
+          context,
+          CachedNetworkImage(
+            imageUrl: imageUrl,
+            height: constraints?.maxHeight,
+            width: constraints?.maxWidth,
+            fit: BoxFit.cover,
+            placeholder: (context, __) {
+              final image = Image.asset(
                 'images/placeholder.png',
+                fit: BoxFit.cover,
                 package: 'stream_chat_flutter',
-              ),
-            ),
-          );
-        },
-        network: () {
-          var imageUrl =
-              attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
+              );
+              final colorTheme = StreamChatTheme.of(context).colorTheme;
+              return Shimmer.fromColors(
+                baseColor: colorTheme.disabled,
+                highlightColor: colorTheme.inputBg,
+                child: image,
+              );
+            },
+            errorWidget: (context, url, error) =>
+                AttachmentError(constraints: constraints),
+          ),
+        );
+      },
+    );
+  }
 
-          if (imageUrl == null) {
-            return AttachmentError(size: size);
-          }
-
-          var imageUri = Uri.parse(imageUrl);
-          if (imageUri.host.endsWith('stream-io-cdn.com') &&
-              imageUri.queryParameters['h'] == '*' &&
-              imageUri.queryParameters['w'] == '*' &&
-              imageUri.queryParameters['crop'] == '*' &&
-              imageUri.queryParameters['resize'] == '*') {
-            imageUri = imageUri.replace(queryParameters: {
-              ...imageUri.queryParameters,
-              'h': '400',
-              'w': '400',
-              'crop': 'center',
-              'resize': 'crop',
-            });
-          } else if (imageUri.host.endsWith('stream-cloud-uploads.imgix.net')) {
-            imageUri = imageUri.replace(queryParameters: {
-              ...imageUri.queryParameters,
-              'height': '400',
-              'width': '400',
-              'fit': 'crop',
-            });
-          }
-          imageUrl = imageUri.toString();
-
-          return _buildImageAttachment(
-            context,
-            CachedNetworkImage(
-              cacheKey: imageUri.replace(queryParameters: {}).toString(),
-              height: size?.height,
-              width: size?.width,
-              placeholder: (context, __) {
-                final image = Image.asset(
-                  'images/placeholder.png',
-                  fit: BoxFit.cover,
-                  package: 'stream_chat_flutter',
-                );
-                final colorTheme = StreamChatTheme.of(context).colorTheme;
-                return Shimmer.fromColors(
-                  baseColor: colorTheme.disabled,
-                  highlightColor: colorTheme.inputBg,
-                  child: image,
-                );
-              },
-              imageUrl: imageUrl,
-              errorWidget: (context, url, error) => AttachmentError(size: size),
-              fit: BoxFit.cover,
-            ),
-          );
-        },
-      );
-
-  Widget _buildImageAttachment(BuildContext context, Widget imageWidget) =>
-      ConstrainedBox(
-        constraints: BoxConstraints.loose(size!),
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Stack(
-                children: [
-                  GestureDetector(
+  Widget _buildImageAttachment(BuildContext context, Widget imageWidget) {
+    return Container(
+      constraints: constraints,
+      child: Column(
+        children: <Widget>[
+          Expanded(
+            child: Stack(
+              children: [
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
                     onTap: onAttachmentTap ??
-                        () async {
-                          final result = await Navigator.push(
-                            context,
+                        () {
+                          Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) {
                                 final channel =
                                     StreamChannel.of(context).channel;
                                 return StreamChannel(
                                   channel: channel,
-                                  child: StreamFullScreenMedia(
+                                  child: StreamFullScreenMediaBuilder(
                                     mediaAttachmentPackages:
                                         message.getAttachmentPackageList(),
                                     startIndex:
                                         message.attachments.indexOf(attachment),
-                                    userName: message.user?.name,
+                                    userName: message.user!.name,
                                     onShowMessage: onShowMessage,
+                                    onReplyMessage: onReplyMessage,
                                   ),
                                 );
                               },
                             ),
                           );
-                          if (result != null) onReturnAction?.call(result);
                         },
                     child: imageWidget,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: StreamAttachmentUploadStateBuilder(
-                      message: message,
-                      attachment: attachment,
-                    ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: StreamAttachmentUploadStateBuilder(
+                    message: message,
+                    attachment: attachment,
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+          if (showTitle && attachment.title != null)
+            Material(
+              color: messageTheme.messageBackgroundColor,
+              child: StreamAttachmentTitle(
+                messageTheme: messageTheme,
+                attachment: attachment,
               ),
             ),
-            if (showTitle && attachment.title != null)
-              Material(
-                color: messageTheme.messageBackgroundColor,
-                child: StreamAttachmentTitle(
-                  messageTheme: messageTheme,
-                  attachment: attachment,
-                ),
-              ),
-          ],
-        ),
-      );
+        ],
+      ),
+    );
+  }
 }

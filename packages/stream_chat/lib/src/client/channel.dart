@@ -3,11 +3,14 @@ import 'dart:math';
 
 import 'package:collection/collection.dart'
     show IterableExtension, ListEquality;
-import 'package:dio/dio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
+
+/// The maximum time the incoming [Event.typingStart] event is valid before a
+/// [Event.typingStop] event is emitted automatically.
+const incomingTypingStartEventTimeout = 7;
 
 /// Class that manages a specific channel.
 ///
@@ -1061,9 +1064,9 @@ class Channel {
   /// See, https://getstream.io/chat/docs/other-rest/channel_update/?language=dart
   /// for more information.
   Future<UpdateChannelResponse> update(
-    Map<String, Object?> channelData, [
+    Map<String, Object?> channelData, {
     Message? updateMessage,
-  ]) async {
+  }) async {
     _checkInitialized();
     return _client.updateChannel(
       id!,
@@ -1146,27 +1149,34 @@ class Channel {
 
   /// Add members to the channel.
   Future<AddMembersResponse> addMembers(
-    List<String> memberIds, [
+    List<String> memberIds, {
     Message? message,
-  ]) async {
+    bool hideHistory = false,
+  }) async {
     _checkInitialized();
-    return _client.addChannelMembers(id!, type, memberIds, message: message);
+    return _client.addChannelMembers(
+      id!,
+      type,
+      memberIds,
+      message: message,
+      hideHistory: hideHistory,
+    );
   }
 
   /// Invite members to the channel.
   Future<InviteMembersResponse> inviteMembers(
-    List<String> memberIds, [
+    List<String> memberIds, {
     Message? message,
-  ]) async {
+  }) async {
     _checkInitialized();
     return _client.inviteChannelMembers(id!, type, memberIds, message: message);
   }
 
   /// Remove members from the channel.
   Future<RemoveMembersResponse> removeMembers(
-    List<String> memberIds, [
+    List<String> memberIds, {
     Message? message,
-  ]) async {
+  }) async {
     _checkInitialized();
     return _client.removeChannelMembers(id!, type, memberIds, message: message);
   }
@@ -1494,36 +1504,38 @@ class Channel {
           )
           .where((e) => e.cid == cid);
 
-  DateTime? _lastTypingEvent;
+  late final _keyStrokeHandler = KeyStrokeHandler(
+    onStartTyping: startTyping,
+    onStopTyping: stopTyping,
+  );
 
-  /// First of the [EventType.typingStart] and [EventType.typingStop] events
-  /// based on the users keystrokes. Call this on every keystroke.
+  /// Sends the [Event.typingStart] event and schedules a timer to invoke the
+  /// [Event.typingStop] event.
+  ///
+  /// This is meant to be called every time the user presses a key.
   Future<void> keyStroke([String? parentId]) async {
-    if (config?.typingEvents == false) {
-      return;
-    }
+    if (config?.typingEvents == false) return;
 
-    client.logger.info('start typing');
-    final now = DateTime.now();
-
-    if (_lastTypingEvent == null ||
-        now.difference(_lastTypingEvent!).inSeconds >= 2) {
-      _lastTypingEvent = now;
-      await sendEvent(Event(
-        type: EventType.typingStart,
-        parentId: parentId,
-      ));
-    }
+    client.logger.info('KeyStroke received');
+    return _keyStrokeHandler(parentId);
   }
 
-  /// Sets last typing to null and sends the typing.stop event.
+  /// Sends the [EventType.typingStart] event.
+  Future<void> startTyping([String? parentId]) async {
+    if (config?.typingEvents == false) return;
+
+    client.logger.info('start typing');
+    await sendEvent(Event(
+      type: EventType.typingStart,
+      parentId: parentId,
+    ));
+  }
+
+  /// Sends the [EventType.typingStop] event.
   Future<void> stopTyping([String? parentId]) async {
-    if (config?.typingEvents == false) {
-      return;
-    }
+    if (config?.typingEvents == false) return;
 
     client.logger.info('stop typing');
-    _lastTypingEvent = null;
     await sendEvent(Event(
       type: EventType.typingStop,
       parentId: parentId,
@@ -1533,6 +1545,7 @@ class Channel {
   /// Call this method to dispose the channel client.
   void dispose() {
     state?.dispose();
+    _keyStrokeHandler.cancel();
   }
 
   void _checkInitialized() {
@@ -1594,9 +1607,9 @@ class ChannelClientState {
 
     _listenMemberUnbanned();
 
-    _startCleaning();
+    _startCleaningStaleTypingEvents();
 
-    _startCleaningPinnedMessages();
+    _startCleaningStalePinnedMessages();
 
     _channel._client.chatPersistenceClient
         ?.getChannelThreads(_channel.cid!)
@@ -1614,7 +1627,8 @@ class ChannelClientState {
     });
   }
 
-  final _subscriptions = <StreamSubscription>[];
+  final Channel _channel;
+  final _subscriptions = CompositeSubscription();
 
   void _checkExpiredAttachmentMessages(ChannelState channelState) async {
     final expiredAttachmentMessagesId = channelState.messages
@@ -1787,20 +1801,15 @@ class ChannelClientState {
 
   /// Retry failed message.
   Future<void> retryFailedMessages() async {
-    final failedMessages =
-        <Message>[...messages, ...threads.values.expand((v) => v)]
-            .where(
-              (message) =>
-                  message.status != MessageSendingStatus.sent &&
-                  message.createdAt.isBefore(
-                    DateTime.now().subtract(
-                      const Duration(
-                        seconds: 5,
-                      ),
-                    ),
-                  ),
-            )
-            .toList();
+    final failedMessages = [...messages, ...threads.values.expand((v) => v)]
+        .where(
+          (message) =>
+              message.status != MessageSendingStatus.sent &&
+              message.createdAt.isBefore(
+                DateTime.now().subtract(const Duration(seconds: 5)),
+              ),
+        )
+        .toList();
 
     _retryQueue.add(failedMessages);
   }
@@ -1956,11 +1965,13 @@ class ChannelClientState {
       // Early return in case the thread is not available
       if (!newThreads.containsKey(parentId)) return;
 
-      _threads = newThreads
-        ..update(
-          parentId,
-          (messages) => messages..removeWhere((e) => e.id == message.id),
-        );
+      // Remove thread message shown in thread page.
+      newThreads.update(
+        parentId,
+        (messages) => [...messages.where((e) => e.id != message.id)],
+      );
+
+      _threads = newThreads;
 
       // Early return if the thread message is not shown in channel.
       if (message.showInChannel == false) return;
@@ -1985,12 +1996,7 @@ class ChannelClientState {
     }
 
     _subscriptions.add(
-      _channel
-          .on(
-        EventType.messageRead,
-        EventType.notificationMarkRead,
-      )
-          .listen(
+      _channel.on(EventType.messageRead, EventType.notificationMarkRead).listen(
         (event) {
           final readList = List<Read>.from(_channelState.read ?? []);
           final userReadIndex =
@@ -2077,10 +2083,6 @@ class ChannelClientState {
   Member? get currentUserMember => members.firstWhereOrNull(
         (m) => m.user?.id == _channel.client.state.currentUser?.id,
       );
-
-  /// User role for the current user.
-  @Deprecated('Please use currentUserChannelRole')
-  String? get currentUserRole => currentUserMember?.role;
 
   /// Channel role for the current user
   String? get currentUserChannelRole => currentUserMember?.channelRole;
@@ -2251,34 +2253,29 @@ class ChannelClientState {
     );
   }
 
-  /// Channel related typing users last value.
-  Map<User, Event> get typingEvents => _typingEventsController.value;
-
   /// Channel related typing users stream.
   Stream<Map<User, Event>> get typingEventsStream =>
       _typingEventsController.stream;
 
-  final BehaviorSubject<Map<User, Event>> _typingEventsController =
-      BehaviorSubject.seeded({});
-
-  final Channel _channel;
-  final Map<User, Event> _typings = {};
+  /// Channel related typing users last value.
+  Map<User, Event> get typingEvents => _typingEventsController.value;
+  final _typingEventsController = BehaviorSubject.seeded(<User, Event>{});
 
   void _listenTypingEvents() {
-    if (_channelState.channel?.config.typingEvents == false) {
-      return;
-    }
+    if (_channelState.channel?.config.typingEvents == false) return;
+
+    final currentUser = _channel.client.state.currentUser;
+    if (currentUser == null) return;
 
     _subscriptions
       ..add(
         _channel.on(EventType.typingStart).listen(
           (event) {
-            if (event.user != null) {
-              final user = event.user!;
-              if (user.id != _channel.client.state.currentUser?.id) {
-                _typings[user] = event;
-                _typingEventsController.add(_typings);
-              }
+            final user = event.user;
+            if (user != null && user.id != currentUser.id) {
+              final events = {...typingEvents};
+              events[user] = event;
+              _typingEventsController.add(events);
             }
           },
         ),
@@ -2286,112 +2283,109 @@ class ChannelClientState {
       ..add(
         _channel.on(EventType.typingStop).listen(
           (event) {
-            if (event.user != null) {
-              final user = event.user!;
-              if (user.id != _channel.client.state.currentUser?.id) {
-                _typings.remove(event.user);
-                _typingEventsController.add(_typings);
-              }
+            final user = event.user;
+            if (user != null && user.id != currentUser.id) {
+              final events = {...typingEvents}..remove(user);
+              _typingEventsController.add(events);
             }
           },
         ),
       )
       ..add(
-        _channel
-            .on()
-            .where((event) =>
-                event.user != null &&
-                members.any((m) => m.userId == event.user!.id))
-            .listen(
+        _channel.on().where((event) {
+          final user = event.user;
+          if (user == null) return false;
+          return members.any((m) => m.userId == user.id);
+        }).listen(
           (event) {
             final newMembers = List<Member>.from(members);
             final oldMemberIndex =
                 newMembers.indexWhere((m) => m.userId == event.user!.id);
             if (oldMemberIndex > -1) {
               final oldMember = newMembers.removeAt(oldMemberIndex);
-              updateChannelState(ChannelState(
-                members: [
-                  ...newMembers,
-                  oldMember.copyWith(
-                    user: event.user,
-                  ),
-                ],
-              ));
+              updateChannelState(
+                ChannelState(
+                  members: [
+                    ...newMembers,
+                    oldMember.copyWith(
+                      user: event.user,
+                    ),
+                  ],
+                ),
+              );
             }
           },
         ),
       );
   }
 
-  Timer? _cleaningTimer;
+  Timer? _staleTypingEventsCleanerTimer;
 
-  void _startCleaning() {
-    if (_channelState.channel?.config.typingEvents == false) {
-      return;
-    }
+  // Checks and removes stale typing events that were not explicitly stopped by
+  // the sender due to technical difficulties. e.g. process death, loss of
+  // Internet connection or custom implementation.
+  void _startCleaningStaleTypingEvents() {
+    if (_channelState.channel?.config.typingEvents == false) return;
 
-    _cleaningTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      final now = DateTime.now();
-
-      if (_channel._lastTypingEvent != null &&
-          now.difference(_channel._lastTypingEvent!).inSeconds > 1) {
-        _channel.stopTyping();
-      }
-
-      _clean();
-    });
+    _staleTypingEventsCleanerTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) {
+        final now = DateTime.now();
+        typingEvents.forEach((user, event) {
+          if (now.difference(event.createdAt).inSeconds >
+              incomingTypingStartEventTimeout) {
+            _channel.client.handleEvent(
+              Event(
+                type: EventType.typingStop,
+                user: user,
+                cid: _channel.cid,
+                parentId: event.parentId,
+              ),
+            );
+          }
+        });
+      },
+    );
   }
 
-  late Timer _pinnedMessagesTimer;
+  Timer? _stalePinnedMessagesCleanerTimer;
 
-  void _startCleaningPinnedMessages() {
-    _pinnedMessagesTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      final now = DateTime.now();
-      var expiredMessages = channelState.pinnedMessages
-          ?.where((m) => m.pinExpires?.isBefore(now) == true)
-          .toList();
-      if (expiredMessages != null && expiredMessages.isNotEmpty) {
-        expiredMessages = expiredMessages
-            .map((m) => m.copyWith(
-                  pinExpires: null,
-                  pinned: false,
-                ))
+  // Checks and removes stale pinned messages that are not valid anymore.
+  void _startCleaningStalePinnedMessages() {
+    _stalePinnedMessagesCleanerTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) {
+        final now = DateTime.now();
+        var expiredMessages = channelState.pinnedMessages
+            ?.where((m) => m.pinExpires?.isBefore(now) == true)
             .toList();
+        if (expiredMessages != null && expiredMessages.isNotEmpty) {
+          expiredMessages = expiredMessages
+              .map((m) => m.copyWith(
+                    pinExpires: null,
+                    pinned: false,
+                  ))
+              .toList();
 
-        updateChannelState(_channelState.copyWith(
-          pinnedMessages: pinnedMessages.where(_pinIsValid).toList(),
-          messages: expiredMessages,
-        ));
-      }
-    });
-  }
-
-  void _clean() {
-    final now = DateTime.now();
-    _typings.forEach((user, event) {
-      if (now.difference(event.createdAt).inSeconds > 7) {
-        _channel.client.handleEvent(
-          Event(
-            type: EventType.typingStop,
-            user: user,
-            cid: _channel.cid,
-            parentId: event.parentId,
-          ),
-        );
-      }
-    });
+          updateChannelState(_channelState.copyWith(
+            pinnedMessages: pinnedMessages.where(_pinIsValid).toList(),
+            messages: expiredMessages,
+          ));
+        }
+      },
+    );
   }
 
   /// Call this method to dispose this object.
   void dispose() {
     _debouncedUpdatePersistenceChannelState.cancel();
     _retryQueue.dispose();
-    _subscriptions.forEach((s) => s.cancel());
+    _subscriptions.cancel();
     _channelStateController.close();
     _isUpToDateController.close();
     _threadsController.close();
-    _cleaningTimer?.cancel();
-    _pinnedMessagesTimer.cancel();
+    _staleTypingEventsCleanerTimer?.cancel();
+    _stalePinnedMessagesCleanerTimer?.cancel();
     _typingEventsController.close();
   }
 }

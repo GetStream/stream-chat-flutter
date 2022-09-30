@@ -1,6 +1,4 @@
 // ignore_for_file: public_member_api_docs
-// ignore_for_file: prefer_expression_function_bodies
-
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -31,7 +29,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// [StreamChannelListView] handles pagination
 /// and updates automatically when new channels are created or when a new
 /// message is added to a channel.
-void main() async {
+Future<void> main() async {
   final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
@@ -100,23 +98,25 @@ class _ChannelListPageState extends State<ChannelListPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: RefreshIndicator(
-          onRefresh: _controller.refresh,
-          child: StreamChannelListView(
-            controller: _controller,
-            onChannelTap: (channel) => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => StreamChannel(
-                  channel: channel,
-                  child: const ChannelPage(),
-                ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: RefreshIndicator(
+        onRefresh: _controller.refresh,
+        child: StreamChannelListView(
+          controller: _controller,
+          onChannelTap: (channel) => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => StreamChannel(
+                channel: channel,
+                child: const ChannelPage(),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class ChannelPage extends StatelessWidget {
@@ -125,15 +125,17 @@ class ChannelPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: const StreamChannelHeader(),
-        body: Column(
-          children: const <Widget>[
-            Expanded(
-              child: StreamMessageListView(),
-            ),
-            StreamMessageInput(),
-          ],
-        ),
-      );
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const StreamChannelHeader(),
+      body: Column(
+        children: const <Widget>[
+          Expanded(
+            child: StreamMessageListView(),
+          ),
+          StreamMessageInput(),
+        ],
+      ),
+    );
+  }
 }

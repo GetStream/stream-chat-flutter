@@ -47,11 +47,12 @@ class AttachmentFile {
   final String? _name;
 
   /// File name including its extension.
-  String? get name => _name ?? path?.split('/').last;
+  String? get name =>
+      _name ?? path?.split(CurrentPlatform.isWindows ? r'\' : '/').last;
 
   /// Byte data for this file. Particularly useful if you want to manipulate
   /// its data or easily upload to somewhere else.
-  @JsonKey(toJson: _toString, fromJson: _fromString)
+  @JsonKey(ignore: true)
   final Uint8List? bytes;
 
   /// The file size in bytes.
@@ -84,6 +85,22 @@ class AttachmentFile {
       );
     }
     return multiPartFile;
+  }
+
+  /// Creates a copy of this [AttachmentFile] but with the given fields
+  /// replaced with the new values.
+  AttachmentFile copyWith({
+    String? path,
+    String? name,
+    Uint8List? bytes,
+    int? size,
+  }) {
+    return AttachmentFile(
+      path: path ?? this.path,
+      name: name ?? this.name,
+      bytes: bytes ?? this.bytes,
+      size: size ?? this.size,
+    );
   }
 }
 
@@ -123,14 +140,4 @@ class UploadState with _$UploadState {
 
   /// Returns true if state is [Failed]
   bool get isFailed => this is Failed;
-}
-
-Uint8List? _fromString(String? bytes) {
-  if (bytes == null) return null;
-  return Uint8List.fromList(bytes.codeUnits);
-}
-
-String? _toString(Uint8List? bytes) {
-  if (bytes == null) return null;
-  return String.fromCharCodes(bytes);
 }

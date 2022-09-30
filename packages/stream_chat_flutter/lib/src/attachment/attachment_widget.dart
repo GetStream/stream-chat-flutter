@@ -24,31 +24,28 @@ enum AttachmentSource {
   }
 }
 
-/// {@macro attachment_widget}
-@Deprecated("Use 'StreamAttachmentWidget' instead")
-typedef AttachmentWidget = StreamAttachmentWidget;
-
-/// {@template attachment_widget}
+/// {@template streamAttachmentWidget}
 /// Abstract class for deriving attachment types
 /// {@endtemplate}
 abstract class StreamAttachmentWidget extends StatelessWidget {
-  /// Constructor for creating attachment widget
+  /// {@macro streamAttachmentWidget}
   const StreamAttachmentWidget({
     super.key,
     required this.message,
     required this.attachment,
-    this.size,
+    this.constraints,
     AttachmentSource? source,
   }) : _source = source;
 
-  /// Size of attachments
-  final Size? size;
+  /// Contraints of attachments
+  final BoxConstraints? constraints;
+
   final AttachmentSource? _source;
 
-  /// Message which attachment is attached to
+  /// The message that [attachment] is associated with
   final Message message;
 
-  /// Attachment to display
+  /// The [Attachment] to display
   final Attachment attachment;
 
   /// Getter for source of attachment
@@ -57,34 +54,4 @@ abstract class StreamAttachmentWidget extends StatelessWidget {
       (attachment.file != null
           ? AttachmentSource.local
           : AttachmentSource.network);
-}
-
-/// Widget for building in case of error
-class AttachmentError extends StatelessWidget {
-  /// Constructor for creating AttachmentError
-  const AttachmentError({
-    super.key,
-    this.size,
-  });
-
-  /// Size of error
-  final Size? size;
-
-  @override
-  Widget build(BuildContext context) => Center(
-        child: Container(
-          width: size?.width,
-          height: size?.height,
-          color: StreamChatTheme.of(context)
-              .colorTheme
-              .accentError
-              .withOpacity(0.1),
-          child: Center(
-            child: Icon(
-              Icons.error_outline,
-              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-            ),
-          ),
-        ),
-      );
 }

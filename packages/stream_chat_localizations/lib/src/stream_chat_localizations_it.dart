@@ -135,7 +135,8 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
 Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
 
   @override
-  String emojiMatchingQueryText(String query) => 'Emoji per "$query"';
+  String get couldNotReadBytesFromFileError =>
+      'Impossibile leggere i byte dal file.';
 
   @override
   String get addAFileLabel => 'Aggiungi un file';
@@ -383,6 +384,54 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get slowModeOnLabel => 'Slowmode attiva';
 
   @override
+  String get downloadLabel => 'Scaricamento';
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    if (isMuted) {
+      return "Attiva l'audio dell'utente";
+    } else {
+      return 'Utente muto';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Sei sicuro di voler riattivare questo gruppo?';
+    } else {
+      return 'Sei sicuro di voler disattivare questo gruppo?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Sei sicuro di voler riattivare questo utente?';
+    } else {
+      return 'Sei sicuro di voler silenziare questo utente?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return 'RIATTIVATO';
+    } else {
+      return 'MUTO';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Riattiva gruppo';
+    } else {
+      return 'Gruppo muto';
+    }
+  }
+
+  @override
   String get linkDisabledDetails =>
       'Non è permesso condividere link in questa convesazione.';
 
@@ -396,4 +445,11 @@ Attenzione: il limite massimo di $limit file è stato superato.
     }
     return '$unreadCount messaggi non letti';
   }
+
+  @override
+  String get enableFileAccessMessage => "Per favore attiva l'accesso ai file"
+      '\ncosí potrai condividerli con i tuoi amici.';
+
+  @override
+  String get allowFileAccessMessage => "Consenti l'accesso ai file";
 }

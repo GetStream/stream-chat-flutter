@@ -1,50 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/upload_progress_indicator.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Widget to build in progress
-typedef InProgressBuilder = Widget Function(BuildContext, int, int);
-
-/// Widget to build on failure
-typedef FailedBuilder = Widget Function(BuildContext, String);
-
-/// {@macro attachment_upload_state_builder}
-@Deprecated("Use 'StreamAttachmentsUploadStateBuilder' instead")
-typedef AttachmentUploadStateBuilder = StreamAttachmentUploadStateBuilder;
-
-/// {@template attachment_upload_state_builder}
+/// {@template streamAttachmentUploadStateBuilder}
 /// Widget to display attachment upload state
 /// {@endtemplate}
 class StreamAttachmentUploadStateBuilder extends StatelessWidget {
-  /// Constructor for creating an [StreamAttachmentUploadStateBuilder] widget
+  /// {@macro streamAttachmentUploadStateBuilder}
   const StreamAttachmentUploadStateBuilder({
     super.key,
     required this.message,
     required this.attachment,
-    this.failedBuilder,
-    this.successBuilder,
-    this.inProgressBuilder,
     this.preparingBuilder,
+    this.inProgressBuilder,
+    this.successBuilder,
+    this.failedBuilder,
   });
 
-  /// Message which attachment is added to
+  /// The message that [attachment] is associated with
   final Message message;
 
-  /// Attachment in concern
+  /// The attachment currently being handled
   final Attachment attachment;
 
-  /// Widget to display when failed
-  final FailedBuilder? failedBuilder;
+  /// Widget to display when preparing to upload the [attachment]
+  final PreparingBuilder? preparingBuilder;
 
-  /// Widget to display when succeeded
-  final WidgetBuilder? successBuilder;
-
-  /// Widget to display when in progress
+  /// {@macro inProgressBuilder}
   final InProgressBuilder? inProgressBuilder;
 
-  /// Widget to display when in prep
-  final WidgetBuilder? preparingBuilder;
+  /// {@macro successBuilder}
+  final SuccessBuilder? successBuilder;
+
+  /// {@macro failedBuilder}
+  final FailedBuilder? failedBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -56,18 +45,22 @@ class StreamAttachmentUploadStateBuilder extends StatelessWidget {
     final attachmentId = attachment.id;
 
     final inProgress = inProgressBuilder ??
-        (context, int sent, int total) => _InProgressState(
-              sent: sent,
-              total: total,
-              attachmentId: attachmentId,
-            );
+        (context, int sent, int total) {
+          return _InProgressState(
+            sent: sent,
+            total: total,
+            attachmentId: attachmentId,
+          );
+        };
 
     final failed = failedBuilder ??
-        (context, error) => _FailedState(
-              error: error,
-              messageId: messageId,
-              attachmentId: attachmentId,
-            );
+        (context, error) {
+          return _FailedState(
+            error: error,
+            messageId: messageId,
+            attachmentId: attachmentId,
+          );
+        };
 
     final success = successBuilder ?? (context) => _SuccessState();
 
@@ -93,22 +86,24 @@ class _IconButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        height: 24,
-        width: 24,
-        child: RawMaterialButton(
-          elevation: 0,
-          highlightElevation: 0,
-          focusElevation: 0,
-          hoverElevation: 0,
-          onPressed: onPressed,
-          fillColor: StreamChatTheme.of(context).colorTheme.overlayDark,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: icon,
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 24,
+      width: 24,
+      child: RawMaterialButton(
+        elevation: 0,
+        highlightElevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        onPressed: onPressed,
+        fillColor: StreamChatTheme.of(context).colorTheme.overlayDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-      );
+        child: icon,
+      ),
+    );
+  }
 }
 
 class _PreparingState extends StatelessWidget {
@@ -237,14 +232,16 @@ class _FailedState extends StatelessWidget {
 
 class _SuccessState extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Align(
-        alignment: Alignment.topRight,
-        child: CircleAvatar(
-          backgroundColor: StreamChatTheme.of(context).colorTheme.overlayDark,
-          maxRadius: 12,
-          child: StreamSvgIcon.check(
-            color: StreamChatTheme.of(context).colorTheme.barsBg,
-          ),
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: CircleAvatar(
+        backgroundColor: StreamChatTheme.of(context).colorTheme.overlayDark,
+        maxRadius: 12,
+        child: StreamSvgIcon.check(
+          color: StreamChatTheme.of(context).colorTheme.barsBg,
         ),
-      );
+      ),
+    );
+  }
 }

@@ -163,13 +163,14 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     }
   }
 
-  /// Replaces the previously loaded channels with [channels] and updates
-  /// the nextPageKey.
+  /// Replaces the previously loaded channels with the passed [channels].
   set channels(List<Channel> channels) {
-    value = PagedValue(
-      items: channels,
-      nextPageKey: channels.length,
-    );
+    if (value.isSuccess) {
+      final currentValue = value.asSuccess;
+      value = currentValue.copyWith(items: channels);
+    } else {
+      value = PagedValue(items: channels);
+    }
   }
 
   /// Returns/Creates a new Channel and starts watching it.
@@ -223,6 +224,9 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         client.on().skip(1) // Skipping the last emitted event.
             // We only need to handle the latest events.
             .listen((event) {
+      // Only handle the event if the value is in success state.
+      if (value.isNotSuccess) return;
+
       // Returns early if the event is already handled by the listener.
       if (eventListener?.call(event) ?? false) return;
 

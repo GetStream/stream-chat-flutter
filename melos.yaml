@@ -1,9 +1,6 @@
 name: stream_chat_flutter
 repository: https://github.com/GetStream/stream-chat-flutter
 
-versioning:
-  mode: independent
-
 packages:
   - packages/**
 
@@ -54,11 +51,11 @@ scripts:
     description: Build all generated files for Dart & Flutter packages in this project.
 
   generate:dart:
-    run: melos exec -c 1 --depends-on="build_runner" --no-flutter -- "dart run build_runner build --delete-conflicting-outputs"
+    run: melos exec -c 1 --depends-on="build_runner" --no-flutter -- "dart run build_runner build --delete-conflicting-outputs --enable-experiment=super-parameters,enhanced-enums"
     description: Build all generated files for Dart packages in this project.
 
   generate:flutter:
-    run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter pub run build_runner build --delete-conflicting-outputs"
+    run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter run build_runner build --delete-conflicting-outputs --enable-experiment=super-parameters,enhanced-enums"
     description: Build all generated files for Flutter packages in this project.
 
   test:all:
@@ -97,10 +94,3 @@ scripts:
       npm install -g https://github.com/GetStream/stream-chat-docusaurus-cli &&
       npx stream-chat-docusaurus -i -s
     description: Runs the docusaurus documentation locally.
-
-dev_dependencies:
-  dart_code_metrics: ^4.4.0
-
-environment:
-  sdk: '>=2.17.0 <3.0.0'
-  flutter: '>=1.17.0 <3.0.0'

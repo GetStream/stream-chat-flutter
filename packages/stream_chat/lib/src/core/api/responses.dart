@@ -1,7 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client/client.dart';
+import 'package:stream_chat/src/core/api/call_api.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
+import 'package:stream_chat/src/core/models/call_payload.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/device.dart';
@@ -494,4 +496,32 @@ class OGAttachmentResponse extends _BaseResponse {
   /// Create a new instance from a [json].
   static OGAttachmentResponse fromJson(Map<String, dynamic> json) =>
       _$OGAttachmentResponseFromJson(json);
+}
+
+/// The response to [CallApi.getCallToken]
+@JsonSerializable(createToJson: false)
+class CallTokenPayload extends _BaseResponse {
+  /// Create a new instance from a [json].
+  static CallTokenPayload fromJson(Map<String, dynamic> json) =>
+      _$CallTokenPayloadFromJson(json);
+
+  /// The token to use for the call.
+  String? token;
+
+  /// The user id specific to Agora.
+  int? agoraUid;
+
+  /// The appId specific to Agora.
+  String? agoraAppId;
+}
+
+/// The response to [CallApi.createCall]
+@JsonSerializable(createToJson: false)
+class CreateCallPayload extends _BaseResponse {
+  /// Create a new instance from a [json].
+  static CreateCallPayload fromJson(Map<String, dynamic> json) =>
+      _$CreateCallPayloadFromJson(json);
+
+  /// The call object.
+  CallPayload? call;
 }

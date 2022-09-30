@@ -1,12 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro gallery_footer_theme}
-@Deprecated("Use 'StreamGalleryFooterTheme' instead")
-typedef GalleryFooterTheme = StreamGalleryFooterTheme;
-
-/// {@template gallery_footer_theme}
+/// {@template galleryFooterTheme}
 /// Overrides the default style of [GalleryFooter] descendants.
 ///
 /// See also:
@@ -52,11 +48,7 @@ class StreamGalleryFooterTheme extends InheritedTheme {
       data != oldWidget.data;
 }
 
-/// {@macro gallery_footer_theme_data}
-@Deprecated("Use 'StreamGalleryFooterThemeData' instead")
-typedef GalleryFooterThemeData = StreamGalleryFooterThemeData;
-
-/// {@template gallery_footer_theme_data}
+/// {@template galleryFooterThemeData}
 /// A style that overrides the default appearance of [GalleryFooter]s when used
 /// with [StreamGalleryFooterTheme] or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.galleryFooterTheme].
@@ -130,21 +122,22 @@ class StreamGalleryFooterThemeData with Diagnosticable {
     Color? bottomSheetBackgroundColor,
     TextStyle? bottomSheetPhotosTextStyle,
     Color? bottomSheetCloseIconColor,
-  }) =>
-      StreamGalleryFooterThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-        shareIconColor: shareIconColor ?? this.shareIconColor,
-        titleTextStyle: titleTextStyle ?? this.titleTextStyle,
-        gridIconButtonColor: gridIconButtonColor ?? this.gridIconButtonColor,
-        bottomSheetBarrierColor:
-            bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
-        bottomSheetBackgroundColor:
-            bottomSheetBackgroundColor ?? this.bottomSheetBackgroundColor,
-        bottomSheetPhotosTextStyle:
-            bottomSheetPhotosTextStyle ?? this.bottomSheetPhotosTextStyle,
-        bottomSheetCloseIconColor:
-            bottomSheetCloseIconColor ?? this.bottomSheetCloseIconColor,
-      );
+  }) {
+    return StreamGalleryFooterThemeData(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      shareIconColor: shareIconColor ?? this.shareIconColor,
+      titleTextStyle: titleTextStyle ?? this.titleTextStyle,
+      gridIconButtonColor: gridIconButtonColor ?? this.gridIconButtonColor,
+      bottomSheetBarrierColor:
+          bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
+      bottomSheetBackgroundColor:
+          bottomSheetBackgroundColor ?? this.bottomSheetBackgroundColor,
+      bottomSheetPhotosTextStyle:
+          bottomSheetPhotosTextStyle ?? this.bottomSheetPhotosTextStyle,
+      bottomSheetCloseIconColor:
+          bottomSheetCloseIconColor ?? this.bottomSheetCloseIconColor,
+    );
+  }
 
   /// Linearly interpolate between two [GalleryFooter] themes.
   ///
@@ -153,31 +146,32 @@ class StreamGalleryFooterThemeData with Diagnosticable {
     StreamGalleryFooterThemeData a,
     StreamGalleryFooterThemeData b,
     double t,
-  ) =>
-      StreamGalleryFooterThemeData(
-        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-        shareIconColor: Color.lerp(a.shareIconColor, b.shareIconColor, t),
-        titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
-        gridIconButtonColor:
-            Color.lerp(a.gridIconButtonColor, b.gridIconButtonColor, t),
-        bottomSheetBarrierColor:
-            Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
-        bottomSheetBackgroundColor: Color.lerp(
-          a.bottomSheetBackgroundColor,
-          b.bottomSheetBackgroundColor,
-          t,
-        ),
-        bottomSheetPhotosTextStyle: TextStyle.lerp(
-          a.bottomSheetPhotosTextStyle,
-          b.bottomSheetPhotosTextStyle,
-          t,
-        ),
-        bottomSheetCloseIconColor: Color.lerp(
-          a.bottomSheetCloseIconColor,
-          b.bottomSheetCloseIconColor,
-          t,
-        ),
-      );
+  ) {
+    return StreamGalleryFooterThemeData(
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+      shareIconColor: Color.lerp(a.shareIconColor, b.shareIconColor, t),
+      titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
+      gridIconButtonColor:
+          Color.lerp(a.gridIconButtonColor, b.gridIconButtonColor, t),
+      bottomSheetBarrierColor:
+          Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
+      bottomSheetBackgroundColor: Color.lerp(
+        a.bottomSheetBackgroundColor,
+        b.bottomSheetBackgroundColor,
+        t,
+      ),
+      bottomSheetPhotosTextStyle: TextStyle.lerp(
+        a.bottomSheetPhotosTextStyle,
+        b.bottomSheetPhotosTextStyle,
+        t,
+      ),
+      bottomSheetCloseIconColor: Color.lerp(
+        a.bottomSheetCloseIconColor,
+        b.bottomSheetCloseIconColor,
+        t,
+      ),
+    );
+  }
 
   /// Merges one [StreamGalleryFooterThemeData] with another.
   StreamGalleryFooterThemeData merge(StreamGalleryFooterThemeData? other) {

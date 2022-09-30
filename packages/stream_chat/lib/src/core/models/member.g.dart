@@ -17,7 +17,6 @@ Member _$MemberFromJson(Map<String, dynamic> json) => Member(
           ? null
           : DateTime.parse(json['invite_rejected_at'] as String),
       invited: json['invited'] as bool? ?? false,
-      role: json['role'] as String?,
       channelRole: json['channel_role'] as String?,
       userId: json['user_id'] as String?,
       isModerator: json['is_moderator'] as bool? ?? false,
@@ -39,7 +38,6 @@ Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
       'invite_accepted_at': instance.inviteAcceptedAt?.toIso8601String(),
       'invite_rejected_at': instance.inviteRejectedAt?.toIso8601String(),
       'invited': instance.invited,
-      'role': instance.role,
       'channel_role': instance.channelRole,
       'user_id': instance.userId,
       'is_moderator': instance.isModerator,

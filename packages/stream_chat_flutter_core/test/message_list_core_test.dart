@@ -93,7 +93,7 @@ void main() {
 
       final mockChannel = MockChannel();
       when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
-
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value([]));
@@ -129,6 +129,7 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value([]));
       when(() => mockChannel.state.messages).thenReturn([]);
@@ -167,6 +168,7 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
       final messages = _generateMessages();
       when(() => mockChannel.state.messages).thenReturn(messages);
       when(() => mockChannel.state.messagesStream)
@@ -222,6 +224,7 @@ void main() {
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.error(error));
       when(() => mockChannel.state.messages).thenReturn([]);
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
 
       await tester.pumpWidget(
         Directionality(
@@ -263,6 +266,7 @@ void main() {
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
 
       await tester.pumpWidget(
         Directionality(
@@ -312,6 +316,7 @@ void main() {
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
 
       await tester.pumpWidget(
         Directionality(
@@ -357,6 +362,7 @@ void main() {
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
 
       await tester.pumpWidget(
         Directionality(
@@ -406,6 +412,7 @@ void main() {
       when(() => mockChannel.state.threads).thenReturn(threads);
       when(() => mockChannel.state.threadsStream)
           .thenAnswer((_) => Stream.value(threads));
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
 
       await tester.pumpWidget(
         Directionality(

@@ -3,7 +3,6 @@ analyzer:
     - dart_code_metrics
   exclude:
     - packages/*/lib/**/*.g.dart
-    - packages/*/lib/src/emoji/**
     - packages/*/lib/scrollable_positioned_list/**
     - packages/*/lib/**/*.freezed.dart
 

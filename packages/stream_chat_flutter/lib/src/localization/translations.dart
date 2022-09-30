@@ -1,7 +1,6 @@
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter/src/connection_status_builder.dart';
-import 'package:stream_chat_flutter/src/message_list_view.dart';
-import 'package:stream_chat_flutter/src/v4/message_input/stream_message_input.dart';
+import 'package:stream_chat_flutter/src/message_list_view/message_list_view.dart';
+import 'package:stream_chat_flutter/src/misc/connection_status_builder.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart'
     show User;
 
@@ -113,7 +112,7 @@ abstract class Translations {
   /// The label for instant commands in [StreamMessageInput]
   String get instantCommandsLabel;
 
-  /// The error shown in case the fi"le is too large even after compression
+  /// The error shown in case the file is too large even after compression
   /// while uploading via [StreamMessageInput]
   String fileTooLargeAfterCompressionError(double limitInMB);
 
@@ -121,8 +120,8 @@ abstract class Translations {
   /// while uploading via [StreamMessageInput]
   String fileTooLargeError(double limitInMB);
 
-  /// The text for showing the query while searching for emojis
-  String emojiMatchingQueryText(String query);
+  /// The error shown when the file being read has no bytes
+  String get couldNotReadBytesFromFileError;
 
   /// The label for "add a file"
   String get addAFileLabel;
@@ -160,8 +159,14 @@ abstract class Translations {
   /// The message shown for asking photo and video access permission
   String get enablePhotoAndVideoAccessMessage;
 
+  /// The message shown for asking photo and video access permission
+  String get enableFileAccessMessage;
+
   /// The message shown for asking gallery access permission
   String get allowGalleryAccessMessage;
+
+  /// The message shown for asking file access permission
+  String get allowFileAccessMessage;
 
   /// The label for "flag message"
   String get flagMessageLabel;
@@ -330,6 +335,26 @@ abstract class Translations {
   /// Label for "Attachment limit exceeded:
   /// it's not possible to add more than $limit attachments"
   String attachmentLimitExceedError(int limit);
+
+  /// The label for "Download"
+  String get downloadLabel;
+
+  /// The text for "Mute Group"/"Unmute Group" based on the value of [isMuted].
+  String toggleMuteUnmuteGroupText({required bool isMuted});
+
+  /// The text for "Mute User"/"Unmute User" based on the value of [isMuted].
+  String toggleMuteUnmuteUserText({required bool isMuted});
+
+  /// The text for "Are you sure you want to mute this group?"/"Are you sure you want to unmute this group?"
+  /// based on the value of [isMuted].
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted});
+
+  /// The text for "Are you sure you want to mute this user?"/"Are you sure you want to unmute this user?"
+  /// based on the value of [isMuted].
+  String toggleMuteUnmuteUserQuestion({required bool isMuted});
+
+  /// The text for "MUTE"/"UNMUTE" based on the value of [isMuted].
+  String toggleMuteUnmuteAction({required bool isMuted});
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -462,7 +487,8 @@ class DefaultTranslations implements Translations {
       'The file is too large to upload. The file size limit is $limitInMB MB.';
 
   @override
-  String emojiMatchingQueryText(String query) => 'Emoji matching "$query"';
+  String get couldNotReadBytesFromFileError =>
+      'Could not read bytes from file.';
 
   @override
   String get addAFileLabel => 'Add a file';
@@ -710,6 +736,54 @@ class DefaultTranslations implements Translations {
 Attachment limit exceeded: it's not possible to add more than $limit attachments""";
 
   @override
+  String get downloadLabel => 'Download';
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Unmute User';
+    } else {
+      return 'Mute User';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Are you sure you want to unmute this group?';
+    } else {
+      return 'Are you sure you want to mute this group?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return 'Are you sure you want to unmute this user?';
+    } else {
+      return 'Are you sure you want to mute this user?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return 'UNMUTE';
+    } else {
+      return 'MUTE';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Unmute Group';
+    } else {
+      return 'Mute Group';
+    }
+  }
+
+  @override
   String get linkDisabledDetails =>
       'Sending links is not allowed in this conversation.';
 
@@ -723,4 +797,11 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
     }
     return '$unreadCount unread messages';
   }
+
+  @override
+  String get enableFileAccessMessage => 'Please enable access to files'
+      '\nso you can share them with friends.';
+
+  @override
+  String get allowFileAccessMessage => 'Allow access to files';
 }

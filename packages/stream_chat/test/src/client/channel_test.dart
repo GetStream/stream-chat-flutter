@@ -108,7 +108,6 @@ void main() {
     });
   });
 
-  // TODO : test all persistence related logic in this group
   group('Initialized Channel with Persistence', () {
     late final client = MockStreamChatClientWithPersistence();
     const channelId = 'test-channel-id';
@@ -1832,7 +1831,10 @@ void main() {
           ..message = updateMessage,
       );
 
-      final res = await channel.update(channelData, updateMessage);
+      final res = await channel.update(
+        channelData,
+        updateMessage: updateMessage,
+      );
 
       expect(res, isNotNull);
       expect(res.channel.cid, channelModel.cid);
@@ -2028,7 +2030,7 @@ void main() {
           ..message = message,
       );
 
-      final res = await channel.addMembers(memberIds, message);
+      final res = await channel.addMembers(memberIds, message: message);
 
       expect(res, isNotNull);
       expect(res.channel.cid, channelModel.cid);
@@ -2060,7 +2062,7 @@ void main() {
           ..message = message,
       );
 
-      final res = await channel.inviteMembers(memberIds, message);
+      final res = await channel.inviteMembers(memberIds, message: message);
 
       expect(res, isNotNull);
       expect(res.channel.cid, channelModel.cid);
@@ -2093,7 +2095,7 @@ void main() {
           ..message = message,
       );
 
-      final res = await channel.removeMembers(memberIds, message);
+      final res = await channel.removeMembers(memberIds, message: message);
 
       expect(res, isNotNull);
       expect(res.channel.cid, channelModel.cid);
@@ -2658,16 +2660,22 @@ void main() {
         });
 
         test(
-          '''should send `typingStart` event if there is not already a typingEvent or the difference between the two is >= 2 seconds''',
+          '''should send `typingStart` event if there is not already a typingEvent or the difference between the two is > 3 seconds''',
           () async {
-            final typingEvent = Event(type: EventType.typingStart);
+            final startTypingEvent = Event(type: EventType.typingStart);
+            final stopTypingEvent = Event(type: EventType.typingStop);
 
             when(() => channel.config?.typingEvents).thenReturn(true);
 
             when(() => client.sendEvent(
                   channelId,
                   channelType,
-                  any(that: isSameEventAs(typingEvent)),
+                  any(that: isSameEventAs(startTypingEvent)),
+                )).thenAnswer((_) async => EmptyResponse());
+            when(() => client.sendEvent(
+                  channelId,
+                  channelType,
+                  any(that: isSameEventAs(stopTypingEvent)),
                 )).thenAnswer((_) async => EmptyResponse());
 
             await channel.keyStroke();
@@ -2675,7 +2683,12 @@ void main() {
             verify(() => client.sendEvent(
                   channelId,
                   channelType,
-                  any(that: isSameEventAs(typingEvent)),
+                  any(that: isSameEventAs(startTypingEvent)),
+                )).called(1);
+            verify(() => client.sendEvent(
+                  channelId,
+                  channelType,
+                  any(that: isSameEventAs(stopTypingEvent)),
                 )).called(1);
           },
         );
@@ -2688,7 +2701,7 @@ void main() {
 
         final typingStopEvent = Event(type: EventType.typingStop);
 
-        await channel.keyStroke();
+        await channel.stopTyping();
 
         verifyNever(() => client.sendEvent(
               channelId,

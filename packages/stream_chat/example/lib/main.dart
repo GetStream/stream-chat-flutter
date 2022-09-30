@@ -4,7 +4,10 @@ import 'package:stream_chat/stream_chat.dart';
 Future<void> main() async {
   /// Create a new instance of [StreamChatClient]
   /// by passing the apikey obtained from your project dashboard.
-  final client = StreamChatClient('b67pax5b2wdq', logLevel: Level.INFO);
+  final client = StreamChatClient(
+    'b67pax5b2wdq',
+    logLevel: Level.INFO,
+  );
 
   /// Set the current user. In a production scenario, this should be done using
   /// a backend to generate a user token using our server SDK.

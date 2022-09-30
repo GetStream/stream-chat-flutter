@@ -436,6 +436,9 @@ class WebSocket with TimerHelper {
   /// Disconnects the WS and releases eventual resources
   void disconnect() {
     if (connectionStatus == ConnectionStatus.disconnected) return;
+
+    _resetRequestFlags(resetAttempts: true);
+
     _connectionStatus = ConnectionStatus.disconnected;
 
     _logger?.info('Disconnecting web-socket connection');
@@ -447,6 +450,7 @@ class WebSocket with TimerHelper {
     _stopMonitoringEvents();
 
     _manuallyClosed = true;
+
     _closeWebSocketChannel();
   }
 }

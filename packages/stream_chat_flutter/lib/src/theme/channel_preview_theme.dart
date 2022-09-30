@@ -1,13 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro channel_preview_theme}
-@Deprecated("Use 'StreamChannelPreviewTheme' instead")
-typedef ChannelPreviewTheme = StreamChannelPreviewTheme;
-
-/// {@template channel_preview_theme}
+/// {@template channelPreviewTheme}
 /// Overrides the default style of [ChannelPreview] descendants.
 ///
 /// See also:
@@ -53,11 +49,7 @@ class StreamChannelPreviewTheme extends InheritedTheme {
       data != oldWidget.data;
 }
 
-/// {@macro channel_preview_theme_data}
-@Deprecated("Use 'StreamChannelPreviewThemeData' instead")
-typedef ChannelPreviewThemeData = StreamChannelPreviewThemeData;
-
-/// {@template channel_preview_theme_data}
+/// {@template channelPreviewThemeData}
 /// A style that overrides the default appearance of [ChannelPreview]s when used
 /// with [StreamChannelPreviewTheme] or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.channelPreviewTheme].
@@ -106,33 +98,35 @@ class StreamChannelPreviewThemeData with Diagnosticable {
     StreamAvatarThemeData? avatarTheme,
     Color? unreadCounterColor,
     double? indicatorIconSize,
-  }) =>
-      StreamChannelPreviewThemeData(
-        titleStyle: titleStyle ?? this.titleStyle,
-        subtitleStyle: subtitleStyle ?? this.subtitleStyle,
-        lastMessageAtStyle: lastMessageAtStyle ?? this.lastMessageAtStyle,
-        avatarTheme: avatarTheme ?? this.avatarTheme,
-        unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
-        indicatorIconSize: indicatorIconSize ?? this.indicatorIconSize,
-      );
+  }) {
+    return StreamChannelPreviewThemeData(
+      titleStyle: titleStyle ?? this.titleStyle,
+      subtitleStyle: subtitleStyle ?? this.subtitleStyle,
+      lastMessageAtStyle: lastMessageAtStyle ?? this.lastMessageAtStyle,
+      avatarTheme: avatarTheme ?? this.avatarTheme,
+      unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
+      indicatorIconSize: indicatorIconSize ?? this.indicatorIconSize,
+    );
+  }
 
   /// Linearly interpolate one [StreamChannelPreviewThemeData] to another.
   StreamChannelPreviewThemeData lerp(
     StreamChannelPreviewThemeData a,
     StreamChannelPreviewThemeData b,
     double t,
-  ) =>
-      StreamChannelPreviewThemeData(
-        avatarTheme: const StreamAvatarThemeData()
-            .lerp(a.avatarTheme!, b.avatarTheme!, t),
-        indicatorIconSize: a.indicatorIconSize,
-        lastMessageAtStyle:
-            TextStyle.lerp(a.lastMessageAtStyle, b.lastMessageAtStyle, t),
-        subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
-        titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
-        unreadCounterColor:
-            Color.lerp(a.unreadCounterColor, b.unreadCounterColor, t),
-      );
+  ) {
+    return StreamChannelPreviewThemeData(
+      avatarTheme:
+          const StreamAvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+      indicatorIconSize: a.indicatorIconSize,
+      lastMessageAtStyle:
+          TextStyle.lerp(a.lastMessageAtStyle, b.lastMessageAtStyle, t),
+      subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
+      titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
+      unreadCounterColor:
+          Color.lerp(a.unreadCounterColor, b.unreadCounterColor, t),
+    );
+  }
 
   /// Merge with theme
   StreamChannelPreviewThemeData merge(StreamChannelPreviewThemeData? other) {

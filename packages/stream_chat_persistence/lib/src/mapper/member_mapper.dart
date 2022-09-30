@@ -11,7 +11,6 @@ extension MemberEntityX on MemberEntity {
         shadowBanned: shadowBanned,
         updatedAt: updatedAt,
         createdAt: createdAt,
-        role: role,
         channelRole: channelRole,
         inviteAcceptedAt: inviteAcceptedAt,
         invited: invited,
@@ -33,8 +32,6 @@ extension MemberX on Member {
         inviteRejectedAt: inviteRejectedAt,
         invited: invited,
         inviteAcceptedAt: inviteAcceptedAt,
-        // ignore: deprecated_member_use
-        role: role,
         channelRole: channelRole,
         updatedAt: updatedAt,
       );

@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// {@macro text_theme}
-@Deprecated("Use 'StreamTextTheme' instead")
-typedef TextTheme = StreamTextTheme;
-
 /// {@template text_theme}
 /// Class for holding text theme
 /// {@endtemplate}
