@@ -11,6 +11,7 @@
 #include <desktop_drop/desktop_drop_plugin.h>
 #include <file_selector_windows/file_selector_windows.h>
 #include <flutter_native_view/flutter_native_view_plugin.h>
+#include <permission_handler_windows/permission_handler_windows_plugin.h>
 #include <screen_retriever/screen_retriever_plugin.h>
 #include <sqlite3_flutter_libs/sqlite3_flutter_libs_plugin.h>
 #include <thumblr_windows/thumblr_windows_plugin.h>
@@ -28,6 +29,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("FileSelectorWindows"));
   FlutterNativeViewPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterNativeViewPlugin"));
+  PermissionHandlerWindowsPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("PermissionHandlerWindowsPlugin"));
   ScreenRetrieverPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("ScreenRetrieverPlugin"));
   Sqlite3FlutterLibsPluginRegisterWithRegistrar(

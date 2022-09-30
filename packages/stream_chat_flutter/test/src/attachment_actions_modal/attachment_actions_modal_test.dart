@@ -8,17 +8,18 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../mocks.dart';
 
 class MockAttachmentDownloader extends Mock {
-  ProgressCallback? progressCallback;
-  DownloadedPathCallback? downloadedPathCallback;
+  ProgressCallback? onReceiveProgress;
   Completer<String> completer = Completer();
 
   Future<String> call(
     Attachment attachment, {
-    ProgressCallback? progressCallback,
-    DownloadedPathCallback? downloadedPathCallback,
+    ProgressCallback? onReceiveProgress,
+    Map<String, dynamic>? queryParameters,
+    CancelToken? cancelToken,
+    bool deleteOnError = true,
+    Options? options,
   }) {
-    this.progressCallback = progressCallback;
-    this.downloadedPathCallback = downloadedPathCallback;
+    this.onReceiveProgress = onReceiveProgress;
     return completer.future;
   }
 }
@@ -61,12 +62,6 @@ void main() {
             streamChatThemeData: streamTheme,
             client: client,
             child: AttachmentActionsModal(
-              onReply: () {
-                print('reply');
-              },
-              onShowMessage: () {
-                print('show');
-              },
               message: message,
               attachment: attachment,
             ),
@@ -113,12 +108,6 @@ void main() {
             child: AttachmentActionsModal(
               message: message,
               attachment: attachment,
-              onReply: () {
-                print('reply');
-              },
-              onShowMessage: () {
-                print('show');
-              },
             ),
           ),
         ),
@@ -170,6 +159,54 @@ void main() {
         ),
       );
       expect(find.text('Save Video'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'tapping on reply should pop',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+
+      final themeData = ThemeData();
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
+
+      final mockObserver = MockNavigatorObserver();
+
+      final attachment = Attachment(
+        type: 'image',
+        title: 'image.jpg',
+      );
+      final message = Message(
+        text: 'test',
+        user: User(
+          id: 'user-id',
+        ),
+        attachments: [
+          attachment,
+        ],
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          navigatorObservers: [mockObserver],
+          home: StreamChat(
+            streamChatThemeData: streamTheme,
+            client: client,
+            child: SizedBox(
+              child: AttachmentActionsModal(
+                message: message,
+                attachment: attachment,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Reply'));
+      verify(() => mockObserver.didPop(any(), any()));
     },
   );
 

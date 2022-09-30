@@ -1,22 +1,19 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart'
     hide ErrorListener;
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
+import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
-import 'package:stream_chat_flutter/src/message_input/file_upload_error_handler.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
@@ -24,11 +21,6 @@ import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-const _kMinMediaPickerSize = 360.0;
-
-/// The default maximum size for media attachments.
-const kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
 
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
@@ -108,7 +100,6 @@ class StreamMessageInput extends StatefulWidget {
     this.commandButtonBuilder,
     this.customAutocompleteTriggers = const [],
     this.mentionAllAppUsers = false,
-    this.attachmentsPickerBuilder,
     this.sendButtonBuilder,
     this.shouldKeepFocusAfterMessage,
     this.validator = _defaultValidator,
@@ -207,23 +198,20 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Builder for customizing the attachment button.
   ///
-  /// The builder contains the default [IconButton] that can be customized by
-  /// calling `.copyWith`.
-  final ActionButtonBuilder? attachmentButtonBuilder;
+  /// The builder contains the default [AttachmentButton] that can be customized
+  /// by calling `.copyWith`.
+  final AttachmentButtonBuilder? attachmentButtonBuilder;
 
   /// Builder for customizing the command button.
   ///
-  /// The builder contains the default [IconButton] that can be customized by
+  /// The builder contains the default [CommandButton] that can be customized by
   /// calling `.copyWith`.
-  final ActionButtonBuilder? commandButtonBuilder;
+  final CommandButtonBuilder? commandButtonBuilder;
 
   /// When enabled mentions search users across the entire app.
   ///
   /// Defaults to false.
   final bool mentionAllAppUsers;
-
-  /// Builds bottom sheet when attachment picker is opened.
-  final AttachmentsPickerBuilder? attachmentsPickerBuilder;
 
   /// Builder for creating send button
   final MessageRelatedBuilder? sendButtonBuilder;
@@ -268,12 +256,9 @@ class StreamMessageInput extends StatefulWidget {
 /// State of [StreamMessageInput]
 class StreamMessageInputState extends State<StreamMessageInput>
     with RestorationMixin<StreamMessageInput>, WidgetsBindingObserver {
-  bool _inputEnabled = true;
-
   bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool _actionsShrunk = false;
-  bool _openFilePickerSection = false;
 
   late StreamChatThemeData _streamChatTheme;
   late StreamMessageInputThemeData _messageInputTheme;
@@ -389,11 +374,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
   @override
   String? get restorationId => widget.restorationId;
 
-  void _focusNodeListener() {
-    if (_effectiveFocusNode.hasFocus) {
-      _openFilePickerSection = false;
-    }
-  }
+  // ignore: no-empty-block
+  void _focusNodeListener() {}
 
   int _timeOut = 0;
   Timer? _slowModeTimer;
@@ -466,9 +448,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
               onPanUpdate: (details) {
                 if (details.delta.dy > 0) {
                   _effectiveFocusNode.unfocus();
-                  if (_openFilePickerSection) {
-                    setState(() => _openFilePickerSection = false);
-                  }
                 }
               },
               child: Column(
@@ -527,9 +506,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
                             : CrossFadeState.showSecond,
                       ),
                     ),
-                  PlatformWidgetBuilder(
-                    mobile: (context, child) => _buildFilePickerSection(),
-                  ),
+                  // PlatformWidgetBuilder(
+                  //   mobile: (context, child) => _buildFilePickerSection(),
+                  // ),
                 ],
               ),
             ),
@@ -690,10 +669,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   Widget _buildAttachmentButton(BuildContext context) {
     final defaultButton = AttachmentButton(
-      color: _openFilePickerSection
-          ? _messageInputTheme.actionButtonColor!
-          : _messageInputTheme.actionButtonIdleColor!,
-      onPressed: _handleFileSelect,
+      color: _messageInputTheme.actionButtonIdleColor!,
+      onPressed: _onAttachmentButtonPressed,
     );
 
     return widget.attachmentButtonBuilder?.call(context, defaultButton) ??
@@ -705,30 +682,15 @@ class StreamMessageInputState extends State<StreamMessageInput>
   /// On mobile, this will open the file selection bottom sheet. On desktop,
   /// this will open the native file system and allow the user to select one
   /// or more files.
-  Future<void> _handleFileSelect() async {
-    if (isDesktopDeviceOrWeb) {
-      final desktopAttachmentHandler = DesktopAttachmentHandler(
-        maxAttachmentSize: widget.maxAttachmentSize,
-      );
-      desktopAttachmentHandler.upload().then((attachments) {
-        // If attachments is empty, it means the user closed the file system
-        // without selecting any files.
-        if (attachments.isNotEmpty) {
-          setState(() => _addAttachments(attachments));
-        }
-      }).catchError((error) {
-        handleFileUploadError(context, error, widget.maxAttachmentSize);
-      });
-    } else {
-      if (_openFilePickerSection) {
-        setState(() => _openFilePickerSection = false);
-      } else {
-        if (_effectiveFocusNode.hasFocus) {
-          _effectiveFocusNode.unfocus();
-        }
-        _permissionState = await PhotoManager.requestPermissionExtend();
-        setState(() => _openFilePickerSection = true);
-      }
+  Future<void> _onAttachmentButtonPressed() async {
+    final attachments = await showStreamAttachmentPickerModalBottomSheet(
+      context: context,
+      initialAttachments: _effectiveController.attachments,
+      useRootNavigator: true,
+    );
+
+    if (attachments != null) {
+      _effectiveController.attachments = attachments;
     }
   }
 
@@ -739,22 +701,18 @@ class StreamMessageInputState extends State<StreamMessageInput>
         (widget.actionsLocation != ActionsLocation.left || _commandEnabled
             ? const EdgeInsets.only(left: 8)
             : EdgeInsets.zero);
-    final _desktopAttachmentHandler = DesktopAttachmentHandler(
-      maxAttachmentSize: widget.maxAttachmentSize,
-    );
 
     return Expanded(
       child: DropTarget(
-        onDragDone: (details) {
-          _desktopAttachmentHandler
-              .uploadViaDragNDrop(details.files)
-              .then((attachments) {
-            if (attachments.isNotEmpty) {
-              setState(() => _addAttachments(attachments));
-            }
-          }).catchError((error) {
-            handleFileUploadError(context, error, widget.maxAttachmentSize);
-          });
+        onDragDone: (details) async {
+          final files = details.files;
+          final attachments = <Attachment>[];
+          for (final file in files) {
+            final attachment = await file.toAttachment(type: 'file');
+            attachments.add(attachment);
+          }
+
+          if (attachments.isNotEmpty) _addAttachments(attachments);
         },
         onDragEntered: (details) {
           setState(() {
@@ -815,7 +773,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
                       mobile: (context, child) => child,
                       child: StreamMessageTextField(
                         key: const Key('messageInputText'),
-                        enabled: _inputEnabled,
                         maxLines: widget.maxLines,
                         minLines: widget.minLines,
                         textInputAction: widget.textInputAction,
@@ -1055,30 +1012,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     return response;
   }
 
-  Widget _buildFilePickerSection() {
-    final picker = StreamAttachmentPicker(
-      messageInputController: _effectiveController,
-      onFilePicked: pickFile,
-      isOpen: _openFilePickerSection,
-      pickerSize: _openFilePickerSection ? _kMinMediaPickerSize : 0,
-      attachmentLimit: widget.attachmentLimit,
-      onAttachmentLimitExceeded: widget.onAttachmentLimitExceed,
-      maxAttachmentSize: widget.maxAttachmentSize,
-      onError: _showErrorAlert,
-      permissionState: _permissionState,
-    );
-
-    if (_openFilePickerSection && widget.attachmentsPickerBuilder != null) {
-      return widget.attachmentsPickerBuilder!(
-        context,
-        _effectiveController,
-        picker,
-      );
-    }
-
-    return picker;
-  }
-
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return const Offstage();
     final containsUrl = _effectiveController.message.quotedMessage!.attachments
@@ -1186,7 +1119,16 @@ class StreamMessageInputState extends State<StreamMessageInput>
         highlightElevation: 0,
         focusElevation: 0,
         hoverElevation: 0,
-        onPressed: () {
+        onPressed: () async {
+          final file = attachment.file;
+          final uploadState = attachment.uploadState;
+
+          if (file != null && !uploadState.isSuccess && !isWeb) {
+            await StreamAttachmentHandler.instance.deleteAttachmentFile(
+              attachmentFile: file,
+            );
+          }
+
           _effectiveController.removeAttachmentById(attachment.id);
         },
         fillColor:
@@ -1273,26 +1215,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Widget _buildCommandButton(BuildContext context) {
     final s = _effectiveController.text.trim();
     final isCommandOptionsVisible = s.startsWith(_kCommandTrigger);
-    final defaultButton = IconButton(
-      icon: StreamSvgIcon.lightning(
-        color: s.isNotEmpty
-            ? _streamChatTheme.colorTheme.disabled
-            : (isCommandOptionsVisible
-                ? _messageInputTheme.actionButtonColor
-                : _messageInputTheme.actionButtonIdleColor),
-      ),
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(
-        height: 24,
-        width: 24,
-      ),
-      splashRadius: 24,
+    final defaultButton = CommandButton(
+      color: s.isNotEmpty
+          ? _streamChatTheme.colorTheme.disabled
+          : (isCommandOptionsVisible
+              ? _messageInputTheme.actionButtonColor!
+              : _messageInputTheme.actionButtonIdleColor!),
       onPressed: () async {
-        if (_openFilePickerSection) {
-          setState(() => _openFilePickerSection = false);
-          await Future.delayed(const Duration(milliseconds: 300));
-        }
-
         // Clear the text if the commands options are already visible.
         if (isCommandOptionsVisible) {
           _effectiveController.clear();
@@ -1310,35 +1239,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
     return widget.commandButtonBuilder?.call(context, defaultButton) ??
         defaultButton;
-  }
-
-  /// Show the attachment modal, making the user choose where to
-  /// pick a media from
-  void showAttachmentModal() {
-    if (_effectiveFocusNode.hasFocus) {
-      _effectiveFocusNode.unfocus();
-    }
-
-    if (!kIsWeb) {
-      setState(() => _openFilePickerSection = true);
-    } else {
-      showModalBottomSheet(
-        clipBehavior: Clip.hardEdge,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
-          ),
-        ),
-        context: context,
-        isScrollControlled: true,
-        builder: (_) => AttachmentModalSheet(
-          onFileTap: () => pickFile(DefaultAttachmentTypes.file),
-          onPhotoTap: () => pickFile(DefaultAttachmentTypes.image),
-          onVideoTap: () => pickFile(DefaultAttachmentTypes.video),
-        ),
-      );
-    }
   }
 
   /// Adds an attachment to the [messageInputController.attachments] map
@@ -1360,70 +1260,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     for (final attachment in attachments) {
       _effectiveController.addAttachment(attachment);
     }
-  }
-
-  /// Pick a file from the device
-  /// If [camera] is true then the camera will open
-  void pickFile(
-    DefaultAttachmentTypes fileType, {
-    bool camera = false,
-  }) async {
-    setState(() => _inputEnabled = false);
-    final attachmentHandler = MobileAttachmentHandler(
-      maxAttachmentSize: widget.maxAttachmentSize,
-    );
-
-    attachmentHandler
-        .upload(fileType: fileType, camera: camera)
-        .then((attachments) {
-      setState(() => _inputEnabled = true);
-
-      if (attachments.isNotEmpty) {
-        setState(() => _addAttachments(attachments));
-      }
-    }).catchError((error) async {
-      if (error is FileSystemException) {
-        switch (error.message) {
-          case 'File size too large after compression and exceeds maximum '
-              'attachment size':
-            _showErrorAlert(
-              context.translations.fileTooLargeAfterCompressionError(
-                widget.maxAttachmentSize / (1024 * 1024),
-              ),
-            );
-            break;
-          case 'File size exceeds maximum attachment size':
-            _showErrorAlert(
-              context.translations.fileTooLargeError(
-                widget.maxAttachmentSize / (1024 * 1024),
-              ),
-            );
-            break;
-          default:
-            _showErrorAlert(context.translations.somethingWentWrongError);
-            break;
-        }
-      } else if (error is PlatformException) {
-        final res = await showConfirmationBottomSheet(
-          context,
-          icon: StreamSvgIcon.error(
-            color: StreamChatTheme.of(context).colorTheme.accentError,
-            size: 24,
-          ),
-          title: camera
-              ? context.translations.allowGalleryAccessMessage
-              : context.translations.allowFileAccessMessage,
-          question: camera
-              ? context.translations.enablePhotoAndVideoAccessMessage
-              : context.translations.enableFileAccessMessage,
-          okText: context.translations.okLabel,
-          cancelText: context.translations.cancelLabel,
-        );
-        if (res == true) {
-          await PhotoManager.openSetting();
-        }
-      }
-    });
   }
 
   /// Sends the current message

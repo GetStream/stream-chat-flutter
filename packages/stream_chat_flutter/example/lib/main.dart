@@ -71,6 +71,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
+      // themeMode: ThemeMode.dark,
       supportedLocales: const [
         Locale('en'),
         Locale('hi'),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
+import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template inProgressBuilder}
@@ -170,14 +172,25 @@ typedef UserMentionTileBuilder = Widget Function(
 );
 
 /// {@template actionButtonBuilder}
+/// A widget builder for building a custom command button.
+///
+/// [commandButton] is the default [CommandButton] configuration,
+/// use [commandButton.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef CommandButtonBuilder = Widget Function(
+  BuildContext context,
+  CommandButton commandButton,
+);
+
+/// {@template actionButtonBuilder}
 /// A widget builder for building a custom action button.
 ///
-/// [defaultActionButton] is the default [IconButton] configuration,
-/// use [defaultActionButton.copyWith] to easily customize it.
+/// [attachmentButton] is the default [AttachmentButton] configuration,
+/// use [attachmentButton.copyWith] to easily customize it.
 /// {@endtemplate}
-typedef ActionButtonBuilder = Widget Function(
+typedef AttachmentButtonBuilder = Widget Function(
   BuildContext context,
-  Widget defaultActionButton,
+  AttachmentButton attachmentButton,
 );
 
 /// {@template quotedMessageAttachmentThumbnailBuilder}
@@ -312,8 +325,11 @@ typedef SpacingWidgetBuilder = Widget Function(
 /// Callback to download an attachment asset
 typedef AttachmentDownloader = Future<String> Function(
   Attachment attachment, {
-  ProgressCallback? progressCallback,
-  DownloadedPathCallback? downloadedPathCallback,
+  ProgressCallback? onReceiveProgress,
+  Map<String, dynamic>? queryParameters,
+  CancelToken? cancelToken,
+  bool deleteOnError,
+  Options? options,
 });
 
 /// Callback to receive the path once the attachment asset is downloaded
@@ -332,13 +348,6 @@ typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 /// The action to perform when the "scroll to bottom" button is pressed
 /// within a [MessageListView].
 typedef OnScrollToBottom = Function(int unreadCount);
-
-/// Widget builder for a custom attachment picker.
-typedef AttachmentsPickerBuilder = Widget Function(
-  BuildContext context,
-  StreamMessageInputController messageInputController,
-  StreamAttachmentPicker defaultPicker,
-);
 
 /// Widget builder for widgets that may require data from the
 /// [MessageInputController].

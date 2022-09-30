@@ -17,10 +17,13 @@ void main() {
 
       final attachmentHandler = MockAttachmentHandler();
 
-      when(() => attachmentHandler.download(attachment))
-          .thenAnswer((invocation) async => true);
+      when(() => attachmentHandler.downloadAttachment(attachment))
+          .thenAnswer((invocation) async => 'filePath');
 
-      expect(await attachmentHandler.download(attachment), true);
+      expect(
+        await attachmentHandler.downloadAttachment(attachment),
+        'filePath',
+      );
     });
 
     test('AttachmentHandler downloads giphy', () async {
@@ -35,10 +38,13 @@ void main() {
 
       final attachmentHandler = MockAttachmentHandler();
 
-      when(() => attachmentHandler.download(attachment))
-          .thenAnswer((invocation) async => true);
+      when(() => attachmentHandler.downloadAttachment(attachment))
+          .thenAnswer((invocation) async => 'filePath');
 
-      expect(await attachmentHandler.download(attachment), true);
+      expect(
+        await attachmentHandler.downloadAttachment(attachment),
+        'filePath',
+      );
     });
 
     test('AttachmentHandler downloads video', () async {
@@ -50,45 +56,13 @@ void main() {
 
       final attachmentHandler = MockAttachmentHandler();
 
-      when(() => attachmentHandler.download(attachment))
-          .thenAnswer((invocation) async => true);
+      when(() => attachmentHandler.downloadAttachment(attachment))
+          .thenAnswer((invocation) async => 'filePath');
 
-      expect(await attachmentHandler.download(attachment), true);
-    });
-  });
-
-  group('AttachmentHandler Uploads', () {
-    test('AttachmentHandler.upload() cancelled operation', () async {
-      final attachments = <Attachment>[];
-      final attachmentHandler = MockAttachmentHandler();
-      when(attachmentHandler.upload).thenAnswer((invocation) async => []);
-      expect(await attachmentHandler.upload(), attachments);
-    });
-
-    test('AttachmentHandler.upload() results in one file', () async {
-      final attachments = <Attachment>[
-        Attachment(
-          title: 'Attachment One',
-          type: 'file',
-        ),
-      ];
-      final attachmentHandler = MockAttachmentHandler();
-      when(attachmentHandler.upload)
-          .thenAnswer((invocation) async => attachments);
-      expect(await attachmentHandler.upload(), attachments);
-    });
-
-    test('AttachmentHandler.upload() results in one file', () async {
-      final attachments = <Attachment>[
-        Attachment(
-          title: 'Attachment One',
-          type: 'file',
-        ),
-      ];
-      final attachmentHandler = MockAttachmentHandler();
-      when(attachmentHandler.upload)
-          .thenAnswer((invocation) async => attachments);
-      expect(await attachmentHandler.upload(), attachments);
+      expect(
+        await attachmentHandler.downloadAttachment(attachment),
+        'filePath',
+      );
     });
   });
 }

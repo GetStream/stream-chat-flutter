@@ -125,7 +125,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
           final _currentAttachment = _currentAttachmentPackage.attachment;
           return Stack(
             children: [
-              Positioned.fill(child: child!),
+              child!,
               ValueListenableBuilder<bool>(
                 valueListenable: _isDisplayingDetail,
                 builder: (context, isDisplayingDetail, child) {

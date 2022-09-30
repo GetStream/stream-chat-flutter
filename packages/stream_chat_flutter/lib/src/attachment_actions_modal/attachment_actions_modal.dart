@@ -1,8 +1,4 @@
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -15,8 +11,9 @@ class AttachmentActionsModal extends StatelessWidget {
     required this.message,
     this.onShowMessage,
     this.onReply,
-    this.imageDownloader,
-    this.fileDownloader,
+    this.attachmentDownloader,
+    this.showReply = true,
+    this.showShowInChat = true,
     this.showSave = true,
     this.showDelete = true,
     this.customActions = const [],
@@ -34,11 +31,14 @@ class AttachmentActionsModal extends StatelessWidget {
   /// Callback to reply the message
   final VoidCallback? onReply;
 
-  /// Callback to download images
-  final AttachmentDownloader? imageDownloader;
+  /// Callback to download [attachment].
+  final AttachmentDownloader? attachmentDownloader;
 
-  /// Callback to provide download files
-  final AttachmentDownloader? fileDownloader;
+  /// Show reply option
+  final bool showReply;
+
+  /// Show show in chat option
+  final bool showShowInChat;
 
   /// Show save option
   final bool showSave;
@@ -56,9 +56,9 @@ class AttachmentActionsModal extends StatelessWidget {
     Attachment? attachment,
     Message? message,
     VoidCallback? onShowMessage,
-    VoidCallback? onReply,
-    AttachmentDownloader? imageDownloader,
-    AttachmentDownloader? fileDownloader,
+    AttachmentDownloader? attachmentDownloader,
+    bool? showReply,
+    bool? showShowInChat,
     bool? showSave,
     bool? showDelete,
     List<AttachmentAction>? customActions,
@@ -68,9 +68,9 @@ class AttachmentActionsModal extends StatelessWidget {
       attachment: attachment ?? this.attachment,
       message: message ?? this.message,
       onShowMessage: onShowMessage ?? this.onShowMessage,
-      onReply: onReply ?? this.onReply,
-      imageDownloader: imageDownloader ?? this.imageDownloader,
-      fileDownloader: fileDownloader ?? this.fileDownloader,
+      attachmentDownloader: attachmentDownloader ?? this.attachmentDownloader,
+      showReply: showReply ?? this.showReply,
+      showShowInChat: showShowInChat ?? this.showShowInChat,
       showSave: showSave ?? this.showSave,
       showDelete: showDelete ?? this.showDelete,
       customActions: customActions ?? this.customActions,
@@ -105,7 +105,7 @@ class AttachmentActionsModal extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (onReply != null)
+                  if (showReply)
                     _buildButton(
                       context,
                       context.translations.replyLabel,
@@ -113,9 +113,9 @@ class AttachmentActionsModal extends StatelessWidget {
                         size: 24,
                         color: theme.colorTheme.textLowEmphasis,
                       ),
-                      onReply,
+                      () => Navigator.of(context).pop(ReturnActionType.reply),
                     ),
-                  if (onShowMessage != null)
+                  if (showShowInChat)
                     _buildButton(
                       context,
                       context.translations.showInChatLabel,
@@ -135,60 +135,42 @@ class AttachmentActionsModal extends StatelessWidget {
                         size: 24,
                         color: theme.colorTheme.textLowEmphasis,
                       ),
-                      () async {
+                      () {
                         // Closing attachment actions modal before opening
                         // attachment download dialog
                         Navigator.of(context).pop();
 
-                        if (kIsWeb) {
-                          return launchURL(
-                            context,
-                            attachment.imageUrl ??
-                                attachment.assetUrl ??
-                                (attachment.extraData.entries.first.value!
-                                    as Map<String, dynamic>)['original']['url'],
-                          );
-                        }
+                        final downloader = attachmentDownloader ??
+                            StreamAttachmentHandler.instance.downloadAttachment;
 
-                        if (isDesktopDevice) {
-                          final attachmentHandler = DesktopAttachmentHandler();
-                          await attachmentHandler.download(attachment);
+                        // No need to show progress dialog in case of
+                        // web or desktop.
+                        if (isDesktopDeviceOrWeb) {
+                          downloader(attachment);
                           return;
                         }
-
-                        final isImage = attachment.type == 'image';
-                        final Future<String?> Function(
-                          Attachment, {
-                          void Function(int, int) progressCallback,
-                          DownloadedPathCallback downloadedPathCallback,
-                        }) saveFile = fileDownloader ?? _downloadAttachment;
-                        final Future<String?> Function(
-                          Attachment, {
-                          void Function(int, int) progressCallback,
-                          DownloadedPathCallback downloadedPathCallback,
-                        }) saveImage = imageDownloader ?? _downloadAttachment;
-                        final downloader = isImage ? saveImage : saveFile;
 
                         final progressNotifier =
                             ValueNotifier<_DownloadProgress?>(
                           _DownloadProgress.initial(),
                         );
-                        final downloadedPathNotifier = ValueNotifier<String?>(
-                          null,
-                        );
+
+                        final downloadedPathNotifier =
+                            ValueNotifier<String?>(null);
 
                         downloader(
                           attachment,
-                          progressCallback: (received, total) {
+                          onReceiveProgress: (received, total) {
                             progressNotifier.value = _DownloadProgress(
                               total,
                               received,
                             );
                           },
-                          downloadedPathCallback: (String? path) {
-                            downloadedPathNotifier.value = path;
-                          },
-                        ).catchError((e, stk) {
+                        ).then((path) {
+                          downloadedPathNotifier.value = path;
+                        }).catchError((e, stk) {
+                          print(e);
+                          print(stk);
                           progressNotifier.value = null;
                         });
 
@@ -387,29 +369,6 @@ class AttachmentActionsModal extends StatelessWidget {
         );
       },
     );
-  }
-
-  Future<String?> _downloadAttachment(
-    Attachment attachment, {
-    ProgressCallback? progressCallback,
-    DownloadedPathCallback? downloadedPathCallback,
-  }) async {
-    String? filePath;
-    final appDocDir = await getTemporaryDirectory();
-    final url =
-        attachment.assetUrl ?? attachment.imageUrl ?? attachment.thumbUrl!;
-    await Dio().download(
-      url,
-      (Headers responseHeaders) {
-        final ext = Uri.parse(url).pathSegments.last;
-        filePath ??= '${appDocDir.path}/${attachment.id}.$ext';
-        return filePath!;
-      },
-      onReceiveProgress: progressCallback,
-    );
-    final result = await ImageGallerySaver.saveFile(filePath!);
-    downloadedPathCallback?.call((result as Map)['filePath']);
-    return (result as Map)['filePath'];
   }
 }
 
