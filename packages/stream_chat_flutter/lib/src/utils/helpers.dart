@@ -61,6 +61,29 @@ bool getEffectiveCenterTitle(
 }
 
 /// Shows confirmation dialog
+@Deprecated(
+  '''
+  showConfirmationDialog is deprecated.
+  Use showConfirmationBottomSheet instead.''',
+)
+Future<bool?> showConfirmationDialog(
+  BuildContext context, {
+  required String title,
+  required String okText,
+  Widget? icon,
+  String? question,
+  String? cancelText,
+}) =>
+    showConfirmationBottomSheet(
+      context,
+      title: title,
+      okText: okText,
+      icon: icon,
+      question: question,
+      cancelText: cancelText,
+    );
+
+/// Shows confirmation bottom sheet
 Future<bool?> showConfirmationBottomSheet(
   BuildContext context, {
   required String title,
@@ -148,6 +171,29 @@ Future<bool?> showConfirmationBottomSheet(
 }
 
 /// Shows info dialog
+@Deprecated(
+  '''
+  showInfoDialog is deprecated.
+  Use showInfoBottomSheet instead.''',
+)
+Future<bool?> showInfoDialog(
+  BuildContext context, {
+  required String title,
+  required String okText,
+  Widget? icon,
+  String? details,
+  StreamChatThemeData? theme,
+}) =>
+    showInfoBottomSheet(
+      context,
+      title: title,
+      okText: okText,
+      icon: icon,
+      details: details,
+      theme: theme,
+    );
+
+/// Shows info bottom sheet
 Future<bool?> showInfoBottomSheet(
   BuildContext context, {
   required String title,
@@ -372,6 +418,26 @@ StreamSvgIcon getFileTypeImage(String? mimeType) {
       return StreamSvgIcon.filetypeGeneric();
   }
 }
+
+/// Wraps attachment widget with custom shape
+@Deprecated(
+  '''
+wrapAttachmentWidget is deprecated.
+Use WrapAttachmentWidget instead
+''',
+)
+Widget wrapAttachmentWidget(
+  BuildContext context,
+  Widget attachmentWidget,
+  ShapeBorder attachmentShape,
+  // ignore: avoid_positional_boolean_parameters
+  bool reverse,
+) =>
+    WrapAttachmentWidget(
+      attachmentWidget: attachmentWidget,
+      attachmentShape: attachmentShape,
+      reverse: reverse,
+    );
 
 /// Wraps attachment widget with custom shape
 class WrapAttachmentWidget extends StatelessWidget {

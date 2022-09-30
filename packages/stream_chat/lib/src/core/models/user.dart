@@ -19,22 +19,11 @@ class User extends Equatable {
   /// print(user.name == user.extraData['name']); // true
   /// ```
   /// {@endtemplate}
-  ///
-  /// {@template image}
-  /// If an [image] is provided it will be set on [extraData] with a `key`
-  /// of 'image'.
-  ///
-  /// For example:
-  /// ```dart
-  /// final user = User(id: 'id', image: 'https://getstream.io/image.png');
-  /// print(user.image == user.extraData['image']); // true
-  /// ```
-  /// {@endtemplate}
   User({
     required this.id,
     this.role,
     String? name,
-    String? image,
+    this.image,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.lastActive,
@@ -46,12 +35,10 @@ class User extends Equatable {
     this.language,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now(),
-        // TODO: Make them top-level fields in v5
-        // For backwards compatibility, set 'name', 'image' in [extraData].
+        // For backwards compatibility, set 'name', in [extraData].
         extraData = {
           ...extraData,
           if (name != null) 'name': name,
-          if (image != null) 'image': image,
         };
 
   /// Create a new instance from json.
@@ -72,6 +59,7 @@ class User extends Equatable {
     'ban_expires',
     'teams',
     'language',
+    'image',
   ];
 
   /// User id.
@@ -90,10 +78,8 @@ class User extends Equatable {
   }
 
   /// Shortcut for user image.
-  ///
-  /// {@macro image}
   @JsonKey(ignore: true)
-  String? get image => extraData['image'] as String?;
+  final String? image;
 
   /// User role.
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
@@ -176,7 +162,7 @@ class User extends Equatable {
             extraData?['name'] as String? ??
             // Using extraData value in order to not use id as name.
             this.extraData['name'] as String?,
-        image: image ?? extraData?['image'] as String? ?? this.image,
+        image: image ?? this.image,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         lastActive: lastActive ?? this.lastActive,
