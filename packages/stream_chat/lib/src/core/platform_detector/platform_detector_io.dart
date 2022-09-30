@@ -10,3 +10,8 @@ PlatformType get currentPlatform {
   if (Platform.isIOS) return PlatformType.ios;
   return PlatformType.android;
 }
+
+/// True if the app is running in test environment.
+bool get isFlutterTestEnvironment {
+  return Platform.environment.containsKey('FLUTTER_TEST');
+}

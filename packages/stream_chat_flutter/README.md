@@ -60,6 +60,26 @@ We also use [video_player](https://pub.dev/packages/video_player) to reproduce v
 To pick images from the camera, we use the [image_picker](https://pub.dev/packages/image_picker) plugin.
 Follow [these instructions](https://pub.dev/packages/image_picker#ios) to check the requirements.
 
+### Web
+
+For the web, edit your `index.html` and add the following in the `<body>` tag in order to allow the SDK to override the right-click behaviour:
+
+```html
+<body oncontextmenu="return false;">
+```
+
+### MacOS
+
+For MacOS use the [file_selector](https://pub.dev/packages/file_selector#macos) package.
+Follow [these instructions](https://pub.dev/packages/file_selector#macos) to check the requirements.
+
+You also need to add the following [entitlement](https://docs.flutter.dev/development/platform-integration/desktop#entitlements-and-the-app-sandbox):
+
+```xml
+<key>com.apple.security.network.client</key>
+<true/>
+```
+
 ### Troubleshooting
 
 It may happen that you have some problems building the app.

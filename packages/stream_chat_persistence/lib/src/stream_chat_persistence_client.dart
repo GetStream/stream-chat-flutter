@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:mutex/mutex.dart';
 import 'package:stream_chat/stream_chat.dart';
+
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 
 /// Various connection modes on which [StreamChatPersistenceClient] can work
@@ -28,14 +29,8 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     /// Connection mode on which the client will work
     ConnectionMode connectionMode = ConnectionMode.regular,
     Level logLevel = Level.WARNING,
-
-    /// Whether to use an experimental storage implementation on the web
-    /// that uses IndexedDB if the current browser supports it.
-    /// Otherwise, falls back to the local storage based implementation.
-    bool webUseExperimentalIndexedDb = false,
     LogHandlerFunction? logHandlerFunction,
   })  : _connectionMode = connectionMode,
-        _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb,
         _logger = Logger.detached('💽')..level = logLevel {
     _logger.onRecord.listen(logHandlerFunction ?? _defaultLogHandler);
   }
@@ -46,7 +41,6 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
 
   final Logger _logger;
   final ConnectionMode _connectionMode;
-  final bool _webUseIndexedDbIfSupported;
   final _mutex = ReadWriteMutex();
 
   void _defaultLogHandler(LogRecord record) {
@@ -74,15 +68,11 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     return true;
   }
 
-  Future<DriftChatDatabase> _defaultDatabaseProvider(
+  DriftChatDatabase _defaultDatabaseProvider(
     String userId,
     ConnectionMode mode,
   ) =>
-      SharedDB.constructDatabase(
-        userId,
-        connectionMode: mode,
-        webUseIndexedDbIfSupported: _webUseIndexedDbIfSupported,
-      );
+      SharedDB.constructDatabase(userId, connectionMode: mode);
 
   @override
   Future<void> connect(
@@ -96,7 +86,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       );
     }
     db = databaseProvider?.call(userId, _connectionMode) ??
-        await _defaultDatabaseProvider(userId, _connectionMode);
+        _defaultDatabaseProvider(userId, _connectionMode);
   }
 
   @override

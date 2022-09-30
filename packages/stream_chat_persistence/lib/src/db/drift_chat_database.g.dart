@@ -3943,9 +3943,6 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   final String channelCid;
 
   /// The role of the user in the channel
-  final String? role;
-
-  /// The role of the user in the channel
   final String? channelRole;
 
   /// The date on which the user accepted the invite to the channel
@@ -3974,7 +3971,6 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   MemberEntity(
       {required this.userId,
       required this.channelCid,
-      this.role,
       this.channelRole,
       this.inviteAcceptedAt,
       this.inviteRejectedAt,
@@ -3991,8 +3987,6 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
       channelCid: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid'])!,
-      role: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}role']),
       channelRole: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_role']),
       inviteAcceptedAt: const DateTimeType().mapFromDatabaseResponse(
@@ -4018,9 +4012,6 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     final map = <String, Expression>{};
     map['user_id'] = Variable<String>(userId);
     map['channel_cid'] = Variable<String>(channelCid);
-    if (!nullToAbsent || role != null) {
-      map['role'] = Variable<String?>(role);
-    }
     if (!nullToAbsent || channelRole != null) {
       map['channel_role'] = Variable<String?>(channelRole);
     }
@@ -4045,7 +4036,6 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     return MemberEntity(
       userId: serializer.fromJson<String>(json['userId']),
       channelCid: serializer.fromJson<String>(json['channelCid']),
-      role: serializer.fromJson<String?>(json['role']),
       channelRole: serializer.fromJson<String?>(json['channelRole']),
       inviteAcceptedAt:
           serializer.fromJson<DateTime?>(json['inviteAcceptedAt']),
@@ -4065,7 +4055,6 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     return <String, dynamic>{
       'userId': serializer.toJson<String>(userId),
       'channelCid': serializer.toJson<String>(channelCid),
-      'role': serializer.toJson<String?>(role),
       'channelRole': serializer.toJson<String?>(channelRole),
       'inviteAcceptedAt': serializer.toJson<DateTime?>(inviteAcceptedAt),
       'inviteRejectedAt': serializer.toJson<DateTime?>(inviteRejectedAt),
@@ -4081,7 +4070,6 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   MemberEntity copyWith(
           {String? userId,
           String? channelCid,
-          Value<String?> role = const Value.absent(),
           Value<String?> channelRole = const Value.absent(),
           Value<DateTime?> inviteAcceptedAt = const Value.absent(),
           Value<DateTime?> inviteRejectedAt = const Value.absent(),
@@ -4094,7 +4082,6 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       MemberEntity(
         userId: userId ?? this.userId,
         channelCid: channelCid ?? this.channelCid,
-        role: role.present ? role.value : this.role,
         channelRole: channelRole.present ? channelRole.value : this.channelRole,
         inviteAcceptedAt: inviteAcceptedAt.present
             ? inviteAcceptedAt.value
@@ -4114,7 +4101,6 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     return (StringBuffer('MemberEntity(')
           ..write('userId: $userId, ')
           ..write('channelCid: $channelCid, ')
-          ..write('role: $role, ')
           ..write('channelRole: $channelRole, ')
           ..write('inviteAcceptedAt: $inviteAcceptedAt, ')
           ..write('inviteRejectedAt: $inviteRejectedAt, ')
@@ -4132,7 +4118,6 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   int get hashCode => Object.hash(
       userId,
       channelCid,
-      role,
       channelRole,
       inviteAcceptedAt,
       inviteRejectedAt,
@@ -4148,7 +4133,6 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       (other is MemberEntity &&
           other.userId == this.userId &&
           other.channelCid == this.channelCid &&
-          other.role == this.role &&
           other.channelRole == this.channelRole &&
           other.inviteAcceptedAt == this.inviteAcceptedAt &&
           other.inviteRejectedAt == this.inviteRejectedAt &&
@@ -4163,7 +4147,6 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
 class MembersCompanion extends UpdateCompanion<MemberEntity> {
   final Value<String> userId;
   final Value<String> channelCid;
-  final Value<String?> role;
   final Value<String?> channelRole;
   final Value<DateTime?> inviteAcceptedAt;
   final Value<DateTime?> inviteRejectedAt;
@@ -4176,7 +4159,6 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
   const MembersCompanion({
     this.userId = const Value.absent(),
     this.channelCid = const Value.absent(),
-    this.role = const Value.absent(),
     this.channelRole = const Value.absent(),
     this.inviteAcceptedAt = const Value.absent(),
     this.inviteRejectedAt = const Value.absent(),
@@ -4190,7 +4172,6 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
   MembersCompanion.insert({
     required String userId,
     required String channelCid,
-    this.role = const Value.absent(),
     this.channelRole = const Value.absent(),
     this.inviteAcceptedAt = const Value.absent(),
     this.inviteRejectedAt = const Value.absent(),
@@ -4205,7 +4186,6 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
   static Insertable<MemberEntity> custom({
     Expression<String>? userId,
     Expression<String>? channelCid,
-    Expression<String?>? role,
     Expression<String?>? channelRole,
     Expression<DateTime?>? inviteAcceptedAt,
     Expression<DateTime?>? inviteRejectedAt,
@@ -4219,7 +4199,6 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     return RawValuesInsertable({
       if (userId != null) 'user_id': userId,
       if (channelCid != null) 'channel_cid': channelCid,
-      if (role != null) 'role': role,
       if (channelRole != null) 'channel_role': channelRole,
       if (inviteAcceptedAt != null) 'invite_accepted_at': inviteAcceptedAt,
       if (inviteRejectedAt != null) 'invite_rejected_at': inviteRejectedAt,
@@ -4235,7 +4214,6 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
   MembersCompanion copyWith(
       {Value<String>? userId,
       Value<String>? channelCid,
-      Value<String?>? role,
       Value<String?>? channelRole,
       Value<DateTime?>? inviteAcceptedAt,
       Value<DateTime?>? inviteRejectedAt,
@@ -4248,7 +4226,6 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     return MembersCompanion(
       userId: userId ?? this.userId,
       channelCid: channelCid ?? this.channelCid,
-      role: role ?? this.role,
       channelRole: channelRole ?? this.channelRole,
       inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
       inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
@@ -4269,9 +4246,6 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     }
     if (channelCid.present) {
       map['channel_cid'] = Variable<String>(channelCid.value);
-    }
-    if (role.present) {
-      map['role'] = Variable<String?>(role.value);
     }
     if (channelRole.present) {
       map['channel_role'] = Variable<String?>(channelRole.value);
@@ -4308,7 +4282,6 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     return (StringBuffer('MembersCompanion(')
           ..write('userId: $userId, ')
           ..write('channelCid: $channelCid, ')
-          ..write('role: $role, ')
           ..write('channelRole: $channelRole, ')
           ..write('inviteAcceptedAt: $inviteAcceptedAt, ')
           ..write('inviteRejectedAt: $inviteRejectedAt, ')
@@ -4341,11 +4314,6 @@ class $MembersTable extends Members
       type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
-  final VerificationMeta _roleMeta = const VerificationMeta('role');
-  @override
-  late final GeneratedColumn<String?> role = GeneratedColumn<String?>(
-      'role', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
   final VerificationMeta _channelRoleMeta =
       const VerificationMeta('channelRole');
   @override
@@ -4416,7 +4384,6 @@ class $MembersTable extends Members
   List<GeneratedColumn> get $columns => [
         userId,
         channelCid,
-        role,
         channelRole,
         inviteAcceptedAt,
         inviteRejectedAt,
@@ -4449,10 +4416,6 @@ class $MembersTable extends Members
               data['channel_cid']!, _channelCidMeta));
     } else if (isInserting) {
       context.missing(_channelCidMeta);
-    }
-    if (data.containsKey('role')) {
-      context.handle(
-          _roleMeta, role.isAcceptableOrUnknown(data['role']!, _roleMeta));
     }
     if (data.containsKey('channel_role')) {
       context.handle(

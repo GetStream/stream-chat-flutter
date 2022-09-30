@@ -47,7 +47,8 @@ class AttachmentFile {
   final String? _name;
 
   /// File name including its extension.
-  String? get name => _name ?? path?.split('/').last;
+  String? get name =>
+      _name ?? path?.split(CurrentPlatform.isWindows ? r'\' : '/').last;
 
   /// Byte data for this file. Particularly useful if you want to manipulate
   /// its data or easily upload to somewhere else.
@@ -84,6 +85,22 @@ class AttachmentFile {
       );
     }
     return multiPartFile;
+  }
+
+  /// Creates a copy of this [AttachmentFile] but with the given fields
+  /// replaced with the new values.
+  AttachmentFile copyWith({
+    String? path,
+    String? name,
+    Uint8List? bytes,
+    int? size,
+  }) {
+    return AttachmentFile(
+      path: path ?? this.path,
+      name: name ?? this.name,
+      bytes: bytes ?? this.bytes,
+      size: size ?? this.size,
+    );
   }
 }
 

@@ -27,7 +27,6 @@ class UserListPageState extends State<UserListPage> {
   /// [StreamUserListController].
   late final userListController = StreamUserListController(
     client: StreamChatCore.of(context).client,
-    filter: Filter.notEqual('id', StreamChatCore.of(context).currentUser!),
   );
 ```
 

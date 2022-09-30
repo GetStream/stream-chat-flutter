@@ -7,32 +7,13 @@ import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart'
 /// specifically for Web applications.
 class SharedDB {
   /// Returns a new instance of [DriftChatDatabase].
-  static Future<DriftChatDatabase> constructDatabase(
+  static DriftChatDatabase constructDatabase(
     String userId, {
     bool logStatements = false,
     ConnectionMode connectionMode = ConnectionMode.regular, // Ignored on web
-    bool webUseIndexedDbIfSupported = false,
-  }) async {
+  }) {
     final dbName = 'db_$userId';
-    final queryExecutor = await _getQueryExecutor(
-      dbName,
-      useIndexedDbIfSupported: webUseIndexedDbIfSupported,
-      logStatements: logStatements,
-    );
+    final queryExecutor = WebDatabase(dbName, logStatements: logStatements);
     return DriftChatDatabase(userId, queryExecutor);
-  }
-
-  static Future<WebDatabase> _getQueryExecutor(
-    String dbName, {
-    required bool useIndexedDbIfSupported,
-    required bool logStatements,
-  }) async {
-    if (useIndexedDbIfSupported) {
-      return WebDatabase.withStorage(
-        await DriftWebStorage.indexedDbIfSupported(dbName),
-        logStatements: logStatements,
-      );
-    }
-    return WebDatabase(dbName, logStatements: logStatements);
   }
 }

@@ -23,10 +23,10 @@ class StreamChatApi {
     StreamHttpClientOptions? options,
     TokenManager? tokenManager,
     ConnectionIdManager? connectionIdManager,
-    AttachmentFileUploaderProvider? attachmentFileUploaderProvider,
+    AttachmentFileUploaderProvider attachmentFileUploaderProvider =
+        StreamAttachmentFileUploader.new,
     Logger? logger,
-  })  : _fileUploaderProvider =
-            attachmentFileUploaderProvider ?? StreamAttachmentFileUploader.new,
+  })  : _fileUploaderProvider = attachmentFileUploaderProvider,
         _client = client ??
             StreamHttpClient(
               apiKey,

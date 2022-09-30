@@ -2,14 +2,10 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
-/// {@macro message_input_theme}
-@Deprecated("Use 'StreamMessageInputTheme' instead")
-typedef MessageInputTheme = StreamMessageInputTheme;
-
-/// {@template message_input_theme}
+/// {@template messageInputTheme}
 /// Overrides the default style of [MessageInput] descendants.
 ///
 /// See also:
@@ -55,11 +51,7 @@ class StreamMessageInputTheme extends InheritedTheme {
       data != oldWidget.data;
 }
 
-/// {@macro message_input_theme_data}
-@Deprecated("Use 'StreamMessageInputThemeData' instead")
-typedef MessageInputThemeData = StreamMessageInputThemeData;
-
-/// {@template message_input_theme_data}
+/// {@template messageInputThemeData}
 /// A style that overrides the default appearance of [MessageInput] widgets
 /// when used with [StreamMessageInputTheme]
 /// or with the overall [StreamChatTheme]'s
@@ -153,60 +145,59 @@ class StreamMessageInputThemeData with Diagnosticable {
     bool? enableSafeArea,
     double? elevation,
     BoxShadow? shadow,
-  }) =>
-      StreamMessageInputThemeData(
-        sendAnimationDuration:
-            sendAnimationDuration ?? this.sendAnimationDuration,
-        inputBackgroundColor: inputBackgroundColor ?? this.inputBackgroundColor,
-        actionButtonColor: actionButtonColor ?? this.actionButtonColor,
-        sendButtonColor: sendButtonColor ?? this.sendButtonColor,
-        actionButtonIdleColor:
-            actionButtonIdleColor ?? this.actionButtonIdleColor,
-        expandButtonColor: expandButtonColor ?? this.expandButtonColor,
-        inputTextStyle: inputTextStyle ?? this.inputTextStyle,
-        sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
-        inputDecoration: inputDecoration ?? this.inputDecoration,
-        activeBorderGradient: activeBorderGradient ?? this.activeBorderGradient,
-        idleBorderGradient: idleBorderGradient ?? this.idleBorderGradient,
-        borderRadius: borderRadius ?? this.borderRadius,
-        linkHighlightColor: linkHighlightColor ?? this.linkHighlightColor,
-        enableSafeArea: enableSafeArea ?? this.enableSafeArea,
-        elevation: elevation ?? this.elevation,
-        shadow: shadow ?? this.shadow,
-      );
+  }) {
+    return StreamMessageInputThemeData(
+      sendAnimationDuration:
+          sendAnimationDuration ?? this.sendAnimationDuration,
+      inputBackgroundColor: inputBackgroundColor ?? this.inputBackgroundColor,
+      actionButtonColor: actionButtonColor ?? this.actionButtonColor,
+      sendButtonColor: sendButtonColor ?? this.sendButtonColor,
+      actionButtonIdleColor:
+          actionButtonIdleColor ?? this.actionButtonIdleColor,
+      expandButtonColor: expandButtonColor ?? this.expandButtonColor,
+      inputTextStyle: inputTextStyle ?? this.inputTextStyle,
+      sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
+      inputDecoration: inputDecoration ?? this.inputDecoration,
+      activeBorderGradient: activeBorderGradient ?? this.activeBorderGradient,
+      idleBorderGradient: idleBorderGradient ?? this.idleBorderGradient,
+      borderRadius: borderRadius ?? this.borderRadius,
+      enableSafeArea: enableSafeArea ?? this.enableSafeArea,
+      elevation: elevation ?? this.elevation,
+      shadow: shadow ?? this.shadow,
+    );
+  }
 
   /// Linearly interpolate from one [StreamMessageInputThemeData] to another.
   StreamMessageInputThemeData lerp(
     StreamMessageInputThemeData a,
     StreamMessageInputThemeData b,
     double t,
-  ) =>
-      StreamMessageInputThemeData(
-        actionButtonColor:
-            Color.lerp(a.actionButtonColor, b.actionButtonColor, t),
-        actionButtonIdleColor:
-            Color.lerp(a.actionButtonIdleColor, b.actionButtonIdleColor, t),
-        activeBorderGradient:
-            Gradient.lerp(a.activeBorderGradient, b.activeBorderGradient, t),
-        borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
-        expandButtonColor:
-            Color.lerp(a.expandButtonColor, b.expandButtonColor, t),
-        idleBorderGradient:
-            Gradient.lerp(a.idleBorderGradient, b.idleBorderGradient, t),
-        inputBackgroundColor:
-            Color.lerp(a.inputBackgroundColor, b.inputBackgroundColor, t),
-        inputTextStyle: TextStyle.lerp(a.inputTextStyle, b.inputTextStyle, t),
-        sendButtonColor: Color.lerp(a.sendButtonColor, b.sendButtonColor, t),
-        sendButtonIdleColor:
-            Color.lerp(a.sendButtonIdleColor, b.sendButtonIdleColor, t),
-        sendAnimationDuration: a.sendAnimationDuration,
-        inputDecoration: a.inputDecoration,
-        linkHighlightColor:
-            Color.lerp(a.linkHighlightColor, b.linkHighlightColor, t),
-        enableSafeArea: a.enableSafeArea,
-        elevation: lerpDouble(a.elevation, b.elevation, t),
-        shadow: BoxShadow.lerp(a.shadow, b.shadow, t),
-      );
+  ) {
+    return StreamMessageInputThemeData(
+      actionButtonColor:
+          Color.lerp(a.actionButtonColor, b.actionButtonColor, t),
+      actionButtonIdleColor:
+          Color.lerp(a.actionButtonIdleColor, b.actionButtonIdleColor, t),
+      activeBorderGradient:
+          Gradient.lerp(a.activeBorderGradient, b.activeBorderGradient, t),
+      borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
+      expandButtonColor:
+          Color.lerp(a.expandButtonColor, b.expandButtonColor, t),
+      idleBorderGradient:
+          Gradient.lerp(a.idleBorderGradient, b.idleBorderGradient, t),
+      inputBackgroundColor:
+          Color.lerp(a.inputBackgroundColor, b.inputBackgroundColor, t),
+      inputTextStyle: TextStyle.lerp(a.inputTextStyle, b.inputTextStyle, t),
+      sendButtonColor: Color.lerp(a.sendButtonColor, b.sendButtonColor, t),
+      sendButtonIdleColor:
+          Color.lerp(a.sendButtonIdleColor, b.sendButtonIdleColor, t),
+      sendAnimationDuration: a.sendAnimationDuration,
+      inputDecoration: a.inputDecoration,
+      enableSafeArea: a.enableSafeArea,
+      elevation: lerpDouble(a.elevation, b.elevation, t),
+      shadow: BoxShadow.lerp(a.shadow, b.shadow, t),
+    );
+  }
 
   /// Merges [this] [StreamMessageInputThemeData] with the [other]
   StreamMessageInputThemeData merge(StreamMessageInputThemeData? other) {

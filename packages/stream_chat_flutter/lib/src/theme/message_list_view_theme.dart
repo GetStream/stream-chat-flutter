@@ -1,12 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro message_list_view_theme}
-@Deprecated("Use 'StreamMessageListViewTheme' instead")
-typedef MessageListViewTheme = StreamMessageListViewTheme;
-
-/// {@template message_list_view_theme}
+/// {@template messageListViewTheme}
 /// Overrides the default style of [MessageListView] descendants.
 ///
 /// See also:
@@ -52,11 +48,7 @@ class StreamMessageListViewTheme extends InheritedTheme {
       data != oldWidget.data;
 }
 
-/// {@macro message_list_view_theme_data}
-@Deprecated("Use 'StreamMessageListViewThemeData' instead")
-typedef MessageListViewThemeData = StreamMessageListViewThemeData;
-
-/// {@template message_list_view_theme_data}
+/// {@template messageListViewThemeData}
 /// A style that overrides the default appearance of [MessageListView]s when
 /// used with [StreamMessageListViewTheme] or with
 /// the overall [StreamChatTheme]'s
@@ -87,11 +79,12 @@ class StreamMessageListViewThemeData with Diagnosticable {
   StreamMessageListViewThemeData copyWith({
     Color? backgroundColor,
     DecorationImage? backgroundImage,
-  }) =>
-      StreamMessageListViewThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-        backgroundImage: backgroundImage ?? this.backgroundImage,
-      );
+  }) {
+    return StreamMessageListViewThemeData(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      backgroundImage: backgroundImage ?? this.backgroundImage,
+    );
+  }
 
   /// Linearly interpolate between two [MessageListView] themes.
   ///
@@ -100,11 +93,12 @@ class StreamMessageListViewThemeData with Diagnosticable {
     StreamMessageListViewThemeData a,
     StreamMessageListViewThemeData b,
     double t,
-  ) =>
-      StreamMessageListViewThemeData(
-        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-        backgroundImage: t < 0.5 ? a.backgroundImage : b.backgroundImage,
-      );
+  ) {
+    return StreamMessageListViewThemeData(
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+      backgroundImage: t < 0.5 ? a.backgroundImage : b.backgroundImage,
+    );
+  }
 
   /// Merges one [StreamMessageListViewThemeData] with another.
   StreamMessageListViewThemeData merge(StreamMessageListViewThemeData? other) {

@@ -50,9 +50,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
-  })  : _activeFilter = filter,
-        _activeSort = sort,
-        _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
+  })  : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
         super(const PagedValue.loading());
 
   /// Creates a [StreamChannelListController] from the passed [value].
@@ -66,9 +64,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
-  })  : _activeFilter = filter,
-        _activeSort = sort,
-        _eventHandler = eventHandler ?? StreamChannelListEventHandler();
+  }) : _eventHandler = eventHandler ?? StreamChannelListEventHandler();
 
   /// The client to use for the channels list.
   final StreamChatClient client;
@@ -82,7 +78,6 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   ///
   /// You can also filter other built-in channel fields.
   final Filter? filter;
-  Filter? _activeFilter;
 
   /// The sorting used for the channels matching the filters.
   ///
@@ -94,7 +89,6 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   ///
   /// Direction can be ascending or descending.
   final List<SortOption<ChannelModel>>? sort;
-  List<SortOption<ChannelModel>>? _activeSort;
 
   /// If true you’ll receive user presence updates via the websocket events
   final bool presence;
@@ -109,18 +103,6 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   /// Number of members to fetch in each channel.
   final int? memberLimit;
 
-  /// Allows for the change of filters used for channel queries.
-  ///
-  /// Use this if you need to support runtime filter changes,
-  /// through custom filters UI.
-  set filter(Filter? value) => _activeFilter = value;
-
-  /// Allows for the change of sort used for channel queries.
-  ///
-  /// Use this if you need to support runtime sort changes,
-  /// through custom sort UI.
-  set sort(List<SortOption<ChannelModel>>? value) => _activeSort = value;
-
   @override
   Future<void> doInitialLoad() async {
     final limit = min(
@@ -129,8 +111,8 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     );
     try {
       await for (final channels in client.queryChannels(
-        filter: _activeFilter,
-        sort: _activeSort,
+        filter: filter,
+        sort: sort,
         memberLimit: memberLimit,
         messageLimit: messageLimit,
         presence: presence,
@@ -158,8 +140,8 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
 
     try {
       await for (final channels in client.queryChannels(
-        filter: _activeFilter,
-        sort: _activeSort,
+        filter: filter,
+        sort: sort,
         memberLimit: memberLimit,
         messageLimit: messageLimit,
         presence: presence,
@@ -179,15 +161,6 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       final chatError = StreamChatError(error.toString());
       value = previousValue.copyWith(error: chatError);
     }
-  }
-
-  @override
-  Future<void> refresh({bool resetValue = true}) {
-    if (resetValue) {
-      _activeFilter = filter;
-      _activeSort = sort;
-    }
-    return super.refresh(resetValue: resetValue);
   }
 
   /// Replaces the previously loaded channels with the passed [channels].

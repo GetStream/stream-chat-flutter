@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-void main() async {
+Future<void> main() async {
   final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
@@ -29,13 +29,15 @@ class MyApp extends StatelessWidget {
   final StreamChatClient client;
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        builder: (context, child) => StreamChat(
-          client: client,
-          child: child,
-        ),
-        home: const SplitView(),
-      );
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      builder: (context, child) => StreamChat(
+        client: client,
+        child: child,
+      ),
+      home: const SplitView(),
+    );
+  }
 }
 
 class SplitView extends StatefulWidget {
@@ -51,37 +53,39 @@ class _SplitViewState extends State<SplitView> {
   Channel? selectedChannel;
 
   @override
-  Widget build(BuildContext context) => Flex(
-        direction: Axis.horizontal,
-        children: <Widget>[
-          Flexible(
-            child: ChannelListPage(
-              onTap: (channel) {
-                setState(() {
-                  selectedChannel = channel;
-                });
-              },
-            ),
+  Widget build(BuildContext context) {
+    return Flex(
+      direction: Axis.horizontal,
+      children: <Widget>[
+        Flexible(
+          child: ChannelListPage(
+            onTap: (channel) {
+              setState(() {
+                selectedChannel = channel;
+              });
+            },
           ),
-          Flexible(
-            flex: 2,
-            child: Scaffold(
-              body: selectedChannel != null
-                  ? StreamChannel(
-                      key: ValueKey(selectedChannel!.cid),
-                      channel: selectedChannel!,
-                      child: const ChannelPage(),
-                    )
-                  : Center(
-                      child: Text(
-                        'Pick a channel to show the messages 💬',
-                        style: Theme.of(context).textTheme.headline5,
-                      ),
+        ),
+        Flexible(
+          flex: 2,
+          child: Scaffold(
+            body: selectedChannel != null
+                ? StreamChannel(
+                    key: ValueKey(selectedChannel!.cid),
+                    channel: selectedChannel!,
+                    child: const ChannelPage(),
+                  )
+                : Center(
+                    child: Text(
+                      'Pick a channel to show the messages 💬',
+                      style: Theme.of(context).textTheme.headline5,
                     ),
-            ),
+                  ),
           ),
-        ],
-      );
+        ),
+      ],
+    );
+  }
 }
 
 class ChannelListPage extends StatefulWidget {

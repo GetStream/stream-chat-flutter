@@ -132,8 +132,8 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
       'El límite de tamaño de los archivos es de $limitInMB MB.';
 
   @override
-  String emojiMatchingQueryText(String query) =>
-      'Emoji que corresponde a "$query"';
+  String get couldNotReadBytesFromFileError =>
+      'No se pudieron leer los bytes del archivo.';
 
   @override
   String get addAFileLabel => 'Añadir un archivo';
@@ -382,6 +382,54 @@ No es posible añadir más de $limit archivos adjuntos
   String get slowModeOnLabel => 'Modo lento activado';
 
   @override
+  String get downloadLabel => 'Descargar';
+
+  @override
+  String toggleMuteUnmuteUserText({required bool isMuted}) {
+    if (isMuted) {
+      return 'No silenciar usuario';
+    } else {
+      return 'Usuario mudo';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return '¿Estás seguro de que quieres activar el silencio de este grupo?';
+    } else {
+      return '¿Estás seguro de que quieres silenciar a este grupo?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
+    if (isMuted) {
+      return '¿Estás seguro de que quieres activar el sonido de este usuario?';
+    } else {
+      return '¿Estás seguro de que quieres silenciar a este usuario?';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteAction({required bool isMuted}) {
+    if (isMuted) {
+      return 'DESACTIVAR';
+    } else {
+      return 'SILENCIO';
+    }
+  }
+
+  @override
+  String toggleMuteUnmuteGroupText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Activar grupo';
+    } else {
+      return 'Silenciar grupo';
+    }
+  }
+
+  @override
   String get linkDisabledDetails =>
       'No se permite enviar enlaces en esta conversación.';
 
@@ -395,4 +443,11 @@ No es posible añadir más de $limit archivos adjuntos
     }
     return '$unreadCount mensajes no leídos';
   }
+
+  @override
+  String get enableFileAccessMessage => 'Habilite el acceso a los archivos'
+      '\npara poder compartirlos con amigos.';
+
+  @override
+  String get allowFileAccessMessage => 'Permitir el acceso a los archivos';
 }

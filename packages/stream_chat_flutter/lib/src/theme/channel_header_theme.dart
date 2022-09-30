@@ -1,12 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
-
-/// {@macro channel_header_theme}
-@Deprecated("Use 'StreamChannelHeaderTheme' instead")
-typedef ChannelHeaderTheme = StreamChannelHeaderTheme;
 
 /// {@template channel_header_theme}
 /// Overrides the default style of [ChannelHeader] descendants.
@@ -54,10 +50,6 @@ class StreamChannelHeaderTheme extends InheritedTheme {
       data != oldWidget.data;
 }
 
-/// {@macro channel_header_theme_data}
-@Deprecated("Use 'StreamChannelHeaderThemeData' instead")
-typedef ChannelHeaderThemeData = StreamChannelHeaderThemeData;
-
 /// {@template channel_header_theme_data}
 /// A style that overrides the default appearance of [ChannelHeader]s when used
 /// with [StreamChannelHeaderTheme] or with the overall [StreamChatTheme]'s
@@ -96,13 +88,14 @@ class StreamChannelHeaderThemeData with Diagnosticable {
     TextStyle? subtitleStyle,
     StreamAvatarThemeData? avatarTheme,
     Color? color,
-  }) =>
-      StreamChannelHeaderThemeData(
-        titleStyle: titleStyle ?? this.titleStyle,
-        subtitleStyle: subtitleStyle ?? this.subtitleStyle,
-        avatarTheme: avatarTheme ?? this.avatarTheme,
-        color: color ?? this.color,
-      );
+  }) {
+    return StreamChannelHeaderThemeData(
+      titleStyle: titleStyle ?? this.titleStyle,
+      subtitleStyle: subtitleStyle ?? this.subtitleStyle,
+      avatarTheme: avatarTheme ?? this.avatarTheme,
+      color: color ?? this.color,
+    );
+  }
 
   /// Linearly interpolate between two [StreamChannelHeaderThemeData].
   ///
@@ -111,14 +104,15 @@ class StreamChannelHeaderThemeData with Diagnosticable {
     StreamChannelHeaderThemeData a,
     StreamChannelHeaderThemeData b,
     double t,
-  ) =>
-      StreamChannelHeaderThemeData(
-        titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
-        subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
-        avatarTheme: const StreamAvatarThemeData()
-            .lerp(a.avatarTheme!, b.avatarTheme!, t),
-        color: Color.lerp(a.color, b.color, t),
-      );
+  ) {
+    return StreamChannelHeaderThemeData(
+      titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
+      subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
+      avatarTheme:
+          const StreamAvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+      color: Color.lerp(a.color, b.color, t),
+    );
+  }
 
   /// Merge with other [StreamChannelHeaderThemeData]
   StreamChannelHeaderThemeData merge(StreamChannelHeaderThemeData? other) {

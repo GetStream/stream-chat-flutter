@@ -4,25 +4,25 @@ import 'package:stream_chat/src/core/platform_detector/platform_detector_stub.da
 
 /// Possible platforms
 enum PlatformType {
-  ///
+  /// Android: <https://www.android.com/>
   android,
 
-  ///
+  /// iOS: <https://www.apple.com/ios/>
   ios,
 
-  ///
+  /// web: <https://en.wikipedia.org/wiki/World_Wide_Web>
   web,
 
-  ///
+  /// macOS: <https://www.apple.com/macos>
   macOS,
 
-  ///
+  /// Windows: <https://www.windows.com>
   windows,
 
-  ///
+  /// Linux: <https://www.linux.org>
   linux,
 
-  ///
+  /// Fuchsia: <https://fuchsia.dev/fuchsia-src/concepts>
   fuchsia,
 }
 
@@ -51,6 +51,9 @@ class CurrentPlatform {
   /// True if the app is running on fuchsia
   static bool get isFuchsia => type == PlatformType.fuchsia;
 
+  /// True if the app is running in test environment
+  static bool get isFlutterTest => isFlutterTestEnvironment;
+
   /// Returns a string version of the platform
   static String get name {
     switch (type) {
@@ -68,8 +71,6 @@ class CurrentPlatform {
         return 'linux';
       case PlatformType.fuchsia:
         return 'fuchsia';
-      default:
-        return '';
     }
   }
 

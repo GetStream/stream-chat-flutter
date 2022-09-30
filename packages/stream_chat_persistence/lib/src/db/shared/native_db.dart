@@ -15,12 +15,11 @@ import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 /// specifically for native platform applications.
 class SharedDB {
   /// Returns a new instance of [DriftChatDatabase].
-  static Future<DriftChatDatabase> constructDatabase(
+  static DriftChatDatabase constructDatabase(
     String userId, {
     bool logStatements = false,
     ConnectionMode connectionMode = ConnectionMode.regular,
-    bool webUseIndexedDbIfSupported = false, // Ignored on native
-  }) async {
+  }) {
     final dbName = 'db_$userId';
     if (connectionMode == ConnectionMode.background) {
       return DriftChatDatabase.connect(

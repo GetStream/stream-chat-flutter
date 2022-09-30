@@ -1,3 +1,35 @@
+## 5.0.0
+
+- Included the changes from version [4.5.0](#450).
+
+🛑️ Breaking Changes from `5.0.0-beta.2`
+
+- `Channel.addMembers`, `Channel.removeMembers`, `Channel.inviteMembers` and `Channel.update`
+  positional params are now optional params.
+
+  ```dart
+    // previous
+    channel.addMembers([...ids], message, hideHistory);
+    channel.removeMembers([...ids], message);
+    channel.inviteMembers([...ids], message);
+    channel.update({...channelData}, updateMessage);
+  
+    // new
+    channel.addMembers([...ids], message: ..., hideHistory: ...);
+    channel.removeMembers([...ids], message: ...);
+    channel.inviteMembers([...ids], message: ...);
+    channel.update({...channelData}, updateMessage: ...);
+    ```
+
+## 5.0.0-beta.2
+
+- Included the changes from version [4.4.0](#440) and [4.4.1](#441).
+
+## 5.0.0-beta.1
+
+- Minor fixes.
+- Removed deprecated code.
+
 ## 4.6.0
 
 ✅ Added

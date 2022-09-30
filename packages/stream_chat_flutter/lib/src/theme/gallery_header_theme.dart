@@ -1,12 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@macro gallery_header_them}
-@Deprecated("Use 'StreamGalleryHeaderTheme' instead")
-typedef GalleryHeaderTheme = StreamGalleryHeaderTheme;
-
-/// {@template gallery_header_theme}
+/// {@template galleryHeaderTheme}
 /// Overrides the default style of [GalleryHeader] descendants.
 ///
 /// See also:
@@ -52,11 +48,7 @@ class StreamGalleryHeaderTheme extends InheritedTheme {
       data != oldWidget.data;
 }
 
-/// {@macro gallery_header_theme_data}
-@Deprecated("Use 'StreamGalleryHeaderThemeData' instead")
-typedef GalleryHeaderThemeData = StreamGalleryHeaderThemeData;
-
-/// {@template gallery_header_theme_data}
+/// {@template galleryHeaderThemeData}
 /// A style that overrides the default appearance of [GalleryHeader]s when used
 /// with [StreamGalleryHeaderTheme] or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.galleryHeaderTheme].
@@ -112,16 +104,17 @@ class StreamGalleryHeaderThemeData with Diagnosticable {
     TextStyle? titleTextStyle,
     TextStyle? subtitleTextStyle,
     Color? bottomSheetBarrierColor,
-  }) =>
-      StreamGalleryHeaderThemeData(
-        closeButtonColor: closeButtonColor ?? this.closeButtonColor,
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-        iconMenuPointColor: iconMenuPointColor ?? this.iconMenuPointColor,
-        titleTextStyle: titleTextStyle ?? this.titleTextStyle,
-        subtitleTextStyle: subtitleTextStyle ?? this.subtitleTextStyle,
-        bottomSheetBarrierColor:
-            bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
-      );
+  }) {
+    return StreamGalleryHeaderThemeData(
+      closeButtonColor: closeButtonColor ?? this.closeButtonColor,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      iconMenuPointColor: iconMenuPointColor ?? this.iconMenuPointColor,
+      titleTextStyle: titleTextStyle ?? this.titleTextStyle,
+      subtitleTextStyle: subtitleTextStyle ?? this.subtitleTextStyle,
+      bottomSheetBarrierColor:
+          bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
+    );
+  }
 
   /// Linearly interpolate between two [GalleryHeader] themes.
   ///
@@ -130,18 +123,19 @@ class StreamGalleryHeaderThemeData with Diagnosticable {
     StreamGalleryHeaderThemeData a,
     StreamGalleryHeaderThemeData b,
     double t,
-  ) =>
-      StreamGalleryHeaderThemeData(
-        closeButtonColor: Color.lerp(a.closeButtonColor, b.closeButtonColor, t),
-        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-        iconMenuPointColor:
-            Color.lerp(a.iconMenuPointColor, b.iconMenuPointColor, t),
-        titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
-        subtitleTextStyle:
-            TextStyle.lerp(a.subtitleTextStyle, b.subtitleTextStyle, t),
-        bottomSheetBarrierColor:
-            Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
-      );
+  ) {
+    return StreamGalleryHeaderThemeData(
+      closeButtonColor: Color.lerp(a.closeButtonColor, b.closeButtonColor, t),
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+      iconMenuPointColor:
+          Color.lerp(a.iconMenuPointColor, b.iconMenuPointColor, t),
+      titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
+      subtitleTextStyle:
+          TextStyle.lerp(a.subtitleTextStyle, b.subtitleTextStyle, t),
+      bottomSheetBarrierColor:
+          Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
+    );
+  }
 
   /// Merges one [StreamGalleryHeaderThemeData] with the another
   StreamGalleryHeaderThemeData merge(StreamGalleryHeaderThemeData? other) {

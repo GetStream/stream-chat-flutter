@@ -1,3 +1,21 @@
+## 5.0.0
+
+- Included the changes from version [4.5.0](#450).
+
+✅ Added
+
+- Added `StreamMemberListController`.
+
+## 5.0.0-beta.2
+
+- Included the changes from version [4.4.0](#440) and [4.4.1](#441).
+
+## 5.0.0-beta.1
+
+- Updated `stream_chat` dependency
+  to [`5.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
+- Removed deprecated code.
+
 ## 4.6.0
 
 - Updated `stream_chat` dependency to [`4.6.0`](https://pub.dev/packages/stream_chat/changelog).
@@ -5,18 +23,10 @@
 ## 4.5.0
 
 - Updated `stream_chat` dependency to [`4.5.0`](https://pub.dev/packages/stream_chat/changelog).
-
-🐞 Fixed
-
 - [#1269](https://github.com/GetStream/stream-chat-flutter/issues/1269)
   Fix `ChannelListEventHandler` castError at PagedValue.asSuccess.
 - [#1241](https://github.com/GetStream/stream-chat-flutter/issues/1241) StreamChannelListView load
   more indicator non stop.
-
-✅ Added
-
-- Added setters to update `ChannelListController.filter` and `ChannelListController.sort` properties
-  in order to support runtime changes.
 
 ## 4.4.1
 

@@ -5,7 +5,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/viewport.dart';
 
 /// {@template custom_scroll_view}

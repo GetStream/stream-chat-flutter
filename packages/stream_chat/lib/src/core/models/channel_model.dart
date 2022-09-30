@@ -39,7 +39,6 @@ class ChannelModel {
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now(),
 
-        // TODO: Make them top-level fields in v5
         // For backwards compatibility, set 'disabled', 'hidden'
         // and 'truncated_at' in [extraData].
         extraData = {
