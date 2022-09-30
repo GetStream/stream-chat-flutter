@@ -60,20 +60,9 @@ class StreamFilePicker extends StatelessWidget {
     final theme = StreamChatTheme.of(context);
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            StreamSvgIcon.files(
-              size: 240,
-              color: theme.colorTheme.disabled,
-            ),
-            Text(
-              'Stream Image Picker',
-              style: theme.textTheme.body.copyWith(
-                color: theme.colorTheme.textLowEmphasis,
-              ),
-            ),
-          ],
+        child: StreamSvgIcon.files(
+          size: 240,
+          color: theme.colorTheme.disabled,
         ),
         onEndOfFrame: (_) async {
           final pickedFile = await runInPermissionRequestLock(() {

@@ -65,6 +65,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
 Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   required BuildContext context,
+  Iterable<AttachmentPickerOption>? customOptions,
   List<Attachment>? initialAttachments,
   StreamAttachmentPickerController? controller,
   Color? backgroundColor,
@@ -111,6 +112,9 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
               return webOrDesktopAttachmentPickerBuilder.call(
                 context: context,
                 controller: controller,
+                customOptions: customOptions?.map(
+                  WebOrDesktopAttachmentPickerOption.fromAttachmentPickerOption,
+                ),
                 attachmentThumbnailSize: attachmentThumbnailSize,
                 attachmentThumbnailFormat: attachmentThumbnailFormat,
                 attachmentThumbnailQuality: attachmentThumbnailQuality,
@@ -121,6 +125,7 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
               return mobileAttachmentPickerBuilder.call(
                 context: context,
                 controller: controller,
+                customOptions: customOptions,
                 attachmentThumbnailSize: attachmentThumbnailSize,
                 attachmentThumbnailFormat: attachmentThumbnailFormat,
                 attachmentThumbnailQuality: attachmentThumbnailQuality,
@@ -131,6 +136,9 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
               return webOrDesktopAttachmentPickerBuilder.call(
                 context: context,
                 controller: controller,
+                customOptions: customOptions?.map(
+                  WebOrDesktopAttachmentPickerOption.fromAttachmentPickerOption,
+                ),
                 attachmentThumbnailSize: attachmentThumbnailSize,
                 attachmentThumbnailFormat: attachmentThumbnailFormat,
                 attachmentThumbnailQuality: attachmentThumbnailQuality,
@@ -149,6 +157,7 @@ class StreamPlatformAttachmentPickerBottomSheetBuilder extends StatefulWidget {
   /// Creates a new instance of the widget.
   const StreamPlatformAttachmentPickerBottomSheetBuilder({
     super.key,
+    this.customOptions,
     this.initialAttachments,
     this.child,
     this.controller,
@@ -164,6 +173,9 @@ class StreamPlatformAttachmentPickerBottomSheetBuilder extends StatefulWidget {
     StreamAttachmentPickerController controller,
     Widget? child,
   ) builder;
+
+  /// The custom options to be displayed in the attachment picker.
+  final List<AttachmentPickerOption>? customOptions;
 
   /// The initial attachments.
   final List<Attachment>? initialAttachments;

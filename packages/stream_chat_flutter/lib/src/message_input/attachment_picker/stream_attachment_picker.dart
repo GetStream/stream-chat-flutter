@@ -172,11 +172,15 @@ typedef AttachmentPickerOptionViewBuilder = Widget Function(
 class AttachmentPickerOption {
   /// Creates a new instance of [AttachmentPickerOption].
   const AttachmentPickerOption({
+    this.key,
     required this.supportedTypes,
     required this.icon,
     this.title,
     this.optionViewBuilder,
   });
+
+  /// A key to identify the option.
+  final String? key;
 
   /// The icon of the option.
   final Widget icon;
@@ -195,10 +199,42 @@ class AttachmentPickerOption {
       identical(this, other) ||
       other is AttachmentPickerOption &&
           runtimeType == other.runtimeType &&
+          key == other.key &&
           const IterableEquality().equals(supportedTypes, other.supportedTypes);
 
   @override
-  int get hashCode => const IterableEquality().hash(supportedTypes);
+  int get hashCode =>
+      key.hashCode ^ const IterableEquality().hash(supportedTypes);
+}
+
+/// The attachment picker option for the web or desktop platforms.
+class WebOrDesktopAttachmentPickerOption extends AttachmentPickerOption {
+  /// Creates a new instance of [WebOrDesktopAttachmentPickerOption].
+  WebOrDesktopAttachmentPickerOption({
+    super.key,
+    required AttachmentPickerType type,
+    required super.icon,
+    required super.title,
+  }) : super(supportedTypes: [type]);
+
+  /// Creates a new instance of [WebOrDesktopAttachmentPickerOption] from
+  /// [option].
+  factory WebOrDesktopAttachmentPickerOption.fromAttachmentPickerOption(
+    AttachmentPickerOption option,
+  ) {
+    return WebOrDesktopAttachmentPickerOption(
+      key: option.key,
+      type: option.supportedTypes.first,
+      icon: option.icon,
+      title: option.title,
+    );
+  }
+
+  @override
+  String get title => super.title!;
+
+  /// Type of the option.
+  AttachmentPickerType get type => supportedTypes.first;
 }
 
 /// Helpful extensions for [StreamAttachmentPickerController].
@@ -241,22 +277,6 @@ extension AttachmentPickerOptionTypeX on StreamAttachmentPickerController {
 
     return !isEqual;
   }
-}
-
-/// The attachment picker option for the web or desktop platforms.
-class WebOrDesktopAttachmentPickerOption extends AttachmentPickerOption {
-  /// Creates a new instance of [WebOrDesktopAttachmentPickerOption].
-  WebOrDesktopAttachmentPickerOption({
-    required AttachmentPickerType type,
-    required super.icon,
-    required super.title,
-  }) : super(supportedTypes: [type]);
-
-  @override
-  String get title => super.title!;
-
-  /// Type of the option.
-  AttachmentPickerType get type => supportedTypes.first;
 }
 
 /// Function signature for the callback when the web or desktop attachment
@@ -673,6 +693,7 @@ class OptionDrawer extends StatelessWidget {
 Widget mobileAttachmentPickerBuilder({
   required BuildContext context,
   required StreamAttachmentPickerController controller,
+  Iterable<AttachmentPickerOption>? customOptions,
   ThumbnailSize attachmentThumbnailSize = const ThumbnailSize(400, 400),
   ThumbnailFormat attachmentThumbnailFormat = ThumbnailFormat.jpeg,
   int attachmentThumbnailQuality = 100,
@@ -682,7 +703,9 @@ Widget mobileAttachmentPickerBuilder({
     controller: controller,
     onSendAttachments: Navigator.of(context).pop,
     options: [
+      if (customOptions != null) ...customOptions,
       AttachmentPickerOption(
+        key: 'gallery-picker',
         icon: StreamSvgIcon.pictures(size: 36).toIconThemeSvgIcon(),
         supportedTypes: [
           AttachmentPickerType.images,
@@ -706,6 +729,7 @@ Widget mobileAttachmentPickerBuilder({
         },
       ),
       AttachmentPickerOption(
+        key: 'file-picker',
         icon: StreamSvgIcon.files(size: 36).toIconThemeSvgIcon(),
         supportedTypes: [AttachmentPickerType.files],
         optionViewBuilder: (context, controller) {
@@ -718,6 +742,7 @@ Widget mobileAttachmentPickerBuilder({
         },
       ),
       AttachmentPickerOption(
+        key: 'image-picker',
         icon: StreamSvgIcon.camera(size: 36).toIconThemeSvgIcon(),
         supportedTypes: [AttachmentPickerType.images],
         optionViewBuilder: (context, controller) {
@@ -732,6 +757,7 @@ Widget mobileAttachmentPickerBuilder({
         },
       ),
       AttachmentPickerOption(
+        key: 'video-picker',
         icon: StreamSvgIcon.record(size: 36).toIconThemeSvgIcon(),
         supportedTypes: [AttachmentPickerType.videos],
         optionViewBuilder: (context, controller) {
@@ -753,6 +779,7 @@ Widget mobileAttachmentPickerBuilder({
 Widget webOrDesktopAttachmentPickerBuilder({
   required BuildContext context,
   required StreamAttachmentPickerController controller,
+  Iterable<WebOrDesktopAttachmentPickerOption>? customOptions,
   ThumbnailSize attachmentThumbnailSize = const ThumbnailSize(400, 400),
   ThumbnailFormat attachmentThumbnailFormat = ThumbnailFormat.jpeg,
   int attachmentThumbnailQuality = 100,
@@ -761,17 +788,21 @@ Widget webOrDesktopAttachmentPickerBuilder({
   return StreamWebOrDesktopAttachmentPickerBottomSheet(
     controller: controller,
     options: [
+      if (customOptions != null) ...customOptions,
       WebOrDesktopAttachmentPickerOption(
+        key: 'image-picker',
         type: AttachmentPickerType.images,
         icon: StreamSvgIcon.pictures(size: 36).toIconThemeSvgIcon(),
         title: 'Upload a photo',
       ),
       WebOrDesktopAttachmentPickerOption(
+        key: 'video-picker',
         type: AttachmentPickerType.videos,
         icon: StreamSvgIcon.record(size: 36).toIconThemeSvgIcon(),
         title: 'Upload a video',
       ),
       WebOrDesktopAttachmentPickerOption(
+        key: 'file-picker',
         type: AttachmentPickerType.files,
         icon: StreamSvgIcon.files(size: 36).toIconThemeSvgIcon(),
         title: 'Upload a file',

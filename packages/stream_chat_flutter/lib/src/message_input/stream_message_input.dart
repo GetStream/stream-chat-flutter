@@ -687,6 +687,15 @@ class StreamMessageInputState extends State<StreamMessageInput>
       context: context,
       initialAttachments: _effectiveController.attachments,
       useRootNavigator: true,
+      customOptions: [
+        AttachmentPickerOption(
+          icon: StreamSvgIcon.filetypePdf(size: 36).toIconThemeSvgIcon(),
+          supportedTypes: [AttachmentPickerType.files],
+          optionViewBuilder: (context, controller) {
+            return Center(child: Text('Hello'));
+          },
+        ),
+      ],
     );
 
     if (attachments != null) {

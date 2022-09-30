@@ -368,7 +368,7 @@ class StreamPhotoGallery extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
-                  emptyIcon: StreamSvgIcon.user(
+                  emptyIcon: StreamSvgIcon.pictures(
                     size: 148,
                     color: chatThemeData.colorTheme.disabled,
                   ),
