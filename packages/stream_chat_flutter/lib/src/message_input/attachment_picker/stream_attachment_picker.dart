@@ -298,7 +298,7 @@ class StreamWebOrDesktopAttachmentPickerBottomSheet extends StatelessWidget {
   });
 
   /// The list of options.
-  final List<WebOrDesktopAttachmentPickerOption> options;
+  final Set<WebOrDesktopAttachmentPickerOption> options;
 
   /// The controller of the attachment picker.
   final StreamAttachmentPickerController controller;
@@ -347,7 +347,7 @@ class StreamMobileAttachmentPickerBottomSheet extends StatefulWidget {
   });
 
   /// The list of options.
-  final List<AttachmentPickerOption> options;
+  final Set<AttachmentPickerOption> options;
 
   /// The initial option to be selected.
   final AttachmentPickerOption? initialOption;
@@ -702,7 +702,7 @@ Widget mobileAttachmentPickerBuilder({
   return StreamMobileAttachmentPickerBottomSheet(
     controller: controller,
     onSendAttachments: Navigator.of(context).pop,
-    options: [
+    options: {
       if (customOptions != null) ...customOptions,
       AttachmentPickerOption(
         key: 'gallery-picker',
@@ -771,7 +771,7 @@ Widget mobileAttachmentPickerBuilder({
           );
         },
       ),
-    ],
+    },
   );
 }
 
@@ -787,7 +787,7 @@ Widget webOrDesktopAttachmentPickerBuilder({
 }) {
   return StreamWebOrDesktopAttachmentPickerBottomSheet(
     controller: controller,
-    options: [
+    options: {
       if (customOptions != null) ...customOptions,
       WebOrDesktopAttachmentPickerOption(
         key: 'image-picker',
@@ -807,7 +807,7 @@ Widget webOrDesktopAttachmentPickerBuilder({
         icon: StreamSvgIcon.files(size: 36).toIconThemeSvgIcon(),
         title: 'Upload a file',
       ),
-    ],
+    },
     onOptionTap: (context, controller, option) async {
       final attachment = await StreamAttachmentHandler.instance.pickFile(
         type: option.type.fileType,
