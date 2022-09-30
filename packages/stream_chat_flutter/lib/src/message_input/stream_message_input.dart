@@ -374,9 +374,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
   @override
   String? get restorationId => widget.restorationId;
 
-  void _focusNodeListener() {
-    if (_effectiveFocusNode.hasFocus) {}
-  }
+  // ignore: no-empty-block
+  void _focusNodeListener() {}
 
   int _timeOut = 0;
   Timer? _slowModeTimer;

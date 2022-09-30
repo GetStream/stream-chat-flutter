@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/options.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Shows a modal material design bottom sheet.
@@ -146,7 +144,9 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   );
 }
 
+/// Builds the attachment picker bottom sheet.
 class StreamPlatformAttachmentPickerBottomSheetBuilder extends StatefulWidget {
+  /// Creates a new instance of the widget.
   const StreamPlatformAttachmentPickerBottomSheetBuilder({
     super.key,
     this.initialAttachments,
@@ -155,13 +155,20 @@ class StreamPlatformAttachmentPickerBottomSheetBuilder extends StatefulWidget {
     required this.builder,
   });
 
+  /// The child widget.
   final Widget? child;
+
+  /// Builder for the attachment picker bottom sheet.
   final Widget Function(
     BuildContext context,
     StreamAttachmentPickerController controller,
     Widget? child,
   ) builder;
+
+  /// The initial attachments.
   final List<Attachment>? initialAttachments;
+
+  /// The controller.
   final StreamAttachmentPickerController? controller;
 
   @override

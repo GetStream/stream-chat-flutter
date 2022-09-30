@@ -16,9 +16,9 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 // Taken from https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing
 const maxCDNImageResolution = 16800000;
 
-///
+/// Widget used to pick media from the device gallery.
 class StreamGalleryPicker extends StatefulWidget {
-  ///
+  /// Creates a [StreamGalleryPicker] widget.
   const StreamGalleryPicker({
     super.key,
     this.limit = 50,
@@ -30,8 +30,13 @@ class StreamGalleryPicker extends StatefulWidget {
     this.mediaThumbnailScale = 1,
   });
 
+  /// Maximum number of media items that can be selected.
   final int limit;
+
+  /// List of selected media items.
   final Iterable<String> selectedMediaItems;
+
+  /// Callback called when an media item is selected.
   final ValueSetter<AssetEntity> onMediaItemSelected;
 
   /// Size of the attachment thumbnails.

@@ -12,8 +12,9 @@ const kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
 /// The default maximum number of media attachments.
 const kDefaultMaxAttachmentCount = 10;
 
+/// Controller class for [StreamAttachmentPicker].
 class StreamAttachmentPickerController extends ValueNotifier<List<Attachment>> {
-  ///
+  /// Creates a new instance of [StreamAttachmentPickerController].
   StreamAttachmentPickerController({
     this.initialAttachments,
     this.maxAttachmentSize = kDefaultMaxAttachmentSize,
@@ -24,8 +25,13 @@ class StreamAttachmentPickerController extends ValueNotifier<List<Attachment>> {
         ),
         super(initialAttachments ?? const []);
 
+  /// The max attachment size allowed in bytes.
   final int maxAttachmentSize;
+
+  /// The max attachment count allowed.
   final int maxAttachmentCount;
+
+  /// The initial attachments.
   final List<Attachment>? initialAttachments;
 
   @override
@@ -156,12 +162,15 @@ enum AttachmentPickerType {
   files,
 }
 
+/// Function signature for building the attachment picker option view.
 typedef AttachmentPickerOptionViewBuilder = Widget Function(
   BuildContext context,
   StreamAttachmentPickerController controller,
 );
 
+/// Model class for the attachment picker options.
 class AttachmentPickerOption {
+  /// Creates a new instance of [AttachmentPickerOption].
   const AttachmentPickerOption({
     required this.supportedTypes,
     required this.icon,
@@ -169,9 +178,16 @@ class AttachmentPickerOption {
     this.optionViewBuilder,
   });
 
+  /// The icon of the option.
   final Widget icon;
+
+  /// The title of the option.
   final String? title;
+
+  /// The supported types of the option.
   final Iterable<AttachmentPickerType> supportedTypes;
+
+  /// The option view builder.
   final AttachmentPickerOptionViewBuilder? optionViewBuilder;
 
   @override
@@ -185,7 +201,7 @@ class AttachmentPickerOption {
   int get hashCode => const IterableEquality().hash(supportedTypes);
 }
 
-///
+/// Helpful extensions for [StreamAttachmentPickerController].
 extension AttachmentPickerOptionTypeX on StreamAttachmentPickerController {
   /// Returns the list of available attachment picker options.
   Set<AttachmentPickerType> get currentAttachmentPickerTypes {
@@ -227,7 +243,9 @@ extension AttachmentPickerOptionTypeX on StreamAttachmentPickerController {
   }
 }
 
+/// The attachment picker option for the web or desktop platforms.
 class WebOrDesktopAttachmentPickerOption extends AttachmentPickerOption {
+  /// Creates a new instance of [WebOrDesktopAttachmentPickerOption].
   WebOrDesktopAttachmentPickerOption({
     required AttachmentPickerType type,
     required super.icon,
@@ -237,16 +255,21 @@ class WebOrDesktopAttachmentPickerOption extends AttachmentPickerOption {
   @override
   String get title => super.title!;
 
+  /// Type of the option.
   AttachmentPickerType get type => supportedTypes.first;
 }
 
+/// Function signature for the callback when the web or desktop attachment
+/// picker option gets tapped.
 typedef OnWebOrDesktopAttachmentPickerOptionTap = void Function(
   BuildContext context,
   StreamAttachmentPickerController controller,
   WebOrDesktopAttachmentPickerOption option,
 );
 
+/// Bottom sheet widget for the web or desktop version of the attachment picker.
 class StreamWebOrDesktopAttachmentPickerBottomSheet extends StatelessWidget {
+  /// Creates a new instance of [StreamWebOrDesktopAttachmentPickerBottomSheet].
   const StreamWebOrDesktopAttachmentPickerBottomSheet({
     super.key,
     required this.options,
@@ -254,8 +277,13 @@ class StreamWebOrDesktopAttachmentPickerBottomSheet extends StatelessWidget {
     this.onOptionTap,
   });
 
+  /// The list of options.
   final List<WebOrDesktopAttachmentPickerOption> options;
+
+  /// The controller of the attachment picker.
   final StreamAttachmentPickerController controller;
+
+  /// The callback when the option gets tapped.
   final OnWebOrDesktopAttachmentPickerOptionTap? onOptionTap;
 
   @override
@@ -287,7 +315,9 @@ class StreamWebOrDesktopAttachmentPickerBottomSheet extends StatelessWidget {
   }
 }
 
+/// Bottom sheet widget for the mobile version of the  attachment picker.
 class StreamMobileAttachmentPickerBottomSheet extends StatefulWidget {
+  /// Creates a new instance of [StreamMobileAttachmentPickerBottomSheet].
   const StreamMobileAttachmentPickerBottomSheet({
     super.key,
     required this.options,
@@ -296,9 +326,16 @@ class StreamMobileAttachmentPickerBottomSheet extends StatefulWidget {
     this.onSendAttachments,
   });
 
+  /// The list of options.
   final List<AttachmentPickerOption> options;
+
+  /// The initial option to be selected.
   final AttachmentPickerOption? initialOption;
+
+  /// The controller of the attachment picker.
   final StreamAttachmentPickerController controller;
+
+  /// The callback when the send button gets tapped.
   final ValueSetter<List<Attachment>>? onSendAttachments;
 
   @override
@@ -360,7 +397,6 @@ class _StreamMobileAttachmentPickerBottomSheetState
 
 class _AttachmentPickerOptions extends StatelessWidget {
   const _AttachmentPickerOptions({
-    super.key,
     required this.options,
     required this.currentOption,
     required this.controller,
@@ -450,9 +486,14 @@ typedef EndOfFrameCallbackErrorWidgetBuilder = Widget Function(
   StackTrace? stackTrace,
 );
 
+/// Function signature for a callback that is called when the end of the frame
+/// is reached.
 typedef EndOfFrameCallback = FutureOr<void> Function(BuildContext context);
 
+/// A widget that calls the given [callback] when the end of the frame is
+/// reached.
 class EndOfFrameCallbackWidget extends StatefulWidget {
+  /// Creates a new instance of [EndOfFrameCallbackWidget].
   const EndOfFrameCallbackWidget({
     super.key,
     required this.onEndOfFrame,
@@ -463,7 +504,7 @@ class EndOfFrameCallbackWidget extends StatefulWidget {
   /// The widget below this widget in the tree.
   final Widget? child;
 
-  /// The callback that will be called after the widget has been built.
+  /// The callback that is called when the end of the frame is reached.x
   final EndOfFrameCallback onEndOfFrame;
 
   /// The callback that will be called if the [onEndOfFrame] callback throws an
@@ -483,7 +524,6 @@ class _EndOfFrameCallbackWidgetState extends State<EndOfFrameCallbackWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.endOfFrame.then((_) async {
-      print('End of frame');
       if (mounted) {
         try {
           await widget.onEndOfFrame(context);
@@ -629,6 +669,7 @@ class OptionDrawer extends StatelessWidget {
   }
 }
 
+/// Returns the mobile version of the attachment picker.
 Widget mobileAttachmentPickerBuilder({
   required BuildContext context,
   required StreamAttachmentPickerController controller,
@@ -694,8 +735,8 @@ Widget mobileAttachmentPickerBuilder({
         icon: StreamSvgIcon.record(size: 36).toIconThemeSvgIcon(),
         supportedTypes: [AttachmentPickerType.videos],
         optionViewBuilder: (context, controller) {
-          return StreamVideoCapture(
-            onVideoCaptured: (video) async {
+          return StreamVideoPicker(
+            onVideoPicked: (video) async {
               if (video != null) {
                 await controller.addAttachment(video);
               }
@@ -708,6 +749,7 @@ Widget mobileAttachmentPickerBuilder({
   );
 }
 
+/// Returns the web or desktop version of the attachment picker.
 Widget webOrDesktopAttachmentPickerBuilder({
   required BuildContext context,
   required StreamAttachmentPickerController controller,

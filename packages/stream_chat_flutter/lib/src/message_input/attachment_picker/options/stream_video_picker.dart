@@ -4,18 +4,27 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-class StreamVideoCapture extends StatelessWidget {
-  const StreamVideoCapture({
+/// Widget used to capture video using the device camera.
+class StreamVideoPicker extends StatelessWidget {
+  /// Creates a [StreamVideoPicker] widget.
+  const StreamVideoPicker({
     super.key,
-    required this.onVideoCaptured,
+    required this.onVideoPicked,
     this.source = ImageSource.camera,
     this.preferredCameraDevice = CameraDevice.rear,
     this.maxDuration,
   });
 
-  final ValueSetter<Attachment?> onVideoCaptured;
+  /// Callback called when a video is picked.
+  final ValueSetter<Attachment?> onVideoPicked;
+
+  /// Source of the video to pick.
   final ImageSource source;
+
+  /// Preferred camera device to use.
   final CameraDevice preferredCameraDevice;
+
+  /// Maximum duration of the video.
   final Duration? maxDuration;
 
   @override
@@ -47,7 +56,7 @@ class StreamVideoCapture extends StatelessWidget {
             );
           });
 
-          onVideoCaptured.call(pickedVideo);
+          onVideoPicked.call(pickedVideo);
         },
         errorBuilder: (context, error, stacktrace) {
           return Column(

@@ -8,7 +8,9 @@ import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// Widget used to pick files from the device
 class StreamFilePicker extends StatelessWidget {
+  /// Creates a [StreamFilePicker] widget.
   const StreamFilePicker({
     super.key,
     required this.onFilePicked,
@@ -23,15 +25,34 @@ class StreamFilePicker extends StatelessWidget {
     this.lockParentWindow = false,
   });
 
+  /// Callback called when a file is picked.
   final ValueSetter<Attachment?> onFilePicked;
+
+  /// Title of the file picker dialog.
   final String? dialogTitle;
+
+  /// Initial directory of the file picker dialog.
   final String? initialDirectory;
+
+  /// Type of the file to pick.
   final FileType type;
+
+  /// Allowed extensions of the file to pick.
   final List<String>? allowedExtensions;
+
+  /// Callback called when the file picker is loading a file.
   final Function(FilePickerStatus)? onFileLoading;
+
+  /// Whether to allow compression of the file.
   final bool allowCompression;
+
+  /// Whether to include the file data in the [Attachment].
   final bool withData;
+
+  /// Whether to include the file read stream in the [Attachment].
   final bool withReadStream;
+
+  /// Whether to lock the parent window when the file picker is open.
   final bool lockParentWindow;
 
   @override

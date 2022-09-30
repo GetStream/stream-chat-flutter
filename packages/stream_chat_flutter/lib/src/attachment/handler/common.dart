@@ -4,12 +4,13 @@ import 'package:dio/dio.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// Downloads the [attachment] to the device and returns
+/// the path to the file.
 Future<String?> downloadWebOrDesktopAttachment(
   Attachment attachment, {
   ProgressCallback? onReceiveProgress,
   Map<String, dynamic>? queryParameters,
   CancelToken? cancelToken,
-  bool deleteOnError = true,
   Options? options,
 }) async {
   final type = attachment.type;

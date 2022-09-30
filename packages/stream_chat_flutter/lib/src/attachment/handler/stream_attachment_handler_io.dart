@@ -12,7 +12,9 @@ import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// StreamAttachmentHandler implementation for desktop.
 class StreamAttachmentHandlerDesktop extends StreamAttachmentHandler {
+  /// Returns the singleton instance of [StreamAttachmentHandler].
   StreamAttachmentHandlerDesktop() : super.__();
 
   @override
@@ -21,7 +23,6 @@ class StreamAttachmentHandlerDesktop extends StreamAttachmentHandler {
     ProgressCallback? onReceiveProgress,
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
-    bool deleteOnError = true,
     Options? options,
   }) {
     return downloadWebOrDesktopAttachment(
@@ -29,12 +30,12 @@ class StreamAttachmentHandlerDesktop extends StreamAttachmentHandler {
       onReceiveProgress: onReceiveProgress,
       queryParameters: queryParameters,
       cancelToken: cancelToken,
-      deleteOnError: deleteOnError,
       options: options,
     );
   }
 }
 
+/// StreamAttachmentHandler implementation for io.
 class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
   StreamAttachmentHandler.__();
 
@@ -47,6 +48,8 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
 
   static StreamAttachmentHandler? _instance;
 
+  /// Returns the singleton instance of [StreamAttachmentHandler].
+  // ignore: prefer_constructors_over_static_methods
   static StreamAttachmentHandler get instance =>
       _instance ??= StreamAttachmentHandler._();
 
@@ -156,7 +159,6 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     ProgressCallback? onReceiveProgress,
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
-    bool deleteOnError = true,
     Options? options,
   }) async {
     final type = attachment.type;

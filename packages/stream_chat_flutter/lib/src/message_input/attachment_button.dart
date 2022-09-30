@@ -18,6 +18,7 @@ class AttachmentButton extends StatelessWidget {
   /// The callback to perform when the button is tapped or clicked.
   final VoidCallback onPressed;
 
+  /// Returns a copy of this object with the given fields updated.
   AttachmentButton copyWith({
     Key? key,
     Color? color,

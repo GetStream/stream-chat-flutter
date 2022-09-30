@@ -6,7 +6,9 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
+/// Widget that displays a photo or video item from the gallery.
 class StreamPhotoGalleryTile extends StatelessWidget {
+  /// Creates a new instance of [StreamPhotoGalleryTile].
   const StreamPhotoGalleryTile({
     super.key,
     required this.media,
@@ -19,8 +21,10 @@ class StreamPhotoGalleryTile extends StatelessWidget {
     this.thumbnailScale = 1,
   });
 
+  /// The media item to display.
   final AssetEntity media;
 
+  /// Whether the media item is selected.
   final bool selected;
 
   /// Called when the user taps this grid tile.

@@ -29,7 +29,9 @@ const defaultStreamPhotoGalleryDelegate =
 typedef StreamPhotoGalleryIndexedWidgetBuilder
     = StreamScrollViewIndexedWidgetBuilder<AssetEntity, StreamPhotoGalleryTile>;
 
+/// Widget used to display a gallery of photos in the form of grid.
 class StreamPhotoGallery extends StatelessWidget {
+  /// Creates a [StreamPhotoGallery] widget.
   const StreamPhotoGallery({
     super.key,
     required this.controller,

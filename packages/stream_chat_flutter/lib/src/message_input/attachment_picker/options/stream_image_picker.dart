@@ -9,7 +9,9 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/src/utils/helpers.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// Widget used to pick images from the device.
 class StreamImagePicker extends StatelessWidget {
+  /// Creates a [StreamImagePicker] widget.
   const StreamImagePicker({
     super.key,
     required this.onImagePicked,
@@ -20,11 +22,22 @@ class StreamImagePicker extends StatelessWidget {
     this.preferredCameraDevice = CameraDevice.rear,
   });
 
+  /// Callback called when an image is picked.
   final ValueSetter<Attachment?> onImagePicked;
+
+  /// Source of the image to pick.
   final ImageSource source;
+
+  /// Maximum width of the image.
   final double? maxWidth;
+
+  /// Maximum height of the image.
   final double? maxHeight;
+
+  /// Quality of the image.
   final int? imageQuality;
+
+  /// Preferred camera device to use.
   final CameraDevice preferredCameraDevice;
 
   @override
