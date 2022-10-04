@@ -1544,6 +1544,7 @@ class Channel {
 
   /// Call this method to dispose the channel client.
   void dispose() {
+    client.state.channels.remove('$_type:$_id');
     state?.dispose();
     _keyStrokeHandler.cancel();
   }
