@@ -24,7 +24,7 @@ class IndexedKey extends LocalKey {
   }
 
   @override
-  int get hashCode => hashValues(runtimeType, key);
+  int get hashCode => Object.hash(runtimeType, key);
 
   @override
   String toString() => '(IndexedKey) index: $index, key: $key';

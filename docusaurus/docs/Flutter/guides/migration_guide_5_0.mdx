@@ -1,0 +1,113 @@
+---
+id: migration_guide_5_0
+sidebar_position: 14
+title: Migration Guide v5.0
+---
+
+**Version 5.0.0** of the Stream Chat Flutter SDK UI package has been overhauled to better support larger screen sizes, and provide native feeling web and desktop platform interactions in a way that feels intuitive and expected.
+
+These newly introduced changes are platform-dependent, and will not affect your current Android and iOS builds.
+
+This guide is intended to enumerate and better explain the changes in the SDK.
+
+If you find any bugs or have any questions, please file an [issue on our GitHub repository](https://github.com/GetStream/stream-chat-flutter/issues). We want to support you as much as we can with this migration.
+
+Code examples:
+
+- See our [Stream Chat Flutter tutorial](https://getstream.io/chat/flutter/tutorial/) for an up-to-date guide using the latest Stream Chat version.
+- See the [Stream Flutter Samples repository](https://github.com/GetStream/flutter-samples) with our fully-fledged messaging [sample application](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1).
+
+All of our documentation has also been updated to support v5, so all of the guides and examples will have updated code.
+
+### Dependencies
+
+To migrate to v5.0.0, update your `pubspec.yaml` with the correct Stream chat package you're using:
+
+```yaml
+dependencies:
+	stream_chat_flutter: ^5.0.0 # full UI, core and client packages
+	stream_chat_flutter_core: ^5.0.0 # core and client packages
+	stream_chat: ^5.0.0 # client package
+```
+
+---
+
+## Desktop and Web Support: What Changed?
+
+This section highlights our efforts on Desktop and Web support.
+
+### Supporting Larger Screens
+
+We've added support for larger screens, and have made changes to the UI to better support larger screen sizes.
+
+- Widgets are constrained to a maximum size, for example, appropriate message sizing for larger screens.
+- UI changes to make use of larger screen real estate, for example, reactions are added to the bottom of a message on desktop and web.
+
+Below is an example running on macOS, with a split-screen view showing channels on the left and messages on the right. 
+
+![MacOS split](../assets/mac_os_split.png)
+
+### Native Platform Interactions
+
+The user experience of interacting with a desktop application is different than a mobile counterpart. For a Flutter application to feel native and intuitive on the platform it is running, there are a number of factors to consider:
+
+- Input controls: touch, keyboard, and mouse interactions
+- Native file-system or gallery access
+- Shortcuts
+- Dialogs
+
+By default, Stream Chat Flutter will use the correct input controls and visual elements for the target platform. For example, touch and swipe controls will be the default on mobile, while on web and desktop these will be disabled and interactions with the mouse and keyboard will be preferred.
+
+## What's New?
+
+We improved the overall user experience of the Stream Chat Flutter SDK, and added new features to make it easier to customize the SDK to your needs.
+
+We've also fixed a number of bugs and improved the overall stability of the SDK.
+
+### StreamChatConfiguration
+
+The `StreamChatConfiguration` class is a new inherited widget that allows you to configure the Stream Chat Flutter SDK. 
+
+It provides a few configuration options. For example it lets you specify if you want to `enforceUniqueReactions` or not, and allows you to set the `reactionIcons` to use in your app.
+
+You can always retrieve the current configuration using `StreamChatConfiguration.of(context)`.
+
+### StreamMemberListView and StreamMemberGridView
+
+The `StreamMemberListView` and `StreamMemberGridView` widgets are new widgets that allows you to display a list of members in a channel.
+
+Check out the dedicated [documentation](../stream_chat_flutter/stream_member_list_view.mdx) for more information.
+
+### Attachment picker
+
+As part of the v5 release, we've refactored the `AttachmentPicker` to be more flexible and customizable. This allows you to use the `AttachmentPicker` in a variety of ways, and to customize the UI to your liking.
+
+Check out the dedicated [guide](./attachment_picker_guide) for more information.
+
+## Breaking changes
+
+The following components have been deprecated in v5.0.0:
+
+- `StreamImageAttachment.size` has been removed in favor of `StreamImageAttachment.constraints`.
+- `StreamFileAttachment.size` has been removed in favor of `StreamFileAttachment.constraints`.
+- `StreamGiphyAttachment.size` has been removed in favor of `StreamGiphyAttachment.constraints`.
+- `StreamVideoAttachment.size` has been removed in favor of `StreamVideoAttachment.constraints`.
+- `StreamVideoThumbnailImage.width` and `StreamVideoThumbnailImage.height` have been removed in favor of `StreamVideoThumbnailImage.constraints`.
+
+In order to fix these deprecations in your code you can use a `BoxConstraints.tight` passing the desidered fixed size as parameter.
+
+```dart
+/// BEFORE
+StreamImageAttachment(
+  size: size,
+)
+
+/// AFTER
+StreamImageAttachment(
+  constraints: BoxConstraints.tight(size),
+)
+```
+
+- Removed `StreamMessageInput.customOverlays` in favor of `StreamMessageInput.customAutocompleteTriggers`. Make sure to read the guide on [Adding Custom Autocomplete Triggers](./autocomplete_triggers.mdx) to learn how to migrate your code.
+
+- Removed the default emoji overlay picker. Make sure to read the guide on [Adding Custom Autocomplete Triggers](./autocomplete_triggers.mdx) to learn how to migrate your code.
