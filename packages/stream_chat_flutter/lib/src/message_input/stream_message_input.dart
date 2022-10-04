@@ -18,7 +18,6 @@ import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

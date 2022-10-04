@@ -10,7 +10,6 @@ import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/message_reactions_modal.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// The display behaviour of a widget

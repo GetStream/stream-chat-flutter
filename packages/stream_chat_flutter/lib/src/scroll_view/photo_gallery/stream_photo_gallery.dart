@@ -3,18 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart'
     show AssetEntity, ThumbnailFormat, ThumbnailSize;
 
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery_controller.dart';
-import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery_tile.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_empty_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_indicator.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default grid delegate  for [StreamPhotoGallery].
 const defaultStreamPhotoGalleryDelegate =

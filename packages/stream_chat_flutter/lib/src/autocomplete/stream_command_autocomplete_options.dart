@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/autocomplete/stream_autocomplete.dart';
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
-
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template commands_overlay}
 /// Overlay for displaying commands that can be used

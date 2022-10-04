@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/theme/themes.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamDeletedMessage}
 /// Displays that a message was deleted at this position in the message list.
