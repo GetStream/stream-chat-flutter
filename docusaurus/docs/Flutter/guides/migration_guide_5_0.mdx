@@ -64,6 +64,27 @@ By default, Stream Chat Flutter will use the correct input controls and visual e
 
 On desktop and web it's also possible to add attachments by simply dragging them into the message input box.
 
+### All UI/Behaviour Changes for Desktop and Web
+
+- Right-click context menus for messages and full-screen attachments.
+- Upload and download attachments using the native desktop file system.
+- Press the "enter" key to send a message.
+- If you are quoting a message and have not yet typed any text, you can press the "esc" key to remove the quoted message.
+- A dedicated "X" button for removing a quoted message with your mouse.
+- Drag and drop attachment files to `StreamMessageInput`.
+- New `StreamMessageInput.draggingBorder` property to customize the border color of the message input when dropping a file.
+- Message reactions bubbles differ per platform.
+- Hovering over a message reaction will show the users that have reacted to the message.
+- Desktop attachment sharing UI.
+- Selectable message text with mouse input.
+- Gallery navigation controls with keyboard shortcuts (left and right arrow keys).
+- Appropriate message sizing for large screens.
+- Right-click context menu for `StreamMessageListView` items.
+- `StreamMessageListView` items not swipeable on desktop & web.
+- Video support for Windows & Linux through `dart_vlc`.
+- Video support for macOS through `video_player_macos`.
+- Replace bottom sheets with dialogs where appropriate.
+
 ## What's New?
 
 We improved the overall user experience of the Stream Chat Flutter SDK and added new features to make it easier to customize the SDK to your needs.
@@ -78,6 +99,8 @@ It provides a few configuration options. For example, it lets you specify if you
 
 You can retrieve the current configuration using `StreamChatConfiguration.of(context)`, as long as there is a `StreamChat` or `StreamChatConfiguration` widget higher up the widget tree. You can provide a custom `StreamChatConfigurationData` directly to `StreamChat` or wrap a section of the widget tree with a `StreamChatConfiguration`.
 
+For additional information, see [#1125](https://github.com/GetStream/stream-chat-flutter/issues/1125). The `defaultUserImage`, `placeholderUserImage`, `reactionIcons`, and `enforceUniqueReactions` have been refactored out of `StreamChatThemeData` and into the new`StreamChatConfigurationData` class.
+
 ### StreamMemberListView and StreamMemberGridView
 
 The `StreamMemberListView` and `StreamMemberGridView` widgets are new widgets that allow you to display a list of members in a channel.
@@ -90,9 +113,41 @@ As part of the v5 release, we've refactored the `AttachmentPicker` to be more fl
 
 Check out the dedicated [guide](./attachment_picker_guide.mdx) for more information.
 
-## Breaking changes
+### Other Changes
+
+The following was also introduced:
+
+- Added support for additional text field params in`StreamMessageInput`: `maxLines`, `minLines`, `textInputAction`, `keyboardType`, and `textCapitalization`.
+- Added `showStreamAttachmentPickerModalBottomSheet` to show the attachment picker modal bottom sheet.
+- Added `onQuotedMessageCleared` to `StreamMessageInput`
+- `selected` and `selectedTileColor` to `StreamChannelListTile`
+- Added `AttachmentUploadStateBuilder.inProgressBuilder` to `AttachmentUploadStateBuilder`
+- Added `AttachmentUploadStateBuilder.successBuilder` to `AttachmentUploadStateBuilder`
+- Added `AttachmentUploadStateBuilder.failedBuilder` to `AttachmentUploadStateBuilder`
+- Added `StreamAutocomplete` widget for auto-complete triggers in `StreamMessageInput`.
+- Added `StreamMessageInput.customAutocompleteTriggers` to allow users to define their custom triggers.
+
+New translations:
+
+- `couldNotReadBytesFromFileError`
+- `downloadLabel`
+- `toggleMuteUnmuteAction`
+- `toggleMuteUnmuteGroupQuestion`
+- `toggleMuteUnmuteGroupText`
+- `toggleMuteUnmuteUserQuestion`
+- `toggleMuteUnmuteUserText`
+
+## Deprecated
 
 The following components have been deprecated in v5.0.0:
+
+- Deprecated `showConfirmationDialog` in favor of `showConfirmationBottomSheet`
+- Deprecated `showInfoDialog` in favor of `showInfoBottomSheet`
+- Deprecated `wrapAttachmentWidget` in favor of the `WrapAttachmentWidget` class
+
+## Breaking changes
+
+The following components have been removed in v5.0.0:
 
 - `StreamImageAttachment.size` has been removed in favor of `StreamImageAttachment.constraints`.
 - `StreamFileAttachment.size` has been removed in favor of `StreamFileAttachment.constraints`.
