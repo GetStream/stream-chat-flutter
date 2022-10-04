@@ -435,7 +435,6 @@ Widget wrapAttachmentWidget(
     WrapAttachmentWidget(
       attachmentWidget: attachmentWidget,
       attachmentShape: attachmentShape,
-      reverse: reverse,
     );
 
 /// Wraps attachment widget with custom shape
@@ -445,7 +444,6 @@ class WrapAttachmentWidget extends StatelessWidget {
     super.key,
     required this.attachmentWidget,
     required this.attachmentShape,
-    required this.reverse,
   });
 
   /// The widget to wrap
@@ -453,9 +451,6 @@ class WrapAttachmentWidget extends StatelessWidget {
 
   /// The shape of the wrapper
   final ShapeBorder attachmentShape;
-
-  /// Whether to reverse the wrapper shape
-  final bool reverse;
 
   @override
   Widget build(BuildContext context) {

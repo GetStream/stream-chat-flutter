@@ -127,7 +127,6 @@ class StreamMessageWidget extends StatefulWidget {
                     ),
                   ),
                   attachmentShape: border,
-                  reverse: reverse,
                 ),
               );
             }
@@ -154,7 +153,6 @@ class StreamMessageWidget extends StatefulWidget {
                 imageThumbnailCropType: imageAttachmentThumbnailCropType,
               ),
               attachmentShape: border,
-              reverse: reverse,
             );
           },
           'video': (context, message, attachments) {
@@ -186,7 +184,6 @@ class StreamMessageWidget extends StatefulWidget {
                 }).toList(),
               ),
               attachmentShape: border,
-              reverse: reverse,
             );
           },
           'giphy': (context, message, attachments) {
@@ -217,7 +214,6 @@ class StreamMessageWidget extends StatefulWidget {
                 }).toList(),
               ),
               attachmentShape: border,
-              reverse: reverse,
             );
           },
           'file': (context, message, attachments) {
@@ -248,8 +244,7 @@ class StreamMessageWidget extends StatefulWidget {
                               }
                             : null,
                       ),
-                      attachmentShape: border,
-                      reverse: reverse,
+                      attachmentShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     );
                   })
                   .insertBetween(SizedBox(
