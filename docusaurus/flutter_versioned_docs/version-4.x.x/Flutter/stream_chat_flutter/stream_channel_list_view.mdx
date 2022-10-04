@@ -1,0 +1,107 @@
+---
+id: stream_channel_list_view
+sidebar_position: 4
+title: StreamChannelListView
+---
+
+A Widget For Displaying A List Of Channels
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChannelListView-class.html)
+
+![](../assets/channel_list_view.png)
+
+### Background
+
+Channels are fundamental elements of Stream Chat and constitute shared spaces which allow users to
+message each other.
+
+1:1 conversations and groups are both examples of channels, albeit with some (distinct/non-distinct)
+differences. Displaying the list of channels that a user is a part of is a pattern present in most messaging apps.
+
+The `StreamChannelListView` widget allows displaying a list of channels to a user. By default, this is NOT
+ONLY the channels that the user is a part of. This section goes into setting up and using a `StreamChannelListView`
+widget.
+
+:::note
+Make sure to check the [StreamChannelListController](./stream_channel_list_controller.mdx) documentation for more information on how to use the controller to manipulate the `StreamChannelListView`.
+:::
+
+### Basic Example
+
+Here is a basic example of the `StreamChannelListView` widget. It consists of the main widget itself, a `StreamChannelListController` to control the list of channels and a callback to handle the tap of a channel.
+
+```dart
+class ChannelListPage extends StatefulWidget {
+  const ChannelListPage({
+    Key? key,
+    required this.client,
+  }) : super(key: key);
+
+  final StreamChatClient client;
+
+  @override
+  State<ChannelListPage> createState() => _ChannelListPageState();
+}
+
+class _ChannelListPageState extends State<ChannelListPage> {
+  late final _controller = StreamChannelListController(
+    client: widget.client,
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).currentUser!.id],
+    ),
+    sort: const [SortOption('last_message_at')],
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: RefreshIndicator(
+          onRefresh: _controller.refresh,
+          child: StreamChannelListView(
+            controller: _controller,
+            onChannelTap: (channel) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StreamChannel(
+                  channel: channel,
+                  child: const ChannelPage(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+```
+
+This example by default displays the channels that a user is a part of. Now let's look at customizing
+the widget.
+
+### Customizing the Channel Preview
+
+A common aspect of the widget needed to be tweaked according to each app is the Channel Preview (the
+Channel tile in the list). To do this, we use the `itemBuilder` parameter like this:
+
+```dart
+StreamChannelListView(
+  ...
+  itemBuilder: (context, channels, index, defaultTile) {
+    return ListTile(
+      tileColor: Colors.amberAccent,
+      title: Center(
+        child: StreamChannelName(channel: channels[index]),
+      ),
+    );
+  },
+),
+```
+
+Which gives you a new Channel preview in the list:
+
+![](../assets/channel_preview.png)

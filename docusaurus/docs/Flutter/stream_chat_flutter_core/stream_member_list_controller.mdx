@@ -1,81 +1,81 @@
 ---
-id: stream_user_list_controller
+id: stream_member_list_controller
 sidebar_position: 5
-title: StreamUserListController
+title: StreamMemberListController
 ---
 
-A Widget For Controlling A List Of Users
+A Widget For Controlling A List Of Members
 
-Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter_core/latest/stream_chat_flutter_core/StreamUserListController-class.html)
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter_core/latest/stream_chat_flutter_core/StreamMemberListController-class.html)
 
 ### Background
 
-The `StreamUserListController` is a controller class that allows you to control a list of users.
-`StreamUserListController` is a required parameter of the `StreamUserListView` widget.
-Check the [`StreamUserListView` documentation](../stream_chat_flutter/stream_user_list_view.mdx) to read more about that.
+The `StreamMemberListController` is a controller class that allows you to control a list of users.
+`StreamMemberListController` is a required parameter of the `StreamMemberListView` widget.
+Check the [`StreamMemberListView` documentation](../stream_chat_flutter/stream_member_list_view.mdx) to read more about that.
 
 ### Basic Example
 
-Building a custom user list is a very common task. Here is an example of how to use the `StreamUserListController` to build a simple list with pagination.
+Building a custom member list is a very common task. Here is an example of how to use the `StreamMemberListController` to build a simple list with pagination.
 
-First of all we should create an instance of the `StreamUserListController` and provide it with the `StreamChatClient` instance.
+First of all we should create an instance of the `StreamMemberListController` and provide it with the `StreamChatClient` instance.
 You can also add a `Filter`, a list of `SortOption`s and other pagination-related parameters.
 
 ```dart
-class UserListPageState extends State<UserListPage> {
+class MemberListPageState extends State<MemberListPage> {
   /// Controller used for loading more data and controlling pagination in
-  /// [StreamUserListController].
-  late final userListController = StreamUserListController(
+  /// [StreamMemberListController].
+  late final memberListController = StreamMemberListController(
     client: StreamChatCore.of(context).client,
   );
 ```
 
-Make sure you call `userListController.doInitialLoad()` to load the initial data and `userListController.dispose()` when the controller is no longer required.
+Make sure you call `memberListController.doInitialLoad()` to load the initial data and `memberListController.dispose()` when the controller is no longer required.
 
 ```dart
 @override
 void initState() {
-  userListController.doInitialLoad();
+  memberListController.doInitialLoad();
   super.initState();
 }
 
 @override
 void dispose() {
-  userListController.dispose();
+  memberListController.dispose();
   super.dispose();
 }
 ```
 
-The `StreamUserListController` is basically a [`PagedValueNotifier`](./paged_value_notifier.mdx) that notifies you when the list of users has changed.
-You can use a [`PagedValueListenableBuilder`](./paged_value_listenable_builder.mdx) to build your UI depending on the latest users.
+The `StreamMemberListController` is basically a [`PagedValueNotifier`](./paged_value_notifier.mdx) that notifies you when the list of members has changed.
+You can use a [`PagedValueListenableBuilder`](./paged_value_listenable_builder.mdx) to build your UI depending on the latest members.
 
 ```dart
 @override
 Widget build(BuildContext context) => Scaffold(
-      body: PagedValueListenableBuilder<int, List<User>>(
-        valueListenable: userListController,
+      body: PagedValueListenableBuilder<int, List<Member>>(
+        valueListenable: memberListController,
         builder: (context, value, child) {
           return value.when(
-            (users, nextPageKey, error) => LazyLoadScrollView(
+            (members, nextPageKey, error) => LazyLoadScrollView(
               onEndOfPage: () async {
                 if (nextPageKey != null) {
-                  userListController.loadMore(nextPageKey);
+                  memberListController.loadMore(nextPageKey);
                 }
               },
               child: ListView.builder(
-                /// We're using the users length when there are no more
+                /// We're using the members length when there are no more
                 /// pages to load and there are no errors with pagination.
                 /// In case we need to show a loading indicator or and error
                 /// tile we're increasing the count by 1.
                 itemCount: (nextPageKey != null || error != null)
-                    ? users.length + 1
-                    : users.length,
+                    ? members.length + 1
+                    : members.length,
                 itemBuilder: (BuildContext context, int index) {
-                  if (index == users.length) {
+                  if (index == members.length) {
                     if (error != null) {
                       return TextButton(
                           onPressed: () {
-                            userListController.retry();
+                            memberListController.retry();
                           },
                           child: Text(error.message),
                         );
@@ -83,7 +83,7 @@ Widget build(BuildContext context) => Scaffold(
                     return CircularProgressIndicator();
                   }
 
-                  final _item = users[index];
+                  final _item = members[index];
                   return ListTile(
                     title: Text(_item.name ?? ''),
                   );
