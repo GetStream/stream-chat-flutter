@@ -4,11 +4,11 @@ sidebar_position: 14
 title: Migration Guide v5.0
 ---
 
-**Version 5.0.0** of the Stream Chat Flutter SDK UI package has been overhauled to better support larger screen sizes, and provide native feeling web and desktop platform interactions in a way that feels intuitive and expected.
+**Version 5.0.0** of the Stream Chat Flutter SDK UI package has been overhauled to support larger screen sizes better and provide native feeling web and desktop platform interactions that feel intuitive and expected.
 
-These newly introduced changes are platform-dependent, and will not affect your current Android and iOS builds.
+These newly introduced changes are platform-dependent and will not affect your current Android and iOS builds.
 
-This guide is intended to enumerate and better explain the changes in the SDK.
+This guide enumerates and better explains the SDK changes introduced in v5.
 
 If you find any bugs or have any questions, please file an [issue on our GitHub repository](https://github.com/GetStream/stream-chat-flutter/issues). We want to support you as much as we can with this migration.
 
@@ -17,7 +17,7 @@ Code examples:
 - See our [Stream Chat Flutter tutorial](https://getstream.io/chat/flutter/tutorial/) for an up-to-date guide using the latest Stream Chat version.
 - See the [Stream Flutter Samples repository](https://github.com/GetStream/flutter-samples) with our fully-fledged messaging [sample application](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1).
 
-All of our documentation has also been updated to support v5, so all of the guides and examples will have updated code.
+Our documentation has also been updated to support v5, so all guides and examples will have updated code.
 
 ### Dependencies
 
@@ -34,55 +34,61 @@ dependencies:
 
 ## Desktop and Web Support: What Changed?
 
-This section highlights our efforts on Desktop and Web support.
+This section highlights our efforts on Desktop (macOS, Windows, and Linux) and Web support.
+
+### Setup
+
+See the [setup guide](../stream_chat_flutter/setup.mdx) for platform specific instructions.
 
 ### Supporting Larger Screens
 
-We've added support for larger screens, and have made changes to the UI to better support larger screen sizes.
+We've added support for larger screens and have made changes to the UI to support larger screen sizes better.
 
 - Widgets are constrained to a maximum size, for example, appropriate message sizing for larger screens.
-- UI changes to make use of larger screen real estate, for example, reactions are added to the bottom of a message on desktop and web.
+- UI changes to use larger screen real estate. For example, reactions are added to the bottom of a message on desktop and web.
 
-Below is an example running on macOS, with a split-screen view showing channels on the left and messages on the right. 
+Below is an example running on macOS, with a split-screen view showing channels on the left and messages on the right.
 
 ![MacOS split](../assets/mac_os_split.png)
 
 ### Native Platform Interactions
 
-The user experience of interacting with a desktop application is different than a mobile counterpart. For a Flutter application to feel native and intuitive on the platform it is running, there are a number of factors to consider:
+The user experience of interacting with a desktop application differs from a mobile counterpart. There are several factors to consider for an application to feel native and intuitive on the platform it is running, for example:
 
 - Input controls: touch, keyboard, and mouse interactions
-- Native file-system or gallery access
+- Native file system or gallery access (as well as sharing functionality)
 - Shortcuts
 - Dialogs
 
 By default, Stream Chat Flutter will use the correct input controls and visual elements for the target platform. For example, touch and swipe controls will be the default on mobile, while on web and desktop these will be disabled and interactions with the mouse and keyboard will be preferred.
 
+On desktop and web it's also possible to add attachments by simply dragging them into the message input box.
+
 ## What's New?
 
-We improved the overall user experience of the Stream Chat Flutter SDK, and added new features to make it easier to customize the SDK to your needs.
+We improved the overall user experience of the Stream Chat Flutter SDK and added new features to make it easier to customize the SDK to your needs.
 
-We've also fixed a number of bugs and improved the overall stability of the SDK.
+We've also fixed several bugs and improved the overall stability of the SDK.
 
 ### StreamChatConfiguration
 
-The `StreamChatConfiguration` class is a new inherited widget that allows you to configure the Stream Chat Flutter SDK. 
+The `StreamChatConfiguration` class is a new inherited widget that allows you to configure the Stream Chat Flutter SDK.
 
-It provides a few configuration options. For example it lets you specify if you want to `enforceUniqueReactions` or not, and allows you to set the `reactionIcons` to use in your app.
+It provides a few configuration options. For example, it lets you specify if you want to `enforceUniqueReactions` or not and allows you to set the `reactionIcons` to use in your app.
 
-You can always retrieve the current configuration using `StreamChatConfiguration.of(context)`.
+You can retrieve the current configuration using `StreamChatConfiguration.of(context)`, as long as there is a `StreamChat` or `StreamChatConfiguration` widget higher up the widget tree. You can provide a custom `StreamChatConfigurationData` directly to `StreamChat` or wrap a section of the widget tree with a `StreamChatConfiguration`.
 
 ### StreamMemberListView and StreamMemberGridView
 
-The `StreamMemberListView` and `StreamMemberGridView` widgets are new widgets that allows you to display a list of members in a channel.
+The `StreamMemberListView` and `StreamMemberGridView` widgets are new widgets that allow you to display a list of members in a channel.
 
 Check out the dedicated [documentation](../stream_chat_flutter/stream_member_list_view.mdx) for more information.
 
-### Attachment picker
+### Attachment Picker
 
-As part of the v5 release, we've refactored the `AttachmentPicker` to be more flexible and customizable. This allows you to use the `AttachmentPicker` in a variety of ways, and to customize the UI to your liking.
+As part of the v5 release, we've refactored the `AttachmentPicker` to be more flexible and customizable. This allows you to use the `AttachmentPicker` in various ways and customize the UI to your liking.
 
-Check out the dedicated [guide](./attachment_picker_guide) for more information.
+Check out the dedicated [guide](./attachment_picker_guide.mdx) for more information.
 
 ## Breaking changes
 
@@ -94,7 +100,7 @@ The following components have been deprecated in v5.0.0:
 - `StreamVideoAttachment.size` has been removed in favor of `StreamVideoAttachment.constraints`.
 - `StreamVideoThumbnailImage.width` and `StreamVideoThumbnailImage.height` have been removed in favor of `StreamVideoThumbnailImage.constraints`.
 
-In order to fix these deprecations in your code you can use a `BoxConstraints.tight` passing the desidered fixed size as parameter.
+To fix these deprecations in your code, you can use a `BoxConstraints.tight` passing the desired fixed size as a parameter.
 
 ```dart
 /// BEFORE
@@ -108,6 +114,6 @@ StreamImageAttachment(
 )
 ```
 
-- Removed `StreamMessageInput.customOverlays` in favor of `StreamMessageInput.customAutocompleteTriggers`. Make sure to read the guide on [Adding Custom Autocomplete Triggers](./autocomplete_triggers.mdx) to learn how to migrate your code.
+- Removed `StreamMessageInput.customOverlays` in favor of `StreamMessageInput.customAutocompleteTriggers`. Read the guide on [Adding Custom Autocomplete Triggers](./autocomplete_triggers.mdx) to learn how to migrate your code.
 
-- Removed the default emoji overlay picker. Make sure to read the guide on [Adding Custom Autocomplete Triggers](./autocomplete_triggers.mdx) to learn how to migrate your code.
+- Removed the default emoji overlay picker. Read the guide on [Adding Custom Autocomplete Triggers](./autocomplete_triggers.mdx) to learn how to migrate your code.

@@ -4,7 +4,7 @@ sidebar_position: 5
 title: StreamMemberListController
 ---
 
-A Widget For Controlling A List Of Members
+A widget for controlling a list of members.
 
 Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter_core/latest/stream_chat_flutter_core/StreamMemberListController-class.html)
 
@@ -18,8 +18,8 @@ Check the [`StreamMemberListView` documentation](../stream_chat_flutter/stream_m
 
 Building a custom member list is a very common task. Here is an example of how to use the `StreamMemberListController` to build a simple list with pagination.
 
-First of all we should create an instance of the `StreamMemberListController` and provide it with the `StreamChatClient` instance.
-You can also add a `Filter`, a list of `SortOption`s and other pagination-related parameters.
+First, create an instance of the `StreamMemberListController` and provide it with the `StreamChatClient` instance.
+You can also add a `Filter`, a list of `SortOption`s, and other pagination-related parameters.
 
 ```dart
 class MemberListPageState extends State<MemberListPage> {
@@ -109,4 +109,4 @@ Widget build(BuildContext context) => Scaffold(
     );
 ```
 
-In this case we're using the [`LazyLoadScrollView`](./lazy_load_scroll_view.mdx) widget to load more data when the user scrolls to the bottom of the list.
+In this case, we're using the [LazyLoadScrollView](./lazy_load_scroll_view.mdx) widget to load more data when the user scrolls to the bottom of the list.
