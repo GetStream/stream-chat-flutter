@@ -175,7 +175,7 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
     this.size = const ThumbnailSize(400, 400),
     this.format = ThumbnailFormat.jpeg,
     this.quality = 100,
-    this.scale = 2,
+    this.scale = 1,
   });
 
   /// Media to load
