@@ -1,0 +1,74 @@
+---
+id: stream_member_grid_view
+sidebar_position: 7
+title: StreamMemberGridView
+---
+
+A widget for displaying and selecting members in a grid view.
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamMemberGridView-class.html)
+
+### Background
+
+The `StreamMemberGridView` widget allows displaying a list of members in a `GridView`.
+
+:::note
+See the [StreamMemberListView](./stream_member_list_view.mdx) documentation for displaying members in a `ListView`.
+:::
+
+### Basic Example
+
+```dart
+class MemberGridPage extends StatefulWidget {
+  const MemberGridPage({
+    Key? key,
+    required this.client,
+  }) : super(key: key);
+
+  final StreamChatClient client;
+
+  @override
+  State<MemberGridPage> createState() => _MemberGridPageState();
+}
+
+class _MemberGridPageState extends State<MemberGridPage> {
+  late final _controller = StreamMemberListController(
+    client: widget.client,
+    limit: 25,
+    filter: Filter.and([
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+    ]),
+    sort: [
+      SortOption(
+        'name',
+        direction: 1,
+      ),
+    ],
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: RefreshIndicator(
+          onRefresh: _controller.refresh,
+          child: StreamMemberGridView(
+            controller: _controller,
+            onChannelTap: (channel) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StreamChannel(
+                  channel: channel,
+                  child: const ChannelPage(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+```

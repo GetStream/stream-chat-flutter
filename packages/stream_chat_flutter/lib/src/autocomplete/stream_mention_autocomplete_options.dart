@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/autocomplete/stream_autocomplete.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/user/user_mention_tile.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
-import 'package:stream_chat_flutter/src/utils/typedefs.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template user_mentions_overlay}
 /// Overlay for displaying users that can be mentioned.

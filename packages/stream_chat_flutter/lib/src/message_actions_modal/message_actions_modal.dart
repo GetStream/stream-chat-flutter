@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:stream_chat_flutter/src/message_actions_modal/mam_widgets.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template messageActionsModal}

@@ -1,0 +1,72 @@
+---
+id: message_list_core
+sidebar_position: 5
+title: MessageListCore
+---
+
+A Widget For Building A List Of Messages
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter_core/latest/stream_chat_flutter_core/MessageListCore-class.html)
+
+### Background
+
+The UI SDK of Stream Chat supplies a `MessageListView` class that builds a list of channels fetching
+according to the filters and sort order given. However, in some cases, implementing novel UI is necessary
+that cannot be done using the customization approaches given in the widget.
+
+To do this, we extracted the logic required for fetching channels into a 'Core' widget - a widget that
+fetches channels in the expected way via the usual params but does not supply any UI and instead
+exposes builders to build the UI in situations such as loading, empty data, errors, and on data received.
+
+### Basic Example
+
+`MessageListCore` is a simplified class that allows fetching a list of
+messages while exposing UI builders.
+
+This allows you to construct your own UI while not having to
+worry about the specific logic of fetching messages in a channel.
+
+A `MessageListController` is used to paginate data.
+
+```dart
+class ChannelPage extends StatelessWidget {
+  const ChannelPage({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: MessageListCore(
+        emptyBuilder: (context) {
+          return Center(
+            child: Text('Nothing here...'),
+          );
+        },
+        loadingBuilder: (context) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+        messageListBuilder: (context, list) {
+          return MessagesPage(list);
+        },
+        errorWidgetBuilder: (context, err) {
+          return Center(
+            child: Text('Error'),
+          );
+        },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+Make sure to have a `StreamChannel` ancestor in order to provide the
+information about the channels.

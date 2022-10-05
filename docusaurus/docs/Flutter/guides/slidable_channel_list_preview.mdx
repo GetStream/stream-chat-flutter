@@ -39,7 +39,7 @@ In this example, you are doing a few important things in the ChannelListPage wid
 - Using the **flutter_slidable** package to easily add slide functionality.
 - Passing in the `itemBuilder` argument for the **StreamChannelListView** widget. This gives access to the current **BuildContext**, **Channel**, and **StreamChannelListTile**, and allows you to create, or customize, the stream channel list tiles.
 - Returning a Slidable widget with two CustomSlidableAction widgets - to delete a channel and show more options. These widgets come from the flutter_slidable package.
-- Adding `onPressed` behaviour to call `showConfirmationDialog` and `showChannelInfoModalBottomSheet`. These methods come from the **stream_chat_flutter** package. They have a few different on-tap callbacks you can supply, for example, `onViewInfoTap`. Alternatively, you can create custom dialogs from scratch.
+- Adding `onPressed` behaviour to call `showConfirmationBottomSheet` and `showChannelInfoModalBottomSheet`. These methods come from the **stream_chat_flutter** package. They have a few different on-tap callbacks you can supply, for example, `onViewInfoTap`. Alternatively, you can create custom dialogs from scratch.
 - Using the **StreamChannelListController** to perform actions, such as, `deleteChannel`.
 
 ```dart
@@ -153,7 +153,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                             color: chatTheme.colorTheme.accentError,
                           ),
                           onPressed: (_) async {
-                            final res = await showConfirmationDialog(
+                            final res = await showConfirmationBottomSheet(
                               context,
                               title: 'Delete Conversation',
                               question:

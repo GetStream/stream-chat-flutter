@@ -7,10 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/common.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler_base.dart';
-
-import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// StreamAttachmentHandler implementation for desktop.
 class StreamAttachmentHandlerDesktop extends StreamAttachmentHandler {
