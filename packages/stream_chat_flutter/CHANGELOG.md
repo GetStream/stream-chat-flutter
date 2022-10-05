@@ -1,3 +1,21 @@
+## 5.0.1
+
+ - **PERF**: improve image resizing.
+ - **FIX**: Fix message text hiding because of a flutter bug (#1327).
+ - **FIX**: fix `stopTyping` unhandled exceptions when network is off or spotty. (#1296).
+ - **FIX**: do not linkify system message mentions.
+ - **FIX**: do not serialize bytes (#1283).
+ - **FIX**: fix image download on iOS (#1280).
+ - **FIX**: rename const.
+ - **FIX**: export kDefaultMaxAttachmentSize and use it in `StreamAttachmentPicker` default, also increase it to 100Mb.
+ - **FIX**: substitute mentioned user ids with user names in system message (#1278).
+ - **FIX**: fix date divider not showing (#1259).
+ - **FIX**: fix jiffy locale initialization (#1255).
+ - **FIX**: Fix `ChannelListTile` sendingIndicator `isMessageRead` calculation.
+ - **FIX**: fix x-stream-client header.
+ - **FEAT**: Added `thumbnailSize`, `thumbnailResizeType`, and `thumbnailCropType` params to `StreamMessageWidget` and `StreamAttachmentPicker` to customize the appearance of image thumbnails.
+ - **DOCS**: v5 (#1341).
+
 ## 5.0.0
 
 - Included the changes from version [4.5.0](#450).
