@@ -1,5 +1,3 @@
-import 'dart:ui' show hashValues;
-
 import 'package:flutter/foundation.dart';
 
 /// {@template indexed_key}
