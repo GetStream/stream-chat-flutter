@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -109,13 +110,10 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                         shareButtonKey.currentContext?.findRenderObject();
                     final position =
                         (box! as RenderBox).localToGlobal(Offset.zero);
-                    await Share.shareFiles(
-                      [filePath],
+                    await Share.shareXFiles(
+                      [XFile(filePath)],
                       sharePositionOrigin:
                           Rect.fromLTWH(position.dx, position.dy, 0, 0),
-                      mimeTypes: [
-                        'image/$type',
-                      ],
                     );
                   },
                 ),
