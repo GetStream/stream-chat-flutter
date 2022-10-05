@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template attachmentModalSheet}
 /// The modalBottomSheet that appears when a mobile user attempts to add

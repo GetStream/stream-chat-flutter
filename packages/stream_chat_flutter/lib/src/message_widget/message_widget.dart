@@ -10,7 +10,6 @@ import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/message_reactions_modal.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// The display behaviour of a widget
@@ -99,6 +98,10 @@ class StreamMessageWidget extends StatefulWidget {
   }) : attachmentBuilders = {
           'image': (context, message, attachments) {
             final border = RoundedRectangleBorder(
+              side: attachmentBorderSide ??
+                  BorderSide(
+                    color: StreamChatTheme.of(context).colorTheme.borders,
+                  ),
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
@@ -128,7 +131,6 @@ class StreamMessageWidget extends StatefulWidget {
                     ),
                   ),
                   attachmentShape: border,
-                  reverse: reverse,
                 ),
               );
             }
@@ -155,11 +157,14 @@ class StreamMessageWidget extends StatefulWidget {
                 imageThumbnailCropType: imageAttachmentThumbnailCropType,
               ),
               attachmentShape: border,
-              reverse: reverse,
             );
           },
           'video': (context, message, attachments) {
             final border = RoundedRectangleBorder(
+              side: attachmentBorderSide ??
+                  BorderSide(
+                    color: StreamChatTheme.of(context).colorTheme.borders,
+                  ),
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
@@ -187,11 +192,14 @@ class StreamMessageWidget extends StatefulWidget {
                 }).toList(),
               ),
               attachmentShape: border,
-              reverse: reverse,
             );
           },
           'giphy': (context, message, attachments) {
             final border = RoundedRectangleBorder(
+              side: attachmentBorderSide ??
+                  BorderSide(
+                    color: StreamChatTheme.of(context).colorTheme.borders,
+                  ),
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
@@ -218,7 +226,6 @@ class StreamMessageWidget extends StatefulWidget {
                 }).toList(),
               ),
               attachmentShape: border,
-              reverse: reverse,
             );
           },
           'file': (context, message, attachments) {
@@ -250,7 +257,6 @@ class StreamMessageWidget extends StatefulWidget {
                             : null,
                       ),
                       attachmentShape: border,
-                      reverse: reverse,
                     );
                   })
                   .insertBetween(SizedBox(

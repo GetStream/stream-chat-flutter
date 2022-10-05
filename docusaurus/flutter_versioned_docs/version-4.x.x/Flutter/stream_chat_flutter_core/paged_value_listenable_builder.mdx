@@ -1,0 +1,88 @@
+---
+id: paged_value_listenable_builder
+sidebar_position: 9
+title: PagedValueListenableBuilder
+---
+
+A Widget Whose Content Stays Synced With A `ValueNotifier` Of Type `PagedValue`.
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter_core/latest/stream_chat_flutter_core/PagedValueListenableBuilder-class.html)
+
+### Background
+
+Given a `PagedValueNotifier<Key, Value>` implementation and a [builder] which builds widgets from
+concrete values of `PagedValue<Key, Value>`, this class will automatically register itself as a
+listener of the [PagedValueNotifier] and call the [builder] with updated values
+when the value changes.
+
+### Basic Example
+
+```dart
+class UserNameValueNotifier extends PagedValueNotifier<int, String> {
+  UserNameValueNotifier() : super(const PagedValue.loading());
+
+  @override
+  Future<void> doInitialLoad() async {
+    // Imitating network delay
+    await Future.delayed(const Duration(seconds: 1));
+    value = const PagedValue(
+      items: ['Sahil', 'Salvatore', 'Reuben'],
+
+      /// Passing the key to load the next page
+      nextPageKey: nextPageKey,
+    );
+  }
+
+  @override
+  Future<void> loadMore(int nextPageKey) async {
+    // Imitating network delay
+    await Future.delayed(const Duration(seconds: 1));
+    final previousItems = value.asSuccess.items;
+    final newItems = previousItems + ['Deven', 'Sacha', 'Gordon'];
+    value = PagedValue(
+      items: newItems,
+      // Passing nextPageKey as null to indicate
+      // that there are no more items.
+      nextPageKey: null,
+    );
+  }
+}
+
+class _MyHomePageState extends State {
+  final pagedValueNotifier = UserNameValueNotifier();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: PagedValueListenableBuilder<int, String>(
+          builder: (context, value, child) {
+            // This builder will only get called when the _counter
+            // is updated.
+            return value.when(
+              (userNames, nextPageKey, error) => Column(
+                children: [
+                  const Text('Usernames:'),
+                  Expanded(
+                    child: ListView(
+                      children: userNames.map((it) => Text(it)).toList(),
+                    ),
+                  ),
+                  if (nextPageKey != null)
+                    TextButton(
+                      child: const Text('Load more'),
+                      onPressed: () => pagedValueNotifier.loadMore(nextPageKey),
+                    ),
+                ],
+              ),
+              loading: () => CircularProgressIndicator(),
+              error: (e) => Text('Error: $e'),
+            );
+          },
+          valueListenable: pagedValueNotifier,
+        ),
+      ),
+    );
+  }
+}
+```

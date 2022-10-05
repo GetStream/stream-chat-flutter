@@ -1,0 +1,74 @@
+---
+id: stream_message_search_list_view
+sidebar_position: 8
+title: StreamMessageSearchListView
+---
+
+A Widget To Search For Messages Across Channels
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamMessageSearchListView-class.html)
+
+![](../assets/message_search_list_view.png)
+
+### Background
+
+Users in Stream Chat can have several channels and it can get hard to remember which channel has the
+message they are searching for. As such, there needs to be a way to search for a message across multiple
+channels. This is where `StreamMessageSearchListView` comes in.
+
+:::note
+Make sure to check the [StreamMessageSearchListController](./stream_message_search_list_controller.mdx) documentation for more information on how to use the controller to manipulate the `StreamMessageSearchListView`.
+:::
+
+### Basic Example
+
+While the `StreamMessageListView` is tied to a certain `StreamChannel`, a `StreamMessageSearchListView` is not.
+
+```dart
+class StreamMessageSearchPage extends StatefulWidget {
+  const StreamMessageSearchPage({
+    Key? key,
+    required this.client,
+  }) : super(key: key);`
+
+  final StreamChatClient client;
+
+  @override
+  State<StreamMessageSearchPage> createState() => _StreamMessageSearchState();
+}
+
+class _StreamMessageSearchState extends State<StreamMessageSearchPage> {
+  late final _controller = StreamMessageSearchListController(
+    client: widget.client,
+    limit: 20,
+    filters: Filter.in_('members', [StreamChat.of(context).user!.id],),
+    searchQuery: 'your query here',
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: StreamMessageSearchListView(
+          controller: _controller,
+        ),
+      );
+}
+```
+
+### Customize The Result Tiles
+
+You can use your own widget for the result items using the `itemBuilder` parameter.
+
+```dart
+StreamMessageSearchListView(
+  // ...
+  itemBuilder: (context, responses, index, defaultWidget) {
+    return Text(responses[index].message.text);
+  },
+),
+```

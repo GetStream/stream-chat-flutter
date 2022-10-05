@@ -52,7 +52,7 @@ You can use a [`PagedValueListenableBuilder`](./paged_value_listenable_builder.m
 ```dart
 @override
 Widget build(BuildContext context) => Scaffold(
-      body: PagedValueListenableBuilder<int, User>(
+      body: PagedValueListenableBuilder<int, List<User>>(
         valueListenable: userListController,
         builder: (context, value, child) {
           return value.when(

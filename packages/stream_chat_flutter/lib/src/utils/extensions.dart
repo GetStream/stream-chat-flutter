@@ -77,7 +77,7 @@ extension StringExtension on String {
 }
 
 /// List extension
-extension IterableX<T> on Iterable<T> {
+extension IterableExtension<T> on Iterable<T> {
   /// Insert any item<T> inBetween the list items
   List<T> insertBetween(T item) => expand((e) sync* {
         yield item;

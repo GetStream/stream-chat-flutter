@@ -1,6 +1,5 @@
 import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template contextMenuReactionPicker}

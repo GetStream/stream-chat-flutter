@@ -1,0 +1,90 @@
+---
+id: stream_member_list_view
+sidebar_position: 7
+title: StreamMemberListView
+---
+
+A widget for displaying and selecting members in a list view.
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamMemberListView-class.html)
+
+### Background
+
+A list of members is required for many different purposes, for example, showing a list of users in a Channel. The `StreamMemberListView` displays a list of members.
+
+:::note
+Make sure to check the [StreamMemberListController](./stream_member_list_controller.mdx) documentation for more information on how to use the controller to manipulate the `StreamMemberListView`.
+:::
+
+### Basic Example
+
+```dart
+class MemberListPage extends StatefulWidget {
+  const MemberListPage({Key? key}) : super(key: key);
+
+  @override
+  State<MemberListPage> createState() => _MemberListPageState();
+}
+
+class _MemberListPageState extends State<MemberListPage> {
+  late final StreamMemberListController _memberListController =
+      StreamMemberListController(
+    client: StreamChat.of(context).client,
+    limit: 25,
+    filter: Filter.and(
+      [Filter.notEqual('id', StreamChat.of(context).currentUser!.id)],
+    ),
+    sort: [
+      const SortOption(
+        'name',
+        direction: 1,
+      ),
+    ],
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: () => _memberListController.refresh(),
+      child: StreamMemberListView(
+        controller: _memberListController,
+      ),
+    );
+  }
+}
+```
+
+### Customize The Member Items
+
+You can use your own widget for the member items using the `itemBuilder` parameter.
+
+```dart
+StreamMemberListView(
+  // ...
+  itemBuilder: (context, members, index, defaultWidget) {
+    return Text(members[index].name);
+  },
+),
+```
+
+### Selecting Members
+
+The `StreamMemberListView` widget allows selecting members in a list. The `defaultWidget` returned can be customized to indicate that it has been selected.
+
+```dart
+Set<Member> _selectedMembers = {};
+
+StreamMemberListView(
+  controller: _memberListController,
+  itemBuilder: (context, members, index, defaultWidget) {
+    return defaultWidget.copyWith(
+      selected: _selectedMembers.contains(members[index]),
+    );
+  },
+  onMemberTap: (member) {
+    setState(() {
+      _selectedMembers.add(member);
+    });
+  },
+);
+```

@@ -95,6 +95,6 @@ export 'src/theme/themes.dart';
 export 'src/user/user_item.dart';
 export 'src/user/user_mention_tile.dart';
 export 'src/utils/device_segmentation.dart';
-export 'src/utils/extensions.dart' show IconButtonX;
+export 'src/utils/extensions.dart';
 export 'src/utils/helpers.dart';
 export 'src/utils/typedefs.dart';

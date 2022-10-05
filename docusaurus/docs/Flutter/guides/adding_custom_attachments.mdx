@@ -161,7 +161,10 @@ StreamMessageListView(
               ),
             );
 
-            return wrapAttachmentWidget(context, attachmentWidget, null, true, BorderRadius.circular(8.0));
+            return WrapAttachmentWidget(
+              attachmentWidget: attachmentWidget, 
+              attachmentShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            );
           }
         },
     );

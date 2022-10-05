@@ -1,0 +1,74 @@
+---
+id: stream_channel_grid_view
+sidebar_position: 4
+title: StreamChannelGridView
+---
+
+A Widget For Displaying A List Of Channels
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChannelGridView-class.html)
+
+### Background
+
+The `StreamChannelGridView` widget allows displaying a list of channels to a user in a `GridView`.
+
+:::note
+Make sure to check the [StreamChannelListView](./stream_channel_list_view.mdx) documentation to know how to show results in a `ListView`.
+:::
+
+### Basic Example
+
+Here is a basic example of the `StreamChannelGridView` widget. It consists of the main widget itself, a `StreamChannelListController` to control the list of channels and a callback to handle the tap of a channel.
+
+```dart
+class ChannelGridPage extends StatefulWidget {
+  const ChannelGridPage({
+    Key? key,
+    required this.client,
+  }) : super(key: key);
+
+  final StreamChatClient client;
+
+  @override
+  State<ChannelGridPage> createState() => _ChannelGridPageState();
+}
+
+class _ChannelGridPageState extends State<ChannelGridPage> {
+  late final _controller = StreamChannelListController(
+    client: widget.client,
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).currentUser!.id],
+    ),
+    sort: const [SortOption('last_message_at')],
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: RefreshIndicator(
+          onRefresh: _controller.refresh,
+          child: StreamChannelGridView(
+            controller: _controller,
+            onChannelTap: (channel) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StreamChannel(
+                  channel: channel,
+                  child: const ChannelPage(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+```
+
+This example by default displays the channels that a user is a part of. Now let's look at customizing
+the widget.
