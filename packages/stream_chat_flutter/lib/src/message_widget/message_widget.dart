@@ -98,6 +98,10 @@ class StreamMessageWidget extends StatefulWidget {
   }) : attachmentBuilders = {
           'image': (context, message, attachments) {
             final border = RoundedRectangleBorder(
+              side: attachmentBorderSide ??
+                  BorderSide(
+                    color: StreamChatTheme.of(context).colorTheme.borders,
+                  ),
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
@@ -157,6 +161,10 @@ class StreamMessageWidget extends StatefulWidget {
           },
           'video': (context, message, attachments) {
             final border = RoundedRectangleBorder(
+              side: attachmentBorderSide ??
+                  BorderSide(
+                    color: StreamChatTheme.of(context).colorTheme.borders,
+                  ),
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
@@ -188,6 +196,10 @@ class StreamMessageWidget extends StatefulWidget {
           },
           'giphy': (context, message, attachments) {
             final border = RoundedRectangleBorder(
+              side: attachmentBorderSide ??
+                  BorderSide(
+                    color: StreamChatTheme.of(context).colorTheme.borders,
+                  ),
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
@@ -244,7 +256,7 @@ class StreamMessageWidget extends StatefulWidget {
                               }
                             : null,
                       ),
-                      attachmentShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      attachmentShape: border,
                     );
                   })
                   .insertBetween(SizedBox(
