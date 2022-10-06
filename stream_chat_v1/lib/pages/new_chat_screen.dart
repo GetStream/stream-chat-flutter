@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:example/localizations.dart';
+import 'package:example/utils/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'channel_page.dart';
-import 'chips_input_text_field.dart';
-import 'routes/routes.dart';
+import '../widgets/chips_input_text_field.dart';
+import '../routes/routes.dart';
 
 class NewChatScreen extends StatefulWidget {
   @override

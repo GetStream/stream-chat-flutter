@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:example/localizations.dart';
+import 'package:example/utils/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'routes/routes.dart';
-import 'search_text_field.dart';
+import '../routes/routes.dart';
+import '../widgets/search_text_field.dart';
 
 class NewGroupChatScreen extends StatefulWidget {
   @override
@@ -251,7 +251,6 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                 onPanDown: (_) => FocusScope.of(context).unfocus(),
                 child: StreamUserListView(
                   controller: userListController,
-                  // groupAlphabetically: _isSearchActive ? false : true,
                   itemBuilder: (context, items, index, defaultWidget) {
                     return defaultWidget.copyWith(
                       selected: _selectedUsers.contains(items[index]),

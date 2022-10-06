@@ -1,16 +1,16 @@
 import 'dart:async';
 
-import 'package:example/localizations.dart';
+import 'package:example/utils/localizations.dart';
 import 'package:example/routes/routes.dart';
-import 'package:example/search_text_field.dart';
+import 'package:example/widgets/search_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import 'channel_page.dart';
-import 'chat_info_screen.dart';
-import 'group_info_screen.dart';
+import '../pages/channel_page.dart';
+import '../pages/chat_info_screen.dart';
+import '../pages/group_info_screen.dart';
 
 class ChannelList extends StatefulWidget {
   @override

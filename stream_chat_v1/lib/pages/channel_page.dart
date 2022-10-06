@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:example/routes/routes.dart';
-import 'package:example/thread_page.dart';
+import 'package:example/pages/thread_page.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

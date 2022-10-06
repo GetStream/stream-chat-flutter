@@ -1,5 +1,5 @@
-import 'package:example/channel_page.dart';
-import 'package:example/localizations.dart';
+import 'package:example/pages/channel_page.dart';
+import 'package:example/utils/localizations.dart';
 import 'package:example/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'

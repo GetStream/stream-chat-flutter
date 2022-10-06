@@ -1,19 +1,19 @@
 import 'package:collection/collection.dart';
-import 'package:example/channel_list_page.dart';
+import 'package:example/pages/channel_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../advanced_options_page.dart';
-import '../channel_page.dart';
-import '../chat_info_screen.dart';
-import '../choose_user_page.dart';
-import '../group_chat_details_screen.dart';
-import '../group_info_screen.dart';
-import '../home_page.dart';
-import '../main.dart';
-import '../new_chat_screen.dart';
-import '../new_group_chat_screen.dart';
-import '../thread_page.dart';
+import '../app.dart';
+import '../pages/advanced_options_page.dart';
+import '../pages/channel_page.dart';
+import '../pages/chat_info_screen.dart';
+import '../pages/choose_user_page.dart';
+import '../pages/group_chat_details_screen.dart';
+import '../pages/group_info_screen.dart';
+import '../pages/home_page.dart';
+import '../pages/new_chat_screen.dart';
+import '../pages/new_group_chat_screen.dart';
+import '../pages/thread_page.dart';
 import 'routes.dart';
 
 class AppRoutes {
