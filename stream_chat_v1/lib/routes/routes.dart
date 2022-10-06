@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 /// Application routes
 abstract class Routes {
   static const String APP = '/app';

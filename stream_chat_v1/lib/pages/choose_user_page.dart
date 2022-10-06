@@ -16,6 +16,8 @@ const kStreamUserId = 'STREAM_USER_ID';
 const kStreamToken = 'STREAM_TOKEN';
 
 class ChooseUserPage extends StatelessWidget {
+  const ChooseUserPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     final users = defaultUsers;
@@ -85,7 +87,7 @@ class ChooseUserPage extends StatelessWidget {
                                   ),
                                   height: 100,
                                   width: 100,
-                                  child: Center(
+                                  child: const Center(
                                     child: CircularProgressIndicator(),
                                   ),
                                 ),
@@ -97,13 +99,15 @@ class ChooseUserPage extends StatelessWidget {
                               logLevel: Level.INFO,
                             )..chatPersistenceClient = chatPersistentClient;
 
+                            final navigator = Navigator.of(context);
+
                             await client.connectUser(
                               user,
                               token,
                             );
 
                             if (!kIsWeb) {
-                              final secureStorage = FlutterSecureStorage();
+                              const secureStorage = FlutterSecureStorage();
                               secureStorage.write(
                                 key: kStreamApiKey,
                                 value: kDefaultStreamApiKey,
@@ -117,8 +121,7 @@ class ChooseUserPage extends StatelessWidget {
                                 value: token,
                               );
                             }
-                            Navigator.pushNamedAndRemoveUntil(
-                              context,
+                            navigator.pushNamedAndRemoveUntil(
                               Routes.HOME,
                               ModalRoute.withName(Routes.HOME),
                               arguments: HomePageArgs(client),
@@ -127,7 +130,7 @@ class ChooseUserPage extends StatelessWidget {
                           leading: StreamUserAvatar(
                             user: user,
                             constraints: BoxConstraints.tight(
-                              Size.fromRadius(20),
+                              const Size.fromRadius(20),
                             ),
                           ),
                           title: Text(
@@ -158,13 +161,13 @@ class ChooseUserPage extends StatelessWidget {
                           Navigator.pushNamed(context, Routes.ADVANCED_OPTIONS);
                         },
                         leading: CircleAvatar(
+                          backgroundColor:
+                              StreamChatTheme.of(context).colorTheme.borders,
                           child: StreamSvgIcon.settings(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
                                 .textHighEmphasis,
                           ),
-                          backgroundColor:
-                              StreamChatTheme.of(context).colorTheme.borders,
                         ),
                         title: Text(
                           AppLocalizations.of(context).advancedOptions,
@@ -193,7 +196,7 @@ class ChooseUserPage extends StatelessWidget {
                 ),
               ),
             ),
-            StreamVersion(),
+            const StreamVersion(),
           ],
         ),
       ),

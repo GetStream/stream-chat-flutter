@@ -18,7 +18,7 @@ class StreamVersion extends StatelessWidget {
         future: rootBundle.loadString('pubspec.lock'),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return SizedBox();
+            return const SizedBox();
           }
 
           final pubspec = snapshot.data!;

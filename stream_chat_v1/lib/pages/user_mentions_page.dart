@@ -6,6 +6,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'channel_page.dart';
 
 class UserMentionsPage extends StatefulWidget {
+  const UserMentionsPage({super.key});
+
   @override
   State<UserMentionsPage> createState() => _UserMentionsPageState();
 }
@@ -20,7 +22,7 @@ class _UserMentionsPageState extends State<UserMentionsPage> {
       value: StreamChat.of(context).currentUser!.id,
     ),
     sort: [
-      SortOption(
+      const SortOption(
         'created_at',
         direction: SortOption.ASC,
       ),
@@ -35,7 +37,7 @@ class _UserMentionsPageState extends State<UserMentionsPage> {
         return LayoutBuilder(
           builder: (context, viewportConstraints) {
             return SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
+              physics: const AlwaysScrollableScrollPhysics(),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: viewportConstraints.maxHeight,
@@ -70,6 +72,7 @@ class _UserMentionsPageState extends State<UserMentionsPage> {
       },
       onMessageTap: (messageResponse) async {
         final client = StreamChat.of(context).client;
+        final navigator = Navigator.of(context);
         final message = messageResponse.message;
         final channel = client.channel(
           messageResponse.channel!.type,
@@ -78,8 +81,7 @@ class _UserMentionsPageState extends State<UserMentionsPage> {
         if (channel.state == null) {
           await channel.watch();
         }
-        Navigator.pushNamed(
-          context,
+        navigator.pushNamed(
           Routes.CHANNEL_PAGE,
           arguments: ChannelPageArgs(
             channel: channel,

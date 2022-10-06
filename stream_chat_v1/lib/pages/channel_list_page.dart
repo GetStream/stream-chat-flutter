@@ -18,7 +18,7 @@ class ChannelListPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ChannelListPageState createState() => _ChannelListPageState();
+  State<ChannelListPage> createState() => _ChannelListPageState();
 }
 
 class _ChannelListPageState extends State<ChannelListPage> {
@@ -37,7 +37,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                   ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
                   : Colors.grey,
             ),
-            Positioned(
+            const Positioned(
               top: -3,
               right: -16,
               child: StreamUnreadIndicator(),
@@ -66,7 +66,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
   Widget build(BuildContext context) {
     final user = StreamChat.of(context).currentUser;
     if (user == null) {
-      return Offstage();
+      return const Offstage();
     }
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
@@ -99,7 +99,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
       ),
       body: IndexedStack(
         index: _currentIndex,
-        children: [
+        children: const [
           ChannelList(),
           UserMentionsPage(),
         ],
@@ -164,13 +164,14 @@ class LeftDrawer extends StatelessWidget {
                       StreamUserAvatar(
                         user: user,
                         showOnlineStatus: false,
-                        constraints: BoxConstraints.tight(Size.fromRadius(20)),
+                        constraints:
+                            BoxConstraints.tight(const Size.fromRadius(20)),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 16.0),
                         child: Text(
                           user.name,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -194,7 +195,7 @@ class LeftDrawer extends StatelessWidget {
                   },
                   title: Text(
                     AppLocalizations.of(context).newDirectMessage,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14.5,
                     ),
                   ),
@@ -214,7 +215,7 @@ class LeftDrawer extends StatelessWidget {
                   },
                   title: Text(
                     AppLocalizations.of(context).newGroup,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14.5,
                     ),
                   ),
@@ -224,21 +225,20 @@ class LeftDrawer extends StatelessWidget {
                     alignment: Alignment.bottomCenter,
                     child: ListTile(
                       onTap: () async {
+                        final client = StreamChat.of(context).client;
+                        final navigator =
+                            Navigator.of(context, rootNavigator: true);
                         Navigator.pop(context);
 
                         if (!kIsWeb) {
-                          final secureStorage = FlutterSecureStorage();
+                          const secureStorage = FlutterSecureStorage();
                           await secureStorage.deleteAll();
                         }
 
-                        final client = StreamChat.of(context).client;
                         client.disconnectUser();
                         await client.dispose();
 
-                        await Navigator.of(
-                          context,
-                          rootNavigator: true,
-                        ).pushNamedAndRemoveUntil(
+                        await navigator.pushNamedAndRemoveUntil(
                           Routes.CHOOSE_USER,
                           ModalRoute.withName(Routes.CHOOSE_USER),
                         );
@@ -251,7 +251,7 @@ class LeftDrawer extends StatelessWidget {
                       ),
                       title: Text(
                         AppLocalizations.of(context).signOut,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14.5,
                         ),
                       ),
@@ -263,12 +263,11 @@ class LeftDrawer extends StatelessWidget {
                             .colorTheme
                             .textLowEmphasis,
                         onPressed: () async {
+                          final theme = Theme.of(context);
                           final sp = await StreamingSharedPreferences.instance;
                           sp.setInt(
                             'theme',
-                            Theme.of(context).brightness == Brightness.dark
-                                ? 1
-                                : -1,
+                            theme.brightness == Brightness.dark ? 1 : -1,
                           );
                         },
                       ),

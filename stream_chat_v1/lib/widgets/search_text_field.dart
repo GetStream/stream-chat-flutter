@@ -41,7 +41,7 @@ class SearchTextField extends StatelessWidget {
               onChanged: onChanged,
               decoration: InputDecoration(
                 prefixText: '    ',
-                prefixIconConstraints: BoxConstraints.tight(Size(40, 24)),
+                prefixIconConstraints: BoxConstraints.tight(const Size(40, 24)),
                 prefixIcon: Padding(
                   padding: const EdgeInsets.only(
                     left: 8,

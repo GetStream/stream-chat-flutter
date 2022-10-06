@@ -8,8 +8,10 @@ import '../routes/routes.dart';
 import '../widgets/search_text_field.dart';
 
 class NewGroupChatScreen extends StatefulWidget {
+  const NewGroupChatScreen({super.key});
+
   @override
-  _NewGroupChatScreenState createState() => _NewGroupChatScreenState();
+  State<NewGroupChatScreen> createState() => _NewGroupChatScreenState();
 }
 
 class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
@@ -26,7 +28,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
   late final userListController = StreamUserListController(
     client: StreamChat.of(context).client,
     sort: [
-      SortOption(
+      const SortOption(
         'name',
         direction: 1,
       ),
@@ -144,13 +146,14 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                   ),
                   if (_selectedUsers.isNotEmpty)
                     SliverToBoxAdapter(
-                      child: Container(
+                      child: SizedBox(
                         height: 104,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: _selectedUsers.length,
                           padding: const EdgeInsets.all(8),
-                          separatorBuilder: (_, __) => SizedBox(width: 16),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 16),
                           itemBuilder: (_, index) {
                             final user = _selectedUsers.elementAt(index);
                             return Column(
@@ -159,11 +162,12 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                   children: [
                                     StreamUserAvatar(
                                       onlineIndicatorAlignment:
-                                          Alignment(0.9, 0.9),
+                                          const Alignment(0.9, 0.9),
                                       user: user,
                                       showOnlineStatus: true,
                                       borderRadius: BorderRadius.circular(32),
-                                      constraints: BoxConstraints.tightFor(
+                                      constraints:
+                                          const BoxConstraints.tightFor(
                                         height: 64,
                                         width: 64,
                                       ),
@@ -201,10 +205,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                     )
                                   ],
                                 ),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 4),
                                 Text(
                                   user.name.split(' ')[0],
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 12,
                                   ),
@@ -218,7 +222,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                   SliverPersistentHeader(
                     pinned: true,
                     delegate: _HeaderDelegate(
-                      height: 30,
+                      height: 32,
                       child: Container(
                         width: double.maxFinite,
                         decoration: BoxDecoration(
@@ -232,7 +236,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                           ),
                           child: Text(
                             _isSearchActive
-                                ? '${AppLocalizations.of(context).matchesFor} \"$_userNameQuery\"'
+                                ? '${AppLocalizations.of(context).matchesFor} "$_userNameQuery"'
                                 : AppLocalizations.of(context).onThePlatorm,
                             style: TextStyle(
                               color: StreamChatTheme.of(context)
@@ -271,7 +275,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                     return LayoutBuilder(
                       builder: (context, viewportConstraints) {
                         return SingleChildScrollView(
-                          physics: AlwaysScrollableScrollPhysics(),
+                          physics: const AlwaysScrollableScrollPhysics(),
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
                               minHeight: viewportConstraints.maxHeight,

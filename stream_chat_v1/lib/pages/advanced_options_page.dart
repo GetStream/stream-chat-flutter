@@ -10,8 +10,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'choose_user_page.dart';
 
 class AdvancedOptionsPage extends StatefulWidget {
+  const AdvancedOptionsPage({super.key});
+
   @override
-  _AdvancedOptionsPageState createState() => _AdvancedOptionsPageState();
+  State<AdvancedOptionsPage> createState() => _AdvancedOptionsPageState();
 }
 
 class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
@@ -88,7 +90,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           .textHighEmphasis,
                     ),
                     decoration: InputDecoration(
-                      errorStyle: TextStyle(height: 0, fontSize: 0),
+                      errorStyle: const TextStyle(height: 0, fontSize: 0),
                       labelStyle: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -110,7 +112,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     ),
                     textInputAction: TextInputAction.next,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _userIdController,
                     onChanged: (_) {
@@ -139,7 +141,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     ),
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      errorStyle: TextStyle(height: 0, fontSize: 0),
+                      errorStyle: const TextStyle(height: 0, fontSize: 0),
                       labelStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -160,7 +162,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           : AppLocalizations.of(context).userId,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   TextFormField(
                     onChanged: (_) {
                       if (_userTokenError != null) {
@@ -189,7 +191,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     ),
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      errorStyle: TextStyle(height: 0, fontSize: 0),
+                      errorStyle: const TextStyle(height: 0, fontSize: 0),
                       labelStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -210,7 +212,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           : AppLocalizations.of(context).userToken,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _usernameController,
                     textInputAction: TextInputAction.done,
@@ -231,7 +233,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       labelText: AppLocalizations.of(context).usernameOptional,
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(
@@ -286,7 +288,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                               ),
                               height: 100,
                               width: 100,
-                              child: Center(
+                              child: const Center(
                                 child: CircularProgressIndicator(),
                               ),
                             ),
@@ -294,6 +296,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         );
 
                         final client = buildStreamChatClient(apiKey);
+                        final navigator = Navigator.of(context);
 
                         try {
                           await client.connectUser(
@@ -303,7 +306,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                             userToken,
                           );
 
-                          final secureStorage = FlutterSecureStorage();
+                          const secureStorage = FlutterSecureStorage();
                           secureStorage.write(
                             key: kStreamApiKey,
                             value: apiKey,
@@ -330,8 +333,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           return;
                         }
                         loading = false;
-                        await Navigator.pushNamedAndRemoveUntil(
-                          context,
+                        await navigator.pushNamedAndRemoveUntil(
                           Routes.HOME,
                           ModalRoute.withName(Routes.HOME),
                           arguments: HomePageArgs(client),
@@ -339,7 +341,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       }
                     },
                   ),
-                  StreamVersion(),
+                  const StreamVersion(),
                 ],
               ),
             ),

@@ -25,7 +25,7 @@ class AppRoutes {
         return MaterialPageRoute(
             settings: RouteSettings(arguments: args, name: Routes.APP),
             builder: (_) {
-              return MyApp();
+              return const StreamChatSampleApp();
             });
       case Routes.HOME:
         return MaterialPageRoute(
@@ -40,13 +40,13 @@ class AppRoutes {
         return MaterialPageRoute(
             settings: RouteSettings(arguments: args, name: Routes.CHOOSE_USER),
             builder: (_) {
-              return ChooseUserPage();
+              return const ChooseUserPage();
             });
       case Routes.ADVANCED_OPTIONS:
         return MaterialPageRoute(
           settings:
               RouteSettings(arguments: args, name: Routes.ADVANCED_OPTIONS),
-          builder: (_) => AdvancedOptionsPage(),
+          builder: (_) => const AdvancedOptionsPage(),
         );
       case Routes.CHANNEL_PAGE:
         return MaterialPageRoute(
@@ -83,14 +83,14 @@ class AppRoutes {
         return MaterialPageRoute(
             settings: RouteSettings(arguments: args, name: Routes.NEW_CHAT),
             builder: (_) {
-              return NewChatScreen();
+              return const NewChatScreen();
             });
       case Routes.NEW_GROUP_CHAT:
         return MaterialPageRoute(
             settings:
                 RouteSettings(arguments: args, name: Routes.NEW_GROUP_CHAT),
             builder: (_) {
-              return NewGroupChatScreen();
+              return const NewGroupChatScreen();
             });
       case Routes.NEW_GROUP_CHAT_DETAILS:
         return MaterialPageRoute(
@@ -125,7 +125,7 @@ class AppRoutes {
             settings:
                 RouteSettings(arguments: args, name: Routes.CHANNEL_LIST_PAGE),
             builder: (context) {
-              return ChannelListPage();
+              return const ChannelListPage();
             });
       // Default case, should not reach here.
       default:

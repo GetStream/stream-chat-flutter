@@ -45,12 +45,14 @@ StreamChatClient buildStreamChatClient(
   )..chatPersistenceClient = chatPersistentClient;
 }
 
-class MyApp extends StatefulWidget {
+class StreamChatSampleApp extends StatefulWidget {
+  const StreamChatSampleApp({super.key});
+
   @override
-  _MyAppState createState() => _MyAppState();
+  State<StreamChatSampleApp> createState() => _StreamChatSampleAppState();
 }
 
-class _MyAppState extends State<MyApp>
+class _StreamChatSampleAppState extends State<StreamChatSampleApp>
     with SplashScreenStateMixin, TickerProviderStateMixin {
   InitData? _initData;
 
@@ -58,7 +60,7 @@ class _MyAppState extends State<MyApp>
     String? apiKey, userId, token;
 
     if (!kIsWeb) {
-      final secureStorage = FlutterSecureStorage();
+      const secureStorage = FlutterSecureStorage();
       apiKey = await secureStorage.read(key: kStreamApiKey);
       userId = await secureStorage.read(key: kStreamUserId);
       token = await secureStorage.read(key: kStreamToken);
@@ -95,7 +97,7 @@ class _MyAppState extends State<MyApp>
             forwardAnimations();
           });
         } else {
-          Future.delayed(Duration(milliseconds: 1500)).then((value) {
+          Future.delayed(const Duration(milliseconds: 1500)).then((value) {
             forwardAnimations();
           });
         }
@@ -157,7 +159,7 @@ class _MyAppState extends State<MyApp>
                 }
                 return [
                   AppRoutes.generateRoute(
-                    RouteSettings(
+                    const RouteSettings(
                       name: Routes.CHOOSE_USER,
                     ),
                   )!

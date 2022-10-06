@@ -27,10 +27,10 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
     ),
     messageFilter: Filter.in_(
       'attachments.type',
-      ['file'],
+      const ['file'],
     ),
     sort: [
-      SortOption(
+      const SortOption(
         'created_at',
         direction: SortOption.ASC,
       ),
@@ -52,7 +52,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
             fontSize: 16.0,
           ),
         ),
-        leading: StreamBackButton(),
+        leading: const StreamBackButton(),
         backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       ),
       body: ValueListenableBuilder(
@@ -73,7 +73,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                         size: 136.0,
                         color: StreamChatTheme.of(context).colorTheme.disabled,
                       ),
-                      SizedBox(height: 16.0),
+                      const SizedBox(height: 16.0),
                       Text(
                         AppLocalizations.of(context).noFiles,
                         style: TextStyle(
@@ -83,7 +83,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                               .textHighEmphasis,
                         ),
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 8.0),
                       Text(
                         AppLocalizations.of(context).filesAppearHere,
                         textAlign: TextAlign.center,
@@ -132,10 +132,10 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                 ),
               );
             },
-            loading: () => Center(
-              child: const CircularProgressIndicator(),
+            loading: () => const Center(
+              child: CircularProgressIndicator(),
             ),
-            error: (_) => Offstage(),
+            error: (_) => const Offstage(),
           );
         },
       ),

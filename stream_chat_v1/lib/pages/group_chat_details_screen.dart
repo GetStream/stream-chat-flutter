@@ -14,7 +14,7 @@ class GroupChatDetailsScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _GroupChatDetailsScreenState createState() => _GroupChatDetailsScreenState();
+  State<GroupChatDetailsScreen> createState() => _GroupChatDetailsScreenState();
 }
 
 class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
@@ -73,7 +73,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
           ),
           centerTitle: true,
           bottom: PreferredSize(
-            preferredSize: Size.fromHeight(kToolbarHeight),
+            preferredSize: const Size.fromHeight(kToolbarHeight),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
               child: Row(
@@ -87,7 +87,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                           .textLowEmphasis,
                     ),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: TextField(
                       controller: _groupNameController,
@@ -130,8 +130,9 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                         try {
                           final groupName = _groupNameController!.text;
                           final client = StreamChat.of(context).client;
+                          final navigator = Navigator.of(context);
                           final channel = client.channel('messaging',
-                              id: Uuid().v4(),
+                              id: const Uuid().v4(),
                               extraData: {
                                 'members': [
                                   client.state.currentUser!.id,
@@ -140,8 +141,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                                 'name': groupName,
                               });
                           await channel.watch();
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
+                          navigator.pushNamedAndRemoveUntil(
                             Routes.CHANNEL_PAGE,
                             ModalRoute.withName(Routes.CHANNEL_LIST_PAGE),
                             arguments: ChannelPageArgs(channel: channel),
@@ -223,14 +223,15 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                             key: ObjectKey(user),
                             leading: StreamUserAvatar(
                               user: user,
-                              constraints: BoxConstraints.tightFor(
+                              constraints: const BoxConstraints.tightFor(
                                 width: 40,
                                 height: 40,
                               ),
                             ),
                             title: Text(
                               user.name,
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -273,7 +274,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
       useRootNavigator: false,
       backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
         topLeft: Radius.circular(16.0),
         topRight: Radius.circular(16.0),
@@ -282,25 +283,25 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
+            const SizedBox(
               height: 26.0,
             ),
             StreamSvgIcon.error(
               color: StreamChatTheme.of(context).colorTheme.accentError,
               size: 24.0,
             ),
-            SizedBox(
+            const SizedBox(
               height: 26.0,
             ),
             Text(
               AppLocalizations.of(context).somethingWentWrongErrorMessage,
               style: StreamChatTheme.of(context).textTheme.headlineBold,
             ),
-            SizedBox(
+            const SizedBox(
               height: 7.0,
             ),
             Text(AppLocalizations.of(context).operationCouldNotBeCompleted),
-            SizedBox(
+            const SizedBox(
               height: 36.0,
             ),
             Container(

@@ -30,10 +30,10 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
     ),
     messageFilter: Filter.in_(
       'attachments.type',
-      ['image', 'video'],
+      const ['image', 'video'],
     ),
     sort: [
-      SortOption(
+      const SortOption(
         'created_at',
         direction: SortOption.ASC,
       ),
@@ -55,7 +55,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
             fontSize: 16.0,
           ),
         ),
-        leading: StreamBackButton(),
+        leading: const StreamBackButton(),
         backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       ),
       body: ValueListenableBuilder(
@@ -73,7 +73,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                         size: 136.0,
                         color: StreamChatTheme.of(context).colorTheme.disabled,
                       ),
-                      SizedBox(height: 16.0),
+                      const SizedBox(height: 16.0),
                       Text(
                         AppLocalizations.of(context).noMedia,
                         style: TextStyle(
@@ -83,7 +83,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                               .textHighEmphasis,
                         ),
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 8.0),
                       Text(
                         AppLocalizations.of(context)
                             .photosOrVideosWillAppearHere,
@@ -131,7 +131,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                   }
                 },
                 child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3),
                   itemBuilder: (context, position) {
                     var channel = StreamChannel.of(context).channel;
@@ -158,6 +158,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                                   onShowMessage: (m, c) async {
                                     final client =
                                         StreamChat.of(context).client;
+                                    final navigator = Navigator.of(context);
                                     final message = m;
                                     final channel = client.channel(
                                       c.type,
@@ -166,8 +167,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                                     if (channel.state == null) {
                                       await channel.watch();
                                     }
-                                    Navigator.pushNamed(
-                                      context,
+                                    navigator.pushNamed(
                                       Routes.CHANNEL_PAGE,
                                       arguments: ChannelPageArgs(
                                         channel: channel,
@@ -197,10 +197,10 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                 ),
               );
             },
-            loading: () => Center(
-              child: const CircularProgressIndicator(),
+            loading: () => const Center(
+              child: CircularProgressIndicator(),
             ),
-            error: (_) => Offstage(),
+            error: (_) => const Offstage(),
           );
         },
       ),

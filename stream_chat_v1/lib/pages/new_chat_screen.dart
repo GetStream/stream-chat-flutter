@@ -9,8 +9,10 @@ import '../widgets/chips_input_text_field.dart';
 import '../routes/routes.dart';
 
 class NewChatScreen extends StatefulWidget {
+  const NewChatScreen({super.key});
+
   @override
-  _NewChatScreenState createState() => _NewChatScreenState();
+  State<NewChatScreen> createState() => _NewChatScreenState();
 }
 
 class _NewChatScreenState extends State<NewChatScreen> {
@@ -26,7 +28,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
       Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
     ]),
     sort: [
-      SortOption(
+      const SortOption(
         'name',
         direction: 1,
       ),
@@ -54,11 +56,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
   void _userNameListener() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _userNameQuery = _controller.text;
           _isSearchActive = _userNameQuery.isNotEmpty;
         });
+      }
       userListController.filter = Filter.and([
         if (_userNameQuery.isNotEmpty)
           Filter.autoComplete('name', _userNameQuery),
@@ -97,13 +100,13 @@ class _NewChatScreenState extends State<NewChatScreen> {
             'distinct': true,
           }),
           messageLimit: 0,
-          paginationParams: PaginationParams(
+          paginationParams: const PaginationParams(
             limit: 1,
           ),
         );
 
-        final _channelExisted = res.length == 1;
-        if (_channelExisted) {
+        final channelExisted = res.length == 1;
+        if (channelExisted) {
           channel = res.first;
           await channel!.watch();
         } else {
@@ -224,7 +227,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                               child: StreamUserAvatar(
                                 showOnlineStatus: false,
                                 user: user,
-                                constraints: BoxConstraints.tightFor(
+                                constraints: const BoxConstraints.tightFor(
                                   height: 24,
                                   width: 24,
                                 ),
@@ -243,37 +246,35 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     },
                   ),
                   if (!_isSearchActive && !_selectedUsers.isNotEmpty)
-                    Container(
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            Routes.NEW_GROUP_CHAT,
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Row(
-                            children: [
-                              StreamNeumorphicButton(
-                                child: Center(
-                                  child: StreamSvgIcon.contacts(
-                                    color: StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .accentPrimary,
-                                    size: 24,
-                                  ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.NEW_GROUP_CHAT,
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            StreamNeumorphicButton(
+                              child: Center(
+                                child: StreamSvgIcon.contacts(
+                                  color: StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .accentPrimary,
+                                  size: 24,
                                 ),
                               ),
-                              SizedBox(width: 8),
-                              Text(
-                                AppLocalizations.of(context).createAGroup,
-                                style: StreamChatTheme.of(context)
-                                    .textTheme
-                                    .bodyBold,
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              AppLocalizations.of(context).createAGroup,
+                              style: StreamChatTheme.of(context)
+                                  .textTheme
+                                  .bodyBold,
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -337,7 +338,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                 return LayoutBuilder(
                                   builder: (context, viewportConstraints) {
                                     return SingleChildScrollView(
-                                      physics: AlwaysScrollableScrollPhysics(),
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
                                       child: ConstrainedBox(
                                         constraints: BoxConstraints(
                                           minHeight:
@@ -382,7 +384,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             future: channel!.initialized,
                             builder: (context, snapshot) {
                               if (snapshot.data == true) {
-                                return StreamMessageListView();
+                                return const StreamMessageListView();
                               }
 
                               return Center(

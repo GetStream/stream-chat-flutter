@@ -6,7 +6,7 @@ class ThreadPage extends StatefulWidget {
   final int? initialScrollIndex;
   final double? initialAlignment;
 
-  ThreadPage({
+  const ThreadPage({
     Key? key,
     required this.parent,
     this.initialScrollIndex,
@@ -14,11 +14,11 @@ class ThreadPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ThreadPageState createState() => _ThreadPageState();
+  State<ThreadPage> createState() => _ThreadPageState();
 }
 
 class _ThreadPageState extends State<ThreadPage> {
-  FocusNode _focusNode = FocusNode();
+  final FocusNode _focusNode = FocusNode();
   late StreamMessageInputController _messageInputController;
 
   @override
@@ -82,8 +82,8 @@ class _ThreadPageState extends State<ThreadPage> {
   }
 
   bool defaultFilter(Message m) {
-    var _currentUser = StreamChat.of(context).currentUser;
-    final isMyMessage = m.user?.id == _currentUser?.id;
+    final currentUser = StreamChat.of(context).currentUser;
+    final isMyMessage = m.user?.id == currentUser?.id;
     final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
     if (isDeletedOrShadowed && !isMyMessage) return false;
     return true;
