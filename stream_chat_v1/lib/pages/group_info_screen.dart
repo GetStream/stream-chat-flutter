@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:example/localizations.dart';
+import 'package:example/pages/channel_file_display_screen.dart';
+import 'package:example/utils/localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'channel_file_display_screen.dart';
 import 'channel_media_display_screen.dart';
 import 'channel_page.dart';
 import 'chat_info_screen.dart';

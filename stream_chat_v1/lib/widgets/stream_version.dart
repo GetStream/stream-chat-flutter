@@ -1,4 +1,4 @@
-import 'package:example/localizations.dart';
+import 'package:example/utils/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
