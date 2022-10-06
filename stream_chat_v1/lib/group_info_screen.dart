@@ -654,7 +654,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               width: 24.0,
             ),
             onTap: () async {
-              final res = await showConfirmationDialog(
+              final res = await showConfirmationBottomSheet(
                 context,
                 title: AppLocalizations.of(context).leaveConversation,
                 okText: AppLocalizations.of(context).leave.toUpperCase(),
@@ -939,7 +939,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           size: 24.0,
                         ),
                         AppLocalizations.of(context).removeFromGroup, () async {
-                      final res = await showConfirmationDialog(
+                      final res = await showConfirmationBottomSheet(
                         context,
                         title: AppLocalizations.of(context).removeMember,
                         okText:
