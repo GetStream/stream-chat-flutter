@@ -39,6 +39,7 @@ dependencies:
 dev_dependencies:
   flutter_launcher_icons: ^0.9.2
   test: any
+  flutter_lints: ^2.0.0
 
 dependency_overrides:
   stream_chat:

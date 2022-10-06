@@ -20,18 +20,23 @@ void showLocalNotification(
   }
   if (event.message == null) return;
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  final initializationSettingsAndroid =
+  const initializationSettingsAndroid =
       AndroidInitializationSettings('launch_background');
-  final initializationSettingsIOS = IOSInitializationSettings();
-  final initializationSettings = InitializationSettings(
+  const initializationSettingsIOS = IOSInitializationSettings();
+  const initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
     iOS: initializationSettingsIOS,
   );
+
+  final appLocalizations = AppLocalizations.of(context);
+
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
     onSelectNotification: (channelCid) async {
       if (channelCid != null) {
         final client = StreamChat.of(context).client;
+        final navigator = Navigator.of(context);
+
         var channel = client.state.channels[channelCid];
 
         if (channel == null) {
@@ -45,8 +50,7 @@ void showLocalNotification(
           await channel.watch();
         }
 
-        Navigator.pushNamed(
-          context,
+        navigator.pushNamed(
           Routes.CHANNEL_PAGE,
           arguments: ChannelPageArgs(
             channel: channel,
@@ -62,13 +66,12 @@ void showLocalNotification(
     NotificationDetails(
       android: AndroidNotificationDetails(
         'message channel',
-        AppLocalizations.of(context).messageChannelName,
-        channelDescription:
-            AppLocalizations.of(context).messageChannelDescription,
+        appLocalizations.messageChannelName,
+        channelDescription: appLocalizations.messageChannelDescription,
         priority: Priority.high,
         importance: Importance.high,
       ),
-      iOS: IOSNotificationDetails(),
+      iOS: const IOSNotificationDetails(),
     ),
     payload: '${event.channelType}:${event.channelId}',
   );

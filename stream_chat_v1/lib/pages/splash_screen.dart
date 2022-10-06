@@ -12,7 +12,7 @@ mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T>
     _scaleAnimationController = AnimationController(
       vsync: this,
       value: 0,
-      duration: Duration(
+      duration: const Duration(
         milliseconds: 500,
       ),
     );
@@ -26,7 +26,7 @@ mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T>
 
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(
+      duration: const Duration(
         milliseconds: 1000,
       ),
     );
@@ -38,14 +38,14 @@ mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T>
       curve: Curves.easeInOut,
     ));
     colorAnimation = ColorTween(
-      begin: Color(0xff005FFF),
-      end: Color(0xff005FFF),
+      begin: const Color(0xff005FFF),
+      end: const Color(0xff005FFF),
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
     colorAnimation = ColorTween(
-      begin: Color(0xff005FFF),
+      begin: const Color(0xff005FFF),
       end: Colors.transparent,
     ).animate(CurvedAnimation(
       parent: _animationController,
@@ -73,14 +73,14 @@ mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T>
                     builder: (context, snapshot) {
                       return Container(
                         alignment: Alignment.center,
-                        constraints: BoxConstraints.expand(),
+                        constraints: const BoxConstraints.expand(),
                         color: colorAnimation.value,
                         child: !_animationController.isAnimating
                             ? Lottie.asset(
                                 'assets/floating_boat.json',
                                 alignment: Alignment.center,
                               )
-                            : SizedBox(),
+                            : const SizedBox(),
                       );
                     }),
               );

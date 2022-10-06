@@ -72,7 +72,7 @@ class HomePageArgs {
 }
 
 class HomePage extends StatefulWidget {
-  HomePage({
+  const HomePage({
     Key? key,
     required this.chatClient,
   }) : super(key: key);
@@ -80,7 +80,7 @@ class HomePage extends StatefulWidget {
   final StreamChatClient chatClient;
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {

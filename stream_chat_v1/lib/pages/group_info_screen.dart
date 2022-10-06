@@ -21,7 +21,7 @@ class GroupInfoScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _GroupInfoScreenState createState() => _GroupInfoScreenState();
+  State<GroupInfoScreen> createState() => _GroupInfoScreenState();
 }
 
 class _GroupInfoScreenState extends State<GroupInfoScreen> {
@@ -101,7 +101,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ],
       ),
       sort: [
-        SortOption(
+        const SortOption(
           'name',
           direction: 1,
         ),
@@ -124,7 +124,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           if (!snapshot.hasData) {
             return Container(
               color: StreamChatTheme.of(context).colorTheme.disabled,
-              child: Center(child: CircularProgressIndicator()),
+              child: const Center(child: CircularProgressIndicator()),
             );
           }
 
@@ -134,7 +134,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               elevation: 1.0,
               toolbarHeight: 56.0,
               backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
-              leading: StreamBackButton(),
+              leading: const StreamBackButton(),
               title: Column(
                 children: [
                   StreamBuilder<ChannelState>(
@@ -171,7 +171,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           overflow: TextOverflow.ellipsis,
                         );
                       }),
-                  SizedBox(
+                  const SizedBox(
                     height: 3.0,
                   ),
                   Text(
@@ -242,11 +242,12 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
       children: [
         ListView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: groupMembersLength,
           itemBuilder: (context, index) {
             final member = groupMembers[index];
             return Material(
+              color: StreamChatTheme.of(context).colorTheme.appBg,
               child: InkWell(
                 onTap: () {
                   final userMember = groupMembers.firstWhereOrNull(
@@ -255,7 +256,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   _showUserInfoModal(
                       member.user, userMember?.userId == channel.createdBy?.id);
                 },
-                child: Container(
+                child: SizedBox(
                   height: 65.0,
                   child: Column(
                     children: [
@@ -268,7 +269,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                             ),
                             child: StreamUserAvatar(
                               user: member.user!,
-                              constraints: BoxConstraints.tightFor(
+                              constraints: const BoxConstraints.tightFor(
                                 height: 40.0,
                                 width: 40.0,
                               ),
@@ -281,9 +282,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                               children: [
                                 Text(
                                   member.user!.name,
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 1.0,
                                 ),
                                 Text(
@@ -320,7 +322,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   ),
                 ),
               ),
-              color: StreamChatTheme.of(context).colorTheme.appBg,
             );
           },
         ),
@@ -333,7 +334,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             },
             child: Material(
               color: StreamChatTheme.of(context).colorTheme.appBg,
-              child: Container(
+              child: SizedBox(
                 height: 65.0,
                 child: Column(
                   children: [
@@ -401,7 +402,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         .withOpacity(0.5)),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               width: 7.0,
             ),
             Expanded(
@@ -422,7 +423,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                 .colorTheme
                                 .textHighEmphasis
                                 .withOpacity(0.5))),
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   height: 0.82,
                 ),
@@ -478,18 +479,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   Widget _buildOptionListTiles() {
     return Column(
       children: [
-        // OptionListTile(
-        //   title: 'Notifications',
-        //   leading: StreamSvgIcon.Icon_notification(
-        //     size: 24.0,
-        //     color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
-        //   ),
-        //   trailing: CupertinoSwitch(
-        //     value: true,
-        //     onChanged: (val) {},
-        //   ),
-        //   onTap: () {},
-        // ),
         if (channel.ownCapabilities.contains(PermissionType.muteChannel))
           StreamBuilder<bool>(
               stream: channel.isMutedStream,
@@ -513,7 +502,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     ),
                   ),
                   trailing: snapshot.data == null
-                      ? CircularProgressIndicator()
+                      ? const CircularProgressIndicator()
                       : ValueListenableBuilder<bool?>(
                           valueListenable: mutedBool,
                           builder: (context, value, _) {
@@ -558,7 +547,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
                   channel: channel,
-                  child: PinnedMessagesScreen(),
+                  child: const PinnedMessagesScreen(),
                 ),
               ),
             );
@@ -649,11 +638,14 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     .withOpacity(0.5),
               ),
             ),
-            trailing: Container(
+            trailing: const SizedBox(
               height: 24.0,
               width: 24.0,
             ),
             onTap: () async {
+              final streamChannel = StreamChannel.of(context);
+              final streamChat = StreamChat.of(context);
+              final navigator = Navigator.of(context);
               final res = await showConfirmationBottomSheet(
                 context,
                 title: AppLocalizations.of(context).leaveConversation,
@@ -666,10 +658,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                 ),
               );
               if (res == true) {
-                final channel = StreamChannel.of(context).channel;
-                await channel
-                    .removeMembers([StreamChat.of(context).currentUser!.id]);
-                Navigator.pop(context);
+                final channel = streamChannel.channel;
+                await channel.removeMembers([streamChat.currentUser!.id]);
+                navigator.pop();
               }
             },
           ),
@@ -684,9 +675,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
       barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
       builder: (context) {
         return Padding(
-          padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
+          padding: const EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
           child: Material(
-            borderRadius: BorderRadius.only(
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(16.0),
               topRight: Radius.circular(16.0),
             ),
@@ -703,16 +694,17 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       controller: userListController,
                       onUserTap: (user) async {
                         _searchController!.clear();
+                        final navigator = Navigator.of(context);
 
                         await channel.addMembers([user.id]);
-                        Navigator.pop(context);
+                        navigator.pop();
                         setState(() {});
                       },
                       emptyBuilder: (_) {
                         return LayoutBuilder(
                           builder: (context, viewportConstraints) {
                             return SingleChildScrollView(
-                              physics: AlwaysScrollableScrollPhysics(),
+                              physics: const AlwaysScrollableScrollPhysics(),
                               child: ConstrainedBox(
                                 constraints: BoxConstraints(
                                   minHeight: viewportConstraints.maxHeight,
@@ -760,7 +752,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
-              child: Container(
+              child: SizedBox(
                 height: 36,
                 child: TextField(
                   controller: _searchController,
@@ -771,7 +763,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     hintStyle: theme.textTheme.body.copyWith(
                       color: theme.colorTheme.textLowEmphasis,
                     ),
-                    prefixIconConstraints: BoxConstraints.tight(Size(40, 24)),
+                    prefixIconConstraints:
+                        BoxConstraints.tight(const Size(40, 24)),
                     prefixIcon: StreamSvgIcon.search(
                       color: theme.colorTheme.textHighEmphasis,
                       size: 24,
@@ -792,12 +785,12 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                 ),
               ),
             ),
-            SizedBox(width: 16.0),
+            const SizedBox(width: 16.0),
             IconButton(
               icon: StreamSvgIcon.closeSmall(
                 color: theme.colorTheme.textLowEmphasis,
               ),
-              constraints: BoxConstraints.tightFor(
+              constraints: const BoxConstraints.tightFor(
                 height: 24,
                 width: 24,
               ),
@@ -829,19 +822,19 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 24.0,
                   ),
                   Center(
                     child: Text(
                       user!.name,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 5.0,
                   ),
                   _buildConnectedTitleState(user)!,
@@ -850,7 +843,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       padding: const EdgeInsets.all(16.0),
                       child: StreamUserAvatar(
                         user: user,
-                        constraints: BoxConstraints.tightFor(
+                        constraints: const BoxConstraints.tightFor(
                           height: 64.0,
                           width: 64.0,
                         ),
@@ -869,9 +862,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       ),
                       AppLocalizations.of(context).viewInfo,
                       () async {
-                        var client = StreamChat.of(context).client;
+                        final client = StreamChat.of(context).client;
+                        final navigator = Navigator.of(context);
 
-                        var c = client.channel('messaging', extraData: {
+                        final c = client.channel('messaging', extraData: {
                           'members': [
                             user.id,
                             StreamChat.of(context).currentUser!.id,
@@ -880,8 +874,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
                         await c.watch();
 
-                        await Navigator.push(
-                          context,
+                        await navigator.push(
                           MaterialPageRoute(
                             builder: (context) => StreamChannel(
                               channel: c,
@@ -905,9 +898,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       ),
                       AppLocalizations.of(context).message,
                       () async {
-                        var client = StreamChat.of(context).client;
+                        final client = StreamChat.of(context).client;
+                        final navigator = Navigator.of(context);
 
-                        var c = client.channel('messaging', extraData: {
+                        final c = client.channel('messaging', extraData: {
                           'members': [
                             user.id,
                             StreamChat.of(context).currentUser!.id,
@@ -916,12 +910,11 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
                         await c.watch();
 
-                        await Navigator.push(
-                          context,
+                        await navigator.push(
                           MaterialPageRoute(
                             builder: (context) => StreamChannel(
                               channel: c,
-                              child: ChannelPage(),
+                              child: const ChannelPage(),
                             ),
                           ),
                         );
@@ -939,6 +932,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           size: 24.0,
                         ),
                         AppLocalizations.of(context).removeFromGroup, () async {
+                      final navigator = Navigator.of(context);
                       final res = await showConfirmationBottomSheet(
                         context,
                         title: AppLocalizations.of(context).removeMember,
@@ -953,7 +947,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       if (res == true) {
                         await channel.removeMembers([user.id]);
                       }
-                      Navigator.pop(context);
+                      navigator.pop();
                     },
                         color:
                             StreamChatTheme.of(context).colorTheme.accentError),
@@ -974,7 +968,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           ),
         );
       },
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16.0),
           topRight: Radius.circular(16.0),
@@ -984,7 +978,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   }
 
   Widget? _buildConnectedTitleState(User? user) {
-    var alternativeWidget;
+    late Text alternativeWidget;
 
     final otherMember = user;
 
@@ -1028,7 +1022,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               height: 1.0,
               color: StreamChatTheme.of(context).colorTheme.disabled,
             ),
-            Container(
+            SizedBox(
               height: 64.0,
               child: Row(
                 children: [
@@ -1068,13 +1062,13 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         final maxChars = maxWidth / maxFontSize!;
         var currentChars = 0;
         final currentMembers = <Member>[];
-        otherMembers.forEach((element) {
+        for (var element in otherMembers) {
           final newLength = currentChars + element.user!.name.length;
           if (newLength < maxChars) {
             currentChars = newLength;
             currentMembers.add(element);
           }
-        });
+        }
 
         final exceedingMembers = otherMembers.length - currentMembers.length;
         title =

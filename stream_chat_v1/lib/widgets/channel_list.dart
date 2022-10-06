@@ -13,21 +13,23 @@ import '../pages/chat_info_screen.dart';
 import '../pages/group_info_screen.dart';
 
 class ChannelList extends StatefulWidget {
+  const ChannelList({super.key});
+
   @override
-  _ChannelList createState() => _ChannelList();
+  State<ChannelList> createState() => _ChannelList();
 }
 
 class _ChannelList extends State<ChannelList> {
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
 
-  late StreamMessageSearchListController _messageSearchListController =
+  late final StreamMessageSearchListController _messageSearchListController =
       StreamMessageSearchListController(
     client: StreamChat.of(context).client,
     filter: Filter.in_('members', [StreamChat.of(context).currentUser!.id]),
     limit: 5,
     searchQuery: '',
     sort: [
-      SortOption(
+      const SortOption(
         'created_at',
         direction: SortOption.ASC,
       ),
@@ -116,7 +118,7 @@ class _ChannelList extends State<ChannelList> {
                     return LayoutBuilder(
                       builder: (context, viewportConstraints) {
                         return SingleChildScrollView(
-                          physics: AlwaysScrollableScrollPhysics(),
+                          physics: const AlwaysScrollableScrollPhysics(),
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
                               minHeight: viewportConstraints.maxHeight,
@@ -153,6 +155,7 @@ class _ChannelList extends State<ChannelList> {
                         final messageResponse = messageResponses[index];
                         FocusScope.of(context).requestFocus(FocusNode());
                         final client = StreamChat.of(context).client;
+                        final navigator = Navigator.of(context);
                         final message = messageResponse.message;
                         final channel = client.channel(
                           messageResponse.channel!.type,
@@ -161,8 +164,7 @@ class _ChannelList extends State<ChannelList> {
                         if (channel.state == null) {
                           await channel.watch();
                         }
-                        Navigator.pushNamed(
-                          context,
+                        navigator.pushNamed(
                           Routes.CHANNEL_PAGE,
                           arguments: ChannelPageArgs(
                             channel: channel,
@@ -192,7 +194,6 @@ class _ChannelList extends State<ChannelList> {
                             motion: const BehindMotion(),
                             children: [
                               CustomSlidableAction(
-                                child: Icon(Icons.more_horiz),
                                 backgroundColor: backgroundColor,
                                 onPressed: (_) {
                                   showChannelInfoModalBottomSheet(
@@ -236,6 +237,7 @@ class _ChannelList extends State<ChannelList> {
                                     },
                                   );
                                 },
+                                child: const Icon(Icons.more_horiz),
                               ),
                               if (canDeleteChannel)
                                 CustomSlidableAction(

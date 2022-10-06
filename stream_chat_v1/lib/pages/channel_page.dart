@@ -30,12 +30,12 @@ class ChannelPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ChannelPageState createState() => _ChannelPageState();
+  State<ChannelPage> createState() => _ChannelPageState();
 }
 
 class _ChannelPageState extends State<ChannelPage> {
   FocusNode? _focusNode;
-  StreamMessageInputController _messageInputController =
+  final StreamMessageInputController _messageInputController =
       StreamMessageInputController();
 
   @override
@@ -64,7 +64,8 @@ class _ChannelPageState extends State<ChannelPage> {
       appBar: StreamChannelHeader(
         showTypingIndicator: false,
         onImageTap: () async {
-          var channel = StreamChannel.of(context).channel;
+          final channel = StreamChannel.of(context).channel;
+          final navigator = Navigator.of(context);
 
           if (channel.memberCount == 2 && channel.isDistinct) {
             final currentUser = StreamChat.of(context).currentUser;
@@ -76,17 +77,17 @@ class _ChannelPageState extends State<ChannelPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => StreamChannel(
+                    channel: channel,
                     child: ChatInfoScreen(
                       messageTheme: StreamChatTheme.of(context).ownMessageTheme,
                       user: otherUser.user,
                     ),
-                    channel: channel,
                   ),
                 ),
               );
 
               if (pop == true) {
-                Navigator.pop(context);
+                navigator.pop();
               }
             }
           } else {
@@ -94,10 +95,10 @@ class _ChannelPageState extends State<ChannelPage> {
               context,
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
+                  channel: channel,
                   child: GroupInfoScreen(
                     messageTheme: StreamChatTheme.of(context).ownMessageTheme,
                   ),
-                  channel: channel,
                 ),
               ),
             );
@@ -116,6 +117,7 @@ class _ChannelPageState extends State<ChannelPage> {
                   onMessageSwiped: _reply,
                   messageFilter: defaultFilter,
                   messageBuilder: (context, details, messages, defaultMessage) {
+                    final navigator = Navigator.of(context);
                     return defaultMessage.copyWith(
                       onReplyTap: _reply,
                       onShowMessage: (m, c) async {
@@ -128,8 +130,7 @@ class _ChannelPageState extends State<ChannelPage> {
                         if (channel.state == null) {
                           await channel.watch();
                         }
-                        Navigator.pushReplacementNamed(
-                          context,
+                        navigator.pushReplacementNamed(
                           Routes.CHANNEL_PAGE,
                           arguments: ChannelPageArgs(
                             channel: channel,
@@ -184,8 +185,8 @@ class _ChannelPageState extends State<ChannelPage> {
   }
 
   bool defaultFilter(Message m) {
-    var _currentUser = StreamChat.of(context).currentUser;
-    final isMyMessage = m.user?.id == _currentUser?.id;
+    final currentUser = StreamChat.of(context).currentUser;
+    final isMyMessage = m.user?.id == currentUser?.id;
     final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
     if (isDeletedOrShadowed && !isMyMessage) return false;
     return true;

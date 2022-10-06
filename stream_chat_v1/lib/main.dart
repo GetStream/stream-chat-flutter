@@ -19,7 +19,7 @@ void main() async {
     }
   };
 
-  Future<void> _reportError(dynamic error, StackTrace stackTrace) async {
+  Future<void> reportError(dynamic error, StackTrace stackTrace) async {
     // Print the exception to the console.
     if (kDebugMode) {
       // Print the full stacktrace in debug mode.
@@ -36,8 +36,8 @@ void main() async {
       await SentryFlutter.init(
         (options) => options.dsn = sentryDsn,
       );
-      runApp(MyApp());
+      runApp(const StreamChatSampleApp());
     },
-    _reportError,
+    reportError,
   );
 }
