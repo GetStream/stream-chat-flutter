@@ -25,9 +25,14 @@ class GroupInfoScreen extends StatefulWidget {
 }
 
 class _GroupInfoScreenState extends State<GroupInfoScreen> {
-  TextEditingController? _nameController;
+  late final TextEditingController _nameController =
+      TextEditingController.fromValue(
+    TextEditingValue(text: (channel.extraData['name'] as String?) ?? ''),
+  );
 
-  TextEditingController? _searchController;
+  late final TextEditingController _searchController = TextEditingController()
+    ..addListener(_userNameListener);
+
   String _userNameQuery = '';
 
   Timer? _debounce;
@@ -37,23 +42,23 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
   bool listExpanded = false;
 
-  ValueNotifier<bool?> mutedBool = ValueNotifier(false);
+  late ValueNotifier<bool?> mutedBool = ValueNotifier(channel.isMuted);
 
   late final channel = StreamChannel.of(context).channel;
 
-  late StreamUserListController userListController;
+  late StreamUserListController _userListController;
 
   void _userNameListener() {
-    if (_searchController!.text == _userNameQuery) {
+    if (_searchController.text == _userNameQuery) {
       return;
     }
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted) {
-        _userNameQuery = _searchController!.text;
-        userListController.filter = Filter.and(
+        _userNameQuery = _searchController.text;
+        _userListController.filter = Filter.and(
           [
-            if (_searchController!.text.isNotEmpty)
+            if (_searchController.text.isNotEmpty)
               Filter.autoComplete('name', _userNameQuery),
             Filter.notIn('id', [
               StreamChat.of(context).currentUser!.id,
@@ -63,7 +68,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             ]),
           ],
         );
-        userListController.doInitialLoad();
+        _userListController.doInitialLoad();
       }
     });
   }
@@ -72,12 +77,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   void initState() {
     super.initState();
 
-    _nameController = TextEditingController.fromValue(
-      TextEditingValue(text: (channel.extraData['name'] as String?) ?? ''),
-    );
-    _searchController = TextEditingController()..addListener(_userNameListener);
-
-    _nameController!.addListener(() {
+    _nameController.addListener(() {
       setState(() {});
     });
     mutedBool = ValueNotifier(channel.isMuted);
@@ -85,12 +85,12 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
   @override
   void didChangeDependencies() {
-    userListController = StreamUserListController(
+    _userListController = StreamUserListController(
       client: StreamChat.of(context).client,
       limit: 25,
       filter: Filter.and(
         [
-          if (_searchController!.text.isNotEmpty)
+          if (_searchController.text.isNotEmpty)
             Filter.autoComplete('name', _userNameQuery),
           Filter.notIn('id', [
             StreamChat.of(context).currentUser!.id,
@@ -112,7 +112,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
   @override
   void dispose() {
-    userListController.dispose();
+    _nameController.dispose();
+    _searchController.dispose();
+    _userListController.dispose();
     super.dispose();
   }
 
@@ -382,7 +384,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   }
 
   Widget _buildNameTile() {
-    var channelName = (channel.extraData['name'] as String?) ?? '';
+    final channelName = (channel.extraData['name'] as String?) ?? '';
 
     return Material(
       color: StreamChatTheme.of(context).colorTheme.appBg,
@@ -429,7 +431,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                 ),
               ),
             ),
-            if (channelName != _nameController!.text.trim())
+            if (channelName != _nameController.text.trim())
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -437,7 +439,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     child: StreamSvgIcon.closeSmall(),
                     onTap: () {
                       setState(() {
-                        _nameController!.text = _getChannelName(
+                        _nameController.text = _getChannelName(
                           2 * MediaQuery.of(context).size.width / 3,
                           members: channel.state!.members,
                           extraData: channel.extraData,
@@ -458,10 +460,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       ),
                       onTap: () {
                         channel.update({
-                          'name': _nameController!.text.trim(),
+                          'name': _nameController.text.trim(),
                         }).catchError((err) {
                           setState(() {
-                            _nameController!.text = channelName;
+                            _nameController.text = channelName;
                             _focusNode.unfocus();
                           });
                         });
@@ -572,7 +574,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
-            var channel = StreamChannel.of(context).channel;
+            final channel = StreamChannel.of(context).channel;
 
             Navigator.push(
               context,
@@ -606,7 +608,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
-            var channel = StreamChannel.of(context).channel;
+            final channel = StreamChannel.of(context).channel;
 
             Navigator.push(
               context,
@@ -691,9 +693,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   ),
                   Expanded(
                     child: StreamUserGridView(
-                      controller: userListController,
+                      controller: _userListController,
                       onUserTap: (user) async {
-                        _searchController!.clear();
+                        _searchController.clear();
                         final navigator = Navigator.of(context);
 
                         await channel.addMembers([user.id]);
@@ -740,7 +742,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         );
       },
     ).whenComplete(() {
-      _searchController?.clear();
+      _searchController.clear();
     });
   }
 
@@ -1053,7 +1055,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
     double? maxFontSize,
   }) {
     String? title;
-    var client = StreamChat.of(context);
+    final client = StreamChat.of(context);
     if (extraData['name'] == null) {
       final otherMembers =
           members!.where((member) => member.user!.id != client.currentUser!.id);
@@ -1062,7 +1064,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         final maxChars = maxWidth / maxFontSize!;
         var currentChars = 0;
         final currentMembers = <Member>[];
-        for (var element in otherMembers) {
+        for (final element in otherMembers) {
           final newLength = currentChars + element.user!.name.length;
           if (newLength < maxChars) {
             currentChars = newLength;

@@ -15,7 +15,8 @@ class NewGroupChatScreen extends StatefulWidget {
 }
 
 class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
-  TextEditingController? _controller;
+  late final TextEditingController _controller = TextEditingController()
+    ..addListener(_userNameListener);
 
   String _userNameQuery = '';
 
@@ -44,7 +45,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
     _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted) {
         setState(() {
-          _userNameQuery = _controller!.text;
+          _userNameQuery = _controller.text;
           _isSearchActive = _userNameQuery.isNotEmpty;
         });
         userListController.filter = Filter.and([
@@ -58,16 +59,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController()..addListener(_userNameListener);
-  }
-
-  @override
   void dispose() {
-    _controller?.clear();
-    _controller?.removeListener(_userNameListener);
-    _controller?.dispose();
+    _controller.clear();
+    _controller.removeListener(_userNameListener);
+    _controller.dispose();
     userListController.dispose();
     super.dispose();
   }

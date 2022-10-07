@@ -36,7 +36,8 @@ class _ChannelList extends State<ChannelList> {
     ],
   );
 
-  TextEditingController? _controller;
+  late final TextEditingController _controller = TextEditingController()
+    ..addListener(_channelQueryListener);
 
   bool _isSearchActive = false;
 
@@ -46,9 +47,9 @@ class _ChannelList extends State<ChannelList> {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted) {
-        _messageSearchListController.searchQuery = _controller!.text;
+        _messageSearchListController.searchQuery = _controller.text;
         setState(() {
-          _isSearchActive = _controller!.text.isNotEmpty;
+          _isSearchActive = _controller.text.isNotEmpty;
         });
         if (_isSearchActive) _messageSearchListController.doInitialLoad();
       }
@@ -66,15 +67,9 @@ class _ChannelList extends State<ChannelList> {
   );
 
   @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController()..addListener(_channelQueryListener);
-  }
-
-  @override
   void dispose() {
-    _controller?.removeListener(_channelQueryListener);
-    _controller?.dispose();
+    _controller.removeListener(_channelQueryListener);
+    _controller.dispose();
     _scrollController.dispose();
     _channelListController.dispose();
     super.dispose();
@@ -85,7 +80,7 @@ class _ChannelList extends State<ChannelList> {
     return WillPopScope(
       onWillPop: () async {
         if (_isSearchActive) {
-          _controller!.clear();
+          _controller.clear();
           setState(() => _isSearchActive = false);
           return false;
         }

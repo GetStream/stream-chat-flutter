@@ -102,7 +102,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
               }
               final media = <_AssetPackage>[];
 
-              for (var item in value.asSuccess.items) {
+              for (final item in value.asSuccess.items) {
                 item.message.attachments
                     .where((e) =>
                         (e.type == 'image' || e.type == 'video') &&
@@ -110,7 +110,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                     .forEach((e) {
                   VideoPlayerController? controller;
                   if (e.type == 'video') {
-                    var cachedController = controllerCache[e.assetUrl];
+                    final cachedController = controllerCache[e.assetUrl];
 
                     if (cachedController == null) {
                       controller = VideoPlayerController.network(e.assetUrl!);
