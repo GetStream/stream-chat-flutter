@@ -18,16 +18,17 @@ class GroupChatDetailsScreen extends StatefulWidget {
 }
 
 class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
-  final _selectedUsers = <User>[];
+  late final _selectedUsers = <User>[...?widget.selectedUsers];
 
-  TextEditingController? _groupNameController;
+  late final TextEditingController _groupNameController =
+      TextEditingController()..addListener(_groupNameListener);
 
   bool _isGroupNameEmpty = true;
 
   int get _totalUsers => _selectedUsers.length;
 
   void _groupNameListener() {
-    final name = _groupNameController!.text;
+    final name = _groupNameController.text;
     if (mounted) {
       setState(() {
         _isGroupNameEmpty = name.isEmpty;
@@ -36,18 +37,10 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _selectedUsers.addAll(widget.selectedUsers!);
-    _groupNameController = TextEditingController()
-      ..addListener(_groupNameListener);
-  }
-
-  @override
   void dispose() {
-    _groupNameController?.removeListener(_groupNameListener);
-    _groupNameController?.clear();
-    _groupNameController?.dispose();
+    _groupNameController.removeListener(_groupNameListener);
+    _groupNameController.clear();
+    _groupNameController.dispose();
     super.dispose();
   }
 
@@ -128,7 +121,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                     ? null
                     : () async {
                         try {
-                          final groupName = _groupNameController!.text;
+                          final groupName = _groupNameController.text;
                           final client = StreamChat.of(context).client;
                           final navigator = Navigator.of(context);
                           final channel = client.channel('messaging',

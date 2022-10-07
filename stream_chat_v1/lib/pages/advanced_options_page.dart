@@ -33,6 +33,15 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
   bool loading = false;
 
   @override
+  void dispose() {
+    _apiKeyController.dispose();
+    _userIdController.dispose();
+    _userTokenController.dispose();
+    _usernameController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,

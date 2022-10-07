@@ -117,7 +117,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   }
 
   Widget _buildOptionListTiles() {
-    var channel = StreamChannel.of(context);
+    final channel = StreamChannel.of(context);
 
     return Column(
       children: [
@@ -398,7 +398,7 @@ class _SharedGroupsScreen extends StatefulWidget {
 class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
   @override
   Widget build(BuildContext context) {
-    var chat = StreamChat.of(context);
+    final chat = StreamChat.of(context);
 
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
@@ -505,7 +505,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
               final maxChars = maxWidth / textStyle.fontSize!;
               var currentChars = 0;
               final currentMembers = <Member>[];
-              for (var element in otherMembers) {
+              for (final element in otherMembers) {
                 final newLength = currentChars + element.user!.name.length;
                 if (newLength < maxChars) {
                   currentChars = newLength;
