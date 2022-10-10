@@ -1693,7 +1693,11 @@ class ClientState {
     _currentUserController.close();
     _unreadChannelsController.close();
     _totalUnreadCountController.close();
-    channels.values.forEach((c) => c.dispose());
+
+    final channels = this.channels.values.toList();
+    for (final channel in channels) {
+      channel.dispose();
+    }
     _channelsController.close();
   }
 }

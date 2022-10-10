@@ -50,6 +50,10 @@ void main() {
 
       // client logger
       when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+
+      // fake clientState
+      final clientState = FakeClientState();
+      when(() => client.state).thenReturn(clientState);
     });
 
     setUp(() {

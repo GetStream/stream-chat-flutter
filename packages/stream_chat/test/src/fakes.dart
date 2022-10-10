@@ -91,6 +91,11 @@ class FakeClientState extends Fake implements ClientState {
 
   @override
   int totalUnreadCount = 0;
+
+  @override
+  void removeChannel(String channelCid) {
+    return;
+  }
 }
 
 class FakeMessage extends Fake implements Message {}
