@@ -1,3 +1,7 @@
+## 5.0.1
+
+- Fixed including changes from version [4.4.0](#440).
+
 ## 5.0.0
 
 - Included the changes from version [4.3.0](#430) and [4.4.0](#440).
