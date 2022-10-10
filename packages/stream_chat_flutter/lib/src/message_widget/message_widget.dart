@@ -92,6 +92,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.customActions = const [],
     this.onAttachmentTap,
     this.usernameBuilder,
+    this.sendingIndicatorBuilder,
     this.imageAttachmentThumbnailSize = const Size(400, 400),
     this.imageAttachmentThumbnailResizeType = 'clip',
     this.imageAttachmentThumbnailCropType = 'center',
@@ -296,6 +297,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// Widget builder for building username
   /// {@endtemplate}
   final Widget Function(BuildContext, Message)? usernameBuilder;
+
+  /// {@template sendingIndicatorBuilder}
+  /// Widget builder for building sending indicator
+  /// {@endtemplate}
+  final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
 
   /// {@template onMessageActions}
   /// Function called on long press
@@ -532,6 +538,7 @@ class StreamMessageWidget extends StatefulWidget {
     Widget Function(BuildContext, Message)? editMessageInputBuilder,
     Widget Function(BuildContext, Message)? textBuilder,
     Widget Function(BuildContext, Message)? usernameBuilder,
+    Widget Function(BuildContext, Message)? sendingIndicatorBuilder,
     Widget Function(BuildContext, Message)? bottomRowBuilder,
     Widget Function(BuildContext, Message)? deletedBottomRowBuilder,
     void Function(BuildContext, Message)? onMessageActions,
@@ -589,6 +596,8 @@ class StreamMessageWidget extends StatefulWidget {
           editMessageInputBuilder ?? this.editMessageInputBuilder,
       textBuilder: textBuilder ?? this.textBuilder,
       usernameBuilder: usernameBuilder ?? this.usernameBuilder,
+      sendingIndicatorBuilder:
+          sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
       bottomRowBuilder: bottomRowBuilder ?? this.bottomRowBuilder,
       deletedBottomRowBuilder:
           deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
@@ -875,6 +884,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                     onUserAvatarTap: widget.onUserAvatarTap,
                     userAvatarBuilder: widget.userAvatarBuilder,
                     usernameBuilder: widget.usernameBuilder,
+                    sendingIndicatorBuilder: widget.sendingIndicatorBuilder,
                   ),
                 ),
               ),

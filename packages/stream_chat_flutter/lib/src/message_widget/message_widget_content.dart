@@ -56,6 +56,7 @@ class MessageWidgetContent extends StatelessWidget {
     this.deletedBottomRowBuilder,
     this.userAvatarBuilder,
     this.usernameBuilder,
+    this.sendingIndicatorBuilder,
   });
 
   /// {@macro reverse}
@@ -154,6 +155,9 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro bottomRowBuilder}
   final Widget Function(BuildContext, Message)? bottomRowBuilder;
 
+  /// {@macro sendingIndicatorBuilder}
+  final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
+
   /// {@macro showInChannelIndicator}
   final bool showInChannel;
 
@@ -230,6 +234,7 @@ class MessageWidgetContent extends StatelessWidget {
                       streamChat: streamChat,
                       hasNonUrlAttachments: hasNonUrlAttachments,
                       usernameBuilder: usernameBuilder,
+                      sendingIndicatorBuilder: sendingIndicatorBuilder,
                     ),
               ),
             Padding(

@@ -1,3 +1,9 @@
+## UPCOMING
+
+✅ Added
+
+- Added `sendingIndicatorBuilder` to customize sending indicator in `StreamMessageWidget`.
+
 ## 5.0.1
 
 🔄 Changed
