@@ -1,6 +1,6 @@
-## 5.0.1
+## Upcoming
 
-- Fixed including changes from version [4.4.0](#440).
+- Reintroduce support for experimental indexedDB on Web.
 
 ## 5.0.0
 
