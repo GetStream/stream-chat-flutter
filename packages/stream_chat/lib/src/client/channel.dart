@@ -1237,7 +1237,7 @@ class Channel {
     state = ChannelClientState(this, channelState);
 
     if (cid != null) {
-      client.state.channels = {cid!: this};
+      client.state.addChannels({cid!: this});
     }
     if (!_initializedCompleter.isCompleted) {
       _initializedCompleter.complete(true);
@@ -1544,6 +1544,7 @@ class Channel {
 
   /// Call this method to dispose the channel client.
   void dispose() {
+    client.state.removeChannel('$cid');
     state?.dispose();
     _keyStrokeHandler.cancel();
   }

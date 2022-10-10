@@ -665,7 +665,7 @@ class StreamChatClient {
       clearQueryCache: paginationParams.offset == 0,
     );
 
-    this.state.channels = updateData.key;
+    this.state.addChannels(updateData.key);
     return updateData.value;
   }
 
@@ -682,7 +682,7 @@ class StreamChatClient {
         )) ??
         [];
     final updatedData = _mapChannelStateToChannel(offlineChannels);
-    state.channels = updatedData.key;
+    state.addChannels(updatedData.key);
     return updatedData.value;
   }
 
@@ -1549,7 +1549,6 @@ class ClientState {
         final eventChannel = event.channel!;
         await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
         channels[eventChannel.cid]?.dispose();
-        channels = channels..remove(eventChannel.cid);
       }),
     );
   }
@@ -1589,7 +1588,6 @@ class ClientState {
         final eventChannel = event.channel!;
         await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
         channels[eventChannel.cid]?.dispose();
-        channels = channels..remove(eventChannel.cid);
       }),
     );
   }
@@ -1648,9 +1646,22 @@ class ClientState {
   /// The current list of channels in memory
   Map<String, Channel> get channels => _channelsController.value;
 
-  set channels(Map<String, Channel> channelMap) {
-    final newChannels = {...channels, ...channelMap};
+  set channels(Map<String, Channel> newChannels) {
     _channelsController.add(newChannels);
+  }
+
+  /// Adds a list of channels to the current list of cached channels
+  void addChannels(Map<String, Channel> channelMap) {
+    final newChannels = {
+      ...channels,
+      ...channelMap,
+    };
+    channels = newChannels;
+  }
+
+  /// Removes the channel from the cached list of [channels]
+  void removeChannel(String channelCid) {
+    channels = channels..remove(channelCid);
   }
 
   /// Used internally for optimistic update of unread count
@@ -1682,7 +1693,11 @@ class ClientState {
     _currentUserController.close();
     _unreadChannelsController.close();
     _totalUnreadCountController.close();
-    channels.values.forEach((c) => c.dispose());
+
+    final channels = this.channels.values.toList();
+    for (final channel in channels) {
+      channel.dispose();
+    }
     _channelsController.close();
   }
 }
