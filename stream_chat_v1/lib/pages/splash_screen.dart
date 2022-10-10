@@ -3,55 +3,46 @@ import 'package:lottie/lottie.dart';
 
 mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T>
     implements TickerProvider {
-  late Animation<double> animation, scaleAnimation;
-  late AnimationController _animationController, _scaleAnimationController;
-  late Animation<Color?> colorAnimation;
+  late final _animationController = AnimationController(
+    vsync: this,
+    duration: const Duration(
+      milliseconds: 1000,
+    ),
+  );
+
+  late final _scaleAnimationController = AnimationController(
+    vsync: this,
+    value: 0,
+    duration: const Duration(
+      milliseconds: 500,
+    ),
+  );
+
+  late final _circleAnimation = Tween(
+    begin: 0.0,
+    end: 1000.0,
+  ).animate(CurvedAnimation(
+    parent: _animationController,
+    curve: Curves.easeInOut,
+  ));
+
+  late final _colorAnimation = ColorTween(
+    begin: const Color(0xff005FFF),
+    end: Colors.transparent,
+  ).animate(CurvedAnimation(
+    parent: _animationController,
+    curve: Curves.easeInOut,
+  ));
+
+  late final _scaleAnimation = Tween(
+    begin: 1.0,
+    end: 1.5,
+  ).animate(CurvedAnimation(
+    parent: _scaleAnimationController,
+    curve: Curves.easeInOutCubic,
+  ));
+
   bool animationCompleted = false;
-
-  void _createAnimations() {
-    _scaleAnimationController = AnimationController(
-      vsync: this,
-      value: 0,
-      duration: const Duration(
-        milliseconds: 500,
-      ),
-    );
-    scaleAnimation = Tween(
-      begin: 1.0,
-      end: 1.5,
-    ).animate(CurvedAnimation(
-      parent: _scaleAnimationController,
-      curve: Curves.easeInOutBack,
-    ));
-
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(
-        milliseconds: 1000,
-      ),
-    );
-    animation = Tween(
-      begin: 0.0,
-      end: 1000.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    colorAnimation = ColorTween(
-      begin: const Color(0xff005FFF),
-      end: const Color(0xff005FFF),
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    colorAnimation = ColorTween(
-      begin: const Color(0xff005FFF),
-      end: Colors.transparent,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-  }
 
   void forwardAnimations() {
     _scaleAnimationController.forward().whenComplete(() {
@@ -59,38 +50,61 @@ mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T>
     });
   }
 
+  void _onAnimationComplete(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      setState(() {
+        animationCompleted = true;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController.addStatusListener(_onAnimationComplete);
+  }
+
+  @override
+  void dispose() {
+    _animationController.removeStatusListener(_onAnimationComplete);
+    _animationController.dispose();
+    _scaleAnimationController.dispose();
+    super.dispose();
+  }
+
   Widget buildAnimation() => Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
           AnimatedBuilder(
-            animation: scaleAnimation,
-            builder: (context, _) {
-              return Transform.scale(
-                scale: scaleAnimation.value,
-                child: AnimatedBuilder(
-                    animation: colorAnimation,
-                    builder: (context, snapshot) {
-                      return Container(
-                        alignment: Alignment.center,
-                        constraints: const BoxConstraints.expand(),
-                        color: colorAnimation.value,
-                        child: !_animationController.isAnimating
-                            ? Lottie.asset(
-                                'assets/floating_boat.json',
-                                alignment: Alignment.center,
-                              )
-                            : const SizedBox(),
-                      );
-                    }),
-              );
-            },
+            animation: _scaleAnimation,
+            builder: (context, child) =>
+                Transform.scale(scale: _scaleAnimation.value, child: child),
+            child: AnimatedBuilder(
+              animation: _colorAnimation,
+              builder: (context, child) {
+                return DecoratedBox(
+                  decoration: BoxDecoration(color: _colorAnimation.value),
+                  child: Center(
+                    child: !_animationController.isAnimating
+                        ? child
+                        : const SizedBox(),
+                  ),
+                );
+              },
+              child: RepaintBoundary(
+                child: Lottie.asset(
+                  'assets/floating_boat.json',
+                  alignment: Alignment.center,
+                ),
+              ),
+            ),
           ),
           AnimatedBuilder(
-            animation: animation,
+            animation: _circleAnimation,
             builder: (context, snapshot) {
               return Transform.scale(
-                scale: animation.value,
+                scale: _circleAnimation.value,
                 child: Container(
                   width: 1.0,
                   height: 1.0,
@@ -105,17 +119,4 @@ mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T>
           ),
         ],
       );
-
-  @override
-  void initState() {
-    _createAnimations();
-    _animationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        setState(() {
-          animationCompleted = true;
-        });
-      }
-    });
-    super.initState();
-  }
 }
