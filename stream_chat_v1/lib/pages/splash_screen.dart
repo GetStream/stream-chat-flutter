@@ -60,8 +60,8 @@ mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T>
 
   @override
   void initState() {
-    _animationController.addStatusListener(_onAnimationComplete);
     super.initState();
+    _animationController.addStatusListener(_onAnimationComplete);
   }
 
   @override
