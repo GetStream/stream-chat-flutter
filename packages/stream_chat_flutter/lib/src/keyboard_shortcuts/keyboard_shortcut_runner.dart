@@ -35,10 +35,11 @@ class KeyboardShortcutRunner extends StatelessWidget {
     return FocusableActionDetector(
       autofocus: true,
       shortcuts: {
-        enterKeySet: EnterKeyIntent(),
-        escapeKeySet: EscapeKeyIntent(),
-        rightArrowKeySet: RightArrowKeyIntent(),
-        leftArrowKeySet: LeftArrowKeyIntent(),
+        if (onEnterKeypress != null) enterKeySet: EnterKeyIntent(),
+        if (onEscapeKeypress != null) escapeKeySet: EscapeKeyIntent(),
+        if (onRightArrowKeypress != null)
+          rightArrowKeySet: RightArrowKeyIntent(),
+        if (onLeftArrowKeypress != null) leftArrowKeySet: LeftArrowKeyIntent(),
       },
       actions: {
         EnterKeyIntent: CallbackAction(

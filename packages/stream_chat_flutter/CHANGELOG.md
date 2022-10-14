@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - Show message custom actions on desktop context menu.
+- Can move cursor by left/right arrow in StreamMessageInput on web/desktop.
 
 ## 5.0.1
 
