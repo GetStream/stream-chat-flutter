@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Show message custom actions on desktop context menu.
+
 ## 5.0.1
 
 🔄 Changed
