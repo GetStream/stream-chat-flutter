@@ -1,12 +1,13 @@
-import 'package:example/app.dart';
+import 'package:example/state/init_data.dart';
 import 'package:example/utils/app_config.dart';
-import 'package:example/pages/home_page.dart';
 import 'package:example/utils/localizations.dart';
 import 'package:example/widgets/stream_version.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../routes/routes.dart';
@@ -94,12 +95,10 @@ class ChooseUserPage extends StatelessWidget {
                               ),
                             );
 
-                            final client = StreamChatClient(
-                              kDefaultStreamApiKey,
-                              logLevel: Level.INFO,
-                            )..chatPersistenceClient = chatPersistentClient;
+                            final client =
+                                context.read<InitNotifier>().initData!.client;
 
-                            final navigator = Navigator.of(context);
+                            final router = GoRouter.of(context);
 
                             await client.connectUser(
                               user,
@@ -121,11 +120,7 @@ class ChooseUserPage extends StatelessWidget {
                                 value: token,
                               );
                             }
-                            navigator.pushNamedAndRemoveUntil(
-                              Routes.HOME,
-                              ModalRoute.withName(Routes.HOME),
-                              arguments: HomePageArgs(client),
-                            );
+                            router.replaceNamed(Routes.CHANNEL_LIST_PAGE.name);
                           },
                           leading: StreamUserAvatar(
                             user: user,
@@ -157,9 +152,8 @@ class ChooseUserPage extends StatelessWidget {
                         );
                       }),
                       ListTile(
-                        onTap: () {
-                          Navigator.pushNamed(context, Routes.ADVANCED_OPTIONS);
-                        },
+                        onTap: () => GoRouter.of(context)
+                            .pushNamed(Routes.ADVANCED_OPTIONS.name),
                         leading: CircleAvatar(
                           backgroundColor:
                               StreamChatTheme.of(context).colorTheme.borders,

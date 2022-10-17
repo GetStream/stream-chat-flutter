@@ -1,28 +1,31 @@
 import 'dart:async';
 
+import 'package:example/state/init_data.dart';
 import 'package:example/pages/choose_user_page.dart';
-import 'package:example/pages/home_page.dart';
-import 'package:example/utils/localizations.dart';
 import 'package:example/pages/splash_screen.dart';
+import 'package:example/routes/app_routes.dart';
+import 'package:example/routes/routes.dart';
+import 'package:example/utils/app_config.dart';
+import 'package:example/utils/local_notification_observer.dart';
+import 'package:example/utils/localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
-import 'routes/app_routes.dart';
-import 'routes/routes.dart';
-
 final chatPersistentClient = StreamChatPersistenceClient(
   logLevel: Level.SEVERE,
   connectionMode: ConnectionMode.regular,
 );
 
-void sampleAppLogHandler(LogRecord record) async {
+void _sampleAppLogHandler(LogRecord record) async {
   if (kDebugMode) StreamChatClient.defaultLogHandler(record);
 
   // report errors to setnry.io
@@ -34,14 +37,17 @@ void sampleAppLogHandler(LogRecord record) async {
   }
 }
 
-StreamChatClient buildStreamChatClient(
-  String apiKey, {
-  Level logLevel = Level.INFO,
-}) {
+StreamChatClient buildStreamChatClient(String apiKey) {
+  late Level logLevel;
+  if (kDebugMode) {
+    logLevel = Level.INFO;
+  } else {
+    logLevel = Level.SEVERE;
+  }
   return StreamChatClient(
     apiKey,
     logLevel: logLevel,
-    logHandlerFunction: sampleAppLogHandler,
+    logHandlerFunction: _sampleAppLogHandler,
   )..chatPersistenceClient = chatPersistentClient;
 }
 
@@ -54,7 +60,7 @@ class StreamChatSampleApp extends StatefulWidget {
 
 class _StreamChatSampleAppState extends State<StreamChatSampleApp>
     with SplashScreenStateMixin, TickerProviderStateMixin {
-  InitData? _initData;
+  final InitNotifier _initNotifier = InitNotifier();
 
   Future<InitData> _initConnection() async {
     String? apiKey, userId, token;
@@ -66,7 +72,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
       token = await secureStorage.read(key: kStreamToken);
     }
 
-    final client = buildStreamChatClient(apiKey ?? kStreamApiKey);
+    final client = buildStreamChatClient(apiKey ?? kDefaultStreamApiKey);
 
     if (userId != null && token != null) {
       await client.connectUser(
@@ -87,7 +93,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
     _initConnection().then(
       (initData) {
         setState(() {
-          _initData = initData;
+          _initNotifier.initData = initData;
         });
 
         final now = DateTime.now().millisecondsSinceEpoch;
@@ -107,78 +113,91 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
     super.initState();
   }
 
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
+  LocalNotificationObserver? localNotificationObserver;
+
+  /// Conditionally sets up the router and adding an observer for the
+  /// current chat client.
+  GoRouter _setupRouter() {
+    if (localNotificationObserver != null) {
+      localNotificationObserver!.dispose();
+    }
+    localNotificationObserver = LocalNotificationObserver(
+        _initNotifier.initData!.client, _navigatorKey);
+
+    return GoRouter(
+      refreshListenable: _initNotifier,
+      initialLocation: Routes.CHANNEL_LIST_PAGE.path,
+      navigatorKey: _navigatorKey,
+      observers: [localNotificationObserver!],
+      redirect: (context, state) {
+        final loggedIn =
+            _initNotifier.initData?.client.state.currentUser != null;
+        final loggingIn = state.subloc == Routes.CHOOSE_USER.path ||
+            state.subloc == Routes.ADVANCED_OPTIONS.path;
+
+        if (!loggedIn) {
+          return loggingIn ? null : Routes.CHOOSE_USER.path;
+        }
+
+        // if the user is logged in but still on the login page, send them to
+        // the home page
+        if (loggedIn && state.subloc == Routes.CHOOSE_USER.path) {
+          return Routes.CHANNEL_LIST_PAGE.path;
+        }
+
+        return null;
+      },
+      routes: appRoutes,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       alignment: Alignment.center,
       children: [
-        if (_initData != null)
-          PreferenceBuilder<int>(
-            preference: _initData!.preferences.getInt(
-              'theme',
-              defaultValue: 0,
-            ),
-            builder: (context, snapshot) => MaterialApp(
-              theme: ThemeData.light(),
-              darkTheme: ThemeData.dark(),
-              themeMode: {
-                -1: ThemeMode.dark,
-                0: ThemeMode.system,
-                1: ThemeMode.light,
-              }[snapshot],
-              supportedLocales: const [
-                Locale('en'),
-                Locale('it'),
-              ],
-              localizationsDelegates: const [
-                AppLocalizationsDelegate(),
-                GlobalStreamChatLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-              ],
-              builder: (context, child) => StreamChatConfiguration(
-                data: StreamChatConfigurationData(),
-                child: StreamChatTheme(
-                  data: StreamChatThemeData(
-                    brightness: Theme.of(context).brightness,
+        if (_initNotifier.initData != null)
+          ChangeNotifierProvider.value(
+            value: _initNotifier,
+            builder: (context, child) => Builder(
+              builder: (context) {
+                context.watch<InitNotifier>(); // rebuild on change
+                return PreferenceBuilder<int>(
+                  preference: _initNotifier.initData!.preferences.getInt(
+                    'theme',
+                    defaultValue: 0,
                   ),
-                  child: child!,
-                ),
-              ),
-              onGenerateRoute: AppRoutes.generateRoute,
-              onGenerateInitialRoutes: (initialRouteName) {
-                if (initialRouteName == Routes.HOME) {
-                  return [
-                    AppRoutes.generateRoute(
-                      RouteSettings(
-                        name: Routes.HOME,
-                        arguments: HomePageArgs(_initData!.client),
-                      ),
-                    )!
-                  ];
-                }
-                return [
-                  AppRoutes.generateRoute(
-                    const RouteSettings(
-                      name: Routes.CHOOSE_USER,
+                  builder: (context, snapshot) => MaterialApp.router(
+                    theme: ThemeData.light(),
+                    darkTheme: ThemeData.dark(),
+                    themeMode: const {
+                      -1: ThemeMode.dark,
+                      0: ThemeMode.system,
+                      1: ThemeMode.light,
+                    }[snapshot],
+                    supportedLocales: const [
+                      Locale('en'),
+                      Locale('it'),
+                    ],
+                    localizationsDelegates: const [
+                      AppLocalizationsDelegate(),
+                      GlobalStreamChatLocalizations.delegate,
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                    ],
+                    builder: (context, child) => StreamChat(
+                      client: _initNotifier.initData!.client,
+                      child: child,
                     ),
-                  )!
-                ];
+                    routerConfig: _setupRouter(),
+                  ),
+                );
               },
-              initialRoute: _initData!.client.state.currentUser == null
-                  ? Routes.CHOOSE_USER
-                  : Routes.HOME,
             ),
           ),
         if (!animationCompleted) buildAnimation(),
       ],
     );
   }
-}
-
-class InitData {
-  final StreamChatClient client;
-  final StreamingSharedPreferences preferences;
-
-  InitData(this.client, this.preferences);
 }

@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:example/utils/localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'channel_page.dart';
 import '../widgets/chips_input_text_field.dart';
 import '../routes/routes.dart';
 
@@ -61,13 +61,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
           _userNameQuery = _controller.text;
           _isSearchActive = _userNameQuery.isNotEmpty;
         });
+
+        userListController.filter = Filter.and([
+          if (_userNameQuery.isNotEmpty)
+            Filter.autoComplete('name', _userNameQuery),
+          Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+        ]);
+        userListController.doInitialLoad();
       }
-      userListController.filter = Filter.and([
-        if (_userNameQuery.isNotEmpty)
-          Filter.autoComplete('name', _userNameQuery),
-        Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-      ]);
-      userListController.doInitialLoad();
     });
   }
 
@@ -248,9 +249,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
                   if (!_isSearchActive && !_selectedUsers.isNotEmpty)
                     InkWell(
                       onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          Routes.NEW_GROUP_CHAT,
+                        GoRouter.of(context).pushNamed(
+                          Routes.NEW_GROUP_CHAT.name,
                         );
                       },
                       child: Padding(
@@ -311,8 +311,6 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             onPanDown: (_) => FocusScope.of(context).unfocus(),
                             child: StreamUserListView(
                               controller: userListController,
-                              // groupAlphabetically:
-                              //     _isSearchActive ? false : true,
                               onUserTap: (user) {
                                 _controller.clear();
                                 if (!_selectedUsers.contains(user)) {
@@ -409,11 +407,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
                       return message;
                     },
                     onMessageSent: (m) {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        Routes.CHANNEL_PAGE,
-                        ModalRoute.withName(Routes.CHANNEL_LIST_PAGE),
-                        arguments: ChannelPageArgs(channel: channel),
+                      GoRouter.of(context).goNamed(
+                        Routes.CHANNEL_PAGE.name,
+                        params: Routes.CHANNEL_PAGE.params(channel!),
                       );
                     },
                   ),

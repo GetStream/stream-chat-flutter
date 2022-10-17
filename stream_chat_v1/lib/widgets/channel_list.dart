@@ -5,10 +5,10 @@ import 'package:example/routes/routes.dart';
 import 'package:example/widgets/search_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../pages/channel_page.dart';
 import '../pages/chat_info_screen.dart';
 import '../pages/group_info_screen.dart';
 
@@ -150,7 +150,7 @@ class _ChannelList extends State<ChannelList> {
                         final messageResponse = messageResponses[index];
                         FocusScope.of(context).requestFocus(FocusNode());
                         final client = StreamChat.of(context).client;
-                        final navigator = Navigator.of(context);
+                        final router = GoRouter.of(context);
                         final message = messageResponse.message;
                         final channel = client.channel(
                           messageResponse.channel!.type,
@@ -159,12 +159,10 @@ class _ChannelList extends State<ChannelList> {
                         if (channel.state == null) {
                           await channel.watch();
                         }
-                        navigator.pushNamed(
-                          Routes.CHANNEL_PAGE,
-                          arguments: ChannelPageArgs(
-                            channel: channel,
-                            initialMessage: message,
-                          ),
+                        router.pushNamed(
+                          Routes.CHANNEL_PAGE.name,
+                          params: Routes.CHANNEL_PAGE.params(channel),
+                          queryParams: Routes.CHANNEL_PAGE.queryParams(message),
                         );
                       },
                     );
@@ -265,12 +263,9 @@ class _ChannelList extends State<ChannelList> {
                         );
                       },
                       onChannelTap: (channel) {
-                        Navigator.pushNamed(
-                          context,
-                          Routes.CHANNEL_PAGE,
-                          arguments: ChannelPageArgs(
-                            channel: channel,
-                          ),
+                        GoRouter.of(context).pushNamed(
+                          Routes.CHANNEL_PAGE.name,
+                          params: Routes.CHANNEL_PAGE.params(channel),
                         );
                       },
                       emptyBuilder: (_) {
@@ -286,10 +281,8 @@ class _ChannelList extends State<ChannelList> {
                               ),
                               emptyTitle: TextButton(
                                 onPressed: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    Routes.NEW_CHAT,
-                                  );
+                                  GoRouter.of(context)
+                                      .pushNamed(Routes.NEW_CHAT.name);
                                 },
                                 child: Text(
                                   'Start a chat',

@@ -2,20 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:example/routes/routes.dart';
 import 'package:example/pages/thread_page.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-import 'chat_info_screen.dart';
-import 'group_info_screen.dart';
-
-class ChannelPageArgs {
-  final Channel? channel;
-  final Message? initialMessage;
-
-  const ChannelPageArgs({
-    this.channel,
-    this.initialMessage,
-  });
-}
 
 class ChannelPage extends StatefulWidget {
   final int? initialScrollIndex;
@@ -63,9 +51,10 @@ class _ChannelPageState extends State<ChannelPage> {
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: StreamChannelHeader(
         showTypingIndicator: false,
+        onBackPressed: () => GoRouter.of(context).pop(),
         onImageTap: () async {
           final channel = StreamChannel.of(context).channel;
-          final navigator = Navigator.of(context);
+          final router = GoRouter.of(context);
 
           if (channel.memberCount == 2 && channel.isDistinct) {
             final currentUser = StreamChat.of(context).currentUser;
@@ -73,34 +62,16 @@ class _ChannelPageState extends State<ChannelPage> {
               (element) => element.user!.id != currentUser!.id,
             );
             if (otherUser != null) {
-              final pop = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => StreamChannel(
-                    channel: channel,
-                    child: ChatInfoScreen(
-                      messageTheme: StreamChatTheme.of(context).ownMessageTheme,
-                      user: otherUser.user,
-                    ),
-                  ),
-                ),
+              router.pushNamed(
+                Routes.CHAT_INFO_SCREEN.name,
+                params: Routes.CHAT_INFO_SCREEN.params(channel),
+                extra: otherUser.user,
               );
-
-              if (pop == true) {
-                navigator.pop();
-              }
             }
           } else {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => StreamChannel(
-                  channel: channel,
-                  child: GroupInfoScreen(
-                    messageTheme: StreamChatTheme.of(context).ownMessageTheme,
-                  ),
-                ),
-              ),
+            GoRouter.of(context).pushNamed(
+              Routes.GROUP_INFO_SCREEN.name,
+              params: Routes.GROUP_INFO_SCREEN.params(channel),
             );
           }
         },
@@ -117,7 +88,7 @@ class _ChannelPageState extends State<ChannelPage> {
                   onMessageSwiped: _reply,
                   messageFilter: defaultFilter,
                   messageBuilder: (context, details, messages, defaultMessage) {
-                    final navigator = Navigator.of(context);
+                    final router = GoRouter.of(context);
                     return defaultMessage.copyWith(
                       onReplyTap: _reply,
                       onShowMessage: (m, c) async {
@@ -130,12 +101,10 @@ class _ChannelPageState extends State<ChannelPage> {
                         if (channel.state == null) {
                           await channel.watch();
                         }
-                        navigator.pushReplacementNamed(
-                          Routes.CHANNEL_PAGE,
-                          arguments: ChannelPageArgs(
-                            channel: channel,
-                            initialMessage: message,
-                          ),
+                        router.goNamed(
+                          Routes.CHANNEL_PAGE.name,
+                          params: Routes.CHANNEL_PAGE.params(channel),
+                          queryParams: Routes.CHANNEL_PAGE.queryParams(message),
                         );
                       },
                       deletedBottomRowBuilder: (context, message) {

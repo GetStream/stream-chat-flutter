@@ -1,16 +1,20 @@
 import 'dart:async';
 
-import 'package:example/utils/localizations.dart';
-import 'package:example/routes/routes.dart';
+import 'package:example/app.dart';
+import 'package:example/state/init_data.dart';
 import 'package:example/pages/user_mentions_page.dart';
+import 'package:example/routes/routes.dart';
+import 'package:example/utils/app_config.dart';
+import 'package:example/utils/localizations.dart';
+import 'package:example/widgets/channel_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
-
-import 'package:example/widgets/channel_list.dart';
 
 class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
@@ -71,12 +75,10 @@ class _ChannelListPageState extends State<ChannelListPage> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: StreamChannelListHeader(
-        onNewChatButtonTap: () {
-          Navigator.pushNamed(context, Routes.NEW_CHAT);
-        },
-        preNavigationCallback: () {
-          FocusScope.of(context).requestFocus(FocusNode());
-        },
+        onNewChatButtonTap: () =>
+            GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name),
+        preNavigationCallback: () =>
+            FocusScope.of(context).requestFocus(FocusNode()),
       ),
       drawer: LeftDrawer(
         user: user,
@@ -188,10 +190,8 @@ class LeftDrawer extends StatelessWidget {
                         .withOpacity(.5),
                   ),
                   onTap: () {
-                    Navigator.popAndPushNamed(
-                      context,
-                      Routes.NEW_CHAT,
-                    );
+                    Navigator.of(context).pop();
+                    GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name);
                   },
                   title: Text(
                     AppLocalizations.of(context).newDirectMessage,
@@ -208,10 +208,8 @@ class LeftDrawer extends StatelessWidget {
                         .withOpacity(.5),
                   ),
                   onTap: () {
-                    Navigator.popAndPushNamed(
-                      context,
-                      Routes.NEW_GROUP_CHAT,
-                    );
+                    Navigator.of(context).pop();
+                    GoRouter.of(context).pushNamed(Routes.NEW_GROUP_CHAT.name);
                   },
                   title: Text(
                     AppLocalizations.of(context).newGroup,
@@ -226,22 +224,21 @@ class LeftDrawer extends StatelessWidget {
                     child: ListTile(
                       onTap: () async {
                         final client = StreamChat.of(context).client;
-                        final navigator =
-                            Navigator.of(context, rootNavigator: true);
-                        Navigator.pop(context);
+                        final router = GoRouter.of(context);
+                        final initNotifier = context.read<InitNotifier>();
 
                         if (!kIsWeb) {
                           const secureStorage = FlutterSecureStorage();
                           await secureStorage.deleteAll();
                         }
 
-                        client.disconnectUser();
+                        await client.disconnectUser(flushChatPersistence: true);
                         await client.dispose();
+                        initNotifier.initData = initNotifier.initData!.copyWith(
+                            client:
+                                buildStreamChatClient(kDefaultStreamApiKey));
 
-                        await navigator.pushNamedAndRemoveUntil(
-                          Routes.CHOOSE_USER,
-                          ModalRoute.withName(Routes.CHOOSE_USER),
-                        );
+                        router.goNamed(Routes.CHOOSE_USER.name);
                       },
                       leading: StreamSvgIcon.user(
                         color: StreamChatTheme.of(context)
