@@ -106,7 +106,7 @@ class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
     if (thumbUrl != null) {
       return CachedNetworkImage(
         imageUrl: thumbUrl,
-        fit: BoxFit.cover,
+        fit: widget.fit,
         height: widget.constraints?.maxHeight,
         width: widget.constraints?.maxWidth,
         placeholder: (context, __) => placeHolderWidget,
