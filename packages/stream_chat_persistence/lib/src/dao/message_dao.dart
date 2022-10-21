@@ -170,7 +170,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
         }
       }
       if (messagePagination?.limit != null) {
-        return msgList.take(messagePagination!.limit).toList();
+        return msgList.skip(msgList.length - messagePagination!.limit).toList();
       }
     }
     return msgList;
