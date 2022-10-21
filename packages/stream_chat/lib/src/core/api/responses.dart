@@ -157,11 +157,24 @@ class ListDevicesResponse extends _BaseResponse {
       _$ListDevicesResponseFromJson(json);
 }
 
+/// Base Model response for [Channel.sendImage] and [Channel.sendFile] api call.
+@JsonSerializable(createToJson: false)
+class SendAttachmentResponse extends _BaseResponse {
+  /// The url of the uploaded attachment.
+  late String? file;
+
+  /// Create a new instance from a json
+  static SendAttachmentResponse fromJson(Map<String, dynamic> json) =>
+      _$SendAttachmentResponseFromJson(json);
+}
+
 /// Model response for [Channel.sendFile] api call
 @JsonSerializable(createToJson: false)
-class SendFileResponse extends _BaseResponse {
-  /// The url of the uploaded file
-  late String file;
+class SendFileResponse extends SendAttachmentResponse {
+  /// The url of the uploaded video file.
+  ///
+  /// This is only present if the file is a video.
+  String? thumbUrl;
 
   /// Create a new instance from a json
   static SendFileResponse fromJson(Map<String, dynamic> json) =>
@@ -169,15 +182,7 @@ class SendFileResponse extends _BaseResponse {
 }
 
 /// Model response for [Channel.sendImage] api call
-@JsonSerializable(createToJson: false)
-class SendImageResponse extends _BaseResponse {
-  /// The url of the uploaded file
-  late String file;
-
-  /// Create a new instance from a json
-  static SendImageResponse fromJson(Map<String, dynamic> json) =>
-      _$SendImageResponseFromJson(json);
-}
+typedef SendImageResponse = SendAttachmentResponse;
 
 /// Model response for [Channel.sendReaction] api call
 @JsonSerializable(createToJson: false)

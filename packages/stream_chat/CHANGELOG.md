@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added `thumbUrl` field in `SendFileResponse` model.
+
 🐞 Fixed
 
 - Remove disposed channel clients from the client state.

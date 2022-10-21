@@ -493,36 +493,41 @@ class Channel {
 
       final isImage = it.type == 'image';
       final cancelToken = CancelToken();
-      Future<String> future;
+      Future<SendAttachmentResponse> future;
       if (isImage) {
         future = sendImage(
           it.file!,
           onSendProgress: onSendProgress,
           cancelToken: cancelToken,
           extraData: it.extraData,
-        ).then((it) => it.file);
+        );
       } else {
         future = sendFile(
           it.file!,
           onSendProgress: onSendProgress,
           cancelToken: cancelToken,
           extraData: it.extraData,
-        ).then((it) => it.file);
+        );
       }
       _cancelableAttachmentUploadRequest[it.id] = cancelToken;
-      return future.then((url) {
+      return future.then((response) {
         client.logger.info('Attachment ${it.id} uploaded successfully...');
-        if (isImage) {
+
+        // If the response is SendFileResponse, then we might also be getting
+        // thumbUrl in case of video. So we need to update the attachment with
+        // both the assetUrl and thumbUrl.
+        if (response is SendFileResponse) {
           updateAttachment(
             it.copyWith(
-              imageUrl: url,
+              assetUrl: response.file,
+              thumbUrl: response.thumbUrl,
               uploadState: const UploadState.success(),
             ),
           );
         } else {
           updateAttachment(
             it.copyWith(
-              assetUrl: url,
+              imageUrl: response.file,
               uploadState: const UploadState.success(),
             ),
           );

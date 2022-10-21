@@ -1,3 +1,10 @@
+## Upcoming
+
+✅ Added
+
+- `VideoAttachment` now uses `thumbUrl` to show the thumbnail
+  if it's available instead of generating them.
+
 ## 5.0.1
 
 🔄 Changed
@@ -551,7 +558,7 @@ typedef ActionButtonBuilder = Widget Function(
 ```
 
 > **_NOTE:_** The last parameter is the default `ActionButton`
-You can call `.copyWith` to customize just a subset of properties.
+> You can call `.copyWith` to customize just a subset of properties.
 
 - Added slow mode which allows a cooldown period after a user sends a message.
 
@@ -654,7 +661,7 @@ typedef MessageBuilder = Widget Function(
 ```
 
 > **_NOTE:_** the last parameter is the default `MessageWidget`
-You can call `.copyWith` to customize just a subset of properties
+> You can call `.copyWith` to customize just a subset of properties
 
 
 ✅ Added
@@ -724,7 +731,7 @@ typedef MessageBuilder = Widget Function(
 ```
 
 > **_NOTE:_** The last parameter is the default `MessageWidget`
-You can call `.copyWith` to customize just a subset of properties.
+> You can call `.copyWith` to customize just a subset of properties.
 
 ✅ Added
 
