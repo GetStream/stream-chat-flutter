@@ -66,18 +66,10 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
   /// Get list of channels by filter, sort and paginationParams
   Future<List<ChannelModel>> getChannels({
     Filter? filter,
-    List<SortOption<ChannelModel>>? sort,
+    @Deprecated('sort has been deprecated')
+        List<SortOption<ChannelModel>>? sort,
     PaginationParams? paginationParams,
   }) async {
-    assert(() {
-      if (sort != null && sort.any((it) => it.comparator == null)) {
-        throw ArgumentError(
-          'SortOption requires a comparator in order to sort',
-        );
-      }
-      return true;
-    }(), '');
-
     final cachedChannelCids = await getCachedChannelCids(filter);
     final query = select(channels)..where((c) => c.cid.isIn(cachedChannelCids));
 
@@ -98,9 +90,10 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
     if (sort != null && sort.isNotEmpty) {
       chainedComparator = (a, b) {
         int result;
-        for (final comparator in sort.map((it) => it.comparator)) {
+        for (final comparator
+            in sort.map((it) => it.comparator).withNullifyer) {
           try {
-            result = comparator!(a, b);
+            result = comparator(a, b);
           } catch (e) {
             result = 0;
           }

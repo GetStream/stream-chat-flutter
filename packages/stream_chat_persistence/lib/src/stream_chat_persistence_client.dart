@@ -263,7 +263,10 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    List<SortOption<ChannelModel>>? sort,
+    @Deprecated('''
+    sort has been deprecated. 
+    Please use channelStateSort instead.''') List<SortOption<ChannelModel>>? sort,
+    List<SortOption<ChannelState>>? channelStateSort,
     PaginationParams? paginationParams,
   }) {
     assert(_debugIsConnected, '');
@@ -272,10 +275,47 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       () async {
         final channels = await db!.channelQueryDao.getChannels(
           filter: filter,
+          // ignore: deprecated_member_use_from_same_package
           sort: sort,
           paginationParams: paginationParams,
         );
-        return Future.wait(channels.map((e) => getChannelStateByCid(e.cid)));
+        final channelStates =
+            await Future.wait(channels.map((e) => getChannelStateByCid(e.cid)));
+
+        var chainedComparator = (ChannelState a, ChannelState b) {
+          final dateA = a.channel?.lastMessageAt ?? a.channel?.createdAt;
+          final dateB = b.channel?.lastMessageAt ?? b.channel?.createdAt;
+
+          if (dateA == null && dateB == null) {
+            return 0;
+          } else if (dateA == null) {
+            return 1;
+          } else if (dateB == null) {
+            return -1;
+          } else {
+            return dateB.compareTo(dateA);
+          }
+        };
+
+        if (channelStateSort != null && channelStateSort.isNotEmpty) {
+          chainedComparator = (a, b) {
+            int result;
+            for (final comparator
+                in channelStateSort.map((it) => it.comparator).withNullifyer) {
+              try {
+                result = comparator(a, b);
+              } catch (e) {
+                result = 0;
+              }
+              if (result != 0) return result;
+            }
+            return 0;
+          };
+        }
+
+        channelStates.sort(chainedComparator);
+
+        return channelStates;
       },
     );
   }

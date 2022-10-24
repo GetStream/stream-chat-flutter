@@ -517,7 +517,10 @@ class StreamChatClient {
   /// Requests channels with a given query.
   Stream<List<Channel>> queryChannels({
     Filter? filter,
-    List<SortOption<ChannelModel>>? sort,
+    @Deprecated('''
+    sort has been deprecated. 
+    Please use channelStateSort instead.''') List<SortOption<ChannelModel>>? sort,
+    List<SortOption<ChannelState>>? channelStateSort,
     bool state = true,
     bool watch = true,
     bool presence = false,
@@ -547,7 +550,9 @@ class StreamChatClient {
     } else {
       final channels = await queryChannelsOffline(
         filter: filter,
+        // ignore: deprecated_member_use_from_same_package
         sort: sort,
+        channelStateSort: channelStateSort,
         paginationParams: paginationParams,
       );
       if (channels.isNotEmpty) yield channels;
@@ -555,7 +560,7 @@ class StreamChatClient {
       try {
         final newQueryChannelsFuture = queryChannelsOnline(
           filter: filter,
-          sort: sort,
+          sort: channelStateSort ?? sort,
           state: state,
           watch: watch,
           presence: presence,
@@ -598,7 +603,7 @@ class StreamChatClient {
   /// Requests channels with a given query from the API.
   Future<List<Channel>> queryChannelsOnline({
     Filter? filter,
-    List<SortOption<ChannelModel>>? sort,
+    List<SortOption>? sort,
     bool state = true,
     bool watch = true,
     bool presence = false,
@@ -672,12 +677,17 @@ class StreamChatClient {
   /// Requests channels with a given query from the Persistence client.
   Future<List<Channel>> queryChannelsOffline({
     Filter? filter,
-    List<SortOption<ChannelModel>>? sort,
+    @Deprecated('''
+    sort has been deprecated. 
+    Please use channelStateSort instead.''') List<SortOption<ChannelModel>>? sort,
+    List<SortOption<ChannelState>>? channelStateSort,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
     final offlineChannels = (await _chatPersistenceClient?.getChannelStates(
           filter: filter,
+          // ignore: deprecated_member_use_from_same_package
           sort: sort,
+          channelStateSort: channelStateSort,
           paginationParams: paginationParams,
         )) ??
         [];

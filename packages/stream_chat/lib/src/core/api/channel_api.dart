@@ -51,7 +51,7 @@ class ChannelApi {
   /// Requests channels with a given query from the API.
   Future<QueryChannelsResponse> queryChannels({
     Filter? filter,
-    List<SortOption<ChannelModel>>? sort,
+    List<SortOption>? sort,
     int? memberLimit,
     int? messageLimit,
     bool state = true,
