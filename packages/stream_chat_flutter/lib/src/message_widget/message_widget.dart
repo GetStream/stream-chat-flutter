@@ -88,6 +88,7 @@ class StreamMessageWidget extends StatefulWidget {
       vertical: 8,
     ),
     this.attachmentPadding = EdgeInsets.zero,
+    this.widthFactor = 0.78,
     this.onQuotedMessageTap,
     this.customActions = const [],
     this.onAttachmentTap,
@@ -377,6 +378,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final EdgeInsetsGeometry attachmentPadding;
 
+  /// {@template widthFactor}
+  /// The percentage of the available width the message content should take
+  /// {@endtemplate}
+  final double widthFactor;
+
   /// {@template showUserAvatar}
   /// It controls the display behaviour of the user avatar
   /// {@endtemplate}
@@ -547,6 +553,7 @@ class StreamMessageWidget extends StatefulWidget {
     EdgeInsetsGeometry? padding,
     EdgeInsets? textPadding,
     EdgeInsetsGeometry? attachmentPadding,
+    double? widthFactor,
     DisplayWidget? showUserAvatar,
     bool? showSendingIndicator,
     bool? showReactions,
@@ -606,6 +613,7 @@ class StreamMessageWidget extends StatefulWidget {
       padding: padding ?? this.padding,
       textPadding: textPadding ?? this.textPadding,
       attachmentPadding: attachmentPadding ?? this.attachmentPadding,
+      widthFactor: widthFactor ?? this.widthFactor,
       showUserAvatar: showUserAvatar ?? this.showUserAvatar,
       showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
       showReactions: showReactions ?? this.showReactions,
@@ -829,7 +837,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                   alignment: widget.reverse
                       ? Alignment.centerRight
                       : Alignment.centerLeft,
-                  widthFactor: 0.78,
+                  widthFactor: widget.widthFactor,
                   child: MessageWidgetContent(
                     streamChatTheme: _streamChatTheme,
                     showUsername: showUsername,

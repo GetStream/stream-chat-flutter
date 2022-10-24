@@ -4,6 +4,7 @@
 
 - `VideoAttachment` now uses `thumbUrl` to show the thumbnail
   if it's available instead of generating them.
+- Expose `widthFactor` option in `MessageWidget`
 
 ## 5.0.1
 
