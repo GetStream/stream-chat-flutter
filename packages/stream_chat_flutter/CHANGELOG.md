@@ -1,9 +1,12 @@
+## Upcoming
+
+- Expose `widthFactor` option in `MessageWidget`
+
 ## 5.0.1
 
 🔄 Changed
 
 - Updated `share_plus` dependency to `^4.5.0`
-- Expose `widthFactor` option in `MessageWidget`
 
 ## 5.0.0
 
