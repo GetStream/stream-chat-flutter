@@ -1,5 +1,10 @@
 ## Upcoming
 
+🐞 Fixed
+
+- Show message custom actions on desktop context menu.
+- Can move cursor by left/right arrow in StreamMessageInput on web/desktop.
+
 ✅ Added
 
 - `VideoAttachment` now uses `thumbUrl` to show the thumbnail
