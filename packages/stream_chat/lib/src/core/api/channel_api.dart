@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';

@@ -169,6 +169,7 @@ void main() {
       // Should match with the inserted channels
       final updatedChannels = await channelQueryDao.getChannels(
         filter: filter,
+        // ignore: deprecated_member_use_from_same_package
         sort: [
           SortOption(
             'member_count',
@@ -205,6 +206,7 @@ void main() {
     test('should throw if comparator is not provided in sort list', () {
       expect(
         () => channelQueryDao.getChannels(
+          // ignore: deprecated_member_use_from_same_package
           sort: [const SortOption('test_custom_field')],
         ),
         throwsArgumentError,
@@ -225,6 +227,7 @@ void main() {
       // Should match with the inserted channels
       final updatedChannels = await channelQueryDao.getChannels(
         filter: filter,
+        // ignore: deprecated_member_use_from_same_package
         sort: [SortOption('test_custom_field', comparator: sortComparator)],
       );
 
