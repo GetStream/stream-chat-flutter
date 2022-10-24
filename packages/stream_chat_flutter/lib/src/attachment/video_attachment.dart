@@ -42,9 +42,8 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
           context,
           StreamVideoThumbnailImage(
             video: attachment.file!.path!,
+            thumbUrl: attachment.thumbUrl,
             constraints: constraints,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __) => AttachmentError(constraints: constraints),
           ),
         );
       },
@@ -56,9 +55,8 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
           context,
           StreamVideoThumbnailImage(
             video: attachment.assetUrl!,
+            thumbUrl: attachment.thumbUrl,
             constraints: constraints,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __) => AttachmentError(constraints: constraints),
           ),
         );
       },

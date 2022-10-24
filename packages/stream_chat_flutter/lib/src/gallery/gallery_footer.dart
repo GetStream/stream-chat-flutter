@@ -221,7 +221,6 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                             child: StreamVideoThumbnailImage(
                               video: (attachment.file?.path ??
                                   attachment.assetUrl)!,
-                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
