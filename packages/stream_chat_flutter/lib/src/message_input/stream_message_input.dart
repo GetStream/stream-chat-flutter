@@ -112,6 +112,7 @@ class StreamMessageInput extends StatefulWidget {
     this.enableActionAnimation = true,
   });
 
+  /// If true the message input will animate the actions while you type
   final bool enableActionAnimation;
 
   /// List of triggers for showing autocomplete.
