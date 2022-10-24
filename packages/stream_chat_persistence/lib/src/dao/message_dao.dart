@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
@@ -170,7 +172,9 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
         }
       }
       if (messagePagination?.limit != null) {
-        return msgList.take(messagePagination!.limit).toList();
+        return msgList
+            .skip(max(0, msgList.length - messagePagination!.limit))
+            .toList();
       }
     }
     return msgList;
