@@ -278,7 +278,6 @@ class _ParseAttachments extends StatelessWidget {
           key: ValueKey(attachment.assetUrl),
           video: attachment.file?.path ?? attachment.assetUrl!,
           constraints: BoxConstraints.loose(const Size(32, 32)),
-          fit: BoxFit.cover,
           errorBuilder: (_, __) => AttachmentError(
             constraints: BoxConstraints.loose(const Size(32, 32)),
           ),
