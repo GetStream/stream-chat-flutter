@@ -203,16 +203,6 @@ void main() {
       }
     });
 
-    test('should throw if comparator is not provided in sort list', () {
-      expect(
-        () => channelQueryDao.getChannels(
-          // ignore: deprecated_member_use_from_same_package
-          sort: [const SortOption('test_custom_field')],
-        ),
-        throwsArgumentError,
-      );
-    });
-
     test('should return sorted channels using custom field', () async {
       int sortComparator(ChannelModel a, ChannelModel b) {
         final aData = int.parse(a.extraData['test_custom_field'].toString());
