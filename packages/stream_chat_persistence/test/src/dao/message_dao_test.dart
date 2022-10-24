@@ -382,8 +382,8 @@ void main() {
       messagePagination: pagination,
     );
     expect(fetchedMessages.length, limit);
-    expect(fetchedMessages.first.id, greaterThanOrEqual);
-    expect(fetchedMessages.last.id != lessThan, true);
+    expect(fetchedMessages.last.id, 'testMessageId${cid}24');
+    expect(fetchedMessages.first.id != lessThan, true);
   });
 
   test('updateMessages', () async {
