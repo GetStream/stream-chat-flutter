@@ -1191,7 +1191,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
                 ),
               ),
               video: (attachment.file?.path ?? attachment.assetUrl)!,
-              fit: BoxFit.cover,
             ),
             Positioned(
               left: 8,

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/video/video_service.dart';
@@ -14,15 +15,19 @@ class StreamVideoThumbnailImage extends StatefulWidget {
   const StreamVideoThumbnailImage({
     super.key,
     required this.video,
+    this.thumbUrl,
     this.constraints,
-    this.fit,
+    this.fit = BoxFit.cover,
     this.format = ImageFormat.PNG,
     this.errorBuilder,
     this.placeholderBuilder,
   });
 
-  /// Video path
+  /// Video path or url
   final String video;
+
+  /// Video thumbnail url
+  final String? thumbUrl;
 
   /// Contraints of attachments
   final BoxConstraints? constraints;
@@ -49,13 +54,20 @@ class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
   late Future<Uint8List?> thumbnailFuture;
   late StreamChatThemeData _streamChatTheme;
 
+  void _generateThumbnail() {
+    // Only generate thumbnail if the thumbnail url is not provided.
+    if (widget.thumbUrl == null) {
+      thumbnailFuture = StreamVideoService.generateVideoThumbnail(
+        video: widget.video,
+        imageFormat: widget.format,
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    thumbnailFuture = StreamVideoService.generateVideoThumbnail(
-      video: widget.video,
-      imageFormat: widget.format,
-    );
+    _generateThumbnail();
   }
 
   @override
@@ -67,16 +79,41 @@ class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
   @override
   void didUpdateWidget(covariant StreamVideoThumbnailImage oldWidget) {
     if (oldWidget.video != widget.video || oldWidget.format != widget.format) {
-      thumbnailFuture = StreamVideoService.generateVideoThumbnail(
-        video: widget.video,
-        imageFormat: widget.format,
-      );
+      _generateThumbnail();
     }
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   Widget build(BuildContext context) {
+    final placeHolderWidget = widget.placeholderBuilder?.call(context) ??
+        Shimmer.fromColors(
+          baseColor: _streamChatTheme.colorTheme.disabled,
+          highlightColor: _streamChatTheme.colorTheme.inputBg,
+          child: Image.asset(
+            'images/placeholder.png',
+            fit: BoxFit.cover,
+            height: widget.constraints?.maxHeight,
+            width: widget.constraints?.maxWidth,
+            package: 'stream_chat_flutter',
+          ),
+        );
+
+    final errorWidget = widget.errorBuilder?.call(context, null) ??
+        AttachmentError(constraints: widget.constraints);
+
+    final thumbUrl = widget.thumbUrl;
+    if (thumbUrl != null) {
+      return CachedNetworkImage(
+        imageUrl: thumbUrl,
+        fit: widget.fit,
+        height: widget.constraints?.maxHeight,
+        width: widget.constraints?.maxWidth,
+        placeholder: (context, __) => placeHolderWidget,
+        errorWidget: (context, url, error) => errorWidget,
+      );
+    }
+
     return ConstrainedBox(
       constraints: widget.constraints ?? const BoxConstraints.expand(),
       child: FutureBuilder<Uint8List?>(
@@ -86,30 +123,16 @@ class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
           child: Builder(
             key: ValueKey<AsyncSnapshot<Uint8List?>>(snapshot),
             builder: (_) {
-              if (snapshot.hasError) {
-                return widget.errorBuilder?.call(context, snapshot.error) ??
-                    Center(
-                      child: StreamSvgIcon.error(),
-                    );
-              }
+              if (snapshot.hasError) return errorWidget;
+
               if (!snapshot.hasData) {
                 return SizedBox(
                   height: double.maxFinite,
                   width: double.maxFinite,
-                  child: widget.placeholderBuilder?.call(context) ??
-                      Shimmer.fromColors(
-                        baseColor: _streamChatTheme.colorTheme.disabled,
-                        highlightColor: _streamChatTheme.colorTheme.inputBg,
-                        child: Image.asset(
-                          'images/placeholder.png',
-                          fit: BoxFit.cover,
-                          height: widget.constraints?.maxHeight,
-                          width: widget.constraints?.maxWidth,
-                          package: 'stream_chat_flutter',
-                        ),
-                      ),
+                  child: placeHolderWidget,
                 );
               }
+
               return SizedBox(
                 height: double.maxFinite,
                 width: double.maxFinite,

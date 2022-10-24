@@ -97,15 +97,17 @@ ListDevicesResponse _$ListDevicesResponseFromJson(Map<String, dynamic> json) =>
               .toList() ??
           [];
 
+SendAttachmentResponse _$SendAttachmentResponseFromJson(
+        Map<String, dynamic> json) =>
+    SendAttachmentResponse()
+      ..duration = json['duration'] as String?
+      ..file = json['file'] as String?;
+
 SendFileResponse _$SendFileResponseFromJson(Map<String, dynamic> json) =>
     SendFileResponse()
       ..duration = json['duration'] as String?
-      ..file = json['file'] as String;
-
-SendImageResponse _$SendImageResponseFromJson(Map<String, dynamic> json) =>
-    SendImageResponse()
-      ..duration = json['duration'] as String?
-      ..file = json['file'] as String;
+      ..file = json['file'] as String?
+      ..thumbUrl = json['thumb_url'] as String?;
 
 SendReactionResponse _$SendReactionResponseFromJson(
         Map<String, dynamic> json) =>
