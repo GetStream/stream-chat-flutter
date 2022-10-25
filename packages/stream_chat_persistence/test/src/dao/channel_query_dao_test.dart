@@ -137,24 +137,6 @@ void main() {
       }
     });
 
-    test(
-      'should return all the inserted channels along with pagination applied',
-      () async {
-        const limit = 15;
-
-        // Inserting test data for get channels
-        await _insertTestDataForGetChannel(filter, count: 30);
-
-        // Should match with the inserted channels
-        final updatedChannels = await channelQueryDao.getChannels(
-          filter: filter,
-        );
-        expect(updatedChannels.length, limit);
-        expect(updatedChannels.first.id, 'testId24');
-        expect(updatedChannels.first.cid, 'testCid24');
-      },
-    );
-
     test('should return sorted channels using member count', () async {
       int sortComparator(ChannelModel a, ChannelModel b) =>
           b.memberCount.compareTo(a.memberCount);
