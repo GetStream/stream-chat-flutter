@@ -8,6 +8,8 @@
 
 - Remove disposed channel clients from the client state.
 
+- Deprecated the `sort` parameter in `queryChannels` in favor of `channelStateSort`.
+
 ## 5.0.0
 
 - Included the changes from version [4.5.0](#450).

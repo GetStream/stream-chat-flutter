@@ -618,7 +618,7 @@ void main() {
 
           when(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
-                sort: any(named: 'sort'),
+                channelStateSort: any(named: 'channelStateSort'),
                 paginationParams: any(named: 'paginationParams'),
               )).thenAnswer((_) async => persistentChannelStates);
 
@@ -674,7 +674,7 @@ void main() {
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
-                sort: any(named: 'sort'),
+                channelStateSort: any(named: 'channelStateSort'),
                 paginationParams: any(named: 'paginationParams'),
               )).called(1);
 
@@ -715,7 +715,7 @@ void main() {
 
           when(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
-                sort: any(named: 'sort'),
+                channelStateSort: any(named: 'channelStateSort'),
                 paginationParams: any(named: 'paginationParams'),
               )).thenAnswer((_) async => persistentChannelStates);
 
@@ -757,7 +757,7 @@ void main() {
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
-                sort: any(named: 'sort'),
+                channelStateSort: any(named: 'channelStateSort'),
                 paginationParams: any(named: 'paginationParams'),
               )).called(1);
 

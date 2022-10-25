@@ -45,7 +45,10 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     required this.client,
     StreamChannelListEventHandler? eventHandler,
     this.filter,
-    this.sort,
+    @Deprecated('''
+    sort has been deprecated. 
+    Please use channelStateSort instead.''') this.sort,
+    this.channelStateSort,
     this.presence = true,
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
@@ -59,7 +62,10 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     required this.client,
     StreamChannelListEventHandler? eventHandler,
     this.filter,
-    this.sort,
+    this.channelStateSort,
+    @Deprecated('''
+    sort has been deprecated. 
+    Please use channelStateSort instead.''') this.sort,
     this.presence = true,
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
@@ -88,7 +94,21 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   /// created_at or member_count.
   ///
   /// Direction can be ascending or descending.
+  @Deprecated('''
+  sort has been deprecated. 
+  Please use channelStateSort instead.''')
   final List<SortOption<ChannelModel>>? sort;
+
+  /// The sorting used for the channels matching the filters.
+  ///
+  /// Sorting is based on field and direction, multiple sorting options
+  /// can be provided.
+  ///
+  /// You can sort based on last_updated, last_message_at, updated_at,
+  /// created_at or member_count.
+  ///
+  /// Direction can be ascending or descending.
+  final List<SortOption<ChannelState>>? channelStateSort;
 
   /// If true you’ll receive user presence updates via the websocket events
   final bool presence;
@@ -112,6 +132,8 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     try {
       await for (final channels in client.queryChannels(
         filter: filter,
+        channelStateSort: channelStateSort,
+        // ignore: deprecated_member_use, deprecated_member_use_from_same_package
         sort: sort,
         memberLimit: memberLimit,
         messageLimit: messageLimit,
@@ -141,7 +163,9 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     try {
       await for (final channels in client.queryChannels(
         filter: filter,
+        // ignore: deprecated_member_use, deprecated_member_use_from_same_package
         sort: sort,
+        channelStateSort: channelStateSort,
         memberLimit: memberLimit,
         messageLimit: messageLimit,
         presence: presence,

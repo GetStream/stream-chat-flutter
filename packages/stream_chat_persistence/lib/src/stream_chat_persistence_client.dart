@@ -263,19 +263,76 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    List<SortOption<ChannelModel>>? sort,
+    @Deprecated('''
+    sort has been deprecated. 
+    Please use channelStateSort instead.''') List<SortOption<ChannelModel>>? sort,
+    List<SortOption<ChannelState>>? channelStateSort,
     PaginationParams? paginationParams,
   }) {
     assert(_debugIsConnected, '');
+    assert(
+      sort == null || channelStateSort == null,
+      'sort and channelStateSort cannot be used together',
+    );
     _logger.info('getChannelStates');
     return _readProtected(
       () async {
         final channels = await db!.channelQueryDao.getChannels(
           filter: filter,
           sort: sort,
-          paginationParams: paginationParams,
         );
-        return Future.wait(channels.map((e) => getChannelStateByCid(e.cid)));
+
+        final channelStates = await Future.wait(
+          channels.map((e) => getChannelStateByCid(e.cid)),
+        );
+
+        // Only sort the channel states if the channels are not already sorted.
+        if (sort == null) {
+          var chainedComparator = (ChannelState a, ChannelState b) {
+            final dateA = a.channel?.lastMessageAt ?? a.channel?.createdAt;
+            final dateB = b.channel?.lastMessageAt ?? b.channel?.createdAt;
+
+            if (dateA == null && dateB == null) {
+              return 0;
+            } else if (dateA == null) {
+              return 1;
+            } else if (dateB == null) {
+              return -1;
+            } else {
+              return dateB.compareTo(dateA);
+            }
+          };
+
+          if (channelStateSort != null && channelStateSort.isNotEmpty) {
+            chainedComparator = (a, b) {
+              int result;
+              for (final comparator in channelStateSort
+                  .map((it) => it.comparator)
+                  .withNullifyer) {
+                try {
+                  result = comparator(a, b);
+                } catch (e) {
+                  result = 0;
+                }
+                if (result != 0) return result;
+              }
+              return 0;
+            };
+          }
+
+          channelStates.sort(chainedComparator);
+        }
+
+        final offset = paginationParams?.offset;
+        if (offset != null && offset > 0 && channelStates.isNotEmpty) {
+          channelStates.removeRange(0, offset);
+        }
+
+        if (paginationParams?.limit != null) {
+          return channelStates.take(paginationParams!.limit).toList();
+        }
+
+        return channelStates;
       },
     );
   }

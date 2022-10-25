@@ -121,7 +121,7 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_persistence/coverage/lcov.info
-          min_coverage: 97
+          min_coverage: 95
       - name: "Stream Chat Flutter Core Coverage Check"
         uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:

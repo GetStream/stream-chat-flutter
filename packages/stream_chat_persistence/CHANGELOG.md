@@ -1,6 +1,8 @@
 ## Upcoming
 
 - Reintroduce support for experimental indexedDB on Web.
+- Deprecated the `sort` parameter in the getChannelStates method in favor of `channelStateSort`.
+- Use the comparator function to sort the channel states and not the channel models.
 
 🐞 Fixed
 
