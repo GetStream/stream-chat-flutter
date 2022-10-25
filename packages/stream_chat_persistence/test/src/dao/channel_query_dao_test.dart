@@ -140,9 +140,7 @@ void main() {
     test(
       'should return all the inserted channels along with pagination applied',
       () async {
-        const offset = 5;
         const limit = 15;
-        const pagination = PaginationParams(offset: offset, limit: limit);
 
         // Inserting test data for get channels
         await _insertTestDataForGetChannel(filter, count: 30);
@@ -150,7 +148,6 @@ void main() {
         // Should match with the inserted channels
         final updatedChannels = await channelQueryDao.getChannels(
           filter: filter,
-          paginationParams: pagination,
         );
         expect(updatedChannels.length, limit);
         expect(updatedChannels.first.id, 'testId24');

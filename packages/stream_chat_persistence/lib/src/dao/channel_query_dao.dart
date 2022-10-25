@@ -68,7 +68,6 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
     Filter? filter,
     @Deprecated('sort has been deprecated')
         List<SortOption<ChannelModel>>? sort,
-    PaginationParams? paginationParams,
   }) async {
     final cachedChannelCids = await getCachedChannelCids(filter);
     final query = select(channels)..where((c) => c.cid.isIn(cachedChannelCids));
@@ -104,15 +103,6 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
     }
 
     cachedChannels.sort(chainedComparator);
-
-    final offset = paginationParams?.offset;
-    if (offset != null && offset > 0 && cachedChannels.isNotEmpty) {
-      cachedChannels.removeRange(0, offset);
-    }
-
-    if (paginationParams?.limit != null) {
-      return cachedChannels.take(paginationParams!.limit).toList();
-    }
 
     return cachedChannels;
   }

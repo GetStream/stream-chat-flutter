@@ -270,6 +270,8 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     PaginationParams? paginationParams,
   }) {
     assert(_debugIsConnected, '');
+    assert(sort == null || channelStateSort == null,
+        'sort and channelStateSort cannot be used together');
     _logger.info('getChannelStates');
     return _readProtected(
       () async {
@@ -277,7 +279,6 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
           filter: filter,
           // ignore: deprecated_member_use_from_same_package
           sort: sort,
-          paginationParams: paginationParams,
         );
         final channelStates =
             await Future.wait(channels.map((e) => getChannelStateByCid(e.cid)));
@@ -314,6 +315,15 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
         }
 
         channelStates.sort(chainedComparator);
+
+        final offset = paginationParams?.offset;
+        if (offset != null && offset > 0 && channelStates.isNotEmpty) {
+          channelStates.removeRange(0, offset);
+        }
+
+        if (paginationParams?.limit != null) {
+          return channelStates.take(paginationParams!.limit).toList();
+        }
 
         return channelStates;
       },
