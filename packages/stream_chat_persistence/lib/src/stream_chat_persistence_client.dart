@@ -270,51 +270,58 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     PaginationParams? paginationParams,
   }) {
     assert(_debugIsConnected, '');
-    assert(sort == null || channelStateSort == null,
-        'sort and channelStateSort cannot be used together');
+    assert(
+      sort == null || channelStateSort == null,
+      'sort and channelStateSort cannot be used together',
+    );
     _logger.info('getChannelStates');
     return _readProtected(
       () async {
         final channels = await db!.channelQueryDao.getChannels(
           filter: filter,
-          // ignore: deprecated_member_use_from_same_package
           sort: sort,
         );
-        final channelStates =
-            await Future.wait(channels.map((e) => getChannelStateByCid(e.cid)));
 
-        var chainedComparator = (ChannelState a, ChannelState b) {
-          final dateA = a.channel?.lastMessageAt ?? a.channel?.createdAt;
-          final dateB = b.channel?.lastMessageAt ?? b.channel?.createdAt;
+        final channelStates = await Future.wait(
+          channels.map((e) => getChannelStateByCid(e.cid)),
+        );
 
-          if (dateA == null && dateB == null) {
-            return 0;
-          } else if (dateA == null) {
-            return 1;
-          } else if (dateB == null) {
-            return -1;
-          } else {
-            return dateB.compareTo(dateA);
-          }
-        };
+        // Only sort the channel states if the channels are not already sorted.
+        if (sort == null) {
+          var chainedComparator = (ChannelState a, ChannelState b) {
+            final dateA = a.channel?.lastMessageAt ?? a.channel?.createdAt;
+            final dateB = b.channel?.lastMessageAt ?? b.channel?.createdAt;
 
-        if (channelStateSort != null && channelStateSort.isNotEmpty) {
-          chainedComparator = (a, b) {
-            int result;
-            for (final comparator
-                in channelStateSort.map((it) => it.comparator).withNullifyer) {
-              try {
-                result = comparator(a, b);
-              } catch (e) {
-                result = 0;
-              }
-              if (result != 0) return result;
+            if (dateA == null && dateB == null) {
+              return 0;
+            } else if (dateA == null) {
+              return 1;
+            } else if (dateB == null) {
+              return -1;
+            } else {
+              return dateB.compareTo(dateA);
             }
-            return 0;
           };
-        }
 
-        channelStates.sort(chainedComparator);
+          if (channelStateSort != null && channelStateSort.isNotEmpty) {
+            chainedComparator = (a, b) {
+              int result;
+              for (final comparator in channelStateSort
+                  .map((it) => it.comparator)
+                  .withNullifyer) {
+                try {
+                  result = comparator(a, b);
+                } catch (e) {
+                  result = 0;
+                }
+                if (result != 0) return result;
+              }
+              return 0;
+            };
+          }
+
+          channelStates.sort(chainedComparator);
+        }
 
         final offset = paginationParams?.offset;
         if (offset != null && offset > 0 && channelStates.isNotEmpty) {
