@@ -1,3 +1,11 @@
+## 5.1.0
+
+ - **REFACTOR**: remove deprecated code and cleanup.
+ - **FIX**: deprecated sort, add channelStateSort s… (#1366).
+ - **FIX**: fix offline message pagination (#1361).
+ - **FIX**: bring back experimental indexedDB on web (#1348).
+ - **FEAT**: allow experimental indexedDB on web.
+
 ## Upcoming
 
 - Reintroduce support for experimental indexedDB on Web.
