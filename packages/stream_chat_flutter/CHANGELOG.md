@@ -10,6 +10,7 @@
 - `VideoAttachment` now uses `thumbUrl` to show the thumbnail
   if it's available instead of generating them.
 - Expose `widthFactor` option in `MessageWidget`
+- Add `enableActionAnimation` flag to `StreamMessageInput`
 
 ## 5.0.1
 

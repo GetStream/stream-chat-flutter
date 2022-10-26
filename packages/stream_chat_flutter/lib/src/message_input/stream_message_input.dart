@@ -109,7 +109,11 @@ class StreamMessageInput extends StatefulWidget {
     this.autoCorrect = true,
     this.enableMentionsOverlay = true,
     this.onQuotedMessageCleared,
+    this.enableActionAnimation = true,
   });
+
+  /// If true the message input will animate the actions while you type
+  final bool enableActionAnimation;
 
   /// List of triggers for showing autocomplete.
   final Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers;
@@ -615,7 +619,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: AnimatedCrossFade(
-        crossFadeState: _actionsShrunk
+        crossFadeState: (_actionsShrunk && widget.enableActionAnimation)
             ? CrossFadeState.showFirst
             : CrossFadeState.showSecond,
         firstCurve: Curves.easeOut,
