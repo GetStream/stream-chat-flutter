@@ -1,3 +1,12 @@
+## 5.1.0
+
+ - **FIX**: deprecated sort, add channelStateSort s… (#1366).
+ - **FIX**: remove unused member.
+ - **FEAT**: add enableActionAnimation flag to StreamMessageInput (#1367).
+ - **FEAT**: show custom action on context menu (#1353).
+ - **FEAT**: add support for thumbUrl in video attachment. (#1362).
+ - **FEAT**: expose widthFactor in MessageWidget (#1357).
+
 ## Upcoming
 
 🐞 Fixed
