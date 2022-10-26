@@ -1,4 +1,4 @@
-## Upcoming
+## 5.1.0
 
 - Reintroduce support for experimental indexedDB on Web.
 - Deprecated the `sort` parameter in the getChannelStates method in favor of `channelStateSort`.
