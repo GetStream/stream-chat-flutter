@@ -1,3 +1,7 @@
+## 5.1.0
+
+ - **FIX**: deprecated sort, add channelStateSort s… (#1366).
+
 ## Upcoming 
 
 - Deprecated the `sort` parameter in the `StreamChannelListController` in favor of `channelStateSort`.
