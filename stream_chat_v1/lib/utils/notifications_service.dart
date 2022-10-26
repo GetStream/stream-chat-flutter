@@ -1,9 +1,9 @@
-import 'package:example/pages/channel_page.dart';
 import 'package:example/utils/localizations.dart';
 import 'package:example/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide Message;
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void showLocalNotification(
@@ -35,7 +35,7 @@ void showLocalNotification(
     onSelectNotification: (channelCid) async {
       if (channelCid != null) {
         final client = StreamChat.of(context).client;
-        final navigator = Navigator.of(context);
+        final router = GoRouter.of(context);
 
         var channel = client.state.channels[channelCid];
 
@@ -50,11 +50,9 @@ void showLocalNotification(
           await channel.watch();
         }
 
-        navigator.pushNamed(
-          Routes.CHANNEL_PAGE,
-          arguments: ChannelPageArgs(
-            channel: channel,
-          ),
+        router.pushNamed(
+          Routes.CHANNEL_PAGE.name,
+          params: Routes.CHANNEL_PAGE.params(channel),
         );
       }
     },

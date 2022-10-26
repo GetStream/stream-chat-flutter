@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:example/pages/channel_file_display_screen.dart';
+import 'package:example/routes/routes.dart';
 import 'package:example/utils/localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'channel_media_display_screen.dart';
-import 'channel_page.dart';
-import 'chat_info_screen.dart';
 import 'pinned_messages_screen.dart';
 
 class GroupInfoScreen extends StatefulWidget {
@@ -647,7 +647,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             onTap: () async {
               final streamChannel = StreamChannel.of(context);
               final streamChat = StreamChat.of(context);
-              final navigator = Navigator.of(context);
+              final router = GoRouter.of(context);
               final res = await showConfirmationBottomSheet(
                 context,
                 title: AppLocalizations.of(context).leaveConversation,
@@ -662,7 +662,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               if (res == true) {
                 final channel = streamChannel.channel;
                 await channel.removeMembers([streamChat.currentUser!.id]);
-                navigator.pop();
+                router.pop();
               }
             },
           ),
@@ -865,7 +865,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       AppLocalizations.of(context).viewInfo,
                       () async {
                         final client = StreamChat.of(context).client;
-                        final navigator = Navigator.of(context);
+                        final router = GoRouter.of(context);
 
                         final c = client.channel('messaging', extraData: {
                           'members': [
@@ -876,16 +876,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
                         await c.watch();
 
-                        await navigator.push(
-                          MaterialPageRoute(
-                            builder: (context) => StreamChannel(
-                              channel: c,
-                              child: ChatInfoScreen(
-                                messageTheme: widget.messageTheme,
-                                user: user,
-                              ),
-                            ),
-                          ),
+                        router.pushNamed(
+                          Routes.CHAT_INFO_SCREEN.name,
+                          params: Routes.CHAT_INFO_SCREEN.params(c),
+                          extra: user,
                         );
                       },
                     ),
@@ -901,7 +895,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       AppLocalizations.of(context).message,
                       () async {
                         final client = StreamChat.of(context).client;
-                        final navigator = Navigator.of(context);
+                        final router = GoRouter.of(context);
 
                         final c = client.channel('messaging', extraData: {
                           'members': [
@@ -912,13 +906,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
                         await c.watch();
 
-                        await navigator.push(
-                          MaterialPageRoute(
-                            builder: (context) => StreamChannel(
-                              channel: c,
-                              child: const ChannelPage(),
-                            ),
-                          ),
+                        router.pushNamed(
+                          Routes.CHANNEL_PAGE.name,
+                          params: Routes.CHANNEL_PAGE.params(c),
                         );
                       },
                     ),
@@ -934,7 +924,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           size: 24.0,
                         ),
                         AppLocalizations.of(context).removeFromGroup, () async {
-                      final navigator = Navigator.of(context);
+                      final router = GoRouter.of(context);
                       final res = await showConfirmationBottomSheet(
                         context,
                         title: AppLocalizations.of(context).removeMember,
@@ -949,21 +939,23 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       if (res == true) {
                         await channel.removeMembers([user.id]);
                       }
-                      navigator.pop();
+                      router.pop();
                     },
                         color:
                             StreamChatTheme.of(context).colorTheme.accentError),
                   _buildModalListTile(
-                      context,
-                      StreamSvgIcon.closeSmall(
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .textLowEmphasis,
-                        size: 24.0,
-                      ),
-                      AppLocalizations.of(context).cancel, () {
-                    Navigator.pop(context);
-                  }),
+                    context,
+                    StreamSvgIcon.closeSmall(
+                      color: StreamChatTheme.of(context)
+                          .colorTheme
+                          .textLowEmphasis,
+                      size: 24.0,
+                    ),
+                    AppLocalizations.of(context).cancel,
+                    () {
+                      Navigator.pop(context);
+                    },
+                  ),
                 ],
               ),
             ),

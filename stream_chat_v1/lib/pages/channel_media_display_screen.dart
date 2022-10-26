@@ -1,10 +1,10 @@
 import 'package:example/utils/localizations.dart';
-import 'package:example/routes/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
-import 'channel_page.dart';
+import '../routes/routes.dart';
 
 class ChannelMediaDisplayScreen extends StatefulWidget {
   final StreamMessageThemeData messageTheme;
@@ -156,23 +156,16 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                                   startIndex: position,
                                   userName: media[position].message.user!.name,
                                   onShowMessage: (m, c) async {
-                                    final client =
-                                        StreamChat.of(context).client;
-                                    final navigator = Navigator.of(context);
-                                    final message = m;
-                                    final channel = client.channel(
-                                      c.type,
-                                      id: c.id,
-                                    );
+                                    final router = GoRouter.of(context);
                                     if (channel.state == null) {
                                       await channel.watch();
                                     }
-                                    navigator.pushNamed(
-                                      Routes.CHANNEL_PAGE,
-                                      arguments: ChannelPageArgs(
-                                        channel: channel,
-                                        initialMessage: message,
-                                      ),
+                                    router.pushNamed(
+                                      Routes.CHANNEL_PAGE.name,
+                                      params:
+                                          Routes.CHANNEL_PAGE.params(channel),
+                                      queryParams:
+                                          Routes.CHANNEL_PAGE.queryParams(m),
                                     );
                                   },
                                 ),

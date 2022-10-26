@@ -1,9 +1,8 @@
 import 'package:example/utils/localizations.dart';
 import 'package:example/routes/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-import 'channel_page.dart';
 
 class UserMentionsPage extends StatefulWidget {
   const UserMentionsPage({super.key});
@@ -72,7 +71,7 @@ class _UserMentionsPageState extends State<UserMentionsPage> {
       },
       onMessageTap: (messageResponse) async {
         final client = StreamChat.of(context).client;
-        final navigator = Navigator.of(context);
+        final router = GoRouter.of(context);
         final message = messageResponse.message;
         final channel = client.channel(
           messageResponse.channel!.type,
@@ -81,12 +80,10 @@ class _UserMentionsPageState extends State<UserMentionsPage> {
         if (channel.state == null) {
           await channel.watch();
         }
-        navigator.pushNamed(
-          Routes.CHANNEL_PAGE,
-          arguments: ChannelPageArgs(
-            channel: channel,
-            initialMessage: message,
-          ),
+        router.pushNamed(
+          Routes.CHANNEL_PAGE.name,
+          params: Routes.CHANNEL_PAGE.params(channel),
+          queryParams: Routes.CHANNEL_PAGE.queryParams(message),
         );
       },
     );

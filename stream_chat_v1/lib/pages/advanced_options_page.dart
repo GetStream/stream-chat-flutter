@@ -1,13 +1,15 @@
 import 'package:example/app.dart';
-import 'package:example/pages/home_page.dart';
+import 'package:example/state/init_data.dart';
 import 'package:example/utils/localizations.dart';
 import 'package:example/routes/routes.dart';
 import 'package:example/widgets/stream_version.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'choose_user_page.dart';
+import 'package:example/pages/choose_user_page.dart';
 
 class AdvancedOptionsPage extends StatefulWidget {
   const AdvancedOptionsPage({super.key});
@@ -39,6 +41,86 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
     _userTokenController.dispose();
     _usernameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _login() async {
+    if (loading) {
+      return;
+    }
+    if (_formKey.currentState!.validate()) {
+      final apiKey = _apiKeyController.text;
+      final userId = _userIdController.text;
+      final userToken = _userTokenController.text;
+      final username = _usernameController.text;
+
+      loading = true;
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
+        builder: (context) => Center(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: StreamChatTheme.of(context).colorTheme.barsBg,
+            ),
+            height: 100,
+            width: 100,
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        ),
+      );
+
+      final client = buildStreamChatClient(apiKey);
+      final router = GoRouter.of(context);
+      final initNotifier = context.read<InitNotifier>();
+
+      try {
+        await client.connectUser(
+          User(
+            id: userId,
+            extraData: {
+              'name': username,
+            },
+          ),
+          userToken,
+        );
+
+        const secureStorage = FlutterSecureStorage();
+        await Future.wait([
+          secureStorage.write(
+            key: kStreamApiKey,
+            value: apiKey,
+          ),
+          secureStorage.write(
+            key: kStreamUserId,
+            value: userId,
+          ),
+          secureStorage.write(
+            key: kStreamToken,
+            value: userToken,
+          ),
+        ]);
+      } catch (e) {
+        debugPrint(e.toString());
+        var errorText = AppLocalizations.of(context).errorConnecting;
+        if (e is Map) {
+          errorText = e['message'] ?? errorText;
+        }
+        Navigator.of(context).pop();
+        setState(() {
+          _apiKeyError = errorText.toUpperCase();
+        });
+        loading = false;
+        return;
+      }
+      loading = false;
+      initNotifier.initData = initNotifier.initData!.copyWith(client: client);
+
+      router.goNamed(Routes.CHOOSE_USER.name);
+    }
   }
 
   @override
@@ -260,6 +342,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         ),
                       ),
                     ),
+                    onPressed: _login,
                     child: Text(
                       AppLocalizations.of(context).login,
                       style: TextStyle(
@@ -271,84 +354,6 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                             : Colors.white,
                       ),
                     ),
-                    onPressed: () async {
-                      if (loading) {
-                        return;
-                      }
-                      if (_formKey.currentState!.validate()) {
-                        final apiKey = _apiKeyController.text;
-                        final userId = _userIdController.text;
-                        final userToken = _userTokenController.text;
-                        final username = _usernameController.text;
-
-                        loading = true;
-                        showDialog(
-                          barrierDismissible: false,
-                          context: context,
-                          barrierColor:
-                              StreamChatTheme.of(context).colorTheme.overlay,
-                          builder: (context) => Center(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .barsBg,
-                              ),
-                              height: 100,
-                              width: 100,
-                              child: const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                          ),
-                        );
-
-                        final client = buildStreamChatClient(apiKey);
-                        final navigator = Navigator.of(context);
-
-                        try {
-                          await client.connectUser(
-                            User(id: userId, extraData: {
-                              'name': username,
-                            }),
-                            userToken,
-                          );
-
-                          const secureStorage = FlutterSecureStorage();
-                          secureStorage.write(
-                            key: kStreamApiKey,
-                            value: apiKey,
-                          );
-                          secureStorage.write(
-                            key: kStreamUserId,
-                            value: userId,
-                          );
-                          secureStorage.write(
-                            key: kStreamToken,
-                            value: userToken,
-                          );
-                        } catch (e) {
-                          var errorText =
-                              AppLocalizations.of(context).errorConnecting;
-                          if (e is Map) {
-                            errorText = e['message'] ?? errorText;
-                          }
-                          Navigator.pop(context);
-                          setState(() {
-                            _apiKeyError = errorText.toUpperCase();
-                          });
-                          loading = false;
-                          return;
-                        }
-                        loading = false;
-                        await navigator.pushNamedAndRemoveUntil(
-                          Routes.HOME,
-                          ModalRoute.withName(Routes.HOME),
-                          arguments: HomePageArgs(client),
-                        );
-                      }
-                    },
                   ),
                   const StreamVersion(),
                 ],
