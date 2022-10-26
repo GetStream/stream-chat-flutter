@@ -1033,11 +1033,13 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             }
           },
         ),
-      ...widget.customActions.map((e) => StreamChatContextMenuItem(
-            leading: e.leading,
-            title: e.title,
-            onClick: () => e.onTap?.call(widget.message),
-          ))
+      ...widget.customActions.map(
+        (e) => StreamChatContextMenuItem(
+          leading: e.leading,
+          title: e.title,
+          onClick: () => e.onTap?.call(widget.message),
+        ),
+      ),
     ];
   }
 
