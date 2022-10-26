@@ -1,3 +1,9 @@
+## 5.1.0
+
+ - **FIX**: deprecated sort, add channelStateSort s… (#1366).
+ - **FIX**: channel clean up after dispose from cache (#1342).
+ - **FEAT**: add support for thumbUrl in video attachment. (#1362).
+
 ## Upcoming
 
 ✅ Added
