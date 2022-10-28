@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamMessageInput.sendMessageKey` and `StreamMessageInput.clearQuotedMessageKey` to customize the keys used to send and clear the quoted message.
+
 ## 5.1.0
 
 🐞 Fixed
