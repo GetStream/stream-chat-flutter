@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart'
     hide ErrorListener;
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
@@ -110,7 +111,15 @@ class StreamMessageInput extends StatefulWidget {
     this.enableMentionsOverlay = true,
     this.onQuotedMessageCleared,
     this.enableActionAnimation = true,
+    this.sendMessageKey = PhysicalKeyboardKey.enter,
+    this.clearQuotedMessageKey = PhysicalKeyboardKey.escape,
   });
+
+  /// The key used to send a message on web/desktop
+  final PhysicalKeyboardKey? sendMessageKey;
+
+  /// The key used to send a message on web/desktop
+  final PhysicalKeyboardKey? clearQuotedMessageKey;
 
   /// If true the message input will animate the actions while you type
   final bool enableActionAnimation;
@@ -509,9 +518,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
                             : CrossFadeState.showSecond,
                       ),
                     ),
-                  // PlatformWidgetBuilder(
-                  //   mobile: (context, child) => _buildFilePickerSection(),
-                  // ),
                 ],
               ),
             ),
@@ -753,25 +759,45 @@ class StreamMessageInputState extends State<StreamMessageInput>
                   LimitedBox(
                     maxHeight: widget.maxHeight,
                     child: PlatformWidgetBuilder(
-                      web: (context, child) => KeyboardShortcutRunner(
-                        onEnterKeypress: sendMessage,
-                        onEscapeKeypress: () {
-                          if (_hasQuotedMessage &&
-                              _effectiveController.text.isEmpty) {
-                            widget.onQuotedMessageCleared?.call();
-                          }
-                        },
+                      web: (context, child) => Focus(
                         child: child!,
+                        onKeyEvent: (node, event) {
+                          if (widget.sendMessageKey != null &&
+                              event.physicalKey == widget.sendMessageKey) {
+                            sendMessage();
+                            return KeyEventResult.handled;
+                          } else if (widget.clearQuotedMessageKey != null &&
+                              event.physicalKey ==
+                                  widget.clearQuotedMessageKey) {
+                            if (_hasQuotedMessage &&
+                                _effectiveController.text.isEmpty) {
+                              widget.onQuotedMessageCleared?.call();
+                            }
+                            return KeyEventResult.handled;
+                          }
+
+                          return KeyEventResult.ignored;
+                        },
                       ),
-                      desktop: (context, child) => KeyboardShortcutRunner(
-                        onEnterKeypress: sendMessage,
-                        onEscapeKeypress: () {
-                          if (_hasQuotedMessage &&
-                              _effectiveController.text.isEmpty) {
-                            widget.onQuotedMessageCleared?.call();
-                          }
-                        },
+                      desktop: (context, child) => Focus(
                         child: child!,
+                        onKeyEvent: (node, event) {
+                          if (widget.sendMessageKey != null &&
+                              event.physicalKey == widget.sendMessageKey) {
+                            sendMessage();
+                            return KeyEventResult.handled;
+                          } else if (widget.clearQuotedMessageKey != null &&
+                              event.physicalKey ==
+                                  widget.clearQuotedMessageKey) {
+                            if (_hasQuotedMessage &&
+                                _effectiveController.text.isEmpty) {
+                              widget.onQuotedMessageCleared?.call();
+                            }
+                            return KeyEventResult.handled;
+                          }
+
+                          return KeyEventResult.ignored;
+                        },
                       ),
                       mobile: (context, child) => child,
                       child: StreamMessageTextField(
