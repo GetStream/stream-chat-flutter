@@ -1,0 +1,89 @@
+---
+id: stream_message_input_controller
+sidebar_position: 4
+title: StreamMessageInputController
+---
+
+A Widget For Controlling A Message Input
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter_core/latest/stream_chat_flutter_core/StreamMessageInputController-class.html)
+
+### Background
+
+The `StreamMessageInputController` is a controller class that embed the business logic to compose a message.
+`StreamMessageInputController` is a parameter of the `StreamMessageInput` widget.
+Check the [`StreamMessageInput` documentation](../03-stream_chat_flutter/stream_message_input.mdx) to read more about that.
+
+### Basic Example
+
+Building a custom message input is a common task. Here is an example of how to use the `StreamMessageInputController` to build a simple custom message input widget.
+
+First of all we should create an instance of the `StreamMessageInputController`.
+
+```dart
+class MessageScreenState extends State<MessageScreen> {
+  final StreamMessageInputController messageInputController = StreamMessageInputController();
+```
+
+Make sure you call `messageInputController.dispose()` when the controller is no longer required.
+
+```dart
+@override
+void dispose() {
+  messageInputController.dispose();
+  super.dispose();
+}
+```
+
+The `StreamMessageInputController` is basically a `ValueNotifier` that notifies you when the message being composed has changed.
+You can use a `ValueListenableBuilder` to build your UI depending on the latest message.
+For a very simple message input you could even pass the `messageInputController.textEditingController` to your `TextField` and set the `onChanged` callback.
+
+```dart
+...
+Padding(
+  padding: const EdgeInsets.all(8),
+  child: Row(
+    children: [
+      Expanded(
+        child: TextField(
+          controller: messageInputController.textEditingController,
+          onChanged: (s) => messageInputController.text = s,
+          decoration: const InputDecoration(
+            hintText: 'Enter your message',
+          ),
+        ),
+      ),
+      Material(
+        type: MaterialType.circle,
+        color: Colors.blue,
+        clipBehavior: Clip.hardEdge,
+        child: InkWell(
+          onTap: () async {
+            if (messageInputController.message.text?.isNotEmpty ==
+                true) {
+              await channel.sendMessage(
+                messageInputController.message,
+              );
+              messageInputController.clear();
+              if (mounted) {
+                _updateList();
+              }
+            }
+          },
+          child: const Padding(
+            padding: EdgeInsets.all(8),
+            child: Center(
+              child: Icon(
+                Icons.send,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+...
+```

@@ -1,0 +1,112 @@
+---
+id: stream_member_list_controller
+sidebar_position: 5
+title: StreamMemberListController
+---
+
+A widget for controlling a list of members.
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter_core/latest/stream_chat_flutter_core/StreamMemberListController-class.html)
+
+### Background
+
+The `StreamMemberListController` is a controller class that allows you to control a list of users.
+`StreamMemberListController` is a required parameter of the `StreamMemberListView` widget.
+Check the [`StreamMemberListView` documentation](../03-stream_chat_flutter/stream_member_list_view.mdx) to read more about that.
+
+### Basic Example
+
+Building a custom member list is a very common task. Here is an example of how to use the `StreamMemberListController` to build a simple list with pagination.
+
+First, create an instance of the `StreamMemberListController` and provide it with the `StreamChatClient` instance.
+You can also add a `Filter`, a list of `SortOption`s, and other pagination-related parameters.
+
+```dart
+class MemberListPageState extends State<MemberListPage> {
+  /// Controller used for loading more data and controlling pagination in
+  /// [StreamMemberListController].
+  late final memberListController = StreamMemberListController(
+    client: StreamChatCore.of(context).client,
+  );
+```
+
+Make sure you call `memberListController.doInitialLoad()` to load the initial data and `memberListController.dispose()` when the controller is no longer required.
+
+```dart
+@override
+void initState() {
+  memberListController.doInitialLoad();
+  super.initState();
+}
+
+@override
+void dispose() {
+  memberListController.dispose();
+  super.dispose();
+}
+```
+
+The `StreamMemberListController` is basically a [`PagedValueNotifier`](./paged_value_notifier.mdx) that notifies you when the list of members has changed.
+You can use a [`PagedValueListenableBuilder`](./paged_value_listenable_builder.mdx) to build your UI depending on the latest members.
+
+```dart
+@override
+Widget build(BuildContext context) => Scaffold(
+      body: PagedValueListenableBuilder<int, List<Member>>(
+        valueListenable: memberListController,
+        builder: (context, value, child) {
+          return value.when(
+            (members, nextPageKey, error) => LazyLoadScrollView(
+              onEndOfPage: () async {
+                if (nextPageKey != null) {
+                  memberListController.loadMore(nextPageKey);
+                }
+              },
+              child: ListView.builder(
+                /// We're using the members length when there are no more
+                /// pages to load and there are no errors with pagination.
+                /// In case we need to show a loading indicator or and error
+                /// tile we're increasing the count by 1.
+                itemCount: (nextPageKey != null || error != null)
+                    ? members.length + 1
+                    : members.length,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == members.length) {
+                    if (error != null) {
+                      return TextButton(
+                          onPressed: () {
+                            memberListController.retry();
+                          },
+                          child: Text(error.message),
+                        );
+                    }
+                    return CircularProgressIndicator();
+                  }
+
+                  final _item = members[index];
+                  return ListTile(
+                    title: Text(_item.name ?? ''),
+                  );
+                },
+              ),
+            ),
+            loading: () => const Center(
+              child: SizedBox(
+                height: 100,
+                width: 100,
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (e) => Center(
+              child: Text(
+                'Oh no, something went wrong. '
+                'Please check your config. $e',
+              ),
+            ),
+          );
+        },
+      ),
+    );
+```
+
+In this case, we're using the [LazyLoadScrollView](./lazy_load_scroll_view.mdx) widget to load more data when the user scrolls to the bottom of the list.
