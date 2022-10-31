@@ -1,0 +1,164 @@
+---
+id: customize_attachment_picker_modal
+title: Attachment Picker Modal
+---
+
+Customizing the Attachment Picker Modal
+
+### Introduction
+
+The Attachment Picker is a modal that allows users to select attachments from their device.
+It is generally used when a user taps the attachment button in the [StreamMessageInput](../../03-stream_chat_flutter/stream_message_input.mdx).
+
+By default, the Attachment Picker provides multiple picker options as per the platform.
+- For example, on Mobile, the default options are Camera, Gallery, File, and Video.
+- On Web and Desktop, the default options are Image, Video and File.
+
+### Customizing the Attachment Picker Modal
+
+The Attachment Picker Modal can be customized by passing the different values to the `showStreamAttachmentPickerModalBottomSheet` function.
+
+#### Initial Attachments
+
+The initial attachments can be passed to the Attachment Picker Modal in two ways.
+
+ * By passing the `initialAttachments` parameter.
+
+ ```dart
+ showStreamAttachmentPickerModalBottomSheet(
+   context: context,
+   initialAttachments: [
+     // Pass the initial attachments to the modal here if any are available already (optional)
+     ...messageInputController.attachments,
+   ],
+ );
+ ```
+
+ * By creating a new instance of the `AttachmentPickerModalController` and passing it to the `controller` parameter.
+
+ ```dart
+ final attachmentPickerController = StreamAttachmentPickerController(
+    initialAttachments: [
+      // Pass the initial attachments to the modal here if any are available already (optional)
+      ...messageInputController.attachments,
+    ],
+
+    // The `maxAttachmentSize` and `maxAttachmentCount` can also be set while creating a controller.
+    maxAttachmentSize: 10 * 1024 * 1024, // 10 MB
+    maxAttachmentCount: 10, // 10 attachments
+ );
+
+ showStreamAttachmentPickerModalBottomSheet(
+   context: context,
+   controller: attachmentPickerController,
+ );
+ ```
+
+#### Custom Attachment Picker Options
+
+The Attachment Picker Modal provides a default set of options as per the platform.
+However, you can also customize the options by passing the `customOptions` parameter.
+
+ ```dart
+ showStreamAttachmentPickerModalBottomSheet(
+   context: context,
+   customOptions: [
+     // Pass the custom attachment picker options here
+     AttachmentPickerOption(
+       icon: Icon(Icons.audiotrack),
+       supportedTypes: [AttachmentPickerType.audios],
+       optionViewBuilder: (context, attachmentPickerController) {
+         return AudioPicker(
+           onAudioPicked: (audio) async {
+             await attachmentPickerController.addAttachment(audio);
+             return Navigator.pop(context, attachmentPickerController.value);
+           },
+         );
+       },
+     ),
+   ],
+ );
+ ```
+
+#### Attachment thumbnail size
+
+The size of the attachment thumbnail item shown in the gallery picker can be defined by passing the `attachmentThumbnailSize` parameter.
+
+ ```dart
+ showStreamAttachmentPickerModalBottomSheet(
+   context: context,
+   attachmentThumbnailSize: ThumbnailSize.square(600),
+ );
+ ```
+
+#### Attachment thumbnail format
+
+The format of the attachment thumbnail item shown in the gallery picker can be defined by passing the `attachmentThumbnailFormat` parameter.
+
+Possible values are `ThumbnailFormat.jpeg` and `ThumbnailFormat.png`.
+
+ ```dart
+ showStreamAttachmentPickerModalBottomSheet(
+   context: context,
+   attachmentThumbnailFormat: ThumbnailFormat.jpeg,
+ );
+ ```
+
+#### Attachment thumbnail quality
+
+The quality of the attachment thumbnail item shown in the gallery picker can be defined by passing the `attachmentThumbnailQuality` parameter.
+
+Possible values are between 0 and 100.
+
+ ```dart
+ showStreamAttachmentPickerModalBottomSheet(
+   context: context,
+   attachmentThumbnailQuality: 70,
+ );
+ ```
+
+#### Attachment thumbnail scale
+
+The scale of the attachment thumbnail item shown in the gallery picker can be defined by passing the `attachmentThumbnailScale` parameter.
+
+For example, if this is 2.0, it means that there are four image pixels for every one logical pixel, and the image's actual width and height are
+double the height and width that should be used when painting the image.
+
+ ```dart
+ showStreamAttachmentPickerModalBottomSheet(
+   context: context,
+   attachmentThumbnailScale: 2.0,
+ );
+ ```
+
+#### Additional modal bottom sheet parameters
+
+The `showStreamAttachmentPickerModalBottomSheet` function also accepts the parameters that are available in the `showModalBottomSheet` function.
+
+ ```dart
+ showStreamAttachmentPickerModalBottomSheet(
+   context: context,
+   isScrollControlled: true,
+   backgroundColor: Colors.transparent,
+   useRootNavigator: true,
+   elevation: 4,
+   isDismissible: true,
+   clipBehavior: Clip.antiAlias,
+   barrierColor: Colors.black.withOpacity(0.5),
+   constraints: BoxConstraints(
+     maxHeight: 500,
+     maxWidth: 500,
+   ),
+   shape: RoundedRectangleBorder(
+     borderRadius: BorderRadius.vertical(
+       top: Radius.circular(16.0),
+     ),
+   ),
+ );
+ ```
+
+
+
+
+
+
