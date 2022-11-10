@@ -26,6 +26,7 @@ class StreamFullScreenMedia extends FullScreenMediaWidget {
     this.onReplyMessage,
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
+    this.httpHeaders,
   }) : assert(startIndex >= 0, 'startIndex cannot be negative');
 
   /// The url of the image
@@ -51,6 +52,9 @@ class StreamFullScreenMedia extends FullScreenMediaWidget {
   /// Auto-play videos when page is opened
   final bool autoplayVideos;
 
+  /// Http headers
+  final Map<String, String>? httpHeaders;
+
   @override
   _FullScreenMediaState createState() => _FullScreenMediaState();
 }
@@ -74,7 +78,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
     for (var i = 0; i < widget.mediaAttachmentPackages.length; i++) {
       final attachment = widget.mediaAttachmentPackages[i].attachment;
       if (attachment.type != 'video') continue;
-      final package = VideoPackage(attachment, showControls: true);
+      final package = VideoPackage(attachment, showControls: true, httpHeaders: widget.httpHeaders);
       videoPackages[attachment.id] = package;
     }
     initializePlayers();
@@ -85,16 +89,14 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
       return;
     }
 
-    final currentAttachment =
-        widget.mediaAttachmentPackages[widget.startIndex].attachment;
+    final currentAttachment = widget.mediaAttachmentPackages[widget.startIndex].attachment;
 
     await Future.wait(videoPackages.values.map(
       (it) => it.initialize(),
     ));
 
     if (widget.autoplayVideos && currentAttachment.type == 'video') {
-      final package = videoPackages.values
-          .firstWhere((e) => e._attachment == currentAttachment);
+      final package = videoPackages.values.firstWhere((e) => e._attachment == currentAttachment);
       package._chewieController?.play();
     }
     setState(() {}); // ignore: no-empty-block
@@ -118,8 +120,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
       body: ValueListenableBuilder<int>(
         valueListenable: _currentPage,
         builder: (context, currentPage, child) {
-          final _currentAttachmentPackage =
-              widget.mediaAttachmentPackages[currentPage];
+          final _currentAttachmentPackage = widget.mediaAttachmentPackages[currentPage];
           final _currentMessage = _currentAttachmentPackage.message;
           final _currentAttachment = _currentAttachmentPackage.attachment;
           return Stack(
@@ -133,8 +134,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                   return AnimatedPositionedDirectional(
                     duration: kThemeAnimationDuration,
                     curve: Curves.easeInOut,
-                    top:
-                        isDisplayingDetail ? 0 : -(topPadding + kToolbarHeight),
+                    top: isDisplayingDetail ? 0 : -(topPadding + kToolbarHeight),
                     start: 0,
                     end: 0,
                     height: topPadding + kToolbarHeight,
@@ -166,8 +166,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                               );
                             }
                           : null,
-                      attachmentActionsModalBuilder:
-                          widget.attachmentActionsModalBuilder,
+                      attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
                     ),
                   );
                 },
@@ -181,9 +180,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                     return AnimatedPositionedDirectional(
                       duration: kThemeAnimationDuration,
                       curve: Curves.easeInOut,
-                      bottom: isDisplayingDetail
-                          ? 0
-                          : -(bottomPadding + kToolbarHeight),
+                      bottom: isDisplayingDetail ? 0 : -(bottomPadding + kToolbarHeight),
                       start: 0,
                       end: 0,
                       height: bottomPadding + kToolbarHeight,
@@ -249,8 +246,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
               }
             },
             onRightArrowKeypress: () {
-              if (_currentPage.value <
-                  widget.mediaAttachmentPackages.length - 1) {
+              if (_currentPage.value < widget.mediaAttachmentPackages.length - 1) {
                 _currentPage.value++;
                 _pageController.nextPage(
                   duration: const Duration(milliseconds: 300),
@@ -264,34 +260,26 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
               onPageChanged: (val) {
                 _currentPage.value = val;
                 if (videoPackages.isEmpty) return;
-                final currentAttachment =
-                    widget.mediaAttachmentPackages[val].attachment;
+                final currentAttachment = widget.mediaAttachmentPackages[val].attachment;
                 for (final e in videoPackages.values) {
                   if (e._attachment != currentAttachment) {
                     e._chewieController?.pause();
                   }
                 }
-                if (widget.autoplayVideos &&
-                    currentAttachment.type == 'video') {
+                if (widget.autoplayVideos && currentAttachment.type == 'video') {
                   final controller = videoPackages[currentAttachment.id]!;
                   controller._chewieController?.play();
                 }
               },
               itemBuilder: (context, index) {
-                final currentAttachmentPackage =
-                    widget.mediaAttachmentPackages[index];
+                final currentAttachmentPackage = widget.mediaAttachmentPackages[index];
                 final attachment = currentAttachmentPackage.attachment;
                 if (attachment.type == 'image' || attachment.type == 'giphy') {
-                  final imageUrl = attachment.imageUrl ??
-                      attachment.assetUrl ??
-                      attachment.thumbUrl;
+                  final imageUrl = attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl;
                   return ValueListenableBuilder<bool>(
                     valueListenable: _isDisplayingDetail,
-                    builder: (context, isDisplayingDetail, _) =>
-                        AnimatedContainer(
-                      color: isDisplayingDetail
-                          ? StreamChannelHeaderTheme.of(context).color
-                          : Colors.black,
+                    builder: (context, isDisplayingDetail, _) => AnimatedContainer(
+                      color: isDisplayingDetail ? StreamChannelHeaderTheme.of(context).color : Colors.black,
                       duration: kThemeAnimationDuration,
                       child: ContextMenuArea(
                         verticalPadding: 0,
@@ -301,11 +289,10 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                           ),
                         ],
                         child: PhotoView(
-                          imageProvider: (imageUrl == null &&
-                                  attachment.localUri != null &&
-                                  attachment.file?.bytes != null)
-                              ? Image.memory(attachment.file!.bytes!).image
-                              : CachedNetworkImageProvider(imageUrl!),
+                          imageProvider:
+                              (imageUrl == null && attachment.localUri != null && attachment.file?.bytes != null)
+                                  ? Image.memory(attachment.file!.bytes!).image
+                                  : CachedNetworkImageProvider(imageUrl!, headers: widget.httpHeaders),
                           errorBuilder: (_, __, ___) => const AttachmentError(),
                           loadingBuilder: (context, _) {
                             final image = Image.asset(
@@ -313,8 +300,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                               fit: BoxFit.cover,
                               package: 'stream_chat_flutter',
                             );
-                            final colorTheme =
-                                StreamChatTheme.of(context).colorTheme;
+                            final colorTheme = StreamChatTheme.of(context).colorTheme;
                             return Shimmer.fromColors(
                               baseColor: colorTheme.disabled,
                               highlightColor: colorTheme.inputBg,
@@ -443,11 +429,12 @@ class VideoPackage {
     this._attachment, {
     bool showControls = false,
     bool autoInitialize = true,
+    Map<String, String>? httpHeaders = null,
   })  : _showControls = showControls,
         _autoInitialize = autoInitialize,
         _videoPlayerController = _attachment.localUri != null
             ? VideoPlayerController.file(File.fromUri(_attachment.localUri!))
-            : VideoPlayerController.network(_attachment.assetUrl!);
+            : VideoPlayerController.network(_attachment.assetUrl!, httpHeaders: httpHeaders ?? <String, String>{});
 
   final Attachment _attachment;
   final bool _showControls;
@@ -477,12 +464,10 @@ class VideoPackage {
   }
 
   /// Add a listener to video player controller
-  void addListener(VoidCallback listener) =>
-      _videoPlayerController.addListener(listener);
+  void addListener(VoidCallback listener) => _videoPlayerController.addListener(listener);
 
   /// Remove a listener to video player controller
-  void removeListener(VoidCallback listener) =>
-      _videoPlayerController.removeListener(listener);
+  void removeListener(VoidCallback listener) => _videoPlayerController.removeListener(listener);
 
   /// Dispose controllers
   Future<void> dispose() {

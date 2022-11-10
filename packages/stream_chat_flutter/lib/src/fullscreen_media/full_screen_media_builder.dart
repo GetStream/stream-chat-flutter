@@ -34,6 +34,7 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
     this.onReplyMessage,
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
+    this.httpHeaders,
   });
 
   /// The url of the image
@@ -59,6 +60,8 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
   /// Auto-play videos when page is opened
   final bool autoplayVideos;
 
+  final Map<String, String>? httpHeaders;
+
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb && isDesktopVideoPlayerSupported) {
@@ -81,6 +84,7 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
       onReplyMessage: onReplyMessage,
       attachmentActionsModalBuilder: attachmentActionsModalBuilder,
       autoplayVideos: autoplayVideos,
+      httpHeaders: httpHeaders,
     );
   }
 }

@@ -17,6 +17,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
     this.onShowMessage,
     this.onReplyMessage,
     this.onAttachmentTap,
+    this.httpHeaders,
   });
 
   /// The [StreamMessageThemeData] to use for the title
@@ -31,6 +32,9 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
   /// {@macro onAttachmentTap}
   final OnAttachmentTap? onAttachmentTap;
 
+  /// Http headers
+  final Map<String, String>? httpHeaders;
+
   @override
   Widget build(BuildContext context) {
     return source.when(
@@ -44,6 +48,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
             video: attachment.file!.path,
             thumbUrl: attachment.thumbUrl,
             constraints: constraints,
+            httpHeaders: httpHeaders,
           ),
         );
       },
@@ -57,6 +62,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
             video: attachment.assetUrl,
             thumbUrl: attachment.thumbUrl,
             constraints: constraints,
+            httpHeaders: httpHeaders,
           ),
         );
       },
@@ -86,6 +92,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
                               userName: message.user!.name,
                               onShowMessage: onShowMessage,
                               onReplyMessage: onReplyMessage,
+                              httpHeaders: httpHeaders,
                             ),
                           ),
                         ),

@@ -33,6 +33,7 @@ class _IVideoService {
   /// PNG format.
   Future<Uint8List?> generateVideoThumbnail({
     String? video,
+    Map<String, String>? httpHeaders,
     ImageFormat imageFormat = ImageFormat.PNG,
     int maxHeight = 0,
     int maxWidth = 0,
@@ -63,6 +64,7 @@ class _IVideoService {
     } else if (isMobileDevice) {
       return VideoThumbnail.thumbnailData(
         video: video,
+        headers: httpHeaders,
         imageFormat: imageFormat,
         maxHeight: maxHeight,
         maxWidth: maxWidth,
@@ -75,8 +77,7 @@ class _IVideoService {
 
   /// Generates a placeholder thumbnail by loading placeholder.png from assets.
   Future<Uint8List> generatePlaceholderThumbnail() async {
-    final placeholder = await rootBundle
-        .load('packages/stream_chat_flutter/images/placeholder.png');
+    final placeholder = await rootBundle.load('packages/stream_chat_flutter/images/placeholder.png');
     return placeholder.buffer.asUint8List();
   }
 }

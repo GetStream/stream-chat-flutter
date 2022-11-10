@@ -31,6 +31,7 @@ class StreamVideoThumbnailImage extends StatefulWidget {
     this.format = ImageFormat.PNG,
     this.errorBuilder,
     this.placeholderBuilder,
+    this.httpHeaders,
   });
 
   /// Video path or url
@@ -55,9 +56,11 @@ class StreamVideoThumbnailImage extends StatefulWidget {
   /// A builder for building custom thumbnail loading UI
   final WidgetBuilder? placeholderBuilder;
 
+  /// Http headers
+  final Map<String, String>? httpHeaders;
+
   @override
-  _StreamVideoThumbnailImageState createState() =>
-      _StreamVideoThumbnailImageState();
+  _StreamVideoThumbnailImageState createState() => _StreamVideoThumbnailImageState();
 }
 
 class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
@@ -70,6 +73,7 @@ class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
       thumbnailFuture = StreamVideoService.generateVideoThumbnail(
         video: widget.video,
         imageFormat: widget.format,
+        httpHeaders: widget.httpHeaders,
       );
     }
   }
@@ -109,12 +113,12 @@ class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
           ),
         );
 
-    final errorWidget = widget.errorBuilder?.call(context, null) ??
-        AttachmentError(constraints: widget.constraints);
+    final errorWidget = widget.errorBuilder?.call(context, null) ?? AttachmentError(constraints: widget.constraints);
 
     final thumbUrl = widget.thumbUrl;
     if (thumbUrl != null) {
       return CachedNetworkImage(
+        httpHeaders: widget.httpHeaders,
         imageUrl: thumbUrl,
         fit: widget.fit,
         height: widget.constraints?.maxHeight,

@@ -23,6 +23,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
     this.onTap,
     this.onQuotedMessageClear,
     this.composing = true,
+    this.httpHeaders,
   });
 
   /// The message
@@ -56,6 +57,9 @@ class StreamQuotedMessageWidget extends StatelessWidget {
   /// True if the message is being composed
   final bool composing;
 
+  /// Http headers
+  final Map<String, String>? httpHeaders;
+
   @override
   Widget build(BuildContext context) {
     final children = [
@@ -69,6 +73,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
           showBorder: showBorder,
           reverse: reverse,
           attachmentThumbnailBuilders: attachmentThumbnailBuilders,
+          httpHeaders: httpHeaders,
         ),
       ),
       const SizedBox(width: 8),
@@ -110,6 +115,7 @@ class _QuotedMessage extends StatelessWidget {
     required this.showBorder,
     required this.reverse,
     this.attachmentThumbnailBuilders,
+    this.httpHeaders,
   });
 
   final Message message;
@@ -119,6 +125,7 @@ class _QuotedMessage extends StatelessWidget {
   final StreamMessageThemeData messageTheme;
   final bool showBorder;
   final bool reverse;
+  final Map<String, String>? httpHeaders;
 
   /// Map that defines a thumbnail builder for an attachment type
   final Map<String, QuotedMessageAttachmentThumbnailBuilder>?
@@ -158,6 +165,7 @@ class _QuotedMessage extends StatelessWidget {
           message: message,
           messageTheme: messageTheme,
           attachmentThumbnailBuilders: attachmentThumbnailBuilders,
+          httpHeaders: httpHeaders,
         ),
       if (msg.text!.isNotEmpty && !_isGiphy)
         Flexible(
@@ -216,12 +224,14 @@ class _ParseAttachments extends StatelessWidget {
     required this.message,
     required this.messageTheme,
     this.attachmentThumbnailBuilders,
+    this.httpHeaders,
   });
 
   final Message message;
   final StreamMessageThemeData messageTheme;
   final Map<String, QuotedMessageAttachmentThumbnailBuilder>?
       attachmentThumbnailBuilders;
+  final Map<String, String>? httpHeaders;
 
   bool get _containsLinkAttachment =>
       message.attachments.any((element) => element.titleLink != null);
@@ -234,7 +244,7 @@ class _ParseAttachments extends StatelessWidget {
       attachment = message.attachments.firstWhere(
         (element) => element.ogScrapeUrl != null || element.titleLink != null,
       );
-      child = _UrlAttachment(attachment: attachment);
+      child = _UrlAttachment(attachment: attachment, httpHeaders: httpHeaders);
     } else {
       QuotedMessageAttachmentThumbnailBuilder? attachmentBuilder;
       attachment = message.attachments.last;
@@ -271,6 +281,7 @@ class _ParseAttachments extends StatelessWidget {
           message: message,
           messageTheme: messageTheme,
           constraints: BoxConstraints.loose(const Size(32, 32)),
+          httpHeaders: httpHeaders,
         );
       },
       'video': (_, attachment) {
@@ -321,9 +332,12 @@ class _ParseAttachments extends StatelessWidget {
 class _UrlAttachment extends StatelessWidget {
   const _UrlAttachment({
     required this.attachment,
+    this.httpHeaders,
   });
 
   final Attachment attachment;
+
+  final Map<String, String>? httpHeaders;
 
   @override
   Widget build(BuildContext context) {
@@ -337,6 +351,7 @@ class _UrlAttachment extends StatelessWidget {
             fit: BoxFit.cover,
             image: CachedNetworkImageProvider(
               attachment.thumbUrl!,
+              headers: httpHeaders,
             ),
           ),
         ),
@@ -349,9 +364,12 @@ class _UrlAttachment extends StatelessWidget {
 class _VideoAttachmentThumbnail extends StatefulWidget {
   const _VideoAttachmentThumbnail({
     required this.attachment,
+    this.httpHeaders,
   });
 
   final Attachment attachment;
+
+  final Map<String, String>? httpHeaders;
 
   @override
   _VideoAttachmentThumbnailState createState() =>
@@ -364,7 +382,7 @@ class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(widget.attachment.assetUrl!)
+    _controller = VideoPlayerController.network(widget.attachment.assetUrl!, httpHeaders: widget.httpHeaders ?? <String, String>{})
       ..initialize().then((_) {
         // ignore: no-empty-block
         setState(() {}); //when your thumbnail will show.

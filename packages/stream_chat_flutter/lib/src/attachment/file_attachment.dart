@@ -25,6 +25,7 @@ class StreamFileAttachment extends StreamAttachmentWidget {
     this.title,
     this.trailing,
     this.onAttachmentTap,
+    this.httpHeaders,
   });
 
   /// Title for the attachment
@@ -36,6 +37,9 @@ class StreamFileAttachment extends StreamAttachmentWidget {
 
   /// {@macro onAttachmentTap}
   final OnAttachmentTap? onAttachmentTap;
+
+  /// Http headers
+  final Map<String, String>? httpHeaders;
 
   /// Checks if the attachment is a video
   bool get isVideoAttachment => attachment.title?.mimeType?.type == 'video';
@@ -71,6 +75,7 @@ class StreamFileAttachment extends StreamAttachmentWidget {
                   isVideoAttachment: isVideoAttachment,
                   source: source,
                   attachment: attachment,
+                  httpHeaders: httpHeaders,
                 ),
               ),
               const SizedBox(width: 8),
@@ -113,12 +118,14 @@ class _FileTypeImage extends StatelessWidget {
     required this.isVideoAttachment,
     required this.source,
     required this.attachment,
+    this.httpHeaders,
   });
 
   final bool isImageAttachment;
   final bool isVideoAttachment;
   final AttachmentSource source;
   final Attachment attachment;
+  final Map<String, String>? httpHeaders;
 
   ShapeBorder _getDefaultShape(BuildContext context) {
     return RoundedRectangleBorder(
@@ -152,18 +159,14 @@ class _FileTypeImage extends StatelessWidget {
             );
           },
           network: () {
-            if ((attachment.imageUrl ??
-                    attachment.assetUrl ??
-                    attachment.thumbUrl) ==
-                null) {
+            if ((attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl) == null) {
               return getFileTypeImage(
                 attachment.extraData['mime_type'] as String?,
               );
             }
             return CachedNetworkImage(
-              imageUrl: attachment.imageUrl ??
-                  attachment.assetUrl ??
-                  attachment.thumbUrl!,
+              imageUrl: attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl!,
+              httpHeaders: httpHeaders,
               fit: BoxFit.cover,
               errorWidget: (_, obj, trace) => getFileTypeImage(
                 attachment.extraData['mime_type'] as String?,
@@ -196,6 +199,7 @@ class _FileTypeImage extends StatelessWidget {
         child: source.when(
           local: () => StreamVideoThumbnailImage(
             video: attachment.file!.path,
+            httpHeaders: httpHeaders,
             placeholderBuilder: (_) => const Center(
               child: SizedBox(
                 width: 20,
@@ -206,6 +210,7 @@ class _FileTypeImage extends StatelessWidget {
           ),
           network: () => StreamVideoThumbnailImage(
             video: attachment.assetUrl,
+            httpHeaders: httpHeaders,
             placeholderBuilder: (_) => const Center(
               child: SizedBox(
                 width: 20,

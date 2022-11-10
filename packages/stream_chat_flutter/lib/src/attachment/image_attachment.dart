@@ -22,6 +22,7 @@ class StreamImageAttachment extends StreamAttachmentWidget {
     this.imageThumbnailSize = const Size(400, 400),
     this.imageThumbnailResizeType = 'clip',
     this.imageThumbnailCropType = 'center',
+    this.httpHeaders,
   });
 
   /// The [StreamMessageThemeData] to use for the image title
@@ -51,6 +52,9 @@ class StreamImageAttachment extends StreamAttachmentWidget {
   ///
   /// Defaults to [center]
   final String /*center|top|bottom|left|right*/ imageThumbnailCropType;
+
+  /// Http headers
+  final Map<String, String>? httpHeaders;
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +107,7 @@ class StreamImageAttachment extends StreamAttachmentWidget {
           context,
           CachedNetworkImage(
             imageUrl: imageUrl,
+            httpHeaders: httpHeaders,
             height: constraints?.maxHeight,
             width: constraints?.maxWidth,
             fit: BoxFit.cover,
@@ -161,6 +166,7 @@ class StreamImageAttachment extends StreamAttachmentWidget {
                                     userName: message.user!.name,
                                     onShowMessage: onShowMessage,
                                     onReplyMessage: onReplyMessage,
+                                    httpHeaders: httpHeaders,
                                   ),
                                 );
                               },
