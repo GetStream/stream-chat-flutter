@@ -1,3 +1,9 @@
+## Upcomming
+
+🔄 Changed
+
+- Updated `lottie` dependency to `^2.0.0`
+
 ## 5.1.0
 
 🐞 Fixed
