@@ -31,7 +31,7 @@ dependencies:
   image_gallery_saver: ^1.7.0
   image_picker: ^0.8.2
   jiffy: ^5.0.0
-  lottie: ^1.0.1
+  lottie: ^2.0.0
   meta: ^1.3.0
   path_provider: ^2.0.9
   photo_manager: ^2.0.1
