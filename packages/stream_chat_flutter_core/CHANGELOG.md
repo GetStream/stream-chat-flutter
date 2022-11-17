@@ -1,8 +1,3 @@
-## Upcomming
-
-🐞 Fixed
-- [[#1379]](https://github.com/GetStream/stream-chat-flutter/issues/1379) Fixed "Issues with photo attachments on web", where the cached image attachment would not render while uploading.
-- 
 ## 5.1.0
 
 - Deprecated the `sort` parameter in the `StreamChannelListController` in favor of `channelStateSort`.
