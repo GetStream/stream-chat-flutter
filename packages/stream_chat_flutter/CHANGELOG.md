@@ -2,6 +2,11 @@
 
 🐞 Fixed
 - Fix render overflow issue with `MessageSearchListTileTitle`. It now uses `Text.rich` instead of `Row`. Better default behaviour and allows `TextOverflow`.
+
+🔄 Changed
+
+- Updated `connectivity_plus` dependency to `^3.0.2`
+
 ## 5.1.0
 
 🐞 Fixed
