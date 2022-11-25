@@ -8,13 +8,23 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 /// {@template streamVideoThumbnailImage}
-/// Displays a video thumbnail for video attachments in a message.
+/// Displays a video thumbnail for video attachments.
+///
+/// [thumbUrl] is used if provided.
+///
+/// Else [video] (path to local or remote video) is used to generate
+/// a thumbnail from the video asset.
+///
+/// WARNING! a local path does not work on web.
+///
+/// If both [thumbUrl] and [video] are null, or if a thumbnail can't be
+/// generated, a stock default image will be used.
 /// {@endtemplate}
 class StreamVideoThumbnailImage extends StatefulWidget {
   /// {@macro streamVideoThumbnailImage}
   const StreamVideoThumbnailImage({
     super.key,
-    required this.video,
+    this.video,
     this.thumbUrl,
     this.constraints,
     this.fit = BoxFit.cover,
@@ -24,7 +34,7 @@ class StreamVideoThumbnailImage extends StatefulWidget {
   });
 
   /// Video path or url
-  final String video;
+  final String? video;
 
   /// Video thumbnail url
   final String? thumbUrl;
