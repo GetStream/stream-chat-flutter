@@ -2,6 +2,8 @@
 
 🐞 Fixed
 - Fix render overflow issue with `MessageSearchListTileTitle`. It now uses `Text.rich` instead of `Row`. Better default behaviour and allows `TextOverflow`.
+- Fix [[#1347]](https://github.com/GetStream/stream-chat-flutter/issues/1347) `onReply` not working in `AttachmentActionsModal` which is used by `StreamImageAttachment` and `StreamImageGroup`.
+
 ## 5.1.0
 
 🐞 Fixed
