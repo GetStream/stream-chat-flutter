@@ -32,7 +32,7 @@ It teaches you how to use this SDK and also shows how to make frequently require
 
 ## Example App
 
-This repo includes a fully functional example app with setup instructions.
+This repository includes a fully functional example app with setup instructions.
 The example is available under the [example](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter/example) folder.
 
 ## Add dependency
@@ -46,7 +46,7 @@ You should then run `flutter packages get`
 
 ### Android
 
-The package uses [photo_manager](https://pub.dev/packages/photo_manager) to access the device's photo library.
+The package uses [`photo_manager`](https://pub.dev/packages/photo_manager) to access the device's photo library.
 Follow [this wiki](https://pub.dev/packages/photo_manager#android-10-q-29) to fulfil the Android requirements.
 
 ### iOS
@@ -55,9 +55,9 @@ The library uses [flutter file picker plugin](https://github.com/miguelpruivo/fl
 files from the os.
 Follow [this wiki](https://github.com/miguelpruivo/flutter_file_picker/wiki/Setup#ios) to fulfill iOS requirements.
 
-We also use [video_player](https://pub.dev/packages/video_player) to reproduce videos. Follow [this guide](https://pub.dev/packages/video_player#installation) to fulfill the requirements.
+We also use [`video_player`](https://pub.dev/packages/video_player) to reproduce videos. Follow [this guide](https://pub.dev/packages/video_player#installation) to fulfill the requirements.
 
-To pick images from the camera, we use the [image_picker](https://pub.dev/packages/image_picker) plugin.
+To pick images from the camera, we use the [`image_picker`](https://pub.dev/packages/image_picker) plugin.
 Follow [these instructions](https://pub.dev/packages/image_picker#ios) to check the requirements.
 
 ### Web
@@ -70,7 +70,7 @@ For the web, edit your `index.html` and add the following in the `<body>` tag in
 
 ### MacOS
 
-For MacOS use the [file_selector](https://pub.dev/packages/file_selector#macos) package.
+For MacOS use the [`file_selector`](https://pub.dev/packages/file_selector#macos) package.
 Follow [these instructions](https://pub.dev/packages/file_selector#macos) to check the requirements.
 
 You also need to add the following [entitlement](https://docs.flutter.dev/development/platform-integration/desktop#entitlements-and-the-app-sandbox):
@@ -88,8 +88,8 @@ If it seems related to the [flutter file picker plugin](https://github.com/migue
 ## Docs
 
 This package provides UI components required for integrating Stream Chat into your application.
-Alternatively, you may use the core package [stream_chat_flutter_core](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter_core) which allows more customisation and provides business logic but no UI components.
-If you require the maximum amount of control over the API, please use the low level client package: [stream_chat](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat).
+Alternatively, you may use the core package [`stream_chat_flutter_core`](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter_core) which allows more customisation and provides business logic but no UI components.
+If you require the maximum amount of control over the API, please use the low level client package: [`stream_chat`](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat).
 
 ### UI Components
 
@@ -175,7 +175,7 @@ Out of the box, all chat widgets use their default styling, and there are two wa
   
 ### Offline storage 
 
-To add data persistance you can extend the class `ChatPersistenceClient` and pass an instance to the `StreamChatClient`.
+To add data persistence you can extend the class `ChatPersistenceClient` and pass an instance to the `StreamChatClient`.
 
 ```dart
 class CustomChatPersistentClient extends ChatPersistenceClient {
@@ -207,7 +207,7 @@ final client = StreamChatClient(
 ## Contributing
 
 We welcome code changes that improve this library or fix a problem,
-please make sure to follow all best practices and add tests if applicable before submitting a Pull Request on Github.
+please make sure to follow all best practices and add tests if applicable before submitting a Pull Request on GitHub.
 We are pleased to merge your code into the official repository.
 Make sure to sign our [Contributor License Agreement (CLA)](https://docs.google.com/forms/d/e/1FAIpQLScFKsKkAJI7mhCr7K9rEIOpqIDThrWxuvxnwUq2XkHyG154vQ/viewform) first.
 See our license file for more details.

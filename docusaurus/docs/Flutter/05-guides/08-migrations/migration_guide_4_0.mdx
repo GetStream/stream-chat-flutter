@@ -14,7 +14,7 @@ If you find any bugs or have any questions, please file an [issue on our GitHub 
 Code examples:
 
 - See our [Stream Chat Flutter tutorial](https://getstream.io/chat/flutter/tutorial/) for an up-to-date guide using the latest Stream Chat version.
-- See the [Stream Flutter Samples repository](https://github.com/GetStream/flutter-samples) with our fully-fledged messaging [sample application](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1).
+- See the [Stream Flutter Samples repository](https://github.com/GetStream/flutter-samples) with our full fledged messaging [sample application](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1).
 
 All of our documentation has also been updated to support v4, so all of the guides and examples will have updated code.
 
@@ -209,10 +209,10 @@ Let's explore some examples of the functional differences when using the new `St
 
 The **StreamChannelListController** provides various methods, such as:
 
-- **deleteChannel**
-- **loadMore**
-- **muteChannel**
-- **deleteChannel**
+- **`deleteChannel`**
+- **`loadMore`**
+- **`muteChannel`**
+- **`deleteChannel`**
 
 For a complete list with additional information, see the code documentation.
 
@@ -537,7 +537,7 @@ Creating a separate controller allows easier control over the message input cont
 
 The widget is also separated into smaller components: `StreamCountDownButton`, `StreamAttachmentPicker`, etc.
 
-> ❗The `MessageInputController` is exposed by the **stream_chat_flutter_core** package. This allows you to use the controller even if you're not using the UI components.
+> ❗The `MessageInputController` is exposed by the **`stream_chat_flutter_core`** package. This allows you to use the controller even if you're not using the UI components.
 
 As a result of this extra control, it is no longer needed for the new `StreamMessageInput` widget to expose these `MessageInput` arguments:
 
@@ -734,7 +734,7 @@ The controller makes it much simpler to dynamically modify the message input.
 
 ## Stream Chat Flutter Core
 
-Various changes have been made to the Core package, most notably, the indroduction of all of the controllers mentioned above.
+Various changes have been made to the Core package, most notably, the introduction of all of the controllers mentioned above.
 
 These controllers replace the business logic implementations (Bloc). Please note that this is not related to the well-known Flutter Bloc package, but instead refers to the naming we used for our business logic components.
 

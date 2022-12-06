@@ -155,7 +155,7 @@ Running the above will give this:
 ![](../assets/authentication_demo_app.jpg)
 
 The `Auth` widget handles all of the authentication logic. It initializes a `FirebaseAuth.instance` and uses that
-in the `createAccount`, `signIn` and `signOut` methods. There is a button to envoke each of these methods.
+in the `createAccount`, `signIn` and `signOut` methods. There is a button to invoke each of these methods.
 
 The `FirebaseFunctions.instance` will be used later in this guide.
 
@@ -289,7 +289,7 @@ firebase deploy --only functions
 ### Create a Stream User and Get the User's Token
 
 In the `createStreamUserAndGetToken` cloud function you create an `onCall` HTTPS handler, which exposes
-a cloud function that can be envoked from your Flutter app.
+a cloud function that can be invoked from your Flutter app.
 
 ```js
 // Create a Stream user and return auth token.
@@ -325,13 +325,13 @@ by ensuring that `context.auth` is not null. If it is null, then it throws an `H
 message. This error can be caught in your Flutter application.
 
 If the caller is authenticated the function proceeds to use the `serverClient` to create a new Stream Chat
-user by calling the `upsertUser` method and passing in some user data. It uses the authenticated caller's **uid** as an **id**.
+user by calling the `upsertUser` method and passing in some user data. It uses the authenticated caller's **`uid`** as an **id**.
 
 After the user is created it generates a token for that user. This token is then returned to the caller.
 
 To call this from Flutter, you will need to use the `cloud_functions` package.
 
-Update the **createAccount** method in your Flutter code to the following:
+Update the **`createAccount`** method in your Flutter code to the following:
 
 ```dart
 Future<void> createAccount() async {
@@ -355,7 +355,7 @@ in the request.
 
 Once you have the Stream user token, you can authenticate your Stream Chat user as you normally would.
 
-Please see our [initialization documention](https://getstream.io/chat/docs/flutter-dart/init_and_users/?language=dart) for more information.
+Please see our [initialization documentation](https://getstream.io/chat/docs/flutter-dart/init_and_users/?language=dart) for more information.
 
 As you can see below, the User ID matches on both Firebase's and Stream's user database.
 
@@ -373,7 +373,7 @@ As you can see below, the User ID matches on both Firebase's and Stream's user d
 The `getStreamUserToken` cloud function is very similar to the `createStreamUserAndGetToken` function. The only difference is
 that it only creates a user token and does not create a new user account on Stream.
 
-Update the **signIn** method in your Flutter code to the following:
+Update the **`signIn`** method in your Flutter code to the following:
 
 ```dart
 Future<void> signIn() async {
@@ -434,7 +434,7 @@ exports.deleteStreamUser = functions.auth.user().onDelete((user, context) => {
 ```
 
 In this function, you are listening to delete events on Firebase auth. When an account is deleted, this function will be triggered, and you can get the
-user's **uid** and call the `deleteUser` method on the `serverClient`.
+user's **`uid`** and call the `deleteUser` method on the `serverClient`.
 
 This is not an external cloud function; it can only be triggered when an
 account is deleted.

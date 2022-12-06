@@ -21,7 +21,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// - We set up the Chat [StreamChatClient] with the API key
 ///
-/// - We set the the current user for Chat with [StreamChatClient.connectUser]
+/// - We set the current user for Chat with [StreamChatClient.connectUser]
 /// and a pre-generated user token
 ///
 /// - We make [StreamChat] the root Widget of our application

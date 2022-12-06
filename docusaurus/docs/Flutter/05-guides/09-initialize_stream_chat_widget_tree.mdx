@@ -196,7 +196,7 @@ Both of these will ensure the route is disposed of and the user is disconnected 
 Another approach would be to introduce a new [Navigator](https://api.flutter.dev/flutter/widgets/Navigator-class.html).
 This has the benefit that everything related to Stream chat is contained to a specific part of the widget tree.
 
-### Defining Routes and Subroutes
+### Defining Routes and Nested Routes
 
 In this example, our application has the following routes.
 
@@ -208,7 +208,7 @@ const routeChatChannels = 'chat_channels';
 const routeChatChannel = 'chat_channel';
 ```
 
-For the `/chat/` subroutes (**routePrefixChat**), this approach initializes Stream Chat in our application and introduces a nested navigator.
+For the `/chat/` nested routes (**routePrefixChat**), this approach initializes Stream Chat in our application and introduces a nested navigator.
 
 Let’s explore the code:
 
@@ -267,7 +267,7 @@ In the above code you’re:
 1. Creating a navigator key, passing it to `MaterialApp`, and exposing it to the whole application using Provider (you can expose it however you want).
 2. Creating `onGenerateRoute` that specifies what page to show depending on the route. Most importantly, if the route contains the **routePrefixChat,** it navigates to the **ChatSetup** page and passes in the remainder of the route.
 
-For example, `Navigator.pushNamed(context, routeChatHome)` will navigate to the **ChatSetup** page and pass in the subroute **routeChatChannels.**
+For example, `Navigator.pushNamed(context, routeChatHome)` will navigate to the **ChatSetup** page and pass in the nested route **routeChatChannels.**
 
 ### Stream Chat Initialization, User Connection, and Nested Navigation
 
@@ -456,7 +456,7 @@ This final example will be a combination of the first two options. The following
 
 ### Application Routes and Conditional Stream Initialization
 
-For this example we have the following routes and subroutes:
+For this example we have the following routes and nested routes:
 
 ```dart
 |_ '/' -> home page
@@ -553,7 +553,7 @@ If you’re unfamiliar with GoRouter it will help to first read the documentatio
 
 There are a few important things to note in the above code:
 
-- Define our routes and subroutes
+- Define our routes and nested routes
 - Specify the initial route with `initialLocation`
 - Use the `navigatorBuilder` to wrap certain routes with **StreamChat** and **ChatSetup**.
   - The `wasPreviousRouteChat` \***\*boolean is used to determine if the previous route was a chat route. This is important because when you press the back button from the `/chat` route and navigate to the `/` route, the **StreamChat** widget still needs to be accessible while the navigation transition occurs. However, if you then navigate to the `/setting` route, you no longer need the **StreamChat\*\* widget and can safely remove it.

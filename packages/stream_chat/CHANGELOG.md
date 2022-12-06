@@ -17,7 +17,7 @@
 🛑️ Breaking Changes from `5.0.0-beta.2`
 
 - `Channel.addMembers`, `Channel.removeMembers`, `Channel.inviteMembers` and `Channel.update`
-  positional params are now optional params.
+  positional parameters are now optional parameters.
 
   ```dart
     // previous
@@ -390,21 +390,21 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 🛑️ Breaking Changes from `1.5.3`
 
 - migrate this package to null safety
-- `ConnectUserWithProvider` now requires `tokenProvider` as a required param. (Removed from the
+- `ConnectUserWithProvider` now requires `tokenProvider` as a required parameter. (Removed from the
   constructor)
 - `client.disconnect()` is now divided into two different functions
-    - `client.closeConnection()` -> for closing user websocket connection.
+    - `client.closeConnection()` -> for closing user web socket connection.
     - `client.disconnectUser()` -> for disconnecting user and resetting client state.
 - `client.devToken()` now returns a `Token` model instead of `String`.
 - `ApiError` is removed in favor of `StreamChatError`
     - `StreamChatError` -> parent type for all the stream errors.
-    - `StreamWebSocketError` -> for user websocket related errors.
+    - `StreamWebSocketError` -> for user web socket related errors.
     - `StreamChatNetworkError` -> for network related errors.
-- `client.queryChannels()`, `channel.query()` options param is removed in favor of individual params
+- `client.queryChannels()`, `channel.query()` options parameter is removed in favor of individual parameters
     - `option.state` -> bool state
     - `option.watch` -> bool watch
     - `option.presence` -> bool presence
-- `client.queryUsers()` options param is removed in favor of individual params
+- `client.queryUsers()` options parameter is removed in favor of individual parameters
     - `option.presence` -> bool presence
 - Migrate this package to null safety
 - Added typed filters
@@ -438,28 +438,28 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 🛑️ Breaking Changes from `2.0.0-nullsafety.6`
 
-- `ConnectUserWithProvider` now requires `tokenProvider` as a required param. (Removed from the
+- `ConnectUserWithProvider` now requires `tokenProvider` as a required parameter. (Removed from the
   constructor)
 - `client.disconnect()` is now divided into two different functions
-    - `client.closeConnection()` -> for closing user websocket connection.
+    - `client.closeConnection()` -> for closing user web socket connection.
     - `client.disconnectUser()` -> for disconnecting user and resetting client state.
 - `client.devToken()` now returns a `Token` model instead of `String`.
 - `ApiError` is removed in favor of `StreamChatError`
     - `StreamChatError` -> parent type for all the stream errors.
-    - `StreamWebSocketError` -> for user websocket related errors.
+    - `StreamWebSocketError` -> for user web socket related errors.
     - `StreamChatNetworkError` -> for network related errors.
-- `client.queryChannels()`, `channel.query()` options param is removed in favor of individual params
+- `client.queryChannels()`, `channel.query()` options parameter is removed in favor of individual parameters
     - `option.state` -> bool state
     - `option.watch` -> bool watch
     - `option.presence` -> bool presence
-- `client.queryUsers()` options param is removed in favor of individual params
+- `client.queryUsers()` options parameter is removed in favor of individual parameters
     - `option.presence` -> bool presence
 
 ✅ Added
 
 - New `Location` enum is introduced for easily changing the client location/baseUrl.
 - New `client.openConnection()` and `client.closeConnection()` is introduced to connect/disconnect
-  user ws connection.
+  user WS connection.
 
 🔄 Changed
 
@@ -562,7 +562,7 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 
 - 🛑 **BREAKING** Renamed `Client` to less generic `StreamChatClient`
 - 🛑 **BREAKING** Segregated the persistence layer into separate
-  package [stream_chat_persistence](https://pub.dev/packages/stream_chat_persistence)
+  package [`stream_chat_persistence`](https://pub.dev/packages/stream_chat_persistence)
 - 🛑 **BREAKING** Moved `Client.backgroundKeepAlive`
   to [core package](https://pub.dev/packages/stream_chat_core)
 - 🛑 **BREAKING** Moved `Client.showLocalNotification`

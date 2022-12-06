@@ -26,7 +26,7 @@ Let's build an example of location sharing option in the app:
 
 ![](../../assets/location_sharing_example.jpg)
 
-* Show a "Share Location" button next to StreamMessageInput Textfield.
+* Show a "Share Location" button next to StreamMessageInput `Textfield`.
 
 * When the user presses this button, it should fetch the current location coordinates of the user, and send a message on the channel as follows:
 
@@ -46,7 +46,7 @@ Message(
 )
 ```
 
-For our example, we are going to use [geolocator](https://pub.dev/packages/geolocator) library.
+For our example, we are going to use [`geolocator`](https://pub.dev/packages/geolocator) library.
 Please check their [setup instructions](https://pub.dev/packages/geolocator) on their docs.
 
 NOTE: If you are testing on iOS simulator, you will need to set some dummy coordinates, as mentioned [here](https://stackoverflow.com/a/31238119/7489541).
@@ -54,7 +54,7 @@ Also don't forget to enable "location update" capability in background mode, fro
 
 On the receiver end, `location` type attachment should be rendered in map view, in the `StreamMessageListView`.
 We are going to use [Google Static Maps API](https://developers.google.com/maps/documentation/maps-static/overview) to render the map in the message.
-You can use other libraries as well such as [google_maps_flutter](https://pub.dev/packages/google_maps_flutter).
+You can use other libraries as well such as [`google_maps_flutter`](https://pub.dev/packages/google_maps_flutter).
 
 First, we add a button which when clicked fetches and shares location into the `MessageInput`:
 

@@ -17,7 +17,7 @@ You can read more about Stream’s [push delivery logic](https://getstream.io/ch
 
 ### Setup FCM
 
-To integrate push notifications in your Flutter app, you need to use the package [firebase_messaging](https://pub.dev/packages/firebase_messaging).
+To integrate push notifications in your Flutter app, you need to use the package [`firebase_messaging`](https://pub.dev/packages/firebase_messaging).
 
 
 Follow the [Firebase documentation](https://firebase.flutter.dev/docs/messaging/overview/) to set up the plugin for Android and iOS.
@@ -55,7 +55,7 @@ You can upload your Firebase credentials using either the dashboard or the app s
 
 ![](../../assets/firebase_notifications_toggle-5aeabfcbdc24cb8f1fea7d41d0e845fc.png)
 
-3. Enter your Firebase Credentials and press "Save".
+3. Enter your Firebase Credentials and press `"Save"`.
 
 ##### Using the API
 
@@ -86,7 +86,7 @@ firebaseMessaging.onTokenRefresh.listen((token) {
 }); 
 ```
 
-Push Notifications v2 also supports specifying a name to the push device tokens you register. By setting the optional `pushProviderName` param in the `addDevice` call you can support different configurations between the device and the `PushProvider`.
+Push Notifications v2 also supports specifying a name to the push device tokens you register. By setting the optional `pushProviderName` parameter in the `addDevice` call you can support different configurations between the device and the `PushProvider`.
 
 ```dart
 firebaseMessaging.onTokenRefresh.listen((token) { 
@@ -105,7 +105,7 @@ On iOS we send both a **notification** and a **data** payload.
 This means you don't need to do anything special to get the notification to show up. However, you might want to handle the data payload to perform some logic when the user taps on the notification.
 
 To update the template, you can use a backend SDK.
-For example, using the javascript SDK:
+For example, using the JavaScript SDK:
 
 ```js
 const client = StreamChat.getInstance(‘api_key’, ‘api_secret’);
@@ -181,13 +181,13 @@ void handleNotification(
 FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
 ```
 
-In the above example, you get the message details using the `getMessage` method and then you use the [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications) package to show the actual notification.
+In the above example, you get the message details using the `getMessage` method and then you use the [`flutter_local_notifications`](https://pub.dev/packages/flutter_local_notifications) package to show the actual notification.
 
 ##### Using a Template on Android
 
 It's still possible to add a **notification** payload to Android notifications. 
 You can do so by adding a template using a backend SDK.
-For example, using the javascript SDK:
+For example, using the JavaScript SDK:
 
 ```js
 const client = StreamChat.getInstance(‘api_key’, ‘api_secret’);
@@ -211,11 +211,11 @@ Make sure to read the [general push notification docs](https://getstream.io/chat
 
 ### Testing if Push Notifications are Setup Correctly
 
-If you're not sure whether you've set up push notifications correctly, for example, you don't always receive them, or they don’t work reliably, then you can follow these steps to make sure your config is correct and working:
-1. Clone our repo for push testing: `git clone git@github.com:GetStream/chat-push-test.git`
+If you're not sure whether you've set up push notifications correctly, for example, you don't always receive them, or they don’t work reliably, then you can follow these steps to make sure your configuration is correct and working:
+1. Clone our repository for push testing: `git clone git@github.com:GetStream/chat-push-test.git`
 2. `cd flutter`
 3. In that folder run `flutter pub get`
-4. Input your api key and secret in `lib/main.dart`
+4. Input your API key and secret in `lib/main.dart`
 5. Change the bundle identifier/application ID and development team/user so you can run the app on your physical device.**Do not** run on an iOS simulator, as it will not work. Testing on an Android emulator is fine.
 6. Add your `google-services.json/GoogleService-Info.plist`
 7. Run the app
@@ -257,7 +257,7 @@ Take a look at the [Stream Chat v1 sample app](https://github.com/GetStream/flut
 
 When the app is closed you may want to save received messages when you receive them via a notification so that later on when you open the app they're already there.
 
-To do this you need to integrate the package [stream_chat_persistence](https://pub.dev/packages/stream_chat_persistence) in our app that exports a persistence client, see [here](https://pub.dev/packages/stream_chat_persistence#usage) how to set it up.
+To do this you need to integrate the package [`stream_chat_persistence`](https://pub.dev/packages/stream_chat_persistence) in our app that exports a persistence client, see [here](https://pub.dev/packages/stream_chat_persistence#usage) how to set it up.
 
 Then calling `FirebaseMessaging.onBackgroundMessage(...)` you need to use a TOP-LEVEL or STATIC function to handle background messages; here is an example:
 
