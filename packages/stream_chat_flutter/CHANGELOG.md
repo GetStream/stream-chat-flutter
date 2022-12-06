@@ -2,6 +2,8 @@
 
 🐞 Fixed
 - Fix render overflow issue with `MessageSearchListTileTitle`. It now uses `Text.rich` instead of `Row`. Better default behaviour and allows `TextOverflow`.
+- [[1346]](https://github.com/GetStream/stream-chat-flutter/issues/1346) Fixed a render issue while uploading video on web.
+
 ## 5.1.0
 
 🐞 Fixed
