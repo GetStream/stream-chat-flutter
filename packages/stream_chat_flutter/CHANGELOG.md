@@ -1,11 +1,14 @@
 ## Upcomming
 
-🐞 Fixed
-- Fix render overflow issue with `MessageSearchListTileTitle`. It now uses `Text.rich` instead of `Row`. Better default behaviour and allows `TextOverflow`.
-
 🔄 Changed
 
+- Updated `lottie` dependency to `^2.0.0`
+- Updated `desktop_drop` dependency to `^0.4.0`
 - Updated `connectivity_plus` dependency to `^3.0.2`
+
+🐞 Fixed
+- [[#1379]](https://github.com/GetStream/stream-chat-flutter/issues/1379) Fixed "Issues with photo attachments on web", where the cached image attachment would not render while uploading.
+- Fix render overflow issue with `MessageSearchListTileTitle`. It now uses `Text.rich` instead of `Row`. Better default behaviour and allows `TextOverflow`.
 
 ## 5.1.0
 
