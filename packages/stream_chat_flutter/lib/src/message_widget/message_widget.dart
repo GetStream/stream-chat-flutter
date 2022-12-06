@@ -8,6 +8,7 @@ import 'package:stream_chat_flutter/src/context_menu_items/context_menu_reaction
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
+import 'package:stream_chat_flutter/src/message_widget/bottom_row.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -306,7 +307,7 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@template bottomRowBuilder}
   /// Widget builder for building a bottom row below the message
   /// {@endtemplate}
-  final Widget Function(BuildContext, Message)? bottomRowBuilder;
+  final Widget Function(BuildContext, Message, BottomRow)? bottomRowBuilder;
 
   /// {@template deletedBottomRowBuilder}
   /// Widget builder for building a bottom row below a deleted message
@@ -538,7 +539,7 @@ class StreamMessageWidget extends StatefulWidget {
     Widget Function(BuildContext, Message)? editMessageInputBuilder,
     Widget Function(BuildContext, Message)? textBuilder,
     Widget Function(BuildContext, Message)? usernameBuilder,
-    Widget Function(BuildContext, Message)? bottomRowBuilder,
+    Widget Function(BuildContext, Message, BottomRow)? bottomRowBuilder,
     Widget Function(BuildContext, Message)? deletedBottomRowBuilder,
     void Function(BuildContext, Message)? onMessageActions,
     Message? message,

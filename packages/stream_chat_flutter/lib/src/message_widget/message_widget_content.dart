@@ -152,7 +152,7 @@ class MessageWidgetContent extends StatelessWidget {
   final double bottomRowPadding;
 
   /// {@macro bottomRowBuilder}
-  final Widget Function(BuildContext, Message)? bottomRowBuilder;
+  final Widget Function(BuildContext, Message, BottomRow)? bottomRowBuilder;
 
   /// {@macro showInChannelIndicator}
   final bool showInChannel;
@@ -207,30 +207,7 @@ class MessageWidgetContent extends StatelessWidget {
                   right: reverse ? bottomRowPadding : 0,
                   bottom: isPinned && showPinHighlight ? 6.0 : 0.0,
                 ),
-                child: bottomRowBuilder?.call(
-                      context,
-                      message,
-                    ) ??
-                    BottomRow(
-                      message: message,
-                      reverse: reverse,
-                      messageTheme: messageTheme,
-                      hasUrlAttachments: hasUrlAttachments,
-                      isOnlyEmoji: isOnlyEmoji,
-                      isDeleted: message.isDeleted,
-                      isGiphy: isGiphy,
-                      showInChannel: showInChannel,
-                      showSendingIndicator: showSendingIndicator,
-                      showThreadReplyIndicator: showThreadReplyIndicator,
-                      showTimeStamp: showTimeStamp,
-                      showUsername: showUsername,
-                      streamChatTheme: streamChatTheme,
-                      onThreadTap: onThreadTap,
-                      deletedBottomRowBuilder: deletedBottomRowBuilder,
-                      streamChat: streamChat,
-                      hasNonUrlAttachments: hasNonUrlAttachments,
-                      usernameBuilder: usernameBuilder,
-                    ),
+                child: _buildBottomRow(context),
               ),
             Padding(
               padding: EdgeInsets.only(
@@ -456,5 +433,31 @@ class MessageWidgetContent extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildBottomRow(BuildContext context) {
+    final defaultWidget = BottomRow(
+      message: message,
+      reverse: reverse,
+      messageTheme: messageTheme,
+      hasUrlAttachments: hasUrlAttachments,
+      isOnlyEmoji: isOnlyEmoji,
+      isDeleted: message.isDeleted,
+      isGiphy: isGiphy,
+      showInChannel: showInChannel,
+      showSendingIndicator: showSendingIndicator,
+      showThreadReplyIndicator: showThreadReplyIndicator,
+      showTimeStamp: showTimeStamp,
+      showUsername: showUsername,
+      streamChatTheme: streamChatTheme,
+      onThreadTap: onThreadTap,
+      deletedBottomRowBuilder: deletedBottomRowBuilder,
+      streamChat: streamChat,
+      hasNonUrlAttachments: hasNonUrlAttachments,
+      usernameBuilder: usernameBuilder,
+    );
+
+    return bottomRowBuilder?.call(context, message, defaultWidget) ??
+        defaultWidget;
   }
 }
