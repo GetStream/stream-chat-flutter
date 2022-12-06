@@ -9,6 +9,7 @@
 🐞 Fixed
 - [[#1379]](https://github.com/GetStream/stream-chat-flutter/issues/1379) Fixed "Issues with photo attachments on web", where the cached image attachment would not render while uploading.
 - Fix render overflow issue with `MessageSearchListTileTitle`. It now uses `Text.rich` instead of `Row`. Better default behaviour and allows `TextOverflow`.
+- [[#1347]](https://github.com/GetStream/stream-chat-flutter/issues/1347) `onReply` not working in `AttachmentActionsModal` which is used by `StreamImageAttachment` and `StreamImageGroup`.
 
 ## 5.1.0
 
