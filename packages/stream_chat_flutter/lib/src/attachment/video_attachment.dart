@@ -41,7 +41,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
         return _buildVideoAttachment(
           context,
           StreamVideoThumbnailImage(
-            video: attachment.file!.path!,
+            video: attachment.file!.path,
             thumbUrl: attachment.thumbUrl,
             constraints: constraints,
           ),
@@ -54,7 +54,7 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
         return _buildVideoAttachment(
           context,
           StreamVideoThumbnailImage(
-            video: attachment.assetUrl!,
+            video: attachment.assetUrl,
             thumbUrl: attachment.thumbUrl,
             constraints: constraints,
           ),
