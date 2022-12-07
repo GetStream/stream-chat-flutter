@@ -56,22 +56,33 @@ class StreamImageAttachment extends StreamAttachmentWidget {
   Widget build(BuildContext context) {
     return source.when(
       local: () {
-        if (attachment.localUri == null || attachment.file?.bytes == null) {
-          return AttachmentError(constraints: constraints);
-        }
-        return _buildImageAttachment(
-          context,
-          Image.memory(
-            attachment.file!.bytes!,
-            height: constraints?.maxHeight,
-            width: constraints?.maxWidth,
-            fit: BoxFit.cover,
-            errorBuilder: (context, _, __) => Image.asset(
-              'images/placeholder.png',
-              package: 'stream_chat_flutter',
+        if (attachment.file?.bytes != null) {
+          return _buildImageAttachment(
+            context,
+            Image.memory(
+              attachment.file!.bytes!,
+              height: constraints?.maxHeight,
+              width: constraints?.maxWidth,
+              fit: BoxFit.cover,
+              errorBuilder: _imageErrorBuilder,
             ),
-          ),
-        );
+          );
+        } else if (attachment.localUri != null) {
+          return _buildImageAttachment(
+            context,
+            Image.asset(
+              attachment.localUri!.path,
+              height: constraints?.maxHeight,
+              width: constraints?.maxWidth,
+              fit: BoxFit.cover,
+              errorBuilder: _imageErrorBuilder,
+            ),
+          );
+        } else {
+          return AttachmentError(
+            constraints: constraints,
+          );
+        }
       },
       network: () {
         var imageUrl =
@@ -115,6 +126,12 @@ class StreamImageAttachment extends StreamAttachmentWidget {
       },
     );
   }
+
+  Widget _imageErrorBuilder(BuildContext _, Object __, StackTrace? ___) =>
+      Image.asset(
+        'images/placeholder.png',
+        package: 'stream_chat_flutter',
+      );
 
   Widget _buildImageAttachment(BuildContext context, Widget imageWidget) {
     return Container(
