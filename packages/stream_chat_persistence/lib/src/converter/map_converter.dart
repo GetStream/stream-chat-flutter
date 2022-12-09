@@ -6,18 +6,12 @@ import 'package:drift/drift.dart';
 /// by the sqlite backend.
 class MapConverter<T> extends TypeConverter<Map<String, T>, String> {
   @override
-  Map<String, T>? mapToDart(String? fromDb) {
-    if (fromDb == null) {
-      return null;
-    }
+  Map<String, T> fromSql(String fromDb) {
     return Map<String, T>.from(jsonDecode(fromDb) ?? {});
   }
 
   @override
-  String? mapToSql(Map<String, T>? value) {
-    if (value == null) {
-      return null;
-    }
+  String toSql(Map<String, T> value) {
     return jsonEncode(value);
   }
 }

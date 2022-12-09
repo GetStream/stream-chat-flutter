@@ -3,10 +3,9 @@ import 'package:stream_chat/stream_chat.dart';
 
 /// Maps a [MessageSendingStatus] into a [int] understood
 /// by the sqlite backend.
-class MessageSendingStatusConverter
-    extends TypeConverter<MessageSendingStatus, int> {
+class MessageSendingStatusConverter extends TypeConverter<MessageSendingStatus, int> {
   @override
-  MessageSendingStatus? mapToDart(int? fromDb) {
+  MessageSendingStatus fromSql(int fromDb) {
     switch (fromDb) {
       case 0:
         return MessageSendingStatus.sending;
@@ -23,12 +22,12 @@ class MessageSendingStatusConverter
       case 6:
         return MessageSendingStatus.failed_delete;
       default:
-        return null;
+        return MessageSendingStatus.failed;
     }
   }
 
   @override
-  int? mapToSql(MessageSendingStatus? value) {
+  int toSql(MessageSendingStatus value) {
     switch (value) {
       case MessageSendingStatus.sending:
         return 0;
@@ -45,7 +44,7 @@ class MessageSendingStatusConverter
       case MessageSendingStatus.failed_delete:
         return 6;
       default:
-        return null;
+        return -1;
     }
   }
 }
