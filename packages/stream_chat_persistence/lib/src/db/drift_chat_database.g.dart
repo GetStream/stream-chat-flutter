@@ -3,7 +3,7 @@
 part of 'drift_chat_database.dart';
 
 // **************************************************************************
-// MoorGenerator
+// DriftDatabaseGenerator
 // **************************************************************************
 
 // ignore_for_file: type=lint
@@ -46,7 +46,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
 
   /// Map of custom channel extraData
   final Map<String, Object?>? extraData;
-  ChannelEntity(
+  const ChannelEntity(
       {required this.id,
       required this.type,
       required this.cid,
@@ -60,37 +60,6 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       required this.memberCount,
       this.createdById,
       this.extraData});
-  factory ChannelEntity.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return ChannelEntity(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      type: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      cid: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}cid'])!,
-      ownCapabilities: $ChannelsTable.$converter0.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}own_capabilities'])),
-      config: $ChannelsTable.$converter1.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}config']))!,
-      frozen: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}frozen'])!,
-      lastMessageAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}last_message_at']),
-      createdAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      updatedAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      deletedAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}deleted_at']),
-      memberCount: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}member_count'])!,
-      createdById: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_by_id']),
-      extraData: $ChannelsTable.$converter2.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -98,30 +67,30 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
     map['type'] = Variable<String>(type);
     map['cid'] = Variable<String>(cid);
     if (!nullToAbsent || ownCapabilities != null) {
-      final converter = $ChannelsTable.$converter0;
+      final converter = $ChannelsTable.$converter0n;
       map['own_capabilities'] =
-          Variable<String?>(converter.mapToSql(ownCapabilities));
+          Variable<String>(converter.toSql(ownCapabilities));
     }
     {
       final converter = $ChannelsTable.$converter1;
-      map['config'] = Variable<String>(converter.mapToSql(config)!);
+      map['config'] = Variable<String>(converter.toSql(config));
     }
     map['frozen'] = Variable<bool>(frozen);
     if (!nullToAbsent || lastMessageAt != null) {
-      map['last_message_at'] = Variable<DateTime?>(lastMessageAt);
+      map['last_message_at'] = Variable<DateTime>(lastMessageAt);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
-      map['deleted_at'] = Variable<DateTime?>(deletedAt);
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['member_count'] = Variable<int>(memberCount);
     if (!nullToAbsent || createdById != null) {
-      map['created_by_id'] = Variable<String?>(createdById);
+      map['created_by_id'] = Variable<String>(createdById);
     }
     if (!nullToAbsent || extraData != null) {
-      final converter = $ChannelsTable.$converter2;
-      map['extra_data'] = Variable<String?>(converter.mapToSql(extraData));
+      final converter = $ChannelsTable.$converter2n;
+      map['extra_data'] = Variable<String>(converter.toSql(extraData));
     }
     return map;
   }
@@ -303,16 +272,16 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     Expression<String>? id,
     Expression<String>? type,
     Expression<String>? cid,
-    Expression<List<String>?>? ownCapabilities,
-    Expression<Map<String, dynamic>>? config,
+    Expression<String>? ownCapabilities,
+    Expression<String>? config,
     Expression<bool>? frozen,
-    Expression<DateTime?>? lastMessageAt,
+    Expression<DateTime>? lastMessageAt,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
-    Expression<DateTime?>? deletedAt,
+    Expression<DateTime>? deletedAt,
     Expression<int>? memberCount,
-    Expression<String?>? createdById,
-    Expression<Map<String, Object?>?>? extraData,
+    Expression<String>? createdById,
+    Expression<String>? extraData,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -375,19 +344,19 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       map['cid'] = Variable<String>(cid.value);
     }
     if (ownCapabilities.present) {
-      final converter = $ChannelsTable.$converter0;
+      final converter = $ChannelsTable.$converter0n;
       map['own_capabilities'] =
-          Variable<String?>(converter.mapToSql(ownCapabilities.value));
+          Variable<String>(converter.toSql(ownCapabilities.value));
     }
     if (config.present) {
       final converter = $ChannelsTable.$converter1;
-      map['config'] = Variable<String>(converter.mapToSql(config.value)!);
+      map['config'] = Variable<String>(converter.toSql(config.value));
     }
     if (frozen.present) {
       map['frozen'] = Variable<bool>(frozen.value);
     }
     if (lastMessageAt.present) {
-      map['last_message_at'] = Variable<DateTime?>(lastMessageAt.value);
+      map['last_message_at'] = Variable<DateTime>(lastMessageAt.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -396,18 +365,17 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (deletedAt.present) {
-      map['deleted_at'] = Variable<DateTime?>(deletedAt.value);
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
     if (memberCount.present) {
       map['member_count'] = Variable<int>(memberCount.value);
     }
     if (createdById.present) {
-      map['created_by_id'] = Variable<String?>(createdById.value);
+      map['created_by_id'] = Variable<String>(createdById.value);
     }
     if (extraData.present) {
-      final converter = $ChannelsTable.$converter2;
-      map['extra_data'] =
-          Variable<String?>(converter.mapToSql(extraData.value));
+      final converter = $ChannelsTable.$converter2n;
+      map['extra_data'] = Variable<String>(converter.toSql(extraData.value));
     }
     return map;
   }
@@ -441,86 +409,86 @@ class $ChannelsTable extends Channels
   $ChannelsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _cidMeta = const VerificationMeta('cid');
   @override
-  late final GeneratedColumn<String?> cid = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> cid = GeneratedColumn<String>(
       'cid', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _ownCapabilitiesMeta =
       const VerificationMeta('ownCapabilities');
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String?>
-      ownCapabilities = GeneratedColumn<String?>(
+  late final GeneratedColumnWithTypeConverter<List<String>?, String>
+      ownCapabilities = GeneratedColumn<String>(
               'own_capabilities', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<List<String>>($ChannelsTable.$converter0);
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<String>?>($ChannelsTable.$converter0n);
   final VerificationMeta _configMeta = const VerificationMeta('config');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String?>
-      config = GeneratedColumn<String?>('config', aliasedName, false,
-              type: const StringType(), requiredDuringInsert: true)
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
+      config = GeneratedColumn<String>('config', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<Map<String, dynamic>>($ChannelsTable.$converter1);
   final VerificationMeta _frozenMeta = const VerificationMeta('frozen');
   @override
-  late final GeneratedColumn<bool?> frozen = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> frozen = GeneratedColumn<bool>(
       'frozen', aliasedName, false,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (frozen IN (0, 1))',
       defaultValue: const Constant(false));
   final VerificationMeta _lastMessageAtMeta =
       const VerificationMeta('lastMessageAt');
   @override
-  late final GeneratedColumn<DateTime?> lastMessageAt =
-      GeneratedColumn<DateTime?>('last_message_at', aliasedName, true,
-          type: const IntType(), requiredDuringInsert: false);
+  late final GeneratedColumn<DateTime> lastMessageAt =
+      GeneratedColumn<DateTime>('last_message_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<DateTime?> updatedAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
       'updated_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   final VerificationMeta _deletedAtMeta = const VerificationMeta('deletedAt');
   @override
-  late final GeneratedColumn<DateTime?> deletedAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
       'deleted_at', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _memberCountMeta =
       const VerificationMeta('memberCount');
   @override
-  late final GeneratedColumn<int?> memberCount = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> memberCount = GeneratedColumn<int>(
       'member_count', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
   final VerificationMeta _createdByIdMeta =
       const VerificationMeta('createdById');
   @override
-  late final GeneratedColumn<String?> createdById = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> createdById = GeneratedColumn<String>(
       'created_by_id', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
-      extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, Object?>>($ChannelsTable.$converter2);
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>?, String>
+      extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, Object?>?>($ChannelsTable.$converter2n);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -607,8 +575,37 @@ class $ChannelsTable extends Channels
   Set<GeneratedColumn> get $primaryKey => {cid};
   @override
   ChannelEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ChannelEntity.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChannelEntity(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      type: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      cid: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}cid'])!,
+      ownCapabilities: $ChannelsTable.$converter0n.fromSql(
+          attachedDatabase.options.types.read(
+              DriftSqlType.string, data['${effectivePrefix}own_capabilities'])),
+      config: $ChannelsTable.$converter1.fromSql(attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}config'])!),
+      frozen: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}frozen'])!,
+      lastMessageAt: attachedDatabase.options.types.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_message_at']),
+      createdAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      memberCount: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}member_count'])!,
+      createdById: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}created_by_id']),
+      extraData: $ChannelsTable.$converter2n.fromSql(attachedDatabase
+          .options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
+    );
   }
 
   @override
@@ -622,6 +619,10 @@ class $ChannelsTable extends Channels
       MapConverter();
   static TypeConverter<Map<String, Object?>, String> $converter2 =
       MapConverter<Object?>();
+  static TypeConverter<List<String>?, String?> $converter0n =
+      NullAwareTypeConverter.wrap($converter0);
+  static TypeConverter<Map<String, Object?>?, String?> $converter2n =
+      NullAwareTypeConverter.wrap($converter2);
 }
 
 class MessageEntity extends DataClass implements Insertable<MessageEntity> {
@@ -700,7 +701,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
 
   /// Message custom extraData
   final Map<String, Object?>? extraData;
-  MessageEntity(
+  const MessageEntity(
       {required this.id,
       this.messageText,
       required this.attachments,
@@ -726,134 +727,79 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       required this.channelCid,
       this.i18n,
       this.extraData});
-  factory MessageEntity.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return MessageEntity(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      messageText: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}message_text']),
-      attachments: $MessagesTable.$converter0.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}attachments']))!,
-      status: $MessagesTable.$converter1.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
-      type: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      mentionedUsers: $MessagesTable.$converter2.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}mentioned_users']))!,
-      reactionCounts: $MessagesTable.$converter3.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}reaction_counts'])),
-      reactionScores: $MessagesTable.$converter4.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}reaction_scores'])),
-      parentId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}parent_id']),
-      quotedMessageId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}quoted_message_id']),
-      replyCount: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}reply_count']),
-      showInChannel: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}show_in_channel']),
-      shadowed: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}shadowed'])!,
-      command: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}command']),
-      createdAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      updatedAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      deletedAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}deleted_at']),
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
-      pinned: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}pinned'])!,
-      pinnedAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}pinned_at']),
-      pinExpires: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}pin_expires']),
-      pinnedByUserId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}pinned_by_user_id']),
-      channelCid: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid'])!,
-      i18n: $MessagesTable.$converter5.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}i18n'])),
-      extraData: $MessagesTable.$converter6.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     if (!nullToAbsent || messageText != null) {
-      map['message_text'] = Variable<String?>(messageText);
+      map['message_text'] = Variable<String>(messageText);
     }
     {
       final converter = $MessagesTable.$converter0;
-      map['attachments'] = Variable<String>(converter.mapToSql(attachments)!);
+      map['attachments'] = Variable<String>(converter.toSql(attachments));
     }
     {
       final converter = $MessagesTable.$converter1;
-      map['status'] = Variable<int>(converter.mapToSql(status)!);
+      map['status'] = Variable<int>(converter.toSql(status));
     }
     map['type'] = Variable<String>(type);
     {
       final converter = $MessagesTable.$converter2;
       map['mentioned_users'] =
-          Variable<String>(converter.mapToSql(mentionedUsers)!);
+          Variable<String>(converter.toSql(mentionedUsers));
     }
     if (!nullToAbsent || reactionCounts != null) {
-      final converter = $MessagesTable.$converter3;
+      final converter = $MessagesTable.$converter3n;
       map['reaction_counts'] =
-          Variable<String?>(converter.mapToSql(reactionCounts));
+          Variable<String>(converter.toSql(reactionCounts));
     }
     if (!nullToAbsent || reactionScores != null) {
-      final converter = $MessagesTable.$converter4;
+      final converter = $MessagesTable.$converter4n;
       map['reaction_scores'] =
-          Variable<String?>(converter.mapToSql(reactionScores));
+          Variable<String>(converter.toSql(reactionScores));
     }
     if (!nullToAbsent || parentId != null) {
-      map['parent_id'] = Variable<String?>(parentId);
+      map['parent_id'] = Variable<String>(parentId);
     }
     if (!nullToAbsent || quotedMessageId != null) {
-      map['quoted_message_id'] = Variable<String?>(quotedMessageId);
+      map['quoted_message_id'] = Variable<String>(quotedMessageId);
     }
     if (!nullToAbsent || replyCount != null) {
-      map['reply_count'] = Variable<int?>(replyCount);
+      map['reply_count'] = Variable<int>(replyCount);
     }
     if (!nullToAbsent || showInChannel != null) {
-      map['show_in_channel'] = Variable<bool?>(showInChannel);
+      map['show_in_channel'] = Variable<bool>(showInChannel);
     }
     map['shadowed'] = Variable<bool>(shadowed);
     if (!nullToAbsent || command != null) {
-      map['command'] = Variable<String?>(command);
+      map['command'] = Variable<String>(command);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
-      map['deleted_at'] = Variable<DateTime?>(deletedAt);
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     if (!nullToAbsent || userId != null) {
-      map['user_id'] = Variable<String?>(userId);
+      map['user_id'] = Variable<String>(userId);
     }
     map['pinned'] = Variable<bool>(pinned);
     if (!nullToAbsent || pinnedAt != null) {
-      map['pinned_at'] = Variable<DateTime?>(pinnedAt);
+      map['pinned_at'] = Variable<DateTime>(pinnedAt);
     }
     if (!nullToAbsent || pinExpires != null) {
-      map['pin_expires'] = Variable<DateTime?>(pinExpires);
+      map['pin_expires'] = Variable<DateTime>(pinExpires);
     }
     if (!nullToAbsent || pinnedByUserId != null) {
-      map['pinned_by_user_id'] = Variable<String?>(pinnedByUserId);
+      map['pinned_by_user_id'] = Variable<String>(pinnedByUserId);
     }
     map['channel_cid'] = Variable<String>(channelCid);
     if (!nullToAbsent || i18n != null) {
-      final converter = $MessagesTable.$converter5;
-      map['i18n'] = Variable<String?>(converter.mapToSql(i18n));
+      final converter = $MessagesTable.$converter5n;
+      map['i18n'] = Variable<String>(converter.toSql(i18n));
     }
     if (!nullToAbsent || extraData != null) {
-      final converter = $MessagesTable.$converter6;
-      map['extra_data'] = Variable<String?>(converter.mapToSql(extraData));
+      final converter = $MessagesTable.$converter6n;
+      map['extra_data'] = Variable<String>(converter.toSql(extraData));
     }
     return map;
   }
@@ -1158,30 +1104,30 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
         channelCid = Value(channelCid);
   static Insertable<MessageEntity> custom({
     Expression<String>? id,
-    Expression<String?>? messageText,
-    Expression<List<String>>? attachments,
-    Expression<MessageSendingStatus>? status,
+    Expression<String>? messageText,
+    Expression<String>? attachments,
+    Expression<int>? status,
     Expression<String>? type,
-    Expression<List<String>>? mentionedUsers,
-    Expression<Map<String, int>?>? reactionCounts,
-    Expression<Map<String, int>?>? reactionScores,
-    Expression<String?>? parentId,
-    Expression<String?>? quotedMessageId,
-    Expression<int?>? replyCount,
-    Expression<bool?>? showInChannel,
+    Expression<String>? mentionedUsers,
+    Expression<String>? reactionCounts,
+    Expression<String>? reactionScores,
+    Expression<String>? parentId,
+    Expression<String>? quotedMessageId,
+    Expression<int>? replyCount,
+    Expression<bool>? showInChannel,
     Expression<bool>? shadowed,
-    Expression<String?>? command,
+    Expression<String>? command,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
-    Expression<DateTime?>? deletedAt,
-    Expression<String?>? userId,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? userId,
     Expression<bool>? pinned,
-    Expression<DateTime?>? pinnedAt,
-    Expression<DateTime?>? pinExpires,
-    Expression<String?>? pinnedByUserId,
+    Expression<DateTime>? pinnedAt,
+    Expression<DateTime>? pinExpires,
+    Expression<String>? pinnedByUserId,
     Expression<String>? channelCid,
-    Expression<Map<String, String>?>? i18n,
-    Expression<Map<String, Object?>?>? extraData,
+    Expression<String>? i18n,
+    Expression<String>? extraData,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1274,16 +1220,15 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       map['id'] = Variable<String>(id.value);
     }
     if (messageText.present) {
-      map['message_text'] = Variable<String?>(messageText.value);
+      map['message_text'] = Variable<String>(messageText.value);
     }
     if (attachments.present) {
       final converter = $MessagesTable.$converter0;
-      map['attachments'] =
-          Variable<String>(converter.mapToSql(attachments.value)!);
+      map['attachments'] = Variable<String>(converter.toSql(attachments.value));
     }
     if (status.present) {
       final converter = $MessagesTable.$converter1;
-      map['status'] = Variable<int>(converter.mapToSql(status.value)!);
+      map['status'] = Variable<int>(converter.toSql(status.value));
     }
     if (type.present) {
       map['type'] = Variable<String>(type.value);
@@ -1291,35 +1236,35 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     if (mentionedUsers.present) {
       final converter = $MessagesTable.$converter2;
       map['mentioned_users'] =
-          Variable<String>(converter.mapToSql(mentionedUsers.value)!);
+          Variable<String>(converter.toSql(mentionedUsers.value));
     }
     if (reactionCounts.present) {
-      final converter = $MessagesTable.$converter3;
+      final converter = $MessagesTable.$converter3n;
       map['reaction_counts'] =
-          Variable<String?>(converter.mapToSql(reactionCounts.value));
+          Variable<String>(converter.toSql(reactionCounts.value));
     }
     if (reactionScores.present) {
-      final converter = $MessagesTable.$converter4;
+      final converter = $MessagesTable.$converter4n;
       map['reaction_scores'] =
-          Variable<String?>(converter.mapToSql(reactionScores.value));
+          Variable<String>(converter.toSql(reactionScores.value));
     }
     if (parentId.present) {
-      map['parent_id'] = Variable<String?>(parentId.value);
+      map['parent_id'] = Variable<String>(parentId.value);
     }
     if (quotedMessageId.present) {
-      map['quoted_message_id'] = Variable<String?>(quotedMessageId.value);
+      map['quoted_message_id'] = Variable<String>(quotedMessageId.value);
     }
     if (replyCount.present) {
-      map['reply_count'] = Variable<int?>(replyCount.value);
+      map['reply_count'] = Variable<int>(replyCount.value);
     }
     if (showInChannel.present) {
-      map['show_in_channel'] = Variable<bool?>(showInChannel.value);
+      map['show_in_channel'] = Variable<bool>(showInChannel.value);
     }
     if (shadowed.present) {
       map['shadowed'] = Variable<bool>(shadowed.value);
     }
     if (command.present) {
-      map['command'] = Variable<String?>(command.value);
+      map['command'] = Variable<String>(command.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -1328,34 +1273,33 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (deletedAt.present) {
-      map['deleted_at'] = Variable<DateTime?>(deletedAt.value);
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
     if (userId.present) {
-      map['user_id'] = Variable<String?>(userId.value);
+      map['user_id'] = Variable<String>(userId.value);
     }
     if (pinned.present) {
       map['pinned'] = Variable<bool>(pinned.value);
     }
     if (pinnedAt.present) {
-      map['pinned_at'] = Variable<DateTime?>(pinnedAt.value);
+      map['pinned_at'] = Variable<DateTime>(pinnedAt.value);
     }
     if (pinExpires.present) {
-      map['pin_expires'] = Variable<DateTime?>(pinExpires.value);
+      map['pin_expires'] = Variable<DateTime>(pinExpires.value);
     }
     if (pinnedByUserId.present) {
-      map['pinned_by_user_id'] = Variable<String?>(pinnedByUserId.value);
+      map['pinned_by_user_id'] = Variable<String>(pinnedByUserId.value);
     }
     if (channelCid.present) {
       map['channel_cid'] = Variable<String>(channelCid.value);
     }
     if (i18n.present) {
-      final converter = $MessagesTable.$converter5;
-      map['i18n'] = Variable<String?>(converter.mapToSql(i18n.value));
+      final converter = $MessagesTable.$converter5n;
+      map['i18n'] = Variable<String>(converter.toSql(i18n.value));
     }
     if (extraData.present) {
-      final converter = $MessagesTable.$converter6;
-      map['extra_data'] =
-          Variable<String?>(converter.mapToSql(extraData.value));
+      final converter = $MessagesTable.$converter6n;
+      map['extra_data'] = Variable<String>(converter.toSql(extraData.value));
     }
     return map;
   }
@@ -1401,165 +1345,165 @@ class $MessagesTable extends Messages
   $MessagesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _messageTextMeta =
       const VerificationMeta('messageText');
   @override
-  late final GeneratedColumn<String?> messageText = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> messageText = GeneratedColumn<String>(
       'message_text', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _attachmentsMeta =
       const VerificationMeta('attachments');
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String?>
-      attachments = GeneratedColumn<String?>('attachments', aliasedName, false,
-              type: const StringType(), requiredDuringInsert: true)
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      attachments = GeneratedColumn<String>('attachments', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>($MessagesTable.$converter0);
   final VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
-  late final GeneratedColumnWithTypeConverter<MessageSendingStatus, int?>
-      status = GeneratedColumn<int?>('status', aliasedName, false,
-              type: const IntType(),
+  late final GeneratedColumnWithTypeConverter<MessageSendingStatus, int>
+      status = GeneratedColumn<int>('status', aliasedName, false,
+              type: DriftSqlType.int,
               requiredDuringInsert: false,
               defaultValue: const Constant(1))
           .withConverter<MessageSendingStatus>($MessagesTable.$converter1);
   final VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
-      type: const StringType(),
+      type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('regular'));
   final VerificationMeta _mentionedUsersMeta =
       const VerificationMeta('mentionedUsers');
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String?>
-      mentionedUsers = GeneratedColumn<String?>(
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      mentionedUsers = GeneratedColumn<String>(
               'mentioned_users', aliasedName, false,
-              type: const StringType(), requiredDuringInsert: true)
+              type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>($MessagesTable.$converter2);
   final VerificationMeta _reactionCountsMeta =
       const VerificationMeta('reactionCounts');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>, String?>
-      reactionCounts = GeneratedColumn<String?>(
+  late final GeneratedColumnWithTypeConverter<Map<String, int>?, String>
+      reactionCounts = GeneratedColumn<String>(
               'reaction_counts', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, int>>($MessagesTable.$converter3);
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, int>?>($MessagesTable.$converter3n);
   final VerificationMeta _reactionScoresMeta =
       const VerificationMeta('reactionScores');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>, String?>
-      reactionScores = GeneratedColumn<String?>(
+  late final GeneratedColumnWithTypeConverter<Map<String, int>?, String>
+      reactionScores = GeneratedColumn<String>(
               'reaction_scores', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, int>>($MessagesTable.$converter4);
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, int>?>($MessagesTable.$converter4n);
   final VerificationMeta _parentIdMeta = const VerificationMeta('parentId');
   @override
-  late final GeneratedColumn<String?> parentId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> parentId = GeneratedColumn<String>(
       'parent_id', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _quotedMessageIdMeta =
       const VerificationMeta('quotedMessageId');
   @override
-  late final GeneratedColumn<String?> quotedMessageId =
-      GeneratedColumn<String?>('quoted_message_id', aliasedName, true,
-          type: const StringType(), requiredDuringInsert: false);
+  late final GeneratedColumn<String> quotedMessageId = GeneratedColumn<String>(
+      'quoted_message_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _replyCountMeta = const VerificationMeta('replyCount');
   @override
-  late final GeneratedColumn<int?> replyCount = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> replyCount = GeneratedColumn<int>(
       'reply_count', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.int, requiredDuringInsert: false);
   final VerificationMeta _showInChannelMeta =
       const VerificationMeta('showInChannel');
   @override
-  late final GeneratedColumn<bool?> showInChannel = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> showInChannel = GeneratedColumn<bool>(
       'show_in_channel', aliasedName, true,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (show_in_channel IN (0, 1))');
   final VerificationMeta _shadowedMeta = const VerificationMeta('shadowed');
   @override
-  late final GeneratedColumn<bool?> shadowed = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> shadowed = GeneratedColumn<bool>(
       'shadowed', aliasedName, false,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (shadowed IN (0, 1))',
       defaultValue: const Constant(false));
   final VerificationMeta _commandMeta = const VerificationMeta('command');
   @override
-  late final GeneratedColumn<String?> command = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> command = GeneratedColumn<String>(
       'command', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<DateTime?> updatedAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
       'updated_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   final VerificationMeta _deletedAtMeta = const VerificationMeta('deletedAt');
   @override
-  late final GeneratedColumn<DateTime?> deletedAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
       'deleted_at', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
   @override
-  late final GeneratedColumn<bool?> pinned = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> pinned = GeneratedColumn<bool>(
       'pinned', aliasedName, false,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (pinned IN (0, 1))',
       defaultValue: const Constant(false));
   final VerificationMeta _pinnedAtMeta = const VerificationMeta('pinnedAt');
   @override
-  late final GeneratedColumn<DateTime?> pinnedAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> pinnedAt = GeneratedColumn<DateTime>(
       'pinned_at', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _pinExpiresMeta = const VerificationMeta('pinExpires');
   @override
-  late final GeneratedColumn<DateTime?> pinExpires = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> pinExpires = GeneratedColumn<DateTime>(
       'pin_expires', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _pinnedByUserIdMeta =
       const VerificationMeta('pinnedByUserId');
   @override
-  late final GeneratedColumn<String?> pinnedByUserId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> pinnedByUserId = GeneratedColumn<String>(
       'pinned_by_user_id', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
   @override
-  late final GeneratedColumn<String?> channelCid = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> channelCid = GeneratedColumn<String>(
       'channel_cid', aliasedName, false,
-      type: const StringType(),
+      type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
   final VerificationMeta _i18nMeta = const VerificationMeta('i18n');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, String>, String?>
-      i18n = GeneratedColumn<String?>('i18n', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, String>>($MessagesTable.$converter5);
+  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
+      i18n = GeneratedColumn<String>('i18n', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, String>?>($MessagesTable.$converter5n);
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
-      extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, Object?>>($MessagesTable.$converter6);
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>?, String>
+      extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, Object?>?>($MessagesTable.$converter6n);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1700,8 +1644,64 @@ class $MessagesTable extends Messages
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   MessageEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return MessageEntity.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MessageEntity(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      messageText: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}message_text']),
+      attachments: $MessagesTable.$converter0.fromSql(attachedDatabase
+          .options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}attachments'])!),
+      status: $MessagesTable.$converter1.fromSql(attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}status'])!),
+      type: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      mentionedUsers: $MessagesTable.$converter2.fromSql(
+          attachedDatabase.options.types.read(
+              DriftSqlType.string, data['${effectivePrefix}mentioned_users'])!),
+      reactionCounts: $MessagesTable.$converter3n.fromSql(
+          attachedDatabase.options.types.read(
+              DriftSqlType.string, data['${effectivePrefix}reaction_counts'])),
+      reactionScores: $MessagesTable.$converter4n.fromSql(
+          attachedDatabase.options.types.read(
+              DriftSqlType.string, data['${effectivePrefix}reaction_scores'])),
+      parentId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}parent_id']),
+      quotedMessageId: attachedDatabase.options.types.read(
+          DriftSqlType.string, data['${effectivePrefix}quoted_message_id']),
+      replyCount: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}reply_count']),
+      showInChannel: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}show_in_channel']),
+      shadowed: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}shadowed'])!,
+      command: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}command']),
+      createdAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      userId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
+      pinned: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}pinned'])!,
+      pinnedAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}pinned_at']),
+      pinExpires: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}pin_expires']),
+      pinnedByUserId: attachedDatabase.options.types.read(
+          DriftSqlType.string, data['${effectivePrefix}pinned_by_user_id']),
+      channelCid: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}channel_cid'])!,
+      i18n: $MessagesTable.$converter5n.fromSql(attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}i18n'])),
+      extraData: $MessagesTable.$converter6n.fromSql(attachedDatabase
+          .options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
+    );
   }
 
   @override
@@ -1723,6 +1723,14 @@ class $MessagesTable extends Messages
       MapConverter<String>();
   static TypeConverter<Map<String, Object?>, String> $converter6 =
       MapConverter<Object?>();
+  static TypeConverter<Map<String, int>?, String?> $converter3n =
+      NullAwareTypeConverter.wrap($converter3);
+  static TypeConverter<Map<String, int>?, String?> $converter4n =
+      NullAwareTypeConverter.wrap($converter4);
+  static TypeConverter<Map<String, String>?, String?> $converter5n =
+      NullAwareTypeConverter.wrap($converter5);
+  static TypeConverter<Map<String, Object?>?, String?> $converter6n =
+      NullAwareTypeConverter.wrap($converter6);
 }
 
 class PinnedMessageEntity extends DataClass
@@ -1802,7 +1810,7 @@ class PinnedMessageEntity extends DataClass
 
   /// Message custom extraData
   final Map<String, Object?>? extraData;
-  PinnedMessageEntity(
+  const PinnedMessageEntity(
       {required this.id,
       this.messageText,
       required this.attachments,
@@ -1828,138 +1836,79 @@ class PinnedMessageEntity extends DataClass
       required this.channelCid,
       this.i18n,
       this.extraData});
-  factory PinnedMessageEntity.fromData(Map<String, dynamic> data,
-      {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return PinnedMessageEntity(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      messageText: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}message_text']),
-      attachments: $PinnedMessagesTable.$converter0.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}attachments']))!,
-      status: $PinnedMessagesTable.$converter1.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
-      type: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      mentionedUsers: $PinnedMessagesTable.$converter2.mapToDart(
-          const StringType().mapFromDatabaseResponse(
-              data['${effectivePrefix}mentioned_users']))!,
-      reactionCounts: $PinnedMessagesTable.$converter3.mapToDart(
-          const StringType().mapFromDatabaseResponse(
-              data['${effectivePrefix}reaction_counts'])),
-      reactionScores: $PinnedMessagesTable.$converter4.mapToDart(
-          const StringType().mapFromDatabaseResponse(
-              data['${effectivePrefix}reaction_scores'])),
-      parentId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}parent_id']),
-      quotedMessageId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}quoted_message_id']),
-      replyCount: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}reply_count']),
-      showInChannel: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}show_in_channel']),
-      shadowed: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}shadowed'])!,
-      command: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}command']),
-      createdAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      updatedAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      deletedAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}deleted_at']),
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
-      pinned: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}pinned'])!,
-      pinnedAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}pinned_at']),
-      pinExpires: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}pin_expires']),
-      pinnedByUserId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}pinned_by_user_id']),
-      channelCid: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid'])!,
-      i18n: $PinnedMessagesTable.$converter5.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}i18n'])),
-      extraData: $PinnedMessagesTable.$converter6.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     if (!nullToAbsent || messageText != null) {
-      map['message_text'] = Variable<String?>(messageText);
+      map['message_text'] = Variable<String>(messageText);
     }
     {
       final converter = $PinnedMessagesTable.$converter0;
-      map['attachments'] = Variable<String>(converter.mapToSql(attachments)!);
+      map['attachments'] = Variable<String>(converter.toSql(attachments));
     }
     {
       final converter = $PinnedMessagesTable.$converter1;
-      map['status'] = Variable<int>(converter.mapToSql(status)!);
+      map['status'] = Variable<int>(converter.toSql(status));
     }
     map['type'] = Variable<String>(type);
     {
       final converter = $PinnedMessagesTable.$converter2;
       map['mentioned_users'] =
-          Variable<String>(converter.mapToSql(mentionedUsers)!);
+          Variable<String>(converter.toSql(mentionedUsers));
     }
     if (!nullToAbsent || reactionCounts != null) {
-      final converter = $PinnedMessagesTable.$converter3;
+      final converter = $PinnedMessagesTable.$converter3n;
       map['reaction_counts'] =
-          Variable<String?>(converter.mapToSql(reactionCounts));
+          Variable<String>(converter.toSql(reactionCounts));
     }
     if (!nullToAbsent || reactionScores != null) {
-      final converter = $PinnedMessagesTable.$converter4;
+      final converter = $PinnedMessagesTable.$converter4n;
       map['reaction_scores'] =
-          Variable<String?>(converter.mapToSql(reactionScores));
+          Variable<String>(converter.toSql(reactionScores));
     }
     if (!nullToAbsent || parentId != null) {
-      map['parent_id'] = Variable<String?>(parentId);
+      map['parent_id'] = Variable<String>(parentId);
     }
     if (!nullToAbsent || quotedMessageId != null) {
-      map['quoted_message_id'] = Variable<String?>(quotedMessageId);
+      map['quoted_message_id'] = Variable<String>(quotedMessageId);
     }
     if (!nullToAbsent || replyCount != null) {
-      map['reply_count'] = Variable<int?>(replyCount);
+      map['reply_count'] = Variable<int>(replyCount);
     }
     if (!nullToAbsent || showInChannel != null) {
-      map['show_in_channel'] = Variable<bool?>(showInChannel);
+      map['show_in_channel'] = Variable<bool>(showInChannel);
     }
     map['shadowed'] = Variable<bool>(shadowed);
     if (!nullToAbsent || command != null) {
-      map['command'] = Variable<String?>(command);
+      map['command'] = Variable<String>(command);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
-      map['deleted_at'] = Variable<DateTime?>(deletedAt);
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     if (!nullToAbsent || userId != null) {
-      map['user_id'] = Variable<String?>(userId);
+      map['user_id'] = Variable<String>(userId);
     }
     map['pinned'] = Variable<bool>(pinned);
     if (!nullToAbsent || pinnedAt != null) {
-      map['pinned_at'] = Variable<DateTime?>(pinnedAt);
+      map['pinned_at'] = Variable<DateTime>(pinnedAt);
     }
     if (!nullToAbsent || pinExpires != null) {
-      map['pin_expires'] = Variable<DateTime?>(pinExpires);
+      map['pin_expires'] = Variable<DateTime>(pinExpires);
     }
     if (!nullToAbsent || pinnedByUserId != null) {
-      map['pinned_by_user_id'] = Variable<String?>(pinnedByUserId);
+      map['pinned_by_user_id'] = Variable<String>(pinnedByUserId);
     }
     map['channel_cid'] = Variable<String>(channelCid);
     if (!nullToAbsent || i18n != null) {
-      final converter = $PinnedMessagesTable.$converter5;
-      map['i18n'] = Variable<String?>(converter.mapToSql(i18n));
+      final converter = $PinnedMessagesTable.$converter5n;
+      map['i18n'] = Variable<String>(converter.toSql(i18n));
     }
     if (!nullToAbsent || extraData != null) {
-      final converter = $PinnedMessagesTable.$converter6;
-      map['extra_data'] = Variable<String?>(converter.mapToSql(extraData));
+      final converter = $PinnedMessagesTable.$converter6n;
+      map['extra_data'] = Variable<String>(converter.toSql(extraData));
     }
     return map;
   }
@@ -2264,30 +2213,30 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
         channelCid = Value(channelCid);
   static Insertable<PinnedMessageEntity> custom({
     Expression<String>? id,
-    Expression<String?>? messageText,
-    Expression<List<String>>? attachments,
-    Expression<MessageSendingStatus>? status,
+    Expression<String>? messageText,
+    Expression<String>? attachments,
+    Expression<int>? status,
     Expression<String>? type,
-    Expression<List<String>>? mentionedUsers,
-    Expression<Map<String, int>?>? reactionCounts,
-    Expression<Map<String, int>?>? reactionScores,
-    Expression<String?>? parentId,
-    Expression<String?>? quotedMessageId,
-    Expression<int?>? replyCount,
-    Expression<bool?>? showInChannel,
+    Expression<String>? mentionedUsers,
+    Expression<String>? reactionCounts,
+    Expression<String>? reactionScores,
+    Expression<String>? parentId,
+    Expression<String>? quotedMessageId,
+    Expression<int>? replyCount,
+    Expression<bool>? showInChannel,
     Expression<bool>? shadowed,
-    Expression<String?>? command,
+    Expression<String>? command,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
-    Expression<DateTime?>? deletedAt,
-    Expression<String?>? userId,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? userId,
     Expression<bool>? pinned,
-    Expression<DateTime?>? pinnedAt,
-    Expression<DateTime?>? pinExpires,
-    Expression<String?>? pinnedByUserId,
+    Expression<DateTime>? pinnedAt,
+    Expression<DateTime>? pinExpires,
+    Expression<String>? pinnedByUserId,
     Expression<String>? channelCid,
-    Expression<Map<String, String>?>? i18n,
-    Expression<Map<String, Object?>?>? extraData,
+    Expression<String>? i18n,
+    Expression<String>? extraData,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2380,16 +2329,15 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       map['id'] = Variable<String>(id.value);
     }
     if (messageText.present) {
-      map['message_text'] = Variable<String?>(messageText.value);
+      map['message_text'] = Variable<String>(messageText.value);
     }
     if (attachments.present) {
       final converter = $PinnedMessagesTable.$converter0;
-      map['attachments'] =
-          Variable<String>(converter.mapToSql(attachments.value)!);
+      map['attachments'] = Variable<String>(converter.toSql(attachments.value));
     }
     if (status.present) {
       final converter = $PinnedMessagesTable.$converter1;
-      map['status'] = Variable<int>(converter.mapToSql(status.value)!);
+      map['status'] = Variable<int>(converter.toSql(status.value));
     }
     if (type.present) {
       map['type'] = Variable<String>(type.value);
@@ -2397,35 +2345,35 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     if (mentionedUsers.present) {
       final converter = $PinnedMessagesTable.$converter2;
       map['mentioned_users'] =
-          Variable<String>(converter.mapToSql(mentionedUsers.value)!);
+          Variable<String>(converter.toSql(mentionedUsers.value));
     }
     if (reactionCounts.present) {
-      final converter = $PinnedMessagesTable.$converter3;
+      final converter = $PinnedMessagesTable.$converter3n;
       map['reaction_counts'] =
-          Variable<String?>(converter.mapToSql(reactionCounts.value));
+          Variable<String>(converter.toSql(reactionCounts.value));
     }
     if (reactionScores.present) {
-      final converter = $PinnedMessagesTable.$converter4;
+      final converter = $PinnedMessagesTable.$converter4n;
       map['reaction_scores'] =
-          Variable<String?>(converter.mapToSql(reactionScores.value));
+          Variable<String>(converter.toSql(reactionScores.value));
     }
     if (parentId.present) {
-      map['parent_id'] = Variable<String?>(parentId.value);
+      map['parent_id'] = Variable<String>(parentId.value);
     }
     if (quotedMessageId.present) {
-      map['quoted_message_id'] = Variable<String?>(quotedMessageId.value);
+      map['quoted_message_id'] = Variable<String>(quotedMessageId.value);
     }
     if (replyCount.present) {
-      map['reply_count'] = Variable<int?>(replyCount.value);
+      map['reply_count'] = Variable<int>(replyCount.value);
     }
     if (showInChannel.present) {
-      map['show_in_channel'] = Variable<bool?>(showInChannel.value);
+      map['show_in_channel'] = Variable<bool>(showInChannel.value);
     }
     if (shadowed.present) {
       map['shadowed'] = Variable<bool>(shadowed.value);
     }
     if (command.present) {
-      map['command'] = Variable<String?>(command.value);
+      map['command'] = Variable<String>(command.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -2434,34 +2382,33 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (deletedAt.present) {
-      map['deleted_at'] = Variable<DateTime?>(deletedAt.value);
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
     if (userId.present) {
-      map['user_id'] = Variable<String?>(userId.value);
+      map['user_id'] = Variable<String>(userId.value);
     }
     if (pinned.present) {
       map['pinned'] = Variable<bool>(pinned.value);
     }
     if (pinnedAt.present) {
-      map['pinned_at'] = Variable<DateTime?>(pinnedAt.value);
+      map['pinned_at'] = Variable<DateTime>(pinnedAt.value);
     }
     if (pinExpires.present) {
-      map['pin_expires'] = Variable<DateTime?>(pinExpires.value);
+      map['pin_expires'] = Variable<DateTime>(pinExpires.value);
     }
     if (pinnedByUserId.present) {
-      map['pinned_by_user_id'] = Variable<String?>(pinnedByUserId.value);
+      map['pinned_by_user_id'] = Variable<String>(pinnedByUserId.value);
     }
     if (channelCid.present) {
       map['channel_cid'] = Variable<String>(channelCid.value);
     }
     if (i18n.present) {
-      final converter = $PinnedMessagesTable.$converter5;
-      map['i18n'] = Variable<String?>(converter.mapToSql(i18n.value));
+      final converter = $PinnedMessagesTable.$converter5n;
+      map['i18n'] = Variable<String>(converter.toSql(i18n.value));
     }
     if (extraData.present) {
-      final converter = $PinnedMessagesTable.$converter6;
-      map['extra_data'] =
-          Variable<String?>(converter.mapToSql(extraData.value));
+      final converter = $PinnedMessagesTable.$converter6n;
+      map['extra_data'] = Variable<String>(converter.toSql(extraData.value));
     }
     return map;
   }
@@ -2507,167 +2454,168 @@ class $PinnedMessagesTable extends PinnedMessages
   $PinnedMessagesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _messageTextMeta =
       const VerificationMeta('messageText');
   @override
-  late final GeneratedColumn<String?> messageText = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> messageText = GeneratedColumn<String>(
       'message_text', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _attachmentsMeta =
       const VerificationMeta('attachments');
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String?>
-      attachments = GeneratedColumn<String?>('attachments', aliasedName, false,
-              type: const StringType(), requiredDuringInsert: true)
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      attachments = GeneratedColumn<String>('attachments', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>($PinnedMessagesTable.$converter0);
   final VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
-  late final GeneratedColumnWithTypeConverter<MessageSendingStatus, int?>
-      status = GeneratedColumn<int?>('status', aliasedName, false,
-              type: const IntType(),
+  late final GeneratedColumnWithTypeConverter<MessageSendingStatus, int>
+      status = GeneratedColumn<int>('status', aliasedName, false,
+              type: DriftSqlType.int,
               requiredDuringInsert: false,
               defaultValue: const Constant(1))
           .withConverter<MessageSendingStatus>(
               $PinnedMessagesTable.$converter1);
   final VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
-      type: const StringType(),
+      type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('regular'));
   final VerificationMeta _mentionedUsersMeta =
       const VerificationMeta('mentionedUsers');
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String?>
-      mentionedUsers = GeneratedColumn<String?>(
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      mentionedUsers = GeneratedColumn<String>(
               'mentioned_users', aliasedName, false,
-              type: const StringType(), requiredDuringInsert: true)
+              type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>($PinnedMessagesTable.$converter2);
   final VerificationMeta _reactionCountsMeta =
       const VerificationMeta('reactionCounts');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>, String?>
-      reactionCounts = GeneratedColumn<String?>(
+  late final GeneratedColumnWithTypeConverter<Map<String, int>?, String>
+      reactionCounts = GeneratedColumn<String>(
               'reaction_counts', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, int>>($PinnedMessagesTable.$converter3);
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, int>?>($PinnedMessagesTable.$converter3n);
   final VerificationMeta _reactionScoresMeta =
       const VerificationMeta('reactionScores');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>, String?>
-      reactionScores = GeneratedColumn<String?>(
+  late final GeneratedColumnWithTypeConverter<Map<String, int>?, String>
+      reactionScores = GeneratedColumn<String>(
               'reaction_scores', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, int>>($PinnedMessagesTable.$converter4);
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, int>?>($PinnedMessagesTable.$converter4n);
   final VerificationMeta _parentIdMeta = const VerificationMeta('parentId');
   @override
-  late final GeneratedColumn<String?> parentId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> parentId = GeneratedColumn<String>(
       'parent_id', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _quotedMessageIdMeta =
       const VerificationMeta('quotedMessageId');
   @override
-  late final GeneratedColumn<String?> quotedMessageId =
-      GeneratedColumn<String?>('quoted_message_id', aliasedName, true,
-          type: const StringType(), requiredDuringInsert: false);
+  late final GeneratedColumn<String> quotedMessageId = GeneratedColumn<String>(
+      'quoted_message_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _replyCountMeta = const VerificationMeta('replyCount');
   @override
-  late final GeneratedColumn<int?> replyCount = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> replyCount = GeneratedColumn<int>(
       'reply_count', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.int, requiredDuringInsert: false);
   final VerificationMeta _showInChannelMeta =
       const VerificationMeta('showInChannel');
   @override
-  late final GeneratedColumn<bool?> showInChannel = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> showInChannel = GeneratedColumn<bool>(
       'show_in_channel', aliasedName, true,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (show_in_channel IN (0, 1))');
   final VerificationMeta _shadowedMeta = const VerificationMeta('shadowed');
   @override
-  late final GeneratedColumn<bool?> shadowed = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> shadowed = GeneratedColumn<bool>(
       'shadowed', aliasedName, false,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (shadowed IN (0, 1))',
       defaultValue: const Constant(false));
   final VerificationMeta _commandMeta = const VerificationMeta('command');
   @override
-  late final GeneratedColumn<String?> command = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> command = GeneratedColumn<String>(
       'command', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<DateTime?> updatedAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
       'updated_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   final VerificationMeta _deletedAtMeta = const VerificationMeta('deletedAt');
   @override
-  late final GeneratedColumn<DateTime?> deletedAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
       'deleted_at', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
   @override
-  late final GeneratedColumn<bool?> pinned = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> pinned = GeneratedColumn<bool>(
       'pinned', aliasedName, false,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (pinned IN (0, 1))',
       defaultValue: const Constant(false));
   final VerificationMeta _pinnedAtMeta = const VerificationMeta('pinnedAt');
   @override
-  late final GeneratedColumn<DateTime?> pinnedAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> pinnedAt = GeneratedColumn<DateTime>(
       'pinned_at', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _pinExpiresMeta = const VerificationMeta('pinExpires');
   @override
-  late final GeneratedColumn<DateTime?> pinExpires = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> pinExpires = GeneratedColumn<DateTime>(
       'pin_expires', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _pinnedByUserIdMeta =
       const VerificationMeta('pinnedByUserId');
   @override
-  late final GeneratedColumn<String?> pinnedByUserId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> pinnedByUserId = GeneratedColumn<String>(
       'pinned_by_user_id', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
   @override
-  late final GeneratedColumn<String?> channelCid = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> channelCid = GeneratedColumn<String>(
       'channel_cid', aliasedName, false,
-      type: const StringType(),
+      type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
   final VerificationMeta _i18nMeta = const VerificationMeta('i18n');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, String>, String?>
-      i18n = GeneratedColumn<String?>('i18n', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, String>>($PinnedMessagesTable.$converter5);
+  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
+      i18n = GeneratedColumn<String>('i18n', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, String>?>(
+              $PinnedMessagesTable.$converter5n);
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
-      extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, Object?>>(
-              $PinnedMessagesTable.$converter6);
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>?, String>
+      extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, Object?>?>(
+              $PinnedMessagesTable.$converter6n);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -2809,8 +2757,66 @@ class $PinnedMessagesTable extends PinnedMessages
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   PinnedMessageEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return PinnedMessageEntity.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PinnedMessageEntity(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      messageText: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}message_text']),
+      attachments: $PinnedMessagesTable.$converter0.fromSql(attachedDatabase
+          .options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}attachments'])!),
+      status: $PinnedMessagesTable.$converter1.fromSql(attachedDatabase
+          .options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}status'])!),
+      type: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      mentionedUsers: $PinnedMessagesTable.$converter2.fromSql(
+          attachedDatabase.options.types.read(
+              DriftSqlType.string, data['${effectivePrefix}mentioned_users'])!),
+      reactionCounts: $PinnedMessagesTable.$converter3n.fromSql(
+          attachedDatabase.options.types.read(
+              DriftSqlType.string, data['${effectivePrefix}reaction_counts'])),
+      reactionScores: $PinnedMessagesTable.$converter4n.fromSql(
+          attachedDatabase.options.types.read(
+              DriftSqlType.string, data['${effectivePrefix}reaction_scores'])),
+      parentId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}parent_id']),
+      quotedMessageId: attachedDatabase.options.types.read(
+          DriftSqlType.string, data['${effectivePrefix}quoted_message_id']),
+      replyCount: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}reply_count']),
+      showInChannel: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}show_in_channel']),
+      shadowed: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}shadowed'])!,
+      command: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}command']),
+      createdAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      userId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
+      pinned: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}pinned'])!,
+      pinnedAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}pinned_at']),
+      pinExpires: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}pin_expires']),
+      pinnedByUserId: attachedDatabase.options.types.read(
+          DriftSqlType.string, data['${effectivePrefix}pinned_by_user_id']),
+      channelCid: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}channel_cid'])!,
+      i18n: $PinnedMessagesTable.$converter5n.fromSql(attachedDatabase
+          .options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}i18n'])),
+      extraData: $PinnedMessagesTable.$converter6n.fromSql(attachedDatabase
+          .options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
+    );
   }
 
   @override
@@ -2832,6 +2838,14 @@ class $PinnedMessagesTable extends PinnedMessages
       MapConverter<String>();
   static TypeConverter<Map<String, Object?>, String> $converter6 =
       MapConverter<Object?>();
+  static TypeConverter<Map<String, int>?, String?> $converter3n =
+      NullAwareTypeConverter.wrap($converter3);
+  static TypeConverter<Map<String, int>?, String?> $converter4n =
+      NullAwareTypeConverter.wrap($converter4);
+  static TypeConverter<Map<String, String>?, String?> $converter5n =
+      NullAwareTypeConverter.wrap($converter5);
+  static TypeConverter<Map<String, Object?>?, String?> $converter6n =
+      NullAwareTypeConverter.wrap($converter6);
 }
 
 class PinnedMessageReactionEntity extends DataClass
@@ -2853,32 +2867,13 @@ class PinnedMessageReactionEntity extends DataClass
 
   /// Reaction custom extraData
   final Map<String, Object?>? extraData;
-  PinnedMessageReactionEntity(
+  const PinnedMessageReactionEntity(
       {required this.userId,
       required this.messageId,
       required this.type,
       required this.createdAt,
       required this.score,
       this.extraData});
-  factory PinnedMessageReactionEntity.fromData(Map<String, dynamic> data,
-      {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return PinnedMessageReactionEntity(
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      messageId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
-      type: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      createdAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      score: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}score'])!,
-      extraData: $PinnedMessageReactionsTable.$converter0.mapToDart(
-          const StringType()
-              .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2888,8 +2883,8 @@ class PinnedMessageReactionEntity extends DataClass
     map['created_at'] = Variable<DateTime>(createdAt);
     map['score'] = Variable<int>(score);
     if (!nullToAbsent || extraData != null) {
-      final converter = $PinnedMessageReactionsTable.$converter0;
-      map['extra_data'] = Variable<String?>(converter.mapToSql(extraData));
+      final converter = $PinnedMessageReactionsTable.$converter0n;
+      map['extra_data'] = Variable<String>(converter.toSql(extraData));
     }
     return map;
   }
@@ -2994,7 +2989,7 @@ class PinnedMessageReactionsCompanion
     Expression<String>? type,
     Expression<DateTime>? createdAt,
     Expression<int>? score,
-    Expression<Map<String, Object?>?>? extraData,
+    Expression<String>? extraData,
   }) {
     return RawValuesInsertable({
       if (userId != null) 'user_id': userId,
@@ -3042,9 +3037,8 @@ class PinnedMessageReactionsCompanion
       map['score'] = Variable<int>(score.value);
     }
     if (extraData.present) {
-      final converter = $PinnedMessageReactionsTable.$converter0;
-      map['extra_data'] =
-          Variable<String?>(converter.mapToSql(extraData.value));
+      final converter = $PinnedMessageReactionsTable.$converter0n;
+      map['extra_data'] = Variable<String>(converter.toSql(extraData.value));
     }
     return map;
   }
@@ -3071,42 +3065,42 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
   $PinnedMessageReactionsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   @override
-  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
       'message_id', aliasedName, false,
-      type: const StringType(),
+      type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'REFERENCES pinned_messages(id) ON DELETE CASCADE');
   final VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   final VerificationMeta _scoreMeta = const VerificationMeta('score');
   @override
-  late final GeneratedColumn<int?> score = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> score = GeneratedColumn<int>(
       'score', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
-      extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, Object?>>(
-              $PinnedMessageReactionsTable.$converter0);
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>?, String>
+      extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, Object?>?>(
+              $PinnedMessageReactionsTable.$converter0n);
   @override
   List<GeneratedColumn> get $columns =>
       [userId, messageId, type, createdAt, score, extraData];
@@ -3155,8 +3149,22 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
   @override
   PinnedMessageReactionEntity map(Map<String, dynamic> data,
       {String? tablePrefix}) {
-    return PinnedMessageReactionEntity.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PinnedMessageReactionEntity(
+      userId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      messageId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
+      type: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      createdAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      score: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}score'])!,
+      extraData: $PinnedMessageReactionsTable.$converter0n.fromSql(
+          attachedDatabase.options.types
+              .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
+    );
   }
 
   @override
@@ -3166,6 +3174,8 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
 
   static TypeConverter<Map<String, Object?>, String> $converter0 =
       MapConverter<Object?>();
+  static TypeConverter<Map<String, Object?>?, String?> $converter0n =
+      NullAwareTypeConverter.wrap($converter0);
 }
 
 class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
@@ -3186,30 +3196,13 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
 
   /// Reaction custom extraData
   final Map<String, Object?>? extraData;
-  ReactionEntity(
+  const ReactionEntity(
       {required this.userId,
       required this.messageId,
       required this.type,
       required this.createdAt,
       required this.score,
       this.extraData});
-  factory ReactionEntity.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return ReactionEntity(
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      messageId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
-      type: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      createdAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      score: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}score'])!,
-      extraData: $ReactionsTable.$converter0.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -3219,8 +3212,8 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
     map['created_at'] = Variable<DateTime>(createdAt);
     map['score'] = Variable<int>(score);
     if (!nullToAbsent || extraData != null) {
-      final converter = $ReactionsTable.$converter0;
-      map['extra_data'] = Variable<String?>(converter.mapToSql(extraData));
+      final converter = $ReactionsTable.$converter0n;
+      map['extra_data'] = Variable<String>(converter.toSql(extraData));
     }
     return map;
   }
@@ -3324,7 +3317,7 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
     Expression<String>? type,
     Expression<DateTime>? createdAt,
     Expression<int>? score,
-    Expression<Map<String, Object?>?>? extraData,
+    Expression<String>? extraData,
   }) {
     return RawValuesInsertable({
       if (userId != null) 'user_id': userId,
@@ -3372,9 +3365,8 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
       map['score'] = Variable<int>(score.value);
     }
     if (extraData.present) {
-      final converter = $ReactionsTable.$converter0;
-      map['extra_data'] =
-          Variable<String?>(converter.mapToSql(extraData.value));
+      final converter = $ReactionsTable.$converter0n;
+      map['extra_data'] = Variable<String>(converter.toSql(extraData.value));
     }
     return map;
   }
@@ -3401,41 +3393,41 @@ class $ReactionsTable extends Reactions
   $ReactionsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   @override
-  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
       'message_id', aliasedName, false,
-      type: const StringType(),
+      type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'REFERENCES messages(id) ON DELETE CASCADE');
   final VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   final VerificationMeta _scoreMeta = const VerificationMeta('score');
   @override
-  late final GeneratedColumn<int?> score = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> score = GeneratedColumn<int>(
       'score', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
-      extraData = GeneratedColumn<String?>('extra_data', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, Object?>>($ReactionsTable.$converter0);
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>?, String>
+      extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, Object?>?>($ReactionsTable.$converter0n);
   @override
   List<GeneratedColumn> get $columns =>
       [userId, messageId, type, createdAt, score, extraData];
@@ -3482,8 +3474,22 @@ class $ReactionsTable extends Reactions
   Set<GeneratedColumn> get $primaryKey => {messageId, type, userId};
   @override
   ReactionEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ReactionEntity.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReactionEntity(
+      userId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      messageId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
+      type: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      createdAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      score: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}score'])!,
+      extraData: $ReactionsTable.$converter0n.fromSql(attachedDatabase
+          .options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
+    );
   }
 
   @override
@@ -3493,6 +3499,8 @@ class $ReactionsTable extends Reactions
 
   static TypeConverter<Map<String, Object?>, String> $converter0 =
       MapConverter<Object?>();
+  static TypeConverter<Map<String, Object?>?, String?> $converter0n =
+      NullAwareTypeConverter.wrap($converter0);
 }
 
 class UserEntity extends DataClass implements Insertable<UserEntity> {
@@ -3522,7 +3530,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
 
   /// Map of custom user extraData
   final Map<String, Object?> extraData;
-  UserEntity(
+  const UserEntity(
       {required this.id,
       this.role,
       this.language,
@@ -3532,49 +3540,26 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       required this.online,
       required this.banned,
       required this.extraData});
-  factory UserEntity.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return UserEntity(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      role: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}role']),
-      language: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}language']),
-      createdAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      updatedAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      lastActive: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}last_active']),
-      online: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}online'])!,
-      banned: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}banned'])!,
-      extraData: $UsersTable.$converter0.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}extra_data']))!,
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     if (!nullToAbsent || role != null) {
-      map['role'] = Variable<String?>(role);
+      map['role'] = Variable<String>(role);
     }
     if (!nullToAbsent || language != null) {
-      map['language'] = Variable<String?>(language);
+      map['language'] = Variable<String>(language);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || lastActive != null) {
-      map['last_active'] = Variable<DateTime?>(lastActive);
+      map['last_active'] = Variable<DateTime>(lastActive);
     }
     map['online'] = Variable<bool>(online);
     map['banned'] = Variable<bool>(banned);
     {
       final converter = $UsersTable.$converter0;
-      map['extra_data'] = Variable<String>(converter.mapToSql(extraData)!);
+      map['extra_data'] = Variable<String>(converter.toSql(extraData));
     }
     return map;
   }
@@ -3700,14 +3685,14 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
         extraData = Value(extraData);
   static Insertable<UserEntity> custom({
     Expression<String>? id,
-    Expression<String?>? role,
-    Expression<String?>? language,
+    Expression<String>? role,
+    Expression<String>? language,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
-    Expression<DateTime?>? lastActive,
+    Expression<DateTime>? lastActive,
     Expression<bool>? online,
     Expression<bool>? banned,
-    Expression<Map<String, Object?>>? extraData,
+    Expression<String>? extraData,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3752,10 +3737,10 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       map['id'] = Variable<String>(id.value);
     }
     if (role.present) {
-      map['role'] = Variable<String?>(role.value);
+      map['role'] = Variable<String>(role.value);
     }
     if (language.present) {
-      map['language'] = Variable<String?>(language.value);
+      map['language'] = Variable<String>(language.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -3764,7 +3749,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (lastActive.present) {
-      map['last_active'] = Variable<DateTime?>(lastActive.value);
+      map['last_active'] = Variable<DateTime>(lastActive.value);
     }
     if (online.present) {
       map['online'] = Variable<bool>(online.value);
@@ -3774,8 +3759,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     }
     if (extraData.present) {
       final converter = $UsersTable.$converter0;
-      map['extra_data'] =
-          Variable<String>(converter.mapToSql(extraData.value)!);
+      map['extra_data'] = Variable<String>(converter.toSql(extraData.value));
     }
     return map;
   }
@@ -3804,59 +3788,59 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
   $UsersTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _roleMeta = const VerificationMeta('role');
   @override
-  late final GeneratedColumn<String?> role = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
       'role', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _languageMeta = const VerificationMeta('language');
   @override
-  late final GeneratedColumn<String?> language = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> language = GeneratedColumn<String>(
       'language', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<DateTime?> updatedAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
       'updated_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   final VerificationMeta _lastActiveMeta = const VerificationMeta('lastActive');
   @override
-  late final GeneratedColumn<DateTime?> lastActive = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> lastActive = GeneratedColumn<DateTime>(
       'last_active', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _onlineMeta = const VerificationMeta('online');
   @override
-  late final GeneratedColumn<bool?> online = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> online = GeneratedColumn<bool>(
       'online', aliasedName, false,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (online IN (0, 1))',
       defaultValue: const Constant(false));
   final VerificationMeta _bannedMeta = const VerificationMeta('banned');
   @override
-  late final GeneratedColumn<bool?> banned = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> banned = GeneratedColumn<bool>(
       'banned', aliasedName, false,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (banned IN (0, 1))',
       defaultValue: const Constant(false));
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String?>
-      extraData = GeneratedColumn<String?>('extra_data', aliasedName, false,
-              type: const StringType(), requiredDuringInsert: true)
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String>
+      extraData = GeneratedColumn<String>('extra_data', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<Map<String, Object?>>($UsersTable.$converter0);
   @override
   List<GeneratedColumn> get $columns => [
@@ -3922,8 +3906,27 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   UserEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return UserEntity.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UserEntity(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      role: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}role']),
+      language: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}language']),
+      createdAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      lastActive: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}last_active']),
+      online: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}online'])!,
+      banned: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}banned'])!,
+      extraData: $UsersTable.$converter0.fromSql(attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])!),
+    );
   }
 
   @override
@@ -3968,7 +3971,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
 
   /// The last date of update
   final DateTime updatedAt;
-  MemberEntity(
+  const MemberEntity(
       {required this.userId,
       required this.channelCid,
       this.channelRole,
@@ -3980,46 +3983,19 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       required this.isModerator,
       required this.createdAt,
       required this.updatedAt});
-  factory MemberEntity.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return MemberEntity(
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      channelCid: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid'])!,
-      channelRole: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}channel_role']),
-      inviteAcceptedAt: const DateTimeType().mapFromDatabaseResponse(
-          data['${effectivePrefix}invite_accepted_at']),
-      inviteRejectedAt: const DateTimeType().mapFromDatabaseResponse(
-          data['${effectivePrefix}invite_rejected_at']),
-      invited: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}invited'])!,
-      banned: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}banned'])!,
-      shadowBanned: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}shadow_banned'])!,
-      isModerator: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}is_moderator'])!,
-      createdAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      updatedAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['user_id'] = Variable<String>(userId);
     map['channel_cid'] = Variable<String>(channelCid);
     if (!nullToAbsent || channelRole != null) {
-      map['channel_role'] = Variable<String?>(channelRole);
+      map['channel_role'] = Variable<String>(channelRole);
     }
     if (!nullToAbsent || inviteAcceptedAt != null) {
-      map['invite_accepted_at'] = Variable<DateTime?>(inviteAcceptedAt);
+      map['invite_accepted_at'] = Variable<DateTime>(inviteAcceptedAt);
     }
     if (!nullToAbsent || inviteRejectedAt != null) {
-      map['invite_rejected_at'] = Variable<DateTime?>(inviteRejectedAt);
+      map['invite_rejected_at'] = Variable<DateTime>(inviteRejectedAt);
     }
     map['invited'] = Variable<bool>(invited);
     map['banned'] = Variable<bool>(banned);
@@ -4186,9 +4162,9 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
   static Insertable<MemberEntity> custom({
     Expression<String>? userId,
     Expression<String>? channelCid,
-    Expression<String?>? channelRole,
-    Expression<DateTime?>? inviteAcceptedAt,
-    Expression<DateTime?>? inviteRejectedAt,
+    Expression<String>? channelRole,
+    Expression<DateTime>? inviteAcceptedAt,
+    Expression<DateTime>? inviteRejectedAt,
     Expression<bool>? invited,
     Expression<bool>? banned,
     Expression<bool>? shadowBanned,
@@ -4248,13 +4224,13 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       map['channel_cid'] = Variable<String>(channelCid.value);
     }
     if (channelRole.present) {
-      map['channel_role'] = Variable<String?>(channelRole.value);
+      map['channel_role'] = Variable<String>(channelRole.value);
     }
     if (inviteAcceptedAt.present) {
-      map['invite_accepted_at'] = Variable<DateTime?>(inviteAcceptedAt.value);
+      map['invite_accepted_at'] = Variable<DateTime>(inviteAcceptedAt.value);
     }
     if (inviteRejectedAt.present) {
-      map['invite_rejected_at'] = Variable<DateTime?>(inviteRejectedAt.value);
+      map['invite_rejected_at'] = Variable<DateTime>(inviteRejectedAt.value);
     }
     if (invited.present) {
       map['invited'] = Variable<bool>(invited.value);
@@ -4304,80 +4280,80 @@ class $MembersTable extends Members
   $MembersTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
   @override
-  late final GeneratedColumn<String?> channelCid = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> channelCid = GeneratedColumn<String>(
       'channel_cid', aliasedName, false,
-      type: const StringType(),
+      type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
   final VerificationMeta _channelRoleMeta =
       const VerificationMeta('channelRole');
   @override
-  late final GeneratedColumn<String?> channelRole = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> channelRole = GeneratedColumn<String>(
       'channel_role', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _inviteAcceptedAtMeta =
       const VerificationMeta('inviteAcceptedAt');
   @override
-  late final GeneratedColumn<DateTime?> inviteAcceptedAt =
-      GeneratedColumn<DateTime?>('invite_accepted_at', aliasedName, true,
-          type: const IntType(), requiredDuringInsert: false);
+  late final GeneratedColumn<DateTime> inviteAcceptedAt =
+      GeneratedColumn<DateTime>('invite_accepted_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _inviteRejectedAtMeta =
       const VerificationMeta('inviteRejectedAt');
   @override
-  late final GeneratedColumn<DateTime?> inviteRejectedAt =
-      GeneratedColumn<DateTime?>('invite_rejected_at', aliasedName, true,
-          type: const IntType(), requiredDuringInsert: false);
+  late final GeneratedColumn<DateTime> inviteRejectedAt =
+      GeneratedColumn<DateTime>('invite_rejected_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _invitedMeta = const VerificationMeta('invited');
   @override
-  late final GeneratedColumn<bool?> invited = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> invited = GeneratedColumn<bool>(
       'invited', aliasedName, false,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (invited IN (0, 1))',
       defaultValue: const Constant(false));
   final VerificationMeta _bannedMeta = const VerificationMeta('banned');
   @override
-  late final GeneratedColumn<bool?> banned = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> banned = GeneratedColumn<bool>(
       'banned', aliasedName, false,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (banned IN (0, 1))',
       defaultValue: const Constant(false));
   final VerificationMeta _shadowBannedMeta =
       const VerificationMeta('shadowBanned');
   @override
-  late final GeneratedColumn<bool?> shadowBanned = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> shadowBanned = GeneratedColumn<bool>(
       'shadow_banned', aliasedName, false,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (shadow_banned IN (0, 1))',
       defaultValue: const Constant(false));
   final VerificationMeta _isModeratorMeta =
       const VerificationMeta('isModerator');
   @override
-  late final GeneratedColumn<bool?> isModerator = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> isModerator = GeneratedColumn<bool>(
       'is_moderator', aliasedName, false,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (is_moderator IN (0, 1))',
       defaultValue: const Constant(false));
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<DateTime?> updatedAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
       'updated_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
@@ -4470,8 +4446,31 @@ class $MembersTable extends Members
   Set<GeneratedColumn> get $primaryKey => {userId, channelCid};
   @override
   MemberEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return MemberEntity.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MemberEntity(
+      userId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      channelCid: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}channel_cid'])!,
+      channelRole: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}channel_role']),
+      inviteAcceptedAt: attachedDatabase.options.types.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}invite_accepted_at']),
+      inviteRejectedAt: attachedDatabase.options.types.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}invite_rejected_at']),
+      invited: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}invited'])!,
+      banned: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}banned'])!,
+      shadowBanned: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}shadow_banned'])!,
+      isModerator: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_moderator'])!,
+      createdAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+    );
   }
 
   @override
@@ -4492,24 +4491,11 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
 
   /// Number of unread messages
   final int unreadMessages;
-  ReadEntity(
+  const ReadEntity(
       {required this.lastRead,
       required this.userId,
       required this.channelCid,
       required this.unreadMessages});
-  factory ReadEntity.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return ReadEntity(
-      lastRead: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}last_read'])!,
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      channelCid: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid'])!,
-      unreadMessages: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}unread_messages'])!,
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -4658,27 +4644,27 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
   $ReadsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _lastReadMeta = const VerificationMeta('lastRead');
   @override
-  late final GeneratedColumn<DateTime?> lastRead = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> lastRead = GeneratedColumn<DateTime>(
       'last_read', aliasedName, false,
-      type: const IntType(), requiredDuringInsert: true);
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
   @override
-  late final GeneratedColumn<String?> channelCid = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> channelCid = GeneratedColumn<String>(
       'channel_cid', aliasedName, false,
-      type: const StringType(),
+      type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
   final VerificationMeta _unreadMessagesMeta =
       const VerificationMeta('unreadMessages');
   @override
-  late final GeneratedColumn<int?> unreadMessages = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> unreadMessages = GeneratedColumn<int>(
       'unread_messages', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
   @override
@@ -4726,8 +4712,17 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
   Set<GeneratedColumn> get $primaryKey => {userId, channelCid};
   @override
   ReadEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ReadEntity.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReadEntity(
+      lastRead: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}last_read'])!,
+      userId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      channelCid: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}channel_cid'])!,
+      unreadMessages: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}unread_messages'])!,
+    );
   }
 
   @override
@@ -4743,17 +4738,7 @@ class ChannelQueryEntity extends DataClass
 
   /// The channel cid of this query
   final String channelCid;
-  ChannelQueryEntity({required this.queryHash, required this.channelCid});
-  factory ChannelQueryEntity.fromData(Map<String, dynamic> data,
-      {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return ChannelQueryEntity(
-      queryHash: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}query_hash'])!,
-      channelCid: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid'])!,
-    );
-  }
+  const ChannelQueryEntity({required this.queryHash, required this.channelCid});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -4863,14 +4848,14 @@ class $ChannelQueriesTable extends ChannelQueries
   $ChannelQueriesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _queryHashMeta = const VerificationMeta('queryHash');
   @override
-  late final GeneratedColumn<String?> queryHash = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> queryHash = GeneratedColumn<String>(
       'query_hash', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
   @override
-  late final GeneratedColumn<String?> channelCid = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> channelCid = GeneratedColumn<String>(
       'channel_cid', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [queryHash, channelCid];
   @override
@@ -4903,8 +4888,13 @@ class $ChannelQueriesTable extends ChannelQueries
   Set<GeneratedColumn> get $primaryKey => {queryHash, channelCid};
   @override
   ChannelQueryEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ChannelQueryEntity.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChannelQueryEntity(
+      queryHash: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}query_hash'])!,
+      channelCid: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}channel_cid'])!,
+    );
   }
 
   @override
@@ -4935,7 +4925,7 @@ class ConnectionEventEntity extends DataClass
 
   /// DateTime of the last sync
   final DateTime? lastSyncAt;
-  ConnectionEventEntity(
+  const ConnectionEventEntity(
       {required this.id,
       required this.type,
       this.ownUser,
@@ -4943,46 +4933,26 @@ class ConnectionEventEntity extends DataClass
       this.unreadChannels,
       this.lastEventAt,
       this.lastSyncAt});
-  factory ConnectionEventEntity.fromData(Map<String, dynamic> data,
-      {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return ConnectionEventEntity(
-      id: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      type: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      ownUser: $ConnectionEventsTable.$converter0.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}own_user'])),
-      totalUnreadCount: const IntType().mapFromDatabaseResponse(
-          data['${effectivePrefix}total_unread_count']),
-      unreadChannels: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}unread_channels']),
-      lastEventAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}last_event_at']),
-      lastSyncAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}last_sync_at']),
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['type'] = Variable<String>(type);
     if (!nullToAbsent || ownUser != null) {
-      final converter = $ConnectionEventsTable.$converter0;
-      map['own_user'] = Variable<String?>(converter.mapToSql(ownUser));
+      final converter = $ConnectionEventsTable.$converter0n;
+      map['own_user'] = Variable<String>(converter.toSql(ownUser));
     }
     if (!nullToAbsent || totalUnreadCount != null) {
-      map['total_unread_count'] = Variable<int?>(totalUnreadCount);
+      map['total_unread_count'] = Variable<int>(totalUnreadCount);
     }
     if (!nullToAbsent || unreadChannels != null) {
-      map['unread_channels'] = Variable<int?>(unreadChannels);
+      map['unread_channels'] = Variable<int>(unreadChannels);
     }
     if (!nullToAbsent || lastEventAt != null) {
-      map['last_event_at'] = Variable<DateTime?>(lastEventAt);
+      map['last_event_at'] = Variable<DateTime>(lastEventAt);
     }
     if (!nullToAbsent || lastSyncAt != null) {
-      map['last_sync_at'] = Variable<DateTime?>(lastSyncAt);
+      map['last_sync_at'] = Variable<DateTime>(lastSyncAt);
     }
     return map;
   }
@@ -5093,11 +5063,11 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   static Insertable<ConnectionEventEntity> custom({
     Expression<int>? id,
     Expression<String>? type,
-    Expression<Map<String, dynamic>?>? ownUser,
-    Expression<int?>? totalUnreadCount,
-    Expression<int?>? unreadChannels,
-    Expression<DateTime?>? lastEventAt,
-    Expression<DateTime?>? lastSyncAt,
+    Expression<String>? ownUser,
+    Expression<int>? totalUnreadCount,
+    Expression<int>? unreadChannels,
+    Expression<DateTime>? lastEventAt,
+    Expression<DateTime>? lastSyncAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -5139,20 +5109,20 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
       map['type'] = Variable<String>(type.value);
     }
     if (ownUser.present) {
-      final converter = $ConnectionEventsTable.$converter0;
-      map['own_user'] = Variable<String?>(converter.mapToSql(ownUser.value));
+      final converter = $ConnectionEventsTable.$converter0n;
+      map['own_user'] = Variable<String>(converter.toSql(ownUser.value));
     }
     if (totalUnreadCount.present) {
-      map['total_unread_count'] = Variable<int?>(totalUnreadCount.value);
+      map['total_unread_count'] = Variable<int>(totalUnreadCount.value);
     }
     if (unreadChannels.present) {
-      map['unread_channels'] = Variable<int?>(unreadChannels.value);
+      map['unread_channels'] = Variable<int>(unreadChannels.value);
     }
     if (lastEventAt.present) {
-      map['last_event_at'] = Variable<DateTime?>(lastEventAt.value);
+      map['last_event_at'] = Variable<DateTime>(lastEventAt.value);
     }
     if (lastSyncAt.present) {
-      map['last_sync_at'] = Variable<DateTime?>(lastSyncAt.value);
+      map['last_sync_at'] = Variable<DateTime>(lastSyncAt.value);
     }
     return map;
   }
@@ -5180,44 +5150,44 @@ class $ConnectionEventsTable extends ConnectionEvents
   $ConnectionEventsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
       'id', aliasedName, false,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.int, requiredDuringInsert: false);
   final VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _ownUserMeta = const VerificationMeta('ownUser');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String?>
-      ownUser = GeneratedColumn<String?>('own_user', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<Map<String, dynamic>>(
-              $ConnectionEventsTable.$converter0);
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
+      ownUser = GeneratedColumn<String>('own_user', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, dynamic>?>(
+              $ConnectionEventsTable.$converter0n);
   final VerificationMeta _totalUnreadCountMeta =
       const VerificationMeta('totalUnreadCount');
   @override
-  late final GeneratedColumn<int?> totalUnreadCount = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> totalUnreadCount = GeneratedColumn<int>(
       'total_unread_count', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.int, requiredDuringInsert: false);
   final VerificationMeta _unreadChannelsMeta =
       const VerificationMeta('unreadChannels');
   @override
-  late final GeneratedColumn<int?> unreadChannels = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> unreadChannels = GeneratedColumn<int>(
       'unread_channels', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.int, requiredDuringInsert: false);
   final VerificationMeta _lastEventAtMeta =
       const VerificationMeta('lastEventAt');
   @override
-  late final GeneratedColumn<DateTime?> lastEventAt =
-      GeneratedColumn<DateTime?>('last_event_at', aliasedName, true,
-          type: const IntType(), requiredDuringInsert: false);
+  late final GeneratedColumn<DateTime> lastEventAt = GeneratedColumn<DateTime>(
+      'last_event_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _lastSyncAtMeta = const VerificationMeta('lastSyncAt');
   @override
-  late final GeneratedColumn<DateTime?> lastSyncAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> lastSyncAt = GeneratedColumn<DateTime>(
       'last_sync_at', aliasedName, true,
-      type: const IntType(), requiredDuringInsert: false);
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -5279,8 +5249,24 @@ class $ConnectionEventsTable extends ConnectionEvents
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   ConnectionEventEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ConnectionEventEntity.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ConnectionEventEntity(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      type: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      ownUser: $ConnectionEventsTable.$converter0n.fromSql(attachedDatabase
+          .options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}own_user'])),
+      totalUnreadCount: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}total_unread_count']),
+      unreadChannels: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}unread_channels']),
+      lastEventAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}last_event_at']),
+      lastSyncAt: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}last_sync_at']),
+    );
   }
 
   @override
@@ -5290,11 +5276,12 @@ class $ConnectionEventsTable extends ConnectionEvents
 
   static TypeConverter<Map<String, dynamic>, String> $converter0 =
       MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converter0n =
+      NullAwareTypeConverter.wrap($converter0);
 }
 
 abstract class _$DriftChatDatabase extends GeneratedDatabase {
-  _$DriftChatDatabase(QueryExecutor e)
-      : super(SqlTypeSystem.defaultInstance, e);
+  _$DriftChatDatabase(QueryExecutor e) : super(e);
   _$DriftChatDatabase.connect(DatabaseConnection c) : super.connect(c);
   late final $ChannelsTable channels = $ChannelsTable(this);
   late final $MessagesTable messages = $MessagesTable(this);
@@ -5323,7 +5310,8 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
   late final ConnectionEventDao connectionEventDao =
       ConnectionEventDao(this as DriftChatDatabase);
   @override
-  Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
+  Iterable<TableInfo<Table, dynamic>> get allTables =>
+      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
         channels,
