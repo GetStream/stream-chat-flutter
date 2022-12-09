@@ -1,8 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-/// Maps a [MessageSendingStatus] into a [int] understood
-/// by the sqlite backend.
+/// Maps a [MessageSendingStatus] into a [int] understood by the sqlite backend.
 class MessageSendingStatusConverter extends TypeConverter<MessageSendingStatus, int> {
   @override
   MessageSendingStatus fromSql(int fromDb) {
