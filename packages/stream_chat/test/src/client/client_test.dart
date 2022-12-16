@@ -535,7 +535,8 @@ void main() {
       test(
         '''should update persistence connectionInfo and lastSync when sync succeeds''',
         () async {
-          // persistence.updateLastSyncAt might be called when connecting the user.
+          // persistence.updateLastSyncAt might be called
+          // when connecting the user.
           // Resetting the logs so we start counting invocations correctly.
           reset(persistence);
           const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
@@ -572,7 +573,8 @@ void main() {
       test(
         'should work fine if persistence contains sync params',
         () async {
-          // persistence.updateLastSyncAt might be called when connecting the user.
+          // persistence.updateLastSyncAt might be called
+          // when connecting the user.
           // Resetting the logs so we start counting invocations correctly.
           reset(persistence);
           const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
