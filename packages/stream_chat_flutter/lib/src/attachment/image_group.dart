@@ -185,6 +185,7 @@ class StreamImageGroup extends StatelessWidget {
       imageThumbnailSize: imageThumbnailSize,
       imageThumbnailResizeType: imageThumbnailResizeType,
       imageThumbnailCropType: imageThumbnailCropType,
+      httpHeaders: httpHeaders,
     );
   }
 }
