@@ -73,6 +73,8 @@ class StreamMessageWidget extends StatefulWidget {
     this.showFlagButton = true,
     this.showPinButton = true,
     this.showPinHighlight = true,
+    this.showMessageActionButton = true,
+    this.showShareButton = true,
     this.onUserAvatarTap,
     this.onLinkTap,
     this.onMessageActions,
@@ -142,10 +144,11 @@ class StreamMessageWidget extends StatefulWidget {
                       onReplyMessage: onReplyTap,
                       onAttachmentTap: onAttachmentTap,
                       imageThumbnailSize: imageAttachmentThumbnailSize,
-                      imageThumbnailResizeType:
-                          imageAttachmentThumbnailResizeType,
+                      imageThumbnailResizeType: imageAttachmentThumbnailResizeType,
                       imageThumbnailCropType: imageAttachmentThumbnailCropType,
                       httpHeaders: httpHeaders,
+                      showMessageActionButton: showMessageActionButton,
+                      showShareButton: showShareButton,
                     ),
                   ),
                   attachmentShape: border,
@@ -174,9 +177,10 @@ class StreamMessageWidget extends StatefulWidget {
                 imageThumbnailSize: imageAttachmentThumbnailSize,
                 imageThumbnailResizeType: imageAttachmentThumbnailResizeType,
                 imageThumbnailCropType: imageAttachmentThumbnailCropType,
+                showMessageActionButton: showMessageActionButton,
+                showShareButton: showShareButton,
               ),
               attachmentShape: border,
-
             );
           },
           'video': (context, message, attachments) {
@@ -195,6 +199,8 @@ class StreamMessageWidget extends StatefulWidget {
                   return StreamVideoAttachment(
                     attachment: attachment,
                     httpHeaders: httpHeaders,
+                    showMessageActionButton: showMessageActionButton,
+                    showShareButton: showShareButton,
                     messageTheme: messageTheme,
                     constraints: BoxConstraints(
                       maxWidth: 400,
@@ -509,6 +515,16 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final bool showPinHighlight;
 
+  /// {@template showShareButton}
+  /// Show share button in Attachment preview
+  /// {@endtemplate}
+  final bool showShareButton;
+
+  /// {@template showMessageAction}
+  /// Show message action button in Attachment preview
+  /// {@endtemplate}
+  final bool showMessageActionButton;
+
   /// {@template attachmentBuilders}
   /// Builder for respective attachment types
   /// {@endtemplate}
@@ -614,6 +630,8 @@ class StreamMessageWidget extends StatefulWidget {
     bool? showFlagButton,
     bool? showPinButton,
     bool? showPinHighlight,
+    bool? showMessageAction,
+    bool? showShareButton,
     Map<String, AttachmentBuilder>? customAttachmentBuilders,
     bool? translateUserAvatar,
     OnQuotedMessageTap? onQuotedMessageTap,
@@ -653,10 +671,11 @@ class StreamMessageWidget extends StatefulWidget {
       onMentionTap: onMentionTap ?? this.onMentionTap,
       onThreadTap: onThreadTap ?? this.onThreadTap,
       onReplyTap: onReplyTap ?? this.onReplyTap,
-      editMessageInputBuilder:
-          editMessageInputBuilder ?? this.editMessageInputBuilder,
+      editMessageInputBuilder: editMessageInputBuilder ?? this.editMessageInputBuilder,
       textBuilder: textBuilder ?? this.textBuilder,
-      bottomRowBuilderWithDefaultWidget: _bottomRowBuilderWithDefaultWidget,
+      usernameBuilder: usernameBuilder ?? this.usernameBuilder,
+      bottomRowBuilder: bottomRowBuilder ?? this.bottomRowBuilder,
+      deletedBottomRowBuilder: deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
       onMessageActions: onMessageActions ?? this.onMessageActions,
       message: message ?? this.message,
       messageTheme: messageTheme ?? this.messageTheme,
@@ -666,8 +685,7 @@ class StreamMessageWidget extends StatefulWidget {
       borderSide: borderSide ?? this.borderSide,
       attachmentBorderSide: attachmentBorderSide ?? this.attachmentBorderSide,
       borderRadiusGeometry: borderRadiusGeometry ?? this.borderRadiusGeometry,
-      attachmentBorderRadiusGeometry:
-          attachmentBorderRadiusGeometry ?? this.attachmentBorderRadiusGeometry,
+      attachmentBorderRadiusGeometry: attachmentBorderRadiusGeometry ?? this.attachmentBorderRadiusGeometry,
       padding: padding ?? this.padding,
       textPadding: textPadding ?? this.textPadding,
       attachmentPadding: attachmentPadding ?? this.attachmentPadding,
@@ -675,20 +693,16 @@ class StreamMessageWidget extends StatefulWidget {
       showUserAvatar: showUserAvatar ?? this.showUserAvatar,
       showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
       showReactions: showReactions ?? this.showReactions,
-      showThreadReplyIndicator:
-          showThreadReplyIndicator ?? this.showThreadReplyIndicator,
-      showInChannelIndicator:
-          showInChannelIndicator ?? this.showInChannelIndicator,
+      showThreadReplyIndicator: showThreadReplyIndicator ?? this.showThreadReplyIndicator,
+      showInChannelIndicator: showInChannelIndicator ?? this.showInChannelIndicator,
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
       onLinkTap: onLinkTap ?? this.onLinkTap,
-      showReactionPickerIndicator:
-          showReactionPickerIndicator ?? this.showReactionPickerIndicator,
+      showReactionPickerIndicator: showReactionPickerIndicator ?? this.showReactionPickerIndicator,
       onShowMessage: onShowMessage ?? this.onShowMessage,
       showUsername: showUsername ?? this.showUsername,
       showTimestamp: showTimestamp ?? this.showTimestamp,
       showReplyMessage: showReplyMessage ?? this.showReplyMessage,
-      showThreadReplyMessage:
-          showThreadReplyMessage ?? this.showThreadReplyMessage,
+      showThreadReplyMessage: showThreadReplyMessage ?? this.showThreadReplyMessage,
       showEditMessage: showEditMessage ?? this.showEditMessage,
       showCopyMessage: showCopyMessage ?? this.showCopyMessage,
       showDeleteMessage: showDeleteMessage ?? this.showDeleteMessage,
@@ -696,20 +710,18 @@ class StreamMessageWidget extends StatefulWidget {
       showFlagButton: showFlagButton ?? this.showFlagButton,
       showPinButton: showPinButton ?? this.showPinButton,
       showPinHighlight: showPinHighlight ?? this.showPinHighlight,
-      customAttachmentBuilders:
-          customAttachmentBuilders ?? this.customAttachmentBuilders,
+      showMessageActionButton: showMessageAction ?? this.showMessageActionButton,
+      showShareButton: showShareButton ?? this.showShareButton,
+      customAttachmentBuilders: customAttachmentBuilders ?? this.customAttachmentBuilders,
       translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
       onMessageTap: onMessageTap ?? this.onMessageTap,
       customActions: customActions ?? this.customActions,
       onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
       userAvatarBuilder: userAvatarBuilder ?? this.userAvatarBuilder,
-      imageAttachmentThumbnailSize:
-          imageAttachmentThumbnailSize ?? this.imageAttachmentThumbnailSize,
-      imageAttachmentThumbnailResizeType: imageAttachmentThumbnailResizeType ??
-          this.imageAttachmentThumbnailResizeType,
-      imageAttachmentThumbnailCropType: imageAttachmentThumbnailCropType ??
-          this.imageAttachmentThumbnailCropType,
+      imageAttachmentThumbnailSize: imageAttachmentThumbnailSize ?? this.imageAttachmentThumbnailSize,
+      imageAttachmentThumbnailResizeType: imageAttachmentThumbnailResizeType ?? this.imageAttachmentThumbnailResizeType,
+      imageAttachmentThumbnailCropType: imageAttachmentThumbnailCropType ?? this.imageAttachmentThumbnailCropType,
     );
   }
 
@@ -738,11 +750,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
   bool get isSendFailed => widget.message.status == MessageSendingStatus.failed;
 
-  bool get isUpdateFailed =>
-      widget.message.status == MessageSendingStatus.failed_update;
+  bool get isUpdateFailed => widget.message.status == MessageSendingStatus.failed_update;
 
-  bool get isDeleteFailed =>
-      widget.message.status == MessageSendingStatus.failed_delete;
+  bool get isDeleteFailed => widget.message.status == MessageSendingStatus.failed_delete;
 
   /// {@template isFailedState}
   /// Whether the message has failed to be sent, updated, or deleted.
@@ -752,8 +762,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// {@template isGiphy}
   /// `true` if any of the [message]'s attachments are a giphy.
   /// {@endtemplate}
-  bool get isGiphy =>
-      widget.message.attachments.any((element) => element.type == 'giphy');
+  bool get isGiphy => widget.message.attachments.any((element) => element.type == 'giphy');
 
   /// {@template isOnlyEmoji}
   /// `true` if [message.text] contains only emoji.
@@ -764,16 +773,14 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// `true` if any of the [message]'s attachments are a giphy and do not
   /// have a [Attachment.titleLink].
   /// {@endtemplate}
-  bool get hasNonUrlAttachments => widget.message.attachments
-      .where((it) => it.titleLink == null || it.type == 'giphy')
-      .isNotEmpty;
+  bool get hasNonUrlAttachments =>
+      widget.message.attachments.where((it) => it.titleLink == null || it.type == 'giphy').isNotEmpty;
 
   /// {@template hasUrlAttachments}
   /// `true` if any of the [message]'s attachments are a giphy with a
   /// [Attachment.titleLink].
   /// {@endtemplate}
-  bool get hasUrlAttachments => widget.message.attachments
-      .any((it) => it.titleLink != null && it.type != 'giphy');
+  bool get hasUrlAttachments => widget.message.attachments.any((it) => it.titleLink != null && it.type != 'giphy');
 
   /// {@template showBottomRow}
   /// Show the [BottomRow] widget if any of the following are `true`:
@@ -785,12 +792,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// * [StreamMessageWidget.message.isDeleted]
   /// {@endtemplate}
   bool get showBottomRow =>
-      showThreadReplyIndicator ||
-      showUsername ||
-      showTimeStamp ||
-      showInChannel ||
-      showSendingIndicator ||
-      isDeleted;
+      showThreadReplyIndicator || showUsername || showTimeStamp || showInChannel || showSendingIndicator || isDeleted;
 
   /// {@template isPinned}
   /// Whether [StreamMessageWidget.message] is pinned or not.
@@ -802,35 +804,26 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// `true`, if there are reactions to show, and if the message is not deleted.
   /// {@endtemplate}
   bool get shouldShowReactions =>
-      widget.showReactions &&
-      (widget.message.reactionCounts?.isNotEmpty == true) &&
-      !widget.message.isDeleted;
+      widget.showReactions && (widget.message.reactionCounts?.isNotEmpty == true) && !widget.message.isDeleted;
 
-  bool get shouldShowReplyAction =>
-      widget.showReplyMessage && !isFailedState && widget.onReplyTap != null;
+  bool get shouldShowReplyAction => widget.showReplyMessage && !isFailedState && widget.onReplyTap != null;
 
   bool get shouldShowEditAction =>
       widget.showEditMessage &&
       !isDeleteFailed &&
       !widget.message.attachments.any((element) => element.type == 'giphy');
 
-  bool get shouldShowResendAction =>
-      widget.showResendMessage && (isSendFailed || isUpdateFailed);
+  bool get shouldShowResendAction => widget.showResendMessage && (isSendFailed || isUpdateFailed);
 
   bool get shouldShowCopyAction =>
-      widget.showCopyMessage &&
-      !isFailedState &&
-      widget.message.text?.trim().isNotEmpty == true;
+      widget.showCopyMessage && !isFailedState && widget.message.text?.trim().isNotEmpty == true;
 
   bool get shouldShowEditMessage =>
       widget.showEditMessage &&
       !isDeleteFailed &&
       !widget.message.attachments.any((element) => element.type == 'giphy');
 
-  bool get shouldShowThreadReplyAction =>
-      widget.showThreadReplyMessage &&
-      !isFailedState &&
-      widget.onThreadTap != null;
+  bool get shouldShowThreadReplyAction => widget.showThreadReplyMessage && !isFailedState && widget.onThreadTap != null;
 
   bool get shouldShowDeleteAction => widget.showDeleteMessage || isDeleteFailed;
 
@@ -850,10 +843,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final avatarWidth =
-        widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
-    final bottomRowPadding =
-        widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
+    final avatarWidth = widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
+    final bottomRowPadding = widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
     final showReactions = shouldShowReactions;
 
@@ -881,9 +872,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               mobile: (context, child) {
                 return InkWell(
                   onTap: () => widget.onMessageTap!(widget.message),
-                  onLongPress: widget.message.isDeleted && !isFailedState
-                      ? null
-                      : () => onLongPress(context),
+                  onLongPress: widget.message.isDeleted && !isFailedState ? null : () => onLongPress(context),
                   child: child,
                 );
               },
@@ -892,9 +881,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               child: Padding(
                 padding: widget.padding ?? const EdgeInsets.all(8),
                 child: FractionallySizedBox(
-                  alignment: widget.reverse
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
+                  alignment: widget.reverse ? Alignment.centerRight : Alignment.centerLeft,
                   widthFactor: widget.widthFactor,
                   child: Builder(builder: (context) {
                     var _bottomRowBuilderWithDefaultWidget =
@@ -915,49 +902,50 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                     };
 
                     return MessageWidgetContent(
-                      streamChatTheme: _streamChatTheme,
-                      showUsername: showUsername,
-                      showTimeStamp: showTimeStamp,
-                      showThreadReplyIndicator: showThreadReplyIndicator,
-                      showSendingIndicator: showSendingIndicator,
-                      showInChannel: showInChannel,
-                      isGiphy: isGiphy,
-                      isOnlyEmoji: isOnlyEmoji,
-                      hasUrlAttachments: hasUrlAttachments,
-                      messageTheme: widget.messageTheme,
-                      reverse: widget.reverse,
-                      message: widget.message,
-                      hasNonUrlAttachments: hasNonUrlAttachments,
-                      shouldShowReactions: shouldShowReactions,
-                      hasQuotedMessage: hasQuotedMessage,
-                      textPadding: widget.textPadding,
-                      attachmentBuilders: widget.attachmentBuilders,
-                      attachmentPadding: widget.attachmentPadding,
-                      avatarWidth: avatarWidth,
-                      bottomRowPadding: bottomRowPadding,
-                      isFailedState: isFailedState,
-                      isPinned: isPinned,
-                      messageWidget: widget,
-                      showBottomRow: showBottomRow,
-                      showPinHighlight: widget.showPinHighlight,
-                      showReactionPickerIndicator:
-                          widget.showReactionPickerIndicator,
-                      showReactions: showReactions,
-                      showUserAvatar: widget.showUserAvatar,
-                      streamChat: _streamChat,
-                      translateUserAvatar: widget.translateUserAvatar,
-                      shape: widget.shape,
-                      borderSide: widget.borderSide,
-                      borderRadiusGeometry: widget.borderRadiusGeometry,
-                      textBuilder: widget.textBuilder,
-                      onLinkTap: widget.onLinkTap,
-                      onMentionTap: widget.onMentionTap,
-                      onQuotedMessageTap: widget.onQuotedMessageTap,
-                      bottomRowBuilderWithDefaultWidget:
-                          _bottomRowBuilderWithDefaultWidget,
-                      onUserAvatarTap: widget.onUserAvatarTap,
-                      userAvatarBuilder: widget.userAvatarBuilder,
-                    );
+                    streamChatTheme: _streamChatTheme,
+                    showUsername: showUsername,
+                    showTimeStamp: showTimeStamp,
+                    showThreadReplyIndicator: showThreadReplyIndicator,
+                    showSendingIndicator: showSendingIndicator,
+                    showInChannel: showInChannel,
+                    isGiphy: isGiphy,
+                    isOnlyEmoji: isOnlyEmoji,
+                    hasUrlAttachments: hasUrlAttachments,
+                    messageTheme: widget.messageTheme,
+                    reverse: widget.reverse,
+                    message: widget.message,
+                    hasNonUrlAttachments: hasNonUrlAttachments,
+                    shouldShowReactions: shouldShowReactions,
+                    hasQuotedMessage: hasQuotedMessage,
+                    textPadding: widget.textPadding,
+                    attachmentBuilders: widget.attachmentBuilders,
+                    attachmentPadding: widget.attachmentPadding,
+                    avatarWidth: avatarWidth,
+                    bottomRowPadding: bottomRowPadding,
+                    isFailedState: isFailedState,
+                    isPinned: isPinned,
+                    messageWidget: widget,
+                    showBottomRow: showBottomRow,
+                    showPinHighlight: widget.showPinHighlight,
+                    showReactionPickerIndicator: widget.showReactionPickerIndicator,
+                    showReactions: showReactions,
+                    showUserAvatar: widget.showUserAvatar,
+                    streamChat: _streamChat,
+                    translateUserAvatar: widget.translateUserAvatar,
+                    deletedBottomRowBuilder: widget.deletedBottomRowBuilder,
+                    onThreadTap: widget.onThreadTap,
+                    shape: widget.shape,
+                    borderSide: widget.borderSide,
+                    borderRadiusGeometry: widget.borderRadiusGeometry,
+                    textBuilder: widget.textBuilder,
+                    onLinkTap: widget.onLinkTap,
+                    onMentionTap: widget.onMentionTap,
+                    onQuotedMessageTap: widget.onQuotedMessageTap,
+                    bottomRowBuilder: widget.bottomRowBuilder,
+                    onUserAvatarTap: widget.onUserAvatarTap,
+                    userAvatarBuilder: widget.userAvatarBuilder,
+                    usernameBuilder: widget.usernameBuilder,
+                  );
                   }),
                 ),
               ),
@@ -1019,8 +1007,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               elevation: 2,
               clipBehavior: Clip.hardEdge,
               isScrollControlled: true,
-              backgroundColor:
-                  StreamMessageInputTheme.of(context).inputBackgroundColor,
+              backgroundColor: StreamMessageInputTheme.of(context).inputBackgroundColor,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(16),
@@ -1064,14 +1051,12 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           leading: StreamSvgIcon.iconSendMessage(),
           title: Text(
             context.translations.toggleResendOrResendEditedMessage(
-              isUpdateFailed:
-                  widget.message.status == MessageSendingStatus.failed,
+              isUpdateFailed: widget.message.status == MessageSendingStatus.failed,
             ),
           ),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
-            final isUpdateFailed =
-                widget.message.status == MessageSendingStatus.failed_update;
+            final isUpdateFailed = widget.message.status == MessageSendingStatus.failed_update;
             final channel = StreamChannel.of(context).channel;
             if (isUpdateFailed) {
               channel.updateMessage(widget.message);
@@ -1096,9 +1081,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             );
             if (deleted) {
               try {
-                await StreamChannel.of(context)
-                    .channel
-                    .deleteMessage(widget.message);
+                await StreamChannel.of(context).channel.deleteMessage(widget.message);
               } catch (e) {
                 showDialog(
                   context: context,
@@ -1119,8 +1102,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   }
 
   void onLongPress(BuildContext context) {
-    if (widget.message.isEphemeral ||
-        widget.message.status == MessageSendingStatus.sending) {
+    if (widget.message.isEphemeral || widget.message.status == MessageSendingStatus.sending) {
       return;
     }
 
@@ -1155,16 +1137,13 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             translateUserAvatar: false,
             showSendingIndicator: false,
             padding: EdgeInsets.zero,
-            showReactionPickerIndicator: widget.showReactions &&
-                (widget.message.status == MessageSendingStatus.sent),
+            showReactionPickerIndicator: widget.showReactions && (widget.message.status == MessageSendingStatus.sent),
             showPinHighlight: false,
-            showUserAvatar:
-                widget.message.user!.id == channel.client.state.currentUser!.id
-                    ? DisplayWidget.gone
-                    : DisplayWidget.show,
+            showUserAvatar: widget.message.user!.id == channel.client.state.currentUser!.id
+                ? DisplayWidget.gone
+                : DisplayWidget.show,
           ),
-          onCopyTap: (message) =>
-              Clipboard.setData(ClipboardData(text: message.text)),
+          onCopyTap: (message) => Clipboard.setData(ClipboardData(text: message.text)),
           messageTheme: widget.messageTheme,
           reverse: widget.reverse,
           showDeleteMessage: shouldShowDeleteAction,

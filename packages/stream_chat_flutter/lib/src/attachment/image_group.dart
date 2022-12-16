@@ -18,6 +18,8 @@ class StreamImageGroup extends StatelessWidget {
     this.imageThumbnailSize = const Size(400, 400),
     this.imageThumbnailResizeType = 'clip',
     this.imageThumbnailCropType = 'center',
+    this.showShareButton = true,
+    this.showMessageActionButton = true,
     this.httpHeaders,
   });
 
@@ -57,6 +59,12 @@ class StreamImageGroup extends StatelessWidget {
 
   /// Http headers
   final Map<String, String>? httpHeaders;
+
+  /// Show share button on preview
+  final bool showShareButton;
+
+  /// Show message action button on preview
+  final bool showMessageActionButton;
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +167,8 @@ class StreamImageGroup extends StatelessWidget {
             onShowMessage: onShowMessage,
             onReplyMessage: onReplyMessage,
             httpHeaders: httpHeaders,
+            showMessageActionButton: showMessageActionButton,
+            showShareButton: showShareButton,
           ),
         ),
       ),

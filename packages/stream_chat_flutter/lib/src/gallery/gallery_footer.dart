@@ -12,8 +12,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@template streamGalleryFooter}
 /// Footer widget for media display
 /// {@endtemplate}
-class StreamGalleryFooter extends StatefulWidget
-    implements PreferredSizeWidget {
+class StreamGalleryFooter extends StatefulWidget implements PreferredSizeWidget {
   /// {@macro streamGalleryFooter}
   const StreamGalleryFooter({
     super.key,
@@ -25,6 +24,7 @@ class StreamGalleryFooter extends StatefulWidget
     required this.mediaAttachmentPackages,
     this.mediaSelectedCallBack,
     this.backgroundColor,
+    this.showShareButton = false,
   }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// Callback to call when pressing the back button.
@@ -52,6 +52,9 @@ class StreamGalleryFooter extends StatefulWidget
   /// The background color of this [StreamGalleryFooter].
   final Color? backgroundColor;
 
+  /// Show or hide the share button
+  final bool showShareButton;
+
   @override
   _StreamGalleryFooterState createState() => _StreamGalleryFooterState();
 
@@ -63,7 +66,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
   final shareButtonKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
-    const showShareButton = !kIsWeb;
+    final showShareButton = !kIsWeb || !widget.showShareButton;
     final mediaQueryData = MediaQuery.of(context);
     final galleryFooterThemeData = StreamGalleryFooterTheme.of(context);
     return SizedBox.fromSize(
@@ -75,8 +78,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
         context: context,
         removeTop: true,
         child: BottomAppBar(
-          color:
-              widget.backgroundColor ?? galleryFooterThemeData.backgroundColor,
+          color: widget.backgroundColor ?? galleryFooterThemeData.backgroundColor,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -90,30 +92,21 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                     color: galleryFooterThemeData.shareIconColor,
                   ),
                   onPressed: () async {
-                    final attachment = widget
-                        .mediaAttachmentPackages[widget.currentPage].attachment;
-                    final url = attachment.imageUrl ??
-                        attachment.assetUrl ??
-                        attachment.thumbUrl!;
-                    final type = attachment.type == 'image'
-                        ? 'jpg'
-                        : url.split('?').first.split('.').last;
+                    final attachment = widget.mediaAttachmentPackages[widget.currentPage].attachment;
+                    final url = attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl!;
+                    final type = attachment.type == 'image' ? 'jpg' : url.split('?').first.split('.').last;
                     final request = await HttpClient().getUrl(Uri.parse(url));
                     final response = await request.close();
-                    final bytes =
-                        await consolidateHttpClientResponseBytes(response);
+                    final bytes = await consolidateHttpClientResponseBytes(response);
                     final tmpPath = await getTemporaryDirectory();
                     final filePath = '${tmpPath.path}/${attachment.id}.$type';
                     final file = File(filePath);
                     await file.writeAsBytes(bytes);
-                    final box =
-                        shareButtonKey.currentContext?.findRenderObject();
-                    final position =
-                        (box! as RenderBox).localToGlobal(Offset.zero);
+                    final box = shareButtonKey.currentContext?.findRenderObject();
+                    final position = (box! as RenderBox).localToGlobal(Offset.zero);
                     await Share.shareXFiles(
                       [XFile(filePath)],
-                      sharePositionOrigin:
-                          Rect.fromLTWH(position.dx, position.dy, 0, 0),
+                      sharePositionOrigin: Rect.fromLTWH(position.dx, position.dy, 0, 0),
                     );
                   },
                 ),
@@ -165,8 +158,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
       builder: (context) {
         return DraggableScrollableSheet(
           expand: false,
-          initialChildSize:
-              (CurrentPlatform.isAndroid || CurrentPlatform.isIos) ? 0.3 : 0.5,
+          initialChildSize: (CurrentPlatform.isAndroid || CurrentPlatform.isIos) ? 0.3 : 0.5,
           minChildSize: 0.3,
           maxChildSize: 0.7,
           builder: (context, scrollController) => Column(
@@ -178,8 +170,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                       padding: const EdgeInsets.all(16),
                       child: Text(
                         context.translations.photosLabel,
-                        style:
-                            galleryFooterThemeData.bottomSheetPhotosTextStyle,
+                        style: galleryFooterThemeData.bottomSheetPhotosTextStyle,
                       ),
                     ),
                   ),
@@ -207,8 +198,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                   ),
                   itemBuilder: (context, index) {
                     Widget media;
-                    final attachmentPackage =
-                        widget.mediaAttachmentPackages[index];
+                    final attachmentPackage = widget.mediaAttachmentPackages[index];
                     final attachment = attachmentPackage.attachment;
                     final message = attachmentPackage.message;
                     if (attachment.type == 'video') {
@@ -219,8 +209,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                           child: AspectRatio(
                             aspectRatio: 1,
                             child: StreamVideoThumbnailImage(
-                              video:
-                                  attachment.file?.path ?? attachment.assetUrl,
+                              video: attachment.file?.path ?? attachment.assetUrl,
                             ),
                           ),
                         ),
@@ -233,9 +222,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                           child: AspectRatio(
                             aspectRatio: 1,
                             child: CachedNetworkImage(
-                              imageUrl: attachment.imageUrl ??
-                                  attachment.assetUrl ??
-                                  attachment.thumbUrl!,
+                              imageUrl: attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl!,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -258,16 +245,13 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                                 boxShadow: [
                                   BoxShadow(
                                     blurRadius: 8,
-                                    color: chatThemeData
-                                        .colorTheme.textHighEmphasis
-                                        .withOpacity(0.3),
+                                    color: chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.3),
                                   ),
                                 ],
                               ),
                               child: StreamUserAvatar(
                                 user: message.user!,
-                                constraints:
-                                    BoxConstraints.tight(const Size(24, 24)),
+                                constraints: BoxConstraints.tight(const Size(24, 24)),
                                 showOnlineStatus: false,
                               ),
                             ),

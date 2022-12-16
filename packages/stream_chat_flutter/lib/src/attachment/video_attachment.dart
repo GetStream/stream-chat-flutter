@@ -18,6 +18,8 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
     this.onReplyMessage,
     this.onAttachmentTap,
     this.httpHeaders,
+    this.showMessageActionButton = true,
+    this.showShareButton = true,
   });
 
   /// The [StreamMessageThemeData] to use for the title
@@ -34,6 +36,12 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
 
   /// Http headers
   final Map<String, String>? httpHeaders;
+
+  /// Show message action button on preview
+  final bool showMessageActionButton;
+
+  /// Show share button on preview
+  final bool showShareButton;
 
   @override
   Widget build(BuildContext context) {
@@ -85,14 +93,14 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
                           builder: (_) => StreamChannel(
                             channel: channel,
                             child: StreamFullScreenMediaBuilder(
-                              mediaAttachmentPackages:
-                                  message.getAttachmentPackageList(),
-                              startIndex:
-                                  message.attachments.indexOf(attachment),
+                              mediaAttachmentPackages: message.getAttachmentPackageList(),
+                              startIndex: message.attachments.indexOf(attachment),
                               userName: message.user!.name,
                               onShowMessage: onShowMessage,
                               onReplyMessage: onReplyMessage,
                               httpHeaders: httpHeaders,
+                              showMessageActionButton: showMessageActionButton,
+                              showShareButton: showShareButton,
                             ),
                           ),
                         ),

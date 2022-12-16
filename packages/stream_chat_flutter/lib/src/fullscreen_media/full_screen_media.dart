@@ -27,6 +27,8 @@ class StreamFullScreenMedia extends FullScreenMediaWidget {
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
     this.httpHeaders,
+    this.showShareButton = false,
+    this.showMessageActionButton = false,
   }) : assert(startIndex >= 0, 'startIndex cannot be negative');
 
   /// The url of the image
@@ -54,6 +56,12 @@ class StreamFullScreenMedia extends FullScreenMediaWidget {
 
   /// Http headers
   final Map<String, String>? httpHeaders;
+
+  /// Show share button on footer
+  final bool showShareButton;
+
+  /// Show message action button in header
+  final bool showMessageActionButton;
 
   @override
   _FullScreenMediaState createState() => _FullScreenMediaState();
@@ -167,6 +175,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                             }
                           : null,
                       attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
+                      showMessageActionButton: widget.showMessageActionButton,
                     ),
                   );
                 },
@@ -185,6 +194,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                       end: 0,
                       height: bottomPadding + kToolbarHeight,
                       child: StreamGalleryFooter(
+                        showShareButton: widget.showShareButton,
                         currentPage: currentPage,
                         totalPages: widget.mediaAttachmentPackages.length,
                         mediaAttachmentPackages: widget.mediaAttachmentPackages,

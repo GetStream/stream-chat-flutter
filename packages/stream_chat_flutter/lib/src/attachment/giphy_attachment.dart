@@ -30,8 +30,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl =
-        attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
+    final imageUrl = attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
     if (imageUrl == null) {
       return const AttachmentError();
     }
@@ -82,10 +81,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                           child: Text(
                             attachment.title!,
                             style: TextStyle(
-                              color: StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .textHighEmphasis
-                                  .withOpacity(0.5),
+                              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                             ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
@@ -123,10 +119,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                   ),
                 ),
                 Container(
-                  color: StreamChatTheme.of(context)
-                      .colorTheme
-                      .textHighEmphasis
-                      .withOpacity(0.2),
+                  color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.2),
                   width: double.infinity,
                   height: 0.5,
                 ),
@@ -145,17 +138,9 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                             );
                           },
                           child: Text(
-                            context.translations.cancelLabel
-                                .toLowerCase()
-                                .capitalize(),
-                            style: StreamChatTheme.of(context)
-                                .textTheme
-                                .bodyBold
-                                .copyWith(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .textHighEmphasis
-                                      .withOpacity(0.5),
+                            context.translations.cancelLabel.toLowerCase().capitalize(),
+                            style: StreamChatTheme.of(context).textTheme.bodyBold.copyWith(
+                                  color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                                 ),
                           ),
                         ),
@@ -163,10 +148,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                     ),
                     Container(
                       width: 0.5,
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .textHighEmphasis
-                          .withOpacity(0.2),
+                      color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.2),
                       height: 50,
                     ),
                     Expanded(
@@ -183,14 +165,8 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                           },
                           child: Text(
                             context.translations.shuffleLabel,
-                            style: StreamChatTheme.of(context)
-                                .textTheme
-                                .bodyBold
-                                .copyWith(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .textHighEmphasis
-                                      .withOpacity(0.5),
+                            style: StreamChatTheme.of(context).textTheme.bodyBold.copyWith(
+                                  color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                                 ),
                             maxLines: 1,
                           ),
@@ -199,10 +175,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                     ),
                     Container(
                       width: 0.5,
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .textHighEmphasis
-                          .withOpacity(0.2),
+                      color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.2),
                       height: 50,
                     ),
                     Expanded(
@@ -220,9 +193,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                           child: Text(
                             context.translations.sendLabel,
                             style: TextStyle(
-                              color: StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .accentPrimary,
+                              color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -305,10 +276,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
             bottom: 8,
             left: 8,
             child: Material(
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .textHighEmphasis
-                  .withOpacity(0.5),
+              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

@@ -23,6 +23,8 @@ class StreamImageAttachment extends StreamAttachmentWidget {
     this.imageThumbnailResizeType = 'clip',
     this.imageThumbnailCropType = 'center',
     this.httpHeaders,
+    this.showMessageActionButton = true,
+    this.showShareButton = true,
   });
 
   /// The [StreamMessageThemeData] to use for the image title
@@ -55,6 +57,12 @@ class StreamImageAttachment extends StreamAttachmentWidget {
 
   /// Http headers
   final Map<String, String>? httpHeaders;
+
+  /// Show message action button on preview
+  final bool showMessageActionButton;
+
+  /// Show share button on preview
+  final bool showShareButton;
 
   @override
   Widget build(BuildContext context) {
@@ -89,8 +97,7 @@ class StreamImageAttachment extends StreamAttachmentWidget {
         }
       },
       network: () {
-        var imageUrl =
-            attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
+        var imageUrl = attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
 
         if (imageUrl == null) {
           return AttachmentError(constraints: constraints);
@@ -124,16 +131,14 @@ class StreamImageAttachment extends StreamAttachmentWidget {
                 child: image,
               );
             },
-            errorWidget: (context, url, error) =>
-                AttachmentError(constraints: constraints),
+            errorWidget: (context, url, error) => AttachmentError(constraints: constraints),
           ),
         );
       },
     );
   }
 
-  Widget _imageErrorBuilder(BuildContext _, Object __, StackTrace? ___) =>
-      Image.asset(
+  Widget _imageErrorBuilder(BuildContext _, Object __, StackTrace? ___) => Image.asset(
         'images/placeholder.png',
         package: 'stream_chat_flutter',
       );
@@ -154,19 +159,18 @@ class StreamImageAttachment extends StreamAttachmentWidget {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) {
-                                final channel =
-                                    StreamChannel.of(context).channel;
+                                final channel = StreamChannel.of(context).channel;
                                 return StreamChannel(
                                   channel: channel,
                                   child: StreamFullScreenMediaBuilder(
-                                    mediaAttachmentPackages:
-                                        message.getAttachmentPackageList(),
-                                    startIndex:
-                                        message.attachments.indexOf(attachment),
+                                    mediaAttachmentPackages: message.getAttachmentPackageList(),
+                                    startIndex: message.attachments.indexOf(attachment),
                                     userName: message.user!.name,
                                     onShowMessage: onShowMessage,
                                     onReplyMessage: onReplyMessage,
                                     httpHeaders: httpHeaders,
+                                    showMessageActionButton: showMessageActionButton,
+                                    showShareButton: showShareButton,
                                   ),
                                 );
                               },

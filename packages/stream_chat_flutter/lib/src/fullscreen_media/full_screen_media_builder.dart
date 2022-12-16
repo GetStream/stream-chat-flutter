@@ -35,6 +35,8 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
     this.attachmentActionsModalBuilder,
     this.autoplayVideos = false,
     this.httpHeaders,
+    this.showMessageActionButton = true,
+    this.showShareButton = true,
   });
 
   /// The url of the image
@@ -60,7 +62,14 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
   /// Auto-play videos when page is opened
   final bool autoplayVideos;
 
+  /// Headers passed in to authenticate attachment retrieval
   final Map<String, String>? httpHeaders;
+
+  /// Show message action button on preview
+  final bool showMessageActionButton;
+
+  /// Show share button on preview
+  final bool showShareButton;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +94,8 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
       attachmentActionsModalBuilder: attachmentActionsModalBuilder,
       autoplayVideos: autoplayVideos,
       httpHeaders: httpHeaders,
+      showMessageActionButton: showMessageActionButton,
+      showShareButton: showShareButton,
     );
   }
 }

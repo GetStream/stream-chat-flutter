@@ -10,8 +10,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// {@macro streamGalleryHeader}
 /// Header/AppBar widget for media display screen
 /// {@endtemplate}
-class StreamGalleryHeader extends StatelessWidget
-    implements PreferredSizeWidget {
+class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   /// {@macro streamGalleryHeader}
   const StreamGalleryHeader({
     super.key,
@@ -28,6 +27,7 @@ class StreamGalleryHeader extends StatelessWidget
     this.backgroundColor,
     this.attachmentActionsModalBuilder,
     this.elevation = 1.0,
+    this.showMessageActionButton = false,
   }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// Whether to show the leading back button.
@@ -69,6 +69,9 @@ class StreamGalleryHeader extends StatelessWidget
   /// {@macro attachmentActionsBuilder}
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
+  /// Show message actions
+  final bool showMessageActionButton;
+
   /// The elevation of this [StreamGalleryHeader].
   ///
   /// Defaults to `1.0`. When used for desktop & web platforms, it should
@@ -82,9 +85,7 @@ class StreamGalleryHeader extends StatelessWidget
     return AppBar(
       toolbarTextStyle: theme.textTheme.bodyText2,
       titleTextStyle: theme.textTheme.headline6,
-      systemOverlayStyle: theme.brightness == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
+      systemOverlayStyle: theme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       elevation: elevation,
       leading: showBackButton
           ? IconButton(
@@ -95,8 +96,7 @@ class StreamGalleryHeader extends StatelessWidget
               onPressed: onBackPressed,
             )
           : const SizedBox(),
-      backgroundColor:
-          backgroundColor ?? galleryHeaderThemeData.backgroundColor,
+      backgroundColor: backgroundColor ?? galleryHeaderThemeData.backgroundColor,
       actions: <Widget>[
         if (!message.isEphemeral)
           IconButton(
@@ -138,8 +138,7 @@ class StreamGalleryHeader extends StatelessWidget
 
   Future<void> _showMessageActionModalBottomSheet(BuildContext context) async {
     final channel = StreamChannel.of(context).channel;
-    final galleryHeaderThemeData =
-        StreamChatTheme.of(context).galleryHeaderTheme;
+    final galleryHeaderThemeData = StreamChatTheme.of(context).galleryHeaderTheme;
 
     final defaultModal = AttachmentActionsModal(
       attachment: attachment,
