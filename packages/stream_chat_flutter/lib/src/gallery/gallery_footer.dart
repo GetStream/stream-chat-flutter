@@ -66,7 +66,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
   final shareButtonKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
-    final showShareButton = !kIsWeb || !widget.showShareButton;
+    final showShareButton = !kIsWeb && widget.showShareButton;
     final mediaQueryData = MediaQuery.of(context);
     final galleryFooterThemeData = StreamGalleryFooterTheme.of(context);
     return SizedBox.fromSize(

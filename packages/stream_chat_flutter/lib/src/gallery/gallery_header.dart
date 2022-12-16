@@ -98,7 +98,7 @@ class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget
           : const SizedBox(),
       backgroundColor: backgroundColor ?? galleryHeaderThemeData.backgroundColor,
       actions: <Widget>[
-        if (!message.isEphemeral)
+        if (!message.isEphemeral && showMessageActionButton)
           IconButton(
             icon: StreamSvgIcon.iconMenuPoint(
               color: galleryHeaderThemeData.iconMenuPointColor,
