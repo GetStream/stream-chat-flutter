@@ -71,7 +71,7 @@ class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
     // Only generate thumbnail if the thumbnail url is not provided.
     if (widget.thumbUrl == null) {
       thumbnailFuture = StreamVideoService.generateVideoThumbnail(
-        video: widget.video,
+        video: widget.video!,
         imageFormat: widget.format,
         httpHeaders: widget.httpHeaders,
       );
