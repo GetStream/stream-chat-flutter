@@ -1,3 +1,9 @@
+## Upcomming
+
+✅ Added
+
+- Added `Huawei` and `Xiaomi` PushProviders.
+
 ## 5.1.0
 
 ✅ Added
