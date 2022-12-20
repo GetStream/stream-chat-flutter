@@ -6,6 +6,12 @@ enum PushProvider {
   /// Send notifications using Google's Firebase Cloud Messaging
   firebase,
 
+  /// Send notifications using Huawei's Push Kit
+  huawei,
+
+  /// Send notifications using Xiaomi's Mi Push Service
+  xiaomi,
+
   /// Send notifications using Apple's Push Notification service
   apn,
 }
