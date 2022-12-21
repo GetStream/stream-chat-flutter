@@ -21,6 +21,9 @@ class _IVideoService {
   ///
   /// Thumbnails are not supported on Web at this time.
   ///
+  /// If no [video] path is supplied, or if a thumbnail cannot be generated,
+  /// returns [generatePlaceholderThumbnail]. A stock placeholder image.
+  ///
   /// For desktop, you can specify the position of the video to generate
   /// the thumbnail.
   ///
@@ -29,14 +32,14 @@ class _IVideoService {
   /// creates lower quality of the thumbnail image, but it gets ignored for
   /// PNG format.
   Future<Uint8List?> generateVideoThumbnail({
-    required String video,
+    String? video,
     ImageFormat imageFormat = ImageFormat.PNG,
     int maxHeight = 0,
     int maxWidth = 0,
     int timeMs = 0,
     int quality = 10,
   }) async {
-    if (kIsWeb) {
+    if (kIsWeb || video == null) {
       final placeholder = await generatePlaceholderThumbnail();
       return placeholder;
     }

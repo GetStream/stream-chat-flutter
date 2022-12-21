@@ -219,8 +219,8 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                           child: AspectRatio(
                             aspectRatio: 1,
                             child: StreamVideoThumbnailImage(
-                              video: (attachment.file?.path ??
-                                  attachment.assetUrl)!,
+                              video:
+                                  attachment.file?.path ?? attachment.assetUrl,
                             ),
                           ),
                         ),
