@@ -22,26 +22,37 @@ void main() {
 
   test('addDevice should work', () async {
     const deviceId = 'test-device-id';
-    const pushProvider = PushProvider.firebase;
-
+    const pushProvidersMap = {
+      'apn': PushProvider.apn,
+      'firebase': PushProvider.firebase,
+      'huawei': PushProvider.huawei,
+      'xiaomi': PushProvider.xiaomi,
+    };
     const path = '/devices';
 
-    when(() => client.post(
-              path,
-              data: {
-                'id': deviceId,
-                'push_provider': pushProvider.name,
-              },
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    for (final pushProviderMapEntry in pushProvidersMap.entries) {
+      final data = {
+        'id': deviceId,
+        'push_provider': pushProviderMapEntry.key,
+      };
+      when(() {
+        return client.post(
+          path,
+          data: data,
+        );
+      }).thenAnswer(
+          (_) async => successResponse(path, data: <String, dynamic>{}));
 
-    final res = await deviceApi.addDevice(deviceId, pushProvider);
+      final res =
+          await deviceApi.addDevice(deviceId, pushProviderMapEntry.value);
 
-    expect(res, isNotNull);
+      expect(res, isNotNull);
 
-    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+      verify(() => client.post(path, data: data)).called(1);
+    }
     verifyNoMoreInteractions(client);
+    expect(pushProvidersMap.length, PushProvider.values.length,
+        reason: 'All PushProvider should be tested');
   });
 
   test('addDevice should work with pushProviderName', () async {
