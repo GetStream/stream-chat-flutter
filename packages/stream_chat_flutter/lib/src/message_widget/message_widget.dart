@@ -80,8 +80,15 @@ class StreamMessageWidget extends StatefulWidget {
     this.userAvatarBuilder,
     this.editMessageInputBuilder,
     this.textBuilder,
-    this.bottomRowBuilder,
-    this.deletedBottomRowBuilder,
+    @Deprecated('''
+    Use [bottomRowBuilderWithDefaultWidget] instead.
+    Will be removed in the next major version.
+    ''') this.bottomRowBuilder,
+    this.bottomRowBuilderWithDefaultWidget,
+    @Deprecated('''
+    Use [bottomRowBuilderWithDefaultWidget] instead.
+    Will be removed in the next major version.
+    ''') this.deletedBottomRowBuilder,
     this.customAttachmentBuilders,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
@@ -93,11 +100,18 @@ class StreamMessageWidget extends StatefulWidget {
     this.onQuotedMessageTap,
     this.customActions = const [],
     this.onAttachmentTap,
-    this.usernameBuilder,
+    @Deprecated('''
+    Use [bottomRowBuilderWithDefaultWidget] instead.
+    Will be removed in the next major version.
+    ''') this.usernameBuilder,
     this.imageAttachmentThumbnailSize = const Size(400, 400),
     this.imageAttachmentThumbnailResizeType = 'clip',
     this.imageAttachmentThumbnailCropType = 'center',
-  }) : attachmentBuilders = {
+  })  : assert(
+          bottomRowBuilder == null || bottomRowBuilderWithDefaultWidget == null,
+          'You can only use one of the two bottom row builders',
+        ),
+        attachmentBuilders = {
           'image': (context, message, attachments) {
             final border = RoundedRectangleBorder(
               side: attachmentBorderSide ??
@@ -307,7 +321,13 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@template bottomRowBuilder}
   /// Widget builder for building a bottom row below the message
   /// {@endtemplate}
-  final Widget Function(BuildContext, Message, BottomRow)? bottomRowBuilder;
+  final BottomRowBuilder? bottomRowBuilder;
+
+  /// {@template bottomRowBuilderWithDefaultWidget}
+  /// Widget builder for building a bottom row below the message.
+  /// Also contains the default bottom row widget.
+  /// {@endtemplate}
+  final BottomRowBuilderWithDefaultWidget? bottomRowBuilderWithDefaultWidget;
 
   /// {@template deletedBottomRowBuilder}
   /// Widget builder for building a bottom row below a deleted message
@@ -538,9 +558,19 @@ class StreamMessageWidget extends StatefulWidget {
     void Function(Message)? onReplyTap,
     Widget Function(BuildContext, Message)? editMessageInputBuilder,
     Widget Function(BuildContext, Message)? textBuilder,
-    Widget Function(BuildContext, Message)? usernameBuilder,
-    Widget Function(BuildContext, Message, BottomRow)? bottomRowBuilder,
-    Widget Function(BuildContext, Message)? deletedBottomRowBuilder,
+    @Deprecated('''
+    Use [bottomRowBuilderWithDefaultWidget] instead.
+    Will be removed in the next major version.
+    ''') Widget Function(BuildContext, Message)? usernameBuilder,
+    @Deprecated('''
+    Use [bottomRowBuilderWithDefaultWidget] instead.
+    Will be removed in the next major version.
+    ''') BottomRowBuilder? bottomRowBuilder,
+    BottomRowBuilderWithDefaultWidget? bottomRowBuilderWithDefaultWidget,
+    @Deprecated('''
+    Use [bottomRowBuilderWithDefaultWidget] instead.
+    Will be removed in the next major version.
+    ''') Widget Function(BuildContext, Message)? deletedBottomRowBuilder,
     void Function(BuildContext, Message)? onMessageActions,
     Message? message,
     StreamMessageThemeData? messageTheme,
@@ -588,6 +618,23 @@ class StreamMessageWidget extends StatefulWidget {
     String? imageAttachmentThumbnailResizeType,
     String? imageAttachmentThumbnailCropType,
   }) {
+    var _bottomRowBuilderWithDefaultWidget =
+        bottomRowBuilderWithDefaultWidget ??
+            this.bottomRowBuilderWithDefaultWidget;
+
+    _bottomRowBuilderWithDefaultWidget ??= (context, message, defaultWidget) {
+      final _bottomRowBuilder = bottomRowBuilder ?? this.bottomRowBuilder;
+      if (_bottomRowBuilder != null) {
+        return _bottomRowBuilder(context, message);
+      }
+
+      return defaultWidget.copyWith(
+        onThreadTap: onThreadTap,
+        usernameBuilder: usernameBuilder,
+        deletedBottomRowBuilder: deletedBottomRowBuilder,
+      );
+    };
+
     return StreamMessageWidget(
       key: key ?? this.key,
       onMentionTap: onMentionTap ?? this.onMentionTap,
@@ -596,10 +643,7 @@ class StreamMessageWidget extends StatefulWidget {
       editMessageInputBuilder:
           editMessageInputBuilder ?? this.editMessageInputBuilder,
       textBuilder: textBuilder ?? this.textBuilder,
-      usernameBuilder: usernameBuilder ?? this.usernameBuilder,
-      bottomRowBuilder: bottomRowBuilder ?? this.bottomRowBuilder,
-      deletedBottomRowBuilder:
-          deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
+      bottomRowBuilderWithDefaultWidget: _bottomRowBuilderWithDefaultWidget,
       onMessageActions: onMessageActions ?? this.onMessageActions,
       message: message ?? this.message,
       messageTheme: messageTheme ?? this.messageTheme,
@@ -871,8 +915,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                     showUserAvatar: widget.showUserAvatar,
                     streamChat: _streamChat,
                     translateUserAvatar: widget.translateUserAvatar,
-                    deletedBottomRowBuilder: widget.deletedBottomRowBuilder,
-                    onThreadTap: widget.onThreadTap,
                     shape: widget.shape,
                     borderSide: widget.borderSide,
                     borderRadiusGeometry: widget.borderRadiusGeometry,
@@ -880,10 +922,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                     onLinkTap: widget.onLinkTap,
                     onMentionTap: widget.onMentionTap,
                     onQuotedMessageTap: widget.onQuotedMessageTap,
-                    bottomRowBuilder: widget.bottomRowBuilder,
+                    bottomRowBuilderWithDefaultWidget:
+                        widget.bottomRowBuilderWithDefaultWidget,
                     onUserAvatarTap: widget.onUserAvatarTap,
                     userAvatarBuilder: widget.userAvatarBuilder,
-                    usernameBuilder: widget.usernameBuilder,
                   ),
                 ),
               ),

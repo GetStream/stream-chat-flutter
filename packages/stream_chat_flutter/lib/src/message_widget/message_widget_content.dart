@@ -4,6 +4,18 @@ import 'package:stream_chat_flutter/src/message_widget/message_widget_content_co
 import 'package:stream_chat_flutter/src/message_widget/reactions/desktop_reactions_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// Signature for the builder function that will be called when the message
+/// bottom row is built. Includes the [Message].
+typedef BottomRowBuilder = Widget Function(BuildContext, Message);
+
+/// Signature for the builder function that will be called when the message
+/// bottom row is built. Includes the [Message] and the default [BottomRow].
+typedef BottomRowBuilderWithDefaultWidget = Widget Function(
+  BuildContext,
+  Message,
+  BottomRow,
+);
+
 /// {@template messageWidgetContent}
 /// The main content of a [StreamMessageWidget].
 ///
@@ -51,12 +63,28 @@ class MessageWidgetContent extends StatelessWidget {
     this.onMentionTap,
     this.onLinkTap,
     this.textBuilder,
-    this.bottomRowBuilder,
-    this.onThreadTap,
-    this.deletedBottomRowBuilder,
+    @Deprecated('''
+    Use [bottomRowBuilderWithDefaultWidget] instead.
+    Will be removed in the next major version.
+    ''') this.bottomRowBuilder,
+    this.bottomRowBuilderWithDefaultWidget,
+    @Deprecated('''
+    Use [bottomRowBuilderWithDefaultWidget] instead.
+    Will be removed in the next major version.
+    ''') this.onThreadTap,
+    @Deprecated('''
+    Use [bottomRowBuilderWithDefaultWidget] instead.
+    Will be removed in the next major version.
+    ''') this.deletedBottomRowBuilder,
     this.userAvatarBuilder,
-    this.usernameBuilder,
-  });
+    @Deprecated('''
+    Use [bottomRowBuilderWithDefaultWidget] instead.
+    Will be removed in the next major version.
+    ''') this.usernameBuilder,
+  }) : assert(
+          bottomRowBuilder == null || bottomRowBuilderWithDefaultWidget == null,
+          'You can only use one of the two bottom row builders',
+        );
 
   /// {@macro reverse}
   final bool reverse;
@@ -152,7 +180,10 @@ class MessageWidgetContent extends StatelessWidget {
   final double bottomRowPadding;
 
   /// {@macro bottomRowBuilder}
-  final Widget Function(BuildContext, Message, BottomRow)? bottomRowBuilder;
+  final BottomRowBuilder? bottomRowBuilder;
+
+  /// {@macro bottomRowBuilderWithDefaultWidget}
+  final BottomRowBuilderWithDefaultWidget? bottomRowBuilderWithDefaultWidget;
 
   /// {@macro showInChannelIndicator}
   final bool showInChannel;
@@ -457,7 +488,16 @@ class MessageWidgetContent extends StatelessWidget {
       usernameBuilder: usernameBuilder,
     );
 
-    return bottomRowBuilder?.call(context, message, defaultWidget) ??
-        defaultWidget;
+    if (bottomRowBuilder != null) {
+      return bottomRowBuilder!(context, message);
+    } else if (bottomRowBuilderWithDefaultWidget != null) {
+      return bottomRowBuilderWithDefaultWidget!(
+        context,
+        message,
+        defaultWidget,
+      );
+    }
+
+    return defaultWidget;
   }
 }
