@@ -618,6 +618,11 @@ class StreamMessageWidget extends StatefulWidget {
     String? imageAttachmentThumbnailResizeType,
     String? imageAttachmentThumbnailCropType,
   }) {
+    assert(
+      bottomRowBuilder == null || bottomRowBuilderWithDefaultWidget == null,
+      'You can only use one of the two bottom row builders',
+    );
+
     var _bottomRowBuilderWithDefaultWidget =
         bottomRowBuilderWithDefaultWidget ??
             this.bottomRowBuilderWithDefaultWidget;
@@ -629,9 +634,10 @@ class StreamMessageWidget extends StatefulWidget {
       }
 
       return defaultWidget.copyWith(
-        onThreadTap: onThreadTap,
-        usernameBuilder: usernameBuilder,
-        deletedBottomRowBuilder: deletedBottomRowBuilder,
+        onThreadTap: onThreadTap ?? this.onThreadTap,
+        usernameBuilder: usernameBuilder ?? this.usernameBuilder,
+        deletedBottomRowBuilder:
+            deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
       );
     };
 
@@ -883,50 +889,69 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       ? Alignment.centerRight
                       : Alignment.centerLeft,
                   widthFactor: widget.widthFactor,
-                  child: MessageWidgetContent(
-                    streamChatTheme: _streamChatTheme,
-                    showUsername: showUsername,
-                    showTimeStamp: showTimeStamp,
-                    showThreadReplyIndicator: showThreadReplyIndicator,
-                    showSendingIndicator: showSendingIndicator,
-                    showInChannel: showInChannel,
-                    isGiphy: isGiphy,
-                    isOnlyEmoji: isOnlyEmoji,
-                    hasUrlAttachments: hasUrlAttachments,
-                    messageTheme: widget.messageTheme,
-                    reverse: widget.reverse,
-                    message: widget.message,
-                    hasNonUrlAttachments: hasNonUrlAttachments,
-                    shouldShowReactions: shouldShowReactions,
-                    hasQuotedMessage: hasQuotedMessage,
-                    textPadding: widget.textPadding,
-                    attachmentBuilders: widget.attachmentBuilders,
-                    attachmentPadding: widget.attachmentPadding,
-                    avatarWidth: avatarWidth,
-                    bottomRowPadding: bottomRowPadding,
-                    isFailedState: isFailedState,
-                    isPinned: isPinned,
-                    messageWidget: widget,
-                    showBottomRow: showBottomRow,
-                    showPinHighlight: widget.showPinHighlight,
-                    showReactionPickerIndicator:
-                        widget.showReactionPickerIndicator,
-                    showReactions: showReactions,
-                    showUserAvatar: widget.showUserAvatar,
-                    streamChat: _streamChat,
-                    translateUserAvatar: widget.translateUserAvatar,
-                    shape: widget.shape,
-                    borderSide: widget.borderSide,
-                    borderRadiusGeometry: widget.borderRadiusGeometry,
-                    textBuilder: widget.textBuilder,
-                    onLinkTap: widget.onLinkTap,
-                    onMentionTap: widget.onMentionTap,
-                    onQuotedMessageTap: widget.onQuotedMessageTap,
-                    bottomRowBuilderWithDefaultWidget:
-                        widget.bottomRowBuilderWithDefaultWidget,
-                    onUserAvatarTap: widget.onUserAvatarTap,
-                    userAvatarBuilder: widget.userAvatarBuilder,
-                  ),
+                  child: Builder(builder: (context) {
+                    var _bottomRowBuilderWithDefaultWidget =
+                        widget.bottomRowBuilderWithDefaultWidget;
+
+                    _bottomRowBuilderWithDefaultWidget ??=
+                        (context, message, defaultWidget) {
+                      final _bottomRowBuilder = widget.bottomRowBuilder;
+                      if (_bottomRowBuilder != null) {
+                        return _bottomRowBuilder(context, message);
+                      }
+
+                      return defaultWidget.copyWith(
+                        onThreadTap: widget.onThreadTap,
+                        usernameBuilder: widget.usernameBuilder,
+                        deletedBottomRowBuilder: widget.deletedBottomRowBuilder,
+                      );
+                    };
+
+                    return MessageWidgetContent(
+                      streamChatTheme: _streamChatTheme,
+                      showUsername: showUsername,
+                      showTimeStamp: showTimeStamp,
+                      showThreadReplyIndicator: showThreadReplyIndicator,
+                      showSendingIndicator: showSendingIndicator,
+                      showInChannel: showInChannel,
+                      isGiphy: isGiphy,
+                      isOnlyEmoji: isOnlyEmoji,
+                      hasUrlAttachments: hasUrlAttachments,
+                      messageTheme: widget.messageTheme,
+                      reverse: widget.reverse,
+                      message: widget.message,
+                      hasNonUrlAttachments: hasNonUrlAttachments,
+                      shouldShowReactions: shouldShowReactions,
+                      hasQuotedMessage: hasQuotedMessage,
+                      textPadding: widget.textPadding,
+                      attachmentBuilders: widget.attachmentBuilders,
+                      attachmentPadding: widget.attachmentPadding,
+                      avatarWidth: avatarWidth,
+                      bottomRowPadding: bottomRowPadding,
+                      isFailedState: isFailedState,
+                      isPinned: isPinned,
+                      messageWidget: widget,
+                      showBottomRow: showBottomRow,
+                      showPinHighlight: widget.showPinHighlight,
+                      showReactionPickerIndicator:
+                          widget.showReactionPickerIndicator,
+                      showReactions: showReactions,
+                      showUserAvatar: widget.showUserAvatar,
+                      streamChat: _streamChat,
+                      translateUserAvatar: widget.translateUserAvatar,
+                      shape: widget.shape,
+                      borderSide: widget.borderSide,
+                      borderRadiusGeometry: widget.borderRadiusGeometry,
+                      textBuilder: widget.textBuilder,
+                      onLinkTap: widget.onLinkTap,
+                      onMentionTap: widget.onMentionTap,
+                      onQuotedMessageTap: widget.onQuotedMessageTap,
+                      bottomRowBuilderWithDefaultWidget:
+                          _bottomRowBuilderWithDefaultWidget,
+                      onUserAvatarTap: widget.onUserAvatarTap,
+                      userAvatarBuilder: widget.userAvatarBuilder,
+                    );
+                  }),
                 ),
               ),
             ),
