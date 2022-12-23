@@ -1,4 +1,4 @@
-## Upcomming
+## 5.2.0
 
 ✅ Added
 - Added a new `bottomRowBuilderWithDefaultWidget` parameter to `StreamMessageWidget` which contains a third parameter (default `BottomRow` widget with `copyWith` method available) to allow easier customization.
