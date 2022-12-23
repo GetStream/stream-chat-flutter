@@ -1,5 +1,8 @@
 ## Upcomming
 
+✅ Added
+- Added a new `bottomRowBuilderWithDefaultWidget` parameter to `StreamMessageWidget` which contains a third parameter (default `BottomRow` widget with `copyWith` method available) to allow easier customization.
+
 🔄 Changed
 
 - Updated `lottie` dependency to `^2.0.0`
@@ -7,6 +10,9 @@
 - Updated `connectivity_plus` dependency to `^3.0.2`
 - Updated `dart_vlc` dependency to `^0.4.0`
 - Updated `file_picker` dependency to `^5.2.4`
+- Deprecated `StreamMessageWidget.bottomRowBuilder` in favor of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
+- Deprecated `StreamMessageWidget.deletedBottomRowBuilder` in favor of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
+- Deprecated `StreamMessageWidget.usernameBuilder` in favor of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
 
 🐞 Fixed
 - [[#1379]](https://github.com/GetStream/stream-chat-flutter/issues/1379) Fixed "Issues with photo attachments on web", where the cached image attachment would not render while uploading.
