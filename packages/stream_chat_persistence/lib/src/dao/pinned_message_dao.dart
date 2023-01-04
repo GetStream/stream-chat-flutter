@@ -10,8 +10,7 @@ part 'pinned_message_dao.g.dart';
 
 /// The Data Access Object for operations in [Messages] table.
 @DriftAccessor(tables: [PinnedMessages, Users])
-class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
-    with _$PinnedMessageDaoMixin {
+class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$PinnedMessageDaoMixin {
   /// Creates a new message dao instance
   PinnedMessageDao(this._db) : super(_db);
 
@@ -39,10 +38,8 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
     final userEntity = rows.readTableOrNull(users);
     final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
     final msgEntity = rows.readTable(pinnedMessages);
-    final latestReactions =
-        await _db.pinnedMessageReactionDao.getReactions(msgEntity.id);
-    final ownReactions =
-        await _db.pinnedMessageReactionDao.getReactionsByUserId(
+    final latestReactions = await _db.pinnedMessageReactionDao.getReactions(msgEntity.id);
+    final ownReactions = await _db.pinnedMessageReactionDao.getReactionsByUserId(
       msgEntity.id,
       _db.userId,
     );
@@ -61,8 +58,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
   }
 
   /// Returns a single message by matching the [PinnedMessages.id] with [id]
-  Future<Message?> getMessageById(String id) async =>
-      await (select(pinnedMessages).join([
+  Future<Message?> getMessageById(String id) async => await (select(pinnedMessages).join([
         leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
         leftOuterJoin(
           _pinnedByUsers,
@@ -75,8 +71,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
 
   /// Returns all the messages of a particular thread by matching
   /// [PinnedMessages.channelCid] with [cid]
-  Future<List<Message>> getThreadMessages(String cid) async =>
-      Future.wait(await (select(pinnedMessages).join([
+  Future<List<Message>> getThreadMessages(String cid) async => Future.wait(await (select(pinnedMessages).join([
         leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
         leftOuterJoin(
           _pinnedByUsers,
@@ -146,8 +141,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
       ),
     ])
           ..where(pinnedMessages.channelCid.equals(cid))
-          ..where(pinnedMessages.parentId.isNull() |
-              pinnedMessages.showInChannel.equals(true))
+          ..where(pinnedMessages.parentId.isNull() | pinnedMessages.showInChannel.equals(true))
           ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
         .map(_messageFromJoinRow)
         .get());
@@ -178,8 +172,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
 
   /// Updates the message data of a particular channel with
   /// the new [messageList] data
-  Future<void> updateMessages(String cid, List<Message> messageList) =>
-      bulkUpdateMessages({cid: messageList});
+  Future<void> updateMessages(String cid, List<Message> messageList) => bulkUpdateMessages({cid: messageList});
 
   /// Bulk updates the message data of multiple channels
   Future<void> bulkUpdateMessages(

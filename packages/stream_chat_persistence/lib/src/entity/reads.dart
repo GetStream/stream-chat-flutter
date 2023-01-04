@@ -11,8 +11,7 @@ class Reads extends Table {
   TextColumn get userId => text()();
 
   /// The channel cid of which this read belongs
-  TextColumn get channelCid =>
-      text().customConstraint('REFERENCES channels(cid) ON DELETE CASCADE')();
+  TextColumn get channelCid => text().customConstraint('REFERENCES channels(cid) ON DELETE CASCADE NOT NULL')();
 
   /// Number of unread messages
   IntColumn get unreadMessages => integer().withDefault(const Constant(0))();

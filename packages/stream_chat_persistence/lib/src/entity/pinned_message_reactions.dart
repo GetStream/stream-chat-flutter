@@ -8,6 +8,5 @@ import 'package:stream_chat_persistence/src/entity/reactions.dart';
 class PinnedMessageReactions extends Reactions {
   /// The messageId to which the reaction belongs
   @override
-  TextColumn get messageId => text()
-      .customConstraint('REFERENCES pinned_messages(id) ON DELETE CASCADE')();
+  TextColumn get messageId => text().customConstraint('REFERENCES pinned_messages(id) ON DELETE CASCADE NOT NULL')();
 }

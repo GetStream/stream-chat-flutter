@@ -18,9 +18,7 @@ class Messages extends Table {
   TextColumn get attachments => text().map(ListConverter<String>())();
 
   /// The status of a sending message
-  IntColumn get status => integer()
-      .withDefault(const Constant(1))
-      .map(MessageSendingStatusConverter())();
+  IntColumn get status => integer().withDefault(const Constant(1)).map(MessageSendingStatusConverter())();
 
   /// The message type
   TextColumn get type => text().withDefault(const Constant('regular'))();
@@ -77,8 +75,7 @@ class Messages extends Table {
   TextColumn get pinnedByUserId => text().nullable()();
 
   /// The channel cid of which this message is part of
-  TextColumn get channelCid =>
-      text().customConstraint('REFERENCES channels(cid) ON DELETE CASCADE')();
+  TextColumn get channelCid => text().customConstraint('REFERENCES channels(cid) ON DELETE CASCADE NOT NULL')();
 
   /// A Map of [messageText] translations.
   TextColumn get i18n => text().nullable().map(MapConverter<String>())();

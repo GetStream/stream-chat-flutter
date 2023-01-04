@@ -8,8 +8,7 @@ class Members extends Table {
   TextColumn get userId => text()();
 
   /// The channel cid of which this user is part of
-  TextColumn get channelCid =>
-      text().customConstraint('REFERENCES channels(cid) ON DELETE CASCADE')();
+  TextColumn get channelCid => text().customConstraint('REFERENCES channels(cid) ON DELETE CASCADE NOT NULL')();
 
   /// The role of the user in the channel
   TextColumn get channelRole => text().nullable()();

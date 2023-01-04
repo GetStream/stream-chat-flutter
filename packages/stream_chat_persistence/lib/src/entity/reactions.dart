@@ -9,8 +9,7 @@ class Reactions extends Table {
   TextColumn get userId => text()();
 
   /// The messageId to which the reaction belongs
-  TextColumn get messageId =>
-      text().customConstraint('REFERENCES messages(id) ON DELETE CASCADE')();
+  TextColumn get messageId => text().customConstraint('REFERENCES messages(id) ON DELETE CASCADE NOT NULL')();
 
   /// The type of the reaction
   TextColumn get type => text()();
