@@ -114,7 +114,7 @@ class StreamMessageWidget extends StatefulWidget {
           bottomRowBuilder == null || bottomRowBuilderWithDefaultWidget == null,
           'You can only use one of the two bottom row builders',
         ),
-        attachmentBuilders = {}
+        attachmentBuilders = {
           'image': (context, message, attachments) {
             final border = RoundedRectangleBorder(
               side: attachmentBorderSide ??
