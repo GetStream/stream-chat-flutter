@@ -1,3 +1,8 @@
+## Upcoming
+
+🐞 Fixed
+- [[#1424]](https://github.com/GetStream/stream-chat-flutter/issues/1424) Fixed a render issue when showing messages starting with 4 whitespaces.
+
 ## 5.2.0
 
 ✅ Added
