@@ -20,6 +20,10 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
     this.httpHeaders,
     this.showMessageActionButton = true,
     this.showShareButton = true,
+    this.showReplyAction = true,
+    this.showSaveAction = true,
+    this.showShowInChatAction = true,
+    this.showDeleteAction = true,
   });
 
   /// The [StreamMessageThemeData] to use for the title
@@ -42,6 +46,18 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
 
   /// Show share button on preview
   final bool showShareButton;
+
+  /// Show reply button on preview
+  final bool showReplyAction;
+
+  /// Show save button on preview
+  final bool showSaveAction;
+
+  /// Show Show In Chat button on preview
+  final bool showShowInChatAction;
+
+  /// Show delete button on preview
+  final bool showDeleteAction;
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +117,10 @@ class StreamVideoAttachment extends StreamAttachmentWidget {
                               httpHeaders: httpHeaders,
                               showMessageActionButton: showMessageActionButton,
                               showShareButton: showShareButton,
+                              showReplyAction: showReplyAction,
+                              showSaveAction: showSaveAction,
+                              showShowInChatAction: showShowInChatAction,
+                              showDeleteAction: showDeleteAction,
                             ),
                           ),
                         ),

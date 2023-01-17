@@ -75,6 +75,10 @@ class StreamMessageWidget extends StatefulWidget {
     this.showPinHighlight = true,
     this.showMessageActionButton = true,
     this.showShareButton = true,
+    this.showReplyAction = true,
+    this.showSaveAction = true,
+    this.showShowInChatAction = true,
+    this.showDeleteAction = true,
     this.onUserAvatarTap,
     this.onLinkTap,
     this.onMessageActions,
@@ -179,6 +183,10 @@ class StreamMessageWidget extends StatefulWidget {
                 imageThumbnailCropType: imageAttachmentThumbnailCropType,
                 showMessageActionButton: showMessageActionButton,
                 showShareButton: showShareButton,
+                showReplyAction: showReplyAction,
+                showSaveAction: showSaveAction,
+                showShowInChatAction: showShowInChatAction,
+                showDeleteAction: showDeleteAction,
               ),
               attachmentShape: border,
             );
@@ -215,6 +223,10 @@ class StreamMessageWidget extends StatefulWidget {
                             onAttachmentTap(message, attachment);
                           }
                         : null,
+                    showReplyAction: showReplyAction,
+                    showSaveAction: showSaveAction,
+                    showShowInChatAction: showShowInChatAction,
+                    showDeleteAction: showDeleteAction,
                   );
                 }).toList(),
               ),
@@ -249,6 +261,10 @@ class StreamMessageWidget extends StatefulWidget {
                             onAttachmentTap(message, attachment);
                           }
                         : null,
+                    showReplyAction: showReplyAction,
+                    showSaveAction: showSaveAction,
+                    showShowInChatAction: showShowInChatAction,
+                    showDeleteAction: showDeleteAction,
                   );
                 }).toList(),
               ),
@@ -568,7 +584,20 @@ class StreamMessageWidget extends StatefulWidget {
   final String /*center|top|bottom|left|right*/
       imageAttachmentThumbnailCropType;
 
+  /// Custom headers
   final Map<String, String>? httpHeaders;
+
+  /// Show reply button on preview
+  final bool showReplyAction;
+
+  /// Show save button on preview
+  final bool showSaveAction;
+
+  /// Show Show In Chat button on preview
+  final bool showShowInChatAction;
+
+  /// Show delete button on preview
+  final bool showDeleteAction;
 
   /// {@template copyWith}
   /// Creates a copy of [StreamMessageWidget] with specified attributes
@@ -649,8 +678,7 @@ class StreamMessageWidget extends StatefulWidget {
     );
 
     var _bottomRowBuilderWithDefaultWidget =
-        bottomRowBuilderWithDefaultWidget ??
-            this.bottomRowBuilderWithDefaultWidget;
+        bottomRowBuilderWithDefaultWidget ?? this.bottomRowBuilderWithDefaultWidget;
 
     _bottomRowBuilderWithDefaultWidget ??= (context, message, defaultWidget) {
       final _bottomRowBuilder = bottomRowBuilder ?? this.bottomRowBuilder;
@@ -661,8 +689,7 @@ class StreamMessageWidget extends StatefulWidget {
       return defaultWidget.copyWith(
         onThreadTap: onThreadTap ?? this.onThreadTap,
         usernameBuilder: usernameBuilder ?? this.usernameBuilder,
-        deletedBottomRowBuilder:
-            deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
+        deletedBottomRowBuilder: deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
       );
     };
 
@@ -884,11 +911,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                   alignment: widget.reverse ? Alignment.centerRight : Alignment.centerLeft,
                   widthFactor: widget.widthFactor,
                   child: Builder(builder: (context) {
-                    var _bottomRowBuilderWithDefaultWidget =
-                        widget.bottomRowBuilderWithDefaultWidget;
+                    var _bottomRowBuilderWithDefaultWidget = widget.bottomRowBuilderWithDefaultWidget;
 
-                    _bottomRowBuilderWithDefaultWidget ??=
-                        (context, message, defaultWidget) {
+                    _bottomRowBuilderWithDefaultWidget ??= (context, message, defaultWidget) {
                       final _bottomRowBuilder = widget.bottomRowBuilder;
                       if (_bottomRowBuilder != null) {
                         return _bottomRowBuilder(context, message);
@@ -902,50 +927,50 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                     };
 
                     return MessageWidgetContent(
-                    streamChatTheme: _streamChatTheme,
-                    showUsername: showUsername,
-                    showTimeStamp: showTimeStamp,
-                    showThreadReplyIndicator: showThreadReplyIndicator,
-                    showSendingIndicator: showSendingIndicator,
-                    showInChannel: showInChannel,
-                    isGiphy: isGiphy,
-                    isOnlyEmoji: isOnlyEmoji,
-                    hasUrlAttachments: hasUrlAttachments,
-                    messageTheme: widget.messageTheme,
-                    reverse: widget.reverse,
-                    message: widget.message,
-                    hasNonUrlAttachments: hasNonUrlAttachments,
-                    shouldShowReactions: shouldShowReactions,
-                    hasQuotedMessage: hasQuotedMessage,
-                    textPadding: widget.textPadding,
-                    attachmentBuilders: widget.attachmentBuilders,
-                    attachmentPadding: widget.attachmentPadding,
-                    avatarWidth: avatarWidth,
-                    bottomRowPadding: bottomRowPadding,
-                    isFailedState: isFailedState,
-                    isPinned: isPinned,
-                    messageWidget: widget,
-                    showBottomRow: showBottomRow,
-                    showPinHighlight: widget.showPinHighlight,
-                    showReactionPickerIndicator: widget.showReactionPickerIndicator,
-                    showReactions: showReactions,
-                    showUserAvatar: widget.showUserAvatar,
-                    streamChat: _streamChat,
-                    translateUserAvatar: widget.translateUserAvatar,
-                    deletedBottomRowBuilder: widget.deletedBottomRowBuilder,
-                    onThreadTap: widget.onThreadTap,
-                    shape: widget.shape,
-                    borderSide: widget.borderSide,
-                    borderRadiusGeometry: widget.borderRadiusGeometry,
-                    textBuilder: widget.textBuilder,
-                    onLinkTap: widget.onLinkTap,
-                    onMentionTap: widget.onMentionTap,
-                    onQuotedMessageTap: widget.onQuotedMessageTap,
-                    bottomRowBuilder: widget.bottomRowBuilder,
-                    onUserAvatarTap: widget.onUserAvatarTap,
-                    userAvatarBuilder: widget.userAvatarBuilder,
-                    usernameBuilder: widget.usernameBuilder,
-                  );
+                      streamChatTheme: _streamChatTheme,
+                      showUsername: showUsername,
+                      showTimeStamp: showTimeStamp,
+                      showThreadReplyIndicator: showThreadReplyIndicator,
+                      showSendingIndicator: showSendingIndicator,
+                      showInChannel: showInChannel,
+                      isGiphy: isGiphy,
+                      isOnlyEmoji: isOnlyEmoji,
+                      hasUrlAttachments: hasUrlAttachments,
+                      messageTheme: widget.messageTheme,
+                      reverse: widget.reverse,
+                      message: widget.message,
+                      hasNonUrlAttachments: hasNonUrlAttachments,
+                      shouldShowReactions: shouldShowReactions,
+                      hasQuotedMessage: hasQuotedMessage,
+                      textPadding: widget.textPadding,
+                      attachmentBuilders: widget.attachmentBuilders,
+                      attachmentPadding: widget.attachmentPadding,
+                      avatarWidth: avatarWidth,
+                      bottomRowPadding: bottomRowPadding,
+                      isFailedState: isFailedState,
+                      isPinned: isPinned,
+                      messageWidget: widget,
+                      showBottomRow: showBottomRow,
+                      showPinHighlight: widget.showPinHighlight,
+                      showReactionPickerIndicator: widget.showReactionPickerIndicator,
+                      showReactions: showReactions,
+                      showUserAvatar: widget.showUserAvatar,
+                      streamChat: _streamChat,
+                      translateUserAvatar: widget.translateUserAvatar,
+                      deletedBottomRowBuilder: widget.deletedBottomRowBuilder,
+                      onThreadTap: widget.onThreadTap,
+                      shape: widget.shape,
+                      borderSide: widget.borderSide,
+                      borderRadiusGeometry: widget.borderRadiusGeometry,
+                      textBuilder: widget.textBuilder,
+                      onLinkTap: widget.onLinkTap,
+                      onMentionTap: widget.onMentionTap,
+                      onQuotedMessageTap: widget.onQuotedMessageTap,
+                      bottomRowBuilder: widget.bottomRowBuilder,
+                      onUserAvatarTap: widget.onUserAvatarTap,
+                      userAvatarBuilder: widget.userAvatarBuilder,
+                      usernameBuilder: widget.usernameBuilder,
+                    );
                   }),
                 ),
               ),

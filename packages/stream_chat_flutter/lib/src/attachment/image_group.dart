@@ -21,6 +21,10 @@ class StreamImageGroup extends StatelessWidget {
     this.showShareButton = true,
     this.showMessageActionButton = true,
     this.httpHeaders,
+    this.showReplyAction = true,
+    this.showSaveAction = true,
+    this.showShowInChatAction = true,
+    this.showDeleteAction = true,
   });
 
   /// List of attachments to show
@@ -65,6 +69,18 @@ class StreamImageGroup extends StatelessWidget {
 
   /// Show message action button on preview
   final bool showMessageActionButton;
+
+  /// Show reply button on preview
+  final bool showReplyAction;
+
+  /// Show save button on preview
+  final bool showSaveAction;
+
+  /// Show Show In Chat button on preview
+  final bool showShowInChatAction;
+
+  /// Show delete button on preview
+  final bool showDeleteAction;
 
   @override
   Widget build(BuildContext context) {
@@ -169,6 +185,10 @@ class StreamImageGroup extends StatelessWidget {
             httpHeaders: httpHeaders,
             showMessageActionButton: showMessageActionButton,
             showShareButton: showShareButton,
+            showReplyAction: showReplyAction,
+            showSaveAction: showSaveAction,
+            showShowInChatAction: showShowInChatAction,
+            showDeleteAction: showDeleteAction,
           ),
         ),
       ),

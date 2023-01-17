@@ -17,6 +17,10 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
     this.onShowMessage,
     this.onReplyMessage,
     this.onAttachmentTap,
+    this.showReplyAction = true,
+    this.showSaveAction = true,
+    this.showShowInChatAction = true,
+    this.showDeleteAction = true,
   });
 
   /// {@macro showMessageCallback}
@@ -27,6 +31,18 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
 
   /// {@macro onAttachmentTap}
   final OnAttachmentTap? onAttachmentTap;
+
+  /// Show reply button on preview
+  final bool showReplyAction;
+
+  /// Show save button on preview
+  final bool showSaveAction;
+
+  /// Show Show In Chat button on preview
+  final bool showShowInChatAction;
+
+  /// Show delete button on preview
+  final bool showDeleteAction;
 
   @override
   Widget build(BuildContext context) {
@@ -231,6 +247,10 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
               userName: message.user!.name,
               onShowMessage: onShowMessage,
               onReplyMessage: onReplyMessage,
+              showReplyAction: showReplyAction,
+              showSaveAction: showSaveAction,
+              showShowInChatAction: showShowInChatAction,
+              showDeleteAction: showDeleteAction,
             ),
           );
         },

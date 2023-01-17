@@ -141,8 +141,7 @@ class AttachmentActionsModal extends StatelessWidget {
                         // attachment download dialog
                         Navigator.of(context).pop();
 
-                        final downloader = attachmentDownloader ??
-                            StreamAttachmentHandler.instance.downloadAttachment;
+                        final downloader = attachmentDownloader ?? StreamAttachmentHandler.instance.downloadAttachment;
 
                         // No need to show progress dialog in case of
                         // web or desktop.
@@ -151,13 +150,11 @@ class AttachmentActionsModal extends StatelessWidget {
                           return;
                         }
 
-                        final progressNotifier =
-                            ValueNotifier<_DownloadProgress?>(
+                        final progressNotifier = ValueNotifier<_DownloadProgress?>(
                           _DownloadProgress.initial(),
                         );
 
-                        final downloadedPathNotifier =
-                            ValueNotifier<String?>(null);
+                        final downloadedPathNotifier = ValueNotifier<String?>(null);
 
                         downloader(
                           attachment,
@@ -187,9 +184,7 @@ class AttachmentActionsModal extends StatelessWidget {
                         );
                       },
                     ),
-                  if (StreamChat.of(context).currentUser?.id ==
-                          message.user?.id &&
-                      showDelete)
+                  if (StreamChat.of(context).currentUser?.id == message.user?.id && showDelete)
                     _buildButton(
                       context,
                       context.translations.deleteLabel.capitalize(),
@@ -199,14 +194,11 @@ class AttachmentActionsModal extends StatelessWidget {
                       ),
                       () {
                         final channel = StreamChannel.of(context).channel;
-                        if (message.attachments.length > 1 ||
-                            message.text?.isNotEmpty == true) {
-                          final currentAttachmentIndex =
-                              message.attachments.indexWhere(
+                        if (message.attachments.length > 1 || message.text?.isNotEmpty == true) {
+                          final currentAttachmentIndex = message.attachments.indexWhere(
                             (element) => element.id == attachment.id,
                           );
-                          final remainingAttachments = [...message.attachments]
-                            ..removeAt(currentAttachmentIndex);
+                          final remainingAttachments = [...message.attachments]..removeAt(currentAttachmentIndex);
                           channel.updateMessage(message.copyWith(
                             attachments: remainingAttachments,
                           ));
@@ -272,10 +264,7 @@ class AttachmentActionsModal extends StatelessWidget {
               const SizedBox(width: 16),
               Text(
                 title,
-                style: StreamChatTheme.of(context)
-                    .textTheme
-                    .body
-                    .copyWith(color: color),
+                style: StreamChatTheme.of(context).textTheme.body.copyWith(color: color),
               ),
             ],
           ),
@@ -352,10 +341,8 @@ class AttachmentActionsModal extends StatelessWidget {
                                     Center(
                                       child: Text(
                                         '${progress.receivedValueInMB} MB',
-                                        style:
-                                            theme.textTheme.headline.copyWith(
-                                          color:
-                                              theme.colorTheme.textLowEmphasis,
+                                        style: theme.textTheme.headline.copyWith(
+                                          color: theme.colorTheme.textLowEmphasis,
                                         ),
                                       ),
                                     ),
@@ -376,8 +363,7 @@ class AttachmentActionsModal extends StatelessWidget {
 class _DownloadProgress {
   const _DownloadProgress(this.total, this.received);
 
-  factory _DownloadProgress.initial() =>
-      _DownloadProgress(double.maxFinite.toInt(), 0);
+  factory _DownloadProgress.initial() => _DownloadProgress(double.maxFinite.toInt(), 0);
 
   final int total;
   final int received;

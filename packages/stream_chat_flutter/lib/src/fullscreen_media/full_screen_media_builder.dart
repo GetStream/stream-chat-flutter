@@ -37,6 +37,10 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
     this.httpHeaders,
     this.showMessageActionButton = true,
     this.showShareButton = true,
+    this.showReplyAction = true,
+    this.showSaveAction = true,
+    this.showShowInChatAction = true,
+    this.showDeleteAction = true,
   });
 
   /// The url of the image
@@ -71,6 +75,18 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
   /// Show share button on preview
   final bool showShareButton;
 
+  /// Show reply button on preview
+  final bool showReplyAction;
+
+  /// Show save button on preview
+  final bool showSaveAction;
+
+  /// Show Show In Chat button on preview
+  final bool showShowInChatAction;
+
+  /// Show delete button on preview
+  final bool showDeleteAction;
+
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb && isDesktopVideoPlayerSupported) {
@@ -81,7 +97,14 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
         autoplayVideos: autoplayVideos,
         onShowMessage: onShowMessage,
         onReplyMessage: onReplyMessage,
-        attachmentActionsModalBuilder: attachmentActionsModalBuilder,
+        attachmentActionsModalBuilder: (context, attachment, defaultActionsModal) {
+          return defaultActionsModal.copyWith(
+            showReply: showReplyAction,
+            showSave: showSaveAction,
+            showShowInChat: showShowInChatAction,
+            showDelete: showDeleteAction,
+          );
+        },
       );
     }
 
@@ -91,7 +114,14 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
       userName: userName,
       onShowMessage: onShowMessage,
       onReplyMessage: onReplyMessage,
-      attachmentActionsModalBuilder: attachmentActionsModalBuilder,
+      attachmentActionsModalBuilder: (context, attachment, defaultActionsModal) {
+        return defaultActionsModal.copyWith(
+          showReply: showReplyAction,
+          showSave: showSaveAction,
+          showShowInChat: showShowInChatAction,
+          showDelete: showDeleteAction,
+        );
+      },
       autoplayVideos: autoplayVideos,
       httpHeaders: httpHeaders,
       showMessageActionButton: showMessageActionButton,
