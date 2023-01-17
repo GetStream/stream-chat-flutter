@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Shows a modal material design bottom sheet.
@@ -107,44 +107,34 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
         controller: controller,
         initialAttachments: initialAttachments,
         builder: (context, controller, child) {
-          return PlatformWidget(
-            web: (context) {
-              return webOrDesktopAttachmentPickerBuilder.call(
-                context: context,
-                controller: controller,
-                customOptions: customOptions?.map(
-                  WebOrDesktopAttachmentPickerOption.fromAttachmentPickerOption,
-                ),
-                attachmentThumbnailSize: attachmentThumbnailSize,
-                attachmentThumbnailFormat: attachmentThumbnailFormat,
-                attachmentThumbnailQuality: attachmentThumbnailQuality,
-                attachmentThumbnailScale: attachmentThumbnailScale,
-              );
-            },
-            mobile: (context) {
-              return mobileAttachmentPickerBuilder.call(
-                context: context,
-                controller: controller,
-                customOptions: customOptions,
-                attachmentThumbnailSize: attachmentThumbnailSize,
-                attachmentThumbnailFormat: attachmentThumbnailFormat,
-                attachmentThumbnailQuality: attachmentThumbnailQuality,
-                attachmentThumbnailScale: attachmentThumbnailScale,
-              );
-            },
-            desktop: (context) {
-              return webOrDesktopAttachmentPickerBuilder.call(
-                context: context,
-                controller: controller,
-                customOptions: customOptions?.map(
-                  WebOrDesktopAttachmentPickerOption.fromAttachmentPickerOption,
-                ),
-                attachmentThumbnailSize: attachmentThumbnailSize,
-                attachmentThumbnailFormat: attachmentThumbnailFormat,
-                attachmentThumbnailQuality: attachmentThumbnailQuality,
-                attachmentThumbnailScale: attachmentThumbnailScale,
-              );
-            },
+          final currentPlatform = defaultTargetPlatform;
+          final isWebOrDesktop = kIsWeb ||
+              currentPlatform == TargetPlatform.macOS ||
+              currentPlatform == TargetPlatform.linux ||
+              currentPlatform == TargetPlatform.windows;
+
+          if (isWebOrDesktop) {
+            return webOrDesktopAttachmentPickerBuilder.call(
+              context: context,
+              controller: controller,
+              customOptions: customOptions?.map(
+                WebOrDesktopAttachmentPickerOption.fromAttachmentPickerOption,
+              ),
+              attachmentThumbnailSize: attachmentThumbnailSize,
+              attachmentThumbnailFormat: attachmentThumbnailFormat,
+              attachmentThumbnailQuality: attachmentThumbnailQuality,
+              attachmentThumbnailScale: attachmentThumbnailScale,
+            );
+          }
+
+          return mobileAttachmentPickerBuilder.call(
+            context: context,
+            controller: controller,
+            customOptions: customOptions,
+            attachmentThumbnailSize: attachmentThumbnailSize,
+            attachmentThumbnailFormat: attachmentThumbnailFormat,
+            attachmentThumbnailQuality: attachmentThumbnailQuality,
+            attachmentThumbnailScale: attachmentThumbnailScale,
           );
         },
       );
