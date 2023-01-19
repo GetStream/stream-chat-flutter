@@ -1,3 +1,13 @@
+## Upcoming
+
+✅ Added
+
+* Added support for [Catalan](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ca.dart) locale.
+
+🔄 Changed
+
+* Some of the `Spanish` translations have been updated/changed for better understanding.
+
 ## 4.0.0
 
 🔄 Changed

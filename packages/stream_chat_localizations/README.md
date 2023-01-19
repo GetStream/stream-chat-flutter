@@ -35,6 +35,7 @@ At the moment we support the following languages:
 - [Italian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_it.dart)
 - [French](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_fr.dart)
 - [Spanish](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_es.dart)
+- [Catalan](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ca.dart)
 - [Japanese](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ja.dart)
 - [Korean](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ko.dart)
 - [Portuguese](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_pt.dart)
@@ -75,6 +76,7 @@ class MyApp extends StatelessWidget {
         Locale('fr'),
         Locale('it'),
         Locale('es'),
+        Locale('ca'),
         Locale('ja'),
         Locale('ko'),
         Locale('pt'),
@@ -123,6 +125,7 @@ Example:
   <string>fr</string>
   <string>it</string>
   <string>es</string>
+  <string>ca</string>
   <string>ja</string>
   <string>ko</string>
   <string>pt</string>
