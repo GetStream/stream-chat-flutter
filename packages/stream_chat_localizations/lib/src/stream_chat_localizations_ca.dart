@@ -40,8 +40,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get onlyVisibleToYouText => 'Només visible per vostè';
 
   @override
-  String threadReplyCountText(int count) =>
-      '$count respostes al fil';
+  String threadReplyCountText(int count) => '$count respostes al fil';
 
   @override
   String attachmentsUploadProgressText({
@@ -123,13 +122,13 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
       'El fitxer és massa gran descargar-lo. '
-          'La mida màxima del fitxer és de $limitInMB MB. '
-          'Hem intentat comprimir-lo, pero ha estat suficient.';
+      'La mida màxima del fitxer és de $limitInMB MB. '
+      'Hem intentat comprimir-lo, pero ha estat suficient.';
 
   @override
   String fileTooLargeError(double limitInMB) =>
       'El fitxer és massa gran per descargar-lo. '
-          'El límit de mida dels fitxers és de $limitInMB MB.';
+      'El límit de mida dels fitxers és de $limitInMB MB.';
 
   @override
   String get couldNotReadBytesFromFileError =>
@@ -176,7 +175,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   @override
   String get flagMessageQuestion =>
       "¿Vol enviar una còpia d'aquest missatge a un"
-          '\nmoderador per una major investigació?';
+      '\nmoderador per una major investigació?';
 
   @override
   String get flagLabel => 'REPORTAR';
