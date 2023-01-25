@@ -453,6 +453,15 @@ class StreamChatClient {
         if (persistenceEnabled) {
           await sync(cids: cids, lastSyncAt: _lastSyncedAt);
         }
+      } else {
+        // channels are empty, assuming it's a fresh start
+        // and making sure `lastSyncAt` is initialized
+        if (persistenceEnabled) {
+          final lastSyncAt = await _chatPersistenceClient?.getLastSyncAt();
+          if (lastSyncAt == null) {
+            await _chatPersistenceClient?.updateLastSyncAt(DateTime.now());
+          }
+        }
       }
       handleEvent(Event(
         type: EventType.connectionRecovered,

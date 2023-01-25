@@ -1,3 +1,13 @@
+## 5.2.0
+
+✅ Added
+
+- Added `Huawei` and `Xiaomi` PushProviders.
+
+🐞 Fixed
+
+- Fixed initializing last synced date.
+
 ## 5.1.0
 
 ✅ Added

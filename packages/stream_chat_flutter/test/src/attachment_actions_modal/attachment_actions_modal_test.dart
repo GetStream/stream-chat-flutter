@@ -163,7 +163,7 @@ void main() {
   );
 
   testWidgets(
-    'tapping on reply should pop',
+    'tapping on reply should invoke callback',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -174,7 +174,7 @@ void main() {
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
-      final mockObserver = MockNavigatorObserver();
+      final mockCallback = MockVoidCallback();
 
       final attachment = Attachment(
         type: 'image',
@@ -192,7 +192,6 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
-          navigatorObservers: [mockObserver],
           home: StreamChat(
             streamChatThemeData: streamTheme,
             client: client,
@@ -200,13 +199,14 @@ void main() {
               child: AttachmentActionsModal(
                 message: message,
                 attachment: attachment,
+                onReply: mockCallback,
               ),
             ),
           ),
         ),
       );
       await tester.tap(find.text('Reply'));
-      verify(() => mockObserver.didPop(any(), any()));
+      verify(mockCallback.call);
     },
   );
 
