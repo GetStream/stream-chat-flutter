@@ -124,8 +124,8 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
-      'El fitxer és massa gran per descarregar-lo.'
-      'La mida màxima del fitxer és de $limitInMB MB.'
+      'El fitxer és massa gran per descarregar-lo. '
+      'La mida màxima del fitxer és de $limitInMB MB. '
       'Hem intentat comprimir-lo, pero no ha estat suficient.';
 
   @override
