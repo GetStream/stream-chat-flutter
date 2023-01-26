@@ -15,6 +15,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get noUsersLabel => 'वर्तमान में कोई यूजर नहीं हैं';
 
   @override
+  String get noPhotoOrVideoLabel => "कोई फोटो या वीडियो नहीं है।";
+
+  @override
   String get retryLabel => 'पुन: प्रयास करे';
 
   @override

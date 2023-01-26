@@ -4,6 +4,9 @@
 - [[#1424]](https://github.com/GetStream/stream-chat-flutter/issues/1424) Fixed a render issue when showing messages starting with 4 whitespaces.
 - Fixed a bug where the `AttachmentPickerBottomSheet` was not able to identify the mobile browser.
 
+✅ Added
+- New `noPhotoOrVideoLabel` displayed when there is no files to choose.
+
 ## 5.2.0
 
 ✅ Added

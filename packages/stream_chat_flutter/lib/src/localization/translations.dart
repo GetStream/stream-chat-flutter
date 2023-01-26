@@ -18,6 +18,9 @@ abstract class Translations {
   /// The label for showing no users
   String get noUsersLabel;
 
+  /// The label for showing no photo or video
+  String get noPhotoOrVideoLabel;
+
   /// The text for showing user is online
   String get userOnlineText;
 
@@ -372,6 +375,9 @@ class DefaultTranslations implements Translations {
 
   @override
   String get noUsersLabel => 'There are no users currently';
+
+  @override
+  String get noPhotoOrVideoLabel => 'There is no photo or video';
 
   @override
   String get retryLabel => 'Retry';

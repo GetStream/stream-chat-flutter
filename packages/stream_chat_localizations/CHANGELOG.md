@@ -3,6 +3,7 @@
 ✅ Added
 
 * Added support for [Catalan](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ca.dart) locale.
+* Added translations for new `noPhotoOrVideoLabel` label.
 
 🔄 Changed
 
