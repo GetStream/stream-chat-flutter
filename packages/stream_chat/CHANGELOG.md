@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Updated `rate_limiter` dependency to `^1.0.0`
+
 ## 5.2.0
 
 ✅ Added
