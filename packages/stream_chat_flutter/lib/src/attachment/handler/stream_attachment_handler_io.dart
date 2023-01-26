@@ -123,10 +123,9 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
 
     final tempDir = await getTemporaryDirectory();
     final tempPath = Uri.file(tempDir.path, windows: CurrentPlatform.isWindows);
-    var tempFilePath = tempPath.resolve(fileName!).path;
-    if (CurrentPlatform.isWindows && tempFilePath.startsWith('/')) {
-      tempFilePath = tempFilePath.substring(1);
-    }
+    final tempFilePath = tempPath
+        .resolve(fileName!)
+        .toFilePath(windows: CurrentPlatform.isWindows);
     print(tempFilePath);
 
     final attachmentFileBytes = attachmentFile.bytes;
