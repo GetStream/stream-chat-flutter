@@ -66,7 +66,7 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get genericErrorText => 'Ocorreu um problema';
 
   @override
-  String get loadingMessagesError => 'Ocorreu um problema ao carregar mensagem';
+  String get loadingMessagesError => 'Ocorreu um problema ao carregar a mensagem';
 
   @override
   String resultCountText(int count) => '$count resultados';
@@ -158,7 +158,7 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Por favor, permita o acesso a suas fotos'
+      'Por favor, permita o acesso às suas fotos'
       '\ne vídeos para que possa compartilhar com sua rede.';
 
   @override
