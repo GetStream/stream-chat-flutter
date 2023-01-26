@@ -15,6 +15,9 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get noUsersLabel => 'Nenhum usuário atualmente';
 
   @override
+  String get noPhotoOrVideoLabel => 'Não há fotos ou vídeos';
+
+  @override
   String get retryLabel => 'Tente novamente';
 
   @override
@@ -66,7 +69,8 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get genericErrorText => 'Ocorreu um problema';
 
   @override
-  String get loadingMessagesError => 'Ocorreu um problema ao carregar a mensagem';
+  String get loadingMessagesError =>
+      'Ocorreu um problema ao carregar a mensagem';
 
   @override
   String resultCountText(int count) => '$count resultados';

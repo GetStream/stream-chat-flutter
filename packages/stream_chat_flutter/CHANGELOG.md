@@ -9,6 +9,9 @@
 - Fixed a bug where the `AttachmentPickerBottomSheet` was not able to identify the mobile browser.
 - Fixed uploading files on Windows - fixed temp file path.
 
+✅ Added
+- New `noPhotoOrVideoLabel` displayed when there is no files to choose.
+
 ## 5.2.0
 
 ✅ Added

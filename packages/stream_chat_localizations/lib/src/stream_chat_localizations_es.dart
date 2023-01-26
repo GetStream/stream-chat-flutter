@@ -15,6 +15,9 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get noUsersLabel => 'No hay usuarios actualmente';
 
   @override
+  String get noPhotoOrVideoLabel => 'No hay fotos ni vídeos';
+
+  @override
   String get retryLabel => 'Inténtelo de nuevo';
 
   @override
