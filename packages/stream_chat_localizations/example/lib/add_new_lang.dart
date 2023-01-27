@@ -459,7 +459,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'View library';
 
   @override
-  String unreadMessagesSeparatorText() => 'New messages';
+  String unreadMessagesSeparatorText(int unreadCount) => 'New messages';
 
   @override
   String get enableFileAccessMessage => 'Enable file access to continue';

@@ -431,7 +431,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'Bibliothek öffnen';
 
   @override
-  String unreadMessagesSeparatorText() => 'Neue Nachrichten';
+  String unreadMessagesSeparatorText(int unreadCount) => 'Neue Nachrichten';
 
   @override
   String get enableFileAccessMessage =>

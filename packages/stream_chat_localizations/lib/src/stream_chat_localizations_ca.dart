@@ -438,7 +438,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get linkDisabledError => 'Els enllaços estan deshabilitats';
 
   @override
-  String unreadMessagesSeparatorText() => 'Missatges nous';
+  String unreadMessagesSeparatorText(int unreadCount) => 'Missatges nous';
 
   @override
   String get enableFileAccessMessage => "Habilita l'accés als fitxers"
