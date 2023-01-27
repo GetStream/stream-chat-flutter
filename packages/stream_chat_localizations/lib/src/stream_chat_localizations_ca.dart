@@ -6,7 +6,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsCa({super.localeName = 'ca'});
 
   @override
-  String get launchUrlError => "No s'ha pogut obrir la url";
+  String get launchUrlError => "No s'ha pogut obrir l'enllaç";
 
   @override
   String get loadingUsersError => "Error de càrrega de l'usuari";
@@ -40,7 +40,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Respon al fil';
 
   @override
-  String get onlyVisibleToYouText => 'Només visible per vostè';
+  String get onlyVisibleToYouText => 'Només visible per a tu';
 
   @override
   String threadReplyCountText(int count) => '$count respostes al fil';
@@ -74,13 +74,13 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get loadingMessagesError =>
-      'Hi ha hagut un error mentres carregava el missatge';
+      'Hi ha hagut un error mentre carregava el missatge';
 
   @override
   String resultCountText(int count) => '$count resultats';
 
   @override
-  String get messageDeletedText => 'Aquest missatge ha estat esborrat.';
+  String get messageDeletedText => 'Aquest missatge ha estat esborrat';
 
   @override
   String get messageDeletedLabel => 'Missatge esborrat';
@@ -124,21 +124,21 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
-      'El fitxer és massa gran descargar-lo. '
+      'El fitxer és massa gran per descarregar-lo. '
       'La mida màxima del fitxer és de $limitInMB MB. '
-      'Hem intentat comprimir-lo, pero ha estat suficient.';
+      'Hem intentat comprimir-lo, pero no ha estat suficient.';
 
   @override
   String fileTooLargeError(double limitInMB) =>
-      'El fitxer és massa gran per descargar-lo. '
-      'El límit de mida dels fitxers és de $limitInMB MB.';
+      'El fitxer és massa gran per descarregar-lo. '
+      'La mida màxima del fitxer és de $limitInMB MB.';
 
   @override
   String get couldNotReadBytesFromFileError =>
       "No s'han pogut llegir els bytes del fitxer.";
 
   @override
-  String get addAFileLabel => 'Afegir un fitxer';
+  String get addAFileLabel => 'Afegeix un fitxer';
 
   @override
   String get photoFromCameraLabel => 'Foto de la càmera';
@@ -147,16 +147,16 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get uploadAFileLabel => 'Transferir un fitxer';
 
   @override
-  String get uploadAPhotoLabel => 'Pujar una foto';
+  String get uploadAPhotoLabel => 'Puja una foto';
 
   @override
-  String get uploadAVideoLabel => 'Pujar un vídeo';
+  String get uploadAVideoLabel => 'Puja un vídeo';
 
   @override
   String get videoFromCameraLabel => 'Vídeo de la càmera';
 
   @override
-  String get okLabel => 'Vale';
+  String get okLabel => "D'acord";
 
   @override
   String get somethingWentWrongError => 'Alguna cosa ha anat malament';
@@ -166,72 +166,72 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      "Si us plau, permeti l'accés a les seves fotos"
-      '\ni vídeos per a que pugui compartir-los.';
+      "Si us plau, permet l'accés a les teves fotos"
+      '\ni vídeos per a que puguis compartir-los';
 
   @override
-  String get allowGalleryAccessMessage => "Permetre l'accés a la galeria";
+  String get allowGalleryAccessMessage => "Permet l'accés a la galeria";
 
   @override
-  String get flagMessageLabel => 'Reportar un missatge';
+  String get flagMessageLabel => 'Reporta un missatge';
 
   @override
   String get flagMessageQuestion =>
-      "¿Vol enviar una còpia d'aquest missatge a un"
+      "Vols enviar una còpia d'aquest missatge a un"
       '\nmoderador per una major investigació?';
 
   @override
-  String get flagLabel => 'REPORTAR';
+  String get flagLabel => 'REPORTA';
 
   @override
-  String get cancelLabel => 'CANCELAR';
+  String get cancelLabel => 'CANCEL·LA';
 
   @override
   String get flagMessageSuccessfulLabel => 'Missatge reportat';
 
   @override
   String get flagMessageSuccessfulText =>
-      'Aquest missatge ha estat reportat a un moderador.';
+      'Aquest missatge ha estat reportat a un moderador';
 
   @override
-  String get deleteLabel => 'ESBORRAR';
+  String get deleteLabel => 'ESBORRA';
 
   @override
-  String get deleteMessageLabel => 'Esborrar el missatge';
+  String get deleteMessageLabel => 'Esborra el missatge';
 
   @override
   String get deleteMessageQuestion =>
-      '¿Estàs segur de que vols esborrar aquest\nmissatge de forma permanent?';
+      'Estàs segur que vols esborrar aquest\nmissatge de forma permanent?';
 
   @override
   String get operationCouldNotBeCompletedText =>
-      "L'operació no s'ha pogut completar.";
+      "L'operació no s'ha pogut completar";
 
   @override
   String get replyLabel => 'Respondre';
 
   @override
   String togglePinUnpinText({required bool pinned}) {
-    if (pinned) return 'Desfixar de la conversa';
-    return 'Fixar a la conversa';
+    if (pinned) return 'Desfixa de la conversa';
+    return 'Fixa a la conversa';
   }
 
   @override
   String toggleDeleteRetryDeleteMessageText({required bool isDeleteFailed}) {
-    if (isDeleteFailed) return 'Reintentar esborrar el misssatge';
-    return 'Esborrar el misssatge';
+    if (isDeleteFailed) return 'Reintenta esborrar el missatge';
+    return 'Esborra el missatge';
   }
 
   @override
-  String get copyMessageLabel => 'Copiar el misssatge';
+  String get copyMessageLabel => 'Copia el missatge';
 
   @override
-  String get editMessageLabel => 'Editar el misssatge';
+  String get editMessageLabel => 'Edita el missatge';
 
   @override
   String toggleResendOrResendEditedMessage({required bool isUpdateFailed}) {
-    if (isUpdateFailed) return 'Reenviar el missatge modificat';
-    return 'Reenviar';
+    if (isUpdateFailed) return 'Reenvia el missatge modificat';
+    return 'Reenvia';
   }
 
   @override
@@ -270,30 +270,30 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get noTitleText => 'Sense títol';
 
   @override
-  String get letsStartChattingLabel => '¡Comencem a parlar!';
+  String get letsStartChattingLabel => 'Comencem a parlar!';
 
   @override
   String get sendingFirstMessageLabel =>
-      'Qué li sembla enviar el seu primer missatge a un amic?';
+      'Què et sembla enviar el teu primer missatge?';
 
   @override
-  String get startAChatLabel => 'Iniciar una conversa';
+  String get startAChatLabel => 'Inicia una conversa';
 
   @override
   String get loadingChannelsError => 'Error al carregar els canals';
 
   @override
-  String get deleteConversationLabel => 'Esborrar la conversa';
+  String get deleteConversationLabel => 'Esborra la conversa';
 
   @override
   String get deleteConversationQuestion =>
-      'Estàs segur de que vols esborrar aquesta conversa?';
+      'Estàs segur que vols esborrar aquesta conversa?';
 
   @override
   String get streamChatLabel => 'Stream Chat';
 
   @override
-  String get searchingForNetworkText => 'Buscant xarxa';
+  String get searchingForNetworkText => 'Cercant xarxa';
 
   @override
   String get offlineLabel => 'Sense connexió...';
@@ -309,8 +309,8 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String watchersCountText(int count) {
-    if (count == 1) return '1 En línea';
-    return '$count En línea';
+    if (count == 1) return '1 En línia';
+    return '$count En línia';
   }
 
   @override
@@ -320,35 +320,35 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get leaveGroupLabel => 'Sortir del Grup';
 
   @override
-  String get leaveLabel => 'SORTIR';
+  String get leaveLabel => 'SURT';
 
   @override
-  String get leaveConversationLabel => 'Sortir de la conversa';
+  String get leaveConversationLabel => 'Surt de la conversa';
 
   @override
   String get leaveConversationQuestion =>
-      "Estàs segur de que vol sortir d'aquesta conversa?";
+      "Estàs segur que vols sortir d'aquesta conversa?";
 
   @override
-  String get showInChatLabel => 'Mostrar al chat';
+  String get showInChatLabel => 'Mostra al xat';
 
   @override
-  String get saveImageLabel => 'Guardar la imatge';
+  String get saveImageLabel => 'Guarda la imatge';
 
   @override
-  String get saveVideoLabel => 'Guardar el vídeo';
+  String get saveVideoLabel => 'Guarda el vídeo';
 
   @override
-  String get uploadErrorLabel => 'ERROR DE TRANSFERENCIA';
+  String get uploadErrorLabel => 'ERROR DE TRANSFERÈNCIA';
 
   @override
   String get giphyLabel => 'Giphy';
 
   @override
-  String get shuffleLabel => 'Remenar';
+  String get shuffleLabel => 'Remena';
 
   @override
-  String get sendLabel => 'Enviar';
+  String get sendLabel => 'Envia';
 
   @override
   String get withText => 'amb';
@@ -383,56 +383,56 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'Mode lent activat';
 
   @override
-  String get downloadLabel => 'Descarregar';
+  String get downloadLabel => 'Descarrega';
 
   @override
   String toggleMuteUnmuteUserText({required bool isMuted}) {
     if (isMuted) {
-      return "Activar so de l'usuari";
+      return "Activa so de l'usuari";
     } else {
-      return 'Silenciar usuari';
+      return "Silencia l'usuari";
     }
   }
 
   @override
   String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
     if (isMuted) {
-      return "Estàs segur de que vols activar el so d'aquest grup?";
+      return "Estàs segur que vols activar el so d'aquest grup?";
     } else {
-      return 'Estàs segur de que vols silenciar aquest grup?';
+      return 'Estàs segur que vols silenciar aquest grup?';
     }
   }
 
   @override
   String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
     if (isMuted) {
-      return "Estàs segur de que vols activar el so d'aquest usuari";
+      return "Estàs segur que vols activar el so d'aquest usuari?";
     } else {
-      return 'Estàs seguro de que vols silenciar aquest usuari?';
+      return 'Estàs segur que vols silenciar aquest usuari?';
     }
   }
 
   @override
   String toggleMuteUnmuteAction({required bool isMuted}) {
     if (isMuted) {
-      return 'ACTIVAR SO';
+      return 'ACTIVA SO';
     } else {
-      return 'SILENCIAR';
+      return 'SILENCIA';
     }
   }
 
   @override
   String toggleMuteUnmuteGroupText({required bool isMuted}) {
     if (isMuted) {
-      return 'Activar so del grup';
+      return 'Activa so del grup';
     } else {
-      return 'Silenciar grup';
+      return 'Silencia el grup';
     }
   }
 
   @override
   String get linkDisabledDetails =>
-      'No es permet enviar enllaços a aquesta conversa.';
+      'No es permet enviar enllaços a aquesta conversa';
 
   @override
   String get linkDisabledError => 'Els enllaços estan deshabilitats';
@@ -446,9 +446,9 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get enableFileAccessMessage => "Habiliti l'accés als fitxers"
-      '\nper poder compartir-los amb amics.';
+  String get enableFileAccessMessage => "Habilita l'accés als fitxers"
+      '\nper poder compartir-los amb amics';
 
   @override
-  String get allowFileAccessMessage => "Permetre l'accés als fitxers";
+  String get allowFileAccessMessage => "Permet l'accés als fitxers";
 }

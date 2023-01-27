@@ -8,6 +8,7 @@
 🔄 Changed
 
 * Some of the `Spanish` translations have been updated/changed for better understanding.
+* Some of the `Catalan` translations have been updated/changed for better understanding.
 
 ## 4.0.0
 
