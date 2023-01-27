@@ -83,8 +83,6 @@ export 'src/scroll_view/photo_gallery/stream_photo_gallery_tile.dart';
 export 'src/scroll_view/stream_scroll_view_empty_widget.dart';
 export 'src/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
 export 'src/scroll_view/user_scroll_view/stream_user_grid_tile.dart';
-export 'src/scroll_view/user_scroll_view/stream_user_grid_tile.dart';
-export 'src/scroll_view/user_scroll_view/stream_user_grid_view.dart';
 export 'src/scroll_view/user_scroll_view/stream_user_grid_view.dart';
 export 'src/scroll_view/user_scroll_view/stream_user_list_tile.dart';
 export 'src/scroll_view/user_scroll_view/stream_user_list_view.dart';
