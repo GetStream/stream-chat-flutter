@@ -439,7 +439,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get linkDisabledError => 'Les liens sont désactivés';
 
   @override
-  String unreadMessagesSeparatorText(int unreadCount) => "Nouveaux messages";
+  String unreadMessagesSeparatorText(int unreadCount) => 'Nouveaux messages';
 
   @override
   String get enableFileAccessMessage =>
