@@ -383,12 +383,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'Se bibliotek';
 
   @override
-  String unreadMessagesSeparatorText(int unreadCount) {
-    if (unreadCount == 1) {
-      return '1 ulest melding';
-    }
-    return '$unreadCount uleste meldinger';
-  }
+  String unreadMessagesSeparatorText() => 'Nye meldinger.';
 
   @override
   String get couldNotReadBytesFromFileError =>

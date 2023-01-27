@@ -195,7 +195,7 @@ void main() {
           localizations.toggleMuteUnmuteUserQuestion(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteUserText(isMuted: true), isNotNull);
       expect(localizations.viewLibrary, isNotNull);
-      expect(localizations.unreadMessagesSeparatorText(2), isNotNull);
+      expect(localizations.unreadMessagesSeparatorText(), isNotNull);
       expect(localizations.enableFileAccessMessage, isNotNull);
       expect(localizations.allowFileAccessMessage, isNotNull);
     });

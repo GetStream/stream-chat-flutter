@@ -15,7 +15,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get noUsersLabel => 'Derzeit gibt es keine User';
 
   @override
-  String get noPhotoOrVideoLabel => 'Es gibt keine Foto oder Video';
+  String get noPhotoOrVideoLabel => 'Es gibt kein Foto oder Video';
 
   @override
   String get retryLabel => 'Erneut versuchen';
@@ -431,12 +431,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'Bibliothek öffnen';
 
   @override
-  String unreadMessagesSeparatorText(int unreadCount) {
-    if (unreadCount == 1) {
-      return '1 ungelesene Nachricht';
-    }
-    return '$unreadCount ungelesene Nachrichten';
-  }
+  String unreadMessagesSeparatorText() => 'Neue Nachrichten';
 
   @override
   String get enableFileAccessMessage =>

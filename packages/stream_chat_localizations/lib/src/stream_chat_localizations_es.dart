@@ -440,12 +440,7 @@ No es posible añadir más de $limit archivos adjuntos
   String get linkDisabledError => 'Los enlaces están deshabilitados';
 
   @override
-  String unreadMessagesSeparatorText(int unreadCount) {
-    if (unreadCount == 1) {
-      return '1 mensaje no leído';
-    }
-    return '$unreadCount mensajes no leídos';
-  }
+  String unreadMessagesSeparatorText() => 'Nuevos mensajes';
 
   @override
   String get enableFileAccessMessage => 'Habilite el acceso a los archivos'
