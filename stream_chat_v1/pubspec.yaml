@@ -31,7 +31,7 @@ dependencies:
   yaml: ^3.1.0
   uuid: ^3.0.5
   streaming_shared_preferences: ^2.0.0
-  lottie: ^1.2.1
+  lottie: ^2.2.0
   collection: ^1.15.0
   sentry_flutter: ^6.5.0
   flutter_slidable: ^2.0.0
