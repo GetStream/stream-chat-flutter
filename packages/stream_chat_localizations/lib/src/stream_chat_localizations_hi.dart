@@ -433,12 +433,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get linkDisabledError => 'लिंक भेजना प्रतिबंधित';
 
   @override
-  String unreadMessagesSeparatorText(int unreadCount) {
-    if (unreadCount == 1) {
-      return '1 अपठित संदेश';
-    }
-    return '$unreadCount अपठित संदेश';
-  }
+  String unreadMessagesSeparatorText(int unreadCount) => 'नए संदेश।';
 
   @override
   String get enableFileAccessMessage => 'कृपया फ़ाइलों तक पहुंच सक्षम करें ताकि'
