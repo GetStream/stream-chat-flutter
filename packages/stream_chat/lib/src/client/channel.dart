@@ -1754,6 +1754,26 @@ class ChannelClientState {
     ));
   }
 
+  void _listenUserStartWatching() {
+    _subscriptions.add(
+      _channel.on(EventType.userWatchingStart).listen((event) {
+        if (event.user != null) {
+          _incrementWatcher(event.user!);
+        }
+      }),
+    );
+  }
+
+  void _listenUserStopWatching() {
+    _subscriptions.add(
+      _channel.on(EventType.userWatchingStop).listen((event) {
+        if (event.user != null) {
+          channelState.watchers?.remove(event.user);
+        }
+      }),
+    );
+  }
+
   void _listenMemberUnbanned() {
     _subscriptions.add(_channel
         .on(EventType.userUnbanned)
@@ -1768,6 +1788,19 @@ class ChannelClientState {
         _updateMember(member);
       },
     ));
+  }
+
+  void _incrementWatcher(User user) {
+    List<User> newWatchers;
+
+    if (channelState.watchers == null) {
+      channelState.watchers!.add(user);
+      newWatchers = channelState.watchers!;
+    } else {
+      newWatchers = [user];
+    }
+
+    channelState.copyWith(watchers: newWatchers);
   }
 
   void _updateMember(Member member) {
