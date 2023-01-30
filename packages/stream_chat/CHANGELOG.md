@@ -1,3 +1,9 @@
+## To come
+
+🐞 Fixed
+
+- Fixed streamWatchers. Before it was always new, now it is possible to follow the watchers of a channel. 
+
 ## 5.3.0
 
 🔄 Changed
