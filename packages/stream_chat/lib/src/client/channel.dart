@@ -1613,6 +1613,10 @@ class ChannelClientState {
 
     _listenMemberUnbanned();
 
+    _listenUserStartWatching();
+
+    _listenUserStopWatching();
+
     _startCleaningStaleTypingEvents();
 
     _startCleaningStalePinnedMessages();
@@ -1793,7 +1797,7 @@ class ChannelClientState {
   void _incrementWatcher(User user) {
     List<User> newWatchers;
 
-    if (channelState.watchers == null) {
+    if (channelState.watchers != null) {
       channelState.watchers!.add(user);
       newWatchers = channelState.watchers!;
     } else {
@@ -2113,9 +2117,13 @@ class ChannelClientState {
   /// Channel watchers list as a stream.
   Stream<List<User>> get watchersStream => CombineLatestStream.combine2<
           List<User>?, Map<String?, User?>, List<User>>(
-        channelStateStream.map((cs) => cs.watchers),
+        channelStateStream
+            .map((cs) => cs.watchers)
+            .where((watchers) => watchers != null),
         _channel.client.state.usersStream,
-        (watchers, users) => watchers!.map((e) => users[e.id] ?? e).toList(),
+        (watchers, users) {
+          return watchers!.map((e) => users[e.id] ?? e).toList();
+        } ,
       );
 
   /// Channel member for the current user.
