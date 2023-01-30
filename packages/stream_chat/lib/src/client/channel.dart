@@ -2115,16 +2115,9 @@ class ChannelClientState {
       .toList();
 
   /// Channel watchers list as a stream.
-  Stream<List<User>> get watchersStream => CombineLatestStream.combine2<
-          List<User>?, Map<String?, User?>, List<User>>(
-        channelStateStream
-            .map((cs) => cs.watchers)
-            .where((watchers) => watchers != null),
-        _channel.client.state.usersStream,
-        (watchers, users) {
-          return watchers!.map((e) => users[e.id] ?? e).toList();
-        } ,
-      );
+  Stream<List<User>?> get watchersStream => channelStateStream
+      .map((cs) => cs.watchers)
+      .where((watchers) => watchers != null);
 
   /// Channel member for the current user.
   Member? get currentUserMember => members.firstWhereOrNull(
