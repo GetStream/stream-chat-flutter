@@ -1808,19 +1808,6 @@ class ChannelClientState {
     ));
   }
 
-  void _incrementWatcher(User user) {
-    List<User> newWatchers;
-
-    if (channelState.watchers != null) {
-      channelState.watchers!.add(user);
-      newWatchers = channelState.watchers!;
-    } else {
-      newWatchers = [user];
-    }
-
-    channelState.copyWith(watchers: newWatchers);
-  }
-
   void _updateMember(Member member) {
     final currentMembers = [...members];
     final memberIndex = currentMembers.indexWhere(
