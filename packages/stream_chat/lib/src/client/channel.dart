@@ -1762,7 +1762,14 @@ class ChannelClientState {
     _subscriptions.add(
       _channel.on(EventType.userWatchingStart).listen((event) {
         if (event.user != null) {
-          _incrementWatcher(event.user!);
+          final watcher = event.user;
+          final existingWatchers = channelState.watchers ?? [];
+          updateChannelState(channelState.copyWith(
+            watchers: [
+              ...existingWatchers,
+              watcher!,
+            ],
+          ));
         }
       }),
     );
@@ -1772,7 +1779,14 @@ class ChannelClientState {
     _subscriptions.add(
       _channel.on(EventType.userWatchingStop).listen((event) {
         if (event.user != null) {
-          channelState.watchers?.remove(event.user);
+          final watcher = event.user;
+          final existingWatchers = channelState.watchers ?? [];
+
+          updateChannelState(channelState.copyWith(
+            watchers: existingWatchers
+                .where((user) => user.id != watcher!.id)
+                .toList(growable: false),
+          ));
         }
       }),
     );
