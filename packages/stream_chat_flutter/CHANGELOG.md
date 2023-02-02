@@ -1,3 +1,8 @@
+## 5.4.0
+
+✅ Added 
+- Now it is possible to customize the max lines of the title of a url attachment. Before it was always 1 line.
+
 ## 5.3.0
 
 🔄 Changed
