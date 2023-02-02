@@ -1,3 +1,7 @@
+## Upcoming
+
+- Updated `share_plus` dependency to `^6.3.0`
+
 ## 5.3.0
 
 🔄 Changed
