@@ -84,7 +84,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
                     message: message,
                   ),
                 ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               IgnorePointer(
                 child: messageWidget,
               ),

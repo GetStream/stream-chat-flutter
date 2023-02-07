@@ -148,7 +148,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                     );
                   },
                 ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               IgnorePointer(
                 child: widget.messageWidget,
               ),
@@ -294,13 +294,13 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
          offset necessary for the position of reaction look the best way
          possible.
          */
-        const offsetConstant = 2700;
-        final offsetCorrection = maxWidth / offsetConstant;
+        const positiveConstant = 2700;
+        const negativeConstant = 1700;
 
         if (maxWidth <= 752) {
-          result = shiftFactor - offsetCorrection;
+          result = shiftFactor - maxWidth / negativeConstant;
         } else {
-          result = shiftFactor + offsetCorrection;
+          result = shiftFactor + maxWidth / positiveConstant;
         }
       } else {
         result = 1.2 - divFactor;
