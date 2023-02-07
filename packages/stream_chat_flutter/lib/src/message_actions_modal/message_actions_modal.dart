@@ -101,20 +101,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final user = StreamChat.of(context).currentUser;
 
     final roughMaxSize = size.width * 2 / 3;
-    var messageTextLength = widget.message.text!.length;
-    if (widget.message.quotedMessage != null) {
-      var quotedMessageLength =
-          (widget.message.quotedMessage!.text?.length ?? 0) + 40;
-      if (widget.message.quotedMessage!.attachments.isNotEmpty) {
-        quotedMessageLength += 40;
-      }
-      if (quotedMessageLength > messageTextLength) {
-        messageTextLength = quotedMessageLength;
-      }
-    }
-    final roughSentenceSize = messageTextLength *
-        (widget.messageTheme.messageTextStyle?.fontSize ?? 1) *
-        1.2;
+
+    final roughSentenceSize = widget.message
+        .roughMessageSize(widget.messageTheme.messageTextStyle?.fontSize);
+
     final divFactor = widget.message.attachments.isNotEmpty
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
@@ -289,6 +279,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   ) {
     var result = 0.0;
     var cont = true;
+
+    print('INFO - max width: ${constraints.maxWidth}. '
+        'shiftFactor: $shiftFactor '
+        'divFactor: $divFactor '
+        'cont: $cont');
+
     if (user?.id == widget.message.user?.id) {
       if (divFactor >= 1.0) {
         // This calculation is hacky and does not cover all bases!!!
@@ -357,6 +353,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         result = -(1.2 - divFactor);
       }
     }
+
+    print('INFO - result: $result');
 
     // Ensure reactions don't get pushed past the edge of the screen.
     //

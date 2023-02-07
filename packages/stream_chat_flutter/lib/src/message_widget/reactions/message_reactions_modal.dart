@@ -47,19 +47,9 @@ class StreamMessageReactionsModal extends StatelessWidget {
         _userPermissions.contains(PermissionType.sendReaction);
 
     final roughMaxSize = size.width * 2 / 3;
-    var messageTextLength = message.text!.length;
-    if (message.quotedMessage != null) {
-      var quotedMessageLength = message.quotedMessage!.text!.length + 40;
-      if (message.quotedMessage!.attachments.isNotEmpty) {
-        quotedMessageLength += 40;
-      }
-      if (quotedMessageLength > messageTextLength) {
-        messageTextLength = quotedMessageLength;
-      }
-    }
-    final roughSentenceSize = messageTextLength *
-        (messageTheme.messageTextStyle?.fontSize ?? 1) *
-        1.2;
+
+    final roughSentenceSize =
+        message.roughMessageSize(messageTheme.messageTextStyle?.fontSize);
     final divFactor = message.attachments.isNotEmpty
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));

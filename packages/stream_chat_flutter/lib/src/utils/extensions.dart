@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +12,16 @@ extension StringExtension on String {
   /// Returns the capitalized string
   String capitalize() =>
       isNotEmpty ? '${this[0].toUpperCase()}${substring(1).toLowerCase()}' : '';
+
+  /// Returns the biggest line of a text.
+  String biggestLine() {
+    if (contains('\n')) {
+      return split('\n')
+          .reduce((curr, next) => curr.length > next.length ? curr : next);
+    } else {
+      return this;
+    }
+  }
 
   /// Returns whether the string contains only emoji's or not.
   ///
@@ -351,6 +362,24 @@ extension MessageX on Message {
       }
     }
     return copyWith(text: messageTextToRender);
+  }
+
+  /// Returns an approximation of message size
+  double roughMessageSize(double? fontSize) {
+    var messageTextLength = text!.biggestLine().length;
+
+    if (quotedMessage != null) {
+      var quotedMessageLength =
+          (quotedMessage!.text?.biggestLine().length ?? 0) + 40;
+      if (quotedMessage!.attachments.isNotEmpty) {
+        quotedMessageLength += 40;
+      }
+      if (quotedMessageLength > messageTextLength) {
+        messageTextLength = quotedMessageLength;
+      }
+    }
+
+    return messageTextLength * (fontSize ?? 1) * 1.2;
   }
 
   /// It returns the message with the translated text if available locally
