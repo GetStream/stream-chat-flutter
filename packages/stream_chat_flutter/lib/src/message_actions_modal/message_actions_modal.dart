@@ -106,6 +106,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         .roughMessageSize(widget.messageTheme.messageTextStyle?.fontSize);
 
     print('roughSentenceSize $roughSentenceSize');
+    print('roughMaxSize $roughMaxSize');
 
     final divFactor = widget.message.attachments.isNotEmpty
         ? 1
@@ -282,8 +283,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     var result = 0.0;
 
     final maxWidth = constraints.maxWidth;
+    final maxHeight = constraints.maxHeight;
 
-    print('INFO - max width: ${maxWidth}. '
+    print('INFO - max width: $maxWidth. '
+        'maxHeight: $maxHeight '
         'shiftFactor: $shiftFactor '
         'divFactor: $divFactor');
 
@@ -294,15 +297,11 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
          offset necessary for the position of reaction look the best way
          possible.
          */
-        const positiveConstant = 2700;
-        const negativeConstant = 1700;
+        const constant = 1500;
 
-        if (maxWidth <= 752) {
-          result = shiftFactor - maxWidth / negativeConstant;
-        } else {
-          result = shiftFactor + maxWidth / positiveConstant;
-        }
+        result = shiftFactor - maxWidth / constant;
       } else {
+        // Small messages, it is simpler to align then.
         result = 1.2 - divFactor;
       }
     } else {
