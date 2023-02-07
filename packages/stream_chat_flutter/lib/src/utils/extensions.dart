@@ -371,7 +371,7 @@ extension MessageX on Message {
     if (quotedMessage != null) {
       var quotedMessageLength =
           (quotedMessage!.text?.biggestLine().length ?? 0) + 6;
-      
+
       if (quotedMessage!.attachments.isNotEmpty) {
         quotedMessageLength += 40;
       }

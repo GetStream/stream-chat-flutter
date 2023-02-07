@@ -105,6 +105,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final roughSentenceSize = widget.message
         .roughMessageSize(widget.messageTheme.messageTextStyle?.fontSize);
 
+    print('roughSentenceSize $roughSentenceSize');
+
     final divFactor = widget.message.attachments.isNotEmpty
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
@@ -278,70 +280,27 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     BoxConstraints constraints,
   ) {
     var result = 0.0;
-    var cont = true;
 
-    print('INFO - max width: ${constraints.maxWidth}. '
+    final maxWidth = constraints.maxWidth;
+
+    print('INFO - max width: ${maxWidth}. '
         'shiftFactor: $shiftFactor '
-        'divFactor: $divFactor '
-        'cont: $cont');
+        'divFactor: $divFactor');
 
     if (user?.id == widget.message.user?.id) {
       if (divFactor >= 1.0) {
-        // This calculation is hacky and does not cover all bases!!!
-        // A better option is needed!
+        /*
+         This is an empiric value. This number tries to approximate all the
+         offset necessary for the position of reaction look the best way
+         possible.
+         */
+        const offsetConstant = 2700;
+        final offsetCorrection = maxWidth / offsetConstant;
 
-        // Landscape calculations
-        if (constraints.maxWidth == 1350) {
-          // 12.7 iPad Pro
-          result = shiftFactor + 0.5;
-          cont = false;
-        } else if (constraints.maxWidth == 1178) {
-          // 11 inch iPad Pro
-          result = shiftFactor + 0.42;
-          cont = false;
-        } else if (constraints.maxWidth == 1164) {
-          // iPad Air 4
-          result = shiftFactor + 0.4;
-          cont = false;
-        } else if (constraints.maxWidth == 1117) {
-          // iPad Mini 6
-          result = shiftFactor + 0.37;
-          cont = false;
-        } else if (constraints.maxWidth == 1064) {
-          // iPad 9th gen
-          result = shiftFactor + 0.33;
-          cont = false;
-        } else if (constraints.maxWidth == 1008) {
-          // 9.7 inch iPad Pro
-          result = shiftFactor + 0.3;
-          cont = false;
-        } else if (constraints.maxWidth >= 200 && constraints.maxWidth <= 400) {
-          // Phone (?)
-          result = shiftFactor - 0.2;
-          cont = false;
-        }
-
-        if (cont) {
-          // Portrait calculations
-          if (constraints.maxWidth == 1008) {
-            // 12.7 iPad Pro
-            result = shiftFactor + 0.3;
-          } else if (constraints.maxWidth == 818) {
-            // 11 inch iPad Pro
-            result = shiftFactor + 0.07;
-          } else if (constraints.maxWidth == 804) {
-            // iPad Air 4
-            result = shiftFactor + 0.04;
-          } else if (constraints.maxWidth == 794) {
-            // iPad 9th gen
-            result = shiftFactor + 0.02;
-          } else if (constraints.maxWidth >= 752) {
-            // 9.7 inch iPad Pro
-            result = shiftFactor - 0.05;
-          } else if (constraints.maxWidth == 728) {
-            // iPad Mini 6
-            result = shiftFactor - 0.1;
-          }
+        if (maxWidth <= 752) {
+          result = shiftFactor - offsetCorrection;
+        } else {
+          result = shiftFactor + offsetCorrection;
         }
       } else {
         result = 1.2 - divFactor;
@@ -359,7 +318,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     // Ensure reactions don't get pushed past the edge of the screen.
     //
     // Hacky!!! Needs improvement!!!
-    if (result > 1) {
+    if (result > 1.0) {
       return 1;
     } else {
       return result;
