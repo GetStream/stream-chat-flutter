@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:stream_chat_flutter/src/message_actions_modal/mam_widgets.dart';
+import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template messageActionsModal}
@@ -135,8 +136,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   builder: (context, constraints) {
                     return Align(
                       alignment: Alignment(
-                        _calculateReactionsHorizontalAlignmentValue(
+                        calculateReactionsHorizontalAlignmentValue(
                           user,
+                          widget.message,
                           divFactor,
                           shiftFactor,
                           constraints,
@@ -272,56 +274,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         ],
       ),
     );
-  }
-
-  double _calculateReactionsHorizontalAlignmentValue(
-    User? user,
-    num divFactor,
-    double shiftFactor,
-    BoxConstraints constraints,
-  ) {
-    var result = 0.0;
-
-    final maxWidth = constraints.maxWidth;
-    final maxHeight = constraints.maxHeight;
-
-    print('INFO - max width: $maxWidth. '
-        'maxHeight: $maxHeight '
-        'shiftFactor: $shiftFactor '
-        'divFactor: $divFactor');
-
-    if (user?.id == widget.message.user?.id) {
-      if (divFactor >= 1.0) {
-        /*
-         This is an empiric value. This number tries to approximate all the
-         offset necessary for the position of reaction look the best way
-         possible.
-         */
-        const constant = 1500;
-
-        result = shiftFactor - maxWidth / constant;
-      } else {
-        // Small messages, it is simpler to align then.
-        result = 1.2 - divFactor;
-      }
-    } else {
-      if (divFactor >= 1.0) {
-        result = shiftFactor + 0.2;
-      } else {
-        result = -(1.2 - divFactor);
-      }
-    }
-
-    print('INFO - result: $result');
-
-    // Ensure reactions don't get pushed past the edge of the screen.
-    //
-    // Hacky!!! Needs improvement!!!
-    if (result > 1.0) {
-      return 1;
-    } else {
-      return result;
-    }
   }
 
   InkWell _buildCustomAction(
