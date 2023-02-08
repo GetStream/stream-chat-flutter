@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Document here!!
+/// This method calculates the align that the modal of reactions should have.
+/// THis is an approximation based on the size of the message and the
+/// available space in the screen.
 double calculateReactionsHorizontalAlignmentValue(
   User? user,
   Message message,
@@ -75,17 +77,7 @@ double _portraitAlign(
     }
   }
 
-  // Ensure reactions don't get pushed past the edge of the screen.
-  //
-  // This happens if divFactor is really big. When this happens, we can simply
-  // move the model all the way to the end of screen.
-  if (result > 1.0) {
-    return 1;
-  } else if (result < -1.0) {
-    return -1;
-  } else {
-    return result;
-  }
+  return _capResult(result);
 }
 
 double _landScapeAlign(
@@ -121,10 +113,14 @@ double _landScapeAlign(
     }
   }
 
-  // Ensure reactions don't get pushed past the edge of the screen.
-  //
-  // This happens if divFactor is really big. When this happens, we can simply
-  // move the model all the way to the end of screen.
+  return _capResult(result);
+}
+
+// Ensure reactions don't get pushed past the edge of the screen.
+//
+// This happens if divFactor is really big. When this happens, we can simply
+// move the model all the way to the end of screen.
+double _capResult(double result) {
   if (result > 1.0) {
     return 1;
   } else if (result < -1.0) {
