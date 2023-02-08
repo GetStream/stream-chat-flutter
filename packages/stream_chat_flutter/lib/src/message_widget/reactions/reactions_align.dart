@@ -3,16 +3,24 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Document here!!
 double calculateReactionsHorizontalAlignmentValue(
-    User? user,
-    Message message,
-    num divFactor,
-    double shiftFactor,
-    BoxConstraints constraints,
-    ) {
+  User? user,
+  Message message,
+  BoxConstraints constraints,
+  double maxSize,
+  double? fontSize,
+  int reactionsCount,
+) {
   var result = 0.0;
 
+  final shiftFactor = reactionsCount < 5 ? (5 - reactionsCount) * 0.1 : 0.0;
   final maxWidth = constraints.maxWidth;
   final maxHeight = constraints.maxHeight;
+
+  final roughSentenceSize = message.roughMessageSize(fontSize);
+
+  final divFactor = message.attachments.isNotEmpty
+      ? 1
+      : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / maxSize));
 
   print('INFO - max width: $maxWidth. '
       'maxHeight: $maxHeight '
@@ -48,6 +56,8 @@ double calculateReactionsHorizontalAlignmentValue(
   // Hacky!!! Needs improvement!!!
   if (result > 1.0) {
     return 1;
+  } else if (result < -1.0) {
+    return -1;
   } else {
     return result;
   }

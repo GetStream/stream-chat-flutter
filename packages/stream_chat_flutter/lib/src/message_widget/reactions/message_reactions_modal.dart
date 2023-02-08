@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/reaction_bubble.dart';
+import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamMessageReactionsModal}
@@ -45,19 +46,10 @@ class StreamMessageReactionsModal extends StatelessWidget {
 
     final hasReactionPermission =
         _userPermissions.contains(PermissionType.sendReaction);
-
     final roughMaxSize = size.width * 2 / 3;
-
-    final roughSentenceSize =
-        message.roughMessageSize(messageTheme.messageTextStyle?.fontSize);
-    final divFactor = message.attachments.isNotEmpty
-        ? 1
-        : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
-
+    final fontSize = messageTheme.messageTextStyle?.fontSize;
     final numberOfReactions =
         StreamChatConfiguration.of(context).reactionIcons.length;
-    final shiftFactor =
-        numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
 
     final child = Center(
       child: SingleChildScrollView(
@@ -69,20 +61,25 @@ class StreamMessageReactionsModal extends StatelessWidget {
             children: <Widget>[
               if ((showReactions ?? hasReactionPermission) &&
                   (message.status == MessageSendingStatus.sent))
-                Align(
-                  alignment: Alignment(
-                    user!.id == message.user!.id
-                        ? (divFactor >= 1.0
-                            ? -0.2 - shiftFactor
-                            : (1.2 - divFactor))
-                        : (divFactor >= 1.0
-                            ? shiftFactor + 0.2
-                            : -(1.2 - divFactor)),
-                    0,
-                  ),
-                  child: StreamReactionPicker(
-                    message: message,
-                  ),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Align(
+                      alignment: Alignment(
+                        calculateReactionsHorizontalAlignmentValue(
+                          user,
+                          message,
+                          constraints,
+                          roughMaxSize,
+                          fontSize,
+                          numberOfReactions,
+                        ),
+                        0,
+                      ),
+                      child: StreamReactionPicker(
+                        message: message,
+                      ),
+                    );
+                  },
                 ),
               const SizedBox(height: 10),
               IgnorePointer(

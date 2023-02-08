@@ -106,19 +106,16 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final roughSentenceSize = widget.message
         .roughMessageSize(widget.messageTheme.messageTextStyle?.fontSize);
 
+    final fontSize = widget.messageTheme.messageTextStyle?.fontSize;
+
     print('roughSentenceSize $roughSentenceSize');
     print('roughMaxSize $roughMaxSize');
-
-    final divFactor = widget.message.attachments.isNotEmpty
-        ? 1
-        : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
     final streamChatThemeData = StreamChatTheme.of(context);
 
     final numberOfReactions =
         StreamChatConfiguration.of(context).reactionIcons.length;
-    final shiftFactor =
-        numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
+
     final channel = StreamChannel.of(context).channel;
 
     final child = Center(
@@ -139,9 +136,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                         calculateReactionsHorizontalAlignmentValue(
                           user,
                           widget.message,
-                          divFactor,
-                          shiftFactor,
                           constraints,
+                          roughMaxSize,
+                          fontSize,
+                          numberOfReactions,
                         ),
                         0,
                       ),
