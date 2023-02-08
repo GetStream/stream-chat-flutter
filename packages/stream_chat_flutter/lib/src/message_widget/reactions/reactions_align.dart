@@ -53,11 +53,6 @@ double _portraitAlign(
   num divFactor,
   bool hasAttachments,
 ) {
-  print('INFO - max width: $maxWidth. '
-      'maxHeight: $maxHeight '
-      'shiftFactor: $shiftFactor '
-      'divFactor: $divFactor');
-
   var result = 0.0;
 
   // This is an empiric value. This number tries to approximate all the
@@ -106,16 +101,11 @@ double _landScapeAlign(
 ) {
   var result = 0.0;
 
-  print('INFO - max width: $maxWidth. '
-      'maxHeight: $maxHeight '
-      'shiftFactor: $shiftFactor '
-      'divFactor: $divFactor');
-
   /*
-         This is an empiric value. This number tries to approximate all the
-         offset necessary for the position of reaction look the best way
-         possible.
-         */
+   This is an empiric value. This number tries to approximate all the
+   offset necessary for the position of reaction look the best way
+   possible.
+  */
   const constant = 3000;
 
   if (user?.id == message.user?.id) {
@@ -132,8 +122,6 @@ double _landScapeAlign(
       result = -(1.2 - divFactor * 0.6);
     }
   }
-
-  print('INFO - result landscape: $result');
 
   // Ensure reactions don't get pushed past the edge of the screen.
   //
