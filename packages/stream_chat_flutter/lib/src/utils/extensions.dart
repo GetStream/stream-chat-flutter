@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:file_picker/file_picker.dart';
@@ -366,11 +368,11 @@ extension MessageX on Message {
 
   /// Returns an approximation of message size
   double roughMessageSize(double? fontSize) {
-    var messageTextLength = text!.biggestLine().length;
+    var messageTextLength = min(text!.biggestLine().length, 65);
 
     if (quotedMessage != null) {
       var quotedMessageLength =
-          (quotedMessage!.text?.biggestLine().length ?? 0) + 6;
+          (min(quotedMessage!.text?.biggestLine().length ?? 0, 65)) + 6;
 
       if (quotedMessage!.attachments.isNotEmpty) {
         quotedMessageLength += 40;
