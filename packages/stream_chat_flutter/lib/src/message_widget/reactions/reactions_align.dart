@@ -16,8 +16,8 @@ double calculateReactionsHorizontalAlignmentValue(
   final maxHeight = constraints.maxHeight;
 
   final roughSentenceSize = message.roughMessageSize(fontSize);
-
-  final divFactor = message.attachments.isNotEmpty
+  final hasAttachments = message.attachments.isNotEmpty;
+  final divFactor = hasAttachments
       ? 1
       : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / maxSize));
 
@@ -29,6 +29,7 @@ double calculateReactionsHorizontalAlignmentValue(
       maxHeight,
       shiftFactor,
       divFactor,
+      hasAttachments,
     );
   } else {
     return _landScapeAlign(
@@ -38,6 +39,7 @@ double calculateReactionsHorizontalAlignmentValue(
       maxHeight,
       shiftFactor,
       divFactor,
+      hasAttachments,
     );
   }
 }
@@ -49,6 +51,7 @@ double _portraitAlign(
   double maxHeight,
   double shiftFactor,
   num divFactor,
+  bool hasAttachments,
 ) {
   print('INFO - max width: $maxWidth. '
       'maxHeight: $maxHeight '
@@ -57,23 +60,21 @@ double _portraitAlign(
 
   var result = 0.0;
 
-  if (user?.id == message.user?.id) {
-    if (divFactor >= 1.0) {
-      /*
-         This is an empiric value. This number tries to approximate all the
-         offset necessary for the position of reaction look the best way
-         possible.
-         */
-      const constant = 1300;
+  // This is an empiric value. This number tries to approximate all the
+  // offset necessary for the position of reaction look the best way
+  // possible.
+  const constant = 1300;
 
+  if (user?.id == message.user?.id) {
+    if (divFactor >= 1.0 || hasAttachments) {
       result = shiftFactor - maxWidth / constant;
     } else {
       // Small messages, it is simpler to align then.
       result = 1.2 - divFactor;
     }
   } else {
-    if (divFactor >= 1.0) {
-      result = shiftFactor + 0.2;
+    if (divFactor >= 1.0 || hasAttachments) {
+      result = shiftFactor + maxWidth / constant;
     } else {
       result = -(1.2 - divFactor);
     }
@@ -101,6 +102,7 @@ double _landScapeAlign(
   double maxHeight,
   double shiftFactor,
   num divFactor,
+  bool hasAttachments,
 ) {
   var result = 0.0;
 
@@ -109,15 +111,15 @@ double _landScapeAlign(
       'shiftFactor: $shiftFactor '
       'divFactor: $divFactor');
 
-  if (user?.id == message.user?.id) {
-    if (divFactor >= 1.7) {
-      /*
+  /*
          This is an empiric value. This number tries to approximate all the
          offset necessary for the position of reaction look the best way
          possible.
          */
-      const constant = 3000;
+  const constant = 3000;
 
+  if (user?.id == message.user?.id) {
+    if (divFactor >= 1.7) {
       result = shiftFactor - maxWidth / constant;
     } else {
       // Small messages, it is simpler to align then.
@@ -125,9 +127,9 @@ double _landScapeAlign(
     }
   } else {
     if (divFactor >= 1.7) {
-      result = shiftFactor + 0.2;
+      result = shiftFactor + maxWidth / constant;
     } else {
-      result = -(1.2 - divFactor);
+      result = -(1.2 - divFactor * 0.6);
     }
   }
 
