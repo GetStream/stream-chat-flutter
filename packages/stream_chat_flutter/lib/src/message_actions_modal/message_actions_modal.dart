@@ -100,6 +100,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final mediaQueryData = MediaQuery.of(context);
     final size = mediaQueryData.size;
     final user = StreamChat.of(context).currentUser;
+    final orientation = mediaQueryData.orientation;
 
     final roughMaxSize = size.width * 2 / 3;
 
@@ -140,6 +141,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                           roughMaxSize,
                           fontSize,
                           numberOfReactions,
+                          orientation,
                         ),
                         0,
                       ),

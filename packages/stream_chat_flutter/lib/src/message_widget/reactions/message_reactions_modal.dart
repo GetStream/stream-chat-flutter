@@ -43,6 +43,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final user = StreamChat.of(context).currentUser;
     final _userPermissions = StreamChannel.of(context).channel.ownCapabilities;
+    final orientation = MediaQuery.of(context).orientation;
 
     final hasReactionPermission =
         _userPermissions.contains(PermissionType.sendReaction);
@@ -72,6 +73,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
                           roughMaxSize,
                           fontSize,
                           numberOfReactions,
+                          orientation,
                         ),
                         0,
                       ),
