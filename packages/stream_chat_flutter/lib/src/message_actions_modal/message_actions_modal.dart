@@ -103,17 +103,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final orientation = mediaQueryData.orientation;
 
     final roughMaxSize = size.width * 2 / 3;
-
-    final roughSentenceSize = widget.message
-        .roughMessageSize(widget.messageTheme.messageTextStyle?.fontSize);
-
     final fontSize = widget.messageTheme.messageTextStyle?.fontSize;
-
-    print('roughSentenceSize $roughSentenceSize');
-    print('roughMaxSize $roughMaxSize');
-
     final streamChatThemeData = StreamChatTheme.of(context);
-
     final numberOfReactions =
         StreamChatConfiguration.of(context).reactionIcons.length;
 

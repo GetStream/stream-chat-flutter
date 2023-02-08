@@ -75,8 +75,6 @@ double _portraitAlign(
     }
   }
 
-  print('INFO - result portrait: $result');
-
   // Ensure reactions don't get pushed past the edge of the screen.
   //
   // This happens if divFactor is really big. When this happens, we can simply
