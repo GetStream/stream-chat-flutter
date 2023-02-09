@@ -225,6 +225,13 @@ class StreamChannelListTile extends StatelessWidget {
                     return const Offstage();
                   }
 
+                  final isLastMessageRead = channelState.read
+                      .where((readData) => readData.user.id != currentUser.id)
+                      .any((readData) =>
+                          readData.lastRead.isAfter(lastMessage.createdAt) ||
+                          readData.lastRead
+                              .isAtSameMomentAs(lastMessage.createdAt));
+
                   return Padding(
                     padding: const EdgeInsets.only(right: 4),
                     child:
@@ -232,9 +239,7 @@ class StreamChannelListTile extends StatelessWidget {
                             StreamSendingIndicator(
                               message: lastMessage,
                               size: channelPreviewTheme.indicatorIconSize,
-                              isMessageRead: channelState
-                                  .currentUserRead!.lastRead
-                                  .isAfter(lastMessage.createdAt),
+                              isMessageRead: isLastMessageRead,
                             ),
                   );
                 },
