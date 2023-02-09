@@ -463,12 +463,19 @@ class Channel {
 
     client.logger.info('Found ${attachments.length} attachments');
 
-    void updateAttachment(Attachment attachment) {
+    void updateAttachment(Attachment attachment, {bool remove = false}) {
       final index = message!.attachments.indexWhere(
         (it) => it.id == attachment.id,
       );
       if (index != -1) {
-        final newAttachments = [...message!.attachments]..[index] = attachment;
+        // update or remove attachment from message.
+        final List<Attachment> newAttachments;
+        if (remove) {
+          newAttachments = [...message!.attachments]..removeAt(index);
+        } else {
+          newAttachments = [...message!.attachments]..[index] = attachment;
+        }
+
         final updatedMessage = message!.copyWith(attachments: newAttachments);
         state?.updateMessage(updatedMessage);
         // updating original message for next iteration
@@ -533,6 +540,14 @@ class Channel {
           );
         }
       }).catchError((e, stk) {
+        if (e is StreamChatNetworkError && e.isRequestCancelledError) {
+          client.logger.info('Attachment ${it.id} upload cancelled');
+
+          // remove attachment from message if cancelled.
+          updateAttachment(it, remove: true);
+          return;
+        }
+
         client.logger.severe('error uploading the attachment', e, stk);
         updateAttachment(
           it.copyWith(uploadState: UploadState.failed(error: e.toString())),
