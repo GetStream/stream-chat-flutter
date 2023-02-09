@@ -1761,13 +1761,13 @@ class ChannelClientState {
   void _listenUserStartWatching() {
     _subscriptions.add(
       _channel.on(EventType.userWatchingStart).listen((event) {
-        if (event.user != null) {
-          final watcher = event.user;
-          final existingWatchers = channelState.watchers ?? [];
+        final watcher = event.user;
+        if (watcher != null) {
+          final existingWatchers = channelState.watchers;
           updateChannelState(channelState.copyWith(
             watchers: [
-              ...existingWatchers,
-              watcher!,
+              ...?existingWatchers,
+              watcher,
             ],
           ));
         }
@@ -1778,13 +1778,12 @@ class ChannelClientState {
   void _listenUserStopWatching() {
     _subscriptions.add(
       _channel.on(EventType.userWatchingStop).listen((event) {
-        if (event.user != null) {
-          final watcher = event.user;
-          final existingWatchers = channelState.watchers ?? [];
-
+        final watcher = event.user;
+        if (watcher != null) {
+          final existingWatchers = channelState.watchers;
           updateChannelState(channelState.copyWith(
             watchers: existingWatchers
-                .where((user) => user.id != watcher!.id)
+                ?.where((user) => user.id != watcher.id)
                 .toList(growable: false),
           ));
         }
@@ -2116,9 +2115,12 @@ class ChannelClientState {
       .toList();
 
   /// Channel watchers list as a stream.
-  Stream<List<User>?> get watchersStream => channelStateStream
-      .map((cs) => cs.watchers)
-      .where((watchers) => watchers != null);
+  Stream<List<User>> get watchersStream => CombineLatestStream.combine2<
+          List<User>?, Map<String?, User?>, List<User>>(
+        channelStateStream.map((cs) => cs.watchers),
+        _channel.client.state.usersStream,
+        (watchers, users) => watchers!.map((e) => users[e.id] ?? e).toList(),
+      ).distinct(const ListEquality().equals);
 
   /// Channel member for the current user.
   Member? get currentUserMember => members.firstWhereOrNull(
