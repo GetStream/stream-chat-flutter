@@ -2,12 +2,15 @@
 
 🐞 Fixed
 
-- Fixed streamWatchers. Before it was always new, now it is possible to follow the watchers of a channel. 
-## Upcoming
+- Fixed streamWatchers. Before it was always new, now it is possible to follow the watchers of a channel.
 
 🔄 Changed
 
 - Cancelling a attachment upload now removes the attachment from the message.
+
+✅ Added
+
+- Added `presence` property to `Channel::watch` method.
 
 ## 5.3.0
 
