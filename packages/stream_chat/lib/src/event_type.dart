@@ -36,6 +36,12 @@ class EventType {
   /// Event sent when updating a message
   static const String messageUpdated = 'message.updated';
 
+  /// Event sent when a user starts watching a channel
+  static const String userWatchingStart = 'user.watching.start';
+
+  /// Event sent when a user stops watching a channel
+  static const String userWatchingStop = 'user.watching.stop';
+
   /// Event sent when reading a message
   static const String messageRead = 'message.read';
 

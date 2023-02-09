@@ -37,7 +37,7 @@ dependencies:
   photo_manager: ^2.5.2
   photo_view: ^0.14.0
   rxdart: ^0.27.0
-  share_plus: ^4.5.0
+  share_plus: ^6.3.0
   shimmer: ^2.0.0
   stream_chat_flutter_core: ^5.3.0
   synchronized: ^3.0.0
