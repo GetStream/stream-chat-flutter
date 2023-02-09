@@ -1628,6 +1628,10 @@ class ChannelClientState {
 
     _listenMemberUnbanned();
 
+    _listenUserStartWatching();
+
+    _listenUserStopWatching();
+
     _startCleaningStaleTypingEvents();
 
     _startCleaningStalePinnedMessages();
@@ -1767,6 +1771,39 @@ class ChannelClientState {
         _updateMember(member);
       },
     ));
+  }
+
+  void _listenUserStartWatching() {
+    _subscriptions.add(
+      _channel.on(EventType.userWatchingStart).listen((event) {
+        final watcher = event.user;
+        if (watcher != null) {
+          final existingWatchers = channelState.watchers;
+          updateChannelState(channelState.copyWith(
+            watchers: [
+              ...?existingWatchers,
+              watcher,
+            ],
+          ));
+        }
+      }),
+    );
+  }
+
+  void _listenUserStopWatching() {
+    _subscriptions.add(
+      _channel.on(EventType.userWatchingStop).listen((event) {
+        final watcher = event.user;
+        if (watcher != null) {
+          final existingWatchers = channelState.watchers;
+          updateChannelState(channelState.copyWith(
+            watchers: existingWatchers
+                ?.where((user) => user.id != watcher.id)
+                .toList(growable: false),
+          ));
+        }
+      }),
+    );
   }
 
   void _listenMemberUnbanned() {
@@ -2098,7 +2135,7 @@ class ChannelClientState {
         channelStateStream.map((cs) => cs.watchers),
         _channel.client.state.usersStream,
         (watchers, users) => watchers!.map((e) => users[e.id] ?? e).toList(),
-      );
+      ).distinct(const ListEquality().equals);
 
   /// Channel member for the current user.
   Member? get currentUserMember => members.firstWhereOrNull(
