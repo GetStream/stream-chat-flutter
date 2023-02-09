@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       ownMessageTheme: const StreamMessageThemeData(
-        urlLinkTitleMaxLine: 1,
+        urlAttachmentTitleMaxLine: 1,
       ),
       otherMessageTheme: StreamMessageThemeData(
         messageBackgroundColor: colorTheme.textHighEmphasis,
@@ -85,7 +85,7 @@ class MyApp extends StatelessWidget {
         avatarTheme: StreamAvatarThemeData(
           borderRadius: BorderRadius.circular(8),
         ),
-        urlLinkTitleMaxLine: 1,
+        urlAttachmentTitleMaxLine: 1,
       ),
     ).merge(defaultTheme);
 

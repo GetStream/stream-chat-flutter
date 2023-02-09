@@ -107,7 +107,7 @@ class StreamUrlAttachment extends StatelessWidget {
                     if (urlAttachment.title != null)
                       Text(
                         urlAttachment.title!.trim(),
-                        maxLines: messageTheme.urlLinkTitleMaxLine ?? 1,
+                        maxLines: messageTheme.urlAttachmentTitleMaxLine ?? 1,
                         overflow: TextOverflow.ellipsis,
                         style: chatThemeData.textTheme.body
                             .copyWith(fontWeight: FontWeight.w700),
