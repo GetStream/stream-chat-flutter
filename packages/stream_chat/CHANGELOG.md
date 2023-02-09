@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Cancelling a attachment upload now removes the attachment from the message.
+
 ## 5.3.0
 
 🔄 Changed
