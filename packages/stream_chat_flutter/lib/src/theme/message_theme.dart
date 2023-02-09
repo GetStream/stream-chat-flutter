@@ -95,7 +95,7 @@ class StreamMessageThemeData with Diagnosticable {
       reactionsMaskColor: reactionsMaskColor ?? this.reactionsMaskColor,
       linkBackgroundColor: linkBackgroundColor ?? this.linkBackgroundColor,
       urlAttachmentTitleMaxLine:
-          urlLinkTitleMaxLine ?? this.urlAttachmentTitleMaxLine,
+          urlLinkTitleMaxLine ?? urlAttachmentTitleMaxLine,
     );
   }
 
