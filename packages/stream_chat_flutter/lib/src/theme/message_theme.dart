@@ -77,7 +77,7 @@ class StreamMessageThemeData with Diagnosticable {
     Color? reactionsBorderColor,
     Color? reactionsMaskColor,
     Color? linkBackgroundColor,
-    int? urlLinkTitleMaxLine,
+    int? urlAttachmentTitleMaxLine,
   }) {
     return StreamMessageThemeData(
       messageTextStyle: messageTextStyle ?? this.messageTextStyle,
@@ -95,7 +95,7 @@ class StreamMessageThemeData with Diagnosticable {
       reactionsMaskColor: reactionsMaskColor ?? this.reactionsMaskColor,
       linkBackgroundColor: linkBackgroundColor ?? this.linkBackgroundColor,
       urlAttachmentTitleMaxLine:
-          urlLinkTitleMaxLine ?? urlAttachmentTitleMaxLine,
+          urlAttachmentTitleMaxLine ?? this.urlAttachmentTitleMaxLine,
     );
   }
 
@@ -155,7 +155,7 @@ class StreamMessageThemeData with Diagnosticable {
       reactionsBorderColor: other.reactionsBorderColor,
       reactionsMaskColor: other.reactionsMaskColor,
       linkBackgroundColor: other.linkBackgroundColor,
-      urlLinkTitleMaxLine: other.urlAttachmentTitleMaxLine,
+      urlAttachmentTitleMaxLine: other.urlAttachmentTitleMaxLine,
     );
   }
 
