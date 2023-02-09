@@ -1,5 +1,10 @@
 ## Upcoming
 
+🐞 Fixed
+
+- Fixed streamWatchers. Before it was always new, now it is possible to follow the watchers of a channel. 
+## Upcoming
+
 🔄 Changed
 
 - Cancelling a attachment upload now removes the attachment from the message.
