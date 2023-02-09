@@ -1234,11 +1234,11 @@ class Channel {
   }
 
   /// Loads the initial channel state and watches for changes.
-  Future<ChannelState> watch() async {
+  Future<ChannelState> watch({bool presence = false}) async {
     ChannelState response;
 
     try {
-      response = await query(watch: true);
+      response = await query(watch: true, presence: presence);
     } catch (error, stackTrace) {
       if (!_initializedCompleter.isCompleted) {
         _initializedCompleter.completeError(error, stackTrace);
