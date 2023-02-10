@@ -1,5 +1,8 @@
 ## Upcoming
 
+🐞 Fixed
+[#1463](https://github.com/GetStream/stream-chat-flutter/pull/1463) Fixed support for iPad in the share button for images. 
+
 ✅ Added
 
 - Now it is possible to customize the max lines of the title of a url attachment. Before it was always 1 line.
