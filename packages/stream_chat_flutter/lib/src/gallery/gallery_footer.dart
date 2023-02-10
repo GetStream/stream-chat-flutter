@@ -60,6 +60,7 @@ class StreamGalleryFooter extends StatefulWidget
 
 class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
   final shareButtonKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     const showShareButton = !kIsWeb;
@@ -107,12 +108,19 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                     await file.writeAsBytes(bytes);
                     final box =
                         shareButtonKey.currentContext?.findRenderObject();
+                    final size = shareButtonKey.currentContext?.size;
+
                     final position =
                         (box! as RenderBox).localToGlobal(Offset.zero);
+
                     await Share.shareXFiles(
                       [XFile(filePath)],
-                      sharePositionOrigin:
-                          Rect.fromLTWH(position.dx, position.dy, 0, 0),
+                      sharePositionOrigin: Rect.fromLTWH(
+                        position.dx,
+                        position.dy,
+                        size?.width ?? 50,
+                        (size?.height ?? 2) / 2,
+                      ),
                     );
                   },
                 ),
