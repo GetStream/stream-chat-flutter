@@ -65,7 +65,7 @@ class SendingIndicatorWrapper extends StatelessWidget {
       initialData: channel.state?.read,
       builder: (context, data) {
         final readList = data.where((it) =>
-        it.user.id != streamChat.currentUser?.id &&
+            it.user.id != streamChat.currentUser?.id &&
             (it.lastRead.isAfter(message.createdAt) ||
                 it.lastRead.isAtSameMomentAs(message.createdAt)));
 
