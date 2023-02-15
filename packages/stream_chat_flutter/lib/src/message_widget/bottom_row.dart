@@ -204,7 +204,7 @@ class BottomRow extends StatelessWidget {
       if (showSendingIndicator)
         WidgetSpan(
           child: sendingIndicatorBuilder?.call(context, message) ??
-              SendingIndicatorWrapper(
+              SendingIndicatorBuilder(
                 messageTheme: messageTheme,
                 message: message,
                 hasNonUrlAttachments: hasNonUrlAttachments,

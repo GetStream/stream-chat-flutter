@@ -302,12 +302,13 @@ class ChannelPreview extends StatelessWidget {
                                         it.type == 'giphy')
                                     .isNotEmpty;
 
-                                return SendingIndicatorWrapper(
+                                return SendingIndicatorBuilder(
                                   messageTheme: streamChatTheme.ownMessageTheme,
                                   message: lastMessage,
                                   hasNonUrlAttachments: hasNonUrlAttachments,
                                   streamChat: streamChatState,
                                   streamChatTheme: streamChatTheme,
+                                  channel: channel,
                                 );
                               },
                             ),
