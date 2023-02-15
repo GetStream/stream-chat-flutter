@@ -211,11 +211,12 @@ class StreamChannelListTile extends StatelessWidget {
                   child: subtitle,
                 ),
               ),
-              BetterStreamBuilder<List<Read>>(
-                stream: channelState.readStream,
-                initialData: channelState.read,
-                builder: (context, reads) {
-                  final lastMessage = channelState.messages.lastWhereOrNull(
+              BetterStreamBuilder<List<Message>>(
+                stream: channelState.messagesStream,
+                initialData: channelState.messages,
+                comparator: const ListEquality().equals,
+                builder: (context, messages) {
+                  final lastMessage = messages.lastWhereOrNull(
                     (m) => !m.shadowed && !m.isDeleted,
                   );
 
@@ -235,15 +236,13 @@ class StreamChannelListTile extends StatelessWidget {
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 4),
-                    child: sendingIndicatorBuilder?.call(
-                          context,
-                          lastMessage,
-                        ) ??
-                        StreamSendingIndicator(
-                          message: lastMessage,
-                          size: channelPreviewTheme.indicatorIconSize,
-                          isMessageRead: isLastMessageRead,
-                        ),
+                    child:
+                        sendingIndicatorBuilder?.call(context, lastMessage) ??
+                            StreamSendingIndicator(
+                              message: lastMessage,
+                              size: channelPreviewTheme.indicatorIconSize,
+                              isMessageRead: isLastMessageRead,
+                            ),
                   );
                 },
               ),
