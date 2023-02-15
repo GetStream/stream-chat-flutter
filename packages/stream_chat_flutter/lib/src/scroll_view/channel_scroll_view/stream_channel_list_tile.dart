@@ -227,16 +227,7 @@ class StreamChannelListTile extends StatelessWidget {
                       (lastMessage.user?.id != currentUser.id)) {
                     return const Offstage();
                   }
-
-                  final isLastMessageRead = channelState.read
-                      .where(
-                        (readData) => readData.user.id != currentUser.id,
-                      )
-                      .any((readData) =>
-                          readData.lastRead.isAfter(lastMessage.createdAt) ||
-                          readData.lastRead
-                              .isAtSameMomentAs(lastMessage.createdAt));
-
+                  
                   final hasNonUrlAttachments = lastMessage.attachments
                       .where((it) => it.titleLink == null || it.type == 'giphy')
                       .isNotEmpty;
