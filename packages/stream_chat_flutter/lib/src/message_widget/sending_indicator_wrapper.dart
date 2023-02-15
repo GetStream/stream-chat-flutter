@@ -33,6 +33,7 @@ class SendingIndicatorBuilder extends StatelessWidget {
   /// {@macro streamChatThemeData}
   final StreamChatThemeData streamChatTheme;
 
+  /// {@macro channel}
   final Channel? channel;
 
   @override
