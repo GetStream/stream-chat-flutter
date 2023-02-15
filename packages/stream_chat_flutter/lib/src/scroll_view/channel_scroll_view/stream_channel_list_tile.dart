@@ -211,45 +211,39 @@ class StreamChannelListTile extends StatelessWidget {
                   child: subtitle,
                 ),
               ),
-              BetterStreamBuilder<List<Message>>(
-                stream: channelState.messagesStream,
-                initialData: channelState.messages,
-                comparator: const ListEquality().equals,
-                builder: (context, messages) {
-                  return BetterStreamBuilder<List<Read>>(
-                    stream: channelState.readStream,
-                    initialData: channelState.read,
-                    builder: (context, reads) {
-                      final lastMessage = messages.lastWhereOrNull(
-                        (m) => !m.shadowed && !m.isDeleted,
-                      );
+              BetterStreamBuilder<List<Read>>(
+                stream: channelState.readStream,
+                initialData: channelState.read,
+                builder: (context, reads) {
+                  final lastMessage = channelState.messages.lastWhereOrNull(
+                    (m) => !m.shadowed && !m.isDeleted,
+                  );
 
-                      if (lastMessage == null ||
-                          (lastMessage.user?.id != currentUser.id)) {
-                        return const Offstage();
-                      }
+                  if (lastMessage == null ||
+                      (lastMessage.user?.id != currentUser.id)) {
+                    return const Offstage();
+                  }
 
-                      final isLastMessageRead = channelState.read
-                          .where(
-                            (readData) => readData.user.id != currentUser.id,
-                          )
-                          .any((readData) =>
-                              readData.lastRead
-                                  .isAfter(lastMessage.createdAt) ||
-                              readData.lastRead
-                                  .isAtSameMomentAs(lastMessage.createdAt));
+                  final isLastMessageRead = channelState.read
+                      .where(
+                        (readData) => readData.user.id != currentUser.id,
+                      )
+                      .any((readData) =>
+                          readData.lastRead.isAfter(lastMessage.createdAt) ||
+                          readData.lastRead
+                              .isAtSameMomentAs(lastMessage.createdAt));
 
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 4),
-                        child: sendingIndicatorBuilder?.call(
-                                context, lastMessage) ??
-                            StreamSendingIndicator(
-                              message: lastMessage,
-                              size: channelPreviewTheme.indicatorIconSize,
-                              isMessageRead: isLastMessageRead,
-                            ),
-                      );
-                    },
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: sendingIndicatorBuilder?.call(
+                          context,
+                          lastMessage,
+                        ) ??
+                        StreamSendingIndicator(
+                          message: lastMessage,
+                          size: channelPreviewTheme.indicatorIconSize,
+                          isMessageRead: isLastMessageRead,
+                        ),
                   );
                 },
               ),
