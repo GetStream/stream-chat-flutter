@@ -6,6 +6,7 @@ import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
+import 'package:stream_chat_flutter/src/message_widget/sending_indicator_wrapper.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template channelPreview}
@@ -76,6 +77,7 @@ class ChannelPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
     final streamChatState = StreamChat.of(context);
+    final streamChatTheme = StreamChatTheme.of(context);
     return BetterStreamBuilder<bool>(
       stream: channel.isMutedStream,
       initialData: channel.isMuted,
@@ -292,20 +294,20 @@ class ChannelPreview extends StatelessWidget {
                               stream: channel.state?.readStream,
                               initialData: channel.state?.read,
                               builder: (context, data) {
-                                final readList = data.where((it) =>
-                                    it.user.id !=
-                                        channel.client.state.currentUser?.id &&
-                                    (it.lastRead
-                                            .isAfter(lastMessage!.createdAt) ||
-                                        it.lastRead.isAtSameMomentAs(
-                                          lastMessage.createdAt,
-                                        )));
-                                final isMessageRead = readList.length >=
-                                    (channel.memberCount ?? 0) - 1;
-                                return StreamSendingIndicator(
-                                  message: lastMessage!,
-                                  size: channelPreviewTheme.indicatorIconSize,
-                                  isMessageRead: isMessageRead,
+
+                                final hasNonUrlAttachments = lastMessage!
+                                    .attachments
+                                    .where((it) =>
+                                        it.titleLink == null ||
+                                        it.type == 'giphy')
+                                    .isNotEmpty;
+
+                                return SendingIndicatorWrapper(
+                                  messageTheme: streamChatTheme.ownMessageTheme,
+                                  message: lastMessage,
+                                  hasNonUrlAttachments: hasNonUrlAttachments,
+                                  streamChat: streamChatState,
+                                  streamChatTheme: streamChatTheme,
                                 );
                               },
                             ),
