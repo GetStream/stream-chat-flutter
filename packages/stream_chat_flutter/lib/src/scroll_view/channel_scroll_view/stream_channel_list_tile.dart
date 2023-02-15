@@ -227,7 +227,7 @@ class StreamChannelListTile extends StatelessWidget {
                       (lastMessage.user?.id != currentUser.id)) {
                     return const Offstage();
                   }
-                  
+
                   final hasNonUrlAttachments = lastMessage.attachments
                       .where((it) => it.titleLink == null || it.type == 'giphy')
                       .isNotEmpty;
