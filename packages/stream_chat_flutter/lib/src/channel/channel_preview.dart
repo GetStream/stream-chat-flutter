@@ -294,7 +294,6 @@ class ChannelPreview extends StatelessWidget {
                               stream: channel.state?.readStream,
                               initialData: channel.state?.read,
                               builder: (context, data) {
-
                                 final hasNonUrlAttachments = lastMessage!
                                     .attachments
                                     .where((it) =>
