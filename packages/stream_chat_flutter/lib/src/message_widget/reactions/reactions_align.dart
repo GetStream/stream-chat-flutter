@@ -29,7 +29,7 @@ double calculateReactionsHorizontalAlignment(
   var divFactor = 0.5;
 
   // When in portrait, attachments normally take 75% of the screen, when in
-  // landscape, attachments normally take 50% of the screen. 
+  // landscape, attachments normally take 50% of the screen.
   if (isAttachment) {
     if (orientation == Orientation.portrait) {
       divFactor = 0.75;
