@@ -371,17 +371,25 @@ extension MessageX on Message {
 
     if (quotedMessage != null) {
       var quotedMessageLength =
-          (min(quotedMessage!.text?.biggestLine().length ?? 0, 65)) + 6;
+          (min(quotedMessage!.text?.biggestLine().length ?? 0, 65)) + 8;
 
       if (quotedMessage!.attachments.isNotEmpty) {
         quotedMessageLength += 8;
       }
-      if (quotedMessageLength > messageTextLength) {
+
+      if (quotedMessageLength > messageTextLength * 1.2) {
         messageTextLength = quotedMessageLength;
       }
     }
 
-    return messageTextLength * (fontSize ?? 1) * 1.2;
+    // Quoted message have a smaller font, so it is necessary to reduce the
+    // size of the multiplier to count for the smaller font.
+    var multiplier = 1.2;
+    if (quotedMessage != null) {
+      multiplier = 1;
+    }
+
+    return messageTextLength * (fontSize ?? 1) * multiplier;
   }
 
   /// It returns the message with the translated text if available locally
