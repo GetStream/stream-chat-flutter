@@ -108,19 +108,18 @@ double _landScapeAlign(
    offset necessary for the position of reaction look the best way
    possible.
   */
-  const constant = 3000;
   if (isAttachment) {
     result = 0;
   } else if (user?.id == message.user?.id) {
-    if (divFactor >= 1.0) {
+    if (divFactor >= 1.3) {
       result = 0;
     } else {
       // Small messages, it is simpler to align then.
       result = 1 - divFactor * 0.6;
     }
   } else {
-    if (divFactor >= 1.0) {
-      result = shiftFactor + maxWidth / constant;
+    if (divFactor >= 1.3) {
+      result = 0;
     } else {
       result = -(1 - divFactor * 0.6);
     }
