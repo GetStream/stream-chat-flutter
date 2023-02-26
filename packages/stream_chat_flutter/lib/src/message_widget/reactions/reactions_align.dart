@@ -97,8 +97,9 @@ double _landScapeAlign(
    possible.
   */
   const constant = 3000;
-
-  if (user?.id == message.user?.id) {
+  if (hasAttachments) {
+    result = 0;
+  } else if (user?.id == message.user?.id) {
     if (divFactor >= 1.7) {
       result = shiftFactor - maxWidth / constant;
     } else {
