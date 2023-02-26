@@ -112,17 +112,17 @@ double _landScapeAlign(
   if (isAttachment) {
     result = 0;
   } else if (user?.id == message.user?.id) {
-    if (divFactor >= 1.7) {
+    if (divFactor >= 1.0) {
       result = 0;
     } else {
       // Small messages, it is simpler to align then.
       result = 1 - divFactor * 0.6;
     }
   } else {
-    if (divFactor >= 1.7) {
+    if (divFactor >= 1.0) {
       result = shiftFactor + maxWidth / constant;
     } else {
-      result = -(1.2 - divFactor * 0.6);
+      result = -(1 - divFactor * 0.6);
     }
   }
 
