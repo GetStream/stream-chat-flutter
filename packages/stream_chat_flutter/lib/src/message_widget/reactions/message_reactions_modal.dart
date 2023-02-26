@@ -40,17 +40,13 @@ class StreamMessageReactionsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final user = StreamChat.of(context).currentUser;
     final _userPermissions = StreamChannel.of(context).channel.ownCapabilities;
     final orientation = MediaQuery.of(context).orientation;
 
     final hasReactionPermission =
         _userPermissions.contains(PermissionType.sendReaction);
-    final roughMaxSize = size.width * 2 / 3;
     final fontSize = messageTheme.messageTextStyle?.fontSize;
-    final numberOfReactions =
-        StreamChatConfiguration.of(context).reactionIcons.length;
 
     final child = Center(
       child: SingleChildScrollView(
@@ -66,13 +62,11 @@ class StreamMessageReactionsModal extends StatelessWidget {
                   builder: (context, constraints) {
                     return Align(
                       alignment: Alignment(
-                        calculateReactionsHorizontalAlignmentValue(
+                        calculateReactionsHorizontalAlignment(
                           user,
                           message,
                           constraints,
-                          roughMaxSize,
                           fontSize,
-                          numberOfReactions,
                           orientation,
                         ),
                         0,

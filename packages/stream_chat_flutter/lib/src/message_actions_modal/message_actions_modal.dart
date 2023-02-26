@@ -98,15 +98,11 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   Widget _showMessageOptionsModal() {
     final mediaQueryData = MediaQuery.of(context);
-    final size = mediaQueryData.size;
     final user = StreamChat.of(context).currentUser;
     final orientation = mediaQueryData.orientation;
 
-    final roughMaxSize = size.width * 2 / 3;
     final fontSize = widget.messageTheme.messageTextStyle?.fontSize;
     final streamChatThemeData = StreamChatTheme.of(context);
-    final numberOfReactions =
-        StreamChatConfiguration.of(context).reactionIcons.length;
 
     final channel = StreamChannel.of(context).channel;
 
@@ -125,13 +121,11 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   builder: (context, constraints) {
                     return Align(
                       alignment: Alignment(
-                        calculateReactionsHorizontalAlignmentValue(
+                        calculateReactionsHorizontalAlignment(
                           user,
                           widget.message,
                           constraints,
-                          roughMaxSize,
                           fontSize,
-                          numberOfReactions,
                           orientation,
                         ),
                         0,

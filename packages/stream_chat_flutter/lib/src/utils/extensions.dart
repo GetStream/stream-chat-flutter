@@ -384,9 +384,9 @@ extension MessageX on Message {
 
     // Quoted message have a smaller font, so it is necessary to reduce the
     // size of the multiplier to count for the smaller font.
-    var multiplier = 1.2;
+    var multiplier = 0.55;
     if (quotedMessage != null) {
-      multiplier = 1;
+      multiplier = 0.45;
     }
 
     return messageTextLength * (fontSize ?? 1) * multiplier;

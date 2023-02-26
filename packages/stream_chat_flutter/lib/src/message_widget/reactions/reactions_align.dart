@@ -2,128 +2,46 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// This method calculates the align that the modal of reactions should have.
-/// THis is an approximation based on the size of the message and the
+/// This is an approximation based on the size of the message and the
 /// available space in the screen.
-double calculateReactionsHorizontalAlignmentValue(
+double calculateReactionsHorizontalAlignment(
   User? user,
   Message message,
   BoxConstraints constraints,
-  double maxSize,
   double? fontSize,
-  int reactionsCount,
   Orientation orientation,
 ) {
-  final shiftFactor = reactionsCount < 5 ? (5 - reactionsCount) * 0.1 : 0.0;
   final maxWidth = constraints.maxWidth;
-  final maxHeight = constraints.maxHeight;
 
   final roughSentenceSize = message.roughMessageSize(fontSize);
-  print('roughSentenceSize: $roughSentenceSize');
-  print('maxSize: $maxSize');
   final hasAttachments = message.attachments.isNotEmpty;
   final isReply = message.quotedMessageId != null;
   final isAttachment = hasAttachments && !isReply;
-  final divFactor = isAttachment
-      ? 1
-      : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / maxSize));
 
-  if (orientation == Orientation.portrait) {
-    return _portraitAlign(
-      user,
-      message,
-      maxWidth,
-      maxHeight,
-      shiftFactor,
-      divFactor,
-      isAttachment,
-    );
-  } else {
-    return _landScapeAlign(
-      user,
-      message,
-      maxWidth,
-      maxHeight,
-      shiftFactor,
-      divFactor,
-      isAttachment,
-    );
-  }
-}
+  // divFactor is the percentage of the available space that the message takes.
+  // When the divFactor is bigger than 0.5 that means that the messages is
+  // bigger than 50% of the available space and the modal should have an offset
+  // in the direction that the message grows. When the divFactor is smaller
+  // than 0.5 then the offset should be to he side opposite of the message
+  // growth.
+  // In resume, when divFactor > 0.5 then result > 0, when divFactor < 0.5
+  // then result < 0.
+  var divFactor = 0.5;
 
-double _portraitAlign(
-  User? user,
-  Message message,
-  double maxWidth,
-  double maxHeight,
-  double shiftFactor,
-  num divFactor,
-  bool isAttachment,
-) {
-  var result = 0.0;
-
-  // This is an empiric value. This number tries to approximate all the
-  // offset necessary for the position of reaction look the best way
-  // possible.
-  const constant = 1300;
-
-  print('is attachment: $isAttachment');
-  print('shiftFactor: $shiftFactor');
-  print('divFactor: $divFactor');
-
-  if (user?.id == message.user?.id) {
-    if (divFactor >= 1.0 || isAttachment) {
-      result = shiftFactor - maxWidth / constant;
-    } else {
-      // Small messages, it is simpler to align then.
-      result = 1.2 - divFactor;
-    }
-  } else {
-    if (divFactor >= 1.0 || isAttachment) {
-      result = shiftFactor + maxWidth / constant;
-    } else {
-      result = -(1.2 - divFactor);
-    }
-  }
-
-  return _capResult(result);
-}
-
-double _landScapeAlign(
-  User? user,
-  Message message,
-  double maxWidth,
-  double maxHeight,
-  double shiftFactor,
-  num divFactor,
-  bool isAttachment,
-) {
-  var result = 0.0;
-
-  print('is attachment: $isAttachment');
-  print('shiftFactor: $shiftFactor');
-  print('divFactor: $divFactor');
-
-  /*
-   This is an empiric value. This number tries to approximate all the
-   offset necessary for the position of reaction look the best way
-   possible.
-  */
+  // When in portrait, attachments normally take 75% of the screen, when in
+  // landscape, attachments normally take 50% of the screen. 
   if (isAttachment) {
-    result = 0;
-  } else if (user?.id == message.user?.id) {
-    if (divFactor >= 1.3) {
-      result = 0;
+    if (orientation == Orientation.portrait) {
+      divFactor = 0.75;
     } else {
-      // Small messages, it is simpler to align then.
-      result = 1 - divFactor * 0.6;
+      divFactor = 0.5;
     }
   } else {
-    if (divFactor >= 1.3) {
-      result = 0;
-    } else {
-      result = -(1 - divFactor * 0.6);
-    }
+    divFactor = roughSentenceSize == 0 ? 0.5 : (roughSentenceSize / maxWidth);
   }
+
+  final signal = user?.id == message.user?.id ? 1 : -1;
+  final result = signal * (1 - divFactor * 2.0);
 
   return _capResult(result);
 }
