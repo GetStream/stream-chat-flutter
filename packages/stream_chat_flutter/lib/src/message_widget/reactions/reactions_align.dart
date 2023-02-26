@@ -66,6 +66,10 @@ double _portraitAlign(
   // possible.
   const constant = 1300;
 
+  print('is attachment: $isAttachment');
+  print('shiftFactor: $shiftFactor');
+  print('divFactor: $divFactor');
+
   if (user?.id == message.user?.id) {
     if (divFactor >= 1.0 || isAttachment) {
       result = shiftFactor - maxWidth / constant;
@@ -109,7 +113,7 @@ double _landScapeAlign(
     result = 0;
   } else if (user?.id == message.user?.id) {
     if (divFactor >= 1.7) {
-      result = shiftFactor - maxWidth / constant;
+      result = 0;
     } else {
       // Small messages, it is simpler to align then.
       result = 1 - divFactor * 0.6;
