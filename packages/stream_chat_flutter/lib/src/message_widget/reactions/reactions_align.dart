@@ -18,8 +18,12 @@ double calculateReactionsHorizontalAlignmentValue(
   final maxHeight = constraints.maxHeight;
 
   final roughSentenceSize = message.roughMessageSize(fontSize);
+  print('roughSentenceSize: $roughSentenceSize');
+  print('maxSize: $maxSize');
   final hasAttachments = message.attachments.isNotEmpty;
-  final divFactor = hasAttachments
+  final isReply = message.quotedMessageId != null;
+  final isAttachment = hasAttachments && !isReply;
+  final divFactor = isAttachment
       ? 1
       : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / maxSize));
 
@@ -31,7 +35,7 @@ double calculateReactionsHorizontalAlignmentValue(
       maxHeight,
       shiftFactor,
       divFactor,
-      hasAttachments,
+      isAttachment,
     );
   } else {
     return _landScapeAlign(
@@ -41,7 +45,7 @@ double calculateReactionsHorizontalAlignmentValue(
       maxHeight,
       shiftFactor,
       divFactor,
-      hasAttachments,
+      isAttachment,
     );
   }
 }
@@ -53,7 +57,7 @@ double _portraitAlign(
   double maxHeight,
   double shiftFactor,
   num divFactor,
-  bool hasAttachments,
+  bool isAttachment,
 ) {
   var result = 0.0;
 
@@ -63,14 +67,14 @@ double _portraitAlign(
   const constant = 1300;
 
   if (user?.id == message.user?.id) {
-    if (divFactor >= 1.0 || hasAttachments) {
+    if (divFactor >= 1.0 || isAttachment) {
       result = shiftFactor - maxWidth / constant;
     } else {
       // Small messages, it is simpler to align then.
       result = 1.2 - divFactor;
     }
   } else {
-    if (divFactor >= 1.0 || hasAttachments) {
+    if (divFactor >= 1.0 || isAttachment) {
       result = shiftFactor + maxWidth / constant;
     } else {
       result = -(1.2 - divFactor);
@@ -87,9 +91,13 @@ double _landScapeAlign(
   double maxHeight,
   double shiftFactor,
   num divFactor,
-  bool hasAttachments,
+  bool isAttachment,
 ) {
   var result = 0.0;
+
+  print('is attachment: $isAttachment');
+  print('shiftFactor: $shiftFactor');
+  print('divFactor: $divFactor');
 
   /*
    This is an empiric value. This number tries to approximate all the
@@ -97,7 +105,7 @@ double _landScapeAlign(
    possible.
   */
   const constant = 3000;
-  if (hasAttachments) {
+  if (isAttachment) {
     result = 0;
   } else if (user?.id == message.user?.id) {
     if (divFactor >= 1.7) {
