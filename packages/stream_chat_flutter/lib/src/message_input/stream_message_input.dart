@@ -11,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
+import 'package:stream_chat_flutter/src/message_input/on_hold_button.dart';
 import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
@@ -681,10 +682,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildRecordVoiceButton() {
-    final defaultButton = OnPressButton.audioRecord(
-      color: _messageInputTheme.actionButtonIdleColor!,
-      onPressed: _onAudioRecordButtonPressed,
-    );
+    final defaultButton = OnHoldButton.audioRecord();
 
     return defaultButton;
   }

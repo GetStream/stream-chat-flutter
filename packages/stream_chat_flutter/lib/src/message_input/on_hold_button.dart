@@ -1,58 +1,125 @@
-import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
+import 'dart:io';
 
-/// {@template commandButton}
-/// The button that allows a user to use commands in a chat.
-/// {@endtemplate}
-class OnHoldButton extends StatelessWidget {
-  /// {@macro commandButton}
+import 'package:flutter/material.dart';
+import 'package:record/record.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+/// Docs
+typedef RecordCallback = void Function(String);
+/// Docs
+typedef HoldStartCallback = Future<void> Function(BuildContext);
+/// Docs
+typedef HoldStopCallback = Future<void> Function(BuildContext);
+
+/// Docs
+class OnHoldButton extends StatefulWidget {
+  /// Docs
   const OnHoldButton({
     super.key,
-    required this.icon,
-    required this.onHold,
+    required this.onHoldStart,
+    required this.onHoldStop,
+    required this.iconIdle,
+    required this.iconActive,
   });
 
-  /// Audio Record button
+  /// Docs
   factory OnHoldButton.audioRecord({
-    required Color color,
-    required VoidCallback onHold,
+    IconData? iconIdle,
+    IconData? iconActive,
   }) {
+    final _audioRecorder = Record();
+
+    Future<void> _start(BuildContext context) async {
+      try {
+        if (await _audioRecorder.hasPermission()) {
+          await _audioRecorder.start();
+        }
+      } catch (e) {
+        print(e);
+      }
+    }
+
+    void recordingFinishedCallback(String path, BuildContext context) {
+      final uri = Uri.parse(path);
+      final file = File(uri.path);
+
+      file.length().then(
+        (fileSize) {
+          StreamChannel.of(context).channel.sendMessage(
+                Message(
+                  attachments: [
+                    Attachment(
+                      type: 'voicenote',
+                      file: AttachmentFile(
+                        size: fileSize,
+                        path: uri.path,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+        },
+      );
+    }
+
+    Future<void> _stop(BuildContext context) async {
+      final path = await _audioRecorder.stop();
+      recordingFinishedCallback(path!, context);
+    }
+
     return OnHoldButton(
-      icon: StreamSvgIcon.microphone(color: color),
-      onHold: onHold,
+      onHoldStart: _start,
+      onHoldStop: _stop,
+      iconIdle: iconIdle ?? Icons.mic,
+      iconActive: iconActive ?? Icons.stop,
     );
   }
 
-  /// Icon of the button
-  final StreamSvgIcon icon;
+  /// Docs
+  final HoldStartCallback onHoldStart;
 
-  /// The action to perform when the button is pressed or clicked.
-  final VoidCallback onHold;
+  /// Docs
+  final HoldStopCallback onHoldStop;
 
-  /// Returns a copy of this object with the given fields updated.
-  OnHoldButton copyWith({
-    Key? key,
-    StreamSvgIcon? icon,
-    VoidCallback? onHold,
-  }) {
-    return OnHoldButton(
-      key: key ?? this.key,
-      icon: icon ?? this.icon,
-      onHold: onHold ?? this.onHold,
-    );
+  /// Docs
+  final IconData iconIdle;
+
+  /// Docs
+  final IconData iconActive;
+
+  @override
+  State<OnHoldButton> createState() => _OnHoldButtonState();
+}
+
+class _OnHoldButtonState extends State<OnHoldButton> {
+  bool _isHolding = false;
+
+  Future<void> _start(BuildContext context) async {
+    widget.onHoldStart.call(context);
+    setState(() {
+      _isHolding = true;
+    });
+  }
+
+  Future<void> _stop(BuildContext context) async {
+    widget.onHoldStop.call(context);
+    setState(() => _isHolding = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: icon,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(
-        height: 24,
-        width: 24,
+    final color = _isHolding
+        ? Colors.red.withOpacity(0.3)
+        : StreamChatTheme.of(context).primaryIconTheme.color;
+
+    return GestureDetector(
+      onTap: () {
+        _isHolding ? _stop(context) : _start(context);
+      },
+      child: Icon(
+        _isHolding ? widget.iconActive : widget.iconIdle,
+        color: color,
       ),
-      splashRadius: 24,
-      onPressed: onHold,
     );
   }
 }
