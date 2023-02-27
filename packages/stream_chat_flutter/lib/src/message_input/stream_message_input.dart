@@ -11,8 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
-import 'package:stream_chat_flutter/src/message_input/command_button.dart';
+import 'package:stream_chat_flutter/src/message_input/action_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
@@ -652,6 +651,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             ? const Offstage()
             : Wrap(
                 children: <Widget>[
+                  _buildRecordVoiceButton(),
                   if (!widget.disableAttachments &&
                       channel.ownCapabilities
                           .contains(PermissionType.uploadFile))
@@ -671,13 +671,22 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildAttachmentButton(BuildContext context) {
-    final defaultButton = AttachmentButton(
+    final defaultButton = ActionButton.attachment(
       color: _messageInputTheme.actionButtonIdleColor!,
       onPressed: _onAttachmentButtonPressed,
     );
 
     return widget.attachmentButtonBuilder?.call(context, defaultButton) ??
         defaultButton;
+  }
+
+  Widget _buildRecordVoiceButton() {
+    final defaultButton = ActionButton.audioRecord(
+      color: _messageInputTheme.actionButtonIdleColor!,
+      onPressed: _onAudioRecordButtonPressed,
+    );
+
+    return defaultButton;
   }
 
   /// Handle the platform-specific logic for selecting files.
@@ -695,6 +704,15 @@ class StreamMessageInputState extends State<StreamMessageInput>
     if (attachments != null) {
       _effectiveController.attachments = attachments;
     }
+  }
+
+  /// Handle the platform-specific logic for selecting files.
+  ///
+  /// On mobile, this will open the file selection bottom sheet. On desktop,
+  /// this will open the native file system and allow the user to select one
+  /// or more files.
+  Future<void> _onAudioRecordButtonPressed() async {
+    print('To implement');
   }
 
   Expanded _buildTextInput(BuildContext context) {
@@ -1217,7 +1235,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Widget _buildCommandButton(BuildContext context) {
     final s = _effectiveController.text.trim();
     final isCommandOptionsVisible = s.startsWith(_kCommandTrigger);
-    final defaultButton = CommandButton(
+    final defaultButton = ActionButton.command(
       color: s.isNotEmpty
           ? _streamChatTheme.colorTheme.disabled
           : (isCommandOptionsVisible

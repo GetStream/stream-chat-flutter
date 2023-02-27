@@ -392,6 +392,19 @@ class StreamSvgIcon extends StatelessWidget {
   }
 
   /// [StreamSvgIcon] type
+  factory StreamSvgIcon.microphone({
+    double? size,
+    Color? color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_microphone.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  /// [StreamSvgIcon] type
   factory StreamSvgIcon.emptyCircleLeft({
     double? size,
     Color? color,

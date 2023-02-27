@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
-import 'package:stream_chat_flutter/src/message_input/command_button.dart';
+import 'package:stream_chat_flutter/src/message_input/action_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template inProgressBuilder}
@@ -179,7 +178,7 @@ typedef UserMentionTileBuilder = Widget Function(
 /// {@endtemplate}
 typedef CommandButtonBuilder = Widget Function(
   BuildContext context,
-  CommandButton commandButton,
+  ActionButton commandButton,
 );
 
 /// {@template actionButtonBuilder}
@@ -190,7 +189,7 @@ typedef CommandButtonBuilder = Widget Function(
 /// {@endtemplate}
 typedef AttachmentButtonBuilder = Widget Function(
   BuildContext context,
-  AttachmentButton attachmentButton,
+  ActionButton attachmentButton,
 );
 
 /// {@template quotedMessageAttachmentThumbnailBuilder}
