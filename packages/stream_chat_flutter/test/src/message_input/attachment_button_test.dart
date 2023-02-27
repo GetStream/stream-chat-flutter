@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
-import 'package:stream_chat_flutter/src/message_input/action_button.dart';
+import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
@@ -11,7 +11,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: ActionButton.attachment(
+            child: OnPressButton.attachment(
               color: StreamChatThemeData.light()
                   .messageInputTheme
                   .actionButtonIdleColor!,
@@ -36,7 +36,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: ActionButton.attachment(
+            child: OnPressButton.attachment(
               color: StreamChatThemeData.light()
                   .messageInputTheme
                   .actionButtonIdleColor!,

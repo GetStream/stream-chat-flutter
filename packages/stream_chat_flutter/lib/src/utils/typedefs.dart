@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_input/action_button.dart';
+import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template inProgressBuilder}
@@ -178,7 +178,7 @@ typedef UserMentionTileBuilder = Widget Function(
 /// {@endtemplate}
 typedef CommandButtonBuilder = Widget Function(
   BuildContext context,
-  ActionButton commandButton,
+  OnPressButton commandButton,
 );
 
 /// {@template actionButtonBuilder}
@@ -189,7 +189,7 @@ typedef CommandButtonBuilder = Widget Function(
 /// {@endtemplate}
 typedef AttachmentButtonBuilder = Widget Function(
   BuildContext context,
-  ActionButton attachmentButton,
+  OnPressButton attachmentButton,
 );
 
 /// {@template quotedMessageAttachmentThumbnailBuilder}

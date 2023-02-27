@@ -4,44 +4,22 @@ import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 /// {@template commandButton}
 /// The button that allows a user to use commands in a chat.
 /// {@endtemplate}
-class ActionButton extends StatelessWidget {
+class OnHoldButton extends StatelessWidget {
   /// {@macro commandButton}
-  const ActionButton({
+  const OnHoldButton({
     super.key,
     required this.icon,
-    required this.onPressed,
+    required this.onHold,
   });
 
-  /// Attachment button
-  factory ActionButton.attachment({
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return ActionButton(
-      icon: StreamSvgIcon.attach(color: color),
-      onPressed: onPressed,
-    );
-  }
-
-  /// Command button
-  factory ActionButton.command({
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return ActionButton(
-      icon: StreamSvgIcon.lightning(color: color),
-      onPressed: onPressed,
-    );
-  }
-
   /// Audio Record button
-  factory ActionButton.audioRecord({
+  factory OnHoldButton.audioRecord({
     required Color color,
-    required VoidCallback onPressed,
+    required VoidCallback onHold,
   }) {
-    return ActionButton(
+    return OnHoldButton(
       icon: StreamSvgIcon.microphone(color: color),
-      onPressed: onPressed,
+      onHold: onHold,
     );
   }
 
@@ -49,18 +27,18 @@ class ActionButton extends StatelessWidget {
   final StreamSvgIcon icon;
 
   /// The action to perform when the button is pressed or clicked.
-  final VoidCallback onPressed;
+  final VoidCallback onHold;
 
   /// Returns a copy of this object with the given fields updated.
-  ActionButton copyWith({
+  OnHoldButton copyWith({
     Key? key,
     StreamSvgIcon? icon,
-    VoidCallback? onPressed,
+    VoidCallback? onHold,
   }) {
-    return ActionButton(
+    return OnHoldButton(
       key: key ?? this.key,
       icon: icon ?? this.icon,
-      onPressed: onPressed ?? this.onPressed,
+      onHold: onHold ?? this.onHold,
     );
   }
 
@@ -74,7 +52,7 @@ class ActionButton extends StatelessWidget {
         width: 24,
       ),
       splashRadius: 24,
-      onPressed: onPressed,
+      onPressed: onHold,
     );
   }
 }

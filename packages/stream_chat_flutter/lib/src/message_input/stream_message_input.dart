@@ -11,7 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/message_input/action_button.dart';
+import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
@@ -671,7 +671,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildAttachmentButton(BuildContext context) {
-    final defaultButton = ActionButton.attachment(
+    final defaultButton = OnPressButton.attachment(
       color: _messageInputTheme.actionButtonIdleColor!,
       onPressed: _onAttachmentButtonPressed,
     );
@@ -681,7 +681,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildRecordVoiceButton() {
-    final defaultButton = ActionButton.audioRecord(
+    final defaultButton = OnPressButton.audioRecord(
       color: _messageInputTheme.actionButtonIdleColor!,
       onPressed: _onAudioRecordButtonPressed,
     );
@@ -1235,7 +1235,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Widget _buildCommandButton(BuildContext context) {
     final s = _effectiveController.text.trim();
     final isCommandOptionsVisible = s.startsWith(_kCommandTrigger);
-    final defaultButton = ActionButton.command(
+    final defaultButton = OnPressButton.command(
       color: s.isNotEmpty
           ? _streamChatTheme.colorTheme.disabled
           : (isCommandOptionsVisible
