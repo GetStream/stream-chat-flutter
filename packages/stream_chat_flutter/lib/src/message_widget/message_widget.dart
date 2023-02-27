@@ -2,8 +2,11 @@ import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:stream_chat_flutter/conditional_parent_builder/conditional_parent_builder.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
+import 'package:stream_chat_flutter/src/attachment/audio_loading_attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/audio_player_attachment.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/context_menu_reaction_picker.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
@@ -214,6 +217,23 @@ class StreamMessageWidget extends StatefulWidget {
                 }).toList(),
               ),
               attachmentShape: border,
+            );
+          },
+          'voicenote': (context, defaultMessage, attachments) {
+            final url = attachments.first.assetUrl;
+            late final Widget widget;
+            if (url == null) {
+              widget = const AudioLoadingMessage();
+            } else {
+              widget = AudioPlayerMessage(
+                source: AudioSource.uri(Uri.parse(url)),
+                id: defaultMessage.id,
+              );
+            }
+            return SizedBox(
+              width: 250,
+              height: 50,
+              child: widget,
             );
           },
           'giphy': (context, message, attachments) {

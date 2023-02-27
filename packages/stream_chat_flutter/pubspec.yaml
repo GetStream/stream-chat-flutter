@@ -31,6 +31,7 @@ dependencies:
   image_gallery_saver: ^1.7.1
   image_picker: ^0.8.2
   jiffy: ^5.0.0
+  just_audio: ^0.9.31
   lottie: ^2.0.0
   meta: ^1.3.0
   path_provider: ^2.0.9
