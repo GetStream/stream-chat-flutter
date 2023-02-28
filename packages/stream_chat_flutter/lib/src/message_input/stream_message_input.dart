@@ -593,6 +593,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         _buildTextInput(context),
         if (!_commandEnabled && widget.actionsLocation == ActionsLocation.right)
           _buildExpandActionsButton(context),
+        _buildRecordVoiceButton(),
         if (widget.sendButtonLocation == SendButtonLocation.outside)
           _buildSendButton(context),
       ],
@@ -652,7 +653,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
             ? const Offstage()
             : Wrap(
                 children: <Widget>[
-                  _buildRecordVoiceButton(),
                   if (!widget.disableAttachments &&
                       channel.ownCapabilities
                           .contains(PermissionType.uploadFile))
