@@ -6,8 +6,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Docs
 typedef RecordCallback = void Function(String);
+
 /// Docs
 typedef HoldStartCallback = Future<void> Function(BuildContext);
+
 /// Docs
 typedef HoldStopCallback = Future<void> Function(BuildContext);
 
@@ -18,14 +20,12 @@ class OnHoldButton extends StatefulWidget {
     super.key,
     required this.onHoldStart,
     required this.onHoldStop,
-    required this.iconIdle,
-    required this.iconActive,
+    required this.icon,
   });
 
   /// Docs
   factory OnHoldButton.audioRecord({
-    IconData? iconIdle,
-    IconData? iconActive,
+    IconData? icon,
   }) {
     final _audioRecorder = Record();
 
@@ -70,8 +70,7 @@ class OnHoldButton extends StatefulWidget {
     return OnHoldButton(
       onHoldStart: _start,
       onHoldStop: _stop,
-      iconIdle: iconIdle ?? Icons.mic,
-      iconActive: iconActive ?? Icons.stop,
+      icon: icon ?? Icons.mic,
     );
   }
 
@@ -82,42 +81,40 @@ class OnHoldButton extends StatefulWidget {
   final HoldStopCallback onHoldStop;
 
   /// Docs
-  final IconData iconIdle;
-
-  /// Docs
-  final IconData iconActive;
+  final IconData icon;
 
   @override
   State<OnHoldButton> createState() => _OnHoldButtonState();
 }
 
 class _OnHoldButtonState extends State<OnHoldButton> {
-  bool _isHolding = false;
+  // bool _isHolding = false;
 
   Future<void> _start(BuildContext context) async {
     widget.onHoldStart.call(context);
-    setState(() {
-      _isHolding = true;
-    });
+    // setState(() {
+    //   _isHolding = true;
+    // });
   }
 
   Future<void> _stop(BuildContext context) async {
     widget.onHoldStop.call(context);
-    setState(() => _isHolding = false);
+    // setState(() => _isHolding = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = _isHolding
-        ? Colors.red.withOpacity(0.3)
-        : StreamChatTheme.of(context).primaryIconTheme.color;
+    final color = StreamChatTheme.of(context).primaryIconTheme.color;
 
     return GestureDetector(
-      onTap: () {
-        _isHolding ? _stop(context) : _start(context);
+      onTapDown: (details) {
+        _start(context);
+      },
+      onTapUp: (details) {
+        _stop(context);
       },
       child: Icon(
-        _isHolding ? widget.iconActive : widget.iconIdle,
+        widget.icon,
         color: color,
       ),
     );
