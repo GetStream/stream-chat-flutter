@@ -16,6 +16,7 @@ import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
+import 'package:stream_chat_flutter/src/message_input/record_timer.dart';
 import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
@@ -594,7 +595,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
             widget.actionsLocation == ActionsLocation.left &&
             !_recording)
           _buildExpandActionsButton(context),
-        _buildTextInput(context),
+        if (_recording) _buildRecordLeftInfo(),
+        if (_recording)
+          _buildRecordHowToCancelInfo()
+        else
+          _buildTextInput(context),
         if (!_commandEnabled &&
             widget.actionsLocation == ActionsLocation.right &&
             !_recording)
@@ -675,6 +680,27 @@ class StreamMessageInputState extends State<StreamMessageInput>
         duration: const Duration(milliseconds: 300),
         alignment: Alignment.center,
       ),
+    );
+  }
+
+  Widget _buildRecordLeftInfo() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        children: [
+          StreamSvgIcon.microphone(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: RecordTimer(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecordHowToCancelInfo() {
+    return const Expanded(
+      child: Center(child: Text('Slide do cancel <')),
     );
   }
 
