@@ -263,6 +263,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   bool _actionsShrunk = false;
 
+  bool _recording = false;
+
   late StreamChatThemeData _streamChatTheme;
   late StreamMessageInputThemeData _messageInputTheme;
 
@@ -588,14 +590,19 @@ class StreamMessageInputState extends State<StreamMessageInput>
     return Flex(
       direction: Axis.horizontal,
       children: <Widget>[
-        if (!_commandEnabled && widget.actionsLocation == ActionsLocation.left)
+        if (!_commandEnabled &&
+            widget.actionsLocation == ActionsLocation.left &&
+            !_recording)
           _buildExpandActionsButton(context),
         _buildTextInput(context),
-        if (!_commandEnabled && widget.actionsLocation == ActionsLocation.right)
+        if (!_commandEnabled &&
+            widget.actionsLocation == ActionsLocation.right &&
+            !_recording)
           _buildExpandActionsButton(context),
-        _buildRecordVoiceButton(),
-        if (widget.sendButtonLocation == SendButtonLocation.outside)
+        if (widget.sendButtonLocation == SendButtonLocation.outside &&
+            !_recording)
           _buildSendButton(context),
+        _buildRecordVoiceButton(),
       ],
     );
   }
@@ -682,8 +689,23 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildRecordVoiceButton() {
-    final defaultButton = OnHoldButton.audioRecord();
-
+    final defaultButton = OnHoldButton.audioRecord(
+      onHoldStart: () {
+        setState(() {
+          _recording = true;
+        });
+      },
+      onHoldCancel: () {
+        setState(() {
+          _recording = false;
+        });
+      },
+      onHoldStop: () {
+        setState(() {
+          _recording = false;
+        });
+      },
+    );
     return defaultButton;
   }
 
@@ -948,6 +970,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
     if (_timeOut != 0) {
       return context.translations.slowModeOnLabel;
+    }
+
+    if (_recording) {
+      return 'Slide to cancel <';
     }
 
     return context.translations.writeAMessageLabel;

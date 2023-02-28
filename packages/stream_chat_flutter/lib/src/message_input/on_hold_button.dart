@@ -133,12 +133,17 @@ class _OnHoldButtonState extends State<OnHoldButton> {
 
     final buttonAnimated = AnimatedPositioned(
       duration: const Duration(milliseconds: 100),
-      left: posX,
+      right: posX,
       key: const ValueKey("item 1"),
       child: Container(
-        height: 20,
-        width: 20,
-        alignment: Alignment.center,
+        height: 30,
+        width: 30,
+        // padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(50),
+          color: _isHolding ? Colors.red : Colors.transparent,
+
+        ),
         child: Icon(
           widget.icon,
           color: color,
@@ -164,11 +169,9 @@ class _OnHoldButtonState extends State<OnHoldButton> {
       onHorizontalDragUpdate: (details) {
         if (details.localPosition.dx < 0 && _isHolding) {
           setState(() {
-            posX = details.localPosition.dx;
+            posX = -details.localPosition.dx;
           });
         }
-
-        print('posX: $posX');
 
         if (details.localPosition.dx < -100 && _isHolding) {
           print('canceling record');
@@ -190,12 +193,21 @@ class _OnHoldButtonState extends State<OnHoldButton> {
       },
     );
 
+    // if (_isHolding) {
+    //   return Expanded(
+    //     child: Stack(
+    //       alignment: Alignment.centerRight,
+    //       children: [buttonAnimated, gestureDetector],
+    //     ),
+    //   );
+    // }
+
     return Container(
-      height: 24,
-      width: 60,
-      alignment: Alignment.centerRight,
-      padding: const EdgeInsets.only(left: 8),
+      height: 46,
+      width: 90,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Stack(
+        alignment: Alignment.centerRight,
         children: [buttonAnimated, gestureDetector],
       ),
     );
