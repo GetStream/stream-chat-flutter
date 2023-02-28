@@ -173,7 +173,7 @@ class _OnHoldButtonState extends State<OnHoldButton> {
           });
         }
 
-        if (details.localPosition.dx < -100 && _isHolding) {
+        if (details.localPosition.dx < -50 && _isHolding) {
           print('canceling record');
           _cancel(context);
           setState(() {
@@ -204,7 +204,7 @@ class _OnHoldButtonState extends State<OnHoldButton> {
 
     return Container(
       height: 46,
-      width: 90,
+      width: _isHolding ? 90 : 46,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Stack(
         alignment: Alignment.centerRight,
