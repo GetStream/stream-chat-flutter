@@ -704,15 +704,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
   }
 
-  /// Handle the platform-specific logic for selecting files.
-  ///
-  /// On mobile, this will open the file selection bottom sheet. On desktop,
-  /// this will open the native file system and allow the user to select one
-  /// or more files.
-  Future<void> _onAudioRecordButtonPressed() async {
-    print('To implement');
-  }
-
   Expanded _buildTextInput(BuildContext context) {
     final margin = (widget.sendButtonLocation == SendButtonLocation.inside
             ? const EdgeInsets.only(right: 8)

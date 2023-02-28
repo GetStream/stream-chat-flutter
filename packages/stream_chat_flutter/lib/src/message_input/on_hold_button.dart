@@ -20,18 +20,23 @@ class OnHoldButton extends StatefulWidget {
     super.key,
     required this.onHoldStart,
     required this.onHoldStop,
+    required this.onHoldCancel,
     required this.icon,
   });
 
   /// Docs
   factory OnHoldButton.audioRecord({
     IconData? icon,
+    VoidCallback? onHoldStart,
+    VoidCallback? onHoldStop,
+    VoidCallback? onHoldCancel,
   }) {
     final _audioRecorder = Record();
 
     Future<void> _start(BuildContext context) async {
       try {
         if (await _audioRecorder.hasPermission()) {
+          onHoldStart?.call();
           await _audioRecorder.start();
         }
       } catch (e) {
@@ -63,13 +68,20 @@ class OnHoldButton extends StatefulWidget {
     }
 
     Future<void> _stop(BuildContext context) async {
+      onHoldStop?.call();
       final path = await _audioRecorder.stop();
       recordingFinishedCallback(path!, context);
+    }
+
+    Future<void> _cancel(BuildContext context) async {
+      onHoldCancel?.call();
+      await _audioRecorder.stop();
     }
 
     return OnHoldButton(
       onHoldStart: _start,
       onHoldStop: _stop,
+      onHoldCancel: _cancel,
       icon: icon ?? Icons.mic,
     );
   }
@@ -81,6 +93,9 @@ class OnHoldButton extends StatefulWidget {
   final HoldStopCallback onHoldStop;
 
   /// Docs
+  final HoldStopCallback onHoldCancel;
+
+  /// Docs
   final IconData icon;
 
   @override
@@ -88,18 +103,21 @@ class OnHoldButton extends StatefulWidget {
 }
 
 class _OnHoldButtonState extends State<OnHoldButton> {
-  // bool _isHolding = false;
+  bool _isHolding = false;
 
   Future<void> _start(BuildContext context) async {
+    print('start recording...');
     widget.onHoldStart.call(context);
-    // setState(() {
-    //   _isHolding = true;
-    // });
   }
 
   Future<void> _stop(BuildContext context) async {
+    print('stop recording...');
     widget.onHoldStop.call(context);
-    // setState(() => _isHolding = false);
+  }
+
+  Future<void> _cancel(BuildContext context) async {
+    print('cancel recording...');
+    widget.onHoldCancel.call(context);
   }
 
   @override
@@ -108,10 +126,35 @@ class _OnHoldButtonState extends State<OnHoldButton> {
 
     return GestureDetector(
       onTapDown: (details) {
+        setState(() {
+          _isHolding = true;
+        });
         _start(context);
       },
       onTapUp: (details) {
-        _stop(context);
+        if (_isHolding) {
+          _stop(context);
+        }
+        setState(() {
+          _isHolding = false;
+        });
+      },
+      onHorizontalDragUpdate: (details) {
+        if (details.localPosition.dx > 100 && _isHolding) {
+          print('canceling record');
+          _cancel(context);
+          setState(() {
+            _isHolding = false;
+          });
+        }
+      },
+      onHorizontalDragEnd: (details) {
+        if (_isHolding) {
+          _stop(context);
+        }
+        setState(() {
+          _isHolding = false;
+        });
       },
       child: Icon(
         widget.icon,
