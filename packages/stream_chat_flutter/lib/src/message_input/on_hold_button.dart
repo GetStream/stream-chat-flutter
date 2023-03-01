@@ -30,6 +30,7 @@ class OnHoldButton extends StatefulWidget {
     VoidCallback? onHoldStart,
     VoidCallback? onHoldStop,
     VoidCallback? onHoldCancel,
+    Function(Attachment)? onRecordedAudio,
   }) {
     final _audioRecorder = Record();
 
@@ -44,36 +45,27 @@ class OnHoldButton extends StatefulWidget {
       }
     }
 
-    void recordingFinishedCallback(String path, BuildContext context) {
+    void recordingFinishedCallback(String path) async {
       final uri = Uri.parse(path);
       final file = File(uri.path);
 
-      file.length().then(
-            (fileSize) {
-          StreamChannel
-              .of(context)
-              .channel
-              .sendMessage(
-            Message(
-              attachments: [
-                Attachment(
-                  type: 'voicenote',
-                  file: AttachmentFile(
-                    size: fileSize,
-                    path: uri.path,
-                  ),
-                ),
-              ],
+      final message = await file.length().then(
+            (fileSize) => Attachment(
+              type: 'voicenote',
+              file: AttachmentFile(
+                size: fileSize,
+                path: uri.path,
+              ),
             ),
           );
-        },
-      );
+
+      await onRecordedAudio?.call(message);
     }
 
     Future<void> _stop(BuildContext context) async {
       onHoldStop?.call();
       final path = await _audioRecorder.stop();
-      recordingFinishedCallback(path!, context);
+      recordingFinishedCallback(path!);
     }
 
     Future<void> _cancel(BuildContext context) async {
@@ -126,10 +118,7 @@ class _OnHoldButtonState extends State<OnHoldButton> {
 
   @override
   Widget build(BuildContext context) {
-    final color = StreamChatTheme
-        .of(context)
-        .primaryIconTheme
-        .color;
+    final color = StreamChatTheme.of(context).primaryIconTheme.color;
 
     final buttonAnimated = AnimatedPositioned(
       duration: const Duration(milliseconds: 100),
@@ -142,7 +131,6 @@ class _OnHoldButtonState extends State<OnHoldButton> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50),
           color: _isHolding ? Colors.red : Colors.transparent,
-
         ),
         child: Icon(
           widget.icon,

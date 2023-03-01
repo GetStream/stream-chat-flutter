@@ -726,8 +726,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
           _recording = false;
         });
       },
-      onHoldStop: () {
+      onRecordedAudio: (attachment) {
         setState(() {
+          _effectiveController.attachments = [
+            ..._effectiveController.attachments,
+            attachment,
+          ];
           _recording = false;
         });
       },
