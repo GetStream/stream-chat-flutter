@@ -101,8 +101,9 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
             _audioPlayer.playerState.playing ? Colors.red : Colors.blue;
         final icon =
             _audioPlayer.playerState.playing ? Icons.pause : Icons.play_arrow;
-        return Padding(
-          padding: const EdgeInsets.all(4),
+
+        final playButton = Padding(
+          padding: const EdgeInsets.only(left: 4),
           child: GestureDetector(
             onTap: () {
               if (_audioPlayer.playerState.playing) {
@@ -111,13 +112,29 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
                 play();
               }
             },
-            child: SizedBox(
-              width: 40,
-              height: 40,
-              child: Icon(icon, color: color, size: 30),
-            ),
+            child: Icon(icon, color: color, size: 30),
           ),
         );
+
+        final speedButton = TextButton(
+          style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              minimumSize: const Size(30, 30),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+          child: Text(_audioPlayer.speed.toString()),
+          onPressed: () {
+            setState(() {
+              if (_audioPlayer.speed == 2) {
+                _audioPlayer.setSpeed(1);
+              } else {
+                _audioPlayer.setSpeed(_audioPlayer.speed + 0.5);
+              }
+            });
+          },
+        );
+
+        return Row(children: [playButton, speedButton]);
       },
     );
   }
@@ -140,9 +157,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
             onChangeEnd: (val) {
               _audioPlayer.seek(duration * val);
             },
-            onChanged: (val) {
-
-            },
+            onChanged: (val) {},
             activeColor: Colors.yellow,
           );
         } else {
