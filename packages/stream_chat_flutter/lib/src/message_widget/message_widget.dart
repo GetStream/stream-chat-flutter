@@ -220,9 +220,8 @@ class StreamMessageWidget extends StatefulWidget {
             );
           },
           'voicenote': (context, defaultMessage, attachments) {
-            final url = attachments.first.assetUrl;
-
             Widget createAudioPlayer(Attachment attachment) {
+              final url = attachment.assetUrl;
               Widget player;
 
               if (url == null) {
@@ -231,21 +230,26 @@ class StreamMessageWidget extends StatefulWidget {
                 player = AudioPlayerMessage(
                   source: AudioSource.uri(Uri.parse(url)),
                   id: defaultMessage.id,
+                  fileName: attachment.title ?? 'No name',
                 );
               }
 
-              return SizedBox(
-                  width: 400,
-                  height: 50,
-                  child: player,
+              return Container(
+                margin: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: StreamChatTheme.of(context).colorTheme.borders,
+                  ),
+                  borderRadius:
+                      attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+                ),
+                width: 400,
+                height: 85,
+                child: player,
               );
             }
 
             final border = RoundedRectangleBorder(
-              side: attachmentBorderSide ??
-                  BorderSide(
-                    color: StreamChatTheme.of(context).colorTheme.borders,
-                  ),
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 

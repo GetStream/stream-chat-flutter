@@ -13,6 +13,7 @@ class AudioPlayerMessage extends StatefulWidget {
     super.key,
     required this.source,
     required this.id,
+    required this.fileName,
   });
 
   /// Docs
@@ -20,6 +21,9 @@ class AudioPlayerMessage extends StatefulWidget {
 
   /// Docs
   final String id;
+
+  /// Docs
+  final String fileName;
 
   @override
   AudioPlayerMessageState createState() => AudioPlayerMessageState();
@@ -77,11 +81,20 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       future: futureDuration,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return Row(
-            children: <Widget>[
-              _controlButtons(),
-              _slider(snapshot.data),
-            ],
+          return Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: <Widget>[
+                _controlButtons(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(widget.fileName),
+                    _slider(snapshot.data),
+                  ],
+                ),
+              ],
+            ),
           );
         } else if (snapshot.hasError) {
           return const Text('Error!!');
@@ -117,10 +130,10 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
 
         final speedButton = TextButton(
           style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 2),
-              minimumSize: const Size(30, 30),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            minimumSize: const Size(30, 30),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
           child: Text(_audioPlayer.speed.toString()),
           onPressed: () {
             setState(() {
