@@ -235,7 +235,7 @@ class StreamMessageWidget extends StatefulWidget {
               }
 
               return SizedBox(
-                  width: 250,
+                  width: 400,
                   height: 50,
                   child: player,
               );

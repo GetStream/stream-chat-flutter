@@ -78,7 +78,6 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Row(
-            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               _controlButtons(),
               _slider(snapshot.data),
@@ -144,7 +143,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       stream: _audioPlayer.positionStream,
       builder: (context, snapshot) {
         if (snapshot.hasData && duration != null) {
-          return CupertinoSlider(
+          return Slider.adaptive(
             value: min(
               snapshot.data!.inMicroseconds / duration.inMicroseconds,
               1,
@@ -157,11 +156,13 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
             onChangeEnd: (val) {
               _audioPlayer.seek(duration * val);
             },
-            onChanged: (val) {},
+            onChanged: (val) {
+              _audioPlayer.seek(duration * val);
+            },
             activeColor: Colors.yellow,
           );
         } else {
-          return const SizedBox.shrink();
+          return const SizedBox.expand();
         }
       },
     );
