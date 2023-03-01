@@ -221,19 +221,39 @@ class StreamMessageWidget extends StatefulWidget {
           },
           'voicenote': (context, defaultMessage, attachments) {
             final url = attachments.first.assetUrl;
-            late final Widget widget;
-            if (url == null) {
-              widget = const AudioLoadingMessage();
-            } else {
-              widget = AudioPlayerMessage(
-                source: AudioSource.uri(Uri.parse(url)),
-                id: defaultMessage.id,
+
+            Widget createAudioPlayer(Attachment attachment) {
+              Widget player;
+
+              if (url == null) {
+                player = const AudioLoadingMessage();
+              } else {
+                player = AudioPlayerMessage(
+                  source: AudioSource.uri(Uri.parse(url)),
+                  id: defaultMessage.id,
+                );
+              }
+
+              return SizedBox(
+                  width: 250,
+                  height: 50,
+                  child: player,
               );
             }
-            return SizedBox(
-              width: 250,
-              height: 50,
-              child: widget,
+
+            final border = RoundedRectangleBorder(
+              side: attachmentBorderSide ??
+                  BorderSide(
+                    color: StreamChatTheme.of(context).colorTheme.borders,
+                  ),
+              borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+            );
+
+            return WrapAttachmentWidget(
+              attachmentShape: border,
+              attachmentWidget: Column(
+                children: attachments.map(createAudioPlayer).toList(),
+              ),
             );
           },
           'giphy': (context, message, attachments) {
