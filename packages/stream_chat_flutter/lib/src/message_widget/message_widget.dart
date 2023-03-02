@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:flutter/services.dart';
@@ -220,17 +221,28 @@ class StreamMessageWidget extends StatefulWidget {
             );
           },
           'voicenote': (context, defaultMessage, attachments) {
-            Widget createAudioPlayer(Attachment attachment) {
+            final playList = attachments
+                .where((attachment) => attachment.assetUrl != null)
+                .map((attachment) =>
+                    AudioSource.uri(Uri.parse(attachment.assetUrl!)))
+                .toList();
+
+            final audioSource = ConcatenatingAudioSource(children: playList);
+            final player = AudioPlayer()
+              ..setShuffleModeEnabled(false)
+              ..setAudioSource(audioSource);
+
+            Widget createAudioPlayer(int index, Attachment attachment) {
               final url = attachment.assetUrl;
-              Widget player;
+              Widget playerMessage;
 
               if (url == null) {
-                player = const AudioLoadingMessage();
+                playerMessage = const AudioLoadingMessage();
               } else {
-                player = AudioPlayerMessage(
-                  source: AudioSource.uri(Uri.parse(url)),
-                  id: defaultMessage.id,
+                playerMessage = AudioPlayerMessage(
+                  player: player,
                   fileName: attachment.title ?? 'No name',
+                  index: index,
                 );
               }
 
@@ -245,7 +257,7 @@ class StreamMessageWidget extends StatefulWidget {
                 ),
                 width: 400,
                 height: 85,
-                child: player,
+                child: playerMessage,
               );
             }
 
@@ -256,7 +268,7 @@ class StreamMessageWidget extends StatefulWidget {
             return WrapAttachmentWidget(
               attachmentShape: border,
               attachmentWidget: Column(
-                children: attachments.map(createAudioPlayer).toList(),
+                children: attachments.mapIndexed(createAudioPlayer).toList(),
               ),
             );
           },
