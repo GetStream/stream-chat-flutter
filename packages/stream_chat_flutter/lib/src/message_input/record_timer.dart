@@ -34,15 +34,15 @@ class _RecordTimerState extends State<RecordTimer> {
     });
   }
 
-  String twoDigits(int value) {
+  String _twoDigits(int value) {
     return value.toString().padLeft(2, '0');
   }
 
   @override
   Widget build(BuildContext context) {
     print('build timer');
-    final minutes = twoDigits(duration.inMinutes);
-    final seconds = twoDigits(duration.inSeconds);
+    final minutes = _twoDigits(duration.inMinutes);
+    final seconds = _twoDigits(duration.inSeconds);
 
     return Text('$minutes:$seconds', style: const TextStyle(fontSize: 18));
   }

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:stream_chat_flutter/src/attachment/audio_loading_attachment.dart';
@@ -90,7 +89,12 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(widget.fileName),
-                    _slider(snapshot.data),
+                    Row(
+                      children: [
+                        _timer(snapshot.data!),
+                        _slider(snapshot.data),
+                      ],
+                    ),
                   ],
                 ),
               ],
@@ -105,14 +109,18 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     );
   }
 
+  String _twoDigits(int value) {
+    return value.toString().padLeft(2, '0');
+  }
+
   Widget _controlButtons() {
     return StreamBuilder<bool>(
       stream: _audioPlayer.playingStream,
       builder: (context, _) {
         final color =
-            _audioPlayer.playerState.playing ? Colors.red : Colors.blue;
+        _audioPlayer.playerState.playing ? Colors.red : Colors.blue;
         final icon =
-            _audioPlayer.playerState.playing ? Icons.pause : Icons.play_arrow;
+        _audioPlayer.playerState.playing ? Icons.pause : Icons.play_arrow;
 
         final playButton = Padding(
           padding: const EdgeInsets.only(left: 4),
@@ -147,6 +155,27 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
         );
 
         return Row(children: [playButton, speedButton]);
+      },
+    );
+  }
+
+  Widget _timer(Duration totalDuration) {
+    return StreamBuilder<Duration>(
+      stream: _audioPlayer.positionStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasData &&
+            (_audioPlayer.playing || snapshot.data!.inSeconds > 0 ||
+                snapshot.data!.inMinutes > 0)) {
+            final minutes = _twoDigits(snapshot.data!.inMinutes);
+            final seconds = _twoDigits(snapshot.data!.inSeconds);
+
+            return Text('$minutes:$seconds');
+        } else {
+          final minutes = _twoDigits(totalDuration.inMinutes);
+          final seconds = _twoDigits(totalDuration.inSeconds);
+
+          return Text('$minutes:$seconds');
+        }
       },
     );
   }
