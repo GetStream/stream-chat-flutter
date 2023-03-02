@@ -34,17 +34,6 @@ class OnPressButton extends StatelessWidget {
     );
   }
 
-  /// Audio Record button
-  factory OnPressButton.audioRecord({
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return OnPressButton(
-      icon: StreamSvgIcon.microphone(color: color),
-      onPressed: onPressed,
-    );
-  }
-
   /// Icon of the button
   final StreamSvgIcon icon;
 

@@ -230,7 +230,10 @@ class StreamMessageWidget extends StatefulWidget {
             final audioSource = ConcatenatingAudioSource(children: playList);
             final player = AudioPlayer()
               ..setShuffleModeEnabled(false)
-              ..setAudioSource(audioSource);
+              ..setAudioSource(audioSource)
+              ..setLoopMode(LoopMode.off);
+
+            final loadFuture = player.load();
 
             Widget createAudioPlayer(int index, Attachment attachment) {
               final url = attachment.assetUrl;
@@ -243,6 +246,7 @@ class StreamMessageWidget extends StatefulWidget {
                   player: player,
                   fileName: attachment.title ?? 'No name',
                   index: index,
+                  loadFuture: loadFuture,
                 );
               }
 

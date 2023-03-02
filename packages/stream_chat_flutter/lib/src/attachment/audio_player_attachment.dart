@@ -3,9 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/src/attachment/audio_loading_attachment.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Docs
 class AudioPlayerMessage extends StatefulWidget {
@@ -15,6 +13,7 @@ class AudioPlayerMessage extends StatefulWidget {
     required this.player,
     required this.fileName,
     required this.index,
+    required this.loadFuture,
   });
 
   /// Docs
@@ -26,6 +25,9 @@ class AudioPlayerMessage extends StatefulWidget {
   /// Docs
   final String fileName;
 
+  /// Docs
+  final Future<Duration?> loadFuture;
+
   @override
   AudioPlayerMessageState createState() => AudioPlayerMessageState();
 }
@@ -34,25 +36,20 @@ class AudioPlayerMessage extends StatefulWidget {
 class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   late StreamSubscription<PlayerState> _playerStateChangedSubscription;
 
-  /// Docs
-  late Future<Duration?> futureDuration;
-
   @override
   void initState() {
     super.initState();
 
-    // _playerStateChangedSubscription =
-    //     widget.player.playerStateStream.listen(playerStateListener);
-
-    futureDuration = widget.player.load();
+    _playerStateChangedSubscription =
+        widget.player.playerStateStream.listen(playerStateListener);
   }
 
   /// Docs
-  // void playerStateListener(PlayerState state) async {
-  //   if (state.processingState == ProcessingState.completed) {
-  //     await _reset();
-  //   }
-  // }
+  void playerStateListener(PlayerState state) async {
+    if (state.processingState == ProcessingState.completed) {
+      await _reset();
+    }
+  }
 
   /// Docs
   void onError(Object e, StackTrace st) {
@@ -74,7 +71,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Duration?>(
-      future: futureDuration,
+      future: widget.loadFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Container(
@@ -98,7 +95,8 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
             ),
           );
         } else if (snapshot.hasError) {
-          return const Text('Error!!');
+          print(snapshot.error);
+          return const Center(child: Text('Error!!'));
         } else {
           return const AudioLoadingMessage();
         }
@@ -107,47 +105,56 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   }
 
   Widget _controlButtons() {
-    return StreamBuilder<bool>(
-      stream: widget.player.playingStream,
-      builder: (context, _) {
-        final color =
-            _playingThisAudio(widget.player) ? Colors.red : Colors.blue;
-        final icon =
-            _playingThisAudio(widget.player) ? Icons.pause : Icons.play_arrow;
+    return StreamBuilder<int?>(
+      initialData: 0,
+      stream: widget.player.currentIndexStream,
+      builder: (context, snapshot) {
+        final currentIndex = snapshot.data;
+        return StreamBuilder<bool>(
+          initialData: false,
+          stream: widget.player.playingStream,
+          builder: (context, snapshot) {
+            final playingCurrentAudio =
+                snapshot.data == true && currentIndex == widget.index;
 
-        final playButton = Padding(
-          padding: const EdgeInsets.only(left: 4),
-          child: GestureDetector(
-            onTap: () {
-              if (_playingThisAudio(widget.player)) {
-                _pause();
-              } else {
-                _play();
-              }
-            },
-            child: Icon(icon, color: color, size: 30),
-          ),
-        );
+            final color = playingCurrentAudio ? Colors.red : Colors.blue;
+            final icon = playingCurrentAudio ? Icons.pause : Icons.play_arrow;
 
-        final speedButton = TextButton(
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            minimumSize: const Size(30, 30),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: Text(widget.player.speed.toString()),
-          onPressed: () {
-            setState(() {
-              if (widget.player.speed == 2) {
-                widget.player.setSpeed(1);
-              } else {
-                widget.player.setSpeed(widget.player.speed + 0.5);
-              }
-            });
+            final playButton = Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: GestureDetector(
+                onTap: () {
+                  if (playingCurrentAudio) {
+                    _pause();
+                  } else {
+                    _play();
+                  }
+                },
+                child: Icon(icon, color: color, size: 30),
+              ),
+            );
+
+            final speedButton = TextButton(
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                minimumSize: const Size(30, 30),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(widget.player.speed.toString()),
+              onPressed: () {
+                setState(() {
+                  if (widget.player.speed == 2) {
+                    widget.player.setSpeed(1);
+                  } else {
+                    widget.player.setSpeed(widget.player.speed + 0.5);
+                  }
+                });
+              },
+            );
+
+            return Row(children: [playButton, speedButton]);
           },
         );
-
-        return Row(children: [playButton, speedButton]);
       },
     );
   }
@@ -176,32 +183,40 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   }
 
   Widget _slider(Duration? totalDuration) {
-    return StreamBuilder<Duration>(
-      stream: widget.player.positionStream,
+    return StreamBuilder<int?>(
+      initialData: 0,
+      stream: widget.player.currentIndexStream,
       builder: (context, snapshot) {
-        if (snapshot.hasData && totalDuration != null) {
-          return Slider.adaptive(
-            value: _sliderValue(
-              snapshot.data!,
-              totalDuration,
-              widget.player.currentIndex,
-            ),
-            onChangeStart: (val) {
-              if (widget.player.playing) {
-                widget.player.pause();
-              }
-            },
-            onChangeEnd: (val) {
-              widget.player.seek(totalDuration * val, index: widget.index);
-            },
-            onChanged: (val) {
-              widget.player.seek(totalDuration * val, index: widget.index);
-            },
-            activeColor: Colors.yellow,
-          );
-        } else {
-          return const SizedBox.expand();
-        }
+        final currentIndex = snapshot.data;
+
+        return StreamBuilder<Duration>(
+          stream: widget.player.positionStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasData && totalDuration != null) {
+              return Slider.adaptive(
+                value: _sliderValue(
+                  snapshot.data!,
+                  totalDuration,
+                  currentIndex,
+                ),
+                onChangeStart: (val) {
+                  if (widget.player.playing) {
+                    widget.player.pause();
+                  }
+                },
+                onChangeEnd: (val) {
+                  widget.player.seek(totalDuration * val, index: widget.index);
+                },
+                onChanged: (val) {
+                  widget.player.seek(totalDuration * val, index: widget.index);
+                },
+                activeColor: Colors.yellow,
+              );
+            } else {
+              return const SizedBox.shrink();
+            }
+          },
+        );
       },
     );
   }
@@ -235,15 +250,10 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
 
   /// Docs
   Future<void> _reset() async {
-    return widget.player.seek(Duration.zero, index: widget.index);
+    return widget.player.stop();
   }
 
   String _twoDigits(int value) {
     return value.toString().padLeft(2, '0');
-  }
-
-  bool _playingThisAudio(AudioPlayer player) {
-    return widget.player.playerState.playing &&
-        player.currentIndex == widget.index;
   }
 }
