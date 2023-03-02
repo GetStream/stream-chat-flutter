@@ -1092,6 +1092,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
   }
 
+  /// Mark!
   Widget _buildAttachments() {
     final nonOGAttachments = _effectiveController.attachments.where(
       (it) => it.titleLink == null,
@@ -1100,8 +1101,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final fileAttachments = nonOGAttachments
         .where((it) => it.type == 'file')
         .toList(growable: false);
+    final voiceAttachments = nonOGAttachments
+        .where((it) => it.type == 'voicenote')
+        .toList(growable: false);
     final remainingAttachments = nonOGAttachments
-        .where((it) => it.type != 'file')
+        .where((it) => it.type != 'file' && it.type != 'voicenote')
         .toList(growable: false);
     return Column(
       children: [
@@ -1133,6 +1137,14 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     )
                     .insertBetween(const SizedBox(height: 8)),
               ),
+            ),
+          ),
+        if (voiceAttachments.isNotEmpty)
+          const Padding(
+            padding: EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: LimitedBox(
+              maxHeight: 104,
+              child: Text('To do!'),
             ),
           ),
         if (remainingAttachments.isNotEmpty)
