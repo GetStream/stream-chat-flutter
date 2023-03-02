@@ -34,23 +34,14 @@ class AudioPlayerMessage extends StatefulWidget {
 
 /// Docs
 class AudioPlayerMessageState extends State<AudioPlayerMessage> {
-  late StreamSubscription<PlayerState> _playerStateChangedSubscription;
   var _seeking = false;
 
   @override
   void initState() {
     super.initState();
-
-    _playerStateChangedSubscription =
-        widget.player.playerStateStream.listen(playerStateListener);
   }
 
-  /// Docs
-  void playerStateListener(PlayerState state) async {
-    if (state.processingState == ProcessingState.completed) {
-      await _reset();
-    }
-  }
+
 
   /// Docs
   void onError(Object e, StackTrace st) {
@@ -64,7 +55,6 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
 
   @override
   void dispose() {
-    _playerStateChangedSubscription.cancel();
     widget.player.dispose();
     super.dispose();
   }
@@ -259,11 +249,6 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   /// Docs
   Future<void> _pause() {
     return widget.player.pause();
-  }
-
-  /// Docs
-  Future<void> _reset() async {
-    return widget.player.stop();
   }
 
   String _twoDigits(int value) {

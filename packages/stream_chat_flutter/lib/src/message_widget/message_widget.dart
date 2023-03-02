@@ -235,6 +235,15 @@ class StreamMessageWidget extends StatefulWidget {
 
             final loadFuture = player.load();
 
+            void playerStateListener(PlayerState state) async {
+              if (state.processingState == ProcessingState.completed) {
+                await player.stop();
+                await player.seek(Duration.zero, index: 0);
+              }
+            }
+
+            player.playerStateStream.listen(playerStateListener);
+
             Widget createAudioPlayer(int index, Attachment attachment) {
               final url = attachment.assetUrl;
               Widget playerMessage;
