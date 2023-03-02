@@ -35,6 +35,7 @@ class AudioPlayerMessage extends StatefulWidget {
 /// Docs
 class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   late StreamSubscription<PlayerState> _playerStateChangedSubscription;
+  var _seeking = false;
 
   @override
   void initState() {
@@ -134,21 +135,27 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
               ),
             );
 
-            final speedButton = TextButton(
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                minimumSize: const Size(30, 30),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(widget.player.speed.toString()),
-              onPressed: () {
-                setState(() {
-                  if (widget.player.speed == 2) {
-                    widget.player.setSpeed(1);
-                  } else {
-                    widget.player.setSpeed(widget.player.speed + 0.5);
-                  }
-                });
+            final speedButton = StreamBuilder<double>(
+              stream: widget.player.speedStream,
+              builder: (context, snapshot) {
+                final speed = snapshot.data ?? 1;
+                return TextButton(
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    minimumSize: const Size(30, 30),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(speed.toString()),
+                  onPressed: () {
+                    setState(() {
+                      if (speed == 2) {
+                        widget.player.setSpeed(1);
+                      } else {
+                        widget.player.setSpeed(speed + 0.5);
+                      }
+                    });
+                  },
+                );
               },
             );
 
@@ -166,8 +173,8 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
         if (snapshot.hasData &&
             (widget.player.currentIndex == widget.index &&
                 (widget.player.playing ||
-                    snapshot.data!.inSeconds > 0 ||
-                    snapshot.data!.inMinutes > 0))) {
+                    snapshot.data!.inMilliseconds > 0 ||
+                    _seeking))) {
           final minutes = _twoDigits(snapshot.data!.inMinutes);
           final seconds = _twoDigits(snapshot.data!.inSeconds);
 
@@ -200,11 +207,17 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
                   currentIndex,
                 ),
                 onChangeStart: (val) {
+                  setState(() {
+                    _seeking = true;
+                  });
                   if (widget.player.playing) {
                     widget.player.pause();
                   }
                 },
                 onChangeEnd: (val) {
+                  setState(() {
+                    _seeking = false;
+                  });
                   widget.player.seek(totalDuration * val, index: widget.index);
                 },
                 onChanged: (val) {
