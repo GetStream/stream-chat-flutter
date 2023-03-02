@@ -8,9 +8,12 @@ import 'package:cached_network_image/cached_network_image.dart'
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
+import 'package:stream_chat_flutter/src/attachment/audio_loading_attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/audio_player_attachment.dart';
 import 'package:stream_chat_flutter/src/message_input/on_hold_button.dart';
 import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
@@ -1099,10 +1102,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
     if (nonOGAttachments.isEmpty) return const Offstage();
     final fileAttachments = nonOGAttachments
-        .where((it) => it.type == 'file')
-        .toList(growable: false);
-    final voiceAttachments = nonOGAttachments
-        .where((it) => it.type == 'voicenote')
+        .where((it) => it.type == 'file' || it.type == 'voicenote')
         .toList(growable: false);
     final remainingAttachments = nonOGAttachments
         .where((it) => it.type != 'file' && it.type != 'voicenote')
@@ -1121,30 +1121,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     .map<Widget>(
                       (e) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: StreamFileAttachment(
-                          message: Message(), // dummy message
-                          attachment: e,
-                          constraints: BoxConstraints.loose(Size(
-                            MediaQuery.of(context).size.width * 0.65,
-                            56,
-                          )),
-                          trailing: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: _buildRemoveButton(e),
-                          ),
-                        ),
+                        child: e.type == 'voicenote'
+                            ? _buildVoiceNoteAttachment(e)
+                            : _buildFileAttachment(e),
                       ),
                     )
                     .insertBetween(const SizedBox(height: 8)),
               ),
-            ),
-          ),
-        if (voiceAttachments.isNotEmpty)
-          const Padding(
-            padding: EdgeInsets.fromLTRB(8, 8, 8, 0),
-            child: LimitedBox(
-              maxHeight: 104,
-              child: Text('To do!'),
             ),
           ),
         if (remainingAttachments.isNotEmpty)
@@ -1165,7 +1148,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                               child: SizedBox(
                                 height: 104,
                                 width: 104,
-                                child: _buildAttachment(attachment),
+                                child: _buildRemainingAttachment(attachment),
                               ),
                             ),
                             Positioned(
@@ -1182,6 +1165,54 @@ class StreamMessageInputState extends State<StreamMessageInput>
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildFileAttachment(Attachment attachment) {
+    return StreamFileAttachment(
+      message: Message(), // dummy message
+      attachment: attachment,
+      constraints: BoxConstraints.loose(Size(
+        MediaQuery.of(context).size.width * 0.65,
+        56,
+      )),
+      trailing: Padding(
+        padding: const EdgeInsets.all(8),
+        child: _buildRemoveButton(attachment),
+      ),
+    );
+  }
+
+  Widget _buildVoiceNoteAttachment(Attachment attachment) {
+    final audioFilePath = attachment.file?.path;
+    Widget playerMessage;
+
+    if (audioFilePath == null) {
+      playerMessage = const AudioLoadingMessage();
+    } else {
+      final player = AudioPlayer()
+        ..setAudioSource(AudioSource.file(audioFilePath));
+
+      void playerStateListener(PlayerState state) async {
+        if (state.processingState == ProcessingState.completed) {
+          await player.stop();
+          await player.seek(Duration.zero, index: 0);
+        }
+      }
+
+      player.playerStateStream.listen(playerStateListener);
+
+      playerMessage = AudioPlayerMessage(
+        player: player,
+        fileName: attachment.title ?? 'No name',
+        index: 0,
+      );
+    }
+
+    return SizedBox(
+      height: 85,
+      width: 120,
+      child: playerMessage,
     );
   }
 
@@ -1221,7 +1252,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
   }
 
-  Widget _buildAttachment(Attachment attachment) {
+  Widget _buildRemainingAttachment(Attachment attachment) {
     if (widget.attachmentThumbnailBuilders?.containsKey(attachment.type) ==
         true) {
       return widget.attachmentThumbnailBuilders![attachment.type!]!(

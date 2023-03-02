@@ -49,7 +49,7 @@ class OnHoldButton extends StatefulWidget {
       final uri = Uri.parse(path);
       final file = File(uri.path);
 
-      final message = await file.length().then(
+      final attachment = await file.length().then(
             (fileSize) => Attachment(
               type: 'voicenote',
               file: AttachmentFile(
@@ -59,7 +59,7 @@ class OnHoldButton extends StatefulWidget {
             ),
           );
 
-      await onRecordedAudio?.call(message);
+      await onRecordedAudio?.call(attachment);
     }
 
     Future<void> _stop(BuildContext context) async {
