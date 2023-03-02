@@ -14,9 +14,9 @@ import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/audio_loading_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/audio_player_attachment.dart';
+import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/on_hold_button.dart';
 import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
-import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/record_timer.dart';
@@ -1209,10 +1209,19 @@ class StreamMessageInputState extends State<StreamMessageInput>
       );
     }
 
-    return SizedBox(
-      height: 85,
-      width: 120,
-      child: playerMessage,
+    return Stack(
+      children: [
+        SizedBox(
+          height: 85,
+          width: 120,
+          child: playerMessage,
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: _buildRemoveButton(attachment),
+        ),
+      ],
     );
   }
 
