@@ -13,7 +13,6 @@ class AudioPlayerMessage extends StatefulWidget {
     required this.player,
     required this.fileName,
     required this.index,
-    required this.loadFuture,
   });
 
   /// Docs
@@ -24,9 +23,6 @@ class AudioPlayerMessage extends StatefulWidget {
 
   /// Docs
   final String fileName;
-
-  /// Docs
-  final Future<Duration?> loadFuture;
 
   @override
   AudioPlayerMessageState createState() => AudioPlayerMessageState();
@@ -40,8 +36,6 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   void initState() {
     super.initState();
   }
-
-
 
   /// Docs
   void onError(Object e, StackTrace st) {
@@ -61,8 +55,8 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Duration?>(
-      future: widget.loadFuture,
+    return StreamBuilder<Duration?>(
+      stream: widget.player.durationStream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Container(

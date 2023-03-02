@@ -228,12 +228,11 @@ class StreamMessageWidget extends StatefulWidget {
                 .toList();
 
             final audioSource = ConcatenatingAudioSource(children: playList);
+
             final player = AudioPlayer()
               ..setShuffleModeEnabled(false)
-              ..setAudioSource(audioSource)
-              ..setLoopMode(LoopMode.off);
-
-            final loadFuture = player.load();
+              ..setLoopMode(LoopMode.off)
+              ..setAudioSource(audioSource);
 
             void playerStateListener(PlayerState state) async {
               if (state.processingState == ProcessingState.completed) {
@@ -255,7 +254,6 @@ class StreamMessageWidget extends StatefulWidget {
                   player: player,
                   fileName: attachment.title ?? 'No name',
                   index: index,
-                  loadFuture: loadFuture,
                 );
               }
 
