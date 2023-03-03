@@ -60,22 +60,13 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Container(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.all(8),
             child: Row(
               children: <Widget>[
-                _controlButtons(),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.fileName),
-                    Row(
-                      children: [
-                        _timer(snapshot.data!),
-                        _slider(snapshot.data),
-                      ],
-                    ),
-                  ],
-                ),
+                _controlButton(),
+                _timer(snapshot.data!),
+                _slider(snapshot.data),
+                _speedAndActionButton(),
               ],
             ),
           );
@@ -89,7 +80,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     );
   }
 
-  Widget _controlButtons() {
+  Widget _controlButton() {
     return StreamBuilder<int?>(
       initialData: 0,
       stream: widget.player.currentIndexStream,
@@ -106,7 +97,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
             final icon = playingCurrentAudio ? Icons.pause : Icons.play_arrow;
 
             final playButton = Padding(
-              padding: const EdgeInsets.only(left: 4),
+              padding: const EdgeInsets.only(right: 4),
               child: GestureDetector(
                 onTap: () {
                   if (playingCurrentAudio) {
@@ -119,35 +110,39 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
               ),
             );
 
-            final speedButton = StreamBuilder<double>(
-              stream: widget.player.speedStream,
-              builder: (context, snapshot) {
-                final speed = snapshot.data ?? 1;
-                return TextButton(
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                    minimumSize: const Size(30, 30),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(speed.toString()),
-                  onPressed: () {
-                    setState(() {
-                      if (speed == 2) {
-                        widget.player.setSpeed(1);
-                      } else {
-                        widget.player.setSpeed(speed + 0.5);
-                      }
-                    });
-                  },
-                );
-              },
-            );
-
-            return Row(children: [playButton, speedButton]);
+            return Row(children: [playButton]);
           },
         );
       },
     );
+  }
+
+  Widget _speedAndActionButton() {
+    final speedButton = StreamBuilder<double>(
+      stream: widget.player.speedStream,
+      builder: (context, snapshot) {
+        final speed = snapshot.data ?? 1;
+        return TextButton(
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            minimumSize: const Size(20, 20),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: Text(speed.toString()),
+          onPressed: () {
+            setState(() {
+              if (speed == 2) {
+                widget.player.setSpeed(1);
+              } else {
+                widget.player.setSpeed(speed + 0.5);
+              }
+            });
+          },
+        );
+      },
+    );
+
+    return speedButton;
   }
 
   Widget _timer(Duration totalDuration) {
@@ -184,30 +179,34 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
           stream: widget.player.positionStream,
           builder: (context, snapshot) {
             if (snapshot.hasData && totalDuration != null) {
-              return Slider.adaptive(
-                value: _sliderValue(
-                  snapshot.data!,
-                  totalDuration,
-                  currentIndex,
+              return Expanded(
+                child: Slider.adaptive(
+                  value: _sliderValue(
+                    snapshot.data!,
+                    totalDuration,
+                    currentIndex,
+                  ),
+                  onChangeStart: (val) {
+                    setState(() {
+                      _seeking = true;
+                    });
+                    if (widget.player.playing) {
+                      widget.player.pause();
+                    }
+                  },
+                  onChangeEnd: (val) {
+                    setState(() {
+                      _seeking = false;
+                    });
+                    widget.player
+                        .seek(totalDuration * val, index: widget.index);
+                  },
+                  onChanged: (val) {
+                    widget.player
+                        .seek(totalDuration * val, index: widget.index);
+                  },
+                  activeColor: Colors.yellow,
                 ),
-                onChangeStart: (val) {
-                  setState(() {
-                    _seeking = true;
-                  });
-                  if (widget.player.playing) {
-                    widget.player.pause();
-                  }
-                },
-                onChangeEnd: (val) {
-                  setState(() {
-                    _seeking = false;
-                  });
-                  widget.player.seek(totalDuration * val, index: widget.index);
-                },
-                onChanged: (val) {
-                  widget.player.seek(totalDuration * val, index: widget.index);
-                },
-                activeColor: Colors.yellow,
               );
             } else {
               return const SizedBox.shrink();

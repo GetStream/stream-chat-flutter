@@ -267,7 +267,6 @@ class StreamMessageWidget extends StatefulWidget {
                       attachmentBorderRadiusGeometry ?? BorderRadius.zero,
                 ),
                 width: 400,
-                height: 85,
                 child: playerMessage,
               );
             }
