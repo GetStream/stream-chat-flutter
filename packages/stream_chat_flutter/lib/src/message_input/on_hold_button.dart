@@ -20,7 +20,6 @@ class OnHoldButton extends StatefulWidget {
     super.key,
     required this.onHoldStart,
     required this.onHoldStop,
-    required this.onHoldCancel,
     required this.icon,
   });
 
@@ -29,7 +28,6 @@ class OnHoldButton extends StatefulWidget {
     IconData? icon,
     VoidCallback? onHoldStart,
     VoidCallback? onHoldStop,
-    VoidCallback? onHoldCancel,
     Function(Attachment)? onRecordedAudio,
   }) {
     final _audioRecorder = Record();
@@ -68,15 +66,9 @@ class OnHoldButton extends StatefulWidget {
       recordingFinishedCallback(path!);
     }
 
-    Future<void> _cancel(BuildContext context) async {
-      onHoldCancel?.call();
-      await _audioRecorder.stop();
-    }
-
     return OnHoldButton(
       onHoldStart: _start,
       onHoldStop: _stop,
-      onHoldCancel: _cancel,
       icon: icon ?? Icons.mic,
     );
   }
@@ -86,9 +78,6 @@ class OnHoldButton extends StatefulWidget {
 
   /// Docs
   final HoldStopCallback onHoldStop;
-
-  /// Docs
-  final HoldStopCallback onHoldCancel;
 
   /// Docs
   final IconData icon;
@@ -111,33 +100,9 @@ class _OnHoldButtonState extends State<OnHoldButton> {
     widget.onHoldStop.call(context);
   }
 
-  Future<void> _cancel(BuildContext context) async {
-    print('cancel recording...');
-    widget.onHoldCancel.call(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     final color = StreamChatTheme.of(context).primaryIconTheme.color;
-
-    final buttonAnimated = AnimatedPositioned(
-      duration: const Duration(milliseconds: 100),
-      right: posX,
-      key: const ValueKey("item 1"),
-      child: Container(
-        height: 30,
-        width: 30,
-        // padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50),
-          color: _isHolding ? Colors.red : Colors.transparent,
-        ),
-        child: Icon(
-          widget.icon,
-          color: color,
-        ),
-      ),
-    );
 
     final gestureDetector = GestureDetector(
       onTapDown: (details) {
@@ -154,50 +119,16 @@ class _OnHoldButtonState extends State<OnHoldButton> {
           _isHolding = false;
         });
       },
-      onHorizontalDragUpdate: (details) {
-        if (details.localPosition.dx < 0 && _isHolding) {
-          setState(() {
-            posX = -details.localPosition.dx;
-          });
-        }
-
-        if (details.localPosition.dx < -50 && _isHolding) {
-          print('canceling record');
-          _cancel(context);
-          setState(() {
-            posX = 0;
-            _isHolding = false;
-          });
-        }
-      },
-      onHorizontalDragEnd: (details) {
-        if (_isHolding) {
-          _stop(context);
-        }
-        setState(() {
-          posX = 0;
-          _isHolding = false;
-        });
-      },
+      child: Icon(
+        widget.icon,
+        color: color,
+      ),
     );
 
-    // if (_isHolding) {
-    //   return Expanded(
-    //     child: Stack(
-    //       alignment: Alignment.centerRight,
-    //       children: [buttonAnimated, gestureDetector],
-    //     ),
-    //   );
-    // }
-
-    return Container(
-      height: 46,
-      width: _isHolding ? 90 : 46,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Stack(
-        alignment: Alignment.centerRight,
-        children: [buttonAnimated, gestureDetector],
-      ),
+    return SizedBox(
+      height: 30,
+      width: 30,
+      child: gestureDetector,
     );
   }
 }

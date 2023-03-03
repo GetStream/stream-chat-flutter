@@ -605,18 +605,14 @@ class StreamMessageInputState extends State<StreamMessageInput>
             !_recording)
           _buildExpandActionsButton(context),
         if (_recording) _buildRecordLeftInfo(),
-        if (_recording)
-          _buildRecordHowToCancelInfo()
-        else
-          _buildTextInput(context),
+        if (_recording) _buildRecordInfo() else _buildTextInput(context),
         if (!_commandEnabled &&
             widget.actionsLocation == ActionsLocation.right &&
             !_recording)
           _buildExpandActionsButton(context),
-        if (widget.sendButtonLocation == SendButtonLocation.outside &&
-            !_recording)
-          _buildSendButton(context),
-        _buildRecordVoiceButton(),
+        if (widget.sendButtonLocation == SendButtonLocation.outside)
+          if (!_recording) _buildSendButton(context),
+        if (_recording) _buildConfirmRecordButton(),
       ],
     );
   }
@@ -633,6 +629,17 @@ class StreamMessageInputState extends State<StreamMessageInput>
       isEditEnabled: _isEditing,
       idleSendButton: widget.idleSendButton,
       activeSendButton: widget.activeSendButton,
+    );
+  }
+
+  Widget _buildConfirmRecordButton() {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: OnPressButton.confirmAudio(onPressed: () {
+        setState(() {
+          _recording = false;
+        });
+      }),
     );
   }
 
@@ -674,6 +681,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             ? const Offstage()
             : Wrap(
                 children: <Widget>[
+                  _buildRecordVoiceButton(),
                   if (!widget.disableAttachments &&
                       channel.ownCapabilities
                           .contains(PermissionType.uploadFile))
@@ -694,7 +702,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   Widget _buildRecordLeftInfo() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.all(8),
       child: Row(
         children: [
           StreamSvgIcon.microphone(),
@@ -707,9 +715,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
   }
 
-  Widget _buildRecordHowToCancelInfo() {
+  Widget _buildRecordInfo() {
     return const Expanded(
-      child: Center(child: Text('Slide do cancel <')),
+      child: Center(child: Text('Recording')),
     );
   }
 
@@ -728,11 +736,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
       onHoldStart: () {
         setState(() {
           _recording = true;
-        });
-      },
-      onHoldCancel: () {
-        setState(() {
-          _recording = false;
         });
       },
       onRecordedAudio: (attachment) {
@@ -1019,7 +1022,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
 
     if (_recording) {
-      return 'Slide to cancel <';
+      return 'Recording...';
     }
 
     return context.translations.writeAMessageLabel;
