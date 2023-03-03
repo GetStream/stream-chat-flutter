@@ -13,6 +13,7 @@ class AudioPlayerMessage extends StatefulWidget {
     required this.player,
     required this.fileName,
     required this.index,
+    this.actionButton,
   });
 
   /// Docs
@@ -23,6 +24,9 @@ class AudioPlayerMessage extends StatefulWidget {
 
   /// Docs
   final String fileName;
+
+  /// Docs
+  final Widget? actionButton;
 
   @override
   AudioPlayerMessageState createState() => AudioPlayerMessageState();
@@ -118,31 +122,39 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   }
 
   Widget _speedAndActionButton() {
-    final speedButton = StreamBuilder<double>(
-      stream: widget.player.speedStream,
+    return StreamBuilder<bool>(
+      stream: widget.player.playingStream,
+      initialData: false,
       builder: (context, snapshot) {
-        final speed = snapshot.data ?? 1;
-        return TextButton(
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            minimumSize: const Size(20, 20),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: Text(speed.toString()),
-          onPressed: () {
-            setState(() {
-              if (speed == 2) {
-                widget.player.setSpeed(1);
-              } else {
-                widget.player.setSpeed(speed + 0.5);
-              }
-            });
-          },
-        );
+        if (snapshot.data == true) {
+          return StreamBuilder<double>(
+            stream: widget.player.speedStream,
+            builder: (context, snapshot) {
+              final speed = snapshot.data ?? 1;
+              return TextButton(
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(30, 30),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(speed.toString()),
+                onPressed: () {
+                  setState(() {
+                    if (speed == 2) {
+                      widget.player.setSpeed(1);
+                    } else {
+                      widget.player.setSpeed(speed + 0.5);
+                    }
+                  });
+                },
+              );
+            },
+          );
+        } else {
+          return widget.actionButton ?? const SizedBox.shrink();
+        }
       },
     );
-
-    return speedButton;
   }
 
   Widget _timer(Duration totalDuration) {

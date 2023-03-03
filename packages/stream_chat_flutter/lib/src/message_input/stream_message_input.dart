@@ -1206,22 +1206,15 @@ class StreamMessageInputState extends State<StreamMessageInput>
         player: player,
         fileName: attachment.title ?? 'No name',
         index: 0,
+        actionButton: _buildRemoveButton(attachment),
       );
     }
 
-    return Stack(
-      children: [
-        SizedBox(
-          height: 85,
-          width: 120,
-          child: playerMessage,
-        ),
-        Positioned(
-          top: 8,
-          right: 8,
-          child: _buildRemoveButton(attachment),
-        ),
-      ],
+    // Todo: Allow the Widget to freely expand
+    return SizedBox(
+      height: 85,
+      width: 260,
+      child: playerMessage,
     );
   }
 
