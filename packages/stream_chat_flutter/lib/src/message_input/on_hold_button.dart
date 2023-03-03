@@ -1,25 +1,13 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:record/record.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-/// Docs
-typedef RecordCallback = void Function(String);
-
-/// Docs
-typedef HoldStartCallback = Future<void> Function(BuildContext);
-
-/// Docs
-typedef HoldStopCallback = Future<void> Function(BuildContext);
 
 /// Docs
 class OnHoldButton extends StatefulWidget {
   /// Docs
   const OnHoldButton({
     super.key,
-    required this.onHoldStart,
-    required this.onHoldStop,
+    this.onHoldStart,
+    this.onHoldStop,
     required this.icon,
   });
 
@@ -28,56 +16,20 @@ class OnHoldButton extends StatefulWidget {
     IconData? icon,
     VoidCallback? onHoldStart,
     VoidCallback? onHoldStop,
-    Function(Attachment)? onRecordedAudio,
   }) {
-    final _audioRecorder = Record();
-
-    Future<void> _start(BuildContext context) async {
-      try {
-        if (await _audioRecorder.hasPermission()) {
-          onHoldStart?.call();
-          await _audioRecorder.start();
-        }
-      } catch (e) {
-        print(e);
-      }
-    }
-
-    void recordingFinishedCallback(String path) async {
-      final uri = Uri.parse(path);
-      final file = File(uri.path);
-
-      final attachment = await file.length().then(
-            (fileSize) => Attachment(
-              type: 'voicenote',
-              file: AttachmentFile(
-                size: fileSize,
-                path: uri.path,
-              ),
-            ),
-          );
-
-      await onRecordedAudio?.call(attachment);
-    }
-
-    Future<void> _stop(BuildContext context) async {
-      onHoldStop?.call();
-      final path = await _audioRecorder.stop();
-      recordingFinishedCallback(path!);
-    }
 
     return OnHoldButton(
-      onHoldStart: _start,
-      onHoldStop: _stop,
+      onHoldStart: onHoldStart,
+      onHoldStop: onHoldStop,
       icon: icon ?? Icons.mic,
     );
   }
 
   /// Docs
-  final HoldStartCallback onHoldStart;
+  final VoidCallback? onHoldStart;
 
   /// Docs
-  final HoldStopCallback onHoldStop;
+  final VoidCallback? onHoldStop;
 
   /// Docs
   final IconData icon;
@@ -91,13 +43,11 @@ class _OnHoldButtonState extends State<OnHoldButton> {
   double posX = 0;
 
   Future<void> _start(BuildContext context) async {
-    print('start recording...');
-    widget.onHoldStart.call(context);
+    widget.onHoldStart?.call();
   }
 
   Future<void> _stop(BuildContext context) async {
-    print('stop recording...');
-    widget.onHoldStop.call(context);
+    widget.onHoldStop?.call();
   }
 
   @override

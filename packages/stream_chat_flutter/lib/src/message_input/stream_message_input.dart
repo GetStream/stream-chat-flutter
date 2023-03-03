@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart'
@@ -10,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:record/record.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/audio_loading_attachment.dart';
@@ -269,6 +271,8 @@ class StreamMessageInput extends StatefulWidget {
 /// State of [StreamMessageInput]
 class StreamMessageInputState extends State<StreamMessageInput>
     with RestorationMixin<StreamMessageInput>, WidgetsBindingObserver {
+  final _audioRecorder = Record();
+
   bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool _actionsShrunk = false;
@@ -636,9 +640,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     return Padding(
       padding: const EdgeInsets.all(8),
       child: OnPressButton.confirmAudio(onPressed: () {
-        setState(() {
-          _recording = false;
-        });
+        _finishRecording(context);
       }),
     );
   }
@@ -731,29 +733,59 @@ class StreamMessageInputState extends State<StreamMessageInput>
         defaultButton;
   }
 
-  Widget _buildRecordVoiceButton() {
-    final defaultButton = OnHoldButton.audioRecord(
-      onHoldStart: () {
+  Future<void> _startRecording() async {
+    try {
+      if (await _audioRecorder.hasPermission()) {
+        await _audioRecorder.start();
+
         setState(() {
           _recording = true;
         });
-      },
-      onRecordedAudio: (attachment) {
-        setState(() {
-          if (widget.sendVoiceRecordDirectly) {
-            StreamChannel.of(context)
-                .channel
-                .sendMessage(Message(attachments: [attachment]));
-          } else {
-            _effectiveController.attachments = [
-              ..._effectiveController.attachments,
-              attachment,
-            ];
-          }
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
 
-          _recording = false;
-        });
-      },
+  Future<void> _finishRecording(BuildContext context) async {
+    final path = await _audioRecorder.stop();
+
+    if (path != null) {
+      final uri = Uri.parse(path);
+      final file = File(uri.path);
+
+      final attachment = await file.length().then(
+            (fileSize) =>
+            Attachment(
+              type: 'voicenote',
+              file: AttachmentFile(
+                size: fileSize,
+                path: uri.path,
+              ),
+            ),
+      );
+
+      if (widget.sendVoiceRecordDirectly) {
+        StreamChannel
+            .of(context)
+            .channel
+            .sendMessage(Message(attachments: [attachment]));
+      } else {
+        _effectiveController.attachments = [
+          ..._effectiveController.attachments,
+          attachment,
+        ];
+      }
+    }
+
+    setState(() {
+      _recording = false;
+    });
+  }
+
+  Widget _buildRecordVoiceButton() {
+    final defaultButton = OnHoldButton.audioRecord(
+      onHoldStart: _startRecording,
     );
     return defaultButton;
   }
