@@ -8,9 +8,9 @@ import 'package:stream_chat_flutter/src/attachment/audio_player_attachment.dart'
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Docs
-class AudioPlayerWrapper extends StatefulWidget {
+class AudioListPlayer extends StatefulWidget {
   /// Docs
-  const AudioPlayerWrapper({
+  const AudioListPlayer({
     super.key,
     required this.attachments,
     this.attachmentBorderRadiusGeometry,
@@ -29,14 +29,14 @@ class AudioPlayerWrapper extends StatefulWidget {
   final BoxConstraints? constraints;
 
   @override
-  State<AudioPlayerWrapper> createState() => _AudioPlayerWrapperState();
+  State<AudioListPlayer> createState() => _AudioListPlayerState();
 }
 
-class _AudioPlayerWrapperState extends State<AudioPlayerWrapper> {
+class _AudioListPlayerState extends State<AudioListPlayer> {
   final _player = AudioPlayer();
   late StreamSubscription<PlayerState> _playerStateChangedSubscription;
 
-  Widget _createAudioPlayer(int index, Attachment attachment) {
+  Widget  _createAudioPlayer(int index, Attachment attachment) {
     final url = attachment.assetUrl;
     Widget playerMessage;
 
@@ -74,17 +74,8 @@ class _AudioPlayerWrapperState extends State<AudioPlayerWrapper> {
   void initState() {
     super.initState();
 
-    final playList = widget.attachments
-        .where((attachment) => attachment.assetUrl != null)
-        .map((attachment) => AudioSource.uri(Uri.parse(attachment.assetUrl!)))
-        .toList();
-
-    final audioSource = ConcatenatingAudioSource(children: playList);
-
-    _player
-      ..setShuffleModeEnabled(false)
-      ..setLoopMode(LoopMode.off)
-      ..setAudioSource(audioSource);
+    _playerStateChangedSubscription =
+        _player.playerStateStream.listen(_playerStateListener);
   }
 
   @override
@@ -97,8 +88,17 @@ class _AudioPlayerWrapperState extends State<AudioPlayerWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    _playerStateChangedSubscription =
-        _player.playerStateStream.listen(_playerStateListener);
+    final playList = widget.attachments
+        .where((attachment) => attachment.assetUrl != null)
+        .map((attachment) => AudioSource.uri(Uri.parse(attachment.assetUrl!)))
+        .toList();
+
+    final audioSource = ConcatenatingAudioSource(children: playList);
+
+    _player
+      ..setShuffleModeEnabled(false)
+      ..setLoopMode(LoopMode.off)
+      ..setAudioSource(audioSource);
 
     return Column(
       children: widget.attachments.mapIndexed(_createAudioPlayer).toList(),

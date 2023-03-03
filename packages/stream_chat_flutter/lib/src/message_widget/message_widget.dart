@@ -280,7 +280,7 @@ class StreamMessageWidget extends StatefulWidget {
 
             return WrapAttachmentWidget(
               attachmentShape: border,
-              attachmentWidget: AudioPlayerWrapper(
+              attachmentWidget: AudioListPlayer(
                 attachments: attachments,
                 attachmentBorderRadiusGeometry: attachmentBorderRadiusGeometry,
                 constraints: const BoxConstraints.tightFor(width: 400),
