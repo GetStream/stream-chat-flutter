@@ -132,7 +132,8 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       stream: widget.player.playingStream,
       initialData: false,
       builder: (context, snapshot) {
-        if (snapshot.data == true) {
+        if (snapshot.data == true &&
+            widget.player.currentIndex == widget.index) {
           return StreamBuilder<double>(
             stream: widget.player.speedStream,
             builder: (context, snapshot) {
