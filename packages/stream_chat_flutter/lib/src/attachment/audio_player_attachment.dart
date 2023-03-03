@@ -274,6 +274,6 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   }
 
   String _twoDigits(int value) {
-    return value.toString().padLeft(2, '0');
+    return value.remainder(60).toString().padLeft(2, '0');
   }
 }
