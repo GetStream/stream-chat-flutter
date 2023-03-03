@@ -114,6 +114,7 @@ class StreamMessageInput extends StatefulWidget {
     this.enableMentionsOverlay = true,
     this.onQuotedMessageCleared,
     this.enableActionAnimation = true,
+    this.sendVoiceRecordDirectly = false,
   });
 
   /// If true the message input will animate the actions while you type
@@ -252,6 +253,11 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Callback for when the quoted message is cleared
   final VoidCallback? onQuotedMessageCleared;
+
+  /// Enables sending messages directly without adding then to message compose
+  /// for review.
+  /// Disabled by default.
+  final bool sendVoiceRecordDirectly;
 
   static bool _defaultValidator(Message message) =>
       message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
@@ -731,10 +737,17 @@ class StreamMessageInputState extends State<StreamMessageInput>
       },
       onRecordedAudio: (attachment) {
         setState(() {
-          _effectiveController.attachments = [
-            ..._effectiveController.attachments,
-            attachment,
-          ];
+          if (widget.sendVoiceRecordDirectly) {
+            StreamChannel.of(context)
+                .channel
+                .sendMessage(Message(attachments: [attachment]));
+          } else {
+            _effectiveController.attachments = [
+              ..._effectiveController.attachments,
+              attachment,
+            ];
+          }
+
           _recording = false;
         });
       },
