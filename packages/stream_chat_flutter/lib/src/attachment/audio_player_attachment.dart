@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:stream_chat_flutter/src/attachment/audio_loading_attachment.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Docs
 class AudioPlayerMessage extends StatefulWidget {
@@ -11,8 +12,8 @@ class AudioPlayerMessage extends StatefulWidget {
   const AudioPlayerMessage({
     super.key,
     required this.player,
-    required this.fileName,
-    required this.index,
+    this.index,
+    this.fileSize,
     this.actionButton,
   });
 
@@ -20,10 +21,10 @@ class AudioPlayerMessage extends StatefulWidget {
   final AudioPlayer player;
 
   /// Docs
-  final int index;
+  final int? index;
 
   /// Docs
-  final String fileName;
+  final int? fileSize;
 
   /// Docs
   final Widget? actionButton;
@@ -68,7 +69,12 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
             child: Row(
               children: <Widget>[
                 _controlButton(),
-                _timer(snapshot.data!),
+                Column(
+                  children: [
+                    _timer(snapshot.data!),
+                    _fileSizeWidget(widget.fileSize),
+                  ],
+                ),
                 _slider(snapshot.data),
                 _speedAndActionButton(),
               ],
@@ -157,6 +163,17 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     );
   }
 
+  Widget _fileSizeWidget(int? fileSize) {
+    if (fileSize != null) {
+      return Text(
+        fileSize.toHumanReadableSize(),
+        style: const TextStyle(fontSize: 10),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+  }
+
   Widget _timer(Duration totalDuration) {
     return StreamBuilder<Duration>(
       stream: widget.player.positionStream,
@@ -211,11 +228,11 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
                       _seeking = false;
                     });
                     widget.player
-                        .seek(totalDuration * val, index: widget.index);
+                        .seek(totalDuration * val, index: widget.index ?? 0);
                   },
                   onChanged: (val) {
                     widget.player
-                        .seek(totalDuration * val, index: widget.index);
+                        .seek(totalDuration * val, index: widget.index ?? 0);
                   },
                   activeColor: Colors.yellow,
                 ),

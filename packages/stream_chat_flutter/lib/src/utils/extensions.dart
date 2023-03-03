@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:diacritic/diacritic.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -5,6 +7,37 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+int _byteUnitConversionFactor = 1024;
+
+/// int extensions
+extension IntExtension on int {
+
+  /// Parses int in bytes to human readable size. Like: 17 KB
+  /// instead of 17524 bytes;
+  String toHumanReadableSize() {
+    if (this <= 0) return '0 B';
+    const suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    final i = (log(this) / log(_byteUnitConversionFactor)).floor();
+    final numberValue =
+        (this / pow(_byteUnitConversionFactor, i)).toStringAsFixed(2);
+    final suffix = suffixes[i];
+    return '$numberValue $suffix';
+  }
+
+// public fun convertFileSizeByteCount(bytes: Long): String {
+// return when {
+// bytes <= 0 -> "0 B"
+// bytes < BYTE_UNIT_CONVERSION_FACTOR -> "$bytes B"
+// else -> {
+// val exp = (ln(bytes.toDouble()) / ln(BYTE_UNIT_CONVERSION_FACTOR.toDouble())).toInt()
+// val pre = "KMGTPE"[exp - 1].toString()
+// val df = DecimalFormat("###.##")
+// df.format(bytes / BYTE_UNIT_CONVERSION_FACTOR.toDouble().pow(exp.toDouble())) + " ${pre}B"
+// }
+// }
+// }
+}
 
 /// String extension
 extension StringExtension on String {

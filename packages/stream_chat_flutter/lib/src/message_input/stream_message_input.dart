@@ -1204,16 +1204,23 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
       playerMessage = AudioPlayerMessage(
         player: player,
-        fileName: attachment.title ?? 'No name',
         index: 0,
+        fileSize: attachment.fileSize,
         actionButton: _buildRemoveButton(attachment),
       );
     }
 
-    // Todo: Allow the Widget to freely expand
-    return SizedBox(
-      height: 85,
-      width: 260,
+    final colorTheme = StreamChatTheme.of(context).colorTheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorTheme.barsBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorTheme.borders,
+        ),
+      ),
+      width: MediaQuery.of(context).size.width * 0.65,
       child: playerMessage,
     );
   }

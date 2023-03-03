@@ -250,18 +250,18 @@ class StreamMessageWidget extends StatefulWidget {
               if (url == null) {
                 playerMessage = const AudioLoadingMessage();
               } else {
-                playerMessage = AudioPlayerMessage(
-                  player: player,
-                  fileName: attachment.title ?? 'No name',
-                  index: index,
-                );
+                playerMessage =
+                    AudioPlayerMessage(player: player, index: index);
               }
+
+              final colorTheme = StreamChatTheme.of(context).colorTheme;
 
               return Container(
                 margin: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
+                  color: colorTheme.barsBg,
                   border: Border.all(
-                    color: StreamChatTheme.of(context).colorTheme.borders,
+                    color: colorTheme.borders,
                   ),
                   borderRadius:
                       attachmentBorderRadiusGeometry ?? BorderRadius.zero,
