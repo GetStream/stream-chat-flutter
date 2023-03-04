@@ -2,83 +2,98 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Docs
-class OnHoldButton extends StatefulWidget {
+class RecordButton extends StatefulWidget {
   /// Docs
-  const OnHoldButton({
+  const RecordButton({
     super.key,
-    this.onHoldStart,
-    this.onHoldStop,
+    required this.onHold,
     required this.icon,
+    this.onPressed,
   });
 
   /// Docs
-  factory OnHoldButton.audioRecord({
-    IconData? icon,
-    VoidCallback? onHoldStart,
-    VoidCallback? onHoldStop,
+  factory RecordButton.defaultButton({
+    required VoidCallback onHold,
   }) {
-
-    return OnHoldButton(
-      onHoldStart: onHoldStart,
-      onHoldStop: onHoldStop,
-      icon: icon ?? Icons.mic,
+    return RecordButton(
+      onHold: onHold,
+      icon: Icons.mic,
     );
   }
 
   /// Docs
-  final VoidCallback? onHoldStart;
+  final VoidCallback onHold;
 
   /// Docs
-  final VoidCallback? onHoldStop;
+  final VoidCallback? onPressed;
 
   /// Docs
   final IconData icon;
 
   @override
-  State<OnHoldButton> createState() => _OnHoldButtonState();
+  State<RecordButton> createState() => _RecordButtonState();
 }
 
-class _OnHoldButtonState extends State<OnHoldButton> {
-  bool _isHolding = false;
+class _RecordButtonState extends State<RecordButton> {
   double posX = 0;
 
-  Future<void> _start(BuildContext context) async {
-    widget.onHoldStart?.call();
+  //Todo: Fix the position to be above this button
+  void showOnPressHint() {
+    final entry = OverlayEntry(builder: (context) {
+      return Positioned(
+        top: MediaQuery.of(context).size.height * 0.8,
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          alignment: Alignment.center,
+          child: const Card(
+            color: Colors.red,
+            child: Padding(
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'You need to hold to record!',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+
+    Overlay.of(context).insert(entry);
+    Future.delayed(const Duration(seconds: 2)).then((value) => entry.remove());
   }
 
-  Future<void> _stop(BuildContext context) async {
-    widget.onHoldStop?.call();
+  void onTap(BuildContext context) {
+    if (widget.onPressed != null) {
+      widget.onPressed!.call();
+    } else {
+      showOnPressHint();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final color = StreamChatTheme.of(context).primaryIconTheme.color;
 
-    final gestureDetector = GestureDetector(
-      onTapDown: (details) {
-        setState(() {
-          _isHolding = true;
-        });
-        _start(context);
+    return GestureDetector(
+      onLongPress: () {
+        widget.onHold.call();
       },
-      onTapUp: (details) {
-        if (_isHolding) {
-          _stop(context);
-        }
-        setState(() {
-          _isHolding = false;
-        });
-      },
-      child: Icon(
-        widget.icon,
-        color: color,
+      child: IconButton(
+        icon: Icon(
+          widget.icon,
+          color: color,
+        ),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(
+          height: 24,
+          width: 24,
+        ),
+        splashRadius: 24,
+        onPressed: () {
+          onTap(context);
+        },
       ),
-    );
-
-    return SizedBox(
-      height: 30,
-      width: 30,
-      child: gestureDetector,
     );
   }
 }

@@ -755,19 +755,17 @@ class StreamMessageInputState extends State<StreamMessageInput>
       final file = File(uri.path);
 
       final attachment = await file.length().then(
-            (fileSize) =>
-            Attachment(
+            (fileSize) => Attachment(
               type: 'voicenote',
               file: AttachmentFile(
                 size: fileSize,
                 path: uri.path,
               ),
             ),
-      );
+          );
 
       if (widget.sendVoiceRecordDirectly) {
-        StreamChannel
-            .of(context)
+        StreamChannel.of(context)
             .channel
             .sendMessage(Message(attachments: [attachment]));
       } else {
@@ -784,10 +782,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildRecordVoiceButton() {
-    final defaultButton = OnHoldButton.audioRecord(
-      onHoldStart: _startRecording,
-    );
-    return defaultButton;
+    return RecordButton.defaultButton(onHold: _startRecording);
   }
 
   /// Handle the platform-specific logic for selecting files.
