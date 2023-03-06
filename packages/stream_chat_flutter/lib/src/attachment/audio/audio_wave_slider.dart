@@ -33,7 +33,7 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
   }
 
   double _maxWidth(BuildContext context) {
-    return 180;
+    return 160;
   }
 
   double _progressToWidth(BuildContext context, double progress) {

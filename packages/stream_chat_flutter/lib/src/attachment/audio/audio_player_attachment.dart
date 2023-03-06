@@ -284,13 +284,16 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       builder: (context, snapshot) {
         final currentIndex = snapshot.data;
 
-        return SizedBox(
-          width: 190,
-          height: 30,
-          child: AudioWaveSlider(
-            bars: _audioBars(),
-            progressStream: widget.player.positionStream.map((duration) =>
-                _sliderValue(duration, totalDuration, currentIndex)),
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: SizedBox(
+            width: 170,
+            height: 30,
+            child: AudioWaveSlider(
+              bars: _audioBars(),
+              progressStream: widget.player.positionStream.map((duration) =>
+                  _sliderValue(duration, totalDuration, currentIndex)),
+            ),
           ),
         );
       },
