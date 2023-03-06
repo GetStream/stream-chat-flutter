@@ -32,6 +32,7 @@ dependencies:
   image_picker: ^0.8.2
   jiffy: ^5.0.0
   just_audio: ^0.9.31
+  just_waveform: ^0.0.4
   lottie: ^2.0.0
   meta: ^1.3.0
   path_provider: ^2.0.9

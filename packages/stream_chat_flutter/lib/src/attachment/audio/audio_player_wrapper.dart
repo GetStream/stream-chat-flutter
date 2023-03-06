@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:stream_chat_flutter/src/attachment/audio_loading_attachment.dart';
-import 'package:stream_chat_flutter/src/attachment/audio_player_attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/audio_player_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Docs
@@ -36,14 +36,18 @@ class _AudioListPlayerState extends State<AudioListPlayer> {
   final _player = AudioPlayer();
   late StreamSubscription<PlayerState> _playerStateChangedSubscription;
 
-  Widget  _createAudioPlayer(int index, Attachment attachment) {
+  Widget _createAudioPlayer(int index, Attachment attachment) {
     final url = attachment.assetUrl;
     Widget playerMessage;
 
     if (url == null) {
       playerMessage = const AudioLoadingMessage();
     } else {
-      playerMessage = AudioPlayerMessage(player: _player, index: index);
+      playerMessage = AudioPlayerMessage(
+        player: _player,
+        index: index,
+        audioFile: attachment.file,
+      );
     }
 
     final colorTheme = StreamChatTheme.of(context).colorTheme;

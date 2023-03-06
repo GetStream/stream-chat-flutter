@@ -14,8 +14,8 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:record/record.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/attachment/audio_loading_attachment.dart';
-import 'package:stream_chat_flutter/src/attachment/audio_player_attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/audio_player_attachment.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/on_hold_button.dart';
 import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
@@ -1247,6 +1247,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
       playerMessage = AudioPlayerMessage(
         player: player,
+        audioFile: attachment.file,
         index: 0,
         fileSize: attachment.fileSize,
         actionButton: _buildRemoveButton(attachment),

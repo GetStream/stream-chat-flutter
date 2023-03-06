@@ -3,8 +3,82 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:stream_chat_flutter/src/attachment/audio_loading_attachment.dart';
+import 'package:just_waveform/just_waveform.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_slider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+List<int> _audioBars() {
+  return [
+    50,
+    75,
+    100,
+    150,
+    200,
+    255,
+    200,
+    150,
+    100,
+    75,
+    50,
+    75,
+    100,
+    150,
+    200,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    255,
+    200,
+    150,
+    100,
+    75,
+    50,
+    75,
+    100,
+    150,
+    200,
+    255,
+    200,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    150,
+    100,
+    75,
+    50,
+    75,
+    100,
+    150,
+    200,
+    255,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    200,
+  ];
+}
 
 /// Docs
 class AudioPlayerMessage extends StatefulWidget {
@@ -12,6 +86,7 @@ class AudioPlayerMessage extends StatefulWidget {
   const AudioPlayerMessage({
     super.key,
     required this.player,
+    required this.audioFile,
     this.index,
     this.fileSize,
     this.actionButton,
@@ -25,6 +100,9 @@ class AudioPlayerMessage extends StatefulWidget {
 
   /// Docs
   final int? fileSize;
+
+  /// Docs
+  final AttachmentFile? audioFile;
 
   /// Docs
   final Widget? actionButton;
@@ -75,7 +153,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
                     _fileSizeWidget(widget.fileSize),
                   ],
                 ),
-                _slider(snapshot.data),
+                _audioWaveSlider(snapshot.data),
                 _speedAndActionButton(),
               ],
             ),
@@ -133,7 +211,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       initialData: false,
       builder: (context, snapshot) {
         if (snapshot.data == true &&
-            widget.player.currentIndex == widget.index) {
+            widget.player.currentIndex == widget.index || true) {
           return StreamBuilder<double>(
             stream: widget.player.speedStream,
             builder: (context, snapshot) {
@@ -194,6 +272,33 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
 
           return Text('$minutes:$seconds');
         }
+      },
+    );
+  }
+
+  Widget _audioWaveSlider(Duration? totalDuration) {
+    return StreamBuilder<int?>(
+      initialData: 0,
+      stream: widget.player.currentIndexStream,
+      builder: (context, snapshot) {
+        final currentIndex = snapshot.data;
+
+        return StreamBuilder<Duration>(
+          stream: widget.player.positionStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasData && totalDuration != null) {
+              return SizedBox(
+                width: 180,
+                height: 30,
+                child: AudioWaveSlider(
+                  bars: _audioBars(),
+                ),
+              );
+            } else {
+              return const SizedBox(width: 180,);
+            }
+          },
+        );
       },
     );
   }
