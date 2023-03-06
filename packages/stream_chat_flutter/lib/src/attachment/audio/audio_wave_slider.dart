@@ -12,6 +12,9 @@ class AudioWaveSlider extends StatefulWidget {
     required this.bars,
     required this.progressStream,
     this.barsRatio = 1,
+    this.onChangeStart,
+    this.onChanged,
+    this.onChangeEnd,
   });
 
   /// Docs
@@ -22,6 +25,15 @@ class AudioWaveSlider extends StatefulWidget {
 
   ///Docs
   final double barsRatio;
+
+  ///Docs
+  final Function(double)? onChangeStart;
+
+  ///Docs
+  final Function(double)? onChanged;
+
+  ///Docs
+  final Function()? onChangeEnd;
 
   @override
   _AudioWaveSliderState createState() => _AudioWaveSliderState();
@@ -42,20 +54,6 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
 
   @override
   Widget build(BuildContext context) {
-    final gestureDetector = GestureDetector(
-      onHorizontalDragStart: (details) {
-        setState(() {
-          _dragging = true;
-        });
-      },
-      onHorizontalDragEnd: (details) {
-        setState(() {
-          _dragging = false;
-        });
-      },
-      onHorizontalDragUpdate: (details) {},
-    );
-
     return StreamBuilder<double>(
       initialData: 0,
       stream: widget.progressStream,
@@ -91,7 +89,27 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
                     ),
                   ),
                 ),
-                gestureDetector,
+                GestureDetector(
+                  onHorizontalDragStart: (details) {
+                    widget.onChangeStart
+                        ?.call(details.localPosition.dx / constraints.maxWidth);
+
+                    setState(() {
+                      _dragging = true;
+                    });
+                  },
+                  onHorizontalDragEnd: (details) {
+                    widget.onChangeEnd?.call();
+
+                    setState(() {
+                      _dragging = false;
+                    });
+                  },
+                  onHorizontalDragUpdate: (details) {
+                    widget.onChanged
+                        ?.call(details.localPosition.dx / constraints.maxWidth);
+                  },
+                ),
               ],
             );
           },

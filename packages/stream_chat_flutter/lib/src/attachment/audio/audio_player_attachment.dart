@@ -154,7 +154,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
                     _fileSizeWidget(widget.fileSize),
                   ],
                 ),
-                _audioWaveSlider(snapshot.data),
+                _audioWaveSlider(snapshot.data!),
                 _speedAndActionButton(),
               ],
             ),
@@ -277,7 +277,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     );
   }
 
-  Widget _audioWaveSlider(Duration? totalDuration) {
+  Widget _audioWaveSlider(Duration totalDuration) {
     return StreamBuilder<int?>(
       initialData: 0,
       stream: widget.player.currentIndexStream,
@@ -291,6 +291,21 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
               bars: _audioBars(),
               progressStream: widget.player.positionStream.map((duration) =>
                   _sliderValue(duration, totalDuration, currentIndex)),
+              onChangeStart: (val) {
+                setState(() {
+                  _seeking = true;
+                });
+              },
+              onChanged: (val) {
+                widget.player.pause();
+                widget.player
+                    .seek(totalDuration * val, index: widget.index ?? 0);
+              },
+              onChangeEnd: () {
+                setState(() {
+                  _seeking = false;
+                });
+              },
             ),
           ),
         );
@@ -300,10 +315,10 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
 
   double _sliderValue(
     Duration duration,
-    Duration? totalDuration,
+    Duration totalDuration,
     int? currentIndex,
   ) {
-    if (widget.index != currentIndex || totalDuration == null) {
+    if (widget.index != currentIndex) {
       return 0;
     } else {
       return min(duration.inMicroseconds / totalDuration.inMicroseconds, 1);
