@@ -11,6 +11,7 @@ class AudioWaveSlider extends StatefulWidget {
     super.key,
     required this.bars,
     required this.progressStream,
+    this.barsRatio = 1,
   });
 
   /// Docs
@@ -18,6 +19,9 @@ class AudioWaveSlider extends StatefulWidget {
 
   /// Docs
   final Stream<double> progressStream;
+
+  ///Docs
+  final double barsRatio;
 
   @override
   _AudioWaveSliderState createState() => _AudioWaveSliderState();
@@ -32,19 +36,12 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
     return _dragging ? _finalSize : _initialSize;
   }
 
-  double _maxWidth(BuildContext context) {
-    return 160;
-  }
-
-  double _progressToWidth(BuildContext context, double progress) {
-    return _maxWidth(context) * progress;
+  double _progressToWidth(BoxConstraints constraints, double progress) {
+    return constraints.maxWidth * progress;
   }
 
   @override
   Widget build(BuildContext context) {
-    final maxWidth = _maxWidth(context);
-    final maxHeight = MediaQuery.of(context).size.height;
-
     final gestureDetector = GestureDetector(
       onHorizontalDragStart: (details) {
         setState(() {
@@ -65,35 +62,39 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
       builder: (context, snapshot) {
         final progress = snapshot.data ?? 0;
 
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            CustomPaint(
-              size: Size(maxWidth, maxHeight),
-              painter: _AudioBarsPainter(
-                bars: widget.bars,
-                colorLeft: Colors.lightBlueAccent,
-                colorRight: Colors.blueAccent,
-                progress:
-                    _progressToWidth(context, progress),
-              ),
-            ),
-            AnimatedPositioned(
-              duration: Duration.zero,
-              left: _progressToWidth(context, progress),
-              key: const ValueKey('item 1'),
-              child: Container(
-                width: _currentSize(),
-                height: _currentSize(),
-                // color: Colors.red,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.green,
+        return LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                CustomPaint(
+                  size: Size(constraints.maxWidth, constraints.maxHeight),
+                  painter: _AudioBarsPainter(
+                    bars: widget.bars,
+                    colorLeft: Colors.lightBlueAccent,
+                    colorRight: Colors.blueAccent,
+                    progress: _progressToWidth(constraints, progress),
+                    barRatio: 0.6,
+                  ),
                 ),
-              ),
-            ),
-            gestureDetector,
-          ],
+                AnimatedPositioned(
+                  duration: Duration.zero,
+                  left: _progressToWidth(constraints, progress),
+                  key: const ValueKey('item 1'),
+                  child: Container(
+                    width: _currentSize(),
+                    height: _currentSize(),
+                    // color: Colors.red,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
+                gestureDetector,
+              ],
+            );
+          },
         );
       },
     );
@@ -106,6 +107,7 @@ class _AudioBarsPainter extends CustomPainter {
     required this.colorLeft,
     required this.colorRight,
     required this.progress,
+    required this.barRatio,
   });
 
   final List<int> bars;
@@ -113,10 +115,15 @@ class _AudioBarsPainter extends CustomPainter {
   final Color colorLeft;
   final double progress;
   final spacingRatio = 0.005;
+  final double barRatio;
 
   /// barWidth should include spacing, not only the width of the bar.
   Color _barColor(double barCenter, double progress) {
     return (progress > barCenter) ? colorRight : colorLeft;
+  }
+
+  double _barHeight(int barValue, totalHeight) {
+    return max((barValue / _maxBarHeight) * totalHeight * barRatio, 4);
   }
 
   @override
@@ -126,8 +133,8 @@ class _AudioBarsPainter extends CustomPainter {
     final barWidth = totalBarWidth / bars.length;
     final barY = size.height / 2;
 
-    bars.forEachIndexed((i, bar) {
-      final double barHeight = max((bar / _maxBarHeight) * size.height, 4);
+    bars.forEachIndexed((i, barValue) {
+      final barHeight = _barHeight(barValue, size.height);
       final barX = i * (barWidth + spacingWidth) + barWidth / 2;
 
       final rect = RRect.fromRectAndRadius(

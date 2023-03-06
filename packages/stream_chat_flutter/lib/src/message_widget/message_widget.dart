@@ -1,13 +1,9 @@
-import 'package:collection/collection.dart';
 import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:stream_chat_flutter/conditional_parent_builder/conditional_parent_builder.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachment.dart';
-import 'package:stream_chat_flutter/src/attachment/audio/audio_player_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_player_wrapper.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/context_menu_reaction_picker.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
@@ -222,58 +218,6 @@ class StreamMessageWidget extends StatefulWidget {
             );
           },
           'voicenote': (context, defaultMessage, attachments) {
-            // final playList = attachments
-            //     .where((attachment) => attachment.assetUrl != null)
-            //     .map((attachment) =>
-            //         AudioSource.uri(Uri.parse(attachment.assetUrl!)))
-            //     .toList();
-            //
-            // final audioSource = ConcatenatingAudioSource(children: playList);
-            //
-            // final player = AudioPlayer()
-            //   ..setShuffleModeEnabled(false)
-            //   ..setLoopMode(LoopMode.off)
-            //   ..setAudioSource(audioSource);
-            //
-            // void playerStateListener(PlayerState state) async {
-            //   if (state.processingState == ProcessingState.completed) {
-            //     await player.stop();
-            //     await player.seek(Duration.zero, index: 0);
-            //   }
-            // }
-            //
-            // player.playerStateStream.listen(playerStateListener);
-            //
-            // Widget createAudioPlayer(int index, Attachment attachment) {
-            //   final url = attachment.assetUrl;
-            //   Widget playerMessage;
-            //
-            //   if (url == null) {
-            //     playerMessage = const AudioLoadingMessage();
-            //   } else {
-            //     playerMessage = AudioPlayerMessage(
-            //       player: player,
-            //       index: index,
-            //     );
-            //   }
-            //
-            //   final colorTheme = StreamChatTheme.of(context).colorTheme;
-            //
-            //   return Container(
-            //     margin: const EdgeInsets.all(2),
-            //     decoration: BoxDecoration(
-            //       color: colorTheme.barsBg,
-            //       border: Border.all(
-            //         color: colorTheme.borders,
-            //       ),
-            //       borderRadius:
-            //           attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-            //     ),
-            //     width: 400,
-            //     child: playerMessage,
-            //   );
-            // }
-
             final border = RoundedRectangleBorder(
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );

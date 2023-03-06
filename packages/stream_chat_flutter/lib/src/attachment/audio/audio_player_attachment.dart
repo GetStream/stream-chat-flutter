@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_waveform/just_waveform.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_slider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -144,10 +143,12 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
         if (snapshot.hasData) {
           return Container(
             padding: const EdgeInsets.all(8),
+            height: 56,
             child: Row(
               children: <Widget>[
                 _controlButton(),
                 Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _timer(snapshot.data!),
                     _fileSizeWidget(widget.fileSize),
@@ -194,11 +195,11 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
                     _play();
                   }
                 },
-                child: Icon(icon, color: color, size: 30),
+                child: Icon(icon, color: color),
               ),
             );
 
-            return Row(children: [playButton]);
+            return playButton;
           },
         );
       },
@@ -211,8 +212,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       initialData: false,
       builder: (context, snapshot) {
         if (snapshot.data == true &&
-                widget.player.currentIndex == widget.index ||
-            true) {
+            widget.player.currentIndex == widget.index) {
           return StreamBuilder<double>(
             stream: widget.player.speedStream,
             builder: (context, snapshot) {
@@ -284,63 +284,15 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       builder: (context, snapshot) {
         final currentIndex = snapshot.data;
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: SizedBox(
-            width: 170,
-            height: 30,
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: AudioWaveSlider(
               bars: _audioBars(),
               progressStream: widget.player.positionStream.map((duration) =>
                   _sliderValue(duration, totalDuration, currentIndex)),
             ),
           ),
-        );
-      },
-    );
-  }
-
-  Widget _slider(Duration? totalDuration) {
-    return StreamBuilder<int?>(
-      initialData: 0,
-      stream: widget.player.currentIndexStream,
-      builder: (context, snapshot) {
-        final currentIndex = snapshot.data;
-
-        return StreamBuilder<double>(
-          stream: widget.player.positionStream.map((duration) =>
-              _sliderValue(duration, totalDuration, currentIndex)),
-          builder: (context, snapshot) {
-            if (snapshot.hasData && totalDuration != null) {
-              return Expanded(
-                child: Slider.adaptive(
-                  value: snapshot.data!,
-                  onChangeStart: (val) {
-                    setState(() {
-                      _seeking = true;
-                    });
-                    if (widget.player.playing) {
-                      widget.player.pause();
-                    }
-                  },
-                  onChangeEnd: (val) {
-                    setState(() {
-                      _seeking = false;
-                    });
-                    widget.player
-                        .seek(totalDuration * val, index: widget.index ?? 0);
-                  },
-                  onChanged: (val) {
-                    widget.player
-                        .seek(totalDuration * val, index: widget.index ?? 0);
-                  },
-                  activeColor: Colors.yellow,
-                ),
-              );
-            } else {
-              return const SizedBox.shrink();
-            }
-          },
         );
       },
     );
