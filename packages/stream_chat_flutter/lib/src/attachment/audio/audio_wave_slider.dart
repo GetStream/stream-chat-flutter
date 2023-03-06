@@ -10,17 +10,20 @@ class AudioWaveSlider extends StatefulWidget {
   const AudioWaveSlider({
     super.key,
     required this.bars,
+    required this.progressStream,
   });
 
   /// Docs
   final List<int> bars;
+
+  /// Docs
+  final Stream<double> progressStream;
 
   @override
   _AudioWaveSliderState createState() => _AudioWaveSliderState();
 }
 
 class _AudioWaveSliderState extends State<AudioWaveSlider> {
-  double posX = 0;
   var _dragging = false;
   final _initialSize = 15.0;
   final _finalSize = 22.0;
@@ -29,69 +32,70 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
     return _dragging ? _finalSize : _initialSize;
   }
 
-  double _sizeDifference() {
-    return _finalSize - _initialSize;
+  double _maxWidth(BuildContext context) {
+    return 180;
+  }
+
+  double _progressToWidth(BuildContext context, double progress) {
+    return _maxWidth(context) * progress;
   }
 
   @override
   Widget build(BuildContext context) {
-    final maxWidth = MediaQuery.of(context).size.width * 0.9;
+    final maxWidth = _maxWidth(context);
     final maxHeight = MediaQuery.of(context).size.height;
 
-    final audioBars = CustomPaint(
-      size: Size(maxWidth, maxHeight),
-      painter: _AudioBarsPainter(
-        bars: widget.bars,
-        colorLeft: Colors.lightBlueAccent,
-        colorRight: Colors.blueAccent,
-        progress: posX + (_currentSize() / 2),
-      ),
+    final gestureDetector = GestureDetector(
+      onHorizontalDragStart: (details) {
+        setState(() {
+          _dragging = true;
+        });
+      },
+      onHorizontalDragEnd: (details) {
+        setState(() {
+          _dragging = false;
+        });
+      },
+      onHorizontalDragUpdate: (details) {},
     );
 
-    return Stack(
-      alignment: Alignment.centerLeft,
-      children: [
-        audioBars,
-        AnimatedPositioned(
-          duration: Duration.zero,
-          left: posX,
-          key: const ValueKey('item 1'),
-          child: Container(
-            width: _currentSize(),
-            height: _currentSize(),
-            // color: Colors.red,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.green,
+    return StreamBuilder<double>(
+      initialData: 0,
+      stream: widget.progressStream,
+      builder: (context, snapshot) {
+        final progress = snapshot.data ?? 0;
+
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            CustomPaint(
+              size: Size(maxWidth, maxHeight),
+              painter: _AudioBarsPainter(
+                bars: widget.bars,
+                colorLeft: Colors.lightBlueAccent,
+                colorRight: Colors.blueAccent,
+                progress:
+                    _progressToWidth(context, progress),
+              ),
             ),
-          ),
-        ),
-        GestureDetector(
-          onHorizontalDragStart: (details) {
-            setState(() {
-              _dragging = true;
-              posX -= _sizeDifference() / 2;
-            });
-          },
-          onHorizontalDragEnd: (details) {
-            setState(() {
-              _dragging = false;
-              posX += _sizeDifference() / 2;
-            });
-          },
-          onHorizontalDragUpdate: (details) {
-            setState(() {
-              posX = min(
-                maxWidth - _currentSize() / 2,
-                max(
-                  -(_currentSize() / 2),
-                  details.localPosition.dx - _currentSize() / 2,
+            AnimatedPositioned(
+              duration: Duration.zero,
+              left: _progressToWidth(context, progress),
+              key: const ValueKey('item 1'),
+              child: Container(
+                width: _currentSize(),
+                height: _currentSize(),
+                // color: Colors.red,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.green,
                 ),
-              );
-            });
-          },
-        ),
-      ],
+              ),
+            ),
+            gestureDetector,
+          ],
+        );
+      },
     );
   }
 }

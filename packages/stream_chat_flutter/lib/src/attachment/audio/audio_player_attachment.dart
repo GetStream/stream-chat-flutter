@@ -211,7 +211,8 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       initialData: false,
       builder: (context, snapshot) {
         if (snapshot.data == true &&
-            widget.player.currentIndex == widget.index || true) {
+                widget.player.currentIndex == widget.index ||
+            true) {
           return StreamBuilder<double>(
             stream: widget.player.speedStream,
             builder: (context, snapshot) {
@@ -283,21 +284,14 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       builder: (context, snapshot) {
         final currentIndex = snapshot.data;
 
-        return StreamBuilder<Duration>(
-          stream: widget.player.positionStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData && totalDuration != null) {
-              return SizedBox(
-                width: 180,
-                height: 30,
-                child: AudioWaveSlider(
-                  bars: _audioBars(),
-                ),
-              );
-            } else {
-              return const SizedBox(width: 180,);
-            }
-          },
+        return SizedBox(
+          width: 190,
+          height: 30,
+          child: AudioWaveSlider(
+            bars: _audioBars(),
+            progressStream: widget.player.positionStream.map((duration) =>
+                _sliderValue(duration, totalDuration, currentIndex)),
+          ),
         );
       },
     );
@@ -310,17 +304,14 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       builder: (context, snapshot) {
         final currentIndex = snapshot.data;
 
-        return StreamBuilder<Duration>(
-          stream: widget.player.positionStream,
+        return StreamBuilder<double>(
+          stream: widget.player.positionStream.map((duration) =>
+              _sliderValue(duration, totalDuration, currentIndex)),
           builder: (context, snapshot) {
             if (snapshot.hasData && totalDuration != null) {
               return Expanded(
                 child: Slider.adaptive(
-                  value: _sliderValue(
-                    snapshot.data!,
-                    totalDuration,
-                    currentIndex,
-                  ),
+                  value: snapshot.data!,
                   onChangeStart: (val) {
                     setState(() {
                       _seeking = true;
@@ -354,10 +345,10 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
 
   double _sliderValue(
     Duration duration,
-    Duration totalDuration,
+    Duration? totalDuration,
     int? currentIndex,
   ) {
-    if (widget.index != currentIndex) {
+    if (widget.index != currentIndex || totalDuration == null) {
       return 0;
     } else {
       return min(duration.inMicroseconds / totalDuration.inMicroseconds, 1);
