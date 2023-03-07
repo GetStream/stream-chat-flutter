@@ -769,10 +769,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             .channel
             .sendMessage(Message(attachments: [attachment]));
       } else {
-        _effectiveController.attachments = [
-          ..._effectiveController.attachments,
-          attachment,
-        ];
+        _effectiveController.attachments += [attachment];
       }
     }
 
@@ -1538,6 +1535,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _stopSlowMode();
     _onChangedDebounced.cancel();
     WidgetsBinding.instance.removeObserver(this);
+    _audioRecorder.dispose();
     super.dispose();
   }
 }
