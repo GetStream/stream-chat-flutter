@@ -298,8 +298,10 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
               },
               onChanged: (val) {
                 widget.player.pause();
-                widget.player
-                    .seek(totalDuration * val, index: widget.index ?? 0);
+                widget.player.seek(
+                  totalDuration * val,
+                  index: widget.index ?? 0,
+                );
               },
               onChangeEnd: () {
                 setState(() {
