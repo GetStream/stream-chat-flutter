@@ -1,7 +1,9 @@
 ## Upcoming
 
 🐞 Fixed
-[#1463](https://github.com/GetStream/stream-chat-flutter/pull/1463) Fixed support for iPad in the share button for images. 
+
+- [#1462](https://github.com/GetStream/stream-chat-flutter/issues/1462) Fixed support for iPad in the share button for images. 
+- [#1475](https://github.com/GetStream/stream-chat-flutter/issues/1475) Fixed typo to fix compilation.
 
 ✅ Added
 

@@ -1,6 +1,6 @@
 import 'package:stream_chat_flutter/src/video/vlc/vlc_stub.dart'
     if (dart.library.io) 'vlc_manager_desktop.dart'
-    if (dar.library.html) 'vlc_manager_web.dart';
+    if (dart.library.html) 'vlc_manager_web.dart';
 
 /// {@template vlcManager}
 /// An abstract class for the purpose of ensuring Flutter applications that
