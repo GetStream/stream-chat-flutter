@@ -89,6 +89,7 @@ class AudioPlayerMessage extends StatefulWidget {
     this.index,
     this.fileSize,
     this.actionButton,
+    this.singleAudio = false,
   });
 
   /// Docs
@@ -106,6 +107,8 @@ class AudioPlayerMessage extends StatefulWidget {
   /// Docs
   final Widget? actionButton;
 
+  final bool singleAudio;
+
   @override
   AudioPlayerMessageState createState() => AudioPlayerMessageState();
 }
@@ -113,10 +116,20 @@ class AudioPlayerMessage extends StatefulWidget {
 /// Docs
 class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   var _seeking = false;
+  StreamSubscription<PlayerState>? stateSubscription;
 
   @override
   void initState() {
     super.initState();
+
+    void playerStateListener(PlayerState state) async {
+      if (state.processingState == ProcessingState.completed) {
+        await widget.player.stop();
+        await widget.player.seek(Duration.zero, index: 0);
+      }
+    }
+
+    widget.player.playerStateStream.listen(playerStateListener);
   }
 
   /// Docs
@@ -131,8 +144,10 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
 
   @override
   void dispose() {
-    widget.player.dispose();
     super.dispose();
+
+    widget.player.dispose();
+    stateSubscription?.cancel();
   }
 
   @override

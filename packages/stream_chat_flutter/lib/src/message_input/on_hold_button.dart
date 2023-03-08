@@ -6,13 +6,13 @@ class RecordButton extends StatefulWidget {
   /// Docs
   const RecordButton({
     super.key,
-    required this.onHold,
     required this.icon,
+    this.onHold,
     this.onPressed,
   });
 
   /// Docs
-  factory RecordButton.defaultButton({
+  factory RecordButton.startButton({
     required VoidCallback onHold,
   }) {
     return RecordButton(
@@ -20,9 +20,18 @@ class RecordButton extends StatefulWidget {
       icon: Icons.mic,
     );
   }
+  /// Docs
+  factory RecordButton.resumeButton({
+    required VoidCallback onPressed,
+  }) {
+    return RecordButton(
+      onPressed: onPressed,
+      icon: Icons.mic,
+    );
+  }
 
   /// Docs
-  final VoidCallback onHold;
+  final VoidCallback? onHold;
 
   /// Docs
   final VoidCallback? onPressed;
@@ -77,7 +86,7 @@ class _RecordButtonState extends State<RecordButton> {
 
     return GestureDetector(
       onLongPress: () {
-        widget.onHold.call();
+        widget.onHold?.call();
       },
       child: IconButton(
         icon: Icon(
@@ -96,4 +105,13 @@ class _RecordButtonState extends State<RecordButton> {
       ),
     );
   }
+}
+
+/// Docs
+enum Trigger {
+  /// Docs
+  onTap,
+
+  /// Docs
+  onHold,
 }

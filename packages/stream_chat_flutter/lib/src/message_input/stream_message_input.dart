@@ -277,7 +277,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   bool _actionsShrunk = false;
 
-  bool _recording = false;
+  RecordState _recordingState = RecordState.stop;
 
   late StreamChatThemeData _streamChatTheme;
   late StreamMessageInputThemeData _messageInputTheme;
@@ -320,6 +320,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
     if (!_isEditing && _timeOut <= 0) _startSlowMode();
   }
 
+  /// Docs
+  late StreamSubscription<RecordState> recordStateSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -329,6 +332,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
     } else {
       _initialiseEffectiveController();
     }
+
+    recordStateSubscription = _audioRecorder.onStateChanged().listen((state) {
+      setState(() {
+        _recordingState = state;
+      });
+    });
+
     _effectiveFocusNode.addListener(_focusNodeListener);
   }
 
@@ -604,19 +614,27 @@ class StreamMessageInputState extends State<StreamMessageInput>
     return Flex(
       direction: Axis.horizontal,
       children: <Widget>[
+        // Todo: Separate this list into a list for recording and one for message!!
         if (!_commandEnabled &&
             widget.actionsLocation == ActionsLocation.left &&
-            !_recording)
+            _recordingState == RecordState.stop)
           _buildExpandActionsButton(context),
-        if (_recording) _buildRecordLeftInfo(),
-        if (_recording) _buildRecordInfo() else _buildTextInput(context),
+        if (_recordingState == RecordState.record ||
+            _recordingState == RecordState.pause)
+          _buildRecordLeftInfo(),
+        if (_recordingState == RecordState.record)
+          Expanded(child: _buildPauseRecordButton()),
+        if (_recordingState == RecordState.pause)
+          Expanded(child: _buildResumeRecordButton()),
+        if (_recordingState == RecordState.stop) _buildTextInput(context),
         if (!_commandEnabled &&
             widget.actionsLocation == ActionsLocation.right &&
-            !_recording)
+            _recordingState == RecordState.stop)
           _buildExpandActionsButton(context),
-        if (widget.sendButtonLocation == SendButtonLocation.outside)
-          if (!_recording) _buildSendButton(context),
-        if (_recording) _buildConfirmRecordButton(),
+        if (widget.sendButtonLocation == SendButtonLocation.outside &&
+            _recordingState == RecordState.stop)
+          _buildSendButton(context),
+        if (_recordingState != RecordState.stop) _buildConfirmRecordButton(),
       ],
     );
   }
@@ -683,7 +701,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             ? const Offstage()
             : Wrap(
                 children: <Widget>[
-                  _buildRecordVoiceButton(),
+                  _buildStartRecordButton(),
                   if (!widget.disableAttachments &&
                       channel.ownCapabilities
                           .contains(PermissionType.uploadFile))
@@ -707,20 +725,19 @@ class StreamMessageInputState extends State<StreamMessageInput>
       padding: const EdgeInsets.all(8),
       child: Row(
         children: [
-          StreamSvgIcon.microphone(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: RecordTimer(),
-          ),
+          StreamSvgIcon.microphone(size: 19,),
+          if (_recordingState == RecordState.record)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: RecordTimer(),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildRecordInfo() {
-    return const Expanded(
-      child: Center(child: Text('Recording')),
-    );
+  Widget _buildPauseRecordButton() {
+    return OnPressButton.pauseRecord(onPressed: _pauseRecording);
   }
 
   Widget _buildAttachmentButton(BuildContext context) {
@@ -733,18 +750,22 @@ class StreamMessageInputState extends State<StreamMessageInput>
         defaultButton;
   }
 
-  Future<void> _startRecording() async {
+  Future<void> _record() async {
     try {
       if (await _audioRecorder.hasPermission()) {
-        await _audioRecorder.start();
-
-        setState(() {
-          _recording = true;
-        });
+        if (_recordingState == RecordState.stop) {
+          await _audioRecorder.start();
+        } else if (_recordingState == RecordState.pause) {
+          await _audioRecorder.resume();
+        }
       }
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<void> _pauseRecording() {
+    return _audioRecorder.pause();
   }
 
   Future<void> _finishRecording(BuildContext context) async {
@@ -772,14 +793,14 @@ class StreamMessageInputState extends State<StreamMessageInput>
         _effectiveController.attachments += [attachment];
       }
     }
-
-    setState(() {
-      _recording = false;
-    });
   }
 
-  Widget _buildRecordVoiceButton() {
-    return RecordButton.defaultButton(onHold: _startRecording);
+  Widget _buildStartRecordButton() {
+    return RecordButton.startButton(onHold: _record);
+  }
+
+  Widget _buildResumeRecordButton() {
+    return RecordButton.resumeButton(onPressed: _record);
   }
 
   /// Handle the platform-specific logic for selecting files.
@@ -1045,10 +1066,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
       return context.translations.slowModeOnLabel;
     }
 
-    if (_recording) {
-      return 'Recording...';
-    }
-
     return context.translations.writeAMessageLabel;
   }
 
@@ -1233,21 +1250,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
       final player = AudioPlayer()
         ..setAudioSource(AudioSource.file(audioFilePath));
 
-      void playerStateListener(PlayerState state) async {
-        if (state.processingState == ProcessingState.completed) {
-          await player.stop();
-          await player.seek(Duration.zero, index: 0);
-        }
-      }
-
-      player.playerStateStream.listen(playerStateListener);
-
       playerMessage = AudioPlayerMessage(
         player: player,
         audioFile: attachment.file,
         index: 0,
         fileSize: attachment.fileSize,
         actionButton: _buildRemoveButton(attachment),
+        singleAudio: true,
       );
     }
 
@@ -1535,7 +1544,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _stopSlowMode();
     _onChangedDebounced.cancel();
     WidgetsBinding.instance.removeObserver(this);
+    recordStateSubscription.cancel();
     _audioRecorder.dispose();
+
     super.dispose();
   }
 }

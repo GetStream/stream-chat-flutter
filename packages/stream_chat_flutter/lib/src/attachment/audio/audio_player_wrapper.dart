@@ -25,7 +25,7 @@ class AudioListPlayer extends StatefulWidget {
   /// {@endtemplate}
   final BorderRadiusGeometry? attachmentBorderRadiusGeometry;
 
-  /// Contraints of attachments
+  /// Constraints of attachments
   final BoxConstraints? constraints;
 
   @override

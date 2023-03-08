@@ -33,12 +33,23 @@ class OnPressButton extends StatelessWidget {
       onPressed: onPressed,
     );
   }
+
   /// Command button
   factory OnPressButton.confirmAudio({
     required VoidCallback onPressed,
   }) {
     return OnPressButton(
       icon: StreamSvgIcon.checkSend(),
+      onPressed: onPressed,
+    );
+  }
+
+  /// Command button
+  factory OnPressButton.pauseRecord({
+    required VoidCallback onPressed,
+  }) {
+    return OnPressButton(
+      icon: StreamSvgIcon.pause(color: Colors.white,),
       onPressed: onPressed,
     );
   }

@@ -288,6 +288,19 @@ class StreamSvgIcon extends StatelessWidget {
   }
 
   /// [StreamSvgIcon] type
+  factory StreamSvgIcon.pause({
+    double? size,
+    Color? color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_pause.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  /// [StreamSvgIcon] type
   factory StreamSvgIcon.penWrite({
     double? size,
     Color? color,
