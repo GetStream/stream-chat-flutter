@@ -1,18 +1,29 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:fftea/fftea.dart';
+import 'package:just_waveform/just_waveform.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// Docs
 class WaveBarsParser {
-  void parseWavebars(File audioFile) {
-    final audioData =
-        audioFile.readAsBytesSync().map((e) => (e - 128) / 128).toList();
+  
+  static List<double> randomBars() {
+    final random = Random();
+    return List<double>.generate(60, (_) => random.nextDouble());
+  }
 
-    final dataSize = audioData.length;
+  static Future<List<double>> parseBarsJustWave(String audioFilePath) async {
+    print('getTemporaryDirectory');
+    final outputFile = await getTemporaryDirectory().then(
+      (tempDirectory) => File('${tempDirectory.path}/waveform.wave}'),
+    );
 
-    //
-    // STFT(audioData.length)
-    //     .realFft(audioData)
-    //     .map((c) => c.abs() / dataSize)
-    //     .toList();
+    final waveValues = await JustWaveform.extract(
+      audioInFile: File(audioFilePath),
+      waveOutFile: outputFile,
+      zoom: const WaveformZoom.samplesPerPixel(1),
+    ).firstWhere((waveProgress) => waveProgress.progress == 1.0);
+
+    return waveValues.waveform?.data.map((e) => e.abs() / 32768).toList() ?? [];
   }
 }

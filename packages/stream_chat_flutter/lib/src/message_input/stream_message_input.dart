@@ -10,14 +10,13 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_waveform/just_waveform.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:record/record.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_player_attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/wavebars_parser.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
@@ -807,25 +806,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final path = await _audioRecorder.stop();
 
     if (path != null) {
-      //Todo: Maybe separate this logic to another class;
       final recordDuration = _stopwatch.elapsed;
-
-      final outputFile = await getTemporaryDirectory().then(
-        (tempDirectory) => File('${tempDirectory.path}/waveform.wave}'),
-      );
-
-      final waveValues = await JustWaveform.extract(
-        audioInFile: File(path),
-        waveOutFile: outputFile,
-        zoom: const WaveformZoom.pixelsPerSecond(4),
-      ).firstWhere((waveProgress) => waveProgress.progress == 1.0);
-
       final uri = Uri.parse(path);
       final file = File(uri.path);
-      final waveList =
-          waveValues.waveform?.data.map((e) => e.abs() / 32768).toList() ?? [];
 
-      print('waveList: $waveList');
+      final waveList = WaveBarsParser.randomBars();
 
       final attachment = await file.length().then(
             (fileSize) => Attachment(
@@ -846,6 +831,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             .channel
             .sendMessage(Message(attachments: [attachment]));
       } else {
+        print('adding attachment');
         _effectiveController.attachments += [attachment];
       }
     }
