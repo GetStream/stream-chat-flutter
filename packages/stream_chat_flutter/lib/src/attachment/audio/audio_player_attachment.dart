@@ -121,7 +121,7 @@ class AudioPlayerMessage extends StatefulWidget {
 /// Docs
 class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   var _seeking = false;
-  StreamSubscription<PlayerState>? stateSubscription;
+  StreamSubscription<PlayerState>? _stateSubscription;
 
   @override
   void initState() {
@@ -152,40 +152,48 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     super.dispose();
 
     widget.player.dispose();
-    stateSubscription?.cancel();
+    _stateSubscription?.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Duration?>(
-      stream: widget.player.durationStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Container(
-            padding: const EdgeInsets.all(8),
-            height: 56,
-            child: Row(
-              children: <Widget>[
-                _controlButton(),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _timer(widget.duration),
-                    _fileSizeWidget(widget.fileSize),
-                  ],
-                ),
-                _audioWaveSlider(widget.duration),
-                _speedAndActionButton(),
-              ],
-            ),
-          );
-        } else if (snapshot.hasError) {
-          print(snapshot.error);
-          return const Center(child: Text('Error!!'));
-        } else {
-          return const AudioLoadingMessage();
-        }
-      },
+    if (widget.duration != Duration.zero) {
+      return _content(widget.duration);
+    } else {
+      return StreamBuilder<Duration?>(
+        stream: widget.player.durationStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return _content(snapshot.data!);
+          } else if (snapshot.hasError) {
+            print(snapshot.error);
+            return const Center(child: Text('Error!!'));
+          } else {
+            return const AudioLoadingMessage();
+          }
+        },
+      );
+    }
+  }
+
+  Widget _content(Duration totalDuration) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      height: 56,
+      child: Row(
+        children: <Widget>[
+          _controlButton(),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _timer(totalDuration),
+              _fileSizeWidget(widget.fileSize),
+            ],
+          ),
+          _audioWaveSlider(totalDuration),
+          _speedAndActionButton(),
+        ],
+      ),
     );
   }
 
