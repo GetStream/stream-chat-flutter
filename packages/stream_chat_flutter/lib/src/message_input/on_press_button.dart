@@ -49,7 +49,17 @@ class OnPressButton extends StatelessWidget {
     required VoidCallback onPressed,
   }) {
     return OnPressButton(
-      icon: StreamSvgIcon.pause(color: Colors.white,),
+      icon: StreamSvgIcon.pause(),
+      onPressed: onPressed,
+    );
+  }
+
+  /// Command button
+  factory OnPressButton.deleteRecord({
+    required VoidCallback onPressed,
+  }) {
+    return OnPressButton(
+      icon: StreamSvgIcon.delete(),
       onPressed: onPressed,
     );
   }

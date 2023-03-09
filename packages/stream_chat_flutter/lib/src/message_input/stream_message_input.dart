@@ -21,7 +21,6 @@ import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/record/record_button.dart';
-import 'package:stream_chat_flutter/src/message_input/record/record_time_tracker.dart';
 import 'package:stream_chat_flutter/src/message_input/record/record_timer_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
@@ -616,33 +615,63 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
   }
 
-  Flex _buildTextField(BuildContext context) {
-    return Flex(
-      direction: Axis.horizontal,
-      children: <Widget>[
-        // Todo: Separate this list into a list for recording and one for message!!
-        if (!_commandEnabled &&
-            widget.actionsLocation == ActionsLocation.left &&
-            _recordingState == RecordState.stop)
-          _buildExpandActionsButton(context),
-        if (_recordingState == RecordState.record ||
-            _recordingState == RecordState.pause)
-          _buildRecordLeftInfo(),
-        if (_recordingState == RecordState.record)
-          Expanded(child: _buildPauseRecordButton()),
-        if (_recordingState == RecordState.pause)
-          Expanded(child: _buildResumeRecordButton()),
-        if (_recordingState == RecordState.stop) _buildTextInput(context),
-        if (!_commandEnabled &&
-            widget.actionsLocation == ActionsLocation.right &&
-            _recordingState == RecordState.stop)
-          _buildExpandActionsButton(context),
-        if (widget.sendButtonLocation == SendButtonLocation.outside &&
-            _recordingState == RecordState.stop)
-          _buildSendButton(context),
-        if (_recordingState != RecordState.stop) _buildConfirmRecordButton(),
-      ],
-    );
+  Widget _buildTextField(BuildContext context) {
+    if (_recordingState != RecordState.stop) {
+      return Column(
+        children: [
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: RecordTimer(recordState: _recordStateStream),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    _recordingState == RecordState.record
+                        ? 'Recording'
+                        : 'Paused',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Stack(
+            children: [
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: _buildCancelRecordButton(),
+              ),
+              Align(
+                alignment: AlignmentDirectional.topCenter,
+                child: _recordingState == RecordState.record
+                    ? _buildPauseRecordButton()
+                    : _buildResumeRecordButton(),
+              ),
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: _buildConfirmRecordButton(),
+              ),
+            ],
+          ),
+        ],
+      );
+    } else {
+      return Flex(
+        direction: Axis.horizontal,
+        children: <Widget>[
+          if (!_commandEnabled &&
+              widget.actionsLocation == ActionsLocation.left)
+            _buildExpandActionsButton(context),
+          _buildTextInput(context),
+          if (!_commandEnabled &&
+              widget.actionsLocation == ActionsLocation.right)
+            _buildExpandActionsButton(context),
+          if (widget.sendButtonLocation == SendButtonLocation.outside)
+            _buildSendButton(context),
+        ],
+      );
+    }
   }
 
   Widget _buildSendButton(BuildContext context) {
@@ -726,25 +755,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
   }
 
-  Widget _buildRecordLeftInfo() {
+  Widget _buildCancelRecordButton() {
     return Padding(
       padding: const EdgeInsets.all(8),
-      child: Row(
-        children: [
-          StreamSvgIcon.microphone(
-            size: 19,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: RecordTimer(recordState: _recordStateStream),
-          ),
-        ],
-      ),
+      child: _recordingState == RecordState.record
+          ? StreamSvgIcon.microphone(size: 19)
+          : OnPressButton.deleteRecord(onPressed: _cancelRecording),
     );
-  }
-
-  Widget _buildPauseRecordButton() {
-    return OnPressButton.pauseRecord(onPressed: _pauseRecording);
   }
 
   Widget _buildAttachmentButton(BuildContext context) {
@@ -778,6 +795,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Future<void> _pauseRecording() {
     _stopwatch.stop();
     return _audioRecorder.pause();
+  }
+
+  Future<void> _cancelRecording() {
+    return _audioRecorder.stop();
   }
 
   Future<void> _finishRecording(BuildContext context) async {
@@ -818,7 +839,17 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildResumeRecordButton() {
-    return RecordButton.resumeButton(onPressed: _record);
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: RecordButton.resumeButton(onPressed: _record),
+    );
+  }
+
+  Widget _buildPauseRecordButton() {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: OnPressButton.pauseRecord(onPressed: _pauseRecording),
+    );
   }
 
   /// Handle the platform-specific logic for selecting files.
