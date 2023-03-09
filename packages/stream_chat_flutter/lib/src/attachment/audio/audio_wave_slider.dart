@@ -2,8 +2,6 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
-const double _maxBarHeight = 255;
-
 /// Docs
 class AudioWaveSlider extends StatefulWidget {
   /// Docs
@@ -18,7 +16,7 @@ class AudioWaveSlider extends StatefulWidget {
   });
 
   /// Docs
-  final List<int> bars;
+  final List<double> bars;
 
   /// Docs
   final Stream<double> progressStream;
@@ -72,7 +70,7 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
                     colorLeft: Colors.lightBlueAccent,
                     colorRight: Colors.blueAccent,
                     progress: _progressToWidth(constraints, progress),
-                    barRatio: 0.6,
+                    barRatio: 1,
                   ),
                 ),
                 AnimatedPositioned(
@@ -128,7 +126,7 @@ class _AudioBarsPainter extends CustomPainter {
     required this.barRatio,
   });
 
-  final List<int> bars;
+  final List<double> bars;
   final Color colorRight;
   final Color colorLeft;
   final double progress;
@@ -140,8 +138,8 @@ class _AudioBarsPainter extends CustomPainter {
     return (progress > barCenter) ? colorRight : colorLeft;
   }
 
-  double _barHeight(int barValue, totalHeight) {
-    return max((barValue / _maxBarHeight) * totalHeight * barRatio, 4);
+  double _barHeight(double barValue, totalHeight) {
+    return max(barValue * totalHeight * barRatio, 2);
   }
 
   @override

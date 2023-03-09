@@ -10,6 +10,8 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_waveform/just_waveform.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:record/record.dart';
 import 'package:shimmer/shimmer.dart';
@@ -808,10 +810,22 @@ class StreamMessageInputState extends State<StreamMessageInput>
       //Todo: Maybe separate this logic to another class;
       final recordDuration = _stopwatch.elapsed;
 
+      final outputFile = await getTemporaryDirectory().then(
+        (tempDirectory) => File('${tempDirectory.path}/waveform.wave}'),
+      );
+
+      final waveValues = await JustWaveform.extract(
+        audioInFile: File(path),
+        waveOutFile: outputFile,
+        zoom: const WaveformZoom.pixelsPerSecond(4),
+      ).firstWhere((waveProgress) => waveProgress.progress == 1.0);
+
       final uri = Uri.parse(path);
       final file = File(uri.path);
+      final waveList =
+          waveValues.waveform?.data.map((e) => e.abs() / 32768).toList() ?? [];
 
-      print('duration: ${recordDuration.inSeconds}');
+      print('waveList: $waveList');
 
       final attachment = await file.length().then(
             (fileSize) => Attachment(
@@ -820,7 +834,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
                 size: fileSize,
                 path: uri.path,
               ),
-              extraData: {'duration': recordDuration.inMilliseconds},
+              extraData: {
+                'duration': recordDuration.inMilliseconds,
+                'waveList': waveList,
+              },
             ),
           );
 
@@ -1307,10 +1324,18 @@ class StreamMessageInputState extends State<StreamMessageInput>
         duration = Duration.zero;
       }
 
+      List<double> waveBars;
+      if (attachment.extraData['waveList'] != null) {
+        waveBars = attachment.extraData['waveList']! as List<double>;
+      } else {
+        waveBars =List.filled(60, 0);
+      }
+
       playerMessage = AudioPlayerMessage(
         player: player,
         audioFile: attachment.file,
         duration: duration,
+        waveBars: waveBars,
         index: 0,
         fileSize: attachment.fileSize,
         actionButton: _buildRemoveButton(attachment),

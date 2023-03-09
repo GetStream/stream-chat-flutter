@@ -19,6 +19,7 @@ dependencies:
   diacritic: ^0.1.3
   dio: ^4.0.6
   ezanimation: ^0.6.0
+  fftea: ^1.2.0+1
   file_picker: ^5.2.4
   file_selector: ^0.9.0
   flutter:

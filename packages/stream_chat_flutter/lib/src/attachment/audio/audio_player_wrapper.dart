@@ -51,9 +51,17 @@ class _AudioListPlayerState extends State<AudioListPlayer> {
         duration = Duration.zero;
       }
 
+      List<double> waveBars;
+      if (attachment.extraData['waveList'] != null) {
+        waveBars = attachment.extraData['waveList']! as List<double>;
+      } else {
+        waveBars = List.filled(60, 0);
+      }
+
       playerMessage = AudioPlayerMessage(
         player: _player,
         duration: duration,
+        waveBars: waveBars,
         index: index,
         audioFile: attachment.file,
       );

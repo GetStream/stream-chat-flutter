@@ -7,78 +7,6 @@ import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachmen
 import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_slider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-List<int> _audioBars() {
-  return [
-    50,
-    75,
-    100,
-    150,
-    200,
-    255,
-    200,
-    150,
-    100,
-    75,
-    50,
-    75,
-    100,
-    150,
-    200,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    255,
-    200,
-    150,
-    100,
-    75,
-    50,
-    75,
-    100,
-    150,
-    200,
-    255,
-    200,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    150,
-    100,
-    75,
-    50,
-    75,
-    100,
-    150,
-    200,
-    255,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    200,
-  ];
-}
-
 /// Docs
 class AudioPlayerMessage extends StatefulWidget {
   /// Docs
@@ -87,6 +15,7 @@ class AudioPlayerMessage extends StatefulWidget {
     required this.player,
     required this.audioFile,
     required this.duration,
+    required this.waveBars,
     this.index,
     this.fileSize,
     this.actionButton,
@@ -95,6 +24,9 @@ class AudioPlayerMessage extends StatefulWidget {
 
   /// Docs
   final AudioPlayer player;
+
+  /// Docs
+  final List<double> waveBars;
 
   /// Docs
   final AttachmentFile? audioFile;
@@ -316,7 +248,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: AudioWaveSlider(
-              bars: _audioBars(),
+              bars: widget.waveBars,
               progressStream: widget.player.positionStream.map((duration) =>
                   _sliderValue(duration, totalDuration, currentIndex)),
               onChangeStart: (val) {
