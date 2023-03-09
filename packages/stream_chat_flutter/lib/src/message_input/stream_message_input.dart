@@ -321,7 +321,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   /// Docs
-  late StreamSubscription<RecordState> recordStateSubscription;
+  late StreamSubscription<RecordState> _recordStateSubscription;
+  /// Docs
+  late Stream<RecordState> _recordStateStream;
 
   @override
   void initState() {
@@ -333,7 +335,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
       _initialiseEffectiveController();
     }
 
-    recordStateSubscription = _audioRecorder.onStateChanged().listen((state) {
+    _recordStateStream = _audioRecorder.onStateChanged();
+    _recordStateSubscription = _recordStateStream.listen((state) {
       setState(() {
         _recordingState = state;
       });
@@ -725,12 +728,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
       padding: const EdgeInsets.all(8),
       child: Row(
         children: [
-          StreamSvgIcon.microphone(size: 19,),
-          if (_recordingState == RecordState.record)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: RecordTimer(),
-            ),
+          StreamSvgIcon.microphone(
+            size: 19,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: RecordTimer(recordState: _recordStateStream),
+          ),
         ],
       ),
     );
@@ -1544,7 +1548,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _stopSlowMode();
     _onChangedDebounced.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    recordStateSubscription.cancel();
+    _recordStateSubscription.cancel();
     _audioRecorder.dispose();
 
     super.dispose();
