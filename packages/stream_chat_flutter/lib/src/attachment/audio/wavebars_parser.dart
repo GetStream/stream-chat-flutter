@@ -1,15 +1,13 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:fftea/fftea.dart';
 import 'package:just_waveform/just_waveform.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Docs
 class WaveBarsParser {
-  
-  static List<double> randomBars() {
+  static List<int> randomBars() {
     final random = Random();
-    return List<double>.generate(60, (_) => random.nextDouble());
+    return List<int>.generate(60, (_) => random.nextInt(100)).toList();
   }
 
   static Future<List<double>> parseBarsJustWave(String audioFilePath) async {

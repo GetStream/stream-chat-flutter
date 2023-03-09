@@ -1312,9 +1312,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
       List<double> waveBars;
       if (attachment.extraData['waveList'] != null) {
-        waveBars = attachment.extraData['waveList']! as List<double>;
+        waveBars = (attachment.extraData['waveList']! as List<int>)
+            .map((e) => e / 100)
+            .toList();
       } else {
-        waveBars =List.filled(60, 0);
+        waveBars = List.filled(60, 0);
       }
 
       playerMessage = AudioPlayerMessage(
