@@ -86,6 +86,7 @@ class AudioPlayerMessage extends StatefulWidget {
     super.key,
     required this.player,
     required this.audioFile,
+    required this.duration,
     this.index,
     this.fileSize,
     this.actionButton,
@@ -96,17 +97,21 @@ class AudioPlayerMessage extends StatefulWidget {
   final AudioPlayer player;
 
   /// Docs
+  final AttachmentFile? audioFile;
+
+  /// Docs
+  final Duration duration;
+
+  /// Docs
   final int? index;
 
   /// Docs
   final int? fileSize;
 
   /// Docs
-  final AttachmentFile? audioFile;
-
-  /// Docs
   final Widget? actionButton;
 
+  /// Docs
   final bool singleAudio;
 
   @override
@@ -165,11 +170,11 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _timer(snapshot.data!),
+                    _timer(widget.duration),
                     _fileSizeWidget(widget.fileSize),
                   ],
                 ),
-                _audioWaveSlider(snapshot.data!),
+                _audioWaveSlider(widget.duration),
                 _speedAndActionButton(),
               ],
             ),

@@ -43,8 +43,17 @@ class _AudioListPlayerState extends State<AudioListPlayer> {
     if (url == null) {
       playerMessage = const AudioLoadingMessage();
     } else {
+      Duration duration;
+      if (attachment.extraData['duration'] != null) {
+        duration =
+            Duration(milliseconds: attachment.extraData['duration']! as int);
+      } else {
+        duration = Duration.zero;
+      }
+
       playerMessage = AudioPlayerMessage(
         player: _player,
+        duration: duration,
         index: index,
         audioFile: attachment.file,
       );

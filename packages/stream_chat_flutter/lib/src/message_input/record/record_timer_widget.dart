@@ -52,10 +52,8 @@ class _RecordTimerState extends State<RecordTimer> {
   }
 
   void _addTime() {
-    final seconds = duration.inSeconds + 1;
-
     setState(() {
-      duration = Duration(seconds: seconds);
+      duration += const Duration(seconds: 1);
     });
   }
 

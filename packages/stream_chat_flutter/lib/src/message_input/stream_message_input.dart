@@ -17,11 +17,12 @@ import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_
 import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_player_attachment.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
-import 'package:stream_chat_flutter/src/message_input/on_hold_button.dart';
 import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
-import 'package:stream_chat_flutter/src/message_input/record_timer.dart';
+import 'package:stream_chat_flutter/src/message_input/record/record_button.dart';
+import 'package:stream_chat_flutter/src/message_input/record/record_time_tracker.dart';
+import 'package:stream_chat_flutter/src/message_input/record/record_timer_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
@@ -272,6 +273,7 @@ class StreamMessageInput extends StatefulWidget {
 class StreamMessageInputState extends State<StreamMessageInput>
     with RestorationMixin<StreamMessageInput>, WidgetsBindingObserver {
   final _audioRecorder = Record();
+  final _stopwatch = Stopwatch();
 
   bool get _commandEnabled => _effectiveController.message.command != null;
 
@@ -322,6 +324,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   /// Docs
   late StreamSubscription<RecordState> _recordStateSubscription;
+
   /// Docs
   late Stream<RecordState> _recordStateStream;
 
@@ -759,8 +762,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
       if (await _audioRecorder.hasPermission()) {
         if (_recordingState == RecordState.stop) {
           await _audioRecorder.start();
+          _stopwatch
+            ..reset()
+            ..start();
         } else if (_recordingState == RecordState.pause) {
           await _audioRecorder.resume();
+          _stopwatch.start();
         }
       }
     } catch (e) {
@@ -769,6 +776,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Future<void> _pauseRecording() {
+    _stopwatch.stop();
     return _audioRecorder.pause();
   }
 
@@ -776,8 +784,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final path = await _audioRecorder.stop();
 
     if (path != null) {
+      //Todo: Maybe separate this logic to another class;
+      final recordDuration = _stopwatch.elapsed;
+
       final uri = Uri.parse(path);
       final file = File(uri.path);
+
+      print('duration: ${recordDuration.inSeconds}');
 
       final attachment = await file.length().then(
             (fileSize) => Attachment(
@@ -786,6 +799,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                 size: fileSize,
                 path: uri.path,
               ),
+              extraData: {'duration': recordDuration.inMilliseconds},
             ),
           );
 
@@ -1254,9 +1268,18 @@ class StreamMessageInputState extends State<StreamMessageInput>
       final player = AudioPlayer()
         ..setAudioSource(AudioSource.file(audioFilePath));
 
+      Duration duration;
+      if (attachment.extraData['duration'] != null) {
+        duration =
+            Duration(milliseconds: attachment.extraData['duration']! as int);
+      } else {
+        duration = Duration.zero;
+      }
+
       playerMessage = AudioPlayerMessage(
         player: player,
         audioFile: attachment.file,
+        duration: duration,
         index: 0,
         fileSize: attachment.fileSize,
         actionButton: _buildRemoveButton(attachment),
