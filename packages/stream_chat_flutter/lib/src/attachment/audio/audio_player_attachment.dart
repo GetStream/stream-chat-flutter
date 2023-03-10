@@ -173,16 +173,17 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       stream: widget.player.playingStream,
       initialData: false,
       builder: (context, snapshot) {
+        Widget content;
+
         if (snapshot.data == true &&
             widget.player.currentIndex == widget.index) {
-          return StreamBuilder<double>(
+          content = StreamBuilder<double>(
             stream: widget.player.speedStream,
             builder: (context, snapshot) {
               final speed = snapshot.data ?? 1;
               return TextButton(
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  minimumSize: const Size(30, 30),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: Text(speed.toString()),
@@ -199,8 +200,10 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
             },
           );
         } else {
-          return widget.actionButton ?? const SizedBox.shrink();
+          content = StreamSvgIcon.filetypeAac();
         }
+
+        return SizedBox(width: 36, height: 36, child: content);
       },
     );
   }

@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 class WaveBarsParser {
   static List<int> randomBars() {
     final random = Random();
-    return List<int>.generate(60, (_) => random.nextInt(100)).toList();
+    return List<int>.generate(40, (_) => random.nextInt(100)).toList();
   }
 
   static Future<List<double>> parseBarsJustWave(String audioFilePath) async {
