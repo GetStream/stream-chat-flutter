@@ -444,6 +444,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   void _stopSlowMode() => _slowModeTimer?.cancel();
 
+  /// Docs
+  GlobalKey globalKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
@@ -838,7 +841,45 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildStartRecordButton() {
-    return RecordButton.startButton(onHold: _record);
+    return RecordButton.startButton(
+      onHold: _record,
+      onPressed: _showTapRecordHint,
+    );
+  }
+
+  void _showTapRecordHint() {
+    final renderBox = context.findRenderObject() as RenderBox?;
+    double positionY;
+
+    if (renderBox?.size.height != null) {
+      positionY = renderBox!.size.height;
+    } else {
+      positionY = 0;
+    }
+
+    final entry = OverlayEntry(builder: (context) {
+      return Positioned(
+        bottom: positionY,
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          color: Colors.grey,
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              'Hold 1 second to start recording.',
+              style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                    decoration: TextDecoration.none,
+                    color: Colors.white,
+                  ),
+            ),
+          ),
+        ),
+      );
+    });
+
+    Overlay.of(context).insert(entry);
+    Future.delayed(const Duration(seconds: 2)).then((value) => entry.remove());
   }
 
   Widget _buildResumeRecordButton() {

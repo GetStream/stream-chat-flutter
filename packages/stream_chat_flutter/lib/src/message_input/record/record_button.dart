@@ -14,10 +14,12 @@ class RecordButton extends StatefulWidget {
   /// Docs
   factory RecordButton.startButton({
     required VoidCallback onHold,
+    VoidCallback? onPressed,
   }) {
     return RecordButton(
       onHold: onHold,
       icon: Icons.mic,
+      onPressed: onPressed,
     );
   }
   /// Docs
@@ -46,38 +48,8 @@ class RecordButton extends StatefulWidget {
 class _RecordButtonState extends State<RecordButton> {
   double posX = 0;
 
-  //Todo: Fix the position to be above this button
-  void showOnPressHint() {
-    final entry = OverlayEntry(builder: (context) {
-      return Positioned(
-        top: MediaQuery.of(context).size.height * 0.8,
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          alignment: Alignment.center,
-          child: const Card(
-            color: Colors.red,
-            child: Padding(
-              padding: EdgeInsets.all(8),
-              child: Text(
-                'You need to hold to record!',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-        ),
-      );
-    });
-
-    Overlay.of(context).insert(entry);
-    Future.delayed(const Duration(seconds: 2)).then((value) => entry.remove());
-  }
-
   void onTap(BuildContext context) {
-    if (widget.onPressed != null) {
-      widget.onPressed!.call();
-    } else {
-      showOnPressHint();
-    }
+    widget.onPressed?.call();
   }
 
   @override
