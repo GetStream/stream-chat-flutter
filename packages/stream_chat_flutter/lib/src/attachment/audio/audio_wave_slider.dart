@@ -13,6 +13,8 @@ class AudioWaveSlider extends StatefulWidget {
     this.onChangeStart,
     this.onChanged,
     this.onChangeEnd,
+    this.customSliderButton,
+    this.customSliderButtonWidth,
   });
 
   /// Docs
@@ -33,6 +35,12 @@ class AudioWaveSlider extends StatefulWidget {
   ///Docs
   final Function()? onChangeEnd;
 
+  ///Docs
+  final Widget? customSliderButton;
+
+  ///Docs
+  final double? customSliderButtonWidth;
+
   @override
   _AudioWaveSliderState createState() => _AudioWaveSliderState();
 }
@@ -46,7 +54,11 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
   final _padding = 20;
 
   double _currentWidth() {
-    return _dragging ? _finalWidth : _initialWidth;
+    if (widget.customSliderButtonWidth != null) {
+      return widget.customSliderButtonWidth!;
+    } else {
+      return _dragging ? _finalWidth : _initialWidth;
+    }
   }
 
   double _currentHeight() {
@@ -67,15 +79,16 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
       builder: (context, snapshot) {
         final progress = snapshot.data ?? 0;
 
-        final sliderButton = Container(
-          width: _currentWidth(),
-          height: _currentHeight(),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(6),
-          ),
-        );
+        final sliderButton = widget.customSliderButton ??
+            Container(
+              width: _currentWidth(),
+              height: _currentHeight(),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(6),
+              ),
+            );
 
         return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
@@ -91,7 +104,6 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
                     progressPercentage: progress,
                     barRatio: 1,
                     padding: _padding,
-                    buttonWidth: _currentWidth(),
                   ),
                 ),
                 AnimatedPositioned(
@@ -142,7 +154,6 @@ class _AudioBarsPainter extends CustomPainter {
     required this.progressPercentage,
     required this.barRatio,
     required this.padding,
-    required this.buttonWidth,
   });
 
   final List<double> bars;
@@ -152,7 +163,6 @@ class _AudioBarsPainter extends CustomPainter {
   final spacingRatio = 0.005;
   final double barRatio;
   final int padding;
-  final double buttonWidth;
 
   /// barWidth should include spacing, not only the width of the bar.
   /// progressX should be the middle of the moving button of the slider, not
