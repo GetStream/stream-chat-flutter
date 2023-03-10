@@ -51,7 +51,7 @@ class _AudioListPlayerState extends State<AudioListPlayer> {
         duration = Duration.zero;
       }
 
-      List<double> waveBars;
+      List<double>? waveBars;
       if (attachment.extraData['waveList'] != null) {
         // print('waveList: ${attachment.extraData['waveList']}');
         waveBars = (attachment.extraData['waveList']! as List<dynamic>)
@@ -60,7 +60,7 @@ class _AudioListPlayerState extends State<AudioListPlayer> {
             .map((e) => e! / 100)
             .toList();
       } else {
-        waveBars = List.filled(60, 0);
+        waveBars = null;
       }
 
       playerMessage = AudioPlayerMessage(

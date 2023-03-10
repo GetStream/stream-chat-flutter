@@ -15,7 +15,7 @@ class AudioPlayerMessage extends StatefulWidget {
     required this.player,
     required this.audioFile,
     required this.duration,
-    required this.waveBars,
+    this.waveBars,
     this.index,
     this.fileSize,
     this.actionButton,
@@ -26,7 +26,7 @@ class AudioPlayerMessage extends StatefulWidget {
   final AudioPlayer player;
 
   /// Docs
-  final List<double> waveBars;
+  final List<double>? waveBars;
 
   /// Docs
   final AttachmentFile? audioFile;
@@ -250,7 +250,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: AudioWaveSlider(
-              bars: widget.waveBars,
+              bars: widget.waveBars ?? List<double>.filled(50, 0),
               progressStream: widget.player.positionStream.map((duration) =>
                   _sliderValue(duration, totalDuration, currentIndex)),
               onChangeStart: (val) {
