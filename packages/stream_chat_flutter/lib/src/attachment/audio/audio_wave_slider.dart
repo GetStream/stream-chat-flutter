@@ -39,15 +39,21 @@ class AudioWaveSlider extends StatefulWidget {
 
 class _AudioWaveSliderState extends State<AudioWaveSlider> {
   var _dragging = false;
-  final _initialSize = 15.0;
-  final _finalSize = 22.0;
+  final _initialWidth = 7.0;
+  final _finalWidth = 14.0;
+  final _initialHeight = 30.0;
+  final _finalHeight = 35.0;
 
-  double _currentSize() {
-    return _dragging ? _finalSize : _initialSize;
+  double _currentWidth() {
+    return _dragging ? _finalWidth : _initialWidth;
+  }
+
+  double _currentHeight() {
+    return _dragging ? _finalHeight : _initialHeight;
   }
 
   double _progressToWidth(BoxConstraints constraints, double progress) {
-    return constraints.maxWidth * progress;
+    return constraints.maxWidth * progress - _currentWidth() / 2;
   }
 
   @override
@@ -57,6 +63,16 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
       stream: widget.progressStream,
       builder: (context, snapshot) {
         final progress = snapshot.data ?? 0;
+
+        final sliderButton = Container(
+          width: _currentWidth(),
+          height: _currentHeight(),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(6),
+          ),
+        );
 
         return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
@@ -77,15 +93,7 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
                   duration: Duration.zero,
                   left: _progressToWidth(constraints, progress),
                   key: const ValueKey('item 1'),
-                  child: Container(
-                    width: _currentSize(),
-                    height: _currentSize(),
-                    // color: Colors.red,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.green,
-                    ),
-                  ),
+                  child: sliderButton,
                 ),
                 GestureDetector(
                   onHorizontalDragStart: (details) {
@@ -104,8 +112,12 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
                     });
                   },
                   onHorizontalDragUpdate: (details) {
-                    widget.onChanged
-                        ?.call(details.localPosition.dx / constraints.maxWidth);
+                    widget.onChanged?.call(
+                      min(
+                        max(details.localPosition.dx / constraints.maxWidth, 0),
+                        1,
+                      ),
+                    );
                   },
                 ),
               ],
