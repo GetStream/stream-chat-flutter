@@ -43,6 +43,7 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
   final _finalWidth = 14.0;
   final _initialHeight = 30.0;
   final _finalHeight = 35.0;
+  final _padding = 20;
 
   double _currentWidth() {
     return _dragging ? _finalWidth : _initialWidth;
@@ -53,7 +54,9 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
   }
 
   double _progressToWidth(BoxConstraints constraints, double progress) {
-    return constraints.maxWidth * progress - _currentWidth() / 2;
+    final availableWidth = constraints.maxWidth - _padding * 2;
+
+    return availableWidth * progress - _currentWidth() / 2 + _padding;
   }
 
   @override
@@ -85,8 +88,10 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
                     bars: widget.bars,
                     colorLeft: Colors.lightBlueAccent,
                     colorRight: Colors.blueAccent,
-                    progress: _progressToWidth(constraints, progress),
+                    progressPercentage: progress,
                     barRatio: 1,
+                    padding: _padding,
+                    buttonWidth: _currentWidth(),
                   ),
                 ),
                 AnimatedPositioned(
@@ -134,36 +139,50 @@ class _AudioBarsPainter extends CustomPainter {
     required this.bars,
     required this.colorLeft,
     required this.colorRight,
-    required this.progress,
+    required this.progressPercentage,
     required this.barRatio,
+    required this.padding,
+    required this.buttonWidth,
   });
 
   final List<double> bars;
   final Color colorRight;
   final Color colorLeft;
-  final double progress;
+  final double progressPercentage;
   final spacingRatio = 0.005;
   final double barRatio;
+  final int padding;
+  final double buttonWidth;
 
   /// barWidth should include spacing, not only the width of the bar.
-  Color _barColor(double barCenter, double progress) {
-    return (progress > barCenter) ? colorRight : colorLeft;
+  /// progressX should be the middle of the moving button of the slider, not
+  /// initial X position.
+  Color _barColor(double buttonCenter, double progressX) {
+    return (progressX > buttonCenter) ? colorRight : colorLeft;
   }
 
   double _barHeight(double barValue, totalHeight) {
     return max(barValue * totalHeight * barRatio, 2);
   }
 
+  double _progressToWidth(double totalWidth, double progress) {
+    final availableWidth = totalWidth;
+
+    return availableWidth * progress + padding;
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
-    final spacingWidth = size.width * spacingRatio;
-    final totalBarWidth = size.width - spacingWidth * (bars.length - 1);
+    final totalWidth = size.width - padding * 2;
+
+    final spacingWidth = totalWidth * spacingRatio;
+    final totalBarWidth = totalWidth - spacingWidth * (bars.length - 1);
     final barWidth = totalBarWidth / bars.length;
     final barY = size.height / 2;
 
     bars.forEachIndexed((i, barValue) {
       final barHeight = _barHeight(barValue, size.height);
-      final barX = i * (barWidth + spacingWidth) + barWidth / 2;
+      final barX = i * (barWidth + spacingWidth) + barWidth / 2 + padding;
 
       final rect = RRect.fromRectAndRadius(
         Rect.fromCenter(
@@ -174,7 +193,11 @@ class _AudioBarsPainter extends CustomPainter {
         const Radius.circular(50),
       );
 
-      final paint = Paint()..color = _barColor(barX + barWidth / 2, progress);
+      final paint = Paint()
+        ..color = _barColor(
+          barX + barWidth / 2,
+          _progressToWidth(totalWidth, progressPercentage),
+        );
       canvas.drawRRect(rect, paint);
     });
   }

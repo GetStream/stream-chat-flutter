@@ -59,14 +59,16 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   void initState() {
     super.initState();
 
-    void playerStateListener(PlayerState state) async {
-      if (state.processingState == ProcessingState.completed) {
-        await widget.player.stop();
-        await widget.player.seek(Duration.zero, index: 0);
+    if (widget.singleAudio) {
+      void playerStateListener(PlayerState state) async {
+        if (state.processingState == ProcessingState.completed) {
+          await widget.player.stop();
+          await widget.player.seek(Duration.zero, index: 0);
+        }
       }
-    }
 
-    widget.player.playerStateStream.listen(playerStateListener);
+      widget.player.playerStateStream.listen(playerStateListener);
+    }
   }
 
   /// Docs
