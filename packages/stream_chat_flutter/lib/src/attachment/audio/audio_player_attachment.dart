@@ -169,6 +169,10 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   }
 
   Widget _speedAndActionButton() {
+    if (widget.actionButton != null) {
+      return widget.actionButton!;
+    }
+
     return StreamBuilder<bool>(
       stream: widget.player.playingStream,
       initialData: false,
