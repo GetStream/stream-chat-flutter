@@ -806,10 +806,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Future<void> _finishRecording(BuildContext context) async {
+    final recordDuration = _stopwatch.elapsed;
     final path = await _audioRecorder.stop();
 
     if (path != null) {
-      final recordDuration = _stopwatch.elapsed;
       final uri = Uri.parse(path);
       final file = File(uri.path);
 
