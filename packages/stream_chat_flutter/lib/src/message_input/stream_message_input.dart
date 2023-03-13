@@ -631,9 +631,17 @@ class StreamMessageInputState extends State<StreamMessageInput>
                 child: RecordTimer(recordState: _recordStateStream),
               ),
               Expanded(
-                child: AudioWaveBars(
-                  recorder: _audioRecorder,
-                  recordState: _recordStateStream,
+                child: SizedBox(
+                  height: 30,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      right: 16,
+                    ),
+                    child: AudioWaveBars(
+                      recorder: _audioRecorder,
+                      recordState: _recordStateStream,
+                    ),
+                  ),
                 ),
               ),
             ],

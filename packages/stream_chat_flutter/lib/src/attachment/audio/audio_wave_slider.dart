@@ -102,7 +102,6 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
                     colorLeft: Colors.lightBlueAccent,
                     colorRight: Colors.blueAccent,
                     progressPercentage: progress,
-                    barRatio: 1,
                     padding: _padding,
                   ),
                 ),
@@ -149,19 +148,20 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
 class _AudioBarsPainter extends CustomPainter {
   _AudioBarsPainter({
     required this.bars,
-    required this.colorLeft,
-    required this.colorRight,
     required this.progressPercentage,
-    required this.barRatio,
-    required this.padding,
+    this.spacingRatio = 0.005,
+    this.colorLeft = Colors.blueAccent,
+    this.colorRight = Colors.lightBlue,
+    this.barHeightRatio = 1,
+    this.padding = 20,
   });
 
   final List<double> bars;
   final Color colorRight;
   final Color colorLeft;
   final double progressPercentage;
-  final spacingRatio = 0.005;
-  final double barRatio;
+  final double spacingRatio;
+  final double barHeightRatio;
   final int padding;
 
   /// barWidth should include spacing, not only the width of the bar.
@@ -172,7 +172,7 @@ class _AudioBarsPainter extends CustomPainter {
   }
 
   double _barHeight(double barValue, totalHeight) {
-    return max(barValue * totalHeight * barRatio, 2);
+    return max(barValue * totalHeight * barHeightRatio, 2);
   }
 
   double _progressToWidth(double totalWidth, double progress) {
@@ -212,6 +212,7 @@ class _AudioBarsPainter extends CustomPainter {
     });
   }
 
+  //Todo: Take a look in this method later.
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
