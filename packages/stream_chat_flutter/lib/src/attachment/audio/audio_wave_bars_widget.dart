@@ -63,7 +63,7 @@ class _AudioWaveBarsState extends State<AudioWaveBars> {
           stream: amplitudeStream,
           builder: (context, snapshot) {
             return CustomPaint(
-              size: Size(constraints.maxWidth, 25),
+              size: Size(constraints.maxWidth, constraints.maxHeight),
               painter: _AudioBarsPainter(
                 bars: snapshot.data ?? List.empty(),
                 inverse: true,
