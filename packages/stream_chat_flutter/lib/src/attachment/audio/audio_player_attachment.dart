@@ -185,12 +185,21 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
             stream: widget.player.speedStream,
             builder: (context, snapshot) {
               final speed = snapshot.data ?? 1;
-              return TextButton(
-                style: TextButton.styleFrom(
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                child: Text(speed.toString()),
+                child: Text(
+                  '${speed}',
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 12,
+                  ),
+                ),
                 onPressed: () {
                   setState(() {
                     if (speed == 2) {
