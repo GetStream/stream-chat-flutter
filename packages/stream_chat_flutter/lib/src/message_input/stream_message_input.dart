@@ -16,6 +16,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_player_attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_bars_widget.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/wave_bars_parser.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
@@ -30,8 +31,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
-
-const _amplitudeChangeMilliSecondsInterval = 700;
 
 /// Inactive state:
 ///
@@ -276,7 +275,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     with RestorationMixin<StreamMessageInput>, WidgetsBindingObserver {
   final _audioRecorder = Record();
   final _stopwatch = Stopwatch();
-  StreamSubscription<Amplitude>? _noiseSubscription;
 
   bool get _commandEnabled => _effectiveController.message.command != null;
 
@@ -633,12 +631,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
                 child: RecordTimer(recordState: _recordStateStream),
               ),
               Expanded(
-                child: Center(
-                  child: Text(
-                    _recordingState == RecordState.record
-                        ? 'Recording'
-                        : 'Paused',
-                  ),
+                child: AudioWaveBars(
+                  recorder: _audioRecorder,
+                  recordState: _recordStateStream,
                 ),
               ),
             ],
@@ -785,25 +780,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
     try {
       if (await _audioRecorder.hasPermission()) {
         if (_recordingState == RecordState.stop) {
-          _noiseSubscription = _audioRecorder
-              .onAmplitudeChanged(
-                const Duration(
-                  milliseconds: _amplitudeChangeMilliSecondsInterval,
-                ),
-              )
-              .listen(_onNoiseData);
           await _audioRecorder.start();
           _stopwatch
             ..reset()
             ..start();
         } else if (_recordingState == RecordState.pause) {
-          _noiseSubscription = _audioRecorder
-              .onAmplitudeChanged(
-                const Duration(
-                  milliseconds: _amplitudeChangeMilliSecondsInterval,
-                ),
-              )
-              .listen(_onNoiseData);
           await _audioRecorder.resume();
           _stopwatch.start();
         }
@@ -813,15 +794,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
   }
 
-  void _onNoiseData(Amplitude amplitude) {
-    print(
-      'Amplitude data: max: ${amplitude.max}, current: ${amplitude.current}',
-    );
-  }
-
   Future<void> _pauseRecording() {
     _stopwatch.stop();
-    _noiseSubscription?.cancel();
     return _audioRecorder.pause();
   }
 
@@ -832,7 +806,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Future<void> _finishRecording(BuildContext context) async {
     final recordDuration = _stopwatch.elapsed;
     final path = await _audioRecorder.stop();
-    _noiseSubscription?.cancel();
 
     if (path != null) {
       final uri = Uri.parse(path);
@@ -1683,7 +1656,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     WidgetsBinding.instance.removeObserver(this);
     _recordStateSubscription.cancel();
     _audioRecorder.dispose();
-    _noiseSubscription?.cancel();
 
     super.dispose();
   }

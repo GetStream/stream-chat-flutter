@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:just_waveform/just_waveform.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// Docs
+/// Todo: delete this class
 class WaveBarsParser {
   static List<int> randomBars() {
     final random = Random();
