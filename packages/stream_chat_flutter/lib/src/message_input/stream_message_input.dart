@@ -637,10 +637,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     padding: const EdgeInsets.only(
                       right: 16,
                     ),
-                    child: AudioWaveBars(
-                      recorder: _audioRecorder,
-                      recordState: _recordStateStream,
-                    ),
+                    child: AudioWaveBars(recorder: _audioRecorder),
                   ),
                 ),
               ),

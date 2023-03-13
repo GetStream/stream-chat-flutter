@@ -14,14 +14,10 @@ class AudioWaveBars extends StatefulWidget {
   const AudioWaveBars({
     super.key,
     required this.recorder,
-    required this.recordState,
   });
 
   /// Docs
   final Record recorder;
-
-  /// Docs
-  final Stream<RecordState> recordState;
 
   @override
   State<AudioWaveBars> createState() => _AudioWaveBarsState();
@@ -38,11 +34,13 @@ class _AudioWaveBarsState extends State<AudioWaveBars> {
 
     const duration = Duration(milliseconds: _amplitudeInterval);
     amplitudeStream = widget.recorder.onAmplitudeChanged(duration).map((event) {
+      print('amplitude: ${event.current}');
+
       if (barsQueue.length == _maxBars) {
         barsQueue.removeLast();
       }
 
-      barsQueue.addFirst(event.current);
+      barsQueue.addFirst((event.current + 70) / 70);
       return barsQueue;
     });
   }
@@ -61,13 +59,14 @@ class _AudioWaveBarsState extends State<AudioWaveBars> {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return StreamBuilder<List<double>>(
-          initialData: List<double>.filled(_maxBars, 0),
+          initialData: List.empty(),
           stream: amplitudeStream,
           builder: (context, snapshot) {
             return CustomPaint(
               size: Size(constraints.maxWidth, 25),
               painter: _AudioBarsPainter(
-                bars: snapshot.data ?? List<double>.filled(_maxBars, 0),
+                bars: snapshot.data ?? List.empty(),
+                inverse: true,
               ),
             );
           },
@@ -85,6 +84,7 @@ class _AudioBarsPainter extends CustomPainter {
     this.colorRight = Colors.grey,
     this.barHeightRatio = 1,
     this.spacingRatio = 0.005,
+    this.inverse = false,
   });
 
   final List<double> bars;
@@ -93,9 +93,10 @@ class _AudioBarsPainter extends CustomPainter {
   final Color colorLeft;
   final double barHeightRatio;
   final double spacingRatio;
+  final bool inverse;
 
   double _barHeight(double barValue, totalHeight) {
-    return max(barValue / 60 * totalHeight * barHeightRatio, 2);
+    return max(barValue * totalHeight * barHeightRatio, 2);
   }
 
   @override
@@ -108,11 +109,11 @@ class _AudioBarsPainter extends CustomPainter {
     final List<double> dataBars;
     var hasRemainingBars = false;
 
-    print('numberOfBars : $numberOfBars. bars.length: ${bars.length}');
-
     void drawBar(int i, double barValue, Color color) {
       final barHeight = _barHeight(barValue, size.height);
-      final barX = i * (barWidth + spacingWidth) + barWidth / 2;
+      final barX = inverse
+          ? totalWidth - i * (barWidth + spacingWidth) + barWidth / 2
+          : i * (barWidth + spacingWidth) + barWidth / 2;
 
       final rect = RRect.fromRectAndRadius(
         Rect.fromCenter(
@@ -137,12 +138,12 @@ class _AudioBarsPainter extends CustomPainter {
     }
 
     // Drawing bars with real data
-    dataBars.forEachIndexed((i, bar) => drawBar(i, bar.abs(), colorLeft));
+    dataBars.forEachIndexed((i, bar) => drawBar(i, bar, colorLeft));
 
     // Drawing remaining bars
     if (hasRemainingBars) {
       for (var i = bars.length - 1; i < numberOfBars; i++) {
-        drawBar(i, 60, colorRight);
+        drawBar(i, 0, colorRight);
       }
     }
   }
