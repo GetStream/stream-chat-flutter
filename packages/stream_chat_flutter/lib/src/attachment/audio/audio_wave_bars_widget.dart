@@ -43,13 +43,11 @@ class _AudioWaveBarsState extends State<AudioWaveBars> {
 
   @override
   Widget build(BuildContext context) {
-    // Todo: Evaluate if I should extract this to a controller class.
-
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return StreamBuilder<List<double>>(
           initialData: List.empty(),
-          stream: barsStream.asBroadcastStream(),
+          stream: barsStream,
           builder: (context, snapshot) {
             return CustomPaint(
               size: Size(constraints.maxWidth, constraints.maxHeight),
