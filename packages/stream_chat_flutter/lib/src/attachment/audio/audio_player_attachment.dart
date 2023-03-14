@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_slider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -173,52 +174,52 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       return widget.actionButton!;
     }
 
-    return StreamBuilder<bool>(
-      stream: widget.player.playingStream,
-      initialData: false,
-      builder: (context, snapshot) {
-        Widget content;
+    final showSpeed = widget.player.playingStream.flatMap((playing) {
+      return widget.player.currentIndexStream.map(
+        (index) => playing && index == widget.index,
+      );
+    }).flatMap((showSpeed) =>
+        widget.player.speedStream.map((speed) => showSpeed ? speed : -1.0));
 
-        if (snapshot.data == true &&
-            widget.player.currentIndex == widget.index) {
-          content = StreamBuilder<double>(
-            stream: widget.player.speedStream,
-            builder: (context, snapshot) {
-              final speed = snapshot.data ?? 1;
-              return ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Text(
-                  '${speed}',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 12,
-                  ),
-                ),
-                onPressed: () {
-                  setState(() {
-                    if (speed == 2) {
-                      widget.player.setSpeed(1);
-                    } else {
-                      widget.player.setSpeed(speed + 0.5);
-                    }
-                  });
-                },
-              );
+    final content = StreamBuilder<double>(
+      initialData: -1,
+      stream: showSpeed,
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data! > 0) {
+          final speed = snapshot.data!;
+
+          return ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: Text(
+              '${speed}x',
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 12,
+              ),
+            ),
+            onPressed: () {
+              setState(() {
+                if (speed == 2) {
+                  widget.player.setSpeed(1);
+                } else {
+                  widget.player.setSpeed(speed + 0.5);
+                }
+              });
             },
           );
         } else {
-          content = StreamSvgIcon.filetypeAac();
+          return StreamSvgIcon.filetypeAac();
         }
-
-        return SizedBox(width: 36, height: 36, child: content);
       },
     );
+
+    return SizedBox(width: 36, height: 36, child: content);
   }
 
   Widget _fileSizeWidget(int? fileSize) {
@@ -256,40 +257,39 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   }
 
   Widget _audioWaveSlider(Duration totalDuration) {
-    return StreamBuilder<int?>(
-      initialData: 0,
-      stream: widget.player.currentIndexStream,
-      builder: (context, snapshot) {
-        final currentIndex = snapshot.data;
+    final positionStream = widget.player.currentIndexStream.flatMap(
+      (index) => widget.player.positionStream.map((duration) => _sliderValue(
+            duration,
+            totalDuration,
+            index,
+          )),
+    );
 
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: AudioWaveSlider(
-              bars: widget.waveBars ?? List<double>.filled(50, 0),
-              progressStream: widget.player.positionStream.map((duration) =>
-                  _sliderValue(duration, totalDuration, currentIndex)),
-              onChangeStart: (val) {
-                setState(() {
-                  _seeking = true;
-                });
-              },
-              onChanged: (val) {
-                widget.player.pause();
-                widget.player.seek(
-                  totalDuration * val,
-                  index: widget.index ?? 0,
-                );
-              },
-              onChangeEnd: () {
-                setState(() {
-                  _seeking = false;
-                });
-              },
-            ),
-          ),
-        );
-      },
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: AudioWaveSlider(
+          bars: widget.waveBars ?? List<double>.filled(50, 0),
+          progressStream: positionStream,
+          onChangeStart: (val) {
+            setState(() {
+              _seeking = true;
+            });
+          },
+          onChanged: (val) {
+            widget.player.pause();
+            widget.player.seek(
+              totalDuration * val,
+              index: widget.index ?? 0,
+            );
+          },
+          onChangeEnd: () {
+            setState(() {
+              _seeking = false;
+            });
+          },
+        ),
+      ),
     );
   }
 
