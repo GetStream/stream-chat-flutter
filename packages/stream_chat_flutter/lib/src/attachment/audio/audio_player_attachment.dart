@@ -114,10 +114,10 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   Widget _content(Duration totalDuration) {
     return Container(
       padding: const EdgeInsets.all(8),
-      height: 56,
+      height: 60,
       child: Row(
         children: <Widget>[
-          SizedBox(width: 36, child: _controlButton()),
+          SizedBox(width: 36, height: 36, child: _controlButton()),
           Padding(
             padding: const EdgeInsets.only(left: 8),
             child: Column(
@@ -129,7 +129,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
             ),
           ),
           _audioWaveSlider(totalDuration),
-          _speedAndActionButton(),
+          SizedBox(width: 46, child: _speedAndActionButton()),
         ],
       ),
     );
@@ -188,7 +188,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
               backgroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(50),
               ),
             ),
             child: Text(
