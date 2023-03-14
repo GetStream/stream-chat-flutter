@@ -55,6 +55,7 @@ class AudioPlayerMessage extends StatefulWidget {
 class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   var _seeking = false;
   StreamSubscription<PlayerState>? _stateSubscription;
+  var _waitingForLoad = false;
 
   @override
   void initState() {
@@ -145,24 +146,28 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
         final color = playingThis ? Colors.red : Colors.blue;
         final icon = playingThis ? Icons.pause : Icons.play_arrow;
 
-        return ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            elevation: 2,
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(50),
+        if (!_waitingForLoad) {
+          return ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              elevation: 2,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50),
+              ),
             ),
-          ),
-          child: Icon(icon, color: color),
-          onPressed: () {
-            if (playingThis) {
-              _pause();
-            } else {
-              _play();
-            }
-          },
-        );
+            child: Icon(icon, color: color),
+            onPressed: () {
+              if (playingThis) {
+                _pause();
+              } else {
+                _play();
+              }
+            },
+          );
+        } else {
+          return const CircularProgressIndicator(strokeWidth: 3);
+        }
       },
     );
   }
@@ -214,7 +219,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       },
     );
 
-    return SizedBox(width: 50, height: 36, child: content);
+    return SizedBox(width: 44, height: 36, child: content);
   }
 
   Widget _fileSizeWidget(int? fileSize) {
@@ -306,13 +311,19 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   }
 
   /// Docs
-  Future<void> _play() {
-    if (widget.index == widget.player.currentIndex) {
-      return widget.player.play();
-    } else {
+  Future<void> _play() async {
+    if (widget.index != widget.player.currentIndex) {
       widget.player.seek(Duration.zero, index: widget.index);
-      return widget.player.play();
     }
+
+    setState(() {
+      // _waitingForLoad = true;
+    });
+    await widget.player.play();
+
+    setState(() {
+      _waitingForLoad = false;
+    });
   }
 
   /// Docs

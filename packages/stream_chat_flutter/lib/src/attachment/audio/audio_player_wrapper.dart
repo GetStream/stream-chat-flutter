@@ -53,7 +53,6 @@ class _AudioListPlayerState extends State<AudioListPlayer> {
 
       List<double>? waveBars;
       if (attachment.extraData['waveList'] != null) {
-        // print('waveList: ${attachment.extraData['waveList']}');
         waveBars = (attachment.extraData['waveList']! as List<dynamic>)
             .map((e) => double.tryParse(e.toString()))
             .whereNotNull()
@@ -123,7 +122,7 @@ class _AudioListPlayerState extends State<AudioListPlayer> {
     _player
       ..setShuffleModeEnabled(false)
       ..setLoopMode(LoopMode.off)
-      ..setAudioSource(audioSource);
+      ..setAudioSource(audioSource, preload: false);
 
     return Column(
       children: widget.attachments.mapIndexed(_createAudioPlayer).toList(),
