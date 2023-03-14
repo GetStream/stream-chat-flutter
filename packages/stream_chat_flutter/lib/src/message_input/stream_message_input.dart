@@ -17,7 +17,7 @@ import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_
 import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_player_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_bars_widget.dart';
-import 'package:stream_chat_flutter/src/attachment/audio/wave_bars_parser.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/wave_bars_normalizer.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
@@ -276,6 +276,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
   final _audioRecorder = Record();
   final _stopwatch = Stopwatch();
 
+  late WaveBarsNormalizer _waveBarsNormalizer;
+
   bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool _actionsShrunk = false;
@@ -345,6 +347,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
         _recordingState = state;
       });
     });
+
+    _waveBarsNormalizer = WaveBarsNormalizer(
+      barsStream: _audioRecorder.onAmplitudeChanged(
+        const Duration(milliseconds: 200),
+      ),
+    );
 
     _effectiveFocusNode.addListener(_focusNodeListener);
   }
@@ -816,7 +824,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       final uri = Uri.parse(path);
       final file = File(uri.path);
 
-      final waveList = WaveBarsParser.randomBars();
+      final waveList = _waveBarsNormalizer.normalizedBars();
 
       final attachment = await file.length().then(
             (fileSize) => Attachment(
@@ -1661,6 +1669,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     WidgetsBinding.instance.removeObserver(this);
     _recordStateSubscription.cancel();
     _audioRecorder.dispose();
+    _waveBarsNormalizer.dispose();
 
     super.dispose();
   }

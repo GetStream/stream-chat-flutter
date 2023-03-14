@@ -24,7 +24,6 @@ class AudioWaveBars extends StatefulWidget {
 }
 
 class _AudioWaveBarsState extends State<AudioWaveBars> {
-  StreamSubscription<Amplitude>? _noiseSubscription;
   final barsQueue = QueueList<double>(_maxBars);
   late Stream<List<double>> amplitudeStream;
 
@@ -43,13 +42,6 @@ class _AudioWaveBarsState extends State<AudioWaveBars> {
       barsQueue.addFirst((event.current + 70) / 70);
       return barsQueue;
     });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-
-    _noiseSubscription?.cancel();
   }
 
   @override
