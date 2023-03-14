@@ -133,38 +133,30 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   }
 
   Widget _controlButton() {
-    return StreamBuilder<int?>(
-      initialData: 0,
-      stream: widget.player.currentIndexStream,
+    return StreamBuilder<bool>(
+      initialData: false,
+      stream: _playingThisStream(),
       builder: (context, snapshot) {
-        final currentIndex = snapshot.data;
-        return StreamBuilder<bool>(
-          initialData: false,
-          stream: widget.player.playingStream,
-          builder: (context, snapshot) {
-            final playingCurrentAudio =
-                snapshot.data == true && currentIndex == widget.index;
+        final playingThis = snapshot.data == true;
 
-            final color = playingCurrentAudio ? Colors.red : Colors.blue;
-            final icon = playingCurrentAudio ? Icons.pause : Icons.play_arrow;
+        final color = playingThis ? Colors.red : Colors.blue;
+        final icon = playingThis ? Icons.pause : Icons.play_arrow;
 
-            final playButton = Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: GestureDetector(
-                onTap: () {
-                  if (playingCurrentAudio) {
-                    _pause();
-                  } else {
-                    _play();
-                  }
-                },
-                child: Icon(icon, color: color),
-              ),
-            );
-
-            return playButton;
-          },
+        final playButton = Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: GestureDetector(
+            onTap: () {
+              if (playingThis) {
+                _pause();
+              } else {
+                _play();
+              }
+            },
+            child: Icon(icon, color: color),
+          ),
         );
+
+        return playButton;
       },
     );
   }
@@ -174,11 +166,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       return widget.actionButton!;
     }
 
-    final showSpeed = widget.player.playingStream.flatMap((playing) {
-      return widget.player.currentIndexStream.map(
-        (index) => playing && index == widget.index,
-      );
-    }).flatMap((showSpeed) =>
+    final showSpeed = _playingThisStream().flatMap((showSpeed) =>
         widget.player.speedStream.map((speed) => showSpeed ? speed : -1.0));
 
     final content = StreamBuilder<double>(
@@ -303,6 +291,14 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     } else {
       return min(duration.inMicroseconds / totalDuration.inMicroseconds, 1);
     }
+  }
+
+  Stream<bool> _playingThisStream() {
+    return widget.player.playingStream.flatMap((playing) {
+      return widget.player.currentIndexStream.map(
+        (index) => playing && index == widget.index,
+      );
+    });
   }
 
   /// Docs
