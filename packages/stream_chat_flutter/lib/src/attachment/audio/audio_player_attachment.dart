@@ -129,7 +129,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
             ),
           ),
           _audioWaveSlider(totalDuration),
-          SizedBox(width: 46, child: _speedAndActionButton()),
+          _speedAndActionButton(),
         ],
       ),
     );
@@ -214,7 +214,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       },
     );
 
-    return SizedBox(width: 36, height: 36, child: content);
+    return SizedBox(width: 50, height: 36, child: content);
   }
 
   Widget _fileSizeWidget(int? fileSize) {
