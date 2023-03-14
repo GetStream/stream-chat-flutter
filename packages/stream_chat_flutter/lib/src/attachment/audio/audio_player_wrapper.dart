@@ -55,9 +55,8 @@ class _AudioListPlayerState extends State<AudioListPlayer> {
       if (attachment.extraData['waveList'] != null) {
         // print('waveList: ${attachment.extraData['waveList']}');
         waveBars = (attachment.extraData['waveList']! as List<dynamic>)
-            .map((e) => int.tryParse(e.toString()))
-            .where((e) => e != null)
-            .map((e) => e! / 100)
+            .map((e) => double.tryParse(e.toString()))
+            .whereNotNull()
             .toList();
       } else {
         waveBars = null;
