@@ -5,15 +5,40 @@ void main() {
   group(
     'List normalization test',
     () {
-      test('Final size of list is should be close to approximation1', () async {
+      test('Final size of list should be correct - shrink1', () async {
         const listSize = 60;
         final inputList = List<double>.filled(10245, 0);
 
         final result = ListNormalization.normalizeList(inputList, listSize);
 
-        final error = result.length - listSize;
+        expect(result.length, listSize);
+      });
 
-        expect(error, lessThanOrEqualTo(3));
+      test('Final size of list should be correct2 - shrink2', () async {
+        const listSize = 60;
+        final inputList = List<double>.filled(80, 0);
+
+        final result = ListNormalization.normalizeList(inputList, listSize);
+
+        expect(result.length, listSize);
+      });
+
+      test('Final size of list should be correct2 - expand1', () async {
+        const listSize = 10245;
+        final inputList = List<double>.filled(60, 0);
+
+        final result = ListNormalization.normalizeList(inputList, listSize);
+
+        expect(result.length, listSize);
+      });
+
+      test('Final size of list should be correct2 - expand2', () async {
+        const listSize = 80;
+        final inputList = List<double>.filled(60, 0);
+
+        final result = ListNormalization.normalizeList(inputList, listSize);
+
+        expect(result.length, listSize);
       });
 
       test('Simple median should be correct1', () async {

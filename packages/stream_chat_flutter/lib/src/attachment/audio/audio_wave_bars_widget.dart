@@ -33,8 +33,6 @@ class _AudioWaveBarsState extends State<AudioWaveBars> {
 
     const duration = Duration(milliseconds: _amplitudeInterval);
     amplitudeStream = widget.recorder.onAmplitudeChanged(duration).map((event) {
-      print('amplitude: ${event.current}');
-
       if (barsQueue.length == _maxBars) {
         barsQueue.removeLast();
       }
