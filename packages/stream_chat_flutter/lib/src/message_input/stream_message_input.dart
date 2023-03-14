@@ -833,7 +833,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       final uri = Uri.parse(path);
       final file = File(uri.path);
 
-      final waveList = _waveBarsNormalizer.normalizedBars(50);
+      final waveList = _waveBarsNormalizer.normalizedBars(30);
       _waveBarsNormalizer.reset();
 
       final attachment = await file.length().then(

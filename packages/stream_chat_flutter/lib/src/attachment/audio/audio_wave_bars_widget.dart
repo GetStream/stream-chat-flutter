@@ -5,7 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 
-const _amplitudeInterval = 100;
+const _maxAmplitude = 50;
 const _maxBars = 70;
 
 /// Docs
@@ -36,7 +36,7 @@ class _AudioWaveBarsState extends State<AudioWaveBars> {
         barsQueue.removeLast();
       }
 
-      barsQueue.addFirst((amplitude.current + 70) / 70);
+      barsQueue.addFirst((amplitude.current + _maxAmplitude) / _maxAmplitude);
       return barsQueue;
     });
   }
@@ -72,7 +72,7 @@ class _AudioBarsPainter extends CustomPainter {
     this.colorLeft = Colors.blueAccent,
     this.colorRight = Colors.grey,
     this.barHeightRatio = 1,
-    this.spacingRatio = 0.005,
+    this.spacingRatio = 0.007,
     this.inverse = false,
   });
 

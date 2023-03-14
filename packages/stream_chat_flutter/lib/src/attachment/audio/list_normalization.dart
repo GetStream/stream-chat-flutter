@@ -1,14 +1,14 @@
-import 'dart:collection';
+
 import 'dart:math';
 
 /// Docs
 class ListNormalization {
   /// A LinkedList fits this problem very well. We should evaluate its
   /// performance here.
-  static List<double> normalizeBarsWidth(List<double> inputList, int listSize) {
+  static List<double> shrinkList(List<double> inputList, int listSize) {
     final resultList = List<double>.empty(growable: true);
 
-    final pace = (inputList.length / listSize).ceil();
+    final pace = (inputList.length / listSize).round();
 
     for (var i = 0; i <= inputList.length - pace; i += pace) {
       final median =
@@ -25,10 +25,6 @@ class ListNormalization {
           lastListSize;
 
       resultList.add(lastBar);
-    }
-
-    if (resultList.length < listSize) {
-      return _expandList(resultList, listSize);
     }
 
     return resultList;
@@ -104,12 +100,13 @@ class ListNormalization {
         : inputList;
 
     print('positive list: $positiveList');
-    //Now we take the median of the elements
-    final widthNormalized = normalizeBarsWidth(
-      positiveList,
-      listSize,
-    );
 
+    //Now we take the median of the elements
+    final widthNormalized = listSize > inputList.length
+        ? _expandList(positiveList, listSize)
+        : shrinkList(positiveList, listSize);
+
+    print('median list: $widthNormalized');
     //At last the normalize the height of the bars. The result of this method
     //will be a list of bars a bit bigger.
     final normalized = _normalizeBarsHeight(widthNormalized);
