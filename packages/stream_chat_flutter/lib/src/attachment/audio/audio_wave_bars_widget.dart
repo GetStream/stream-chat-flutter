@@ -13,11 +13,11 @@ class AudioWaveBars extends StatefulWidget {
   /// Docs
   const AudioWaveBars({
     super.key,
-    required this.recorder,
+    required this.amplitudeStream,
   });
 
   /// Docs
-  final Record recorder;
+  final Stream<Amplitude> amplitudeStream;
 
   @override
   State<AudioWaveBars> createState() => _AudioWaveBarsState();
@@ -25,19 +25,18 @@ class AudioWaveBars extends StatefulWidget {
 
 class _AudioWaveBarsState extends State<AudioWaveBars> {
   final barsQueue = QueueList<double>(_maxBars);
-  late Stream<List<double>> amplitudeStream;
+  late Stream<List<double>> barsStream;
 
   @override
   void initState() {
     super.initState();
 
-    const duration = Duration(milliseconds: _amplitudeInterval);
-    amplitudeStream = widget.recorder.onAmplitudeChanged(duration).map((event) {
+    barsStream = widget.amplitudeStream.map((amplitude) {
       if (barsQueue.length == _maxBars) {
         barsQueue.removeLast();
       }
 
-      barsQueue.addFirst((event.current + 70) / 70);
+      barsQueue.addFirst((amplitude.current + 70) / 70);
       return barsQueue;
     });
   }
@@ -50,7 +49,7 @@ class _AudioWaveBarsState extends State<AudioWaveBars> {
       builder: (BuildContext context, BoxConstraints constraints) {
         return StreamBuilder<List<double>>(
           initialData: List.empty(),
-          stream: amplitudeStream,
+          stream: barsStream.asBroadcastStream(),
           builder: (context, snapshot) {
             return CustomPaint(
               size: Size(constraints.maxWidth, constraints.maxHeight),

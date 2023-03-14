@@ -12,6 +12,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:record/record.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachment.dart';
@@ -275,6 +276,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     with RestorationMixin<StreamMessageInput>, WidgetsBindingObserver {
   final _audioRecorder = Record();
   final _stopwatch = Stopwatch();
+  final _amplitudeController = BehaviorSubject<Amplitude>();
 
   late WaveBarsNormalizer _waveBarsNormalizer;
 
@@ -348,10 +350,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
       });
     });
 
+    _amplitudeController.sink.addStream(_audioRecorder.onAmplitudeChanged(
+      const Duration(milliseconds: 150),
+    ));
+
     _waveBarsNormalizer = WaveBarsNormalizer(
-      barsStream: _audioRecorder.onAmplitudeChanged(
-        const Duration(milliseconds: 200),
-      ),
+      barsStream: _amplitudeController.stream,
     );
 
     _effectiveFocusNode.addListener(_focusNodeListener);
@@ -645,7 +649,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     padding: const EdgeInsets.only(
                       right: 16,
                     ),
-                    child: AudioWaveBars(recorder: _audioRecorder),
+                    child: AudioWaveBars(
+                      amplitudeStream: _amplitudeController.stream,
+                    ),
                   ),
                 ),
               ),
@@ -797,6 +803,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
           _stopwatch
             ..reset()
             ..start();
+
+          _waveBarsNormalizer.start();
         } else if (_recordingState == RecordState.pause) {
           await _audioRecorder.resume();
           _stopwatch.start();
@@ -813,6 +821,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Future<void> _cancelRecording() {
+    _waveBarsNormalizer.reset();
     return _audioRecorder.stop();
   }
 
@@ -824,7 +833,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
       final uri = Uri.parse(path);
       final file = File(uri.path);
 
-      final waveList = _waveBarsNormalizer.normalizedBars();
+      final waveList = _waveBarsNormalizer.normalizedBars(50);
+      _waveBarsNormalizer.reset();
 
       final attachment = await file.length().then(
             (fileSize) => Attachment(
@@ -1364,9 +1374,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
       List<double> waveBars;
       if (attachment.extraData['waveList'] != null) {
-        waveBars = (attachment.extraData['waveList']! as List<int>)
-            .map((e) => e / 100)
-            .toList();
+        waveBars = attachment.extraData['waveList']! as List<double>;
       } else {
         waveBars = List.filled(60, 0);
       }
@@ -1670,6 +1678,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _recordStateSubscription.cancel();
     _audioRecorder.dispose();
     _waveBarsNormalizer.dispose();
+    _amplitudeController.close();
 
     super.dispose();
   }
