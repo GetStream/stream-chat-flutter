@@ -117,13 +117,16 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       height: 56,
       child: Row(
         children: <Widget>[
-          _controlButton(),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _timer(totalDuration),
-              _fileSizeWidget(widget.fileSize),
-            ],
+          SizedBox(width: 36, child: _controlButton()),
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _timer(totalDuration),
+                _fileSizeWidget(widget.fileSize),
+              ],
+            ),
           ),
           _audioWaveSlider(totalDuration),
           _speedAndActionButton(),
@@ -142,21 +145,24 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
         final color = playingThis ? Colors.red : Colors.blue;
         final icon = playingThis ? Icons.pause : Icons.play_arrow;
 
-        final playButton = Padding(
-          padding: const EdgeInsets.only(right: 4),
-          child: GestureDetector(
-            onTap: () {
-              if (playingThis) {
-                _pause();
-              } else {
-                _play();
-              }
-            },
-            child: Icon(icon, color: color),
+        return ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            elevation: 2,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(50),
+            ),
           ),
+          child: Icon(icon, color: color),
+          onPressed: () {
+            if (playingThis) {
+              _pause();
+            } else {
+              _play();
+            }
+          },
         );
-
-        return playButton;
       },
     );
   }
@@ -178,6 +184,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
 
           return ElevatedButton(
             style: ElevatedButton.styleFrom(
+              elevation: 2,
               backgroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               shape: RoundedRectangleBorder(
@@ -254,29 +261,26 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     );
 
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: AudioWaveSlider(
-          bars: widget.waveBars ?? List<double>.filled(50, 0),
-          progressStream: positionStream,
-          onChangeStart: (val) {
-            setState(() {
-              _seeking = true;
-            });
-          },
-          onChanged: (val) {
-            widget.player.pause();
-            widget.player.seek(
-              totalDuration * val,
-              index: widget.index ?? 0,
-            );
-          },
-          onChangeEnd: () {
-            setState(() {
-              _seeking = false;
-            });
-          },
-        ),
+      child: AudioWaveSlider(
+        bars: widget.waveBars ?? List<double>.filled(50, 0),
+        progressStream: positionStream,
+        onChangeStart: (val) {
+          setState(() {
+            _seeking = true;
+          });
+        },
+        onChanged: (val) {
+          widget.player.pause();
+          widget.player.seek(
+            totalDuration * val,
+            index: widget.index ?? 0,
+          );
+        },
+        onChangeEnd: () {
+          setState(() {
+            _seeking = false;
+          });
+        },
       ),
     );
   }

@@ -51,7 +51,7 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
   final _finalWidth = 14.0;
   final _initialHeight = 30.0;
   final _finalHeight = 35.0;
-  final _padding = 20;
+  final _padding = 10;
 
   double _currentWidth() {
     if (widget.customSliderButtonWidth != null) {
