@@ -344,11 +344,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
 
     _recordStateStream = _audioRecorder.onStateChanged();
-    _recordStateSubscription = _recordStateStream.listen((state) {
-      setState(() {
-        _recordingState = state;
-      });
-    });
+    // _recordStateSubscription = _recordStateStream.listen((state) {
+    //   setState(() {
+    //     _recordingState = state;
+    //   });
+    // });
 
     _amplitudeController.sink.addStream(_audioRecorder.onAmplitudeChanged(
       const Duration(milliseconds: 150),
@@ -1680,7 +1680,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _stopSlowMode();
     _onChangedDebounced.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    _recordStateSubscription.cancel();
+    // _recordStateSubscription.cancel();
     _waveBarsNormalizer.dispose();
     _audioRecorder.dispose().then((value) => _amplitudeController.close);
 
