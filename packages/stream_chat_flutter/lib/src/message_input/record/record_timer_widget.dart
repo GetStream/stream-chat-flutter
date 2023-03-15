@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Docs
 class RecordTimer extends StatefulWidget {
@@ -57,15 +58,11 @@ class _RecordTimerState extends State<RecordTimer> {
     });
   }
 
-  String _twoDigits(int value) {
-    return value.remainder(60).toString().padLeft(2, '0');
-  }
-
   @override
   Widget build(BuildContext context) {
-    final minutes = _twoDigits(duration.inMinutes);
-    final seconds = _twoDigits(duration.inSeconds);
-
-    return Text('$minutes:$seconds', style: const TextStyle(fontSize: 18));
+    return Text(
+      duration.toMinutesAndSeconds(),
+      style: const TextStyle(fontSize: 18),
+    );
   }
 }

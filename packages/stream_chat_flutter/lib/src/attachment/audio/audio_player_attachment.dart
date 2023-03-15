@@ -242,15 +242,10 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
                 (widget.player.playing ||
                     snapshot.data!.inMilliseconds > 0 ||
                     _seeking))) {
-          final minutes = _twoDigits(snapshot.data!.inMinutes);
-          final seconds = _twoDigits(snapshot.data!.inSeconds);
 
-          return Text('$minutes:$seconds');
+          return Text(snapshot.data!.toMinutesAndSeconds());
         } else {
-          final minutes = _twoDigits(totalDuration.inMinutes);
-          final seconds = _twoDigits(totalDuration.inSeconds);
-
-          return Text('$minutes:$seconds');
+          return Text(totalDuration.toMinutesAndSeconds());
         }
       },
     );
@@ -317,8 +312,9 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     }
 
     setState(() {
-      // _waitingForLoad = true;
+      _waitingForLoad = true;
     });
+
     await widget.player.play();
 
     setState(() {
@@ -329,9 +325,5 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   /// Docs
   Future<void> _pause() {
     return widget.player.pause();
-  }
-
-  String _twoDigits(int value) {
-    return value.remainder(60).toString().padLeft(2, '0');
   }
 }

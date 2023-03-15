@@ -58,6 +58,7 @@ class _QuotedMessageState extends State<QuotedMessage> {
       messageTheme: isMyMessage
           ? chatThemeData.otherMessageTheme
           : chatThemeData.ownMessageTheme,
+      chatThemeData: chatThemeData,
       reverse: widget.reverse,
       padding: EdgeInsets.only(
         right: 8,

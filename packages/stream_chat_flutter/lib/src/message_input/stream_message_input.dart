@@ -1260,6 +1260,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       reverse: true,
       showBorder: !containsUrl,
       message: _effectiveController.message.quotedMessage!,
+      chatThemeData: _streamChatTheme,
       messageTheme: _streamChatTheme.otherMessageTheme,
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       onQuotedMessageClear: widget.onQuotedMessageCleared,

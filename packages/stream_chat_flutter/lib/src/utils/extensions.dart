@@ -24,19 +24,19 @@ extension IntExtension on int {
     final suffix = suffixes[i];
     return '$numberValue $suffix';
   }
+}
 
-// public fun convertFileSizeByteCount(bytes: Long): String {
-// return when {
-// bytes <= 0 -> "0 B"
-// bytes < BYTE_UNIT_CONVERSION_FACTOR -> "$bytes B"
-// else -> {
-// val exp = (ln(bytes.toDouble()) / ln(BYTE_UNIT_CONVERSION_FACTOR.toDouble())).toInt()
-// val pre = "KMGTPE"[exp - 1].toString()
-// val df = DecimalFormat("###.##")
-// df.format(bytes / BYTE_UNIT_CONVERSION_FACTOR.toDouble().pow(exp.toDouble())) + " ${pre}B"
-// }
-// }
-// }
+/// Durations extensions.
+extension DurationExtension on Duration {
+
+  /// Transforms Duration to a minutes and seconds time. Like: 04:13.
+  String toMinutesAndSeconds() {
+    final minutes = inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = inSeconds.remainder(60).toString().padLeft(2, '0');
+
+    return '$minutes:$seconds';
+  }
+
 }
 
 /// String extension
