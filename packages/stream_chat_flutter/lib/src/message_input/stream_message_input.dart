@@ -277,6 +277,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   final _audioRecorder = Record();
   final _stopwatch = Stopwatch();
   final _amplitudeController = BehaviorSubject<Amplitude>();
+  late StreamSink<Amplitude> _amplitudeSink;
 
   late WaveBarsNormalizer _waveBarsNormalizer;
 
@@ -344,13 +345,15 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
 
     _recordStateStream = _audioRecorder.onStateChanged();
-    // _recordStateSubscription = _recordStateStream.listen((state) {
-    //   setState(() {
-    //     _recordingState = state;
-    //   });
-    // });
+    _recordStateSubscription = _recordStateStream.listen((state) {
+      setState(() {
+        _recordingState = state;
+      });
+    });
 
-    _amplitudeController.sink.addStream(_audioRecorder.onAmplitudeChanged(
+    _amplitudeSink = _amplitudeController.sink;
+
+    _amplitudeSink.addStream(_audioRecorder.onAmplitudeChanged(
       const Duration(milliseconds: 150),
     ));
 
@@ -780,7 +783,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     return Padding(
       padding: const EdgeInsets.all(8),
       child: _recordingState == RecordState.record
-          ? StreamSvgIcon.microphone(size: 19)
+          ? StreamSvgIcon.microphone(color: Colors.red)
           : OnPressButton.deleteRecord(onPressed: _cancelRecording),
     );
   }
@@ -1680,9 +1683,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _stopSlowMode();
     _onChangedDebounced.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    // _recordStateSubscription.cancel();
+    _recordStateSubscription.cancel();
     _waveBarsNormalizer.dispose();
-    _audioRecorder.dispose().then((value) => _amplitudeController.close);
+    _audioRecorder.dispose().then((value) {
+      _amplitudeSink.close();
+      _amplitudeController.close();
+    });
 
     super.dispose();
   }

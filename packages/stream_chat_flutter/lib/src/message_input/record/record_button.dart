@@ -18,7 +18,7 @@ class RecordButton extends StatefulWidget {
   }) {
     return RecordButton(
       onHold: onHold,
-      icon: Icons.mic,
+      icon: StreamSvgIcon.microphone(size: 20),
       onPressed: onPressed,
     );
   }
@@ -28,7 +28,7 @@ class RecordButton extends StatefulWidget {
   }) {
     return RecordButton(
       onPressed: onPressed,
-      icon: Icons.mic,
+      icon: StreamSvgIcon.microphone(color: Colors.red,),
     );
   }
 
@@ -39,7 +39,7 @@ class RecordButton extends StatefulWidget {
   final VoidCallback? onPressed;
 
   /// Docs
-  final IconData icon;
+  final Widget icon;
 
   @override
   State<RecordButton> createState() => _RecordButtonState();
@@ -54,17 +54,12 @@ class _RecordButtonState extends State<RecordButton> {
 
   @override
   Widget build(BuildContext context) {
-    final color = StreamChatTheme.of(context).primaryIconTheme.color;
-
     return GestureDetector(
       onLongPress: () {
         widget.onHold?.call();
       },
       child: IconButton(
-        icon: Icon(
-          widget.icon,
-          color: color,
-        ),
+        icon: widget.icon,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints.tightFor(
           height: 24,

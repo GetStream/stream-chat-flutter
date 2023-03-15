@@ -151,7 +151,7 @@ class _AudioBarsPainter extends CustomPainter {
     required this.progressPercentage,
     this.spacingRatio = 0.01,
     this.colorLeft = Colors.blueAccent,
-    this.colorRight = Colors.lightBlue,
+    this.colorRight = Colors.grey,
     this.barHeightRatio = 1,
     this.padding = 20,
   });

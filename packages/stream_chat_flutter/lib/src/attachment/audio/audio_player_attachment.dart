@@ -113,12 +113,18 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   }
 
   Widget _content(Duration totalDuration) {
+    final streamChatThemeData = StreamChatTheme.of(context).primaryIconTheme;
+
     return Container(
       padding: const EdgeInsets.all(8),
       height: 60,
       child: Row(
         children: <Widget>[
-          SizedBox(width: 36, height: 36, child: _controlButton()),
+          SizedBox(
+            width: 36,
+            height: 36,
+            child: _controlButton(streamChatThemeData),
+          ),
           Padding(
             padding: const EdgeInsets.only(left: 8),
             child: Column(
@@ -136,14 +142,13 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     );
   }
 
-  Widget _controlButton() {
+  Widget _controlButton(IconThemeData iconTheme) {
     return StreamBuilder<bool>(
       initialData: false,
       stream: _playingThisStream(),
       builder: (context, snapshot) {
         final playingThis = snapshot.data == true;
 
-        final color = playingThis ? Colors.red : Colors.blue;
         final icon = playingThis ? Icons.pause : Icons.play_arrow;
 
         if (!_waitingForLoad) {
@@ -156,7 +161,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
                 borderRadius: BorderRadius.circular(50),
               ),
             ),
-            child: Icon(icon, color: color),
+            child: Icon(icon, color: Colors.black),
             onPressed: () {
               if (playingThis) {
                 _pause();
@@ -242,7 +247,6 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
                 (widget.player.playing ||
                     snapshot.data!.inMilliseconds > 0 ||
                     _seeking))) {
-
           return Text(snapshot.data!.toMinutesAndSeconds());
         } else {
           return Text(totalDuration.toMinutesAndSeconds());
@@ -311,15 +315,12 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
       widget.player.seek(Duration.zero, index: widget.index);
     }
 
-    setState(() {
-      _waitingForLoad = true;
-    });
+    // Todo: fix loading state
+    // setState(() {
+    //   _waitingForLoad = true;
+    // });
 
-    await widget.player.play();
-
-    setState(() {
-      _waitingForLoad = false;
-    });
+    widget.player.play();
   }
 
   /// Docs

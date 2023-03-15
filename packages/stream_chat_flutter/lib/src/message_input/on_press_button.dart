@@ -49,7 +49,7 @@ class OnPressButton extends StatelessWidget {
     required VoidCallback onPressed,
   }) {
     return OnPressButton(
-      icon: StreamSvgIcon.pause(),
+      icon: StreamSvgIcon.pause(color: Colors.red),
       onPressed: onPressed,
     );
   }
@@ -59,7 +59,7 @@ class OnPressButton extends StatelessWidget {
     required VoidCallback onPressed,
   }) {
     return OnPressButton(
-      icon: StreamSvgIcon.delete(),
+      icon: StreamSvgIcon.delete(color: Colors.blue),
       onPressed: onPressed,
     );
   }
