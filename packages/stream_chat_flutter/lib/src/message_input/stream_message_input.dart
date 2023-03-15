@@ -1681,9 +1681,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _onChangedDebounced.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _recordStateSubscription.cancel();
-    _audioRecorder.dispose();
     _waveBarsNormalizer.dispose();
-    _amplitudeController.close();
+    _audioRecorder.dispose().then((value) => _amplitudeController.close);
 
     super.dispose();
   }
