@@ -12,7 +12,6 @@ int _byteUnitConversionFactor = 1024;
 
 /// int extensions
 extension IntExtension on int {
-
   /// Parses int in bytes to human readable size. Like: 17 KB
   /// instead of 17524 bytes;
   String toHumanReadableSize() {
@@ -28,7 +27,6 @@ extension IntExtension on int {
 
 /// Durations extensions.
 extension DurationExtension on Duration {
-
   /// Transforms Duration to a minutes and seconds time. Like: 04:13.
   String toMinutesAndSeconds() {
     final minutes = inMinutes.remainder(60).toString().padLeft(2, '0');
@@ -36,7 +34,6 @@ extension DurationExtension on Duration {
 
     return '$minutes:$seconds';
   }
-
 }
 
 /// String extension

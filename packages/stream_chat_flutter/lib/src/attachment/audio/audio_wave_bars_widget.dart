@@ -24,16 +24,22 @@ class AudioWaveBars extends StatefulWidget {
 
   /// Docs
   final Stream<Amplitude> amplitudeStream;
+
   /// Docs
   final int numberOfBars;
+
   /// Docs
   final Color colorRight;
+
   /// Docs
   final Color colorLeft;
+
   /// Docs
   final double barHeightRatio;
+
   /// Docs
   final double spacingRatio;
+
   /// Docs
   final bool inverse;
 

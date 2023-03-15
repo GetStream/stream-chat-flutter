@@ -9,8 +9,7 @@ void main() {
         const listSize = 60;
         final inputList = List<double>.filled(10245, 0);
 
-        final result =
-            ListNormalization.normalizeBars(inputList, listSize, 0);
+        final result = ListNormalization.normalizeBars(inputList, listSize, 0);
 
         expect(result.length, listSize);
       });
@@ -28,8 +27,7 @@ void main() {
         const listSize = 10245;
         final inputList = List<double>.filled(60, 0);
 
-        final result =
-            ListNormalization.normalizeBars(inputList, listSize, 0);
+        final result = ListNormalization.normalizeBars(inputList, listSize, 0);
 
         expect(result.length, listSize);
       });
@@ -38,8 +36,7 @@ void main() {
         const listSize = 80;
         final inputList = List<double>.filled(60, 0);
 
-        final result =
-            ListNormalization.normalizeBars(inputList, listSize, 0);
+        final result = ListNormalization.normalizeBars(inputList, listSize, 0);
 
         expect(result.length, listSize);
       });
@@ -48,8 +45,7 @@ void main() {
         const listSize = 60;
         final inputList = List<double>.filled(10245, 0);
 
-        final result =
-            ListNormalization.shrinkList(inputList, listSize);
+        final result = ListNormalization.shrinkList(inputList, listSize);
         expect(result.last, 0);
       });
 
@@ -57,8 +53,7 @@ void main() {
         const listSize = 60;
         final inputList = List<double>.filled(10245, 3);
 
-        final result =
-            ListNormalization.shrinkList(inputList, listSize);
+        final result = ListNormalization.shrinkList(inputList, listSize);
         expect(result.first, 3);
       });
 
@@ -67,8 +62,7 @@ void main() {
         const listSize = 60;
         final inputList = List<double>.filled(10245, 3);
 
-        final result =
-            ListNormalization.shrinkList(inputList, listSize);
+        final result = ListNormalization.shrinkList(inputList, listSize);
         expect(result.last, 3);
       });
 
@@ -78,8 +72,7 @@ void main() {
         final inputList =
             List<double>.generate(10, (index) => index.toDouble());
 
-        final result =
-            ListNormalization.shrinkList(inputList, listSize);
+        final result = ListNormalization.shrinkList(inputList, listSize);
         expect(result.first, 4.5);
       });
 
@@ -111,8 +104,6 @@ void main() {
 
         expect(result.any((element) => element == 1), true);
       });
-
-
     },
   );
 }

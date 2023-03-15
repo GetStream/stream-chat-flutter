@@ -22,13 +22,16 @@ class RecordButton extends StatefulWidget {
       onPressed: onPressed,
     );
   }
+
   /// Docs
   factory RecordButton.resumeButton({
     required VoidCallback onPressed,
   }) {
     return RecordButton(
       onPressed: onPressed,
-      icon: StreamSvgIcon.microphone(color: Colors.red,),
+      icon: StreamSvgIcon.microphone(
+        color: Colors.red,
+      ),
     );
   }
 
