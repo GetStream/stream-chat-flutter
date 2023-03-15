@@ -126,6 +126,9 @@ class _QuotedMessage extends StatelessWidget {
 
   bool get _hasAttachments => message.attachments.isNotEmpty;
 
+  bool get _isVoiceMessage =>
+      message.attachments.any((e) => e.type == 'voicenote');
+
   bool get _containsText => message.text?.isNotEmpty == true;
 
   bool get _containsLinkAttachment =>
@@ -137,9 +140,19 @@ class _QuotedMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
-    var msg = _hasAttachments && !_containsText
-        ? message.copyWith(text: message.attachments.last.title ?? '')
-        : message;
+    Message msg;
+
+    if (_isVoiceMessage) {
+      msg = message.copyWith(text: 'Voice note');
+    } else if (_hasAttachments && !_containsText) {
+      msg = message.copyWith(text: message.attachments.last.title ?? '');
+    } else {
+      msg = message;
+    }
+
+    // var msg = _hasAttachments && !_containsText
+    //     ? message.copyWith(text: message.attachments.last.title ?? '')
+    //     : message;
     if (msg.text!.length > textLimit) {
       msg = msg.copyWith(text: '${msg.text!.substring(0, textLimit - 3)}...');
     }
@@ -240,8 +253,9 @@ class _ParseAttachments extends StatelessWidget {
       attachment = message.attachments.last;
       if (attachmentThumbnailBuilders?.containsKey(attachment.type) == true) {
         attachmentBuilder = attachmentThumbnailBuilders![attachment.type];
+      } else {
+        attachmentBuilder = _defaultAttachmentBuilder[attachment.type];
       }
-      attachmentBuilder = _defaultAttachmentBuilder[attachment.type];
       if (attachmentBuilder == null) {
         child = const Offstage();
       } else {
@@ -252,7 +266,7 @@ class _ParseAttachments extends StatelessWidget {
     return Material(
       clipBehavior: Clip.hardEdge,
       type: MaterialType.transparency,
-      shape: attachment.type == 'file'
+      shape: attachment.type == 'file' || attachment.type == 'voicenote'
           ? null
           : RoundedRectangleBorder(
               side: const BorderSide(width: 0, color: Colors.transparent),
@@ -312,6 +326,13 @@ class _ParseAttachments extends StatelessWidget {
           child: getFileTypeImage(
             attachment.extraData['mime_type'] as String?,
           ),
+        );
+      },
+      'voicenote': (_, attachment) {
+        return SizedBox(
+          height: 32,
+          width: 32,
+          child: StreamSvgIcon.filetypeAac(),
         );
       },
     };
