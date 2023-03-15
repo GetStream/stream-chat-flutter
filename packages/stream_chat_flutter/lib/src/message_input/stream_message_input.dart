@@ -16,7 +16,6 @@ import 'package:record/record.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_player_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_bars_widget.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/wave_bars_normalizer.dart';

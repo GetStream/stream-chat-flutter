@@ -15,15 +15,14 @@ void main() {
         expect(result.length, listSize);
       });
 
-      // test('Width - Final size of list should be correct2 - shrink2', () async {
-      //   const listSize = 60;
-      //   final inputList = List<double>.filled(80, 0);
-      //
-      //   final result =
-      //       ListNormalization.normalizeBars(inputList, listSize, 0);
-      //
-      //   expect(result.length, listSize);
-      // });
+// test('Width - Final size of list should be correct2 - shrink2', () async {
+//   const listSize = 60;
+//   final inputList = List<double>.filled(80, 0);
+//
+//   final result = ListNormalization.normalizeBars(inputList, listSize, 0);
+//
+//   expect(result.length, listSize);
+// });
 
       test('Width - Final size of list should be correct2 - expand1', () async {
         const listSize = 10245;
