@@ -15,6 +15,11 @@ class AudioWaveSlider extends StatefulWidget {
     this.onChangeEnd,
     this.customSliderButton,
     this.customSliderButtonWidth,
+    this.horizontalPadding = 10,
+    this.spacingRatio = 0.01,
+    this.barHeightRatio = 0.01,
+    this.colorRight = Colors.grey,
+    this.colorLeft = Colors.blueAccent,
   });
 
   /// Docs
@@ -41,6 +46,21 @@ class AudioWaveSlider extends StatefulWidget {
   ///Docs
   final double? customSliderButtonWidth;
 
+  ///Docs
+  final int horizontalPadding;
+
+  ///Docs
+  final double spacingRatio;
+
+  ///Docs
+  final double barHeightRatio;
+
+  ///Docs
+  final Color colorLeft;
+
+  ///Docs
+  final Color colorRight;
+
   @override
   _AudioWaveSliderState createState() => _AudioWaveSliderState();
 }
@@ -51,7 +71,6 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
   final _finalWidth = 14.0;
   final _initialHeight = 30.0;
   final _finalHeight = 35.0;
-  final _padding = 10;
 
   double _currentWidth() {
     if (widget.customSliderButtonWidth != null) {
@@ -66,9 +85,11 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
   }
 
   double _progressToWidth(BoxConstraints constraints, double progress) {
-    final availableWidth = constraints.maxWidth - _padding * 2;
+    final availableWidth = constraints.maxWidth - widget.horizontalPadding * 2;
 
-    return availableWidth * progress - _currentWidth() / 2 + _padding;
+    return availableWidth * progress -
+        _currentWidth() / 2 +
+        widget.horizontalPadding;
   }
 
   @override
@@ -99,10 +120,12 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
                   size: Size(constraints.maxWidth, constraints.maxHeight),
                   painter: _AudioBarsPainter(
                     bars: widget.bars,
-                    colorLeft: Colors.lightBlueAccent,
-                    colorRight: Colors.blueAccent,
+                    spacingRatio: widget.spacingRatio,
+                    barHeightRatio: widget.barHeightRatio,
+                    colorLeft: widget.colorLeft,
+                    colorRight: widget.colorRight,
                     progressPercentage: progress,
-                    padding: _padding,
+                    padding: widget.horizontalPadding,
                   ),
                 ),
                 AnimatedPositioned(

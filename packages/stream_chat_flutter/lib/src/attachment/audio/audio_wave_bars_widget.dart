@@ -14,10 +14,28 @@ class AudioWaveBars extends StatefulWidget {
   const AudioWaveBars({
     super.key,
     required this.amplitudeStream,
+    this.numberOfBars = _maxBars,
+    this.colorLeft = Colors.blueAccent,
+    this.colorRight = Colors.grey,
+    this.barHeightRatio = 1,
+    this.spacingRatio = 0.007,
+    this.inverse = true,
   });
 
   /// Docs
   final Stream<Amplitude> amplitudeStream;
+  /// Docs
+  final int numberOfBars;
+  /// Docs
+  final Color colorRight;
+  /// Docs
+  final Color colorLeft;
+  /// Docs
+  final double barHeightRatio;
+  /// Docs
+  final double spacingRatio;
+  /// Docs
+  final bool inverse;
 
   @override
   State<AudioWaveBars> createState() => _AudioWaveBarsState();
@@ -53,7 +71,12 @@ class _AudioWaveBarsState extends State<AudioWaveBars> {
               size: Size(constraints.maxWidth, constraints.maxHeight),
               painter: _AudioBarsPainter(
                 bars: snapshot.data ?? List.empty(),
-                inverse: true,
+                numberOfBars: widget.numberOfBars,
+                colorLeft: widget.colorLeft,
+                colorRight: widget.colorRight,
+                barHeightRatio: widget.barHeightRatio,
+                spacingRatio: widget.spacingRatio,
+                inverse: widget.inverse,
               ),
             );
           },
