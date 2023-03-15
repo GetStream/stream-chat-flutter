@@ -203,8 +203,9 @@ class _QuotedMessage extends StatelessWidget {
               ),
               if (_isVoiceMessage && audioRecordDuration != null)
                 Text(
-                  Duration(milliseconds: audioRecordDuration)
-                      .toMinutesAndSeconds(),
+                  Duration(
+                    milliseconds: audioRecordDuration,
+                  ).toMinutesAndSeconds(),
                   style: chatThemeData.textTheme.footnote.copyWith(
                     color: chatThemeData.colorTheme.textLowEmphasis,
                   ),

@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart'
     hide ErrorListener;
+import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -1359,38 +1360,42 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final audioFilePath = attachment.file?.path;
     Widget playerMessage;
 
-    if (audioFilePath == null) {
-      playerMessage = const AudioLoadingMessage();
-    } else {
-      final player = AudioPlayer()
-        ..setAudioSource(AudioSource.file(audioFilePath));
+    final player = AudioPlayer();
 
-      Duration duration;
-      if (attachment.extraData['duration'] != null) {
-        duration =
-            Duration(milliseconds: attachment.extraData['duration']! as int);
-      } else {
-        duration = Duration.zero;
-      }
-
-      List<double> waveBars;
-      if (attachment.extraData['waveList'] != null) {
-        waveBars = attachment.extraData['waveList']! as List<double>;
-      } else {
-        waveBars = List.filled(60, 0);
-      }
-
-      playerMessage = AudioPlayerMessage(
-        player: player,
-        audioFile: attachment.file,
-        duration: duration,
-        waveBars: waveBars,
-        index: 0,
-        fileSize: attachment.fileSize,
-        actionButton: _buildRemoveButton(attachment),
-        singleAudio: true,
-      );
+    if (attachment.file?.path != null) {
+      player.setAudioSource(AudioSource.file(audioFilePath!));
+    } else if (attachment.assetUrl != null) {
+      player.setAudioSource(AudioSource.uri(Uri.parse(attachment.assetUrl!)));
     }
+
+    Duration duration;
+    if (attachment.extraData['duration'] != null) {
+      duration =
+          Duration(milliseconds: attachment.extraData['duration']! as int);
+    } else {
+      duration = Duration.zero;
+    }
+
+    List<double> waveBars;
+    if (attachment.extraData['waveList'] != null) {
+      waveBars = (attachment.extraData['waveList']! as List<dynamic>)
+          .map((e) => double.tryParse(e.toString()))
+          .whereNotNull()
+          .toList();
+    } else {
+      waveBars = List.filled(60, 0);
+    }
+
+    playerMessage = AudioPlayerMessage(
+      player: player,
+      audioFile: attachment.file,
+      duration: duration,
+      waveBars: waveBars,
+      index: 0,
+      fileSize: attachment.fileSize,
+      actionButton: _buildRemoveButton(attachment),
+      singleAudio: true,
+    );
 
     final colorTheme = StreamChatTheme.of(context).colorTheme;
 
