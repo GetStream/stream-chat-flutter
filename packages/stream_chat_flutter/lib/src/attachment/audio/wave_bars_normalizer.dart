@@ -41,11 +41,13 @@ class WaveBarsNormalizer {
   /// Clear the state of this class. Use this after calling normalizedBars to
   /// avoid using too much memory and causing memory overflow.
   void reset() {
+    _minValue = 0;
     _barsList.clear();
   }
 
   /// Disposes the class.
   void dispose() {
+    _minValue = 0;
     _barsList.clear();
     _barsSubscription?.cancel();
   }
