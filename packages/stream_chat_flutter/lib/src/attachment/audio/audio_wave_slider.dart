@@ -17,7 +17,7 @@ class AudioWaveSlider extends StatefulWidget {
     this.customSliderButtonWidth,
     this.horizontalPadding = 10,
     this.spacingRatio = 0.01,
-    this.barHeightRatio = 0.01,
+    this.barHeightRatio = 1,
     this.colorRight = Colors.grey,
     this.colorLeft = Colors.blueAccent,
   });
