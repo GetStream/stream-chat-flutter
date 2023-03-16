@@ -110,6 +110,6 @@ class ListNormalization {
         : shrinkList(positiveList, listSize);
     //At last the normalize the height of the bars. The result of this method
     //will be a list of bars a bit bigger in high.
-    return  _normalizeBarsHeight(widthNormalized);
+    return _normalizeBarsHeight(widthNormalized);
   }
 }
