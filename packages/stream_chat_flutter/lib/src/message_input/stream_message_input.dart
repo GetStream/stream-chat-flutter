@@ -306,6 +306,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
       widget.messageInputController ?? _controller!.value;
   StreamRestorableMessageInputController? _controller;
 
+  late StreamSubscription<RecordState> _recordStateSubscription;
+  late Stream<RecordState> _recordStateStream;
+
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
     _controller = StreamRestorableMessageInputController(message: message);
@@ -327,12 +330,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
       ..addListener(_onChangedDebounced);
     if (!_isEditing && _timeOut <= 0) _startSlowMode();
   }
-
-  /// Docs
-  late StreamSubscription<RecordState> _recordStateSubscription;
-
-  /// Docs
-  late Stream<RecordState> _recordStateStream;
 
   @override
   void initState() {
@@ -459,9 +456,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   void _stopSlowMode() => _slowModeTimer?.cancel();
-
-  /// Docs
-  GlobalKey globalKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {

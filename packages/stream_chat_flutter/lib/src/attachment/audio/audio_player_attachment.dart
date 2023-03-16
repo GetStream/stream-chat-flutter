@@ -14,7 +14,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// to play/pause, seek the audio and change the speed of reproduction.
 ///
 /// When waveBars are not provided they are shown as 0 bars.
-/// {@AudioPlayerMessage}
+/// {@endtemplate}
 class AudioPlayerMessage extends StatefulWidget {
   /// {@macro AudioPlayerMessage}
   const AudioPlayerMessage({
@@ -48,15 +48,16 @@ class AudioPlayerMessage extends StatefulWidget {
   /// An action button to be used.
   final Widget? actionButton;
 
-  /// Docs
+  /// Marks if this is a single audio message or this audio is inside.
+  /// If this is true, the audio will reset itself when it ends, otherwise
+  /// it gets managed by the player.
   final bool singleAudio;
 
   @override
-  AudioPlayerMessageState createState() => AudioPlayerMessageState();
+  _AudioPlayerMessageState createState() => _AudioPlayerMessageState();
 }
 
-/// Docs
-class AudioPlayerMessageState extends State<AudioPlayerMessage> {
+class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
   var _seeking = false;
   late StreamSubscription<PlayerState> _playStateSubscription;
   var _waitingForLoad = false;
@@ -88,16 +89,6 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
 
     _playStateSubscription =
         widget.player.playerStateStream.listen(playerStateListener);
-  }
-
-  /// Docs
-  void onError(Object e, StackTrace st) {
-    if (e is PlayerException) {
-      print('Error code: ${e.code}');
-      print('Error message: ${e.message}');
-    } else {
-      print('An error occurred: $e');
-    }
   }
 
   @override
@@ -331,7 +322,6 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     });
   }
 
-  /// Docs
   Future<void> _play() async {
     if (widget.index != widget.player.currentIndex) {
       widget.player.seek(Duration.zero, index: widget.index);
@@ -340,7 +330,6 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     widget.player.play();
   }
 
-  /// Docs
   Future<void> _pause() {
     return widget.player.pause();
   }

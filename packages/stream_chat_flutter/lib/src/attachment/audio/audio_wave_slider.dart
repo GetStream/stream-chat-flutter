@@ -2,14 +2,17 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
-/// Docs
+/// {@template AudioWaveSlider}
+/// A Widget that draws the audio wave bars for an audio inside a Slider.
+/// This Widget is indeed to be used to control the position of an audio message
+/// and to get feedback of the position.
+/// {@endtemplate}
 class AudioWaveSlider extends StatefulWidget {
-  /// Docs
+  /// {@macro AudioWaveSlider}
   const AudioWaveSlider({
     super.key,
     required this.bars,
     required this.progressStream,
-    this.barsRatio = 1,
     this.onChangeStart,
     this.onChanged,
     this.onChangeEnd,
@@ -22,43 +25,45 @@ class AudioWaveSlider extends StatefulWidget {
     this.colorLeft = Colors.blueAccent,
   });
 
-  /// Docs
+  /// The audio bars from 0.0 to 1.0.
   final List<double> bars;
 
-  /// Docs
+  /// The progress of the audio.
   final Stream<double> progressStream;
 
-  ///Docs
-  final double barsRatio;
-
-  ///Docs
+  /// Callback called when Slider drag starts.
   final Function(double)? onChangeStart;
 
-  ///Docs
+  /// Callback called when Slider drag updates.
   final Function(double)? onChanged;
 
-  ///Docs
+  /// Callback called when Slider drag ends.
   final Function()? onChangeEnd;
 
-  ///Docs
+  /// A custom Slider button. Use this to substitute the default rounded
+  /// rectangle.
   final Widget? customSliderButton;
 
-  ///Docs
+  /// The width of the customSliderButton. This should match the width of the
+  /// provided Widget.
   final double? customSliderButtonWidth;
 
-  ///Docs
+  /// Horizontal padding. Use this when using a wide customSliderButton.
   final int horizontalPadding;
 
-  ///Docs
+  /// Spacing ratios. This is the percentage that the space takes from the whole
+  /// available space. Typically this value should be between 0.003 to 0.02.
+  /// Default = 0.01
   final double spacingRatio;
 
-  ///Docs
+  /// The percentage maximum value of bars. This can be used to reduce the
+  /// height of bars. Default = 1;
   final double barHeightRatio;
 
-  ///Docs
+  /// Color of the bars to the left side of the slider button.
   final Color colorLeft;
 
-  ///Docs
+  /// Color of the bars to the right side of the slider button.
   final Color colorRight;
 
   @override

@@ -1,9 +1,14 @@
 import 'dart:math';
 
-/// Docs
+/// Normalizer of wave bars. This class shrinks bars, when they List has many
+/// items, by calculating the median values, or expands the list then it has
+/// to little items, by repeating items.
+///
+/// It is important to normalize the bars to avoid audio message with too many
+/// or too little bars, which would cause then to look ugly.
 class ListNormalization {
-  /// A LinkedList fits this problem very well. We should evaluate its
-  /// performance here.
+  /// Shrinks the list by taking medians. The resulting list will have a close
+  /// value, but not exact to param listSize.
   static List<double> shrinkList(List<double> inputList, int listSize) {
     final resultList = List<double>.empty(growable: true);
 
@@ -29,6 +34,8 @@ class ListNormalization {
     return resultList;
   }
 
+  /// Expands the list by repeating the values. The resulting list will be the
+  /// size of listSize.
   static List<double> _expandList(List<double> inputList, int listSize) {
     final differenceRatio = listSize / inputList.length;
 
@@ -85,33 +92,24 @@ class ListNormalization {
     }
   }
 
-  ///Docs
+  /// Normalizes the bars by expanding it or shrinking when needed. This also
+  /// normalizes the height by the highest value.
   static List<double> normalizeBars(
     List<double> inputList,
     int listSize,
     double minValue,
   ) {
-    print('normalizing list: $inputList');
-
     //First it is necessary to ensure that all element are positive.
     final positiveList = minValue < 0
         ? inputList.map((e) => e + minValue.abs()).toList()
         : inputList;
 
-    print('positive list: $positiveList');
-
     //Now we take the median of the elements
     final widthNormalized = listSize > inputList.length
         ? _expandList(positiveList, listSize)
         : shrinkList(positiveList, listSize);
-
-    print('median list: $widthNormalized');
     //At last the normalize the height of the bars. The result of this method
-    //will be a list of bars a bit bigger.
-    final normalized = _normalizeBarsHeight(widthNormalized);
-
-    print('normalized: $normalized');
-
-    return normalized;
+    //will be a list of bars a bit bigger in high.
+    return  _normalizeBarsHeight(widthNormalized);
   }
 }

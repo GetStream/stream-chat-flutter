@@ -7,9 +7,11 @@ import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachmen
 import 'package:stream_chat_flutter/src/attachment/audio/audio_player_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Docs
+/// {@template AudioListPlayer}
+/// Display many audios and displays a list of AudioPlayerMessage.
+/// {@endtemplate}
 class AudioListPlayer extends StatefulWidget {
-  /// Docs
+  /// {@macro AudioListPlayer}
   const AudioListPlayer({
     super.key,
     required this.attachments,
@@ -17,15 +19,13 @@ class AudioListPlayer extends StatefulWidget {
     this.constraints,
   });
 
-  /// Docs
+  /// List of audio attachments.
   final List<Attachment> attachments;
 
-  /// {@template attachmentBorderRadiusGeometry}
-  /// The border radius of an attachment
-  /// {@endtemplate}
+  /// The border radius of each audio.
   final BorderRadiusGeometry? attachmentBorderRadiusGeometry;
 
-  /// Constraints of attachments
+  /// Constraints of audio attachments
   final BoxConstraints? constraints;
 
   @override

@@ -8,9 +8,12 @@ import 'package:record/record.dart';
 const _maxAmplitude = 50;
 const _maxBars = 70;
 
-/// Docs
+/// {@template AudioWaveBars}
+/// A Widget that draws the audio wave bars for an audio. This Widget is
+/// intended to be used as a feedback for the input of voice recording.
+/// {@endtemplate}
 class AudioWaveBars extends StatefulWidget {
-  /// Docs
+  /// {@macro AudioWaveBars}
   const AudioWaveBars({
     super.key,
     required this.amplitudeStream,
@@ -22,25 +25,29 @@ class AudioWaveBars extends StatefulWidget {
     this.inverse = true,
   });
 
-  /// Docs
+  /// Stream of Amplitude. The Amplitude will be converted to the wave bars.
   final Stream<Amplitude> amplitudeStream;
 
-  /// Docs
+  /// The number of bars that will be draw in the screen. When the number of
+  /// bars is bigger than this number only the X last bars will be shown.
   final int numberOfBars;
 
-  /// Docs
+  /// The color of the bars showing audio that was already recorded.
   final Color colorRight;
 
-  /// Docs
+  /// The color of the bars showing audio that was not recorded.
   final Color colorLeft;
 
-  /// Docs
+  /// The percentage maximum value of bars. This can be used to reduce the
+  /// height of bars. Default = 1;
   final double barHeightRatio;
 
-  /// Docs
+  /// Spacing ratios. This is the percentage that the space takes from the whole
+  /// available space. Typically this value should be between 0.003 to 0.01.
+  /// Default = 0.007
   final double spacingRatio;
 
-  /// Docs
+  /// When inverse is enabled the bars grow from right to left.
   final bool inverse;
 
   @override
@@ -145,8 +152,8 @@ class _AudioBarsPainter extends CustomPainter {
     }
 
     if (bars.length > numberOfBars) {
-      /// Misconfiguration, bars.length should never be bigger
-      /// than numberOfBars.
+      // Misconfiguration, bars.length should never be bigger
+      // than numberOfBars.
       dataBars = bars.take(numberOfBars).toList();
     } else {
       hasRemainingBars = numberOfBars > bars.length;

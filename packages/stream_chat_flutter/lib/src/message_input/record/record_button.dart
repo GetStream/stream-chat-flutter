@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Docs
+/// {@template AudioLoadingMessage}
+/// Button to start and resume recording. The business logic of recording is
+/// not provided by this button, just the UI and the logic to hold to start.
+/// The logic of the recording must be provided of using methods onHold and
+/// onPressed.
+/// {@endtemplate}
 class RecordButton extends StatefulWidget {
-  /// Docs
+  /// {@macro AudioLoadingMessage}
   const RecordButton({
     super.key,
     required this.icon,
@@ -11,7 +16,7 @@ class RecordButton extends StatefulWidget {
     this.onPressed,
   });
 
-  /// Docs
+  /// Creates the button to start the recording.
   factory RecordButton.startButton({
     required VoidCallback onHold,
     VoidCallback? onPressed,
@@ -23,7 +28,7 @@ class RecordButton extends StatefulWidget {
     );
   }
 
-  /// Docs
+  /// Creates the button to resume the recording.
   factory RecordButton.resumeButton({
     required VoidCallback onPressed,
   }) {
@@ -35,13 +40,13 @@ class RecordButton extends StatefulWidget {
     );
   }
 
-  /// Docs
+  /// Callback for holding the button.
   final VoidCallback? onHold;
 
-  /// Docs
+  /// Callback for pressing the button.
   final VoidCallback? onPressed;
 
-  /// Docs
+  /// Icon of the button.
   final Widget icon;
 
   @override
@@ -75,13 +80,4 @@ class _RecordButtonState extends State<RecordButton> {
       ),
     );
   }
-}
-
-/// Docs
-enum Trigger {
-  /// Docs
-  onTap,
-
-  /// Docs
-  onHold,
 }

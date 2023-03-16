@@ -4,50 +4,49 @@ import 'dart:math';
 import 'package:record/record.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/list_normalization.dart';
 
-/// Docs
+/// {@template WaveBarsNormalizer}
+/// This class holds the value bars to later provide the normalized bars.
+/// The values should be provided by the barsStream and they will be kept until
+/// needed.
+/// {@endtemplate}
 class WaveBarsNormalizer {
-  /// Docs
-  WaveBarsNormalizer({
-    required this.barsStream,
-  });
+  /// {@macro AudioWaveSlider}
+  WaveBarsNormalizer({required this.barsStream});
 
-  /// Docs
+  /// The stream of amplitude of audio recorded.
   final Stream<Amplitude> barsStream;
 
-  /// Docs
   StreamSubscription<double>? _barsSubscription;
-
-  /// Docs
   final List<double> _barsList = List<double>.empty(growable: true);
 
   double _minValue = 0;
-  double _maxValue = 0;
 
-  /// Docs
+  /// Start listening to amplitude of the recoded sounds.
   void start() {
     _barsSubscription = barsStream
         .where((amplitude) => amplitude.current > -1000)
         .map((amplitude) {
       return amplitude.current;
     }).listen((barValue) {
-      _maxValue = max(_maxValue, barValue);
       _minValue = min(_minValue, barValue);
       _barsList.add(barValue);
     });
   }
 
-  /// Docs
+  /// Provides the normalized bars.
   List<double> normalizedBars(int outputLength) {
     return ListNormalization.normalizeBars(_barsList, outputLength, _minValue);
   }
 
-  /// Docs
+  /// Clear the state of this class. Use this after calling normalizedBars to
+  /// avoid using too much memory and causing memory overflow.
   void reset() {
     _barsList.clear();
   }
 
-  /// Docs
+  /// Disposes the class.
   void dispose() {
+    _barsList.clear();
     _barsSubscription?.cancel();
   }
 }

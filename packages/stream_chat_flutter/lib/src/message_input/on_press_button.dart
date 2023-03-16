@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 
-/// {@template commandButton}
-/// The button that allows a user to use commands in a chat.
+/// {@template onPressButton}
+/// The button that allows a user to use commands in a chat. Use the factory
+/// constructors of this button to create pre defined buttons.
 /// {@endtemplate}
 class OnPressButton extends StatelessWidget {
-  /// {@macro commandButton}
+  /// {@macro onPressButton}
   const OnPressButton({
     super.key,
     required this.icon,

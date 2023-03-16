@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Docs
+/// {@template RecordTimer}
+/// Widget the presents the elapsed in a form of a simple close with mm:ss.
+/// {@endtemplate}
 class RecordTimer extends StatefulWidget {
-  /// Docs
+  /// {@macro RecordTimer}
   const RecordTimer({
     super.key,
     required this.recordState,
@@ -15,7 +17,7 @@ class RecordTimer extends StatefulWidget {
   @override
   State<RecordTimer> createState() => _RecordTimerState();
 
-  /// Docs
+  /// The state of the recoding. This is used to pause and resume the timer.
   final Stream<RecordState> recordState;
 }
 
