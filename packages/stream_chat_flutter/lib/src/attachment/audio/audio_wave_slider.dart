@@ -191,7 +191,7 @@ class _AudioBarsPainter extends CustomPainter {
   /// progressX should be the middle of the moving button of the slider, not
   /// initial X position.
   Color _barColor(double buttonCenter, double progressX) {
-    return (progressX > buttonCenter) ? colorRight : colorLeft;
+    return (progressX > buttonCenter) ? colorLeft : colorRight;
   }
 
   double _barHeight(double barValue, totalHeight) {
