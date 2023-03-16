@@ -895,7 +895,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Text(
-              'Hold 1 second to start recording.',
+              context.translations.holdToStartRecording,
               style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
                     decoration: TextDecoration.none,
                     color: Colors.white,

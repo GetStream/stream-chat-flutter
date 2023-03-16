@@ -361,6 +361,9 @@ abstract class Translations {
 
   /// The text for "MUTE"/"UNMUTE" based on the value of [isMuted].
   String toggleMuteUnmuteAction({required bool isMuted});
+
+  /// The text in the snack bar of tap in the record button.
+  String get holdToStartRecording;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -808,4 +811,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get allowFileAccessMessage => 'Allow access to files';
+
+  @override
+  String get holdToStartRecording => 'Hold 1 second to start recording.';
 }

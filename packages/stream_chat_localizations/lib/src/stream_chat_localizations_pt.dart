@@ -446,4 +446,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get allowFileAccessMessage => 'Permitir acesso aos arquivos';
+
+  @override
+  String get holdToStartRecording => 'Segure 1 segundo para gravar';
 }
