@@ -902,7 +902,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       );
     });
 
-    Overlay.of(context).insert(entry);
+    Overlay.of(context)?.insert(entry);
     Future.delayed(const Duration(seconds: 2)).then((value) => entry.remove());
   }
 
@@ -1390,10 +1390,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
     playerMessage = AudioPlayerMessage(
       player: player,
-      audioFile: attachment.file,
       duration: duration,
       waveBars: waveBars,
-      index: 0,
       fileSize: attachment.fileSize,
       actionButton: _buildRemoveButton(attachment),
       singleAudio: true,
