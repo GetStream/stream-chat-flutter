@@ -813,5 +813,5 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get allowFileAccessMessage => 'Allow access to files';
 
   @override
-  String get holdToStartRecording => 'Hold 1 second to start recording.';
+  String get holdToStartRecording => 'Hold to start recording.';
 }
