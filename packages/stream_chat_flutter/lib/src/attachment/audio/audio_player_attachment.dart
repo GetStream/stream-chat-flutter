@@ -110,7 +110,6 @@ class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
           if (snapshot.hasData) {
             return _content(snapshot.data!);
           } else if (snapshot.hasError) {
-            print(snapshot.error);
             return const Center(child: Text('Error!!'));
           } else {
             return const AudioLoadingMessage();
