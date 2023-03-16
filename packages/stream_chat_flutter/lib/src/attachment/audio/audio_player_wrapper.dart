@@ -66,7 +66,6 @@ class _AudioListPlayerState extends State<AudioListPlayer> {
         duration: duration,
         waveBars: waveBars,
         index: index,
-        audioFile: attachment.file,
       );
     }
 
