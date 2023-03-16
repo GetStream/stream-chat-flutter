@@ -863,10 +863,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
           FocusScope.of(context).unfocus();
         }
       } else {
-        print('adding attachment');
         _effectiveController.attachments += [attachment];
       }
-
     }
   }
 
