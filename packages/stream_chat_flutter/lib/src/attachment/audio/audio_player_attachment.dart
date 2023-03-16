@@ -54,23 +54,36 @@ class AudioPlayerMessage extends StatefulWidget {
 /// Docs
 class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   var _seeking = false;
-  StreamSubscription<PlayerState>? _stateSubscription;
+  late StreamSubscription<PlayerState> _playStateSubscription;
   var _waitingForLoad = false;
 
   @override
   void initState() {
     super.initState();
 
-    if (widget.singleAudio) {
-      void playerStateListener(PlayerState state) async {
-        if (state.processingState == ProcessingState.completed) {
-          await widget.player.stop();
-          await widget.player.seek(Duration.zero, index: 0);
-        }
+    void playerStateListener(PlayerState state) async {
+      if (state.processingState == ProcessingState.completed &&
+          widget.singleAudio) {
+        await widget.player.stop();
+        await widget.player.seek(Duration.zero, index: 0);
       }
 
-      widget.player.playerStateStream.listen(playerStateListener);
+      final currentAudio = widget.player.currentIndex == widget.index;
+
+      if (currentAudio && state.processingState == ProcessingState.ready) {
+        setState(() {
+          _waitingForLoad = false;
+        });
+      } else if (currentAudio &&
+          state.processingState == ProcessingState.loading) {
+        setState(() {
+          _waitingForLoad = true;
+        });
+      }
     }
+
+    _playStateSubscription =
+        widget.player.playerStateStream.listen(playerStateListener);
   }
 
   /// Docs
@@ -88,7 +101,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     super.dispose();
 
     widget.player.dispose();
-    _stateSubscription?.cancel();
+    _playStateSubscription.cancel();
   }
 
   @override
@@ -314,11 +327,6 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     if (widget.index != widget.player.currentIndex) {
       widget.player.seek(Duration.zero, index: widget.index);
     }
-
-    // Todo: fix loading state
-    // setState(() {
-    //   _waitingForLoad = true;
-    // });
 
     widget.player.play();
   }
