@@ -848,13 +848,25 @@ class StreamMessageInputState extends State<StreamMessageInput>
           );
 
       if (widget.sendVoiceRecordDirectly) {
-        StreamChannel.of(context)
+        final resp = await StreamChannel.of(context)
             .channel
             .sendMessage(Message(attachments: [attachment]));
+
+        widget.onMessageSent?.call(resp.message);
+
+        var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
+        shouldKeepFocus ??= !_commandEnabled;
+
+        if (shouldKeepFocus) {
+          FocusScope.of(context).requestFocus(_effectiveFocusNode);
+        } else {
+          FocusScope.of(context).unfocus();
+        }
       } else {
         print('adding attachment');
         _effectiveController.attachments += [attachment];
       }
+
     }
   }
 
