@@ -1413,35 +1413,38 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildRemoveButton(Attachment attachment) {
-    return SizedBox(
-      height: 24,
-      width: 24,
-      child: RawMaterialButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        elevation: 0,
-        highlightElevation: 0,
-        focusElevation: 0,
-        hoverElevation: 0,
-        onPressed: () async {
-          final file = attachment.file;
-          final uploadState = attachment.uploadState;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 9),
+      child: SizedBox(
+        height: 24,
+        width: 24,
+        child: RawMaterialButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+          highlightElevation: 0,
+          focusElevation: 0,
+          hoverElevation: 0,
+          onPressed: () async {
+            final file = attachment.file;
+            final uploadState = attachment.uploadState;
 
-          if (file != null && !uploadState.isSuccess && !isWeb) {
-            await StreamAttachmentHandler.instance.deleteAttachmentFile(
-              attachmentFile: file,
-            );
-          }
+            if (file != null && !uploadState.isSuccess && !isWeb) {
+              await StreamAttachmentHandler.instance.deleteAttachmentFile(
+                attachmentFile: file,
+              );
+            }
 
-          _effectiveController.removeAttachmentById(attachment.id);
-        },
-        fillColor:
-            _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
-        child: Center(
-          child: StreamSvgIcon.close(
-            size: 24,
-            color: _streamChatTheme.colorTheme.barsBg,
+            _effectiveController.removeAttachmentById(attachment.id);
+          },
+          fillColor:
+              _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
+          child: Center(
+            child: StreamSvgIcon.close(
+              size: 24,
+              color: _streamChatTheme.colorTheme.barsBg,
+            ),
           ),
         ),
       ),

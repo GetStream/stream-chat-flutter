@@ -198,46 +198,55 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     final showSpeed = _playingThisStream().flatMap((showSpeed) =>
         widget.player.speedStream.map((speed) => showSpeed ? speed : -1.0));
 
-    final content = StreamBuilder<double>(
+    return StreamBuilder<double>(
       initialData: -1,
       stream: showSpeed,
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data! > 0) {
           final speed = snapshot.data!;
-
-          return ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              elevation: 2,
-              backgroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50),
+          return SizedBox(
+            width: 44,
+            height: 36,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                elevation: 2,
+                backgroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                ),
               ),
-            ),
-            child: Text(
-              '${speed}x',
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 12,
+              child: Text(
+                '${speed}x',
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 12,
+                ),
               ),
+              onPressed: () {
+                setState(() {
+                  if (speed == 2) {
+                    widget.player.setSpeed(1);
+                  } else {
+                    widget.player.setSpeed(speed + 0.5);
+                  }
+                });
+              },
             ),
-            onPressed: () {
-              setState(() {
-                if (speed == 2) {
-                  widget.player.setSpeed(1);
-                } else {
-                  widget.player.setSpeed(speed + 0.5);
-                }
-              });
-            },
           );
         } else {
-          return widget.actionButton ?? StreamSvgIcon.filetypeAac();
+          if (widget.actionButton != null) {
+            return widget.actionButton!;
+          } else {
+            return SizedBox(
+              width: 44,
+              height: 36,
+              child: StreamSvgIcon.filetypeAac(),
+            );
+          }
         }
       },
     );
-
-    return SizedBox(width: 44, height: 36, child: content);
   }
 
   Widget _fileSizeWidget(int? fileSize) {
