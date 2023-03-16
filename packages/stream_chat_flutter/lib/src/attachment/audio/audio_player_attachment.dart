@@ -8,40 +8,44 @@ import 'package:stream_chat_flutter/src/attachment/audio/audio_loading_attachmen
 import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_slider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Docs
+/// {@template AudioPlayerMessage}
+/// Embedded player for audio messages. It displays the data for the audio
+/// message and allow the user to interact with the player providing buttons
+/// to play/pause, seek the audio and change the speed of reproduction.
+///
+/// When waveBars are not provided they are shown as 0 bars.
+/// {@AudioPlayerMessage}
 class AudioPlayerMessage extends StatefulWidget {
-  /// Docs
+  /// {@macro AudioPlayerMessage}
   const AudioPlayerMessage({
     super.key,
     required this.player,
-    required this.audioFile,
     required this.duration,
     this.waveBars,
-    this.index,
+    this.index = 0,
     this.fileSize,
     this.actionButton,
     this.singleAudio = false,
   });
 
-  /// Docs
+  /// The player of the audio.
   final AudioPlayer player;
 
-  /// Docs
+  /// The wave bars of the recorded audio from 0 to 1. When not provided
+  /// this Widget shows then as small dots.
   final List<double>? waveBars;
 
-  /// Docs
-  final AttachmentFile? audioFile;
-
-  /// Docs
+  /// The duration of the audio.
   final Duration duration;
 
-  /// Docs
-  final int? index;
+  /// The index of the audio inside the play list. If not provided, this is
+  /// assumed to be zero.
+  final int index;
 
-  /// Docs
+  /// The file size in bits.
   final int? fileSize;
 
-  /// Docs
+  /// An action button to be used.
   final Widget? actionButton;
 
   /// Docs
@@ -191,10 +195,6 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   }
 
   Widget _speedAndActionButton() {
-    if (widget.actionButton != null) {
-      return widget.actionButton!;
-    }
-
     final showSpeed = _playingThisStream().flatMap((showSpeed) =>
         widget.player.speedStream.map((speed) => showSpeed ? speed : -1.0));
 
@@ -232,7 +232,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
             },
           );
         } else {
-          return StreamSvgIcon.filetypeAac();
+          return widget.actionButton ?? StreamSvgIcon.filetypeAac();
         }
       },
     );
@@ -290,7 +290,7 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
           widget.player.pause();
           widget.player.seek(
             totalDuration * val,
-            index: widget.index ?? 0,
+            index: widget.index,
           );
         },
         onChangeEnd: () {

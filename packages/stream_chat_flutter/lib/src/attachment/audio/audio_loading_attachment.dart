@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
-///Docs
+/// {@template AudioLoadingMessage}
+/// Loading widget for audio message. Use this when the url from the audio
+/// message is still now available. One use situation in when the audio is
+/// still being uploaded.
+/// {@AudioLoadingMessage}
 class AudioLoadingMessage extends StatelessWidget {
-  ///Docs
+  /// {@macro AudioLoadingMessage}
   const AudioLoadingMessage({super.key});
 
   @override
