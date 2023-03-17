@@ -240,7 +240,6 @@ class _AudioBarsPainter extends CustomPainter {
     });
   }
 
-  //Todo: Take a look in this method later.
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;

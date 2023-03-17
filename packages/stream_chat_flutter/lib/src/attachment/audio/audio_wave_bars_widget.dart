@@ -50,7 +50,26 @@ class AudioWaveBars extends StatefulWidget {
   /// When inverse is enabled the bars grow from right to left.
   final bool inverse;
 
-  // Todo create copyWith!!
+  /// Creates a copy of AudioWaveBars use this to customize the default version
+  /// of AudioWaveBars.
+  AudioWaveBars copyWith({
+    int? numberOfBars,
+    Color? colorRight,
+    Color? colorLeft,
+    double? barHeightRatio,
+    double? spacingRatio,
+    bool? inverse,
+  }) {
+    return AudioWaveBars(
+      amplitudeStream: amplitudeStream,
+      numberOfBars: numberOfBars ?? this.numberOfBars,
+      colorRight: colorRight ?? this.colorRight,
+      colorLeft: colorLeft ?? this.colorLeft,
+      barHeightRatio: barHeightRatio ?? this.barHeightRatio,
+      spacingRatio: spacingRatio ?? this.spacingRatio,
+      inverse: inverse ?? this.inverse,
+    );
+  }
 
   @override
   State<AudioWaveBars> createState() => _AudioWaveBarsState();
@@ -173,7 +192,6 @@ class _AudioBarsPainter extends CustomPainter {
     }
   }
 
-  //Todo: Take a look in this method later.
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
