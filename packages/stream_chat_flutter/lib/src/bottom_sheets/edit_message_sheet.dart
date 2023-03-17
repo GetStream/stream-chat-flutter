@@ -84,6 +84,7 @@ class _EditMessageSheetState extends State<EditMessageSheet> {
                     Navigator.of(context).pop();
                     return m;
                   },
+                  enableAudioRecord: false,
                 ),
             ],
           ),
