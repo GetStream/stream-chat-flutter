@@ -466,6 +466,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get allowFileAccessMessage => 'Allow access to files';
+
+  @override
+  String get holdToStartRecording => 'Hold to record';
 }
 
 void main() async {
