@@ -244,9 +244,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       _unsubscribeFromChannelListEvents();
     }
 
-    _channelEventSubscription = client
-        .on()
-        .skip(1) // Skipping the last emitted event.
+    _channelEventSubscription = client.on().skip(1) // Skipping the last emitted event.
         // We only need to handle the latest events.
         .listen((event) {
       // Only handle the event if the value is in success state.
