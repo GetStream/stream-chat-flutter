@@ -18,7 +18,7 @@ void main() {
       expect(const Duration(minutes: 45).toMinutesAndSeconds(), '45:00');
     });
   });
-  
+
   group('List<User>.search', () {
     test('should work fine', () {
       final tommaso = User(id: 'tommaso', name: 'Tommaso');

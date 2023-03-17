@@ -792,8 +792,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             ? const Offstage()
             : Wrap(
                 children: <Widget>[
-                  if (widget.enableAudioRecord)
-                    _buildStartRecordButton(),
+                  if (widget.enableAudioRecord) _buildStartRecordButton(),
                   if (!widget.disableAttachments &&
                       channel.ownCapabilities
                           .contains(PermissionType.uploadFile))
