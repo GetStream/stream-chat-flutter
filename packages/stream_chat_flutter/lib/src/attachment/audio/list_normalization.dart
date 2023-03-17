@@ -7,9 +7,9 @@ import 'dart:math';
 /// It is important to normalize the bars to avoid audio message with too many
 /// or too little bars, which would cause then to look ugly.
 class ListNormalization {
-  /// Shrinks the list by taking medians. The resulting list will have a close
-  /// value, but not exact to param listSize.
-  static List<double> shrinkList(List<double> inputList, int listSize) {
+  /// Shrinks the list by taking medians. The resulting list will have the
+  /// listSize.
+  static List<double> normalizeWidth(List<double> inputList, int listSize) {
     final resultList = List<double>.empty(growable: true);
 
     final pace = (inputList.length / listSize).round();
@@ -29,6 +29,10 @@ class ListNormalization {
           lastListSize;
 
       resultList.add(lastBar);
+    }
+
+    if (resultList.length < listSize) {
+      return _expandList(resultList, listSize);
     }
 
     return resultList;
@@ -107,7 +111,7 @@ class ListNormalization {
     //Now we take the median of the elements
     final widthNormalized = listSize > inputList.length
         ? _expandList(positiveList, listSize)
-        : shrinkList(positiveList, listSize);
+        : normalizeWidth(positiveList, listSize);
     //At last the normalize the height of the bars. The result of this method
     //will be a list of bars a bit bigger in high.
     return _normalizeBarsHeight(widthNormalized);
