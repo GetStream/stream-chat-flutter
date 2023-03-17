@@ -198,6 +198,7 @@ void main() {
       expect(localizations.unreadMessagesSeparatorText(2), isNotNull);
       expect(localizations.enableFileAccessMessage, isNotNull);
       expect(localizations.allowFileAccessMessage, isNotNull);
+      expect(localizations.holdToStartRecording, isNotNull);
     });
   }
 
