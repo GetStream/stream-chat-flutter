@@ -436,5 +436,5 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   // TODO: implement holdToStartRecording
-  String get holdToStartRecording => '';
+  String get holdToStartRecording => 'Hold inne for å ta opp';
 }

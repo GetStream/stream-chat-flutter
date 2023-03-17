@@ -451,5 +451,5 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   // TODO: implement holdToStartRecording
-  String get holdToStartRecording => '';
+  String get holdToStartRecording => 'Maintenir pour enregistrer';
 }

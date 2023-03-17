@@ -451,5 +451,5 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   // TODO: implement holdToStartRecording
-  String get holdToStartRecording => '';
+  String get holdToStartRecording => 'Mantén presionado para grabar.';
 }

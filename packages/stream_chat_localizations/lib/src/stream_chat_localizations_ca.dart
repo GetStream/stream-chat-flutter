@@ -448,6 +448,5 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get allowFileAccessMessage => "Permet l'accés als fitxers";
 
   @override
-  // TODO: implement holdToStartRecording
-  String get holdToStartRecording => '';
+  String get holdToStartRecording => 'Mantén premut per enregistrar.';
 }

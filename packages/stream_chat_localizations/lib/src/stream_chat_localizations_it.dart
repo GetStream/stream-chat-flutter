@@ -452,6 +452,5 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get allowFileAccessMessage => "Consenti l'accesso ai file";
 
   @override
-  // TODO: implement holdToStartRecording
-  String get holdToStartRecording => '';
+  String get holdToStartRecording => 'Tieni premuto per registrare.';
 }

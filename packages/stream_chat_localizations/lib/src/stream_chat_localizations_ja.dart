@@ -428,6 +428,5 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get allowFileAccessMessage => 'ファイルへのアクセスを許可する';
 
   @override
-  // TODO: implement holdToStartRecording
-  String get holdToStartRecording => '';
+  String get holdToStartRecording => '押しで録音';
 }
