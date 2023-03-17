@@ -205,7 +205,7 @@ typedef StartRecordButtonBuilder = Widget Function(
 );
 
 /// {@template resumeRecordButtonBuilder}
-/// A widget builder for building a custom startRecord button.
+/// A widget builder for building a custom resumeRecord button.
 ///
 /// [resumeRecordButton] is the default [OnPressButton.resumeRecord]
 /// configuration, use [resumeRecordButton.copyWith] to easily customize it.
@@ -216,7 +216,7 @@ typedef ResumeRecordButtonBuilder = Widget Function(
 );
 
 /// {@template pauseRecordButtonBuilder}
-/// A widget builder for building a custom startRecord button.
+/// A widget builder for building a custom pauseRecord button.
 ///
 /// [pauseRecordButton] is the default [OnPressButton.pauseRecord]
 /// configuration, use [pauseRecordButton.copyWith] to easily customize it.
@@ -224,6 +224,17 @@ typedef ResumeRecordButtonBuilder = Widget Function(
 typedef PauseRecordButtonBuilder = Widget Function(
   BuildContext context,
   OnPressButton pauseRecordButton,
+);
+
+/// {@template cancelRecordButtonBuilder}
+/// A widget builder for building a custom cancelRecord button.
+///
+/// [cancelRecordButton] is the default [OnPressButton.cancelRecord]
+/// configuration, use [cancelRecordButton.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef CancelRecordButtonBuilder = Widget Function(
+  BuildContext context,
+  OnPressButton cancelRecordButton,
 );
 
 /// {@template quotedMessageAttachmentThumbnailBuilder}

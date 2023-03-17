@@ -67,7 +67,7 @@ class OnPressButton extends StatelessWidget {
   }
 
   /// Command button
-  factory OnPressButton.deleteRecord({
+  factory OnPressButton.cancelRecord({
     required VoidCallback onPressed,
   }) {
     return OnPressButton(

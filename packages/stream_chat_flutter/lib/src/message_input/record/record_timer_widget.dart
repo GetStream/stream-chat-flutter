@@ -12,6 +12,7 @@ class RecordTimer extends StatefulWidget {
   const RecordTimer({
     super.key,
     required this.recordState,
+    this.textStyle = const TextStyle(fontSize: 18),
   });
 
   @override
@@ -19,6 +20,9 @@ class RecordTimer extends StatefulWidget {
 
   /// The state of the recoding. This is used to pause and resume the timer.
   final Stream<RecordState> recordState;
+
+  /// TextStyle of the text.
+  final TextStyle textStyle;
 }
 
 class _RecordTimerState extends State<RecordTimer> {
@@ -64,7 +68,7 @@ class _RecordTimerState extends State<RecordTimer> {
   Widget build(BuildContext context) {
     return Text(
       duration.toMinutesAndSeconds(),
-      style: const TextStyle(fontSize: 18),
+      style: widget.textStyle,
     );
   }
 }

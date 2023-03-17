@@ -108,6 +108,7 @@ class StreamMessageInput extends StatefulWidget {
     this.startRecordButtonBuilder,
     this.resumeRecordButtonBuilder,
     this.pauseRecordButtonBuilder,
+    this.cancelRecordButtonBuilder,
     this.commandButtonBuilder,
     this.customAutocompleteTriggers = const [],
     this.mentionAllAppUsers = false,
@@ -235,6 +236,12 @@ class StreamMessageInput extends StatefulWidget {
   /// The builder contains the default [OnPressButton.pause] that can be
   /// customized by calling `.copyWith`.
   final PauseRecordButtonBuilder? pauseRecordButtonBuilder;
+
+  /// Builder for customizing the resumeRecord button.
+  ///
+  /// The builder contains the default [OnPressButton.pause] that can be
+  /// customized by calling `.copyWith`.
+  final CancelRecordButtonBuilder? cancelRecordButtonBuilder;
 
   /// Builder for customizing the command button.
   ///
@@ -787,12 +794,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
   }
 
-  Widget _buildCancelRecordButton() {
-    return _recordingState == RecordState.record
-        ? StreamSvgIcon.microphone(color: Colors.red)
-        : OnPressButton.deleteRecord(onPressed: _cancelRecording);
-  }
-
   Widget _buildAttachmentButton(BuildContext context) {
     final defaultButton = OnPressButton.attachment(
       color: _messageInputTheme.actionButtonIdleColor!,
@@ -876,6 +877,18 @@ class StreamMessageInputState extends State<StreamMessageInput>
       } else {
         _effectiveController.attachments += [attachment];
       }
+    }
+  }
+
+  Widget _buildCancelRecordButton() {
+    if (_recordingState == RecordState.record) {
+      return StreamSvgIcon.microphone(color: Colors.red);
+    } else {
+      final defaultButton =
+          OnPressButton.cancelRecord(onPressed: _cancelRecording);
+
+      return widget.cancelRecordButtonBuilder?.call(context, defaultButton) ??
+          defaultButton;
     }
   }
 
