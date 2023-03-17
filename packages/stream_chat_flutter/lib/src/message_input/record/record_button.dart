@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 
-/// {@template AudioLoadingMessage}
-/// Button to start and resume recording. The business logic of recording is
-/// not provided by this button, just the UI and the logic to hold to start.
-/// The logic of the recording must be provided of using methods onHold and
-/// onPressed.
-/// {@endtemplate}
-class RecordButton extends StatefulWidget {
-  /// {@macro AudioLoadingMessage}
+///Docs
+class RecordButton extends StatelessWidget {
+  ///Docs
   const RecordButton({
     super.key,
-    required this.icon,
     this.onHold,
     this.onPressed,
+    required this.icon,
   });
 
   /// Creates the button to start the recording.
@@ -50,24 +45,13 @@ class RecordButton extends StatefulWidget {
   final Widget icon;
 
   @override
-  State<RecordButton> createState() => _RecordButtonState();
-}
-
-class _RecordButtonState extends State<RecordButton> {
-  double posX = 0;
-
-  void onTap(BuildContext context) {
-    widget.onPressed?.call();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () {
-        widget.onHold?.call();
+        onHold?.call();
       },
       child: IconButton(
-        icon: widget.icon,
+        icon: icon,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints.tightFor(
           height: 24,
@@ -75,7 +59,7 @@ class _RecordButtonState extends State<RecordButton> {
         ),
         splashRadius: 24,
         onPressed: () {
-          onTap(context);
+          onPressed?.call();
         },
       ),
     );
