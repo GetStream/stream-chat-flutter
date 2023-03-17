@@ -45,7 +45,7 @@ void main() {
         const listSize = 60;
         final inputList = List<double>.filled(10245, 0);
 
-        final result = ListNormalization.shrinkList(inputList, listSize);
+        final result = ListNormalization.normalizeWidth(inputList, listSize);
         expect(result.last, 0);
       });
 
@@ -53,7 +53,7 @@ void main() {
         const listSize = 60;
         final inputList = List<double>.filled(10245, 3);
 
-        final result = ListNormalization.shrinkList(inputList, listSize);
+        final result = ListNormalization.normalizeWidth(inputList, listSize);
         expect(result.first, 3);
       });
 
@@ -62,7 +62,7 @@ void main() {
         const listSize = 60;
         final inputList = List<double>.filled(10245, 3);
 
-        final result = ListNormalization.shrinkList(inputList, listSize);
+        final result = ListNormalization.normalizeWidth(inputList, listSize);
         expect(result.last, 3);
       });
 
@@ -72,7 +72,7 @@ void main() {
         final inputList =
             List<double>.generate(10, (index) => index.toDouble());
 
-        final result = ListNormalization.shrinkList(inputList, listSize);
+        final result = ListNormalization.normalizeWidth(inputList, listSize);
         expect(result.first, 4.5);
       });
 
