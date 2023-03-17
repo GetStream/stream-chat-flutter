@@ -6,9 +6,10 @@ class RecordButton extends StatelessWidget {
   ///Docs
   const RecordButton({
     super.key,
-    this.onHold,
-    this.onPressed,
     required this.icon,
+    this.onPressed,
+    this.onHold,
+    this.padding,
   });
 
   /// Creates the button to start the recording.
@@ -20,18 +21,7 @@ class RecordButton extends StatelessWidget {
       onHold: onHold,
       icon: StreamSvgIcon.microphone(size: 20),
       onPressed: onPressed,
-    );
-  }
-
-  /// Creates the button to resume the recording.
-  factory RecordButton.resumeButton({
-    required VoidCallback onPressed,
-  }) {
-    return RecordButton(
-      onPressed: onPressed,
-      icon: StreamSvgIcon.microphone(
-        color: Colors.red,
-      ),
+      padding: EdgeInsets.zero,
     );
   }
 
@@ -44,23 +34,44 @@ class RecordButton extends StatelessWidget {
   /// Icon of the button.
   final Widget icon;
 
+  ///Docs
+  final EdgeInsetsGeometry? padding;
+
+  /// Returns a copy of this object with the given fields updated.
+  RecordButton copyWith({
+    Key? key,
+    StreamSvgIcon? icon,
+    VoidCallback? onPressed,
+    VoidCallback? onHold,
+  }) {
+    return RecordButton(
+      key: key ?? this.key,
+      icon: icon ?? this.icon,
+      onPressed: onPressed ?? this.onPressed,
+      onHold: onHold ?? this.onPressed,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () {
         onHold?.call();
       },
-      child: IconButton(
-        icon: icon,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints.tightFor(
-          height: 24,
-          width: 24,
+      child: Padding(
+        padding: padding ?? const EdgeInsets.all(8),
+        child: IconButton(
+          icon: icon,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints.tightFor(
+            height: 24,
+            width: 24,
+          ),
+          splashRadius: 24,
+          onPressed: () {
+            onPressed?.call();
+          },
         ),
-        splashRadius: 24,
-        onPressed: () {
-          onPressed?.call();
-        },
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
+import 'package:stream_chat_flutter/src/message_input/record/record_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template inProgressBuilder}
@@ -184,12 +185,45 @@ typedef CommandButtonBuilder = Widget Function(
 /// {@template actionButtonBuilder}
 /// A widget builder for building a custom action button.
 ///
-/// [attachmentButton] is the default [AttachmentButton] configuration,
+/// [attachmentButton] is the default [OnPressButton.attachment] configuration,
 /// use [attachmentButton.copyWith] to easily customize it.
 /// {@endtemplate}
 typedef AttachmentButtonBuilder = Widget Function(
   BuildContext context,
   OnPressButton attachmentButton,
+);
+
+/// {@template startRecordButtonBuilder}
+/// A widget builder for building a custom startRecord button.
+///
+/// [startRecordButton] is the default [RecordButton.startRecord] configuration,
+/// use [startRecordButton.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef StartRecordButtonBuilder = Widget Function(
+  BuildContext context,
+  RecordButton startRecordButton,
+);
+
+/// {@template resumeRecordButtonBuilder}
+/// A widget builder for building a custom startRecord button.
+///
+/// [resumeRecordButton] is the default [OnPressButton.resumeRecord]
+/// configuration, use [resumeRecordButton.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef ResumeRecordButtonBuilder = Widget Function(
+  BuildContext context,
+  OnPressButton resumeRecordButton,
+);
+
+/// {@template pauseRecordButtonBuilder}
+/// A widget builder for building a custom startRecord button.
+///
+/// [pauseRecordButton] is the default [OnPressButton.pauseRecord]
+/// configuration, use [pauseRecordButton.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef PauseRecordButtonBuilder = Widget Function(
+  BuildContext context,
+  OnPressButton pauseRecordButton,
 );
 
 /// {@template quotedMessageAttachmentThumbnailBuilder}

@@ -105,6 +105,9 @@ class StreamMessageInput extends StatefulWidget {
     this.attachmentLimit = 10,
     this.onAttachmentLimitExceed,
     this.attachmentButtonBuilder,
+    this.startRecordButtonBuilder,
+    this.resumeRecordButtonBuilder,
+    this.pauseRecordButtonBuilder,
     this.commandButtonBuilder,
     this.customAutocompleteTriggers = const [],
     this.mentionAllAppUsers = false,
@@ -211,9 +214,27 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Builder for customizing the attachment button.
   ///
-  /// The builder contains the default [AttachmentButton] that can be customized
-  /// by calling `.copyWith`.
+  /// The builder contains the default [OnPressButton.attachment] that can be
+  /// customized by calling `.copyWith`.
   final AttachmentButtonBuilder? attachmentButtonBuilder;
+
+  /// Builder for customizing the startRecord button.
+  ///
+  /// The builder contains the default [RecordButton.startButton] that can be
+  /// customized by calling `.copyWith`.
+  final StartRecordButtonBuilder? startRecordButtonBuilder;
+
+  /// Builder for customizing the resumeRecord button.
+  ///
+  /// The builder contains the default [OnPressButton.resumeRecord] that can be
+  /// customized by calling `.copyWith`.
+  final ResumeRecordButtonBuilder? resumeRecordButtonBuilder;
+
+  /// Builder for customizing the resumeRecord button.
+  ///
+  /// The builder contains the default [OnPressButton.pause] that can be
+  /// customized by calling `.copyWith`.
+  final PauseRecordButtonBuilder? pauseRecordButtonBuilder;
 
   /// Builder for customizing the command button.
   ///
@@ -654,23 +675,19 @@ class StreamMessageInputState extends State<StreamMessageInput>
               ),
             ],
           ),
-          Stack(
-            children: [
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: _buildCancelRecordButton(),
-              ),
-              Align(
-                alignment: AlignmentDirectional.topCenter,
-                child: _recordingState == RecordState.record
-                    ? _buildPauseRecordButton()
-                    : _buildResumeRecordButton(),
-              ),
-              Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: _buildConfirmRecordButton(),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildCancelRecordButton(),
+                if (_recordingState == RecordState.record)
+                  _buildPauseRecordButton(),
+                if (_recordingState != RecordState.record)
+                  _buildResumeRecordButton(),
+                _buildConfirmRecordButton(),
+              ],
+            ),
           ),
         ],
       );
@@ -708,12 +725,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildConfirmRecordButton() {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: OnPressButton.confirmAudio(onPressed: () {
-        _finishRecording(context);
-      }),
-    );
+    return OnPressButton.confirmAudio(onPressed: () {
+      _finishRecording(context);
+    });
   }
 
   Widget _buildExpandActionsButton(BuildContext context) {
@@ -774,12 +788,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildCancelRecordButton() {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: _recordingState == RecordState.record
-          ? StreamSvgIcon.microphone(color: Colors.red)
-          : OnPressButton.deleteRecord(onPressed: _cancelRecording),
-    );
+    return _recordingState == RecordState.record
+        ? StreamSvgIcon.microphone(color: Colors.red)
+        : OnPressButton.deleteRecord(onPressed: _cancelRecording);
   }
 
   Widget _buildAttachmentButton(BuildContext context) {
@@ -868,11 +879,28 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
   }
 
+  Widget _buildPauseRecordButton() {
+    final defaultButton = OnPressButton.pauseRecord(onPressed: _pauseRecording);
+
+    return widget.pauseRecordButtonBuilder?.call(context, defaultButton) ??
+        defaultButton;
+  }
+
+  Widget _buildResumeRecordButton() {
+    final defaultButton = OnPressButton.resumeRecord(onPressed: _record);
+
+    return widget.resumeRecordButtonBuilder?.call(context, defaultButton) ??
+        defaultButton;
+  }
+
   Widget _buildStartRecordButton() {
-    return RecordButton.startButton(
+    final defaultButton = RecordButton.startButton(
       onHold: _record,
       onPressed: _showTapRecordHint,
     );
+
+    return widget.startRecordButtonBuilder?.call(context, defaultButton) ??
+        defaultButton;
   }
 
   void _showTapRecordHint() {
@@ -908,20 +936,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
     Overlay.of(context)?.insert(entry);
     Future.delayed(const Duration(seconds: 2)).then((value) => entry.remove());
-  }
-
-  Widget _buildResumeRecordButton() {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: RecordButton.resumeButton(onPressed: _record),
-    );
-  }
-
-  Widget _buildPauseRecordButton() {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: OnPressButton.pauseRecord(onPressed: _pauseRecording),
-    );
   }
 
   /// Handle the platform-specific logic for selecting files.

@@ -11,6 +11,7 @@ class OnPressButton extends StatelessWidget {
     super.key,
     required this.icon,
     required this.onPressed,
+    this.padding,
   });
 
   /// Attachment button
@@ -56,6 +57,16 @@ class OnPressButton extends StatelessWidget {
   }
 
   /// Command button
+  factory OnPressButton.resumeRecord({
+    required VoidCallback onPressed,
+  }) {
+    return OnPressButton(
+      icon: StreamSvgIcon.microphone(color: Colors.red),
+      onPressed: onPressed,
+    );
+  }
+
+  /// Command button
   factory OnPressButton.deleteRecord({
     required VoidCallback onPressed,
   }) {
@@ -70,6 +81,9 @@ class OnPressButton extends StatelessWidget {
 
   /// The action to perform when the button is pressed or clicked.
   final VoidCallback onPressed;
+
+  ///Docs
+  final EdgeInsetsGeometry? padding;
 
   /// Returns a copy of this object with the given fields updated.
   OnPressButton copyWith({
@@ -88,7 +102,7 @@ class OnPressButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       icon: icon,
-      padding: EdgeInsets.zero,
+      padding: padding ?? EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(
         height: 24,
         width: 24,
