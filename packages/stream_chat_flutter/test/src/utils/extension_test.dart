@@ -2,6 +2,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
+  group('IntExtension.toHumanReadableSize', () {
+    test('should convert file size to human readable size', () {
+      expect(10000.toHumanReadableSize(), '9.77 KB');
+      expect(100000.toHumanReadableSize(), '97.66 KB');
+      expect(100000000.toHumanReadableSize(), '95.37 MB');
+    });
+  });
+
+  group('DurationExtension.toMinutesAndSeconds', () {
+    test('should convert Duration to readable time', () {
+      expect(const Duration(seconds: 50).toMinutesAndSeconds(), '00:50');
+      expect(const Duration(seconds: 100).toMinutesAndSeconds(), '01:40');
+      expect(const Duration(seconds: 200).toMinutesAndSeconds(), '03:20');
+      expect(const Duration(minutes: 45).toMinutesAndSeconds(), '45:00');
+    });
+  });
+  
   group('List<User>.search', () {
     test('should work fine', () {
       final tommaso = User(id: 'tommaso', name: 'Tommaso');
