@@ -217,7 +217,7 @@ class StreamMessageWidget extends StatefulWidget {
               attachmentShape: border,
             );
           },
-          'voicenote': (context, defaultMessage, attachments) {
+          'audio_recording': (context, defaultMessage, attachments) {
             final border = RoundedRectangleBorder(
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );

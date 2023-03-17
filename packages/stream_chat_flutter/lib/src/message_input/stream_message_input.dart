@@ -109,6 +109,8 @@ class StreamMessageInput extends StatefulWidget {
     this.resumeRecordButtonBuilder,
     this.pauseRecordButtonBuilder,
     this.cancelRecordButtonBuilder,
+    this.recordTimerBuilder,
+    this.audioWaveBarsBuilder,
     this.commandButtonBuilder,
     this.customAutocompleteTriggers = const [],
     this.mentionAllAppUsers = false,
@@ -248,6 +250,18 @@ class StreamMessageInput extends StatefulWidget {
   /// The builder contains the default [CommandButton] that can be customized by
   /// calling `.copyWith`.
   final CommandButtonBuilder? commandButtonBuilder;
+
+  /// Builder for customizing the record timer.
+  ///
+  /// The builder contains the default [RecordTimer] that can be
+  /// customized by calling `.copyWith`.
+  final RecordTimerBuilder? recordTimerBuilder;
+
+  /// Builder for customizing the audio wave bars.
+  ///
+  /// The builder contains the default [AudioWaveBars] that can be
+  /// customized by calling `.copyWith`.
+  final AudioWaveBarsBuilder? audioWaveBarsBuilder;
 
   /// When enabled mentions search users across the entire app.
   ///
@@ -548,7 +562,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: _buildTextField(context),
+                    child: _recordingState != RecordState.stop
+                        ? _buildRecordField(context)
+                        : _buildTextField(context),
                   ),
                   if (_effectiveController.message.parentId != null &&
                       !widget.hideSendAsDm)
@@ -657,63 +673,59 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
   }
 
-  Widget _buildTextField(BuildContext context) {
-    if (_recordingState != RecordState.stop) {
-      return Column(
-        children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: RecordTimer(recordState: _recordStateStream),
-              ),
-              Expanded(
-                child: SizedBox(
-                  height: 30,
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      right: 16,
-                    ),
-                    child: AudioWaveBars(
-                      amplitudeStream: _amplitudeController.stream,
-                    ),
+  Widget _buildRecordField(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _buildRecordTimer(_recordStateStream),
+            ),
+            Expanded(
+              child: SizedBox(
+                height: 30,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    right: 16,
                   ),
+                  child: _buildAudioWaveBars(_amplitudeController.stream),
                 ),
               ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildCancelRecordButton(),
+              if (_recordingState == RecordState.record)
+                _buildPauseRecordButton(),
+              if (_recordingState != RecordState.record)
+                _buildResumeRecordButton(),
+              _buildConfirmRecordButton(),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildCancelRecordButton(),
-                if (_recordingState == RecordState.record)
-                  _buildPauseRecordButton(),
-                if (_recordingState != RecordState.record)
-                  _buildResumeRecordButton(),
-                _buildConfirmRecordButton(),
-              ],
-            ),
-          ),
-        ],
-      );
-    } else {
-      return Flex(
-        direction: Axis.horizontal,
-        children: <Widget>[
-          if (!_commandEnabled &&
-              widget.actionsLocation == ActionsLocation.left)
-            _buildExpandActionsButton(context),
-          _buildTextInput(context),
-          if (!_commandEnabled &&
-              widget.actionsLocation == ActionsLocation.right)
-            _buildExpandActionsButton(context),
-          if (widget.sendButtonLocation == SendButtonLocation.outside)
-            _buildSendButton(context),
-        ],
-      );
-    }
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField(BuildContext context) {
+    return Flex(
+      direction: Axis.horizontal,
+      children: <Widget>[
+        if (!_commandEnabled && widget.actionsLocation == ActionsLocation.left)
+          _buildExpandActionsButton(context),
+        _buildTextInput(context),
+        if (!_commandEnabled && widget.actionsLocation == ActionsLocation.right)
+          _buildExpandActionsButton(context),
+        if (widget.sendButtonLocation == SendButtonLocation.outside)
+          _buildSendButton(context),
+      ],
+    );
   }
 
   Widget _buildSendButton(BuildContext context) {
@@ -847,7 +859,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
       final attachment = await file.length().then(
             (fileSize) => Attachment(
-              type: 'voicenote',
+              type: 'audio_recording',
               file: AttachmentFile(
                 size: fileSize,
                 path: uri.path,
@@ -914,6 +926,20 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
     return widget.startRecordButtonBuilder?.call(context, defaultButton) ??
         defaultButton;
+  }
+
+  Widget _buildRecordTimer(Stream<RecordState> recordStateStream) {
+    final defaultTimer = RecordTimer(recordState: recordStateStream);
+
+    return widget.recordTimerBuilder?.call(context, defaultTimer) ??
+        defaultTimer;
+  }
+
+  Widget _buildAudioWaveBars(Stream<Amplitude> amplitudeStream) {
+    final defaultWaveBars = AudioWaveBars(amplitudeStream: amplitudeStream);
+
+    return widget.audioWaveBarsBuilder?.call(context, defaultWaveBars) ??
+        defaultWaveBars;
   }
 
   void _showTapRecordHint() {
@@ -1308,10 +1334,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
     if (nonOGAttachments.isEmpty) return const Offstage();
     final fileAttachments = nonOGAttachments
-        .where((it) => it.type == 'file' || it.type == 'voicenote')
+        .where((it) => it.type == 'file' || it.type == 'audio_recording')
         .toList(growable: false);
     final remainingAttachments = nonOGAttachments
-        .where((it) => it.type != 'file' && it.type != 'voicenote')
+        .where((it) => it.type != 'file' && it.type != 'audio_recording')
         .toList(growable: false);
     return Column(
       children: [
@@ -1327,7 +1353,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     .map<Widget>(
                       (e) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: e.type == 'voicenote'
+                        child: e.type == 'audio_recording'
                             ? _buildVoiceNoteAttachment(e)
                             : _buildFileAttachment(e),
                       ),

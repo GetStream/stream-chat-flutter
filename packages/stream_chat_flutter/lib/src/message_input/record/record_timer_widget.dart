@@ -22,7 +22,15 @@ class RecordTimer extends StatefulWidget {
   final Stream<RecordState> recordState;
 
   /// TextStyle of the text.
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
+
+  /// Copy with for RecordTimer.
+  RecordTimer copyWith(TextStyle? textStyle) {
+    return RecordTimer(
+      recordState: recordState,
+      textStyle: textStyle ?? this.textStyle,
+    );
+  }
 }
 
 class _RecordTimerState extends State<RecordTimer> {

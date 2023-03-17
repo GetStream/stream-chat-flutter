@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_bars_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/src/message_input/record/record_button.dart';
+import 'package:stream_chat_flutter/src/message_input/record/record_timer_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template inProgressBuilder}
@@ -235,6 +237,28 @@ typedef PauseRecordButtonBuilder = Widget Function(
 typedef CancelRecordButtonBuilder = Widget Function(
   BuildContext context,
   OnPressButton cancelRecordButton,
+);
+
+/// {@template recordTimerBuilder}
+/// A widget builder for building a custom recordTimer button.
+///
+/// [recordTimer] is the default [RecordTimer]
+/// configuration, use [recordTimer.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef RecordTimerBuilder = Widget Function(
+  BuildContext context,
+  RecordTimer recordTimer,
+);
+
+/// {@template audioWaveBarsBuilder}
+/// A widget builder for building a custom audio wave bars widget.
+///
+/// [audioWaveBars] is the default [AudioWaveBars]
+/// configuration, use [audioWaveBars.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef AudioWaveBarsBuilder = Widget Function(
+  BuildContext context,
+  AudioWaveBars audioWaveBars,
 );
 
 /// {@template quotedMessageAttachmentThumbnailBuilder}

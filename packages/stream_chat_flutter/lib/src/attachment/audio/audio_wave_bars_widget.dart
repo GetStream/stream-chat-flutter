@@ -50,6 +50,8 @@ class AudioWaveBars extends StatefulWidget {
   /// When inverse is enabled the bars grow from right to left.
   final bool inverse;
 
+  // Todo create copyWith!!
+
   @override
   State<AudioWaveBars> createState() => _AudioWaveBarsState();
 }

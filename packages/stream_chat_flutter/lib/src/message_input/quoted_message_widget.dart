@@ -135,7 +135,7 @@ class _QuotedMessage extends StatelessWidget {
   bool get _hasAttachments => message.attachments.isNotEmpty;
 
   bool get _isVoiceMessage =>
-      message.attachments.any((e) => e.type == 'voicenote');
+      message.attachments.any((e) => e.type == 'audio_recording');
 
   bool get _containsText => message.text?.isNotEmpty == true;
 
@@ -150,7 +150,7 @@ class _QuotedMessage extends StatelessWidget {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
     Message msg;
     final audioRecordDuration = message.attachments
-        .firstWhereOrNull((e) => e.type == 'voicenote')
+        .firstWhereOrNull((e) => e.type == 'audio_recording')
         ?.extraData['duration'] as int?;
 
     if (_isVoiceMessage) {
@@ -290,7 +290,7 @@ class _ParseAttachments extends StatelessWidget {
     return Material(
       clipBehavior: Clip.hardEdge,
       type: MaterialType.transparency,
-      shape: attachment.type == 'file' || attachment.type == 'voicenote'
+      shape: attachment.type == 'file' || attachment.type == 'audio_recording'
           ? null
           : RoundedRectangleBorder(
               side: const BorderSide(width: 0, color: Colors.transparent),
@@ -352,7 +352,7 @@ class _ParseAttachments extends StatelessWidget {
           ),
         );
       },
-      'voicenote': (_, attachment) {
+      'audio_recording': (_, attachment) {
         return SizedBox(
           height: 32,
           width: 32,
