@@ -14,14 +14,14 @@ void main() {
         expect(result.length, listSize);
       });
 
-// test('Width - Final size of list should be correct2 - shrink2', () async {
-//   const listSize = 60;
-//   final inputList = List<double>.filled(80, 0);
-//
-//   final result = ListNormalization.normalizeBars(inputList, listSize, 0);
-//
-//   expect(result.length, listSize);
-// });
+      test('Width - Final size of list should be correct2 - shrink2', () async {
+        const listSize = 60;
+        final inputList = List<double>.filled(80, 0);
+
+        final result = ListNormalization.normalizeBars(inputList, listSize, 0);
+
+        expect(result.length, listSize);
+      });
 
       test('Width - Final size of list should be correct2 - expand1', () async {
         const listSize = 10245;
@@ -45,7 +45,7 @@ void main() {
         const listSize = 60;
         final inputList = List<double>.filled(10245, 0);
 
-        final result = ListNormalization.normalizeWidth(inputList, listSize);
+        final result = ListNormalization.shrinkWidth(inputList, listSize);
         expect(result.last, 0);
       });
 
@@ -53,7 +53,7 @@ void main() {
         const listSize = 60;
         final inputList = List<double>.filled(10245, 3);
 
-        final result = ListNormalization.normalizeWidth(inputList, listSize);
+        final result = ListNormalization.shrinkWidth(inputList, listSize);
         expect(result.first, 3);
       });
 
@@ -62,7 +62,7 @@ void main() {
         const listSize = 60;
         final inputList = List<double>.filled(10245, 3);
 
-        final result = ListNormalization.normalizeWidth(inputList, listSize);
+        final result = ListNormalization.shrinkWidth(inputList, listSize);
         expect(result.last, 3);
       });
 
@@ -72,7 +72,7 @@ void main() {
         final inputList =
             List<double>.generate(10, (index) => index.toDouble());
 
-        final result = ListNormalization.normalizeWidth(inputList, listSize);
+        final result = ListNormalization.shrinkWidth(inputList, listSize);
         expect(result.first, 4.5);
       });
 

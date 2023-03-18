@@ -9,13 +9,16 @@ import 'dart:math';
 class ListNormalization {
   /// Shrinks the list by taking medians. The resulting list will have the
   /// listSize.
-  static List<double> normalizeWidth(List<double> inputList, int listSize) {
+  static List<double> shrinkWidth(List<double> inputList, int listSize) {
     final resultList = List<double>.empty(growable: true);
 
     final pace = inputList.length / listSize;
     var acc = 0.0;
 
-    while (acc < inputList.length - pace) {
+    /// Each time the pace is summed, it round is take. It we round pace only
+    /// one time, the deviate too much from the true median of all elements.
+    /// The last page is calculated separately.
+    while (acc <= inputList.length - pace) {
       final median = inputList
               .sublist(acc.round(), (acc + pace).round())
               .reduce((a, b) => a + b) /
@@ -26,8 +29,9 @@ class ListNormalization {
       acc += pace;
     }
 
-    final lastListSize = (inputList.length % pace).ceil();
+    final lastListSize = (inputList.length % pace).round();
 
+    /// The last page.
     if (lastListSize > 0) {
       final lastBar = inputList
               .sublist(inputList.length - lastListSize)
@@ -48,26 +52,34 @@ class ListNormalization {
     final resultList = List<double>.empty(growable: true);
 
     if (differenceRatio > 2) {
-      final pace = differenceRatio.floor();
+      final pace = differenceRatio.round();
 
-      inputList.forEach((bar) {
+      // Here we repeat the elements excluding the last page. It is done this
+      // because the last page can be a little bigger or a little shorter.
+      // Because of that, there a special logic for it.
+      inputList.take(inputList.length - 1).forEach((bar) {
         resultList.addAll(List<double>.filled(pace, bar));
       });
 
       final remainingSize = listSize - resultList.length;
 
+      // The last page.
       if (remainingSize > 0) {
         return resultList + List<double>.filled(remainingSize, resultList.last);
       } else {
         return resultList;
       }
     } else {
+      /// In this case the resulting list must not be at least 2x the size of
+      /// the input list. Then only the first percentage of the bars is
+      /// duplicated. This case may produce bars that not very close of the
+      /// truth.
       const pace = 2;
       final duplicateElements =
           ((differenceRatio - 1) * inputList.length).round();
 
       inputList
-          .take(max(duplicateElements, inputList.length - 1))
+          .take(min(duplicateElements, inputList.length - 1))
           .forEach((bar) {
         resultList.addAll(List<double>.filled(pace, bar));
       });
@@ -115,7 +127,7 @@ class ListNormalization {
     //Now we take the median of the elements
     final widthNormalized = listSize > inputList.length
         ? _expandList(positiveList, listSize)
-        : normalizeWidth(positiveList, listSize);
+        : shrinkWidth(positiveList, listSize);
     //At last the normalize the height of the bars. The result of this method
     //will be a list of bars a bit bigger in high.
     return _normalizeBarsHeight(widthNormalized);
