@@ -12,15 +12,21 @@ class ListNormalization {
   static List<double> normalizeWidth(List<double> inputList, int listSize) {
     final resultList = List<double>.empty(growable: true);
 
-    final pace = (inputList.length / listSize).round();
+    final pace = inputList.length / listSize;
+    var acc = 0.0;
 
-    for (var i = 0; i <= inputList.length - pace; i += pace) {
-      final median =
-          inputList.sublist(i, i + pace).reduce((a, b) => a + b) / pace;
+    while (acc < inputList.length - pace) {
+      final median = inputList
+              .sublist(acc.round(), (acc + pace).round())
+              .reduce((a, b) => a + b) /
+          pace.round();
+
       resultList.add(median);
+
+      acc += pace;
     }
 
-    final lastListSize = inputList.length % pace;
+    final lastListSize = (inputList.length % pace).ceil();
 
     if (lastListSize > 0) {
       final lastBar = inputList
@@ -29,10 +35,6 @@ class ListNormalization {
           lastListSize;
 
       resultList.add(lastBar);
-    }
-
-    if (resultList.length < listSize) {
-      return _expandList(resultList, listSize);
     }
 
     return resultList;
@@ -62,9 +64,11 @@ class ListNormalization {
     } else {
       const pace = 2;
       final duplicateElements =
-          ((differenceRatio - 1) * inputList.length).floor();
+          ((differenceRatio - 1) * inputList.length).round();
 
-      inputList.take(duplicateElements).forEach((bar) {
+      inputList
+          .take(max(duplicateElements, inputList.length - 1))
+          .forEach((bar) {
         resultList.addAll(List<double>.filled(pace, bar));
       });
 
