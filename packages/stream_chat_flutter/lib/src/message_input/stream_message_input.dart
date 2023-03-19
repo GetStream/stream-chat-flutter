@@ -9,6 +9,7 @@ import 'package:cached_network_image/cached_network_image.dart'
 import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -825,6 +826,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     try {
       if (await _audioRecorder.hasPermission()) {
         if (_recordingState == RecordState.stop) {
+          HapticFeedback.heavyImpact();
           await _audioRecorder.start();
           _stopwatch
             ..reset()
@@ -948,6 +950,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   void _showTapRecordHint() {
+    HapticFeedback.heavyImpact();
     final renderBox = context.findRenderObject() as RenderBox?;
     double positionY;
 

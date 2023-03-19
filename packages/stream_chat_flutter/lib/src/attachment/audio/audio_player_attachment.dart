@@ -164,9 +164,7 @@ class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
               elevation: 2,
               padding: const EdgeInsets.symmetric(horizontal: 6),
               backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50),
-              ),
+              shape: const CircleBorder(),
             ),
             child: Icon(icon, color: Colors.black),
             onPressed: () {
