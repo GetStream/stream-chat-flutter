@@ -77,7 +77,10 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
   final _initialHeight = 30.0;
   final _finalHeight = 35.0;
 
-  double _currentWidth() {
+  Duration get animationDuration =>
+      _dragging ? Duration.zero : const Duration(milliseconds: 400);
+
+  double get _currentWidth {
     if (widget.customSliderButtonWidth != null) {
       return widget.customSliderButtonWidth!;
     } else {
@@ -85,15 +88,13 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
     }
   }
 
-  double _currentHeight() {
-    return _dragging ? _finalHeight : _initialHeight;
-  }
+  double get _currentHeight => _dragging ? _finalHeight : _initialHeight;
 
   double _progressToWidth(BoxConstraints constraints, double progress) {
     final availableWidth = constraints.maxWidth - widget.horizontalPadding * 2;
 
     return availableWidth * progress -
-        _currentWidth() / 2 +
+        _currentWidth / 2 +
         widget.horizontalPadding;
   }
 
@@ -107,8 +108,8 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
 
         final sliderButton = widget.customSliderButton ??
             Container(
-              width: _currentWidth(),
-              height: _currentHeight(),
+              width: _currentWidth,
+              height: _currentHeight,
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border.all(color: Colors.grey),
@@ -134,9 +135,9 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
                   ),
                 ),
                 AnimatedPositioned(
-                  duration: Duration.zero,
+                  duration: animationDuration,
                   left: _progressToWidth(constraints, progress),
-                  key: const ValueKey('item 1'),
+                  curve: const ElasticOutCurve(0.98),
                   child: sliderButton,
                 ),
                 GestureDetector(
