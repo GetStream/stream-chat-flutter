@@ -78,7 +78,7 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
   final _finalHeight = 35.0;
 
   Duration get animationDuration =>
-      _dragging ? Duration.zero : const Duration(milliseconds: 400);
+      _dragging ? Duration.zero : const Duration(milliseconds: 300);
 
   double get _currentWidth {
     if (widget.customSliderButtonWidth != null) {
@@ -137,7 +137,7 @@ class _AudioWaveSliderState extends State<AudioWaveSlider> {
                 AnimatedPositioned(
                   duration: animationDuration,
                   left: _progressToWidth(constraints, progress),
-                  curve: const ElasticOutCurve(0.98),
+                  curve: const ElasticOutCurve(1.05),
                   child: sliderButton,
                 ),
                 GestureDetector(
