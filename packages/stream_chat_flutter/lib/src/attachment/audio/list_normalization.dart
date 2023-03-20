@@ -128,7 +128,8 @@ class ListNormalization {
     final widthNormalized = listSize > inputList.length
         ? _expandList(positiveList, listSize)
         : shrinkWidth(positiveList, listSize);
-    //At last the normalize the height of the bars. The result of this method
+    
+    //At last normalisation of the height of the bars. The result of this method
     //will be a list of bars a bit bigger in high.
     return _normalizeBarsHeight(widthNormalized);
   }
