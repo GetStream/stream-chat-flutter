@@ -398,7 +398,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
       _amplitudeSink = _amplitudeController.sink;
       _amplitudeSink?.addStream(_audioRecorder.onAmplitudeChanged(
-        const Duration(milliseconds: 150),
+        const Duration(milliseconds: 100),
       ));
 
       _waveBarsNormalizer = WaveBarsNormalizer(
