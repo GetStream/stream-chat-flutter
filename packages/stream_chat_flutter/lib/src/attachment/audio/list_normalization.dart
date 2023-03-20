@@ -16,7 +16,7 @@ class ListNormalization {
     var acc = 0.0;
 
     /// Each time the pace is summed, it round is take. It we round pace only
-    /// one time, the deviate too much from the true median of all elements.
+    /// one time, it deviates too much from the true median of all elements.
     /// The last page is calculated separately.
     while (acc <= inputList.length - pace) {
       final median = inputList
@@ -94,7 +94,7 @@ class ListNormalization {
     }
   }
 
-  /// This methods assumes that all elements are positives numbers.
+  /// This methods assumes that all elements are positives numbers .
   static List<double> _normalizeBarsHeight(List<double> inputList) {
     var maxValue = 0.0;
     var minValue = 0.0;
@@ -121,7 +121,7 @@ class ListNormalization {
   ) {
     //First it is necessary to ensure that all element are positive.
     final positiveList = minValue < 0
-        ? inputList.map((e) => e + minValue.abs()).toList()
+        ? inputList.map((e) => e - minValue).toList()
         : inputList;
 
     //Now we take the median of the elements
