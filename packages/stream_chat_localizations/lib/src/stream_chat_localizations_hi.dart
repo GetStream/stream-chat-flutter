@@ -444,5 +444,5 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   // TODO: implement holdToStartRecording
-  String get holdToStartRecording => 'रिकॉर्ड करने के लिए दबाये';
+  String get holdToStartRecording => 'रिकॉर्ड करने के लिए दबाए रखें';
 }
