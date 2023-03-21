@@ -66,7 +66,6 @@ class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
   void initState() {
     super.initState();
 
-
     _playStateSubscription =
         widget.player.playerStateStream.listen(_playerStateListener);
   }
