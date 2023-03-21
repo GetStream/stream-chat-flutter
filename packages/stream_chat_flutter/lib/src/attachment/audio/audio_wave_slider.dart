@@ -178,17 +178,17 @@ class _AudioBarsPainter extends CustomPainter {
   _AudioBarsPainter({
     required this.bars,
     required this.progressPercentage,
-    this.spacingRatio = 0.01,
     this.colorLeft = Colors.blueAccent,
     this.colorRight = Colors.grey,
+    this.spacingRatio = 0.01,
     this.barHeightRatio = 1,
     this.padding = 20,
   });
 
   final List<double> bars;
+  final double progressPercentage;
   final Color colorRight;
   final Color colorLeft;
-  final double progressPercentage;
   final double spacingRatio;
   final double barHeightRatio;
   final int padding;
@@ -243,6 +243,16 @@ class _AudioBarsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    if (oldDelegate is _AudioBarsPainter) {
+      return oldDelegate.bars != bars ||
+          oldDelegate.progressPercentage != progressPercentage ||
+          oldDelegate.colorRight != colorRight ||
+          oldDelegate.colorLeft != colorLeft ||
+          oldDelegate.spacingRatio != spacingRatio ||
+          oldDelegate.barHeightRatio != barHeightRatio ||
+          oldDelegate.padding != padding;
+    }
+
     return true;
   }
 }

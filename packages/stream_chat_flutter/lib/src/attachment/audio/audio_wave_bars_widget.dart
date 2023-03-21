@@ -194,6 +194,15 @@ class _AudioBarsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    if (oldDelegate is _AudioBarsPainter) {
+      return oldDelegate.bars != bars ||
+          oldDelegate.colorRight != colorRight ||
+          oldDelegate.colorLeft != colorLeft ||
+          oldDelegate.barHeightRatio != barHeightRatio ||
+          oldDelegate.spacingRatio != spacingRatio ||
+          oldDelegate.inverse != inverse;
+    }
+
     return true;
   }
 }
