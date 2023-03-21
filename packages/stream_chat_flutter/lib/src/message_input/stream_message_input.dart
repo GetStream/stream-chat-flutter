@@ -110,6 +110,7 @@ class StreamMessageInput extends StatefulWidget {
     this.resumeRecordButtonBuilder,
     this.pauseRecordButtonBuilder,
     this.cancelRecordButtonBuilder,
+    this.confirmRecordButtonBuilder,
     this.recordTimerBuilder,
     this.audioWaveBarsBuilder,
     this.commandButtonBuilder,
@@ -246,6 +247,12 @@ class StreamMessageInput extends StatefulWidget {
   /// The builder contains the default [OnPressButton.pause] that can be
   /// customized by calling `.copyWith`.
   final CancelRecordButtonBuilder? cancelRecordButtonBuilder;
+
+  /// Builder for customizing the confirmRecord button.
+  ///
+  /// The builder contains the default [OnPressButton.confirmAudio] that can be
+  /// customized by calling `.copyWith`.
+  final ConfirmRecordButtonBuilder? confirmRecordButtonBuilder;
 
   /// Builder for customizing the command button.
   ///
@@ -750,9 +757,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildConfirmRecordButton() {
-    return OnPressButton.confirmAudio(onPressed: () {
+    final defaultButton = OnPressButton.confirmAudio(onPressed: () {
       _finishRecording(context);
     });
+
+    return widget.confirmRecordButtonBuilder?.call(context, defaultButton) ??
+        defaultButton;
   }
 
   Widget _buildExpandActionsButton(BuildContext context) {

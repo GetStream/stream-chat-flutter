@@ -239,6 +239,17 @@ typedef CancelRecordButtonBuilder = Widget Function(
   OnPressButton cancelRecordButton,
 );
 
+/// {@template confirmRecordButtonBuilder}
+/// A widget builder for building a custom cancelRecord button.
+///
+/// [confirmRecordButton] is the default [OnPressButton.confirmAudio]
+/// configuration, use [confirmRecordButton.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef ConfirmRecordButtonBuilder = Widget Function(
+  BuildContext context,
+  OnPressButton confirmRecordButton,
+);
+
 /// {@template recordTimerBuilder}
 /// A widget builder for building a custom recordTimer button.
 ///
