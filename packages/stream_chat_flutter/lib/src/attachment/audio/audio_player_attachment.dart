@@ -66,29 +66,9 @@ class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
   void initState() {
     super.initState();
 
-    void playerStateListener(PlayerState state) async {
-      if (state.processingState == ProcessingState.completed &&
-          widget.singleAudio) {
-        await widget.player.stop();
-        await widget.player.seek(Duration.zero, index: 0);
-      }
-
-      final currentAudio = widget.player.currentIndex == widget.index;
-
-      if (currentAudio && state.processingState == ProcessingState.ready) {
-        setState(() {
-          _waitingForLoad = false;
-        });
-      } else if (currentAudio &&
-          state.processingState == ProcessingState.loading) {
-        setState(() {
-          _waitingForLoad = true;
-        });
-      }
-    }
 
     _playStateSubscription =
-        widget.player.playerStateStream.listen(playerStateListener);
+        widget.player.playerStateStream.listen(_playerStateListener);
   }
 
   @override
@@ -147,6 +127,27 @@ class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
         ],
       ),
     );
+  }
+
+  void _playerStateListener(PlayerState state) async {
+    if (state.processingState == ProcessingState.completed &&
+        widget.singleAudio) {
+      await widget.player.stop();
+      await widget.player.seek(Duration.zero, index: 0);
+    }
+
+    final currentAudio = widget.player.currentIndex == widget.index;
+
+    if (currentAudio && state.processingState == ProcessingState.ready) {
+      setState(() {
+        _waitingForLoad = false;
+      });
+    } else if (currentAudio &&
+        state.processingState == ProcessingState.loading) {
+      setState(() {
+        _waitingForLoad = true;
+      });
+    }
   }
 
   Widget _controlButton(IconThemeData iconTheme) {
