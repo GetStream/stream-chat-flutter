@@ -120,15 +120,14 @@ class ListNormalization {
     double minValue,
   ) {
     //First it is necessary to ensure that all element are positive.
-    final positiveList = minValue < 0
-        ? inputList.map((e) => e - minValue).toList()
-        : inputList;
+    final positiveList =
+        minValue < 0 ? inputList.map((e) => e - minValue).toList() : inputList;
 
     //Now we take the median of the elements
     final widthNormalized = listSize > inputList.length
         ? _expandList(positiveList, listSize)
         : shrinkWidth(positiveList, listSize);
-    
+
     //At last normalisation of the height of the bars. The result of this method
     //will be a list of bars a bit bigger in high.
     return _normalizeBarsHeight(widthNormalized);
