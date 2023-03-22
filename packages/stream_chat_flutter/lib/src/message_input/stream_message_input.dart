@@ -13,7 +13,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:record/record.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/attachment/audio/audio_player_single_audio.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/audio_player_compose_message.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_bars_widget.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/record_controller.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
@@ -1232,7 +1232,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                       (e) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: e.type == 'audio_recording'
-                            ? AudioPlayerSingleAudio(
+                            ? AudioPlayerComposeMessage(
                                 attachment: e,
                                 actionButton: _buildRemoveButton(e),
                               )

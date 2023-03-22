@@ -25,7 +25,6 @@ class AudioPlayerMessage extends StatefulWidget {
     this.index = 0,
     this.fileSize,
     this.actionButton,
-    this.singleAudio = false,
   });
 
   /// The player of the audio.
@@ -48,11 +47,6 @@ class AudioPlayerMessage extends StatefulWidget {
   /// An action button to be used.
   final Widget? actionButton;
 
-  /// Marks if this is a single audio message or this audio is inside.
-  /// If this is true, the audio will reset itself when it ends, otherwise
-  /// it gets managed by the player.
-  final bool singleAudio;
-
   @override
   _AudioPlayerMessageState createState() => _AudioPlayerMessageState();
 }
@@ -66,6 +60,8 @@ class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
   void initState() {
     super.initState();
 
+    //Todo: There's no need for a listener, this should actually be a builder...
+    //This listener is making the whole widget to redraw itself D=.
     _playStateSubscription =
         widget.player.playerStateStream.listen(_playerStateListener);
   }
@@ -129,12 +125,6 @@ class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
   }
 
   void _playerStateListener(PlayerState state) async {
-    if (state.processingState == ProcessingState.completed &&
-        widget.singleAudio) {
-      await widget.player.stop();
-      await widget.player.seek(Duration.zero, index: 0);
-    }
-
     final currentAudio = widget.player.currentIndex == widget.index;
 
     if (currentAudio && state.processingState == ProcessingState.ready) {
