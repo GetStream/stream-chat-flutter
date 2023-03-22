@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart'
@@ -14,12 +13,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:record/record.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_player_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_bars_widget.dart';
-import 'package:stream_chat_flutter/src/attachment/audio/wave_bars_normalizer.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/record_controller.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
@@ -328,12 +326,7 @@ class StreamMessageInput extends StatefulWidget {
 /// State of [StreamMessageInput]
 class StreamMessageInputState extends State<StreamMessageInput>
     with RestorationMixin<StreamMessageInput>, WidgetsBindingObserver {
-  final _audioRecorder = Record();
-  final _stopwatch = Stopwatch();
-  final _amplitudeController = BehaviorSubject<Amplitude>();
-  StreamSink<Amplitude>? _amplitudeSink;
-
-  WaveBarsNormalizer? _waveBarsNormalizer;
+  RecordController? _audioRecorder;
 
   bool get _commandEnabled => _effectiveController.message.command != null;
 
@@ -359,9 +352,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   StreamMessageInputController get _effectiveController =>
       widget.messageInputController ?? _controller!.value;
   StreamRestorableMessageInputController? _controller;
-
-  StreamSubscription<RecordState>? _recordStateSubscription;
-  Stream<RecordState>? _recordStateStream;
 
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
@@ -396,21 +386,16 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
 
     if (widget.enableAudioRecord) {
-      _recordStateStream = _audioRecorder.onStateChanged();
-      _recordStateSubscription = _recordStateStream?.listen((state) {
-        setState(() {
-          _recordingState = state;
-        });
-      });
-
-      _amplitudeSink = _amplitudeController.sink;
-      _amplitudeSink?.addStream(_audioRecorder.onAmplitudeChanged(
-        const Duration(milliseconds: 100),
-      ));
-
-      _waveBarsNormalizer = WaveBarsNormalizer(
-        barsStream: _amplitudeController.stream,
+      _audioRecorder = RecordController(
+        audioRecorder: Record(),
+        onRecordStateChange: (state) {
+          setState(() {
+            _recordingState = state;
+          });
+        },
       );
+
+      _audioRecorder?.init();
     }
 
     _effectiveFocusNode.addListener(_focusNodeListener);
@@ -575,7 +560,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: _recordingState != RecordState.stop
+                    child: _recordingState != RecordState.stop &&
+                            widget.enableAudioRecord
                         ? _buildRecordField(context)
                         : _buildTextField(context),
                   ),
@@ -693,7 +679,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _buildRecordTimer(_recordStateStream!),
+              child: _buildRecordTimer(_audioRecorder!.recordState!),
             ),
             Expanded(
               child: SizedBox(
@@ -702,7 +688,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                   padding: const EdgeInsets.only(
                     right: 16,
                   ),
-                  child: _buildAudioWaveBars(_amplitudeController.stream),
+                  child: _buildAudioWaveBars(_audioRecorder!.amplitudeStream),
                 ),
               ),
             ),
@@ -832,62 +818,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
         defaultButton;
   }
 
-  Future<void> _record() async {
-    try {
-      if (await _audioRecorder.hasPermission()) {
-        if (_recordingState == RecordState.stop) {
-          HapticFeedback.heavyImpact();
-          await _audioRecorder.start();
-          _stopwatch
-            ..reset()
-            ..start();
-
-          _waveBarsNormalizer?.start();
-        } else if (_recordingState == RecordState.pause) {
-          await _audioRecorder.resume();
-          _stopwatch.start();
-        }
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  Future<void> _pauseRecording() {
-    _stopwatch.stop();
-    return _audioRecorder.pause();
-  }
-
-  Future<void> _cancelRecording() {
-    _waveBarsNormalizer?.reset();
-    return _audioRecorder.stop();
-  }
-
   Future<void> _finishRecording(BuildContext context) async {
-    final recordDuration = _stopwatch.elapsed;
-    final path = await _audioRecorder.stop();
+    final attachment = await _audioRecorder?.finishRecording();
 
-    if (path != null) {
-      final uri = Uri.parse(path);
-      final file = File(uri.path);
-
-      final waveList = _waveBarsNormalizer?.normalizedBars(30);
-      _waveBarsNormalizer?.reset();
-
-      final attachment = await file.length().then(
-            (fileSize) => Attachment(
-              type: 'audio_recording',
-              file: AttachmentFile(
-                size: fileSize,
-                path: uri.path,
-              ),
-              extraData: {
-                'duration': recordDuration.inMilliseconds,
-                'waveList': waveList,
-              },
-            ),
-          );
-
+    if (attachment != null) {
       if (widget.sendVoiceRecordDirectly) {
         final resp = await StreamChannel.of(context)
             .channel
@@ -913,8 +847,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
     if (_recordingState == RecordState.record) {
       return StreamSvgIcon.microphone(color: Colors.red);
     } else {
-      final defaultButton =
-          OnPressButton.cancelRecord(onPressed: _cancelRecording);
+      final defaultButton = OnPressButton.cancelRecord(
+        onPressed: _audioRecorder!.cancelRecording,
+      );
 
       return widget.cancelRecordButtonBuilder?.call(context, defaultButton) ??
           defaultButton;
@@ -922,14 +857,16 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildPauseRecordButton() {
-    final defaultButton = OnPressButton.pauseRecord(onPressed: _pauseRecording);
+    final defaultButton =
+        OnPressButton.pauseRecord(onPressed: _audioRecorder!.pauseRecording);
 
     return widget.pauseRecordButtonBuilder?.call(context, defaultButton) ??
         defaultButton;
   }
 
   Widget _buildResumeRecordButton() {
-    final defaultButton = OnPressButton.resumeRecord(onPressed: _record);
+    final defaultButton =
+        OnPressButton.resumeRecord(onPressed: _audioRecorder!.record);
 
     return widget.resumeRecordButtonBuilder?.call(context, defaultButton) ??
         defaultButton;
@@ -937,7 +874,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   Widget _buildStartRecordButton() {
     final defaultButton = RecordButton.startButton(
-      onHold: _record,
+      onHold: _audioRecorder!.record,
       onPressed: _showTapRecordHint,
     );
 
@@ -1759,12 +1696,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _stopSlowMode();
     _onChangedDebounced.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    _recordStateSubscription?.cancel();
-    _waveBarsNormalizer?.dispose();
-    _audioRecorder.dispose().then((value) {
-      _amplitudeSink?.close();
-      _amplitudeController.close();
-    });
+
+    _audioRecorder?.dispose();
 
     super.dispose();
   }

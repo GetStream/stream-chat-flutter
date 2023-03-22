@@ -10,7 +10,7 @@ import 'package:stream_chat_flutter/src/attachment/audio/list_normalization.dart
 /// needed.
 /// {@endtemplate}
 class WaveBarsNormalizer {
-  /// {@macro AudioWaveSlider}
+  /// {@macro WaveBarsNormalizer}
   WaveBarsNormalizer({required this.barsStream});
 
   /// The stream of amplitude of audio recorded.
