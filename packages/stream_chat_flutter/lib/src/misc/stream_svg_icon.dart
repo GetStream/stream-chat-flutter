@@ -288,17 +288,17 @@ class StreamSvgIcon extends StatelessWidget {
   }
 
   /// [StreamSvgIcon] type
-  factory StreamSvgIcon.pause({
+  const StreamSvgIcon.pause({
+    Key? key,
     double? size,
     Color? color,
-  }) {
-    return StreamSvgIcon(
-      assetName: 'Icon_pause.svg',
-      color: color,
-      width: size,
-      height: size,
-    );
-  }
+  }) : this(
+          key: key,
+          assetName: 'Icon_pause.svg',
+          color: color,
+          width: size,
+          height: size,
+        );
 
   /// [StreamSvgIcon] type
   factory StreamSvgIcon.penWrite({
@@ -405,17 +405,17 @@ class StreamSvgIcon extends StatelessWidget {
   }
 
   /// [StreamSvgIcon] type
-  factory StreamSvgIcon.microphone({
+  const StreamSvgIcon.microphone({
+    Key? key,
     double? size,
     Color? color,
-  }) {
-    return StreamSvgIcon(
-      assetName: 'Icon_microphone.svg',
-      color: color,
-      width: size,
-      height: size,
-    );
-  }
+  }) : this(
+          key: key,
+          assetName: 'Icon_microphone.svg',
+          color: color,
+          width: size,
+          height: size,
+        );
 
   /// [StreamSvgIcon] type
   factory StreamSvgIcon.emptyCircleLeft({
@@ -691,17 +691,17 @@ class StreamSvgIcon extends StatelessWidget {
   }
 
   /// [StreamSvgIcon] type
-  factory StreamSvgIcon.filetypeAac({
+  const StreamSvgIcon.filetypeAac({
+    Key? key,
     double? size,
     Color? color,
-  }) {
-    return StreamSvgIcon(
-      assetName: 'filetype_AAC.svg',
-      color: color,
-      width: size,
-      height: size,
-    );
-  }
+  }) : this(
+          key: key,
+          assetName: 'filetype_AAC.svg',
+          color: color,
+          width: size,
+          height: size,
+        );
 
   /// [StreamSvgIcon] type
   factory StreamSvgIcon.filetypeCsv({

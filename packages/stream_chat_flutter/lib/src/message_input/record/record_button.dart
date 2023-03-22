@@ -12,18 +12,18 @@ class RecordButton extends StatelessWidget {
     this.padding,
   });
 
-  /// Creates the button to start the recording.
-  factory RecordButton.startButton({
+  /// Creates the default button to start the recording.
+  const RecordButton.startButton({
+    Key? key,
     required VoidCallback onHold,
     VoidCallback? onPressed,
-  }) {
-    return RecordButton(
+  }): this(
+      key: key,
       onHold: onHold,
-      icon: StreamSvgIcon.microphone(size: 20),
+      icon: const StreamSvgIcon.microphone(size: 20),
       onPressed: onPressed,
       padding: EdgeInsets.zero,
     );
-  }
 
   /// Callback for holding the button.
   final VoidCallback? onHold;

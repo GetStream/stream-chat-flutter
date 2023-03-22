@@ -15,66 +15,69 @@ class OnPressButton extends StatelessWidget {
   });
 
   /// Attachment button
-  factory OnPressButton.attachment({
+  OnPressButton.attachment({
+    Key? key,
     required Color color,
     required VoidCallback onPressed,
-  }) {
-    return OnPressButton(
-      icon: StreamSvgIcon.attach(color: color),
-      onPressed: onPressed,
-    );
-  }
+  }) : this(
+          key: key,
+          icon: StreamSvgIcon.attach(color: color),
+          onPressed: onPressed,
+        );
 
   /// Command button
-  factory OnPressButton.command({
+  OnPressButton.command({
+    Key? key,
     required Color color,
     required VoidCallback onPressed,
-  }) {
-    return OnPressButton(
-      icon: StreamSvgIcon.lightning(color: color),
-      onPressed: onPressed,
-    );
-  }
+  }) : this(
+          key: key,
+          icon: StreamSvgIcon.lightning(color: color),
+          onPressed: onPressed,
+        );
 
   /// Command button
-  factory OnPressButton.confirmAudio({
+  OnPressButton.confirmAudio({
+    Key? key,
     required VoidCallback onPressed,
-  }) {
-    return OnPressButton(
-      icon: StreamSvgIcon.checkSend(),
-      onPressed: onPressed,
-    );
-  }
+    required Color color,
+  }) : this(
+          key: key,
+          icon: StreamSvgIcon.checkSend(color: color),
+          onPressed: onPressed,
+        );
 
   /// Command button
-  factory OnPressButton.pauseRecord({
+  OnPressButton.pauseRecord({
+    Key? key,
     required VoidCallback onPressed,
-  }) {
-    return OnPressButton(
-      icon: StreamSvgIcon.pause(color: Colors.red),
-      onPressed: onPressed,
-    );
-  }
+    Color color = Colors.red,
+  }) : this(
+          key: key,
+          icon: StreamSvgIcon.pause(color: color),
+          onPressed: onPressed,
+        );
 
   /// Command button
-  factory OnPressButton.resumeRecord({
+  OnPressButton.resumeRecord({
+    Key? key,
     required VoidCallback onPressed,
-  }) {
-    return OnPressButton(
-      icon: StreamSvgIcon.microphone(color: Colors.red),
-      onPressed: onPressed,
-    );
-  }
+    Color color = Colors.red,
+  }) : this(
+          key: key,
+          icon: StreamSvgIcon.microphone(color: color),
+          onPressed: onPressed,
+        );
 
   /// Command button
-  factory OnPressButton.cancelRecord({
+  OnPressButton.cancelRecord({
+    Key? key,
     required VoidCallback onPressed,
-  }) {
-    return OnPressButton(
+  }) : this(
+      key: key,
       icon: StreamSvgIcon.delete(color: Colors.blue),
       onPressed: onPressed,
     );
-  }
 
   /// Icon of the button
   final StreamSvgIcon icon;
