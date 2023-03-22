@@ -435,6 +435,5 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get allowFileAccessMessage => 'Gi tilgang til filer';
 
   @override
-  // TODO: implement holdToStartRecording
   String get holdToStartRecording => 'Hold inne for å ta opp';
 }

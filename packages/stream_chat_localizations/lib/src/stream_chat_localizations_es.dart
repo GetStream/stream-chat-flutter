@@ -450,6 +450,5 @@ No es posible añadir más de $limit archivos adjuntos
   String get allowFileAccessMessage => 'Permitir el acceso a los archivos';
 
   @override
-  // TODO: implement holdToStartRecording
   String get holdToStartRecording => 'Mantén presionado para grabar.';
 }

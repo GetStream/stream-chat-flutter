@@ -450,6 +450,5 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get allowFileAccessMessage => "Autoriser l'accès aux fichiers";
 
   @override
-  // TODO: implement holdToStartRecording
   String get holdToStartRecording => 'Maintenir pour enregistrer';
 }
