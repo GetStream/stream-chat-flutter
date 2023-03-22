@@ -23,38 +23,41 @@ class RecordController {
   /// Function called when record state changes.
   final void Function(RecordState) onRecordStateChange;
 
-  /// A Stream that provides the amplitude variation of the record.
-  Stream<Amplitude> get amplitudeStream => _amplitudeController.stream;
-
   final _stopwatch = Stopwatch();
   final _amplitudeController = BehaviorSubject<Amplitude>();
+  final _recordStateController = BehaviorSubject<RecordState>();
   StreamSink<Amplitude>? _amplitudeSink;
+  StreamSink<RecordState>? _recordStateSink;
 
   StreamSubscription<RecordState>? _recordStateSubscription;
-  Stream<RecordState>? _recordStateStream;
 
   late WaveBarsNormalizer? _waveBarsNormalizer;
   RecordState _recordingState = RecordState.stop;
 
   /// Stream that provides the current record state.
-  Stream<RecordState>? get recordState => _recordStateStream;
+  Stream<RecordState> get recordState => _recordStateController.stream;
+
+  /// A Stream that provides the amplitude variation of the record.
+  Stream<Amplitude> get amplitudeStream => _amplitudeController.stream;
 
   /// Docs
   void init() {
-    _recordStateStream = audioRecorder.onStateChanged();
-    _recordStateSubscription = _recordStateStream?.listen((state) {
+    _amplitudeSink = _amplitudeController.sink;
+    _amplitudeSink?.addStream(
+      audioRecorder.onAmplitudeChanged(
+        const Duration(milliseconds: 100),
+      ),
+    );
+
+    _recordStateSink = _recordStateController.sink;
+    _recordStateSink?.addStream(audioRecorder.onStateChanged());
+
+    _recordStateSubscription = recordState.listen((state) {
       _recordingState = state;
       onRecordStateChange(state);
     });
 
-    _amplitudeSink = _amplitudeController.sink;
-    _amplitudeSink?.addStream(audioRecorder.onAmplitudeChanged(
-      const Duration(milliseconds: 100),
-    ));
-
-    _waveBarsNormalizer = WaveBarsNormalizer(
-      barsStream: _amplitudeController.stream,
-    );
+    _waveBarsNormalizer = WaveBarsNormalizer(barsStream: amplitudeStream);
   }
 
   /// Starts recording
@@ -125,6 +128,7 @@ class RecordController {
     audioRecorder.dispose().then((value) {
       _amplitudeSink?.close();
       _amplitudeController.close();
+      _recordStateController.close();
     });
 
     _recordStateSubscription?.cancel();

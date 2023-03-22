@@ -5,17 +5,15 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart'
     hide ErrorListener;
-import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:record/record.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/attachment/audio/audio_player_attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/audio_player_single_audio.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_bars_widget.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/record_controller.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
@@ -23,6 +21,7 @@ import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/record/record_button.dart';
+import 'package:stream_chat_flutter/src/message_input/record/record_field.dart';
 import 'package:stream_chat_flutter/src/message_input/record/record_timer_widget.dart';
 import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
@@ -252,12 +251,6 @@ class StreamMessageInput extends StatefulWidget {
   /// customized by calling `.copyWith`.
   final ConfirmRecordButtonBuilder? confirmRecordButtonBuilder;
 
-  /// Builder for customizing the command button.
-  ///
-  /// The builder contains the default [CommandButton] that can be customized by
-  /// calling `.copyWith`.
-  final CommandButtonBuilder? commandButtonBuilder;
-
   /// Builder for customizing the record timer.
   ///
   /// The builder contains the default [RecordTimer] that can be
@@ -269,6 +262,12 @@ class StreamMessageInput extends StatefulWidget {
   /// The builder contains the default [AudioWaveBars] that can be
   /// customized by calling `.copyWith`.
   final AudioWaveBarsBuilder? audioWaveBarsBuilder;
+
+  /// Builder for customizing the command button.
+  ///
+  /// The builder contains the default [CommandButton] that can be customized by
+  /// calling `.copyWith`.
+  final CommandButtonBuilder? commandButtonBuilder;
 
   /// When enabled mentions search users across the entire app.
   ///
@@ -673,42 +672,15 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildRecordField(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _buildRecordTimer(_audioRecorder!.recordState!),
-            ),
-            Expanded(
-              child: SizedBox(
-                height: 30,
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    right: 16,
-                  ),
-                  child: _buildAudioWaveBars(_audioRecorder!.amplitudeStream),
-                ),
-              ),
-            ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildCancelRecordButton(),
-              if (_recordingState == RecordState.record)
-                _buildPauseRecordButton(),
-              if (_recordingState != RecordState.record)
-                _buildResumeRecordButton(),
-              _buildConfirmRecordButton(),
-            ],
-          ),
-        ),
-      ],
+    return RecordField(
+      recordController: _audioRecorder!,
+      resumeRecordButtonBuilder: widget.resumeRecordButtonBuilder,
+      pauseRecordButtonBuilder: widget.pauseRecordButtonBuilder,
+      cancelRecordButtonBuilder: widget.cancelRecordButtonBuilder,
+      confirmRecordButtonBuilder: widget.confirmRecordButtonBuilder,
+      recordTimerBuilder: widget.recordTimerBuilder,
+      audioWaveBarsBuilder: widget.audioWaveBarsBuilder,
+      onAudioRecorded: _handleAudioRecording,
     );
   }
 
@@ -740,15 +712,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
       idleSendButton: widget.idleSendButton,
       activeSendButton: widget.activeSendButton,
     );
-  }
-
-  Widget _buildConfirmRecordButton() {
-    final defaultButton = OnPressButton.confirmAudio(onPressed: () {
-      _finishRecording(context);
-    });
-
-    return widget.confirmRecordButtonBuilder?.call(context, defaultButton) ??
-        defaultButton;
   }
 
   Widget _buildExpandActionsButton(BuildContext context) {
@@ -818,58 +781,32 @@ class StreamMessageInputState extends State<StreamMessageInput>
         defaultButton;
   }
 
-  Future<void> _finishRecording(BuildContext context) async {
-    final attachment = await _audioRecorder?.finishRecording();
+  Future<void> _handleAudioRecording(
+    BuildContext context,
+    Future<Attachment?> attachmentFuture,
+  ) async {
+    final attachment = await attachmentFuture;
 
-    if (attachment != null) {
-      if (widget.sendVoiceRecordDirectly) {
-        final resp = await StreamChannel.of(context)
-            .channel
-            .sendMessage(Message(attachments: [attachment]));
+    if (attachment == null) return;
 
-        widget.onMessageSent?.call(resp.message);
+    if (widget.sendVoiceRecordDirectly) {
+      final resp = await StreamChannel.of(context)
+          .channel
+          .sendMessage(Message(attachments: [attachment]));
 
-        var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
-        shouldKeepFocus ??= !_commandEnabled;
+      widget.onMessageSent?.call(resp.message);
 
-        if (shouldKeepFocus) {
-          FocusScope.of(context).requestFocus(_effectiveFocusNode);
-        } else {
-          FocusScope.of(context).unfocus();
-        }
+      var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
+      shouldKeepFocus ??= !_commandEnabled;
+
+      if (shouldKeepFocus) {
+        FocusScope.of(context).requestFocus(_effectiveFocusNode);
       } else {
-        _effectiveController.attachments += [attachment];
+        FocusScope.of(context).unfocus();
       }
-    }
-  }
-
-  Widget _buildCancelRecordButton() {
-    if (_recordingState == RecordState.record) {
-      return StreamSvgIcon.microphone(color: Colors.red);
     } else {
-      final defaultButton = OnPressButton.cancelRecord(
-        onPressed: _audioRecorder!.cancelRecording,
-      );
-
-      return widget.cancelRecordButtonBuilder?.call(context, defaultButton) ??
-          defaultButton;
+      _effectiveController.attachments += [attachment];
     }
-  }
-
-  Widget _buildPauseRecordButton() {
-    final defaultButton =
-        OnPressButton.pauseRecord(onPressed: _audioRecorder!.pauseRecording);
-
-    return widget.pauseRecordButtonBuilder?.call(context, defaultButton) ??
-        defaultButton;
-  }
-
-  Widget _buildResumeRecordButton() {
-    final defaultButton =
-        OnPressButton.resumeRecord(onPressed: _audioRecorder!.record);
-
-    return widget.resumeRecordButtonBuilder?.call(context, defaultButton) ??
-        defaultButton;
   }
 
   Widget _buildStartRecordButton() {
@@ -880,20 +817,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
     return widget.startRecordButtonBuilder?.call(context, defaultButton) ??
         defaultButton;
-  }
-
-  Widget _buildRecordTimer(Stream<RecordState> recordStateStream) {
-    final defaultTimer = RecordTimer(recordState: recordStateStream);
-
-    return widget.recordTimerBuilder?.call(context, defaultTimer) ??
-        defaultTimer;
-  }
-
-  Widget _buildAudioWaveBars(Stream<Amplitude> amplitudeStream) {
-    final defaultWaveBars = AudioWaveBars(amplitudeStream: amplitudeStream);
-
-    return widget.audioWaveBarsBuilder?.call(context, defaultWaveBars) ??
-        defaultWaveBars;
   }
 
   void _showTapRecordHint() {
@@ -1309,7 +1232,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
                       (e) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: e.type == 'audio_recording'
-                            ? _buildVoiceNoteAttachment(e)
+                            ? AudioPlayerSingleAudio(
+                                attachment: e,
+                                actionButton: _buildRemoveButton(e),
+                              )
                             : _buildFileAttachment(e),
                       ),
                     )
@@ -1367,60 +1293,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
         padding: const EdgeInsets.all(8),
         child: _buildRemoveButton(attachment),
       ),
-    );
-  }
-
-  Widget _buildVoiceNoteAttachment(Attachment attachment) {
-    final audioFilePath = attachment.file?.path;
-    Widget playerMessage;
-
-    final player = AudioPlayer();
-
-    if (attachment.file?.path != null) {
-      player.setAudioSource(AudioSource.file(audioFilePath!));
-    } else if (attachment.assetUrl != null) {
-      player.setAudioSource(AudioSource.uri(Uri.parse(attachment.assetUrl!)));
-    }
-
-    Duration duration;
-    if (attachment.extraData['duration'] != null) {
-      duration =
-          Duration(milliseconds: attachment.extraData['duration']! as int);
-    } else {
-      duration = Duration.zero;
-    }
-
-    List<double> waveBars;
-    if (attachment.extraData['waveList'] != null) {
-      waveBars = (attachment.extraData['waveList']! as List<dynamic>)
-          .map((e) => double.tryParse(e.toString()))
-          .whereNotNull()
-          .toList();
-    } else {
-      waveBars = List.filled(60, 0);
-    }
-
-    playerMessage = AudioPlayerMessage(
-      player: player,
-      duration: duration,
-      waveBars: waveBars,
-      fileSize: attachment.fileSize,
-      actionButton: _buildRemoveButton(attachment),
-      singleAudio: true,
-    );
-
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colorTheme.barsBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colorTheme.borders,
-        ),
-      ),
-      width: MediaQuery.of(context).size.width * 0.65,
-      child: playerMessage,
     );
   }
 

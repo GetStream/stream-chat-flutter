@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 
 /// {@template onPressButton}
-/// The button that allows a user to use commands in a chat. Use the factory
+/// The button that allows a user to use commands in a chat. Use the redirection
 /// constructors of this button to create pre defined buttons.
 /// {@endtemplate}
 class OnPressButton extends StatelessWidget {
@@ -40,7 +40,7 @@ class OnPressButton extends StatelessWidget {
   OnPressButton.confirmAudio({
     Key? key,
     required VoidCallback onPressed,
-    required Color color,
+    Color? color,
   }) : this(
           key: key,
           icon: StreamSvgIcon.checkSend(color: color),
@@ -73,11 +73,12 @@ class OnPressButton extends StatelessWidget {
   OnPressButton.cancelRecord({
     Key? key,
     required VoidCallback onPressed,
+    Color color = Colors.blue,
   }) : this(
-      key: key,
-      icon: StreamSvgIcon.delete(color: Colors.blue),
-      onPressed: onPressed,
-    );
+          key: key,
+          icon: StreamSvgIcon.delete(color: color),
+          onPressed: onPressed,
+        );
 
   /// Icon of the button
   final StreamSvgIcon icon;

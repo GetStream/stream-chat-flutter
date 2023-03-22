@@ -17,13 +17,13 @@ class RecordButton extends StatelessWidget {
     Key? key,
     required VoidCallback onHold,
     VoidCallback? onPressed,
-  }): this(
-      key: key,
-      onHold: onHold,
-      icon: const StreamSvgIcon.microphone(size: 20),
-      onPressed: onPressed,
-      padding: EdgeInsets.zero,
-    );
+  }) : this(
+          key: key,
+          onHold: onHold,
+          icon: const StreamSvgIcon.microphone(size: 20),
+          onPressed: onPressed,
+          padding: EdgeInsets.zero,
+        );
 
   /// Callback for holding the button.
   final VoidCallback? onHold;
