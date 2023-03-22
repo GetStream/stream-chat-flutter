@@ -353,7 +353,7 @@ class _ParseAttachments extends StatelessWidget {
         );
       },
       'audio_recording': (_, attachment) {
-        return SizedBox(
+        return const SizedBox(
           height: 32,
           width: 32,
           child: StreamSvgIcon.filetypeAac(),

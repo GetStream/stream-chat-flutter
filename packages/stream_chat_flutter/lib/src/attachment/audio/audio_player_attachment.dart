@@ -226,7 +226,7 @@ class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
           if (widget.actionButton != null) {
             return widget.actionButton!;
           } else {
-            return SizedBox(
+            return const SizedBox(
               width: 44,
               height: 36,
               child: StreamSvgIcon.filetypeAac(),
