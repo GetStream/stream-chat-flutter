@@ -1138,7 +1138,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
         child: Center(
           child: StreamSvgIcon.close(
-            size: 24,
+            size: 32,
             color: _streamChatTheme.colorTheme.barsBg,
           ),
         ),
