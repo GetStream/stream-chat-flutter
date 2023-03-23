@@ -22,7 +22,7 @@ class RecordField extends StatelessWidget {
   });
 
   ///Docs
-  final RecordController recordController;
+  final StreamRecordController recordController;
 
   /// Builder for customizing the resumeRecord button.
   ///

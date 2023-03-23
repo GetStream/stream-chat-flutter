@@ -20,7 +20,7 @@ void main() {
 
       stateSubject.sink.add(RecordState.pause);
 
-      final recordController = RecordController(
+      final recordController = StreamRecordController(
         audioRecorder: mockRecorder,
         onRecordStateChange: (state) {},
       )..init();
@@ -34,7 +34,7 @@ void main() {
     test('Start recording should work', () async {
       final mockRecorder = MockRecorder();
 
-      final recordController = RecordController(
+      final recordController = StreamRecordController(
         audioRecorder: mockRecorder,
         onRecordStateChange: (state) {},
       );
@@ -49,7 +49,7 @@ void main() {
 
       when(mockRecorder.pause).thenAnswer((_) => Future.value());
 
-      final recordController = RecordController(
+      final recordController = StreamRecordController(
         audioRecorder: mockRecorder,
         onRecordStateChange: (state) {},
       );
@@ -71,7 +71,7 @@ void main() {
 
       stateSubject.sink.add(RecordState.pause);
 
-      final recordController = RecordController(
+      final recordController = StreamRecordController(
         audioRecorder: mockRecorder,
         onRecordStateChange: (state) {},
       )..init();
@@ -95,7 +95,7 @@ void main() {
           .thenAnswer((_) => amplitudeSubject.stream);
       when(mockRecorder.stop).thenAnswer((_) => Future.value('path'));
 
-      final recordController = RecordController(
+      final recordController = StreamRecordController(
         audioRecorder: mockRecorder,
         onRecordStateChange: (state) {},
       )..init();

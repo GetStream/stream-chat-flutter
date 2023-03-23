@@ -87,6 +87,7 @@ class StreamMessageInput extends StatefulWidget {
     this.textCapitalization = TextCapitalization.sentences,
     this.disableAttachments = false,
     this.messageInputController,
+    this.recordController,
     this.actions = const [],
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
@@ -176,6 +177,9 @@ class StreamMessageInput extends StatefulWidget {
 
   /// The text controller of the TextField.
   final StreamMessageInputController? messageInputController;
+
+  /// The audio controller of the RecordField.
+  final StreamRecordController? recordController;
 
   /// List of action widgets.
   final List<Widget> actions;
@@ -325,13 +329,9 @@ class StreamMessageInput extends StatefulWidget {
 /// State of [StreamMessageInput]
 class StreamMessageInputState extends State<StreamMessageInput>
     with RestorationMixin<StreamMessageInput>, WidgetsBindingObserver {
-  RecordController? _audioRecorder;
-
   bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool _actionsShrunk = false;
-
-  RecordState _recordingState = RecordState.stop;
 
   late StreamChatThemeData _streamChatTheme;
   late StreamMessageInputThemeData _messageInputTheme;
@@ -352,9 +352,17 @@ class StreamMessageInputState extends State<StreamMessageInput>
       widget.messageInputController ?? _controller!.value;
   StreamRestorableMessageInputController? _controller;
 
+  StreamRecordController get _audioRecorder =>
+      widget.recordController ?? _recordControllerInstance;
+  late StreamRecordController _recordControllerInstance;
+
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
     _controller = StreamRestorableMessageInputController(message: message);
+  }
+
+  void _createLocalRecordController([Message? message]) {
+    _recordControllerInstance = StreamRecordController(audioRecorder: Record());
   }
 
   void _registerController() {
@@ -384,18 +392,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
       _initialiseEffectiveController();
     }
 
-    if (widget.enableAudioRecord) {
-      _audioRecorder = RecordController(
-        audioRecorder: Record(),
-        onRecordStateChange: (state) {
-          setState(() {
-            _recordingState = state;
-          });
-        },
-      );
-
-      _audioRecorder?.init();
+    if (widget.recordController == null) {
+      _createLocalRecordController();
     }
+    _audioRecorder.init();
 
     _effectiveFocusNode.addListener(_focusNodeListener);
   }
@@ -559,10 +559,17 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: _recordingState != RecordState.stop &&
-                            widget.enableAudioRecord
-                        ? _buildRecordField(context)
-                        : _buildTextField(context),
+                    child: StreamBuilder<RecordState>(
+                      initialData: RecordState.stop,
+                      stream: _audioRecorder.recordState,
+                      builder: (context, snapshot) {
+                        final state = snapshot.data ?? RecordState.stop;
+
+                        return state == RecordState.stop
+                            ? _buildTextField(context)
+                            : _buildRecordField(context);
+                      },
+                    ),
                   ),
                   if (_effectiveController.message.parentId != null &&
                       !widget.hideSendAsDm)
@@ -674,7 +681,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Widget _buildRecordField(BuildContext context) {
     return RecordField(
       key: const Key('recordInputField'),
-      recordController: _audioRecorder!,
+      recordController: _audioRecorder,
       resumeRecordButtonBuilder: widget.resumeRecordButtonBuilder,
       pauseRecordButtonBuilder: widget.pauseRecordButtonBuilder,
       cancelRecordButtonBuilder: widget.cancelRecordButtonBuilder,
@@ -812,7 +819,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   Widget _buildStartRecordButton() {
     final defaultButton = RecordButton.startButton(
-      onHold: _audioRecorder!.record,
+      onHold: _audioRecorder.record,
       onPressed: _showTapRecordHint,
     );
 
@@ -1569,8 +1576,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _stopSlowMode();
     _onChangedDebounced.cancel();
     WidgetsBinding.instance.removeObserver(this);
-
-    _audioRecorder?.dispose();
+    _audioRecorder.dispose();
 
     super.dispose();
   }

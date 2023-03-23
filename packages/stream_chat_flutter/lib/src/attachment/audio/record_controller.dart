@@ -10,18 +10,12 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@template recordController}
 /// Controller of audio record
 /// {@endtemplate}
-class RecordController {
+class StreamRecordController {
   /// {@macro WaveBarsNormalizer}
-  RecordController({
-    required this.audioRecorder,
-    required this.onRecordStateChange,
-  });
+  StreamRecordController({required this.audioRecorder});
 
   /// Actual Recorder class
   final Record audioRecorder;
-
-  /// Function called when record state changes.
-  final void Function(RecordState) onRecordStateChange;
 
   final _stopwatch = Stopwatch();
   final _amplitudeController = BehaviorSubject<Amplitude>();
@@ -54,7 +48,6 @@ class RecordController {
 
     _recordStateSubscription = recordState.listen((state) {
       _recordingState = state;
-      onRecordStateChange(state);
     });
 
     _waveBarsNormalizer = WaveBarsNormalizer(barsStream: amplitudeStream);
