@@ -31,7 +31,7 @@ class RecordController {
 
   StreamSubscription<RecordState>? _recordStateSubscription;
 
-  late WaveBarsNormalizer? _waveBarsNormalizer;
+  WaveBarsNormalizer? _waveBarsNormalizer;
   RecordState _recordingState = RecordState.stop;
 
   /// Stream that provides the current record state.
@@ -83,15 +83,15 @@ class RecordController {
   }
 
   /// Pause recording. Recording can be resume by calling record().
-  Future<void> pauseRecording() {
+  Future<void> pauseRecording() async {
     _stopwatch.stop();
-    return audioRecorder.pause();
+    await audioRecorder.pause();
   }
 
   /// Cancel recording. Once cancelled, the recording can't be resumed.
-  Future<void> cancelRecording() {
+  Future<void> cancelRecording() async {
     _waveBarsNormalizer?.reset();
-    return audioRecorder.stop();
+    await audioRecorder.stop();
   }
 
   /// Finishes recording and returns the audio file as an attachment.
@@ -103,21 +103,25 @@ class RecordController {
       final uri = Uri.parse(path);
       final file = File(uri.path);
 
-      final waveList = _waveBarsNormalizer?.normalizedBars(30);
+      final waveList = _waveBarsNormalizer?.normalizedBars(40);
       _waveBarsNormalizer?.reset();
 
-      final fileSize = await file.length();
-      return Attachment(
-        type: 'audio_recording',
-        file: AttachmentFile(
-          size: fileSize,
-          path: uri.path,
-        ),
-        extraData: {
-          'duration': recordDuration.inMilliseconds,
-          'waveList': waveList,
-        },
-      );
+      try {
+        final fileSize = await file.length();
+        return Attachment(
+          type: 'audio_recording',
+          file: AttachmentFile(
+            size: fileSize,
+            path: uri.path,
+          ),
+          extraData: {
+            'duration': recordDuration.inMilliseconds,
+            'waveList': waveList,
+          },
+        );
+      } catch (e) {
+        return null;
+      }
     } else {
       return null;
     }

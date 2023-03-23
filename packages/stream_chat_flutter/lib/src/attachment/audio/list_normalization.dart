@@ -47,6 +47,8 @@ class ListNormalization {
   /// Expands the list by repeating the values. The resulting list will be the
   /// size of listSize.
   static List<double> _expandList(List<double> inputList, int listSize) {
+    if (inputList.isEmpty) return List.filled(listSize, 0);
+
     final differenceRatio = listSize / inputList.length;
 
     final resultList = List<double>.empty(growable: true);
