@@ -680,7 +680,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       confirmRecordButtonBuilder: widget.confirmRecordButtonBuilder,
       recordTimerBuilder: widget.recordTimerBuilder,
       audioWaveBarsBuilder: widget.audioWaveBarsBuilder,
-      onAudioRecorded: _handleAudioRecording,
+      onAudioRecorded: _handleRecordComplete,
     );
   }
 
@@ -799,7 +799,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         defaultButton;
   }
 
-  Future<void> _handleAudioRecording(
+  Future<void> _handleRecordComplete(
     BuildContext context,
     Future<Attachment?> attachmentFuture,
   ) async {
@@ -1224,7 +1224,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
   }
 
-  /// Mark!
   Widget _buildAttachments() {
     final nonOGAttachments = _effectiveController.attachments.where(
       (it) => it.titleLink == null,
