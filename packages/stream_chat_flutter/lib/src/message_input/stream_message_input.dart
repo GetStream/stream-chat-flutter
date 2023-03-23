@@ -1144,7 +1144,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         ),
       ),
     );
-  }
+  }///
 
   Widget _buildAttachment(Attachment attachment) {
     if (widget.attachmentThumbnailBuilders?.containsKey(attachment.type) ==
