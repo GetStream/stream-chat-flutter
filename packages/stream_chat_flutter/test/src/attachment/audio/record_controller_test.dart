@@ -22,7 +22,6 @@ void main() {
 
       final recordController = StreamRecordController(
         audioRecorder: mockRecorder,
-        onRecordStateChange: (state) {},
       )..init();
 
       verify(() => mockRecorder.onAmplitudeChanged(duration)).called(1);
@@ -36,7 +35,6 @@ void main() {
 
       final recordController = StreamRecordController(
         audioRecorder: mockRecorder,
-        onRecordStateChange: (state) {},
       );
 
       await recordController.record();
@@ -51,7 +49,6 @@ void main() {
 
       final recordController = StreamRecordController(
         audioRecorder: mockRecorder,
-        onRecordStateChange: (state) {},
       );
 
       await recordController.pauseRecording();
@@ -73,7 +70,6 @@ void main() {
 
       final recordController = StreamRecordController(
         audioRecorder: mockRecorder,
-        onRecordStateChange: (state) {},
       )..init();
 
       await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -97,7 +93,6 @@ void main() {
 
       final recordController = StreamRecordController(
         audioRecorder: mockRecorder,
-        onRecordStateChange: (state) {},
       )..init();
 
       await Future<void>.delayed(const Duration(milliseconds: 100));

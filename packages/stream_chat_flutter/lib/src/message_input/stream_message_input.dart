@@ -392,10 +392,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
       _initialiseEffectiveController();
     }
 
-    if (widget.recordController == null) {
-      _createLocalRecordController();
+    if (widget.enableAudioRecord) {
+      if (widget.recordController == null) {
+        _createLocalRecordController();
+      }
+      _audioRecorder.init();
     }
-    _audioRecorder.init();
 
     _effectiveFocusNode.addListener(_focusNodeListener);
   }
@@ -559,17 +561,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: StreamBuilder<RecordState>(
-                      initialData: RecordState.stop,
-                      stream: _audioRecorder.recordState,
-                      builder: (context, snapshot) {
-                        final state = snapshot.data ?? RecordState.stop;
-
-                        return state == RecordState.stop
-                            ? _buildTextField(context)
-                            : _buildRecordField(context);
-                      },
-                    ),
+                    child: _buildInputField(context),
                   ),
                   if (_effectiveController.message.parentId != null &&
                       !widget.hideSendAsDm)
@@ -690,6 +682,24 @@ class StreamMessageInputState extends State<StreamMessageInput>
       audioWaveBarsBuilder: widget.audioWaveBarsBuilder,
       onAudioRecorded: _handleAudioRecording,
     );
+  }
+
+  Widget _buildInputField(BuildContext context) {
+    if (widget.enableAudioRecord) {
+      return StreamBuilder<RecordState>(
+        initialData: RecordState.stop,
+        stream: _audioRecorder.recordState,
+        builder: (context, snapshot) {
+          final state = snapshot.data ?? RecordState.stop;
+
+          return state == RecordState.stop
+              ? _buildTextField(context)
+              : _buildRecordField(context);
+        },
+      );
+    } else {
+      return _buildTextField(context);
+    }
   }
 
   Widget _buildTextField(BuildContext context) {
@@ -819,6 +829,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   Widget _buildStartRecordButton() {
     final defaultButton = RecordButton.startButton(
+      key: const Key('startRecord'),
       onHold: _audioRecorder.record,
       onPressed: _showTapRecordHint,
     );
@@ -1576,7 +1587,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _stopSlowMode();
     _onChangedDebounced.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    _audioRecorder.dispose();
+
+    if (widget.enableAudioRecord) {
+      _audioRecorder.dispose();
+    }
 
     super.dispose();
   }
