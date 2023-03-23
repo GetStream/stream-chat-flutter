@@ -86,7 +86,7 @@ class OnPressButton extends StatelessWidget {
   /// The action to perform when the button is pressed or clicked.
   final VoidCallback onPressed;
 
-  ///Docs
+  /// Padding of button.
   final EdgeInsetsGeometry? padding;
 
   /// Returns a copy of this object with the given fields updated.

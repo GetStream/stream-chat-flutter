@@ -129,7 +129,8 @@ class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
           builder: (context, snapshot) {
             final state = snapshot.data ?? ProcessingState.idle;
             if (state == ProcessingState.ready ||
-                state == ProcessingState.idle) {
+                state == ProcessingState.idle ||
+                !playingThis) {
               return ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   elevation: 2,

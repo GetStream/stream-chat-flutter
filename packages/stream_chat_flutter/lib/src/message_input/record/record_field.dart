@@ -6,9 +6,12 @@ import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
 import 'package:stream_chat_flutter/src/message_input/record/record_timer_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-///Docs
+/// {@template recordField}
+/// Record field. The version of text input of StreamMessageInput, but for
+/// recording audio messages.
+/// {@endtemplate}
 class RecordField extends StatelessWidget {
-  ///Docs
+  /// {@macro recordField}
   const RecordField({
     super.key,
     required this.recordController,
@@ -21,7 +24,7 @@ class RecordField extends StatelessWidget {
     this.onAudioRecorded,
   });
 
-  ///Docs
+  /// Controller of record.
   final StreamRecordController recordController;
 
   /// Builder for customizing the resumeRecord button.

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 
-///Docs
+/// {@template recordButton}
+/// Record button that start the recording process. This button doesn't have
+/// any logic related to recording, this should be provided in the callbacks.
+/// This button allows to set callback to onHold and onPressed.
+/// {@endtemplate}
 class RecordButton extends StatelessWidget {
-  ///Docs
+  /// {@macro recordButton}
   const RecordButton({
     super.key,
     required this.icon,
@@ -34,7 +38,7 @@ class RecordButton extends StatelessWidget {
   /// Icon of the button.
   final Widget icon;
 
-  ///Docs
+  /// Padding of button
   final EdgeInsetsGeometry? padding;
 
   /// Returns a copy of this object with the given fields updated.

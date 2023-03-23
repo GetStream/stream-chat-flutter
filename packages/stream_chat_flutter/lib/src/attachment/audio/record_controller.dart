@@ -8,7 +8,8 @@ import 'package:stream_chat_flutter/src/attachment/audio/wave_bars_normalizer.da
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template recordController}
-/// Controller of audio record
+/// Controller of audio record. This call can be used to controll the recording
+/// logic programmatically.
 /// {@endtemplate}
 class StreamRecordController {
   /// {@macro WaveBarsNormalizer}
@@ -34,7 +35,7 @@ class StreamRecordController {
   /// A Stream that provides the amplitude variation of the record.
   Stream<Amplitude> get amplitudeStream => _amplitudeController.stream;
 
-  /// Docs
+  /// Initialization of the controller.
   void init() {
     _amplitudeSink = _amplitudeController.sink;
     _amplitudeSink?.addStream(

@@ -6,19 +6,23 @@ import 'package:just_audio/just_audio.dart';
 import 'package:stream_chat_flutter/src/attachment/audio/audio_player_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Docs
+/// {@template audioListPlayer}
+/// AudioPlayer intended to be used inside message composer. This audio player
+/// plays only one music at a time.
+/// {@endtemplate}
 class AudioPlayerComposeMessage extends StatefulWidget {
-  /// Docs
+  /// {@macro audioListPlayer}
   const AudioPlayerComposeMessage({
     super.key,
     required this.attachment,
     this.actionButton,
   });
 
-  /// Docs
+  /// Attachment of the audio
   final Attachment attachment;
 
-  /// Docs
+  /// An action button to that can be used to perform actions. Example: Delete
+  /// audio from compose.
   final Widget? actionButton;
 
   @override

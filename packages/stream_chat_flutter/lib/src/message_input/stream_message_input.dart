@@ -361,7 +361,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _controller = StreamRestorableMessageInputController(message: message);
   }
 
-  void _createLocalRecordController([Message? message]) {
+  void _createLocalRecordController() {
     _recordControllerInstance = StreamRecordController(audioRecorder: Record());
   }
 

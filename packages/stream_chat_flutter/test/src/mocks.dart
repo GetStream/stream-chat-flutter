@@ -13,10 +13,7 @@ class MockRecorder extends Mock implements Record {
 }
 
 class MockStreamRecordController extends Mock
-    implements StreamRecordController {
-
-
-}
+    implements StreamRecordController {}
 
 class MockClient extends Mock implements StreamChatClient {
   MockClient() {
