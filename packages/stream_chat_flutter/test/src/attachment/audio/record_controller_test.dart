@@ -20,9 +20,9 @@ void main() {
 
       stateSubject.sink.add(RecordState.pause);
 
-      final recordController = StreamRecordController(
+      StreamRecordController(
         audioRecorder: mockRecorder,
-      )..init();
+      ).init();
 
       verify(() => mockRecorder.onAmplitudeChanged(duration)).called(1);
       verify(mockRecorder.onStateChanged).called(1);
