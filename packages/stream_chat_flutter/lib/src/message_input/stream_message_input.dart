@@ -673,6 +673,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   Widget _buildRecordField(BuildContext context) {
     return RecordField(
+      key: const Key('recordInputField'),
       recordController: _audioRecorder!,
       resumeRecordButtonBuilder: widget.resumeRecordButtonBuilder,
       pauseRecordButtonBuilder: widget.pauseRecordButtonBuilder,

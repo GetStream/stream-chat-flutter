@@ -53,25 +53,12 @@ class AudioPlayerMessage extends StatefulWidget {
 
 class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
   var _seeking = false;
-  late StreamSubscription<PlayerState> _playStateSubscription;
-  var _waitingForLoad = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    //Todo: There's no need for a listener, this should actually be a builder...
-    //This listener is making the whole widget to redraw itself D=.
-    _playStateSubscription =
-        widget.player.playerStateStream.listen(_playerStateListener);
-  }
 
   @override
   void dispose() {
     super.dispose();
 
     widget.player.dispose();
-    _playStateSubscription.cancel();
   }
 
   @override
@@ -124,21 +111,6 @@ class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
     );
   }
 
-  void _playerStateListener(PlayerState state) async {
-    final currentAudio = widget.player.currentIndex == widget.index;
-
-    if (currentAudio && state.processingState == ProcessingState.ready) {
-      setState(() {
-        _waitingForLoad = false;
-      });
-    } else if (currentAudio &&
-        state.processingState == ProcessingState.loading) {
-      setState(() {
-        _waitingForLoad = true;
-      });
-    }
-  }
-
   Widget _controlButton(IconThemeData iconTheme) {
     return StreamBuilder<bool>(
       initialData: false,
@@ -148,26 +120,37 @@ class _AudioPlayerMessageState extends State<AudioPlayerMessage> {
 
         final icon = playingThis ? Icons.pause : Icons.play_arrow;
 
-        if (!_waitingForLoad) {
-          return ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              elevation: 2,
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              backgroundColor: Colors.white,
-              shape: const CircleBorder(),
-            ),
-            child: Icon(icon, color: Colors.black),
-            onPressed: () {
-              if (playingThis) {
-                _pause();
-              } else {
-                _play();
-              }
-            },
-          );
-        } else {
-          return const CircularProgressIndicator(strokeWidth: 3);
-        }
+        final processingState = widget.player.playerStateStream
+            .map((event) => event.processingState);
+
+        return StreamBuilder<ProcessingState>(
+          stream: processingState,
+          initialData: ProcessingState.idle,
+          builder: (context, snapshot) {
+            final state = snapshot.data ?? ProcessingState.idle;
+            if (state == ProcessingState.ready ||
+                state == ProcessingState.idle) {
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  elevation: 2,
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  backgroundColor: Colors.white,
+                  shape: const CircleBorder(),
+                ),
+                child: Icon(icon, color: Colors.black),
+                onPressed: () {
+                  if (playingThis) {
+                    _pause();
+                  } else {
+                    _play();
+                  }
+                },
+              );
+            } else {
+              return const CircularProgressIndicator(strokeWidth: 3);
+            }
+          },
+        );
       },
     );
   }
