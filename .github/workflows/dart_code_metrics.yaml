@@ -10,6 +10,10 @@ on:
     branches:
       - master
       - develop
+        
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
@@ -21,15 +25,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: "Cache Flutter dependencies"
-        uses: actions/cache@v2
-        with:
-          path: /opt/hostedtoolcache/flutter
-          key: ${{ env.flutter_version }}-flutter
-
       - name: "Install Flutter"
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
+          cache: true
           flutter-version: ${{ env.flutter_version }}
 
       - name: "Install Tools"
