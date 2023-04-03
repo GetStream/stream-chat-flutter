@@ -75,6 +75,31 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   final val = <String, dynamic>{
     'id': instance.id,
     'text': instance.text,
+    'type': readonly(instance.type),
+    'attachments': instance.attachments.map((e) => e.toJson()).toList(),
+    'mentioned_users': User.toIds(instance.mentionedUsers),
+    'reaction_counts': readonly(instance.reactionCounts),
+    'reaction_scores': readonly(instance.reactionScores),
+    'latest_reactions': readonly(instance.latestReactions),
+    'own_reactions': readonly(instance.ownReactions),
+    'parent_id': instance.parentId,
+    'quoted_message': readonly(instance.quotedMessage),
+    'quoted_message_id': instance.quotedMessageId,
+    'reply_count': readonly(instance.replyCount),
+    'thread_participants': readonly(instance.threadParticipants),
+    'show_in_channel': instance.showInChannel,
+    'silent': instance.silent,
+    'shadowed': readonly(instance.shadowed),
+    'command': readonly(instance.command),
+    'deleted_at': readonly(instance.deletedAt),
+    'created_at': readonly(instance.createdAt),
+    'updated_at': readonly(instance.updatedAt),
+    'user': readonly(instance.user),
+    'pinned': instance.pinned,
+    'pinned_at': readonly(instance.pinnedAt),
+    'pin_expires': instance.pinExpires?.toIso8601String(),
+    'pinned_by': readonly(instance.pinnedBy),
+    'extra_data': instance.extraData,
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -83,31 +108,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
     }
   }
 
-  writeNotNull('type', readonly(instance.type));
-  val['attachments'] = instance.attachments.map((e) => e.toJson()).toList();
-  val['mentioned_users'] = User.toIds(instance.mentionedUsers);
-  writeNotNull('reaction_counts', readonly(instance.reactionCounts));
-  writeNotNull('reaction_scores', readonly(instance.reactionScores));
-  writeNotNull('latest_reactions', readonly(instance.latestReactions));
-  writeNotNull('own_reactions', readonly(instance.ownReactions));
-  val['parent_id'] = instance.parentId;
-  val['quoted_message'] = readonly(instance.quotedMessage);
-  val['quoted_message_id'] = instance.quotedMessageId;
-  writeNotNull('reply_count', readonly(instance.replyCount));
-  writeNotNull('thread_participants', readonly(instance.threadParticipants));
-  val['show_in_channel'] = instance.showInChannel;
-  val['silent'] = instance.silent;
-  writeNotNull('shadowed', readonly(instance.shadowed));
-  writeNotNull('command', readonly(instance.command));
-  writeNotNull('deleted_at', readonly(instance.deletedAt));
-  writeNotNull('created_at', readonly(instance.createdAt));
-  writeNotNull('updated_at', readonly(instance.updatedAt));
-  writeNotNull('user', readonly(instance.user));
-  val['pinned'] = instance.pinned;
-  val['pinned_at'] = readonly(instance.pinnedAt);
-  val['pin_expires'] = instance.pinExpires?.toIso8601String();
-  val['pinned_by'] = readonly(instance.pinnedBy);
-  val['extra_data'] = instance.extraData;
   writeNotNull('i18n', instance.i18n);
   return val;
 }

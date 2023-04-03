@@ -98,8 +98,10 @@ class StreamChatNetworkError extends StreamChatError {
     }
     return StreamChatNetworkError.raw(
       code: errorResponse?.code ?? -1,
-      message:
-          errorResponse?.message ?? response?.statusMessage ?? error.message,
+      message: errorResponse?.message ??
+          response?.statusMessage ??
+          error.message ??
+          '',
       statusCode: errorResponse?.statusCode ?? response?.statusCode,
       data: errorResponse,
       isRequestCancelledError: error.type == DioErrorType.cancel,

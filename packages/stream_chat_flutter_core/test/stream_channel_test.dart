@@ -92,7 +92,7 @@ void main() {
 
       const errorMessage = 'Error! Error! Error!';
       final error = DioError(
-        type: DioErrorType.response,
+        type: DioErrorType.badResponse,
         error: errorMessage,
         requestOptions: RequestOptions(path: ''),
       );

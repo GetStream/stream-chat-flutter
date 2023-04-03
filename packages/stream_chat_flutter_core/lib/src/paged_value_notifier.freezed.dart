@@ -1,7 +1,7 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'paged_value_notifier.dart';
 
@@ -27,11 +27,11 @@ mixin _$PagedValue<Key, Value> {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult Function(
+    TResult? Function(
             List<Value> items, Key? nextPageKey, StreamChatError? error)?
         $default, {
-    TResult Function()? loading,
-    TResult Function(StreamChatError error)? error,
+    TResult? Function()? loading,
+    TResult? Function(StreamChatError error)? error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -53,9 +53,9 @@ mixin _$PagedValue<Key, Value> {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult Function(Success<Key, Value> value)? $default, {
-    TResult Function(Loading<Key, Value> value)? loading,
-    TResult Function(Error<Key, Value> value)? error,
+    TResult? Function(Success<Key, Value> value)? $default, {
+    TResult? Function(Loading<Key, Value> value)? loading,
+    TResult? Function(Error<Key, Value> value)? error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -72,17 +72,19 @@ mixin _$PagedValue<Key, Value> {
 abstract class $PagedValueCopyWith<Key, Value, $Res> {
   factory $PagedValueCopyWith(PagedValue<Key, Value> value,
           $Res Function(PagedValue<Key, Value>) then) =
-      _$PagedValueCopyWithImpl<Key, Value, $Res>;
+      _$PagedValueCopyWithImpl<Key, Value, $Res, PagedValue<Key, Value>>;
 }
 
 /// @nodoc
-class _$PagedValueCopyWithImpl<Key, Value, $Res>
+class _$PagedValueCopyWithImpl<Key, Value, $Res,
+        $Val extends PagedValue<Key, Value>>
     implements $PagedValueCopyWith<Key, Value, $Res> {
   _$PagedValueCopyWithImpl(this._value, this._then);
 
-  final PagedValue<Key, Value> _value;
   // ignore: unused_field
-  final $Res Function(PagedValue<Key, Value>) _then;
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 }
 
 /// @nodoc
@@ -90,36 +92,35 @@ abstract class _$$SuccessCopyWith<Key, Value, $Res> {
   factory _$$SuccessCopyWith(_$Success<Key, Value> value,
           $Res Function(_$Success<Key, Value>) then) =
       __$$SuccessCopyWithImpl<Key, Value, $Res>;
+  @useResult
   $Res call({List<Value> items, Key? nextPageKey, StreamChatError? error});
 }
 
 /// @nodoc
 class __$$SuccessCopyWithImpl<Key, Value, $Res>
-    extends _$PagedValueCopyWithImpl<Key, Value, $Res>
+    extends _$PagedValueCopyWithImpl<Key, Value, $Res, _$Success<Key, Value>>
     implements _$$SuccessCopyWith<Key, Value, $Res> {
   __$$SuccessCopyWithImpl(
       _$Success<Key, Value> _value, $Res Function(_$Success<Key, Value>) _then)
-      : super(_value, (v) => _then(v as _$Success<Key, Value>));
+      : super(_value, _then);
 
-  @override
-  _$Success<Key, Value> get _value => super._value as _$Success<Key, Value>;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? items = freezed,
+    Object? items = null,
     Object? nextPageKey = freezed,
     Object? error = freezed,
   }) {
     return _then(_$Success<Key, Value>(
-      items: items == freezed
+      items: null == items
           ? _value._items
           : items // ignore: cast_nullable_to_non_nullable
               as List<Value>,
-      nextPageKey: nextPageKey == freezed
+      nextPageKey: freezed == nextPageKey
           ? _value.nextPageKey
           : nextPageKey // ignore: cast_nullable_to_non_nullable
               as Key?,
-      error: error == freezed
+      error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
               as StreamChatError?,
@@ -142,6 +143,7 @@ class _$Success<Key, Value> extends Success<Key, Value>
   /// List with all items loaded so far.
   @override
   List<Value> get items {
+    if (_items is EqualUnmodifiableListView) return _items;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_items);
   }
@@ -177,7 +179,7 @@ class _$Success<Key, Value> extends Success<Key, Value>
             const DeepCollectionEquality().equals(other._items, _items) &&
             const DeepCollectionEquality()
                 .equals(other.nextPageKey, nextPageKey) &&
-            const DeepCollectionEquality().equals(other.error, error));
+            (identical(other.error, error) || other.error == error));
   }
 
   @override
@@ -185,10 +187,11 @@ class _$Success<Key, Value> extends Success<Key, Value>
       runtimeType,
       const DeepCollectionEquality().hash(_items),
       const DeepCollectionEquality().hash(nextPageKey),
-      const DeepCollectionEquality().hash(error));
+      error);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$SuccessCopyWith<Key, Value, _$Success<Key, Value>> get copyWith =>
       __$$SuccessCopyWithImpl<Key, Value, _$Success<Key, Value>>(
           this, _$identity);
@@ -208,11 +211,11 @@ class _$Success<Key, Value> extends Success<Key, Value>
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult Function(
+    TResult? Function(
             List<Value> items, Key? nextPageKey, StreamChatError? error)?
         $default, {
-    TResult Function()? loading,
-    TResult Function(StreamChatError error)? error,
+    TResult? Function()? loading,
+    TResult? Function(StreamChatError error)? error,
   }) {
     return $default?.call(items, nextPageKey, this.error);
   }
@@ -246,9 +249,9 @@ class _$Success<Key, Value> extends Success<Key, Value>
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult Function(Success<Key, Value> value)? $default, {
-    TResult Function(Loading<Key, Value> value)? loading,
-    TResult Function(Error<Key, Value> value)? error,
+    TResult? Function(Success<Key, Value> value)? $default, {
+    TResult? Function(Loading<Key, Value> value)? loading,
+    TResult? Function(Error<Key, Value> value)? error,
   }) {
     return $default?.call(this);
   }
@@ -276,13 +279,13 @@ abstract class Success<Key, Value> extends PagedValue<Key, Value> {
   const Success._() : super._();
 
   /// List with all items loaded so far.
-  List<Value> get items => throw _privateConstructorUsedError;
+  List<Value> get items;
 
   /// The key for the next page to be fetched.
-  Key? get nextPageKey => throw _privateConstructorUsedError;
+  Key? get nextPageKey;
 
   /// The current error, if any.
-  StreamChatError? get error => throw _privateConstructorUsedError;
+  StreamChatError? get error;
   @JsonKey(ignore: true)
   _$$SuccessCopyWith<Key, Value, _$Success<Key, Value>> get copyWith =>
       throw _privateConstructorUsedError;
@@ -297,14 +300,11 @@ abstract class _$$LoadingCopyWith<Key, Value, $Res> {
 
 /// @nodoc
 class __$$LoadingCopyWithImpl<Key, Value, $Res>
-    extends _$PagedValueCopyWithImpl<Key, Value, $Res>
+    extends _$PagedValueCopyWithImpl<Key, Value, $Res, _$Loading<Key, Value>>
     implements _$$LoadingCopyWith<Key, Value, $Res> {
   __$$LoadingCopyWithImpl(
       _$Loading<Key, Value> _value, $Res Function(_$Loading<Key, Value>) _then)
-      : super(_value, (v) => _then(v as _$Loading<Key, Value>));
-
-  @override
-  _$Loading<Key, Value> get _value => super._value as _$Loading<Key, Value>;
+      : super(_value, _then);
 }
 
 /// @nodoc
@@ -349,11 +349,11 @@ class _$Loading<Key, Value> extends Loading<Key, Value>
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult Function(
+    TResult? Function(
             List<Value> items, Key? nextPageKey, StreamChatError? error)?
         $default, {
-    TResult Function()? loading,
-    TResult Function(StreamChatError error)? error,
+    TResult? Function()? loading,
+    TResult? Function(StreamChatError error)? error,
   }) {
     return loading?.call();
   }
@@ -387,9 +387,9 @@ class _$Loading<Key, Value> extends Loading<Key, Value>
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult Function(Success<Key, Value> value)? $default, {
-    TResult Function(Loading<Key, Value> value)? loading,
-    TResult Function(Error<Key, Value> value)? error,
+    TResult? Function(Success<Key, Value> value)? $default, {
+    TResult? Function(Loading<Key, Value> value)? loading,
+    TResult? Function(Error<Key, Value> value)? error,
   }) {
     return loading?.call(this);
   }
@@ -419,26 +419,25 @@ abstract class _$$ErrorCopyWith<Key, Value, $Res> {
   factory _$$ErrorCopyWith(
           _$Error<Key, Value> value, $Res Function(_$Error<Key, Value>) then) =
       __$$ErrorCopyWithImpl<Key, Value, $Res>;
+  @useResult
   $Res call({StreamChatError error});
 }
 
 /// @nodoc
 class __$$ErrorCopyWithImpl<Key, Value, $Res>
-    extends _$PagedValueCopyWithImpl<Key, Value, $Res>
+    extends _$PagedValueCopyWithImpl<Key, Value, $Res, _$Error<Key, Value>>
     implements _$$ErrorCopyWith<Key, Value, $Res> {
   __$$ErrorCopyWithImpl(
       _$Error<Key, Value> _value, $Res Function(_$Error<Key, Value>) _then)
-      : super(_value, (v) => _then(v as _$Error<Key, Value>));
+      : super(_value, _then);
 
-  @override
-  _$Error<Key, Value> get _value => super._value as _$Error<Key, Value>;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? error = freezed,
+    Object? error = null,
   }) {
     return _then(_$Error<Key, Value>(
-      error == freezed
+      null == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
               as StreamChatError,
@@ -473,15 +472,15 @@ class _$Error<Key, Value> extends Error<Key, Value>
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$Error<Key, Value> &&
-            const DeepCollectionEquality().equals(other.error, error));
+            (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(error));
+  int get hashCode => Object.hash(runtimeType, error);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$ErrorCopyWith<Key, Value, _$Error<Key, Value>> get copyWith =>
       __$$ErrorCopyWithImpl<Key, Value, _$Error<Key, Value>>(this, _$identity);
 
@@ -500,11 +499,11 @@ class _$Error<Key, Value> extends Error<Key, Value>
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult Function(
+    TResult? Function(
             List<Value> items, Key? nextPageKey, StreamChatError? error)?
         $default, {
-    TResult Function()? loading,
-    TResult Function(StreamChatError error)? error,
+    TResult? Function()? loading,
+    TResult? Function(StreamChatError error)? error,
   }) {
     return error?.call(this.error);
   }
@@ -538,9 +537,9 @@ class _$Error<Key, Value> extends Error<Key, Value>
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult Function(Success<Key, Value> value)? $default, {
-    TResult Function(Loading<Key, Value> value)? loading,
-    TResult Function(Error<Key, Value> value)? error,
+    TResult? Function(Success<Key, Value> value)? $default, {
+    TResult? Function(Loading<Key, Value> value)? loading,
+    TResult? Function(Error<Key, Value> value)? error,
   }) {
     return error?.call(this);
   }
@@ -564,7 +563,7 @@ abstract class Error<Key, Value> extends PagedValue<Key, Value> {
   const factory Error(final StreamChatError error) = _$Error<Key, Value>;
   const Error._() : super._();
 
-  StreamChatError get error => throw _privateConstructorUsedError;
+  StreamChatError get error;
   @JsonKey(ignore: true)
   _$$ErrorCopyWith<Key, Value, _$Error<Key, Value>> get copyWith =>
       throw _privateConstructorUsedError;

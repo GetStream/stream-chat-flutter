@@ -33,6 +33,14 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
 Map<String, dynamic> _$UserToJson(User instance) {
   final val = <String, dynamic>{
     'id': instance.id,
+    'role': readonly(instance.role),
+    'teams': readonly(instance.teams),
+    'created_at': readonly(instance.createdAt),
+    'updated_at': readonly(instance.updatedAt),
+    'last_active': readonly(instance.lastActive),
+    'online': readonly(instance.online),
+    'banned': readonly(instance.banned),
+    'ban_expires': readonly(instance.banExpires),
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -41,14 +49,6 @@ Map<String, dynamic> _$UserToJson(User instance) {
     }
   }
 
-  writeNotNull('role', readonly(instance.role));
-  writeNotNull('teams', readonly(instance.teams));
-  writeNotNull('created_at', readonly(instance.createdAt));
-  writeNotNull('updated_at', readonly(instance.updatedAt));
-  writeNotNull('last_active', readonly(instance.lastActive));
-  writeNotNull('online', readonly(instance.online));
-  writeNotNull('banned', readonly(instance.banned));
-  writeNotNull('ban_expires', readonly(instance.banExpires));
   writeNotNull('language', instance.language);
   val['extra_data'] = instance.extraData;
   return val;
