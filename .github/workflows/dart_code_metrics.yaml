@@ -1,7 +1,7 @@
 name: Dart Code Metrics
 
 env:
-  flutter_version: "3.3.3"
+  flutter_version: "3.7.0"
   folders: "lib, test"
 
 on:
