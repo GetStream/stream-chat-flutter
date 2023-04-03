@@ -3,7 +3,6 @@ name: Dart Code Metrics
 env:
   flutter_version: "3.3.3"
   folders: "lib, test"
-  melos_version: "2.7.1"
 
 on:
   pull_request:
@@ -34,7 +33,7 @@ jobs:
           flutter-version: ${{ env.flutter_version }}
 
       - name: "Install Tools"
-        run: flutter pub global activate melos ${{ env.melos_version }}
+        run: flutter pub global activate melos
       - name: "Bootstrap Workspace"
         run: melos bootstrap
 
