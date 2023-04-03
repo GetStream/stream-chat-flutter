@@ -93,7 +93,7 @@ void main() {
       const errorMessage = 'Error! Error! Error!';
       final error = DioError(
         type: DioErrorType.badResponse,
-        error: errorMessage,
+        message: errorMessage,
         requestOptions: RequestOptions(path: ''),
       );
       when(() => mockChannel.initialized)

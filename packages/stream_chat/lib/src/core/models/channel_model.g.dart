@@ -42,17 +42,7 @@ Map<String, dynamic> _$ChannelModelToJson(ChannelModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'type': instance.type,
-      'cid': readonly(instance.cid),
-      'own_capabilities': readonly(instance.ownCapabilities),
-      'config': readonly(instance.config),
-      'created_by': readonly(instance.createdBy),
       'frozen': instance.frozen,
-      'last_message_at': readonly(instance.lastMessageAt),
-      'created_at': readonly(instance.createdAt),
-      'updated_at': readonly(instance.updatedAt),
-      'deleted_at': readonly(instance.deletedAt),
-      'member_count': readonly(instance.memberCount),
       'cooldown': instance.cooldown,
       'extra_data': instance.extraData,
-      'team': readonly(instance.team),
     };

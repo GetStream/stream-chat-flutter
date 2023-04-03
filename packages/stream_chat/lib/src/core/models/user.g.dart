@@ -33,14 +33,6 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
 Map<String, dynamic> _$UserToJson(User instance) {
   final val = <String, dynamic>{
     'id': instance.id,
-    'role': readonly(instance.role),
-    'teams': readonly(instance.teams),
-    'created_at': readonly(instance.createdAt),
-    'updated_at': readonly(instance.updatedAt),
-    'last_active': readonly(instance.lastActive),
-    'online': readonly(instance.online),
-    'banned': readonly(instance.banned),
-    'ban_expires': readonly(instance.banExpires),
   };
 
   void writeNotNull(String key, dynamic value) {

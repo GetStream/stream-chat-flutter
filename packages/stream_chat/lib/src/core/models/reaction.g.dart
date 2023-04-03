@@ -23,9 +23,6 @@ Reaction _$ReactionFromJson(Map<String, dynamic> json) => Reaction(
 Map<String, dynamic> _$ReactionToJson(Reaction instance) => <String, dynamic>{
       'message_id': instance.messageId,
       'type': instance.type,
-      'created_at': readonly(instance.createdAt),
-      'user': readonly(instance.user),
       'score': instance.score,
-      'user_id': readonly(instance.userId),
       'extra_data': instance.extraData,
     };
