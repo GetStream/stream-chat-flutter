@@ -53,14 +53,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v2
-        with:
-          path: /opt/hostedtoolcache/flutter
-          key: ${{ env.flutter_version }}-flutter
       - name: "Install Flutter"
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
+          cache: true
           flutter-version: ${{ env.flutter_version }}
       - name: "Install Tools"
         run: |
@@ -82,14 +78,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v2
-        with:
-          path: /Users/runner/hostedtoolcache/flutter
-          key: ${{ env.flutter_version }}-flutter
       - name: "Install Flutter"
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
+          cache: true
           flutter-version: ${{ env.flutter_version }}
       - name: "Install Tools"
         run: |
