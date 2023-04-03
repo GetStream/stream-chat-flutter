@@ -94,7 +94,7 @@ void main() {
       final error = DioError(
         type: DioErrorType.badResponse,
         message: errorMessage,
-        requestOptions: RequestOptions(path: ''),
+        requestOptions: RequestOptions(),
       );
       when(() => mockChannel.initialized)
           .thenAnswer((_) => Future.error(error));
