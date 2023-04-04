@@ -7,6 +7,7 @@
 🔄 Changed
 
 - Cancelling a attachment upload now removes the attachment from the message.
+- Updated `dio` and other dependencies to resolvable versions.
 
 ✅ Added
 
