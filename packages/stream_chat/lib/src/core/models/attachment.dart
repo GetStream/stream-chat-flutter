@@ -135,7 +135,6 @@ class Attachment extends Equatable {
   late final UploadState uploadState;
 
   /// Map of custom channel extraData
-  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// The attachment ID.

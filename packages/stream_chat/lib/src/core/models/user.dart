@@ -131,7 +131,6 @@ class User extends Equatable {
   final String? language;
 
   /// Map of custom user extraData.
-  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// List of users to list of userIds.

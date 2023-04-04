@@ -48,7 +48,6 @@ class Reaction {
   final String? userId;
 
   /// Reaction custom extraData
-  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// Map of custom user extraData

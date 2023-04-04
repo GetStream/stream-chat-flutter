@@ -131,7 +131,7 @@ class Message extends Equatable {
   final String? parentId;
 
   /// A quoted reply message.
-  @JsonKey(toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final Message? quotedMessage;
 
   final String? _quotedMessageId;
@@ -185,7 +185,7 @@ class Message extends Equatable {
   final bool pinned;
 
   /// Reserved field indicating when the message was pinned.
-  @JsonKey(toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final DateTime? pinnedAt;
 
   /// Reserved field indicating when the message will expire.
@@ -194,11 +194,10 @@ class Message extends Equatable {
   final DateTime? pinExpires;
 
   /// Reserved field indicating who pinned the message.
-  @JsonKey(toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final User? pinnedBy;
 
   /// Message custom extraData.
-  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// True if the message is a system info.
@@ -211,7 +210,7 @@ class Message extends Equatable {
   bool get isEphemeral => type == 'ephemeral';
 
   /// A Map of translations.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final Map<String, String>? i18n;
 
   /// Known top level fields.

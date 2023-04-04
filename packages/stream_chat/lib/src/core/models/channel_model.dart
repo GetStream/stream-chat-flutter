@@ -122,7 +122,6 @@ class ChannelModel {
   }
 
   /// Map of custom channel extraData
-  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// The team the channel belongs to

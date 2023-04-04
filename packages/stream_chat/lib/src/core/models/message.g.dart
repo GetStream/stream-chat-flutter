@@ -71,30 +71,16 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       ),
     );
 
-Map<String, dynamic> _$MessageToJson(Message instance) {
-  final val = <String, dynamic>{
-    'id': instance.id,
-    'text': instance.text,
-    'attachments': instance.attachments.map((e) => e.toJson()).toList(),
-    'mentioned_users': User.toIds(instance.mentionedUsers),
-    'parent_id': instance.parentId,
-    'quoted_message': readonly(instance.quotedMessage),
-    'quoted_message_id': instance.quotedMessageId,
-    'show_in_channel': instance.showInChannel,
-    'silent': instance.silent,
-    'pinned': instance.pinned,
-    'pinned_at': readonly(instance.pinnedAt),
-    'pin_expires': instance.pinExpires?.toIso8601String(),
-    'pinned_by': readonly(instance.pinnedBy),
-    'extra_data': instance.extraData,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('i18n', instance.i18n);
-  return val;
-}
+Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
+      'id': instance.id,
+      'text': instance.text,
+      'attachments': instance.attachments.map((e) => e.toJson()).toList(),
+      'mentioned_users': User.toIds(instance.mentionedUsers),
+      'parent_id': instance.parentId,
+      'quoted_message_id': instance.quotedMessageId,
+      'show_in_channel': instance.showInChannel,
+      'silent': instance.silent,
+      'pinned': instance.pinned,
+      'pin_expires': instance.pinExpires?.toIso8601String(),
+      'extra_data': instance.extraData,
+    };
