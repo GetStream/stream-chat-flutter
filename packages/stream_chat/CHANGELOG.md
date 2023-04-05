@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - Fixed streamWatchers. Before it was always new, now it is possible to follow the watchers of a channel.
+- Make `Message.i18n` field read-only.
 
 🔄 Changed
 
