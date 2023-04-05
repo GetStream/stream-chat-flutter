@@ -217,7 +217,7 @@ class Message extends Equatable {
   bool get isEphemeral => type == 'ephemeral';
 
   /// A Map of translations.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final Map<String, String>? i18n;
 
   /// Known top level fields.

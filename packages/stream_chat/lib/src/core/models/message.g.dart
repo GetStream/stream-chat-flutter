@@ -108,6 +108,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   val['pin_expires'] = instance.pinExpires?.toIso8601String();
   val['pinned_by'] = readonly(instance.pinnedBy);
   val['extra_data'] = instance.extraData;
-  writeNotNull('i18n', instance.i18n);
+  writeNotNull('i18n', readonly(instance.i18n));
   return val;
 }
