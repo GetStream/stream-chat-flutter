@@ -431,6 +431,8 @@ class _LastMessage extends StatelessWidget {
                 return '🎬';
               } else if (e.type == 'giphy') {
                 return '[GIF]';
+              } else if (e.type == 'audio_recording') {
+                return '\u{1F399}';
               }
               return e == lastMessage.attachments.last
                   ? (e.title ?? 'File')

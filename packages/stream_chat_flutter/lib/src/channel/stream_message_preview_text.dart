@@ -42,6 +42,8 @@ class StreamMessagePreviewText extends StatelessWidget {
           return '🎬';
         } else if (it.type == 'giphy') {
           return '[GIF]';
+        } else if (it.type == 'audio_recording') {
+          return '\u{1F399}';
         }
         return it == message.attachments.last
             ? (it.title ?? 'File')

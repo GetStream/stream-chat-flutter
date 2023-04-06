@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:record/record.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/record_controller.dart';
 import 'package:stream_chat_flutter/src/video/vlc/vlc_manager_desktop.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+class MockRecorder extends Mock implements Record {
+  @override
+  Future<bool> hasPermission() {
+    return Future.value(true);
+  }
+}
+
+class MockStreamRecordController extends Mock
+    implements StreamRecordController {}
 
 class MockClient extends Mock implements StreamChatClient {
   MockClient() {

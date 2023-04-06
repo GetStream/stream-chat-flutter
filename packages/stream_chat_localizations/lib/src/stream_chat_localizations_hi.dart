@@ -441,4 +441,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get allowFileAccessMessage => 'फाइलों तक पहुंच की अनुमति दें';
+
+  @override
+  String get holdToStartRecording => 'रिकॉर्ड करने के लिए दबाए रखें';
 }

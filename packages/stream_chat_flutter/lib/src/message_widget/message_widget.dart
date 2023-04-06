@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/conditional_parent_builder/conditional_parent_builder.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/audio_player_list.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/context_menu_reaction_picker.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
@@ -214,6 +215,20 @@ class StreamMessageWidget extends StatefulWidget {
                 }).toList(),
               ),
               attachmentShape: border,
+            );
+          },
+          'audio_recording': (context, defaultMessage, attachments) {
+            final border = RoundedRectangleBorder(
+              borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+            );
+
+            return WrapAttachmentWidget(
+              attachmentShape: border,
+              attachmentWidget: AudioListPlayer(
+                attachments: attachments,
+                attachmentBorderRadiusGeometry: attachmentBorderRadiusGeometry,
+                constraints: const BoxConstraints.tightFor(width: 400),
+              ),
             );
           },
           'giphy': (context, message, attachments) {

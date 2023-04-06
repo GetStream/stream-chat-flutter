@@ -450,4 +450,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get allowFileAccessMessage => "Consenti l'accesso ai file";
+
+  @override
+  String get holdToStartRecording => 'Tieni premuto per registrare.';
 }

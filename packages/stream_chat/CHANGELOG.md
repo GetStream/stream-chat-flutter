@@ -12,6 +12,7 @@
 
 ✅ Added
 
+- Support for async audio messages.
 - Added `presence` property to `Channel::watch` method.
 
 ## 5.3.0

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
@@ -15,6 +16,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
     super.key,
     required this.message,
     required this.messageTheme,
+    required this.chatThemeData,
     this.reverse = false,
     this.showBorder = false,
     this.textLimit = 170,
@@ -30,6 +32,9 @@ class StreamQuotedMessageWidget extends StatelessWidget {
 
   /// The message theme
   final StreamMessageThemeData messageTheme;
+
+  /// The chat theme
+  final StreamChatThemeData chatThemeData;
 
   /// If true the widget will be mirrored
   final bool reverse;
@@ -66,6 +71,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
           composing: composing,
           onQuotedMessageClear: onQuotedMessageClear,
           messageTheme: messageTheme,
+          chatThemeData: chatThemeData,
           showBorder: showBorder,
           reverse: reverse,
           attachmentThumbnailBuilders: attachmentThumbnailBuilders,
@@ -107,6 +113,7 @@ class _QuotedMessage extends StatelessWidget {
     required this.composing,
     required this.onQuotedMessageClear,
     required this.messageTheme,
+    required this.chatThemeData,
     required this.showBorder,
     required this.reverse,
     this.attachmentThumbnailBuilders,
@@ -117,6 +124,7 @@ class _QuotedMessage extends StatelessWidget {
   final bool composing;
   final VoidCallback? onQuotedMessageClear;
   final StreamMessageThemeData messageTheme;
+  final StreamChatThemeData chatThemeData;
   final bool showBorder;
   final bool reverse;
 
@@ -125,6 +133,9 @@ class _QuotedMessage extends StatelessWidget {
       attachmentThumbnailBuilders;
 
   bool get _hasAttachments => message.attachments.isNotEmpty;
+
+  bool get _isVoiceMessage =>
+      message.attachments.any((e) => e.type == 'audio_recording');
 
   bool get _containsText => message.text?.isNotEmpty == true;
 
@@ -137,9 +148,19 @@ class _QuotedMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
-    var msg = _hasAttachments && !_containsText
-        ? message.copyWith(text: message.attachments.last.title ?? '')
-        : message;
+    Message msg;
+    final audioRecordDuration = message.attachments
+        .firstWhereOrNull((e) => e.type == 'audio_recording')
+        ?.extraData['duration'] as int?;
+
+    if (_isVoiceMessage) {
+      msg = message.copyWith(text: 'Voice note');
+    } else if (_hasAttachments && !_containsText) {
+      msg = message.copyWith(text: message.attachments.last.title ?? '');
+    } else {
+      msg = message;
+    }
+
     if (msg.text!.length > textLimit) {
       msg = msg.copyWith(text: '${msg.text!.substring(0, textLimit - 3)}...');
     }
@@ -161,19 +182,35 @@ class _QuotedMessage extends StatelessWidget {
         ),
       if (msg.text!.isNotEmpty && !_isGiphy)
         Flexible(
-          child: StreamMessageText(
-            message: msg,
-            messageTheme: isOnlyEmoji && _containsText
-                ? messageTheme.copyWith(
-                    messageTextStyle: messageTheme.messageTextStyle?.copyWith(
-                      fontSize: 32,
-                    ),
-                  )
-                : messageTheme.copyWith(
-                    messageTextStyle: messageTheme.messageTextStyle?.copyWith(
-                      fontSize: 12,
-                    ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              StreamMessageText(
+                message: msg,
+                messageTheme: isOnlyEmoji && _containsText
+                    ? messageTheme.copyWith(
+                        messageTextStyle:
+                            messageTheme.messageTextStyle?.copyWith(
+                          fontSize: 32,
+                        ),
+                      )
+                    : messageTheme.copyWith(
+                        messageTextStyle:
+                            messageTheme.messageTextStyle?.copyWith(
+                          fontSize: 12,
+                        ),
+                      ),
+              ),
+              if (_isVoiceMessage && audioRecordDuration != null)
+                Text(
+                  Duration(
+                    milliseconds: audioRecordDuration,
+                  ).toMinutesAndSeconds(),
+                  style: chatThemeData.textTheme.footnote.copyWith(
+                    color: chatThemeData.colorTheme.textLowEmphasis,
                   ),
+                ),
+            ],
           ),
         ),
     ].insertBetween(const SizedBox(width: 8));
@@ -240,8 +277,9 @@ class _ParseAttachments extends StatelessWidget {
       attachment = message.attachments.last;
       if (attachmentThumbnailBuilders?.containsKey(attachment.type) == true) {
         attachmentBuilder = attachmentThumbnailBuilders![attachment.type];
+      } else {
+        attachmentBuilder = _defaultAttachmentBuilder[attachment.type];
       }
-      attachmentBuilder = _defaultAttachmentBuilder[attachment.type];
       if (attachmentBuilder == null) {
         child = const Offstage();
       } else {
@@ -252,7 +290,7 @@ class _ParseAttachments extends StatelessWidget {
     return Material(
       clipBehavior: Clip.hardEdge,
       type: MaterialType.transparency,
-      shape: attachment.type == 'file'
+      shape: attachment.type == 'file' || attachment.type == 'audio_recording'
           ? null
           : RoundedRectangleBorder(
               side: const BorderSide(width: 0, color: Colors.transparent),
@@ -312,6 +350,13 @@ class _ParseAttachments extends StatelessWidget {
           child: getFileTypeImage(
             attachment.extraData['mime_type'] as String?,
           ),
+        );
+      },
+      'audio_recording': (_, attachment) {
+        return const SizedBox(
+          height: 32,
+          width: 32,
+          child: StreamSvgIcon.filetypeAac(),
         );
       },
     };

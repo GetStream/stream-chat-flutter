@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
-import 'package:stream_chat_flutter/src/message_input/command_button.dart';
+import 'package:stream_chat_flutter/src/attachment/audio/audio_wave_bars_widget.dart';
+import 'package:stream_chat_flutter/src/message_input/on_press_button.dart';
+import 'package:stream_chat_flutter/src/message_input/record/record_button.dart';
+import 'package:stream_chat_flutter/src/message_input/record/record_timer_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template inProgressBuilder}
@@ -179,18 +181,95 @@ typedef UserMentionTileBuilder = Widget Function(
 /// {@endtemplate}
 typedef CommandButtonBuilder = Widget Function(
   BuildContext context,
-  CommandButton commandButton,
+  OnPressButton commandButton,
 );
 
 /// {@template actionButtonBuilder}
 /// A widget builder for building a custom action button.
 ///
-/// [attachmentButton] is the default [AttachmentButton] configuration,
+/// [attachmentButton] is the default [OnPressButton.attachment] configuration,
 /// use [attachmentButton.copyWith] to easily customize it.
 /// {@endtemplate}
 typedef AttachmentButtonBuilder = Widget Function(
   BuildContext context,
-  AttachmentButton attachmentButton,
+  OnPressButton attachmentButton,
+);
+
+/// {@template startRecordButtonBuilder}
+/// A widget builder for building a custom startRecord button.
+///
+/// [startRecordButton] is the default [RecordButton.startRecord] configuration,
+/// use [startRecordButton.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef StartRecordButtonBuilder = Widget Function(
+  BuildContext context,
+  RecordButton startRecordButton,
+);
+
+/// {@template resumeRecordButtonBuilder}
+/// A widget builder for building a custom resumeRecord button.
+///
+/// [resumeRecordButton] is the default [OnPressButton.resumeRecord]
+/// configuration, use [resumeRecordButton.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef ResumeRecordButtonBuilder = Widget Function(
+  BuildContext context,
+  OnPressButton resumeRecordButton,
+);
+
+/// {@template pauseRecordButtonBuilder}
+/// A widget builder for building a custom pauseRecord button.
+///
+/// [pauseRecordButton] is the default [OnPressButton.pauseRecord]
+/// configuration, use [pauseRecordButton.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef PauseRecordButtonBuilder = Widget Function(
+  BuildContext context,
+  OnPressButton pauseRecordButton,
+);
+
+/// {@template cancelRecordButtonBuilder}
+/// A widget builder for building a custom cancelRecord button.
+///
+/// [cancelRecordButton] is the default [OnPressButton.cancelRecord]
+/// configuration, use [cancelRecordButton.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef CancelRecordButtonBuilder = Widget Function(
+  BuildContext context,
+  OnPressButton cancelRecordButton,
+);
+
+/// {@template confirmRecordButtonBuilder}
+/// A widget builder for building a custom cancelRecord button.
+///
+/// [confirmRecordButton] is the default [OnPressButton.confirmAudio]
+/// configuration, use [confirmRecordButton.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef ConfirmRecordButtonBuilder = Widget Function(
+  BuildContext context,
+  OnPressButton confirmRecordButton,
+);
+
+/// {@template recordTimerBuilder}
+/// A widget builder for building a custom recordTimer button.
+///
+/// [recordTimer] is the default [RecordTimer]
+/// configuration, use [recordTimer.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef RecordTimerBuilder = Widget Function(
+  BuildContext context,
+  RecordTimer recordTimer,
+);
+
+/// {@template audioWaveBarsBuilder}
+/// A widget builder for building a custom audio wave bars widget.
+///
+/// [audioWaveBars] is the default [AudioWaveBars]
+/// configuration, use [audioWaveBars.copyWith] to easily customize it.
+/// {@endtemplate}
+typedef AudioWaveBarsBuilder = Widget Function(
+  BuildContext context,
+  AudioWaveBars audioWaveBars,
 );
 
 /// {@template quotedMessageAttachmentThumbnailBuilder}

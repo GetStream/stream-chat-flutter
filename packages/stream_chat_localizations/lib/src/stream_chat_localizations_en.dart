@@ -443,4 +443,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get allowFileAccessMessage => 'Allow access to files';
+
+  @override
+  String get holdToStartRecording => 'Hold to start recording.';
 }
