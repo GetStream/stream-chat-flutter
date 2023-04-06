@@ -1,3 +1,7 @@
+## Upcoming
+
+- Updated dependencies to resolvable versions.
+
 ## 5.1.0
 
 - Reintroduce support for experimental indexedDB on Web.

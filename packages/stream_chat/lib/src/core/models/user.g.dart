@@ -41,14 +41,6 @@ Map<String, dynamic> _$UserToJson(User instance) {
     }
   }
 
-  writeNotNull('role', readonly(instance.role));
-  writeNotNull('teams', readonly(instance.teams));
-  writeNotNull('created_at', readonly(instance.createdAt));
-  writeNotNull('updated_at', readonly(instance.updatedAt));
-  writeNotNull('last_active', readonly(instance.lastActive));
-  writeNotNull('online', readonly(instance.online));
-  writeNotNull('banned', readonly(instance.banned));
-  writeNotNull('ban_expires', readonly(instance.banExpires));
   writeNotNull('language', instance.language);
   val['extra_data'] = instance.extraData;
   return val;

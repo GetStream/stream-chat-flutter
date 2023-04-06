@@ -12,7 +12,7 @@
 
 🔄 Changed
 
-- Updated `share_plus` dependency to `^6.3.0`
+- Updated dependencies to resolvable versions.
 
 🚀 Improved
 - 
@@ -86,7 +86,7 @@
 ✅ Added
 
 - Added `StreamMemberGridView` and `StreamMemberListView`.
-- Added support for additional text field params in `StreamMessageInput`
+- Added support for additional text field parameters in `StreamMessageInput`
     * `maxLines`
     * `minLines`
     * `textInputAction`
@@ -271,7 +271,7 @@
 - Fix commands resetting the `StreamMessageInputController.value`.
 - [[#996]](https://github.com/GetStream/stream-chat-flutter/issues/996) Videos break bottom photo
   carousal.
-- Fix: URLs with path and/or query params are not enriched.
+- Fix: URLs with path and/or query parameters are not enriched.
 - [[#1194]](https://github.com/GetStream/stream-chat-flutter/issues/1194) Request permission to
   access gallery when opening the file picker.
 
@@ -935,11 +935,11 @@ typedef MessageBuilder = Widget Function(
 ## 1.0.0-beta
 
 - **Refreshed widgets design**
-- Improved api documentation
+- Improved API documentation
 - Updated `stream_chat` dependency to `^1.0.0-beta`
-- Extracted sample app into dedicated [repo](https://github.com/GetStream/flutter-samples)
-- Reimplemented existing widgets
-  using [stream_chat_flutter_core](https://pub.dev/packages/stream_chat_flutter_core)
+- Extracted sample app into dedicated [repository](https://github.com/GetStream/flutter-samples)
+- Re-implemented existing widgets
+  using [`stream_chat_flutter_core`](https://pub.dev/packages/stream_chat_flutter_core)
 
 ## 0.2.21
 
@@ -948,7 +948,7 @@ typedef MessageBuilder = Widget Function(
 
 ## 0.2.20+4
 
-- Fix channelPreview when the message list is empty
+- Fix `channelPreview` when the message list is empty
 
 ## 0.2.20+3
 

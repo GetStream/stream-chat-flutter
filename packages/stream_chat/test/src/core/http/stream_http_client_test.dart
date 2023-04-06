@@ -129,7 +129,11 @@ void main() {
       await client.get('path');
     } on StreamChatNetworkError catch (e) {
       expect(e, isA<StreamChatNetworkError>());
-      expect(e.message, "Dio can't establish new connection after closed.");
+      expect(
+        e.message,
+        "The connection errored: Dio can't establish a new connection"
+        ' after it was closed.',
+      );
     }
   });
 

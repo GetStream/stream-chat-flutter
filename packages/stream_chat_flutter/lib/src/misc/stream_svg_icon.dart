@@ -1088,7 +1088,12 @@ class StreamSvgIcon extends StatelessWidget {
       key: key,
       width: width,
       height: height,
-      color: color,
+      colorFilter: color != null
+          ? ColorFilter.mode(
+              color!,
+              BlendMode.srcIn,
+            )
+          : null,
     );
   }
 }

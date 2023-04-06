@@ -15,6 +15,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   stream_chat_flutter: ^5.3.0
+
 dev_dependencies:
   dart_code_metrics: ^4.16.0
   flutter_test:

@@ -1,3 +1,7 @@
+## Upcoming
+
+- Updated dependencies to resolvable versions.
+
 ## 5.3.0
 
 - Updated `stream_chat` dependency to [`5.3.0`](https://pub.dev/packages/stream_chat/changelog).

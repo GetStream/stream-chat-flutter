@@ -40,7 +40,7 @@ class SortOption<T> {
   final int direction;
 
   /// Sorting field Comparator required for offline sorting
-  @JsonKey(ignore: true)
+  @JsonKey(includeToJson: false, includeFromJson: false)
   final Comparator<T>? comparator;
 
   /// Serialize model to json
