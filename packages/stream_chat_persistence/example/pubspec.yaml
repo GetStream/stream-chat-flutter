@@ -6,6 +6,7 @@ version: 1.0.0+1
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
+  flutter: ">=1.17.0"
 
 dependencies:
   cupertino_icons: ^1.0.3
@@ -13,6 +14,7 @@ dependencies:
     sdk: flutter
   stream_chat: ^5.1.0
   stream_chat_persistence: ^5.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

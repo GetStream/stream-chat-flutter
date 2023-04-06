@@ -1,3 +1,19 @@
+## Upcoming
+
+🐞 Fixed
+
+- [#1462](https://github.com/GetStream/stream-chat-flutter/issues/1462) Fixed support for iPad in the share button for images. 
+- [#1475](https://github.com/GetStream/stream-chat-flutter/issues/1475) Fixed typo to fix compilation.
+
+✅ Added
+
+- Now it is possible to customize the max lines of the title of a url attachment. Before it was always 1 line.
+- Added `attachmentActionsModalBuilder` parameter to `StreamMessageWidget` that allows to customize `AttachmentActionsModal`.
+
+🔄 Changed
+
+- Updated dependencies to resolvable versions.
+
 ## 5.3.0
 
 🔄 Changed

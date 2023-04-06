@@ -2,8 +2,7 @@ name: stream_flutter_workflow
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  flutter_version: "3.3.3"
-  melos_version: "2.7.1"
+  flutter_version: "3.7.0"
 
 on:
   pull_request:
@@ -12,6 +11,10 @@ on:
     branches:
       - master
       - develop
+      
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze:
@@ -20,21 +23,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v2
-        with:
-          path: /opt/hostedtoolcache/flutter
-          key: ${{ env.flutter_version }}-flutter
       - name: "Install Flutter"
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
+          cache: true
           flutter-version: ${{ env.flutter_version }}
       - name: "Install Tools"
         run: |
-          flutter pub global activate melos ${{ env.melos_version }}
+          flutter pub global activate melos
       - name: "Bootstrap Workspace"
         run: melos bootstrap --verbose
       - name: "Dart Analyze"
@@ -51,21 +50,17 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v2
-        with:
-          path: /opt/hostedtoolcache/flutter
-          key: ${{ env.flutter_version }}-flutter
       - name: "Install Flutter"
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
+          cache: true
           flutter-version: ${{ env.flutter_version }}
       - name: "Install Tools"
         run: |
-          flutter pub global activate melos ${{ env.melos_version }}
+          flutter pub global activate melos
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: "Melos Format"
@@ -75,26 +70,22 @@ jobs:
           ./.github/workflows/scripts/validate-formatting.sh
 
   test:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
     timeout-minutes: 30
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v2
-        with:
-          path: /Users/runner/hostedtoolcache/flutter
-          key: ${{ env.flutter_version }}-flutter
       - name: "Install Flutter"
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
+          cache: true
           flutter-version: ${{ env.flutter_version }}
       - name: "Install Tools"
         run: |
-          flutter pub global activate melos ${{ env.melos_version }}
+          flutter pub global activate melos
           flutter pub global activate remove_from_coverage
       - name: "Bootstrap Workspace"
         run: melos bootstrap
