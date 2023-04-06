@@ -1,3 +1,35 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed streamWatchers. Before it was always new, now it is possible to follow the watchers of a channel.
+- Make `Message.i18n` field read-only.
+
+🔄 Changed
+
+- Cancelling a attachment upload now removes the attachment from the message.
+- Updated `dio` and other dependencies to resolvable versions.
+
+✅ Added
+
+- Added `presence` property to `Channel::watch` method.
+
+## 5.3.0
+
+🔄 Changed
+
+- Updated `rate_limiter` dependency to `^1.0.0`
+
+## 5.2.0
+
+✅ Added
+
+- Added `Huawei` and `Xiaomi` PushProviders.
+
+🐞 Fixed
+
+- Fixed initializing last synced date.
+
 ## 5.1.0
 
 ✅ Added

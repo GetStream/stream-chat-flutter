@@ -15,6 +15,9 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get noUsersLabel => "Il n'y a pas d'utilisateurs actuellement";
 
   @override
+  String get noPhotoOrVideoLabel => "Il n'y a ni photo ni vidéo";
+
+  @override
   String get retryLabel => 'Réessayer';
 
   @override
@@ -436,12 +439,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get linkDisabledError => 'Les liens sont désactivés';
 
   @override
-  String unreadMessagesSeparatorText(int unreadCount) {
-    if (unreadCount == 1) {
-      return '1 message non lu';
-    }
-    return '$unreadCount messages non lus';
-  }
+  String unreadMessagesSeparatorText(int unreadCount) => 'Nouveaux messages';
 
   @override
   String get enableFileAccessMessage =>

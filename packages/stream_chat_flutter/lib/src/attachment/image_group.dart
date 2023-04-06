@@ -18,6 +18,7 @@ class StreamImageGroup extends StatelessWidget {
     this.imageThumbnailSize = const Size(400, 400),
     this.imageThumbnailResizeType = 'clip',
     this.imageThumbnailCropType = 'center',
+    this.attachmentActionsModalBuilder,
   });
 
   /// List of attachments to show
@@ -53,6 +54,9 @@ class StreamImageGroup extends StatelessWidget {
   ///
   /// Defaults to [center]
   final String /*center|top|bottom|left|right*/ imageThumbnailCropType;
+
+  /// {@macro attachmentActionsBuilder}
+  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +158,7 @@ class StreamImageGroup extends StatelessWidget {
             userName: message.user!.name,
             onShowMessage: onShowMessage,
             onReplyMessage: onReplyMessage,
+            attachmentActionsModalBuilder: attachmentActionsModalBuilder,
           ),
         ),
       ),
@@ -170,6 +175,7 @@ class StreamImageGroup extends StatelessWidget {
       imageThumbnailSize: imageThumbnailSize,
       imageThumbnailResizeType: imageThumbnailResizeType,
       imageThumbnailCropType: imageThumbnailCropType,
+      attachmentActionsModalBuilder: attachmentActionsModalBuilder,
     );
   }
 }

@@ -15,6 +15,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get noUsersLabel => '현재 사용자가 없습니다';
 
   @override
+  String get noPhotoOrVideoLabel => '사진이나 동영상이 없습니다';
+
+  @override
   String get retryLabel => '다시 시도하십시오';
 
   @override
@@ -416,12 +419,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get linkDisabledError => '링크가 비활성화되었습니다.';
 
   @override
-  String unreadMessagesSeparatorText(int unreadCount) {
-    if (unreadCount == 1) {
-      return '읽지 않은 메시지 1개';
-    }
-    return '읽지 않은 메시지 $unreadCount개';
-  }
+  String unreadMessagesSeparatorText(int unreadCount) => '새 메시지.';
 
   @override
   String get enableFileAccessMessage => '친구와 공유할 수 있도록 파일에 대한 액세스를 허용하세요.';

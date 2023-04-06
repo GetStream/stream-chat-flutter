@@ -366,7 +366,7 @@ class StreamPhotoGallery extends StatelessWidget {
                     color: chatThemeData.colorTheme.disabled,
                   ),
                   emptyTitle: Text(
-                    context.translations.noUsersLabel,
+                    context.translations.noPhotoOrVideoLabel,
                     style: chatThemeData.textTheme.headline,
                   ),
                 ),
@@ -377,7 +377,7 @@ class StreamPhotoGallery extends StatelessWidget {
         return StreamScrollViewLoadMoreError.grid(
           onTap: controller.retry,
           error: Text(
-            context.translations.loadingUsersError,
+            context.translations.genericErrorText,
             textAlign: TextAlign.center,
           ),
         );
@@ -400,7 +400,7 @@ class StreamPhotoGallery extends StatelessWidget {
         return errorBuilder?.call(context, error) ??
             Center(
               child: StreamScrollViewErrorWidget(
-                errorTitle: Text(context.translations.loadingUsersError),
+                errorTitle: Text(context.translations.genericErrorText),
                 onRetryPressed: controller.refresh,
               ),
             );

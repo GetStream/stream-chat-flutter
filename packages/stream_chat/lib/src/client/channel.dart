@@ -463,12 +463,19 @@ class Channel {
 
     client.logger.info('Found ${attachments.length} attachments');
 
-    void updateAttachment(Attachment attachment) {
+    void updateAttachment(Attachment attachment, {bool remove = false}) {
       final index = message!.attachments.indexWhere(
         (it) => it.id == attachment.id,
       );
       if (index != -1) {
-        final newAttachments = [...message!.attachments]..[index] = attachment;
+        // update or remove attachment from message.
+        final List<Attachment> newAttachments;
+        if (remove) {
+          newAttachments = [...message!.attachments]..removeAt(index);
+        } else {
+          newAttachments = [...message!.attachments]..[index] = attachment;
+        }
+
         final updatedMessage = message!.copyWith(attachments: newAttachments);
         state?.updateMessage(updatedMessage);
         // updating original message for next iteration
@@ -533,6 +540,14 @@ class Channel {
           );
         }
       }).catchError((e, stk) {
+        if (e is StreamChatNetworkError && e.isRequestCancelledError) {
+          client.logger.info('Attachment ${it.id} upload cancelled');
+
+          // remove attachment from message if cancelled.
+          updateAttachment(it, remove: true);
+          return;
+        }
+
         client.logger.severe('error uploading the attachment', e, stk);
         updateAttachment(
           it.copyWith(uploadState: UploadState.failed(error: e.toString())),
@@ -1219,11 +1234,11 @@ class Channel {
   }
 
   /// Loads the initial channel state and watches for changes.
-  Future<ChannelState> watch() async {
+  Future<ChannelState> watch({bool presence = false}) async {
     ChannelState response;
 
     try {
-      response = await query(watch: true);
+      response = await query(watch: true, presence: presence);
     } catch (error, stackTrace) {
       if (!_initializedCompleter.isCompleted) {
         _initializedCompleter.completeError(error, stackTrace);
@@ -1613,6 +1628,10 @@ class ChannelClientState {
 
     _listenMemberUnbanned();
 
+    _listenUserStartWatching();
+
+    _listenUserStopWatching();
+
     _startCleaningStaleTypingEvents();
 
     _startCleaningStalePinnedMessages();
@@ -1752,6 +1771,39 @@ class ChannelClientState {
         _updateMember(member);
       },
     ));
+  }
+
+  void _listenUserStartWatching() {
+    _subscriptions.add(
+      _channel.on(EventType.userWatchingStart).listen((event) {
+        final watcher = event.user;
+        if (watcher != null) {
+          final existingWatchers = channelState.watchers;
+          updateChannelState(channelState.copyWith(
+            watchers: [
+              ...?existingWatchers,
+              watcher,
+            ],
+          ));
+        }
+      }),
+    );
+  }
+
+  void _listenUserStopWatching() {
+    _subscriptions.add(
+      _channel.on(EventType.userWatchingStop).listen((event) {
+        final watcher = event.user;
+        if (watcher != null) {
+          final existingWatchers = channelState.watchers;
+          updateChannelState(channelState.copyWith(
+            watchers: existingWatchers
+                ?.where((user) => user.id != watcher.id)
+                .toList(growable: false),
+          ));
+        }
+      }),
+    );
   }
 
   void _listenMemberUnbanned() {
@@ -2083,7 +2135,7 @@ class ChannelClientState {
         channelStateStream.map((cs) => cs.watchers),
         _channel.client.state.usersStream,
         (watchers, users) => watchers!.map((e) => users[e.id] ?? e).toList(),
-      );
+      ).distinct(const ListEquality().equals);
 
   /// Channel member for the current user.
   Member? get currentUserMember => members.firstWhereOrNull(

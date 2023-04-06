@@ -15,6 +15,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get noUsersLabel => '現在、ユーザーはいません。';
 
   @override
+  String get noPhotoOrVideoLabel => '写真やビデオはありません';
+
+  @override
   String get retryLabel => '再試行';
 
   @override
@@ -415,12 +418,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get linkDisabledError => 'リンクが無効になっています';
 
   @override
-  String unreadMessagesSeparatorText(int unreadCount) {
-    if (unreadCount == 1) {
-      return '未読メッセージ1通';
-    }
-    return '$unreadCountつの未読メッセージ';
-  }
+  String unreadMessagesSeparatorText(int unreadCount) => '新しいメッセージ。';
 
   @override
   String get enableFileAccessMessage =>

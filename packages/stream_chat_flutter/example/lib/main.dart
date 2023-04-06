@@ -177,7 +177,7 @@ class _SplitViewState extends State<SplitView> {
                   : Center(
                       child: Text(
                         'Pick a channel to show the messages 💬',
-                        style: Theme.of(context).textTheme.headline5,
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
                     ),
             ),

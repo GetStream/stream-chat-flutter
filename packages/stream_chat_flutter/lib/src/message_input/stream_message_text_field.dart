@@ -80,7 +80,6 @@ class StreamMessageTextField extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
-    ToolbarOptions? toolbarOptions,
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
@@ -155,31 +154,7 @@ class StreamMessageTextField extends StatefulWidget {
         keyboardType = keyboardType ??
             (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
         enableInteractiveSelection =
-            enableInteractiveSelection ?? (!readOnly || !obscureText),
-        toolbarOptions = toolbarOptions ??
-            (obscureText
-                ? (readOnly
-                    // No point in even offering "Select All" in a read-only obscured
-                    // field.
-                    ? const ToolbarOptions()
-                    // Writable, but obscured.
-                    : const ToolbarOptions(
-                        selectAll: true,
-                        paste: true,
-                      ))
-                : (readOnly
-                    // Read-only, not obscured.
-                    ? const ToolbarOptions(
-                        selectAll: true,
-                        copy: true,
-                      )
-                    // Writable, not obscured.
-                    : const ToolbarOptions(
-                        copy: true,
-                        cut: true,
-                        selectAll: true,
-                        paste: true,
-                      )));
+            enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// Controls the message being edited.
   ///
@@ -303,13 +278,6 @@ class StreamMessageTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.readOnly}
   final bool readOnly;
-
-  /// Configuration of toolbar options.
-  ///
-  /// If not set, select all and paste will default to be enabled. Copy and cut
-  /// will be disabled if [obscureText] is true. If [readOnly] is true,
-  /// paste and cut will be disabled regardless.
-  final ToolbarOptions toolbarOptions;
 
   /// {@macro flutter.widgets.editableText.showCursor}
   final bool? showCursor;
@@ -720,7 +688,6 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
         textAlignVertical: widget.textAlignVertical,
         textDirection: widget.textDirection,
         readOnly: widget.readOnly,
-        toolbarOptions: widget.toolbarOptions,
         showCursor: widget.showCursor,
         autofocus: widget.autofocus,
         obscuringCharacter: widget.obscuringCharacter,

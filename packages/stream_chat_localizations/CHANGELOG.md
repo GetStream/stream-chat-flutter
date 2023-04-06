@@ -1,3 +1,16 @@
+## 4.1.0
+
+✅ Added
+
+* Added support for [Catalan](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ca.dart) locale.
+* Added translations for new `noPhotoOrVideoLabel` label.
+* Changed text in New messages separator. Now is doesn't count the new messages and only shows "New messages". All the translations were updated.
+
+🔄 Changed
+
+* Some of the `Spanish` translations have been updated/changed for better understanding.
+* Some of the `Catalan` translations have been updated/changed for better understanding.
+
 ## 4.0.0
 
 🔄 Changed

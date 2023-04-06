@@ -1,5 +1,4 @@
 export 'attachment_error.dart';
-export 'attachment_error.dart';
 export 'attachment_upload_state_builder.dart';
 export 'attachment_widget.dart' show AttachmentSource;
 export 'file_attachment.dart';
