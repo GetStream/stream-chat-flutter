@@ -1,7 +1,7 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'attachment_file.dart';
 
@@ -43,10 +43,10 @@ mixin _$UploadState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? preparing,
-    TResult Function(int uploaded, int total)? inProgress,
-    TResult Function()? success,
-    TResult Function(String error)? failed,
+    TResult? Function()? preparing,
+    TResult? Function(int uploaded, int total)? inProgress,
+    TResult? Function()? success,
+    TResult? Function(String error)? failed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -68,10 +68,10 @@ mixin _$UploadState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Preparing value)? preparing,
-    TResult Function(InProgress value)? inProgress,
-    TResult Function(Success value)? success,
-    TResult Function(Failed value)? failed,
+    TResult? Function(Preparing value)? preparing,
+    TResult? Function(InProgress value)? inProgress,
+    TResult? Function(Success value)? success,
+    TResult? Function(Failed value)? failed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -90,16 +90,18 @@ mixin _$UploadState {
 abstract class $UploadStateCopyWith<$Res> {
   factory $UploadStateCopyWith(
           UploadState value, $Res Function(UploadState) then) =
-      _$UploadStateCopyWithImpl<$Res>;
+      _$UploadStateCopyWithImpl<$Res, UploadState>;
 }
 
 /// @nodoc
-class _$UploadStateCopyWithImpl<$Res> implements $UploadStateCopyWith<$Res> {
+class _$UploadStateCopyWithImpl<$Res, $Val extends UploadState>
+    implements $UploadStateCopyWith<$Res> {
   _$UploadStateCopyWithImpl(this._value, this._then);
 
-  final UploadState _value;
   // ignore: unused_field
-  final $Res Function(UploadState) _then;
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 }
 
 /// @nodoc
@@ -110,14 +112,12 @@ abstract class _$$PreparingCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$PreparingCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
+class __$$PreparingCopyWithImpl<$Res>
+    extends _$UploadStateCopyWithImpl<$Res, _$Preparing>
     implements _$$PreparingCopyWith<$Res> {
   __$$PreparingCopyWithImpl(
       _$Preparing _value, $Res Function(_$Preparing) _then)
-      : super(_value, (v) => _then(v as _$Preparing));
-
-  @override
-  _$Preparing get _value => super._value as _$Preparing;
+      : super(_value, _then);
 }
 
 /// @nodoc
@@ -162,10 +162,10 @@ class _$Preparing extends Preparing {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? preparing,
-    TResult Function(int uploaded, int total)? inProgress,
-    TResult Function()? success,
-    TResult Function(String error)? failed,
+    TResult? Function()? preparing,
+    TResult? Function(int uploaded, int total)? inProgress,
+    TResult? Function()? success,
+    TResult? Function(String error)? failed,
   }) {
     return preparing?.call();
   }
@@ -199,10 +199,10 @@ class _$Preparing extends Preparing {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Preparing value)? preparing,
-    TResult Function(InProgress value)? inProgress,
-    TResult Function(Success value)? success,
-    TResult Function(Failed value)? failed,
+    TResult? Function(Preparing value)? preparing,
+    TResult? Function(InProgress value)? inProgress,
+    TResult? Function(Success value)? success,
+    TResult? Function(Failed value)? failed,
   }) {
     return preparing?.call(this);
   }
@@ -242,30 +242,30 @@ abstract class _$$InProgressCopyWith<$Res> {
   factory _$$InProgressCopyWith(
           _$InProgress value, $Res Function(_$InProgress) then) =
       __$$InProgressCopyWithImpl<$Res>;
+  @useResult
   $Res call({int uploaded, int total});
 }
 
 /// @nodoc
-class __$$InProgressCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
+class __$$InProgressCopyWithImpl<$Res>
+    extends _$UploadStateCopyWithImpl<$Res, _$InProgress>
     implements _$$InProgressCopyWith<$Res> {
   __$$InProgressCopyWithImpl(
       _$InProgress _value, $Res Function(_$InProgress) _then)
-      : super(_value, (v) => _then(v as _$InProgress));
+      : super(_value, _then);
 
-  @override
-  _$InProgress get _value => super._value as _$InProgress;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? uploaded = freezed,
-    Object? total = freezed,
+    Object? uploaded = null,
+    Object? total = null,
   }) {
     return _then(_$InProgress(
-      uploaded: uploaded == freezed
+      uploaded: null == uploaded
           ? _value.uploaded
           : uploaded // ignore: cast_nullable_to_non_nullable
               as int,
-      total: total == freezed
+      total: null == total
           ? _value.total
           : total // ignore: cast_nullable_to_non_nullable
               as int,
@@ -302,19 +302,18 @@ class _$InProgress extends InProgress {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$InProgress &&
-            const DeepCollectionEquality().equals(other.uploaded, uploaded) &&
-            const DeepCollectionEquality().equals(other.total, total));
+            (identical(other.uploaded, uploaded) ||
+                other.uploaded == uploaded) &&
+            (identical(other.total, total) || other.total == total));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(uploaded),
-      const DeepCollectionEquality().hash(total));
+  int get hashCode => Object.hash(runtimeType, uploaded, total);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$InProgressCopyWith<_$InProgress> get copyWith =>
       __$$InProgressCopyWithImpl<_$InProgress>(this, _$identity);
 
@@ -332,10 +331,10 @@ class _$InProgress extends InProgress {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? preparing,
-    TResult Function(int uploaded, int total)? inProgress,
-    TResult Function()? success,
-    TResult Function(String error)? failed,
+    TResult? Function()? preparing,
+    TResult? Function(int uploaded, int total)? inProgress,
+    TResult? Function()? success,
+    TResult? Function(String error)? failed,
   }) {
     return inProgress?.call(uploaded, total);
   }
@@ -369,10 +368,10 @@ class _$InProgress extends InProgress {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Preparing value)? preparing,
-    TResult Function(InProgress value)? inProgress,
-    TResult Function(Success value)? success,
-    TResult Function(Failed value)? failed,
+    TResult? Function(Preparing value)? preparing,
+    TResult? Function(InProgress value)? inProgress,
+    TResult? Function(Success value)? success,
+    TResult? Function(Failed value)? failed,
   }) {
     return inProgress?.call(this);
   }
@@ -422,13 +421,11 @@ abstract class _$$SuccessCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$SuccessCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
+class __$$SuccessCopyWithImpl<$Res>
+    extends _$UploadStateCopyWithImpl<$Res, _$Success>
     implements _$$SuccessCopyWith<$Res> {
   __$$SuccessCopyWithImpl(_$Success _value, $Res Function(_$Success) _then)
-      : super(_value, (v) => _then(v as _$Success));
-
-  @override
-  _$Success get _value => super._value as _$Success;
+      : super(_value, _then);
 }
 
 /// @nodoc
@@ -473,10 +470,10 @@ class _$Success extends Success {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? preparing,
-    TResult Function(int uploaded, int total)? inProgress,
-    TResult Function()? success,
-    TResult Function(String error)? failed,
+    TResult? Function()? preparing,
+    TResult? Function(int uploaded, int total)? inProgress,
+    TResult? Function()? success,
+    TResult? Function(String error)? failed,
   }) {
     return success?.call();
   }
@@ -510,10 +507,10 @@ class _$Success extends Success {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Preparing value)? preparing,
-    TResult Function(InProgress value)? inProgress,
-    TResult Function(Success value)? success,
-    TResult Function(Failed value)? failed,
+    TResult? Function(Preparing value)? preparing,
+    TResult? Function(InProgress value)? inProgress,
+    TResult? Function(Success value)? success,
+    TResult? Function(Failed value)? failed,
   }) {
     return success?.call(this);
   }
@@ -552,24 +549,24 @@ abstract class Success extends UploadState {
 abstract class _$$FailedCopyWith<$Res> {
   factory _$$FailedCopyWith(_$Failed value, $Res Function(_$Failed) then) =
       __$$FailedCopyWithImpl<$Res>;
+  @useResult
   $Res call({String error});
 }
 
 /// @nodoc
-class __$$FailedCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
+class __$$FailedCopyWithImpl<$Res>
+    extends _$UploadStateCopyWithImpl<$Res, _$Failed>
     implements _$$FailedCopyWith<$Res> {
   __$$FailedCopyWithImpl(_$Failed _value, $Res Function(_$Failed) _then)
-      : super(_value, (v) => _then(v as _$Failed));
+      : super(_value, _then);
 
-  @override
-  _$Failed get _value => super._value as _$Failed;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? error = freezed,
+    Object? error = null,
   }) {
     return _then(_$Failed(
-      error: error == freezed
+      error: null == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
               as String,
@@ -603,16 +600,16 @@ class _$Failed extends Failed {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$Failed &&
-            const DeepCollectionEquality().equals(other.error, error));
+            (identical(other.error, error) || other.error == error));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(error));
+  int get hashCode => Object.hash(runtimeType, error);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$FailedCopyWith<_$Failed> get copyWith =>
       __$$FailedCopyWithImpl<_$Failed>(this, _$identity);
 
@@ -630,10 +627,10 @@ class _$Failed extends Failed {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? preparing,
-    TResult Function(int uploaded, int total)? inProgress,
-    TResult Function()? success,
-    TResult Function(String error)? failed,
+    TResult? Function()? preparing,
+    TResult? Function(int uploaded, int total)? inProgress,
+    TResult? Function()? success,
+    TResult? Function(String error)? failed,
   }) {
     return failed?.call(error);
   }
@@ -667,10 +664,10 @@ class _$Failed extends Failed {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Preparing value)? preparing,
-    TResult Function(InProgress value)? inProgress,
-    TResult Function(Success value)? success,
-    TResult Function(Failed value)? failed,
+    TResult? Function(Preparing value)? preparing,
+    TResult? Function(InProgress value)? inProgress,
+    TResult? Function(Success value)? success,
+    TResult? Function(Failed value)? failed,
   }) {
     return failed?.call(this);
   }

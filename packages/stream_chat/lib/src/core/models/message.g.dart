@@ -71,43 +71,16 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       ),
     );
 
-Map<String, dynamic> _$MessageToJson(Message instance) {
-  final val = <String, dynamic>{
-    'id': instance.id,
-    'text': instance.text,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('type', readonly(instance.type));
-  val['attachments'] = instance.attachments.map((e) => e.toJson()).toList();
-  val['mentioned_users'] = User.toIds(instance.mentionedUsers);
-  writeNotNull('reaction_counts', readonly(instance.reactionCounts));
-  writeNotNull('reaction_scores', readonly(instance.reactionScores));
-  writeNotNull('latest_reactions', readonly(instance.latestReactions));
-  writeNotNull('own_reactions', readonly(instance.ownReactions));
-  val['parent_id'] = instance.parentId;
-  val['quoted_message'] = readonly(instance.quotedMessage);
-  val['quoted_message_id'] = instance.quotedMessageId;
-  writeNotNull('reply_count', readonly(instance.replyCount));
-  writeNotNull('thread_participants', readonly(instance.threadParticipants));
-  val['show_in_channel'] = instance.showInChannel;
-  val['silent'] = instance.silent;
-  writeNotNull('shadowed', readonly(instance.shadowed));
-  writeNotNull('command', readonly(instance.command));
-  writeNotNull('deleted_at', readonly(instance.deletedAt));
-  writeNotNull('created_at', readonly(instance.createdAt));
-  writeNotNull('updated_at', readonly(instance.updatedAt));
-  writeNotNull('user', readonly(instance.user));
-  val['pinned'] = instance.pinned;
-  val['pinned_at'] = readonly(instance.pinnedAt);
-  val['pin_expires'] = instance.pinExpires?.toIso8601String();
-  val['pinned_by'] = readonly(instance.pinnedBy);
-  val['extra_data'] = instance.extraData;
-  writeNotNull('i18n', readonly(instance.i18n));
-  return val;
-}
+Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
+      'id': instance.id,
+      'text': instance.text,
+      'attachments': instance.attachments.map((e) => e.toJson()).toList(),
+      'mentioned_users': User.toIds(instance.mentionedUsers),
+      'parent_id': instance.parentId,
+      'quoted_message_id': instance.quotedMessageId,
+      'show_in_channel': instance.showInChannel,
+      'silent': instance.silent,
+      'pinned': instance.pinned,
+      'pin_expires': instance.pinExpires?.toIso8601String(),
+      'extra_data': instance.extraData,
+    };

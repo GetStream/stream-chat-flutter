@@ -12,7 +12,7 @@
 
 🔄 Changed
 
-- Updated `share_plus` dependency to `^6.3.0`
+- Updated dependencies to resolvable versions.
 
 ## 5.3.0
 

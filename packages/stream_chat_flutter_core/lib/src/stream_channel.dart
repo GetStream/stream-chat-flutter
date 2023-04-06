@@ -425,8 +425,8 @@ class StreamChannelState extends State<StreamChannel> {
           var message = snapshot.error.toString();
           if (snapshot.error is DioError) {
             final dioError = snapshot.error as DioError?;
-            if (dioError?.type == DioErrorType.response) {
-              message = dioError!.message;
+            if (dioError?.type == DioErrorType.badResponse) {
+              message = dioError!.message ?? 'Bad response';
             } else {
               message = 'Check your connection and retry';
             }
