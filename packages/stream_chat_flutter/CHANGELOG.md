@@ -1,8 +1,59 @@
 ## Upcoming
 
+🐞 Fixed
+
+- [#1462](https://github.com/GetStream/stream-chat-flutter/issues/1462) Fixed support for iPad in the share button for images. 
+- [#1475](https://github.com/GetStream/stream-chat-flutter/issues/1475) Fixed typo to fix compilation.
+
 ✅ Added
 
+- Now it is possible to customize the max lines of the title of a url attachment. Before it was always 1 line.
+- Added `attachmentActionsModalBuilder` parameter to `StreamMessageWidget` that allows to customize `AttachmentActionsModal`.
 - Added `StreamMessageInput.sendMessageKeyPredicate` and `StreamMessageInput.clearQuotedMessageKeyPredicate` to customize the keys used to send and clear the quoted message.
+
+🔄 Changed
+
+- Updated dependencies to resolvable versions.
+
+🚀 Improved
+- 
+- Improved draw of reaction options. [#1455](https://github.com/GetStream/stream-chat-flutter/pull/1455)
+
+## 5.3.0
+
+🔄 Changed
+
+- Updated `photo_manager` dependency to `^2.5.2`
+
+🐞 Fixed
+- [[#1424]](https://github.com/GetStream/stream-chat-flutter/issues/1424) Fixed a render issue when showing messages starting with 4 whitespaces.
+- Fixed a bug where the `AttachmentPickerBottomSheet` was not able to identify the mobile browser.
+- Fixed uploading files on Windows - fixed temp file path.
+
+✅ Added
+- New `noPhotoOrVideoLabel` displayed when there is no files to choose.
+
+## 5.2.0
+
+✅ Added
+- Added a new `bottomRowBuilderWithDefaultWidget` parameter to `StreamMessageWidget` which contains a third parameter (default `BottomRow` widget with `copyWith` method available) to allow easier customization.
+
+🔄 Changed
+
+- Updated `lottie` dependency to `^2.0.0`
+- Updated `desktop_drop` dependency to `^0.4.0`
+- Updated `connectivity_plus` dependency to `^3.0.2`
+- Updated `dart_vlc` dependency to `^0.4.0`
+- Updated `file_picker` dependency to `^5.2.4`
+- Deprecated `StreamMessageWidget.bottomRowBuilder` in favor of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
+- Deprecated `StreamMessageWidget.deletedBottomRowBuilder` in favor of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
+- Deprecated `StreamMessageWidget.usernameBuilder` in favor of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
+
+🐞 Fixed
+- [[#1379]](https://github.com/GetStream/stream-chat-flutter/issues/1379) Fixed "Issues with photo attachments on web", where the cached image attachment would not render while uploading.
+- Fix render overflow issue with `MessageSearchListTileTitle`. It now uses `Text.rich` instead of `Row`. Better default behaviour and allows `TextOverflow`.
+- [[1346]](https://github.com/GetStream/stream-chat-flutter/issues/1346) Fixed a render issue while uploading video on web.
+- [[#1347]](https://github.com/GetStream/stream-chat-flutter/issues/1347) `onReply` not working in `AttachmentActionsModal` which is used by `StreamImageAttachment` and `StreamImageGroup`.
 
 ## 5.1.0
 
@@ -36,7 +87,7 @@
 ✅ Added
 
 - Added `StreamMemberGridView` and `StreamMemberListView`.
-- Added support for additional text field params in `StreamMessageInput`
+- Added support for additional text field parameters in `StreamMessageInput`
     * `maxLines`
     * `minLines`
     * `textInputAction`
@@ -221,7 +272,7 @@
 - Fix commands resetting the `StreamMessageInputController.value`.
 - [[#996]](https://github.com/GetStream/stream-chat-flutter/issues/996) Videos break bottom photo
   carousal.
-- Fix: URLs with path and/or query params are not enriched.
+- Fix: URLs with path and/or query parameters are not enriched.
 - [[#1194]](https://github.com/GetStream/stream-chat-flutter/issues/1194) Request permission to
   access gallery when opening the file picker.
 
@@ -885,11 +936,11 @@ typedef MessageBuilder = Widget Function(
 ## 1.0.0-beta
 
 - **Refreshed widgets design**
-- Improved api documentation
+- Improved API documentation
 - Updated `stream_chat` dependency to `^1.0.0-beta`
-- Extracted sample app into dedicated [repo](https://github.com/GetStream/flutter-samples)
-- Reimplemented existing widgets
-  using [stream_chat_flutter_core](https://pub.dev/packages/stream_chat_flutter_core)
+- Extracted sample app into dedicated [repository](https://github.com/GetStream/flutter-samples)
+- Re-implemented existing widgets
+  using [`stream_chat_flutter_core`](https://pub.dev/packages/stream_chat_flutter_core)
 
 ## 0.2.21
 
@@ -898,7 +949,7 @@ typedef MessageBuilder = Widget Function(
 
 ## 0.2.20+4
 
-- Fix channelPreview when the message list is empty
+- Fix `channelPreview` when the message list is empty
 
 ## 0.2.20+3
 

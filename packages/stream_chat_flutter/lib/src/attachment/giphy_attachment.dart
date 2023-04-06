@@ -17,6 +17,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
     this.onShowMessage,
     this.onReplyMessage,
     this.onAttachmentTap,
+    this.attachmentActionsModalBuilder,
   });
 
   /// {@macro showMessageCallback}
@@ -27,6 +28,9 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
 
   /// {@macro onAttachmentTap}
   final OnAttachmentTap? onAttachmentTap;
+
+  /// {@macro attachmentActionsBuilder}
+  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -260,6 +264,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
               userName: message.user!.name,
               onShowMessage: onShowMessage,
               onReplyMessage: onReplyMessage,
+              attachmentActionsModalBuilder: attachmentActionsModalBuilder,
             ),
           );
         },

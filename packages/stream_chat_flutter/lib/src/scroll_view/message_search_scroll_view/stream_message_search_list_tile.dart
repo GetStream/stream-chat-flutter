@@ -122,7 +122,8 @@ class StreamMessageSearchListTile extends StatelessWidget {
     final title = this.title ??
         MessageSearchListTileTitle(
           messageResponse: messageResponse,
-          textStyle: channelPreviewTheme.titleStyle,
+          textStyle: channelPreviewTheme.titleStyle
+              ?.copyWith(overflow: TextOverflow.ellipsis),
         );
 
     final subtitle = this.subtitle ??
@@ -177,27 +178,28 @@ class MessageSearchListTileTitle extends StatelessWidget {
     final channel = messageResponse.channel;
     final channelName = channel?.extraData['name'];
 
-    return Row(
-      children: [
-        Text(
-          user.id == StreamChat.of(context).currentUser?.id
-              ? context.translations.youText
-              : user.name,
-          style: textStyle,
-        ),
-        if (channelName != null) ...[
-          Text(
-            ' ${context.translations.inText} ',
-            style: textStyle?.copyWith(
-              fontWeight: FontWeight.normal,
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: user.id == StreamChat.of(context).currentUser?.id
+                ? context.translations.youText
+                : user.name,
+          ),
+          if (channelName != null) ...[
+            TextSpan(
+              text: ' ${context.translations.inText} ',
+              style: textStyle?.copyWith(
+                fontWeight: FontWeight.normal,
+              ),
             ),
-          ),
-          Text(
-            channelName as String,
-            style: textStyle,
-          ),
+            TextSpan(
+              text: channelName as String,
+            ),
+          ],
         ],
-      ],
+      ),
+      style: textStyle,
     );
   }
 }

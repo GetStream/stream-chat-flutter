@@ -15,6 +15,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get noUsersLabel => 'Det er ingen brukere akkurat nå';
 
   @override
+  String get noPhotoOrVideoLabel => 'Det er ingen bilde eller video';
+
+  @override
   String get retryLabel => 'Prøv igjen';
 
   @override
@@ -380,12 +383,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'Se bibliotek';
 
   @override
-  String unreadMessagesSeparatorText(int unreadCount) {
-    if (unreadCount == 1) {
-      return '1 ulest melding';
-    }
-    return '$unreadCount uleste meldinger';
-  }
+  String unreadMessagesSeparatorText(int unreadCount) => 'Nye meldinger.';
 
   @override
   String get couldNotReadBytesFromFileError =>

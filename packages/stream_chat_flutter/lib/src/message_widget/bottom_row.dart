@@ -32,6 +32,7 @@ class BottomRow extends StatelessWidget {
     this.deletedBottomRowBuilder,
     this.onThreadTap,
     this.usernameBuilder,
+    this.sendingIndicatorBuilder,
   });
 
   /// {@macro messageIsDeleted}
@@ -87,6 +88,61 @@ class BottomRow extends StatelessWidget {
 
   /// {@macro usernameBuilder}
   final Widget Function(BuildContext, Message)? usernameBuilder;
+
+  /// {@macro sendingIndicatorBuilder}
+  final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
+
+  /// {@template copyWith}
+  /// Creates a copy of [BottomRow] with specified attributes
+  /// overridden.
+  /// {@endtemplate}
+  BottomRow copyWith({
+    Key? key,
+    bool? isDeleted,
+    Message? message,
+    bool? showThreadReplyIndicator,
+    bool? showInChannel,
+    bool? showTimeStamp,
+    bool? showUsername,
+    bool? reverse,
+    bool? showSendingIndicator,
+    bool? hasUrlAttachments,
+    bool? isGiphy,
+    bool? isOnlyEmoji,
+    StreamMessageThemeData? messageTheme,
+    StreamChatThemeData? streamChatTheme,
+    bool? hasNonUrlAttachments,
+    StreamChatState? streamChat,
+    Widget Function(BuildContext, Message)? deletedBottomRowBuilder,
+    void Function(Message)? onThreadTap,
+    Widget Function(BuildContext, Message)? usernameBuilder,
+    Widget Function(BuildContext, Message)? sendingIndicatorBuilder,
+  }) =>
+      BottomRow(
+        key: key ?? this.key,
+        isDeleted: isDeleted ?? this.isDeleted,
+        message: message ?? this.message,
+        showThreadReplyIndicator:
+            showThreadReplyIndicator ?? this.showThreadReplyIndicator,
+        showInChannel: showInChannel ?? this.showInChannel,
+        showTimeStamp: showTimeStamp ?? this.showTimeStamp,
+        showUsername: showUsername ?? this.showUsername,
+        reverse: reverse ?? this.reverse,
+        showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
+        hasUrlAttachments: hasUrlAttachments ?? this.hasUrlAttachments,
+        isGiphy: isGiphy ?? this.isGiphy,
+        isOnlyEmoji: isOnlyEmoji ?? this.isOnlyEmoji,
+        messageTheme: messageTheme ?? this.messageTheme,
+        streamChatTheme: streamChatTheme ?? this.streamChatTheme,
+        hasNonUrlAttachments: hasNonUrlAttachments ?? this.hasNonUrlAttachments,
+        streamChat: streamChat ?? this.streamChat,
+        deletedBottomRowBuilder:
+            deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
+        onThreadTap: onThreadTap ?? this.onThreadTap,
+        usernameBuilder: usernameBuilder ?? this.usernameBuilder,
+        sendingIndicatorBuilder:
+            sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -147,13 +203,14 @@ class BottomRow extends StatelessWidget {
         ),
       if (showSendingIndicator)
         WidgetSpan(
-          child: SendingIndicatorWrapper(
-            messageTheme: messageTheme,
-            message: message,
-            hasNonUrlAttachments: hasNonUrlAttachments,
-            streamChat: streamChat,
-            streamChatTheme: streamChatTheme,
-          ),
+          child: sendingIndicatorBuilder?.call(context, message) ??
+              SendingIndicatorWrapper(
+                messageTheme: messageTheme,
+                message: message,
+                hasNonUrlAttachments: hasNonUrlAttachments,
+                streamChat: streamChat,
+                streamChatTheme: streamChatTheme,
+              ),
         ),
     ]);
 

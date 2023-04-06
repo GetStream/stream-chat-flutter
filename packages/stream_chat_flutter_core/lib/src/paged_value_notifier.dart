@@ -83,7 +83,7 @@ abstract class PagedValueNotifier<Key, Value>
 
 /// Paged value that can be used with [PagedValueNotifier].
 @freezed
-abstract class PagedValue<Key, Value> with _$PagedValue<Key, Value> {
+class PagedValue<Key, Value> with _$PagedValue<Key, Value> {
   /// Represents the success state of the [PagedValue]
   // @Assert(
   //   'nextPageKey != null',

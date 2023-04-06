@@ -51,11 +51,11 @@ scripts:
     description: Build all generated files for Dart & Flutter packages in this project.
 
   generate:dart:
-    run: melos exec -c 1 --depends-on="build_runner" --no-flutter -- "dart run build_runner build --delete-conflicting-outputs --enable-experiment=super-parameters,enhanced-enums"
+    run: melos exec -c 1 --depends-on="build_runner" --no-flutter -- "dart run build_runner build --delete-conflicting-outputs"
     description: Build all generated files for Dart packages in this project.
 
   generate:flutter:
-    run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter run build_runner build --delete-conflicting-outputs --enable-experiment=super-parameters,enhanced-enums"
+    run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter pub run build_runner build --delete-conflicting-outputs"
     description: Build all generated files for Flutter packages in this project.
 
   test:all:
@@ -65,29 +65,29 @@ scripts:
   test:dart:
     run: melos exec -c 1 --fail-fast -- "flutter test --coverage"
     description: Run Dart tests for a specific package in this project.
-    select-package:
+    packageFilters:
       flutter: false
-      dir-exists: test
+      dirExists: test
 
   test:flutter:
     run: melos exec -c 4 --fail-fast -- "flutter test --coverage"
     description: Run Flutter tests for a specific package in this project.
-    select-package:
+    packageFilters:
       flutter: true
-      dir-exists: test
+      dirExists: test
 
   clean:flutter:
     run: melos exec -c 4 --fail-fast -- "flutter clean"
     description: Run Flutter clean for a specific package in this project.
-    select-package:
+    packageFilters:
       flutter: true
 
   coverage:ignore-file:
     run: |
       melos exec -c 5 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/remove-from-coverage.sh"
     description: Removes all the ignored files from the coverage report.
-    select-package:
-      dir-exists: coverage
+    packageFilters:
+      dirExists: coverage
 
   docs:
     run: |

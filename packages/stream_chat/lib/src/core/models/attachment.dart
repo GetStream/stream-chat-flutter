@@ -135,7 +135,6 @@ class Attachment extends Equatable {
   late final UploadState uploadState;
 
   /// Map of custom channel extraData
-  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// The attachment ID.
@@ -146,13 +145,13 @@ class Attachment extends Equatable {
   /// Shortcut for file size.
   ///
   /// {@macro fileSize}
-  @JsonKey(ignore: true)
+  @JsonKey(includeToJson: false, includeFromJson: false)
   int? get fileSize => extraData['file_size'] as int?;
 
   /// Shortcut for file mimeType.
   ///
   /// {@macro mimeType}
-  @JsonKey(ignore: true)
+  @JsonKey(includeToJson: false, includeFromJson: false)
   String? get mimeType => extraData['mime_type'] as String?;
 
   /// Known top level fields.
