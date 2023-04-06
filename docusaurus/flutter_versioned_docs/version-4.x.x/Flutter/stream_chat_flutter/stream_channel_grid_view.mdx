@@ -40,7 +40,7 @@ class _ChannelGridPageState extends State<ChannelGridPage> {
       'members',
       [StreamChat.of(context).currentUser!.id],
     ),
-    sort: const [SortOption('last_message_at')],
+    channelStateSort: const [SortOption('last_message_at')],
   );
 
   @override

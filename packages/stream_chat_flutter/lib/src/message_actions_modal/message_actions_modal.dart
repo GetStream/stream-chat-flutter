@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:stream_chat_flutter/src/message_actions_modal/mam_widgets.dart';
+import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template messageActionsModal}
@@ -97,34 +98,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   Widget _showMessageOptionsModal() {
     final mediaQueryData = MediaQuery.of(context);
-    final size = mediaQueryData.size;
     final user = StreamChat.of(context).currentUser;
+    final orientation = mediaQueryData.orientation;
 
-    final roughMaxSize = size.width * 2 / 3;
-    var messageTextLength = widget.message.text!.length;
-    if (widget.message.quotedMessage != null) {
-      var quotedMessageLength =
-          (widget.message.quotedMessage!.text?.length ?? 0) + 40;
-      if (widget.message.quotedMessage!.attachments.isNotEmpty) {
-        quotedMessageLength += 40;
-      }
-      if (quotedMessageLength > messageTextLength) {
-        messageTextLength = quotedMessageLength;
-      }
-    }
-    final roughSentenceSize = messageTextLength *
-        (widget.messageTheme.messageTextStyle?.fontSize ?? 1) *
-        1.2;
-    final divFactor = widget.message.attachments.isNotEmpty
-        ? 1
-        : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
-
+    final fontSize = widget.messageTheme.messageTextStyle?.fontSize;
     final streamChatThemeData = StreamChatTheme.of(context);
 
-    final numberOfReactions =
-        StreamChatConfiguration.of(context).reactionIcons.length;
-    final shiftFactor =
-        numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
     final channel = StreamChannel.of(context).channel;
 
     final child = Center(
@@ -142,11 +121,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   builder: (context, constraints) {
                     return Align(
                       alignment: Alignment(
-                        _calculateReactionsHorizontalAlignmentValue(
+                        calculateReactionsHorizontalAlignment(
                           user,
-                          divFactor,
-                          shiftFactor,
+                          widget.message,
                           constraints,
+                          fontSize,
+                          orientation,
                         ),
                         0,
                       ),
@@ -156,7 +136,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                     );
                   },
                 ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               IgnorePointer(
                 child: widget.messageWidget,
               ),
@@ -279,93 +259,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         ],
       ),
     );
-  }
-
-  double _calculateReactionsHorizontalAlignmentValue(
-    User? user,
-    num divFactor,
-    double shiftFactor,
-    BoxConstraints constraints,
-  ) {
-    var result = 0.0;
-    var cont = true;
-    if (user?.id == widget.message.user?.id) {
-      if (divFactor >= 1.0) {
-        // This calculation is hacky and does not cover all bases!!!
-        // A better option is needed!
-
-        // Landscape calculations
-        if (constraints.maxWidth == 1350) {
-          // 12.7 iPad Pro
-          result = shiftFactor + 0.5;
-          cont = false;
-        } else if (constraints.maxWidth == 1178) {
-          // 11 inch iPad Pro
-          result = shiftFactor + 0.42;
-          cont = false;
-        } else if (constraints.maxWidth == 1164) {
-          // iPad Air 4
-          result = shiftFactor + 0.4;
-          cont = false;
-        } else if (constraints.maxWidth == 1117) {
-          // iPad Mini 6
-          result = shiftFactor + 0.37;
-          cont = false;
-        } else if (constraints.maxWidth == 1064) {
-          // iPad 9th gen
-          result = shiftFactor + 0.33;
-          cont = false;
-        } else if (constraints.maxWidth == 1008) {
-          // 9.7 inch iPad Pro
-          result = shiftFactor + 0.3;
-          cont = false;
-        } else if (constraints.maxWidth >= 200 && constraints.maxWidth <= 400) {
-          // Phone (?)
-          result = shiftFactor - 0.2;
-          cont = false;
-        }
-
-        if (cont) {
-          // Portrait calculations
-          if (constraints.maxWidth == 1008) {
-            // 12.7 iPad Pro
-            result = shiftFactor + 0.3;
-          } else if (constraints.maxWidth == 818) {
-            // 11 inch iPad Pro
-            result = shiftFactor + 0.07;
-          } else if (constraints.maxWidth == 804) {
-            // iPad Air 4
-            result = shiftFactor + 0.04;
-          } else if (constraints.maxWidth == 794) {
-            // iPad 9th gen
-            result = shiftFactor + 0.02;
-          } else if (constraints.maxWidth >= 752) {
-            // 9.7 inch iPad Pro
-            result = shiftFactor - 0.05;
-          } else if (constraints.maxWidth == 728) {
-            // iPad Mini 6
-            result = shiftFactor - 0.1;
-          }
-        }
-      } else {
-        result = 1.2 - divFactor;
-      }
-    } else {
-      if (divFactor >= 1.0) {
-        result = shiftFactor + 0.2;
-      } else {
-        result = -(1.2 - divFactor);
-      }
-    }
-
-    // Ensure reactions don't get pushed past the edge of the screen.
-    //
-    // Hacky!!! Needs improvement!!!
-    if (result > 1) {
-      return 1;
-    } else {
-      return result;
-    }
   }
 
   InkWell _buildCustomAction(

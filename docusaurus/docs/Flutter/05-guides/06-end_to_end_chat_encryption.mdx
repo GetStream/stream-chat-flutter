@@ -37,7 +37,7 @@ Check out the diagram below for an example:
 
 ### Dependencies
 
-Add the [webcrypto](https://pub.dev/packages/webcrypto) package in your `pubspec.yaml` file.
+Add the [`webcrypto`](https://pub.dev/packages/webcrypto) package in your `pubspec.yaml` file.
 
 ```yaml
 dependencies:
@@ -77,9 +77,9 @@ class JsonWebKeyPair {
 }
 ```
 
-### Generate a Crypto Key
+### Generate a Cryptographic Key
 
-Next, create a symmetric **Crypto Key** using the keys generated in the previous step.
+Next, create a symmetric **Cryptographic Key** using the keys generated in the previous step.
 You will use those keys to encrypt and decrypt messages.
 
 ```dart
@@ -108,7 +108,7 @@ Future<List<int>> deriveKey(String senderJwk, String receiverJwk) async {
 
 ### Encrypting Messages
 
-Once you have generated the **Crypto Key**, you're ready to encrypt the message.
+Once you have generated the **Cryptographic Key**, you're ready to encrypt the message.
 You can use the **AES-GCM** algorithm for its known security and performance balance and good browser availability.
 
 ```dart
@@ -254,6 +254,6 @@ StreamMessageListView(
 ),
 ```
 
-That's it! That's all you need to implement E2EE in a Stream powered chat app.
+That's it. That's all you need to implement E2EE in a Stream powered chat app.
 
 For more details, check out our [end-to-end encrypted chat article](https://getstream.io/blog/end-to-end-encrypted-chat-in-flutter/#whats-end-to-end-encryption).

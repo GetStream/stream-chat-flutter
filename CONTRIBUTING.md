@@ -1,4 +1,4 @@
-Welcome to Stream’s Flutter repository! Thank you for taking the time to contribute to our codebase. 🎉.
+Welcome to Stream’s Flutter repository. Thank you for taking the time to contribute to our codebase. 🎉.
 
 This document outlines a set of guidelines for contributing to Stream and our packages. These are mostly guidelines, not necessarily a fixed set of rules. Please use your best judgment and feel free to propose changes to this document in a pull request.
 
@@ -26,7 +26,7 @@ Stream's Flutter code is kept in a single mono-repository consisting of multiple
 
 ### Project Structure 🧱
 
-`.github` - GitHub files including issue templates, pull request templates, and Github Action scripts.
+`.github` - GitHub files including issue templates, pull request templates, and GitHub Action scripts.
 
 `images` - Static images used in our README and elsewhere. 
 
@@ -56,11 +56,11 @@ Stream's Flutter code is kept in a single mono-repository consisting of multiple
 
 ### Local Setup
 
-Congratulations! 🎉.  You've successfully cloned our repo, and you are ready to make your first contribution. Before you can start making code changes, there are a few things to configure. 
+Congratulations. 🎉.  You've successfully cloned our repository, and you are ready to make your first contribution. Before you can start making code changes, there are a few things to configure. 
 
 **Melos Setup**
 
-Stream uses `melos` to manage our mono-repository. For those unfamiliar, Melos is used to  split up large code bases into separate independently versioned packages. To install melos, developers can run the following command:
+Stream uses `Melos` to manage our mono-repository. For those unfamiliar, Melos is used to  split up large code bases into separate independently versioned packages. To install Melos, developers can run the following command:
 
 ```bash
 pub global activate melos 
@@ -72,7 +72,7 @@ Once activated, users can now "bootstrap" their local clone by running the follo
 melos bootstrap
 ```
 
-Bootstrap will automatically fetch and link dependencies for all packages in the repo. It is the melos equivalent of running `flutter pub get`.
+Bootstrap will automatically fetch and link dependencies for all packages in the repository. It is the Melos equivalent of running `flutter pub get`.
 
 Bonus Tip: Did you know it is possible to define and run custom scripts using Melos? Our team uses custom scripts for all sorts of actions like testing, lints, and more. 
 
@@ -88,7 +88,7 @@ Are you ready to dive into code? It's pretty easy to get up and running with you
 
 Before filing bugs, take a look at our existing backlog. For common bugs, there might be an existing ticket on GitHub. 
 
-To quickly narrow down the amount of tickets on Github, try filtering based on the label that best suites the bug.
+To quickly narrow down the amount of tickets on GitHub, try filtering based on the label that best suites the bug.
 
 ![image](https://user-images.githubusercontent.com/20601437/124240983-9d9f6100-db1b-11eb-952f-3c0cc60a910e.png)
 
@@ -98,17 +98,17 @@ Didn't find an existing issue? Go ahead and file a new bug using one of our pre-
 
 Be sure to provide as much information as possible when filing bug reports. A good issue should have steps to reproduce and information on your development environment and expected behavior. 
 
-Screenshots and gifs are always welcomed :)
+Screenshots and GIFs are always welcomed :)
 
 ## Feature Request 💡
 
-Have an idea for a new feature? We would love to hear about it! 
+Have an idea for a new feature? We would love to hear about it.
 
 Our team uses GitHub discussions to triage and discuss feature requests. Before opening a new topic, please check our existing issues and pull requests to ensure the feature you are suggesting is not already in progress. 
 
-To file a feature request, select the "Discussions" tab on our GitHub repo or [visit this link](https://github.com/GetStream/stream-chat-flutter/discussions/new). Once there, change the default category to "**💡 Ideas**", then write a brief description of your feature/change.
+To file a feature request, select the "Discussions" tab on our GitHub repository or [visit this link](https://github.com/GetStream/stream-chat-flutter/discussions/new). Once there, change the default category to "**💡 Ideas**", then write a brief description of your feature/change.
 
-Screenshots, sketches, and sample code are all welcomed!
+Screenshots, sketches, and sample code are all welcomed.
 
 ![image](https://user-images.githubusercontent.com/20601437/124241092-bc055c80-db1b-11eb-9205-7e3d7c157af1.png)
 
@@ -134,13 +134,13 @@ Add any other context or screenshots about the feature request here.
 
 ![image](https://user-images.githubusercontent.com/20601437/124241146-c7f11e80-db1b-11eb-9588-d9f578ec004a.png)
 
-Thank you for taking the time to submit a patch and contribute to our codebase. You rock!  
+Thank you for taking the time to submit a patch and contribute to our codebase. You rock.
 
 Before we can land your pull request, please don't forget to [sign Stream's CLA (Contributor License Agreement](https://docs.google.com/forms/d/e/1FAIpQLScFKsKkAJI7mhCr7K9rEIOpqIDThrWxuvxnwUq2XkHyG154vQ/viewform). 📝
 
 ### PR Semantics 🦄
 
-Our team uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) when coding and creating PRs. This standard makes it easy for our team to review and identify commits in our repo quickly. 
+Our team uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) when coding and creating PRs. This standard makes it easy for our team to review and identify commits in our repository quickly. 
 
 While we don't expect developers to follow the specification down to every commit message, we enforce semantics on PR titles. 
 
@@ -162,7 +162,7 @@ PR titles should follow the format below:
 
 ### Testing
 
-At Stream, we value testing. Every PR should include passing tests for existing and new features. To run our test suite locally, you can use the following *melos* command:
+At Stream, we value testing. Every PR should include passing tests for existing and new features. To run our test suite locally, you can use the following *Melos* command:
 
 ```bash
 > melos run test:dart
@@ -173,13 +173,13 @@ At Stream, we value testing. Every PR should include passing tests for existing 
 
 By default, our development branch is `develop`. Contributors should create new PRs based on `develop` when working on new features. 
 
-Develop is merged into master after the team performs various automated and QA tests on the branch. Master can be considered our stable branch — it represents the latest published release on pub.dev. 
+Develop is merged into master after the team performs various automated and QA tests on the branch. Master can be considered our stable branch, it represents the latest published release on pub.dev. 
 
 ---
 
 # Versioning Policy
 
-All of the Stream Chat packages follow [semantic versioning (semver)](https://semver.org/).
+All of the Stream Chat packages follow [semantic versioning](https://semver.org/).
 
 See our [versioning policy documentation](https://getstream.io/chat/docs/sdk/flutter/basics/versioning_policy/) for more information.
 

@@ -33,22 +33,21 @@ class Reaction {
   final String type;
 
   /// The date of the reaction
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final DateTime createdAt;
 
   /// The user that sent the reaction
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final User? user;
 
   /// The score of the reaction (ie. number of reactions sent)
   final int score;
 
   /// The userId that sent the reaction
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final String? userId;
 
   /// Reaction custom extraData
-  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// Map of custom user extraData
