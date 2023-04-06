@@ -6,6 +6,8 @@ env:
 
 on:
   pull_request:
+    paths:
+      - 'packages/**'
   push:
     branches:
       - master
