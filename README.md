@@ -3,7 +3,7 @@
 ![](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/images/sdk_hero_v4.png)
 
 ![CI](https://github.com/GetStream/stream-chat-flutter/workflows/stream_flutter_workflow/badge.svg?branch=master)
-[![melos](https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square)](https://github.com/invertase/melos)
+[![Melos](https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square)](https://github.com/invertase/melos)
 
 **Quick Links**
 
@@ -21,7 +21,7 @@ Stream allows developers to rapidly deploy scalable feeds and chat messaging wit
 For upgrading from V3 to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
 
 ## Sample apps and demos 
-Our team maintains a dedicated repository for fully-fledged sample applications and demos. Consider checking out [GetStream/flutter-samples](https://github.com/GetStream/flutter-samples) to learn more or get started by looking at our latest [Stream Chat demo](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1). 
+Our team maintains a dedicated repository for full fledged sample applications and demos. Consider checking out [GetStream/flutter-samples](https://github.com/GetStream/flutter-samples) to learn more or get started by looking at our latest [Stream Chat demo](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1). 
 
 ## Free for Makers
 
@@ -40,19 +40,19 @@ melos bootstrap
 ## Packages 
 We provide a variety of packages depending on the level of customization you want to achieve.
 
-### [stream_chat](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat)
+### [`stream_chat`](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat)
 A pure Dart package that can be used on any Dart project. It provides a low-level client to access the Stream Chat service.
 
-### [stream_chat_persistence](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_persistence)
+### [`stream_chat_persistence`](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_persistence)
 This package provides a persistence client for fetching and saving chat data locally. Stream Chat Persistence uses Moor as a disk cache.
 
-### [stream_chat_flutter_core](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter_core)
+### [`stream_chat_flutter_core`](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter_core)
 This package provides business logic to fetch common things required for integrating Stream Chat into your application. The `core` package allows more customisation and hence provides business logic but no UI components.
 
-### [stream_chat_flutter](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter)
+### [`stream_chat_flutter`](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter)
 This library includes both a low-level chat SDK and a set of reusable and customizable UI components.
 
-### [stream_chat_localizations](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_localizations)
+### [`stream_chat_localizations`](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_localizations)
 This library includes a set of localization files for the Flutter UI components.
 
 ## Flutter Chat Tutorial
@@ -68,7 +68,7 @@ We also provide a set of sample apps created using the Stream Flutter SDK at [th
 
 ## Versioning Policy
 
-All of the Stream Chat packages follow [semantic versioning (semver)](https://semver.org/).
+All of the Stream Chat packages follow [semantic versioning](https://semver.org/).
 
 See our [versioning policy documentation](https://getstream.io/chat/docs/sdk/flutter/basics/versioning_policy/) for more information.
 

@@ -39,7 +39,7 @@ There is a detailed Flutter example project in the `example` folder. You can dir
 
 ## Setup API Client
 
-First you need to instantiate a chat client. The Chat client will manage API call, event handling and manage the websocket connection to Stream Chat servers. You should only create the client once and re-use it across your application.
+First you need to instantiate a chat client. The Chat client will manage API call, event handling and manage the web socket connection to Stream Chat servers. You should only create the client once and re-use it across your application.
 
 ```dart
 final client = StreamChatClient("stream-chat-api-key");
@@ -47,7 +47,7 @@ final client = StreamChatClient("stream-chat-api-key");
 
 ### Logging
 
-By default the Chat Client will write all messages with level Warn or Error to stdout.
+By default the Chat Client will write all messages with level Warn or Error to `stdout`.
 
 #### Change Logging Level
 
@@ -59,7 +59,7 @@ final client = StreamChatClient("stream-chat-api-key", logLevel: Level.INFO);
 
 #### Custom Logger
 
-You can handle the log messages directly instead of have them written to stdout, this is very convenient if you use an error tracking tool or if you want to centralize your logs into one facility.
+You can handle the log messages directly instead of have them written to `stdout`, this is very convenient if you use an error tracking tool or if you want to centralize your logs into one facility.
 
 ```dart
 myLogHandlerFunction = (LogRecord record) {
@@ -71,7 +71,7 @@ final client = StreamChatClient("stream-chat-api-key", logHandlerFunction: myLog
 
 ### Offline storage 
 
-To add data persistance you can extend the class `ChatPersistenceClient` and pass an instance to the `StreamChatClient`.
+To add data persistence, you can extend the class `ChatPersistenceClient` and pass an instance to the `StreamChatClient`.
 
 ```dart
 class CustomChatPersistentClient extends ChatPersistenceClient {
@@ -84,7 +84,7 @@ final client = StreamChatClient(
 )..chatPersistenceClient = CustomChatPersistentClient();
 ```
 
-We provide an official persistent client in the [stream_chat_persistence](https://pub.dev/packages/stream_chat_persistence) package.
+We provide an official persistent client in the [`stream_chat_persistence`](https://pub.dev/packages/stream_chat_persistence) package.
 
 ```dart
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
@@ -104,7 +104,7 @@ final client = StreamChatClient(
 
 ### Code conventions
 
-- Make sure that you run `dartfmt` before commiting your code
+- Make sure that you run `dartfmt` before you commit your code
 - Make sure all public methods and functions are well documented
 
 ### Running tests 

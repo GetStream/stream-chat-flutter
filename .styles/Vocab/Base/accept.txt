@@ -1,0 +1,15 @@
+API
+SDK
+Crashlytics
+Rollbar
+APIs
+boolean
+Giphy
+DM
+UI
+[Ss]lidable
+discoverability
+[Ll]ivestream
+monorepo
+Melos
+uploader
