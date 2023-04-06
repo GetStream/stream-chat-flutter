@@ -21,7 +21,7 @@ Make sure to check [this section](https://getstream.io/chat/docs/flutter-dart/pu
 
 ### Setup FCM
 
-To integrate push notifications in your Flutter app you need to use the package [firebase_messaging](https://pub.dev/packages/firebase_messaging).
+To integrate push notifications in your Flutter app you need to use the package [`firebase_messaging`](https://pub.dev/packages/firebase_messaging).
 
 
 Follow the [Firebase documentation](https://firebase.flutter.dev/docs/messaging/overview/) to know how to set up the plugin for both Android and iOS.
@@ -61,7 +61,7 @@ Upload the `Server Key` in your chat dashboard
 
 
 :::note
-We are setting up the Android section, but this will work for both Android and iOS if you're using Firebase for both of them!
+We are setting up the Android section, but this will work for both Android and iOS if you're using Firebase for both of them.
 :::
 
 #### Step 6
@@ -97,21 +97,21 @@ firebaseMessaging.onTokenRefresh.listen((token) {
 ### Possible issues
 
 
-We only send push notifications when the user doesn't have any active websocket connection (which is established when you call `client.connectUser`). If you set the [onBackgroundEventReceived](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat/onBackgroundEventReceived.html) property of the StreamChat widget, when your app goes to background, your device will keep the ws connection alive for 1 minute, and so within this period, you won't receive any push notification.
+We only send push notifications when the user doesn't have any active web socket connection (which is established when you call `client.connectUser`). If you set the [onBackgroundEventReceived](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat/onBackgroundEventReceived.html) property of the StreamChat widget, when your app goes to background, your device will keep the WS connection alive for 1 minute, and so within this period, you won't receive any push notification.
 
 Make sure to read the [general push docs](https://getstream.io/chat/docs/flutter-dart/push_introduction/?language=dart) in order to avoid known gotchas that may make your relationship with notifications go bad 😢
 
 ### Testing if Push Notifications are Setup Correctly
 
-If you're not sure if you've set up push notifications correctly (e.g. you don't always receive them, they work unreliably), you can follow these steps to make sure your config is correct and working:
+If you're not sure if you've set up push notifications correctly (for example you don't always receive them, they work unreliably), you can follow these steps to make sure your configuration is correct and working:
 
-1. Clone our repo for push testing git clone git@github.com:GetStream/chat-push-test.git
+1. Clone our repository for push testing git clone git@github.com:GetStream/chat-push-test.git
 
 2. `cd flutter`
 
 3. In folder run `flutter pub get`
 
-4. Input your api key and secret in `lib/main.dart`
+4. Input your API key and secret in `lib/main.dart`
 
 5. Change the bundle identifier/application ID and development team/user so you can run the app in your device (**do not** run on iOS simulator, Android emulator is fine)
 
@@ -137,11 +137,11 @@ You should get a test push notification
 
 The [StreamChat](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat-class.html) widget lets you define a [onBackgroundEventReceived](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat/onBackgroundEventReceived.html) handler in order to handle events while the app is in the background, but the client is still connected.
 
-This is useful because it lets you keep the connection alive in cases in which the app goes in the background just for some seconds (eg: multitasking, picking pictures from the gallery...)
+This is useful because it lets you keep the connection alive in cases in which the app goes in the background just for some seconds (for example multitasking, picking pictures from the gallery...)
 
 You can even customize the [backgroundKeepAlive](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat/backgroundKeepAlive.html) duration.
 
-In order to show notifications in such a case we suggest using the package [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications); follow the package guide to successfully set up the plugin.
+In order to show notifications in such a case we suggest using the package [`flutter_local_notifications`](https://pub.dev/packages/flutter_local_notifications); follow the package guide to successfully set up the plugin.
 
 Once that's done you should set the [onBackgroundEventReceived](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat/onBackgroundEventReceived.html); here is an example:
 
@@ -234,7 +234,7 @@ To do this we need to update the push notification data payload at Stream Dashbo
 }
 ```
 
-Then we need to integrate the package [stream_chat_persistence](https://pub.dev/packages/stream_chat_persistence) in our app that exports a persistence client, learn [here](https://pub.dev/packages/stream_chat_persistence#usage) how to set it up.
+Then we need to integrate the package [`stream_chat_persistence`](https://pub.dev/packages/stream_chat_persistence) in our app that exports a persistence client, learn [here](https://pub.dev/packages/stream_chat_persistence#usage) how to set it up.
 
 Then during the call `firebaseMessaging.configure(...)` we need to set the `onBackgroundMessage` parameter using a TOP-LEVEL or STATIC function to handle background messages; here is an example:
 

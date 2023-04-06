@@ -16,7 +16,7 @@ If you find any bugs or have any questions, please file an [issue on our GitHub 
 Code examples:
 
 - See our [Stream Chat Flutter tutorial](https://getstream.io/chat/flutter/tutorial/) for an up-to-date guide using the latest Stream Chat version.
-- See the [Stream Flutter Samples repository](https://github.com/GetStream/flutter-samples) with our fully-fledged messaging [sample application](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1).
+- See the [Stream Flutter Samples repository](https://github.com/GetStream/flutter-samples) with our full fledged messaging [sample application](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1).
 
 Our documentation has also been updated to support v5, so all guides and examples will have updated code.
 
@@ -59,7 +59,7 @@ The user experience of interacting with a desktop application differs from a mob
 - Input controls: touch, keyboard, and mouse interactions
 - Native file system or gallery access (as well as sharing functionality)
 - Shortcuts
-- Dialogs
+- Dialog screens
 
 By default, Stream Chat Flutter will use the correct input controls and visual elements for the target platform. For example, touch and swipe controls will be the default on mobile, while on web and desktop these will be disabled and interactions with the mouse and keyboard will be preferred.
 
@@ -70,7 +70,7 @@ On desktop and web it's also possible to add attachments by simply dragging them
 - Right-click context menus for messages and full-screen attachments.
 - Upload and download attachments using the native desktop file system.
 - Press the "enter" key to send a message.
-- If you are quoting a message and have not yet typed any text, you can press the "esc" key to remove the quoted message.
+- If you are quoting a message and have not yet typed any text, you can press the `"esc"` key to remove the quoted message.
 - A dedicated "X" button for removing a quoted message with your mouse.
 - Drag and drop attachment files to `StreamMessageInput`.
 - New `StreamMessageInput.draggingBorder` property to customize the border color of the message input when dropping a file.
@@ -81,10 +81,10 @@ On desktop and web it's also possible to add attachments by simply dragging them
 - Gallery navigation controls with keyboard shortcuts (left and right arrow keys).
 - Appropriate message sizing for large screens.
 - Right-click context menu for `StreamMessageListView` items.
-- `StreamMessageListView` items not swipeable on desktop & web.
+- `StreamMessageListView` items not swipe-able on desktop & web.
 - Video support for Windows & Linux through `dart_vlc`.
 - Video support for macOS through `video_player_macos`.
-- Replace bottom sheets with dialogs where appropriate.
+- Replace bottom sheets with dialog screens where appropriate.
 
 ## What's New?
 
@@ -118,7 +118,7 @@ Check out the dedicated [guide](../../02-customization/01-custom-widgets/05-cust
 
 The following was also introduced:
 
-- Added support for additional text field params in`StreamMessageInput`: `maxLines`, `minLines`, `textInputAction`, `keyboardType`, and `textCapitalization`.
+- Added support for additional text field parameters in`StreamMessageInput`: `maxLines`, `minLines`, `textInputAction`, `keyboardType`, and `textCapitalization`.
 - Added `showStreamAttachmentPickerModalBottomSheet` to show the attachment picker modal bottom sheet.
 - Added `onQuotedMessageCleared` to `StreamMessageInput`
 - `selected` and `selectedTileColor` to `StreamChannelListTile`

@@ -18,12 +18,9 @@
   ],
   "mentioned_users": [],
   "parent_id": "parentId",
-  "quoted_message": null,
   "quoted_message_id": null,
   "pinned": false,
-  "pinned_at": null,
   "pin_expires": null,
-  "pinned_by": null,
   "show_in_channel": true,
   "hey": "test"
 }
