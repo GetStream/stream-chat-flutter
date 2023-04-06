@@ -14,6 +14,10 @@
 
 - Updated dependencies to resolvable versions.
 
+🚀 Improved
+- 
+- Improved draw of reaction options. [#1455](https://github.com/GetStream/stream-chat-flutter/pull/1455)
+
 ## 5.3.0
 
 🔄 Changed

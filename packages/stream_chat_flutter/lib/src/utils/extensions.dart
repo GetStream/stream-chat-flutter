@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:diacritic/diacritic.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +13,16 @@ extension StringExtension on String {
   /// Returns the capitalized string
   String capitalize() =>
       isNotEmpty ? '${this[0].toUpperCase()}${substring(1).toLowerCase()}' : '';
+
+  /// Returns the biggest line of a text.
+  String biggestLine() {
+    if (contains('\n')) {
+      return split('\n')
+          .reduce((curr, next) => curr.length > next.length ? curr : next);
+    } else {
+      return this;
+    }
+  }
 
   /// Returns whether the string contains only emoji's or not.
   ///
@@ -351,6 +363,33 @@ extension MessageX on Message {
       }
     }
     return copyWith(text: messageTextToRender);
+  }
+
+  /// Returns an approximation of message size
+  double roughMessageSize(double? fontSize) {
+    var messageTextLength = min(text!.biggestLine().length, 65);
+
+    if (quotedMessage != null) {
+      var quotedMessageLength =
+          (min(quotedMessage!.text?.biggestLine().length ?? 0, 65)) + 8;
+
+      if (quotedMessage!.attachments.isNotEmpty) {
+        quotedMessageLength += 8;
+      }
+
+      if (quotedMessageLength > messageTextLength * 1.2) {
+        messageTextLength = quotedMessageLength;
+      }
+    }
+
+    // Quoted message have a smaller font, so it is necessary to reduce the
+    // size of the multiplier to count for the smaller font.
+    var multiplier = 0.55;
+    if (quotedMessage != null) {
+      multiplier = 0.45;
+    }
+
+    return messageTextLength * (fontSize ?? 1) * multiplier;
   }
 
   /// It returns the message with the translated text if available locally
