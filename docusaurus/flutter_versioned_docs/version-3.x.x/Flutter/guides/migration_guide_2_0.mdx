@@ -75,7 +75,7 @@ Added video compress options (frame and quality) to MessageInput
 `TypingIndicator` now has a property called `parentId` to show typing indicator specific to threads
 #493: add support for `MessageListView` header/footer
 `MessageWidget` accepts a `userAvatarBuilder`
-Added `pinMessage` ui support
+Added `pinMessage` UI support
 Added `MessageListView.threadSeparatorBuilder` property
 Added `MessageInput.onError` property to allow error handling
 Added `GalleryHeader`/`GalleryFooter` theme classes
@@ -202,20 +202,20 @@ in the constructor)
 #### 🛑️ Breaking Changes from 1.5.3
 
 * Migrate this package to null safety
-* `ConnectUserWithProvider` now requires `tokenProvider` as a required param. (Removed from the constructor)
+* `ConnectUserWithProvider` now requires `tokenProvider` as a required parameter. (Removed from the constructor)
 * `client.disconnect()` is now divided into two different functions
-    * `client.closeConnection()` -> for closing user websocket connection.
+    * `client.closeConnection()` -> for closing user web socket connection.
     * `client.disconnectUser()` -> for disconnecting user and resetting client state.
 * `client.devToken()` now returns a Token model instead of String.
 * `ApiError` is removed in favor of `StreamChatError`
     * `StreamChatError` -> parent type for all the stream errors.
-    * `StreamWebSocketError` -> for user websocket related errors.
+    * `StreamWebSocketError` -> for user web socket related errors.
     * `StreamChatNetworkError` -> for network related errors.
-* `client.queryChannels()`, `channel.query()` options param is removed in favor of individual params
+* `client.queryChannels()`, `channel.query()` options parameter is removed in favor of individual parameters
     * `option.state` -> `bool state`
     * `option.watch` -> `bool watch`
     * `option.presence` -> `bool presence`
-* `client.queryUsers()` options param is removed in favor of individual params
+* `client.queryUsers()` options parameter is removed in favor of individual parameters
     * `option.presence` -> `bool presence`
 * Added typed filters
 
@@ -227,8 +227,8 @@ in the constructor)
 
 #### ✅ Added
 
-* New Location enum is introduced for easily changing the client location/baseUrl.
-* New `client.openConnection()` and `client.closeConnection()` is introduced to connect/disconnect user ws connection.
+* New Location `enum` is introduced for easily changing the client location/baseUrl.
+* New `client.openConnection()` and `client.closeConnection()` is introduced to connect/disconnect user WS connection.
 * New `client.partialUpdateMessage` and `channel.partialUpdateMessage` methods
 * `connectWebSocket` parameter in connect user calls to use the client in "connection-less" mode.
 
@@ -253,29 +253,29 @@ dependencies:
 Upon doing this, all breaking changes from the package will take immediate effect. Here are steps to
 remedy the issues:
 
-1) Change over the constructor of `connectUserWithProvider()` to the new format which has `tokenProvider` as a required param.
+1) Change over the constructor of `connectUserWithProvider()` to the new format which has `tokenProvider` as a required parameter.
 
 2) We added more nuance to `disconnectUser()` by adding two new methods - one to close the connection
 and the other to disconnect the user. This allows more fine-grained control of disconnection.
 
-    * `client.closeConnection()` -> for closing user websocket connection.
+    * `client.closeConnection()` -> for closing user web socket connection.
     * `client.disconnectUser()` -> for disconnecting user and resetting client state.
 
 3) We refactored how we handle errors - new error types are now introduced that replace ApiError.
 
     * `StreamChatError` -> parent type for all the stream errors.
-    * `StreamWebSocketError` -> for user websocket related errors.
+    * `StreamWebSocketError` -> for user web socket related errors.
     * `StreamChatNetworkError` -> for network related errors.
 
 4) We changed over from a map full of options to a more type-safe and sound approach by changing over to explicit parameters.
 
 Use these explicit parameters in the query parameters instead of the option keys:
 
-* `client.queryChannels()`, `channel.query()` options param is removed in favor of individual params
+* `client.queryChannels()`, `channel.query()` options parameter is removed in favor of individual parameters
     * `option.state` -> `bool state`
     * `option.watch` -> `bool watch`
     * `option.presence` -> `bool presence`
-* `client.queryUsers()` options param is removed in favor of individual params
+* `client.queryUsers()` options parameter is removed in favor of individual parameters
     * `option.presence` -> `bool presence`
 
 5) We added type-safe filters to make filtering in the app easier. Change over the filters to the

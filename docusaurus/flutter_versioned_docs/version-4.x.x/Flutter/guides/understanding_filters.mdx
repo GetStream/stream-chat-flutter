@@ -24,7 +24,7 @@ Filter.equal('type', 'messaging'),
 
 #### Filter.notEqual
 
-The 'notEqual' filter gets the objects where the given key does not have the specified value.
+The `notEqual` filter gets the objects where the given key does not have the specified value.
 
 ```dart
 Filter.notEqual('type', 'messaging'),
@@ -64,20 +64,20 @@ Filter.lessOrEqual('count', 5),
 
 #### Filter.in_
 
-The 'in_' filter allows getting objects where the key matches any in a specified array.
+The `in_` filter allows getting objects where the key matches any in a specified array.
 
 ```dart
 Filter.in_('members', [user.id])
 ```
 
 :::note
-Since 'in' is a keyword in Dart, the filter has an underscore added. This does not apply to the 'notIn'
+Since `in` is a keyword in Dart, the filter has an underscore added. This does not apply to the `notIn`
 keyword.
 :::
 
 #### Filter.notIn
 
-The 'notIn' filter allows getting objects where the key matches none in a specified array.
+The `notIn` filter allows getting objects where the key matches none in a specified array.
 
 ```dart
 Filter.notIn('members', [user.id])
@@ -109,7 +109,7 @@ Filter.exists('name')
 
 #### Filter.notExists
 
-The 'notExists' filter checks if the specified key doesn't exist. This is a simplified call to `Filter.exists`
+The `notExists` filter checks if the specified key doesn't exist. This is a simplified call to `Filter.exists`
 with the value set to false.
 
 ```dart
