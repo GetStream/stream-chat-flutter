@@ -117,10 +117,10 @@ class StreamMessageInput extends StatefulWidget {
   });
 
   /// The predicate used to send a message on desktop/web
-  final RawKeyEventPredicate? sendMessageKeyPredicate;
+  final KeyEventPredicate sendMessageKeyPredicate;
 
   /// The predicate used to clear the quoted message on desktop/web
-  final RawKeyEventPredicate? clearQuotedMessageKeyPredicate;
+  final KeyEventPredicate clearQuotedMessageKeyPredicate;
 
   /// If true the message input will animate the actions while you type
   final bool enableActionAnimation;
@@ -264,15 +264,19 @@ class StreamMessageInput extends StatefulWidget {
 
   static bool _defaultSendMessageKeyPredicate(
     FocusNode node,
-    RawKeyEvent event,
-  ) =>
-      event.logicalKey == LogicalKeyboardKey.enter;
+    KeyEvent event,
+  ) {
+    // On desktop/web, send the message when the user presses the enter key.
+    return event is KeyUpEvent && event.logicalKey == LogicalKeyboardKey.enter;
+  }
 
   static bool _defaultClearQuotedMessageKeyPredicate(
     FocusNode node,
-    RawKeyEvent event,
-  ) =>
-      event.logicalKey == LogicalKeyboardKey.escape;
+    KeyEvent event,
+  ) {
+    // On desktop/web, clear the quoted message when the user presses the escape key.
+    return event is KeyUpEvent && event.logicalKey == LogicalKeyboardKey.escape;
+  }
 
   @override
   StreamMessageInputState createState() => StreamMessageInputState();
@@ -773,11 +777,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     maxHeight: widget.maxHeight,
                     child: PlatformWidgetBuilder(
                       web: (context, child) => Focus(
-                        onKey: _handleKeyPressed,
+                        onKeyEvent: _handleKeyPressed,
                         child: child!,
                       ),
                       desktop: (context, child) => Focus(
-                        onKey: _handleKeyPressed,
+                        onKeyEvent: _handleKeyPressed,
                         child: child!,
                       ),
                       mobile: (context, child) => child,
@@ -808,22 +812,22 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
   }
 
-  KeyEventResult _handleKeyPressed(
-    FocusNode node,
-    RawKeyEvent event,
-  ) {
-    if (widget.sendMessageKeyPredicate != null &&
-        widget.sendMessageKeyPredicate!(node, event)) {
+  KeyEventResult _handleKeyPressed(FocusNode node, KeyEvent event) {
+    // Check for send message key.
+    if (widget.sendMessageKeyPredicate(node, event)) {
       sendMessage();
       return KeyEventResult.handled;
-    } else if (widget.clearQuotedMessageKeyPredicate != null &&
-        widget.clearQuotedMessageKeyPredicate!(node, event)) {
+    }
+
+    // Check for clear quoted message key.
+    if (widget.clearQuotedMessageKeyPredicate(node, event)) {
       if (_hasQuotedMessage && _effectiveController.text.isEmpty) {
         widget.onQuotedMessageCleared?.call();
       }
       return KeyEventResult.handled;
     }
 
+    // Return ignored to allow other key events to be handled.
     return KeyEventResult.ignored;
   }
 

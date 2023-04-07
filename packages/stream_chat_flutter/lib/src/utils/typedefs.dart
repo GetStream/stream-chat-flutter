@@ -341,9 +341,9 @@ typedef DownloadedPathCallback = void Function(String? path);
 typedef UserTapCallback = void Function(User, Widget?);
 
 /// {@template rawKeyEventPredicate}
-/// Callback called to react to a raw key event
+/// Callback called to react to a key event
 /// {@endtemplate}
-typedef RawKeyEventPredicate = bool Function(FocusNode, RawKeyEvent);
+typedef KeyEventPredicate = bool Function(FocusNode, KeyEvent);
 
 /// {@template userItemBuilder}
 /// Builder used to create a custom [ListUserItem] from a [User]
