@@ -9,6 +9,7 @@
 
 - Now it is possible to customize the max lines of the title of a url attachment. Before it was always 1 line.
 - Added `attachmentActionsModalBuilder` parameter to `StreamMessageWidget` that allows to customize `AttachmentActionsModal`.
+- Added `StreamMessageInput.sendMessageKeyPredicate` and `StreamMessageInput.clearQuotedMessageKeyPredicate` to customize the keys used to send and clear the quoted message.
 
 🔄 Changed
 
