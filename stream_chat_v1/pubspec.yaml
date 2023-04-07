@@ -32,7 +32,7 @@ dependencies:
   yaml: ^3.1.0
   uuid: ^3.0.5
   streaming_shared_preferences: ^2.0.0
-  lottie: ^2.0.0
+  lottie: ^2.3.2
   collection: ^1.15.0
   sentry_flutter: ^6.5.0
   flutter_slidable: ^2.0.0
@@ -40,8 +40,7 @@ dependencies:
   provider: ^6.0.3
 
 dev_dependencies:
-  flutter_launcher_icons: ^0.9.2
-  test: any
+  flutter_launcher_icons: ^0.12.0
   flutter_lints: ^2.0.0
 
 dependency_overrides:
@@ -62,13 +61,20 @@ dependency_overrides:
       path: packages/stream_chat_flutter
 
 flutter:
+  uses-material-design: true
   assets:
     - assets/
-    - pubspec.lock
-  uses-material-design: true
 
 flutter_icons:
+  image_path: "assets/ic_launcher.png"
+
   android: true
+  adaptive_icon_background: "assets/ic_launcher_background.png"
+  adaptive_icon_foreground: "assets/ic_launcher_foreground.png"
   ios: true
-  image_path_android: "assets/android_icon.png"
-  image_path_ios: "assets/ios_icon.png"
+  web:
+    generate: true
+  windows:
+    generate: true
+  macos:
+    generate: true
