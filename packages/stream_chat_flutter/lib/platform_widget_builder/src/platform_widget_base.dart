@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show Theme;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// A generic widget builder function.
@@ -30,7 +30,7 @@ abstract class PlatformWidgetBase<M extends Widget, D extends Widget,
 
   @override
   Widget build(BuildContext context) {
-    final platform = Theme.of(context).platform;
+    final platform = defaultTargetPlatform;
     if (platform == TargetPlatform.android || platform == TargetPlatform.iOS) {
       return createMobileWidget(context);
     } else if (platform == TargetPlatform.macOS ||
