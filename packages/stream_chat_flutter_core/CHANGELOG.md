@@ -1,4 +1,4 @@
-## Upcoming
+## 6.0.0
 
 - Updated dependencies to resolvable versions.
 
