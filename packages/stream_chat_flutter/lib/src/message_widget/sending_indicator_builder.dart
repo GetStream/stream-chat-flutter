@@ -39,8 +39,8 @@ class SendingIndicatorBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = messageTheme.createdAtStyle;
-    final thisChannel = channel ?? StreamChannel.of(context).channel;
-    final memberCount = thisChannel.memberCount ?? 0;
+    final channel = this.channel ?? StreamChannel.of(context).channel;
+    final memberCount = channel.memberCount ?? 0;
 
     if (hasNonUrlAttachments &&
         (message.status == MessageSendingStatus.sending ||
@@ -64,8 +64,8 @@ class SendingIndicatorBuilder extends StatelessWidget {
     }
 
     return BetterStreamBuilder<List<Read>>(
-      stream: thisChannel.state?.readStream,
-      initialData: thisChannel.state?.read,
+      stream: channel.state?.readStream,
+      initialData: channel.state?.read,
       builder: (context, data) {
         final readList = data.where((it) =>
             it.user.id != streamChat.currentUser?.id &&
@@ -78,6 +78,7 @@ class SendingIndicatorBuilder extends StatelessWidget {
           isMessageRead: isMessageRead,
           size: style!.fontSize,
         );
+
         if (isMessageRead) {
           child = Row(
             mainAxisSize: MainAxisSize.min,
@@ -94,6 +95,7 @@ class SendingIndicatorBuilder extends StatelessWidget {
             ],
           );
         }
+
         return child;
       },
     );
