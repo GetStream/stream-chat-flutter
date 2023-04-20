@@ -7,8 +7,8 @@ void main() {
     final statusConverter = MessageSendingStatusConverter();
 
     test('should return expected status if status code is provided', () {
-      final res = statusConverter.fromSql(3);
-      expect(res, MessageSendingStatus.updating);
+      final res = statusConverter.fromSql(6);
+      expect(res, MessageSendingStatus.failed_delete);
     });
   });
 
@@ -16,8 +16,8 @@ void main() {
     final statusConverter = MessageSendingStatusConverter();
 
     test('should return expected code if the status is provided', () {
-      final res = statusConverter.toSql(MessageSendingStatus.updating);
-      expect(res, 3);
+      final res = statusConverter.toSql(MessageSendingStatus.failed_delete);
+      expect(res, 6);
     });
   });
 }
