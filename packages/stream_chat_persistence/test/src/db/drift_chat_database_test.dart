@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 
 DatabaseConnection _backgroundConnection() =>
-    DatabaseConnection.fromExecutor(NativeDatabase.memory());
+    DatabaseConnection(NativeDatabase.memory());
 
 void main() {
   test(
@@ -30,7 +30,7 @@ void main() {
       final isolate = await DriftIsolate.spawn(_backgroundConnection);
       final connection = DatabaseConnection.delayed(isolate.connect());
 
-      final database = DriftChatDatabase.connect(userId, connection);
+      final database = DriftChatDatabase(userId, connection);
       expect(database, isNotNull);
       expect(database.userId, userId);
 

@@ -46,6 +46,21 @@ dependencies:
   video_thumbnail: ^0.5.0
 
 flutter:
+  plugin:
+    platforms:
+      android:
+        default_package: stream_chat_flutter
+      ios:
+        default_package: stream_chat_flutter
+      windows:
+        default_package: stream_chat_flutter
+      linux:
+        default_package: stream_chat_flutter
+      macos:
+        default_package: stream_chat_flutter
+      web:
+        default_package: stream_chat_flutter
+
   assets:
     - images/
     - svgs/
@@ -54,7 +69,7 @@ flutter:
   uses-material-design: true
 
 dev_dependencies:
-  dart_code_metrics: ^5.7.0
+  dart_code_metrics: ^5.7.2
   flutter_test:
     sdk: flutter
   golden_toolkit: ^0.15.0

@@ -1,5 +1,6 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
+import 'package:stream_chat_persistence/src/entity/channels.dart';
 
 /// Represents a [Reads] table in [MoorChatDatabase].
 @DataClassName('ReadEntity')
@@ -12,7 +13,7 @@ class Reads extends Table {
 
   /// The channel cid of which this read belongs
   TextColumn get channelCid =>
-      text().customConstraint('REFERENCES channels(cid) ON DELETE CASCADE')();
+      text().references(Channels, #cid, onDelete: KeyAction.cascade)();
 
   /// Number of unread messages
   IntColumn get unreadMessages => integer().withDefault(const Constant(0))();

@@ -2,10 +2,7 @@
 
 part of 'connection_event_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$ConnectionEventDaoMixin on DatabaseAccessor<DriftChatDatabase> {
   $ConnectionEventsTable get connectionEvents =>
       attachedDatabase.connectionEvents;
