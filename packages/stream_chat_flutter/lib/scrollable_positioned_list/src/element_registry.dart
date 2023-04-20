@@ -7,8 +7,7 @@ import 'package:flutter/widgets.dart';
 /// A registry to track some [Element]s in the tree.
 class RegistryWidget extends StatefulWidget {
   /// Creates a [RegistryWidget].
-  const RegistryWidget({Key? key, this.elementNotifier, required this.child})
-      : super(key: key);
+  const RegistryWidget({super.key, this.elementNotifier, required this.child});
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -28,8 +27,7 @@ class RegistryWidget extends StatefulWidget {
 /// [RegistryWidget].
 class RegisteredElementWidget extends ProxyWidget {
   /// Creates a [RegisteredElementWidget].
-  const RegisteredElementWidget({Key? key, required Widget child})
-      : super(key: key, child: child);
+  const RegisteredElementWidget({super.key, required super.child});
 
   @override
   Element createElement() => _RegisteredElement(this);
@@ -47,10 +45,9 @@ class _RegistryWidgetState extends State<RegistryWidget> {
 
 class _InheritedRegistryWidget extends InheritedWidget {
   const _InheritedRegistryWidget({
-    Key? key,
     required this.state,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   final _RegistryWidgetState state;
 
@@ -59,7 +56,7 @@ class _InheritedRegistryWidget extends InheritedWidget {
 }
 
 class _RegisteredElement extends ProxyElement {
-  _RegisteredElement(ProxyWidget widget) : super(widget);
+  _RegisteredElement(super.widget);
 
   @override
   void notifyClients(ProxyWidget oldWidget) {}

@@ -19,24 +19,15 @@ import 'package:flutter/widgets.dart';
 class UnboundedViewport extends Viewport {
   /// {@macro unbounded_viewport}
   UnboundedViewport({
-    Key? key,
-    AxisDirection axisDirection = AxisDirection.down,
-    AxisDirection? crossAxisDirection,
+    super.key,
+    super.axisDirection,
+    super.crossAxisDirection,
     double anchor = 0.0,
-    required ViewportOffset offset,
-    Key? center,
-    double? cacheExtent,
-    List<Widget> slivers = const <Widget>[],
-  })  : _anchor = anchor,
-        super(
-          key: key,
-          axisDirection: axisDirection,
-          crossAxisDirection: crossAxisDirection,
-          offset: offset,
-          center: center,
-          cacheExtent: cacheExtent,
-          slivers: slivers,
-        );
+    required super.offset,
+    super.center,
+    super.cacheExtent,
+    super.slivers,
+  }) : _anchor = anchor;
 
   // [Viewport] enforces constraints on [Viewport.anchor], so we need our own
   // version.
@@ -68,22 +59,14 @@ class UnboundedViewport extends Viewport {
 class UnboundedRenderViewport extends RenderViewport {
   /// Creates a viewport for [RenderSliver] objects.
   UnboundedRenderViewport({
-    AxisDirection axisDirection = AxisDirection.down,
-    required AxisDirection crossAxisDirection,
-    required ViewportOffset offset,
+    super.axisDirection,
+    required super.crossAxisDirection,
+    required super.offset,
     double anchor = 0.0,
-    List<RenderSliver>? children,
-    RenderSliver? center,
-    double? cacheExtent,
-  })  : _anchor = anchor,
-        super(
-          axisDirection: axisDirection,
-          crossAxisDirection: crossAxisDirection,
-          offset: offset,
-          center: center,
-          cacheExtent: cacheExtent,
-          children: children,
-        );
+    super.children,
+    super.center,
+    super.cacheExtent,
+  }) : _anchor = anchor;
 
   static const int _maxLayoutCycles = 10;
 

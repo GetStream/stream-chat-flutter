@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
-
 import 'package:stream_chat_flutter_core/src/stream_channel_list_event_handler.dart';
 
 /// The default channel page limit to load.
@@ -53,12 +52,12 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
-  })  : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
+  })
+      : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
         super(const PagedValue.loading());
 
   /// Creates a [StreamChannelListController] from the passed [value].
-  StreamChannelListController.fromValue(
-    super.value, {
+  StreamChannelListController.fromValue(super.value, {
     required this.client,
     StreamChannelListEventHandler? eventHandler,
     this.filter,
@@ -247,8 +246,10 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     _channelEventSubscription = client
         .on()
         .skip(1) // Skipping the last emitted event.
-        // We only need to handle the latest events.
+    // We only need to handle the latest events.
         .listen((event) {
+      print('event: $event');
+
       // Only handle the event if the value is in success state.
       if (value.isNotSuccess) return;
 

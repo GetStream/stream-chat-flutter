@@ -28,7 +28,7 @@ dependencies:
   http_parser: ^4.0.0
   image_gallery_saver: ^1.7.1
   image_picker: ^0.8.2
-  jiffy: ^5.0.0
+  jiffy: ^6.1.0
   lottie: ^2.0.0
   meta: ^1.8.0
   path_provider: ^2.0.9
@@ -46,6 +46,21 @@ dependencies:
   video_thumbnail: ^0.5.0
 
 flutter:
+  plugin:
+    platforms:
+      android:
+        default_package: stream_chat_flutter
+      ios:
+        default_package: stream_chat_flutter
+      windows:
+        default_package: stream_chat_flutter
+      linux:
+        default_package: stream_chat_flutter
+      macos:
+        default_package: stream_chat_flutter
+      web:
+        default_package: stream_chat_flutter
+
   assets:
     - images/
     - svgs/

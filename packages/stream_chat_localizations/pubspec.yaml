@@ -20,3 +20,19 @@ dev_dependencies:
   dart_code_metrics: ^4.16.0
   flutter_test:
     sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        default_package: stream_chat_localizations
+      ios:
+        default_package: stream_chat_localizations
+      windows:
+        default_package: stream_chat_localizations
+      linux:
+        default_package: stream_chat_localizations
+      macos:
+        default_package: stream_chat_localizations
+      web:
+        default_package: stream_chat_localizations
