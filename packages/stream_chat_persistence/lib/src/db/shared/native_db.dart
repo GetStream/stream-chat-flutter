@@ -23,7 +23,7 @@ class SharedDB {
   }) async {
     final dbName = 'db_$userId';
     if (connectionMode == ConnectionMode.background) {
-      return DriftChatDatabase.connect(
+      return DriftChatDatabase(
         userId,
         DatabaseConnection.delayed(Future(() async {
           final isolate = await _createMoorIsolate(
@@ -34,6 +34,7 @@ class SharedDB {
         })),
       );
     }
+
     return DriftChatDatabase(
       userId,
       LazyDatabase(
@@ -68,7 +69,7 @@ class SharedDB {
           logStatements: request.logStatements,
         ));
     final moorIsolate = DriftIsolate.inCurrent(
-      () => DatabaseConnection.fromExecutor(executor),
+      () => DatabaseConnection(executor),
     );
     request.sendMoorIsolate.send(moorIsolate);
   }

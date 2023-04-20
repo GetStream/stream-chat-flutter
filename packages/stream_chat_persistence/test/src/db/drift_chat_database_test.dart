@@ -30,7 +30,7 @@ void main() {
       final isolate = await DriftIsolate.spawn(_backgroundConnection);
       final connection = DatabaseConnection.delayed(isolate.connect());
 
-      final database = DriftChatDatabase.connect(userId, connection);
+      final database = DriftChatDatabase(userId, connection);
       expect(database, isNotNull);
       expect(database.userId, userId);
 

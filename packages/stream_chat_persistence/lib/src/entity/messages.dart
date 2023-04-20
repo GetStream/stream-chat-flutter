@@ -4,6 +4,8 @@ import 'package:stream_chat_persistence/src/converter/list_converter.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
 import 'package:stream_chat_persistence/src/converter/message_sending_status_converter.dart';
 
+import 'channels.dart';
+
 /// Represents a [Messages] table in [MoorChatDatabase].
 @DataClassName('MessageEntity')
 class Messages extends Table {
@@ -78,10 +80,11 @@ class Messages extends Table {
 
   /// The channel cid of which this message is part of
   TextColumn get channelCid =>
-      text().customConstraint('REFERENCES channels(cid) ON DELETE CASCADE')();
+      text().references(Channels, #cid, onDelete: KeyAction.cascade)();
 
   /// A Map of [messageText] translations.
-  TextColumn get i18n => text().nullable().map(MapConverter<String>())();
+  TextColumn get i18n =>
+      text().nullable().map(NullableMapConverter<String>())();
 
   /// Message custom extraData
   TextColumn get extraData => text().nullable().map(MapConverter<Object?>())();

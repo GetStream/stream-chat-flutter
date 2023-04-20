@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-
 import 'package:stream_chat_persistence/src/converter/converter.dart';
 import 'package:stream_chat_persistence/src/dao/dao.dart';
 import 'package:stream_chat_persistence/src/entity/entity.dart';
@@ -37,17 +36,11 @@ part 'drift_chat_database.g.dart';
   ],
 )
 class DriftChatDatabase extends _$DriftChatDatabase {
-  /// Creates a new moor chat database instance
+  /// Creates a new drift chat database instance
   DriftChatDatabase(
     this._userId,
     QueryExecutor executor,
   ) : super(executor);
-
-  /// Instantiate a new database instance
-  DriftChatDatabase.connect(
-    this._userId,
-    DatabaseConnection connection,
-  ) : super.connect(connection);
 
   final String _userId;
 
