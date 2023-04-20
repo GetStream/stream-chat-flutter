@@ -26,12 +26,8 @@ class UnboundedCustomScrollView extends CustomScrollView {
     super.slivers,
     super.semanticChildCount,
     super.dragStartBehavior,
-    ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
-  })  : _anchor = anchor,
-        super(
-          keyboardDismissBehavior: keyboardDismissBehavior ??
-              ScrollViewKeyboardDismissBehavior.manual,
-        );
+    super.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+  }) : _anchor = anchor;
 
   // [CustomScrollView] enforces constraints on [CustomScrollView.anchor], so
   // we need our own version.
