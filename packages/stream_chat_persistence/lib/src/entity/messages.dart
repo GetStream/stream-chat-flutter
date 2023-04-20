@@ -3,8 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/converter/list_converter.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
 import 'package:stream_chat_persistence/src/converter/message_sending_status_converter.dart';
-
-import 'channels.dart';
+import 'package:stream_chat_persistence/src/entity/channels.dart';
 
 /// Represents a [Messages] table in [MoorChatDatabase].
 @DataClassName('MessageEntity')

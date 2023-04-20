@@ -17,14 +17,15 @@ void main() {
       });
 
       test(
-          'should throw type error if the provided json is not a list of String',
-          () {
-        final json = [22, 33, 44];
-        expect(
-          () => listConverter.fromSql(jsonEncode(json)),
-          throwsA(isA<TypeError>()),
-        );
-      });
+        'should throw type error if the provided json is not a list of String',
+        () {
+          final json = [22, 33, 44];
+          expect(
+            () => listConverter.fromSql(jsonEncode(json)),
+            throwsA(isA<TypeError>()),
+          );
+        },
+      );
 
       test('should return list of String if json data list is provided', () {
         final data = ['data1', 'data2', 'data3'];
@@ -60,14 +61,15 @@ void main() {
       });
 
       test(
-          'should throw type error if the provided json is not a list of String',
-          () {
-        final json = [22, 33, 44];
-        expect(
-          () => listConverter.fromSql(jsonEncode(json)),
-          throwsA(isA<TypeError>()),
-        );
-      });
+        'should throw type error if the provided json is not a list of String',
+        () {
+          final json = [22, 33, 44];
+          expect(
+            () => listConverter.fromSql(jsonEncode(json)),
+            throwsA(isA<TypeError>()),
+          );
+        },
+      );
 
       test('should return list of String if json data list is provided', () {
         final data = ['data1', 'data2', 'data3'];

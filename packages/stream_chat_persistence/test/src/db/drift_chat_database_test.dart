@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 
 DatabaseConnection _backgroundConnection() =>
-    DatabaseConnection.fromExecutor(NativeDatabase.memory());
+    DatabaseConnection(NativeDatabase.memory());
 
 void main() {
   test(
