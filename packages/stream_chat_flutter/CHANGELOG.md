@@ -2,6 +2,7 @@
 
 🐞 Fixed
 
+- [#1456](https://github.com/GetStream/stream-chat-flutter/issues/1456) Fixed logic for showing that a message was read using sending indicator.
 - [#1462](https://github.com/GetStream/stream-chat-flutter/issues/1462) Fixed support for iPad in the share button for images. 
 - [#1475](https://github.com/GetStream/stream-chat-flutter/issues/1475) Fixed typo to fix compilation.
 
