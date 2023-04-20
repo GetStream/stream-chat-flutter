@@ -1,5 +1,6 @@
 ## Upcoming
 
+- Updated `drift` to `^2.7.0`.
 - Updated dependencies to resolvable versions.
 
 ## 5.1.0
