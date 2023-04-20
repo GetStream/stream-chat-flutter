@@ -2958,7 +2958,8 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
       'message_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      $customConstraints: 'REFERENCES pinned_messages(id) ON DELETE CASCADE');
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES pinned_messages (id) ON DELETE CASCADE'));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
@@ -3302,7 +3303,8 @@ class $ReactionsTable extends Reactions
       'message_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      $customConstraints: 'REFERENCES messages(id) ON DELETE CASCADE');
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES messages (id) ON DELETE CASCADE'));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
@@ -4102,7 +4104,8 @@ class $MembersTable extends Members
       'channel_cid', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES channels (cid) ON DELETE CASCADE'));
   static const VerificationMeta _channelRoleMeta =
       const VerificationMeta('channelRole');
   @override
@@ -4679,7 +4682,8 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
       'channel_cid', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      $customConstraints: 'REFERENCES channels(cid) ON DELETE CASCADE');
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES channels (cid) ON DELETE CASCADE'));
   static const VerificationMeta _unreadMessagesMeta =
       const VerificationMeta('unreadMessages');
   @override
@@ -5545,6 +5549,34 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('pinned_messages', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('pinned_messages',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('pinned_message_reactions', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('messages',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('reactions', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('channels',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('members', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('channels',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('reads', kind: UpdateKind.delete),
             ],
           ),
         ],

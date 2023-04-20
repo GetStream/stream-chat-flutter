@@ -1,6 +1,7 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
+import 'package:stream_chat_persistence/src/entity/messages.dart';
 
 /// Represents a [Reactions] table in [MoorChatDatabase].
 @DataClassName('ReactionEntity')
@@ -10,7 +11,7 @@ class Reactions extends Table {
 
   /// The messageId to which the reaction belongs
   TextColumn get messageId =>
-      text().customConstraint('REFERENCES messages(id) ON DELETE CASCADE')();
+      text().references(Messages, #id, onDelete: KeyAction.cascade)();
 
   /// The type of the reaction
   TextColumn get type => text()();
