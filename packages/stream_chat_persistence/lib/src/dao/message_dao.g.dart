@@ -2,11 +2,9 @@
 
 part of 'message_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$MessageDaoMixin on DatabaseAccessor<DriftChatDatabase> {
+  $ChannelsTable get channels => attachedDatabase.channels;
   $MessagesTable get messages => attachedDatabase.messages;
   $UsersTable get users => attachedDatabase.users;
 }

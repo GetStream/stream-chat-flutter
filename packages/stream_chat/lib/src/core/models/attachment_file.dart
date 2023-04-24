@@ -52,7 +52,7 @@ class AttachmentFile {
 
   /// Byte data for this file. Particularly useful if you want to manipulate
   /// its data or easily upload to somewhere else.
-  @JsonKey(ignore: true)
+  @JsonKey(includeToJson: false, includeFromJson: false)
   final Uint8List? bytes;
 
   /// The file size in bytes.

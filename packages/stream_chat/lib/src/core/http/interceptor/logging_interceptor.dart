@@ -87,8 +87,8 @@ class LoggingInterceptor extends Interceptor {
       requestHeaders['contentType'] = options.contentType?.toString();
       requestHeaders['responseType'] = options.responseType.toString();
       requestHeaders['followRedirects'] = options.followRedirects;
-      requestHeaders['connectTimeout'] = options.connectTimeout;
-      requestHeaders['receiveTimeout'] = options.receiveTimeout;
+      requestHeaders['connectTimeout'] = options.connectTimeout?.toString();
+      requestHeaders['receiveTimeout'] = options.receiveTimeout?.toString();
       _printMapAsTable(_logPrintRequest, requestHeaders, header: 'Headers');
       _printMapAsTable(_logPrintRequest, options.extra, header: 'Extras');
     }
@@ -101,7 +101,8 @@ class LoggingInterceptor extends Interceptor {
             options.data as Map?,
             header: 'Body',
           );
-        } else if (data is FormData) {
+        }
+        if (data is FormData) {
           final formDataMap = <String, dynamic>{}
             ..addEntries(data.fields)
             ..addEntries(data.files);
@@ -121,7 +122,7 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onError(DioError err, ErrorInterceptorHandler handler) {
     if (error) {
-      if (err.type == DioErrorType.response) {
+      if (err.type == DioErrorType.badResponse) {
         final uri = err.response?.requestOptions.uri;
         _printBoxed(
           _logPrintError,
@@ -162,7 +163,7 @@ class LoggingInterceptor extends Interceptor {
       _logPrintResponse('║');
       _printResponse(_logPrintResponse, response);
       _logPrintResponse('║');
-      _printLine(_logPrintResponse, '╚');
+      _logPrintResponse('╚');
     }
     super.onResponse(response, handler);
   }

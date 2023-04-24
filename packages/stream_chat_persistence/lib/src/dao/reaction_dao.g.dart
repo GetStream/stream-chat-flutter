@@ -2,11 +2,10 @@
 
 part of 'reaction_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$ReactionDaoMixin on DatabaseAccessor<DriftChatDatabase> {
+  $ChannelsTable get channels => attachedDatabase.channels;
+  $MessagesTable get messages => attachedDatabase.messages;
   $ReactionsTable get reactions => attachedDatabase.reactions;
   $UsersTable get users => attachedDatabase.users;
 }

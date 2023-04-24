@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/viewport.dart';
@@ -14,36 +13,24 @@ import 'package:stream_chat_flutter/scrollable_positioned_list/src/viewport.dart
 class UnboundedCustomScrollView extends CustomScrollView {
   /// {@macro custom_scroll_view}
   const UnboundedCustomScrollView({
-    Key? key,
-    Axis scrollDirection = Axis.vertical,
-    bool reverse = false,
-    ScrollController? controller,
-    bool? primary,
-    ScrollPhysics? physics,
-    bool shrinkWrap = false,
-    Key? center,
+    super.key,
+    super.scrollDirection,
+    super.reverse,
+    super.controller,
+    super.primary,
+    super.physics,
+    super.shrinkWrap,
+    super.center,
     double anchor = 0.0,
-    double? cacheExtent,
-    List<Widget> slivers = const <Widget>[],
-    int? semanticChildCount,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    super.cacheExtent,
+    super.slivers,
+    super.semanticChildCount,
+    super.dragStartBehavior,
     ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
   })  : _anchor = anchor,
         super(
-          key: key,
           keyboardDismissBehavior: keyboardDismissBehavior ??
               ScrollViewKeyboardDismissBehavior.manual,
-          scrollDirection: scrollDirection,
-          reverse: reverse,
-          controller: controller,
-          primary: primary,
-          physics: physics,
-          shrinkWrap: shrinkWrap,
-          center: center,
-          cacheExtent: cacheExtent,
-          semanticChildCount: semanticChildCount,
-          dragStartBehavior: dragStartBehavior,
-          slivers: slivers,
         );
 
   // [CustomScrollView] enforces constraints on [CustomScrollView.anchor], so

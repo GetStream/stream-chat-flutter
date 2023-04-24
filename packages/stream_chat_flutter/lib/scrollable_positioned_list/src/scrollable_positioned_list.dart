@@ -35,7 +35,7 @@ class ScrollablePositionedList extends StatefulWidget {
   const ScrollablePositionedList.builder({
     required this.itemCount,
     required this.itemBuilder,
-    Key? key,
+    super.key,
     this.itemScrollController,
     ItemPositionsListener? itemPositionsListener,
     this.initialScrollIndex = 0,
@@ -52,16 +52,15 @@ class ScrollablePositionedList extends StatefulWidget {
     this.findChildIndexCallback,
     this.keyboardDismissBehavior,
   })  : itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?,
-        separatorBuilder = null,
-        super(key: key);
+        separatorBuilder = null;
 
   /// Create a [ScrollablePositionedList] whose items are provided by
   /// [itemBuilder] and separators provided by [separatorBuilder].
   const ScrollablePositionedList.separated({
     required this.itemCount,
     required this.itemBuilder,
-    required this.separatorBuilder,
-    Key? key,
+    required IndexedWidgetBuilder this.separatorBuilder,
+    super.key,
     this.itemScrollController,
     ItemPositionsListener? itemPositionsListener,
     this.initialScrollIndex = 0,
@@ -77,9 +76,7 @@ class ScrollablePositionedList extends StatefulWidget {
     this.minCacheExtent,
     this.findChildIndexCallback,
     this.keyboardDismissBehavior,
-  })  : assert(separatorBuilder != null, 'seperatorBuilder cannot be null'),
-        itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?,
-        super(key: key);
+  }) : itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?;
 
   /// Called to find the new index of a child based on its key in case of
   /// reordering.
@@ -280,7 +277,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
   void initState() {
     super.initState();
     final ItemPosition? initialPosition =
-        PageStorage.of(context)!.readState(context);
+        PageStorage.of(context).readState(context);
     primary
       ..target = initialPosition?.index ?? widget.initialScrollIndex
       ..alignment = initialPosition?.itemLeadingEdge ?? widget.initialAlignment;
@@ -572,7 +569,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
         .where((ItemPosition position) =>
             position.itemLeadingEdge < 1 && position.itemTrailingEdge > 0);
     if (itemPositions.isNotEmpty) {
-      PageStorage.of(context)!.writeState(
+      PageStorage.of(context).writeState(
         context,
         itemPositions.reduce((value, element) =>
             value.itemLeadingEdge < element.itemLeadingEdge ? value : element),

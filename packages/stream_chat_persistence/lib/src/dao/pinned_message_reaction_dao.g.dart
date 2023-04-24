@@ -2,11 +2,10 @@
 
 part of 'pinned_message_reaction_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$PinnedMessageReactionDaoMixin on DatabaseAccessor<DriftChatDatabase> {
+  $ChannelsTable get channels => attachedDatabase.channels;
+  $PinnedMessagesTable get pinnedMessages => attachedDatabase.pinnedMessages;
   $PinnedMessageReactionsTable get pinnedMessageReactions =>
       attachedDatabase.pinnedMessageReactions;
   $UsersTable get users => attachedDatabase.users;

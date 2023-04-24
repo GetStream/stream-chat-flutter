@@ -1,5 +1,6 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
+import 'package:stream_chat_persistence/src/entity/channels.dart';
 
 /// Represents a [Members] table in [MoorChatDatabase].
 @DataClassName('MemberEntity')
@@ -9,7 +10,7 @@ class Members extends Table {
 
   /// The channel cid of which this user is part of
   TextColumn get channelCid =>
-      text().customConstraint('REFERENCES channels(cid) ON DELETE CASCADE')();
+      text().references(Channels, #cid, onDelete: KeyAction.cascade)();
 
   /// The role of the user in the channel
   TextColumn get channelRole => text().nullable()();

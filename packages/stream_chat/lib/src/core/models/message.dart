@@ -95,14 +95,11 @@ class Message extends Equatable {
   final String? text;
 
   /// The status of a sending message.
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final MessageSendingStatus status;
 
   /// The message type.
-  @JsonKey(
-    includeIfNull: false,
-    toJson: Serializer.readOnly,
-  )
+  @JsonKey(includeToJson: false)
   final String type;
 
   /// The list of attachments, either provided by the user or generated from a
@@ -115,26 +112,26 @@ class Message extends Equatable {
   final List<User> mentionedUsers;
 
   /// A map describing the count of number of every reaction.
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final Map<String, int>? reactionCounts;
 
   /// A map describing the count of score of every reaction.
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final Map<String, int>? reactionScores;
 
   /// The latest reactions to the message created by any user.
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final List<Reaction>? latestReactions;
 
   /// The reactions added to the message by the current user.
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final List<Reaction>? ownReactions;
 
   /// The ID of the parent message, if the message is a thread reply.
   final String? parentId;
 
   /// A quoted reply message.
-  @JsonKey(toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final Message? quotedMessage;
 
   final String? _quotedMessageId;
@@ -143,11 +140,11 @@ class Message extends Equatable {
   String? get quotedMessageId => _quotedMessageId ?? quotedMessage?.id;
 
   /// Reserved field indicating the number of replies for this message.
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final int? replyCount;
 
   /// Reserved field indicating the thread participants for this message.
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final List<User>? threadParticipants;
 
   /// Check if this message needs to show in the channel.
@@ -157,41 +154,38 @@ class Message extends Equatable {
   final bool silent;
 
   /// If true the message is shadowed.
-  @JsonKey(
-    includeIfNull: false,
-    toJson: Serializer.readOnly,
-  )
+  @JsonKey(includeToJson: false)
   final bool shadowed;
 
   /// A used command name.
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final String? command;
 
   final DateTime? _createdAt;
 
   /// Reserved field indicating when the message was deleted.
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final DateTime? deletedAt;
 
   /// Reserved field indicating when the message was created.
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   DateTime get createdAt => _createdAt ?? DateTime.now();
 
   final DateTime? _updatedAt;
 
   /// Reserved field indicating when the message was updated last time.
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   DateTime get updatedAt => _updatedAt ?? DateTime.now();
 
   /// User who sent the message.
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final User? user;
 
   /// If true the message is pinned.
   final bool pinned;
 
   /// Reserved field indicating when the message was pinned.
-  @JsonKey(toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final DateTime? pinnedAt;
 
   /// Reserved field indicating when the message will expire.
@@ -200,11 +194,10 @@ class Message extends Equatable {
   final DateTime? pinExpires;
 
   /// Reserved field indicating who pinned the message.
-  @JsonKey(toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final User? pinnedBy;
 
   /// Message custom extraData.
-  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// True if the message is a system info.
@@ -217,7 +210,7 @@ class Message extends Equatable {
   bool get isEphemeral => type == 'ephemeral';
 
   /// A Map of translations.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final Map<String, String>? i18n;
 
   /// Known top level fields.

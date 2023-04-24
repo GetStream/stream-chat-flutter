@@ -24,9 +24,7 @@ class UnreadMessagesSeparator extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Text(
-            context.translations.unreadMessagesSeparatorText(
-              unreadCount,
-            ),
+            context.translations.unreadMessagesSeparatorText(unreadCount),
             textAlign: TextAlign.center,
             style: StreamChannelHeaderTheme.of(context).subtitleStyle,
           ),

@@ -62,19 +62,19 @@ class ChannelModel {
   final String type;
 
   /// The cid of this channel
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final String cid;
 
   /// List of user permissions on this channel
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final List<String>? ownCapabilities;
 
   /// The channel configuration data
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final ChannelConfig config;
 
   /// The user that created this channel
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final User? createdBy;
 
   /// True if this channel is frozen
@@ -82,23 +82,23 @@ class ChannelModel {
   final bool frozen;
 
   /// The date of the last message
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final DateTime? lastMessageAt;
 
   /// The date of channel creation
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final DateTime createdAt;
 
   /// The date of the last channel update
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final DateTime updatedAt;
 
   /// The date of channel deletion
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final DateTime? deletedAt;
 
   /// The count of this channel members
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final int memberCount;
 
   /// The number of seconds in a cooldown
@@ -106,15 +106,15 @@ class ChannelModel {
   final int cooldown;
 
   /// True if the channel is disabled
-  @JsonKey(ignore: true)
+  @JsonKey(includeToJson: false, includeFromJson: false)
   bool? get disabled => extraData['disabled'] as bool?;
 
   /// True if the channel is hidden
-  @JsonKey(ignore: true)
+  @JsonKey(includeToJson: false, includeFromJson: false)
   bool? get hidden => extraData['hidden'] as bool?;
 
   /// The date of the last time channel got truncated
-  @JsonKey(ignore: true)
+  @JsonKey(includeToJson: false, includeFromJson: false)
   DateTime? get truncatedAt {
     final truncatedAt = extraData['truncated_at'] as String?;
     if (truncatedAt == null) return null;
@@ -122,11 +122,10 @@ class ChannelModel {
   }
 
   /// Map of custom channel extraData
-  @JsonKey(includeIfNull: false)
   final Map<String, Object?> extraData;
 
   /// The team the channel belongs to
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeToJson: false)
   final String? team;
 
   /// Known top level fields.

@@ -1,3 +1,8 @@
+## 6.0.0
+
+- Updated `drift` to `^2.7.0`.
+- Updated dependencies to resolvable versions.
+
 ## 5.1.0
 
 - Reintroduce support for experimental indexedDB on Web.

@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/message_widget/sending_indicator_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that displays a channel preview.
@@ -145,6 +146,8 @@ class StreamChannelListTile extends StatelessWidget {
     final currentUser = channel.client.state.currentUser!;
 
     final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
+    final streamChatTheme = StreamChatTheme.of(context);
+    final streamChat = StreamChat.of(context);
 
     final leading = this.leading ??
         StreamChannelAvatar(
@@ -225,16 +228,21 @@ class StreamChannelListTile extends StatelessWidget {
                     return const Offstage();
                   }
 
+                  final hasNonUrlAttachments = lastMessage.attachments
+                      .where((it) => it.titleLink == null || it.type == 'giphy')
+                      .isNotEmpty;
+
                   return Padding(
                     padding: const EdgeInsets.only(right: 4),
                     child:
                         sendingIndicatorBuilder?.call(context, lastMessage) ??
-                            StreamSendingIndicator(
+                            SendingIndicatorBuilder(
+                              messageTheme: streamChatTheme.ownMessageTheme,
                               message: lastMessage,
-                              size: channelPreviewTheme.indicatorIconSize,
-                              isMessageRead: channelState
-                                  .currentUserRead!.lastRead
-                                  .isAfter(lastMessage.createdAt),
+                              hasNonUrlAttachments: hasNonUrlAttachments,
+                              streamChat: streamChat,
+                              streamChatTheme: streamChatTheme,
+                              channel: channel,
                             ),
                   );
                 },

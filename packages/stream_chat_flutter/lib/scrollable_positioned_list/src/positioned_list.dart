@@ -25,7 +25,7 @@ import 'package:stream_chat_flutter/scrollable_positioned_list/src/scroll_view.d
 class PositionedList extends StatefulWidget {
   /// Create a [PositionedList].
   const PositionedList({
-    Key? key,
+    super.key,
     required this.itemCount,
     required this.itemBuilder,
     this.separatorBuilder,
@@ -44,9 +44,8 @@ class PositionedList extends StatefulWidget {
     this.addRepaintBoundaries = true,
     this.addAutomaticKeepAlives = true,
     this.keyboardDismissBehavior,
-  })  : assert((positionedIndex == 0) || (positionedIndex < itemCount),
-            'positionedIndex cannot be 0 and must be smaller than itemCount'),
-        super(key: key);
+  }) : assert((positionedIndex == 0) || (positionedIndex < itemCount),
+            'positionedIndex cannot be 0 and must be smaller than itemCount');
 
   /// Called to find the new index of a child based on its key in case of
   /// reordering.
@@ -272,7 +271,7 @@ class _PositionedListState extends State<PositionedList> {
           : widget.reverse
               ? widget.padding?.copyWith(left: 0)
               : widget.padding?.copyWith(right: 0)) ??
-      const EdgeInsets.all(0);
+      EdgeInsets.zero;
 
   EdgeInsets get _centerSliverPadding => widget.scrollDirection == Axis.vertical
       ? widget.reverse
@@ -283,14 +282,14 @@ class _PositionedListState extends State<PositionedList> {
                 bottom:
                     widget.positionedIndex == 0 ? widget.padding!.bottom : 0,
               ) ??
-              const EdgeInsets.all(0)
+              EdgeInsets.zero
           : widget.padding?.copyWith(
                 top: widget.positionedIndex == 0 ? widget.padding!.top : 0,
                 bottom: widget.positionedIndex == widget.itemCount - 1
                     ? widget.padding!.bottom
                     : 0,
               ) ??
-              const EdgeInsets.all(0)
+              EdgeInsets.zero
       : widget.reverse
           ? widget.padding?.copyWith(
                 left: widget.positionedIndex == widget.itemCount - 1
@@ -298,23 +297,23 @@ class _PositionedListState extends State<PositionedList> {
                     : 0,
                 right: widget.positionedIndex == 0 ? widget.padding!.right : 0,
               ) ??
-              const EdgeInsets.all(0)
+              EdgeInsets.zero
           : widget.padding?.copyWith(
                 left: widget.positionedIndex == 0 ? widget.padding!.left : 0,
                 right: widget.positionedIndex == widget.itemCount - 1
                     ? widget.padding!.right
                     : 0,
               ) ??
-              const EdgeInsets.all(0);
+              EdgeInsets.zero;
 
   EdgeInsets get _trailingSliverPadding =>
       widget.scrollDirection == Axis.vertical
           ? widget.reverse
-              ? widget.padding?.copyWith(bottom: 0) ?? const EdgeInsets.all(0)
-              : widget.padding?.copyWith(top: 0) ?? const EdgeInsets.all(0)
+              ? widget.padding?.copyWith(bottom: 0) ?? EdgeInsets.zero
+              : widget.padding?.copyWith(top: 0) ?? EdgeInsets.zero
           : widget.reverse
-              ? widget.padding?.copyWith(right: 0) ?? const EdgeInsets.all(0)
-              : widget.padding?.copyWith(left: 0) ?? const EdgeInsets.all(0);
+              ? widget.padding?.copyWith(right: 0) ?? EdgeInsets.zero
+              : widget.padding?.copyWith(left: 0) ?? EdgeInsets.zero;
 
   void _schedulePositionNotificationUpdate() {
     if (!updateScheduled) {

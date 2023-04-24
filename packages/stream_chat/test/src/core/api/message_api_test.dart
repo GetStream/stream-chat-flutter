@@ -394,7 +394,12 @@ void main() {
           path,
           data: {'language': language},
         )).thenAnswer((_) async => successResponse(path, data: {
-          'message': translatedMessage.toJson(),
+          'message': {
+            ...translatedMessage.toJson(),
+            'i18n': {
+              language: translatedMessageText,
+            },
+          },
         }));
 
     final res = await messageApi.translateMessage(messageId, language);

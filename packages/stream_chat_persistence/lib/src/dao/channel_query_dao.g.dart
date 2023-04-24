@@ -2,10 +2,7 @@
 
 part of 'channel_query_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$ChannelQueryDaoMixin on DatabaseAccessor<DriftChatDatabase> {
   $ChannelQueriesTable get channelQueries => attachedDatabase.channelQueries;
   $ChannelsTable get channels => attachedDatabase.channels;
