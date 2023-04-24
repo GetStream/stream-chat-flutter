@@ -12,8 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.0
   flutter:
     sdk: flutter
-  stream_chat: 
-    path: ../
+  stream_chat: ^6.0.0
 
 dev_dependencies:
   flutter_test:
