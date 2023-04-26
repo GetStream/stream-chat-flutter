@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -81,6 +82,16 @@ void main() {
       expect('🌶1'.isOnlyEmoji, false);
       expect('👨‍👨👨‍👨'.isOnlyEmoji, true);
       expect('👨‍👨👨‍👨 '.isOnlyEmoji, true);
+      expect('👨👨👨👨'.isOnlyEmoji, false);
+      expect('⭐⭐⭐'.isOnlyEmoji, true);
+      expect('⭕⭕⭐'.isOnlyEmoji, true);
+      expect('✅'.isOnlyEmoji, true);
+      expect('☺️'.isOnlyEmoji, true);
+    });
+
+    test('korean symbols', () {
+      expect('ㅎㅎㅎ'.isOnlyEmoji, false);
+      expect('ㅎㅎㅎㅎ'.isOnlyEmoji, false);
     });
   });
 }
