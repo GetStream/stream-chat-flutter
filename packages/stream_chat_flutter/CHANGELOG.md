@@ -1,3 +1,14 @@
+## Upcoming
+
+✅ Added
+
+- Added `MessageTheme.urlAttachmentHostStyle`, `MessageTheme.urlAttachmentTitleStyle`, and
+  `MessageTheme.urlAttachmentTextStyle` to customize the style of the url attachment.
+
+🔄 Changed
+
+- Deprecated `MessageTheme.linkBackgroundColor` in favor of `MessageTheme.urlAttachmentBackgroundColor`.
+
 ## 6.0.0
 
 🐞 Fixed

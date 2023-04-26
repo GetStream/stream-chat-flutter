@@ -215,7 +215,7 @@ class _MessageCardState extends State<MessageCard> {
     }
 
     if (widget.hasUrlAttachments) {
-      return widget.messageTheme.linkBackgroundColor;
+      return widget.messageTheme.urlAttachmentBackgroundColor;
     }
 
     if (widget.isOnlyEmoji) {
