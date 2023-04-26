@@ -36,8 +36,6 @@ class StreamUrlAttachment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
-
     return ConstrainedBox(
       constraints: const BoxConstraints(
         maxWidth: 400,
