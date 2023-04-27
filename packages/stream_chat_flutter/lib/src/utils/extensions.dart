@@ -34,7 +34,7 @@ extension StringExtension on String {
     if (trimmedString.isEmpty) return false;
     if (trimmedString.characters.length > 3) return false;
     final emojiRegex = RegExp(
-      r'^(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])+$',
+      r'^(\u00a9|\u00ae|\u200d|[\ufe00-\ufe0f]|[\u2600-\u27FF]|[\u2300-\u2bFF]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])+$',
       multiLine: true,
       caseSensitive: false,
     );

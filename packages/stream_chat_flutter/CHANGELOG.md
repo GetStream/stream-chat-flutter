@@ -1,3 +1,12 @@
+## Upcoming
+
+🐞 Fixed
+
+- [#1502](https://github.com/GetStream/stream-chat-flutter/issues/1502) Fixed `isOnlyEmoji` method Detects Single Hangul
+  Consonants as Emoji.
+- [#1505](https://github.com/GetStream/stream-chat-flutter/issues/1505) Fixed Message bubble disappears for Hangul
+  Consonants.
+
 ## 6.0.0
 
 🐞 Fixed
