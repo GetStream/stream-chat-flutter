@@ -205,7 +205,7 @@ class _QuotedMessage extends StatelessWidget {
 
   Color? _getBackgroundColor(BuildContext context) {
     if (_containsLinkAttachment) {
-      return messageTheme.linkBackgroundColor;
+      return messageTheme.urlAttachmentBackgroundColor;
     }
     return messageTheme.messageBackgroundColor;
   }
