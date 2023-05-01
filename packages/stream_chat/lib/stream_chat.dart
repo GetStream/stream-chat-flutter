@@ -24,6 +24,7 @@ export 'src/core/models/attachment.dart';
 export 'src/core/models/attachment_file.dart';
 export 'src/core/models/channel_config.dart';
 export 'src/core/models/channel_model.dart';
+export 'src/core/models/channel_mute.dart';
 export 'src/core/models/channel_state.dart';
 export 'src/core/models/command.dart';
 export 'src/core/models/device.dart';

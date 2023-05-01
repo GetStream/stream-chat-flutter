@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Expose `ChannelMute` class. [#1473](https://github.com/GetStream/stream-chat-flutter/issues/1473)
+
 ## 6.0.0
 
 🐞 Fixed
