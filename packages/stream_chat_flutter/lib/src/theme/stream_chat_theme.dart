@@ -199,7 +199,12 @@ class StreamChatThemeData {
         messageLinksStyle: TextStyle(
           color: accentColor,
         ),
-        linkBackgroundColor: colorTheme.linkBg,
+        urlAttachmentBackgroundColor: colorTheme.linkBg,
+        urlAttachmentHostStyle: textTheme.bodyBold.copyWith(color: accentColor),
+        urlAttachmentTitleStyle:
+            textTheme.body.copyWith(fontWeight: FontWeight.w700),
+        urlAttachmentTextStyle:
+            textTheme.body.copyWith(fontWeight: FontWeight.w400),
       ),
       otherMessageTheme: StreamMessageThemeData(
         reactionsBackgroundColor: colorTheme.disabled,
@@ -223,7 +228,12 @@ class StreamChatThemeData {
             width: 32,
           ),
         ),
-        linkBackgroundColor: colorTheme.linkBg,
+        urlAttachmentBackgroundColor: colorTheme.linkBg,
+        urlAttachmentHostStyle: textTheme.bodyBold.copyWith(color: accentColor),
+        urlAttachmentTitleStyle:
+            textTheme.body.copyWith(fontWeight: FontWeight.w700),
+        urlAttachmentTextStyle:
+            textTheme.body.copyWith(fontWeight: FontWeight.w400),
       ),
       messageInputTheme: StreamMessageInputThemeData(
         borderRadius: BorderRadius.circular(20),

@@ -60,7 +60,7 @@ final _messageThemeControl = StreamMessageThemeData(
   messageLinksStyle: TextStyle(
     color: StreamColorTheme.light().accentPrimary,
   ),
-  linkBackgroundColor: StreamColorTheme.light().linkBg,
+  urlAttachmentBackgroundColor: StreamColorTheme.light().linkBg,
 );
 
 final _messageThemeControlDark = StreamMessageThemeData(
@@ -89,5 +89,5 @@ final _messageThemeControlDark = StreamMessageThemeData(
   messageLinksStyle: TextStyle(
     color: StreamColorTheme.dark().accentPrimary,
   ),
-  linkBackgroundColor: StreamColorTheme.dark().linkBg,
+  urlAttachmentBackgroundColor: StreamColorTheme.dark().linkBg,
 );

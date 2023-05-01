@@ -12,6 +12,8 @@
 
 ✅ Added
 
+- Added `MessageTheme.urlAttachmentHostStyle`, `MessageTheme.urlAttachmentTitleStyle`, and
+  `MessageTheme.urlAttachmentTextStyle` to customize the style of the url attachment.
 - Added `StreamMessageInput.ogPreviewFilter` to allow users to filter out the og preview
   links. [#1338](https://github.com/GetStream/stream-chat-flutter/issues/1338)
 
@@ -27,6 +29,10 @@
       return true;
   ),
   ```
+  
+🔄 Changed
+
+- Deprecated `MessageTheme.linkBackgroundColor` in favor of `MessageTheme.urlAttachmentBackgroundColor`.
 
 ## 6.0.0
 
