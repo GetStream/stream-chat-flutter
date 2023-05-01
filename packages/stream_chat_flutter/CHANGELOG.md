@@ -6,20 +6,26 @@
   Consonants as Emoji.
 - [#1505](https://github.com/GetStream/stream-chat-flutter/issues/1505) Fixed Message bubble disappears for Hangul
   Consonants.
+- [[#1476]](https://github.com/GetStream/stream-chat-flutter/issues/1476) Fixed `UserAvatarTransform.userAvatarBuilder`
+  works only for otherUser.
 
 ## 6.0.0
 
 🐞 Fixed
 
-- [#1456](https://github.com/GetStream/stream-chat-flutter/issues/1456) Fixed logic for showing that a message was read using sending indicator.
-- [#1462](https://github.com/GetStream/stream-chat-flutter/issues/1462) Fixed support for iPad in the share button for images. 
+- [#1456](https://github.com/GetStream/stream-chat-flutter/issues/1456) Fixed logic for showing that a message was read
+  using sending indicator.
+- [#1462](https://github.com/GetStream/stream-chat-flutter/issues/1462) Fixed support for iPad in the share button for
+  images.
 - [#1475](https://github.com/GetStream/stream-chat-flutter/issues/1475) Fixed typo to fix compilation.
 
 ✅ Added
 
 - Now it is possible to customize the max lines of the title of a url attachment. Before it was always 1 line.
-- Added `attachmentActionsModalBuilder` parameter to `StreamMessageWidget` that allows to customize `AttachmentActionsModal`.
-- Added `StreamMessageInput.sendMessageKeyPredicate` and `StreamMessageInput.clearQuotedMessageKeyPredicate` to customize the keys used to send and clear the quoted message.
+- Added `attachmentActionsModalBuilder` parameter to `StreamMessageWidget` that allows to
+  customize `AttachmentActionsModal`.
+- Added `StreamMessageInput.sendMessageKeyPredicate` and `StreamMessageInput.clearQuotedMessageKeyPredicate` to
+  customize the keys used to send and clear the quoted message.
 
 🔄 Changed
 
@@ -27,6 +33,7 @@
 
 🚀 Improved
 - 
+
 - Improved draw of reaction options. [#1455](https://github.com/GetStream/stream-chat-flutter/pull/1455)
 
 ## 5.3.0
@@ -36,17 +43,22 @@
 - Updated `photo_manager` dependency to `^2.5.2`
 
 🐞 Fixed
-- [[#1424]](https://github.com/GetStream/stream-chat-flutter/issues/1424) Fixed a render issue when showing messages starting with 4 whitespaces.
+
+- [[#1424]](https://github.com/GetStream/stream-chat-flutter/issues/1424) Fixed a render issue when showing messages
+  starting with 4 whitespaces.
 - Fixed a bug where the `AttachmentPickerBottomSheet` was not able to identify the mobile browser.
 - Fixed uploading files on Windows - fixed temp file path.
 
 ✅ Added
+
 - New `noPhotoOrVideoLabel` displayed when there is no files to choose.
 
 ## 5.2.0
 
 ✅ Added
-- Added a new `bottomRowBuilderWithDefaultWidget` parameter to `StreamMessageWidget` which contains a third parameter (default `BottomRow` widget with `copyWith` method available) to allow easier customization.
+
+- Added a new `bottomRowBuilderWithDefaultWidget` parameter to `StreamMessageWidget` which contains a third parameter (
+  default `BottomRow` widget with `copyWith` method available) to allow easier customization.
 
 🔄 Changed
 
@@ -56,14 +68,20 @@
 - Updated `dart_vlc` dependency to `^0.4.0`
 - Updated `file_picker` dependency to `^5.2.4`
 - Deprecated `StreamMessageWidget.bottomRowBuilder` in favor of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
-- Deprecated `StreamMessageWidget.deletedBottomRowBuilder` in favor of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
+- Deprecated `StreamMessageWidget.deletedBottomRowBuilder` in favor
+  of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
 - Deprecated `StreamMessageWidget.usernameBuilder` in favor of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
 
 🐞 Fixed
-- [[#1379]](https://github.com/GetStream/stream-chat-flutter/issues/1379) Fixed "Issues with photo attachments on web", where the cached image attachment would not render while uploading.
-- Fix render overflow issue with `MessageSearchListTileTitle`. It now uses `Text.rich` instead of `Row`. Better default behaviour and allows `TextOverflow`.
-- [[1346]](https://github.com/GetStream/stream-chat-flutter/issues/1346) Fixed a render issue while uploading video on web.
-- [[#1347]](https://github.com/GetStream/stream-chat-flutter/issues/1347) `onReply` not working in `AttachmentActionsModal` which is used by `StreamImageAttachment` and `StreamImageGroup`.
+
+- [[#1379]](https://github.com/GetStream/stream-chat-flutter/issues/1379) Fixed "Issues with photo attachments on web",
+  where the cached image attachment would not render while uploading.
+- Fix render overflow issue with `MessageSearchListTileTitle`. It now uses `Text.rich` instead of `Row`. Better default
+  behaviour and allows `TextOverflow`.
+- [[1346]](https://github.com/GetStream/stream-chat-flutter/issues/1346) Fixed a render issue while uploading video on
+  web.
+- [[#1347]](https://github.com/GetStream/stream-chat-flutter/issues/1347) `onReply` not working
+  in `AttachmentActionsModal` which is used by `StreamImageAttachment` and `StreamImageGroup`.
 
 ## 5.1.0
 
