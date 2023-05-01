@@ -25,6 +25,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
 
+/// Signature for the function that determines if a [matchedUri] should be
+/// previewed as an OG Attachment.
+typedef OgPreviewFilter = bool Function(
+  Uri matchedUri,
+  String messageText,
+);
+
 /// Inactive state:
 ///
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input.png)
@@ -114,6 +121,7 @@ class StreamMessageInput extends StatefulWidget {
     this.sendMessageKeyPredicate = _defaultSendMessageKeyPredicate,
     this.clearQuotedMessageKeyPredicate =
         _defaultClearQuotedMessageKeyPredicate,
+    this.ogPreviewFilter = _defaultOgPreviewFilter,
   });
 
   /// The predicate used to send a message on desktop/web
@@ -258,6 +266,18 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Callback for when the quoted message is cleared
   final VoidCallback? onQuotedMessageCleared;
+
+  /// The filter used to determine if a link should be shown as an OpenGraph
+  /// preview.
+  final OgPreviewFilter ogPreviewFilter;
+
+  static bool _defaultOgPreviewFilter(
+    Uri matchedUri,
+    String messageText,
+  ) {
+    // Show the preview for all links
+    return true;
+  }
 
   static bool _defaultValidator(Message message) =>
       message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
@@ -990,11 +1010,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
     if (_lastSearchedContainsUrlText == value) return;
     _lastSearchedContainsUrlText = value;
 
-    final matchedUrls = _urlRegex.allMatches(value).toList()
-      ..removeWhere((it) {
-        final _parsedMatch = Uri.tryParse(it.group(0) ?? '')?.withScheme;
-        return _parsedMatch?.host.split('.').last.isValidTLD() == false;
-      });
+    final matchedUrls = _urlRegex.allMatches(value).where((it) {
+      final _parsedMatch = Uri.tryParse(it.group(0) ?? '')?.withScheme;
+      if (_parsedMatch == null) return false;
+
+      return _parsedMatch.host.split('.').last.isValidTLD() &&
+          widget.ogPreviewFilter.call(_parsedMatch, value);
+    }).toList();
 
     // Reset the og attachment if the text doesn't contain any url
     if (matchedUrls.isEmpty ||

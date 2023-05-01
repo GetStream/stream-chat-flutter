@@ -10,6 +10,24 @@
 - [[#1490]](https://github.com/GetStream/stream-chat-flutter/issues/1490) Fixed `editMessageInputBuilder` property not
   used in message edit widget.
 
+✅ Added
+
+- Added `StreamMessageInput.ogPreviewFilter` to allow users to filter out the og preview
+  links. [#1338](https://github.com/GetStream/stream-chat-flutter/issues/1338)
+
+  ```dart
+  StreamMessageInput(
+    ogPreviewFilter: (matchedUri, messageText) {
+      final url = matchedUri.toString();
+      if (url.contains('giphy.com')) {
+        // Return false to prevent the OG preview from being built.
+        return false;
+      }
+      // Return true to build the OG preview.
+      return true;
+  ),
+  ```
+
 ## 6.0.0
 
 🐞 Fixed
