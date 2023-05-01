@@ -1035,6 +1035,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               builder: (_) => EditMessageSheet(
                 message: widget.message,
                 channel: StreamChannel.of(context).channel,
+                editMessageInputBuilder: widget.editMessageInputBuilder,
               ),
             );
           },
