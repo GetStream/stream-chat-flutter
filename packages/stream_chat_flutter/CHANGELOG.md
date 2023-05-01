@@ -7,6 +7,8 @@
   Consonants as Emoji.
 - [[#1505]](https://github.com/GetStream/stream-chat-flutter/issues/1505) Fixed Message bubble disappears for Hangul
   Consonants.
+- [[#1476]](https://github.com/GetStream/stream-chat-flutter/issues/1476) Fixed `UserAvatarTransform.userAvatarBuilder`
+  works only for otherUser.
 - [[#1490]](https://github.com/GetStream/stream-chat-flutter/issues/1490) Fixed `editMessageInputBuilder` property not
   used in message edit widget.
 

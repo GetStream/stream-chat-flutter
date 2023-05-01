@@ -379,6 +379,8 @@ class MessageWidgetContent extends StatelessWidget {
                           showUserAvatar == DisplayWidget.show &&
                           message.user != null) ...[
                         UserAvatarTransform(
+                          onUserAvatarTap: onUserAvatarTap,
+                          userAvatarBuilder: userAvatarBuilder,
                           translateUserAvatar: translateUserAvatar,
                           messageTheme: messageTheme,
                           message: message,
