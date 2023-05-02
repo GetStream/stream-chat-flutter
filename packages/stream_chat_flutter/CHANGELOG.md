@@ -31,7 +31,27 @@
       return true;
   ),
   ```
-  
+
+- Added `StreamMessageInput.hintGetter` to allow users to customize the hint text of the message
+  input. [#1401](https://github.com/GetStream/stream-chat-flutter/issues/1401)
+
+  ```dart
+  StreamMessageInput(
+    hintGetter: (context, hintType) {
+      switch (hintType) {
+        case HintType.searchGif:
+          return 'Custom Search Giphy';
+        case HintType.addACommentOrSend:
+          return 'Custom Add a comment or send';
+        case HintType.slowModeOn:
+          return 'Custom Slow mode is on';
+        case HintType.writeAMessage:
+          return 'Custom Write a message';
+      }
+    },
+  ),
+  ```
+
 🔄 Changed
 
 - Deprecated `MessageTheme.linkBackgroundColor` in favor of `MessageTheme.urlAttachmentBackgroundColor`.
