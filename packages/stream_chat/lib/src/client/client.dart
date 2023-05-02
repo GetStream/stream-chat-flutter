@@ -1567,7 +1567,7 @@ class ClientState {
       _client.on(EventType.channelHidden).listen((event) async {
         final eventChannel = event.channel!;
         await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-        channels[eventChannel.cid]?.dispose();
+        channels.remove(eventChannel.cid)?.dispose();
       }),
     );
   }
@@ -1606,7 +1606,7 @@ class ClientState {
           .listen((Event event) async {
         final eventChannel = event.channel!;
         await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-        channels[eventChannel.cid]?.dispose();
+        channels.remove(eventChannel.cid)?.dispose();
       }),
     );
   }
@@ -1713,9 +1713,9 @@ class ClientState {
     _unreadChannelsController.close();
     _totalUnreadCountController.close();
 
-    final channels = this.channels.values.toList();
+    final channels = this.channels.keys;
     for (final channel in channels) {
-      channel.dispose();
+      this.channels.remove(channel)?.dispose();
     }
     _channelsController.close();
   }
