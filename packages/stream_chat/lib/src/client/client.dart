@@ -1713,7 +1713,7 @@ class ClientState {
     _unreadChannelsController.close();
     _totalUnreadCountController.close();
 
-    final channels = this.channels.keys;
+    final channels = [...this.channels.keys];
     for (final channel in channels) {
       this.channels.remove(channel)?.dispose();
     }
