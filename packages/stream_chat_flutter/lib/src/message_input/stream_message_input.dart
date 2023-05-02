@@ -32,6 +32,26 @@ typedef OgPreviewFilter = bool Function(
   String messageText,
 );
 
+/// Different types of hints that can be shown in [StreamMessageInput].
+enum HintType {
+  /// Hint for [StreamMessageInput] when the command is enabled and the command
+  /// is 'giphy'.
+  searchGif,
+
+  /// Hint for [StreamMessageInput] when there are attachments.
+  addACommentOrSend,
+
+  /// Hint for [StreamMessageInput] when slow mode is enabled.
+  slowModeOn,
+
+  /// Hint for [StreamMessageInput] when other conditions are not met.
+  writeAMessage,
+}
+
+/// Function that returns the hint text for [StreamMessageInput] based on
+/// [type].
+typedef HintGetter = String? Function(BuildContext context, HintType type);
+
 /// Inactive state:
 ///
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input.png)
@@ -122,6 +142,7 @@ class StreamMessageInput extends StatefulWidget {
     this.clearQuotedMessageKeyPredicate =
         _defaultClearQuotedMessageKeyPredicate,
     this.ogPreviewFilter = _defaultOgPreviewFilter,
+    this.hintGetter = _defaultHintGetter,
   });
 
   /// The predicate used to send a message on desktop/web
@@ -270,6 +291,25 @@ class StreamMessageInput extends StatefulWidget {
   /// The filter used to determine if a link should be shown as an OpenGraph
   /// preview.
   final OgPreviewFilter ogPreviewFilter;
+
+  /// Returns the hint text for the message input.
+  final HintGetter hintGetter;
+
+  static String? _defaultHintGetter(
+    BuildContext context,
+    HintType type,
+  ) {
+    switch (type) {
+      case HintType.searchGif:
+        return context.translations.searchGifLabel;
+      case HintType.addACommentOrSend:
+        return context.translations.addACommentOrSendLabel;
+      case HintType.slowModeOn:
+        return context.translations.slowModeOnLabel;
+      case HintType.writeAMessage:
+        return context.translations.writeAMessageLabel;
+    }
+  }
 
   static bool _defaultOgPreviewFilter(
     Uri matchedUri,
@@ -982,18 +1022,20 @@ class StreamMessageInputState extends State<StreamMessageInput>
     leading: true,
   );
 
-  String _getHint(BuildContext context) {
+  String? _getHint(BuildContext context) {
+    HintType hintType;
+
     if (_commandEnabled && _effectiveController.message.command == 'giphy') {
-      return context.translations.searchGifLabel;
-    }
-    if (_effectiveController.attachments.isNotEmpty) {
-      return context.translations.addACommentOrSendLabel;
-    }
-    if (_timeOut != 0) {
-      return context.translations.slowModeOnLabel;
+      hintType = HintType.searchGif;
+    } else if (_effectiveController.attachments.isNotEmpty) {
+      hintType = HintType.addACommentOrSend;
+    } else if (_timeOut != 0) {
+      hintType = HintType.slowModeOn;
+    } else {
+      hintType = HintType.writeAMessage;
     }
 
-    return context.translations.writeAMessageLabel;
+    return widget.hintGetter.call(context, hintType);
   }
 
   String? _lastSearchedContainsUrlText;
