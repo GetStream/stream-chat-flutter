@@ -1,5 +1,10 @@
 ## Upcoming
 
+🐞 Fixed
+
+- [[#1355]](https://github.com/GetStream/stream-chat-flutter/issues/1355) Fixed error while hiding channel and clearing
+  message history.
+
 ✅ Added
 
 - Expose `ChannelMute` class. [#1473](https://github.com/GetStream/stream-chat-flutter/issues/1473)

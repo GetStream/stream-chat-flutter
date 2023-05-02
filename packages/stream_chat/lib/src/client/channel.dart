@@ -1485,19 +1485,11 @@ class Channel {
   /// will be removed for the user.
   Future<EmptyResponse> hide({bool clearHistory = false}) async {
     _checkInitialized();
-    final response = await _client.hideChannel(
+    return _client.hideChannel(
       id!,
       type,
       clearHistory: clearHistory,
     );
-    if (clearHistory) {
-      state!.truncate();
-      final cid = _cid;
-      if (cid != null) {
-        await _client.chatPersistenceClient?.deleteMessageByCid(cid);
-      }
-    }
-    return response;
   }
 
   /// Removes the hidden status for the channel.

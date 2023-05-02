@@ -101,14 +101,19 @@ class StreamChannelListEventHandler {
   /// we are currently watching.
   ///
   /// By default, this moves the channel to the top of the list.
-  void onMessageNew(Event event, StreamChannelListController controller) {
+  void onMessageNew(Event event, StreamChannelListController controller) async {
     final channelCid = event.cid;
     if (channelCid == null) return;
 
     final channels = [...controller.currentItems];
 
     final channelIndex = channels.indexWhere((it) => it.cid == channelCid);
-    if (channelIndex <= 0) return;
+    if (channelIndex <= 0) {
+      // If the channel is not in the list, It might be hidden.
+      // So, we just refresh the list.
+      await controller.refresh(resetValue: false);
+      return;
+    }
 
     final channel = channels.removeAt(channelIndex);
     channels.insert(0, channel);
