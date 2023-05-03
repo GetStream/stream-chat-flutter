@@ -71,7 +71,7 @@ enum SpacingType {
 /// A [StreamChannel] ancestor widget is required in order to provide the
 /// information about the channels.
 ///
-/// Uses a [ListView.custom] to render the list of channels.
+/// Uses a [ScrollablePositionedList] to render the list of channels.
 ///
 /// The UI is rendered based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget's appearance.
@@ -88,8 +88,10 @@ class StreamMessageListView extends StatefulWidget {
     this.threadBuilder,
     this.onThreadTap,
     this.dateDividerBuilder,
-    this.scrollPhysics =
-        const ClampingScrollPhysics(), // we need to use ClampingScrollPhysics to avoid the list view to animate and break while loading
+    // we need to use ClampingScrollPhysics to avoid the list view to bounce
+    // when we are at the either end of the list view and try to use 'animateTo'
+    // to animate in the same direction.
+    this.scrollPhysics = const ClampingScrollPhysics(),
     this.initialScrollIndex,
     this.initialAlignment,
     this.scrollController,
@@ -555,6 +557,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     if (valueKey != null) {
                       final index = messagesIndex[valueKey.value];
                       if (index != null) {
+                        // The calculation is as follows:
+                        // * Add 2 to the index retrieved to account for the footer and the bottom loader.
+                        // * Multiply the result by 2 to account for the separators between each pair of items.
+                        // * Subtract 1 to adjust for the 0-based indexing of the list view.
                         return ((index + 2) * 2) - 1;
                       }
                     }

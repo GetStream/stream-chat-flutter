@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/scroll_view.dart';
 
@@ -48,8 +48,7 @@ void main() {
           itemCount: itemCount,
           itemScrollController: itemScrollController,
           itemBuilder: (context, index) {
-            assert(index >= 0 && index <= itemCount - 1,
-                '''index needs to be bigger or equal to 0 and smallert than itemCount -1''');
+            assert(index >= 0 && index <= itemCount - 1);
             return SizedBox(
               height:
                   variableHeight ? (itemHeight + (index % 13) * 5) : itemHeight,
@@ -70,6 +69,11 @@ void main() {
       ),
     );
   }
+
+  final fadeTransitionFinder = find.descendant(
+    of: find.byType(ScrollablePositionedList),
+    matching: find.byType(FadeTransition),
+  );
 
   testWidgets('List positioned with 0 at top', (WidgetTester tester) async {
     final itemPositionsListener = ItemPositionsListener.create();
@@ -394,11 +398,7 @@ void main() {
         itemScrollController: itemScrollController,
         itemPositionsListener: itemPositionsListener);
 
-    var fadeTransition = tester.widget<FadeTransition>(find
-        .descendant(
-            of: find.byType(ScrollablePositionedList),
-            matching: find.byType(FadeTransition))
-        .last);
+    var fadeTransition = tester.widget<FadeTransition>(fadeTransitionFinder);
     final initialOpacity = fadeTransition.opacity;
 
     unawaited(
@@ -407,11 +407,7 @@ void main() {
     await tester.pump();
     await tester.pump(scrollDuration ~/ 2);
 
-    fadeTransition = tester.widget<FadeTransition>(find
-        .descendant(
-            of: find.byType(ScrollablePositionedList),
-            matching: find.byType(FadeTransition))
-        .last);
+    fadeTransition = tester.widget<FadeTransition>(fadeTransitionFinder);
     expect(fadeTransition.opacity, initialOpacity);
 
     await tester.pumpAndSettle();
@@ -455,10 +451,6 @@ void main() {
       (WidgetTester tester) async {
     final itemScrollController = ItemScrollController();
     await setUpWidgetTest(tester, itemScrollController: itemScrollController);
-
-    final fadeTransitionFinder = find.descendant(
-        of: find.byType(ScrollablePositionedList),
-        matching: find.byType(FadeTransition));
 
     unawaited(
         itemScrollController.scrollTo(index: 100, duration: scrollDuration));
@@ -533,26 +525,14 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(
-        tester
-            .widget<FadeTransition>(find
-                .descendant(
-                    of: find.byType(ScrollablePositionedList),
-                    matching: find.byType(FadeTransition))
-                .last)
-            .opacity
-            .value,
-        closeTo(0, 0.01));
+      tester.widget<FadeTransition>(fadeTransitionFinder.last).opacity.value,
+      closeTo(0, 0.01),
+    );
     await tester.pump(scrollDuration + scrollDurationTolerance);
     expect(
-        tester
-            .widget<FadeTransition>(find
-                .descendant(
-                    of: find.byType(ScrollablePositionedList),
-                    matching: find.byType(FadeTransition))
-                .last)
-            .opacity
-            .value,
-        closeTo(1, 0.01));
+      tester.widget<FadeTransition>(fadeTransitionFinder.last).opacity.value,
+      closeTo(1, 0.01),
+    );
 
     expect(find.text('Item 0'), findsOneWidget);
     expect(tester.getTopLeft(find.text('Item 0')).dy, 0);
@@ -610,15 +590,9 @@ void main() {
     expect(tester.getTopLeft(find.text('Item 10')).dy, 0);
     expect(tester.getBottomLeft(find.text('Item 19')).dy, screenHeight);
     expect(
-        tester
-            .widget<FadeTransition>(find
-                .descendant(
-                    of: find.byType(ScrollablePositionedList),
-                    matching: find.byType(FadeTransition))
-                .last)
-            .opacity
-            .value,
-        closeTo(0.5, 0.01));
+      tester.widget<FadeTransition>(fadeTransitionFinder.last).opacity.value,
+      closeTo(0.5, 0.01),
+    );
 
     await tester.pumpAndSettle();
   });
@@ -899,11 +873,7 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('Item 9')).dy, 0);
-    final fadeTransition = tester.widget<FadeTransition>(find
-        .descendant(
-            of: find.byType(ScrollablePositionedList),
-            matching: find.byType(FadeTransition))
-        .last);
+    final fadeTransition = tester.widget<FadeTransition>(fadeTransitionFinder);
     expect(fadeTransition.opacity.value, 1.0);
 
     await tester.pumpAndSettle();
@@ -923,20 +893,11 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('Item 10')).dy, 0);
-    final fadeTransition = tester.widget<FadeTransition>(find
-        .descendant(
-            of: find.byType(ScrollablePositionedList),
-            matching: find.byType(FadeTransition))
-        .last);
+    final fadeTransition = tester.widget<FadeTransition>(fadeTransitionFinder);
     expect(fadeTransition.opacity.value, 1.0);
 
     await tester.pumpAndSettle();
   });
-
-  final fadeTransitionFinder = find.descendant(
-    of: find.byType(ScrollablePositionedList),
-    matching: find.byType(FadeTransition),
-  );
 
   testWidgets('Scroll to 0 stop before half way', (WidgetTester tester) async {
     final itemScrollController = ItemScrollController();
@@ -1022,14 +983,13 @@ void main() {
         itemScrollController.scrollTo(index: 0, duration: scrollDuration));
     await tester.pump();
     await tester.pump();
-    await tester.pump(scrollDuration ~/ 2 + scrollDuration ~/ 20);
+    await tester.pump(scrollDuration ~/ 2);
 
     await tester.tap(find.byType(ScrollablePositionedList));
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('Item 9')).dy, closeTo(0, tolerance));
-    final fadeTransition = tester.widget<FadeTransition>(fadeTransitionFinder);
-    expect(fadeTransition.opacity.value, 1.0);
+    expect(tester.getTopLeft(find.text('Item 90')).dy, 0);
+    expect(fadeTransitionFinder, findsNWidgets(1));
 
     await tester.pumpAndSettle();
   });
@@ -1098,6 +1058,34 @@ void main() {
     expect(find.text('Item 100'), findsNothing);
   });
 
+  testWidgets("Second scroll future doesn't complete until scroll is done",
+      (WidgetTester tester) async {
+    final itemScrollController = ItemScrollController();
+    await setUpWidgetTest(tester, itemScrollController: itemScrollController);
+
+    unawaited(
+        itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(scrollDuration ~/ 2);
+
+    final scrollFuture2 =
+        itemScrollController.scrollTo(index: 250, duration: scrollDuration);
+
+    var futureComplete = false;
+    unawaited(scrollFuture2.then((_) => futureComplete = true));
+
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(scrollDuration ~/ 2);
+
+    expect(futureComplete, isFalse);
+
+    await tester.pumpAndSettle();
+
+    expect(futureComplete, isTrue);
+  });
+
   testWidgets('Scroll to 250, scroll to 100, scroll to 0 half way',
       (WidgetTester tester) async {
     final itemScrollController = ItemScrollController();
@@ -1145,7 +1133,7 @@ void main() {
   }, skip: true);
 
   testWidgets(
-      '''Jump to 400 at bottom, manually scroll, scroll to 100 at bottom and back''',
+      'Jump to 400 at bottom, manually scroll, scroll to 100 at bottom and back',
       (WidgetTester tester) async {
     final itemScrollController = ItemScrollController();
     final itemPositionsListener = ItemPositionsListener.create();
@@ -1664,7 +1652,7 @@ void main() {
   });
 
   testWidgets(
-      '''Maintain programmatic and user position (9 half way off top) in page view''',
+      'Maintain programmatic and user position (9 half way off top) in page view',
       (WidgetTester tester) async {
     final itemPositionsListener = ItemPositionsListener.create();
     final itemScrollController = ItemScrollController();
@@ -1751,21 +1739,21 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<int>(
           valueListenable: itemCount,
-          builder: (context, itemCount, child) =>
-              ScrollablePositionedList.builder(
-            initialScrollIndex: min(100, itemCount),
-            itemCount: itemCount,
-            itemScrollController: itemScrollController,
-            itemPositionsListener: itemPositionsListener,
-            itemBuilder: (context, index) {
-              assert(index >= 0 && index <= itemCount - 1,
-                  'index not bigger than 0 and smaller than itemCount - 1');
-              return SizedBox(
-                height: itemHeight,
-                child: Text('Item $index'),
-              );
-            },
-          ),
+          builder: (context, itemCount, child) {
+            return ScrollablePositionedList.builder(
+              initialScrollIndex: min(100, itemCount),
+              itemCount: itemCount,
+              itemScrollController: itemScrollController,
+              itemPositionsListener: itemPositionsListener,
+              itemBuilder: (context, index) {
+                assert(index >= 0 && index <= itemCount - 1);
+                return SizedBox(
+                  height: itemHeight,
+                  child: Text('Item $index'),
+                );
+              },
+            );
+          },
         ),
       ),
     );
@@ -1795,19 +1783,19 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<int>(
           valueListenable: itemCount,
-          builder: (context, itemCount, child) =>
-              ScrollablePositionedList.builder(
-            initialScrollIndex: min(100, itemCount - 1),
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              assert(index >= 0 && index <= itemCount - 1,
-                  'index not bigger than 0 and smaller than itemCount -1');
-              return SizedBox(
-                height: itemHeight,
-                child: Text('Item $index'),
-              );
-            },
-          ),
+          builder: (context, itemCount, child) {
+            return ScrollablePositionedList.builder(
+              initialScrollIndex: min(100, itemCount - 1),
+              itemCount: itemCount,
+              itemBuilder: (context, index) {
+                assert(index >= 0 && index <= itemCount - 1);
+                return SizedBox(
+                  height: itemHeight,
+                  child: Text('Item $index'),
+                );
+              },
+            );
+          },
         ),
       ),
     );
@@ -1834,19 +1822,19 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<int>(
           valueListenable: itemCount,
-          builder: (context, itemCount, child) =>
-              ScrollablePositionedList.builder(
-            initialScrollIndex: itemCount - 1,
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              assert(index >= 0 && index <= itemCount - 1,
-                  'index not bigger than 0 and smaller than itemCount -1');
-              return SizedBox(
-                height: itemHeight,
-                child: Text('Item $index'),
-              );
-            },
-          ),
+          builder: (context, itemCount, child) {
+            return ScrollablePositionedList.builder(
+              initialScrollIndex: itemCount - 1,
+              itemCount: itemCount,
+              itemBuilder: (context, index) {
+                assert(index >= 0 && index <= itemCount - 1);
+                return SizedBox(
+                  height: itemHeight,
+                  child: Text('Item $index'),
+                );
+              },
+            );
+          },
         ),
       ),
     );
@@ -1878,11 +1866,7 @@ void main() {
       minCacheExtent: 10,
     );
 
-    var fadeTransition = tester.widget<FadeTransition>(find
-        .descendant(
-            of: find.byType(ScrollablePositionedList),
-            matching: find.byType(FadeTransition))
-        .last);
+    var fadeTransition = tester.widget<FadeTransition>(fadeTransitionFinder);
     final initialOpacity = fadeTransition.opacity;
 
     unawaited(
@@ -1891,11 +1875,7 @@ void main() {
     await tester.pump();
     await tester.pump(scrollDuration ~/ 2);
 
-    fadeTransition = tester.widget<FadeTransition>(find
-        .descendant(
-            of: find.byType(ScrollablePositionedList),
-            matching: find.byType(FadeTransition))
-        .last);
+    fadeTransition = tester.widget<FadeTransition>(fadeTransitionFinder);
     expect(fadeTransition.opacity, initialOpacity);
 
     await tester.pumpAndSettle();
@@ -1914,11 +1894,9 @@ void main() {
       minCacheExtent: itemHeight * 200,
     );
 
-    var fadeTransition = tester.widget<FadeTransition>(find
-        .descendant(
-            of: find.byType(ScrollablePositionedList),
-            matching: find.byType(FadeTransition))
-        .last);
+    var fadeTransition = tester.widget<FadeTransition>(
+      fadeTransitionFinder,
+    );
     final initialOpacity = fadeTransition.opacity;
 
     unawaited(
@@ -1927,11 +1905,7 @@ void main() {
     await tester.pump();
     await tester.pump(scrollDuration ~/ 2);
 
-    fadeTransition = tester.widget<FadeTransition>(find
-        .descendant(
-            of: find.byType(ScrollablePositionedList),
-            matching: find.byType(FadeTransition))
-        .last);
+    fadeTransition = tester.widget<FadeTransition>(fadeTransitionFinder);
     expect(fadeTransition.opacity, initialOpacity);
 
     await tester.pumpAndSettle();
@@ -1965,17 +1939,21 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<Key>(
           valueListenable: key,
-          builder: (context, key, child) => Container(
-            key: key,
-            child: ScrollablePositionedList.builder(
-              itemCount: 200,
-              itemScrollController: itemScrollController,
-              itemBuilder: (context, index) => SizedBox(
-                height: itemHeight,
-                child: Text('Item $index'),
+          builder: (context, key, child) {
+            return Container(
+              key: key,
+              child: ScrollablePositionedList.builder(
+                itemCount: 200,
+                itemScrollController: itemScrollController,
+                itemBuilder: (context, index) {
+                  return SizedBox(
+                    height: itemHeight,
+                    child: Text('Item $index'),
+                  );
+                },
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -2054,15 +2032,19 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<Key>(
           valueListenable: key,
-          builder: (context, key, child) => ScrollablePositionedList.builder(
-            key: key,
-            itemCount: 10,
-            itemScrollController: itemScrollController,
-            itemBuilder: (context, index) => SizedBox(
-              height: itemHeight,
-              child: Text('Item $index'),
-            ),
-          ),
+          builder: (context, key, child) {
+            return ScrollablePositionedList.builder(
+              key: key,
+              itemCount: 10,
+              itemScrollController: itemScrollController,
+              itemBuilder: (context, index) {
+                return SizedBox(
+                  height: itemHeight,
+                  child: Text('Item $index'),
+                );
+              },
+            );
+          },
         ),
       ),
     );
@@ -2084,17 +2066,21 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<Key>(
           valueListenable: key,
-          builder: (context, key, child) => Container(
-            key: key,
-            child: ScrollablePositionedList.builder(
-              itemCount: 100,
-              itemScrollController: itemScrollController,
-              itemBuilder: (context, index) => SizedBox(
-                height: itemHeight,
-                child: Text('Item $index'),
+          builder: (context, key, child) {
+            return Container(
+              key: key,
+              child: ScrollablePositionedList.builder(
+                itemCount: 100,
+                itemScrollController: itemScrollController,
+                itemBuilder: (context, index) {
+                  return SizedBox(
+                    height: itemHeight,
+                    child: Text('Item $index'),
+                  );
+                },
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -2124,18 +2110,22 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<Key>(
           valueListenable: containerKey,
-          builder: (context, key, child) => Container(
-            key: key,
-            child: ScrollablePositionedList.builder(
-              key: scrollKey,
-              itemCount: 100,
-              itemScrollController: itemScrollController,
-              itemBuilder: (context, index) => SizedBox(
-                height: itemHeight,
-                child: Text('Item $index'),
+          builder: (context, key, child) {
+            return Container(
+              key: key,
+              child: ScrollablePositionedList.builder(
+                key: scrollKey,
+                itemCount: 100,
+                itemScrollController: itemScrollController,
+                itemBuilder: (context, index) {
+                  return SizedBox(
+                    height: itemHeight,
+                    child: Text('Item $index'),
+                  );
+                },
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -2166,15 +2156,18 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<ItemScrollController>(
           valueListenable: itemScrollControllerListenable,
-          builder: (context, itemScrollController, child) =>
-              ScrollablePositionedList.builder(
-            itemCount: 100,
-            itemScrollController: itemScrollController,
-            itemBuilder: (context, index) => SizedBox(
-              height: itemHeight,
-              child: Text('Item $index'),
-            ),
-          ),
+          builder: (context, itemScrollController, child) {
+            return ScrollablePositionedList.builder(
+              itemCount: 100,
+              itemScrollController: itemScrollController,
+              itemBuilder: (context, index) {
+                return SizedBox(
+                  height: itemHeight,
+                  child: Text('Item $index'),
+                );
+              },
+            );
+          },
         ),
       ),
     );
@@ -2215,29 +2208,35 @@ void main() {
           Expanded(
             child: ValueListenableBuilder<ItemScrollController>(
               valueListenable: topItemScrollControllerListenable,
-              builder: (context, itemScrollController, child) =>
-                  ScrollablePositionedList.builder(
-                itemCount: 100,
-                itemScrollController: itemScrollController,
-                itemBuilder: (context, index) => SizedBox(
-                  height: itemHeight,
-                  child: Text('Item $index'),
-                ),
-              ),
+              builder: (context, itemScrollController, child) {
+                return ScrollablePositionedList.builder(
+                  itemCount: 100,
+                  itemScrollController: itemScrollController,
+                  itemBuilder: (context, index) {
+                    return SizedBox(
+                      height: itemHeight,
+                      child: Text('Item $index'),
+                    );
+                  },
+                );
+              },
             ),
           ),
           Expanded(
             child: ValueListenableBuilder<ItemScrollController>(
               valueListenable: bottomItemScrollControllerListenable,
-              builder: (context, itemScrollController, child) =>
-                  ScrollablePositionedList.builder(
-                itemCount: 100,
-                itemScrollController: itemScrollController,
-                itemBuilder: (context, index) => SizedBox(
-                  height: itemHeight,
-                  child: Text('Item $index'),
-                ),
-              ),
+              builder: (context, itemScrollController, child) {
+                return ScrollablePositionedList.builder(
+                  itemCount: 100,
+                  itemScrollController: itemScrollController,
+                  itemBuilder: (context, index) {
+                    return SizedBox(
+                      height: itemHeight,
+                      child: Text('Item $index'),
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],

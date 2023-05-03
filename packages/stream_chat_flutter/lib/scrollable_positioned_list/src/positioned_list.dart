@@ -11,6 +11,7 @@ import 'package:stream_chat_flutter/scrollable_positioned_list/src/indexed_key.d
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/item_positions_listener.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/item_positions_notifier.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/scroll_view.dart';
+import 'package:stream_chat_flutter/scrollable_positioned_list/src/wrapping.dart';
 
 /// A list of widgets similar to [ListView], except scroll control
 /// and position reporting is based on index rather than pixel offset.
@@ -35,28 +36,20 @@ class PositionedList extends StatefulWidget {
     this.alignment = 0,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
+    this.shrinkWrap = false,
     this.physics,
     this.padding,
     this.cacheExtent,
     this.semanticChildCount,
-    this.findChildIndexCallback,
     this.addSemanticIndexes = true,
     this.addRepaintBoundaries = true,
     this.addAutomaticKeepAlives = true,
-    this.keyboardDismissBehavior,
-  }) : assert((positionedIndex == 0) || (positionedIndex < itemCount),
-            'positionedIndex cannot be 0 and must be smaller than itemCount');
-
-  /// Called to find the new index of a child based on its key in case of
-  /// reordering.
-  ///
-  /// If not provided, a child widget may not map to its existing [RenderObject]
-  /// when the order in which children are returned from [builder] changes.
-  /// This may result in state-loss.
-  ///
-  /// This callback should take an input [Key], and it should return the
-  /// index of the child element with that associated key, or null if not found.
-  final ChildIndexGetter? findChildIndexCallback;
+    this.findChildIndexCallback,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+  }) : assert(
+          (positionedIndex == 0) || (positionedIndex < itemCount),
+          'positionedIndex must be 0 or a value less than itemCount',
+        );
 
   /// Number of items the [itemBuilder] can produce.
   final int itemCount;
@@ -98,6 +91,15 @@ class PositionedList extends StatefulWidget {
   /// See [ScrollView.reverse].
   final bool reverse;
 
+  /// {@template flutter.widgets.scroll_view.shrinkWrap}
+  /// Whether the extent of the scroll view in the [scrollDirection] should be
+  /// determined by the contents being viewed.
+  ///
+  ///  Defaults to false.
+  ///
+  /// See [ScrollView.shrinkWrap].
+  final bool shrinkWrap;
+
   /// How the scroll view should respond to user input.
   ///
   /// For example, determines how the scroll view continues to animate after the
@@ -132,9 +134,22 @@ class PositionedList extends StatefulWidget {
   /// See [SliverChildBuilderDelegate.addAutomaticKeepAlives].
   final bool addAutomaticKeepAlives;
 
-  /// [ScrollViewKeyboardDismissBehavior] the defines how this [PositionedList] will
-  /// dismiss the keyboard automatically.
-  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
+  /// Called to find the new index of a child based on its key in case of reordering.
+  ///
+  /// If not provided, a child widget may not map to its existing [RenderObject]
+  /// when the order of children returned from the children builder changes.
+  /// This may result in state-loss.
+  ///
+  /// This callback should take an input [Key], and it should return the
+  /// index of the child element with that associated key, or null if not found.
+  ///
+  /// See [SliverChildBuilderDelegate.findChildIndexCallback].
+  final ChildIndexGetter? findChildIndexCallback;
+
+  /// Defines how this [ScrollView] will dismiss the keyboard automatically.
+  ///
+  /// See [ScrollView.keyboardDismissBehavior].
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   @override
   State<StatefulWidget> createState() => _PositionedListState();
@@ -175,12 +190,13 @@ class _PositionedListState extends State<PositionedList> {
           anchor: widget.alignment,
           center: _centerKey,
           controller: scrollController,
-          keyboardDismissBehavior: widget.keyboardDismissBehavior,
           scrollDirection: widget.scrollDirection,
           reverse: widget.reverse,
           cacheExtent: widget.cacheExtent,
           physics: widget.physics,
+          shrinkWrap: widget.shrinkWrap,
           semanticChildCount: widget.semanticChildCount ?? widget.itemCount,
+          keyboardDismissBehavior: widget.keyboardDismissBehavior,
           slivers: <Widget>[
             if (widget.positionedIndex > 0)
               SliverPadding(
@@ -196,9 +212,9 @@ class _PositionedListState extends State<PositionedList> {
                         ? widget.positionedIndex
                         : widget.positionedIndex * 2,
                     addSemanticIndexes: false,
-                    findChildIndexCallback: widget.findChildIndexCallback,
                     addRepaintBoundaries: widget.addRepaintBoundaries,
                     addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+                    findChildIndexCallback: widget.findChildIndexCallback,
                   ),
                 ),
               ),
@@ -213,10 +229,10 @@ class _PositionedListState extends State<PositionedList> {
                           index + widget.positionedIndex * 2,
                         ),
                   childCount: widget.itemCount != 0 ? 1 : 0,
-                  findChildIndexCallback: widget.findChildIndexCallback,
                   addSemanticIndexes: false,
                   addRepaintBoundaries: widget.addRepaintBoundaries,
                   addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+                  findChildIndexCallback: widget.findChildIndexCallback,
                 ),
               ),
             ),
@@ -234,10 +250,10 @@ class _PositionedListState extends State<PositionedList> {
                     childCount: widget.separatorBuilder == null
                         ? widget.itemCount - widget.positionedIndex - 1
                         : 2 * (widget.itemCount - widget.positionedIndex - 1),
-                    findChildIndexCallback: widget.findChildIndexCallback,
                     addSemanticIndexes: false,
                     addRepaintBoundaries: widget.addRepaintBoundaries,
                     addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+                    findChildIndexCallback: widget.findChildIndexCallback,
                   ),
                 ),
               ),
@@ -319,25 +335,33 @@ class _PositionedListState extends State<PositionedList> {
     if (!updateScheduled) {
       updateScheduled = true;
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (registeredElements.value == null) {
+        final elements = registeredElements.value;
+        if (elements == null) {
           updateScheduled = false;
           return;
         }
         final positions = <ItemPosition>[];
-        RenderViewport? viewport;
-        for (final element in registeredElements.value!) {
-          final box = element.renderObject as RenderBox?;
-          viewport ??= RenderAbstractViewport.of(box) as RenderViewport?;
-          if (viewport == null || box == null) {
-            break;
+        RenderViewportBase? viewport;
+        for (final element in elements) {
+          final box = element.renderObject! as RenderBox;
+          viewport ??= RenderAbstractViewport.of(box) as RenderViewportBase?;
+          var anchor = 0.0;
+          if (viewport is RenderViewport) {
+            anchor = viewport.anchor;
           }
-          final key = element.widget.key as IndexedKey;
+
+          if (viewport is CustomRenderViewport) {
+            anchor = viewport.anchor;
+          }
+
+          final key = element.widget.key! as IndexedKey;
+          // Skip this element if `box` has never been laid out.
+          if (!box.hasSize) continue;
           if (widget.scrollDirection == Axis.vertical) {
-            final reveal = viewport.getOffsetToReveal(box, 0).offset;
+            final reveal = viewport!.getOffsetToReveal(box, 0).offset;
             if (!reveal.isFinite) continue;
-            final itemOffset = reveal -
-                viewport.offset.pixels +
-                viewport.anchor * viewport.size.height;
+            final itemOffset =
+                reveal - viewport.offset.pixels + anchor * viewport.size.height;
             positions.add(ItemPosition(
               index: key.index,
               itemLeadingEdge: itemOffset.round() /
@@ -348,6 +372,7 @@ class _PositionedListState extends State<PositionedList> {
           } else {
             final itemOffset =
                 box.localToGlobal(Offset.zero, ancestor: viewport).dx;
+            if (!itemOffset.isFinite) continue;
             positions.add(ItemPosition(
               index: key.index,
               itemLeadingEdge: (widget.reverse

@@ -12,7 +12,6 @@ const screenHeight = 400.0;
 const screenWidth = 400.0;
 const itemHeight = screenHeight / 10.0;
 const defaultItemCount = 500;
-const cacheExtent = itemHeight * 2;
 
 void main() {
   final itemPositionsNotifier = ItemPositionsListener.create();
@@ -20,9 +19,11 @@ void main() {
   Future<void> setUpWidgetTest(
     WidgetTester tester, {
     int topItem = 0,
+    Key? key,
     ScrollController? scrollController,
     double anchor = 0,
     int itemCount = defaultItemCount,
+    bool reverse = false,
   }) async {
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     tester.binding.window.physicalSizeTestValue =
@@ -30,29 +31,46 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: PositionedList(
-          itemCount: itemCount,
-          positionedIndex: topItem,
-          alignment: anchor,
-          controller: scrollController,
-          itemBuilder: (context, index) => SizedBox(
-            height: itemHeight,
-            child: Text('Item $index'),
+        // Use flex layout to ensure that the minimum height is not limited to screenHeight
+        home: Column(children: [
+          // Use Constrained to make max height not more than screenHeight
+          ConstrainedBox(
+            constraints:
+                const BoxConstraints(maxHeight: screenHeight, maxWidth: screenWidth),
+            child: PositionedList(
+              key: key,
+              itemCount: itemCount,
+              positionedIndex: topItem,
+              alignment: anchor,
+              controller: scrollController,
+              itemBuilder: (context, index) => SizedBox(
+                height: itemHeight,
+                child: Text('Item $index'),
+              ),
+              itemPositionsNotifier:
+                  itemPositionsNotifier as ItemPositionsNotifier,
+              shrinkWrap: true,
+              reverse: reverse,
+            ),
           ),
-          itemPositionsNotifier: itemPositionsNotifier as ItemPositionsNotifier,
-          cacheExtent: cacheExtent,
-        ),
+        ]),
       ),
     );
   }
 
-  testWidgets('short list', (WidgetTester tester) async {
-    await setUpWidgetTest(tester, itemCount: 5);
+  testWidgets('short list with shrink wrap', (WidgetTester tester) async {
+    const itemCount = 5;
+    const key = Key('short_list');
+    await setUpWidgetTest(tester, itemCount: itemCount, key: key);
     await tester.pump();
 
-    expect(find.text('Item 0'), findsOneWidget);
+    expect(
+        tester.getBottomRight(find.text('Item 4')).dy, itemHeight * itemCount);
     expect(find.text('Item 4'), findsOneWidget);
     expect(find.text('Item 5'), findsNothing);
+
+    final positionList = find.byKey(key);
+    expect(tester.getBottomRight(positionList).dy, itemHeight * itemCount);
 
     expect(
         itemPositionsNotifier.itemPositions.value
@@ -63,10 +81,11 @@ void main() {
         itemPositionsNotifier.itemPositions.value
             .firstWhere((position) => position.index == 4)
             .itemTrailingEdge,
-        1 / 2);
+        1.0);
   });
 
-  testWidgets('List positioned with 0 at top', (WidgetTester tester) async {
+  testWidgets('List positioned with 0 at top and shrink wrap',
+      (WidgetTester tester) async {
     await setUpWidgetTest(tester);
     await tester.pump();
 
@@ -96,7 +115,8 @@ void main() {
         11 / 10);
   });
 
-  testWidgets('List positioned with 5 at top', (WidgetTester tester) async {
+  testWidgets('List positioned with 5 at top and shrink wrap',
+      (WidgetTester tester) async {
     await setUpWidgetTest(tester, topItem: 5);
     await tester.pump();
 
@@ -127,7 +147,8 @@ void main() {
         1);
   });
 
-  testWidgets('List positioned with 20 at bottom', (WidgetTester tester) async {
+  testWidgets('List positioned with 20 at bottom and shrink wrap',
+      (WidgetTester tester) async {
     await setUpWidgetTest(tester, topItem: 20, anchor: 1);
     await tester.pump();
 
@@ -157,7 +178,7 @@ void main() {
         1);
   });
 
-  testWidgets('List positioned with 20 at halfway',
+  testWidgets('List positioned with 20 at halfway and shrink wrap',
       (WidgetTester tester) async {
     await setUpWidgetTest(tester, topItem: 20, anchor: 0.5);
     await tester.pump();
@@ -174,7 +195,7 @@ void main() {
         0.5 + itemHeight / screenHeight);
   });
 
-  testWidgets('List positioned with 20 half off top of screen',
+  testWidgets('List positioned with 20 half off top of screen and shrink wrap',
       (WidgetTester tester) async {
     await setUpWidgetTest(tester,
         topItem: 20, anchor: -(itemHeight / screenHeight) / 2);
@@ -192,7 +213,7 @@ void main() {
         (itemHeight / screenHeight) / 2);
   });
 
-  testWidgets('List positioned with 5 at top then scroll up 2',
+  testWidgets('List positioned with 5 at top then scroll up 2 and shrink wrap',
       (WidgetTester tester) async {
     await setUpWidgetTest(tester, topItem: 5);
 
@@ -222,7 +243,8 @@ void main() {
         1);
   });
 
-  testWidgets('List positioned with 5 at top then scroll down 1/2',
+  testWidgets(
+      'List positioned with 5 at top then scroll down 1/2 and shrink wrap',
       (WidgetTester tester) async {
     await setUpWidgetTest(tester, topItem: 5);
 
@@ -242,7 +264,7 @@ void main() {
         17 / 20);
   });
 
-  testWidgets('List positioned with 0 at top scroll up 5',
+  testWidgets('List positioned with 0 at top scroll up 5 and shrink wrap',
       (WidgetTester tester) async {
     final scrollController = ScrollController();
     await setUpWidgetTest(tester, scrollController: scrollController);
@@ -269,7 +291,8 @@ void main() {
         -1 / 10);
   });
 
-  testWidgets('List positioned with 5 at top then scroll up 2 programatically',
+  testWidgets(
+      'List positioned with 5 at top then scroll up 2 programatically and shrink wrap',
       (WidgetTester tester) async {
     final scrollController = ScrollController();
     await setUpWidgetTest(tester,
@@ -301,7 +324,7 @@ void main() {
   });
 
   testWidgets(
-      'List positioned with 5 at top then scroll down 20 programatically',
+      'List positioned with 5 at top then scroll down 20 programatically and shrink wrap',
       (WidgetTester tester) async {
     final scrollController = ScrollController();
     await setUpWidgetTest(tester,
@@ -337,7 +360,8 @@ void main() {
         -20 / 10);
   });
 
-  testWidgets('List positioned with 5 at top and initial scroll offset',
+  testWidgets(
+      'List positioned with 5 at top and initial scroll offset and shrink wrap',
       (WidgetTester tester) async {
     final scrollController =
         ScrollController(initialScrollOffset: -2 * itemHeight);
@@ -361,54 +385,89 @@ void main() {
         1);
   });
 
-  testWidgets('Does not crash when updated offscreen',
+  testWidgets('short List with reverse and shrink wrap',
       (WidgetTester tester) async {
-    late StateSetter setState;
-    var updated = false;
+    const itemCount = 5;
+    const key = Key('short_list');
+    await setUpWidgetTest(tester,
+        itemCount: itemCount, key: key, reverse: true);
+    await tester.pump();
 
-    // There's 0 relayout boundaries in this subtree.
-    final widget = StatefulBuilder(builder: (context, stateSetter) {
-      setState = stateSetter;
-      return Positioned(
-          left: 0,
-          right: 0,
-          child: PositionedList(
-            shrinkWrap: true,
-            itemCount: 1,
-            // When `updated` becomes true this line inserts a
-            // RenderIndexedSemantics to the render tree.
-            addSemanticIndexes: updated,
-            itemBuilder: (context, index) => const SizedBox(height: itemHeight),
-          ));
-    });
+    expect(find.text('Item 4'), findsOneWidget);
+    expect(find.text('Item 5'), findsNothing);
+    expect(
+        tester.getBottomRight(find.text('Item 0')).dy, itemHeight * itemCount);
+    expect(tester.getTopLeft(find.text('Item 4')).dy, 0);
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Overlay(
-        initialEntries: [
-          OverlayEntry(builder: (context) => widget, maintainState: true),
-        ],
+    final positionList = find.byKey(key);
+    expect(tester.getBottomRight(positionList).dy, itemHeight * itemCount);
+    expect(tester.getTopLeft(positionList).dy, 0);
+
+    expect(
+        itemPositionsNotifier.itemPositions.value
+            .firstWhere((position) => position.index == 0)
+            .itemLeadingEdge,
+        0);
+    expect(
+        itemPositionsNotifier.itemPositions.value
+            .firstWhere((position) => position.index == 4)
+            .itemTrailingEdge,
+        1.0);
+  });
+
+  testWidgets('test nested positioned list', (WidgetTester tester) async {
+    const itemCount = 50;
+    const key = Key('short_list');
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    tester.binding.window.physicalSizeTestValue =
+        const Size(screenWidth, screenHeight);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        // Use flex layout to ensure that the minimum height is not limited to screenHeight
+        home: PositionedList(
+          itemCount: 5,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return PositionedList(
+                  key: key,
+                  itemCount: itemCount,
+                  shrinkWrap: true,
+                  itemBuilder: (context, idx) => SizedBox(
+                        height: itemHeight,
+                        child: Text('Item $idx'),
+                      ));
+            } else {
+              return SizedBox(
+                height: itemHeight,
+                child: Text('Item ${itemCount + index - 1}'),
+              );
+            }
+          },
+          itemPositionsNotifier: itemPositionsNotifier as ItemPositionsNotifier,
+        ),
       ),
-    ));
-
-    // Insert a new opaque OverlayEntry that would prevent the first OverlayEntry
-    // from doing re-layout. Since there's no relayout boundaries in the first
-    // OverlayEntry, no dirty RenderObjects in its render subtree can update
-    // layout.
-    final newOverlay =
-        OverlayEntry(builder: (context) => const SizedBox.expand(), opaque: true);
-    tester.state<OverlayState>(find.byType(Overlay)).insert(newOverlay);
+    );
     await tester.pump();
 
-    // Update the list item's render tree. A new RenderObjectElement is
-    // inflated, registeredElement.renderObject will point to this new
-    // RenderObjectElement's RenderObject (RenderIndexedSemantics), which has
-    // never been laid out.
-    setState(() {
-      updated = true;
-    });
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 50'), findsNothing);
+    expect(tester.getTopLeft(find.text('Item 0')).dy, 0);
+    expect(tester.getBottomRight(find.text('Item 9')).dy, screenHeight);
 
-    await tester.pump();
-    expect(tester.takeException(), isNull);
+    final positionList = find.byKey(key);
+    expect(tester.getBottomRight(positionList).dy, itemHeight * itemCount);
+    expect(tester.getTopLeft(positionList).dy, 0);
+
+    expect(
+        itemPositionsNotifier.itemPositions.value
+            .firstWhere((position) => position.index == 0)
+            .itemLeadingEdge,
+        0);
+    expect(
+        itemPositionsNotifier.itemPositions.value
+            .firstWhere((position) => position.index == 0)
+            .itemTrailingEdge,
+        5.0);
   });
 }
