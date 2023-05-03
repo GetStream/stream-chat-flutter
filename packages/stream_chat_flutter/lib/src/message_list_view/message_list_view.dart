@@ -115,6 +115,7 @@ class StreamMessageListView extends StatefulWidget {
     this.unreadMessagesSeparatorBuilder,
     this.messageListController,
     this.reverse = true,
+    this.shrinkWrap = false,
     this.paginationLimit = 20,
     this.paginationLoadingIndicatorBuilder,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
@@ -134,6 +135,14 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// See [ScrollView.reverse].
   final bool reverse;
+
+  /// Whether the extent of the scroll view in the [scrollDirection] should be
+  /// determined by the contents being viewed.
+  ///
+  ///  Defaults to false.
+  ///
+  /// See [ScrollView.shrinkWrap].
+  final bool shrinkWrap;
 
   /// Limit used during pagination
   final int paginationLimit;
@@ -550,6 +559,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   physics: widget.scrollPhysics,
                   itemScrollController: _scrollController,
                   reverse: widget.reverse,
+                  shrinkWrap: widget.shrinkWrap,
                   itemCount: itemCount,
                   findChildIndexCallback: (Key key) {
                     final indexedKey = key as IndexedKey;
