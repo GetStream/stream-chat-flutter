@@ -48,7 +48,10 @@ void main() {
           itemCount: itemCount,
           itemScrollController: itemScrollController,
           itemBuilder: (context, index) {
-            assert(index >= 0 && index <= itemCount - 1);
+            assert(
+              index >= 0 && index <= itemCount - 1,
+              'index must be in the range of 0 to itemCount - 1',
+            );
             return SizedBox(
               height:
                   variableHeight ? (itemHeight + (index % 13) * 5) : itemHeight,
@@ -1133,34 +1136,35 @@ void main() {
   }, skip: true);
 
   testWidgets(
-      'Jump to 400 at bottom, manually scroll, scroll to 100 at bottom and back',
-      (WidgetTester tester) async {
-    final itemScrollController = ItemScrollController();
-    final itemPositionsListener = ItemPositionsListener.create();
-    await setUpWidgetTest(tester,
-        itemScrollController: itemScrollController,
-        itemPositionsListener: itemPositionsListener);
+    'Jump to 400 at bottom, manually scroll, scroll to 100 at bottom and back',
+    (WidgetTester tester) async {
+      final itemScrollController = ItemScrollController();
+      final itemPositionsListener = ItemPositionsListener.create();
+      await setUpWidgetTest(tester,
+          itemScrollController: itemScrollController,
+          itemPositionsListener: itemPositionsListener);
 
-    itemScrollController.jumpTo(index: 400, alignment: 1);
-    await tester.pumpAndSettle();
+      itemScrollController.jumpTo(index: 400, alignment: 1);
+      await tester.pumpAndSettle();
 
-    final listFinder = find.byType(ScrollablePositionedList);
+      final listFinder = find.byType(ScrollablePositionedList);
 
-    await tester.drag(listFinder, const Offset(0, -screenHeight));
-    await tester.pumpAndSettle();
+      await tester.drag(listFinder, const Offset(0, -screenHeight));
+      await tester.pumpAndSettle();
 
-    unawaited(itemScrollController.scrollTo(
-        index: 100, alignment: 1, duration: scrollDuration));
-    await tester.pumpAndSettle();
+      unawaited(itemScrollController.scrollTo(
+          index: 100, alignment: 1, duration: scrollDuration));
+      await tester.pumpAndSettle();
 
-    unawaited(itemScrollController.scrollTo(
-        index: 400, alignment: 1, duration: scrollDuration));
-    await tester.pumpAndSettle();
+      unawaited(itemScrollController.scrollTo(
+          index: 400, alignment: 1, duration: scrollDuration));
+      await tester.pumpAndSettle();
 
-    final itemFinder = find.text('Item 399');
-    expect(itemFinder, findsOneWidget);
-    expect(tester.getBottomLeft(itemFinder).dy, screenHeight);
-  });
+      final itemFinder = find.text('Item 399');
+      expect(itemFinder, findsOneWidget);
+      expect(tester.getBottomLeft(itemFinder).dy, screenHeight);
+    },
+  );
 
   testWidgets('physics', (WidgetTester tester) async {
     final itemScrollController = ItemScrollController();
@@ -1652,70 +1656,71 @@ void main() {
   });
 
   testWidgets(
-      'Maintain programmatic and user position (9 half way off top) in page view',
-      (WidgetTester tester) async {
-    final itemPositionsListener = ItemPositionsListener.create();
-    final itemScrollController = ItemScrollController();
+    'Maintain programmatic and user position (9 half way off top) in page view',
+    (WidgetTester tester) async {
+      final itemPositionsListener = ItemPositionsListener.create();
+      final itemScrollController = ItemScrollController();
 
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    tester.binding.window.physicalSizeTestValue =
-        const Size(screenWidth, screenHeight);
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      tester.binding.window.physicalSizeTestValue =
+          const Size(screenWidth, screenHeight);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: PageView(
-          children: [
-            KeyedSubtree(
-              key: const PageStorageKey('key'),
-              child: ScrollablePositionedList.builder(
-                itemCount: defaultItemCount,
-                itemScrollController: itemScrollController,
-                itemBuilder: (context, index) => SizedBox(
-                  height: itemHeight,
-                  child: Text('Item $index'),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: PageView(
+            children: [
+              KeyedSubtree(
+                key: const PageStorageKey('key'),
+                child: ScrollablePositionedList.builder(
+                  itemCount: defaultItemCount,
+                  itemScrollController: itemScrollController,
+                  itemBuilder: (context, index) => SizedBox(
+                    height: itemHeight,
+                    child: Text('Item $index'),
+                  ),
+                  itemPositionsListener: itemPositionsListener,
                 ),
-                itemPositionsListener: itemPositionsListener,
               ),
-            ),
-            const Center(
-              child: Text('Test'),
-            )
-          ],
+              const Center(
+                child: Text('Test'),
+              )
+            ],
+          ),
         ),
-      ),
-    );
+      );
 
-    itemScrollController.jumpTo(index: 9);
-    await tester.pump();
+      itemScrollController.jumpTo(index: 9);
+      await tester.pump();
 
-    expect(tester.getBottomRight(find.text('Item 9')).dy, itemHeight);
+      expect(tester.getBottomRight(find.text('Item 9')).dy, itemHeight);
 
-    await tester.drag(
-        find.byType(ScrollablePositionedList), const Offset(0, -itemHeight));
-    await tester.pumpAndSettle();
+      await tester.drag(
+          find.byType(ScrollablePositionedList), const Offset(0, -itemHeight));
+      await tester.pumpAndSettle();
 
-    final item9Bottom = tester.getBottomRight(find.text('Item 9')).dy;
-    expect(item9Bottom, lessThan(itemHeight));
+      final item9Bottom = tester.getBottomRight(find.text('Item 9')).dy;
+      expect(item9Bottom, lessThan(itemHeight));
 
-    await tester.drag(find.byType(PageView), const Offset(-500, 0));
-    await tester.pumpAndSettle();
+      await tester.drag(find.byType(PageView), const Offset(-500, 0));
+      await tester.pumpAndSettle();
 
-    await tester.drag(find.byType(PageView), const Offset(500, 0));
-    await tester.pumpAndSettle();
+      await tester.drag(find.byType(PageView), const Offset(500, 0));
+      await tester.pumpAndSettle();
 
-    expect(tester.getBottomRight(find.text('Item 9')).dy, item9Bottom);
+      expect(tester.getBottomRight(find.text('Item 9')).dy, item9Bottom);
 
-    expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 9)
-            .itemLeadingEdge,
-        -(itemHeight / screenHeight) / 2);
-    expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 9)
-            .itemTrailingEdge,
-        (itemHeight / screenHeight) / 2);
-  });
+      expect(
+          itemPositionsListener.itemPositions.value
+              .firstWhere((position) => position.index == 9)
+              .itemLeadingEdge,
+          -(itemHeight / screenHeight) / 2);
+      expect(
+          itemPositionsListener.itemPositions.value
+              .firstWhere((position) => position.index == 9)
+              .itemTrailingEdge,
+          (itemHeight / screenHeight) / 2);
+    },
+  );
 
   testWidgets('List with no items', (WidgetTester tester) async {
     final itemScrollController = ItemScrollController();
@@ -1746,7 +1751,10 @@ void main() {
               itemScrollController: itemScrollController,
               itemPositionsListener: itemPositionsListener,
               itemBuilder: (context, index) {
-                assert(index >= 0 && index <= itemCount - 1);
+                assert(
+                  index >= 0 && index <= itemCount - 1,
+                  'index must be in the range of 0 to itemCount - 1',
+                );
                 return SizedBox(
                   height: itemHeight,
                   child: Text('Item $index'),
@@ -1788,7 +1796,10 @@ void main() {
               initialScrollIndex: min(100, itemCount - 1),
               itemCount: itemCount,
               itemBuilder: (context, index) {
-                assert(index >= 0 && index <= itemCount - 1);
+                assert(
+                  index >= 0 && index <= itemCount - 1,
+                  'index must be in the range of 0 to itemCount - 1',
+                );
                 return SizedBox(
                   height: itemHeight,
                   child: Text('Item $index'),
@@ -1827,7 +1838,10 @@ void main() {
               initialScrollIndex: itemCount - 1,
               itemCount: itemCount,
               itemBuilder: (context, index) {
-                assert(index >= 0 && index <= itemCount - 1);
+                assert(
+                  index >= 0 && index <= itemCount - 1,
+                  'index must be in the range of 0 to itemCount - 1',
+                );
                 return SizedBox(
                   height: itemHeight,
                   child: Text('Item $index'),

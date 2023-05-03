@@ -31,12 +31,13 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        // Use flex layout to ensure that the minimum height is not limited to screenHeight
+        // Use flex layout to ensure that the minimum height is not limited to
+        // screenHeight.
         home: Column(children: [
           // Use Constrained to make max height not more than screenHeight
           ConstrainedBox(
-            constraints:
-                const BoxConstraints(maxHeight: screenHeight, maxWidth: screenWidth),
+            constraints: const BoxConstraints(
+                maxHeight: screenHeight, maxWidth: screenWidth),
             child: PositionedList(
               key: key,
               itemCount: itemCount,
@@ -292,73 +293,75 @@ void main() {
   });
 
   testWidgets(
-      'List positioned with 5 at top then scroll up 2 programatically and shrink wrap',
-      (WidgetTester tester) async {
-    final scrollController = ScrollController();
-    await setUpWidgetTest(tester,
-        topItem: 5, scrollController: scrollController);
+    '''List positioned with 5 at top then scroll up 2 programatically and shrink wrap''',
+    (WidgetTester tester) async {
+      final scrollController = ScrollController();
+      await setUpWidgetTest(tester,
+          topItem: 5, scrollController: scrollController);
 
-    scrollController.jumpTo(-2 * itemHeight);
-    await tester.pump();
+      scrollController.jumpTo(-2 * itemHeight);
+      await tester.pump();
 
-    expect(find.text('Item 2'), findsNothing);
-    expect(find.text('Item 3'), findsOneWidget);
-    expect(find.text('Item 12'), findsOneWidget);
-    expect(find.text('Item 13'), findsNothing);
+      expect(find.text('Item 2'), findsNothing);
+      expect(find.text('Item 3'), findsOneWidget);
+      expect(find.text('Item 12'), findsOneWidget);
+      expect(find.text('Item 13'), findsNothing);
 
-    expect(
-        itemPositionsNotifier.itemPositions.value
-            .firstWhere((position) => position.index == 2)
-            .itemLeadingEdge,
-        -1 / 10);
-    expect(
-        itemPositionsNotifier.itemPositions.value
-            .firstWhere((position) => position.index == 3)
-            .itemLeadingEdge,
-        0);
-    expect(
-        itemPositionsNotifier.itemPositions.value
-            .firstWhere((position) => position.index == 12)
-            .itemTrailingEdge,
-        1);
-  });
+      expect(
+          itemPositionsNotifier.itemPositions.value
+              .firstWhere((position) => position.index == 2)
+              .itemLeadingEdge,
+          -1 / 10);
+      expect(
+          itemPositionsNotifier.itemPositions.value
+              .firstWhere((position) => position.index == 3)
+              .itemLeadingEdge,
+          0);
+      expect(
+          itemPositionsNotifier.itemPositions.value
+              .firstWhere((position) => position.index == 12)
+              .itemTrailingEdge,
+          1);
+    },
+  );
 
   testWidgets(
-      'List positioned with 5 at top then scroll down 20 programatically and shrink wrap',
-      (WidgetTester tester) async {
-    final scrollController = ScrollController();
-    await setUpWidgetTest(tester,
-        topItem: 5, scrollController: scrollController);
+    '''List positioned with 5 at top then scroll down 20 programatically and shrink wrap''',
+    (WidgetTester tester) async {
+      final scrollController = ScrollController();
+      await setUpWidgetTest(tester,
+          topItem: 5, scrollController: scrollController);
 
-    scrollController.jumpTo(itemHeight * 20);
-    await tester.pump();
+      scrollController.jumpTo(itemHeight * 20);
+      await tester.pump();
 
-    expect(
-        itemPositionsNotifier.itemPositions.value
-            .firstWhere((position) => position.index == 23)
-            .itemLeadingEdge,
-        -2 / 10);
-    expect(
-        itemPositionsNotifier.itemPositions.value
-            .firstWhere((position) => position.index == 24)
-            .itemLeadingEdge,
-        -1 / 10);
-    expect(
-        itemPositionsNotifier.itemPositions.value
-            .firstWhere((position) => position.index == 25)
-            .itemLeadingEdge,
-        0);
-    expect(
-        itemPositionsNotifier.itemPositions.value
-            .firstWhere((position) => position.index == 4)
-            .itemLeadingEdge,
-        -21 / 10);
-    expect(
-        itemPositionsNotifier.itemPositions.value
-            .firstWhere((position) => position.index == 5)
-            .itemLeadingEdge,
-        -20 / 10);
-  });
+      expect(
+          itemPositionsNotifier.itemPositions.value
+              .firstWhere((position) => position.index == 23)
+              .itemLeadingEdge,
+          -2 / 10);
+      expect(
+          itemPositionsNotifier.itemPositions.value
+              .firstWhere((position) => position.index == 24)
+              .itemLeadingEdge,
+          -1 / 10);
+      expect(
+          itemPositionsNotifier.itemPositions.value
+              .firstWhere((position) => position.index == 25)
+              .itemLeadingEdge,
+          0);
+      expect(
+          itemPositionsNotifier.itemPositions.value
+              .firstWhere((position) => position.index == 4)
+              .itemLeadingEdge,
+          -21 / 10);
+      expect(
+          itemPositionsNotifier.itemPositions.value
+              .firstWhere((position) => position.index == 5)
+              .itemLeadingEdge,
+          -20 / 10);
+    },
+  );
 
   testWidgets(
       'List positioned with 5 at top and initial scroll offset and shrink wrap',
@@ -424,7 +427,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        // Use flex layout to ensure that the minimum height is not limited to screenHeight
+        // Use flex layout to ensure that the minimum height is not limited to
+        // screenHeight.
         home: PositionedList(
           itemCount: 5,
           itemBuilder: (context, index) {
