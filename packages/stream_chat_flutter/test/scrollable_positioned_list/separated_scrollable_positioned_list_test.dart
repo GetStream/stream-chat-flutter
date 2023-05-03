@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/scroll_view.dart';
 
@@ -497,20 +496,21 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<int>(
           valueListenable: itemCount,
-          builder: (context, itemCount, child) =>
-              ScrollablePositionedList.separated(
-            itemCount: itemCount,
-            itemScrollController: itemScrollController,
-            itemPositionsListener: itemPositionsListener,
-            itemBuilder: (context, index) => SizedBox(
-              height: itemHeight,
-              child: Text('Item $index'),
-            ),
-            separatorBuilder: (context, index) => SizedBox(
-              height: separatorHeight,
-              child: Text('Separator $index'),
-            ),
-          ),
+          builder: (context, itemCount, child) {
+            return ScrollablePositionedList.separated(
+              itemCount: itemCount,
+              itemScrollController: itemScrollController,
+              itemPositionsListener: itemPositionsListener,
+              itemBuilder: (context, index) => SizedBox(
+                height: itemHeight,
+                child: Text('Item $index'),
+              ),
+              separatorBuilder: (context, index) => SizedBox(
+                height: separatorHeight,
+                child: Text('Separator $index'),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -538,20 +538,21 @@ void main() {
       MaterialApp(
         home: ValueListenableBuilder<int>(
           valueListenable: itemCount,
-          builder: (context, itemCount, child) =>
-              ScrollablePositionedList.separated(
-            itemCount: itemCount,
-            itemScrollController: itemScrollController,
-            itemPositionsListener: itemPositionsListener,
-            itemBuilder: (context, index) => SizedBox(
-              height: itemHeight,
-              child: Text('Item $index'),
-            ),
-            separatorBuilder: (context, index) => SizedBox(
-              height: separatorHeight,
-              child: Text('Separator $index'),
-            ),
-          ),
+          builder: (context, itemCount, child) {
+            return ScrollablePositionedList.separated(
+              itemCount: itemCount,
+              itemScrollController: itemScrollController,
+              itemPositionsListener: itemPositionsListener,
+              itemBuilder: (context, index) => SizedBox(
+                height: itemHeight,
+                child: Text('Item $index'),
+              ),
+              separatorBuilder: (context, index) => SizedBox(
+                height: separatorHeight,
+                child: Text('Separator $index'),
+              ),
+            );
+          },
         ),
       ),
     );
