@@ -27,12 +27,13 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        // Use flex layout to ensure that the minimum height is not limited to screenHeight
+        // Use flex layout to ensure that the minimum height is not limited to
+        // screenHeight.
         home: Column(children: [
           // Use Constrained to make max height not more than screenHeight
           ConstrainedBox(
-            constraints:
-                const BoxConstraints(maxHeight: screenHeight, maxWidth: screenWidth),
+            constraints: const BoxConstraints(
+                maxHeight: screenHeight, maxWidth: screenWidth),
             child: ScrollablePositionedList.builder(
               itemCount: itemCount,
               initialScrollIndex: initialIndex,

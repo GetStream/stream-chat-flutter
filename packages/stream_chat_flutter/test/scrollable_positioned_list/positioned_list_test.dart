@@ -391,12 +391,14 @@ void main() {
       ),
     ));
 
-    // Insert a new opaque OverlayEntry that would prevent the first OverlayEntry
-    // from doing re-layout. Since there's no relayout boundaries in the first
-    // OverlayEntry, no dirty RenderObjects in its render subtree can update
-    // layout.
-    final newOverlay =
-        OverlayEntry(builder: (context) => const SizedBox.expand(), opaque: true);
+    // Insert a new opaque OverlayEntry that would prevent the first
+    // OverlayEntry from doing re-layout. Since there's no relayout boundaries
+    // in the first OverlayEntry, no dirty RenderObjects in its render subtree
+    // can update layout.
+    final newOverlay = OverlayEntry(
+      builder: (context) => const SizedBox.expand(),
+      opaque: true,
+    );
     tester.state<OverlayState>(find.byType(Overlay)).insert(newOverlay);
     await tester.pump();
 
