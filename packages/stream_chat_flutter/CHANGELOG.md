@@ -52,6 +52,8 @@
   ),
   ```
 
+- Added `StreamMessageListView.shrinkWrap` to allow users to shrink wrap the message list view.
+
 🔄 Changed
 
 - Deprecated `MessageTheme.linkBackgroundColor` in favor of `MessageTheme.urlAttachmentBackgroundColor`.
