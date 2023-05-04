@@ -8,6 +8,11 @@ on:
   pull_request:
     paths:
       - 'packages/**'
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
   push:
     branches:
       - master
