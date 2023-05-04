@@ -15,7 +15,6 @@ dependencies:
     sdk: flutter
   logging: ^1.0.1
   meta: ^1.8.0
-  mutex: ^3.0.0
   path: ^1.8.2
   path_provider: ^2.0.1
   sqlite3_flutter_libs: ^0.5.0
