@@ -37,7 +37,7 @@ The usage is pretty simple.
 ```dart
 final chatPersistentClient = StreamChatPersistenceClient(
   logLevel: Level.INFO,
-  connectionMode: ConnectionMode.background,
+  connectionMode: ConnectionMode.regular,
 );
 ```
 2. Pass the instance to the official Stream chat client.
