@@ -8,6 +8,8 @@
 ✅ Added
 
 - Expose `ChannelMute` class. [#1473](https://github.com/GetStream/stream-chat-flutter/issues/1473)
+- Added synchronization to the `StreamChatClient.sync`
+  api. [#1392](https://github.com/GetStream/stream-chat-flutter/issues/1392)
 
 ## 6.0.0
 
