@@ -90,6 +90,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
         'disconnect the previous instance before connecting again.',
       );
     }
+    _logger.info('connect');
     db = databaseProvider?.call(userId, _connectionMode) ??
         await _defaultDatabaseProvider(userId, _connectionMode);
   }

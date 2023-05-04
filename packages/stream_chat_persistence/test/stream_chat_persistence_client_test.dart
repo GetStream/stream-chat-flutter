@@ -55,6 +55,15 @@ void main() {
     expect(client.db, isNull);
   });
 
+  test('client function throws stateError if db is not yet connected', () {
+    final client = StreamChatPersistenceClient(logLevel: Level.ALL);
+    expect(
+      // Running a function that requires db connection.
+      () => client.getReplies('testParentId'),
+      throwsA(isA<StateError>()),
+    );
+  });
+
   group('client functions', () {
     const userId = 'testUserId';
     final mockDatabase = MockChatDatabase();
@@ -64,6 +73,10 @@ void main() {
     setUp(() async {
       client = StreamChatPersistenceClient(logLevel: Level.ALL);
       await client.connect(userId, databaseProvider: _mockDatabaseProvider);
+    });
+
+    tearDown(() async {
+      await client.disconnect();
     });
 
     test('getReplies', () async {
