@@ -15,7 +15,7 @@ import 'package:stream_chat/src/core/http/token_manager.dart';
 
 export 'device_api.dart' show PushProvider;
 
-/// Api_client that wraps every other specific api
+/// ApiClient that wraps every other specific api
 class StreamChatApi {
   /// Initialize a new stream chat api
   StreamChatApi(
