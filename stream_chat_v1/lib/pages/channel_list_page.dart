@@ -7,6 +7,7 @@ import 'package:example/routes/routes.dart';
 import 'package:example/utils/app_config.dart';
 import 'package:example/utils/localizations.dart';
 import 'package:example/widgets/channel_list.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
@@ -125,8 +126,37 @@ class _ChannelListPageState extends State<ChannelListPage> {
           FlutterAppBadger.removeBadge();
         }
       });
+      unawaited(_setupPushNotifications(StreamChat.of(context).client));
     }
     super.initState();
+  }
+
+  Future<void> _setupPushNotifications(StreamChatClient client) async {
+    
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    print('[setupPushNotifications] #firebase; settings: ${settings.authorizationStatus}');
+
+    String? token = await FirebaseMessaging.instance.getToken();
+    if (token != null) {
+      final result = await client.addDevice(token, PushProvider.firebase);
+      print('[setupPushNotifications] #firebase; token registered: $token');
+    }
+    FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
+      final result = await client.addDevice(token, PushProvider.firebase);
+      print('[setupPushNotifications] #firebase; token refreshed: $token');
+    });
+
   }
 
   @override

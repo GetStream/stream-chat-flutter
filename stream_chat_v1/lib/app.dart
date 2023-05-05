@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:example/state/init_data.dart';
 import 'package:example/pages/choose_user_page.dart';
 import 'package:example/pages/splash_screen.dart';
 import 'package:example/routes/app_routes.dart';
 import 'package:example/routes/routes.dart';
+import 'package:example/state/init_data.dart';
 import 'package:example/utils/app_config.dart';
 import 'package:example/utils/local_notification_observer.dart';
 import 'package:example/utils/localizations.dart';
