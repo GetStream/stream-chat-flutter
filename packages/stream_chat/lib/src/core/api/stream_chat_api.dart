@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/call_api.dart';
@@ -14,7 +15,7 @@ import 'package:stream_chat/src/core/http/token_manager.dart';
 
 export 'device_api.dart' show PushProvider;
 
-/// ApiClient that wraps every other specific api
+/// Api_client that wraps every other specific api
 class StreamChatApi {
   /// Initialize a new stream chat api
   StreamChatApi(
@@ -26,6 +27,7 @@ class StreamChatApi {
     AttachmentFileUploaderProvider attachmentFileUploaderProvider =
         StreamAttachmentFileUploader.new,
     Logger? logger,
+    Iterable<Interceptor>? interceptors,
   })  : _fileUploaderProvider = attachmentFileUploaderProvider,
         _client = client ??
             StreamHttpClient(
@@ -34,6 +36,7 @@ class StreamChatApi {
               tokenManager: tokenManager,
               connectionIdManager: connectionIdManager,
               logger: logger,
+              interceptors: interceptors,
             );
 
   final StreamHttpClient _client;

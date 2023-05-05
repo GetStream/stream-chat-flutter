@@ -86,41 +86,73 @@ void main() {
     },
   );
 
-  test('loggingInterceptor should be added if logger is provided', () {
-    const apiKey = 'api-key';
-    final client = StreamHttpClient(
-      apiKey,
-      logger: Logger('test-logger'),
-    );
+  group('loggingInterceptor', () {
+    test('should be added if logger is provided', () {
+      const apiKey = 'api-key';
+      final client = StreamHttpClient(
+        apiKey,
+        logger: Logger('test-logger'),
+      );
 
-    expect(
-      client.httpClient.interceptors.whereType<LoggingInterceptor>().length,
-      1,
-    );
-  });
+      expect(
+        client.httpClient.interceptors.whereType<LoggingInterceptor>().length,
+        1,
+      );
+    });
 
-  test('loggingInterceptor should log requests', () async {
-    const apiKey = 'api-key';
-    final logger = MockLogger();
-    final client = StreamHttpClient(apiKey, logger: logger);
+    test('should not be added if logger.level is OFF', () {
+      const apiKey = 'api-key';
+      final client = StreamHttpClient(
+        apiKey,
+        logger: Logger.detached('test-logger')..level = Level.OFF,
+      );
 
-    try {
-      await client.get('path');
-    } catch (_) {}
+      expect(
+        client.httpClient.interceptors.whereType<LoggingInterceptor>().length,
+        0,
+      );
+    });
 
-    verify(() => logger.info(any())).called(greaterThan(0));
-  });
+    test('should not be added if `interceptors` are provided', () {
+      const apiKey = 'api-key';
+      final client = StreamHttpClient(
+        apiKey,
+        logger: Logger.detached('test-logger'),
+        interceptors: [
+          // Sample Interceptor.
+          InterceptorsWrapper(),
+        ],
+      );
 
-  test('loggingInterceptor should log error', () async {
-    const apiKey = 'api-key';
-    final logger = MockLogger();
-    final client = StreamHttpClient(apiKey, logger: logger);
+      expect(
+        client.httpClient.interceptors.whereType<LoggingInterceptor>().length,
+        0,
+      );
+    });
 
-    try {
-      await client.get('path');
-    } catch (_) {}
+    test('should log requests', () async {
+      const apiKey = 'api-key';
+      final logger = MockLogger();
+      final client = StreamHttpClient(apiKey, logger: logger);
 
-    verify(() => logger.severe(any())).called(greaterThan(0));
+      try {
+        await client.get('path');
+      } catch (_) {}
+
+      verify(() => logger.info(any())).called(greaterThan(0));
+    });
+
+    test('should log error', () async {
+      const apiKey = 'api-key';
+      final logger = MockLogger();
+      final client = StreamHttpClient(apiKey, logger: logger);
+
+      try {
+        await client.get('path');
+      } catch (_) {}
+
+      verify(() => logger.severe(any())).called(greaterThan(0));
+    });
   });
 
   test('`.close` should close the dio client', () async {

@@ -73,6 +73,7 @@ class StreamChatClient {
     WebSocket? ws,
     AttachmentFileUploaderProvider attachmentFileUploaderProvider =
         StreamAttachmentFileUploader.new,
+    Iterable<Interceptor>? chatApiInterceptors,
   }) {
     logger.info('Initiating new StreamChatClient');
 
@@ -91,6 +92,7 @@ class StreamChatClient {
           connectionIdManager: _connectionIdManager,
           attachmentFileUploaderProvider: attachmentFileUploaderProvider,
           logger: detachedLogger('🕸️'),
+          interceptors: chatApiInterceptors,
         );
 
     _ws = ws ??
