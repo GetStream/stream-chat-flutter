@@ -10,6 +10,29 @@
 - Expose `ChannelMute` class. [#1473](https://github.com/GetStream/stream-chat-flutter/issues/1473)
 - Added synchronization to the `StreamChatClient.sync`
   api. [#1392](https://github.com/GetStream/stream-chat-flutter/issues/1392)
+- Added support for `StreamChatClient.chatApiInterceptors` to add custom interceptors to the API client.
+  [#1265](https://github.com/GetStream/stream-chat-flutter/issues/1265).
+
+  ```dart
+    final client = StreamChatClient(
+      chatApiInterceptors: [
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            // Do something before request is sent.
+            return handler.next(options);
+          },
+          onResponse: (response, handler) {
+            // Do something with response data
+            return handler.next(response);
+          },
+          onError: (DioError e, handler) {
+            // Do something with response error
+            return handler.next(e);
+          },
+        ),
+      ],
+  );
+  ```
 
 ## 6.0.0
 

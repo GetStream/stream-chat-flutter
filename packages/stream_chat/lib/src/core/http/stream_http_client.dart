@@ -25,6 +25,7 @@ class StreamHttpClient {
     TokenManager? tokenManager,
     ConnectionIdManager? connectionIdManager,
     Logger? logger,
+    Iterable<Interceptor>? interceptors,
   })  : _options = options ?? const StreamHttpClientOptions(),
         httpClient = dio ?? Dio() {
     httpClient
@@ -45,20 +46,25 @@ class StreamHttpClient {
         if (tokenManager != null) AuthInterceptor(this, tokenManager),
         if (connectionIdManager != null)
           ConnectionIdInterceptor(connectionIdManager),
-        if (logger != null && logger.level != Level.OFF)
-          LoggingInterceptor(
-            requestHeader: true,
-            logPrint: (step, message) {
-              switch (step) {
-                case InterceptStep.request:
-                  return logger.info(message);
-                case InterceptStep.response:
-                  return logger.info(message);
-                case InterceptStep.error:
-                  return logger.severe(message);
-              }
-            },
-          ),
+        ...interceptors ??
+            [
+              // Add a default logging interceptor if no interceptors are
+              // provided.
+              if (logger != null && logger.level != Level.OFF)
+                LoggingInterceptor(
+                  requestHeader: true,
+                  logPrint: (step, message) {
+                    switch (step) {
+                      case InterceptStep.request:
+                        return logger.info(message);
+                      case InterceptStep.response:
+                        return logger.info(message);
+                      case InterceptStep.error:
+                        return logger.severe(message);
+                    }
+                  },
+                ),
+            ],
       ]);
   }
 
