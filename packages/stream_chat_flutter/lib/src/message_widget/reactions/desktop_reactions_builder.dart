@@ -163,23 +163,28 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
         onExit: (event) {
           setState(() => _showReactionsPopup = !_showReactionsPopup);
         },
-        child: Wrap(
-          children: [
-            ...reactionsList.map((reaction) {
-              final reactionIcon = reactionIcons.firstWhereOrNull(
-                (r) => r.type == reaction.type,
-              );
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: [
+              ...reactionsList.map((reaction) {
+                final reactionIcon = reactionIcons.firstWhereOrNull(
+                  (r) => r.type == reaction.type,
+                );
 
-              return _BottomReaction(
-                reaction: reaction,
-                message: widget.message,
-                borderSide: widget.borderSide,
-                messageTheme: widget.messageTheme,
-                reactionIcon: reactionIcon,
-                streamChatTheme: streamChatTheme,
-              );
-            }).toList(),
-          ],
+                return _BottomReaction(
+                  reaction: reaction,
+                  message: widget.message,
+                  borderSide: widget.borderSide,
+                  messageTheme: widget.messageTheme,
+                  reactionIcon: reactionIcon,
+                  streamChatTheme: streamChatTheme,
+                );
+              }).toList(),
+            ],
+          ),
         ),
       ),
     );
@@ -206,6 +211,9 @@ class _BottomReaction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userId = StreamChat.of(context).currentUser?.id;
+
+    final backgroundColor = messageTheme?.reactionsBackgroundColor;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -225,33 +233,35 @@ class _BottomReaction extends StatelessWidget {
         }
       },
       child: Card(
-        shape: StadiumBorder(
+        margin: EdgeInsets.zero,
+        // Setting elevation as null when background color is transparent.
+        // This is done to avoid shadow when background color is transparent.
+        elevation: backgroundColor == Colors.transparent ? 0 : null,
+        shape: RoundedRectangleBorder(
           side: borderSide ??
               BorderSide(
-                color: messageTheme?.messageBorderColor ?? Colors.grey,
+                color: messageTheme?.reactionsBorderColor ?? Colors.transparent,
               ),
+          borderRadius: BorderRadius.circular(10),
         ),
-        color: messageTheme?.messageBackgroundColor,
+        color: backgroundColor,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 6,
-            vertical: 2,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               ConstrainedBox(
                 constraints: BoxConstraints.tight(
-                  const Size.square(16),
+                  const Size.square(14),
                 ),
                 child: reactionIcon?.builder(
                       context,
                       reaction.user?.id == userId,
-                      16,
+                      14,
                     ) ??
                     Icon(
                       Icons.help_outline_rounded,
-                      size: 16,
+                      size: 14,
                       color: reaction.user?.id == userId
                           ? streamChatTheme.colorTheme.accentPrimary
                           : streamChatTheme.colorTheme.textHighEmphasis

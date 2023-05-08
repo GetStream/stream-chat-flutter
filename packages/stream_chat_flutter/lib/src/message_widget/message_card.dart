@@ -139,7 +139,8 @@ class _MessageCardState extends State<MessageCard> {
           RoundedRectangleBorder(
             side: widget.borderSide ??
                 BorderSide(
-                  color: widget.messageTheme.messageBorderColor ?? Colors.grey,
+                  color: widget.messageTheme.messageBorderColor ??
+                      Colors.transparent,
                 ),
             borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
           ),

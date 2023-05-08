@@ -174,6 +174,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
   ) {
     final isCurrentUser = reaction.user?.id == currentUser.id;
     final chatThemeData = StreamChatTheme.of(context);
+    final reverse = !isCurrentUser;
     return ConstrainedBox(
       constraints: BoxConstraints.loose(
         const Size(64, 100),
@@ -199,13 +200,14 @@ class StreamMessageReactionsModal extends StatelessWidget {
               ),
               Positioned(
                 bottom: 6,
-                left: isCurrentUser ? -3 : null,
-                right: isCurrentUser ? -3 : null,
+                left: !reverse ? -3 : null,
+                right: reverse ? -3 : null,
                 child: Align(
                   alignment:
                       reverse ? Alignment.centerRight : Alignment.centerLeft,
                   child: StreamReactionBubble(
                     reactions: [reaction],
+                    reverse: !reverse,
                     flipTail: !reverse,
                     borderColor:
                         messageTheme.reactionsBorderColor ?? Colors.transparent,
@@ -213,7 +215,6 @@ class StreamMessageReactionsModal extends StatelessWidget {
                         Colors.transparent,
                     maskColor: chatThemeData.colorTheme.barsBg,
                     tailCirclesSpacing: 1,
-                    highlightOwnReactions: false,
                   ),
                 ),
               ),

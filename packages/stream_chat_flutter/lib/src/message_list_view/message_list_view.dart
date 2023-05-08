@@ -893,6 +893,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final currentUserMember =
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
+    final hasUrlAttachment =
+        message.attachments.any((it) => it.ogScrapeUrl != null);
+
+    final borderSide = isOnlyEmoji || hasUrlAttachment ? BorderSide.none : null;
+
     final defaultMessageWidget = StreamMessageWidget(
       showReplyMessage: false,
       showResendMessage: false,
@@ -917,7 +922,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         vertical: 8,
         horizontal: isOnlyEmoji ? 0 : 16.0,
       ),
-      borderSide: isMyMessage || isOnlyEmoji ? BorderSide.none : null,
+      borderSide: borderSide,
       showUserAvatar: isMyMessage ? DisplayWidget.gone : DisplayWidget.show,
       messageTheme: isMyMessage
           ? _streamTheme.ownMessageTheme
@@ -1096,10 +1101,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final hasUrlAttachment =
         message.attachments.any((it) => it.ogScrapeUrl != null);
 
-    final borderSide =
-        isOnlyEmoji || hasUrlAttachment || (isMyMessage && !hasFileAttachment)
-            ? BorderSide.none
-            : null;
+    final borderSide = isOnlyEmoji || hasUrlAttachment ? BorderSide.none : null;
 
     final currentUser = StreamChat.of(context).currentUser;
     final members = StreamChannel.of(context).channel.state?.members ?? [];
