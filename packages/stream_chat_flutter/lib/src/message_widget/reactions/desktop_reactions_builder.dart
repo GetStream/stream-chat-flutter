@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_card.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 // ignore_for_file: cascade_invocations
@@ -75,6 +76,7 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
   @override
   Widget build(BuildContext context) {
     final streamChat = StreamChat.of(context);
+    final currentUser = streamChat.currentUser!;
     final reactionIcons = StreamChatConfiguration.of(context).reactionIcons;
     final streamChatTheme = StreamChatTheme.of(context);
 
@@ -83,13 +85,13 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
     if (widget.shouldShowReactions) {
       widget.message.latestReactions?.forEach((element) {
         if (!reactionsMap.containsKey(element.type) ||
-            element.user!.id == streamChat.currentUser?.id) {
+            element.user!.id == currentUser.id) {
           reactionsMap[element.type] = element;
         }
       });
 
       reactionsList = reactionsMap.values.toList()
-        ..sort((a, b) => a.user!.id == streamChat.currentUser?.id ? 1 : -1);
+        ..sort((a, b) => a.user!.id == currentUser.id ? 1 : -1);
     }
 
     return PortalTarget(
@@ -114,44 +116,10 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
             maxWidth: 336,
             maxHeight: 342,
           ),
-          child: Card(
-            color: streamChatTheme.colorTheme.barsBg,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    '''${widget.message.latestReactions!.length} ${context.translations.messageReactionsLabel}''',
-                    style: streamChatTheme.textTheme.headlineBold,
-                  ),
-                ),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: [
-                        ...widget.message.latestReactions!.map((reaction) {
-                          final reactionIcon = reactionIcons.firstWhereOrNull(
-                            (r) => r.type == reaction.type,
-                          );
-                          return _StackedReaction(
-                            reaction: reaction,
-                            streamChatTheme: streamChatTheme,
-                            reactionIcon: reactionIcon,
-                          );
-                        }).toList(),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          child: ReactionsCard(
+            currentUser: currentUser,
+            message: widget.message,
+            messageTheme: widget.messageTheme,
           ),
         ),
       ),
@@ -164,7 +132,10 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
           setState(() => _showReactionsPopup = !_showReactionsPopup);
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2),
+          padding: EdgeInsets.symmetric(
+            vertical: 2,
+            horizontal: widget.reverse ? 0 : 4,
+          ),
           child: Wrap(
             spacing: 4,
             runSpacing: 4,
@@ -175,6 +146,7 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
                 );
 
                 return _BottomReaction(
+                  currentUser: currentUser,
                   reaction: reaction,
                   message: widget.message,
                   borderSide: widget.borderSide,
@@ -193,6 +165,7 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
 
 class _BottomReaction extends StatelessWidget {
   const _BottomReaction({
+    required this.currentUser,
     required this.reaction,
     required this.message,
     required this.borderSide,
@@ -201,6 +174,7 @@ class _BottomReaction extends StatelessWidget {
     required this.streamChatTheme,
   });
 
+  final User currentUser;
   final Reaction reaction;
   final Message message;
   final BorderSide? borderSide;
@@ -210,7 +184,7 @@ class _BottomReaction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userId = StreamChat.of(context).currentUser?.id;
+    final userId = currentUser.id;
 
     final backgroundColor = messageTheme?.reactionsBackgroundColor;
 
@@ -264,8 +238,7 @@ class _BottomReaction extends StatelessWidget {
                       size: 14,
                       color: reaction.user?.id == userId
                           ? streamChatTheme.colorTheme.accentPrimary
-                          : streamChatTheme.colorTheme.textHighEmphasis
-                              .withOpacity(0.5),
+                          : streamChatTheme.colorTheme.textLowEmphasis,
                     ),
               ),
               const SizedBox(width: 4),
@@ -288,89 +261,5 @@ class _BottomReaction extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Reaction>('reaction', reaction));
     properties.add(DiagnosticsProperty<Message>('message', message));
-  }
-}
-
-class _StackedReaction extends StatelessWidget {
-  const _StackedReaction({
-    required this.reaction,
-    required this.streamChatTheme,
-    required this.reactionIcon,
-  });
-
-  final Reaction reaction;
-  final StreamChatThemeData streamChatTheme;
-  final StreamReactionIcon? reactionIcon;
-
-  @override
-  Widget build(BuildContext context) {
-    final userId = StreamChat.of(context).currentUser?.id;
-    return SizedBox(
-      width: 80,
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              StreamUserAvatar(
-                user: reaction.user!,
-                constraints: const BoxConstraints.tightFor(
-                  height: 64,
-                  width: 64,
-                ),
-                borderRadius: BorderRadius.circular(32),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: streamChatTheme.colorTheme.inputBg,
-                    border: Border.all(
-                      color: streamChatTheme.colorTheme.barsBg,
-                      width: 2,
-                    ),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: reactionIcon?.builder(
-                          context,
-                          reaction.userId == userId,
-                          16,
-                        ) ??
-                        Icon(
-                          Icons.help_outline_rounded,
-                          size: 16,
-                          color: reaction.user?.id == userId
-                              ? streamChatTheme.colorTheme.accentPrimary
-                              : streamChatTheme.colorTheme.textHighEmphasis
-                                  .withOpacity(0.5),
-                        ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Text(
-            userId == reaction.user!.name ? 'You' : reaction.user!.name,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(
-      DiagnosticsProperty<Reaction>('reaction', reaction),
-    );
-    properties.add(
-      DiagnosticsProperty<StreamReactionIcon?>(
-        'reactionIcon',
-        reactionIcon,
-      ),
-    );
   }
 }

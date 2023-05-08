@@ -126,8 +126,7 @@ class StreamChatThemeData {
     StreamTextTheme textTheme,
   ) {
     final accentColor = colorTheme.accentPrimary;
-    final iconTheme =
-        IconThemeData(color: colorTheme.textHighEmphasis.withOpacity(0.5));
+    final iconTheme = IconThemeData(color: colorTheme.textLowEmphasis);
     final channelHeaderTheme = StreamChannelHeaderThemeData(
       avatarTheme: StreamAvatarThemeData(
         borderRadius: BorderRadius.circular(20),
