@@ -997,26 +997,24 @@ class Channel {
   ) async {
     final type = reaction.type;
 
-    final reactionCounts = {...message.reactionCounts ?? <String, int>{}};
+    final reactionCounts = {...?message.reactionCounts};
     if (reactionCounts.containsKey(type)) {
       reactionCounts.update(type, (value) => value - 1);
     }
-    final reactionScores = {...message.reactionScores ?? <String, int>{}};
+    final reactionScores = {...?message.reactionScores};
     if (reactionScores.containsKey(type)) {
       reactionScores.update(type, (value) => value - 1);
     }
 
-    final latestReactions = [...message.latestReactions ?? <Reaction>[]]
-      ..removeWhere((r) =>
-          r.userId == reaction.userId &&
-          r.type == reaction.type &&
-          r.messageId == reaction.messageId);
+    final latestReactions = [...?message.latestReactions]..removeWhere((r) =>
+        r.userId == reaction.userId &&
+        r.type == reaction.type &&
+        r.messageId == reaction.messageId);
 
-    final ownReactions = message.ownReactions
-      ?..removeWhere((r) =>
-          r.userId == reaction.userId &&
-          r.type == reaction.type &&
-          r.messageId == reaction.messageId);
+    final ownReactions = [...?message.ownReactions]..removeWhere((r) =>
+        r.userId == reaction.userId &&
+        r.type == reaction.type &&
+        r.messageId == reaction.messageId);
 
     final newMessage = message.copyWith(
       reactionCounts: reactionCounts..removeWhere((_, value) => value == 0),
