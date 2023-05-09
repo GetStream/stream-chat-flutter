@@ -4,6 +4,8 @@
 
 - [[#1355]](https://github.com/GetStream/stream-chat-flutter/issues/1355) Fixed error while hiding channel and clearing
   message history.
+- [[#1525]](https://github.com/GetStream/stream-chat-flutter/issues/1525) Fixed removing message not removing quoted
+  message reference.
 
 ✅ Added
 
