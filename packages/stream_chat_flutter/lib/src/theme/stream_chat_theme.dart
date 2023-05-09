@@ -126,8 +126,7 @@ class StreamChatThemeData {
     StreamTextTheme textTheme,
   ) {
     final accentColor = colorTheme.accentPrimary;
-    final iconTheme =
-        IconThemeData(color: colorTheme.textHighEmphasis.withOpacity(0.5));
+    final iconTheme = IconThemeData(color: colorTheme.textLowEmphasis);
     final channelHeaderTheme = StreamChannelHeaderThemeData(
       avatarTheme: StreamAvatarThemeData(
         borderRadius: BorderRadius.circular(20),
@@ -184,11 +183,11 @@ class StreamChatThemeData {
         createdAtStyle:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         repliesStyle: textTheme.footnoteBold.copyWith(color: accentColor),
-        messageBackgroundColor: colorTheme.disabled,
+        messageBackgroundColor: colorTheme.borders,
+        messageBorderColor: colorTheme.borders,
         reactionsBackgroundColor: colorTheme.barsBg,
         reactionsBorderColor: colorTheme.borders,
         reactionsMaskColor: colorTheme.appBg,
-        messageBorderColor: colorTheme.disabled,
         avatarTheme: StreamAvatarThemeData(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
@@ -207,8 +206,8 @@ class StreamChatThemeData {
             textTheme.body.copyWith(fontWeight: FontWeight.w400),
       ),
       otherMessageTheme: StreamMessageThemeData(
-        reactionsBackgroundColor: colorTheme.disabled,
-        reactionsBorderColor: colorTheme.barsBg,
+        reactionsBackgroundColor: colorTheme.borders,
+        reactionsBorderColor: colorTheme.borders,
         reactionsMaskColor: colorTheme.appBg,
         messageTextStyle: textTheme.body,
         createdAtStyle:

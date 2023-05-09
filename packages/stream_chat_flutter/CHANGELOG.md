@@ -11,6 +11,8 @@
   works only for otherUser.
 - [[#1490]](https://github.com/GetStream/stream-chat-flutter/issues/1490) Fixed `editMessageInputBuilder` property not
   used in message edit widget.
+- [[#1523]](https://github.com/GetStream/stream-chat-flutter/issues/1523) Fixed `StreamMessageThemeData` not being
+  applied correctly.
 
 ✅ Added
 

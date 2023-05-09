@@ -165,7 +165,7 @@ class StreamChatConfigurationData {
         return StreamSvgIcon.loveReaction(
           color: highlighted
               ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color!.withOpacity(0.5),
+              : theme.primaryIconTheme.color,
           size: size,
         );
       },
@@ -177,7 +177,7 @@ class StreamChatConfigurationData {
         return StreamSvgIcon.thumbsUpReaction(
           color: highlighted
               ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color!.withOpacity(0.5),
+              : theme.primaryIconTheme.color,
           size: size,
         );
       },
@@ -189,7 +189,7 @@ class StreamChatConfigurationData {
         return StreamSvgIcon.thumbsDownReaction(
           color: highlighted
               ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color!.withOpacity(0.5),
+              : theme.primaryIconTheme.color,
           size: size,
         );
       },
@@ -201,7 +201,7 @@ class StreamChatConfigurationData {
         return StreamSvgIcon.lolReaction(
           color: highlighted
               ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color!.withOpacity(0.5),
+              : theme.primaryIconTheme.color,
           size: size,
         );
       },
@@ -213,7 +213,7 @@ class StreamChatConfigurationData {
         return StreamSvgIcon.wutReaction(
           color: highlighted
               ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color!.withOpacity(0.5),
+              : theme.primaryIconTheme.color,
           size: size,
         );
       },
