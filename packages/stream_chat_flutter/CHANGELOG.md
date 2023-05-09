@@ -13,8 +13,8 @@
   used in message edit widget.
 - [[#1523]](https://github.com/GetStream/stream-chat-flutter/issues/1523) Fixed `StreamMessageThemeData` not being
   applied correctly.
-- [[#1525]](https://github.com/GetStream/stream-chat-flutter/issues/1525) Fixed removing message not removing quoted
-  message reference.
+- [[#1525]](https://github.com/GetStream/stream-chat-flutter/issues/1525) Fixed `StreamQuotedMessageWidget` message for
+  deleted messages not being shown correctly.
 
 ✅ Added
 
