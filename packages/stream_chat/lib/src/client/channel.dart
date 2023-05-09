@@ -746,6 +746,7 @@ class Channel {
       state!.deleteMessage(
         message.copyWith(
           type: 'deleted',
+          deletedAt: message.deletedAt ?? DateTime.now(),
           status: MessageSendingStatus.sent,
         ),
         hardDelete: hardDelete,
@@ -1928,11 +1929,9 @@ class ChannelClientState {
   void _listenMessageDeleted() {
     _subscriptions.add(_channel.on(EventType.messageDeleted).listen((event) {
       final message = event.message!;
-      if (event.hardDelete == true) {
-        removeMessage(message);
-      } else {
-        updateMessage(message);
-      }
+      final hardDelete = event.hardDelete ?? false;
+
+      deleteMessage(message, hardDelete: hardDelete);
     }));
   }
 
@@ -1957,18 +1956,35 @@ class ChannelClientState {
 
   /// Updates the [message] in the state if it exists. Adds it otherwise.
   void updateMessage(Message message) {
+    // Regular messages, which are shown in channel.
     if (message.parentId == null || message.showInChannel == true) {
-      final newMessages = [...messages];
+      var newMessages = [...messages];
       final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
       if (oldIndex != -1) {
-        Message? m;
+        var updatedMessage = message;
+        // Add quoted message to the message if it is not present.
         if (message.quotedMessageId != null && message.quotedMessage == null) {
           final oldMessage = newMessages[oldIndex];
-          m = message.copyWith(
+          updatedMessage = updatedMessage.copyWith(
             quotedMessage: oldMessage.quotedMessage,
           );
         }
-        newMessages[oldIndex] = m ?? message;
+        newMessages[oldIndex] = updatedMessage;
+
+        // Update quoted message reference for every message if available.
+        newMessages = [...newMessages].map((it) {
+          // Early return if the message doesn't have a quoted message.
+          if (it.quotedMessageId != message.id) return it;
+
+          // Setting it to null will remove the quoted message from the message
+          // So, we are setting the same message but with the deleted state.
+          return it.copyWith(
+            quotedMessage: updatedMessage.copyWith(
+              type: 'deleted',
+              deletedAt: updatedMessage.deletedAt ?? DateTime.now(),
+            ),
+          );
+        }).toList();
       } else {
         newMessages.add(message);
       }
@@ -1997,6 +2013,7 @@ class ChannelClientState {
       );
     }
 
+    // Thread messages, which are shown in thread page.
     if (message.parentId != null) {
       updateThreadInfo(message.parentId!, [message]);
     }
@@ -2026,9 +2043,22 @@ class ChannelClientState {
     }
 
     // Remove regular message, thread message shown in channel
-    final allMessages = [...messages];
+    var updatedMessages = [...messages]..removeWhere((e) => e.id == message.id);
+
+    // Remove quoted message reference from every message if available.
+    updatedMessages = [...updatedMessages].map((it) {
+      // Early return if the message doesn't have a quoted message.
+      if (it.quotedMessageId != message.id) return it;
+
+      // Setting it to null will remove the quoted message from the message.
+      return it.copyWith(
+        quotedMessage: null,
+        quotedMessageId: null,
+      );
+    }).toList();
+
     _channelState = _channelState.copyWith(
-      messages: allMessages..removeWhere((e) => e.id == message.id),
+      messages: updatedMessages,
     );
   }
 

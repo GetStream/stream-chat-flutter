@@ -134,6 +134,8 @@ class _QuotedMessage extends StatelessWidget {
   bool get _isGiphy =>
       message.attachments.any((element) => element.type == 'giphy');
 
+  bool get _isDeleted => message.isDeleted || message.deletedAt != null;
+
   @override
   Widget build(BuildContext context) {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
@@ -144,39 +146,54 @@ class _QuotedMessage extends StatelessWidget {
       msg = msg.copyWith(text: '${msg.text!.substring(0, textLimit - 3)}...');
     }
 
-    final children = [
-      if (composing)
-        PlatformWidgetBuilder(
-          web: (context, child) => child,
-          desktop: (context, child) => child,
-          child: ClearInputItemButton(
-            onTap: onQuotedMessageClear,
+    List<Widget> children;
+    if (_isDeleted) {
+      // Show deleted message text
+      children = [
+        Text(
+          context.translations.messageDeletedLabel,
+          style: messageTheme.messageTextStyle?.copyWith(
+            fontStyle: FontStyle.italic,
+            color: messageTheme.createdAtStyle?.color,
           ),
         ),
-      if (_hasAttachments)
-        _ParseAttachments(
-          message: message,
-          messageTheme: messageTheme,
-          attachmentThumbnailBuilders: attachmentThumbnailBuilders,
-        ),
-      if (msg.text!.isNotEmpty && !_isGiphy)
-        Flexible(
-          child: StreamMessageText(
-            message: msg,
-            messageTheme: isOnlyEmoji && _containsText
-                ? messageTheme.copyWith(
-                    messageTextStyle: messageTheme.messageTextStyle?.copyWith(
-                      fontSize: 32,
-                    ),
-                  )
-                : messageTheme.copyWith(
-                    messageTextStyle: messageTheme.messageTextStyle?.copyWith(
-                      fontSize: 12,
-                    ),
-                  ),
+      ];
+    } else {
+      // Show quoted message
+      children = [
+        if (composing)
+          PlatformWidgetBuilder(
+            web: (context, child) => child,
+            desktop: (context, child) => child,
+            child: ClearInputItemButton(
+              onTap: onQuotedMessageClear,
+            ),
           ),
-        ),
-    ].insertBetween(const SizedBox(width: 8));
+        if (_hasAttachments)
+          _ParseAttachments(
+            message: message,
+            messageTheme: messageTheme,
+            attachmentThumbnailBuilders: attachmentThumbnailBuilders,
+          ),
+        if (msg.text!.isNotEmpty && !_isGiphy)
+          Flexible(
+            child: StreamMessageText(
+              message: msg,
+              messageTheme: isOnlyEmoji && _containsText
+                  ? messageTheme.copyWith(
+                      messageTextStyle: messageTheme.messageTextStyle?.copyWith(
+                        fontSize: 32,
+                      ),
+                    )
+                  : messageTheme.copyWith(
+                      messageTextStyle: messageTheme.messageTextStyle?.copyWith(
+                        fontSize: 12,
+                      ),
+                    ),
+            ),
+          ),
+      ].insertBetween(const SizedBox(width: 8));
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -204,7 +221,7 @@ class _QuotedMessage extends StatelessWidget {
   }
 
   Color? _getBackgroundColor(BuildContext context) {
-    if (_containsLinkAttachment) {
+    if (_containsLinkAttachment && !_isDeleted) {
       return messageTheme.urlAttachmentBackgroundColor;
     }
     return messageTheme.messageBackgroundColor;

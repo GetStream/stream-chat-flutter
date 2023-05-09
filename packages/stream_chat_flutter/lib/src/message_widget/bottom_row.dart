@@ -151,7 +151,7 @@ class BottomRow extends StatelessWidget {
             context,
             message,
           ) ??
-          const Offstage();
+          const StreamVisibleFootnote();
     }
 
     final children = <WidgetSpan>[];
