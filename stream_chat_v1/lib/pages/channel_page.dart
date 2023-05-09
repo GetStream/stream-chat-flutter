@@ -47,12 +47,14 @@ class _ChannelPageState extends State<ChannelPage> {
 
   @override
   Widget build(BuildContext context) {
+    print(">>>>>>>>>> CHANNEL PAGE");
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: StreamChannelHeader(
         showTypingIndicator: false,
         onBackPressed: () => GoRouter.of(context).pop(),
         onImageTap: () async {
+          print(">>>>>>>>>> onImageTap");
           final channel = StreamChannel.of(context).channel;
           final router = GoRouter.of(context);
 
@@ -62,6 +64,7 @@ class _ChannelPageState extends State<ChannelPage> {
               (element) => element.user!.id != currentUser!.id,
             );
             if (otherUser != null) {
+              print(">>>>>>>>>> GROUP_INFO_SCREEN otherUser");
               router.pushNamed(
                 Routes.CHAT_INFO_SCREEN.name,
                 params: Routes.CHAT_INFO_SCREEN.params(channel),
@@ -69,6 +72,7 @@ class _ChannelPageState extends State<ChannelPage> {
               );
             }
           } else {
+            print(">>>>>>>>>> GROUP_INFO_SCREEN");
             GoRouter.of(context).pushNamed(
               Routes.GROUP_INFO_SCREEN.name,
               params: Routes.GROUP_INFO_SCREEN.params(channel),

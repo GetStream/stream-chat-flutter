@@ -21,7 +21,7 @@ void showLocalNotification(
   if (event.message == null) return;
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   const initializationSettingsAndroid =
-      AndroidInitializationSettings('launch_background');
+      AndroidInitializationSettings('ic_notification_in_app');
   const initializationSettingsIOS = IOSInitializationSettings();
   const initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
@@ -33,6 +33,8 @@ void showLocalNotification(
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
     onSelectNotification: (channelCid) async {
+      debugPrint("[onSelectNotification] #firebase; channelCid: $channelCid");
+      debugPrint("[onSelectNotification] #firebase; context: $context");
       if (channelCid != null) {
         final client = StreamChat.of(context).client;
         final router = GoRouter.of(context);

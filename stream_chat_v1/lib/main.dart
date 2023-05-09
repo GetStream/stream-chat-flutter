@@ -1,35 +1,21 @@
 import 'dart:async';
 
+import 'package:example/app.dart';
 import 'package:example/utils/app_config.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-
-
-import 'package:example/app.dart';
 
 import 'firebase_options.dart';
 
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("#firebase; PN_2 ");
-  await Firebase.initializeApp();
-
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `initializeApp` before using other Firebase services.
-  print('[setupPushNotifications] newMessage: ${message.toMap()}');
-}
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  print("#firebase; PN_1");
-  await Firebase.initializeApp();
-  Firebase.apps.forEach((it) {
-    print("#firebase; app: $it");
-  });
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  debugPrint("#firebase; PN_1");
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   /// Captures errors reported by the Flutter framework.
   FlutterError.onError = (FlutterErrorDetails details) {
     if (kDebugMode) {

@@ -69,6 +69,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   Widget build(BuildContext context) {
+    print(">>>>>>>>>> ChannelListPage");
     final user = StreamChat.of(context).currentUser;
     if (user == null) {
       return const Offstage();
@@ -76,8 +77,10 @@ class _ChannelListPageState extends State<ChannelListPage> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: StreamChannelListHeader(
-        onNewChatButtonTap: () =>
-            GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name),
+        onNewChatButtonTap: () {
+          print(">>>>>>>>>> onNewChatButtonTap");
+          GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name);
+        },
         preNavigationCallback: () =>
             FocusScope.of(context).requestFocus(FocusNode()),
       ),
@@ -220,6 +223,7 @@ class LeftDrawer extends StatelessWidget {
                         .withOpacity(.5),
                   ),
                   onTap: () {
+                    print(">>>>>>>>>> NEW_CHAT");
                     Navigator.of(context).pop();
                     GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name);
                   },
@@ -238,6 +242,7 @@ class LeftDrawer extends StatelessWidget {
                         .withOpacity(.5),
                   ),
                   onTap: () {
+                    print(">>>>>>>>>> NEW_GROUP_CHAT");
                     Navigator.of(context).pop();
                     GoRouter.of(context).pushNamed(Routes.NEW_GROUP_CHAT.name);
                   },
@@ -253,6 +258,7 @@ class LeftDrawer extends StatelessWidget {
                     alignment: Alignment.bottomCenter,
                     child: ListTile(
                       onTap: () async {
+                        print(">>>>>>>>>> CHOOSE_USER");
                         final client = StreamChat.of(context).client;
                         final router = GoRouter.of(context);
                         final initNotifier = context.read<InitNotifier>();
