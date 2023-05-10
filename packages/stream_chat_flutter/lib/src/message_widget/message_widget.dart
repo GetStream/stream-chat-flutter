@@ -794,8 +794,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       showUsername ||
       showTimeStamp ||
       showInChannel ||
-      showSendingIndicator ||
-      isDeleted;
+      showSendingIndicator;
 
   /// {@template isPinned}
   /// Whether [StreamMessageWidget.message] is pinned or not.

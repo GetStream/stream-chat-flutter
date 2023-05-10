@@ -22,7 +22,6 @@ class StreamQuotedMessageWidget extends StatelessWidget {
     this.padding = const EdgeInsets.all(8),
     this.onTap,
     this.onQuotedMessageClear,
-    this.composing = true,
   });
 
   /// The message
@@ -53,9 +52,6 @@ class StreamQuotedMessageWidget extends StatelessWidget {
   /// Callback for clearing quoted messages.
   final VoidCallback? onQuotedMessageClear;
 
-  /// True if the message is being composed
-  final bool composing;
-
   @override
   Widget build(BuildContext context) {
     final children = [
@@ -63,11 +59,10 @@ class StreamQuotedMessageWidget extends StatelessWidget {
         child: _QuotedMessage(
           message: message,
           textLimit: textLimit,
-          composing: composing,
-          onQuotedMessageClear: onQuotedMessageClear,
           messageTheme: messageTheme,
           showBorder: showBorder,
           reverse: reverse,
+          onQuotedMessageClear: onQuotedMessageClear,
           attachmentThumbnailBuilders: attachmentThumbnailBuilders,
         ),
       ),
@@ -104,17 +99,15 @@ class _QuotedMessage extends StatelessWidget {
   const _QuotedMessage({
     required this.message,
     required this.textLimit,
-    required this.composing,
-    required this.onQuotedMessageClear,
     required this.messageTheme,
     required this.showBorder,
     required this.reverse,
+    this.onQuotedMessageClear,
     this.attachmentThumbnailBuilders,
   });
 
   final Message message;
   final int textLimit;
-  final bool composing;
   final VoidCallback? onQuotedMessageClear;
   final StreamMessageThemeData messageTheme;
   final bool showBorder;
@@ -161,7 +154,7 @@ class _QuotedMessage extends StatelessWidget {
     } else {
       // Show quoted message
       children = [
-        if (composing)
+        if (onQuotedMessageClear != null)
           PlatformWidgetBuilder(
             web: (context, child) => child,
             desktop: (context, child) => child,

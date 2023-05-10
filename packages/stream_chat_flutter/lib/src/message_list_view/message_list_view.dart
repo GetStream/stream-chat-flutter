@@ -282,9 +282,14 @@ class StreamMessageListView extends StatefulWidget {
     BuildContext context,
     List<SpacingType> spacingTypes,
   ) {
-    if (!spacingTypes.contains(SpacingType.defaultSpacing)) {
+    if (spacingTypes.contains(SpacingType.otherUser)) {
+      return const SizedBox(height: 8);
+    } else if (spacingTypes.contains(SpacingType.thread)) {
+      return const SizedBox(height: 8);
+    } else if (spacingTypes.contains(SpacingType.timeDiff)) {
       return const SizedBox(height: 8);
     }
+
     return const SizedBox(height: 2);
   }
 
@@ -644,7 +649,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
                     Widget separator;
 
-                    final isThread = message.replyCount! > 0;
+                    final isPartOfThread = message.replyCount! > 0 ||
+                        message.showInChannel == true;
 
                     if (!Jiffy(message.createdAt.toLocal()).isSame(
                       nextMessage.createdAt.toLocal(),
@@ -666,7 +672,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       final spacingRules = [
                         if (hasTimeDiff) SpacingType.timeDiff,
                         if (!isNextUserSame) SpacingType.otherUser,
-                        if (isThread) SpacingType.thread,
+                        if (isPartOfThread) SpacingType.thread,
                         if (isDeleted) SpacingType.deleted,
                       ];
 
@@ -680,7 +686,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       );
                     }
 
-                    if (!isThread &&
+                    if (!isPartOfThread &&
                         unreadCount > 0 &&
                         _oldestUnreadMessage?.id == nextMessage.id) {
                       final unreadMessagesSeparator =
