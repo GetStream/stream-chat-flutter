@@ -1,5 +1,5 @@
-import 'package:example/utils/localizations.dart';
 import 'package:example/routes/routes.dart';
+import 'package:example/utils/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide Message;
@@ -33,8 +33,6 @@ void showLocalNotification(
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
     onSelectNotification: (channelCid) async {
-      debugPrint("[onSelectNotification] #firebase; channelCid: $channelCid");
-      debugPrint("[onSelectNotification] #firebase; context: $context");
       if (channelCid != null) {
         final client = StreamChat.of(context).client;
         final router = GoRouter.of(context);
