@@ -151,11 +151,6 @@ class BottomRow extends StatelessWidget {
       if (deletedBottomRowBuilder != null) {
         return deletedBottomRowBuilder(context, message);
       }
-
-      // Only show visible footnote for ownUser.
-      final currentUser = streamChat.currentUser;
-      final isOwnUser = message.user?.id == currentUser?.id;
-      if (isOwnUser) return const StreamVisibleFootnote();
     }
 
     final children = <WidgetSpan>[];
