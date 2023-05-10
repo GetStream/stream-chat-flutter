@@ -1,13 +1,12 @@
 import 'dart:async';
 
 import 'package:example/app.dart';
-import 'package:example/state/init_data.dart';
 import 'package:example/pages/user_mentions_page.dart';
 import 'package:example/routes/routes.dart';
+import 'package:example/state/init_data.dart';
 import 'package:example/utils/app_config.dart';
 import 'package:example/utils/localizations.dart';
 import 'package:example/widgets/channel_list.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
@@ -69,7 +68,6 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   Widget build(BuildContext context) {
-    print(">>>>>>>>>> ChannelListPage");
     final user = StreamChat.of(context).currentUser;
     if (user == null) {
       return const Offstage();
@@ -78,7 +76,6 @@ class _ChannelListPageState extends State<ChannelListPage> {
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: StreamChannelListHeader(
         onNewChatButtonTap: () {
-          print(">>>>>>>>>> onNewChatButtonTap");
           GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name);
         },
         preNavigationCallback: () =>
@@ -129,37 +126,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
           FlutterAppBadger.removeBadge();
         }
       });
-      unawaited(_setupPushNotifications(StreamChat.of(context).client));
     }
     super.initState();
-  }
-
-  Future<void> _setupPushNotifications(StreamChatClient client) async {
-    
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
-
-    print('[setupPushNotifications] #firebase; settings: ${settings.authorizationStatus}');
-
-    String? token = await FirebaseMessaging.instance.getToken();
-    if (token != null) {
-      final result = await client.addDevice(token, PushProvider.firebase);
-      print('[setupPushNotifications] #firebase; token registered: $token');
-    }
-    FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
-      final result = await client.addDevice(token, PushProvider.firebase);
-      print('[setupPushNotifications] #firebase; token refreshed: $token');
-    });
-
   }
 
   @override
@@ -223,7 +191,6 @@ class LeftDrawer extends StatelessWidget {
                         .withOpacity(.5),
                   ),
                   onTap: () {
-                    print(">>>>>>>>>> NEW_CHAT");
                     Navigator.of(context).pop();
                     GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name);
                   },
@@ -242,7 +209,6 @@ class LeftDrawer extends StatelessWidget {
                         .withOpacity(.5),
                   ),
                   onTap: () {
-                    print(">>>>>>>>>> NEW_GROUP_CHAT");
                     Navigator.of(context).pop();
                     GoRouter.of(context).pushNamed(Routes.NEW_GROUP_CHAT.name);
                   },
@@ -258,7 +224,6 @@ class LeftDrawer extends StatelessWidget {
                     alignment: Alignment.bottomCenter,
                     child: ListTile(
                       onTap: () async {
-                        print(">>>>>>>>>> CHOOSE_USER");
                         final client = StreamChat.of(context).client;
                         final router = GoRouter.of(context);
                         final initNotifier = context.read<InitNotifier>();

@@ -8,6 +8,7 @@ import 'package:example/state/init_data.dart';
 import 'package:example/utils/app_config.dart';
 import 'package:example/utils/local_notification_observer.dart';
 import 'package:example/utils/localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
@@ -25,12 +25,10 @@ import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 import 'firebase_options.dart';
 
 @pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  debugPrint('[onBackgroundMessage] #firebase; message: ${message.toMap()}');
-
   final data = message.data;
   if (data['type'] != 'message.new') {
     return;
@@ -42,7 +40,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     userId = await secureStorage.read(key: kStreamUserId);
     token = await secureStorage.read(key: kStreamToken);
   }
-  debugPrint('[onBackgroundMessage] #firebase; apiKey: $apiKey, userId: $userId, token: $token');
   if (userId == null || token == null) {
     return;
   }
@@ -59,18 +56,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final messageId = data['id'];
   final cid = data['cid'];
   final response = await client.getMessage(messageId);
-  debugPrint('[onBackgroundMessage] #firebase; response: $response');
   await persistenceClient.updateMessages(cid, [response.message]);
-  debugPrint('[onBackgroundMessage] #firebase; saved');
-
-}
-
-Future<void> _firebaseMessagingForegroundHandler(RemoteMessage message) async {
-  debugPrint('[onForegroundMessage] #firebase; message: ${message.toMap()}');
-}
-
-Future<void> _firebaseMessagingOpenedHandler(RemoteMessage message) async {
-  debugPrint('[onOpenedMessage] #firebase; message: ${message.toMap()}');
 }
 
 final chatPersistentClient = StreamChatPersistenceClient(
@@ -127,7 +113,6 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
       userId = await secureStorage.read(key: kStreamUserId);
       token = await secureStorage.read(key: kStreamToken);
     }
-    debugPrint('[initConnection] #firebase; apiKey: $apiKey, userId: $userId, token: $token');
     final client = buildStreamChatClient(apiKey ?? kDefaultStreamApiKey);
 
     if (userId != null && token != null) {
@@ -148,69 +133,53 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
         .map((it) => it?.id)
         .distinct()
         .listen((userId) async {
-      debugPrint('[onUserIdSet] #firebase; userId: "$userId"');
-
       if (userId != null) {
-        FirebaseMessaging.onBackgroundMessage(
-            _firebaseMessagingBackgroundHandler);
-        firebaseSubscriptions.add(FirebaseMessaging.onMessage
-            .listen(_firebaseMessagingForegroundHandler));
-        firebaseSubscriptions
-            .add(FirebaseMessaging.onMessageOpenedApp.listen((message) async {
-          debugPrint(
-              '[onOpenedMessage] #firebase; message: ${message.toMap()}');
-          final channelCid = (message.data['cid'] as String?) ?? '';
-          final channelType = (message.data['channel_type'] as String?) ?? '';
-          final channelId = (message.data['channel_id'] as String?) ?? '';
-          debugPrint('[onOpenedMessage] #firebase; channelCid; $channelCid, channelType: $channelType, channelId: $channelId');
-          var channel = client.state.channels[channelCid];
-          debugPrint('[onOpenedMessage] #firebase; channel1: $channel');
-          if (channel == null) {
-            channel = client.channel(
-              channelId,
-              id: channelId,
-            );
-            final state = await channel.watch();
-            debugPrint('[onOpenedMessage] #firebase; channelState: $state');
-          }
-          debugPrint('[onOpenedMessage] #firebase; channel2: $channel');
-
-          debugPrint('[onOpenedMessage] #firebase; #1');
-          WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-            if (channel == null) {
-              debugPrint('[onOpenedMessage] #firebase; rejected (channel is null)');
-              return;
-            }
-            try {
-              debugPrint('[onOpenedMessage] #firebase; #2: ${_navigatorKey.currentContext}');
-              final router = GoRouter.of(_navigatorKey.currentContext!);
-              debugPrint('[onOpenedMessage] #firebase; #3: $router');
-
-              router.pushNamed(
-                Routes.CHANNEL_PAGE.name,
-                params: Routes.CHANNEL_PAGE.params(channel),
-              );
-              debugPrint('[onOpenedMessage] #firebase; #4');
-            } catch (e, stk) {
-              debugPrint('[onOpenedMessage] #firebase; failed: $e; $stk');
-            }
-          });
-
-        }));
-        firebaseSubscriptions.add(
-            FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
-          debugPrint('[onTokenRefresh] #firebase; token: "$token"');
-          await client.addDevice(token, PushProvider.firebase);
-          debugPrint('[onTokenRefresh] #firebase; token set: $token');
-        }));
+        await FirebaseMessaging.instance.requestPermission();
+        FirebaseMessaging.onBackgroundMessage(_onFirebaseBackgroundMessage);
+        firebaseSubscriptions.add(FirebaseMessaging.onMessageOpenedApp
+            .listen(_onFirebaseMessageOpenedApp(client)));
+        firebaseSubscriptions.add(FirebaseMessaging.instance.onTokenRefresh
+            .listen(_onFirebaseTokenRefresh(client)));
         final token = await FirebaseMessaging.instance.getToken();
-        debugPrint('[initFirebaseMessaging] #firebase; token: "$token"');
         if (token != null) {
           await client.addDevice(token, PushProvider.firebase);
-          debugPrint('[initFirebaseMessaging] #firebase; token set: $token');
+        }
+      } else {
+        firebaseSubscriptions.cancelAll();
+        final token = await FirebaseMessaging.instance.getToken();
+        if (token != null) {
+          await client.removeDevice(token);
         }
       }
     });
+  }
+
+  OnRemoteMessage _onFirebaseMessageOpenedApp(StreamChatClient client) {
+    return (message) async {
+      final channelType = (message.data['channel_type'] as String?) ?? '';
+      final channelId = (message.data['channel_id'] as String?) ?? '';
+      final channelCid = (message.data['cid'] as String?) ?? '';
+      var channel = client.state.channels[channelCid];
+      if (channel == null) {
+        channel = client.channel(
+          channelType,
+          id: channelId,
+        );
+        await channel.watch();
+      }
+      GoRouter.of(_navigatorKey.currentContext!).pushNamed(
+        Routes.CHANNEL_PAGE.name,
+        params: Routes.CHANNEL_PAGE.params(channel),
+      );
+    };
+  }
+
+  Future<void> Function(String) _onFirebaseTokenRefresh(
+    StreamChatClient client,
+  ) {
+    return (token) async {
+      await client.addDevice(token, PushProvider.firebase);
+    };
   }
 
   @override
@@ -227,19 +196,11 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
 
         if (now - timeOfStartMs > 1500) {
           SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-            debugPrint('[forwardAnimations] #firebase; context1: $context');
-            debugPrint('[forwardAnimations] #firebase; _navigatorKey.currentContext1: ${_navigatorKey.currentContext}');
             forwardAnimations();
-            final router = GoRouter.of(_navigatorKey.currentContext!);
-            debugPrint('[forwardAnimations] #firebase; router1: ${router}');
           });
         } else {
           Future.delayed(const Duration(milliseconds: 1500)).then((value) {
-            debugPrint('[forwardAnimations] #firebase; context2: $context');
-            debugPrint('[forwardAnimations] #firebase; _navigatorKey.currentContext2: ${_navigatorKey.currentContext}');
             forwardAnimations();
-            final router = GoRouter.of(_navigatorKey.currentContext!);
-            debugPrint('[forwardAnimations] #firebase; router2: ${router}');
           });
         }
         _initFirebaseMessaging(initData.client);
@@ -253,10 +214,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
   void dispose() {
     super.dispose();
     userIdSubscription?.cancel();
-    for (final subscription in firebaseSubscriptions) {
-      unawaited(subscription.cancel());
-    }
-    firebaseSubscriptions.clear();
+    firebaseSubscriptions.cancelAll();
   }
 
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
@@ -300,7 +258,6 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('[AppState.build] #firebase; context: $context');
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -346,5 +303,16 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
         if (!animationCompleted) buildAnimation(),
       ],
     );
+  }
+}
+
+typedef OnRemoteMessage = Future<void> Function(RemoteMessage);
+
+extension on List<StreamSubscription> {
+  void cancelAll() {
+    for (final subscription in this) {
+      unawaited(subscription.cancel());
+    }
+    clear();
   }
 }
