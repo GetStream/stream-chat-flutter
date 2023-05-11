@@ -1009,7 +1009,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           title: Text(context.translations.copyMessageLabel),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
-            final text = message.text;
+            final text = widget.message.text;
             if (text != null) Clipboard.setData(ClipboardData(text: text));
           },
         ),
