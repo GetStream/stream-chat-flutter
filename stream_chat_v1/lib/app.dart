@@ -24,15 +24,29 @@ import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 import 'firebase_options.dart';
 
+/// Will be invoked from another Isolate, that's why it's required to
+/// initialize everything again:
+/// - Firebase
+/// - StreamChatClient
+/// - StreamChatPersistenceClient
+///
+/// This callback is not called on iOS
 @pragma('vm:entry-point')
 Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
+  // initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   final data = message.data;
+  // ensure that Push Notification was sent by Stream.
+  if (data['sender'] != 'stream.chat') {
+    return;
+  }
+  // ensure that Push Notification relates to a new message event.
   if (data['type'] != 'message.new') {
     return;
   }
+  // read existing user info.
   String? apiKey, userId, token;
   if (!kIsWeb) {
     const secureStorage = FlutterSecureStorage();
@@ -45,16 +59,21 @@ Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
   }
   final client = buildStreamChatClient(apiKey ?? kDefaultStreamApiKey);
   final persistenceClient = StreamChatPersistenceClient();
+
+  // initialize persistence with current user
   await persistenceClient.connect(userId);
 
+  // initialize client with current user
   await client.connectUser(
     User(id: userId),
     token,
+    // do not open WS connection
     connectWebSocket: false,
   );
 
   final messageId = data['id'];
   final cid = data['cid'];
+  // pre-cache the new message using client and persistence.
   final response = await client.getMessage(messageId);
   await persistenceClient.updateMessages(cid, [response.message]);
 }
@@ -133,29 +152,42 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
         .map((it) => it?.id)
         .distinct()
         .listen((userId) async {
+      // User logged in
       if (userId != null) {
+        // Requests notification permission.
         await FirebaseMessaging.instance.requestPermission();
+        // Sets callback for background messages (it's not called on iOS)
         FirebaseMessaging.onBackgroundMessage(_onFirebaseBackgroundMessage);
+        // Sets callback for the notification click event.
         firebaseSubscriptions.add(FirebaseMessaging.onMessageOpenedApp
             .listen(_onFirebaseMessageOpenedApp(client)));
+        // Sets callback for the token refresh event.
         firebaseSubscriptions.add(FirebaseMessaging.instance.onTokenRefresh
             .listen(_onFirebaseTokenRefresh(client)));
+
         final token = await FirebaseMessaging.instance.getToken();
         if (token != null) {
+          // add Token to Stream
           await client.addDevice(token, PushProvider.firebase);
         }
-      } else {
+      }
+      // User logged out
+      else {
         firebaseSubscriptions.cancelAll();
         final token = await FirebaseMessaging.instance.getToken();
         if (token != null) {
+          // remove token from Stream
           await client.removeDevice(token);
         }
       }
     });
   }
 
+  /// Constructs callback for notification click event.
   OnRemoteMessage _onFirebaseMessageOpenedApp(StreamChatClient client) {
     return (message) async {
+      // This callback is getting invoked when the user clicks
+      // on the notification in case if notification was shown by OS.
       final channelType = (message.data['channel_type'] as String?) ?? '';
       final channelId = (message.data['channel_id'] as String?) ?? '';
       final channelCid = (message.data['cid'] as String?) ?? '';
@@ -167,6 +199,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
         );
         await channel.watch();
       }
+      // Navigates to Channel page, which is associated with the notification.
       GoRouter.of(_navigatorKey.currentContext!).pushNamed(
         Routes.CHANNEL_PAGE.name,
         params: Routes.CHANNEL_PAGE.params(channel),
@@ -174,10 +207,12 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
     };
   }
 
+  /// Constructs callback for notification refresh event.
   Future<void> Function(String) _onFirebaseTokenRefresh(
     StreamChatClient client,
   ) {
     return (token) async {
+      // This callback is getting invoked when the token got refreshed.
       await client.addDevice(token, PushProvider.firebase);
     };
   }
