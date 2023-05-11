@@ -1170,7 +1170,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                     : DisplayWidget.show,
           ),
           onCopyTap: (message) {
-             final text = message.text;
+            final text = message.text;
             if (text != null) Clipboard.setData(ClipboardData(text: text));
           },
           messageTheme: widget.messageTheme,
