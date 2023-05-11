@@ -1009,7 +1009,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           title: Text(context.translations.copyMessageLabel),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
-            Clipboard.setData(ClipboardData(text: widget.message.text));
+            Clipboard.setData(ClipboardData(text: widget.message.text ?? ''));
           },
         ),
       if (shouldShowEditAction) ...[
@@ -1169,7 +1169,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                     : DisplayWidget.show,
           ),
           onCopyTap: (message) =>
-              Clipboard.setData(ClipboardData(text: message.text)),
+              Clipboard.setData(ClipboardData(text: message.text ?? '')),
           messageTheme: widget.messageTheme,
           reverse: widget.reverse,
           showDeleteMessage: shouldShowDeleteAction,
