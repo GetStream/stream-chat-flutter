@@ -22,7 +22,6 @@ class StreamQuotedMessageWidget extends StatelessWidget {
     this.padding = const EdgeInsets.all(8),
     this.onTap,
     this.onQuotedMessageClear,
-    this.composing = true,
   });
 
   /// The message
@@ -53,9 +52,6 @@ class StreamQuotedMessageWidget extends StatelessWidget {
   /// Callback for clearing quoted messages.
   final VoidCallback? onQuotedMessageClear;
 
-  /// True if the message is being composed
-  final bool composing;
-
   @override
   Widget build(BuildContext context) {
     final children = [
@@ -63,11 +59,10 @@ class StreamQuotedMessageWidget extends StatelessWidget {
         child: _QuotedMessage(
           message: message,
           textLimit: textLimit,
-          composing: composing,
-          onQuotedMessageClear: onQuotedMessageClear,
           messageTheme: messageTheme,
           showBorder: showBorder,
           reverse: reverse,
+          onQuotedMessageClear: onQuotedMessageClear,
           attachmentThumbnailBuilders: attachmentThumbnailBuilders,
         ),
       ),
@@ -104,17 +99,15 @@ class _QuotedMessage extends StatelessWidget {
   const _QuotedMessage({
     required this.message,
     required this.textLimit,
-    required this.composing,
-    required this.onQuotedMessageClear,
     required this.messageTheme,
     required this.showBorder,
     required this.reverse,
+    this.onQuotedMessageClear,
     this.attachmentThumbnailBuilders,
   });
 
   final Message message;
   final int textLimit;
-  final bool composing;
   final VoidCallback? onQuotedMessageClear;
   final StreamMessageThemeData messageTheme;
   final bool showBorder;
@@ -134,6 +127,8 @@ class _QuotedMessage extends StatelessWidget {
   bool get _isGiphy =>
       message.attachments.any((element) => element.type == 'giphy');
 
+  bool get _isDeleted => message.isDeleted || message.deletedAt != null;
+
   @override
   Widget build(BuildContext context) {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
@@ -144,39 +139,54 @@ class _QuotedMessage extends StatelessWidget {
       msg = msg.copyWith(text: '${msg.text!.substring(0, textLimit - 3)}...');
     }
 
-    final children = [
-      if (composing)
-        PlatformWidgetBuilder(
-          web: (context, child) => child,
-          desktop: (context, child) => child,
-          child: ClearInputItemButton(
-            onTap: onQuotedMessageClear,
+    List<Widget> children;
+    if (_isDeleted) {
+      // Show deleted message text
+      children = [
+        Text(
+          context.translations.messageDeletedLabel,
+          style: messageTheme.messageTextStyle?.copyWith(
+            fontStyle: FontStyle.italic,
+            color: messageTheme.createdAtStyle?.color,
           ),
         ),
-      if (_hasAttachments)
-        _ParseAttachments(
-          message: message,
-          messageTheme: messageTheme,
-          attachmentThumbnailBuilders: attachmentThumbnailBuilders,
-        ),
-      if (msg.text!.isNotEmpty && !_isGiphy)
-        Flexible(
-          child: StreamMessageText(
-            message: msg,
-            messageTheme: isOnlyEmoji && _containsText
-                ? messageTheme.copyWith(
-                    messageTextStyle: messageTheme.messageTextStyle?.copyWith(
-                      fontSize: 32,
-                    ),
-                  )
-                : messageTheme.copyWith(
-                    messageTextStyle: messageTheme.messageTextStyle?.copyWith(
-                      fontSize: 12,
-                    ),
-                  ),
+      ];
+    } else {
+      // Show quoted message
+      children = [
+        if (onQuotedMessageClear != null)
+          PlatformWidgetBuilder(
+            web: (context, child) => child,
+            desktop: (context, child) => child,
+            child: ClearInputItemButton(
+              onTap: onQuotedMessageClear,
+            ),
           ),
-        ),
-    ].insertBetween(const SizedBox(width: 8));
+        if (_hasAttachments)
+          _ParseAttachments(
+            message: message,
+            messageTheme: messageTheme,
+            attachmentThumbnailBuilders: attachmentThumbnailBuilders,
+          ),
+        if (msg.text!.isNotEmpty && !_isGiphy)
+          Flexible(
+            child: StreamMessageText(
+              message: msg,
+              messageTheme: isOnlyEmoji && _containsText
+                  ? messageTheme.copyWith(
+                      messageTextStyle: messageTheme.messageTextStyle?.copyWith(
+                        fontSize: 32,
+                      ),
+                    )
+                  : messageTheme.copyWith(
+                      messageTextStyle: messageTheme.messageTextStyle?.copyWith(
+                        fontSize: 12,
+                      ),
+                    ),
+            ),
+          ),
+      ].insertBetween(const SizedBox(width: 8));
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -204,7 +214,7 @@ class _QuotedMessage extends StatelessWidget {
   }
 
   Color? _getBackgroundColor(BuildContext context) {
-    if (_containsLinkAttachment) {
+    if (_containsLinkAttachment && !_isDeleted) {
       return messageTheme.urlAttachmentBackgroundColor;
     }
     return messageTheme.messageBackgroundColor;
