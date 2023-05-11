@@ -15,6 +15,7 @@
   applied correctly.
 - [[#1525]](https://github.com/GetStream/stream-chat-flutter/issues/1525) Fixed `StreamQuotedMessageWidget` message for
   deleted messages not being shown correctly.
+- [[#1529]](https://github.com/GetStream/stream-chat-flutter/issues/1529) Fixed fix `ClipboardData` requires non-nullable string as text on Flutter 3.10. 
 
 ✅ Added
 
