@@ -652,22 +652,19 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     final isPartOfThread = message.replyCount! > 0 ||
                         message.showInChannel == true;
 
-                    if (!Jiffy(message.createdAt.toLocal()).isSame(
-                      nextMessage.createdAt.toLocal(),
-                      Units.DAY,
-                    )) {
+                    final createdAt = message.createdAt.toLocal();
+                    final nextCreatedAt = nextMessage.createdAt.toLocal();
+                    if (!Jiffy(createdAt).isSame(nextCreatedAt, Units.DAY)) {
                       separator = _buildDateDivider(nextMessage);
                     } else {
-                      final timeDiff =
-                          Jiffy(nextMessage.createdAt.toLocal()).diff(
-                        message.createdAt.toLocal(),
+                      final hasTimeDiff = !Jiffy(createdAt).isSame(
+                        nextCreatedAt,
                         Units.MINUTE,
                       );
 
                       final isNextUserSame =
                           message.user!.id == nextMessage.user?.id;
                       final isDeleted = message.isDeleted;
-                      final hasTimeDiff = timeDiff >= 1;
 
                       final spacingRules = [
                         if (hasTimeDiff) SpacingType.timeDiff,
@@ -1064,10 +1061,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final isNextUserSame =
         nextMessage != null && message.user!.id == nextMessage.user!.id;
 
-    num timeDiff = 0;
+    var hasTimeDiff = false;
     if (nextMessage != null) {
-      timeDiff = Jiffy(nextMessage.createdAt.toLocal()).diff(
-        message.createdAt.toLocal(),
+      hasTimeDiff = !Jiffy(message.createdAt.toLocal()).isSame(
+        nextMessage.createdAt.toLocal(),
         Units.MINUTE,
       );
     }
@@ -1084,21 +1081,21 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     final showTimeStamp = (!isThreadMessage || _isThreadConversation) &&
         !hasReplies &&
-        (timeDiff >= 1 || !isNextUserSame);
+        (hasTimeDiff || !isNextUserSame);
 
     final showUsername = !isMyMessage &&
         (!isThreadMessage || _isThreadConversation) &&
         !hasReplies &&
-        (timeDiff >= 1 || !isNextUserSame);
+        (hasTimeDiff || !isNextUserSame);
 
     final showUserAvatar = isMyMessage
         ? DisplayWidget.gone
-        : (timeDiff >= 1 || !isNextUserSame)
+        : (hasTimeDiff || !isNextUserSame)
             ? DisplayWidget.show
             : DisplayWidget.hide;
 
     final showSendingIndicator =
-        isMyMessage && (index == 0 || timeDiff >= 1 || !isNextUserSame);
+        isMyMessage && (index == 0 || hasTimeDiff || !isNextUserSame);
 
     final showInChannelIndicator = !_isThreadConversation && isThreadMessage;
     final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
@@ -1157,7 +1154,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         bottomLeft: isMyMessage
             ? Radius.circular(attachmentBorderRadius)
             : Radius.circular(
-                (timeDiff >= 1 || !isNextUserSame) &&
+                (hasTimeDiff || !isNextUserSame) &&
                         !(hasReplies || isThreadMessage || hasFileAttachment)
                     ? 0
                     : attachmentBorderRadius,
@@ -1165,7 +1162,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         topRight: Radius.circular(attachmentBorderRadius),
         bottomRight: isMyMessage
             ? Radius.circular(
-                (timeDiff >= 1 || !isNextUserSame) &&
+                (hasTimeDiff || !isNextUserSame) &&
                         !(hasReplies || isThreadMessage || hasFileAttachment)
                     ? 0
                     : attachmentBorderRadius,
@@ -1178,7 +1175,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         bottomLeft: isMyMessage
             ? const Radius.circular(16)
             : Radius.circular(
-                (timeDiff >= 1 || !isNextUserSame) &&
+                (hasTimeDiff || !isNextUserSame) &&
                         !(hasReplies || isThreadMessage)
                     ? 0
                     : 16,
@@ -1186,7 +1183,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         topRight: const Radius.circular(16),
         bottomRight: isMyMessage
             ? Radius.circular(
-                (timeDiff >= 1 || !isNextUserSame) &&
+                (hasTimeDiff || !isNextUserSame) &&
                         !(hasReplies || isThreadMessage)
                     ? 0
                     : 16,
