@@ -1144,6 +1144,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     showDialog(
       useRootNavigator: false,
       context: context,
+      useSafeArea: false,
       barrierColor: _streamChatTheme.colorTheme.overlay,
       builder: (context) => StreamChannel(
         channel: channel,

@@ -19,6 +19,8 @@
   string as text on Flutter 3.10.
 - [[#1533]](https://github.com/GetStream/stream-chat-flutter/issues/1533) Fixed `StreamMessageListView` messages grouped
   incorrectly w.r.t. timestamp.
+- [[#1532]](https://github.com/GetStream/stream-chat-flutter/issues/1532) Fixed `StreamMessageWidget` actions dialog
+  backdrop filter is cut off by safe area.
 
 ✅ Added
 

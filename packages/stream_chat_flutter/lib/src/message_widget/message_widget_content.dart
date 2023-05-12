@@ -433,6 +433,7 @@ class MessageWidgetContent extends StatelessWidget {
     showDialog(
       useRootNavigator: false,
       context: context,
+      useSafeArea: false,
       barrierColor: streamChatTheme.colorTheme.overlay,
       builder: (context) => StreamChannel(
         channel: channel,
