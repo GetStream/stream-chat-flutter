@@ -1,3 +1,7 @@
+## Upcoming
+
+* Updated `dart` sdk environment range to support `3.0.0`.
+
 ## 5.0.0
 
 * Updated `stream_chat_flutter` dependency to [`6.0.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
@@ -6,9 +10,12 @@
 
 ✅ Added
 
-* Added support for [Catalan](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ca.dart) locale.
+* Added support
+  for [Catalan](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ca.dart)
+  locale.
 * Added translations for new `noPhotoOrVideoLabel` label.
-* Changed text in New messages separator. Now is doesn't count the new messages and only shows "New messages". All the translations were updated.
+* Changed text in New messages separator. Now is doesn't count the new messages and only shows "New messages". All the
+  translations were updated.
 
 🔄 Changed
 
@@ -39,7 +46,9 @@
 
 ## 3.3.0
 
-* Added support for [Norwegian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_no.dart) locale.
+* Added support
+  for [Norwegian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_no.dart)
+  locale.
 
 ## 3.2.0
 
@@ -49,7 +58,9 @@
 
 ## 3.1.0
 
-* Added support for [German](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_de.dart) locale.
+* Added support
+  for [German](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_de.dart)
+  locale.
 
 ## 3.0.0
 
@@ -63,7 +74,9 @@
 
 ✅ Added
 
-* Added support for [Portuguese](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_pt.dart) locale.
+* Added support
+  for [Portuguese](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_pt.dart)
+  locale.
 
 🔄 Changed
 
@@ -81,9 +94,15 @@
 
 ✅ Added
 
-* Added support for [Spanish](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_es.dart) locale.
-* Added support for [Korean](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ko.dart) locale.
-* Added support for [Japanese](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ja.dart) locale.
+* Added support
+  for [Spanish](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_es.dart)
+  locale.
+* Added support
+  for [Korean](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ko.dart)
+  locale.
+* Added support
+  for [Japanese](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_ja.dart)
+  locale.
 * Added translations for cooldown mode.
 * Added translations for attachmentLimitExceed.
 
@@ -94,7 +113,7 @@
     - 'तस्वीरें' -> 'फ़ोटोज'
     - 'बिता हुआ कल' -> 'कल'
     - 'चैनल मौन है' -> 'चैनल म्यूट है'
-    
+
 ## 1.0.2
 
 * Updated `stream_chat_flutter` dependency

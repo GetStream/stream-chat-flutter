@@ -66,6 +66,7 @@
 
 🔄 Changed
 
+- Updated `dart` sdk environment range to support `3.0.0`.
 - Deprecated `MessageTheme.linkBackgroundColor` in favor of `MessageTheme.urlAttachmentBackgroundColor`.
 
 ## 6.0.0
