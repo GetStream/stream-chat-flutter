@@ -41,7 +41,7 @@ scripts:
   lint:pub:
     run: |
       melos exec -c 5 --no-private --ignore="*example*" -- \
-            pub publish --dry-run
+            flutter pub publish --dry-run
     description: |
       Run `pub publish --dry-run` in all packages.
        - Note: you can also rely on your IDEs Dart Analysis / Issues window.
