@@ -1,4 +1,4 @@
-## Upcoming
+## 6.1.0
 
 🐞 Fixed
 
@@ -68,6 +68,8 @@
 
 - Updated `dart` sdk environment range to support `3.0.0`.
 - Deprecated `MessageTheme.linkBackgroundColor` in favor of `MessageTheme.urlAttachmentBackgroundColor`.
+- Updated `stream_chat_flutter_core` dependency
+  to [`6.1.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 6.0.0
 

@@ -1,6 +1,7 @@
-## Upcoming
+## 5.1.0
 
 * Updated `dart` sdk environment range to support `3.0.0`.
+* Updated `stream_chat_flutter` dependency to [`6.1.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 ## 5.0.0
 

@@ -1,6 +1,7 @@
-## Upcoming
+## 6.1.0
 
 - Updated `dart` sdk environment range to support `3.0.0`.
+- Updated `stream_chat` dependency to [`6.1.0`](https://pub.dev/packages/stream_chat/changelog).
 - [[#1356]](https://github.com/GetStream/stream-chat-flutter/issues/1356) Channel doesn't auto display again after being
   hidden.
 
