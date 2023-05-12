@@ -32,6 +32,7 @@ import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/version.dart';
+import 'package:synchronized/extension.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -72,6 +73,7 @@ class StreamChatClient {
     WebSocket? ws,
     AttachmentFileUploaderProvider attachmentFileUploaderProvider =
         StreamAttachmentFileUploader.new,
+    Iterable<Interceptor>? chatApiInterceptors,
   }) {
     logger.info('Initiating new StreamChatClient');
 
@@ -90,6 +92,7 @@ class StreamChatClient {
           connectionIdManager: _connectionIdManager,
           attachmentFileUploaderProvider: attachmentFileUploaderProvider,
           logger: detachedLogger('🕸️'),
+          interceptors: chatApiInterceptors,
         );
 
     _ws = ws ??
@@ -488,37 +491,40 @@ class StreamChatClient {
 
   /// Get the events missed while offline to sync the offline storage
   /// Will automatically fetch [cids] and [lastSyncedAt] if [persistenceEnabled]
-  Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) async {
-    cids ??= await _chatPersistenceClient?.getChannelCids();
-    if (cids == null || cids.isEmpty) {
-      return;
-    }
-
-    lastSyncAt ??= await _chatPersistenceClient?.getLastSyncAt();
-    if (lastSyncAt == null) {
-      return;
-    }
-
-    try {
-      final res = await _chatApi.general.sync(cids, lastSyncAt);
-      final events = res.events
-        ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-
-      for (final event in events) {
-        logger.fine('event.type: ${event.type}');
-        final messageText = event.message?.text;
-        if (messageText != null) {
-          logger.fine('event.message.text: $messageText');
-        }
-        handleEvent(event);
+  Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) {
+    return synchronized(() async {
+      final channels = cids ?? await _chatPersistenceClient?.getChannelCids();
+      if (channels == null || channels.isEmpty) {
+        return;
       }
 
-      final now = DateTime.now();
-      _lastSyncedAt = now;
-      _chatPersistenceClient?.updateLastSyncAt(now);
-    } catch (e, stk) {
-      logger.severe('Error during sync', e, stk);
-    }
+      final syncAt =
+          lastSyncAt ?? await _chatPersistenceClient?.getLastSyncAt();
+      if (syncAt == null) {
+        return;
+      }
+
+      try {
+        final res = await _chatApi.general.sync(channels, syncAt);
+        final events = res.events
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+        for (final event in events) {
+          logger.fine('event.type: ${event.type}');
+          final messageText = event.message?.text;
+          if (messageText != null) {
+            logger.fine('event.message.text: $messageText');
+          }
+          handleEvent(event);
+        }
+
+        final now = DateTime.now();
+        _lastSyncedAt = now;
+        _chatPersistenceClient?.updateLastSyncAt(now);
+      } catch (e, stk) {
+        logger.severe('Error during sync', e, stk);
+      }
+    });
   }
 
   final _queryChannelsStreams = <String, Future<List<Channel>>>{};
@@ -1567,7 +1573,7 @@ class ClientState {
       _client.on(EventType.channelHidden).listen((event) async {
         final eventChannel = event.channel!;
         await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-        channels[eventChannel.cid]?.dispose();
+        channels.remove(eventChannel.cid)?.dispose();
       }),
     );
   }
@@ -1606,7 +1612,7 @@ class ClientState {
           .listen((Event event) async {
         final eventChannel = event.channel!;
         await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-        channels[eventChannel.cid]?.dispose();
+        channels.remove(eventChannel.cid)?.dispose();
       }),
     );
   }
@@ -1713,9 +1719,9 @@ class ClientState {
     _unreadChannelsController.close();
     _totalUnreadCountController.close();
 
-    final channels = this.channels.values.toList();
+    final channels = [...this.channels.keys];
     for (final channel in channels) {
-      channel.dispose();
+      this.channels.remove(channel)?.dispose();
     }
     _channelsController.close();
   }

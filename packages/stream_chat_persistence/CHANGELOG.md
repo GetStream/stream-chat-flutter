@@ -1,3 +1,8 @@
+## 6.1.0
+
+- Updated `dart` sdk environment range to support `3.0.0`.
+- Updated `stream_chat` dependency to [`6.1.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 6.0.0
 
 - Updated `drift` to `^2.7.0`.
@@ -23,7 +28,8 @@
 
 ## 4.4.0
 
-- Allowed experimental use of indexedDb on web with `webUseExperimentalIndexedDb` parameter on `StreamChatPersistenceClient`.
+- Allowed experimental use of indexedDb on web with `webUseExperimentalIndexedDb` parameter
+  on `StreamChatPersistenceClient`.
   Thanks [geweald](https://github.com/geweald).
 
 ## 4.3.0

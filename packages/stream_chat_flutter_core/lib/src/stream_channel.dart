@@ -387,12 +387,20 @@ class StreamChannelState extends State<StreamChannel> {
         (it) => it.user.id == channel.client.state.currentUser?.id,
       );
 
-      if (read != null &&
-          !(channel.state!.messages
-                  .any((it) => it.createdAt.compareTo(read.lastRead) > 0) &&
-              channel.state!.messages
-                  .any((it) => it.createdAt.compareTo(read.lastRead) <= 0))) {
-        _futures.add(_loadChannelAtTimestamp(read.lastRead));
+      if (read == null) return;
+
+      final messages = channel.state!.messages;
+      final lastRead = read.lastRead;
+
+      final hasNewMessages =
+          messages.any((it) => it.createdAt.isAfter(lastRead));
+      final hasOldMessages =
+          messages.any((it) => it.createdAt.isBeforeOrEqualTo(lastRead));
+
+      // Only load messages if the unread message is in-between the messages.
+      // Otherwise, we can just load the channel normally.
+      if (hasNewMessages && hasOldMessages) {
+        _futures.add(_loadChannelAtTimestamp(lastRead));
       }
     }
   }
@@ -447,5 +455,11 @@ class StreamChannelState extends State<StreamChannel> {
       child = Material(child: child);
     }
     return child;
+  }
+}
+
+extension on DateTime {
+  bool isBeforeOrEqualTo(DateTime other) {
+    return isBefore(other) || isAtSameMomentAs(other);
   }
 }

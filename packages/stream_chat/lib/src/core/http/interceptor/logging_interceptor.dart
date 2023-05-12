@@ -101,8 +101,7 @@ class LoggingInterceptor extends Interceptor {
             options.data as Map?,
             header: 'Body',
           );
-        }
-        if (data is FormData) {
+        } else if (data is FormData) {
           final formDataMap = <String, dynamic>{}
             ..addEntries(data.fields)
             ..addEntries(data.files);
@@ -163,7 +162,7 @@ class LoggingInterceptor extends Interceptor {
       _logPrintResponse('║');
       _printResponse(_logPrintResponse, response);
       _logPrintResponse('║');
-      _logPrintResponse('╚');
+      _printLine(_logPrintResponse, '╚');
     }
     super.onResponse(response, handler);
   }

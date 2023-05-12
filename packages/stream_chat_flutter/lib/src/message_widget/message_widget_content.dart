@@ -379,6 +379,8 @@ class MessageWidgetContent extends StatelessWidget {
                           showUserAvatar == DisplayWidget.show &&
                           message.user != null) ...[
                         UserAvatarTransform(
+                          onUserAvatarTap: onUserAvatarTap,
+                          userAvatarBuilder: userAvatarBuilder,
                           translateUserAvatar: translateUserAvatar,
                           messageTheme: messageTheme,
                           message: message,
@@ -431,6 +433,7 @@ class MessageWidgetContent extends StatelessWidget {
     showDialog(
       useRootNavigator: false,
       context: context,
+      useSafeArea: false,
       barrierColor: streamChatTheme.colorTheme.overlay,
       builder: (context) => StreamChannel(
         channel: channel,

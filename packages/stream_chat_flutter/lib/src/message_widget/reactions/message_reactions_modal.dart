@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
+import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_card.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamMessageReactionsModal}
@@ -83,9 +83,10 @@ class StreamMessageReactionsModal extends StatelessWidget {
               ),
               if (message.latestReactions?.isNotEmpty == true) ...[
                 const SizedBox(height: 8),
-                _buildReactionCard(
-                  context,
-                  user,
+                ReactionsCard(
+                  currentUser: user!,
+                  message: message,
+                  messageTheme: messageTheme,
                 ),
               ],
             ],
@@ -121,111 +122,6 @@ class StreamMessageReactionsModal extends StatelessWidget {
               child: widget,
             ),
             child: child,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReactionCard(BuildContext context, User? user) {
-    final chatThemeData = StreamChatTheme.of(context);
-    return Card(
-      color: chatThemeData.colorTheme.barsBg,
-      clipBehavior: Clip.hardEdge,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              context.translations.messageReactionsLabel,
-              style: chatThemeData.textTheme.headlineBold,
-            ),
-            const SizedBox(height: 16),
-            Flexible(
-              child: SingleChildScrollView(
-                child: Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  children: message.latestReactions!
-                      .map((e) => _buildReaction(
-                            e,
-                            user!,
-                            context,
-                          ))
-                      .toList(),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReaction(
-    Reaction reaction,
-    User currentUser,
-    BuildContext context,
-  ) {
-    final isCurrentUser = reaction.user?.id == currentUser.id;
-    final chatThemeData = StreamChatTheme.of(context);
-    return ConstrainedBox(
-      constraints: BoxConstraints.loose(
-        const Size(64, 100),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              StreamUserAvatar(
-                onTap: onUserAvatarTap,
-                user: reaction.user!,
-                constraints: const BoxConstraints.tightFor(
-                  height: 64,
-                  width: 64,
-                ),
-                onlineIndicatorConstraints: const BoxConstraints.tightFor(
-                  height: 12,
-                  width: 12,
-                ),
-                borderRadius: BorderRadius.circular(32),
-              ),
-              Positioned(
-                bottom: 6,
-                left: isCurrentUser ? -3 : null,
-                right: isCurrentUser ? -3 : null,
-                child: Align(
-                  alignment:
-                      reverse ? Alignment.centerRight : Alignment.centerLeft,
-                  child: StreamReactionBubble(
-                    reactions: [reaction],
-                    flipTail: !reverse,
-                    borderColor:
-                        messageTheme.reactionsBorderColor ?? Colors.transparent,
-                    backgroundColor: messageTheme.reactionsBackgroundColor ??
-                        Colors.transparent,
-                    maskColor: chatThemeData.colorTheme.barsBg,
-                    tailCirclesSpacing: 1,
-                    highlightOwnReactions: false,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            reaction.user!.name.split(' ')[0],
-            style: chatThemeData.textTheme.footnoteBold,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
           ),
         ],
       ),

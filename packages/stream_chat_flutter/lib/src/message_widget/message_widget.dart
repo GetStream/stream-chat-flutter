@@ -794,8 +794,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       showUsername ||
       showTimeStamp ||
       showInChannel ||
-      showSendingIndicator ||
-      isDeleted;
+      showSendingIndicator;
 
   /// {@template isPinned}
   /// Whether [StreamMessageWidget.message] is pinned or not.
@@ -1010,7 +1009,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           title: Text(context.translations.copyMessageLabel),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
-            Clipboard.setData(ClipboardData(text: widget.message.text));
+            final text = widget.message.text;
+            if (text != null) Clipboard.setData(ClipboardData(text: text));
           },
         ),
       if (shouldShowEditAction) ...[
@@ -1035,6 +1035,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               builder: (_) => EditMessageSheet(
                 message: widget.message,
                 channel: StreamChannel.of(context).channel,
+                editMessageInputBuilder: widget.editMessageInputBuilder,
               ),
             );
           },
@@ -1143,6 +1144,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     showDialog(
       useRootNavigator: false,
       context: context,
+      useSafeArea: false,
       barrierColor: _streamChatTheme.colorTheme.overlay,
       builder: (context) => StreamChannel(
         channel: channel,
@@ -1168,8 +1170,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                     ? DisplayWidget.gone
                     : DisplayWidget.show,
           ),
-          onCopyTap: (message) =>
-              Clipboard.setData(ClipboardData(text: message.text)),
+          onCopyTap: (message) {
+            final text = message.text;
+            if (text != null) Clipboard.setData(ClipboardData(text: text));
+          },
           messageTheme: widget.messageTheme,
           reverse: widget.reverse,
           showDeleteMessage: shouldShowDeleteAction,

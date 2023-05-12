@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/call_api.dart';
@@ -26,6 +27,7 @@ class StreamChatApi {
     AttachmentFileUploaderProvider attachmentFileUploaderProvider =
         StreamAttachmentFileUploader.new,
     Logger? logger,
+    Iterable<Interceptor>? interceptors,
   })  : _fileUploaderProvider = attachmentFileUploaderProvider,
         _client = client ??
             StreamHttpClient(
@@ -34,6 +36,7 @@ class StreamChatApi {
               tokenManager: tokenManager,
               connectionIdManager: connectionIdManager,
               logger: logger,
+              interceptors: interceptors,
             );
 
   final StreamHttpClient _client;

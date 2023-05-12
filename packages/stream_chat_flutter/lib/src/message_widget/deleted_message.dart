@@ -32,7 +32,6 @@ class StreamDeletedMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
     return Material(
       color: messageTheme.messageBackgroundColor,
       shape: shape ??
@@ -40,9 +39,7 @@ class StreamDeletedMessage extends StatelessWidget {
             borderRadius: borderRadiusGeometry ?? BorderRadius.zero,
             side: borderSide ??
                 BorderSide(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? chatThemeData.colorTheme.barsBg.withAlpha(24)
-                      : chatThemeData.colorTheme.textHighEmphasis.withAlpha(24),
+                  color: messageTheme.messageBorderColor ?? Colors.transparent,
                 ),
           ),
       child: Padding(

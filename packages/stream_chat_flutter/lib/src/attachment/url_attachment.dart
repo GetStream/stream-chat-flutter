@@ -36,8 +36,6 @@ class StreamUrlAttachment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
-
     return ConstrainedBox(
       constraints: const BoxConstraints(
         maxWidth: 400,
@@ -79,7 +77,7 @@ class StreamUrlAttachment extends StatelessWidget {
                             borderRadius: const BorderRadius.only(
                               topRight: Radius.circular(16),
                             ),
-                            color: messageTheme.linkBackgroundColor,
+                            color: messageTheme.urlAttachmentBackgroundColor,
                           ),
                           child: Padding(
                             padding: const EdgeInsets.only(
@@ -89,9 +87,7 @@ class StreamUrlAttachment extends StatelessWidget {
                             ),
                             child: Text(
                               hostDisplayName,
-                              style: chatThemeData.textTheme.bodyBold.copyWith(
-                                color: chatThemeData.colorTheme.accentPrimary,
-                              ),
+                              style: messageTheme.urlAttachmentHostStyle,
                             ),
                           ),
                         ),
@@ -109,14 +105,12 @@ class StreamUrlAttachment extends StatelessWidget {
                         urlAttachment.title!.trim(),
                         maxLines: messageTheme.urlAttachmentTitleMaxLine ?? 1,
                         overflow: TextOverflow.ellipsis,
-                        style: chatThemeData.textTheme.body
-                            .copyWith(fontWeight: FontWeight.w700),
+                        style: messageTheme.urlAttachmentTitleStyle,
                       ),
                     if (urlAttachment.text != null)
                       Text(
                         urlAttachment.text!,
-                        style: chatThemeData.textTheme.body
-                            .copyWith(fontWeight: FontWeight.w400),
+                        style: messageTheme.urlAttachmentTextStyle,
                       ),
                   ],
                 ),
