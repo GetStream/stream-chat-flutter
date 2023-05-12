@@ -14,7 +14,7 @@ on:
       - master
     paths-ignore:
       - 'docs/**'
-        
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -56,7 +56,7 @@ jobs:
           TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
         run: |
           PERCENTAGE=$(( $TOTAL * 100 / $TOTAL_MAX ))
-          if (( $TOTAL < 90 ))
+          if (( $TOTAL < 120 ))
           then
             echo Score too low!
             exit 1
@@ -97,6 +97,26 @@ jobs:
           TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
         run: |
           if (( $TOTAL < 100 ))
+          then
+            echo Score too low!
+            exit 1
+          fi
+  stream_chat_localizations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: axel-op/dart-package-analyzer@v3
+        id: analysis
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          relativePath: packages/stream_chat_localizations
+      - name: Check scores
+        env:
+          # NB: "analysis" is the id set above. Replace it with the one you used if different.
+          TOTAL: ${{ steps.analysis.outputs.total }}
+          TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
+        run: |
+          if (( $TOTAL < 120 ))
           then
             echo Score too low!
             exit 1
