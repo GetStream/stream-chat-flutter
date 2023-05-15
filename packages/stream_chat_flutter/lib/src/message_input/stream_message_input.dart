@@ -1104,8 +1104,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
     var response = _ogAttachmentCache[url];
     if (response == null) {
       final client = StreamChat.of(context).client;
-      response = await client.enrichUrl(url);
-      _ogAttachmentCache[url] = response;
+      try {
+        response = await client.enrichUrl(url);
+        _ogAttachmentCache[url] = response;
+      } catch (e, stk) {
+        return Future.error(e, stk);
+      }
     }
     return response;
   }
