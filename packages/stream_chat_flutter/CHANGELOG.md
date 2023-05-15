@@ -7,6 +7,9 @@
 - [[#1548]](https://github.com/GetStream/stream-chat-flutter/issues/1548) Fixed `StreamMessageInput` urlRegex only
   matching the
   lowercase `http(s)|ftp`.
+- [[#1542]](https://github.com/GetStream/stream-chat-flutter/issues/1542) Handle error thrown in `StreamMessageInput`
+  when unable to fetch a
+  link preview.
 
 ## 6.1.0
 
