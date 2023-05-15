@@ -4,6 +4,9 @@
 
 - [[#1546]](https://github.com/GetStream/stream-chat-flutter/issues/1546)
   Fixed `StreamMessageInputTheme.linkHighlightColor` returning null for default theme.
+- [[#1548]](https://github.com/GetStream/stream-chat-flutter/issues/1548) Fixed `StreamMessageInput` urlRegex only
+  matching the
+  lowercase `http(s)|ftp`.
 
 ## 6.1.0
 
