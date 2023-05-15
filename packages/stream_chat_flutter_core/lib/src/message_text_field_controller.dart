@@ -41,7 +41,10 @@ class MessageTextFieldController extends TextEditingController {
     }
 
     return TextSpan(text: text, style: style).splitMapJoin(
-      RegExp(pattern.keys.map((it) => it.pattern).join('|')),
+      RegExp(
+        pattern.keys.map((it) => it.pattern).join('|'),
+        caseSensitive: false,
+      ),
       onMatch: (match) {
         final text = match[0]!;
         final key = pattern.keys.firstWhere((it) => it.hasMatch(text));
