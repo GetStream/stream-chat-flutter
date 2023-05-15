@@ -1,3 +1,7 @@
+## Upcoming
+
+- Fixed `StreamMessageInputController.textPatternStyle` not matching case-insensitive patterns.
+
 ## 6.1.0
 
 - Updated `dart` sdk environment range to support `3.0.0`.

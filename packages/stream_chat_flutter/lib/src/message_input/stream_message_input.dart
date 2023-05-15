@@ -1042,6 +1042,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   CancelableOperation? _enrichUrlOperation;
   final _urlRegex = RegExp(
     r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+',
+    caseSensitive: false,
   );
 
   void _checkContainsUrl(String value, BuildContext context) async {
