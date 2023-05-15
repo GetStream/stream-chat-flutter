@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#1546]](https://github.com/GetStream/stream-chat-flutter/issues/1546)
+  Fixed `StreamMessageInputTheme.linkHighlightColor` returning null for default theme.
+
 ## 6.1.0
 
 🐞 Fixed

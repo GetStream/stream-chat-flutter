@@ -153,6 +153,7 @@ class StreamMessageInputThemeData with Diagnosticable {
       sendButtonColor: sendButtonColor ?? this.sendButtonColor,
       actionButtonIdleColor:
           actionButtonIdleColor ?? this.actionButtonIdleColor,
+      linkHighlightColor: linkHighlightColor ?? this.linkHighlightColor,
       expandButtonColor: expandButtonColor ?? this.expandButtonColor,
       inputTextStyle: inputTextStyle ?? this.inputTextStyle,
       sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
