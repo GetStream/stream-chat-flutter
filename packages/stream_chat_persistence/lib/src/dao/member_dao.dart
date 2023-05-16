@@ -1,10 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
-
 import 'package:stream_chat_persistence/src/entity/members.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
-
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
 part 'member_dao.g.dart';
@@ -39,9 +37,9 @@ class MemberDao extends DatabaseAccessor<DriftChatDatabase>
   ) {
     final entities = channelWithMembers.entries
         .map((entry) =>
-            (entry.value?.map(
+            entry.value?.map(
               (member) => member.toEntity(cid: entry.key),
-            )) ??
+            ) ??
             [])
         .expand((it) => it)
         .toList(growable: false);
