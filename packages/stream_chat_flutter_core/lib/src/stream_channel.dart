@@ -445,7 +445,7 @@ class StreamChannelState extends State<StreamChannel> {
         final dataLoaded = snapshot.data?.every((it) => it) == true;
         if (widget.showLoading && !dataLoaded) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator.adaptive(),
           );
         }
         return widget.child;

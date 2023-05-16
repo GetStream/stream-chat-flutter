@@ -200,7 +200,7 @@ class _FileTypeImage extends StatelessWidget {
               child: SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator.adaptive(),
               ),
             ),
           ),
@@ -210,7 +210,7 @@ class _FileTypeImage extends StatelessWidget {
               child: SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator.adaptive(),
               ),
             ),
           ),

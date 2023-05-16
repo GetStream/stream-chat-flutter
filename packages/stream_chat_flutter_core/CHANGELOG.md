@@ -8,6 +8,8 @@
 - Updated `stream_chat` dependency to [`6.1.0`](https://pub.dev/packages/stream_chat/changelog).
 - [[#1356]](https://github.com/GetStream/stream-chat-flutter/issues/1356) Channel doesn't auto display again after being
   hidden.
+- [[#1540]](https://github.com/GetStream/stream-chat-flutter/issues/1540) Use `CircularProgressIndicator.adaptive`
+  instead of material indicator.
 
 ## 6.0.0
 

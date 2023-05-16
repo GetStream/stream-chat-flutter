@@ -432,7 +432,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         messageFilter: widget.messageFilter,
         loadingBuilder: widget.loadingBuilder ??
             (context) => const Center(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator.adaptive(),
                 ),
         emptyBuilder: widget.emptyBuilder ??
             (context) => Center(
