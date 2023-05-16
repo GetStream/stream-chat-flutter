@@ -348,6 +348,7 @@ typedef KeyEventPredicate = bool Function(FocusNode, KeyEvent);
 /// {@template userItemBuilder}
 /// Builder used to create a custom [ListUserItem] from a [User]
 /// {@endtemplate}
+// ignore: avoid_positional_boolean_parameters
 typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 
 /// The action to perform when the "scroll to bottom" button is pressed

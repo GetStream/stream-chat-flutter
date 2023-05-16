@@ -26,9 +26,9 @@ scripts:
        - Note: you can also rely on your IDEs Dart Analysis / Issues window.
 
   format:
-    run: flutter format --set-exit-if-changed .
+    run: dart format --set-exit-if-changed .
     description: |
-      Run `flutter format --set-exit-if-changed .` in all packages.
+      Run `dart format --set-exit-if-changed .` in all packages.
 
   metrics:
     run: |

@@ -39,20 +39,27 @@ void main() {
   });
 
   setUp(() {
-    methodChannel.setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'listen') {
-        try {
-          await ServicesBinding.instance.defaultBinaryMessenger
-              .handlePlatformMessage(
-            methodChannel.name,
-            methodChannel.codec.encodeSuccessEnvelope('wifi'),
-            (_) {},
-          );
-        } catch (e) {
-          print(e);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      methodChannel,
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'listen') {
+          try {
+            await TestDefaultBinaryMessengerBinding
+                .instance.defaultBinaryMessenger
+                .handlePlatformMessage(
+              methodChannel.name,
+              methodChannel.codec.encodeSuccessEnvelope('wifi'),
+              (_) {},
+            );
+          } catch (e) {
+            print(e);
+          }
         }
-      }
-    });
+
+        return null;
+      },
+    );
   });
 
   testWidgets(
@@ -118,7 +125,8 @@ void main() {
   );
 
   tearDown(() {
-    methodChannel.setMockMethodCallHandler(null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(methodChannel, null);
   });
 
   /*testGoldens(
