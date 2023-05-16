@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 /// {@endtemplate}
 typedef ReactionIconBuilder = Widget Function(
   BuildContext context,
+  // ignore: avoid_positional_boolean_parameters
   bool isHighlighted,
   double iconSize,
 );
