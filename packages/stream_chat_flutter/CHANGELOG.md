@@ -5,11 +5,11 @@
 - [[#1546]](https://github.com/GetStream/stream-chat-flutter/issues/1546)
   Fixed `StreamMessageInputTheme.linkHighlightColor` returning null for default theme.
 - [[#1548]](https://github.com/GetStream/stream-chat-flutter/issues/1548) Fixed `StreamMessageInput` urlRegex only
-  matching the
-  lowercase `http(s)|ftp`.
+  matching the lowercase `http(s)|ftp`.
 - [[#1542]](https://github.com/GetStream/stream-chat-flutter/issues/1542) Handle error thrown in `StreamMessageInput`
-  when unable to fetch a
-  link preview.
+  when unable to fetch a link preview.
+- [[#1540]](https://github.com/GetStream/stream-chat-flutter/issues/1540) Use `CircularProgressIndicator.adaptive`
+  instead of material indicator.
 
 ## 6.1.0
 
