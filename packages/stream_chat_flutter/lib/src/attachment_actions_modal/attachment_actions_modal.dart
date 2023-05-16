@@ -345,9 +345,11 @@ class AttachmentActionsModal extends StatelessWidget {
                                 child: Stack(
                                   fit: StackFit.expand,
                                   children: [
-                                    CircularProgressIndicator(
+                                    CircularProgressIndicator.adaptive(
                                       strokeWidth: 8,
-                                      color: theme.colorTheme.accentPrimary,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        theme.colorTheme.accentPrimary,
+                                      ),
                                     ),
                                     Center(
                                       child: Text(

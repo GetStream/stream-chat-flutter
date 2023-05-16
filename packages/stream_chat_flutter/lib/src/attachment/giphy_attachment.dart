@@ -115,7 +115,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                         width: constraints?.maxHeight,
                         height: constraints?.maxWidth,
                         child: const Center(
-                          child: CircularProgressIndicator(),
+                          child: CircularProgressIndicator.adaptive(),
                         ),
                       ),
                       imageUrl: imageUrl,
