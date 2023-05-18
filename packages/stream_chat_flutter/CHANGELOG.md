@@ -10,6 +10,8 @@
   when unable to fetch a link preview.
 - [[#1540]](https://github.com/GetStream/stream-chat-flutter/issues/1540) Use `CircularProgressIndicator.adaptive`
   instead of material indicator.
+- [[#1490]](https://github.com/GetStream/stream-chat-flutter/issues/1490) Fixed `editMessageInputBuilder` property not
+  used in `MessageActionsModal.editMessage` option.
 
 ## 6.1.0
 
