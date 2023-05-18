@@ -58,7 +58,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
 
   bool get _debugIsConnected {
     assert(() {
-      if (db == null) {
+      if (!isConnected) {
         throw StateError('''
         $runtimeType hasn't been connected yet or used after `disconnect` 
         was called. Consider calling `connect` to create a connection. 
@@ -408,7 +408,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<void> disconnect({bool flush = false}) async {
     _logger.info('disconnect');
-    if (db != null) {
+    if (isConnected) {
       _logger.info('Disconnecting');
       if (flush) {
         _logger.info('Flushing');
