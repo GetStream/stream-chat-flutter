@@ -16,9 +16,9 @@ void main() {
     const userId = 'testUserId';
     test('successfully connects with the Database', () async {
       final client = StreamChatPersistenceClient(logLevel: Level.ALL);
-      expect(client.db, isNull);
+      expect(client.isConnected, false);
       await client.connect(userId, databaseProvider: testDatabaseProvider);
-      expect(client.db, isNotNull);
+      expect(client.isConnected, true);
       expect(client.db, isA<DriftChatDatabase>());
       expect(client.db!.userId, userId);
 
@@ -29,10 +29,9 @@ void main() {
 
     test('throws if already connected', () async {
       final client = StreamChatPersistenceClient(logLevel: Level.ALL);
-      expect(client.db, isNull);
+      expect(client.isConnected, false);
       await client.connect(userId, databaseProvider: testDatabaseProvider);
-      expect(client.db, isNotNull);
-      expect(client.db, isNotNull);
+      expect(client.isConnected, true);
       expect(client.db, isA<DriftChatDatabase>());
       expect(client.db!.userId, userId);
       expect(
@@ -50,9 +49,9 @@ void main() {
     const userId = 'testUserId';
     final client = StreamChatPersistenceClient(logLevel: Level.ALL);
     await client.connect(userId, databaseProvider: testDatabaseProvider);
-    expect(client.db, isNotNull);
+    expect(client.isConnected, true);
     await client.disconnect(flush: true);
-    expect(client.db, isNull);
+    expect(client.isConnected, false);
   });
 
   test('client function throws stateError if db is not yet connected', () {

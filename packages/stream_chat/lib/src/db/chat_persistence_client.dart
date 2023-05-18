@@ -14,6 +14,9 @@ import 'package:stream_chat/src/core/util/extension.dart';
 
 /// A simple client used for persisting chat data locally.
 abstract class ChatPersistenceClient {
+  /// Whether the connection is established.
+  bool get isConnected;
+
   /// Creates a new connection to the client
   Future<void> connect(String userId);
 

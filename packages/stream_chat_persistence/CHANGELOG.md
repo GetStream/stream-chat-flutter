@@ -1,3 +1,7 @@
+## Upcoming
+
+- Added support for `StreamChatPersistenceClient.isConnected` for checking if the client is connected to the database.
+
 ## 6.1.0
 
 - Updated `dart` sdk environment range to support `3.0.0`.
