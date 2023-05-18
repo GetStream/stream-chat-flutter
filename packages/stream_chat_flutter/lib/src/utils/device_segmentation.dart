@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 bool get isWeb => CurrentPlatform.isWeb;
 
 /// Returns true if the app is running in a mobile device.
-bool get isMobileDevice => true;
+bool get isMobileDevice => CurrentPlatform.isIos || CurrentPlatform.isAndroid;
 
 /// Returns true if the app is running in a desktop device.
 bool get isDesktopDevice =>
@@ -22,7 +22,7 @@ bool get isDesktopVideoPlayerSupported =>
 bool get isMobileDeviceOrWeb => isWeb || isMobileDevice;
 
 /// Returns true if the app is running in a desktop or web.
-bool get isDesktopDeviceOrWeb => false;
+bool get isDesktopDeviceOrWeb => isWeb || isDesktopDevice;
 
 /// Returns true if the app is running in a flutter test environment.
 bool get isTestEnvironment => CurrentPlatform.isFlutterTest;
