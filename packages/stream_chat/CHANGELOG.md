@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added support for `ChatPersistenceClient.isConnected` for checking if the client is connected to the database.
+
 ## 6.1.0
 
 🐞 Fixed
