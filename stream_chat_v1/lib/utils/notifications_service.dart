@@ -74,3 +74,8 @@ void showLocalNotification(
     payload: '${event.channelType}:${event.channelId}',
   );
 }
+
+Future<void> cancelLocalNotifications() async {
+  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  await flutterLocalNotificationsPlugin.cancelAll();
+}

@@ -24,19 +24,16 @@ import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 import 'firebase_options.dart';
 
+/// Constructs callback for background notification handling.
+///
 /// Will be invoked from another Isolate, that's why it's required to
 /// initialize everything again:
 /// - Firebase
 /// - StreamChatClient
 /// - StreamChatPersistenceClient
-///
-/// This callback is not called on iOS
 @pragma('vm:entry-point')
 Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
-  // initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  debugPrint('[onBackgroundMessage] #firebase; message: ${message.toMap()}');
   final data = message.data;
   // ensure that Push Notification was sent by Stream.
   if (data['sender'] != 'stream.chat') {
@@ -46,6 +43,11 @@ Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
   if (data['type'] != 'message.new') {
     return;
   }
+  // If you're going to use Firebase services in the background, make sure
+  // you call `initializeApp` before using Firebase services.
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   // read existing user info.
   String? apiKey, userId, token;
   if (!kIsWeb) {
@@ -57,25 +59,27 @@ Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
   if (userId == null || token == null) {
     return;
   }
-  final client = buildStreamChatClient(apiKey ?? kDefaultStreamApiKey);
-  final persistenceClient = StreamChatPersistenceClient();
+  final chatClient = buildStreamChatClient(apiKey ?? kDefaultStreamApiKey);
+  try {
+    await chatClient.connectUser(
+      User(id: userId),
+      token,
+      // do not open WS connection
+      connectWebSocket: false,
+    );
+    // initialize persistence with current user
+    if (!chatPersistentClient.isConnected) {
+      await chatPersistentClient.connect(userId);
+    }
 
-  // initialize persistence with current user
-  await persistenceClient.connect(userId);
-
-  // initialize client with current user
-  await client.connectUser(
-    User(id: userId),
-    token,
-    // do not open WS connection
-    connectWebSocket: false,
-  );
-
-  final messageId = data['id'];
-  final cid = data['cid'];
-  // pre-cache the new message using client and persistence.
-  final response = await client.getMessage(messageId);
-  await persistenceClient.updateMessages(cid, [response.message]);
+    final messageId = data['id'];
+    final cid = data['cid'];
+    // pre-cache the new message using client and persistence.
+    final response = await chatClient.getMessage(messageId);
+    await chatPersistentClient.updateMessages(cid, [response.message]);
+  } catch (e, stk) {
+    debugPrint('[onBackgroundMessage] #firebase; failed: $e; $stk');
+  }
 }
 
 final chatPersistentClient = StreamChatPersistenceClient(
@@ -156,11 +160,14 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
       if (userId != null) {
         // Requests notification permission.
         await FirebaseMessaging.instance.requestPermission();
-        // Sets callback for background messages (it's not called on iOS)
+        // Sets callback for background messages.
         FirebaseMessaging.onBackgroundMessage(_onFirebaseBackgroundMessage);
         // Sets callback for the notification click event.
         firebaseSubscriptions.add(FirebaseMessaging.onMessageOpenedApp
             .listen(_onFirebaseMessageOpenedApp(client)));
+        // Sets callback for foreground messages
+        firebaseSubscriptions.add(FirebaseMessaging.onMessage
+            .listen(_onFirebaseForegroundMessage(client)));
         // Sets callback for the token refresh event.
         firebaseSubscriptions.add(FirebaseMessaging.instance.onTokenRefresh
             .listen(_onFirebaseTokenRefresh(client)));
@@ -186,6 +193,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
   /// Constructs callback for notification click event.
   OnRemoteMessage _onFirebaseMessageOpenedApp(StreamChatClient client) {
     return (message) async {
+      debugPrint('[onMessageOpenedApp] #firebase; message: ${message.toMap()}');
       // This callback is getting invoked when the user clicks
       // on the notification in case if notification was shown by OS.
       final channelType = (message.data['channel_type'] as String?) ?? '';
@@ -207,11 +215,20 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
     };
   }
 
+  /// Constructs callback for foreground notification handling.
+  OnRemoteMessage _onFirebaseForegroundMessage(StreamChatClient client) {
+    return (message) async {
+      debugPrint(
+          '[onForegroundMessage] #firebase; message: ${message.toMap()}');
+    };
+  }
+
   /// Constructs callback for notification refresh event.
   Future<void> Function(String) _onFirebaseTokenRefresh(
     StreamChatClient client,
   ) {
     return (token) async {
+      debugPrint('[onTokenRefresh] #firebase; token: $token');
       // This callback is getting invoked when the token got refreshed.
       await client.addDevice(token, PushProvider.firebase);
     };
