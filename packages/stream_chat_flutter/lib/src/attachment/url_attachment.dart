@@ -35,33 +35,6 @@ class StreamUrlAttachment extends StatelessWidget {
   /// The function called when tapping on a link
   final void Function(String)? onLinkTap;
 
-  //placeholder: (context, __) {
-  //               final image = Image.asset(
-  //                 'images/placeholder.png',
-  //                 fit: BoxFit.cover,
-  //                 package: 'stream_chat_flutter',
-  //               );
-  //               final colorTheme = StreamChatTheme.of(context).colorTheme;
-  //               return Shimmer.fromColors(
-  //                 baseColor: colorTheme.disabled,
-  //                 highlightColor: colorTheme.inputBg,
-  //                 child: image,
-  //               );
-  //             },
-  //             errorWidget: (context, url, error) =>
-  //                 AttachmentError(constraints: constraints),
-  //           ),
-  //         );
-  //       },
-  //     );
-  //   }
-  //
-  Widget _imageErrorBuilder(BuildContext _, Object __, StackTrace? ___) =>
-      Image.asset(
-        'images/placeholder.png',
-        package: 'stream_chat_flutter',
-      );
-
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
