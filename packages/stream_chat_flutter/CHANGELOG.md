@@ -12,6 +12,8 @@
   instead of material indicator.
 - [[#1490]](https://github.com/GetStream/stream-chat-flutter/issues/1490) Fixed `editMessageInputBuilder` property not
   used in `MessageActionsModal.editMessage` option.
+- [[#1544]](https://github.com/GetStream/stream-chat-flutter/issues/1544) Fixed error thrown when unable to fetch
+  image/data in Message link preview.
 
 ## 6.1.0
 
