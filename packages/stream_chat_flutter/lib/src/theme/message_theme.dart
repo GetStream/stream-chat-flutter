@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
@@ -185,14 +187,16 @@ class StreamMessageThemeData with Diagnosticable {
         b.urlAttachmentTitleStyle,
         t,
       ),
-      urlAttachmentTitleMaxLine: IntTween(
-        begin: a.urlAttachmentTitleMaxLine,
-        end: b.urlAttachmentTitleMaxLine,
-      ).lerp(t),
-      urlAttachmentTextMaxLine: IntTween(
-        begin: a.urlAttachmentTextMaxLine,
-        end: b.urlAttachmentTextMaxLine,
-      ).lerp(t),
+      urlAttachmentTitleMaxLine: lerpDouble(
+        a.urlAttachmentTitleMaxLine,
+        b.urlAttachmentTitleMaxLine,
+        t,
+      )?.round(),
+      urlAttachmentTextMaxLine: lerpDouble(
+        a.urlAttachmentTextMaxLine,
+        b.urlAttachmentTextMaxLine,
+        t,
+      )?.round(),
     );
   }
 
