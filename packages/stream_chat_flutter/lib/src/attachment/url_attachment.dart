@@ -91,7 +91,7 @@ class StreamUrlAttachment extends StatelessWidget {
                       ),
                       Positioned(
                         left: 0,
-                        bottom: -1,
+                        bottom: 0,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             borderRadius: const BorderRadius.only(
@@ -103,7 +103,8 @@ class StreamUrlAttachment extends StatelessWidget {
                             padding: const EdgeInsets.only(
                               top: 8,
                               left: 8,
-                              right: 8,
+                              right: 12,
+                              bottom: 4,
                             ),
                             child: Text(
                               hostDisplayName,
@@ -119,20 +120,40 @@ class StreamUrlAttachment extends StatelessWidget {
                 padding: textPadding,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     if (urlAttachment.title != null)
-                      Text(
-                        urlAttachment.title!.trim(),
-                        maxLines: messageTheme.urlAttachmentTitleMaxLine ?? 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: messageTheme.urlAttachmentTitleStyle,
-                      ),
+                      Builder(builder: (context) {
+                        final maxLines = messageTheme.urlAttachmentTitleMaxLine;
+
+                        TextOverflow? overflow;
+                        if (maxLines != null && maxLines > 0) {
+                          overflow = TextOverflow.ellipsis;
+                        }
+
+                        return Text(
+                          urlAttachment.title!.trim(),
+                          maxLines: maxLines,
+                          overflow: overflow,
+                          style: messageTheme.urlAttachmentTitleStyle,
+                        );
+                      }),
                     if (urlAttachment.text != null)
-                      Text(
-                        urlAttachment.text!,
-                        style: messageTheme.urlAttachmentTextStyle,
-                      ),
-                  ],
+                      Builder(builder: (context) {
+                        final maxLines = messageTheme.urlAttachmentTextMaxLine;
+
+                        TextOverflow? overflow;
+                        if (maxLines != null && maxLines > 0) {
+                          overflow = TextOverflow.ellipsis;
+                        }
+
+                        return Text(
+                          urlAttachment.text!,
+                          maxLines: maxLines,
+                          overflow: overflow,
+                          style: messageTheme.urlAttachmentTextStyle,
+                        );
+                      }),
+                  ].insertBetween(const SizedBox(height: 4)),
                 ),
               ),
             ],

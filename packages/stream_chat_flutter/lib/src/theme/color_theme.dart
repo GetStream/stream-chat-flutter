@@ -66,7 +66,7 @@ class StreamColorTheme {
     this.appBg = const Color(0xff070A0D),
     this.barsBg = const Color(0xff101418),
     this.linkBg = const Color(0xff00193D),
-    this.accentPrimary = const Color(0xff005FFF),
+    this.accentPrimary = const Color(0xff337eff),
     this.accentError = const Color(0xffFF3742),
     this.accentInfo = const Color(0xff20E070),
     this.borderTop = const Effect(
