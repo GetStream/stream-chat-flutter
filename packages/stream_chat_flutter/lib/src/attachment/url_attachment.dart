@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamUrlAttachment}
@@ -34,6 +35,33 @@ class StreamUrlAttachment extends StatelessWidget {
   /// The function called when tapping on a link
   final void Function(String)? onLinkTap;
 
+  //placeholder: (context, __) {
+  //               final image = Image.asset(
+  //                 'images/placeholder.png',
+  //                 fit: BoxFit.cover,
+  //                 package: 'stream_chat_flutter',
+  //               );
+  //               final colorTheme = StreamChatTheme.of(context).colorTheme;
+  //               return Shimmer.fromColors(
+  //                 baseColor: colorTheme.disabled,
+  //                 highlightColor: colorTheme.inputBg,
+  //                 child: image,
+  //               );
+  //             },
+  //             errorWidget: (context, url, error) =>
+  //                 AttachmentError(constraints: constraints),
+  //           ),
+  //         );
+  //       },
+  //     );
+  //   }
+  //
+  Widget _imageErrorBuilder(BuildContext _, Object __, StackTrace? ___) =>
+      Image.asset(
+        'images/placeholder.png',
+        package: 'stream_chat_flutter',
+      );
+
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
@@ -64,10 +92,29 @@ class StreamUrlAttachment extends StatelessWidget {
                   ),
                   child: Stack(
                     children: [
-                      CachedNetworkImage(
-                        width: double.infinity,
-                        imageUrl: urlAttachment.imageUrl!,
-                        fit: BoxFit.cover,
+                      AspectRatio(
+                        // Default aspect ratio for Open Graph images.
+                        // https://www.kapwing.com/resources/what-is-an-og-image-make-and-format-og-images-for-your-blog-or-webpage
+                        aspectRatio: 1.91 / 1,
+                        child: CachedNetworkImage(
+                          imageUrl: urlAttachment.imageUrl!,
+                          fit: BoxFit.cover,
+                          placeholder: (context, __) {
+                            final image = Image.asset(
+                              'images/placeholder.png',
+                              fit: BoxFit.cover,
+                              package: 'stream_chat_flutter',
+                            );
+                            final colorTheme =
+                                StreamChatTheme.of(context).colorTheme;
+                            return Shimmer.fromColors(
+                              baseColor: colorTheme.disabled,
+                              highlightColor: colorTheme.inputBg,
+                              child: image,
+                            );
+                          },
+                          errorWidget: (_, __, ___) => const AttachmentError(),
+                        ),
                       ),
                       Positioned(
                         left: 0,
