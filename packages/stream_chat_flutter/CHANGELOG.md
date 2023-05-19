@@ -15,6 +15,11 @@
 - [[#1544]](https://github.com/GetStream/stream-chat-flutter/issues/1544) Fixed error thrown when unable to fetch
   image/data in Message link preview.
 
+✅ Added
+
+- Added support for `StreamMessageThemeData.urlAttachmentTextMaxLine` to specify the `.maxLines` for the url attachment
+  text. [#1543](https://github.com/GetStream/stream-chat-flutter/issues/1543)
+
 ## 6.1.0
 
 🐞 Fixed
