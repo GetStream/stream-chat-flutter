@@ -196,8 +196,7 @@ class StreamChannelListTile extends StatelessWidget {
                 initialData: channelState.members,
                 comparator: const ListEquality().equals,
                 builder: (context, members) {
-                  if (members.isEmpty ||
-                      !members.any((it) => it.user!.id == currentUser.id)) {
+                  if (members.isEmpty) {
                     return const Offstage();
                   }
                   return unreadIndicatorBuilder?.call(context) ??
