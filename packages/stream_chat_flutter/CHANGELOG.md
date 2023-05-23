@@ -20,6 +20,10 @@
 - Added support for `StreamMessageThemeData.urlAttachmentTextMaxLine` to specify the `.maxLines` for the url attachment
   text. [#1543](https://github.com/GetStream/stream-chat-flutter/issues/1543)
 
+🔄 Changed
+
+- Updated `shimmer` dependency to `^3.0.0`.
+
 ## 6.1.0
 
 🐞 Fixed
