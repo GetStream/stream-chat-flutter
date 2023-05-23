@@ -792,19 +792,19 @@ Widget webOrDesktopAttachmentPickerBuilder({
         key: 'image-picker',
         type: AttachmentPickerType.images,
         icon: StreamSvgIcon.pictures(size: 36).toIconThemeSvgIcon(),
-        title: 'Upload a photo',
+        title: context.translations.uploadAPhotoLabel,
       ),
       WebOrDesktopAttachmentPickerOption(
         key: 'video-picker',
         type: AttachmentPickerType.videos,
         icon: StreamSvgIcon.record(size: 36).toIconThemeSvgIcon(),
-        title: 'Upload a video',
+        title: context.translations.uploadAVideoLabel,
       ),
       WebOrDesktopAttachmentPickerOption(
         key: 'file-picker',
         type: AttachmentPickerType.files,
         icon: StreamSvgIcon.files(size: 36).toIconThemeSvgIcon(),
-        title: 'Upload a file',
+        title: context.translations.uploadAFileLabel,
       ),
     },
     onOptionTap: (context, controller, option) async {
