@@ -14,6 +14,8 @@
   used in `MessageActionsModal.editMessage` option.
 - [[#1544]](https://github.com/GetStream/stream-chat-flutter/issues/1544) Fixed error thrown when unable to fetch
   image/data in Message link preview.
+- [[#1482]](https://github.com/GetStream/stream-chat-flutter/issues/1482) Fixed `StreaChannelListTile` not showing
+  unread indicator when `currentUser` is not present in the initial member list.
 
 ✅ Added
 
