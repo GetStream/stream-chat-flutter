@@ -1,6 +1,7 @@
 ## Upcoming
 
 - Fixed `StreamMessageInputController.textPatternStyle` not matching case-insensitive patterns.
+- Updated `connectivity_plus` dependency to `^4.0.0`
 
 ## 6.1.0
 
