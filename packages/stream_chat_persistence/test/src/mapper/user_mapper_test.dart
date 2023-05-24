@@ -52,7 +52,7 @@ void main() {
     expect(entity.language, user.language);
     expect(entity.createdAt, isSameDateAs(user.createdAt));
     expect(entity.updatedAt, isSameDateAs(user.updatedAt));
-    expect(entity.lastActive, isSameDateAs(user.lastActive!));
+    expect(entity.lastActive, isSameDateAs(user.lastActive));
     expect(entity.online, user.online);
     expect(entity.banned, user.banned);
     expect(entity.extraData, user.extraData);
