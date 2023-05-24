@@ -3651,18 +3651,14 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: false,
-      defaultValue: currentDateAndTime);
+      'created_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-      'updated_at', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: false,
-      defaultValue: currentDateAndTime);
+      'updated_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   static const VerificationMeta _lastActiveMeta =
       const VerificationMeta('lastActive');
   @override
@@ -3773,9 +3769,9 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       language: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}language']),
       createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at']),
       updatedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at']),
       lastActive: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}last_active']),
       online: attachedDatabase.typeMapping
@@ -3808,10 +3804,10 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   final String? language;
 
   /// Date of user creation
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   /// Date of last user update
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   /// Date of last user connection
   final DateTime? lastActive;
@@ -3828,8 +3824,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       {required this.id,
       this.role,
       this.language,
-      required this.createdAt,
-      required this.updatedAt,
+      this.createdAt,
+      this.updatedAt,
       this.lastActive,
       required this.online,
       required this.banned,
@@ -3844,8 +3840,12 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     if (!nullToAbsent || language != null) {
       map['language'] = Variable<String>(language);
     }
-    map['created_at'] = Variable<DateTime>(createdAt);
-    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
     if (!nullToAbsent || lastActive != null) {
       map['last_active'] = Variable<DateTime>(lastActive);
     }
@@ -3865,8 +3865,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       id: serializer.fromJson<String>(json['id']),
       role: serializer.fromJson<String?>(json['role']),
       language: serializer.fromJson<String?>(json['language']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       lastActive: serializer.fromJson<DateTime?>(json['lastActive']),
       online: serializer.fromJson<bool>(json['online']),
       banned: serializer.fromJson<bool>(json['banned']),
@@ -3880,8 +3880,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       'id': serializer.toJson<String>(id),
       'role': serializer.toJson<String?>(role),
       'language': serializer.toJson<String?>(language),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'lastActive': serializer.toJson<DateTime?>(lastActive),
       'online': serializer.toJson<bool>(online),
       'banned': serializer.toJson<bool>(banned),
@@ -3893,8 +3893,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           {String? id,
           Value<String?> role = const Value.absent(),
           Value<String?> language = const Value.absent(),
-          DateTime? createdAt,
-          DateTime? updatedAt,
+          Value<DateTime?> createdAt = const Value.absent(),
+          Value<DateTime?> updatedAt = const Value.absent(),
           Value<DateTime?> lastActive = const Value.absent(),
           bool? online,
           bool? banned,
@@ -3903,8 +3903,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
         id: id ?? this.id,
         role: role.present ? role.value : this.role,
         language: language.present ? language.value : this.language,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
         lastActive: lastActive.present ? lastActive.value : this.lastActive,
         online: online ?? this.online,
         banned: banned ?? this.banned,
@@ -3948,8 +3948,8 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   final Value<String> id;
   final Value<String?> role;
   final Value<String?> language;
-  final Value<DateTime> createdAt;
-  final Value<DateTime> updatedAt;
+  final Value<DateTime?> createdAt;
+  final Value<DateTime?> updatedAt;
   final Value<DateTime?> lastActive;
   final Value<bool> online;
   final Value<bool> banned;
@@ -4010,8 +4010,8 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       {Value<String>? id,
       Value<String?>? role,
       Value<String?>? language,
-      Value<DateTime>? createdAt,
-      Value<DateTime>? updatedAt,
+      Value<DateTime?>? createdAt,
+      Value<DateTime?>? updatedAt,
       Value<DateTime?>? lastActive,
       Value<bool>? online,
       Value<bool>? banned,
