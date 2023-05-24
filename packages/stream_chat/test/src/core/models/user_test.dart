@@ -198,8 +198,8 @@ void main() {
       expect(user.banned, false);
       expect(user.teams, []);
       expect(user.lastActive, null);
-      expect(user.createdAt, isNotNull);
-      expect(user.updatedAt, isNotNull);
+      expect(user.createdAt, null);
+      expect(user.updatedAt, null);
     });
 
     test('default values, parse json', () {
@@ -214,8 +214,8 @@ void main() {
       expect(user.banned, false);
       expect(user.teams, []);
       expect(user.lastActive, null);
-      expect(user.createdAt, isNotNull);
-      expect(user.updatedAt, isNotNull);
+      expect(user.createdAt, null);
+      expect(user.updatedAt, null);
     });
   });
 }
