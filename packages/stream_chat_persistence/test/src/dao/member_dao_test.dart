@@ -66,7 +66,7 @@ void main() {
       expect(fetchedMember.updatedAt, isSameDateAs(member.updatedAt));
       expect(
         fetchedMember.inviteAcceptedAt,
-        isSameDateAs(member.inviteAcceptedAt!),
+        isSameDateAs(member.inviteAcceptedAt),
       );
     }
   });
@@ -93,7 +93,7 @@ void main() {
       expect(fetchedMember.updatedAt, isSameDateAs(member.updatedAt));
       expect(
         fetchedMember.inviteAcceptedAt,
-        isSameDateAs(member.inviteAcceptedAt!),
+        isSameDateAs(member.inviteAcceptedAt),
       );
     }
 

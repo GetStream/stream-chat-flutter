@@ -1,6 +1,8 @@
 ## Upcoming
 
 - Added support for `StreamChatPersistenceClient.isConnected` for checking if the client is connected to the database.
+- [[#1422]](https://github.com/GetStream/stream-chat-flutter/issues/1422) Removed default values
+  from `UserEntity` `createdAt` and `updatedAt` fields.
 
 ## 6.1.0
 

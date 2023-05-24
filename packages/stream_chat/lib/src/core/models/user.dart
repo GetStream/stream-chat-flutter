@@ -35,8 +35,8 @@ class User extends Equatable {
     this.role,
     String? name,
     String? image,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    this.createdAt,
+    this.updatedAt,
     this.lastActive,
     Map<String, Object?> extraData = const {},
     this.online = false,
@@ -44,8 +44,7 @@ class User extends Equatable {
     this.banExpires,
     this.teams = const [],
     this.language,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now(),
+  }) :
         // For backwards compatibility, set 'name', 'image' in [extraData].
         extraData = {
           ...extraData,
@@ -104,11 +103,11 @@ class User extends Equatable {
 
   /// Date of user creation.
   @JsonKey(includeToJson: false)
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   /// Date of last user update.
   @JsonKey(includeToJson: false)
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   /// Date of last user connection.
   @JsonKey(includeToJson: false)
