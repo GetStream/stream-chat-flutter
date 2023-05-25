@@ -507,10 +507,12 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
         final anchor = widget.optionsAlignment._toAnchor();
         final shouldShowOptions = _shouldShowOptions;
         final optionViewBuilder = shouldShowOptions
-            ? _currentTrigger!.optionsViewBuilder(
-                context,
-                _currentQuery!,
-                _messageEditingController,
+            ? TextFieldTapRegion(
+                child: _currentTrigger!.optionsViewBuilder(
+                  context,
+                  _currentQuery!,
+                  _messageEditingController,
+                ),
               )
             : null;
 
