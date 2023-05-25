@@ -508,12 +508,12 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
         final shouldShowOptions = _shouldShowOptions;
         final optionViewBuilder = shouldShowOptions
             ? TextFieldTapRegion(
-              child: _currentTrigger!.optionsViewBuilder(
+                child: _currentTrigger!.optionsViewBuilder(
                   context,
                   _currentQuery!,
                   _messageEditingController,
                 ),
-            )
+              )
             : null;
 
         return PortalTarget(
