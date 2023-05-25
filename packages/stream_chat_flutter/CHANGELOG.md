@@ -18,6 +18,8 @@
   unread indicator when `currentUser` is not present in the initial member list.
 - [[#1487]](https://github.com/GetStream/stream-chat-flutter/issues/1487) Use localized title
   for `WebOrDesktopAttachmentPickerOption` in `StreamMessageInput`.
+- [[#1250]](https://github.com/GetStream/stream-chat-flutter/issues/1250) Fixed bottomRow widgetSpans getting resized
+  twice when `textScaling` is enabled.
 
 ✅ Added
 
