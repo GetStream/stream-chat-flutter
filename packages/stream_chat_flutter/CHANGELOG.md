@@ -20,7 +20,7 @@
   for `WebOrDesktopAttachmentPickerOption` in `StreamMessageInput`.
 - [[#1250]](https://github.com/GetStream/stream-chat-flutter/issues/1250) Fixed bottomRow widgetSpans getting resized
   twice when `textScaling` is enabled.
-- [[#1498]](<https://github.com/GetStream/stream-chat-flutter/issues/1498>) Fixed mentioning on some platforms.
+- [[#1498]](https://github.com/GetStream/stream-chat-flutter/issues/1498) Fixed `MessageInput` autocomplete not working on non-mobile platforms.
 
 ✅ Added
 
