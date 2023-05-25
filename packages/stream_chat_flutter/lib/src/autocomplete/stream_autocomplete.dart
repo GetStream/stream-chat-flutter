@@ -610,32 +610,34 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final colorTheme = StreamChatTheme.of(context).colorTheme;
-    return Card(
-      margin: margin,
-      elevation: elevation,
-      color: color ?? colorTheme.barsBg,
-      shape: shape,
-      clipBehavior: clipBehavior,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (headerBuilder != null) ...[
-            headerBuilder!(context),
-            const Divider(height: 0),
-          ],
-          LimitedBox(
-            maxHeight: maxHeight ?? height * 0.5,
-            child: ListView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              itemCount: options.length,
-              itemBuilder: (context, index) {
-                final option = options.elementAt(index);
-                return optionBuilder(context, option);
-              },
+    return TextFieldTapRegion(
+      child: Card(
+        margin: margin,
+        elevation: elevation,
+        color: color ?? colorTheme.barsBg,
+        shape: shape,
+        clipBehavior: clipBehavior,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (headerBuilder != null) ...[
+              headerBuilder!(context),
+              const Divider(height: 0),
+            ],
+            LimitedBox(
+              maxHeight: maxHeight ?? height * 0.5,
+              child: ListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                itemCount: options.length,
+                itemBuilder: (context, index) {
+                  final option = options.elementAt(index);
+                  return optionBuilder(context, option);
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
