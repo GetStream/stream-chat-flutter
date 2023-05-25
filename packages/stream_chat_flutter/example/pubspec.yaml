@@ -28,7 +28,7 @@ dependencies:
   cupertino_icons: ^1.0.4
   flutter:
     sdk: flutter
-  responsive_builder: ^0.6.4
+  responsive_builder: ^0.7.0
   stream_chat_flutter: 
     path: ../
   stream_chat_localizations: 

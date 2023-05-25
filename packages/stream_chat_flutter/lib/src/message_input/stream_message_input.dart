@@ -645,19 +645,21 @@ class StreamMessageInputState extends State<StreamMessageInput>
                   messageEditingController,
                 ) {
                   final query = autocompleteQuery.query;
-                  return StreamMentionAutocompleteOptions(
-                    query: query,
-                    channel: StreamChannel.of(context).channel,
-                    mentionAllAppUsers: widget.mentionAllAppUsers,
-                    mentionsTileBuilder: widget.userMentionsTileBuilder,
-                    onMentionUserTap: (user) {
-                      // adding the mentioned user to the controller.
-                      _effectiveController.addMentionedUser(user);
+                  return TextFieldTapRegion(
+                    child: StreamMentionAutocompleteOptions(
+                      query: query,
+                      channel: StreamChannel.of(context).channel,
+                      mentionAllAppUsers: widget.mentionAllAppUsers,
+                      mentionsTileBuilder: widget.userMentionsTileBuilder,
+                      onMentionUserTap: (user) {
+                        // adding the mentioned user to the controller.
+                        _effectiveController.addMentionedUser(user);
 
-                      // accepting the autocomplete option.
-                      StreamAutocomplete.of(context)
-                          .acceptAutocompleteOption(user.name);
-                    },
+                        // accepting the autocomplete option.
+                        StreamAutocomplete.of(context)
+                            .acceptAutocompleteOption(user.name);
+                      },
+                    ),
                   );
                 },
               ),
