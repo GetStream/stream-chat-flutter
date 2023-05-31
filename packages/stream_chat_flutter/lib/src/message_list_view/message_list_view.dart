@@ -572,7 +572,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   // * The list view is loaded at a particular message (eg: Last Read, or a quoted message)
                   //   and a new message is added to the list view.
                   //
-                  // Github faced: https://github.com/GetStream/stream-chat-flutter/issues/1576
+                  // Issues faced:
+                  // * https://github.com/GetStream/stream-chat-flutter/issues/1576
+                  // * https://github.com/GetStream/stream-chat-flutter/issues/1414
+                  //
                   // Related issues: https://github.com/flutter/flutter/issues/107123
                   //
                   // findChildIndexCallback: (Key key) {
