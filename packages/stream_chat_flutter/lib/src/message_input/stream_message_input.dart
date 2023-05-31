@@ -1423,7 +1423,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       await WidgetsBinding.instance.endOfFrame;
     }
 
-    await sendOrUpdateMessage(
+    await _sendOrUpdateMessage(
       message: message,
       skipEnrichUrl: skipEnrichUrl,
     );
@@ -1435,7 +1435,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
   }
 
-  Future<void> sendOrUpdateMessage({
+  Future<void> _sendOrUpdateMessage({
     required Message message,
     bool skipEnrichUrl = false,
   }) async {
