@@ -2,6 +2,7 @@
 
 - Fixed `StreamMessageInputController.textPatternStyle` not matching case-insensitive patterns.
 - Updated `connectivity_plus` dependency to `^4.0.0`
+- Fixed `StreamChannel` shows black screen while loading in some cases.
 
 ## 6.1.0
 
