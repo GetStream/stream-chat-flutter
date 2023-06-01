@@ -36,6 +36,8 @@
 - Updated `image_gallery_saver` dependency to `^2.0.1`.
 - Update `Jiffy` dependency to `^6.1.0`.
 - Deprecated `ChannelPreview` in favor of `StreamChannelListTile`.
+- Deprecated ability to import `Jiffy` indirectly from `stream_chat_flutter.dart`, Add a dependency for `jiffy` in
+  the `pubspec.yaml` instead.
 
 ## 6.1.0
 

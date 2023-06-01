@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide Jiffy;
 
 /// {@template streamChat}
 /// Widget used to provide information about the chat to the widget tree

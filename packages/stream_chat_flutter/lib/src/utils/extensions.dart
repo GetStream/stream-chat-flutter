@@ -5,8 +5,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/localization/translations.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide Jiffy;
 
 /// String extension
 extension StringExtension on String {
@@ -476,9 +477,12 @@ extension StreamSvgIconX on StreamSvgIcon {
   }
 }
 
+/// Units of measurement to use when comparing two [DateTime] instances.
+typedef Units = Unit;
+
 /// Useful [Jiffy] extensions on [DateTime].
 extension JiffyX on DateTime {
-  /// Returns a string representation of current [Jiffy]'s instance relative
+  /// Returns a string representation of current [DateTime]'s instance relative
   /// from current date and time, with optional [withPrefixAndSuffix] flag
   /// to include prefix and suffix like "in" or "ago".
   String fromNow({bool withPrefixAndSuffix = true}) {
@@ -486,23 +490,23 @@ extension JiffyX on DateTime {
     return jiffy.fromNow(withPrefixAndSuffix: withPrefixAndSuffix);
   }
 
-  /// Returns a boolean value indicating whether this [Jiffy] instance is
-  /// the same as the given [jiffy] instance.
+  /// Returns a boolean value indicating whether this [DateTime] instance is
+  /// the same as the given [DateTime] instance.
   ///
   /// The [unit] parameter specifies the unit of measurement to use when
   /// comparing the two instances. The default value is [Unit.microsecond].
-  bool isSame(DateTime dateTime, {Unit unit = Unit.microsecond}) {
+  bool isSame(DateTime dateTime, {Units unit = Units.microsecond}) {
     final jiffy = Jiffy.parseFromDateTime(this);
     final jiffyToCompare = Jiffy.parseFromDateTime(dateTime);
     return jiffy.isSame(jiffyToCompare, unit: unit);
   }
 
-  /// Returns a boolean value indicating whether this [Jiffy] instance is
-  /// after the given [jiffy] instance.
+  /// Returns a boolean value indicating whether this [DateTime] instance is
+  /// after the given [DateTime] instance.
   ///
   /// The [unit] parameter specifies the unit of measurement to use when
-  /// comparing the two instances. The default value is [Unit.microsecond].
-  bool isAfterDate(DateTime dateTime, {Unit unit = Unit.microsecond}) {
+  /// comparing the two instances. The default value is [Units.microsecond].
+  bool isAfterDate(DateTime dateTime, {Units unit = Units.microsecond}) {
     final jiffy = Jiffy.parseFromDateTime(this);
     final jiffyToCompare = Jiffy.parseFromDateTime(dateTime);
     return jiffy.isAfter(jiffyToCompare, unit: unit);
@@ -516,25 +520,13 @@ extension JiffyX on DateTime {
     return jiffy.format(pattern: pattern);
   }
 
-  /// Subtracts the date and time from the current [Jiffy] instance and
-  /// returns a new [Jiffy] instance with the result.
+  /// Subtracts the date and time from the current [DateTime] instance and
+  /// returns a new [DateTime] instance with the result.
   ///
   /// The [microseconds], [milliseconds], [seconds], [minutes], [hours],
   /// [days], [weeks], [months], and [years] arguments allow you to specify
-  /// subtractive time to subtract from the current [Jiffy] instance.
+  /// subtractive time to subtract from the current [DateTime] instance.
   /// These arguments are all optional and default to 0.
-  ///
-  /// Example:
-  ///
-  /// ```dart
-  /// final jiffy = Jiffy.parse(
-  ///   '1997-09-23 13:37:00',
-  ///   pattern: 'yyyy-MM-dd HH:mm:ss'
-  /// );
-  /// final previousHour = jiffy.subtract(hours: 1);
-  /// print(previousHour.format('yyyy-MM-dd HH:mm:ss'));
-  /// // output: '1997-09-23 12:37:00'
-  /// ```
   DateTime remove({
     int microseconds = 0,
     int milliseconds = 0,

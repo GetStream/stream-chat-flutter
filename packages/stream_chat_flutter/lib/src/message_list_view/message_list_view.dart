@@ -666,12 +666,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
                     final createdAt = message.createdAt.toLocal();
                     final nextCreatedAt = nextMessage.createdAt.toLocal();
-                    if (!createdAt.isSame(nextCreatedAt, unit: Unit.day)) {
+                    if (!createdAt.isSame(nextCreatedAt, unit: Units.day)) {
                       separator = _buildDateDivider(nextMessage);
                     } else {
                       final hasTimeDiff = !createdAt.isSame(
                         nextCreatedAt,
-                        unit: Unit.minute,
+                        unit: Units.minute,
                       );
 
                       final isNextUserSame =
@@ -1063,7 +1063,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (nextMessage != null) {
       hasTimeDiff = !message.createdAt.toLocal().isSame(
             nextMessage.createdAt.toLocal(),
-            unit: Unit.minute,
+            unit: Units.minute,
           );
     }
 
