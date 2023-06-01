@@ -27,7 +27,7 @@ dependencies:
   flutter_portal: ^1.0.0
   flutter_svg: ^2.0.4
   http_parser: ^4.0.0
-  image_gallery_saver: ^1.7.1
+  image_gallery_saver: ^2.0.1
   image_picker: ^0.8.2
   jiffy: ^6.1.0
   lottie: ^2.0.0
