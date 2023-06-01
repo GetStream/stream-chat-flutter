@@ -90,6 +90,7 @@ typedef ChannelInfoCallback = void Function(Channel);
 /// {@template channelPreviewBuilder}
 /// Builder used to create a custom [ChannelPreview] for a [Channel]
 /// {@endtemplate}
+@Deprecated('Use StreamChannelListViewIndexedWidgetBuilder instead')
 typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 
 /// {@template viewInfoCallback}

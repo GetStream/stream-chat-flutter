@@ -24,6 +24,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The UI is rendered based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget's appearance.
 /// {@endtemplate}
+@Deprecated('Use StreamChannelListTile instead.')
 class ChannelPreview extends StatelessWidget {
   /// {@macro channelPreview}
   const ChannelPreview({
