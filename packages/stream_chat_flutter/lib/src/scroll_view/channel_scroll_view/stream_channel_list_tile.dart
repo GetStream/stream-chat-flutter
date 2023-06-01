@@ -294,7 +294,7 @@ class ChannelLastMessageDate extends StatelessWidget {
                   .millisecondsSinceEpoch) {
             stringDate = context.translations.yesterdayLabel;
           } else if (startOfDay.difference(lastMessageAt).inDays < 7) {
-            stringDate = lastMessageAt.toLocal().format(pattern: 'EEE');
+            stringDate = lastMessageAt.toLocal().format(pattern: 'EEEE');
           } else {
             stringDate = lastMessageAt.toLocal().format(pattern: 'yMd');
           }
