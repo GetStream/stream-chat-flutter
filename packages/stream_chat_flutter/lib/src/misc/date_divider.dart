@@ -20,18 +20,18 @@ class StreamDateDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final createdAt = Jiffy(dateTime);
-    final now = Jiffy(DateTime.now());
+    final createdAt = dateTime;
+    final now = DateTime.now();
 
-    var dayInfo = createdAt.MMMd;
-    if (createdAt.isSame(now, Units.DAY)) {
+    var dayInfo = createdAt.format(pattern: 'MMMd');
+    if (createdAt.isSame(now, unit: Unit.day)) {
       dayInfo = context.translations.todayLabel;
-    } else if (createdAt.isSame(now.subtract(days: 1), Units.DAY)) {
+    } else if (createdAt.isSame(now.remove(days: 1), unit: Unit.day)) {
       dayInfo = context.translations.yesterdayLabel;
-    } else if (createdAt.isAfter(now.subtract(days: 7), Units.DAY)) {
-      dayInfo = createdAt.EEEE;
-    } else if (createdAt.isAfter(now.subtract(years: 1), Units.DAY)) {
-      dayInfo = createdAt.MMMd;
+    } else if (createdAt.isAfterDate(now.remove(days: 7), unit: Unit.day)) {
+      dayInfo = createdAt.format(pattern: 'EEEE');
+    } else if (createdAt.isAfterDate(now.remove(years: 1), unit: Unit.day)) {
+      dayInfo = createdAt.format(pattern: 'MMMd');
     }
 
     if (uppercase) dayInfo = dayInfo.toUpperCase();

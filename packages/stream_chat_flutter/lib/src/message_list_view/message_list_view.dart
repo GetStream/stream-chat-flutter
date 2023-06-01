@@ -666,12 +666,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
                     final createdAt = message.createdAt.toLocal();
                     final nextCreatedAt = nextMessage.createdAt.toLocal();
-                    if (!Jiffy(createdAt).isSame(nextCreatedAt, Units.DAY)) {
+                    if (!createdAt.isSame(nextCreatedAt, unit: Unit.day)) {
                       separator = _buildDateDivider(nextMessage);
                     } else {
-                      final hasTimeDiff = !Jiffy(createdAt).isSame(
+                      final hasTimeDiff = !createdAt.isSame(
                         nextCreatedAt,
-                        Units.MINUTE,
+                        unit: Unit.minute,
                       );
 
                       final isNextUserSame =
@@ -1061,10 +1061,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     var hasTimeDiff = false;
     if (nextMessage != null) {
-      hasTimeDiff = !Jiffy(message.createdAt.toLocal()).isSame(
-        nextMessage.createdAt.toLocal(),
-        Units.MINUTE,
-      );
+      hasTimeDiff = !message.createdAt.toLocal().isSame(
+            nextMessage.createdAt.toLocal(),
+            unit: Unit.minute,
+          );
     }
 
     final hasFileAttachment =

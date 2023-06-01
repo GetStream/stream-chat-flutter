@@ -1,6 +1,6 @@
-import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_list_view/message_list_view.dart';
 import 'package:stream_chat_flutter/src/misc/connection_status_builder.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart'
     show User;
 
@@ -611,13 +611,16 @@ class DefaultTranslations implements Translations {
     } else if (date == yesterday) {
       return 'yesterday';
     } else {
-      return 'on ${Jiffy(date).MMMd}';
+      return 'on ${date.format(pattern: 'MMMd')}';
     }
   }
 
   @override
-  String sentAtText({required DateTime date, required DateTime time}) =>
-      'Sent ${_getDay(date)} at ${Jiffy(time.toLocal()).format('HH:mm')}';
+  String sentAtText({required DateTime date, required DateTime time}) {
+    final _day = _getDay(date);
+    final _time = time.toLocal().format(pattern: 'HH:mm');
+    return 'Sent $_day at $_time';
+  }
 
   @override
   String get todayLabel => 'Today';

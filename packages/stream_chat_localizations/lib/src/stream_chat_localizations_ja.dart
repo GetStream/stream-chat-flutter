@@ -159,6 +159,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   @override
   String get enablePhotoAndVideoAccessMessage => 'お友達と共有できるように、写真'
       '\nやビデオへのアクセスを有効にしてください。';
+
   @override
   String get allowGalleryAccessMessage => 'ギャラリーへのアクセスを許可する';
 
@@ -236,13 +237,16 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
     } else if (date == yesterday) {
       return '昨日';
     } else {
-      return '${Jiffy(date).MMMd}に';
+      return '${date.format(pattern: 'MMMd')}に';
     }
   }
 
   @override
-  String sentAtText({required DateTime date, required DateTime time}) =>
-      '${_getDay(date)}の${Jiffy(time.toLocal()).format('HH:mm')}に送信しました ';
+  String sentAtText({required DateTime date, required DateTime time}) {
+    final _day = _getDay(date);
+    final _time = time.toLocal().format(pattern: 'HH:mm');
+    return '$_dayの$_timeに送信しました ';
+  }
 
   @override
   String get todayLabel => '今日';

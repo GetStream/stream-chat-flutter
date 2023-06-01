@@ -179,7 +179,7 @@ class UserLastActive extends StatelessWidget {
       user.online
           ? context.translations.userOnlineText
           : '${context.translations.userLastOnlineText} '
-              '${Jiffy(user.lastActive).fromNow()}',
+              '${user.lastActive?.fromNow()}',
       style: chatTheme.textTheme.footnote.copyWith(
         color: chatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
       ),

@@ -475,3 +475,90 @@ extension StreamSvgIconX on StreamSvgIcon {
     return StreamIconThemeSvgIcon.fromStreamSvgIcon(this);
   }
 }
+
+/// Useful [Jiffy] extensions on [DateTime].
+extension JiffyX on DateTime {
+  /// Returns a string representation of current [Jiffy]'s instance relative
+  /// from current date and time, with optional [withPrefixAndSuffix] flag
+  /// to include prefix and suffix like "in" or "ago".
+  String fromNow({bool withPrefixAndSuffix = true}) {
+    final jiffy = Jiffy.parseFromDateTime(this);
+    return jiffy.fromNow(withPrefixAndSuffix: withPrefixAndSuffix);
+  }
+
+  /// Returns a boolean value indicating whether this [Jiffy] instance is
+  /// the same as the given [jiffy] instance.
+  ///
+  /// The [unit] parameter specifies the unit of measurement to use when
+  /// comparing the two instances. The default value is [Unit.microsecond].
+  bool isSame(DateTime dateTime, {Unit unit = Unit.microsecond}) {
+    final jiffy = Jiffy.parseFromDateTime(this);
+    final jiffyToCompare = Jiffy.parseFromDateTime(dateTime);
+    return jiffy.isSame(jiffyToCompare, unit: unit);
+  }
+
+  /// Returns a boolean value indicating whether this [Jiffy] instance is
+  /// after the given [jiffy] instance.
+  ///
+  /// The [unit] parameter specifies the unit of measurement to use when
+  /// comparing the two instances. The default value is [Unit.microsecond].
+  bool isAfterDate(DateTime dateTime, {Unit unit = Unit.microsecond}) {
+    final jiffy = Jiffy.parseFromDateTime(this);
+    final jiffyToCompare = Jiffy.parseFromDateTime(dateTime);
+    return jiffy.isAfter(jiffyToCompare, unit: unit);
+  }
+
+  /// Returns the formatted date and time string based on the provided
+  /// [pattern]. If the [pattern] is not provided, the method will return
+  /// the formatted date and time string in the ISO-8601 format.
+  String format({String? pattern}) {
+    final jiffy = Jiffy.parseFromDateTime(this);
+    return jiffy.format(pattern: pattern);
+  }
+
+  /// Subtracts the date and time from the current [Jiffy] instance and
+  /// returns a new [Jiffy] instance with the result.
+  ///
+  /// The [microseconds], [milliseconds], [seconds], [minutes], [hours],
+  /// [days], [weeks], [months], and [years] arguments allow you to specify
+  /// subtractive time to subtract from the current [Jiffy] instance.
+  /// These arguments are all optional and default to 0.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// final jiffy = Jiffy.parse(
+  ///   '1997-09-23 13:37:00',
+  ///   pattern: 'yyyy-MM-dd HH:mm:ss'
+  /// );
+  /// final previousHour = jiffy.subtract(hours: 1);
+  /// print(previousHour.format('yyyy-MM-dd HH:mm:ss'));
+  /// // output: '1997-09-23 12:37:00'
+  /// ```
+  DateTime remove({
+    int microseconds = 0,
+    int milliseconds = 0,
+    int seconds = 0,
+    int minutes = 0,
+    int hours = 0,
+    int days = 0,
+    int weeks = 0,
+    int months = 0,
+    int years = 0,
+  }) {
+    final jiffy = Jiffy.parseFromDateTime(this);
+    return jiffy
+        .subtract(
+          microseconds: microseconds,
+          milliseconds: milliseconds,
+          seconds: seconds,
+          minutes: minutes,
+          hours: hours,
+          days: days,
+          weeks: weeks,
+          months: months,
+          years: years,
+        )
+        .dateTime;
+  }
+}
