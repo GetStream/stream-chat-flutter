@@ -566,21 +566,33 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   reverse: widget.reverse,
                   shrinkWrap: widget.shrinkWrap,
                   itemCount: itemCount,
-                  findChildIndexCallback: (Key key) {
-                    final indexedKey = key as IndexedKey;
-                    final valueKey = indexedKey.key as ValueKey<String>?;
-                    if (valueKey != null) {
-                      final index = messagesIndex[valueKey.value];
-                      if (index != null) {
-                        // The calculation is as follows:
-                        // * Add 2 to the index retrieved to account for the footer and the bottom loader.
-                        // * Multiply the result by 2 to account for the separators between each pair of items.
-                        // * Subtract 1 to adjust for the 0-based indexing of the list view.
-                        return ((index + 2) * 2) - 1;
-                      }
-                    }
-                    return null;
-                  },
+
+                  // Commented out as it is not working as expected.
+                  // The list view gets broken in the following case:
+                  // * The list view is loaded at a particular message (eg: Last Read, or a quoted message)
+                  //   and a new message is added to the list view.
+                  //
+                  // Issues faced:
+                  // * https://github.com/GetStream/stream-chat-flutter/issues/1576
+                  // * https://github.com/GetStream/stream-chat-flutter/issues/1414
+                  //
+                  // Related issues: https://github.com/flutter/flutter/issues/107123
+                  //
+                  // findChildIndexCallback: (Key key) {
+                  //   final indexedKey = key as IndexedKey;
+                  //   final valueKey = indexedKey.key as ValueKey<String>?;
+                  //   if (valueKey != null) {
+                  //     final index = messagesIndex[valueKey.value];
+                  //     if (index != null) {
+                  //       // The calculation is as follows:
+                  //       // * Add 2 to the index retrieved to account for the footer and the bottom loader.
+                  //       // * Multiply the result by 2 to account for the separators between each pair of items.
+                  //       // * Subtract 1 to adjust for the 0-based indexing of the list view.
+                  //       return ((index + 2) * 2) - 1;
+                  //     }
+                  //   }
+                  //   return null;
+                  // },
 
                   // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
                   // eg:     |Type|         rev(|Index(item)|)     rev(|Index(separator)|)    |Index(item)|    |Index(separator)|
@@ -899,7 +911,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final hasUrlAttachment =
         message.attachments.any((it) => it.ogScrapeUrl != null);
 
-    final borderSide = isOnlyEmoji || hasUrlAttachment ? BorderSide.none : null;
+    final isEphemeral = message.isEphemeral;
+
+    final borderSide =
+        isOnlyEmoji || hasUrlAttachment || isEphemeral ? BorderSide.none : null;
 
     final defaultMessageWidget = StreamMessageWidget(
       showReplyMessage: false,
@@ -980,24 +995,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               FloatingActionButton(
                 backgroundColor: _streamTheme.colorTheme.barsBg,
                 onPressed: () async {
-                  if (unreadCount > 0) {
-                    streamChannel!.channel.markRead();
-                  }
-                  if (!_upToDate) {
-                    _bottomPaginationActive = false;
-                    initialAlignment = 0;
-                    initialIndex = 0;
-                    await streamChannel!.reloadChannel();
-
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _scrollController!.jumpTo(index: 0);
-                    });
-                  } else {
-                    _showScrollToBottom.value = false;
-                    _scrollController!.jumpTo(
-                      index: 0,
-                    );
-                  }
+                  return scrollToBottomDefaultTapAction(unreadCount);
                 },
                 child: widget.reverse
                     ? StreamSvgIcon.down(
@@ -1101,10 +1099,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
     final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
 
+    final isEphemeral = message.isEphemeral;
+
     final hasUrlAttachment =
         message.attachments.any((it) => it.ogScrapeUrl != null);
 
-    final borderSide = isOnlyEmoji || hasUrlAttachment ? BorderSide.none : null;
+    final borderSide =
+        isOnlyEmoji || hasUrlAttachment || isEphemeral ? BorderSide.none : null;
 
     final currentUser = StreamChat.of(context).currentUser;
     final members = StreamChannel.of(context).channel.state?.members ?? [];
