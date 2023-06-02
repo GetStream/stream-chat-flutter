@@ -34,6 +34,7 @@
 
 - Updated `shimmer` dependency to `^3.0.0`.
 - Updated `image_gallery_saver` dependency to `^2.0.1`.
+- Deprecated `ChannelPreview` in favor of `StreamChannelListTile`.
 
 ## 6.1.0
 
