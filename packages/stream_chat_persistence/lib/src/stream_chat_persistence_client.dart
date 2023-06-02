@@ -83,6 +83,9 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   bool get isConnected => db != null;
 
   @override
+  String? get userId => db?.userId;
+
+  @override
   Future<void> connect(
     String userId, {
     DatabaseProvider? databaseProvider, // Used only for testing

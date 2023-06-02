@@ -16,6 +16,9 @@ class TestPersistenceClient extends ChatPersistenceClient {
   bool get isConnected => throw UnimplementedError();
 
   @override
+  String? get userId => throw UnimplementedError();
+
+  @override
   Future<void> connect(String userId) => throw UnimplementedError();
 
   @override

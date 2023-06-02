@@ -1379,13 +1379,14 @@ class Channel {
       this.state?.updateChannelState(updatedState);
       return updatedState;
     } catch (e) {
-      if (!_client.persistenceEnabled) {
-        rethrow;
+      if (_client.persistenceEnabled) {
+        return _client.chatPersistenceClient!.getChannelStateByCid(
+          cid!,
+          messagePagination: messagesPagination,
+        );
       }
-      return _client.chatPersistenceClient!.getChannelStateByCid(
-        cid!,
-        messagePagination: messagesPagination,
-      );
+
+      rethrow;
     }
   }
 
@@ -1841,9 +1842,7 @@ class ChannelClientState {
 
   /// [isUpToDate] flag count as a stream.
   Stream<bool> get isUpToDateStream => _isUpToDateController.stream;
-
-  final BehaviorSubject<bool> _isUpToDateController =
-      BehaviorSubject.seeded(true);
+  final _isUpToDateController = BehaviorSubject.seeded(true);
 
   /// The retry queue associated to this channel.
   late final RetryQueue _retryQueue;
