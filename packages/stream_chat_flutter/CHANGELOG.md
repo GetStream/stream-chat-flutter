@@ -1,4 +1,4 @@
-## Upcoming
+## 6.2.0
 
 🐞 Fixed
 
@@ -35,6 +35,8 @@
 - Updated `shimmer` dependency to `^3.0.0`.
 - Updated `image_gallery_saver` dependency to `^2.0.1`.
 - Deprecated `ChannelPreview` in favor of `StreamChannelListTile`.
+- Updated `stream_chat_flutter_core` dependency
+  to [`6.2.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 6.1.0
 
