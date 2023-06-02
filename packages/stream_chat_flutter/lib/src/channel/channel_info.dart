@@ -143,7 +143,7 @@ class _ConnectingTitleState extends StatelessWidget {
           height: 16,
           width: 16,
           child: Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator.adaptive(),
           ),
         ),
         const SizedBox(width: 10),

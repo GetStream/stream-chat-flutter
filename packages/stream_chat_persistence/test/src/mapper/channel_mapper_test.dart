@@ -37,8 +37,8 @@ void main() {
       expect(channelModel.updatedAt, isSameDateAs(entity.updatedAt));
       expect(channelModel.memberCount, entity.memberCount);
       expect(channelModel.cid, entity.cid);
-      expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt!));
-      expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt!));
+      expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt));
+      expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt));
       expect(channelModel.extraData, entity.extraData);
       expect(channelModel.createdBy!.id, entity.createdById);
     });
@@ -77,8 +77,8 @@ void main() {
       expect(channelModel.updatedAt, isSameDateAs(entity.updatedAt));
       expect(channelModel.memberCount, entity.memberCount);
       expect(channelModel.cid, entity.cid);
-      expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt!));
-      expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt!));
+      expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt));
+      expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt));
       expect(channelModel.extraData, entity.extraData);
       expect(channelModel.createdBy!.id, entity.createdById);
     });
@@ -115,8 +115,8 @@ void main() {
     expect(channelEntity.updatedAt, isSameDateAs(model.updatedAt));
     expect(channelEntity.memberCount, model.memberCount);
     expect(channelEntity.cid, model.cid);
-    expect(channelEntity.lastMessageAt, isSameDateAs(model.lastMessageAt!));
-    expect(channelEntity.deletedAt, isSameDateAs(model.deletedAt!));
+    expect(channelEntity.lastMessageAt, isSameDateAs(model.lastMessageAt));
+    expect(channelEntity.deletedAt, isSameDateAs(model.deletedAt));
     expect(channelEntity.extraData, model.extraData);
     expect(channelEntity.createdById, model.createdBy!.id);
   });

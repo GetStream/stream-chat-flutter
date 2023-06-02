@@ -59,6 +59,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
             color: StreamChatTheme.of(context).colorTheme.barsBg,
             elevation: 2,
             clipBehavior: Clip.hardEdge,
+            margin: EdgeInsets.zero,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                 topRight: Radius.circular(16),
@@ -115,7 +116,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
                         width: constraints?.maxHeight,
                         height: constraints?.maxWidth,
                         child: const Center(
-                          child: CircularProgressIndicator(),
+                          child: CircularProgressIndicator.adaptive(),
                         ),
                       ),
                       imageUrl: imageUrl,
@@ -241,10 +242,7 @@ class StreamGiphyAttachment extends StreamAttachmentWidget {
           const SizedBox(height: 4),
           const Align(
             alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: StreamVisibleFootnote(),
-            ),
+            child: StreamVisibleFootnote(),
           ),
         ],
       ),

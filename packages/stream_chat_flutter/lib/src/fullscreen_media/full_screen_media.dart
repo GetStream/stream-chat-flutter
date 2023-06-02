@@ -337,7 +337,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                   final controller = videoPackages[attachment.id]!;
                   if (!controller.initialized) {
                     return const Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator.adaptive(),
                     );
                   }
                   return InkWell(

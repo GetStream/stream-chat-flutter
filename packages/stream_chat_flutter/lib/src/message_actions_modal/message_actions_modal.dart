@@ -400,8 +400,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         ),
       ),
       builder: (context) => EditMessageSheet(
-        message: widget.message,
         channel: channel,
+        message: widget.message,
+        editMessageInputBuilder: widget.editMessageInputBuilder,
       ),
     );
   }

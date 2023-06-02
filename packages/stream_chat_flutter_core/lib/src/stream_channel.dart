@@ -251,14 +251,14 @@ class StreamChannelState extends State<StreamChannel> {
     channel.state!.truncate();
 
     if (messageId == null) {
-      await channel.query(
+      final state = await channel.query(
         messagesPagination: PaginationParams(
           limit: limit,
         ),
         preferOffline: preferOffline,
       );
       channel.state!.isUpToDate = true;
-      return null;
+      return state;
     }
 
     return channel.query(
@@ -445,13 +445,13 @@ class StreamChannelState extends State<StreamChannel> {
         final dataLoaded = snapshot.data?.every((it) => it) == true;
         if (widget.showLoading && !dataLoaded) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator.adaptive(),
           );
         }
         return widget.child;
       },
     );
-    if (initialMessageId != null) {
+    if (_futures.length > 1) {
       child = Material(child: child);
     }
     return child;

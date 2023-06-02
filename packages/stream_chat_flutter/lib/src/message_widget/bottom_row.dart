@@ -153,8 +153,6 @@ class BottomRow extends StatelessWidget {
       }
     }
 
-    final children = <WidgetSpan>[];
-
     final threadParticipants = message.threadParticipants?.take(2);
     final showThreadParticipants = threadParticipants?.isNotEmpty == true;
     final replyCount = message.replyCount;
@@ -183,75 +181,69 @@ class BottomRow extends StatelessWidget {
 
     const usernameKey = Key('username');
 
-    children.addAll([
+    final children = [
       if (showUsername)
-        WidgetSpan(
-          child: usernameBuilder?.call(context, message) ??
-              Username(
-                key: usernameKey,
-                message: message,
-                messageTheme: messageTheme,
-              ),
-        ),
+        usernameBuilder?.call(context, message) ??
+            Username(
+              key: usernameKey,
+              message: message,
+              messageTheme: messageTheme,
+            ),
       if (showTimeStamp)
-        WidgetSpan(
-          child: Text(
-            Jiffy(message.createdAt.toLocal()).jm,
-            style: messageTheme.createdAtStyle,
-          ),
+        Text(
+          Jiffy(message.createdAt.toLocal()).jm,
+          style: messageTheme.createdAtStyle,
         ),
       if (showSendingIndicator)
-        WidgetSpan(
-          child: sendingIndicatorBuilder?.call(context, message) ??
-              SendingIndicatorBuilder(
-                messageTheme: messageTheme,
-                message: message,
-                hasNonUrlAttachments: hasNonUrlAttachments,
-                streamChat: streamChat,
-                streamChatTheme: streamChatTheme,
-              ),
-        ),
-    ]);
+        sendingIndicatorBuilder?.call(context, message) ??
+            SendingIndicatorBuilder(
+              messageTheme: messageTheme,
+              message: message,
+              hasNonUrlAttachments: hasNonUrlAttachments,
+              streamChat: streamChat,
+              streamChatTheme: streamChatTheme,
+            ),
+    ];
 
     final showThreadTail = !(hasUrlAttachments || isGiphy || isOnlyEmoji) &&
         (showThreadReplyIndicator || showInChannel);
 
-    final threadIndicatorWidgets = <WidgetSpan>[
+    final threadIndicatorWidgets = [
       if (showThreadTail)
-        WidgetSpan(
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: context.textScaleFactor *
-                  ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
-            ),
-            child: CustomPaint(
-              size: const Size(16, 32) * context.textScaleFactor,
-              painter: ThreadReplyPainter(
-                context: context,
-                color: messageTheme.messageBorderColor,
-                reverse: reverse,
+        // Added builder to use the nearest context to get the right
+        // textScaleFactor value.
+        Builder(
+          builder: (context) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: context.textScaleFactor *
+                    ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
               ),
-            ),
-          ),
+              child: CustomPaint(
+                size: const Size(16, 32) * context.textScaleFactor,
+                painter: ThreadReplyPainter(
+                  context: context,
+                  color: messageTheme.messageBorderColor,
+                  reverse: reverse,
+                ),
+              ),
+            );
+          },
         ),
       if (showInChannel || showThreadReplyIndicator) ...[
         if (showThreadParticipants)
-          WidgetSpan(
-            child: SizedBox.fromSize(
-              size: Size((threadParticipants!.length * 8.0) + 8, 16),
-              child: ThreadParticipants(
-                threadParticipants: threadParticipants,
-                streamChatTheme: streamChatTheme,
-              ),
+          SizedBox.fromSize(
+            size: Size((threadParticipants!.length * 8.0) + 8, 16),
+            child: ThreadParticipants(
+              threadParticipants: threadParticipants,
+              streamChatTheme: streamChatTheme,
             ),
           ),
-        WidgetSpan(
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: _onThreadTap,
-              child: Text(msg, style: messageTheme.repliesStyle),
-            ),
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: _onThreadTap,
+            child: Text(msg, style: messageTheme.repliesStyle),
           ),
         ),
       ],
@@ -266,8 +258,21 @@ class BottomRow extends StatelessWidget {
     return Text.rich(
       TextSpan(
         children: [
-          ...children,
-        ].insertBetween(const WidgetSpan(child: SizedBox(width: 8))),
+          ...children.insertBetween(const SizedBox(width: 8)).map((child) {
+            final mediaQueryData = MediaQuery.of(context);
+            return WidgetSpan(
+              child: MediaQuery(
+                // Hardcoding the textScaleFactor to 1 to avoid the multiple
+                // resizing of the text. This is needed because the
+                // textScaleFactor is already applied to the textSpan.
+                //
+                // issue: https://github.com/GetStream/stream-chat-flutter/issues/1250
+                data: mediaQueryData.copyWith(textScaleFactor: 1),
+                child: child,
+              ),
+            );
+          }),
+        ],
       ),
       maxLines: 1,
       textAlign: reverse ? TextAlign.right : TextAlign.left,

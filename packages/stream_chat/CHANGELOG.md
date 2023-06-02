@@ -1,3 +1,14 @@
+## 6.2.0
+
+🐞 Fixed
+
+- [[#1422]](https://github.com/GetStream/stream-chat-flutter/issues/1422) Fixed `User.createdAt` property using
+  currentTime when the ws connection is not established.
+
+✅ Added
+
+- Added support for `ChatPersistenceClient.isConnected` for checking if the client is connected to the database.
+
 ## 6.1.0
 
 🐞 Fixed

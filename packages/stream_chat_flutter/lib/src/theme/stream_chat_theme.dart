@@ -195,15 +195,12 @@ class StreamChatThemeData {
             width: 32,
           ),
         ),
-        messageLinksStyle: TextStyle(
-          color: accentColor,
-        ),
+        messageLinksStyle: TextStyle(color: accentColor),
         urlAttachmentBackgroundColor: colorTheme.linkBg,
         urlAttachmentHostStyle: textTheme.bodyBold.copyWith(color: accentColor),
-        urlAttachmentTitleStyle:
-            textTheme.body.copyWith(fontWeight: FontWeight.w700),
-        urlAttachmentTextStyle:
-            textTheme.body.copyWith(fontWeight: FontWeight.w400),
+        urlAttachmentTitleStyle: textTheme.footnoteBold,
+        urlAttachmentTextStyle: textTheme.footnote,
+        urlAttachmentTitleMaxLine: 1,
       ),
       otherMessageTheme: StreamMessageThemeData(
         reactionsBackgroundColor: colorTheme.borders,
@@ -215,9 +212,7 @@ class StreamChatThemeData {
         messageAuthorStyle:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         repliesStyle: textTheme.footnoteBold.copyWith(color: accentColor),
-        messageLinksStyle: TextStyle(
-          color: accentColor,
-        ),
+        messageLinksStyle: TextStyle(color: accentColor),
         messageBackgroundColor: colorTheme.barsBg,
         messageBorderColor: colorTheme.borders,
         avatarTheme: StreamAvatarThemeData(
@@ -229,10 +224,9 @@ class StreamChatThemeData {
         ),
         urlAttachmentBackgroundColor: colorTheme.linkBg,
         urlAttachmentHostStyle: textTheme.bodyBold.copyWith(color: accentColor),
-        urlAttachmentTitleStyle:
-            textTheme.body.copyWith(fontWeight: FontWeight.w700),
-        urlAttachmentTextStyle:
-            textTheme.body.copyWith(fontWeight: FontWeight.w400),
+        urlAttachmentTitleStyle: textTheme.footnoteBold,
+        urlAttachmentTextStyle: textTheme.footnote,
+        urlAttachmentTitleMaxLine: 1,
       ),
       messageInputTheme: StreamMessageInputThemeData(
         borderRadius: BorderRadius.circular(20),

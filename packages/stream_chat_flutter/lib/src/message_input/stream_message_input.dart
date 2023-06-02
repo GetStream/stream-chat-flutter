@@ -1042,6 +1042,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   CancelableOperation? _enrichUrlOperation;
   final _urlRegex = RegExp(
     r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+',
+    caseSensitive: false,
   );
 
   void _checkContainsUrl(String value, BuildContext context) async {
@@ -1103,8 +1104,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
     var response = _ogAttachmentCache[url];
     if (response == null) {
       final client = StreamChat.of(context).client;
-      response = await client.enrichUrl(url);
-      _ogAttachmentCache[url] = response;
+      try {
+        response = await client.enrichUrl(url);
+        _ogAttachmentCache[url] = response;
+      } catch (e, stk) {
+        return Future.error(e, stk);
+      }
     }
     return response;
   }
@@ -1367,10 +1372,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
 
     final streamChannel = StreamChannel.of(context);
+    final channel = streamChannel.channel;
     var message = _effectiveController.value;
 
-    if (!streamChannel.channel.ownCapabilities
-            .contains(PermissionType.sendLinks) &&
+    if (!channel.ownCapabilities.contains(PermissionType.sendLinks) &&
         _urlRegex.allMatches(message.text ?? '').any((element) =>
             element.group(0)?.split('.').last.isValidTLD() == true)) {
       showInfoBottomSheet(
@@ -1396,8 +1401,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final skipEnrichUrl = _effectiveController.ogAttachment == null;
 
     var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
-
     shouldKeepFocus ??= !_commandEnabled;
+
     widget.onQuotedMessageCleared?.call();
 
     _effectiveController.reset();
@@ -1406,12 +1411,35 @@ class StreamMessageInputState extends State<StreamMessageInput>
       message = await widget.preMessageSending!(message);
     }
 
-    final channel = streamChannel.channel;
+    message = message.replaceMentionsWithId();
+
+    // If the channel is not up to date, we should reload it before sending
+    // the message.
     if (!channel.state!.isUpToDate) {
       await streamChannel.reloadChannel();
+
+      // We need to wait for the frame to be rendered with the updated channel
+      // state before sending the message.
+      await WidgetsBinding.instance.endOfFrame;
     }
 
-    message = message.replaceMentionsWithId();
+    await _sendOrUpdateMessage(
+      message: message,
+      skipEnrichUrl: skipEnrichUrl,
+    );
+
+    if (shouldKeepFocus) {
+      FocusScope.of(context).requestFocus(_effectiveFocusNode);
+    } else {
+      FocusScope.of(context).unfocus();
+    }
+  }
+
+  Future<void> _sendOrUpdateMessage({
+    required Message message,
+    bool skipEnrichUrl = false,
+  }) async {
+    final channel = StreamChannel.of(context).channel;
 
     try {
       Future sendingFuture;
@@ -1425,12 +1453,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
           message,
           skipEnrichUrl: skipEnrichUrl,
         );
-      }
-
-      if (shouldKeepFocus) {
-        FocusScope.of(context).requestFocus(_effectiveFocusNode);
-      } else {
-        FocusScope.of(context).unfocus();
       }
 
       final resp = await sendingFuture;

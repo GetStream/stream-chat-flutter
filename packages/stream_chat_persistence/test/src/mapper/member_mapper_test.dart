@@ -29,8 +29,8 @@ void main() {
     expect(member.createdAt, isSameDateAs(entity.createdAt));
     expect(member.updatedAt, isSameDateAs(entity.updatedAt));
     expect(member.channelRole, entity.channelRole);
-    expect(member.inviteAcceptedAt, isSameDateAs(entity.inviteAcceptedAt!));
-    expect(member.inviteRejectedAt, isSameDateAs(entity.inviteRejectedAt!));
+    expect(member.inviteAcceptedAt, isSameDateAs(entity.inviteAcceptedAt));
+    expect(member.inviteRejectedAt, isSameDateAs(entity.inviteRejectedAt));
     expect(member.invited, entity.invited);
     expect(member.banned, entity.banned);
     expect(member.shadowBanned, entity.shadowBanned);
@@ -59,8 +59,8 @@ void main() {
     expect(entity.createdAt, isSameDateAs(member.createdAt));
     expect(entity.updatedAt, isSameDateAs(member.updatedAt));
     expect(entity.channelRole, member.channelRole);
-    expect(entity.inviteAcceptedAt, isSameDateAs(member.inviteAcceptedAt!));
-    expect(entity.inviteRejectedAt, isSameDateAs(member.inviteRejectedAt!));
+    expect(entity.inviteAcceptedAt, isSameDateAs(member.inviteAcceptedAt));
+    expect(entity.inviteRejectedAt, isSameDateAs(member.inviteRejectedAt));
     expect(entity.invited, member.invited);
     expect(entity.banned, member.banned);
     expect(entity.shadowBanned, member.shadowBanned);

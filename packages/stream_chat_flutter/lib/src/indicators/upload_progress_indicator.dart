@@ -51,7 +51,7 @@ class StreamUploadProgressIndicator extends StatelessWidget {
           SizedBox(
             height: 16,
             width: 16,
-            child: CircularProgressIndicator(
+            child: CircularProgressIndicator.adaptive(
               strokeWidth: 3,
               valueColor: AlwaysStoppedAnimation(progressIndicatorColor),
             ),

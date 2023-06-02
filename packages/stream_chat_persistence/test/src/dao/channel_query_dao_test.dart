@@ -132,7 +132,7 @@ void main() {
         // Should match lastMessageAt date
         expect(
           updatedChannel.lastMessageAt,
-          isSameDateAs(insertedChannel.lastMessageAt!),
+          isSameDateAs(insertedChannel.lastMessageAt),
         );
       }
     });
@@ -177,7 +177,7 @@ void main() {
         // Should match lastMessageAt date
         expect(
           updatedChannel.lastMessageAt,
-          isSameDateAs(insertedChannel.lastMessageAt!),
+          isSameDateAs(insertedChannel.lastMessageAt),
         );
       }
     });
@@ -220,7 +220,7 @@ void main() {
         // Should match lastMessageAt date
         expect(
           updatedChannel.lastMessageAt,
-          isSameDateAs(insertedChannel.lastMessageAt!),
+          isSameDateAs(insertedChannel.lastMessageAt),
         );
       }
     });

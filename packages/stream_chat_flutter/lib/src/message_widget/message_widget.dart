@@ -217,17 +217,9 @@ class StreamMessageWidget extends StatefulWidget {
             );
           },
           'giphy': (context, message, attachments) {
-            final border = RoundedRectangleBorder(
-              side: attachmentBorderSide ??
-                  BorderSide(
-                    color: StreamChatTheme.of(context).colorTheme.borders,
-                  ),
-              borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-            );
-
-            return WrapAttachmentWidget(
-              attachmentWidget: Column(
-                children: attachments.map((attachment) {
+            final attachmentWidget = Column(
+              children: [
+                ...attachments.map((attachment) {
                   final mediaQueryData = MediaQuery.of(context);
                   return StreamGiphyAttachment(
                     attachment: attachment,
@@ -240,14 +232,25 @@ class StreamMessageWidget extends StatefulWidget {
                     onShowMessage: onShowMessage,
                     onReplyMessage: onReplyTap,
                     onAttachmentTap: onAttachmentTap != null
-                        ? () {
-                            onAttachmentTap(message, attachment);
-                          }
+                        ? () => onAttachmentTap(message, attachment)
                         : null,
                   );
-                }).toList(),
-              ),
+                }),
+              ],
+            );
+
+            // If the message is ephemeral, we don't want to show the border.
+            if (message.isEphemeral) return attachmentWidget;
+
+            final color = StreamChatTheme.of(context).colorTheme.borders;
+            final border = RoundedRectangleBorder(
+              side: attachmentBorderSide ?? BorderSide(color: color),
+              borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+            );
+
+            return WrapAttachmentWidget(
               attachmentShape: border,
+              attachmentWidget: attachmentWidget,
             );
           },
           'file': (context, message, attachments) {

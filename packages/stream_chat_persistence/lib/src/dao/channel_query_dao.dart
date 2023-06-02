@@ -81,13 +81,13 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
     final cachedChannelCids = await getCachedChannelCids(filter);
     final query = select(channels)..where((c) => c.cid.isIn(cachedChannelCids));
 
-    final cachedChannels = await (query.join([
+    final cachedChannels = await query.join([
       leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
     ]).map((row) {
       final createdByEntity = row.readTableOrNull(users);
       final channelEntity = row.readTable(channels);
       return channelEntity.toChannelModel(createdBy: createdByEntity?.toUser());
-    })).get();
+    }).get();
 
     var chainedComparator = (ChannelModel a, ChannelModel b) {
       final dateA = a.lastMessageAt ?? a.createdAt;

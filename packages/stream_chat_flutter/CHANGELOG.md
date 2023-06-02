@@ -1,3 +1,43 @@
+## 6.2.0
+
+🐞 Fixed
+
+- [[#1546]](https://github.com/GetStream/stream-chat-flutter/issues/1546)
+  Fixed `StreamMessageInputTheme.linkHighlightColor` returning null for default theme.
+- [[#1548]](https://github.com/GetStream/stream-chat-flutter/issues/1548) Fixed `StreamMessageInput` urlRegex only
+  matching the lowercase `http(s)|ftp`.
+- [[#1542]](https://github.com/GetStream/stream-chat-flutter/issues/1542) Handle error thrown in `StreamMessageInput`
+  when unable to fetch a link preview.
+- [[#1540]](https://github.com/GetStream/stream-chat-flutter/issues/1540) Use `CircularProgressIndicator.adaptive`
+  instead of material indicator.
+- [[#1490]](https://github.com/GetStream/stream-chat-flutter/issues/1490) Fixed `editMessageInputBuilder` property not
+  used in `MessageActionsModal.editMessage` option.
+- [[#1544]](https://github.com/GetStream/stream-chat-flutter/issues/1544) Fixed error thrown when unable to fetch
+  image/data in Message link preview.
+- [[#1482]](https://github.com/GetStream/stream-chat-flutter/issues/1482) Fixed `StreaChannelListTile` not showing
+  unread indicator when `currentUser` is not present in the initial member list.
+- [[#1487]](https://github.com/GetStream/stream-chat-flutter/issues/1487) Use localized title
+  for `WebOrDesktopAttachmentPickerOption` in `StreamMessageInput`.
+- [[#1250]](https://github.com/GetStream/stream-chat-flutter/issues/1250) Fixed bottomRow widgetSpans getting resized
+  twice when `textScaling` is enabled.
+- [[#1498]](https://github.com/GetStream/stream-chat-flutter/issues/1498) Fixed `MessageInput` autocomplete not working
+  on non-mobile platforms.
+- [[#1576]](https://github.com/GetStream/stream-chat-flutter/issues/1576) Temporary fix for `StreamMessageListView`
+  getting broken when loaded at a particular message and a new message is added.
+
+✅ Added
+
+- Added support for `StreamMessageThemeData.urlAttachmentTextMaxLine` to specify the `.maxLines` for the url attachment
+  text. [#1543](https://github.com/GetStream/stream-chat-flutter/issues/1543)
+
+🔄 Changed
+
+- Updated `shimmer` dependency to `^3.0.0`.
+- Updated `image_gallery_saver` dependency to `^2.0.1`.
+- Deprecated `ChannelPreview` in favor of `StreamChannelListTile`.
+- Updated `stream_chat_flutter_core` dependency
+  to [`6.2.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 6.1.0
 
 🐞 Fixed
