@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#1585]](https://github.com/GetStream/stream-chat-flutter/issues/1585) Fixed channels left not being removed from
+  the persistent storage.
+
 ## 6.2.0
 
 🐞 Fixed
