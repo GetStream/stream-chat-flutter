@@ -29,7 +29,7 @@ dependencies:
   http_parser: ^4.0.0
   image_gallery_saver: ^2.0.1
   image_picker: ^0.8.2
-  jiffy: ^6.2.1
+  jiffy: ^5.0.0
   lottie: ^2.0.0
   meta: ^1.8.0
   path_provider: ^2.0.9

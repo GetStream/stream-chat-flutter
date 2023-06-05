@@ -77,7 +77,7 @@ class StreamUserItem extends StatelessWidget {
       user.online
           ? context.translations.userOnlineText
           : '${context.translations.userLastOnlineText} '
-              '${Jiffy.parseFromDateTime(user.lastActive!).fromNow()}',
+              '${Jiffy(user.lastActive!).fromNow()}',
       style: chatTheme.textTheme.footnote.copyWith(
         color: chatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
       ),

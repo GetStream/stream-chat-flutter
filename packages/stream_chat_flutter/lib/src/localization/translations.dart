@@ -611,13 +611,13 @@ class DefaultTranslations implements Translations {
     } else if (date == yesterday) {
       return 'yesterday';
     } else {
-      return 'on ${Jiffy.parseFromDateTime(date).MMMd}';
+      return 'on ${Jiffy(date).MMMd}';
     }
   }
 
   @override
   String sentAtText({required DateTime date, required DateTime time}) =>
-      'Sent ${_getDay(date)} at ${Jiffy.parseFromDateTime(time.toLocal()).format(pattern: 'HH:mm')}';
+      'Sent ${_getDay(date)} at ${Jiffy(time.toLocal()).format('HH:mm')}';
 
   @override
   String get todayLabel => 'Today';
