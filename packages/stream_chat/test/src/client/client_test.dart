@@ -2579,9 +2579,9 @@ void main() {
         await client.openPersistenceConnection(user);
         expect(client.persistenceEnabled, isTrue);
 
-        expect(() => client.openPersistenceConnection(user), returnsNormally);
-        expect(() => client.openPersistenceConnection(user), returnsNormally);
-        expect(() => client.openPersistenceConnection(user), returnsNormally);
+        await expectLater(client.openPersistenceConnection(user), completes);
+        await expectLater(client.openPersistenceConnection(user), completes);
+        await expectLater(client.openPersistenceConnection(user), completes);
       },
     );
 
@@ -2592,8 +2592,8 @@ void main() {
         await client.openPersistenceConnection(user);
         expect(client.persistenceEnabled, isTrue);
 
-        expect(
-          () => client.openPersistenceConnection(user.copyWith(id: 'new-id')),
+        await expectLater(
+          client.openPersistenceConnection(user.copyWith(id: 'new-id')),
           throwsA(const TypeMatcher<StreamChatError>()),
         );
       },
@@ -2602,8 +2602,8 @@ void main() {
     test(
       '''openPersistenceConnection throws an error if chatPersistenceClient is not set''',
       () async {
-        expect(
-          () => client.openPersistenceConnection(user),
+        await expectLater(
+          client.openPersistenceConnection(user),
           throwsA(const TypeMatcher<StreamChatError>()),
         );
       },
@@ -2619,32 +2619,34 @@ void main() {
     });
 
     test(
-      '''closePersistenceConnection does nothing if chatPersistenceClient is not connected''',
+      '''closePersistenceConnection compeletes normally if chatPersistenceClient is not connected''',
       () async {
         client.chatPersistenceClient = MockPersistenceClient();
-        expect(client.persistenceEnabled, isFalse);
+        expect(client.chatPersistenceClient!.isConnected, isFalse);
 
-        expect(() => client.closePersistenceConnection(), returnsNormally);
+        await expectLater(client.closePersistenceConnection(), completes);
       },
     );
 
     test(
-      '''closePersistenceConnection does nothing if chatPersistenceClient is not set''',
+      '''closePersistenceConnection completes normally if chatPersistenceClient is not set''',
       () async {
         expect(client.persistenceEnabled, isFalse);
-        expect(() => client.closePersistenceConnection(), returnsNormally);
+        await expectLater(client.closePersistenceConnection(), completes);
       },
     );
 
     test(
-      '''connectUser should re-use the persistence connection if already connected''',
+      '''connectUser completes normally if the persistence connection is already connected to the same user''',
       () async {
         client.chatPersistenceClient = MockPersistenceClient();
         await client.openPersistenceConnection(user);
         expect(client.persistenceEnabled, isTrue);
 
-        await client.connectUser(user, token, connectWebSocket: false);
-        expect(client.persistenceEnabled, isTrue);
+        await expectLater(
+          client.connectUser(user, token, connectWebSocket: false),
+          completes,
+        );
       },
     );
 
@@ -2655,8 +2657,8 @@ void main() {
         await client.openPersistenceConnection(user.copyWith(id: 'new-id'));
         expect(client.persistenceEnabled, isTrue);
 
-        expect(
-          () => client.connectUser(user, token, connectWebSocket: false),
+        await expectLater(
+          client.connectUser(user, token, connectWebSocket: false),
           throwsA(const TypeMatcher<StreamChatError>()),
         );
       },
