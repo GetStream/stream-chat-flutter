@@ -71,6 +71,7 @@ class StreamAttachmentHandlerDesktop extends StreamAttachmentHandler {
       Uint8List.fromList(response.data!),
       mimeType: attachment.mimeType,
       name: fileName,
+      path: path,
     );
 
     // Save the file to the user's selected path.
