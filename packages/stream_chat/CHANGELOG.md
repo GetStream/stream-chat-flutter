@@ -1,5 +1,11 @@
 ## Upcoming
 
+🔄 Changed
+
+- Updated `dio` dependency to `^5.2.0`.
+
+## 6.2.0
+
 🐞 Fixed
 
 - [[#1422]](https://github.com/GetStream/stream-chat-flutter/issues/1422) Fixed `User.createdAt` property using

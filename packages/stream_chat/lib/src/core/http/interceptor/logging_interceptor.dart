@@ -119,32 +119,32 @@ class LoggingInterceptor extends Interceptor {
   }
 
   @override
-  void onError(DioError err, ErrorInterceptorHandler handler) {
+  void onError(DioException exception, ErrorInterceptorHandler handler) {
     if (error) {
-      if (err.type == DioErrorType.badResponse) {
-        final uri = err.response?.requestOptions.uri;
+      if (exception.type == DioExceptionType.badResponse) {
+        final uri = exception.response?.requestOptions.uri;
         _printBoxed(
           _logPrintError,
           header:
-              'DioError ║ Status: ${err.response?.statusCode} ${err.response?.statusMessage}',
+              'DioException ║ Status: ${exception.response?.statusCode} ${exception.response?.statusMessage}',
           text: uri.toString(),
         );
-        if (err.response != null && err.response?.data != null) {
-          _logPrintError('╔ ${err.type.toString()}');
-          _printResponse(_logPrintError, err.response!);
+        if (exception.response != null && exception.response?.data != null) {
+          _logPrintError('╔ ${exception.type.toString()}');
+          _printResponse(_logPrintError, exception.response!);
         }
         _printLine(_logPrintError, '╚');
         _logPrintError('');
       } else {
         _printBoxed(
           _logPrintError,
-          header: 'DioError ║ ${err.type}',
-          text: err.message,
+          header: 'DioException ║ ${exception.type}',
+          text: exception.message,
         );
-        _printRequestHeader(_logPrintError, err.requestOptions);
+        _printRequestHeader(_logPrintError, exception.requestOptions);
       }
     }
-    super.onError(err, handler);
+    super.onError(exception, handler);
   }
 
   @override

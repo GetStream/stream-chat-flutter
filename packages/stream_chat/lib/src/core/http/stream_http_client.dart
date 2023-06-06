@@ -92,16 +92,16 @@ class StreamHttpClient {
   /// calling [close] will throw an exception.
   void close({bool force = false}) => httpClient.close(force: force);
 
-  StreamChatNetworkError _parseError(DioError err) {
+  StreamChatNetworkError _parseError(DioException exception) {
     StreamChatNetworkError error;
     // locally thrown dio error
-    if (err is StreamChatDioError) {
-      error = err.error;
+    if (exception is StreamChatDioError) {
+      error = exception.error;
     } else {
       // real network request dio error
-      error = StreamChatNetworkError.fromDioError(err);
+      error = StreamChatNetworkError.fromDioException(exception);
     }
-    return error..stackTrace = err.stackTrace;
+    return error..stackTrace = exception.stackTrace;
   }
 
   /// Handy method to make http GET request with error parsing.
@@ -121,7 +121,7 @@ class StreamHttpClient {
         cancelToken: cancelToken,
       );
       return response;
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       throw _parseError(error);
     }
   }
@@ -147,7 +147,7 @@ class StreamHttpClient {
         cancelToken: cancelToken,
       );
       return response;
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       throw _parseError(error);
     }
   }
@@ -167,7 +167,7 @@ class StreamHttpClient {
         cancelToken: cancelToken,
       );
       return response;
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       throw _parseError(error);
     }
   }
@@ -193,7 +193,7 @@ class StreamHttpClient {
         cancelToken: cancelToken,
       );
       return response;
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       throw _parseError(error);
     }
   }
@@ -219,7 +219,7 @@ class StreamHttpClient {
         cancelToken: cancelToken,
       );
       return response;
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       throw _parseError(error);
     }
   }
@@ -268,7 +268,7 @@ class StreamHttpClient {
         cancelToken: cancelToken,
       );
       return response;
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       throw _parseError(error);
     }
   }
@@ -281,7 +281,7 @@ class StreamHttpClient {
     try {
       final response = await httpClient.fetch<T>(requestOptions);
       return response;
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       throw _parseError(error);
     }
   }

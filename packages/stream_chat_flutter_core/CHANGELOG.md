@@ -1,8 +1,13 @@
 ## Upcoming
 
+- Updated `stream_chat` dependency to [`Upcoming`](https://pub.dev/packages/stream_chat/changelog).
+
+## 6.2.0
+
 - Fixed `StreamMessageInputController.textPatternStyle` not matching case-insensitive patterns.
 - Updated `connectivity_plus` dependency to `^4.0.0`
 - Fixed `StreamChannel` shows black screen while loading in some cases.
+- Updated `stream_chat` dependency to [`6.2.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 6.1.0
 
