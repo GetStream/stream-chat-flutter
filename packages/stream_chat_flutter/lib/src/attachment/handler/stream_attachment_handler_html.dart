@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:stream_chat_flutter/src/attachment/handler/common.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler_base.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -50,13 +53,53 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
     Options? options,
-  }) {
-    return downloadWebOrDesktopAttachment(
-      attachment,
+  }) async {
+    final type = attachment.type;
+
+    String? downloadUrl;
+    String? fileName;
+    /* ---IMAGES/GIFS--- */
+    if (type == 'image') {
+      downloadUrl = attachment.imageUrl ?? attachment.assetUrl;
+      fileName = attachment.title;
+      fileName ??= 'attachment.${attachment.mimeType ?? 'png'}';
+    }
+    /* ---GIPHY's--- */
+    else if (type == 'giphy') {
+      downloadUrl = attachment.thumbUrl;
+      fileName = '${attachment.title}.gif';
+    }
+    /* ---FILES AND VIDEOS--- */
+    else if (type == 'file' || type == 'video') {
+      downloadUrl = attachment.assetUrl;
+      fileName = attachment.title;
+    }
+
+    assert(
+      downloadUrl != null,
+      'Attachment must have an assetUrl or imageUrl or thumbUrl',
+    );
+
+    final response = await Dio().get<List<int>>(
+      downloadUrl!,
       onReceiveProgress: onReceiveProgress,
       queryParameters: queryParameters,
       cancelToken: cancelToken,
-      options: options,
+      // set responseType to `bytes`
+      options: options?.copyWith(responseType: ResponseType.bytes) ??
+          Options(responseType: ResponseType.bytes),
     );
+
+    // Create an XFile for proper file saving
+    final file = XFile.fromData(
+      Uint8List.fromList(response.data!),
+      mimeType: attachment.mimeType,
+      name: fileName,
+    );
+
+    // Save the file to the user's selected path.
+    // The parameter is ignored in web implementation.
+    await file.saveTo('');
+    return null;
   }
 }
