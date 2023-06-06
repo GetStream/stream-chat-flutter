@@ -20,7 +20,7 @@ void main() {
       await client.connect(userId, databaseProvider: testDatabaseProvider);
       expect(client.isConnected, true);
       expect(client.db, isA<DriftChatDatabase>());
-      expect(client.db!.userId, userId);
+      expect(client.userId, userId);
 
       addTearDown(() async {
         await client.disconnect();
@@ -33,7 +33,7 @@ void main() {
       await client.connect(userId, databaseProvider: testDatabaseProvider);
       expect(client.isConnected, true);
       expect(client.db, isA<DriftChatDatabase>());
-      expect(client.db!.userId, userId);
+      expect(client.userId, userId);
       expect(
         () => client.connect(userId, databaseProvider: testDatabaseProvider),
         throwsException,
