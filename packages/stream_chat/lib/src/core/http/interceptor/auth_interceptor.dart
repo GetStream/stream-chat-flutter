@@ -46,26 +46,26 @@ class AuthInterceptor extends QueuedInterceptor {
 
   @override
   void onError(
-    DioError err,
+    DioException exception,
     ErrorInterceptorHandler handler,
   ) async {
-    final data = err.response?.data;
+    final data = exception.response?.data;
     if (data == null || data is! Map<String, dynamic>) {
-      return handler.next(err);
+      return handler.next(exception);
     }
 
     final error = ErrorResponse.fromJson(data);
     if (error.code == ChatErrorCode.tokenExpired.code) {
-      if (_tokenManager.isStatic) return handler.next(err);
+      if (_tokenManager.isStatic) return handler.next(exception);
       await _tokenManager.loadToken(refresh: true);
       try {
-        final options = err.requestOptions;
+        final options = exception.requestOptions;
         final response = await _client.fetch(options);
         return handler.resolve(response);
-      } on DioError catch (error) {
-        return handler.next(error);
+      } on DioException catch (exception) {
+        return handler.next(exception);
       }
     }
-    return handler.next(err);
+    return handler.next(exception);
   }
 }

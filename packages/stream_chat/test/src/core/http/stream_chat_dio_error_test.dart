@@ -12,7 +12,7 @@ void main() {
       requestOptions: options,
     );
 
-    expect(dioError, isA<DioError>());
+    expect(dioError, isA<DioException>());
     expect(dioError, isNotNull);
     expect(dioError.error, error);
     expect(dioError.requestOptions, options);
