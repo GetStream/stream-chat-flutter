@@ -4,6 +4,8 @@
 - [[#1422]](https://github.com/GetStream/stream-chat-flutter/issues/1422) Removed default values
   from `UserEntity` `createdAt` and `updatedAt` fields.
 - Updated `stream_chat` dependency to [`6.2.0`](https://pub.dev/packages/stream_chat/changelog).
+- Added support for `StreamChatPersistenceClient.openPersistenceConnection`
+  and `StreamChatPersistenceClient.closePersistenceConnection` for opening and closing the database connection.
 
 ## 6.1.0
 

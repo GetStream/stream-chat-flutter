@@ -14,6 +14,9 @@
 ✅ Added
 
 - Added support for `ChatPersistenceClient.isConnected` for checking if the client is connected to the database.
+- Added support for `ChatPersistenceClient.userId` for getting the current connected user id.
+- Added two new methods `ChatPersistenceClient.disconnect` and `ChatPersistenceClient.connect` for disconnecting and
+  connecting to the database.
 
 ## 6.1.0
 
