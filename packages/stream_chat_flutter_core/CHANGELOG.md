@@ -1,3 +1,7 @@
+## Upcoming
+
+- Updated `stream_chat` dependency to [`Upcoming`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 6.2.0
 
 - Fixed `StreamMessageInputController.textPatternStyle` not matching case-insensitive patterns.
