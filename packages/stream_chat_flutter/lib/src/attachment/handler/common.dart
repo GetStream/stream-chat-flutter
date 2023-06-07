@@ -4,9 +4,41 @@ import 'package:dio/dio.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-/// Downloads the [attachment] to the device and returns
-/// the path to the file.
-Future<String?> downloadWebOrDesktopAttachment(
+/// Represents the url and bytes of an attachment.
+class AttachmentData {
+  /// Creates a new [AttachmentData] instance.
+  const AttachmentData({
+    required this.bytes,
+    required this.downloadUrl,
+    required this.fileName,
+    this.mimeType,
+  });
+
+  /// The data downloaded from the [downloadUrl].
+  final Uint8List bytes;
+
+  /// The url of the attachment that was used to download the [bytes].
+  final String downloadUrl;
+
+  /// The name of the file to use when saving the [bytes].
+  final String fileName;
+
+  /// The mime type of the attachment.
+  final String? mimeType;
+
+  /// Creates an [XFile] from the [AttachmentData].
+  XFile toXFile({String? path}) {
+    return XFile.fromData(
+      bytes,
+      mimeType: mimeType,
+      name: fileName,
+      path: path,
+    );
+  }
+}
+
+/// Downloads the [attachment] and returns the [AttachmentData].
+Future<AttachmentData> downloadAttachmentData(
   Attachment attachment, {
   ProgressCallback? onReceiveProgress,
   Map<String, dynamic>? queryParameters,
@@ -34,13 +66,14 @@ Future<String?> downloadWebOrDesktopAttachment(
     fileName = attachment.title;
   }
 
-  assert(
-    downloadUrl != null,
-    'Attachment must have an assetUrl or imageUrl or thumbUrl',
-  );
+  if (downloadUrl == null) {
+    throw ArgumentError(
+      'Attachment must have an assetUrl or imageUrl or thumbUrl',
+    );
+  }
 
   final response = await Dio().get<List<int>>(
-    downloadUrl!,
+    downloadUrl,
     onReceiveProgress: onReceiveProgress,
     queryParameters: queryParameters,
     cancelToken: cancelToken,
@@ -49,23 +82,12 @@ Future<String?> downloadWebOrDesktopAttachment(
         Options(responseType: ResponseType.bytes),
   );
 
-  // Open the native file browser so the user can select the download path.
-  final path = await getSavePath(suggestedName: fileName);
+  final bytes = Uint8List.fromList(response.data!);
 
-  if (path == null) {
-    // Operation was canceled by the user.
-    return null;
-  }
-
-  // Create an XFile for proper file saving
-  final file = XFile.fromData(
-    Uint8List.fromList(response.data!),
+  return AttachmentData(
+    bytes: bytes,
+    downloadUrl: downloadUrl,
+    fileName: fileName!,
     mimeType: attachment.mimeType,
-    name: fileName,
-    path: path,
   );
-
-  // Save the file to the user's selected path.
-  await file.saveTo(path);
-  return path;
 }

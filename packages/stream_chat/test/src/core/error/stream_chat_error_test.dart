@@ -60,7 +60,7 @@ void main() {
       expect(error.message, message);
     });
 
-    test('.fromDioError', () {
+    test('.fromDioException', () {
       const code = 333;
       const statusCode = 666;
       const message = 'test-error-message';
@@ -69,7 +69,7 @@ void main() {
         ..code = code
         ..statusCode = statusCode
         ..message = message;
-      final dioError = DioError(
+      final dioError = DioException(
         requestOptions: options,
         response: Response(
           requestOptions: options,
@@ -77,7 +77,7 @@ void main() {
           data: data.toJson(),
         ),
       );
-      final error = StreamChatNetworkError.fromDioError(dioError);
+      final error = StreamChatNetworkError.fromDioException(dioError);
       expect(error, isNotNull);
       expect(error.code, code);
       expect(error.message, message);

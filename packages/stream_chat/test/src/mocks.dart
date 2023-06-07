@@ -64,11 +64,26 @@ class MockAttachmentFileUploader extends Mock
     implements AttachmentFileUploader {}
 
 class MockPersistenceClient extends Mock implements ChatPersistenceClient {
-  @override
-  Future<void> connect(String userId) => Future.value();
+  String? _userId;
+  bool _isConnected = false;
 
   @override
-  Future<void> disconnect({bool flush = false}) => Future.value();
+  bool get isConnected => _isConnected;
+
+  @override
+  String? get userId => _userId;
+
+  @override
+  Future<void> connect(String userId) async {
+    _userId = userId;
+    _isConnected = true;
+  }
+
+  @override
+  Future<void> disconnect({bool flush = false}) async {
+    _userId = null;
+    _isConnected = false;
+  }
 }
 
 class MockStreamChatClient extends Mock implements StreamChatClient {
