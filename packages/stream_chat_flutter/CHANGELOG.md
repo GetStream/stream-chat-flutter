@@ -3,6 +3,8 @@
 🐞 Fixed
 
 - [[#1592]](https://github.com/GetStream/stream-chat-flutter/issues/1592) Fixed broken attachment download on web.
+- [[#1591]](https://github.com/GetStream/stream-chat-flutter/issues/1591) Fixed `StreamChannelInfoBottomSheet` not
+  rendering member list properly.
 
 🔄 Changed
 
