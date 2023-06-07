@@ -1,5 +1,10 @@
 ## Upcoming
 
+🐞 Fixed
+
+- [[#1592]](https://github.com/GetStream/stream-chat-flutter/issues/1592)
+  Fixed broken attachments downloads in web
+  
 🔄 Changed
 
 - Updated `dio` dependency to `^5.2.0`.
