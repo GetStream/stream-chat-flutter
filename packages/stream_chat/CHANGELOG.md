@@ -1,3 +1,14 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#1585]](https://github.com/GetStream/stream-chat-flutter/issues/1585) Fixed channels left not being removed from
+  the persistent storage.
+  
+🔄 Changed
+
+- Updated `dio` dependency to `^5.2.0`.
+
 ## 6.2.0
 
 🐞 Fixed
@@ -8,6 +19,9 @@
 ✅ Added
 
 - Added support for `ChatPersistenceClient.isConnected` for checking if the client is connected to the database.
+- Added support for `ChatPersistenceClient.userId` for getting the current connected user id.
+- Added two new methods `ChatPersistenceClient.disconnect` and `ChatPersistenceClient.connect` for disconnecting and
+  connecting to the database.
 
 ## 6.1.0
 

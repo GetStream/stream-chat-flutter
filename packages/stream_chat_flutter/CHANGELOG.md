@@ -1,10 +1,3 @@
-## Upcoming
-
-🐞 Fixed
-
-- [[#1427]](https://github.com/GetStream/stream-chat-flutter/issues/1427) Fixed unable to load asset error for
-  `packages/stream_chat_flutter/lib/svgs/video_call_icon.svg`.
-
 ## 6.2.0
 
 🐞 Fixed

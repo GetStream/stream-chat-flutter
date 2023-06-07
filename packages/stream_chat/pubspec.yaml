@@ -11,7 +11,7 @@ environment:
 dependencies:
   async: ^2.10.0
   collection: ^1.17.0
-  dio: ^5.1.1
+  dio: ^5.2.0
   equatable: ^2.0.5
   freezed_annotation: ^2.2.0
   http_parser: ^4.0.2

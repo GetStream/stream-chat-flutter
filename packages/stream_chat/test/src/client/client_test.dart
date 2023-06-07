@@ -2544,4 +2544,124 @@ void main() {
       },
     );
   });
+
+  group('PersistenceConnectionTests', () {
+    const apiKey = 'test-api-key';
+    late final api = FakeChatApi();
+    late final ws = FakeWebSocket();
+
+    final user = User(id: 'test-user-id');
+    final token = Token.development(user.id).rawValue;
+
+    late StreamChatClient client;
+
+    setUp(() async {
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      expect(client.persistenceEnabled, isFalse);
+    });
+
+    tearDown(() {
+      client.chatPersistenceClient = null;
+      expect(client.persistenceEnabled, isFalse);
+      client.dispose();
+    });
+
+    test('openPersistenceConnection connects the client to the user', () async {
+      client.chatPersistenceClient = MockPersistenceClient();
+      await client.openPersistenceConnection(user);
+      expect(client.persistenceEnabled, isTrue);
+    });
+
+    test(
+      '''multiple call to openPersistenceConnection does not throws an error if already connected to the same user''',
+      () async {
+        client.chatPersistenceClient = MockPersistenceClient();
+        await client.openPersistenceConnection(user);
+        expect(client.persistenceEnabled, isTrue);
+
+        await expectLater(client.openPersistenceConnection(user), completes);
+        await expectLater(client.openPersistenceConnection(user), completes);
+        await expectLater(client.openPersistenceConnection(user), completes);
+      },
+    );
+
+    test(
+      '''openPersistenceConnection throws an error if client is already connected to a different user''',
+      () async {
+        client.chatPersistenceClient = MockPersistenceClient();
+        await client.openPersistenceConnection(user);
+        expect(client.persistenceEnabled, isTrue);
+
+        await expectLater(
+          client.openPersistenceConnection(user.copyWith(id: 'new-id')),
+          throwsA(const TypeMatcher<StreamChatError>()),
+        );
+      },
+    );
+
+    test(
+      '''openPersistenceConnection throws an error if chatPersistenceClient is not set''',
+      () async {
+        await expectLater(
+          client.openPersistenceConnection(user),
+          throwsA(const TypeMatcher<StreamChatError>()),
+        );
+      },
+    );
+
+    test('closePersistenceConnection disconnects the client', () async {
+      client.chatPersistenceClient = MockPersistenceClient();
+      await client.openPersistenceConnection(user);
+      expect(client.persistenceEnabled, isTrue);
+
+      await client.closePersistenceConnection();
+      expect(client.persistenceEnabled, isFalse);
+    });
+
+    test(
+      '''closePersistenceConnection compeletes normally if chatPersistenceClient is not connected''',
+      () async {
+        client.chatPersistenceClient = MockPersistenceClient();
+        expect(client.chatPersistenceClient!.isConnected, isFalse);
+
+        await expectLater(client.closePersistenceConnection(), completes);
+      },
+    );
+
+    test(
+      '''closePersistenceConnection completes normally if chatPersistenceClient is not set''',
+      () async {
+        expect(client.persistenceEnabled, isFalse);
+        await expectLater(client.closePersistenceConnection(), completes);
+      },
+    );
+
+    test(
+      '''connectUser completes normally if the persistence connection is already connected to the same user''',
+      () async {
+        client.chatPersistenceClient = MockPersistenceClient();
+        await client.openPersistenceConnection(user);
+        expect(client.persistenceEnabled, isTrue);
+
+        await expectLater(
+          client.connectUser(user, token, connectWebSocket: false),
+          completes,
+        );
+      },
+    );
+
+    test(
+      '''connectUser should throw if the persistence connection if already connected to a different user''',
+      () async {
+        client.chatPersistenceClient = MockPersistenceClient();
+        await client.openPersistenceConnection(user.copyWith(id: 'new-id'));
+        expect(client.persistenceEnabled, isTrue);
+
+        await expectLater(
+          client.connectUser(user, token, connectWebSocket: false),
+          throwsA(const TypeMatcher<StreamChatError>()),
+        );
+      },
+    );
+  });
 }
