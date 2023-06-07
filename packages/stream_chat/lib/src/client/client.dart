@@ -1576,6 +1576,8 @@ class ClientState {
         currentUser = currentUser?.copyWith(totalUnreadCount: count);
       }));
 
+    _listenChannelLeft();
+
     _listenChannelDeleted();
 
     _listenChannelHidden();
@@ -1636,12 +1638,30 @@ class ClientState {
     );
   }
 
+  void _listenChannelLeft() {
+    _eventsSubscription?.add(
+      _client
+          .on(
+        EventType.memberRemoved,
+        EventType.notificationRemovedFromChannel,
+      )
+          .listen((event) async {
+        final isCurrentUser = event.user!.id == currentUser!.id;
+        if (isCurrentUser) {
+          final eventChannel = event.channel!;
+          await _client.chatPersistenceClient
+              ?.deleteChannels([eventChannel.cid]);
+          channels.remove(eventChannel.cid)?.dispose();
+        }
+      }),
+    );
+  }
+
   void _listenChannelDeleted() {
     _eventsSubscription?.add(
       _client
           .on(
         EventType.channelDeleted,
-        EventType.notificationRemovedFromChannel,
         EventType.notificationChannelDeleted,
       )
           .listen((Event event) async {
