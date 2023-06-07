@@ -83,7 +83,7 @@ abstract class Translations {
   /// in the [StreamMessageListView]
   String unreadMessagesSeparatorText(
     @Deprecated('unreadCount is not used anymore and will be removed ')
-    int unreadCount,
+        int unreadCount,
   );
 
   /// The label for "connected" in [StreamConnectionStatusBuilder]

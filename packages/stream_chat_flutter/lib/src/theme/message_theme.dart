@@ -23,7 +23,7 @@ class StreamMessageThemeData with Diagnosticable {
     this.avatarTheme,
     this.createdAtStyle,
     @Deprecated('Use urlAttachmentBackgroundColor instead')
-    Color? linkBackgroundColor,
+        Color? linkBackgroundColor,
     Color? urlAttachmentBackgroundColor,
     this.urlAttachmentHostStyle,
     this.urlAttachmentTitleStyle,
@@ -102,7 +102,7 @@ class StreamMessageThemeData with Diagnosticable {
     Color? reactionsBorderColor,
     Color? reactionsMaskColor,
     @Deprecated('Use urlAttachmentBackgroundColor instead')
-    Color? linkBackgroundColor,
+        Color? linkBackgroundColor,
     Color? urlAttachmentBackgroundColor,
     TextStyle? urlAttachmentHostStyle,
     TextStyle? urlAttachmentTitleStyle,
