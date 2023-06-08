@@ -568,9 +568,8 @@ class StreamChatClient {
   /// Requests channels with a given query.
   Stream<List<Channel>> queryChannels({
     Filter? filter,
-    @Deprecated('''
-    sort has been deprecated. 
-    Please use channelStateSort instead.''') List<SortOption<ChannelModel>>? sort,
+    @Deprecated('Use channelStateSort instead.')
+    List<SortOption<ChannelModel>>? sort,
     List<SortOption<ChannelState>>? channelStateSort,
     bool state = true,
     bool watch = true,
@@ -730,7 +729,8 @@ class StreamChatClient {
     Filter? filter,
     @Deprecated('''
     sort has been deprecated. 
-    Please use channelStateSort instead.''') List<SortOption<ChannelModel>>? sort,
+    Please use channelStateSort instead.''')
+    List<SortOption<ChannelModel>>? sort,
     List<SortOption<ChannelState>>? channelStateSort,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
@@ -1555,12 +1555,16 @@ class ClientState {
     _eventsSubscription!
       ..add(_client
           .on()
-          .where((event) =>
-              event.me != null && event.type != EventType.healthCheck)
+          .where((event) {
+            if (event.type == EventType.notificationMutesUpdated) {
+              print("notificationMutesUpdated");
+            }
+            return event.me != null && event.type != EventType.healthCheck;
+          })
           .map((e) => e.me!)
           .listen((user) {
-        currentUser = currentUser?.merge(user) ?? user;
-      }))
+            currentUser = currentUser?.merge(user) ?? user;
+          }))
       ..add(_client
           .on()
           .map((event) => event.unreadChannels)
