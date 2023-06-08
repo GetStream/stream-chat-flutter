@@ -2,7 +2,7 @@ name: stream_flutter_workflow
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  flutter_version: "3.10.0"
+  flutter_version: "3.10.4"
 
 on:
   pull_request:
@@ -17,7 +17,7 @@ on:
     branches:
       - master
       - develop
-      
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
