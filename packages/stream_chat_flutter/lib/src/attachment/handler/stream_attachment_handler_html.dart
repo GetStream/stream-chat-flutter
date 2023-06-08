@@ -50,13 +50,21 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
     Options? options,
-  }) {
-    return downloadWebOrDesktopAttachment(
+  }) async {
+    final data = await downloadAttachmentData(
       attachment,
       onReceiveProgress: onReceiveProgress,
       queryParameters: queryParameters,
       cancelToken: cancelToken,
       options: options,
     );
+
+    // Create an XFile for proper file saving.
+    final file = data.toXFile();
+
+    // Save the file. We are not using the path parameter because it is not
+    // supported on web.
+    await file.saveTo('');
+    return null;
   }
 }

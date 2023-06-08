@@ -1,3 +1,17 @@
+## 6.3.0
+
+🐞 Fixed
+
+- [[#1592]](https://github.com/GetStream/stream-chat-flutter/issues/1592) Fixed broken attachment download on web.
+- [[#1591]](https://github.com/GetStream/stream-chat-flutter/issues/1591) Fixed `StreamChannelInfoBottomSheet` not
+  rendering member list properly.
+- [[#1427]](https://github.com/GetStream/stream-chat-flutter/issues/1427) Fixed unable to load asset error for
+  `packages/stream_chat_flutter/lib/svgs/video_call_icon.svg`.
+
+🔄 Changed
+
+- Updated `dio` dependency to `^5.2.0`.
+
 ## 6.2.0
 
 🐞 Fixed

@@ -63,7 +63,7 @@ class EventType {
   static const String notificationAddedToChannel =
       'notification.added_to_channel';
 
-  /// Event sent when the user is removed to a channel
+  /// Event sent when the user is removed from a channel
   static const String notificationRemovedFromChannel =
       'notification.removed_from_channel';
 
@@ -76,7 +76,7 @@ class EventType {
   /// Event sent when a member is added to a channel
   static const String memberAdded = 'member.added';
 
-  /// Event sent when a member is removed to a channel
+  /// Event sent when a member is removed from a channel
   static const String memberRemoved = 'member.removed';
 
   /// Event sent when a member is updated in a channel

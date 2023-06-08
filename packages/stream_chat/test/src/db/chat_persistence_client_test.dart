@@ -16,6 +16,9 @@ class TestPersistenceClient extends ChatPersistenceClient {
   bool get isConnected => throw UnimplementedError();
 
   @override
+  String? get userId => throw UnimplementedError();
+
+  @override
   Future<void> connect(String userId) => throw UnimplementedError();
 
   @override
@@ -59,9 +62,8 @@ class TestPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<ChannelState>> getChannelStates(
           {Filter? filter,
-          @Deprecated('''
-          sort has been deprecated. 
-          Please use channelStateSort instead.''') List<SortOption<ChannelModel>>? sort,
+          @Deprecated('Use channelStateSort instead.')
+          List<SortOption<ChannelModel>>? sort,
           List<SortOption<ChannelState>>? channelStateSort,
           PaginationParams? paginationParams}) =>
       throw UnimplementedError();

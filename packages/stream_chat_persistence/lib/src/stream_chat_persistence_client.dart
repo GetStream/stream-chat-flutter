@@ -83,6 +83,9 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   bool get isConnected => db != null;
 
   @override
+  String? get userId => db?.userId;
+
+  @override
   Future<void> connect(
     String userId, {
     DatabaseProvider? databaseProvider, // Used only for testing
@@ -248,9 +251,8 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    @Deprecated('''
-    sort has been deprecated. 
-    Please use channelStateSort instead.''') List<SortOption<ChannelModel>>? sort,
+    @Deprecated('Use channelStateSort instead.')
+    List<SortOption<ChannelModel>>? sort,
     List<SortOption<ChannelState>>? channelStateSort,
     PaginationParams? paginationParams,
   }) async {

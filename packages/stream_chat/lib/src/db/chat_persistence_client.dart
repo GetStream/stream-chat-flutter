@@ -17,6 +17,11 @@ abstract class ChatPersistenceClient {
   /// Whether the connection is established.
   bool get isConnected;
 
+  /// The current user id to which the client is connected.
+  ///
+  /// Returns `null` if the client is not connected.
+  String? get userId;
+
   /// Creates a new connection to the client
   Future<void> connect(String userId);
 
@@ -97,9 +102,8 @@ abstract class ChatPersistenceClient {
   /// for filtering out states.
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    @Deprecated('''
-    sort has been deprecated. 
-    Please use channelStateSort instead.''') List<SortOption<ChannelModel>>? sort,
+    @Deprecated('Use channelStateSort instead.')
+    List<SortOption<ChannelModel>>? sort,
     List<SortOption<ChannelState>>? channelStateSort,
     PaginationParams? paginationParams,
   });
