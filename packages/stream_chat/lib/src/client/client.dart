@@ -1555,16 +1555,12 @@ class ClientState {
     _eventsSubscription!
       ..add(_client
           .on()
-          .where((event) {
-            if (event.type == EventType.notificationMutesUpdated) {
-              print("notificationMutesUpdated");
-            }
-            return event.me != null && event.type != EventType.healthCheck;
-          })
+          .where((event) =>
+              event.me != null && event.type != EventType.healthCheck)
           .map((e) => e.me!)
           .listen((user) {
-            currentUser = currentUser?.merge(user) ?? user;
-          }))
+        currentUser = currentUser?.merge(user) ?? user;
+      }))
       ..add(_client
           .on()
           .map((event) => event.unreadChannels)
