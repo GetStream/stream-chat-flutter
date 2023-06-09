@@ -202,10 +202,7 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   }
 
   @override
-  @Deprecated(
-    'Implement loadImage for image loading. '
-    'This feature was deprecated after v6.4.0.',
-  )
+  @Deprecated('Will get replaced by loadImage in the next major version.')
   ImageStreamCompleter loadBuffer(
     MediaThumbnailProvider key,
     DecoderBufferCallback decode,
@@ -223,10 +220,7 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
     );
   }
 
-  @Deprecated(
-    'Implement loadImage for image loading. '
-    'This feature was deprecated after v6.4.0.',
-  )
+  @Deprecated('Will get replaced by loadImage in the next major version.')
   Future<ui.Codec> _loadAsync(
     MediaThumbnailProvider key,
     DecoderBufferCallback decode,
