@@ -1,8 +1,11 @@
 // ignore_for_file: public_member_api_docs
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_example/debug/channel_page.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
 Future<void> main() async {
@@ -255,6 +258,19 @@ class _ChannelPageState extends State<ChannelPage> {
                       widget.onBackPressed!(context);
                     }
                   : null,
+              onImageTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return StreamChannel(
+                        channel: StreamChannel.of(context).channel,
+                        child: const DebugChannelPage(),
+                      );
+                    },
+                  ),
+                );
+              },
               showBackButton: widget.showBackButton,
             ),
             body: Column(
