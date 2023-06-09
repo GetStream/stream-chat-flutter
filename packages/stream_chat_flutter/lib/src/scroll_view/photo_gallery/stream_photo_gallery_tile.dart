@@ -202,9 +202,13 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   }
 
   @override
-  ImageStreamCompleter loadImage(
+  @Deprecated(
+    'Implement loadImage for image loading. '
+    'This feature was deprecated after v6.4.0.',
+  )
+  ImageStreamCompleter loadBuffer(
     MediaThumbnailProvider key,
-    ImageDecoderCallback decode,
+    DecoderBufferCallback decode,
   ) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
@@ -219,9 +223,13 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
     );
   }
 
+  @Deprecated(
+    'Implement loadImage for image loading. '
+    'This feature was deprecated after v6.4.0.',
+  )
   Future<ui.Codec> _loadAsync(
     MediaThumbnailProvider key,
-    ImageDecoderCallback decode,
+    DecoderBufferCallback decode,
   ) async {
     assert(key == this, '$key is not $this');
     final bytes = await media.thumbnailDataWithSize(
