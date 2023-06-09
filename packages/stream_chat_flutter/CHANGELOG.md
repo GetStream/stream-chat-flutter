@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#1600]](https://github.com/GetStream/stream-chat-flutter/issues/1600) Fixed type `ImageDecoderCallback` not found
+  error on pre-Flutter 3.10.0 versions.
+
 ## 6.3.0
 
 🐞 Fixed
