@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -29,7 +31,7 @@ class DebugMembers extends StatelessWidget {
               final member = members[index];
               return Padding(
                 padding: const EdgeInsets.all(8),
-                child: Container(
+                child: ColoredBox(
                   color: Colors.yellow,
                   child: Padding(
                     padding: const EdgeInsets.all(8),

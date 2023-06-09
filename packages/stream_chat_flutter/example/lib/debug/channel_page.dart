@@ -1,16 +1,17 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_example/debug/actions/ban_user.dart';
+import 'package:stream_chat_flutter_example/debug/actions/mute_user.dart';
 import 'package:stream_chat_flutter_example/debug/actions/remove_shadow_ban.dart';
 import 'package:stream_chat_flutter_example/debug/actions/shadow_ban.dart';
-
-import 'actions/ban_user.dart';
-import 'actions/mute_user.dart';
-import 'actions/unban_user.dart';
-import 'actions/unmute_user.dart';
-import 'members.dart';
-import 'mutes.dart';
+import 'package:stream_chat_flutter_example/debug/actions/unban_user.dart';
+import 'package:stream_chat_flutter_example/debug/actions/unmute_user.dart';
+import 'package:stream_chat_flutter_example/debug/members.dart';
+import 'package:stream_chat_flutter_example/debug/mutes.dart';
 
 class DebugChannelPage extends StatefulWidget {
   const DebugChannelPage({super.key});
@@ -34,13 +35,11 @@ class _DebugChannelPageState extends State<DebugChannelPage> {
   void initState() {
     super.initState();
     _channelSubscription = _channel.state!.channelStateStream.listen((state) {
-      _channelState = state;
-      setState(() {});
+      setState(() => _channelState = state);
     });
     _ownUserSubscription =
         _channel.client.state.currentUserStream.listen((ownUser) {
-      _ownUser = ownUser;
-      setState(() {});
+      setState(() => _ownUser = ownUser);
     });
   }
 

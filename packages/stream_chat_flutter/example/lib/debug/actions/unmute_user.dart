@@ -1,7 +1,9 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../error_dialog.dart';
+import 'package:stream_chat_flutter_example/debug/error_dialog.dart';
 
 class DebugUnmuteUser extends StatelessWidget {
   const DebugUnmuteUser({

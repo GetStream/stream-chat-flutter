@@ -5,9 +5,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_example/debug/channel_page.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
-
-import 'debug/channel_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
