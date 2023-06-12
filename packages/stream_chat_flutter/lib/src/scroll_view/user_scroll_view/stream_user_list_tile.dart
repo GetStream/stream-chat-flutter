@@ -157,6 +157,7 @@ class StreamUserListTile extends StatelessWidget {
       trailing: selected ? selectedWidget : null,
       title: title,
       subtitle: subtitle,
+      tileColor: tileColor,
     );
   }
 }
