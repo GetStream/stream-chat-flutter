@@ -7,6 +7,21 @@
 - [[#1605]](https://github.com/GetStream/stream-chat-flutter/issues/1605) Fixed Null exception is thrown on message list
   for unread messages when `ScrollToBottomButton` is pressed.
 
+✅ Added
+
+- Added support for `StreamMessageInput.allowedAttachmentPickerTypes` to specify the allowed attachment picker types.
+  [#1601](https://github.com/GetStream/stream-chat-flutter/issues/1376)
+
+  ```dart
+  StreamMessageInput(
+    ...,
+    allowedAttachmentPickerTypes: const [
+      AttachmentPickerType.files,
+      AttachmentPickerType.images,
+    ],
+  )
+  ```
+
 ## 6.3.0
 
 🐞 Fixed

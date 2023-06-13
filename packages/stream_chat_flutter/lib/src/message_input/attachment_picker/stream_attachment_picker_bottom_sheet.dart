@@ -66,6 +66,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   required BuildContext context,
   Iterable<AttachmentPickerOption>? customOptions,
+  List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
   List<Attachment>? initialAttachments,
   StreamAttachmentPickerController? controller,
   Color? backgroundColor,
@@ -117,6 +118,7 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
             return webOrDesktopAttachmentPickerBuilder.call(
               context: context,
               controller: controller,
+              allowedTypes: allowedTypes,
               customOptions: customOptions?.map(
                 WebOrDesktopAttachmentPickerOption.fromAttachmentPickerOption,
               ),
@@ -130,6 +132,7 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
           return mobileAttachmentPickerBuilder.call(
             context: context,
             controller: controller,
+            allowedTypes: allowedTypes,
             customOptions: customOptions,
             attachmentThumbnailSize: attachmentThumbnailSize,
             attachmentThumbnailFormat: attachmentThumbnailFormat,
