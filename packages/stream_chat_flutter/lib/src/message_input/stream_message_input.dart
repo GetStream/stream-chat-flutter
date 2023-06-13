@@ -122,6 +122,7 @@ class StreamMessageInput extends StatefulWidget {
     this.maxAttachmentSize = kDefaultMaxAttachmentSize,
     this.onError,
     this.attachmentLimit = 10,
+    this.allowedAttachmentPickerTypes = AttachmentPickerType.values,
     this.onAttachmentLimitExceed,
     this.attachmentButtonBuilder,
     this.commandButtonBuilder,
@@ -232,6 +233,12 @@ class StreamMessageInput extends StatefulWidget {
 
   /// A limit for the no. of attachments that can be sent with a single message.
   final int attachmentLimit;
+
+  /// The list of allowed attachment types which can be picked using the
+  /// attachment button.
+  ///
+  /// By default, all the attachment types are allowed.
+  final List<AttachmentPickerType> allowedAttachmentPickerTypes;
 
   /// A callback for when the [attachmentLimit] is exceeded.
   ///
@@ -771,8 +778,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Future<void> _onAttachmentButtonPressed() async {
     final attachments = await showStreamAttachmentPickerModalBottomSheet(
       context: context,
-      initialAttachments: _effectiveController.attachments,
       useRootNavigator: true,
+      allowedTypes: widget.allowedAttachmentPickerTypes,
+      initialAttachments: _effectiveController.attachments,
     );
 
     if (attachments != null) {
