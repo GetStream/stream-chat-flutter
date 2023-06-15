@@ -35,6 +35,22 @@
   )
   ```
 
+- Added support for `StreamMessageWidget.quotedMessageBuilder` and `StreamMessageInput.quotedMessageBuilder` to override
+  the default quoted message widget. [#1547](https://github.com/GetStream/stream-chat-flutter/issues/1547)
+
+  ```dart
+  StreamMessageWidget(
+    ...,
+    quotedMessageBuilder: (context, message) {
+      return Container(
+        color: Colors.red,
+        child: Text('Quoted Message'),
+      );
+    },
+  )
+  ```
+
+
 ## 6.3.0
 
 🐞 Fixed

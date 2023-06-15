@@ -20,7 +20,6 @@ class StreamQuotedMessageWidget extends StatelessWidget {
     this.textLimit = 170,
     this.attachmentThumbnailBuilders,
     this.padding = const EdgeInsets.all(8),
-    this.onTap,
     this.onQuotedMessageClear,
   });
 
@@ -45,9 +44,6 @@ class StreamQuotedMessageWidget extends StatelessWidget {
 
   /// Padding around the widget
   final EdgeInsetsGeometry padding;
-
-  /// Callback for tap on widget
-  final GestureTapCallback? onTap;
 
   /// Callback for clearing quoted messages.
   final VoidCallback? onQuotedMessageClear;
@@ -77,19 +73,12 @@ class StreamQuotedMessageWidget extends StatelessWidget {
           showOnlineStatus: false,
         ),
     ];
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Padding(
-          padding: padding,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: reverse ? children.reversed.toList() : children,
-          ),
-        ),
+    return Padding(
+      padding: padding,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: reverse ? children.reversed.toList() : children,
       ),
     );
   }
@@ -258,23 +247,26 @@ class _ParseAttachments extends StatelessWidget {
         child = attachmentBuilder(context, attachment);
       }
     }
-    child = AbsorbPointer(child: child);
+
+    final isImageFile = attachment.title?.mimeType?.type == 'image';
+    final isVideoFile = attachment.title?.mimeType?.type == 'video';
+
     return Material(
       clipBehavior: Clip.hardEdge,
       type: MaterialType.transparency,
-      shape: attachment.type == 'file'
+      shape: attachment.type == 'file' && (!isImageFile && !isVideoFile)
           ? null
           : RoundedRectangleBorder(
               side: const BorderSide(width: 0, color: Colors.transparent),
               borderRadius: BorderRadius.circular(8),
             ),
-      child: child,
+      child: AbsorbPointer(child: child),
     );
   }
 
   Map<String, QuotedMessageAttachmentThumbnailBuilder>
       get _defaultAttachmentBuilder {
-    return {
+    final builders = <String, QuotedMessageAttachmentThumbnailBuilder>{
       'image': (_, attachment) {
         return StreamImageAttachment(
           attachment: attachment,
@@ -315,16 +307,33 @@ class _ParseAttachments extends StatelessWidget {
           fit: BoxFit.cover,
         );
       },
-      'file': (_, attachment) {
-        return SizedBox(
-          height: 32,
-          width: 32,
-          child: getFileTypeImage(
-            attachment.extraData['mime_type'] as String?,
-          ),
-        );
-      },
     };
+
+    builders['file'] = (_, attachment) {
+      return SizedBox(
+        height: 32,
+        width: 32,
+        child: Builder(
+          builder: (context) {
+            final isImageFile = attachment.title?.mimeType?.type == 'image';
+            if (isImageFile) {
+              return builders['image']!(context, attachment);
+            }
+
+            final isVideoFile = attachment.title?.mimeType?.type == 'video';
+            if (isVideoFile) {
+              return builders['video']!(context, attachment);
+            }
+
+            return getFileTypeImage(
+              attachment.extraData['mime_type'] as String?,
+            );
+          },
+        ),
+      );
+    };
+
+    return builders;
   }
 }
 

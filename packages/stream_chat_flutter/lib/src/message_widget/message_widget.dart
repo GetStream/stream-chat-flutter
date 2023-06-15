@@ -79,6 +79,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.onMessageActions,
     this.onShowMessage,
     this.userAvatarBuilder,
+    this.quotedMessageBuilder,
     this.editMessageInputBuilder,
     this.textBuilder,
     @Deprecated('''
@@ -354,6 +355,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final Widget Function(BuildContext, User)? userAvatarBuilder;
 
+  /// {@template quotedMessageBuilder}
+  /// Widget builder for building quoted message
+  /// {@endtemplate}
+  final Widget Function(BuildContext, Message)? quotedMessageBuilder;
+
   /// {@template message}
   /// The message to display.
   /// {@endtemplate}
@@ -577,6 +583,7 @@ class StreamMessageWidget extends StatefulWidget {
     Future<void> Function(Message)? onConfirmDeleteTap,
     Widget Function(BuildContext, Message)? editMessageInputBuilder,
     Widget Function(BuildContext, Message)? textBuilder,
+    Widget Function(BuildContext, Message)? quotedMessageBuilder,
     @Deprecated('''
     Use [bottomRowBuilderWithDefaultWidget] instead.
     Will be removed in the next major version.
@@ -670,6 +677,7 @@ class StreamMessageWidget extends StatefulWidget {
       editMessageInputBuilder:
           editMessageInputBuilder ?? this.editMessageInputBuilder,
       textBuilder: textBuilder ?? this.textBuilder,
+      quotedMessageBuilder: quotedMessageBuilder ?? this.quotedMessageBuilder,
       bottomRowBuilderWithDefaultWidget: _bottomRowBuilderWithDefaultWidget,
       onMessageActions: onMessageActions ?? this.onMessageActions,
       message: message ?? this.message,
@@ -965,6 +973,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       borderSide: widget.borderSide,
                       borderRadiusGeometry: widget.borderRadiusGeometry,
                       textBuilder: widget.textBuilder,
+                      quotedMessageBuilder: widget.quotedMessageBuilder,
                       onLinkTap: widget.onLinkTap,
                       onMentionTap: widget.onMentionTap,
                       onQuotedMessageTap: widget.onQuotedMessageTap,
