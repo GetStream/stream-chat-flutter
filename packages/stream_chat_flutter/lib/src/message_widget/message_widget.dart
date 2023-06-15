@@ -61,6 +61,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.showInChannelIndicator = false,
     this.onReplyTap,
     this.onThreadTap,
+    this.onConfirmDeleteTap,
     this.showUsername = true,
     this.showTimestamp = true,
     this.showReactions = true,
@@ -306,6 +307,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// The function called when tapping on replies
   /// {@endtemplate}
   final void Function(Message)? onReplyTap;
+
+  /// {@template onDeleteTap}
+  /// The function called when delete confirmation button is tapped.
+  /// {@endtemplate}
+  final Future<void> Function(Message)? onConfirmDeleteTap;
 
   /// {@template editMessageInputBuilder}
   /// Widget builder for edit message layout
@@ -568,6 +574,7 @@ class StreamMessageWidget extends StatefulWidget {
     void Function(User)? onMentionTap,
     void Function(Message)? onThreadTap,
     void Function(Message)? onReplyTap,
+    Future<void> Function(Message)? onConfirmDeleteTap,
     Widget Function(BuildContext, Message)? editMessageInputBuilder,
     Widget Function(BuildContext, Message)? textBuilder,
     @Deprecated('''
@@ -659,6 +666,7 @@ class StreamMessageWidget extends StatefulWidget {
       onMentionTap: onMentionTap ?? this.onMentionTap,
       onThreadTap: onThreadTap ?? this.onThreadTap,
       onReplyTap: onReplyTap ?? this.onReplyTap,
+      onConfirmDeleteTap: onConfirmDeleteTap ?? this.onConfirmDeleteTap,
       editMessageInputBuilder:
           editMessageInputBuilder ?? this.editMessageInputBuilder,
       textBuilder: textBuilder ?? this.textBuilder,
@@ -1098,16 +1106,21 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           ),
           onClick: () async {
             Navigator.of(context, rootNavigator: true).pop();
-            final deleted = await showDialog(
+            final deleted = await showDialog<bool?>(
               context: context,
               barrierDismissible: false,
               builder: (_) => const DeleteMessageDialog(),
             );
-            if (deleted) {
+            if (deleted == true) {
               try {
-                await StreamChannel.of(context)
-                    .channel
-                    .deleteMessage(widget.message);
+                final onConfirmDeleteTap = widget.onConfirmDeleteTap;
+                if (onConfirmDeleteTap != null) {
+                  await onConfirmDeleteTap(widget.message);
+                } else {
+                  await StreamChannel.of(context)
+                      .channel
+                      .deleteMessage(widget.message);
+                }
               } catch (e) {
                 showDialog(
                   context: context,
@@ -1196,22 +1209,5 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       ),
     );
-  }
-
-  void retryMessage(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
-    if (widget.message.status == MessageSendingStatus.failed) {
-      channel.sendMessage(widget.message);
-      return;
-    }
-    if (widget.message.status == MessageSendingStatus.failed_update) {
-      channel.updateMessage(widget.message);
-      return;
-    }
-
-    if (widget.message.status == MessageSendingStatus.failed_delete) {
-      channel.deleteMessage(widget.message);
-      return;
-    }
   }
 }

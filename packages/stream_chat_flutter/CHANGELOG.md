@@ -22,6 +22,19 @@
   )
   ```
 
+- Added support for `StreamMessageWidget.onConfirmDeleteTap` to override the default action on delete confirmation.
+  [#1604](https://github.com/GetStream/stream-chat-flutter/issues/1604)
+
+  ```dart
+  StreamMessageWidget(
+    ...,
+    onConfirmDeleteTap: (message) async {
+      final channel = StreamChannel.of(context).channel;
+      await channel.deleteMessage(message, hard: false);
+    },
+  )
+  ```
+
 ## 6.3.0
 
 🐞 Fixed
