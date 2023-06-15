@@ -29,6 +29,7 @@ class MessageCard extends StatefulWidget {
     this.borderSide,
     this.borderRadiusGeometry,
     this.textBuilder,
+    this.quotedMessageBuilder,
     this.onLinkTap,
     this.onMentionTap,
     this.onQuotedMessageTap,
@@ -82,6 +83,9 @@ class MessageCard extends StatefulWidget {
   /// {@macro textBuilder}
   final Widget Function(BuildContext, Message)? textBuilder;
 
+  /// {@macro quotedMessageBuilder}
+  final Widget Function(BuildContext, Message)? quotedMessageBuilder;
+
   /// {@macro onLinkTap}
   final void Function(String)? onLinkTap;
 
@@ -130,6 +134,7 @@ class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
     final onQuotedMessageTap = widget.onQuotedMessageTap;
+    final quotedMessageBuilder = widget.quotedMessageBuilder;
 
     return Card(
       elevation: 0,
@@ -164,11 +169,15 @@ class _MessageCardState extends State<MessageCard> {
                           onQuotedMessageTap != null
                       ? () => onQuotedMessageTap(widget.message.quotedMessageId)
                       : null,
-                  child: QuotedMessage(
-                    reverse: widget.reverse,
-                    message: widget.message,
-                    hasNonUrlAttachments: widget.hasNonUrlAttachments,
-                  ),
+                  child: quotedMessageBuilder?.call(
+                        context,
+                        widget.message.quotedMessage!,
+                      ) ??
+                      QuotedMessage(
+                        reverse: widget.reverse,
+                        message: widget.message,
+                        hasNonUrlAttachments: widget.hasNonUrlAttachments,
+                      ),
                 ),
               ),
             if (widget.hasNonUrlAttachments)
