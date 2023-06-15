@@ -129,8 +129,11 @@ class _MessageCardState extends State<MessageCard> {
 
   @override
   Widget build(BuildContext context) {
+    final onQuotedMessageTap = widget.onQuotedMessageTap;
+
     return Card(
       elevation: 0,
+      clipBehavior: Clip.hardEdge,
       margin: EdgeInsets.symmetric(
         horizontal: (widget.isFailedState ? 15.0 : 0.0) +
             (widget.showUserAvatar == DisplayWidget.gone ? 0 : 4.0),
@@ -150,15 +153,23 @@ class _MessageCardState extends State<MessageCard> {
           maxWidth: widthLimit ?? double.infinity,
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.hasQuotedMessage)
-              QuotedMessage(
-                reverse: widget.reverse,
-                message: widget.message,
-                hasNonUrlAttachments: widget.hasNonUrlAttachments,
-                onQuotedMessageTap: widget.onQuotedMessageTap,
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: InkWell(
+                  onTap: !widget.message.quotedMessage!.isDeleted &&
+                          onQuotedMessageTap != null
+                      ? () => onQuotedMessageTap(widget.message.quotedMessageId)
+                      : null,
+                  child: QuotedMessage(
+                    reverse: widget.reverse,
+                    message: widget.message,
+                    hasNonUrlAttachments: widget.hasNonUrlAttachments,
+                  ),
+                ),
               ),
             if (widget.hasNonUrlAttachments)
               ParseAttachments(

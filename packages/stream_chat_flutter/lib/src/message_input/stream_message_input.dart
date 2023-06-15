@@ -1133,6 +1133,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       messageTheme: _streamChatTheme.otherMessageTheme,
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       onQuotedMessageClear: widget.onQuotedMessageCleared,
+      attachmentThumbnailBuilders: widget.attachmentThumbnailBuilders,
     );
   }
 
