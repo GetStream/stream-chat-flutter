@@ -38,6 +38,7 @@ export 'src/core/models/event.dart';
 export 'src/core/models/filter.dart' show Filter;
 export 'src/core/models/member.dart';
 export 'src/core/models/message.dart';
+export 'src/core/models/message_state.dart';
 export 'src/core/models/mute.dart';
 export 'src/core/models/own_user.dart';
 export 'src/core/models/reaction.dart';

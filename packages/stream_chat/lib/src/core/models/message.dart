@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
+import 'package:stream_chat/src/core/models/message_state.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
@@ -15,6 +16,7 @@ class _NullConst {
 const _nullConst = _NullConst();
 
 /// Enum defining the status of a sending message.
+@Deprecated('Use MessageState instead')
 enum MessageSendingStatus {
   /// Message is being sent
   sending,
@@ -37,7 +39,45 @@ enum MessageSendingStatus {
   failed_delete,
 
   /// Message correctly sent
-  sent,
+  sent;
+
+  /// Returns a [MessageState] from a [MessageSendingStatus]
+  MessageState toMessageState() {
+    switch (this) {
+      case MessageSendingStatus.sending:
+        return MessageState.sending;
+      case MessageSendingStatus.updating:
+        return MessageState.updating;
+      case MessageSendingStatus.deleting:
+        return MessageState.softDeleting;
+      case MessageSendingStatus.failed:
+        return MessageState.sendingFailed;
+      case MessageSendingStatus.failed_update:
+        return MessageState.updatingFailed;
+      case MessageSendingStatus.failed_delete:
+        return MessageState.softDeletingFailed;
+      case MessageSendingStatus.sent:
+        return MessageState.sent;
+    }
+  }
+
+  /// Returns a [MessageSendingStatus] from a [MessageState].
+  static MessageSendingStatus fromMessageState(MessageState state) {
+    return state.when(
+      initial: () => MessageSendingStatus.sending,
+      outgoing: (it) => it.when(
+        sending: () => MessageSendingStatus.sending,
+        updating: () => MessageSendingStatus.updating,
+        deleting: (_) => MessageSendingStatus.deleting,
+      ),
+      completed: (_) => MessageSendingStatus.sent,
+      failed: (it, __) => it.when(
+        sendingFailed: () => MessageSendingStatus.failed,
+        updatingFailed: () => MessageSendingStatus.failed_update,
+        deletingFailed: (_) => MessageSendingStatus.failed_delete,
+      ),
+    );
+  }
 }
 
 /// The class that contains the information about a message.
@@ -75,21 +115,39 @@ class Message extends Equatable {
     DateTime? pinExpires,
     this.pinnedBy,
     this.extraData = const {},
-    this.status = MessageSendingStatus.sending,
+    @Deprecated('Use `state` instead') MessageSendingStatus? status,
+    MessageState? state,
     this.i18n,
   })  : id = id ?? const Uuid().v4(),
         pinExpires = pinExpires?.toUtc(),
         remoteCreatedAt = createdAt,
         remoteUpdatedAt = updatedAt,
         remoteDeletedAt = deletedAt,
-        _quotedMessageId = quotedMessageId;
+        _quotedMessageId = quotedMessageId {
+    var messageState = state ?? const MessageState.initial();
+    // Backward compatibility. TODO: Remove in the next major version
+    if (status != null) {
+      messageState = status.toMessageState();
+    }
+
+    this.state = messageState;
+  }
 
   /// Create a new instance from JSON.
-  factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(
-        Serializer.moveToExtraDataFromRoot(json, topLevelFields),
-      ).copyWith(
-        status: MessageSendingStatus.sent,
-      );
+  factory Message.fromJson(Map<String, dynamic> json) {
+    final message = _$MessageFromJson(
+      Serializer.moveToExtraDataFromRoot(json, topLevelFields),
+    );
+
+    var state = MessageState.sent;
+    if (message.deletedAt != null) {
+      state = MessageState.softDeleted;
+    } else if (message.updatedAt.isAfter(message.createdAt)) {
+      state = MessageState.updated;
+    }
+
+    return message.copyWith(state: state);
+  }
 
   /// The message ID. This is either created by Stream or set client side when
   /// the message is added.
@@ -99,8 +157,16 @@ class Message extends Equatable {
   final String? text;
 
   /// The status of a sending message.
+  @Deprecated('Use `state` instead')
   @JsonKey(includeFromJson: false, includeToJson: false)
-  final MessageSendingStatus status;
+  MessageSendingStatus get status {
+    return MessageSendingStatus.fromMessageState(state);
+  }
+
+  // TODO: Remove late modifier in the next major version.
+  /// The current state of the message.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  late final MessageState state;
 
   /// The message type.
   @JsonKey(includeToJson: false)
@@ -316,7 +382,8 @@ class Message extends Equatable {
     Object? pinExpires = _nullConst,
     User? pinnedBy,
     Map<String, Object?>? extraData,
-    MessageSendingStatus? status,
+    @Deprecated('Use `state` instead') MessageSendingStatus? status,
+    MessageState? state,
     Map<String, String>? i18n,
   }) {
     assert(() {
@@ -349,6 +416,8 @@ class Message extends Equatable {
       }
       return true;
     }(), 'Validate type for quotedMessage');
+
+    final messageState = state ?? status?.toMessageState();
 
     return Message(
       id: id ?? this.id,
@@ -386,47 +455,49 @@ class Message extends Equatable {
           pinExpires == _nullConst ? this.pinExpires : pinExpires as DateTime?,
       pinnedBy: pinnedBy ?? this.pinnedBy,
       extraData: extraData ?? this.extraData,
-      status: status ?? this.status,
+      state: messageState ?? this.state,
       i18n: i18n ?? this.i18n,
     );
   }
 
   /// Returns a new [Message] that is a combination of this message and the
   /// given [other] message.
-  Message merge(Message other) => copyWith(
-        id: other.id,
-        text: other.text,
-        type: other.type,
-        attachments: other.attachments,
-        mentionedUsers: other.mentionedUsers,
-        silent: other.silent,
-        shadowed: other.shadowed,
-        reactionCounts: other.reactionCounts,
-        reactionScores: other.reactionScores,
-        latestReactions: other.latestReactions,
-        ownReactions: other.ownReactions,
-        parentId: other.parentId,
-        quotedMessage: other.quotedMessage,
-        quotedMessageId: other.quotedMessageId,
-        replyCount: other.replyCount,
-        threadParticipants: other.threadParticipants,
-        showInChannel: other.showInChannel,
-        command: other.command,
-        createdAt: other.remoteCreatedAt,
-        localCreatedAt: other.localCreatedAt,
-        updatedAt: other.remoteUpdatedAt,
-        localUpdatedAt: other.localUpdatedAt,
-        deletedAt: other.remoteDeletedAt,
-        localDeletedAt: other.localDeletedAt,
-        user: other.user,
-        pinned: other.pinned,
-        pinnedAt: other.pinnedAt,
-        pinExpires: other.pinExpires,
-        pinnedBy: other.pinnedBy,
-        extraData: other.extraData,
-        status: other.status,
-        i18n: other.i18n,
-      );
+  Message merge(Message other) {
+    return copyWith(
+      id: other.id,
+      text: other.text,
+      type: other.type,
+      attachments: other.attachments,
+      mentionedUsers: other.mentionedUsers,
+      silent: other.silent,
+      shadowed: other.shadowed,
+      reactionCounts: other.reactionCounts,
+      reactionScores: other.reactionScores,
+      latestReactions: other.latestReactions,
+      ownReactions: other.ownReactions,
+      parentId: other.parentId,
+      quotedMessage: other.quotedMessage,
+      quotedMessageId: other.quotedMessageId,
+      replyCount: other.replyCount,
+      threadParticipants: other.threadParticipants,
+      showInChannel: other.showInChannel,
+      command: other.command,
+      createdAt: other.remoteCreatedAt,
+      localCreatedAt: other.localCreatedAt,
+      updatedAt: other.remoteUpdatedAt,
+      localUpdatedAt: other.localUpdatedAt,
+      deletedAt: other.remoteDeletedAt,
+      localDeletedAt: other.localDeletedAt,
+      user: other.user,
+      pinned: other.pinned,
+      pinnedAt: other.pinnedAt,
+      pinExpires: other.pinExpires,
+      pinnedBy: other.pinnedBy,
+      extraData: other.extraData,
+      state: other.state,
+      i18n: other.i18n,
+    );
+  }
 
   /// Returns a new [Message] that is [other] with local changes applied to it.
   ///
@@ -482,7 +553,7 @@ class Message extends Equatable {
         pinExpires,
         pinnedBy,
         extraData,
-        status,
+        state,
         i18n,
       ];
 }

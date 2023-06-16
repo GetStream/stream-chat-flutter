@@ -1,27 +1,54 @@
+import 'dart:async';
+
 import 'package:stream_chat/src/client/client.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 
-/// The retry options
-/// When sending/updating/deleting a message any temporary error will trigger the retry policy
-/// The retry policy exposes 2 methods
-/// - shouldRetry: returns a boolean if the request should be retried
-/// - retryTimeout: How many milliseconds to wait till the next attempt
+/// The retry policy associated to a client.
 ///
-/// maxRetryAttempts is a hard limit on maximum retry attempts before giving up
+/// This policy is used to determine if a request should be retried and when.
+///
+/// also see:
+///   - [RetryQueue]
 class RetryPolicy {
   /// Instantiate a new RetryPolicy
   RetryPolicy({
     required this.shouldRetry,
-    required this.retryTimeout,
+    @Deprecated("Use 'delayFactor' instead.") this.retryTimeout,
     this.maxRetryAttempts = 6,
+    this.delayFactor = const Duration(milliseconds: 200),
+    this.randomizationFactor = 0.25,
+    this.maxDelay = const Duration(seconds: 30),
   });
 
-  /// Hard limit on maximum retry attempts before giving up, defaults to 6
-  /// Resets once connection recovers.
+  /// Delay factor to double after every attempt.
+  ///
+  /// Defaults to 200 ms, which results in the following delays:
+  ///
+  ///  1. 400 ms
+  ///  2. 800 ms
+  ///  3. 1600 ms
+  ///  4. 3200 ms
+  ///  5. 6400 ms
+  ///  6. 12800 ms
+  ///
+  /// Before application of [randomizationFactor].
+  final Duration delayFactor;
+
+  /// Percentage the delay should be randomized, given as fraction between
+  /// 0 and 1.
+  ///
+  /// If [randomizationFactor] is `0.25` (default) this indicates 25 % of the
+  /// delay should be increased or decreased by 25 %.
+  final double randomizationFactor;
+
+  /// Maximum delay between retries, defaults to 30 seconds.
+  final Duration maxDelay;
+
+  /// Maximum number of attempts before giving up, defaults to 6.
   final int maxRetryAttempts;
 
-  /// This function evaluates if we should retry the failure
-  final bool Function(
+  /// Function to determine if a retry should be attempted.
+  final FutureOr<bool> Function(
     StreamChatClient client,
     int attempt,
     StreamChatError? error,
@@ -29,9 +56,10 @@ class RetryPolicy {
 
   /// In the case that we want to retry a failed request the retryTimeout
   /// method is called to determine the timeout
+  @Deprecated("Use 'delayFactor' instead.")
   final Duration Function(
     StreamChatClient client,
     int attempt,
     StreamChatError? error,
-  ) retryTimeout;
+  )? retryTimeout;
 }

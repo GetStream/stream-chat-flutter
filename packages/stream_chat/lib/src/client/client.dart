@@ -109,8 +109,9 @@ class StreamChatClient {
 
     _retryPolicy = retryPolicy ??
         RetryPolicy(
-          shouldRetry: (_, attempt, __) => attempt < 5,
-          retryTimeout: (_, attempt, __) => Duration(seconds: attempt),
+          shouldRetry: (_, __, error) {
+            return error is StreamChatNetworkError && error.isRetriable;
+          },
         );
 
     state = ClientState(this);
@@ -1397,12 +1398,19 @@ class StreamChatClient {
       );
 
   /// Deletes the given message
-  Future<EmptyResponse> deleteMessage(String messageId, {bool? hard}) async {
-    final response =
-        await _chatApi.message.deleteMessage(messageId, hard: hard);
-    if (hard == true) {
+  Future<EmptyResponse> deleteMessage(
+    String messageId, {
+    bool hard = false,
+  }) async {
+    final response = await _chatApi.message.deleteMessage(
+      messageId,
+      hard: hard,
+    );
+
+    if (hard) {
       await chatPersistenceClient?.deleteMessageById(messageId);
     }
+
     return response;
   }
 
