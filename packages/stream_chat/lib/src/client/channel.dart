@@ -820,13 +820,7 @@ class Channel {
     _checkInitialized();
 
     // Directly deleting the local messages which are not yet sent to server.
-    final isSynced = message.state.isCompleted ||
-        message.state.isUpdating ||
-        message.state.isDeleting ||
-        message.state.isUpdatingFailed ||
-        message.state.isDeletingFailed;
-
-    if (!isSynced) {
+    if (message.remoteCreatedAt == null) {
       state!.deleteMessage(
         message.copyWith(
           type: 'deleted',
