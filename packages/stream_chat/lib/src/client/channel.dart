@@ -7,6 +7,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:synchronized/synchronized.dart';
 
 /// The maximum time the incoming [Event.typingStart] event is valid before a
 /// [Event.typingStop] event is emitted automatically.
@@ -563,6 +564,8 @@ class Channel {
     });
   }
 
+  final _sendMessageLock = Lock();
+
   /// Send a [message] to this channel.
   ///
   /// If [skipPush] is true the message will not send a push notification.
@@ -586,7 +589,7 @@ class Channel {
     );
     // ignore: parameter_assignments
     message = message.copyWith(
-      createdAt: message.createdAt,
+      localCreatedAt: DateTime.now(),
       user: _client.state.currentUser,
       quotedMessage: quotedMessage,
       status: MessageSendingStatus.sending,
@@ -615,14 +618,21 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
       }
 
-      final response = await _client.sendMessage(
-        message,
-        id!,
-        type,
-        skipPush: skipPush,
-        skipEnrichUrl: skipEnrichUrl,
+      // Wait for the previous sendMessage call to finish. Otherwise, the order
+      // of messages will not be maintained.
+      final response = await _sendMessageLock.synchronized(
+        () => _client.sendMessage(
+          message,
+          id!,
+          type,
+          skipPush: skipPush,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
       );
-      state!.updateMessage(response.message);
+
+      final sentMessage = response.message.syncWith(message);
+
+      state!.updateMessage(sentMessage);
       if (cooldown > 0) cooldownStartedAt = DateTime.now();
       return response;
     } catch (e) {
@@ -632,6 +642,8 @@ class Channel {
       rethrow;
     }
   }
+
+  final _updateMessageLock = Lock();
 
   /// Updates the [message] in this channel.
   ///
@@ -652,7 +664,7 @@ class Channel {
     // ignore: parameter_assignments
     message = message.copyWith(
       status: MessageSendingStatus.updating,
-      updatedAt: message.updatedAt,
+      localUpdatedAt: DateTime.now(),
       attachments: message.attachments.map(
         (it) {
           if (it.uploadState.isSuccess) return it;
@@ -678,16 +690,20 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
       }
 
-      final response = await _client.updateMessage(
-        message,
-        skipEnrichUrl: skipEnrichUrl,
+      // Wait for the previous update call to finish. Otherwise, the order of
+      // messages will not be maintained.
+      final response = await _updateMessageLock.synchronized(
+        () => _client.updateMessage(
+          message,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
       );
 
-      final m = response.message.copyWith(
-        ownReactions: message.ownReactions,
-      );
+      final updatedMessage = response.message
+          .syncWith(message)
+          .copyWith(ownReactions: message.ownReactions);
 
-      state?.updateMessage(m);
+      state?.updateMessage(updatedMessage);
 
       return response;
     } catch (e) {
@@ -714,16 +730,20 @@ class Channel {
     bool skipEnrichUrl = false,
   }) async {
     try {
-      final response = await _client.partialUpdateMessage(
-        message.id,
-        set: set,
-        unset: unset,
-        skipEnrichUrl: skipEnrichUrl,
+      // Wait for the previous update call to finish. Otherwise, the order of
+      // messages will not be maintained.
+      final response = await _updateMessageLock.synchronized(
+        () => _client.partialUpdateMessage(
+          message.id,
+          set: set,
+          unset: unset,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
       );
 
-      final updatedMessage = response.message.copyWith(
-        ownReactions: message.ownReactions,
-      );
+      final updatedMessage = response.message
+          .syncWith(message)
+          .copyWith(ownReactions: message.ownReactions);
 
       state?.updateMessage(updatedMessage);
 
@@ -736,6 +756,8 @@ class Channel {
     }
   }
 
+  final _deleteMessageLock = Lock();
+
   /// Deletes the [message] from the channel.
   Future<EmptyResponse> deleteMessage(Message message, {bool? hard}) async {
     final hardDelete = hard ?? false;
@@ -746,7 +768,7 @@ class Channel {
       state!.deleteMessage(
         message.copyWith(
           type: 'deleted',
-          deletedAt: message.deletedAt ?? DateTime.now(),
+          localDeletedAt: DateTime.now(),
           status: MessageSendingStatus.sent,
         ),
         hardDelete: hardDelete,
@@ -770,12 +792,17 @@ class Channel {
 
       state?.deleteMessage(message, hardDelete: hardDelete);
 
-      final response = await _client.deleteMessage(message.id, hard: hard);
-
-      state?.deleteMessage(
-        message.copyWith(status: MessageSendingStatus.sent),
-        hardDelete: hardDelete,
+      // Wait for the previous delete call to finish. Otherwise, the order of
+      // messages will not be maintained.
+      final response = await _deleteMessageLock.synchronized(
+        () => _client.deleteMessage(message.id, hard: hard),
       );
+
+      final deletedMessage = message.copyWith(
+        status: MessageSendingStatus.sent,
+      );
+
+      state?.deleteMessage(deletedMessage, hardDelete: hardDelete);
 
       return response;
     } catch (e) {
@@ -1942,8 +1969,9 @@ class ChannelClientState {
     )
         .listen((event) {
       final message = event.message!;
-      if (isUpToDate ||
-          (message.parentId != null && message.showInChannel != true)) {
+      final showInChannel =
+          message.parentId != null && message.showInChannel != true;
+      if (isUpToDate || showInChannel) {
         updateMessage(message);
       }
 
@@ -1960,10 +1988,10 @@ class ChannelClientState {
       var newMessages = [...messages];
       final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
       if (oldIndex != -1) {
-        var updatedMessage = message;
+        final oldMessage = newMessages[oldIndex];
+        var updatedMessage = message.syncWith(oldMessage);
         // Add quoted message to the message if it is not present.
         if (message.quotedMessageId != null && message.quotedMessage == null) {
-          final oldMessage = newMessages[oldIndex];
           updatedMessage = updatedMessage.copyWith(
             quotedMessage: oldMessage.quotedMessage,
           );
@@ -1980,7 +2008,7 @@ class ChannelClientState {
           return it.copyWith(
             quotedMessage: updatedMessage.copyWith(
               type: 'deleted',
-              deletedAt: updatedMessage.deletedAt ?? DateTime.now(),
+              deletedAt: DateTime.now(),
             ),
           );
         }).toList();
@@ -2004,7 +2032,7 @@ class ChannelClientState {
       }
 
       _channelState = _channelState.copyWith(
-        messages: newMessages..sort(_sortByCreatedAt),
+        messages: newMessages.sorted(_sortByCreatedAt),
         pinnedMessages: newPinnedMessages,
         channel: _channelState.channel?.copyWith(
           lastMessageAt: message.createdAt,
@@ -2226,7 +2254,7 @@ class ChannelClientState {
         ...newThreads[parentId]!.where(
           (newMessage) => !messages.any((m) => m.id == newMessage.id),
         ),
-      ]..sort(_sortByCreatedAt);
+      ].sorted(_sortByCreatedAt);
     } else {
       newThreads[parentId] = messages;
     }
@@ -2245,15 +2273,10 @@ class ChannelClientState {
 
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    final _existingStateMessages = _channelState.messages ?? [];
-    final _updatedStateMessages = updatedState.messages ?? [];
+    final _existingStateMessages = [...messages];
     final newMessages = <Message>[
-      ..._updatedStateMessages,
-      ..._existingStateMessages
-          .where((m) =>
-              !_updatedStateMessages.any((newMessage) => newMessage.id == m.id))
-          .toList(),
-    ]..sort(_sortByCreatedAt);
+      ..._existingStateMessages.merge(updatedState.messages),
+    ].sorted(_sortByCreatedAt);
 
     final _existingStateWatchers = _channelState.watchers ?? [];
     final _updatedStateWatchers = updatedState.watchers ?? [];
@@ -2308,6 +2331,7 @@ class ChannelClientState {
   final Debounce _debouncedUpdatePersistenceChannelState;
 
   set _channelState(ChannelState v) {
+    print('State: ${StackTrace.current}');
     _channelStateController.add(v);
     _debouncedUpdatePersistenceChannelState.call([v]);
   }
@@ -2470,4 +2494,22 @@ class ChannelClientState {
 bool _pinIsValid(Message message) {
   final now = DateTime.now();
   return message.pinExpires!.isAfter(now);
+}
+
+extension on Iterable<Message> {
+  Iterable<Message> merge(Iterable<Message>? other) {
+    if (other == null) return this;
+
+    final messageMap = {for (final message in this) message.id: message};
+
+    for (final message in other) {
+      messageMap.update(
+        message.id,
+        message.syncWith,
+        ifAbsent: () => message,
+      );
+    }
+
+    return messageMap.values;
+  }
 }
