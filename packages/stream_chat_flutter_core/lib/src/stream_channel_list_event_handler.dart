@@ -108,7 +108,7 @@ class StreamChannelListEventHandler {
     final channels = [...controller.currentItems];
 
     final channelIndex = channels.indexWhere((it) => it.cid == channelCid);
-    if (channelIndex <= 0) {
+    if (channelIndex < 0) {
       // If the channel is not in the list, It might be hidden.
       // So, we just refresh the list.
       await controller.refresh(resetValue: false);
