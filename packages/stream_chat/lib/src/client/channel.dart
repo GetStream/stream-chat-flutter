@@ -2331,7 +2331,6 @@ class ChannelClientState {
   final Debounce _debouncedUpdatePersistenceChannelState;
 
   set _channelState(ChannelState v) {
-    print('State: ${StackTrace.current}');
     _channelStateController.add(v);
     _debouncedUpdatePersistenceChannelState.call([v]);
   }
