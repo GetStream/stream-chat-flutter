@@ -6,6 +6,8 @@
   error on pre-Flutter 3.10.0 versions.
 - [[#1605]](https://github.com/GetStream/stream-chat-flutter/issues/1605) Fixed Null exception is thrown on message list
   for unread messages when `ScrollToBottomButton` is pressed.
+- [[#1615]](https://github.com/GetStream/stream-chat-flutter/issues/1615) Fixed `StreamAttachmentPickerBottomSheet` not
+  able to find the `StreamChatTheme` when used in nested MaterialApp.
 
 ✅ Added
 
@@ -49,7 +51,6 @@
     },
   )
   ```
-
 
 ## 6.3.0
 
