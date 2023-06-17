@@ -38,7 +38,7 @@ void main() {
       parentId: 'testParentId',
       quotedMessageId: quotedMessage.id,
       command: 'testCommand',
-      createdAt: DateTime.now(),
+      remoteCreatedAt: DateTime.now(),
       shadowed: math.Random().nextBool(),
       showInChannel: math.Random().nextBool(),
       replyCount: 33,
@@ -50,10 +50,10 @@ void main() {
       ),
       mentionedUsers: [],
       status: MessageSendingStatus.sent,
-      updatedAt: DateTime.now(),
+      remoteUpdatedAt: DateTime.now(),
       extraData: {'extra_test_data': 'extraData'},
       userId: user.id,
-      deletedAt: DateTime.now(),
+      remoteDeletedAt: DateTime.now(),
       messageText: 'Hello',
       pinned: true,
       pinExpires: DateTime.now().toUtc(),
@@ -79,17 +79,17 @@ void main() {
     expect(message.parentId, entity.parentId);
     expect(message.quotedMessageId, entity.quotedMessageId);
     expect(message.command, entity.command);
-    expect(message.createdAt, isSameDateAs(entity.createdAt));
+    expect(message.createdAt, isSameDateAs(entity.remoteCreatedAt));
     expect(message.shadowed, entity.shadowed);
     expect(message.showInChannel, entity.showInChannel);
     expect(message.replyCount, entity.replyCount);
     expect(message.reactionScores, entity.reactionScores);
     expect(message.reactionCounts, entity.reactionCounts);
     expect(message.status, entity.status);
-    expect(message.updatedAt, isSameDateAs(entity.updatedAt));
+    expect(message.updatedAt, isSameDateAs(entity.remoteUpdatedAt));
     expect(message.extraData, entity.extraData);
     expect(message.user!.id, entity.userId);
-    expect(message.deletedAt, isSameDateAs(entity.deletedAt));
+    expect(message.deletedAt, isSameDateAs(entity.remoteDeletedAt));
     expect(message.text, entity.messageText);
     expect(message.pinned, entity.pinned);
     expect(message.pinExpires, isSameDateAs(entity.pinExpires));
@@ -169,17 +169,17 @@ void main() {
     expect(entity.parentId, message.parentId);
     expect(entity.quotedMessageId, message.quotedMessageId);
     expect(entity.command, message.command);
-    expect(entity.createdAt, isSameDateAs(message.createdAt));
+    expect(entity.remoteCreatedAt, isSameDateAs(message.createdAt));
     expect(entity.shadowed, message.shadowed);
     expect(entity.showInChannel, message.showInChannel);
     expect(entity.replyCount, message.replyCount);
     expect(entity.reactionScores, message.reactionScores);
     expect(entity.reactionCounts, message.reactionCounts);
     expect(entity.status, message.status);
-    expect(entity.updatedAt, isSameDateAs(message.updatedAt));
+    expect(entity.remoteUpdatedAt, isSameDateAs(message.updatedAt));
     expect(entity.extraData, message.extraData);
     expect(entity.userId, message.user!.id);
-    expect(entity.deletedAt, isSameDateAs(message.deletedAt));
+    expect(entity.remoteDeletedAt, isSameDateAs(message.deletedAt));
     expect(entity.messageText, message.text);
     expect(entity.pinned, message.pinned);
     expect(entity.pinExpires, isSameDateAs(message.pinExpires));

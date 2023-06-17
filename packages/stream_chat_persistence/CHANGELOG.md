@@ -1,3 +1,7 @@
+## Upcoming
+
+- Updated `stream_chat` dependency to [`Upcoming`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 6.3.0
 
 - Updated `stream_chat` dependency to [`6.3.0`](https://pub.dev/packages/stream_chat/changelog).
