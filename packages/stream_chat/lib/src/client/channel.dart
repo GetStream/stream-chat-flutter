@@ -1602,6 +1602,7 @@ class Channel {
   void dispose() {
     client.state.removeChannel('$cid');
     state?.dispose();
+    _muteExpirationTimer?.cancel();
     _keyStrokeHandler.cancel();
   }
 
