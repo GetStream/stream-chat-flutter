@@ -52,6 +52,34 @@
   )
   ```
 
+- Added support for `StreamChannelAvatar.ownSpaceAvatarBuilder`, `StreamChannelAvatar.oneToOneAvatarBuilder` and
+  `StreamChannelAvatar.groupAvatarBuilder` to override the default avatar
+  widget.[#1614](https://github.com/GetStream/stream-chat-flutter/issues/1614)
+
+  ```dart
+  StreamChannelAvatar(
+    ...,
+    ownSpaceAvatarBuilder: (context, channel) {
+      return Container(
+        color: Colors.red,
+        child: Text('Own Space Avatar'),
+      );
+    },
+    oneToOneAvatarBuilder: (context, channel) {
+      return Container(
+        color: Colors.red,
+        child: Text('One to One Avatar'),
+      );
+    },
+    groupAvatarBuilder: (context, channel) {
+      return Container(
+        color: Colors.red,
+        child: Text('Group Avatar'),
+      );
+    },
+  )
+  ```
+
 ## 6.3.0
 
 🐞 Fixed
