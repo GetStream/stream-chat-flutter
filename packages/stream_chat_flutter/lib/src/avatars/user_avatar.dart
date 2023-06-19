@@ -2,6 +2,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// WidgetBuilder for [StreamUserAvatar].
+typedef StreamUserAvatarBuilder = Widget Function(
+  BuildContext context,
+  User user,
+  // ignore: avoid_positional_boolean_parameters
+  bool isSelected,
+);
+
 /// {@template streamUserAvatar}
 /// Displays a user's avatar.
 /// {@endtemplate}
