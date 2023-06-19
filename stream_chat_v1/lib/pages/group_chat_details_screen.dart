@@ -136,7 +136,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                           await channel.watch();
                           router.goNamed(
                             Routes.CHANNEL_PAGE.name,
-                            params: Routes.CHANNEL_PAGE.params(channel),
+                            pathParameters: Routes.CHANNEL_PAGE.params(channel),
                           );
                         } catch (err) {
                           _showErrorAlert();

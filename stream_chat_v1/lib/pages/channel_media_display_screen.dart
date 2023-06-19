@@ -162,9 +162,9 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                                     }
                                     router.pushNamed(
                                       Routes.CHANNEL_PAGE.name,
-                                      params:
+                                      pathParameters:
                                           Routes.CHANNEL_PAGE.params(channel),
-                                      queryParams:
+                                      queryParameters:
                                           Routes.CHANNEL_PAGE.queryParams(m),
                                     );
                                   },

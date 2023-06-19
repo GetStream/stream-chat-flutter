@@ -133,8 +133,8 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
       redirect: (context, state) {
         final loggedIn =
             _initNotifier.initData?.client.state.currentUser != null;
-        final loggingIn = state.subloc == Routes.CHOOSE_USER.path ||
-            state.subloc == Routes.ADVANCED_OPTIONS.path;
+        final loggingIn = state.matchedLocation == Routes.CHOOSE_USER.path ||
+            state.matchedLocation == Routes.ADVANCED_OPTIONS.path;
 
         if (!loggedIn) {
           return loggingIn ? null : Routes.CHOOSE_USER.path;
@@ -142,7 +142,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
 
         // if the user is logged in but still on the login page, send them to
         // the home page
-        if (loggedIn && state.subloc == Routes.CHOOSE_USER.path) {
+        if (loggedIn && state.matchedLocation == Routes.CHOOSE_USER.path) {
           return Routes.CHANNEL_LIST_PAGE.path;
         }
 
