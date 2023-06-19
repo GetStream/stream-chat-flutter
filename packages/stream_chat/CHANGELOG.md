@@ -4,6 +4,8 @@
 
 - [[#1293]](https://github.com/GetStream/stream-chat-flutter/issues/1293) Fixed wrong message order when sending
   messages quickly.
+- [[#1612]](https://github.com/GetStream/stream-chat-flutter/issues/1612) Fixed `Channel.isMutedStream` does not emit
+  when channel mute expires.
 
 ## 6.3.0
 

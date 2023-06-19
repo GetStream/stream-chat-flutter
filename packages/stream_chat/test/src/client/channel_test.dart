@@ -2481,6 +2481,31 @@ void main() {
           )).called(1);
     });
 
+    test('`.mute with expiration`', () async {
+      const expiration = Duration(seconds: 3);
+
+      when(() => client.muteChannel(
+            channelCid,
+            expiration: expiration,
+          )).thenAnswer((_) async => EmptyResponse());
+
+      when(() => client.unmuteChannel(channelCid))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await channel.mute(expiration: expiration);
+
+      expect(res, isNotNull);
+
+      verify(() => client.muteChannel(
+            channelCid,
+            expiration: expiration,
+          )).called(1);
+
+      // wait for expiration
+      await Future.delayed(expiration);
+      verify(() => client.unmuteChannel(channelCid)).called(1);
+    });
+
     test('`.unmute`', () async {
       when(
         () => client.unmuteChannel(channelCid),
