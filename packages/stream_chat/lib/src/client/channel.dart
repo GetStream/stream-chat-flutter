@@ -1447,15 +1447,32 @@ class Channel {
     );
   }
 
+  // Timer to keep track of mute expiration. This is used to update the channel
+  // state when the mute expires.
+  Timer? _muteExpirationTimer;
+
   /// Mutes the channel.
   Future<EmptyResponse> mute({Duration? expiration}) {
     _checkInitialized();
+
+    // If there is a expiration set, we will set a timer to automatically unmute
+    // the channel when the mute expires.
+    if (expiration != null) {
+      _muteExpirationTimer?.cancel();
+      _muteExpirationTimer = Timer(expiration, unmute);
+    }
+
     return _client.muteChannel(cid!, expiration: expiration);
   }
 
   /// Unmute the channel.
   Future<EmptyResponse> unmute() {
     _checkInitialized();
+
+    // Cancel the mute expiration timer if it is set.
+    _muteExpirationTimer?.cancel();
+    _muteExpirationTimer = null;
+
     return _client.unmuteChannel(cid!);
   }
 
