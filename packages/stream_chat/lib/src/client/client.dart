@@ -32,7 +32,7 @@ import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/version.dart';
-import 'package:synchronized/extension.dart';
+import 'package:synchronized/synchronized.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -526,10 +526,13 @@ class StreamChatClient {
         event.type == eventType4);
   }
 
+  // Lock to make sure only one sync process is running at a time.
+  final _syncLock = Lock();
+
   /// Get the events missed while offline to sync the offline storage
   /// Will automatically fetch [cids] and [lastSyncedAt] if [persistenceEnabled]
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) {
-    return synchronized(() async {
+    return _syncLock.synchronized(() async {
       final channels = cids ?? await chatPersistenceClient?.getChannelCids();
       if (channels == null || channels.isEmpty) {
         return;

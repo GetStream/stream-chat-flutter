@@ -1,3 +1,100 @@
+## 6.4.0
+
+🐞 Fixed
+
+- [[#1600]](https://github.com/GetStream/stream-chat-flutter/issues/1600) Fixed type `ImageDecoderCallback` not found
+  error on pre-Flutter 3.10.0 versions.
+- [[#1605]](https://github.com/GetStream/stream-chat-flutter/issues/1605) Fixed Null exception is thrown on message list
+  for unread messages when `ScrollToBottomButton` is pressed.
+- [[#1615]](https://github.com/GetStream/stream-chat-flutter/issues/1615) Fixed `StreamAttachmentPickerBottomSheet` not
+  able to find the `StreamChatTheme` when used in nested MaterialApp.
+
+✅ Added
+
+- Added support for `StreamMessageInput.allowedAttachmentPickerTypes` to specify the allowed attachment picker types.
+  [#1601](https://github.com/GetStream/stream-chat-flutter/issues/1376)
+
+  ```dart
+  StreamMessageInput(
+    ...,
+    allowedAttachmentPickerTypes: const [
+      AttachmentPickerType.files,
+      AttachmentPickerType.images,
+    ],
+  )
+  ```
+
+- Added support for `StreamMessageWidget.onConfirmDeleteTap` to override the default action on delete confirmation.
+  [#1604](https://github.com/GetStream/stream-chat-flutter/issues/1604)
+
+  ```dart
+  StreamMessageWidget(
+    ...,
+    onConfirmDeleteTap: (message) async {
+      final channel = StreamChannel.of(context).channel;
+      await channel.deleteMessage(message, hard: false);
+    },
+  )
+  ```
+
+- Added support for `StreamMessageWidget.quotedMessageBuilder` and `StreamMessageInput.quotedMessageBuilder` to override
+  the default quoted message widget. [#1547](https://github.com/GetStream/stream-chat-flutter/issues/1547)
+
+  ```dart
+  StreamMessageWidget(
+    ...,
+    quotedMessageBuilder: (context, message) {
+      return Container(
+        color: Colors.red,
+        child: Text('Quoted Message'),
+      );
+    },
+  )
+  ```
+
+- Added support for `StreamChannelAvatar.ownSpaceAvatarBuilder`, `StreamChannelAvatar.oneToOneAvatarBuilder` and
+  `StreamChannelAvatar.groupAvatarBuilder` to override the default avatar
+  widget.[#1614](https://github.com/GetStream/stream-chat-flutter/issues/1614)
+
+  ```dart
+  StreamChannelAvatar(
+    ...,
+    ownSpaceAvatarBuilder: (context, channel) {
+      return Container(
+        color: Colors.red,
+        child: Text('Own Space Avatar'),
+      );
+    },
+    oneToOneAvatarBuilder: (context, channel) {
+      return Container(
+        color: Colors.red,
+        child: Text('One to One Avatar'),
+      );
+    },
+    groupAvatarBuilder: (context, channel) {
+      return Container(
+        color: Colors.red,
+        child: Text('Group Avatar'),
+      );
+    },
+  )
+  ```
+
+- Added support for `StreamMessageInput.contentInsertionConfiguration` to specify the content insertion configuration.
+  [#1613](https://github.com/GetStream/stream-chat-flutter/issues/1613)
+
+  ```dart
+  StreamMessageInput(
+    ...,
+    contentInsertionConfiguration: ContentInsertionConfiguration(
+      onContentInserted: (content) {
+        // Do something with the content.
+        controller.addAttachment(...);
+      },
+    ),
+  )
+  ```
+
 ## 6.3.0
 
 🐞 Fixed

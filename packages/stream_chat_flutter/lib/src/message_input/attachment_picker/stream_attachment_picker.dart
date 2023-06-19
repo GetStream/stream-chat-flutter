@@ -693,6 +693,7 @@ Widget mobileAttachmentPickerBuilder({
   required BuildContext context,
   required StreamAttachmentPickerController controller,
   Iterable<AttachmentPickerOption>? customOptions,
+  List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
   ThumbnailSize attachmentThumbnailSize = const ThumbnailSize(400, 400),
   ThumbnailFormat attachmentThumbnailFormat = ThumbnailFormat.jpeg,
   int attachmentThumbnailQuality = 100,
@@ -702,74 +703,76 @@ Widget mobileAttachmentPickerBuilder({
     controller: controller,
     onSendAttachments: Navigator.of(context).pop,
     options: {
-      if (customOptions != null) ...customOptions,
-      AttachmentPickerOption(
-        key: 'gallery-picker',
-        icon: StreamSvgIcon.pictures(size: 36).toIconThemeSvgIcon(),
-        supportedTypes: [
-          AttachmentPickerType.images,
-          AttachmentPickerType.videos,
-        ],
-        optionViewBuilder: (context, controller) {
-          final selectedIds = controller.value.map((it) => it.id);
-          return StreamGalleryPicker(
-            selectedMediaItems: selectedIds,
-            mediaThumbnailSize: attachmentThumbnailSize,
-            mediaThumbnailFormat: attachmentThumbnailFormat,
-            mediaThumbnailQuality: attachmentThumbnailQuality,
-            mediaThumbnailScale: attachmentThumbnailScale,
-            onMediaItemSelected: (media) async {
-              if (selectedIds.contains(media.id)) {
-                return controller.removeAssetAttachment(media);
-              }
-              return controller.addAssetAttachment(media);
-            },
-          );
-        },
-      ),
-      AttachmentPickerOption(
-        key: 'file-picker',
-        icon: StreamSvgIcon.files(size: 36).toIconThemeSvgIcon(),
-        supportedTypes: [AttachmentPickerType.files],
-        optionViewBuilder: (context, controller) {
-          return StreamFilePicker(
-            onFilePicked: (file) async {
-              if (file != null) await controller.addAttachment(file);
-              return Navigator.pop(context, controller.value);
-            },
-          );
-        },
-      ),
-      AttachmentPickerOption(
-        key: 'image-picker',
-        icon: StreamSvgIcon.camera(size: 36).toIconThemeSvgIcon(),
-        supportedTypes: [AttachmentPickerType.images],
-        optionViewBuilder: (context, controller) {
-          return StreamImagePicker(
-            onImagePicked: (image) async {
-              if (image != null) {
-                await controller.addAttachment(image);
-              }
-              return Navigator.pop(context, controller.value);
-            },
-          );
-        },
-      ),
-      AttachmentPickerOption(
-        key: 'video-picker',
-        icon: StreamSvgIcon.record(size: 36).toIconThemeSvgIcon(),
-        supportedTypes: [AttachmentPickerType.videos],
-        optionViewBuilder: (context, controller) {
-          return StreamVideoPicker(
-            onVideoPicked: (video) async {
-              if (video != null) {
-                await controller.addAttachment(video);
-              }
-              return Navigator.pop(context, controller.value);
-            },
-          );
-        },
-      ),
+      ...{
+        if (customOptions != null) ...customOptions,
+        AttachmentPickerOption(
+          key: 'gallery-picker',
+          icon: StreamSvgIcon.pictures(size: 36).toIconThemeSvgIcon(),
+          supportedTypes: [
+            AttachmentPickerType.images,
+            AttachmentPickerType.videos,
+          ],
+          optionViewBuilder: (context, controller) {
+            final selectedIds = controller.value.map((it) => it.id);
+            return StreamGalleryPicker(
+              selectedMediaItems: selectedIds,
+              mediaThumbnailSize: attachmentThumbnailSize,
+              mediaThumbnailFormat: attachmentThumbnailFormat,
+              mediaThumbnailQuality: attachmentThumbnailQuality,
+              mediaThumbnailScale: attachmentThumbnailScale,
+              onMediaItemSelected: (media) async {
+                if (selectedIds.contains(media.id)) {
+                  return controller.removeAssetAttachment(media);
+                }
+                return controller.addAssetAttachment(media);
+              },
+            );
+          },
+        ),
+        AttachmentPickerOption(
+          key: 'file-picker',
+          icon: StreamSvgIcon.files(size: 36).toIconThemeSvgIcon(),
+          supportedTypes: [AttachmentPickerType.files],
+          optionViewBuilder: (context, controller) {
+            return StreamFilePicker(
+              onFilePicked: (file) async {
+                if (file != null) await controller.addAttachment(file);
+                return Navigator.pop(context, controller.value);
+              },
+            );
+          },
+        ),
+        AttachmentPickerOption(
+          key: 'image-picker',
+          icon: StreamSvgIcon.camera(size: 36).toIconThemeSvgIcon(),
+          supportedTypes: [AttachmentPickerType.images],
+          optionViewBuilder: (context, controller) {
+            return StreamImagePicker(
+              onImagePicked: (image) async {
+                if (image != null) {
+                  await controller.addAttachment(image);
+                }
+                return Navigator.pop(context, controller.value);
+              },
+            );
+          },
+        ),
+        AttachmentPickerOption(
+          key: 'video-picker',
+          icon: StreamSvgIcon.record(size: 36).toIconThemeSvgIcon(),
+          supportedTypes: [AttachmentPickerType.videos],
+          optionViewBuilder: (context, controller) {
+            return StreamVideoPicker(
+              onVideoPicked: (video) async {
+                if (video != null) {
+                  await controller.addAttachment(video);
+                }
+                return Navigator.pop(context, controller.value);
+              },
+            );
+          },
+        ),
+      }..where((option) => option.supportedTypes.every(allowedTypes.contains)),
     },
   );
 }
@@ -779,6 +782,7 @@ Widget webOrDesktopAttachmentPickerBuilder({
   required BuildContext context,
   required StreamAttachmentPickerController controller,
   Iterable<WebOrDesktopAttachmentPickerOption>? customOptions,
+  List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
   ThumbnailSize attachmentThumbnailSize = const ThumbnailSize(400, 400),
   ThumbnailFormat attachmentThumbnailFormat = ThumbnailFormat.jpeg,
   int attachmentThumbnailQuality = 100,
@@ -787,25 +791,27 @@ Widget webOrDesktopAttachmentPickerBuilder({
   return StreamWebOrDesktopAttachmentPickerBottomSheet(
     controller: controller,
     options: {
-      if (customOptions != null) ...customOptions,
-      WebOrDesktopAttachmentPickerOption(
-        key: 'image-picker',
-        type: AttachmentPickerType.images,
-        icon: StreamSvgIcon.pictures(size: 36).toIconThemeSvgIcon(),
-        title: context.translations.uploadAPhotoLabel,
-      ),
-      WebOrDesktopAttachmentPickerOption(
-        key: 'video-picker',
-        type: AttachmentPickerType.videos,
-        icon: StreamSvgIcon.record(size: 36).toIconThemeSvgIcon(),
-        title: context.translations.uploadAVideoLabel,
-      ),
-      WebOrDesktopAttachmentPickerOption(
-        key: 'file-picker',
-        type: AttachmentPickerType.files,
-        icon: StreamSvgIcon.files(size: 36).toIconThemeSvgIcon(),
-        title: context.translations.uploadAFileLabel,
-      ),
+      ...{
+        if (customOptions != null) ...customOptions,
+        WebOrDesktopAttachmentPickerOption(
+          key: 'image-picker',
+          type: AttachmentPickerType.images,
+          icon: StreamSvgIcon.pictures(size: 36).toIconThemeSvgIcon(),
+          title: context.translations.uploadAPhotoLabel,
+        ),
+        WebOrDesktopAttachmentPickerOption(
+          key: 'video-picker',
+          type: AttachmentPickerType.videos,
+          icon: StreamSvgIcon.record(size: 36).toIconThemeSvgIcon(),
+          title: context.translations.uploadAVideoLabel,
+        ),
+        WebOrDesktopAttachmentPickerOption(
+          key: 'file-picker',
+          type: AttachmentPickerType.files,
+          icon: StreamSvgIcon.files(size: 36).toIconThemeSvgIcon(),
+          title: context.translations.uploadAFileLabel,
+        ),
+      }.where((option) => option.supportedTypes.every(allowedTypes.contains)),
     },
     onOptionTap: (context, controller, option) async {
       final attachment = await StreamAttachmentHandler.instance.pickFile(

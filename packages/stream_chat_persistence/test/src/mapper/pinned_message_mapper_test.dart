@@ -38,7 +38,8 @@ void main() {
       parentId: 'testParentId',
       quotedMessageId: quotedMessage.id,
       command: 'testCommand',
-      createdAt: DateTime.now(),
+      localCreatedAt: DateTime.now(),
+      remoteCreatedAt: DateTime.now().add(const Duration(seconds: 1)),
       shadowed: math.Random().nextBool(),
       showInChannel: math.Random().nextBool(),
       replyCount: 33,
@@ -48,12 +49,16 @@ void main() {
         (prev, curr) =>
             prev?..update(curr.type, (value) => value + 1, ifAbsent: () => 1),
       ),
-      mentionedUsers: [],
+      mentionedUsers: [
+        jsonEncode(User(id: 'testuser')),
+      ],
       status: MessageSendingStatus.sent,
-      updatedAt: DateTime.now(),
+      localUpdatedAt: DateTime.now(),
+      remoteUpdatedAt: DateTime.now().add(const Duration(seconds: 1)),
       extraData: {'extra_test_data': 'extraData'},
       userId: user.id,
-      deletedAt: DateTime.now(),
+      localDeletedAt: DateTime.now(),
+      remoteDeletedAt: DateTime.now().add(const Duration(seconds: 1)),
       messageText: 'Hello',
       pinned: true,
       pinExpires: DateTime.now().toUtc(),
@@ -79,17 +84,25 @@ void main() {
     expect(message.parentId, entity.parentId);
     expect(message.quotedMessageId, entity.quotedMessageId);
     expect(message.command, entity.command);
-    expect(message.createdAt, isSameDateAs(entity.createdAt));
+    expect(message.localCreatedAt, isSameDateAs(entity.localCreatedAt));
+    expect(message.remoteCreatedAt, isSameDateAs(entity.remoteCreatedAt));
     expect(message.shadowed, entity.shadowed);
     expect(message.showInChannel, entity.showInChannel);
+    for (var i = 0; i < message.mentionedUsers.length; i++) {
+      final entityMentionedUser =
+          User.fromJson(jsonDecode(entity.mentionedUsers[i]));
+      expect(message.mentionedUsers[i].id, entityMentionedUser.id);
+    }
     expect(message.replyCount, entity.replyCount);
     expect(message.reactionScores, entity.reactionScores);
     expect(message.reactionCounts, entity.reactionCounts);
     expect(message.status, entity.status);
-    expect(message.updatedAt, isSameDateAs(entity.updatedAt));
+    expect(message.localUpdatedAt, isSameDateAs(entity.localUpdatedAt));
+    expect(message.remoteUpdatedAt, isSameDateAs(entity.remoteUpdatedAt));
     expect(message.extraData, entity.extraData);
     expect(message.user!.id, entity.userId);
-    expect(message.deletedAt, isSameDateAs(entity.deletedAt));
+    expect(message.localDeletedAt, isSameDateAs(entity.localDeletedAt));
+    expect(message.remoteDeletedAt, isSameDateAs(entity.remoteDeletedAt));
     expect(message.text, entity.messageText);
     expect(message.pinned, entity.pinned);
     expect(message.pinExpires, isSameDateAs(entity.pinExpires));
@@ -108,7 +121,7 @@ void main() {
     }
   });
 
-  test('toPinnedEntity should map message into PinnedMessageEntity', () {
+  test('toEntity should map message into MessageEntity', () {
     const cid = 'testCid';
     final user = User(id: 'testUserId');
     final quotedMessage = Message(id: 'testQuotedMessageId');
@@ -137,20 +150,26 @@ void main() {
       parentId: 'testParentId',
       quotedMessageId: quotedMessage.id,
       command: 'testCommand',
-      createdAt: DateTime.now(),
+      localCreatedAt: DateTime.now(),
+      createdAt: DateTime.now().add(const Duration(seconds: 1)),
       shadowed: math.Random().nextBool(),
       showInChannel: math.Random().nextBool(),
       replyCount: 33,
+      mentionedUsers: [
+        User(id: 'testuser'),
+      ],
       reactionScores: {for (final r in reactions) r.type: r.score},
       reactionCounts: reactions.fold(
         {},
         (prev, curr) =>
             prev?..update(curr.type, (value) => value + 1, ifAbsent: () => 1),
       ),
-      updatedAt: DateTime.now(),
+      localUpdatedAt: DateTime.now(),
+      updatedAt: DateTime.now().add(const Duration(seconds: 1)),
       extraData: const {'extra_test_data': 'extraData'},
       user: user,
-      deletedAt: DateTime.now(),
+      localDeletedAt: DateTime.now(),
+      deletedAt: DateTime.now().add(const Duration(seconds: 1)),
       text: 'Hello',
       pinned: true,
       pinExpires: DateTime.now(),
@@ -169,17 +188,22 @@ void main() {
     expect(entity.parentId, message.parentId);
     expect(entity.quotedMessageId, message.quotedMessageId);
     expect(entity.command, message.command);
-    expect(entity.createdAt, isSameDateAs(message.createdAt));
+    expect(entity.localCreatedAt, isSameDateAs(message.localCreatedAt));
+    expect(entity.remoteCreatedAt, isSameDateAs(message.remoteCreatedAt));
     expect(entity.shadowed, message.shadowed);
     expect(entity.showInChannel, message.showInChannel);
     expect(entity.replyCount, message.replyCount);
+    expect(
+        entity.mentionedUsers, message.mentionedUsers.map(jsonEncode).toList());
     expect(entity.reactionScores, message.reactionScores);
     expect(entity.reactionCounts, message.reactionCounts);
     expect(entity.status, message.status);
-    expect(entity.updatedAt, isSameDateAs(message.updatedAt));
+    expect(entity.localUpdatedAt, isSameDateAs(message.localUpdatedAt));
+    expect(entity.remoteUpdatedAt, isSameDateAs(message.remoteUpdatedAt));
     expect(entity.extraData, message.extraData);
     expect(entity.userId, message.user!.id);
-    expect(entity.deletedAt, isSameDateAs(message.deletedAt));
+    expect(entity.localDeletedAt, isSameDateAs(message.localDeletedAt));
+    expect(entity.remoteDeletedAt, isSameDateAs(message.remoteDeletedAt));
     expect(entity.messageText, message.text);
     expect(entity.pinned, message.pinned);
     expect(entity.pinExpires, isSameDateAs(message.pinExpires));

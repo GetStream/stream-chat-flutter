@@ -122,12 +122,14 @@ class StreamMessageInput extends StatefulWidget {
     this.maxAttachmentSize = kDefaultMaxAttachmentSize,
     this.onError,
     this.attachmentLimit = 10,
+    this.allowedAttachmentPickerTypes = AttachmentPickerType.values,
     this.onAttachmentLimitExceed,
     this.attachmentButtonBuilder,
     this.commandButtonBuilder,
     this.customAutocompleteTriggers = const [],
     this.mentionAllAppUsers = false,
     this.sendButtonBuilder,
+    this.quotedMessageBuilder,
     this.shouldKeepFocusAfterMessage,
     this.validator = _defaultValidator,
     this.restorationId,
@@ -143,6 +145,7 @@ class StreamMessageInput extends StatefulWidget {
         _defaultClearQuotedMessageKeyPredicate,
     this.ogPreviewFilter = _defaultOgPreviewFilter,
     this.hintGetter = _defaultHintGetter,
+    this.contentInsertionConfiguration,
   });
 
   /// The predicate used to send a message on desktop/web
@@ -233,6 +236,12 @@ class StreamMessageInput extends StatefulWidget {
   /// A limit for the no. of attachments that can be sent with a single message.
   final int attachmentLimit;
 
+  /// The list of allowed attachment types which can be picked using the
+  /// attachment button.
+  ///
+  /// By default, all the attachment types are allowed.
+  final List<AttachmentPickerType> allowedAttachmentPickerTypes;
+
   /// A callback for when the [attachmentLimit] is exceeded.
   ///
   /// This will override the default error alert behaviour.
@@ -257,6 +266,9 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Builder for creating send button
   final MessageRelatedBuilder? sendButtonBuilder;
+
+  /// Builder for building quoted message
+  final Widget Function(BuildContext, Message)? quotedMessageBuilder;
 
   /// Defines if the [StreamMessageInput] loses focuses after a message is sent.
   /// The default behaviour keeps focus until a command is enabled.
@@ -294,6 +306,9 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Returns the hint text for the message input.
   final HintGetter hintGetter;
+
+  /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
 
   static String? _defaultHintGetter(
     BuildContext context,
@@ -771,8 +786,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Future<void> _onAttachmentButtonPressed() async {
     final attachments = await showStreamAttachmentPickerModalBottomSheet(
       context: context,
+      allowedTypes: widget.allowedAttachmentPickerTypes,
       initialAttachments: _effectiveController.attachments,
-      useRootNavigator: true,
     );
 
     if (attachments != null) {
@@ -860,6 +875,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
                         decoration: _getInputDecoration(context),
                         textCapitalization: widget.textCapitalization,
                         autocorrect: widget.autoCorrect,
+                        contentInsertionConfiguration:
+                            widget.contentInsertionConfiguration,
                       ),
                     ),
                   ),
@@ -1118,14 +1135,20 @@ class StreamMessageInputState extends State<StreamMessageInput>
     if (!_hasQuotedMessage) return const Offstage();
     final containsUrl = _effectiveController.message.quotedMessage!.attachments
         .any((element) => element.titleLink != null);
-    return StreamQuotedMessageWidget(
-      reverse: true,
-      showBorder: !containsUrl,
-      message: _effectiveController.message.quotedMessage!,
-      messageTheme: _streamChatTheme.otherMessageTheme,
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      onQuotedMessageClear: widget.onQuotedMessageCleared,
-    );
+
+    return widget.quotedMessageBuilder?.call(
+          context,
+          _effectiveController.message.quotedMessage!,
+        ) ??
+        StreamQuotedMessageWidget(
+          reverse: true,
+          showBorder: !containsUrl,
+          message: _effectiveController.message.quotedMessage!,
+          messageTheme: _streamChatTheme.otherMessageTheme,
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          onQuotedMessageClear: widget.onQuotedMessageCleared,
+          attachmentThumbnailBuilders: widget.attachmentThumbnailBuilders,
+        );
   }
 
   Widget _buildAttachments() {

@@ -852,20 +852,25 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       streamChannel!.channel.markRead();
     }
 
-    final index = unreadCount > 0 ? unreadCount + 1 : 0;
-
+    // If the channel is not up to date, we need to reload it before scrolling
+    // to the end of the list.
     if (!_upToDate) {
-      _bottomPaginationActive = false;
-      initialAlignment = 0;
+      // Reset the pagination variables.
       initialIndex = 0;
+      initialAlignment = 0;
+      _bottomPaginationActive = false;
+
+      // Reload the channel to get the latest messages.
       await streamChannel!.reloadChannel();
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollController!.jumpTo(index: index);
-      });
-    } else {
+      // Wait for the frame to be rendered with the updated channel state.
+      await WidgetsBinding.instance.endOfFrame;
+    }
+
+    // Scroll to the end of the list.
+    if (_scrollController?.isAttached == true) {
       _scrollController!.scrollTo(
-        index: index,
+        index: 0,
         duration: const Duration(seconds: 1),
         curve: Curves.easeInOut,
       );

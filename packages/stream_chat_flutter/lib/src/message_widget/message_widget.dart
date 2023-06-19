@@ -61,6 +61,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.showInChannelIndicator = false,
     this.onReplyTap,
     this.onThreadTap,
+    this.onConfirmDeleteTap,
     this.showUsername = true,
     this.showTimestamp = true,
     this.showReactions = true,
@@ -78,6 +79,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.onMessageActions,
     this.onShowMessage,
     this.userAvatarBuilder,
+    this.quotedMessageBuilder,
     this.editMessageInputBuilder,
     this.textBuilder,
     @Deprecated('''
@@ -307,6 +309,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final void Function(Message)? onReplyTap;
 
+  /// {@template onDeleteTap}
+  /// The function called when delete confirmation button is tapped.
+  /// {@endtemplate}
+  final Future<void> Function(Message)? onConfirmDeleteTap;
+
   /// {@template editMessageInputBuilder}
   /// Widget builder for edit message layout
   /// {@endtemplate}
@@ -347,6 +354,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// Widget builder for building user avatar
   /// {@endtemplate}
   final Widget Function(BuildContext, User)? userAvatarBuilder;
+
+  /// {@template quotedMessageBuilder}
+  /// Widget builder for building quoted message
+  /// {@endtemplate}
+  final Widget Function(BuildContext, Message)? quotedMessageBuilder;
 
   /// {@template message}
   /// The message to display.
@@ -568,8 +580,10 @@ class StreamMessageWidget extends StatefulWidget {
     void Function(User)? onMentionTap,
     void Function(Message)? onThreadTap,
     void Function(Message)? onReplyTap,
+    Future<void> Function(Message)? onConfirmDeleteTap,
     Widget Function(BuildContext, Message)? editMessageInputBuilder,
     Widget Function(BuildContext, Message)? textBuilder,
+    Widget Function(BuildContext, Message)? quotedMessageBuilder,
     @Deprecated('''
     Use [bottomRowBuilderWithDefaultWidget] instead.
     Will be removed in the next major version.
@@ -659,9 +673,11 @@ class StreamMessageWidget extends StatefulWidget {
       onMentionTap: onMentionTap ?? this.onMentionTap,
       onThreadTap: onThreadTap ?? this.onThreadTap,
       onReplyTap: onReplyTap ?? this.onReplyTap,
+      onConfirmDeleteTap: onConfirmDeleteTap ?? this.onConfirmDeleteTap,
       editMessageInputBuilder:
           editMessageInputBuilder ?? this.editMessageInputBuilder,
       textBuilder: textBuilder ?? this.textBuilder,
+      quotedMessageBuilder: quotedMessageBuilder ?? this.quotedMessageBuilder,
       bottomRowBuilderWithDefaultWidget: _bottomRowBuilderWithDefaultWidget,
       onMessageActions: onMessageActions ?? this.onMessageActions,
       message: message ?? this.message,
@@ -957,6 +973,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       borderSide: widget.borderSide,
                       borderRadiusGeometry: widget.borderRadiusGeometry,
                       textBuilder: widget.textBuilder,
+                      quotedMessageBuilder: widget.quotedMessageBuilder,
                       onLinkTap: widget.onLinkTap,
                       onMentionTap: widget.onMentionTap,
                       onQuotedMessageTap: widget.onQuotedMessageTap,
@@ -1098,16 +1115,21 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           ),
           onClick: () async {
             Navigator.of(context, rootNavigator: true).pop();
-            final deleted = await showDialog(
+            final deleted = await showDialog<bool?>(
               context: context,
               barrierDismissible: false,
               builder: (_) => const DeleteMessageDialog(),
             );
-            if (deleted) {
+            if (deleted == true) {
               try {
-                await StreamChannel.of(context)
-                    .channel
-                    .deleteMessage(widget.message);
+                final onConfirmDeleteTap = widget.onConfirmDeleteTap;
+                if (onConfirmDeleteTap != null) {
+                  await onConfirmDeleteTap(widget.message);
+                } else {
+                  await StreamChannel.of(context)
+                      .channel
+                      .deleteMessage(widget.message);
+                }
               } catch (e) {
                 showDialog(
                   context: context,
@@ -1196,22 +1218,5 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       ),
     );
-  }
-
-  void retryMessage(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
-    if (widget.message.status == MessageSendingStatus.failed) {
-      channel.sendMessage(widget.message);
-      return;
-    }
-    if (widget.message.status == MessageSendingStatus.failed_update) {
-      channel.updateMessage(widget.message);
-      return;
-    }
-
-    if (widget.message.status == MessageSendingStatus.failed_delete) {
-      channel.deleteMessage(widget.message);
-      return;
-    }
   }
 }

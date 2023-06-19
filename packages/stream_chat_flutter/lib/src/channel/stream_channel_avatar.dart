@@ -54,6 +54,9 @@ class StreamChannelAvatar extends StatelessWidget {
     this.selected = false,
     this.selectionColor,
     this.selectionThickness = 4,
+    this.ownSpaceAvatarBuilder,
+    this.oneToOneAvatarBuilder,
+    this.groupAvatarBuilder,
   }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
@@ -79,6 +82,21 @@ class StreamChannelAvatar extends StatelessWidget {
 
   /// Thickness of selection image
   final double selectionThickness;
+
+  /// Builder to create avatar for own space channel.
+  ///
+  /// Defaults to [StreamUserAvatar].
+  final StreamUserAvatarBuilder? ownSpaceAvatarBuilder;
+
+  /// Builder to create avatar for one to one channel.
+  ///
+  /// Defaults to [StreamUserAvatar].
+  final StreamUserAvatarBuilder? oneToOneAvatarBuilder;
+
+  /// Builder to create avatar for group channel.
+  ///
+  /// Defaults to [StreamGroupAvatar].
+  final StreamGroupAvatarBuilder? groupAvatarBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -146,15 +164,22 @@ class StreamChannelAvatar extends StatelessWidget {
           return BetterStreamBuilder<User>(
             stream: client.currentUserStream.map((it) => it!),
             initialData: currentUser,
-            builder: (context, user) => StreamUserAvatar(
-              borderRadius: borderRadius ?? previewTheme?.borderRadius,
-              user: user,
-              constraints: constraints ?? previewTheme?.constraints,
-              onTap: onTap != null ? (_) => onTap!() : null,
-              selected: selected,
-              selectionColor: selectionColor ?? colorTheme.accentPrimary,
-              selectionThickness: selectionThickness,
-            ),
+            builder: (context, user) {
+              final ownSpaceBuilder = ownSpaceAvatarBuilder;
+              if (ownSpaceBuilder != null) {
+                return ownSpaceBuilder(context, user, selected);
+              }
+
+              return StreamUserAvatar(
+                borderRadius: borderRadius ?? previewTheme?.borderRadius,
+                user: user,
+                constraints: constraints ?? previewTheme?.constraints,
+                onTap: onTap != null ? (_) => onTap!() : null,
+                selected: selected,
+                selectionColor: selectionColor ?? colorTheme.accentPrimary,
+                selectionThickness: selectionThickness,
+              );
+            },
           );
         }
 
@@ -169,16 +194,28 @@ class StreamChannelAvatar extends StatelessWidget {
               ),
             ),
             initialData: member,
-            builder: (context, member) => StreamUserAvatar(
-              borderRadius: borderRadius ?? previewTheme?.borderRadius,
-              user: member.user!,
-              constraints: constraints ?? previewTheme?.constraints,
-              onTap: onTap != null ? (_) => onTap!() : null,
-              selected: selected,
-              selectionColor: selectionColor ?? colorTheme.accentPrimary,
-              selectionThickness: selectionThickness,
-            ),
+            builder: (context, member) {
+              final oneToOneBuilder = oneToOneAvatarBuilder;
+              if (oneToOneBuilder != null) {
+                return oneToOneBuilder(context, member.user!, selected);
+              }
+
+              return StreamUserAvatar(
+                borderRadius: borderRadius ?? previewTheme?.borderRadius,
+                user: member.user!,
+                constraints: constraints ?? previewTheme?.constraints,
+                onTap: onTap != null ? (_) => onTap!() : null,
+                selected: selected,
+                selectionColor: selectionColor ?? colorTheme.accentPrimary,
+                selectionThickness: selectionThickness,
+              );
+            },
           );
+        }
+
+        final groupBuilder = groupAvatarBuilder;
+        if (groupBuilder != null) {
+          return groupBuilder(context, otherMembers, selected);
         }
 
         // Group conversation
