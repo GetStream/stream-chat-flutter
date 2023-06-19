@@ -147,6 +147,7 @@ class StreamMessageInput extends StatefulWidget {
         _defaultClearQuotedMessageKeyPredicate,
     this.ogPreviewFilter = _defaultOgPreviewFilter,
     this.hintGetter = _defaultHintGetter,
+    this.contentInsertionConfiguration,
   });
 
   /// The predicate used to send a message on desktop/web
@@ -339,6 +340,9 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Returns the hint text for the message input.
   final HintGetter hintGetter;
+
+  /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
 
   static String? _defaultHintGetter(
     BuildContext context,
@@ -905,6 +909,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
                         decoration: _getInputDecoration(context),
                         textCapitalization: widget.textCapitalization,
                         autocorrect: widget.autoCorrect,
+                        contentInsertionConfiguration:
+                            widget.contentInsertionConfiguration,
                       ),
                     ),
                   ),
