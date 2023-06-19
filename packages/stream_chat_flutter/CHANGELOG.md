@@ -200,6 +200,21 @@
   )
   ```
 
+- Added support for `StreamMessageInput.contentInsertionConfiguration` to specify the content insertion configuration.
+  [#1613](https://github.com/GetStream/stream-chat-flutter/issues/1613)
+
+  ```dart
+  StreamMessageInput(
+    ...,
+    contentInsertionConfiguration: ContentInsertionConfiguration(
+      onContentInserted: (content) {
+        // Do something with the content.
+        controller.addAttachment(...);
+      },
+    ),
+  )
+  ```
+
 ## 6.3.0
 
 🐞 Fixed
