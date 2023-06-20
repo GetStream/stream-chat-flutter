@@ -22,16 +22,17 @@ class ResendMessageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isUpdateFailed = message.status == MessageSendingStatus.failed_update;
+    final isUpdateFailed = message.state.isUpdatingFailed;
     final streamChatThemeData = StreamChatTheme.of(context);
     return InkWell(
       onTap: () {
         Navigator.of(context).pop();
-        if (isUpdateFailed) {
-          channel.updateMessage(message);
-        } else {
-          channel.sendMessage(message);
-        }
+        message.state.whenOrNull(failed: (state, error) {
+          state.whenOrNull(
+            sendingFailed: () => channel.sendMessage(message),
+            updatingFailed: () => channel.updateMessage(message),
+          );
+        });
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),

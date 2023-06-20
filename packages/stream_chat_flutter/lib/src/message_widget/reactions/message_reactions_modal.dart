@@ -57,7 +57,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               if ((showReactions ?? hasReactionPermission) &&
-                  (message.status == MessageSendingStatus.sent))
+                  message.state.isCompleted)
                 LayoutBuilder(
                   builder: (context, constraints) {
                     return Align(

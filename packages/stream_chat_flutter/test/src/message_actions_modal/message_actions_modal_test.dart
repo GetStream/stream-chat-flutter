@@ -40,7 +40,7 @@ void main() {
                     user: User(
                       id: 'user-id',
                     ),
-                    status: MessageSendingStatus.sent,
+                    state: MessageState.sent,
                   ),
                   messageWidget: const Text(
                     'test',
@@ -211,7 +211,7 @@ void main() {
                     user: User(
                       id: 'user-id',
                     ),
-                    status: MessageSendingStatus.sent,
+                    state: MessageState.sent,
                   ),
                   messageTheme: streamTheme.ownMessageTheme,
                 ),
@@ -262,7 +262,7 @@ void main() {
                     user: User(
                       id: 'user-id',
                     ),
-                    status: MessageSendingStatus.sent,
+                    state: MessageState.sent,
                   ),
                   messageTheme: streamTheme.ownMessageTheme,
                 ),
@@ -460,7 +460,7 @@ void main() {
               child: MessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
-                  status: MessageSendingStatus.failed,
+                  state: MessageState.sendingFailed,
                   text: 'test',
                   user: User(
                     id: 'user-id',
@@ -510,7 +510,7 @@ void main() {
               child: MessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
-                  status: MessageSendingStatus.failed_update,
+                  state: MessageState.updatingFailed,
                   text: 'test',
                   user: User(
                     id: 'user-id',

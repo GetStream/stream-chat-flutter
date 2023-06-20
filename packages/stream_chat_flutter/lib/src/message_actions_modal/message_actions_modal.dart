@@ -19,7 +19,6 @@ class MessageActionsModal extends StatefulWidget {
     this.showDeleteMessage = true,
     this.showEditMessage = true,
     this.onReplyTap,
-    this.onConfirmDeleteTap,
     this.onThreadReplyTap,
     this.showCopyMessage = true,
     this.showReplyMessage = true,
@@ -44,9 +43,6 @@ class MessageActionsModal extends StatefulWidget {
 
   /// The action to perform when "reply" is tapped
   final OnMessageTap? onReplyTap;
-
-  /// The action to perform when delete confirmation button is tapped.
-  final Future<void> Function(Message)? onConfirmDeleteTap;
 
   /// Message in focus for actions
   final Message message;
@@ -98,9 +94,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   bool _showActions = true;
 
   @override
-  Widget build(BuildContext context) => _showMessageOptionsModal();
-
-  Widget _showMessageOptionsModal() {
+  Widget build(BuildContext context) {
     final mediaQueryData = MediaQuery.of(context);
     final user = StreamChat.of(context).currentUser;
     final orientation = mediaQueryData.orientation;
@@ -119,8 +113,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                 ? CrossAxisAlignment.end
                 : CrossAxisAlignment.start,
             children: <Widget>[
-              if (widget.showReactions &&
-                  (widget.message.status == MessageSendingStatus.sent))
+              if (widget.showReactions && widget.message.state.isCompleted)
                 LayoutBuilder(
                   builder: (context, constraints) {
                     return Align(
@@ -161,7 +154,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (widget.showReplyMessage &&
-                            widget.message.status == MessageSendingStatus.sent)
+                            widget.message.state.isCompleted)
                           ReplyButton(
                             onTap: () {
                               Navigator.of(context).pop();
@@ -171,8 +164,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             },
                           ),
                         if (widget.showThreadReplyMessage &&
-                            (widget.message.status ==
-                                MessageSendingStatus.sent) &&
+                            (widget.message.state.isCompleted) &&
                             widget.message.parentId == null)
                           ThreadReplyButton(
                             message: widget.message,
@@ -208,8 +200,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                           ),
                         if (widget.showDeleteMessage)
                           DeleteMessageButton(
-                            isDeleteFailed: widget.message.status ==
-                                MessageSendingStatus.failed_delete,
+                            isDeleteFailed:
+                                widget.message.state.isDeletingFailed,
                             onTap: _showDeleteBottomSheet,
                           ),
                         ...widget.customActions
@@ -367,12 +359,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     if (answer == true) {
       try {
         Navigator.of(context).pop();
-        final onConfirmDeleteTap = widget.onConfirmDeleteTap;
-        if (onConfirmDeleteTap != null) {
-          await onConfirmDeleteTap(widget.message);
-        } else {
-          await StreamChannel.of(context).channel.deleteMessage(widget.message);
-        }
+        await StreamChannel.of(context).channel.deleteMessage(widget.message);
       } catch (err) {
         _showErrorAlertBottomSheet();
       }

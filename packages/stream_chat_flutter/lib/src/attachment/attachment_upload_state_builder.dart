@@ -36,7 +36,7 @@ class StreamAttachmentUploadStateBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message.status == MessageSendingStatus.sent) {
+    if (message.state.isCompleted) {
       return const Offstage();
     }
 
@@ -216,7 +216,7 @@ class _FailedState extends StatelessWidget {
                 horizontal: 12,
               ),
               child: Text(
-                context.translations.uploadErrorLabel,
+                error ?? 'Failed to upload file',
                 style: theme.textTheme.footnote.copyWith(
                   color: theme.colorTheme.barsBg,
                 ),
