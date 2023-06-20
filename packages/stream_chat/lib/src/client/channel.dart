@@ -582,7 +582,7 @@ class Channel {
     // Eg. Updating the message while the previous call is in progress.
     _messageAttachmentsUploadCompleter
         .remove(message.id)
-        ?.completeError(const StreamChatError('Message deleted'));
+        ?.completeError(const StreamChatError('Message cancelled'));
 
     final quotedMessage = state!.messages.firstWhereOrNull(
       (m) => m.id == message.quotedMessageId,
