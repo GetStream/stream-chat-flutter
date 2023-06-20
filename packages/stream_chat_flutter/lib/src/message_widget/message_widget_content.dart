@@ -63,6 +63,7 @@ class MessageWidgetContent extends StatelessWidget {
     this.onMentionTap,
     this.onLinkTap,
     this.textBuilder,
+    this.quotedMessageBuilder,
     @Deprecated('''
     Use [bottomRowBuilderWithDefaultWidget] instead.
     Will be removed in the next major version.
@@ -169,6 +170,9 @@ class MessageWidgetContent extends StatelessWidget {
 
   /// {@macro textBuilder}
   final Widget Function(BuildContext, Message)? textBuilder;
+
+  /// {@macro quotedMessageBuilder}
+  final Widget Function(BuildContext, Message)? quotedMessageBuilder;
 
   /// {@macro showReactionPickerIndicator}
   final bool showReactionPickerIndicator;
@@ -351,6 +355,8 @@ class MessageWidgetContent extends StatelessWidget {
                                         onMentionTap: onMentionTap,
                                         onLinkTap: onLinkTap,
                                         textBuilder: textBuilder,
+                                        quotedMessageBuilder:
+                                            quotedMessageBuilder,
                                         borderRadiusGeometry:
                                             borderRadiusGeometry,
                                         borderSide: borderSide,

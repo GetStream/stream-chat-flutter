@@ -876,6 +876,23 @@ class Channel {
     }
   }
 
+  /// Retry the operation on the message based on the failed state.
+  ///
+  /// For example, if the message failed to send, it will retry sending the
+  /// message and vice-versa.
+  Future<Object> retryMessage(Message message) async {
+    assert(message.state.isFailed, 'Message state is not failed');
+
+    return message.state.maybeWhen(
+      failed: (state, _) => state.when(
+        sendingFailed: () => sendMessage(message),
+        updatingFailed: () => updateMessage(message),
+        deletingFailed: (hard) => deleteMessage(message, hard: hard),
+      ),
+      orElse: () => throw StateError('Message state is not failed'),
+    );
+  }
+
   /// Pins provided message
   Future<UpdateMessageResponse> pinMessage(
     Message message, {

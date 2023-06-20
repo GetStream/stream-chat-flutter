@@ -89,7 +89,7 @@ class RetryQueue {
       final retryPolicy = _retryPolicy;
       try {
         await backOff(
-          () => _retryMessage(message),
+          () => channel.retryMessage(message),
           delayFactor: retryPolicy.delayFactor,
           randomizationFactor: retryPolicy.randomizationFactor,
           maxDelay: retryPolicy.maxDelay,
@@ -111,17 +111,6 @@ class RetryQueue {
     }
 
     _isProcessing = false;
-  }
-
-  Future<Object> _retryMessage(Message message) async {
-    return message.state.maybeWhen(
-      failed: (state, _) => state.when(
-        sendingFailed: () => channel.sendMessage(message),
-        updatingFailed: () => channel.updateMessage(message),
-        deletingFailed: (hard) => channel.deleteMessage(message, hard: hard),
-      ),
-      orElse: () => throw StateError('Message state is not failed'),
-    );
   }
 
   /// Whether our [_messageQueue] has messages or not.

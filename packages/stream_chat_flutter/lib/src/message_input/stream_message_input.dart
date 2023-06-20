@@ -129,6 +129,7 @@ class StreamMessageInput extends StatefulWidget {
     this.customAutocompleteTriggers = const [],
     this.mentionAllAppUsers = false,
     this.sendButtonBuilder,
+    this.quotedMessageBuilder,
     this.shouldKeepFocusAfterMessage,
     this.validator = _defaultValidator,
     this.restorationId,
@@ -265,6 +266,9 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Builder for creating send button
   final MessageRelatedBuilder? sendButtonBuilder;
+
+  /// Builder for building quoted message
+  final Widget Function(BuildContext, Message)? quotedMessageBuilder;
 
   /// Defines if the [StreamMessageInput] loses focuses after a message is sent.
   /// The default behaviour keeps focus until a command is enabled.
@@ -781,7 +785,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Future<void> _onAttachmentButtonPressed() async {
     final attachments = await showStreamAttachmentPickerModalBottomSheet(
       context: context,
-      useRootNavigator: true,
       allowedTypes: widget.allowedAttachmentPickerTypes,
       initialAttachments: _effectiveController.attachments,
     );
@@ -1131,14 +1134,20 @@ class StreamMessageInputState extends State<StreamMessageInput>
     if (!_hasQuotedMessage) return const Offstage();
     final containsUrl = _effectiveController.message.quotedMessage!.attachments
         .any((element) => element.titleLink != null);
-    return StreamQuotedMessageWidget(
-      reverse: true,
-      showBorder: !containsUrl,
-      message: _effectiveController.message.quotedMessage!,
-      messageTheme: _streamChatTheme.otherMessageTheme,
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      onQuotedMessageClear: widget.onQuotedMessageCleared,
-    );
+
+    return widget.quotedMessageBuilder?.call(
+          context,
+          _effectiveController.message.quotedMessage!,
+        ) ??
+        StreamQuotedMessageWidget(
+          reverse: true,
+          showBorder: !containsUrl,
+          message: _effectiveController.message.quotedMessage!,
+          messageTheme: _streamChatTheme.otherMessageTheme,
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          onQuotedMessageClear: widget.onQuotedMessageCleared,
+          attachmentThumbnailBuilders: widget.attachmentThumbnailBuilders,
+        );
   }
 
   Widget _buildAttachments() {

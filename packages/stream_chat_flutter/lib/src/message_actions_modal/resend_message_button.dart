@@ -27,12 +27,7 @@ class ResendMessageButton extends StatelessWidget {
     return InkWell(
       onTap: () {
         Navigator.of(context).pop();
-        message.state.whenOrNull(failed: (state, error) {
-          state.whenOrNull(
-            sendingFailed: () => channel.sendMessage(message),
-            updatingFailed: () => channel.updateMessage(message),
-          );
-        });
+        channel.retryMessage(message);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),

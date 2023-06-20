@@ -19,6 +19,7 @@ class MessageActionsModal extends StatefulWidget {
     this.showDeleteMessage = true,
     this.showEditMessage = true,
     this.onReplyTap,
+    this.onConfirmDeleteTap,
     this.onThreadReplyTap,
     this.showCopyMessage = true,
     this.showReplyMessage = true,
@@ -43,6 +44,9 @@ class MessageActionsModal extends StatefulWidget {
 
   /// The action to perform when "reply" is tapped
   final OnMessageTap? onReplyTap;
+
+  /// The action to perform when delete confirmation button is tapped.
+  final Future<void> Function(Message)? onConfirmDeleteTap;
 
   /// Message in focus for actions
   final Message message;
@@ -359,7 +363,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     if (answer == true) {
       try {
         Navigator.of(context).pop();
-        await StreamChannel.of(context).channel.deleteMessage(widget.message);
+        final onConfirmDeleteTap = widget.onConfirmDeleteTap;
+        if (onConfirmDeleteTap != null) {
+          await onConfirmDeleteTap(widget.message);
+        } else {
+          await StreamChannel.of(context).channel.deleteMessage(widget.message);
+        }
       } catch (err) {
         _showErrorAlertBottomSheet();
       }
