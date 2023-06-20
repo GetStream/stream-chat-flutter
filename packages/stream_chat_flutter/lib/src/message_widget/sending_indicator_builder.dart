@@ -76,7 +76,7 @@ class SendingIndicatorBuilder extends StatelessWidget {
         Widget child = StreamSendingIndicator(
           message: message,
           isMessageRead: isMessageRead,
-          size: style!.fontSize,
+          size: style?.fontSize,
         );
 
         if (isMessageRead) {
@@ -86,7 +86,7 @@ class SendingIndicatorBuilder extends StatelessWidget {
               if (memberCount > 2)
                 Text(
                   readList.length.toString(),
-                  style: style.copyWith(
+                  style: style?.copyWith(
                     color: streamChatTheme.colorTheme.accentPrimary,
                   ),
                 ),

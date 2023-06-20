@@ -4,6 +4,8 @@
 
 - [[#1620]](https://github.com/GetStream/stream-chat-flutter/issues/1620) Fixed messages Are Not Hard Deleting even
   after overriding the `onConfirmDeleteTap` callback.
+- [[#1621]](https://github.com/GetStream/stream-chat-flutter/issues/1621) Fixed `createdAtStyle` null check error
+  in `SendingIndicatorBuilder`.
 
 ## 6.4.0
 
