@@ -880,7 +880,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
     return ConditionalParentBuilder(
       builder: (context, child) {
-        if (!widget.message.isDeleted) {
+        if (!widget.message.state.isDeleted) {
           return ContextMenuArea(
             verticalPadding: 0,
             builder: (context) => _buildContextMenu(),
@@ -902,7 +902,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               mobile: (context, child) {
                 return InkWell(
                   onTap: () => widget.onMessageTap!(widget.message),
-                  onLongPress: widget.message.isDeleted && !isFailedState
+                  onLongPress: !widget.message.state.isDeleted
                       ? null
                       : () => onLongPress(context),
                   child: child,
