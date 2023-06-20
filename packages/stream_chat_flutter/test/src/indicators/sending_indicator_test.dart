@@ -27,7 +27,7 @@ void main() {
   );
 
   testWidgets(
-    'StreamSendingIndicator shows an Icon if message state is not initial',
+    'StreamSendingIndicator shows an Icon if message state is sending',
     (tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -37,7 +37,7 @@ void main() {
               body: Center(
                 child: StreamSendingIndicator(
                   message: Message(
-                    state: MessageState.sent,
+                    state: MessageState.sending,
                   ),
                 ),
               ),
