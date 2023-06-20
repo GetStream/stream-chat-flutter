@@ -631,7 +631,7 @@ class Channel {
       );
 
       final sentMessage = response.message.syncWith(message).copyWith(
-            // Update the message state to updated.
+            // Update the message state to sent.
             state: MessageState.sent,
           );
 
@@ -669,7 +669,7 @@ class Channel {
     // Eg. Updating the message while the previous call is in progress.
     _messageAttachmentsUploadCompleter
         .remove(message.id)
-        ?.completeError(const StreamChatError('Message deleted'));
+        ?.completeError(const StreamChatError('Message cancelled'));
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -757,7 +757,7 @@ class Channel {
     // Eg. Updating the message while the previous call is in progress.
     _messageAttachmentsUploadCompleter
         .remove(message.id)
-        ?.completeError(const StreamChatError('Message deleted'));
+        ?.completeError(const StreamChatError('Message cancelled'));
 
     // ignore: parameter_assignments
     message = message.copyWith(
