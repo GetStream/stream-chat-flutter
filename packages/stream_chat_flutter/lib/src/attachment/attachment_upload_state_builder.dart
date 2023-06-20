@@ -216,7 +216,7 @@ class _FailedState extends StatelessWidget {
                 horizontal: 12,
               ),
               child: Text(
-                error ?? 'Failed to upload file',
+                context.translations.uploadErrorLabel,
                 style: theme.textTheme.footnote.copyWith(
                   color: theme.colorTheme.barsBg,
                 ),
