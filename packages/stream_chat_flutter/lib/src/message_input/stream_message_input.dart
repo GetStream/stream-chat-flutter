@@ -366,8 +366,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   bool get _hasQuotedMessage =>
       _effectiveController.message.quotedMessage != null;
 
-  // TODO:
-  bool get _isEditing => _effectiveController.message.state.isCompleted;
+  bool get _isEditing => !_effectiveController.message.state.isInitial;
 
   BoxBorder? _draggingBorder;
 
@@ -553,7 +552,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (_hasQuotedMessage)
+                  if (_hasQuotedMessage && !_isEditing)
                     // Ensure this doesn't show on web & desktop
                     PlatformWidgetBuilder(
                       mobile: (context, child) => child,
