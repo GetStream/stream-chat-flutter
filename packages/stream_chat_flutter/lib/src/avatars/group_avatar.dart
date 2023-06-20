@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// WidgetBuilder for [StreamGroupAvatar].
+typedef StreamGroupAvatarBuilder = Widget Function(
+  BuildContext context,
+  List<Member> members,
+  // ignore: avoid_positional_boolean_parameters
+  bool isSelected,
+);
+
 /// {@template streamGroupAvatar}
 /// Widget for constructing a group of images
 /// {@endtemplate}
