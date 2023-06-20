@@ -1202,6 +1202,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           messageTheme: widget.messageTheme,
           reverse: widget.reverse,
           showDeleteMessage: shouldShowDeleteAction,
+          onConfirmDeleteTap: widget.onConfirmDeleteTap,
           message: widget.message,
           editMessageInputBuilder: widget.editMessageInputBuilder,
           onReplyTap: widget.onReplyTap,
