@@ -10,11 +10,6 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
   /// Captures errors reported by the Flutter framework.
   FlutterError.onError = (FlutterErrorDetails details) {
     if (kDebugMode) {
@@ -26,6 +21,8 @@ Future<void> main() async {
     }
   };
 
+  /// Captures errors reported by the native environment, including native iOS
+  /// and Android code.
   Future<void> reportError(dynamic error, StackTrace stackTrace) async {
     // Print the exception to the console.
     if (kDebugMode) {
@@ -38,11 +35,18 @@ Future<void> main() async {
     }
   }
 
+  /// Runs the app wrapped in a [Zone] that captures errors and sends them to
+  /// sentry.
   runZonedGuarded(
     () async {
-      await SentryFlutter.init(
-        (options) => options.dsn = sentryDsn,
-      );
+      WidgetsFlutterBinding.ensureInitialized();
+
+      // Wait for Sentry and Firebase to initialize before running the app.
+      await Future.wait([
+        SentryFlutter.init((options) => options.dsn = sentryDsn),
+        Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+      ]);
+
       runApp(const StreamChatSampleApp());
     },
     reportError,
