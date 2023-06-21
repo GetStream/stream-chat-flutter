@@ -108,8 +108,16 @@ class _ChannelPageState extends State<ChannelPage> {
                               Routes.CHANNEL_PAGE.queryParams(message),
                         );
                       },
-                      bottomRowBuilderWithDefaultWidget: (context, message, _) {
-                        return const StreamVisibleFootnote();
+                      bottomRowBuilderWithDefaultWidget: (
+                        context,
+                        message,
+                        defaultWidget,
+                      ) {
+                        return defaultWidget.copyWith(
+                          deletedBottomRowBuilder: (context, message) {
+                            return const StreamVisibleFootnote();
+                          },
+                        );
                       },
                     );
                   },

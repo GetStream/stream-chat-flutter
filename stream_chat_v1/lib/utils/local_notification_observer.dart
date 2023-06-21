@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:example/routes/routes.dart';
-import 'package:example/utils/notifications_service.dart';
+import 'package:example/utils/notifications_service.dart' as pn;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -36,7 +36,7 @@ class LocalNotificationObserver extends NavigatorObserver {
       }
     }
 
-    showLocalNotification(
+    pn.showLocalNotification(
       event,
       client.state.currentUser!.id,
       navigatorKey.currentState!.context,

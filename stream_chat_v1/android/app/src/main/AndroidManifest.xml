@@ -30,6 +30,14 @@
                     android:name="io.flutter.embedding.android.NormalTheme"
                     android:resource="@style/NormalTheme"
             />
+            <!-- Action mentioned in Notification Template:
+            {
+              "title": "{{ sender.name }} @ {{ channel.name }}",
+              "body": "{{ truncate message.text 2000 }}",
+              "click_action": "FLUTTER_NOTIFICATION_CLICK",
+              "sound": "default"
+            }
+            -->
             <intent-filter>
                 <action android:name="FLUTTER_NOTIFICATION_CLICK" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -44,5 +52,11 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- Set custom default icon. This is used when no icon is set for background notification messages.
+             See README(https://goo.gl/l4GJaQ) for more. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
     </application>
 </manifest>

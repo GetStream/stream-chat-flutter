@@ -1,5 +1,5 @@
-import 'package:example/utils/localizations.dart';
 import 'package:example/routes/routes.dart';
+import 'package:example/utils/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide Message;
@@ -11,52 +11,48 @@ void showLocalNotification(
   String currentUserId,
   BuildContext context,
 ) async {
+  // Don't show notification if the event is from the current user.
+  if (event.user!.id == currentUserId) return;
+
+  // Don't show notification if the event is not a message.
   if (![
-        EventType.messageNew,
-        EventType.notificationMessageNew,
-      ].contains(event.type) ||
-      event.user!.id == currentUserId) {
-    return;
-  }
+    EventType.messageNew,
+    EventType.notificationMessageNew,
+  ].contains(event.type)) return;
+
+  // Return if the message is null.
   if (event.message == null) return;
+
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  const initializationSettingsAndroid =
-      AndroidInitializationSettings('launch_background');
-  const initializationSettingsIOS = IOSInitializationSettings();
   const initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-    iOS: initializationSettingsIOS,
+    iOS: DarwinInitializationSettings(),
+    android: AndroidInitializationSettings('ic_notification_in_app'),
   );
 
   final appLocalizations = AppLocalizations.of(context);
 
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
-    onSelectNotification: (channelCid) async {
-      if (channelCid != null) {
-        final client = StreamChat.of(context).client;
-        final router = GoRouter.of(context);
+    onDidReceiveNotificationResponse: (response) async {
+      final channelCid = response.payload;
+      if (channelCid == null) return;
 
-        var channel = client.state.channels[channelCid];
+      final channelType = channelCid.split(':')[0];
+      final channelId = channelCid.split(':')[1];
 
-        if (channel == null) {
-          final splits = channelCid.split(':');
-          final type = splits[0];
-          final id = splits[1];
-          channel = client.channel(
-            type,
-            id: id,
-          );
-          await channel.watch();
-        }
+      final client = StreamChat.of(context).client;
+      final router = GoRouter.of(context);
 
-        router.pushNamed(
-          Routes.CHANNEL_PAGE.name,
-          pathParameters: Routes.CHANNEL_PAGE.params(channel),
-        );
-      }
+      final channel = client.channel(channelType, id: channelId);
+      await channel.watch();
+
+      router.pushNamed(
+        Routes.CHANNEL_PAGE.name,
+        pathParameters: Routes.CHANNEL_PAGE.params(channel),
+      );
     },
   );
+
   await flutterLocalNotificationsPlugin.show(
     event.message!.id.hashCode,
     event.message!.user!.name,
@@ -69,8 +65,13 @@ void showLocalNotification(
         priority: Priority.high,
         importance: Importance.high,
       ),
-      iOS: const IOSNotificationDetails(),
+      iOS: const DarwinNotificationDetails(),
     ),
     payload: '${event.channelType}:${event.channelId}',
   );
+}
+
+Future<void> cancelLocalNotifications() async {
+  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  await flutterLocalNotificationsPlugin.cancelAll();
 }

@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:example/app.dart';
-import 'package:example/state/init_data.dart';
 import 'package:example/pages/user_mentions_page.dart';
 import 'package:example/routes/routes.dart';
+import 'package:example/state/init_data.dart';
 import 'package:example/utils/app_config.dart';
 import 'package:example/utils/localizations.dart';
 import 'package:example/widgets/channel_list.dart';
@@ -75,8 +75,9 @@ class _ChannelListPageState extends State<ChannelListPage> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: StreamChannelListHeader(
-        onNewChatButtonTap: () =>
-            GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name),
+        onNewChatButtonTap: () {
+          GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name);
+        },
         preNavigationCallback: () =>
             FocusScope.of(context).requestFocus(FocusNode()),
       ),
