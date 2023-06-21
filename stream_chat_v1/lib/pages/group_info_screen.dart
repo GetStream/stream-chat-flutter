@@ -459,14 +459,16 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         size: 24.0,
                       ),
                       onTap: () {
-                        channel.update({
-                          'name': _nameController.text.trim(),
-                        }).catchError((err) {
+                        try {
+                          channel.update({
+                            'name': _nameController.text.trim(),
+                          });
+                        } catch (_) {
                           setState(() {
                             _nameController.text = channelName;
                             _focusNode.unfocus();
                           });
-                        });
+                        }
                       },
                     ),
                   ),
@@ -878,7 +880,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
                         router.pushNamed(
                           Routes.CHAT_INFO_SCREEN.name,
-                          params: Routes.CHAT_INFO_SCREEN.params(c),
+                          pathParameters: Routes.CHAT_INFO_SCREEN.params(c),
                           extra: user,
                         );
                       },
@@ -908,7 +910,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
                         router.pushNamed(
                           Routes.CHANNEL_PAGE.name,
-                          params: Routes.CHANNEL_PAGE.params(c),
+                          pathParameters: Routes.CHANNEL_PAGE.params(c),
                         );
                       },
                     ),

@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:example/routes/routes.dart';
 import 'package:example/pages/thread_page.dart';
+import 'package:example/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -64,14 +64,14 @@ class _ChannelPageState extends State<ChannelPage> {
             if (otherUser != null) {
               router.pushNamed(
                 Routes.CHAT_INFO_SCREEN.name,
-                params: Routes.CHAT_INFO_SCREEN.params(channel),
+                pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
                 extra: otherUser.user,
               );
             }
           } else {
             GoRouter.of(context).pushNamed(
               Routes.GROUP_INFO_SCREEN.name,
-              params: Routes.GROUP_INFO_SCREEN.params(channel),
+              pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
             );
           }
         },
@@ -103,11 +103,12 @@ class _ChannelPageState extends State<ChannelPage> {
                         }
                         router.goNamed(
                           Routes.CHANNEL_PAGE.name,
-                          params: Routes.CHANNEL_PAGE.params(channel),
-                          queryParams: Routes.CHANNEL_PAGE.queryParams(message),
+                          pathParameters: Routes.CHANNEL_PAGE.params(channel),
+                          queryParameters:
+                              Routes.CHANNEL_PAGE.queryParams(message),
                         );
                       },
-                      deletedBottomRowBuilder: (context, message) {
+                      bottomRowBuilderWithDefaultWidget: (context, message, _) {
                         return const StreamVisibleFootnote();
                       },
                     );

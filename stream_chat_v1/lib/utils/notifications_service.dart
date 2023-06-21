@@ -52,7 +52,7 @@ void showLocalNotification(
 
         router.pushNamed(
           Routes.CHANNEL_PAGE.name,
-          params: Routes.CHANNEL_PAGE.params(channel),
+          pathParameters: Routes.CHANNEL_PAGE.params(channel),
         );
       }
     },

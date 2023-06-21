@@ -161,8 +161,9 @@ class _ChannelList extends State<ChannelList> {
                         }
                         router.pushNamed(
                           Routes.CHANNEL_PAGE.name,
-                          params: Routes.CHANNEL_PAGE.params(channel),
-                          queryParams: Routes.CHANNEL_PAGE.queryParams(message),
+                          pathParameters: Routes.CHANNEL_PAGE.params(channel),
+                          queryParameters:
+                              Routes.CHANNEL_PAGE.queryParams(message),
                         );
                       },
                     );
@@ -265,7 +266,7 @@ class _ChannelList extends State<ChannelList> {
                       onChannelTap: (channel) {
                         GoRouter.of(context).pushNamed(
                           Routes.CHANNEL_PAGE.name,
-                          params: Routes.CHANNEL_PAGE.params(channel),
+                          pathParameters: Routes.CHANNEL_PAGE.params(channel),
                         );
                       },
                       emptyBuilder: (_) {

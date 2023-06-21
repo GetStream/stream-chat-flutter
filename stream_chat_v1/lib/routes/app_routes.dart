@@ -27,10 +27,12 @@ final appRoutes = [
         name: Routes.CHANNEL_PAGE.name,
         path: Routes.CHANNEL_PAGE.path,
         builder: (context, state) {
-          final channel =
-              StreamChat.of(context).client.state.channels[state.params['cid']];
-          final messageId = state.queryParams['mid'];
-          final parentId = state.queryParams['pid'];
+          final channel = StreamChat.of(context)
+              .client
+              .state
+              .channels[state.pathParameters['cid']];
+          final messageId = state.queryParameters['mid'];
+          final parentId = state.queryParameters['pid'];
 
           Message? parentMessage;
           if (parentId != null) {
@@ -60,7 +62,7 @@ final appRoutes = [
               final channel = StreamChat.of(context)
                   .client
                   .state
-                  .channels[state.params['cid']];
+                  .channels[state.pathParameters['cid']];
               return StreamChannel(
                 channel: channel!,
                 child: ChatInfoScreen(
@@ -77,7 +79,7 @@ final appRoutes = [
               final channel = StreamChat.of(context)
                   .client
                   .state
-                  .channels[state.params['cid']];
+                  .channels[state.pathParameters['cid']];
               return StreamChannel(
                 channel: channel!,
                 child: GroupInfoScreen(
