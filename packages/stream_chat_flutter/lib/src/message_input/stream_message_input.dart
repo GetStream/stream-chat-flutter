@@ -131,6 +131,7 @@ class StreamMessageInput extends StatefulWidget {
     this.mentionAllAppUsers = false,
     this.sendButtonBuilder,
     this.quotedMessageBuilder,
+    this.quotedMessageAttachmentThumbnailBuilders,
     this.shouldKeepFocusAfterMessage,
     this.validator = _defaultValidator,
     this.restorationId,
@@ -237,6 +238,13 @@ class StreamMessageInput extends StatefulWidget {
   /// Map that defines a thumbnail builder for an attachment type.
   @Deprecated('Use `mediaAttachmentBuilder` instead.')
   final Map<String, AttachmentThumbnailBuilder>? attachmentThumbnailBuilders;
+
+  /// Map that defines a thumbnail builder for an attachment type.
+  ///
+  /// This is used to build the thumbnail for the attachment in the quoted
+  /// message.
+  final Map<String, QuotedMessageAttachmentThumbnailBuilder>?
+      quotedMessageAttachmentThumbnailBuilders;
 
   /// The focus node associated to the TextField.
   final FocusNode? focusNode;
@@ -1173,7 +1181,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
           messageTheme: _streamChatTheme.otherMessageTheme,
           padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
           onQuotedMessageClear: widget.onQuotedMessageCleared,
-          attachmentThumbnailBuilders: widget.attachmentThumbnailBuilders,
+          attachmentThumbnailBuilders:
+              widget.quotedMessageAttachmentThumbnailBuilders,
         );
   }
 
