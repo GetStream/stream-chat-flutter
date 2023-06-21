@@ -1167,23 +1167,30 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return const Offstage();
-    final containsUrl = _effectiveController.message.quotedMessage!.attachments
-        .any((element) => element.titleLink != null);
+    final quotedMessage = _effectiveController.message.quotedMessage!;
 
-    return widget.quotedMessageBuilder?.call(
-          context,
-          _effectiveController.message.quotedMessage!,
-        ) ??
-        StreamQuotedMessageWidget(
-          reverse: true,
-          showBorder: !containsUrl,
-          message: _effectiveController.message.quotedMessage!,
-          messageTheme: _streamChatTheme.otherMessageTheme,
-          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-          onQuotedMessageClear: widget.onQuotedMessageCleared,
-          attachmentThumbnailBuilders:
-              widget.quotedMessageAttachmentThumbnailBuilders,
-        );
+    final quotedMessageBuilder = widget.quotedMessageBuilder;
+    if (quotedMessageBuilder != null) {
+      return quotedMessageBuilder(
+        context,
+        _effectiveController.message.quotedMessage!,
+      );
+    }
+
+    final containsUrl = quotedMessage.attachments.any((it) {
+      return it.titleLink != null;
+    });
+
+    return StreamQuotedMessageWidget(
+      reverse: true,
+      showBorder: !containsUrl,
+      message: quotedMessage,
+      messageTheme: _streamChatTheme.otherMessageTheme,
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      onQuotedMessageClear: widget.onQuotedMessageCleared,
+      attachmentThumbnailBuilders:
+          widget.quotedMessageAttachmentThumbnailBuilders,
+    );
   }
 
   Widget _buildAttachments() {
@@ -1195,27 +1202,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
     // If there are no attachments, return an empty widget
     if (nonOGAttachments.isEmpty) return const Offstage();
 
-    // Default callback for removing an attachment.
-    Future<void> onAttachmentRemovePressed(Attachment attachment) async {
-      final file = attachment.file;
-      final uploadState = attachment.uploadState;
-
-      if (file != null && !uploadState.isSuccess && !isWeb) {
-        await StreamAttachmentHandler.instance.deleteAttachmentFile(
-          attachmentFile: file,
-        );
-      }
-
-      _effectiveController.removeAttachmentById(attachment.id);
-    }
-
     // If the user has provided a custom attachment list builder, use that.
     final attachmentListBuilder = widget.attachmentListBuilder;
     if (attachmentListBuilder != null) {
       return attachmentListBuilder(
         context,
         nonOGAttachments,
-        onAttachmentRemovePressed,
+        _onAttachmentRemovePressed,
       );
     }
 
@@ -1224,7 +1217,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       maxHeight: 240,
       child: StreamMessageInputAttachmentList(
         attachments: nonOGAttachments,
-        onRemovePressed: onAttachmentRemovePressed,
+        onRemovePressed: _onAttachmentRemovePressed,
         fileAttachmentListBuilder: widget.fileAttachmentListBuilder,
         mediaAttachmentListBuilder: widget.mediaAttachmentListBuilder,
         fileAttachmentBuilder: widget.fileAttachmentBuilder,
@@ -1268,6 +1261,20 @@ class StreamMessageInputState extends State<StreamMessageInput>
             },
       ),
     );
+  }
+
+  // Default callback for removing an attachment.
+  Future<void> _onAttachmentRemovePressed(Attachment attachment) async {
+    final file = attachment.file;
+    final uploadState = attachment.uploadState;
+
+    if (file != null && !uploadState.isSuccess && !isWeb) {
+      await StreamAttachmentHandler.instance.deleteAttachmentFile(
+        attachmentFile: file,
+      );
+    }
+
+    _effectiveController.removeAttachmentById(attachment.id);
   }
 
   Widget _buildCommandButton(BuildContext context) {
