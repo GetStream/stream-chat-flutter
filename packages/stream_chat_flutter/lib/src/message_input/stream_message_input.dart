@@ -3,14 +3,10 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:cached_network_image/cached_network_image.dart'
-    hide ErrorListener;
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
@@ -19,7 +15,6 @@ import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
-import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const _kCommandTrigger = '/';
@@ -110,6 +105,12 @@ class StreamMessageInput extends StatefulWidget {
     this.messageInputController,
     this.actions = const [],
     this.actionsLocation = ActionsLocation.left,
+    this.attachmentListBuilder,
+    this.fileAttachmentListBuilder,
+    this.mediaAttachmentListBuilder,
+    this.fileAttachmentBuilder,
+    this.mediaAttachmentBuilder,
+    @Deprecated('Use `mediaAttachmentBuilder` instead.')
     this.attachmentThumbnailBuilders,
     this.focusNode,
     this.sendButtonLocation = SendButtonLocation.outside,
@@ -209,7 +210,32 @@ class StreamMessageInput extends StatefulWidget {
   /// The location of the custom actions.
   final ActionsLocation actionsLocation;
 
+  /// Builder used to build the attachment list present in the message input.
+  ///
+  /// In case you want to customize only sub-parts of the attachment list,
+  /// consider using [fileAttachmentListBuilder], [mediaAttachmentListBuilder].
+  final AttachmentListBuilder? attachmentListBuilder;
+
+  /// Builder used to build the file type attachment list.
+  ///
+  /// In case you want to customize the attachment item, consider using
+  /// [fileAttachmentBuilder].
+  final AttachmentListBuilder? fileAttachmentListBuilder;
+
+  /// Builder used to build the media type attachment list.
+  ///
+  /// In case you want to customize the attachment item, consider using
+  /// [mediaAttachmentBuilder].
+  final AttachmentListBuilder? mediaAttachmentListBuilder;
+
+  /// Builder used to build the file attachment item.
+  final AttachmentItemBuilder? fileAttachmentBuilder;
+
+  /// Builder used to build the media attachment item.
+  final AttachmentItemBuilder? mediaAttachmentBuilder;
+
   /// Map that defines a thumbnail builder for an attachment type.
+  @Deprecated('Use `mediaAttachmentBuilder` instead.')
   final Map<String, AttachmentThumbnailBuilder>? attachmentThumbnailBuilders;
 
   /// The focus node associated to the TextField.
@@ -1152,188 +1178,87 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildAttachments() {
-    final nonOGAttachments = _effectiveController.attachments.where(
-      (it) => it.titleLink == null,
-    );
+    final attachments = _effectiveController.attachments;
+    final nonOGAttachments = attachments.where((it) {
+      return it.titleLink == null;
+    }).toList(growable: false);
+
+    // If there are no attachments, return an empty widget
     if (nonOGAttachments.isEmpty) return const Offstage();
-    final fileAttachments = nonOGAttachments
-        .where((it) => it.type == 'file')
-        .toList(growable: false);
-    final remainingAttachments = nonOGAttachments
-        .where((it) => it.type != 'file')
-        .toList(growable: false);
-    return Column(
-      children: [
-        if (fileAttachments.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-            child: LimitedBox(
-              maxHeight: 136,
-              child: ListView(
-                reverse: true,
-                shrinkWrap: true,
-                children: fileAttachments.reversed
-                    .map<Widget>(
-                      (e) => ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: StreamFileAttachment(
-                          message: Message(), // dummy message
-                          attachment: e,
-                          constraints: BoxConstraints.loose(Size(
-                            MediaQuery.of(context).size.width * 0.65,
-                            56,
-                          )),
-                          trailing: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: _buildRemoveButton(e),
-                          ),
-                        ),
-                      ),
-                    )
-                    .insertBetween(const SizedBox(height: 8)),
-              ),
-            ),
-          ),
-        if (remainingAttachments.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-            child: LimitedBox(
-              maxHeight: 104,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: remainingAttachments
-                    .map<Widget>(
-                      (attachment) => ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Stack(
-                          children: <Widget>[
-                            AspectRatio(
-                              aspectRatio: 1,
-                              child: SizedBox(
-                                height: 104,
-                                width: 104,
-                                child: _buildAttachment(attachment),
-                              ),
-                            ),
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: _buildRemoveButton(attachment),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                    .insertBetween(const SizedBox(width: 8)),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
 
-  Widget _buildRemoveButton(Attachment attachment) {
-    return SizedBox(
-      height: 24,
-      width: 24,
-      child: RawMaterialButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        elevation: 0,
-        highlightElevation: 0,
-        focusElevation: 0,
-        hoverElevation: 0,
-        onPressed: () async {
-          final file = attachment.file;
-          final uploadState = attachment.uploadState;
+    // Default callback for removing an attachment.
+    Future<void> onAttachmentRemovePressed(Attachment attachment) async {
+      final file = attachment.file;
+      final uploadState = attachment.uploadState;
 
-          if (file != null && !uploadState.isSuccess && !isWeb) {
-            await StreamAttachmentHandler.instance.deleteAttachmentFile(
-              attachmentFile: file,
-            );
-          }
+      if (file != null && !uploadState.isSuccess && !isWeb) {
+        await StreamAttachmentHandler.instance.deleteAttachmentFile(
+          attachmentFile: file,
+        );
+      }
 
-          _effectiveController.removeAttachmentById(attachment.id);
-        },
-        fillColor:
-            _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
-        child: Center(
-          child: StreamSvgIcon.close(
-            size: 24,
-            color: _streamChatTheme.colorTheme.barsBg,
-          ),
-        ),
-      ),
-    );
-  }
+      _effectiveController.removeAttachmentById(attachment.id);
+    }
 
-  Widget _buildAttachment(Attachment attachment) {
-    if (widget.attachmentThumbnailBuilders?.containsKey(attachment.type) ==
-        true) {
-      return widget.attachmentThumbnailBuilders![attachment.type!]!(
+    // If the user has provided a custom attachment list builder, use that.
+    final attachmentListBuilder = widget.attachmentListBuilder;
+    if (attachmentListBuilder != null) {
+      return attachmentListBuilder(
         context,
-        attachment,
+        nonOGAttachments,
+        onAttachmentRemovePressed,
       );
     }
 
-    switch (attachment.type) {
-      case 'image':
-      case 'giphy':
-        return attachment.file != null
-            ? Image.memory(
-                attachment.file!.bytes!,
-                fit: BoxFit.cover,
-                errorBuilder: (context, _, __) => Image.asset(
-                  'images/placeholder.png',
-                  package: 'stream_chat_flutter',
-                ),
-              )
-            : CachedNetworkImage(
-                imageUrl: attachment.imageUrl ??
-                    attachment.assetUrl ??
-                    attachment.thumbUrl!,
-                fit: BoxFit.cover,
-                errorWidget: (_, obj, trace) =>
-                    getFileTypeImage(attachment.extraData['other'] as String?),
-                placeholder: (context, _) => Shimmer.fromColors(
-                  baseColor: _streamChatTheme.colorTheme.disabled,
-                  highlightColor: _streamChatTheme.colorTheme.inputBg,
-                  child: Image.asset(
-                    'images/placeholder.png',
-                    fit: BoxFit.cover,
-                    package: 'stream_chat_flutter',
-                  ),
+    // Otherwise, use the default attachment list builder.
+    return LimitedBox(
+      maxHeight: 240,
+      child: StreamMessageInputAttachmentList(
+        attachments: nonOGAttachments,
+        onRemovePressed: onAttachmentRemovePressed,
+        fileAttachmentListBuilder: widget.fileAttachmentListBuilder,
+        mediaAttachmentListBuilder: widget.mediaAttachmentListBuilder,
+        fileAttachmentBuilder: widget.fileAttachmentBuilder,
+        mediaAttachmentBuilder: widget.mediaAttachmentBuilder ??
+            // For backward compatibility.
+            // TODO: Remove in the next major release.
+            (context, attachment, onRemovePressed) {
+              final Widget mediaAttachmentThumbnail;
+
+              final builder =
+                  widget.attachmentThumbnailBuilders?[attachment.type];
+              if (builder != null) {
+                mediaAttachmentThumbnail = builder(context, attachment);
+              } else {
+                mediaAttachmentThumbnail = MessageInputMediaAttachmentThumbnail(
+                  attachment: attachment,
+                );
+              }
+
+              return ClipRRect(
+                key: Key(attachment.id),
+                borderRadius: BorderRadius.circular(10),
+                child: Stack(
+                  children: <Widget>[
+                    AspectRatio(
+                      aspectRatio: 1,
+                      child: mediaAttachmentThumbnail,
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: RemoveAttachmentButton(
+                        onPressed: onRemovePressed != null
+                            ? () => onRemovePressed(attachment)
+                            : null,
+                      ),
+                    ),
+                  ],
                 ),
               );
-      case 'video':
-        return Stack(
-          children: [
-            StreamVideoThumbnailImage(
-              constraints: BoxConstraints.loose(
-                const Size(
-                  104,
-                  104,
-                ),
-              ),
-              video: attachment.file?.path ?? attachment.assetUrl,
-            ),
-            Positioned(
-              left: 8,
-              bottom: 10,
-              child: SvgPicture.asset(
-                'svgs/video_call_icon.svg',
-                package: 'stream_chat_flutter',
-              ),
-            ),
-          ],
-        );
-      default:
-        return const ColoredBox(
-          color: Colors.black26,
-          child: Icon(Icons.insert_drive_file),
-        );
-    }
+            },
+      ),
+    );
   }
 
   Widget _buildCommandButton(BuildContext context) {
