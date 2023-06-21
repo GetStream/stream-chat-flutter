@@ -64,8 +64,16 @@ class _ThreadPageState extends State<ThreadPage> {
               messageBuilder: (context, details, messages, defaultMessage) {
                 return defaultMessage.copyWith(
                   onReplyTap: _reply,
-                  bottomRowBuilderWithDefaultWidget: (context, message, _) {
-                    return const StreamVisibleFootnote();
+                  bottomRowBuilderWithDefaultWidget: (
+                    context,
+                    message,
+                    defaultWidget,
+                  ) {
+                    return defaultWidget.copyWith(
+                      deletedBottomRowBuilder: (context, message) {
+                        return const StreamVisibleFootnote();
+                      },
+                    );
                   },
                 );
               },
