@@ -1,0 +1,26 @@
+dependency_overrides:
+  stream_chat:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      ref: develop
+      path: packages/stream_chat
+  stream_chat_flutter_core:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      ref: develop
+      path: packages/stream_chat_flutter_core
+  stream_chat_flutter:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      ref: develop
+      path: packages/stream_chat_flutter
+  stream_chat_persistence:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      ref: develop
+      path: packages/stream_chat_persistence
+  stream_chat_localizations:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      ref: develop
+      path: packages/stream_chat_localizations
