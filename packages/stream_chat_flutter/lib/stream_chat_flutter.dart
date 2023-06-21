@@ -48,6 +48,7 @@ export 'src/message_input/attachment_picker/stream_attachment_picker_bottom_shee
 export 'src/message_input/countdown_button.dart';
 export 'src/message_input/enums.dart';
 export 'src/message_input/stream_message_input.dart';
+export 'src/message_input/stream_message_input_attachment_list.dart';
 export 'src/message_input/stream_message_send_button.dart';
 export 'src/message_input/stream_message_text_field.dart';
 export 'src/message_list_view/message_details.dart';
@@ -96,3 +97,4 @@ export 'src/utils/device_segmentation.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/helpers.dart';
 export 'src/utils/typedefs.dart';
+export 'src/video/video_thumbnail_image.dart';
