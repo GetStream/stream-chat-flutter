@@ -4,7 +4,7 @@ publish_to: "none"
 version: 2.2.0
 
 environment:
-  sdk: ">=2.17.0 <4.0.0"
+  sdk: ">=3.0.0 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
@@ -26,7 +26,7 @@ dependencies:
       url: https://github.com/GetStream/stream-chat-flutter.git
       ref: develop
       path: packages/stream_chat_localizations
-  flutter_local_notifications: ^9.0.0
+  flutter_local_notifications: ^14.1.1
   flutter_svg: ^2.0.7
   flutter_secure_storage: ^8.0.0
   yaml: ^3.1.2
@@ -39,7 +39,8 @@ dependencies:
   go_router: ^8.0.5
   provider: ^6.0.5
   video_player: ^2.6.1
-  firebase_messaging: ^14.5.0
+  firebase_core: ^2.14.0
+  firebase_messaging: ^14.6.3
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1

@@ -210,7 +210,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
       // Navigates to Channel page, which is associated with the notification.
       GoRouter.of(_navigatorKey.currentContext!).pushNamed(
         Routes.CHANNEL_PAGE.name,
-        params: Routes.CHANNEL_PAGE.params(channel),
+        pathParameters: Routes.CHANNEL_PAGE.params(channel),
       );
     };
   }
