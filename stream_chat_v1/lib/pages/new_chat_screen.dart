@@ -409,7 +409,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     onMessageSent: (m) {
                       GoRouter.of(context).goNamed(
                         Routes.CHANNEL_PAGE.name,
-                        params: Routes.CHANNEL_PAGE.params(channel!),
+                        pathParameters: Routes.CHANNEL_PAGE.params(channel!),
                       );
                     },
                   ),

@@ -38,7 +38,10 @@ class ChooseUserPage extends StatelessWidget {
                 child: SvgPicture.asset(
                   'assets/logo.svg',
                   height: 40,
-                  color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+                  colorFilter: ColorFilter.mode(
+                    StreamChatTheme.of(context).colorTheme.accentPrimary,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             ),
@@ -120,6 +123,9 @@ class ChooseUserPage extends StatelessWidget {
                                 value: token,
                               );
                             }
+
+                            // Pop the progress dialog.
+                            router.pop();
                             router.replaceNamed(Routes.CHANNEL_LIST_PAGE.name);
                           },
                           leading: StreamUserAvatar(

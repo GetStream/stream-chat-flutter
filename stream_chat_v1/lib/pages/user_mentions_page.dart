@@ -82,8 +82,8 @@ class _UserMentionsPageState extends State<UserMentionsPage> {
         }
         router.pushNamed(
           Routes.CHANNEL_PAGE.name,
-          params: Routes.CHANNEL_PAGE.params(channel),
-          queryParams: Routes.CHANNEL_PAGE.queryParams(message),
+          pathParameters: Routes.CHANNEL_PAGE.params(channel),
+          queryParameters: Routes.CHANNEL_PAGE.queryParams(message),
         );
       },
     );
