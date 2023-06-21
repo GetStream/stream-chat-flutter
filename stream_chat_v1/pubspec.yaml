@@ -67,6 +67,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+    - pubspec.lock
 
 flutter_icons:
   image_path: "assets/ic_launcher.png"
