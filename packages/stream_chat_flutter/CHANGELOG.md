@@ -7,6 +7,26 @@
 - [[#1621]](https://github.com/GetStream/stream-chat-flutter/issues/1621) Fixed `createdAtStyle` null check error
   in `SendingIndicatorBuilder`.
 
+✅ Added
+
+- Added support for customizing attachments in `StreamMessageInput`. Use various properties mentioned
+  below. [#1511](https://github.com/GetStream/stream-chat-flutter/issues/1511)
+    * `StreamMessageInput.attachmentListBuilder` to customize the attachment list.
+    * `StreamMessageInput.fileAttachmentListBuilder` to customize the file attachment list.
+    * `StreamMessageInput.mediaAttachmentListBuilder` to customize the media attachment list. Includes images, videos
+      and gifs.
+    * `StreamMessageInput.fileAttachmentBuilder` to customize the file attachment item shown in `FileAttachmentList`.
+    * `StreamMessageInput.mediaAttachmentBuilder` to customize the media attachment item shown in
+      `MediaAttachmentList`.
+
+
+- Added `StreamMessageInput.quotedMessageAttachmentThumbnailBuilders` to customize the thumbnail builders for quoted
+  message attachments.
+
+🔄 Changed
+
+- Deprecated `StreamMessageInput.attachmentThumbnailBuilders` in favor of `StreamMessageInput.mediaAttachmentBuilder`.
+
 ## 6.4.0
 
 🐞 Fixed
