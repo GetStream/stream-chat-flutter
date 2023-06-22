@@ -1,25 +1,18 @@
 name: stream_chat_localizations_example
 description: A new Flutter project.
 
-publish_to: 'none' 
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: '>=2.17.0 <4.0.0'
 
 dependencies:
   cupertino_icons: ^1.0.3
   flutter:
     sdk: flutter
-  stream_chat_flutter:
-    path: ../../stream_chat_flutter
-  stream_chat_localizations: 
-    path: ../
-
-
-dependency_overrides: 
-  stream_chat_flutter: 
-    path: ../../stream_chat_flutter
+  stream_chat_flutter: ^6.4.0
+  stream_chat_localizations: ^5.4.0
 
 dev_dependencies:
   flutter_test:
