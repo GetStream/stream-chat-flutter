@@ -5,14 +5,14 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: '>=2.17.0 <4.0.0'
   flutter: ">=1.17.0"
 
 dependencies:
-  cupertino_icons: ^1.0.0
+  cupertino_icons: ^1.0.5
   flutter:
     sdk: flutter
-  stream_chat: ^6.0.0
+  stream_chat: ^6.4.0
 
 dev_dependencies:
   flutter_test:
