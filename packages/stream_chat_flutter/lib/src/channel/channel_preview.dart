@@ -349,16 +349,16 @@ class _Date extends StatelessWidget {
 
         if (lastMessageAt.millisecondsSinceEpoch >=
             startOfDay.millisecondsSinceEpoch) {
-          stringDate = Jiffy(lastMessageAt.toLocal()).jm;
+          stringDate = Jiffy.parseFromDateTime(lastMessageAt.toLocal()).jm;
         } else if (lastMessageAt.millisecondsSinceEpoch >=
             startOfDay
                 .subtract(const Duration(days: 1))
                 .millisecondsSinceEpoch) {
           stringDate = context.translations.yesterdayLabel;
         } else if (startOfDay.difference(lastMessageAt).inDays < 7) {
-          stringDate = Jiffy(lastMessageAt.toLocal()).EEEE;
+          stringDate = Jiffy.parseFromDateTime(lastMessageAt.toLocal()).EEEE;
         } else {
-          stringDate = Jiffy(lastMessageAt.toLocal()).yMd;
+          stringDate = Jiffy.parseFromDateTime(lastMessageAt.toLocal()).yMd;
         }
 
         return Text(
