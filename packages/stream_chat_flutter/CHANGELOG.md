@@ -20,6 +20,7 @@
 🔄 Changed
 
 - Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
+- Updated `jiffy` dependency to `^6.2.1`.
 
 ## 6.7.0
 
