@@ -176,11 +176,12 @@ class UserLastActive extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatTheme = StreamChatTheme.of(context);
+    final lastActive = user.lastActive ?? DateTime.now();
     return Text(
       user.online
           ? context.translations.userOnlineText
           : '${context.translations.userLastOnlineText} '
-              '${Jiffy(user.lastActive).fromNow()}',
+              '${Jiffy.parseFromDateTime(lastActive).fromNow()}',
       style: chatTheme.textTheme.footnote.copyWith(
         color: chatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
       ),
