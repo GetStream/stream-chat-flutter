@@ -618,7 +618,7 @@ class DefaultTranslations implements Translations {
   @override
   String sentAtText({required DateTime date, required DateTime time}) {
     final atTime = Jiffy.parseFromDateTime(time.toLocal());
-    return 'Sent ${_getDay(date)} at ${atTime.format(pattern: 'HH:mm')}';
+    return 'Sent ${_getDay(date)} at ${atTime.jm}';
   }
 
   @override
