@@ -227,9 +227,9 @@ class MessageSearchTileMessageDate extends StatelessWidget {
     if (now.year != createdAt.year ||
         now.month != createdAt.month ||
         now.day != createdAt.day) {
-      stringDate = Jiffy(createdAt.toLocal()).yMd;
+      stringDate = Jiffy.parseFromDateTime(createdAt.toLocal()).yMd;
     } else {
-      stringDate = Jiffy(createdAt.toLocal()).jm;
+      stringDate = Jiffy.parseFromDateTime(createdAt.toLocal()).jm;
     }
 
     return Text(
