@@ -6,6 +6,9 @@
   after overriding the `onConfirmDeleteTap` callback.
 - [[#1621]](https://github.com/GetStream/stream-chat-flutter/issues/1621) Fixed `createdAtStyle` null check error
   in `SendingIndicatorBuilder`.
+- [[#1069]](https://github.com/GetStream/stream-chat-flutter/issues/1069) Fixed message swipe to reply using same
+  direction for both current user and other users. It now uses `SwipeDirection.startToEnd` for current user
+  and `SwipeDirection.endToStart` for other users.
 
 ✅ Added
 
@@ -26,6 +29,54 @@
 🔄 Changed
 
 - Deprecated `StreamMessageInput.attachmentThumbnailBuilders` in favor of `StreamMessageInput.mediaAttachmentBuilder`.
+- Deprecated `StreamMessageListView.onMessageSwiped`. Try wrapping the `MessageWidget` with a `Swipeable`, `Dismissible`
+  or a custom widget to achieve the swipe to reply behaviour.
+
+  ```dart
+  // Migration from onMessageSwiped to Swipeable.
+  StreamMessageListView(
+    ...,
+    messageBuilder: (context, messageDetails, messages, defaultWidget) {
+      // The threshold after which the message should be considered as swiped.
+      const threshold = 0.2;
+  
+      // The direction in which the message should be swiped to reply.
+      final swipeDirection = messageDetails.isMyMessage
+          ? SwipeDirection.endToStart //
+          : SwipeDirection.startToEnd;
+  
+      return Swipeable(
+        key: ValueKey(messageDetails.message.id),
+        direction: swipeDirection,
+        swipeThreshold: threshold,
+        onSwiped: (direction) {
+          // Handle the swipe action here.
+        },
+        backgroundBuilder: (context, details) {
+          // The alignment of the swipe action.
+          final alignment = messageDetails.isMyMessage
+              ? Alignment.centerRight //
+              : Alignment.centerLeft;
+  
+          // The progress of the swipe action.
+          final progress = math.min(details.progress, threshold) / threshold;
+  
+          return Align(
+            alignment: alignment,
+            child: Opacity(
+              opacity: progress,
+              child: const Icon(
+                Icons.reply,
+                color: Colors.white,
+              ),
+            ),
+          );
+        },
+        child: defaultWidget,
+      );
+    },
+  )
+  ```
 
 ## 6.4.0
 
