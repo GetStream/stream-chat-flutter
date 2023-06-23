@@ -1,5 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
 import 'dart:async';
+import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +12,7 @@ import 'package:stream_chat_flutter/src/message_list_view/loading_indicator.dart
 import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
 import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart';
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
+import 'package:stream_chat_flutter/src/misc/animated_circle_border_painter.dart';
 import 'package:stream_chat_flutter/src/misc/swipeable.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -1226,26 +1229,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     }
 
     var child = messageWidget;
-    if (!message.isDeleted &&
-        !message.isSystem &&
-        !message.isEphemeral &&
-        widget.onMessageSwiped != null) {
-      child = Container(
-        decoration: const BoxDecoration(),
-        clipBehavior: Clip.hardEdge,
-        child: Swipeable(
-          onSwipeEnd: () {
-            FocusScope.of(context).unfocus();
-            widget.onMessageSwiped?.call(message);
-          },
-          backgroundIcon: StreamSvgIcon.reply(
-            color: _streamTheme.colorTheme.accentPrimary,
-          ),
-          child: child,
-        ),
-      );
-    }
-
     if (!initialMessageHighlightComplete &&
         widget.highlightInitialMessage &&
         isInitialMessage(message.id, streamChannel)) {
@@ -1269,6 +1252,77 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         ),
       );
     }
+
+    // Add swipeable if the callback is provided and the message is not deleted,
+    // system or ephemeral.
+    final onMessageSwiped = widget.onMessageSwiped;
+    if (onMessageSwiped != null &&
+        !message.isDeleted &&
+        !message.isSystem &&
+        !message.isEphemeral) {
+      // The threshold after which the message is considered swiped.
+      const threshold = 0.2;
+
+      // The direction in which the message can be swiped.
+      final swipeDirection = isMyMessage
+          ? SwipeDirection.endToStart //
+          : SwipeDirection.startToEnd;
+
+      child = Swipeable(
+        key: ValueKey(message.id),
+        direction: swipeDirection,
+        swipeThreshold: threshold,
+        onSwiped: (_) => onMessageSwiped(message),
+        backgroundBuilder: (context, details) {
+          // The alignment of the swipe action.
+          final alignment = isMyMessage
+              ? Alignment.centerRight //
+              : Alignment.centerLeft;
+
+          // The progress of the swipe action.
+          final progress = math.min(details.progress, threshold) / threshold;
+
+          // The offset for the reply icon.
+          var offset = Offset.lerp(
+            const Offset(-24, 0),
+            const Offset(12, 0),
+            progress,
+          )!;
+
+          // If the message is mine, we need to flip the offset.
+          if (isMyMessage) {
+            offset = Offset(-offset.dx, -offset.dy);
+          }
+
+          return Align(
+            alignment: alignment,
+            child: Transform.translate(
+              offset: offset,
+              child: Opacity(
+                opacity: progress,
+                child: SizedBox.square(
+                  dimension: 30,
+                  child: CustomPaint(
+                    painter: AnimatedCircleBorderPainter(
+                      progress: progress,
+                      color: _streamTheme.colorTheme.borders,
+                    ),
+                    child: Center(
+                      child: StreamSvgIcon.reply(
+                        size: lerpDouble(0, 18, progress),
+                        color: _streamTheme.colorTheme.accentPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+        child: child,
+      );
+    }
+
     return child;
   }
 
