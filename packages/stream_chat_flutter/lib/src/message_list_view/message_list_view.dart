@@ -99,6 +99,10 @@ class StreamMessageListView extends StatefulWidget {
     this.initialAlignment,
     this.scrollController,
     this.itemPositionListener,
+    @Deprecated(
+      'Try wrapping the `MessageWidget` with a `Swipeable`, `Dismissible` or a '
+      'custom widget to achieve the swipe to reply behaviour.',
+    )
     this.onMessageSwiped,
     this.highlightInitialMessage = false,
     this.messageHighlightColor,
