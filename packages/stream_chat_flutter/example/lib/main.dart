@@ -356,11 +356,7 @@ class _ChannelPageState extends State<ChannelPage> {
                             ),
                           );
                         },
-                        child: defaultWidget.copyWith(
-                          onReplyTap: reply,
-                          // showReactionPicker: true,
-                          // showReactionPickerIndicator: false,
-                        ),
+                        child: defaultWidget.copyWith(onReplyTap: reply),
                       );
                     },
                   ),
