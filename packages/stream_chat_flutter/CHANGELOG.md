@@ -9,6 +9,8 @@
 - [[#1069]](https://github.com/GetStream/stream-chat-flutter/issues/1069) Fixed message swipe to reply using same
   direction for both current user and other users. It now uses `SwipeDirection.startToEnd` for current user
   and `SwipeDirection.endToStart` for other users.
+- [[#1590]](https://github.com/GetStream/stream-chat-flutter/issues/1590)
+  Fixed `StreamMessageWidget.showReactionPickerIndicator` not toggling the reaction picker indicator visibility.
 
 ✅ Added
 
@@ -75,6 +77,14 @@
         child: defaultWidget,
       );
     },
+  )
+  ```
+- Deprecated `StreamMessageWidget.showReactionPickerIndicator` in favor of `StreamMessageWidget.showReactionPicker`.
+
+  ```diff
+  StreamMessageWidget(
+  - showReactionPickerIndicator: true/false,
+  + showReactionPicker: true/false,
   )
   ```
 
