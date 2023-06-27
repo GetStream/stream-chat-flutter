@@ -43,19 +43,9 @@ double calculateReactionsHorizontalAlignment(
   final signal = user?.id == message.user?.id ? 1 : -1;
   final result = signal * (1 - divFactor * 2.0);
 
-  return _capResult(result);
-}
-
-// Ensure reactions don't get pushed past the edge of the screen.
-//
-// This happens if divFactor is really big. When this happens, we can simply
-// move the model all the way to the end of screen.
-double _capResult(double result) {
-  if (result > 1.0) {
-    return 1;
-  } else if (result < -1.0) {
-    return -1;
-  } else {
-    return result;
-  }
+  // Ensure reactions don't get pushed past the edge of the screen.
+  //
+  // This happens if divFactor is really big. When this happens, we can simply
+  // move the model all the way to the end of screen.
+  return result.clamp(-1, 1);
 }

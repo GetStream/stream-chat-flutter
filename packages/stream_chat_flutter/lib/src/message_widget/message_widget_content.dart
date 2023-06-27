@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:meta/meta.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content_components.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/desktop_reactions_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -21,6 +22,7 @@ typedef BottomRowBuilderWithDefaultWidget = Widget Function(
 ///
 /// Should not be used outside of [MessageWidget.
 /// {@endtemplate}
+@internal
 class MessageWidgetContent extends StatelessWidget {
   /// {@macro messageWidgetContent}
   const MessageWidgetContent({
@@ -33,6 +35,7 @@ class MessageWidgetContent extends StatelessWidget {
     required this.showUserAvatar,
     required this.avatarWidth,
     required this.showReactions,
+    required this.onReactionsTap,
     required this.messageTheme,
     required this.shouldShowReactions,
     required this.streamChatTheme,
@@ -45,7 +48,7 @@ class MessageWidgetContent extends StatelessWidget {
     required this.attachmentBuilders,
     required this.attachmentPadding,
     required this.textPadding,
-    required this.showReactionPickerIndicator,
+    required this.showReactionPickerTail,
     required this.translateUserAvatar,
     required this.bottomRowPadding,
     required this.showInChannel,
@@ -111,6 +114,11 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro showReactions}
   final bool showReactions;
 
+  /// Callback called when the reactions icon is tapped.
+  ///
+  /// Do not confuse this with the tap action on the reactions picker.
+  final VoidCallback onReactionsTap;
+
   /// {@macro messageTheme}
   final StreamMessageThemeData messageTheme;
 
@@ -174,8 +182,8 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro quotedMessageBuilder}
   final Widget Function(BuildContext, Message)? quotedMessageBuilder;
 
-  /// {@macro showReactionPickerIndicator}
-  final bool showReactionPickerIndicator;
+  /// {@macro showReactionPickerTail}
+  final bool showReactionPickerTail;
 
   /// {@macro translateUserAvatar}
   final bool translateUserAvatar;
@@ -288,9 +296,7 @@ class MessageWidgetContent extends StatelessWidget {
                                   ownId: streamChat.currentUser!.id,
                                   reverse: reverse,
                                   shouldShowReactions: shouldShowReactions,
-                                  onTap: () => _showMessageReactionsModal(
-                                    context,
-                                  ),
+                                  onTap: onReactionsTap,
                                 )
                               : null,
                           anchor: Aligned(
@@ -363,7 +369,8 @@ class MessageWidgetContent extends StatelessWidget {
                                         shape: shape,
                                       ),
                               ),
-                              if (showReactionPickerIndicator)
+                              // TODO: Make tail part of the Reaction Picker.
+                              if (showReactionPickerTail)
                                 Positioned(
                                   right: reverse ? null : 4,
                                   left: reverse ? 4 : null,
@@ -374,6 +381,7 @@ class MessageWidgetContent extends StatelessWidget {
                                       Colors.transparent,
                                       Colors.transparent,
                                       tailCirclesSpace: 1,
+                                      flipTail: !reverse,
                                     ),
                                   ),
                                 ),
@@ -431,47 +439,6 @@ class MessageWidgetContent extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-
-  void _showMessageReactionsModal(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
-    showDialog(
-      useRootNavigator: false,
-      context: context,
-      useSafeArea: false,
-      barrierColor: streamChatTheme.colorTheme.overlay,
-      builder: (context) => StreamChannel(
-        channel: channel,
-        child: StreamMessageReactionsModal(
-          messageWidget: messageWidget.copyWith(
-            key: const Key('MessageWidget'),
-            message: message.copyWith(
-              text: (message.text?.length ?? 0) > 200
-                  ? '${message.text!.substring(0, 200)}...'
-                  : message.text,
-            ),
-            showReactions: false,
-            showUsername: false,
-            showTimestamp: false,
-            translateUserAvatar: false,
-            showSendingIndicator: false,
-            padding: EdgeInsets.zero,
-            showReactionPickerIndicator:
-                showReactions && (message.status == MessageSendingStatus.sent),
-            showPinHighlight: false,
-            showUserAvatar:
-                message.user!.id == channel.client.state.currentUser!.id
-                    ? DisplayWidget.gone
-                    : DisplayWidget.show,
-          ),
-          onUserAvatarTap: onUserAvatarTap,
-          messageTheme: messageTheme,
-          reverse: reverse,
-          message: message,
-          showReactions: showReactions,
-        ),
-      ),
     );
   }
 

@@ -29,13 +29,15 @@ class StreamAttachmentHandlerDesktop extends StreamAttachmentHandler {
       options: options,
     );
 
-    // Open the native file browser so the user can select the download path.
-    final path = await getSavePath(suggestedName: data.fileName);
-
-    if (path == null) {
+    // Open the native file browser so the user can select the save location.
+    final saveLocation = await getSaveLocation(suggestedName: data.fileName);
+    if (saveLocation == null) {
       // Operation was canceled by the user.
       return null;
     }
+
+    // Get the path to the user's selected location.
+    final path = saveLocation.path;
 
     // Create an XFile for proper file saving.
     final file = data.toXFile(path: path);
