@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/common.dart';
@@ -142,7 +143,6 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     final tempFilePath = tempPath
         .resolve(fileName!)
         .toFilePath(windows: CurrentPlatform.isWindows);
-    print(tempFilePath);
 
     final attachmentFileBytes = attachmentFile.bytes;
     if (attachmentFileBytes == null) {
@@ -191,8 +191,26 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     // Create an XFile for proper file saving.
     final file = data.toXFile(path: path);
 
-    // Save the file to the user's selected path.
+    // Save the file to a temporary location.
     await file.saveTo(path);
+
+    // Now that the file is saved, we need to copy it to the user's gallery
+    // because the gallery only shows files that are in the gallery folder.
+    await ImageGallerySaver.saveFile(path);
+
+    // Once the file is copied to the gallery, we can delete the temporary file.
+    await file.delete();
+
     return path;
+  }
+}
+
+extension on XFile {
+  /// Deletes this xfile from the file system.
+  Future<void> delete() async {
+    final file = File(path);
+    if (file.existsSync()) {
+      await file.delete();
+    }
   }
 }
