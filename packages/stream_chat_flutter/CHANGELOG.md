@@ -11,6 +11,11 @@
   and `SwipeDirection.endToStart` for other users.
 - [[#1590]](https://github.com/GetStream/stream-chat-flutter/issues/1590)
   Fixed `StreamMessageWidget.showReactionPickerIndicator` not toggling the reaction picker indicator visibility.
+- [[#1639]](https://github.com/GetStream/stream-chat-flutter/issues/1639) Fixed attachments not showing in gallery view
+  even after saving them to the device.
+  > **Note**
+  > This fix depends on the [image_gallery_saver](https://pub.dev/packages/image_gallery_saver) plugin. Make sure to add
+  necessary permissions in your App as per the plugin documentation.
 
 ✅ Added
 
@@ -79,6 +84,7 @@
     },
   )
   ```
+
 - Deprecated `StreamMessageWidget.showReactionPickerIndicator` in favor of `StreamMessageWidget.showReactionPicker`.
 
   ```diff
