@@ -188,19 +188,16 @@ class _MessageCardState extends State<MessageCard> {
                 attachmentPadding: widget.attachmentPadding,
               ),
             if (!widget.isGiphy)
-              ConstrainedBox(
-                constraints: BoxConstraints.loose(const Size.fromWidth(500)),
-                child: TextBubble(
-                  messageTheme: widget.messageTheme,
-                  message: widget.message,
-                  textPadding: widget.textPadding,
-                  textBuilder: widget.textBuilder,
-                  isOnlyEmoji: widget.isOnlyEmoji,
-                  hasQuotedMessage: widget.hasQuotedMessage,
-                  hasUrlAttachments: widget.hasUrlAttachments,
-                  onLinkTap: widget.onLinkTap,
-                  onMentionTap: widget.onMentionTap,
-                ),
+              TextBubble(
+                messageTheme: widget.messageTheme,
+                message: widget.message,
+                textPadding: widget.textPadding,
+                textBuilder: widget.textBuilder,
+                isOnlyEmoji: widget.isOnlyEmoji,
+                hasQuotedMessage: widget.hasQuotedMessage,
+                hasUrlAttachments: widget.hasUrlAttachments,
+                onLinkTap: widget.onLinkTap,
+                onMentionTap: widget.onMentionTap,
               ),
             if (widget.hasUrlAttachments && !widget.hasQuotedMessage)
               _buildUrlAttachment(),
