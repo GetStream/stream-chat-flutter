@@ -16,6 +16,8 @@
   > **Note**
   > This fix depends on the [image_gallery_saver](https://pub.dev/packages/image_gallery_saver) plugin. Make sure to add
   necessary permissions in your App as per the plugin documentation.
+- [[#1642]](https://github.com/GetStream/stream-chat-flutter/issues/1642) Fixed `StreamMessageWidget.widthFactor` not
+  working on web and desktop platforms.
 
 ✅ Added
 
