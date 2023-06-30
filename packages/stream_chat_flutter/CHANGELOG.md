@@ -86,7 +86,6 @@
     },
   )
   ```
-
 - Deprecated `StreamMessageWidget.showReactionPickerIndicator` in favor of `StreamMessageWidget.showReactionPicker`.
 
   ```diff
@@ -95,6 +94,7 @@
   + showReactionPicker: true/false,
   )
   ```
+- Updated `video_player` dependency to `^2.7.0`.
 
 ## 6.4.0
 
