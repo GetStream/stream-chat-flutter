@@ -14,7 +14,7 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     steps:
-      - uses: benc-uk/workflow-dispatch@v1
+      - uses: benc-uk/workflow-dispatch@v121
         with:
           workflow: build_nightly
           repo: GetStream/flutter-samples
@@ -23,7 +23,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: benc-uk/workflow-dispatch@v1
+      - uses: benc-uk/workflow-dispatch@v121
         with:
           repo: GetStream/flutter-samples
           workflow: build
