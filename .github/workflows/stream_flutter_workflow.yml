@@ -8,6 +8,7 @@ on:
   pull_request:
     paths:
       - 'packages/**'
+      - '.github/workflows/stream_flutter_workflow.yml'
     types:
       - opened
       - reopened
