@@ -8,6 +8,7 @@ on:
   pull_request:
     paths:
       - 'packages/**'
+      - '.github/workflows/dart_code_metrics.yaml'
   push:
     branches:
       - master
