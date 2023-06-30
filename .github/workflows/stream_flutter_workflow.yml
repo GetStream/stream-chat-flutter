@@ -110,11 +110,11 @@ jobs:
         with:
           path: packages/stream_chat/coverage/lcov.info
           min_coverage: 79
-      - name: "Stream Chat Persistence Coverage Check"
+      - name: "Stream Chat Localizations Coverage Check"
         uses: VeryGoodOpenSource/very_good_coverage@v2.1.0
         with:
           path: packages/stream_chat_localizations/coverage/lcov.info
-          min_coverage: 88
+          min_coverage: 100
       - name: "Stream Chat Persistence Coverage Check"
         uses: VeryGoodOpenSource/very_good_coverage@v2.1.0
         with:
