@@ -3,24 +3,24 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
   - package-ecosystem: "pub"
     directory: "/packages/stream_chat"
     schedule:
-      interval: "daily"
+      interval: "weekly"
   - package-ecosystem: "pub"
     directory: "/packages/stream_chat_flutter_core"
     schedule:
-      interval: "daily"
+      interval: "weekly"
   - package-ecosystem: "pub"
     directory: "/packages/stream_chat_flutter"
     schedule:
-      interval: "daily"
+      interval: "weekly"
   - package-ecosystem: "pub"
     directory: "/packages/stream_chat_persistence"
     schedule:
-      interval: "daily"
+      interval: "weekly"
   - package-ecosystem: "pub"
     directory: "/packages/stream_chat_localizations"
     schedule:
-      interval: "daily"
+      interval: "weekly"
