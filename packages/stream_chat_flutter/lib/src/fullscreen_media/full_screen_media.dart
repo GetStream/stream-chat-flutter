@@ -446,8 +446,12 @@ class VideoPackage {
   })  : _showControls = showControls,
         _autoInitialize = autoInitialize,
         _videoPlayerController = _attachment.localUri != null
-            ? VideoPlayerController.file(File.fromUri(_attachment.localUri!))
-            : VideoPlayerController.network(_attachment.assetUrl!);
+            ? VideoPlayerController.file(
+                File.fromUri(_attachment.localUri!),
+              )
+            : VideoPlayerController.networkUrl(
+                Uri.parse(_attachment.assetUrl!),
+              );
 
   final Attachment _attachment;
   final bool _showControls;
