@@ -1,6 +1,4 @@
 analyzer:
-  plugins:
-    - dart_code_metrics
   exclude:
     - packages/*/lib/**/*.g.dart
     - packages/*/lib/scrollable_positioned_list/**
@@ -160,22 +158,3 @@ linter:
     - prefer_null_aware_method_calls
     - use_named_constants
     - use_raw_strings
-
-# https://dartcodemetrics.dev/docs/getting-started/introduction
-dart_code_metrics:
-  rules:
-    # Dart Specific
-    - binary-expression-operand-order
-    - double-literal-format
-    - no-boolean-literal-compare
-    - no-equal-then-else
-    - no-empty-block:
-        exclude:
-          - packages/*/test/**
-    - prefer-trailing-comma:
-        exclude:
-          - packages/*/test/**
-
-    # Flutter specific
-    - always-remove-listener
-    - avoid-unnecessary-setstate
