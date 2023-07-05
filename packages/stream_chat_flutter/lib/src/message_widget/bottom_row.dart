@@ -191,7 +191,7 @@ class BottomRow extends StatelessWidget {
             ),
       if (showTimeStamp)
         Text(
-          Jiffy(message.createdAt.toLocal()).jm,
+          Jiffy.parseFromDateTime(message.createdAt.toLocal()).jm,
           style: messageTheme.createdAtStyle,
         ),
       if (showSendingIndicator)

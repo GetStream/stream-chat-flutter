@@ -120,7 +120,6 @@ class StreamMessageTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.contentInsertionConfiguration,
   })  : assert(obscuringCharacter.length == 1, ''),
         smartDashesType = smartDashesType ??
             (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -527,9 +526,6 @@ class StreamMessageTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
-  final ContentInsertionConfiguration? contentInsertionConfiguration;
-
   @override
   _StreamMessageTextFieldState createState() => _StreamMessageTextFieldState();
 
@@ -626,9 +622,6 @@ class StreamMessageTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>(
         'enableIMEPersonalizedLearning', enableIMEPersonalizedLearning,
         defaultValue: true));
-    properties.add(DiagnosticsProperty<ContentInsertionConfiguration>(
-        'contentInsertionConfiguration', contentInsertionConfiguration,
-        defaultValue: null));
   }
 }
 
@@ -734,7 +727,6 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
         restorationId: widget.restorationId,
         scribbleEnabled: widget.scribbleEnabled,
         enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-        contentInsertionConfiguration: widget.contentInsertionConfiguration,
       );
 
   @override

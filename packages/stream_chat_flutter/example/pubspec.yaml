@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: '>=2.17.0 <4.0.0'
   flutter: ">=1.17.0"
 
 dependencies:
@@ -29,20 +29,13 @@ dependencies:
   flutter:
     sdk: flutter
   responsive_builder: ^0.7.0
-  stream_chat_flutter: 
-    path: ../
-  stream_chat_localizations: 
-    path: ../../stream_chat_localizations
-  stream_chat_persistence: 
-    path: ../../stream_chat_persistence
+  stream_chat_flutter: ^6.4.0
+  stream_chat_localizations: ^5.4.0
+  stream_chat_persistence: ^6.4.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-dependency_overrides: 
-  stream_chat_flutter: 
-    path: ../
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
-import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
@@ -383,8 +382,9 @@ class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(widget.attachment.assetUrl!)
-      ..initialize().then((_) {
+    _controller = VideoPlayerController.networkUrl(
+      Uri.parse(widget.attachment.assetUrl!),
+    )..initialize().then((_) {
         // ignore: no-empty-block
         setState(() {}); //when your thumbnail will show.
       });

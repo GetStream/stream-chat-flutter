@@ -14,6 +14,7 @@ void main() {
       expect(localizations.launchUrlError, isNotNull);
       expect(localizations.loadingUsersError, isNotNull);
       expect(localizations.noUsersLabel, isNotNull);
+      expect(localizations.noPhotoOrVideoLabel, isNotNull);
       expect(localizations.retryLabel, isNotNull);
       expect(localizations.userLastOnlineText, isNotNull);
       expect(localizations.userOnlineText, isNotNull);

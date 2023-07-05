@@ -1,3 +1,105 @@
+## 6.5.0
+
+🐞 Fixed
+
+- [[#1620]](https://github.com/GetStream/stream-chat-flutter/issues/1620) Fixed messages Are Not Hard Deleting even
+  after overriding the `onConfirmDeleteTap` callback.
+- [[#1621]](https://github.com/GetStream/stream-chat-flutter/issues/1621) Fixed `createdAtStyle` null check error
+  in `SendingIndicatorBuilder`.
+- [[#1069]](https://github.com/GetStream/stream-chat-flutter/issues/1069) Fixed message swipe to reply using same
+  direction for both current user and other users. It now uses `SwipeDirection.startToEnd` for current user
+  and `SwipeDirection.endToStart` for other users.
+- [[#1590]](https://github.com/GetStream/stream-chat-flutter/issues/1590)
+  Fixed `StreamMessageWidget.showReactionPickerIndicator` not toggling the reaction picker indicator visibility.
+- [[#1639]](https://github.com/GetStream/stream-chat-flutter/issues/1639) Fixed attachments not showing in gallery view
+  even after saving them to the device.
+  > **Note**
+  > This fix depends on the [image_gallery_saver](https://pub.dev/packages/image_gallery_saver) plugin. Make sure to add
+  necessary permissions in your App as per the plugin documentation.
+- [[#1642]](https://github.com/GetStream/stream-chat-flutter/issues/1642) Fixed `StreamMessageWidget.widthFactor` not
+  working on web and desktop platforms.
+
+✅ Added
+
+- Added support for customizing attachments in `StreamMessageInput`. Use various properties mentioned
+  below. [#1511](https://github.com/GetStream/stream-chat-flutter/issues/1511)
+    * `StreamMessageInput.attachmentListBuilder` to customize the attachment list.
+    * `StreamMessageInput.fileAttachmentListBuilder` to customize the file attachment list.
+    * `StreamMessageInput.mediaAttachmentListBuilder` to customize the media attachment list. Includes images, videos
+      and gifs.
+    * `StreamMessageInput.fileAttachmentBuilder` to customize the file attachment item shown in `FileAttachmentList`.
+    * `StreamMessageInput.mediaAttachmentBuilder` to customize the media attachment item shown in
+      `MediaAttachmentList`.
+
+
+- Added `StreamMessageInput.quotedMessageAttachmentThumbnailBuilders` to customize the thumbnail builders for quoted
+  message attachments.
+
+🔄 Changed
+
+- Deprecated `StreamMessageInput.attachmentThumbnailBuilders` in favor of `StreamMessageInput.mediaAttachmentBuilder`.
+- Deprecated `StreamMessageListView.onMessageSwiped`. Try wrapping the `MessageWidget` with a `Swipeable`, `Dismissible`
+  or a custom widget to achieve the swipe to reply behaviour.
+
+  ```dart
+  // Migration from onMessageSwiped to Swipeable.
+  StreamMessageListView(
+    ...,
+    messageBuilder: (context, messageDetails, messages, defaultWidget) {
+      // The threshold after which the message should be considered as swiped.
+      const threshold = 0.2;
+  
+      // The direction in which the message should be swiped to reply.
+      final swipeDirection = messageDetails.isMyMessage
+          ? SwipeDirection.endToStart //
+          : SwipeDirection.startToEnd;
+  
+      return Swipeable(
+        key: ValueKey(messageDetails.message.id),
+        direction: swipeDirection,
+        swipeThreshold: threshold,
+        onSwiped: (direction) {
+          // Handle the swipe action here.
+        },
+        backgroundBuilder: (context, details) {
+          // The alignment of the swipe action.
+          final alignment = messageDetails.isMyMessage
+              ? Alignment.centerRight //
+              : Alignment.centerLeft;
+  
+          // The progress of the swipe action.
+          final progress = math.min(details.progress, threshold) / threshold;
+  
+          return Align(
+            alignment: alignment,
+            child: Opacity(
+              opacity: progress,
+              child: const Icon(
+                Icons.reply,
+                color: Colors.white,
+              ),
+            ),
+          );
+        },
+        child: defaultWidget,
+      );
+    },
+  )
+  ```
+- Deprecated `StreamMessageWidget.showReactionPickerIndicator` in favor of `StreamMessageWidget.showReactionPicker`.
+
+  ```diff
+  StreamMessageWidget(
+  - showReactionPickerIndicator: true/false,
+  + showReactionPicker: true/false,
+  )
+  ```
+- Updated `video_player` dependency to `^2.7.0`.
+- Updated `chewie` dependency to `^1.6.0`.
+- Updated `share_plus` dependency to `^7.0.2`.
+- Deprecated `StreamUserItem` in favor of `StreamUserListTile`.
+- Updated `jiffy` dependency to `^6.2.1`.
+
 ## 6.4.0
 
 🐞 Fixed
@@ -77,21 +179,6 @@
         child: Text('Group Avatar'),
       );
     },
-  )
-  ```
-
-- Added support for `StreamMessageInput.contentInsertionConfiguration` to specify the content insertion configuration.
-  [#1613](https://github.com/GetStream/stream-chat-flutter/issues/1613)
-
-  ```dart
-  StreamMessageInput(
-    ...,
-    contentInsertionConfiguration: ContentInsertionConfiguration(
-      onContentInserted: (content) {
-        // Do something with the content.
-        controller.addAttachment(...);
-      },
-    ),
   )
   ```
 
