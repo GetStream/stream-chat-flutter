@@ -1,6 +1,6 @@
-## Upcoming
+## 5.5.0
 
-* Updated `stream_chat_flutter` dependency to [`Upcoming`](https://pub.dev/packages/stream_chat_flutter/changelog).
+* Updated `stream_chat_flutter` dependency to [`6.5.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 ## 5.4.0
 
