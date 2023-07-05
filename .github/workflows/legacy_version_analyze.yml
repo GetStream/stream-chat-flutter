@@ -1,0 +1,57 @@
+name: legacy_version_analyze
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'packages/**'
+      - '.github/workflows/legacy_version_analyze.yml'
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'packages/**'
+      - '.github/workflows/legacy_version_analyze.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Does a sanity check that packages at least pass analysis on the N-1 and N-2
+  # versions of Flutter stable if the package claims to support that version.
+  # This is to minimize accidentally making changes that break old versions
+  # (which we don't commit to supporting, but don't want to actively break)
+  # without updating the constraints.
+  analyze_legacy_versions:
+    timeout-minutes: 15
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+
+    # Note: The versions below should be manually updated after a new stable
+    # version comes out.
+    strategy:
+      matrix:
+        flutter_version:
+          - "3.7.12"
+          - "3.3.10"
+
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: "Install Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          cache: true
+          flutter-version: ${{ matrix.flutter_version }}
+      - name: "Install Tools"
+        run: flutter pub global activate melos
+      - name: "Bootstrap Workspace"
+        run: melos bootstrap --verbose
+      - name: "Dart Analyze"
+        run: melos run analyze
