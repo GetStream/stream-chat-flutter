@@ -15,9 +15,5 @@ dependencies:
   stream_chat_flutter: ^6.4.0
   stream_chat_localizations: ^5.4.0
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-
 flutter:
   uses-material-design: true

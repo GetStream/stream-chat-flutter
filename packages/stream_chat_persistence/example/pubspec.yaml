@@ -1,6 +1,5 @@
 name: stream_chat_persistence_example
 description: A new Flutter project.
-
 publish_to: 'none' 
 version: 1.0.0+1
 
@@ -14,10 +13,6 @@ dependencies:
     sdk: flutter
   stream_chat: ^6.4.0
   stream_chat_persistence: ^6.4.0
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
 
 flutter:
   uses-material-design: true
