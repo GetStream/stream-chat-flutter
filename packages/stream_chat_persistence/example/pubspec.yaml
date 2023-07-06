@@ -1,12 +1,11 @@
 name: stream_chat_persistence_example
 description: A new Flutter project.
-
 publish_to: 'none' 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.17.0 <4.0.0'
-  flutter: ">=1.17.0"
+  sdk: ">=2.18.0 <4.0.0"
+  flutter: ">=3.3.0"
 
 dependencies:
   cupertino_icons: ^1.0.3
@@ -14,10 +13,6 @@ dependencies:
     sdk: flutter
   stream_chat: ^6.4.0
   stream_chat_persistence: ^6.4.0
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
 
 flutter:
   uses-material-design: true
