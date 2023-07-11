@@ -208,7 +208,7 @@ class MessageInputFileAttachments extends StatelessWidget {
               message: Message(), // dummy message
               attachment: attachment,
               constraints: BoxConstraints.loose(Size(
-                MediaQuery.sizeOf(context).width * 0.65,
+                MediaQuery.of(context).size.width * 0.65,
                 56,
               )),
               trailing: Padding(

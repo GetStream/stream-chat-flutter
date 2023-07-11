@@ -2,7 +2,7 @@
 
 🔄 Changed
 
-- Updated minimum supported `SDK` version to Flutter 3.3/Dart 2.18
+- Updated minimum supported `SDK` version to Flutter 3.7/Dart 2.19
 
 ## 6.5.0
 
@@ -104,7 +104,6 @@
 - Updated `chewie` dependency to `^1.6.0`.
 - Updated `share_plus` dependency to `^7.0.2`.
 - Deprecated `StreamUserItem` in favor of `StreamUserListTile`.
-- Updated `jiffy` dependency to `^6.2.1`.
 
 ## 6.4.0
 

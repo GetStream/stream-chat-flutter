@@ -287,16 +287,16 @@ class ChannelLastMessageDate extends StatelessWidget {
 
           if (lastMessageAt.millisecondsSinceEpoch >=
               startOfDay.millisecondsSinceEpoch) {
-            stringDate = Jiffy.parseFromDateTime(lastMessageAt.toLocal()).jm;
+            stringDate = Jiffy(lastMessageAt.toLocal()).jm;
           } else if (lastMessageAt.millisecondsSinceEpoch >=
               startOfDay
                   .subtract(const Duration(days: 1))
                   .millisecondsSinceEpoch) {
             stringDate = context.translations.yesterdayLabel;
           } else if (startOfDay.difference(lastMessageAt).inDays < 7) {
-            stringDate = Jiffy.parseFromDateTime(lastMessageAt.toLocal()).EEEE;
+            stringDate = Jiffy(lastMessageAt.toLocal()).EEEE;
           } else {
-            stringDate = Jiffy.parseFromDateTime(lastMessageAt.toLocal()).yMd;
+            stringDate = Jiffy(lastMessageAt.toLocal()).yMd;
           }
 
           return Text(

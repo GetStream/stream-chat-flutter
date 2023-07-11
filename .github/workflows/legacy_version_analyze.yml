@@ -1,0 +1,71 @@
+name: legacy_version_analyze
+
+env:
+  # Note: The versions below should be manually updated after a new stable
+  # version comes out.
+  flutter_version: "3.7.12"
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'packages/**'
+      - '.github/workflows/legacy_version_analyze.yml'
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'packages/**'
+      - '.github/workflows/legacy_version_analyze.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Does a sanity check that packages at least pass analysis on the N-1
+  # versions of Flutter stable if the package claims to support that version.
+  # This is to minimize accidentally making changes that break old versions
+  # (which we don't commit to supporting, but don't want to actively break)
+  # without updating the constraints.
+  analyze_legacy_versions:
+    timeout-minutes: 15
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: "Install Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          cache: true
+          flutter-version: ${{ env.flutter_version }}
+
+      - name: "Install Tools"
+        run: flutter pub global activate melos
+
+      - name: "Bootstrap Workspace"
+        run: melos bootstrap --verbose
+
+      # Only analyze lib/; non-client code doesn't need to work on
+      # all supported legacy version.
+      - name: "Stream Chat Analyze"
+        run: cd packages/stream_chat/lib && dart analyze --fatal-infos .
+
+      - name: "Stream Chat Flutter Core Analyze"
+        run: cd packages/stream_chat_flutter_core/lib && dart analyze --fatal-infos .
+
+      - name: "Stream Chat Flutter Analyze"
+        run: cd packages/stream_chat_flutter/lib && dart analyze --fatal-infos .
+
+      - name: "Stream Chat Persistence Analyze"
+        run: cd packages/stream_chat_persistence/lib && dart analyze --fatal-infos .
+
+      - name: "Stream Chat Localizations Analyze"
+        run: cd packages/stream_chat_localizations/lib && dart analyze --fatal-infos .

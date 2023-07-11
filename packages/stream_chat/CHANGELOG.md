@@ -2,7 +2,7 @@
 
 🔄 Changed
 
-- Updated minimum supported `SDK` version to Dart 2.18
+- Updated minimum supported `SDK` version to Dart 2.19
 
 ## 6.4.0
 
