@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:meta/meta.dart';
+import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content_components.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/desktop_reactions_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -47,6 +48,10 @@ class MessageWidgetContent extends StatelessWidget {
     required this.isGiphy,
     required this.attachmentBuilders,
     required this.attachmentPadding,
+    required this.onAttachmentTap,
+    required this.onShowMessage,
+    required this.onReplyTap,
+    required this.attachmentActionsModalBuilder,
     required this.textPadding,
     required this.showReactionPickerTail,
     required this.translateUserAvatar,
@@ -140,10 +145,22 @@ class MessageWidgetContent extends StatelessWidget {
   final bool isGiphy;
 
   /// {@macro attachmentBuilders}
-  final Map<String, AttachmentBuilder> attachmentBuilders;
+  final List<StreamAttachmentWidgetBuilder>? attachmentBuilders;
 
   /// {@macro attachmentPadding}
   final EdgeInsetsGeometry attachmentPadding;
+
+  /// {@macro onAttachmentTap}
+  final StreamAttachmentWidgetTapCallback? onAttachmentTap;
+
+  /// {@macro onShowMessage}
+  final ShowMessageCallback? onShowMessage;
+
+  /// {@macro onReplyTap}
+  final void Function(Message)? onReplyTap;
+
+  /// {@macro attachmentActionsBuilder}
+  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   /// {@macro textPadding}
   final EdgeInsets textPadding;
@@ -324,6 +341,11 @@ class MessageWidgetContent extends StatelessWidget {
                                         isGiphy: isGiphy,
                                         attachmentBuilders: attachmentBuilders,
                                         attachmentPadding: attachmentPadding,
+                                        onAttachmentTap: onAttachmentTap,
+                                        onReplyTap: onReplyTap,
+                                        onShowMessage: onShowMessage,
+                                        attachmentActionsModalBuilder:
+                                            attachmentActionsModalBuilder,
                                         textPadding: textPadding,
                                         reverse: reverse,
                                         onQuotedMessageTap: onQuotedMessageTap,

@@ -77,7 +77,6 @@ bool isInitialMessage(String id, StreamChannelState? channelState) {
 
 /// Converts a [ValueListenable] to a [Stream].
 Stream<T> valueListenableToStreamAdapter<T>(ValueListenable<T> listenable) {
-  // ignore: close_sinks
   late StreamController<T> _controller;
 
   void listener() {

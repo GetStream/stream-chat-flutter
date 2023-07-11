@@ -10,6 +10,7 @@ import 'package:stream_chat_flutter/src/message_list_view/loading_indicator.dart
 import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
 import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart';
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
+import 'package:stream_chat_flutter/src/message_widget/ephemeral_message.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Spacing Types (These are properties of a message to help inform the decision
@@ -1047,7 +1048,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Widget buildMessage(Message message, List<Message> messages, int index) {
-    if ((message.type == 'system' || message.type == 'error') &&
+    if ((message.isSystem || message.isError) &&
         message.text?.isNotEmpty == true) {
       return widget.systemMessageBuilder?.call(context, message) ??
           StreamSystemMessage(
@@ -1057,6 +1058,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               FocusScope.of(context).unfocus();
             },
           );
+    }
+
+    if (message.isEphemeral) {
+      // return widget.ephemeralMessageBuilder?.call(context, message) ??
+      return StreamEphemeralMessage(
+        message: message,
+        // onMessageTap: (message) {
+        //   widget.onEphemeralMessageTap?.call(message);
+        //   FocusScope.of(context).unfocus();
+        // },
+      );
     }
 
     final userId = StreamChat.of(context).currentUser!.id;

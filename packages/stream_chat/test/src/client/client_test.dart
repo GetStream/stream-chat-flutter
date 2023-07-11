@@ -805,7 +805,7 @@ void main() {
         emits(ConnectionStatus.disconnected),
       );
 
-      await client.disconnectUser();
+      await client.disconnectUser(flushChatPersistence: true);
 
       expect(client.state.currentUser, isNull);
       expect(client.wsConnectionStatus, ConnectionStatus.disconnected);

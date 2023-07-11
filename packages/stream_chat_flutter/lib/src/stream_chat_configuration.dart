@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/indicators/loading_indicator.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChatConfiguration}
@@ -108,12 +109,14 @@ You must have a StreamChatConfigurationProvider widget at the top of your widget
 class StreamChatConfigurationData {
   /// {@macro streamChatConfigurationData}
   factory StreamChatConfigurationData({
+    Widget loadingIndicator = const StreamLoadingIndicator(),
     Widget Function(BuildContext, User)? defaultUserImage,
     Widget Function(BuildContext, User)? placeholderUserImage,
     List<StreamReactionIcon>? reactionIcons,
     bool? enforceUniqueReactions,
   }) {
     return StreamChatConfigurationData._(
+      loadingIndicator: loadingIndicator,
       defaultUserImage: defaultUserImage ?? _defaultUserImage,
       placeholderUserImage: placeholderUserImage,
       reactionIcons: reactionIcons ?? _defaultReactionIcons,
@@ -122,6 +125,7 @@ class StreamChatConfigurationData {
   }
 
   StreamChatConfigurationData._({
+    required this.loadingIndicator,
     required this.defaultUserImage,
     required this.placeholderUserImage,
     required this.reactionIcons,
@@ -131,19 +135,24 @@ class StreamChatConfigurationData {
   /// Copies the configuration options from one [StreamChatConfigurationData] to
   /// another.
   StreamChatConfigurationData copyWith({
+    Widget? loadingIndicator,
     Widget Function(BuildContext, User)? defaultUserImage,
     Widget Function(BuildContext, User)? placeholderUserImage,
     List<StreamReactionIcon>? reactionIcons,
     bool? enforceUniqueReactions,
   }) {
     return StreamChatConfigurationData(
+      reactionIcons: reactionIcons ?? this.reactionIcons,
       defaultUserImage: defaultUserImage ?? this.defaultUserImage,
       placeholderUserImage: placeholderUserImage ?? this.placeholderUserImage,
-      reactionIcons: reactionIcons ?? this.reactionIcons,
+      loadingIndicator: loadingIndicator ?? this.loadingIndicator,
       enforceUniqueReactions:
           enforceUniqueReactions ?? this.enforceUniqueReactions,
     );
   }
+
+  /// The widget that will be shown to indicate loading.
+  final Widget loadingIndicator;
 
   /// The widget that will be built when the user image is unavailable.
   final Widget Function(BuildContext, User) defaultUserImage;

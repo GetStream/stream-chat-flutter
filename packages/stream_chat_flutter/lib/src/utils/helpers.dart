@@ -330,7 +330,7 @@ String fileSize(dynamic size, [int round = 2]) {
 }
 
 ///
-StreamSvgIcon getFileTypeImage(String? mimeType) {
+StreamSvgIcon getFileTypeImage([String? mimeType]) {
   final subtype = mimeType?.split('/').last;
   switch (subtype) {
     case '7z':
@@ -378,14 +378,14 @@ class WrapAttachmentWidget extends StatelessWidget {
   const WrapAttachmentWidget({
     super.key,
     required this.attachmentWidget,
-    required this.attachmentShape,
+    this.attachmentShape,
   });
 
   /// The widget to wrap
   final Widget attachmentWidget;
 
   /// The shape of the wrapper
-  final ShapeBorder attachmentShape;
+  final ShapeBorder? attachmentShape;
 
   @override
   Widget build(BuildContext context) {
@@ -432,22 +432,6 @@ int levenshtein(String s, String t, {bool caseSensitive = true}) {
   }
 
   return v1[t.length];
-}
-
-/// An easy way to handle attachment related operations on a message
-extension AttachmentPackagesX on Message {
-  /// This extension will return a List of type [StreamAttachmentPackage] from
-  /// the existing attachments of the message
-  List<StreamAttachmentPackage> getAttachmentPackageList() {
-    final _attachmentPackages = List<StreamAttachmentPackage>.generate(
-      attachments.length,
-      (index) => StreamAttachmentPackage(
-        attachment: attachments[index],
-        message: this,
-      ),
-    );
-    return _attachmentPackages;
-  }
 }
 
 /// PortalLabel that refers to [StreamMessageListView]

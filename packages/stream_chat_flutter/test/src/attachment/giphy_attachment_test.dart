@@ -30,7 +30,7 @@ void main() {
                     300,
                   )),
                   message: Message(),
-                  attachment: Attachment(
+                  file: Attachment(
                     type: 'giphy',
                     title: 'example.gif',
                     imageUrl:

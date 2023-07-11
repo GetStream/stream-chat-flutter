@@ -33,6 +33,7 @@ class _IVideoService {
   /// PNG format.
   Future<Uint8List?> generateVideoThumbnail({
     String? video,
+    Map<String, String>? headers,
     ImageFormat imageFormat = ImageFormat.PNG,
     int maxHeight = 0,
     int maxWidth = 0,
@@ -63,6 +64,7 @@ class _IVideoService {
     } else if (isMobileDevice) {
       return VideoThumbnail.thumbnailData(
         video: video,
+        headers: headers,
         imageFormat: imageFormat,
         maxHeight: maxHeight,
         maxWidth: maxWidth,

@@ -193,15 +193,6 @@ typedef QuotedMessageAttachmentThumbnailBuilder = Widget Function(
   Attachment,
 );
 
-/// {@template onMessageWidgetAttachmentTap}
-/// The action to perform when an attachment in an [StreamMessageWidget]
-/// is tapped or clicked.
-/// {@endtemplate}
-typedef OnMessageWidgetAttachmentTap = void Function(
-  Message message,
-  Attachment attachment,
-);
-
 /// {@template attachmentBuilder}
 /// A widget builder for representing attachments.
 /// {@endtemplate}

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
+import 'package:stream_chat_flutter/src/attachment/thumbnail/video_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
@@ -17,6 +18,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
     this.reverse = false,
     this.showBorder = false,
     this.textLimit = 170,
+    this.textBuilder,
     this.attachmentThumbnailBuilders,
     this.padding = const EdgeInsets.all(8),
     this.onQuotedMessageClear,
@@ -47,6 +49,9 @@ class StreamQuotedMessageWidget extends StatelessWidget {
   /// Callback for clearing quoted messages.
   final VoidCallback? onQuotedMessageClear;
 
+  /// {@macro textBuilder}
+  final Widget Function(BuildContext, Message)? textBuilder;
+
   @override
   Widget build(BuildContext context) {
     final children = [
@@ -57,6 +62,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
           messageTheme: messageTheme,
           showBorder: showBorder,
           reverse: reverse,
+          textBuilder: textBuilder,
           onQuotedMessageClear: onQuotedMessageClear,
           attachmentThumbnailBuilders: attachmentThumbnailBuilders,
         ),
@@ -90,6 +96,7 @@ class _QuotedMessage extends StatelessWidget {
     required this.messageTheme,
     required this.showBorder,
     required this.reverse,
+    this.textBuilder,
     this.onQuotedMessageClear,
     this.attachmentThumbnailBuilders,
   });
@@ -100,6 +107,7 @@ class _QuotedMessage extends StatelessWidget {
   final StreamMessageThemeData messageTheme;
   final bool showBorder;
   final bool reverse;
+  final Widget Function(BuildContext, Message)? textBuilder;
 
   /// Map that defines a thumbnail builder for an attachment type
   final Map<String, QuotedMessageAttachmentThumbnailBuilder>?
@@ -158,20 +166,23 @@ class _QuotedMessage extends StatelessWidget {
           ),
         if (msg.text!.isNotEmpty && !_isGiphy)
           Flexible(
-            child: StreamMessageText(
-              message: msg,
-              messageTheme: isOnlyEmoji && _containsText
-                  ? messageTheme.copyWith(
-                      messageTextStyle: messageTheme.messageTextStyle?.copyWith(
-                        fontSize: 32,
-                      ),
-                    )
-                  : messageTheme.copyWith(
-                      messageTextStyle: messageTheme.messageTextStyle?.copyWith(
-                        fontSize: 12,
-                      ),
-                    ),
-            ),
+            child: textBuilder?.call(context, msg) ??
+                StreamMessageText(
+                  message: msg,
+                  messageTheme: isOnlyEmoji && _containsText
+                      ? messageTheme.copyWith(
+                          messageTextStyle:
+                              messageTheme.messageTextStyle?.copyWith(
+                            fontSize: 32,
+                          ),
+                        )
+                      : messageTheme.copyWith(
+                          messageTextStyle:
+                              messageTheme.messageTextStyle?.copyWith(
+                            fontSize: 12,
+                          ),
+                        ),
+                ),
           ),
       ].insertBetween(const SizedBox(width: 8));
     }
@@ -268,20 +279,21 @@ class _ParseAttachments extends StatelessWidget {
     final builders = <String, QuotedMessageAttachmentThumbnailBuilder>{
       'image': (_, attachment) {
         return StreamImageAttachment(
-          attachment: attachment,
           message: message,
-          messageTheme: messageTheme,
+          image: attachment,
           constraints: BoxConstraints.loose(const Size(32, 32)),
         );
       },
       'video': (_, attachment) {
-        return StreamVideoThumbnailImage(
+        return StreamVideoAttachmentThumbnail(
           key: ValueKey(attachment.assetUrl),
-          video: attachment.file?.path ?? attachment.assetUrl,
-          constraints: BoxConstraints.loose(const Size(32, 32)),
-          errorBuilder: (_, __) => AttachmentError(
-            constraints: BoxConstraints.loose(const Size(32, 32)),
-          ),
+          video: attachment,
+          width: 32,
+          height: 32,
+          // constraints: BoxConstraints.loose(const Size(32, 32)),
+          // errorBuilder: (_, __) => AttachmentError(
+          //   constraints: BoxConstraints.loose(const Size(32, 32)),
+          // ),
         );
       },
       'giphy': (_, attachment) {

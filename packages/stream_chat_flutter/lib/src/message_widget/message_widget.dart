@@ -5,6 +5,7 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_chat_flutter/conditional_parent_builder/conditional_parent_builder.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
+import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/context_menu_reaction_picker.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
@@ -41,7 +42,7 @@ enum DisplayWidget {
 /// {@endtemplate}
 class StreamMessageWidget extends StatefulWidget {
   /// {@macro messageWidget}
-  StreamMessageWidget({
+  const StreamMessageWidget({
     super.key,
     required this.message,
     required this.messageTheme,
@@ -85,7 +86,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.editMessageInputBuilder,
     this.textBuilder,
     this.bottomRowBuilderWithDefaultWidget,
-    this.customAttachmentBuilders,
+    this.attachmentBuilders,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
       horizontal: 16,
@@ -100,185 +101,157 @@ class StreamMessageWidget extends StatefulWidget {
     this.imageAttachmentThumbnailResizeType = 'clip',
     this.imageAttachmentThumbnailCropType = 'center',
     this.attachmentActionsModalBuilder,
-  }) : attachmentBuilders = {
-          'image': (context, message, attachments) {
-            final border = RoundedRectangleBorder(
-              side: attachmentBorderSide ??
-                  BorderSide(
-                    color: StreamChatTheme.of(context).colorTheme.borders,
-                  ),
-              borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-            );
+  });
 
-            final mediaQueryData = MediaQuery.of(context);
-            if (attachments.length > 1) {
-              return Padding(
-                padding: attachmentPadding,
-                child: WrapAttachmentWidget(
-                  attachmentWidget: Material(
-                    color: messageTheme.messageBackgroundColor,
-                    child: StreamImageGroup(
-                      constraints: BoxConstraints(
-                        maxWidth: 400,
-                        minWidth: 400,
-                        maxHeight: mediaQueryData.size.height * 0.3,
-                      ),
-                      images: attachments,
-                      message: message,
-                      messageTheme: messageTheme,
-                      onShowMessage: onShowMessage,
-                      onReplyMessage: onReplyTap,
-                      onAttachmentTap: onAttachmentTap,
-                      imageThumbnailSize: imageAttachmentThumbnailSize,
-                      imageThumbnailResizeType:
-                          imageAttachmentThumbnailResizeType,
-                      imageThumbnailCropType: imageAttachmentThumbnailCropType,
-                      attachmentActionsModalBuilder:
-                          attachmentActionsModalBuilder,
-                    ),
-                  ),
-                  attachmentShape: border,
-                ),
-              );
-            }
-
-            return WrapAttachmentWidget(
-              attachmentWidget: StreamImageAttachment(
-                attachment: attachments[0],
-                message: message,
-                messageTheme: messageTheme,
-                constraints: BoxConstraints(
-                  maxWidth: 400,
-                  minWidth: 400,
-                  maxHeight: mediaQueryData.size.height * 0.3,
-                ),
-                onShowMessage: onShowMessage,
-                onReplyMessage: onReplyTap,
-                onAttachmentTap: onAttachmentTap != null
-                    ? () {
-                        onAttachmentTap.call(message, attachments[0]);
-                      }
-                    : null,
-                imageThumbnailSize: imageAttachmentThumbnailSize,
-                imageThumbnailResizeType: imageAttachmentThumbnailResizeType,
-                imageThumbnailCropType: imageAttachmentThumbnailCropType,
-                attachmentActionsModalBuilder: attachmentActionsModalBuilder,
-              ),
-              attachmentShape: border,
-            );
-          },
-          'video': (context, message, attachments) {
-            final border = RoundedRectangleBorder(
-              side: attachmentBorderSide ??
-                  BorderSide(
-                    color: StreamChatTheme.of(context).colorTheme.borders,
-                  ),
-              borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-            );
-
-            return WrapAttachmentWidget(
-              attachmentWidget: Column(
-                children: attachments.map((attachment) {
-                  final mediaQueryData = MediaQuery.of(context);
-                  return StreamVideoAttachment(
-                    attachment: attachment,
-                    messageTheme: messageTheme,
-                    constraints: BoxConstraints(
-                      maxWidth: 400,
-                      minWidth: 400,
-                      maxHeight: mediaQueryData.size.height * 0.3,
-                    ),
-                    message: message,
-                    onShowMessage: onShowMessage,
-                    onReplyMessage: onReplyTap,
-                    onAttachmentTap: onAttachmentTap != null
-                        ? () {
-                            onAttachmentTap(message, attachment);
-                          }
-                        : null,
-                    attachmentActionsModalBuilder:
-                        attachmentActionsModalBuilder,
-                  );
-                }).toList(),
-              ),
-              attachmentShape: border,
-            );
-          },
-          'giphy': (context, message, attachments) {
-            final attachmentWidget = Column(
-              children: [
-                ...attachments.map((attachment) {
-                  final mediaQueryData = MediaQuery.of(context);
-                  return StreamGiphyAttachment(
-                    attachment: attachment,
-                    message: message,
-                    constraints: BoxConstraints(
-                      maxWidth: 400,
-                      minWidth: 400,
-                      maxHeight: mediaQueryData.size.height * 0.3,
-                    ),
-                    onShowMessage: onShowMessage,
-                    onReplyMessage: onReplyTap,
-                    onAttachmentTap: onAttachmentTap != null
-                        ? () => onAttachmentTap(message, attachment)
-                        : null,
-                  );
-                }),
-              ],
-            );
-
-            // If the message is ephemeral, we don't want to show the border.
-            if (message.isEphemeral) return attachmentWidget;
-
-            final color = StreamChatTheme.of(context).colorTheme.borders;
-            final border = RoundedRectangleBorder(
-              side: attachmentBorderSide ?? BorderSide(color: color),
-              borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-            );
-
-            return WrapAttachmentWidget(
-              attachmentShape: border,
-              attachmentWidget: attachmentWidget,
-            );
-          },
-          'file': (context, message, attachments) {
-            final border = RoundedRectangleBorder(
-              side: attachmentBorderSide ??
-                  BorderSide(
-                    color: StreamChatTheme.of(context).colorTheme.borders,
-                  ),
-              borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-            );
-
-            return Column(
-              children: attachments
-                  .map<Widget>((attachment) {
-                    final mediaQueryData = MediaQuery.of(context);
-                    return WrapAttachmentWidget(
-                      attachmentWidget: StreamFileAttachment(
-                        message: message,
-                        attachment: attachment,
-                        constraints: BoxConstraints(
-                          maxWidth: 400,
-                          minWidth: 400,
-                          maxHeight: mediaQueryData.size.height * 0.3,
-                        ),
-                        onAttachmentTap: onAttachmentTap != null
-                            ? () {
-                                onAttachmentTap(message, attachment);
-                              }
-                            : null,
-                      ),
-                      attachmentShape: border,
-                    );
-                  })
-                  .insertBetween(SizedBox(
-                    height: attachmentPadding.vertical / 2,
-                  ))
-                  .toList(),
-            );
-          },
-        }..addAll(customAttachmentBuilders ?? {});
+  // attachmentBuilders = {
+  //   // Add all default builders
+  //   'image': (context, message, attachments) {
+  //     final color = StreamChatTheme.of(context).colorTheme.borders;
+  //     final border = RoundedRectangleBorder(
+  //       side: attachmentBorderSide ?? BorderSide(color: color),
+  //       borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+  //     );
+  //
+  //     if (attachments.length > 1) {
+  //       return WrapAttachmentWidget(
+  //         attachmentShape: border,
+  //         attachmentWidget: Material(
+  //           color: messageTheme.messageBackgroundColor,
+  //           child: StreamGalleryAttachment(
+  //             constraints: const BoxConstraints.tightFor(
+  //               width: 256,
+  //               height: 195,
+  //             ),
+  //             attachments: attachments,
+  //             message: message,
+  //             itemBuilder: (context, index) {
+  //               return Placeholder();
+  //             },
+  //             // onShowMessage: onShowMessage,
+  //             // onReplyMessage: onReplyTap,
+  //             // onAttachmentTap: onAttachmentTap,
+  //             // imageThumbnailSize: imageAttachmentThumbnailSize,
+  //             // imageThumbnailResizeType:
+  //             //     imageAttachmentThumbnailResizeType,
+  //             // imageThumbnailCropType: imageAttachmentThumbnailCropType,
+  //             // attachmentActionsModalBuilder:
+  //             //     attachmentActionsModalBuilder,
+  //           ),
+  //         ),
+  //       );
+  //     }
+  //
+  //     return WrapAttachmentWidget(
+  //       attachmentShape: border,
+  //       attachmentWidget: StreamImageAttachment(
+  //         message: message,
+  //         image: attachments.first,
+  //         constraints: const BoxConstraints(
+  //           minWidth: 170,
+  //           maxWidth: 256,
+  //           minHeight: 100,
+  //           maxHeight: 300,
+  //         ),
+  //         // onShowMessage: onShowMessage,
+  //         // onReplyMessage: onReplyTap,
+  //         imageThumbnailSize: imageAttachmentThumbnailSize,
+  //         imageThumbnailResizeType: imageAttachmentThumbnailResizeType,
+  //         imageThumbnailCropType: imageAttachmentThumbnailCropType,
+  //         // attachmentActionsModalBuilder: attachmentActionsModalBuilder,
+  //         // onAttachmentTap: onAttachmentTap != null
+  //         //     ? () => onAttachmentTap.call(message, attachments.first)
+  //         //     : null,
+  //       ),
+  //     );
+  //   },
+  //   'video': (context, message, attachments) {
+  //     final color = StreamChatTheme.of(context).colorTheme.borders;
+  //     final border = RoundedRectangleBorder(
+  //       side: attachmentBorderSide ?? BorderSide(color: color),
+  //       borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+  //     );
+  //
+  //     return WrapAttachmentWidget(
+  //       attachmentShape: border,
+  //       attachmentWidget: Column(
+  //         children: [
+  //           ...attachments.map((attachment) {
+  //             return StreamVideoAttachment(
+  //               video: attachment,
+  //               constraints: const BoxConstraints.tightFor(
+  //                 width: 256,
+  //                 height: 195,
+  //               ),
+  //               message: message,
+  //             );
+  //           }),
+  //         ],
+  //       ),
+  //     );
+  //   },
+  //   'giphy': (context, message, attachments) {
+  //     final color = StreamChatTheme.of(context).colorTheme.borders;
+  //     final border = RoundedRectangleBorder(
+  //       side: attachmentBorderSide ?? BorderSide(color: color),
+  //       borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+  //     );
+  //
+  //     return WrapAttachmentWidget(
+  //       attachmentShape: border,
+  //       attachmentWidget: Column(
+  //         children: [
+  //           ...attachments.map((attachment) {
+  //             return StreamGiphyAttachment(
+  //               giphy: attachment,
+  //               message: message,
+  //               constraints: const BoxConstraints(
+  //                 minWidth: 170,
+  //                 maxWidth: 256,
+  //                 minHeight: 100,
+  //                 maxHeight: 300,
+  //               ),
+  //             );
+  //           }),
+  //         ],
+  //       ),
+  //     );
+  //   },
+  //   'file': (context, message, attachments) {
+  //     final color = StreamChatTheme.of(context).colorTheme.borders;
+  //     final border = RoundedRectangleBorder(
+  //       side: attachmentBorderSide ?? BorderSide(color: color),
+  //       borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+  //     );
+  //
+  //     return Column(
+  //       children: [
+  //         ...attachments.map<Widget>((attachment) {
+  //           final mediaQueryData = MediaQuery.of(context);
+  //           return WrapAttachmentWidget(
+  //             attachmentShape: border,
+  //             attachmentWidget: StreamFileAttachment(
+  //               message: message,
+  //               file: attachment,
+  //               constraints: BoxConstraints(
+  //                 maxWidth: 400,
+  //                 minWidth: 400,
+  //                 maxHeight: mediaQueryData.size.height * 0.3,
+  //               ),
+  //               // onAttachmentTap: onAttachmentTap != null
+  //               //     ? () => onAttachmentTap(message, attachment)
+  //               //     : null,
+  //             ),
+  //           );
+  //         }).insertBetween(
+  //           SizedBox(height: attachmentPadding.vertical / 2),
+  //         ),
+  //       ],
+  //     );
+  //   },
+  //
+  //   // Add all custom builders, overriding the defaults if needed.
+  //   ...?customAttachmentBuilders,
+  // };
 
   /// {@template onMentionTap}
   /// Function called on mention tap
@@ -504,14 +477,13 @@ class StreamMessageWidget extends StatefulWidget {
   final bool showPinHighlight;
 
   /// {@template attachmentBuilders}
-  /// Builder for respective attachment types
+  /// List of attachment builders for rendering attachment widgets pre-defined
+  /// and custom attachment types.
+  ///
+  /// If null, the widget will create a default list of attachment builders
+  /// based on the [Attachment.type] of the attachment.
   /// {@endtemplate}
-  final Map<String, AttachmentBuilder> attachmentBuilders;
-
-  /// {@template customAttachmentBuilders}
-  /// Builder for respective attachment types (user facing builder)
-  /// {@endtemplate}
-  final Map<String, AttachmentBuilder>? customAttachmentBuilders;
+  final List<StreamAttachmentWidgetBuilder>? attachmentBuilders;
 
   /// {@template translateUserAvatar}
   /// Center user avatar with bottom of the message
@@ -530,7 +502,7 @@ class StreamMessageWidget extends StatefulWidget {
   final List<StreamMessageAction> customActions;
 
   /// {@macro onMessageWidgetAttachmentTap}
-  final OnMessageWidgetAttachmentTap? onAttachmentTap;
+  final StreamAttachmentWidgetTapCallback? onAttachmentTap;
 
   /// {@macro attachmentActionsBuilder}
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
@@ -600,7 +572,7 @@ class StreamMessageWidget extends StatefulWidget {
     bool? showFlagButton,
     bool? showPinButton,
     bool? showPinHighlight,
-    Map<String, AttachmentBuilder>? customAttachmentBuilders,
+    List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     bool? translateUserAvatar,
     OnQuotedMessageTap? onQuotedMessageTap,
     void Function(Message)? onMessageTap,
@@ -664,8 +636,7 @@ class StreamMessageWidget extends StatefulWidget {
       showFlagButton: showFlagButton ?? this.showFlagButton,
       showPinButton: showPinButton ?? this.showPinButton,
       showPinHighlight: showPinHighlight ?? this.showPinHighlight,
-      customAttachmentBuilders:
-          customAttachmentBuilders ?? this.customAttachmentBuilders,
+      attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
       translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
       onMessageTap: onMessageTap ?? this.onMessageTap,
@@ -733,15 +704,14 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// have a [Attachment.titleLink].
   /// {@endtemplate}
   bool get hasNonUrlAttachments => widget.message.attachments
-      .where((it) => it.titleLink == null || it.type == 'giphy')
-      .isNotEmpty;
+      .any((it) => it.type != AttachmentType.urlPreview);
 
   /// {@template hasUrlAttachments}
   /// `true` if any of the [message]'s attachments are a giphy with a
   /// [Attachment.titleLink].
   /// {@endtemplate}
   bool get hasUrlAttachments => widget.message.attachments
-      .any((it) => it.titleLink != null && it.type != 'giphy');
+      .any((it) => it.type == AttachmentType.urlPreview);
 
   /// {@template showBottomRow}
   /// Show the [BottomRow] widget if any of the following are `true`:
@@ -883,6 +853,11 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       textPadding: widget.textPadding,
                       attachmentBuilders: widget.attachmentBuilders,
                       attachmentPadding: widget.attachmentPadding,
+                      onAttachmentTap: widget.onAttachmentTap,
+                      onReplyTap: widget.onReplyTap,
+                      onShowMessage: widget.onShowMessage,
+                      attachmentActionsModalBuilder:
+                          widget.attachmentActionsModalBuilder,
                       avatarWidth: avatarWidth,
                       bottomRowPadding: bottomRowPadding,
                       isFailedState: isFailedState,

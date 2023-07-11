@@ -7,6 +7,8 @@ import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+import '../attachment/thumbnail/video_attachment_thumbnail.dart';
+
 /// WidgetBuilder used to build the message input attachment list.
 ///
 /// see more:
@@ -206,7 +208,7 @@ class MessageInputFileAttachments extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             child: StreamFileAttachment(
               message: Message(), // dummy message
-              attachment: attachment,
+              file: attachment,
               constraints: BoxConstraints.loose(Size(
                 MediaQuery.of(context).size.width * 0.65,
                 56,
@@ -333,9 +335,7 @@ class MessageInputMediaAttachmentThumbnail extends StatelessWidget {
       case 'video':
         return Stack(
           children: [
-            StreamVideoThumbnailImage(
-              video: attachment.file?.path ?? attachment.assetUrl,
-            ),
+            StreamVideoAttachmentThumbnail(video: attachment),
             Positioned(
               left: 8,
               bottom: 10,

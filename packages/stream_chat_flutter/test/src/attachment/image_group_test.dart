@@ -25,14 +25,13 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: SizedBox(
-                child: StreamImageGroup(
-                  messageTheme: streamTheme.ownMessageTheme,
+                child: StreamGalleryAttachment(
                   constraints: BoxConstraints.tight(const Size(
                     300,
                     300,
                   )),
                   message: Message(),
-                  images: [
+                  attachments: [
                     Attachment(
                       type: 'image',
                       title: 'example.png',
