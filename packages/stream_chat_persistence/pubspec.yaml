@@ -6,23 +6,23 @@ repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
 environment:
-  sdk: ">=2.18.0 <4.0.0"
-  flutter: ">=3.3.0"
+  sdk: ">=2.19.0 <4.0.0"
+  flutter: ">=3.7.0"
 
 dependencies:
-  drift: ^2.7.0
+  drift: ^2.8.0
   flutter:
     sdk: flutter
-  logging: ^1.0.1
+  logging: ^1.2.0
   meta: ^1.8.0
   path: ^1.8.2
-  path_provider: ^2.0.1
-  sqlite3_flutter_libs: ^0.5.0
+  path_provider: ^2.0.15
+  sqlite3_flutter_libs: ^0.5.15
   stream_chat: ^6.4.0
 
 dev_dependencies:
   build_runner: ^2.3.3
-  drift_dev: ^2.7.0
+  drift_dev: ^2.8.3
   flutter_test:
     sdk: flutter
   mocktail: ^0.3.0
