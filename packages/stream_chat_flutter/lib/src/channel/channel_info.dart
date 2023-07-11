@@ -106,10 +106,9 @@ class _ConnectedTitleState extends StatelessWidget {
             style: textStyle,
           );
         } else {
-          final lastActive = otherMember.user?.lastActive ?? DateTime.now();
           alternativeWidget = Text(
             '${context.translations.userLastOnlineText} '
-            '${Jiffy.parseFromDateTime(lastActive).fromNow()}',
+            '${Jiffy(otherMember.user?.lastActive).fromNow()}',
             style: textStyle,
           );
         }

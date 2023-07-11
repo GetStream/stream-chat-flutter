@@ -249,15 +249,13 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
     } else if (date == yesterday) {
       return 'hier';
     } else {
-      return 'le ${Jiffy.parseFromDateTime(date).MMMd}';
+      return 'le ${Jiffy(date).MMMd}';
     }
   }
 
   @override
-  String sentAtText({required DateTime date, required DateTime time}) {
-    final atTime = Jiffy.parseFromDateTime(time.toLocal());
-    return 'Envoyé ${_getDay(date)} à ${atTime.jm}';
-  }
+  String sentAtText({required DateTime date, required DateTime time}) =>
+      'Envoyé ${_getDay(date)} à ${Jiffy(time.toLocal()).format('HH:mm')}';
 
   @override
   String get todayLabel => "Aujourd'hui";
