@@ -59,7 +59,7 @@ jobs:
         run: cd packages/stream_chat/lib && dart analyze --fatal-infos .
 
       - name: "Stream Chat Flutter Core Analyze"
-        run: cd packages/stream_chat_core/lib && dart analyze --fatal-infos .
+        run: cd packages/stream_chat_flutter_core/lib && dart analyze --fatal-infos .
 
       - name: "Stream Chat Flutter Analyze"
         run: cd packages/stream_chat_flutter/lib && dart analyze --fatal-infos .
