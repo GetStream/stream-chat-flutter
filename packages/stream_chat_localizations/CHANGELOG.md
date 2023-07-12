@@ -1,4 +1,4 @@
-## Upcoming
+## 5.6.0
 
 - Updated minimum supported `SDK` version to Flutter 3.7/Dart 2.19
 

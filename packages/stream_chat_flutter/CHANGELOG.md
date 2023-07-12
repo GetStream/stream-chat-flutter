@@ -1,4 +1,4 @@
-## Upcoming
+## 6.6.0
 
 🔄 Changed
 
