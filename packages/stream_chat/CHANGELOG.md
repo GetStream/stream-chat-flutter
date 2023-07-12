@@ -1,3 +1,10 @@
+## 6.6.0
+
+🔄 Changed
+
+- Deprecated `Message.status` in favor of `Message.state`.
+- Deprecated `RetryPolicy.retryTimeout` in favor of `RetryPolicy.delayFactor`.
+
 ## 6.5.0
 
 🔄 Changed

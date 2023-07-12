@@ -52,7 +52,7 @@ void main() {
       mentionedUsers: [
         jsonEncode(User(id: 'testuser')),
       ],
-      status: MessageSendingStatus.sent,
+      state: jsonEncode(MessageState.sent),
       localUpdatedAt: DateTime.now(),
       remoteUpdatedAt: DateTime.now().add(const Duration(seconds: 1)),
       extraData: {'extra_test_data': 'extraData'},
@@ -96,7 +96,7 @@ void main() {
     expect(message.replyCount, entity.replyCount);
     expect(message.reactionScores, entity.reactionScores);
     expect(message.reactionCounts, entity.reactionCounts);
-    expect(message.status, entity.status);
+    expect(message.state, MessageState.fromJson(jsonDecode(entity.state)));
     expect(message.localUpdatedAt, isSameDateAs(entity.localUpdatedAt));
     expect(message.remoteUpdatedAt, isSameDateAs(entity.remoteUpdatedAt));
     expect(message.extraData, entity.extraData);
@@ -197,7 +197,7 @@ void main() {
         entity.mentionedUsers, message.mentionedUsers.map(jsonEncode).toList());
     expect(entity.reactionScores, message.reactionScores);
     expect(entity.reactionCounts, message.reactionCounts);
-    expect(entity.status, message.status);
+    expect(entity.state, jsonEncode(message.state));
     expect(entity.localUpdatedAt, isSameDateAs(message.localUpdatedAt));
     expect(entity.remoteUpdatedAt, isSameDateAs(message.remoteUpdatedAt));
     expect(entity.extraData, message.extraData);

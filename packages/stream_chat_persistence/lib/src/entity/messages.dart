@@ -2,7 +2,6 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/converter/list_converter.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
-import 'package:stream_chat_persistence/src/converter/message_sending_status_converter.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 
 /// Represents a [Messages] table in [MoorChatDatabase].
@@ -18,10 +17,8 @@ class Messages extends Table {
   /// or generated from a command or as a result of URL scraping.
   TextColumn get attachments => text().map(ListConverter<String>())();
 
-  /// The status of a sending message
-  IntColumn get status => integer()
-      .withDefault(const Constant(1))
-      .map(MessageSendingStatusConverter())();
+  /// The current state of the message.
+  TextColumn get state => text()();
 
   /// The message type
   TextColumn get type => text().withDefault(const Constant('regular'))();

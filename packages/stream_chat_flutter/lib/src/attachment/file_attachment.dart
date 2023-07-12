@@ -236,7 +236,7 @@ class _Trailing extends StatelessWidget {
     final channel = StreamChannel.of(context).channel;
     final attachmentId = attachment.id;
 
-    if (message.status == MessageSendingStatus.sent) {
+    if (message.state.isCompleted) {
       return IconButton(
         icon: StreamSvgIcon.cloudDownload(
           color: theme.colorTheme.textHighEmphasis,

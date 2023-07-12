@@ -2236,13 +2236,13 @@ void main() {
     test('`.deleteMessage`', () async {
       const messageId = 'test-message-id';
 
-      when(() => api.message.deleteMessage(messageId))
+      when(() => api.message.deleteMessage(messageId, hard: false))
           .thenAnswer((_) async => EmptyResponse());
 
       final res = await client.deleteMessage(messageId);
       expect(res, isNotNull);
 
-      verify(() => api.message.deleteMessage(messageId)).called(1);
+      verify(() => api.message.deleteMessage(messageId, hard: false)).called(1);
       verifyNoMoreInteractions(api.message);
     });
 
@@ -2359,7 +2359,7 @@ void main() {
           ..message = message.copyWith(
             pinned: true,
             pinExpires: null,
-            status: MessageSendingStatus.sent,
+            state: MessageState.sent,
           ));
 
         final res = await client.pinMessage(messageId);
@@ -2393,7 +2393,7 @@ void main() {
               pinExpires: DateTime.now().add(
                 const Duration(seconds: timeoutOrExpirationDate),
               ),
-              status: MessageSendingStatus.sent,
+              state: MessageState.sent,
             ));
 
           final res = await client.pinMessage(
@@ -2430,7 +2430,7 @@ void main() {
             ..message = message.copyWith(
               pinned: true,
               pinExpires: timeoutOrExpirationDate,
-              status: MessageSendingStatus.sent,
+              state: MessageState.sent,
             ));
 
           final res = await client.pinMessage(
@@ -2480,7 +2480,7 @@ void main() {
           )).thenAnswer((_) async => UpdateMessageResponse()
         ..message = message.copyWith(
           pinned: false,
-          status: MessageSendingStatus.sent,
+          state: MessageState.sent,
         ));
 
       final res = await client.unpinMessage(messageId);

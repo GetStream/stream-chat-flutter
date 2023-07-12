@@ -1,3 +1,10 @@
+## 6.7.0
+
+🔄 Changed
+
+- Updated `stream_chat_flutter_core` dependency
+  to [`6.6.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 6.6.0
 
 🔄 Changed
