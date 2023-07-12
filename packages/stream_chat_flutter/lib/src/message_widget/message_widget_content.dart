@@ -67,28 +67,9 @@ class MessageWidgetContent extends StatelessWidget {
     this.onLinkTap,
     this.textBuilder,
     this.quotedMessageBuilder,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') this.bottomRowBuilder,
     this.bottomRowBuilderWithDefaultWidget,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') this.onThreadTap,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') this.deletedBottomRowBuilder,
     this.userAvatarBuilder,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') this.usernameBuilder,
-  }) : assert(
-          bottomRowBuilder == null || bottomRowBuilderWithDefaultWidget == null,
-          'You can only use one of the two bottom row builders',
-        );
+  });
 
   /// {@macro reverse}
   final bool reverse;
@@ -191,9 +172,6 @@ class MessageWidgetContent extends StatelessWidget {
   /// The padding to use for this widget.
   final double bottomRowPadding;
 
-  /// {@macro bottomRowBuilder}
-  final BottomRowBuilder? bottomRowBuilder;
-
   /// {@macro bottomRowBuilderWithDefaultWidget}
   final BottomRowBuilderWithDefaultWidget? bottomRowBuilderWithDefaultWidget;
 
@@ -215,20 +193,11 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro showUsername}
   final bool showUsername;
 
-  /// {@macro onThreadTap}
-  final void Function(Message)? onThreadTap;
-
-  /// {@macro deletedBottomRowBuilder}
-  final Widget Function(BuildContext, Message)? deletedBottomRowBuilder;
-
   /// {@macro messageWidget}
   final StreamMessageWidget messageWidget;
 
   /// {@macro userAvatarBuilder}
   final Widget Function(BuildContext, User)? userAvatarBuilder;
-
-  /// {@macro usernameBuilder}
-  final Widget Function(BuildContext, Message)? usernameBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -457,16 +426,11 @@ class MessageWidgetContent extends StatelessWidget {
       showTimeStamp: showTimeStamp,
       showUsername: showUsername,
       streamChatTheme: streamChatTheme,
-      onThreadTap: onThreadTap,
-      deletedBottomRowBuilder: deletedBottomRowBuilder,
       streamChat: streamChat,
       hasNonUrlAttachments: hasNonUrlAttachments,
-      usernameBuilder: usernameBuilder,
     );
 
-    if (bottomRowBuilder != null) {
-      return bottomRowBuilder!(context, message);
-    } else if (bottomRowBuilderWithDefaultWidget != null) {
+    if (bottomRowBuilderWithDefaultWidget != null) {
       return bottomRowBuilderWithDefaultWidget!(
         context,
         message,
