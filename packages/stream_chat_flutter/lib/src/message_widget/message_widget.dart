@@ -925,7 +925,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               mobile: (context, child) {
                 return InkWell(
                   onTap: () => widget.onMessageTap!(widget.message),
-                  onLongPress: !widget.message.state.isDeleted
+                  onLongPress: widget.message.state.isDeleted
                       ? null
                       : () => onLongPress(context),
                   child: child,
