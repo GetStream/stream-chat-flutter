@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:uuid/uuid.dart';
 
 ///
-class TimerHelper {
+mixin class TimerHelper {
   final _uuid = const Uuid();
   late final _timers = <String, Timer>{};
 
