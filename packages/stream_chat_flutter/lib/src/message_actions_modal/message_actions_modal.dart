@@ -98,9 +98,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   bool _showActions = true;
 
   @override
-  Widget build(BuildContext context) => _showMessageOptionsModal();
-
-  Widget _showMessageOptionsModal() {
+  Widget build(BuildContext context) {
     final mediaQueryData = MediaQuery.of(context);
     final user = StreamChat.of(context).currentUser;
     final orientation = mediaQueryData.orientation;
@@ -163,7 +161,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (widget.showReplyMessage &&
-                            widget.message.status == MessageSendingStatus.sent)
+                            widget.message.state.isCompleted)
                           ReplyButton(
                             onTap: () {
                               Navigator.of(context).pop();
@@ -173,8 +171,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             },
                           ),
                         if (widget.showThreadReplyMessage &&
-                            (widget.message.status ==
-                                MessageSendingStatus.sent) &&
+                            (widget.message.state.isCompleted) &&
                             widget.message.parentId == null)
                           ThreadReplyButton(
                             message: widget.message,
@@ -210,8 +207,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                           ),
                         if (widget.showDeleteMessage)
                           DeleteMessageButton(
-                            isDeleteFailed: widget.message.status ==
-                                MessageSendingStatus.failed_delete,
+                            isDeleteFailed:
+                                widget.message.state.isDeletingFailed,
                             onTap: _showDeleteBottomSheet,
                           ),
                         ...widget.customActions

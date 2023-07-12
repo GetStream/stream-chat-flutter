@@ -91,7 +91,7 @@ class StreamChannelListTile extends StatelessWidget {
   /// The widget builder for the sending indicator.
   ///
   /// `Message` is the last message in the channel, Use it to determine the
-  /// status using [Message.status].
+  /// status using [Message.state].
   final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
 
   /// True if the tile is in a selected state.

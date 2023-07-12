@@ -36,7 +36,7 @@ class StreamAttachmentUploadStateBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message.status == MessageSendingStatus.sent) {
+    if (message.state.isCompleted) {
       return const Offstage();
     }
 

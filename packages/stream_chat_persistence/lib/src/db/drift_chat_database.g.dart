@@ -667,14 +667,11 @@ class $MessagesTable extends Messages
       attachments = GeneratedColumn<String>('attachments', aliasedName, false,
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>($MessagesTable.$converterattachments);
-  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
   @override
-  late final GeneratedColumnWithTypeConverter<MessageSendingStatus, int>
-      status = GeneratedColumn<int>('status', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              defaultValue: const Constant(1))
-          .withConverter<MessageSendingStatus>($MessagesTable.$converterstatus);
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+      'state', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
@@ -856,7 +853,7 @@ class $MessagesTable extends Messages
         id,
         messageText,
         attachments,
-        status,
+        state,
         type,
         mentionedUsers,
         reactionCounts,
@@ -903,7 +900,12 @@ class $MessagesTable extends Messages
               data['message_text']!, _messageTextMeta));
     }
     context.handle(_attachmentsMeta, const VerificationResult.success());
-    context.handle(_statusMeta, const VerificationResult.success());
+    if (data.containsKey('state')) {
+      context.handle(
+          _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
     if (data.containsKey('type')) {
       context.handle(
           _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
@@ -1027,9 +1029,8 @@ class $MessagesTable extends Messages
       attachments: $MessagesTable.$converterattachments.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}attachments'])!),
-      status: $MessagesTable.$converterstatus.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}status'])!),
+      state: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}state'])!,
       type: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
       mentionedUsers: $MessagesTable.$convertermentionedUsers.fromSql(
@@ -1092,8 +1093,6 @@ class $MessagesTable extends Messages
 
   static TypeConverter<List<String>, String> $converterattachments =
       ListConverter();
-  static TypeConverter<MessageSendingStatus, int> $converterstatus =
-      MessageSendingStatusConverter();
   static TypeConverter<List<String>, String> $convertermentionedUsers =
       ListConverter();
   static TypeConverter<Map<String, int>, String> $converterreactionCounts =
@@ -1123,8 +1122,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   /// or generated from a command or as a result of URL scraping.
   final List<String> attachments;
 
-  /// The status of a sending message
-  final MessageSendingStatus status;
+  /// The current state of the message.
+  final String state;
 
   /// The message type
   final String type;
@@ -1201,7 +1200,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       {required this.id,
       this.messageText,
       required this.attachments,
-      required this.status,
+      required this.state,
       required this.type,
       required this.mentionedUsers,
       this.reactionCounts,
@@ -1237,10 +1236,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       final converter = $MessagesTable.$converterattachments;
       map['attachments'] = Variable<String>(converter.toSql(attachments));
     }
-    {
-      final converter = $MessagesTable.$converterstatus;
-      map['status'] = Variable<int>(converter.toSql(status));
-    }
+    map['state'] = Variable<String>(state);
     map['type'] = Variable<String>(type);
     {
       final converter = $MessagesTable.$convertermentionedUsers;
@@ -1323,7 +1319,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       id: serializer.fromJson<String>(json['id']),
       messageText: serializer.fromJson<String?>(json['messageText']),
       attachments: serializer.fromJson<List<String>>(json['attachments']),
-      status: serializer.fromJson<MessageSendingStatus>(json['status']),
+      state: serializer.fromJson<String>(json['state']),
       type: serializer.fromJson<String>(json['type']),
       mentionedUsers: serializer.fromJson<List<String>>(json['mentionedUsers']),
       reactionCounts:
@@ -1359,7 +1355,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       'id': serializer.toJson<String>(id),
       'messageText': serializer.toJson<String?>(messageText),
       'attachments': serializer.toJson<List<String>>(attachments),
-      'status': serializer.toJson<MessageSendingStatus>(status),
+      'state': serializer.toJson<String>(state),
       'type': serializer.toJson<String>(type),
       'mentionedUsers': serializer.toJson<List<String>>(mentionedUsers),
       'reactionCounts': serializer.toJson<Map<String, int>?>(reactionCounts),
@@ -1391,7 +1387,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           {String? id,
           Value<String?> messageText = const Value.absent(),
           List<String>? attachments,
-          MessageSendingStatus? status,
+          String? state,
           String? type,
           List<String>? mentionedUsers,
           Value<Map<String, int>?> reactionCounts = const Value.absent(),
@@ -1420,7 +1416,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         id: id ?? this.id,
         messageText: messageText.present ? messageText.value : this.messageText,
         attachments: attachments ?? this.attachments,
-        status: status ?? this.status,
+        state: state ?? this.state,
         type: type ?? this.type,
         mentionedUsers: mentionedUsers ?? this.mentionedUsers,
         reactionCounts:
@@ -1467,7 +1463,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           ..write('id: $id, ')
           ..write('messageText: $messageText, ')
           ..write('attachments: $attachments, ')
-          ..write('status: $status, ')
+          ..write('state: $state, ')
           ..write('type: $type, ')
           ..write('mentionedUsers: $mentionedUsers, ')
           ..write('reactionCounts: $reactionCounts, ')
@@ -1501,7 +1497,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         id,
         messageText,
         attachments,
-        status,
+        state,
         type,
         mentionedUsers,
         reactionCounts,
@@ -1534,7 +1530,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           other.id == this.id &&
           other.messageText == this.messageText &&
           other.attachments == this.attachments &&
-          other.status == this.status &&
+          other.state == this.state &&
           other.type == this.type &&
           other.mentionedUsers == this.mentionedUsers &&
           other.reactionCounts == this.reactionCounts &&
@@ -1565,7 +1561,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   final Value<String> id;
   final Value<String?> messageText;
   final Value<List<String>> attachments;
-  final Value<MessageSendingStatus> status;
+  final Value<String> state;
   final Value<String> type;
   final Value<List<String>> mentionedUsers;
   final Value<Map<String, int>?> reactionCounts;
@@ -1595,7 +1591,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.id = const Value.absent(),
     this.messageText = const Value.absent(),
     this.attachments = const Value.absent(),
-    this.status = const Value.absent(),
+    this.state = const Value.absent(),
     this.type = const Value.absent(),
     this.mentionedUsers = const Value.absent(),
     this.reactionCounts = const Value.absent(),
@@ -1626,7 +1622,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     required String id,
     this.messageText = const Value.absent(),
     required List<String> attachments,
-    this.status = const Value.absent(),
+    required String state,
     this.type = const Value.absent(),
     required List<String> mentionedUsers,
     this.reactionCounts = const Value.absent(),
@@ -1654,13 +1650,14 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         attachments = Value(attachments),
+        state = Value(state),
         mentionedUsers = Value(mentionedUsers),
         channelCid = Value(channelCid);
   static Insertable<MessageEntity> custom({
     Expression<String>? id,
     Expression<String>? messageText,
     Expression<String>? attachments,
-    Expression<int>? status,
+    Expression<String>? state,
     Expression<String>? type,
     Expression<String>? mentionedUsers,
     Expression<String>? reactionCounts,
@@ -1691,7 +1688,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       if (id != null) 'id': id,
       if (messageText != null) 'message_text': messageText,
       if (attachments != null) 'attachments': attachments,
-      if (status != null) 'status': status,
+      if (state != null) 'state': state,
       if (type != null) 'type': type,
       if (mentionedUsers != null) 'mentioned_users': mentionedUsers,
       if (reactionCounts != null) 'reaction_counts': reactionCounts,
@@ -1724,7 +1721,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       {Value<String>? id,
       Value<String?>? messageText,
       Value<List<String>>? attachments,
-      Value<MessageSendingStatus>? status,
+      Value<String>? state,
       Value<String>? type,
       Value<List<String>>? mentionedUsers,
       Value<Map<String, int>?>? reactionCounts,
@@ -1754,7 +1751,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       id: id ?? this.id,
       messageText: messageText ?? this.messageText,
       attachments: attachments ?? this.attachments,
-      status: status ?? this.status,
+      state: state ?? this.state,
       type: type ?? this.type,
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
       reactionCounts: reactionCounts ?? this.reactionCounts,
@@ -1796,9 +1793,8 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       final converter = $MessagesTable.$converterattachments;
       map['attachments'] = Variable<String>(converter.toSql(attachments.value));
     }
-    if (status.present) {
-      final converter = $MessagesTable.$converterstatus;
-      map['status'] = Variable<int>(converter.toSql(status.value));
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
     }
     if (type.present) {
       map['type'] = Variable<String>(type.value);
@@ -1892,7 +1888,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
           ..write('id: $id, ')
           ..write('messageText: $messageText, ')
           ..write('attachments: $attachments, ')
-          ..write('status: $status, ')
+          ..write('state: $state, ')
           ..write('type: $type, ')
           ..write('mentionedUsers: $mentionedUsers, ')
           ..write('reactionCounts: $reactionCounts, ')
@@ -1948,15 +1944,11 @@ class $PinnedMessagesTable extends PinnedMessages
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>(
               $PinnedMessagesTable.$converterattachments);
-  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
   @override
-  late final GeneratedColumnWithTypeConverter<MessageSendingStatus, int>
-      status = GeneratedColumn<int>('status', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              defaultValue: const Constant(1))
-          .withConverter<MessageSendingStatus>(
-              $PinnedMessagesTable.$converterstatus);
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+      'state', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
@@ -2140,7 +2132,7 @@ class $PinnedMessagesTable extends PinnedMessages
         id,
         messageText,
         attachments,
-        status,
+        state,
         type,
         mentionedUsers,
         reactionCounts,
@@ -2188,7 +2180,12 @@ class $PinnedMessagesTable extends PinnedMessages
               data['message_text']!, _messageTextMeta));
     }
     context.handle(_attachmentsMeta, const VerificationResult.success());
-    context.handle(_statusMeta, const VerificationResult.success());
+    if (data.containsKey('state')) {
+      context.handle(
+          _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
     if (data.containsKey('type')) {
       context.handle(
           _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
@@ -2312,9 +2309,8 @@ class $PinnedMessagesTable extends PinnedMessages
       attachments: $PinnedMessagesTable.$converterattachments.fromSql(
           attachedDatabase.typeMapping.read(
               DriftSqlType.string, data['${effectivePrefix}attachments'])!),
-      status: $PinnedMessagesTable.$converterstatus.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}status'])!),
+      state: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}state'])!,
       type: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
       mentionedUsers: $PinnedMessagesTable.$convertermentionedUsers.fromSql(
@@ -2378,8 +2374,6 @@ class $PinnedMessagesTable extends PinnedMessages
 
   static TypeConverter<List<String>, String> $converterattachments =
       ListConverter();
-  static TypeConverter<MessageSendingStatus, int> $converterstatus =
-      MessageSendingStatusConverter();
   static TypeConverter<List<String>, String> $convertermentionedUsers =
       ListConverter();
   static TypeConverter<Map<String, int>, String> $converterreactionCounts =
@@ -2410,8 +2404,8 @@ class PinnedMessageEntity extends DataClass
   /// or generated from a command or as a result of URL scraping.
   final List<String> attachments;
 
-  /// The status of a sending message
-  final MessageSendingStatus status;
+  /// The current state of the message.
+  final String state;
 
   /// The message type
   final String type;
@@ -2488,7 +2482,7 @@ class PinnedMessageEntity extends DataClass
       {required this.id,
       this.messageText,
       required this.attachments,
-      required this.status,
+      required this.state,
       required this.type,
       required this.mentionedUsers,
       this.reactionCounts,
@@ -2524,10 +2518,7 @@ class PinnedMessageEntity extends DataClass
       final converter = $PinnedMessagesTable.$converterattachments;
       map['attachments'] = Variable<String>(converter.toSql(attachments));
     }
-    {
-      final converter = $PinnedMessagesTable.$converterstatus;
-      map['status'] = Variable<int>(converter.toSql(status));
-    }
+    map['state'] = Variable<String>(state);
     map['type'] = Variable<String>(type);
     {
       final converter = $PinnedMessagesTable.$convertermentionedUsers;
@@ -2610,7 +2601,7 @@ class PinnedMessageEntity extends DataClass
       id: serializer.fromJson<String>(json['id']),
       messageText: serializer.fromJson<String?>(json['messageText']),
       attachments: serializer.fromJson<List<String>>(json['attachments']),
-      status: serializer.fromJson<MessageSendingStatus>(json['status']),
+      state: serializer.fromJson<String>(json['state']),
       type: serializer.fromJson<String>(json['type']),
       mentionedUsers: serializer.fromJson<List<String>>(json['mentionedUsers']),
       reactionCounts:
@@ -2646,7 +2637,7 @@ class PinnedMessageEntity extends DataClass
       'id': serializer.toJson<String>(id),
       'messageText': serializer.toJson<String?>(messageText),
       'attachments': serializer.toJson<List<String>>(attachments),
-      'status': serializer.toJson<MessageSendingStatus>(status),
+      'state': serializer.toJson<String>(state),
       'type': serializer.toJson<String>(type),
       'mentionedUsers': serializer.toJson<List<String>>(mentionedUsers),
       'reactionCounts': serializer.toJson<Map<String, int>?>(reactionCounts),
@@ -2678,7 +2669,7 @@ class PinnedMessageEntity extends DataClass
           {String? id,
           Value<String?> messageText = const Value.absent(),
           List<String>? attachments,
-          MessageSendingStatus? status,
+          String? state,
           String? type,
           List<String>? mentionedUsers,
           Value<Map<String, int>?> reactionCounts = const Value.absent(),
@@ -2707,7 +2698,7 @@ class PinnedMessageEntity extends DataClass
         id: id ?? this.id,
         messageText: messageText.present ? messageText.value : this.messageText,
         attachments: attachments ?? this.attachments,
-        status: status ?? this.status,
+        state: state ?? this.state,
         type: type ?? this.type,
         mentionedUsers: mentionedUsers ?? this.mentionedUsers,
         reactionCounts:
@@ -2754,7 +2745,7 @@ class PinnedMessageEntity extends DataClass
           ..write('id: $id, ')
           ..write('messageText: $messageText, ')
           ..write('attachments: $attachments, ')
-          ..write('status: $status, ')
+          ..write('state: $state, ')
           ..write('type: $type, ')
           ..write('mentionedUsers: $mentionedUsers, ')
           ..write('reactionCounts: $reactionCounts, ')
@@ -2788,7 +2779,7 @@ class PinnedMessageEntity extends DataClass
         id,
         messageText,
         attachments,
-        status,
+        state,
         type,
         mentionedUsers,
         reactionCounts,
@@ -2821,7 +2812,7 @@ class PinnedMessageEntity extends DataClass
           other.id == this.id &&
           other.messageText == this.messageText &&
           other.attachments == this.attachments &&
-          other.status == this.status &&
+          other.state == this.state &&
           other.type == this.type &&
           other.mentionedUsers == this.mentionedUsers &&
           other.reactionCounts == this.reactionCounts &&
@@ -2852,7 +2843,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
   final Value<String> id;
   final Value<String?> messageText;
   final Value<List<String>> attachments;
-  final Value<MessageSendingStatus> status;
+  final Value<String> state;
   final Value<String> type;
   final Value<List<String>> mentionedUsers;
   final Value<Map<String, int>?> reactionCounts;
@@ -2882,7 +2873,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.id = const Value.absent(),
     this.messageText = const Value.absent(),
     this.attachments = const Value.absent(),
-    this.status = const Value.absent(),
+    this.state = const Value.absent(),
     this.type = const Value.absent(),
     this.mentionedUsers = const Value.absent(),
     this.reactionCounts = const Value.absent(),
@@ -2913,7 +2904,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     required String id,
     this.messageText = const Value.absent(),
     required List<String> attachments,
-    this.status = const Value.absent(),
+    required String state,
     this.type = const Value.absent(),
     required List<String> mentionedUsers,
     this.reactionCounts = const Value.absent(),
@@ -2941,13 +2932,14 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         attachments = Value(attachments),
+        state = Value(state),
         mentionedUsers = Value(mentionedUsers),
         channelCid = Value(channelCid);
   static Insertable<PinnedMessageEntity> custom({
     Expression<String>? id,
     Expression<String>? messageText,
     Expression<String>? attachments,
-    Expression<int>? status,
+    Expression<String>? state,
     Expression<String>? type,
     Expression<String>? mentionedUsers,
     Expression<String>? reactionCounts,
@@ -2978,7 +2970,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       if (id != null) 'id': id,
       if (messageText != null) 'message_text': messageText,
       if (attachments != null) 'attachments': attachments,
-      if (status != null) 'status': status,
+      if (state != null) 'state': state,
       if (type != null) 'type': type,
       if (mentionedUsers != null) 'mentioned_users': mentionedUsers,
       if (reactionCounts != null) 'reaction_counts': reactionCounts,
@@ -3011,7 +3003,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       {Value<String>? id,
       Value<String?>? messageText,
       Value<List<String>>? attachments,
-      Value<MessageSendingStatus>? status,
+      Value<String>? state,
       Value<String>? type,
       Value<List<String>>? mentionedUsers,
       Value<Map<String, int>?>? reactionCounts,
@@ -3041,7 +3033,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       id: id ?? this.id,
       messageText: messageText ?? this.messageText,
       attachments: attachments ?? this.attachments,
-      status: status ?? this.status,
+      state: state ?? this.state,
       type: type ?? this.type,
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
       reactionCounts: reactionCounts ?? this.reactionCounts,
@@ -3083,9 +3075,8 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       final converter = $PinnedMessagesTable.$converterattachments;
       map['attachments'] = Variable<String>(converter.toSql(attachments.value));
     }
-    if (status.present) {
-      final converter = $PinnedMessagesTable.$converterstatus;
-      map['status'] = Variable<int>(converter.toSql(status.value));
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
     }
     if (type.present) {
       map['type'] = Variable<String>(type.value);
@@ -3179,7 +3170,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
           ..write('id: $id, ')
           ..write('messageText: $messageText, ')
           ..write('attachments: $attachments, ')
-          ..write('status: $status, ')
+          ..write('state: $state, ')
           ..write('type: $type, ')
           ..write('mentionedUsers: $mentionedUsers, ')
           ..write('reactionCounts: $reactionCounts, ')

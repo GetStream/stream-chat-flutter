@@ -1,3 +1,10 @@
+## Upcoming
+
+🔄 Changed
+
+- Updated `stream_chat_flutter_core` dependency
+  to [`Upcoming`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 6.6.0
 
 🔄 Changed

@@ -46,7 +46,7 @@ Matcher isSameMessageAs(
   Message targetMessage, {
   bool matchText = false,
   bool matchReactions = false,
-  bool matchSendingStatus = false,
+  bool matchMessageState = false,
   bool matchAttachments = false,
   bool matchAttachmentsUploadState = false,
   bool matchParentId = false,
@@ -55,7 +55,7 @@ Matcher isSameMessageAs(
       targetMessage: targetMessage,
       matchText: matchText,
       matchReactions: matchReactions,
-      matchSendingStatus: matchSendingStatus,
+      matchMessageState: matchMessageState,
       matchAttachments: matchAttachments,
       matchAttachmentsUploadState: matchAttachmentsUploadState,
       matchParentId: matchParentId,
@@ -66,7 +66,7 @@ class _IsSameMessageAs extends Matcher {
     required this.targetMessage,
     this.matchText = false,
     this.matchReactions = false,
-    this.matchSendingStatus = false,
+    this.matchMessageState = false,
     this.matchAttachments = false,
     this.matchAttachmentsUploadState = false,
     this.matchParentId = false,
@@ -75,7 +75,7 @@ class _IsSameMessageAs extends Matcher {
   final Message targetMessage;
   final bool matchText;
   final bool matchReactions;
-  final bool matchSendingStatus;
+  final bool matchMessageState;
   final bool matchAttachments;
   final bool matchAttachmentsUploadState;
   final bool matchParentId;
@@ -90,8 +90,8 @@ class _IsSameMessageAs extends Matcher {
     if (matchText) {
       matches &= message.text == targetMessage.text;
     }
-    if (matchSendingStatus) {
-      matches &= message.status == targetMessage.status;
+    if (matchMessageState) {
+      matches &= message.state == targetMessage.state;
     }
     if (matchReactions) {
       matches &= const ListEquality().equals(

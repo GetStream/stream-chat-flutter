@@ -14,7 +14,7 @@ class RetryQueue {
   }) : client = channel.client {
     _retryPolicy = client.retryPolicy;
     _listenConnectionRecovered();
-    _listenFailedEvents();
+    _listenMessageEvents();
   }
 
   /// The channel of this queue.
@@ -31,152 +31,93 @@ class RetryQueue {
   final _compositeSubscription = CompositeSubscription();
 
   final _messageQueue = HeapPriorityQueue(_byDate);
-  bool _isRetrying = false;
 
   void _listenConnectionRecovered() {
-    client.on(EventType.connectionRecovered).listen((event) {
+    client.on(EventType.connectionRecovered).distinct().listen((event) {
       if (event.online == true) {
-        _startRetrying();
+        logger?.info('Connection recovered, retrying failed messages');
+        channel.state?.retryFailedMessages();
       }
     }).addTo(_compositeSubscription);
   }
 
-  void _listenFailedEvents() {
+  void _listenMessageEvents() {
     channel.on().where((event) => event.message != null).listen((event) {
       final message = event.message!;
       final containsMessage = _messageQueue.containsMessage(message);
       if (!containsMessage) return;
-      if (message.status == MessageSendingStatus.sent) {
+
+      if (message.state.isCompleted) {
         logger?.info('Removing sent message from queue : ${message.id}');
-        _messageQueue.removeMessage(message);
-        return;
-      } else {
-        if ([
-          MessageSendingStatus.failed_update,
-          MessageSendingStatus.failed,
-          MessageSendingStatus.failed_delete,
-        ].contains(message.status)) {
-          logger?.info('Adding failed message from event : ${event.type}');
-          add([message]);
-        }
+        return _messageQueue.removeMessage(message);
       }
     }).addTo(_compositeSubscription);
   }
 
   /// Add a list of messages.
-  void add(List<Message> messages) {
-    if (messages.isEmpty) return;
-    if (!_messageQueue.containsAllMessage(messages)) {
-      logger?.info('Adding ${messages.length} messages');
-      final messageList = _messageQueue.toList();
-      // we should not add message if already available in the queue
-      _messageQueue.addAll(messages.where(
-        (it) => !messageList.any((m) => m.id == it.id),
-      ));
-    }
+  void add(Iterable<Message> messages) {
+    assert(
+      messages.every((it) => it.state.isFailed),
+      'Only failed messages can be added to the queue',
+    );
 
-    _startRetrying();
+    // Filter out messages that are already in the queue.
+    final messagesToAdd = messages.where((it) {
+      return !_messageQueue.containsMessage(it);
+    });
+
+    // If there are no messages to add, return.
+    if (messagesToAdd.isEmpty) return;
+
+    logger?.info('Adding ${messagesToAdd.length} messages to the queue');
+    _messageQueue.addAll(messagesToAdd);
+
+    _processQueue();
   }
 
-  Future<void> _startRetrying() async {
-    if (_isRetrying) return;
-    _isRetrying = true;
+  bool _isProcessing = false;
+
+  Future<void> _processQueue() async {
+    if (_isProcessing) return;
+    _isProcessing = true;
 
     logger?.info('Started retrying failed messages');
     while (_messageQueue.isNotEmpty) {
       logger?.info('${_messageQueue.length} messages remaining in the queue');
+
       final message = _messageQueue.first;
-      final succeeded = await _runAndRetry(message);
-      if (!succeeded) {
-        _messageQueue.toList().forEach(_sendFailedEvent);
-        break;
-      }
-    }
-    _isRetrying = false;
-  }
-
-  Future<bool> _runAndRetry(Message message) async {
-    var attempt = 1;
-
-    final maxAttempt = _retryPolicy.maxRetryAttempts;
-    // early return in case maxAttempt is less than 0
-    if (attempt > maxAttempt) return false;
-
-    // ignore: literal_only_boolean_expressions
-    while (true) {
+      final retryPolicy = _retryPolicy;
       try {
-        logger?.info('Message (${message.id}) retry attempt $attempt');
-        await _retryMessage(message);
-        logger?.info('Message (${message.id}) sent successfully');
-        _messageQueue.removeMessage(message);
-        return true;
-      } catch (e) {
-        if (e is! StreamChatNetworkError || !e.isRetriable) {
-          _messageQueue.removeMessage(message);
-          _sendFailedEvent(message);
-          return true;
-        }
-        // retry logic
-        final maxAttempt = _retryPolicy.maxRetryAttempts;
-        if (attempt < maxAttempt) {
-          final shouldRetry = _retryPolicy.shouldRetry(client, attempt, e);
-          if (shouldRetry) {
-            final timeout = _retryPolicy.retryTimeout(client, attempt, e);
-            // temporary failure, continue
-            logger?.info(
-              'API call failed (attempt $attempt), '
-              'retrying in ${timeout.inSeconds} seconds. Error was $e',
-            );
-            await Future.delayed(timeout);
-            attempt += 1;
-          } else {
-            logger?.info(
-              'API call failed (attempt $attempt). '
-              'Giving up for now, will retry when connection recovers. '
-              'Error was $e',
-            );
-            _sendFailedEvent(message);
-            break;
-          }
-        } else {
-          logger?.info(
-            'API call failed (attempt $attempt). '
-            'Exceeds maxRetryAttempt : $maxAttempt '
-            'Giving up for now, will retry when connection recovers. '
-            'Error was $e',
-          );
-          _sendFailedEvent(message);
-          break;
-        }
+        await backOff(
+          () => channel.retryMessage(message),
+          delayFactor: retryPolicy.delayFactor,
+          randomizationFactor: retryPolicy.randomizationFactor,
+          maxDelay: retryPolicy.maxDelay,
+          maxAttempts: retryPolicy.maxRetryAttempts,
+          retryIf: (error, attempt) {
+            if (error is! StreamChatError) return false;
+            return retryPolicy.shouldRetry(client, attempt, error);
+          },
+        );
+      } catch (error) {
+        logger?.severe('Error while retrying message ${message.id}', error);
+        // If we are unable to successfully retry the message, update the state
+        // with the failed state.
+        channel.state?.updateMessage(message);
+      } finally {
+        // remove the message from the queue after it's handled.
+        _messageQueue.removeFirst();
       }
     }
-    return false;
-  }
 
-  void _sendFailedEvent(Message message) {
-    final newStatus = message.status == MessageSendingStatus.sending
-        ? MessageSendingStatus.failed
-        : message.status == MessageSendingStatus.updating
-            ? MessageSendingStatus.failed_update
-            : MessageSendingStatus.failed_delete;
-    channel.state?.updateMessage(message.copyWith(status: newStatus));
-  }
-
-  Future<void> _retryMessage(Message message) async {
-    if (message.status == MessageSendingStatus.failed_update ||
-        message.status == MessageSendingStatus.updating) {
-      await channel.updateMessage(message);
-    } else if (message.status == MessageSendingStatus.failed ||
-        message.status == MessageSendingStatus.sending) {
-      await channel.sendMessage(message);
-    } else if (message.status == MessageSendingStatus.failed_delete ||
-        message.status == MessageSendingStatus.deleting) {
-      await channel.deleteMessage(message);
-    }
+    _isProcessing = false;
   }
 
   /// Whether our [_messageQueue] has messages or not.
   bool get hasMessages => _messageQueue.isNotEmpty;
+
+  /// Returns true if the queue contains the given [message].
+  bool contains(Message message) => _messageQueue.containsMessage(message);
 
   /// Call this method to dispose this object.
   void dispose() {
@@ -188,33 +129,25 @@ class RetryQueue {
     final date1 = _getMessageDate(m1);
     final date2 = _getMessageDate(m2);
 
-    if (date1 == null || date2 == null) {
-      return 0;
-    }
-
+    if (date1 == null && date2 == null) return 0;
+    if (date1 == null) return -1;
+    if (date2 == null) return 1;
     return date1.compareTo(date2);
   }
 
-  static DateTime? _getMessageDate(Message m1) {
-    switch (m1.status) {
-      case MessageSendingStatus.failed_delete:
-      case MessageSendingStatus.deleting:
-        return m1.deletedAt;
-
-      case MessageSendingStatus.failed:
-      case MessageSendingStatus.sending:
-        return m1.createdAt;
-
-      case MessageSendingStatus.failed_update:
-      case MessageSendingStatus.updating:
-        return m1.updatedAt;
-      default:
-        return null;
-    }
+  static DateTime? _getMessageDate(Message message) {
+    return message.state.maybeWhen(
+      failed: (state, _) => state.when(
+        sendingFailed: () => message.createdAt,
+        updatingFailed: () => message.updatedAt,
+        deletingFailed: (_) => message.deletedAt,
+      ),
+      orElse: () => null,
+    );
   }
 }
 
-extension _MessageHeapPriorityQueue on HeapPriorityQueue<Message> {
+extension on HeapPriorityQueue<Message> {
   void removeMessage(Message message) {
     final list = toUnorderedList();
     final index = list.indexWhere((it) => it.id == message.id);
@@ -228,12 +161,5 @@ extension _MessageHeapPriorityQueue on HeapPriorityQueue<Message> {
     final index = list.indexWhere((it) => it.id == message.id);
     if (index == -1) return false;
     return true;
-  }
-
-  bool containsAllMessage(List<Message> messages) {
-    if (isEmpty) return false;
-    final list = toUnorderedList();
-    final messageIds = messages.map((it) => it.id);
-    return list.every((it) => messageIds.contains(it.id));
   }
 }

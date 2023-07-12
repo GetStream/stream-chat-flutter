@@ -783,13 +783,11 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// {@endtemplate}
   bool get hasQuotedMessage => widget.message.quotedMessage != null;
 
-  bool get isSendFailed => widget.message.status == MessageSendingStatus.failed;
+  bool get isSendFailed => widget.message.state.isSendingFailed;
 
-  bool get isUpdateFailed =>
-      widget.message.status == MessageSendingStatus.failed_update;
+  bool get isUpdateFailed => widget.message.state.isUpdatingFailed;
 
-  bool get isDeleteFailed =>
-      widget.message.status == MessageSendingStatus.failed_delete;
+  bool get isDeleteFailed => widget.message.state.isDeletingFailed;
 
   /// {@template isFailedState}
   /// Whether the message has failed to be sent, updated, or deleted.
@@ -905,7 +903,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
     return ConditionalParentBuilder(
       builder: (context, child) {
-        if (!widget.message.isDeleted) {
+        if (!widget.message.state.isDeleted) {
           return ContextMenuArea(
             verticalPadding: 0,
             builder: (_) => _buildContextMenu(),
@@ -927,7 +925,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               mobile: (context, child) {
                 return InkWell(
                   onTap: () => widget.onMessageTap!(widget.message),
-                  onLongPress: widget.message.isDeleted && !isFailedState
+                  onLongPress: !widget.message.state.isDeleted
                       ? null
                       : () => onLongPress(context),
                   child: child,
@@ -1114,14 +1112,12 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           leading: StreamSvgIcon.iconSendMessage(),
           title: Text(
             context.translations.toggleResendOrResendEditedMessage(
-              isUpdateFailed:
-                  widget.message.status == MessageSendingStatus.failed,
+              isUpdateFailed: widget.message.state.isUpdatingFailed,
             ),
           ),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
-            final isUpdateFailed =
-                widget.message.status == MessageSendingStatus.failed_update;
+            final isUpdateFailed = widget.message.state.isUpdatingFailed;
             final channel = StreamChannel.of(context).channel;
             if (isUpdateFailed) {
               channel.updateMessage(widget.message);
@@ -1216,8 +1212,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   }
 
   void onLongPress(BuildContext context) {
-    if (widget.message.isEphemeral ||
-        widget.message.status == MessageSendingStatus.sending) {
+    if (widget.message.isEphemeral || widget.message.state.isOutgoing) {
       return;
     }
 

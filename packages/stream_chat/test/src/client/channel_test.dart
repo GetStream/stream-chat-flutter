@@ -133,7 +133,7 @@ void main() {
 
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
-        retryTimeout: (_, __, ___) => Duration.zero,
+        delayFactor: Duration.zero,
       );
       when(() => client.retryPolicy).thenReturn(retryPolicy);
 
@@ -191,7 +191,7 @@ void main() {
 
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
-        retryTimeout: (_, __, ___) => Duration.zero,
+        delayFactor: Duration.zero,
       );
       when(() => client.retryPolicy).thenReturn(retryPolicy);
 
@@ -253,7 +253,7 @@ void main() {
         );
 
         final sendMessageResponse = SendMessageResponse()
-          ..message = message.copyWith(status: MessageSendingStatus.sent);
+          ..message = message.copyWith(state: MessageState.sent);
 
         when(() => client.sendMessage(
               any(that: isSameMessageAs(message)),
@@ -267,14 +267,14 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(status: MessageSendingStatus.sending),
-                matchSendingStatus: true,
+                message.copyWith(state: MessageState.sending),
+                matchMessageState: true,
               ),
             ],
             [
               isSameMessageAs(
-                message.copyWith(status: MessageSendingStatus.sent),
-                matchSendingStatus: true,
+                message.copyWith(state: MessageState.sent),
+                matchMessageState: true,
               ),
             ],
           ]),
@@ -338,7 +338,7 @@ void main() {
                 .map((it) =>
                     it.copyWith(uploadState: const UploadState.success()))
                 .toList(growable: false),
-            status: MessageSendingStatus.sent,
+            state: MessageState.sent,
           ));
 
         expectLater(
@@ -350,13 +350,13 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.sending,
+                    state: MessageState.sending,
                     attachments: [
                       ...attachments.map((it) => it.copyWith(
                           uploadState: const UploadState.preparing()))
                     ],
                   ),
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchAttachments: true,
                   matchAttachmentsUploadState: true,
                 ),
@@ -365,13 +365,13 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.sending,
+                    state: MessageState.sending,
                     attachments: [...attachments]..[0] =
                           attachments[0].copyWith(
                         uploadState: const UploadState.success(),
                       ),
                   ),
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchAttachments: true,
                   matchAttachmentsUploadState: true,
                 ),
@@ -380,7 +380,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.sending,
+                    state: MessageState.sending,
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -389,7 +389,7 @@ void main() {
                         uploadState: const UploadState.success(),
                       ),
                   ),
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchAttachments: true,
                   matchAttachmentsUploadState: true,
                 ),
@@ -398,13 +398,13 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.sending,
+                    state: MessageState.sending,
                     attachments: [
                       ...attachments.map((it) =>
                           it.copyWith(uploadState: const UploadState.success()))
                     ],
                   ),
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchAttachments: true,
                   matchAttachmentsUploadState: true,
                 ),
@@ -412,13 +412,13 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.sent,
+                    state: MessageState.sent,
                     attachments: [
                       ...attachments.map((it) =>
                           it.copyWith(uploadState: const UploadState.success()))
                     ],
                   ),
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchAttachments: true,
                   matchAttachmentsUploadState: true,
                 ),
@@ -469,7 +469,7 @@ void main() {
       test('should work fine', () async {
         final message = Message(
           id: 'test-message-id',
-          status: MessageSendingStatus.sent,
+          state: MessageState.sent,
         );
 
         final updateMessageResponse = UpdateMessageResponse()
@@ -484,14 +484,14 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(status: MessageSendingStatus.updating),
-                matchSendingStatus: true,
+                message.copyWith(state: MessageState.updating),
+                matchMessageState: true,
               ),
             ],
             [
               isSameMessageAs(
-                message.copyWith(status: MessageSendingStatus.sent),
-                matchSendingStatus: true,
+                message.copyWith(state: MessageState.updated),
+                matchMessageState: true,
               ),
             ],
           ]),
@@ -547,7 +547,7 @@ void main() {
               any(that: isSameMessageAs(message)),
             )).thenAnswer((_) async => UpdateMessageResponse()
           ..message = message.copyWith(
-            status: MessageSendingStatus.sent,
+            state: MessageState.sent,
             attachments: attachments
                 .map((it) =>
                     it.copyWith(uploadState: const UploadState.success()))
@@ -563,13 +563,13 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.updating,
+                    state: MessageState.updating,
                     attachments: [
                       ...attachments.map((it) => it.copyWith(
                           uploadState: const UploadState.preparing()))
                     ],
                   ),
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchAttachments: true,
                   matchAttachmentsUploadState: true,
                 ),
@@ -578,13 +578,13 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.updating,
+                    state: MessageState.updating,
                     attachments: [...attachments]..[0] =
                           attachments[0].copyWith(
                         uploadState: const UploadState.success(),
                       ),
                   ),
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchAttachments: true,
                   matchAttachmentsUploadState: true,
                 ),
@@ -593,7 +593,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.updating,
+                    state: MessageState.updating,
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -602,7 +602,7 @@ void main() {
                         uploadState: const UploadState.success(),
                       ),
                   ),
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchAttachments: true,
                   matchAttachmentsUploadState: true,
                 ),
@@ -611,13 +611,13 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.updating,
+                    state: MessageState.updating,
                     attachments: [
                       ...attachments.map((it) =>
                           it.copyWith(uploadState: const UploadState.success()))
                     ],
                   ),
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchAttachments: true,
                   matchAttachmentsUploadState: true,
                 ),
@@ -625,13 +625,13 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.sent,
+                    state: MessageState.updated,
                     attachments: [
                       ...attachments.map((it) =>
                           it.copyWith(uploadState: const UploadState.success()))
                     ],
                   ),
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchAttachments: true,
                   matchAttachmentsUploadState: true,
                 ),
@@ -677,7 +677,10 @@ void main() {
     });
 
     test('`.partialUpdateMessage`', () async {
-      final message = Message(id: 'test-message-id');
+      final message = Message(
+        id: 'test-message-id',
+        state: MessageState.sent,
+      );
 
       const set = {'text': 'Update Message text'};
       const unset = ['pinExpires'];
@@ -689,19 +692,26 @@ void main() {
         () => client.partialUpdateMessage(message.id, set: set, unset: unset),
       ).thenAnswer((_) async => updateMessageResponse);
 
-      channel.state?.messagesStream.skip(1).listen(print);
-
       expectLater(
         // skipping first seed message list -> [] messages
         channel.state?.messagesStream.skip(1),
         emitsInOrder([
           [
             isSameMessageAs(
-              updateMessageResponse.message.copyWith(
-                status: MessageSendingStatus.sending,
+              message.copyWith(
+                state: MessageState.updating,
               ),
               matchText: true,
-              matchSendingStatus: true,
+              matchMessageState: true,
+            ),
+          ],
+          [
+            isSameMessageAs(
+              updateMessageResponse.message.copyWith(
+                state: MessageState.updated,
+              ),
+              matchText: true,
+              matchMessageState: true,
             ),
           ],
         ]),
@@ -729,7 +739,8 @@ void main() {
         const messageId = 'test-message-id';
         final message = Message(
           id: messageId,
-          status: MessageSendingStatus.sent,
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
         );
 
         when(() => client.deleteMessage(messageId))
@@ -741,14 +752,14 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(status: MessageSendingStatus.deleting),
-                matchSendingStatus: true,
+                message.copyWith(state: MessageState.softDeleting),
+                matchMessageState: true,
               ),
             ],
             [
               isSameMessageAs(
-                message.copyWith(status: MessageSendingStatus.sent),
-                matchSendingStatus: true,
+                message.copyWith(state: MessageState.softDeleted),
+                matchMessageState: true,
               ),
             ],
           ]),
@@ -775,8 +786,8 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(status: MessageSendingStatus.sent),
-                  matchSendingStatus: true,
+                  message.copyWith(state: MessageState.softDeleted),
+                  matchMessageState: true,
                 ),
               ],
             ]),
@@ -785,6 +796,7 @@ void main() {
           final res = await channel.deleteMessage(message);
 
           expect(res, isNotNull);
+          verifyNever(() => client.deleteMessage(messageId));
         },
       );
     });
@@ -802,7 +814,6 @@ void main() {
           ..message = message.copyWith(
             pinned: true,
             pinExpires: null,
-            status: MessageSendingStatus.sent,
           ));
 
         expectLater(
@@ -811,8 +822,14 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(status: MessageSendingStatus.sent),
-                matchSendingStatus: true,
+                message.copyWith(state: MessageState.updating),
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.updated),
+                matchMessageState: true,
               ),
             ],
           ]),
@@ -847,7 +864,6 @@ void main() {
               pinExpires: DateTime.now().add(
                 const Duration(seconds: timeoutOrExpirationDate),
               ),
-              status: MessageSendingStatus.sent,
             ));
 
           expectLater(
@@ -856,8 +872,14 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(status: MessageSendingStatus.sent),
-                  matchSendingStatus: true,
+                  message.copyWith(state: MessageState.updating),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updated),
+                  matchMessageState: true,
                 ),
               ],
             ]),
@@ -895,7 +917,6 @@ void main() {
             ..message = message.copyWith(
               pinned: true,
               pinExpires: timeoutOrExpirationDate,
-              status: MessageSendingStatus.sent,
             ));
 
           expectLater(
@@ -904,8 +925,14 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(status: MessageSendingStatus.sent),
-                  matchSendingStatus: true,
+                  message.copyWith(state: MessageState.updating),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updated),
+                  matchMessageState: true,
                 ),
               ],
             ]),
@@ -954,10 +981,7 @@ void main() {
             message.id,
             set: {'pinned': false},
           )).thenAnswer((_) async => UpdateMessageResponse()
-        ..message = message.copyWith(
-          pinned: false,
-          status: MessageSendingStatus.sent,
-        ));
+        ..message = message.copyWith(pinned: false));
 
       expectLater(
         // skipping first seed message list -> [] messages
@@ -965,8 +989,14 @@ void main() {
         emitsInOrder([
           [
             isSameMessageAs(
-              message.copyWith(status: MessageSendingStatus.sent),
-              matchSendingStatus: true,
+              message.copyWith(state: MessageState.updating),
+              matchMessageState: true,
+            ),
+          ],
+          [
+            isSameMessageAs(
+              message.copyWith(state: MessageState.updated),
+              matchMessageState: true,
             ),
           ],
         ]),
@@ -1101,7 +1131,7 @@ void main() {
         const type = 'test-reaction-type';
         final message = Message(
           id: 'test-message-id',
-          status: MessageSendingStatus.sent,
+          state: MessageState.sent,
         );
 
         final reaction = Reaction(type: type, messageId: message.id);
@@ -1119,14 +1149,14 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  status: MessageSendingStatus.sent,
+                  state: MessageState.sent,
                   reactionCounts: {type: 1},
                   reactionScores: {type: 1},
                   latestReactions: [reaction],
                   ownReactions: [reaction],
                 ),
                 matchReactions: true,
-                matchSendingStatus: true,
+                matchMessageState: true,
               ),
             ],
           ]),
@@ -1145,7 +1175,7 @@ void main() {
         const type = 'test-reaction-type';
         final message = Message(
           id: 'test-message-id',
-          status: MessageSendingStatus.sent,
+          state: MessageState.sent,
         );
 
         const score = 5;
@@ -1172,14 +1202,14 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  status: MessageSendingStatus.sent,
+                  state: MessageState.sent,
                   reactionCounts: {type: 1},
                   reactionScores: {type: score},
                   latestReactions: [reaction],
                   ownReactions: [reaction],
                 ),
                 matchReactions: true,
-                matchSendingStatus: true,
+                matchMessageState: true,
               ),
             ],
           ]),
@@ -1208,7 +1238,7 @@ void main() {
         const type = 'test-reaction-type';
         final message = Message(
           id: 'test-message-id',
-          status: MessageSendingStatus.sent,
+          state: MessageState.sent,
         );
 
         const score = 5;
@@ -1240,14 +1270,14 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  status: MessageSendingStatus.sent,
+                  state: MessageState.sent,
                   reactionCounts: {type: 1},
                   reactionScores: {type: extraDataScore},
                   latestReactions: [reaction],
                   ownReactions: [reaction],
                 ),
                 matchReactions: true,
-                matchSendingStatus: true,
+                matchMessageState: true,
               ),
             ],
           ]),
@@ -1282,7 +1312,7 @@ void main() {
           const type = 'test-reaction-type';
           final message = Message(
             id: 'test-message-id',
-            status: MessageSendingStatus.sent,
+            state: MessageState.sent,
           );
 
           final reaction = Reaction(type: type, messageId: message.id);
@@ -1297,21 +1327,21 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.sent,
+                    state: MessageState.sent,
                     reactionCounts: {type: 1},
                     reactionScores: {type: 1},
                     latestReactions: [reaction],
                     ownReactions: [reaction],
                   ),
                   matchReactions: true,
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                 ),
               ],
               [
                 isSameMessageAs(
                   message,
                   matchReactions: true,
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                 ),
               ],
             ]),
@@ -1344,7 +1374,7 @@ void main() {
             latestReactions: [prevReaction],
             reactionScores: const {prevType: 1},
             reactionCounts: const {prevType: 1},
-            status: MessageSendingStatus.sent,
+            state: MessageState.sent,
           );
 
           const type = 'test-reaction-type-2';
@@ -1378,7 +1408,7 @@ void main() {
                 isSameMessageAs(
                   newMessage,
                   matchReactions: true,
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                 ),
               ],
             ]),
@@ -1409,7 +1439,7 @@ void main() {
         final message = Message(
           id: 'test-message-id',
           parentId: 'test-parent-id', // is thread message
-          status: MessageSendingStatus.sent,
+          state: MessageState.sent,
         );
 
         final reaction = Reaction(type: type, messageId: message.id);
@@ -1429,14 +1459,14 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  status: MessageSendingStatus.sent,
+                  state: MessageState.sent,
                   reactionCounts: {type: 1},
                   reactionScores: {type: 1},
                   latestReactions: [reaction],
                   ownReactions: [reaction],
                 ),
                 matchReactions: true,
-                matchSendingStatus: true,
+                matchMessageState: true,
                 matchParentId: true,
               ),
             ],
@@ -1459,7 +1489,7 @@ void main() {
           final message = Message(
             id: 'test-message-id',
             parentId: 'test-parent-id', // is thread message
-            status: MessageSendingStatus.sent,
+            state: MessageState.sent,
           );
 
           final reaction = Reaction(type: type, messageId: message.id);
@@ -1476,14 +1506,14 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.sent,
+                    state: MessageState.sent,
                     reactionCounts: {type: 1},
                     reactionScores: {type: 1},
                     latestReactions: [reaction],
                     ownReactions: [reaction],
                   ),
                   matchReactions: true,
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchParentId: true,
                 ),
               ],
@@ -1491,7 +1521,7 @@ void main() {
                 isSameMessageAs(
                   message,
                   matchReactions: true,
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchParentId: true,
                 ),
               ],
@@ -1527,7 +1557,7 @@ void main() {
             latestReactions: [prevReaction],
             reactionScores: const {prevType: 1},
             reactionCounts: const {prevType: 1},
-            status: MessageSendingStatus.sent,
+            state: MessageState.sent,
           );
 
           const type = 'test-reaction-type-2';
@@ -1561,9 +1591,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  newMessage.copyWith(status: MessageSendingStatus.sent),
+                  newMessage.copyWith(state: MessageState.sent),
                   matchReactions: true,
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchParentId: true,
                 ),
               ],
@@ -1605,7 +1635,7 @@ void main() {
           latestReactions: [reaction],
           reactionScores: const {type: 1},
           reactionCounts: const {type: 1},
-          status: MessageSendingStatus.sent,
+          state: MessageState.sent,
         );
 
         when(() => client.deleteReaction(messageId, type))
@@ -1618,12 +1648,12 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  status: MessageSendingStatus.sent,
+                  state: MessageState.sent,
                   latestReactions: [],
                   ownReactions: [],
                 ),
                 matchReactions: true,
-                matchSendingStatus: true,
+                matchMessageState: true,
               ),
             ],
           ]),
@@ -1653,7 +1683,7 @@ void main() {
             latestReactions: [reaction],
             reactionScores: const {type: 1},
             reactionCounts: const {type: 1},
-            status: MessageSendingStatus.sent,
+            state: MessageState.sent,
           );
 
           when(() => client.deleteReaction(messageId, type))
@@ -1666,19 +1696,19 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.sent,
+                    state: MessageState.sent,
                     latestReactions: [],
                     ownReactions: [],
                   ),
                   matchReactions: true,
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                 ),
               ],
               [
                 isSameMessageAs(
                   message,
                   matchReactions: true,
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                 ),
               ],
             ]),
@@ -1714,7 +1744,7 @@ void main() {
           latestReactions: [reaction],
           reactionScores: const {type: 1},
           reactionCounts: const {type: 1},
-          status: MessageSendingStatus.sent,
+          state: MessageState.sent,
         );
 
         when(() => client.deleteReaction(messageId, type))
@@ -1729,12 +1759,12 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  status: MessageSendingStatus.sent,
+                  state: MessageState.sent,
                   latestReactions: [],
                   ownReactions: [],
                 ),
                 matchReactions: true,
-                matchSendingStatus: true,
+                matchMessageState: true,
                 matchParentId: true,
               ),
             ],
@@ -1767,7 +1797,7 @@ void main() {
             latestReactions: [reaction],
             reactionScores: const {type: 1},
             reactionCounts: const {type: 1},
-            status: MessageSendingStatus.sent,
+            state: MessageState.sent,
           );
 
           when(() => client.deleteReaction(messageId, type))
@@ -1782,12 +1812,12 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    status: MessageSendingStatus.sent,
+                    state: MessageState.sent,
                     latestReactions: [],
                     ownReactions: [],
                   ),
                   matchReactions: true,
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchParentId: true,
                 ),
               ],
@@ -1795,7 +1825,7 @@ void main() {
                 isSameMessageAs(
                   message,
                   matchReactions: true,
-                  matchSendingStatus: true,
+                  matchMessageState: true,
                   matchParentId: true,
                 ),
               ],
@@ -2144,7 +2174,7 @@ void main() {
             [
               isSameMessageAs(
                 message,
-                matchSendingStatus: true,
+                matchMessageState: true,
               ),
             ],
           ]),

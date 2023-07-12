@@ -4,24 +4,51 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
-  testWidgets('StreamSendingIndicator shows an Icon', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: StreamChatTheme(
-          data: StreamChatThemeData.light(),
-          child: Scaffold(
-            body: Center(
-              child: StreamSendingIndicator(
-                message: Message(),
+  testWidgets(
+    'StreamSendingIndicator shows sizedBox if messsage state is initial',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChatTheme(
+            data: StreamChatThemeData.light(),
+            child: Scaffold(
+              body: Center(
+                child: StreamSendingIndicator(
+                  message: Message(),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(find.byType(Icon), findsOneWidget);
-  });
+      expect(find.byType(SizedBox), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'StreamSendingIndicator shows an Icon if message state is sending',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChatTheme(
+            data: StreamChatThemeData.light(),
+            child: Scaffold(
+              body: Center(
+                child: StreamSendingIndicator(
+                  message: Message(
+                    state: MessageState.sending,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(Icon), findsOneWidget);
+    },
+  );
 
   testGoldens(
       'golden test for StreamSendingIndicator with StreamSvgIcon.checkAll',
