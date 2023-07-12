@@ -16,7 +16,6 @@ class _NullConst {
 const _nullConst = _NullConst();
 
 /// Enum defining the status of a sending message.
-@Deprecated('Use MessageState instead')
 enum MessageSendingStatus {
   /// Message is being sent
   sending,
