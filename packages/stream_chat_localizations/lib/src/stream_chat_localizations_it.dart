@@ -252,15 +252,13 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
     } else if (date == yesterday) {
       return 'ieri';
     } else {
-      return 'il ${Jiffy.parseFromDateTime(date).MMMd}';
+      return 'il ${Jiffy(date).MMMd}';
     }
   }
 
   @override
-  String sentAtText({required DateTime date, required DateTime time}) {
-    final atTime = Jiffy.parseFromDateTime(time.toLocal());
-    return 'Inviato ${_getDay(date)} alle ${atTime.jm}';
-  }
+  String sentAtText({required DateTime date, required DateTime time}) =>
+      "Inviato ${_getDay(date)} alle ${Jiffy(time.toLocal()).format('HH:mm')}";
 
   @override
   String get todayLabel => 'Oggi';

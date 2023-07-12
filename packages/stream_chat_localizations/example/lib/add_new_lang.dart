@@ -270,15 +270,13 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
     } else if (date == yesterday) {
       return 'yesterday';
     } else {
-      return 'on ${Jiffy.parseFromDateTime(date).MMMd}';
+      return 'on ${Jiffy(date).MMMd}';
     }
   }
 
   @override
-  String sentAtText({required DateTime date, required DateTime time}) {
-    final atTime = Jiffy.parseFromDateTime(time.toLocal());
-    return 'Sent ${_getDay(date)} at ${atTime.jm}';
-  }
+  String sentAtText({required DateTime date, required DateTime time}) =>
+      'Sent ${_getDay(date)} at ${Jiffy(time.toLocal()).format('HH:mm')}';
 
   @override
   String get todayLabel => 'Today';

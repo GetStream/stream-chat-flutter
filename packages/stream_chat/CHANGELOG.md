@@ -1,3 +1,9 @@
+## 6.5.0
+
+🔄 Changed
+
+- Updated minimum supported `SDK` version to Dart 2.19
+
 ## 6.4.0
 
 🐞 Fixed
