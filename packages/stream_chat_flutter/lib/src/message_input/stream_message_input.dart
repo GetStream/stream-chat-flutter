@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'dart:async';
 import 'dart:math';
 
@@ -110,8 +108,6 @@ class StreamMessageInput extends StatefulWidget {
     this.mediaAttachmentListBuilder,
     this.fileAttachmentBuilder,
     this.mediaAttachmentBuilder,
-    @Deprecated('Use `mediaAttachmentBuilder` instead.')
-    this.attachmentThumbnailBuilders,
     this.focusNode,
     this.sendButtonLocation = SendButtonLocation.outside,
     this.autofocus = false,
@@ -234,10 +230,6 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Builder used to build the media attachment item.
   final AttachmentItemBuilder? mediaAttachmentBuilder;
-
-  /// Map that defines a thumbnail builder for an attachment type.
-  @Deprecated('Use `mediaAttachmentBuilder` instead.')
-  final Map<String, AttachmentThumbnailBuilder>? attachmentThumbnailBuilders;
 
   /// Map that defines a thumbnail builder for an attachment type.
   ///
@@ -1220,44 +1212,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         fileAttachmentListBuilder: widget.fileAttachmentListBuilder,
         mediaAttachmentListBuilder: widget.mediaAttachmentListBuilder,
         fileAttachmentBuilder: widget.fileAttachmentBuilder,
-        mediaAttachmentBuilder: widget.mediaAttachmentBuilder ??
-            // For backward compatibility.
-            // TODO: Remove in the next major release.
-            (context, attachment, onRemovePressed) {
-              final Widget mediaAttachmentThumbnail;
-
-              final builder =
-                  widget.attachmentThumbnailBuilders?[attachment.type];
-              if (builder != null) {
-                mediaAttachmentThumbnail = builder(context, attachment);
-              } else {
-                mediaAttachmentThumbnail = MessageInputMediaAttachmentThumbnail(
-                  attachment: attachment,
-                );
-              }
-
-              return ClipRRect(
-                key: Key(attachment.id),
-                borderRadius: BorderRadius.circular(10),
-                child: Stack(
-                  children: <Widget>[
-                    AspectRatio(
-                      aspectRatio: 1,
-                      child: mediaAttachmentThumbnail,
-                    ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: RemoveAttachmentButton(
-                        onPressed: onRemovePressed != null
-                            ? () => onRemovePressed(attachment)
-                            : null,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+        mediaAttachmentBuilder: widget.mediaAttachmentBuilder,
       ),
     );
   }

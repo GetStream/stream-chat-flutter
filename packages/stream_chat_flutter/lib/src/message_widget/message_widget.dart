@@ -55,9 +55,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.attachmentBorderRadiusGeometry,
     this.onMentionTap,
     this.onMessageTap,
-    bool? showReactionPicker,
-    @Deprecated('Use `showReactionPicker` instead')
-    bool showReactionPickerIndicator = true,
+    this.showReactionPicker = true,
     @internal this.showReactionPickerTail = false,
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = true,
@@ -86,15 +84,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.quotedMessageBuilder,
     this.editMessageInputBuilder,
     this.textBuilder,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') this.bottomRowBuilder,
     this.bottomRowBuilderWithDefaultWidget,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') this.deletedBottomRowBuilder,
     this.customAttachmentBuilders,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
@@ -106,20 +96,11 @@ class StreamMessageWidget extends StatefulWidget {
     this.onQuotedMessageTap,
     this.customActions = const [],
     this.onAttachmentTap,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') this.usernameBuilder,
     this.imageAttachmentThumbnailSize = const Size(400, 400),
     this.imageAttachmentThumbnailResizeType = 'clip',
     this.imageAttachmentThumbnailCropType = 'center',
     this.attachmentActionsModalBuilder,
-  })  : assert(
-          bottomRowBuilder == null || bottomRowBuilderWithDefaultWidget == null,
-          'You can only use one of the two bottom row builders',
-        ),
-        showReactionPicker = showReactionPicker ?? showReactionPickerIndicator,
-        attachmentBuilders = {
+  }) : attachmentBuilders = {
           'image': (context, message, attachments) {
             final border = RoundedRectangleBorder(
               side: attachmentBorderSide ??
@@ -329,31 +310,16 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final Widget Function(BuildContext, Message)? textBuilder;
 
-  /// {@template usernameBuilder}
-  /// Widget builder for building username
-  /// {@endtemplate}
-  final Widget Function(BuildContext, Message)? usernameBuilder;
-
   /// {@template onMessageActions}
   /// Function called on long press
   /// {@endtemplate}
   final void Function(BuildContext, Message)? onMessageActions;
-
-  /// {@template bottomRowBuilder}
-  /// Widget builder for building a bottom row below the message
-  /// {@endtemplate}
-  final BottomRowBuilder? bottomRowBuilder;
 
   /// {@template bottomRowBuilderWithDefaultWidget}
   /// Widget builder for building a bottom row below the message.
   /// Also contains the default bottom row widget.
   /// {@endtemplate}
   final BottomRowBuilderWithDefaultWidget? bottomRowBuilderWithDefaultWidget;
-
-  /// {@template deletedBottomRowBuilder}
-  /// Widget builder for building a bottom row below a deleted message
-  /// {@endtemplate}
-  final Widget Function(BuildContext, Message)? deletedBottomRowBuilder;
 
   /// {@template userAvatarBuilder}
   /// Widget builder for building user avatar
@@ -470,11 +436,6 @@ class StreamMessageWidget extends StatefulWidget {
   /// Used in [StreamMessageReactionsModal] and [MessageActionsModal].
   /// {@endtemplate}
   final bool showReactionPicker;
-
-  /// {@template showReactionPickerIndicator}
-  /// Used in [StreamMessageReactionsModal] and [MessageActionsModal]
-  /// {@endtemplate}  @Deprecated('Use `showReactionPicker` instead')
-  bool get showReactionPickerIndicator => showReactionPicker;
 
   /// {@template showReactionPickerTail}
   /// Whether or not to show the reaction picker tail
@@ -601,19 +562,7 @@ class StreamMessageWidget extends StatefulWidget {
     Widget Function(BuildContext, Message)? editMessageInputBuilder,
     Widget Function(BuildContext, Message)? textBuilder,
     Widget Function(BuildContext, Message)? quotedMessageBuilder,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') Widget Function(BuildContext, Message)? usernameBuilder,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') BottomRowBuilder? bottomRowBuilder,
     BottomRowBuilderWithDefaultWidget? bottomRowBuilderWithDefaultWidget,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') Widget Function(BuildContext, Message)? deletedBottomRowBuilder,
     void Function(BuildContext, Message)? onMessageActions,
     Message? message,
     StreamMessageThemeData? messageTheme,
@@ -637,8 +586,6 @@ class StreamMessageWidget extends StatefulWidget {
     void Function(User)? onUserAvatarTap,
     void Function(String)? onLinkTap,
     bool? showReactionPicker,
-    @Deprecated('Use `showReactionPicker` instead')
-    bool? showReactionPickerIndicator,
     @internal bool? showReactionPickerTail,
     List<Read>? readList,
     ShowMessageCallback? onShowMessage,
@@ -665,29 +612,6 @@ class StreamMessageWidget extends StatefulWidget {
     String? imageAttachmentThumbnailCropType,
     AttachmentActionsBuilder? attachmentActionsModalBuilder,
   }) {
-    assert(
-      bottomRowBuilder == null || bottomRowBuilderWithDefaultWidget == null,
-      'You can only use one of the two bottom row builders',
-    );
-
-    var _bottomRowBuilderWithDefaultWidget =
-        bottomRowBuilderWithDefaultWidget ??
-            this.bottomRowBuilderWithDefaultWidget;
-
-    _bottomRowBuilderWithDefaultWidget ??= (context, message, defaultWidget) {
-      final _bottomRowBuilder = bottomRowBuilder ?? this.bottomRowBuilder;
-      if (_bottomRowBuilder != null) {
-        return _bottomRowBuilder(context, message);
-      }
-
-      return defaultWidget.copyWith(
-        onThreadTap: onThreadTap ?? this.onThreadTap,
-        usernameBuilder: usernameBuilder ?? this.usernameBuilder,
-        deletedBottomRowBuilder:
-            deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
-      );
-    };
-
     return StreamMessageWidget(
       key: key ?? this.key,
       onMentionTap: onMentionTap ?? this.onMentionTap,
@@ -698,7 +622,8 @@ class StreamMessageWidget extends StatefulWidget {
           editMessageInputBuilder ?? this.editMessageInputBuilder,
       textBuilder: textBuilder ?? this.textBuilder,
       quotedMessageBuilder: quotedMessageBuilder ?? this.quotedMessageBuilder,
-      bottomRowBuilderWithDefaultWidget: _bottomRowBuilderWithDefaultWidget,
+      bottomRowBuilderWithDefaultWidget: bottomRowBuilderWithDefaultWidget ??
+          this.bottomRowBuilderWithDefaultWidget,
       onMessageActions: onMessageActions ?? this.onMessageActions,
       message: message ?? this.message,
       messageTheme: messageTheme ?? this.messageTheme,
@@ -723,9 +648,7 @@ class StreamMessageWidget extends StatefulWidget {
           showInChannelIndicator ?? this.showInChannelIndicator,
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
       onLinkTap: onLinkTap ?? this.onLinkTap,
-      showReactionPicker: showReactionPicker ??
-          showReactionPickerIndicator ??
-          this.showReactionPicker,
+      showReactionPicker: showReactionPicker ?? this.showReactionPicker,
       showReactionPickerTail:
           showReactionPickerTail ?? this.showReactionPickerTail,
       onShowMessage: onShowMessage ?? this.onShowMessage,
@@ -941,23 +864,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       : Alignment.centerLeft,
                   widthFactor: widget.widthFactor,
                   child: Builder(builder: (context) {
-                    var _bottomRowBuilderWithDefaultWidget =
-                        widget.bottomRowBuilderWithDefaultWidget;
-
-                    _bottomRowBuilderWithDefaultWidget ??=
-                        (context, message, defaultWidget) {
-                      final _bottomRowBuilder = widget.bottomRowBuilder;
-                      if (_bottomRowBuilder != null) {
-                        return _bottomRowBuilder(context, message);
-                      }
-
-                      return defaultWidget.copyWith(
-                        onThreadTap: widget.onThreadTap,
-                        usernameBuilder: widget.usernameBuilder,
-                        deletedBottomRowBuilder: widget.deletedBottomRowBuilder,
-                      );
-                    };
-
                     return MessageWidgetContent(
                       streamChatTheme: _streamChatTheme,
                       showUsername: showUsername,
@@ -999,7 +905,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       onMentionTap: widget.onMentionTap,
                       onQuotedMessageTap: widget.onQuotedMessageTap,
                       bottomRowBuilderWithDefaultWidget:
-                          _bottomRowBuilderWithDefaultWidget,
+                          widget.bottomRowBuilderWithDefaultWidget,
                       onUserAvatarTap: widget.onUserAvatarTap,
                       userAvatarBuilder: widget.userAvatarBuilder,
                     );
@@ -1249,7 +1155,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               showSendingIndicator: false,
               padding: EdgeInsets.zero,
               // Show both the tail and indicator if the indicator is shown.
-              showReactionPickerTail: widget.showReactionPickerIndicator,
+              showReactionPickerTail: widget.showReactionPicker,
               showPinHighlight: false,
               showUserAvatar: widget.message.user!.id ==
                       channel.client.state.currentUser!.id
@@ -1271,7 +1177,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             showResendMessage: shouldShowResendAction,
             showCopyMessage: shouldShowCopyAction,
             showEditMessage: shouldShowEditAction,
-            showReactionPicker: widget.showReactionPickerIndicator,
+            showReactionPicker: widget.showReactionPicker,
             showReplyMessage: shouldShowReplyAction,
             showThreadReplyMessage: shouldShowThreadReplyAction,
             showFlagButton: widget.showFlagButton,

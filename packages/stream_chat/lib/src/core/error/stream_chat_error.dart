@@ -89,11 +89,6 @@ class StreamChatNetworkError extends StreamChatError {
   }) : super(message);
 
   ///
-  @Deprecated('Use `StreamChatNetworkError.fromDioException` instead')
-  factory StreamChatNetworkError.fromDioError(DioException error) =
-      StreamChatNetworkError.fromDioException;
-
-  ///
   factory StreamChatNetworkError.fromDioException(DioException exception) {
     final response = exception.response;
     ErrorResponse? errorResponse;

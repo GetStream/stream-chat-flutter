@@ -60,14 +60,12 @@ typedef OnUserAvatarPress = void Function(User);
 typedef PlaceholderUserImage = Widget Function(BuildContext, User);
 
 /// {@template editMessageInputBuilder}
-// ignore: deprecated_member_use_from_same_package
 /// A widget builder for building a pre-populated [MessageInput] for use in
 /// editing messages.
 /// {@endtemplate}
 typedef EditMessageInputBuilder = Widget Function(BuildContext, Message);
 
 /// {@template channelListHeaderTitleBuilder}
-// ignore: deprecated_member_use_from_same_package
 /// A widget builder for custom [ChannelListHeader] title widgets.
 /// {@endtemplate}
 typedef ChannelListHeaderTitleBuilder = Widget Function(
@@ -86,12 +84,6 @@ typedef ChannelTapCallback = void Function(Channel, Widget?);
 /// or clicked.
 /// {@endtemplate}
 typedef ChannelInfoCallback = void Function(Channel);
-
-/// {@template channelPreviewBuilder}
-/// Builder used to create a custom ChannelPreview for a [Channel]
-/// {@endtemplate}
-@Deprecated('Use StreamChannelListViewIndexedWidgetBuilder instead')
-typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 
 /// {@template viewInfoCallback}
 /// Callback for when 'View Info' is tapped
@@ -164,7 +156,6 @@ typedef MentionTileOverlayBuilder = Widget Function(
 /// {@template userMentionTileBuilder}
 /// A builder function for representing a custom user mention tile.
 ///
-// ignore: deprecated_member_use_from_same_package
 /// Use [UserMentionTile] for the default implementation.
 /// {@endtemplate}
 typedef UserMentionTileBuilder = Widget Function(
@@ -232,7 +223,6 @@ typedef OnMessageTap = void Function(Message);
 
 /// {@template messageSearchItemTapCallback}
 /// The action to perform when tapping or clicking on a user in a
-// ignore: deprecated_member_use_from_same_package
 /// [MessageSearchListView].
 /// {@endtemplate}
 typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
