@@ -382,8 +382,9 @@ class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(widget.attachment.assetUrl!)
-      ..initialize().then((_) {
+    _controller = VideoPlayerController.networkUrl(
+      Uri.parse(widget.attachment.assetUrl!),
+    )..initialize().then((_) {
         // ignore: no-empty-block
         setState(() {}); //when your thumbnail will show.
       });

@@ -104,7 +104,7 @@ void main() {
                 message: message,
                 messageTheme: streamTheme.ownMessageTheme,
                 reverse: true,
-                showReactions: false,
+                showReactionPicker: false,
                 onUserAvatarTap: onUserAvatarTap,
               ),
             ),

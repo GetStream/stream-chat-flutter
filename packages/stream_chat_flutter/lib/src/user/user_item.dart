@@ -14,6 +14,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// [StreamChatTheme].
 /// Modify it to change the widget's appearance.
 /// {@endtemplate}
+@Deprecated('Use `StreamUserListTile` instead.')
 class StreamUserItem extends StatelessWidget {
   /// {@macro streamUserItem}
   const StreamUserItem({

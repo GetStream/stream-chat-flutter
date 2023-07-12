@@ -15,7 +15,7 @@ class MessageActionsModal extends StatefulWidget {
     required this.message,
     required this.messageWidget,
     required this.messageTheme,
-    this.showReactions = true,
+    this.showReactionPicker = true,
     this.showDeleteMessage = true,
     this.showEditMessage = true,
     this.onReplyTap,
@@ -54,8 +54,8 @@ class MessageActionsModal extends StatefulWidget {
   /// [StreamMessageThemeData] for message
   final StreamMessageThemeData messageTheme;
 
-  /// Flag for showing reactions
-  final bool showReactions;
+  /// Flag for showing reaction picker.
+  final bool showReactionPicker;
 
   /// Callback when copy is tapped
   final OnMessageTap? onCopyTap;
@@ -103,6 +103,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final user = StreamChat.of(context).currentUser;
     final orientation = mediaQueryData.orientation;
 
+    final _userPermissions = StreamChannel.of(context).channel.ownCapabilities;
+    final hasReactionPermission =
+        _userPermissions.contains(PermissionType.sendReaction);
+
     final fontSize = widget.messageTheme.messageTextStyle?.fontSize;
     final streamChatThemeData = StreamChatTheme.of(context);
 
@@ -113,11 +117,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
-            crossAxisAlignment: widget.reverse
-                ? CrossAxisAlignment.end
-                : CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              if (widget.showReactions && widget.message.state.isCompleted)
+              if (widget.showReactionPicker && hasReactionPermission)
                 LayoutBuilder(
                   builder: (context, constraints) {
                     return Align(

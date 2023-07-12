@@ -15,7 +15,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
     required this.message,
     required this.messageWidget,
     required this.messageTheme,
-    this.showReactions,
+    this.showReactionPicker = true,
     this.reverse = false,
     this.onUserAvatarTap,
   });
@@ -32,8 +32,8 @@ class StreamMessageReactionsModal extends StatelessWidget {
   /// {@macro reverse}
   final bool reverse;
 
-  /// {@macro showReactions}
-  final bool? showReactions;
+  /// Flag for showing reaction picker.
+  final bool showReactionPicker;
 
   /// {@macro onUserAvatarTap}
   final void Function(User)? onUserAvatarTap;
@@ -56,8 +56,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              if ((showReactions ?? hasReactionPermission) &&
-                  message.state.isCompleted)
+              if (showReactionPicker && hasReactionPermission)
                 LayoutBuilder(
                   builder: (context, constraints) {
                     return Align(
