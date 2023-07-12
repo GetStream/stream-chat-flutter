@@ -1,3 +1,7 @@
+## Upcoming Beta
+
+- Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
+
 ## 6.5.0
 
 - Updated minimum supported `SDK` version to Flutter 3.7/Dart 2.19

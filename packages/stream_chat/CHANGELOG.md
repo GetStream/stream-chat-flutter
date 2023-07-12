@@ -1,3 +1,9 @@
+## Upcoming Beta
+
+🔄 Changed
+
+- Updated minimum supported `SDK` version to Dart 3.0
+
 ## 6.5.0
 
 🔄 Changed

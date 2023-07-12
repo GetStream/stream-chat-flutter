@@ -1,3 +1,9 @@
+## Upcoming Beta
+
+🔄 Changed
+
+- Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
+
 ## 6.6.0
 
 🔄 Changed
