@@ -1,5 +1,7 @@
-## Upcoming Beta
+## 7.0.0-beta.1
 
+- 🛑 **BREAKING** Removed deprecated `StreamChannelListController.sort` parameter.
+  Use `StreamChannelListController.channelStateSort` instead.
 - Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
 
 ## 6.6.0

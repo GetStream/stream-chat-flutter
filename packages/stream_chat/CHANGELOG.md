@@ -1,4 +1,12 @@
-## Upcoming Beta
+## 7.0.0-beta.1
+
+🛑️ Breaking
+
+- Removed deprecated `channelQuery.sort` property. Use `channelStateSort` instead.
+- Removed deprecated `RetryPolicy.retryTimeout` property. Use `delayFactor` instead.
+- Removed deprecated `StreamChatNetworkError.fromDioError` constructor. Use `StreamChatNetworkError.fromDioException`
+  instead.
+- Removed deprecated `MessageSendingStatus` enum. Use `MessageState` instead.
 
 🔄 Changed
 
