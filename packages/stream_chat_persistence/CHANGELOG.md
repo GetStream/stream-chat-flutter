@@ -1,6 +1,7 @@
-## Upcoming Beta
+## 7.0.0-beta.1
 
 - Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
+- 🛑 **BREAKING** Removed deprecated `getChannelStates.sort` parameter. Use `getChannelStates.channelStateSort` instead.
 
 ## 6.6.0
 
