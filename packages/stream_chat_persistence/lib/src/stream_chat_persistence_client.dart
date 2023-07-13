@@ -272,17 +272,14 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       channels.map((e) => getChannelStateByCid(e.cid)),
     );
 
-    // Only sort the channel states if the channels are not already sorted.
-    if (channelStateSort == null) {
-      var comparator = _defaultChannelStateComparator;
-      if (channelStateSort != null && channelStateSort.isNotEmpty) {
-        comparator = _combineComparators(
-          channelStateSort.map((it) => it.comparator).withNullifyer,
-        );
-      }
-
-      channelStates.sort(comparator);
+    // Sort the channel states
+    var comparator = _defaultChannelStateComparator;
+    if (channelStateSort != null && channelStateSort.isNotEmpty) {
+      comparator = _combineComparators(
+        channelStateSort.map((it) => it.comparator).withNullifyer,
+      );
     }
+    channelStates.sort(comparator);
 
     final offset = paginationParams?.offset;
     if (offset != null && offset > 0 && channelStates.isNotEmpty) {
