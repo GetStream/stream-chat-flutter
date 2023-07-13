@@ -15,70 +15,6 @@ class _NullConst {
 
 const _nullConst = _NullConst();
 
-/// Enum defining the status of a sending message.
-enum MessageSendingStatus {
-  /// Message is being sent
-  sending,
-
-  /// Message is being updated
-  updating,
-
-  /// Message is being deleted
-  deleting,
-
-  /// Message failed to send
-  failed,
-
-  /// Message failed to updated
-  // ignore: constant_identifier_names
-  failed_update,
-
-  /// Message failed to delete
-  // ignore: constant_identifier_names
-  failed_delete,
-
-  /// Message correctly sent
-  sent;
-
-  /// Returns a [MessageState] from a [MessageSendingStatus]
-  MessageState toMessageState() {
-    switch (this) {
-      case MessageSendingStatus.sending:
-        return MessageState.sending;
-      case MessageSendingStatus.updating:
-        return MessageState.updating;
-      case MessageSendingStatus.deleting:
-        return MessageState.softDeleting;
-      case MessageSendingStatus.failed:
-        return MessageState.sendingFailed;
-      case MessageSendingStatus.failed_update:
-        return MessageState.updatingFailed;
-      case MessageSendingStatus.failed_delete:
-        return MessageState.softDeletingFailed;
-      case MessageSendingStatus.sent:
-        return MessageState.sent;
-    }
-  }
-
-  /// Returns a [MessageSendingStatus] from a [MessageState].
-  static MessageSendingStatus fromMessageState(MessageState state) {
-    return state.when(
-      initial: () => MessageSendingStatus.sending,
-      outgoing: (it) => it.when(
-        sending: () => MessageSendingStatus.sending,
-        updating: () => MessageSendingStatus.updating,
-        deleting: (_) => MessageSendingStatus.deleting,
-      ),
-      completed: (_) => MessageSendingStatus.sent,
-      failed: (it, __) => it.when(
-        sendingFailed: () => MessageSendingStatus.failed,
-        updatingFailed: () => MessageSendingStatus.failed_update,
-        deletingFailed: (_) => MessageSendingStatus.failed_delete,
-      ),
-    );
-  }
-}
-
 /// The class that contains the information about a message.
 @JsonSerializable()
 class Message extends Equatable {
@@ -114,23 +50,14 @@ class Message extends Equatable {
     DateTime? pinExpires,
     this.pinnedBy,
     this.extraData = const {},
-    @Deprecated('Use `state` instead') MessageSendingStatus? status,
-    MessageState? state,
+    this.state = const MessageState.initial(),
     this.i18n,
   })  : id = id ?? const Uuid().v4(),
         pinExpires = pinExpires?.toUtc(),
         remoteCreatedAt = createdAt,
         remoteUpdatedAt = updatedAt,
         remoteDeletedAt = deletedAt,
-        _quotedMessageId = quotedMessageId {
-    var messageState = state ?? const MessageState.initial();
-    // Backward compatibility. TODO: Remove in the next major version
-    if (status != null) {
-      messageState = status.toMessageState();
-    }
-
-    this.state = messageState;
-  }
+        _quotedMessageId = quotedMessageId;
 
   /// Create a new instance from JSON.
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -155,17 +82,9 @@ class Message extends Equatable {
   /// The text of this message.
   final String? text;
 
-  /// The status of a sending message.
-  @Deprecated('Use `state` instead')
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  MessageSendingStatus get status {
-    return MessageSendingStatus.fromMessageState(state);
-  }
-
-  // TODO: Remove late modifier in the next major version.
   /// The current state of the message.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  late final MessageState state;
+  final MessageState state;
 
   /// The message type.
   @JsonKey(includeToJson: false)
@@ -381,7 +300,6 @@ class Message extends Equatable {
     Object? pinExpires = _nullConst,
     User? pinnedBy,
     Map<String, Object?>? extraData,
-    @Deprecated('Use `state` instead') MessageSendingStatus? status,
     MessageState? state,
     Map<String, String>? i18n,
   }) {
@@ -415,8 +333,6 @@ class Message extends Equatable {
       }
       return true;
     }(), 'Validate type for quotedMessage');
-
-    final messageState = state ?? status?.toMessageState();
 
     return Message(
       id: id ?? this.id,
@@ -454,7 +370,7 @@ class Message extends Equatable {
           pinExpires == _nullConst ? this.pinExpires : pinExpires as DateTime?,
       pinnedBy: pinnedBy ?? this.pinnedBy,
       extraData: extraData ?? this.extraData,
-      state: messageState ?? this.state,
+      state: state ?? this.state,
       i18n: i18n ?? this.i18n,
     );
   }

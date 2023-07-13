@@ -440,7 +440,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get viewLibrary => 'Ver biblioteca';
 
   @override
-  String unreadMessagesSeparatorText(int unreadCount) => 'Novas mensagens';
+  String unreadMessagesSeparatorText() => 'Novas mensagens';
 
   @override
   String get enableFileAccessMessage =>

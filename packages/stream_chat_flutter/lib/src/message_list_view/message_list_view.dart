@@ -1,7 +1,5 @@
 // ignore_for_file: lines_longer_than_80_chars
 import 'dart:async';
-import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -97,11 +95,6 @@ class StreamMessageListView extends StatefulWidget {
     this.initialAlignment,
     this.scrollController,
     this.itemPositionListener,
-    @Deprecated(
-      'Try wrapping the `MessageWidget` with a `Swipeable`, `Dismissible` or a '
-      'custom widget to achieve the swipe to reply behaviour.',
-    )
-    this.onMessageSwiped,
     this.highlightInitialMessage = false,
     this.messageHighlightColor,
     this.showConnectionStateTile = false,
@@ -214,9 +207,6 @@ class StreamMessageListView extends StatefulWidget {
 
   /// The ScrollPhysics used by the ListView
   final ScrollPhysics? scrollPhysics;
-
-  /// {@macro onMessageSwiped}
-  final OnMessageSwiped? onMessageSwiped;
 
   /// If true the list will highlight the initialMessage if there is any.
   ///
@@ -1260,76 +1250,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: child,
         ),
-      );
-    }
-
-    // Add swipeable if the callback is provided and the message is not deleted,
-    // system or ephemeral.
-    final onMessageSwiped = widget.onMessageSwiped;
-    if (onMessageSwiped != null &&
-        !message.isDeleted &&
-        !message.isSystem &&
-        !message.isEphemeral) {
-      // The threshold after which the message is considered swiped.
-      const threshold = 0.2;
-
-      // The direction in which the message can be swiped.
-      final swipeDirection = isMyMessage
-          ? SwipeDirection.endToStart //
-          : SwipeDirection.startToEnd;
-
-      child = Swipeable(
-        key: ValueKey(message.id),
-        direction: swipeDirection,
-        swipeThreshold: threshold,
-        onSwiped: (_) => onMessageSwiped(message),
-        backgroundBuilder: (context, details) {
-          // The alignment of the swipe action.
-          final alignment = isMyMessage
-              ? Alignment.centerRight //
-              : Alignment.centerLeft;
-
-          // The progress of the swipe action.
-          final progress = math.min(details.progress, threshold) / threshold;
-
-          // The offset for the reply icon.
-          var offset = Offset.lerp(
-            const Offset(-24, 0),
-            const Offset(12, 0),
-            progress,
-          )!;
-
-          // If the message is mine, we need to flip the offset.
-          if (isMyMessage) {
-            offset = Offset(-offset.dx, -offset.dy);
-          }
-
-          return Align(
-            alignment: alignment,
-            child: Transform.translate(
-              offset: offset,
-              child: Opacity(
-                opacity: progress,
-                child: SizedBox.square(
-                  dimension: 30,
-                  child: CustomPaint(
-                    painter: AnimatedCircleBorderPainter(
-                      progress: progress,
-                      color: _streamTheme.colorTheme.borders,
-                    ),
-                    child: Center(
-                      child: StreamSvgIcon.reply(
-                        size: lerpDouble(0, 18, progress),
-                        color: _streamTheme.colorTheme.accentPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-        child: child,
       );
     }
 
