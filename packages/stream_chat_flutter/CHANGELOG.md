@@ -1,4 +1,28 @@
-## Upcoming Beta
+## 7.0.0-beta.1
+
+🛑️ Breaking
+
+- Removed deprecated `ChannelPreview` widget. Use `StreamChannelListTile` instead.
+- Removed deprecated `ChannelPreviewBuilder`, Use `StreamChannelListViewIndexedWidgetBuilder` instead.
+- Removed deprecated `StreamUserItem` widget. Use `StreamUserListTile` instead.
+- Removed deprecated `ReturnActionType` enum, No longer used.
+- Removed deprecated `StreamMessageInput.attachmentThumbnailBuilders` parameter. Use
+  `StreamMessageInput.mediaAttachmentBuilder` instead.
+- Removed deprecated `MessageListView.onMessageSwiped` parameter. Try wrapping the `MessageWidget` with
+  a `Swipeable`, `Dismissible` or a custom widget to achieve the swipe to reply behaviour.
+- Removed deprecated `MessageWidget.showReactionPickerIndicator` parameter. Use `MessageWidget.showReactionPicker`
+  instead.
+- Removed deprecated `MessageWidget.bottomRowBuilder` parameter. Use `MessageWidget.bottomRowBuilderWithDefaultWidget`
+  instead.
+- Removed deprecated `MessageWidget.deletedBottomRowBuilder` parameter.
+  Use `MessageWidget.deletedBottomRowBuilderWithDefaultWidget` instead.
+- Removed deprecated `MessageWidget.usernameBuilder` parameter. Use `MessageWidget.usernameBuilderWithDefaultWidget`
+  instead.
+- Removed deprecated `MessageTheme.linkBackgroundColor` parameter. Use `MessageTheme.urlAttachmentBackgroundColor`
+  instead.
+- Removed deprecated `showConfirmationDialog` method. Use `showConfirmationBottomSheet` instead.
+- Removed deprecated `showInfoDialog` method. Use `showInfoBottomSheet` instead.
+- Removed deprecated `wrapAttachmentWidget` method. Use `WrapAttachmentWidget` class instead.
 
 ✅ Added
 
