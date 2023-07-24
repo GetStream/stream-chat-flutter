@@ -1,3 +1,7 @@
+## 7.0.0-beta.2
+
+- Updated `stream_chat` dependency to [`7.0.0-beta.2`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 7.0.0-beta.1
 
 - 🛑 **BREAKING** Removed deprecated `StreamChannelListController.sort` parameter.

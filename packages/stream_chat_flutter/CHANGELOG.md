@@ -1,3 +1,8 @@
+## 7.0.0-beta.2
+
+- Updated `stream_chat_flutter_core` dependency
+  to [`7.0.0-beta.2`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 7.0.0-beta.1
 
 🛑️ Breaking

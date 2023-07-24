@@ -1,3 +1,7 @@
+## 7.0.0-beta.2
+
+- Included the changes from version [6.7.0](#670).
+
 ## 7.0.0-beta.1
 
 🛑️ Breaking
