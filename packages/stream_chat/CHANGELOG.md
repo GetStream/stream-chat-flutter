@@ -1,3 +1,15 @@
+## Upcoming
+
+✅ Added
+
+- Added support for setting `Message.type`. [#1682](https://github.com/GetStream/stream-chat-flutter/issues/1682)
+  ```
+  It is now possible to send system messages. System messages differ from normal messages in the way they are
+  presented to the user. Like the name says, system messages are normally send from the system itself, but a user is
+  able to send it as well by specifying type: 'system' with the message. The user who sends a system message client-side
+  should have the Create System Message permission. Server-side system messages don't need that permission.
+  ```
+
 ## 6.6.0
 
 🔄 Changed
