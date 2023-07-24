@@ -1,4 +1,4 @@
-## Upcoming
+## 6.7.0
 
 - [[#1683]](https://github.com/GetStream/stream-chat-flutter/issues/1683) Fixed SqliteException no such
   column `messages.state`.
