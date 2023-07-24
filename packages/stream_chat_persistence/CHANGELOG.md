@@ -1,3 +1,8 @@
+## Upcoming
+
+- [[#1683]](https://github.com/GetStream/stream-chat-flutter/issues/1683) Fixed SqliteException no such
+  column `messages.state`.
+
 ## 6.6.0
 
 - Updated `stream_chat` dependency to [`6.6.0`](https://pub.dev/packages/stream_chat/changelog).
