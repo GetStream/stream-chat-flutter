@@ -74,6 +74,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'id': instance.id,
       'text': instance.text,
+      'type': instance.type,
       'attachments': instance.attachments.map((e) => e.toJson()).toList(),
       'mentioned_users': User.toIds(instance.mentionedUsers),
       'parent_id': instance.parentId,

@@ -87,7 +87,6 @@ class Message extends Equatable {
   final MessageState state;
 
   /// The message type.
-  @JsonKey(includeToJson: false)
   final String type;
 
   /// The list of attachments, either provided by the user or generated from a
