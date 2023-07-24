@@ -220,6 +220,7 @@ class _MessageCardState extends State<MessageCard> {
 
     return StreamUrlAttachment(
       key: linksKey,
+      onLinkTap: widget.onLinkTap,
       urlAttachment: urlAttachment,
       hostDisplayName: hostDisplayName,
       textPadding: widget.textPadding,
